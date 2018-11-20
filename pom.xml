@@ -1,0 +1,99 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <groupId>com.dangjia.acg</groupId>
+    <artifactId>dangjia-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <modelVersion>4.0.0</modelVersion>
+    <modules>
+        <module>dangjia-eureka</module>
+        <module>dangjia-gateway</module>
+        <module>dangjia-group</module>
+        <module>dangjia-subgroup</module>
+    </modules>
+    <packaging>pom</packaging>
+
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.4.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <dependencies>
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>persistence-api</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dyuproject.protostuff</groupId>
+            <artifactId>protostuff-api</artifactId>
+            <version>1.0.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dyuproject.protostuff</groupId>
+            <artifactId>protostuff-core</artifactId>
+            <version>1.0.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dyuproject.protostuff</groupId>
+            <artifactId>protostuff-runtime</artifactId>
+            <version>1.0.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>2.7.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.netflix.feign</groupId>
+            <artifactId>feign-httpclient</artifactId>
+            <version>8.18.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>2.7.0</version>
+        </dependency>
+
+    </dependencies>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <spring-cloud.version>Dalston.SR1</spring-cloud.version>
+        <spring-boot-admin.version>1.5.1</spring-boot-admin.version>
+        <dangjia-common.version>0.0.1-SNAPSHOT</dangjia-common.version>
+        <dangjia-eureka.version>0.0.1-SNAPSHOT</dangjia-eureka.version>
+        <config-server.version>0.0.1-SNAPSHOT</config-server.version>
+        <dangjia-gateway.version>0.0.1-SNAPSHOT</dangjia-gateway.version>
+        <dangjia-api-config.version>0.0.1-SNAPSHOT</dangjia-api-config.version>
+        <dangjia-service-config.version>0.0.1-SNAPSHOT</dangjia-service-config.version>
+        <dangjia-api-cache.version>0.0.1-SNAPSHOT</dangjia-api-cache.version>
+        <dangjia-service-cache.version>0.0.1-SNAPSHOT</dangjia-service-cache.version>
+        <dangjia-service-config.version>0.0.1-SNAPSHOT</dangjia-service-config.version>
+        <dangjia-api-config.version>0.0.1-SNAPSHOT</dangjia-api-config.version>
+        <zipkin-server.version>0.0.1-SNAPSHOT</zipkin-server.version>
+        <dangjia-api-job.version>0.0.1-SNAPSHOT</dangjia-api-job.version>
+        <dangjia-service-job.version>0.0.1-SNAPSHOT</dangjia-service-job.version>
+        <dangjia-api-upload.version>0.0.1-SNAPSHOT</dangjia-api-upload.version>
+        <dangjia-service-upload.version>0.0.1-SNAPSHOT</dangjia-service-upload.version>
+        <dangjia-stream.version>0.0.1-SNAPSHOT</dangjia-stream.version>
+    </properties>
+
+</project>

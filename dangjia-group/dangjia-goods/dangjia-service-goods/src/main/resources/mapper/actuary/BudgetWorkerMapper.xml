@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper">
+
+	<select id="getBudgetWorkerList" resultType="com.dangjia.acg.modle.actuary.BudgetWorker">
+		SELECT
+		    *
+		FROM dj_actuary_budget_worker
+		WHERE
+		   house_id=#{houseId}
+		   and worker_type_id =#{workerTypeId}
+		   and delete_state not in (1,2);
+	</select>
+
+	<sql id="all_columns">
+		id,
+		house_flow_id,
+		house_id,
+		worker_type_id,
+		steta,
+		template_id,
+		delete_state,
+		worker_goods_id,
+		worker_goods_sn,
+		name,
+		price,
+		description,
+		shop_count,
+		unit,
+		total_price,
+		create_date,
+		modify_date
+	</sql>
+	<!-- 查询所有 -->
+	<select id="getBudgetWorker" resultType="java.util.Map">
+		SELECT 
+		    id,
+			house_flow_id as houseFlowId,
+			house_id as houseId,
+			worker_type_id as workerTypeId,
+			steta,
+			template_id as templateId,
+			delete_state as deleteState,
+			worker_goods_id as workerGoodsId,
+			worker_goods_sn as workerGoodsSn,
+			name,
+			price,
+			description,
+			shop_count as shopCount,
+			unit,
+			total_price as totalPrice,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_actuary_budget_worker ORDER BY create_date desc
+	</select>
+	<!-- 根据houseId和wokerTypeId查询房子人工精算 -->
+	<select id="getBudgetWorkerById" resultType="java.util.Map">
+		SELECT 
+		    id,
+			house_flow_id as houseFlowId,
+			house_id as houseId,
+			worker_type_id as workerTypeId,
+			steta,
+			template_id as templateId,
+			delete_state as deleteState,
+			worker_goods_id as workerGoodsId,
+			worker_goods_sn as workerGoodsSn,
+			name,
+			price,
+			description,
+			shop_count as shopCount,
+			unit,
+			total_price as totalPrice,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_actuary_budget_worker
+		WHERE house_id=#{houseId}
+		and worker_type_id =#{workerTypeId}
+		ORDER BY create_date desc
+	</select>
+	<!-- 根据template_id查询所有 -->
+	<select id="getAllbudgetTemplates" resultType="java.util.Map">
+		SELECT 
+			id,
+			house_flow_id as houseFlowId,
+			house_id as houseId,
+			worker_type_id as workerTypeId,
+			steta,
+			template_id as templateId,
+			delete_state,
+			worker_goods_id as workerGoodsId,
+			worker_goods_sn as workerGoodsSn,
+			name,
+			price,
+			description,
+			shop_count as shopCount,
+			unit,
+			total_price as totalPrice,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_actuary_budget_worker WHERE template_id=#{template_id} and steta=3  ORDER BY create_date desc
+	</select>
+	<!-- 删除对象 -->
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM dj_actuary_budget_worker 
+		WHERE id=#{id}
+	</delete>
+	<!-- 删除对象 -->
+	<delete id="deleteBytemplateId" parameterType="java.lang.String">
+		DELETE FROM dj_actuary_budget_worker 
+		WHERE template_id=#{template_id}
+	</delete>
+	<!-- 根据houseId和工种id删除人工精算 -->
+	<delete id="deleteByhouseId" parameterType="java.lang.String">
+		DELETE FROM dj_actuary_budget_worker
+		WHERE house_id=#{houseId}
+		and worker_type_id =#{workerTypeId}
+	</delete>
+	<!-- 根据房子id和工序id查询人工精算总价 -->
+	<select id="getWorkerTotalPrice" resultType="java.util.Map">
+		SELECT
+			 sum(wg.price * abw.shopcount) AS totalPrice
+		FROM
+			dj_basics_worker_goods wg,
+			dj_actuary_budget_worker abw
+		WHERE
+			1 = 1
+		AND wg.id = abw.worker_goods_id
+		AND abw.house_id = #{houseId}
+		AND abw.delete_state != 1
+		AND abw.worker_type_id = #{workerTypeId}
+    </select>
+</mapper>

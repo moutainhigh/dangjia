@@ -1,0 +1,59 @@
+package com.dangjia.acg.api.actuary;
+
+import com.dangjia.acg.common.response.ServerResponse;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+/**
+ * @创建时间： 2018-9-18下午3:53:07
+ */
+@Api(description = "材料精算")
+@FeignClient("dangjia-service-goods")
+public interface BudgetMaterialAPI {
+
+	/**
+	 * 查询所有精算
+	 * @return
+	 */
+	@PostMapping("/actuary/budgetMaterial/getAllBudgetMaterial")
+	@ApiOperation(value = "查询所有精算", notes = "查询所有精算")
+	ServerResponse getAllBudgetMaterial();
+	/**
+	 * 根据houseId和wokerTypeId查询房子材料精算
+	 * @return
+	 */
+	@PostMapping("/actuary/budgetMaterial/getAllBudgetMaterialById")
+	@ApiOperation(value = "根据houseId和wokerTypeId查询房子精算", notes = "根据houseId和wokerTypeId查询房子精算")
+	ServerResponse getAllBudgetMaterialById(@RequestParam("houseId") String houseId, @RequestParam("workerTypeId") String workerTypeId);
+
+
+	@PostMapping("/actuary/budgetMaterial/queryBudgetMaterialByHouseFlowId")
+	@ApiOperation(value = "根据HouseFlowId查询房子材料精算", notes = "根据HouseFlowId查询房子材料精算")
+	ServerResponse queryBudgetMaterialByHouseFlowId(@RequestParam("houseFlowId") String houseFlowId);
+
+	/**
+	 * 根据id查询精算
+	 * @return
+	 */
+	@PostMapping("/actuary/budgetMaterial/getBudgetMaterialById")
+	@ApiOperation(value = "根据id查询精算", notes = "根据id查询精算")
+	ServerResponse getBudgetMaterialById(@RequestParam("id") String id);
+	/**
+	 * 根据类别Id查询所属商品
+	 * @return
+	 */
+	@PostMapping("/actuary/budgetMaterial/getAllGoodsByCategoryId")
+	@ApiOperation(value = "根据类别Id查询所属商品", notes = "根据类别Id查询所属商品")
+	ServerResponse getAllGoodsByCategoryId(@RequestParam("categoryId") String categoryId);
+	/**
+	 * 根据商品Id查询货品
+	 * @param goodsId
+	 * @return
+	 */
+	@PostMapping("/actuary/budgetMaterial/getAllProductByGoodsId")
+	@ApiOperation(value = "根据商品Id查询货品", notes = "根据商品Id查询货品")
+	ServerResponse  getAllProductByGoodsId(@RequestParam("goodsId")String goodsId);
+}

@@ -1,0 +1,49 @@
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://172.16.30.95:3306/dj_changsha?useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: root
+    driverClassName: com.mysql.jdbc.Driver
+    initialSize: 10
+    minIdle: 10
+    maxIdle: 100
+    maxActive: 2000
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+    filters: stat,wall,log4j
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+    changsha:
+      url: jdbc:mysql://172.16.30.95:3306/dj_changsha?useUnicode=true&characterEncoding=utf-8
+      username: root
+      password: root
+    shenzhen:
+      url: jdbc:mysql://172.16.30.95:3306/dj_shenzhen?useUnicode=true&characterEncoding=utf-8
+      username: root
+      password: root
+  elasticsearch:
+    jest:
+      uris: http://172.16.30.95:9200
+      read-timeout: 5000
+server:
+  port: 8013
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://discovery:8888/eureka/    # 指定注册中心的地址
+  instance:
+    preferIpAddress: true
+hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 20000
+hystrix.threadpool.default.coreSize: 500
+ribbon:
+  ConnectTimeout: 10000
+  ReadTimeout: 20000
+  MaxAutoRetriesNextServer: 1
+  OkToRetryOnAllOperations: true

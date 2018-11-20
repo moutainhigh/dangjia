@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.worker.IWorkerBankCardMapper">
+    <sql id="basic_columns">
+        id,
+        bank_card_id,
+        bank_card_number,
+        card_holder,
+        worker_id,
+        create_date,
+        modify_date
+    </sql>
+    <sql id="new_columns">
+        id,
+        bank_card_id as bankCardId,
+        bank_card_number as bankCardNumber,
+        card_holder as cardHolder,
+        worker_id as workerId,
+        create_date as createDate,
+        modify_date as modifyDate
+    </sql>
+    <!--根据id查询绑定的银行卡 -->
+    <select id="getByWorkerid" resultType="com.dangjia.acg.modle.worker.WorkerBankCard">
+        select <include refid="new_columns" />
+        from dj_worker_worker_bank_card
+        where worker_id = #{workerId}
+    </select>
+
+</mapper>
+

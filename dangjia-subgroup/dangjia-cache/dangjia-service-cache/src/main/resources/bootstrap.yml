@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: dangjia-service-cache
+  cloud:
+    config:
+      uri: http://172.16.30.95:6010
+    inetutils:
+      default-ip-address: discovery
+  profiles:
+    active: dev
+server:
+  tomcat:
+    max-http-post-size: 65535
+  max-http-header-size: 102400
+spring.sleuth.feign.enabled: false
+cacheSuffix: dev
+management:
+  security:
+    enabled: false
+endpoints:
+  shutdown:
+    enabled: true
+    sensitive: false

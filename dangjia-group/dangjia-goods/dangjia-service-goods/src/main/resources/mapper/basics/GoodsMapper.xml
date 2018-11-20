@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.basics.IGoodsMapper">
+
+	<sql id="all_columns">
+		id,
+		name,
+		goods_sn,
+		category_id,
+		type,
+		buy,
+		sales,
+		unit_id,
+		create_date,
+		modify_date
+	</sql>
+	<!-- 删除对象 -->
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM dj_basics_goods
+		WHERE id=#{id}
+	</delete>
+    <!-- 查询所有 -->
+	<select id="query" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Goods">
+		SELECT
+			id,
+			name,
+		    goods_sn as goodsSn,
+			category_id as categoryId,
+			type,
+			buy,
+			sales,
+			unit_id as unitId,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_basics_goods
+		<if test="category_id!=null">
+		where
+			category_id=#{categoryId}
+		</if>
+		ORDER BY create_date desc
+	</select>
+	 <!-- 根据id查询属性对象 -->
+	<select id="queryById" resultType="com.dangjia.acg.modle.basics.Goods">
+		SELECT
+			id,
+			name,
+		    goods_sn as goodsSn,
+			category_id as categoryId,
+			type,
+			buy,
+			sales,
+			unit_id as unitId,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_basics_goods
+		where 
+		     id =#{id}
+		ORDER BY create_date desc
+	</select>
+	<sql id="all_GSColumns">
+		id,
+		goods_id,
+		brand_id,
+		series_id,
+		create_date,
+		modify_date
+	</sql>
+	<!-- 新增商品和系列关系 -->
+	<insert id="insertGoodsSeries" parameterType="com.dangjia.acg.modle.brand.GoodsSeries">
+		INSERT INTO dj_basics_goods_series(
+		    <include refid="all_GSColumns" />
+		) 
+		VALUES (#{id}, #{goodsId},#{brandId},#{seriesId},SYSDATE(),SYSDATE())
+	</insert>
+	<!-- 删除商品和系列关系 -->
+	<delete id="deleteGoodsSeries" parameterType="java.lang.String">
+		DELETE FROM dj_basics_goods_series
+		WHERE goods_id=#{goodsId}
+	</delete>
+	<sql id="all_Bcolumns">
+		id,
+		name,
+		create_date,
+		modify_date
+	</sql>
+	<!-- 根据商品id查询关联品牌 -->
+	<select id="queryBrandByGid" resultType="com.dangjia.acg.modle.brand.Brand">
+		SELECT
+			id,
+			name,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_basics_brand
+		where 
+		     id in(
+		        select 
+		              brand_id
+		        from dj_basics_goods_series
+		        where 
+		             goods_id =#{goodsId}
+		        group by brand_id
+		     )
+		ORDER BY create_date desc
+	</select>
+	<sql id="all_BScolumns">
+		id,
+		name,
+		brand_id,
+		content,
+		create_date,
+		modify_date
+	</sql>
+	<!-- 根据商品id和品牌id查询关联品牌系列 -->
+	<select id="queryBrandByGidAndBid" resultType="com.dangjia.acg.modle.brand.BrandSeries">
+		SELECT
+			id,
+			name,
+			brand_id as brandId,
+			content,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_basics_brand_series
+		where 
+		     id in(
+		        select 
+		              series_id
+		        from dj_basics_goods_series
+		        where
+		        1=1
+				<if test="goodsId!=null">
+					and goods_id=#{goodsId}
+				</if>
+				<if test="brandId!=null">
+					and brand_id=#{brandId}
+				</if>
+		     )
+		ORDER BY create_date desc
+	</select>
+	 <!-- 根据类别id查询商品对象 -->
+	<select id="queryByCategoryId" resultType="com.dangjia.acg.modle.basics.Goods">
+		SELECT
+			id,
+			name,
+		    goods_sn as goodsSn,
+			category_id as categoryId,
+			type,
+			buy,
+			sales,
+			unit_id as unitId,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_basics_goods
+		<if test="categoryId!=null">
+			where
+			category_id=#{categoryId}
+		</if>
+		ORDER BY create_date desc
+	</select>
+</mapper>

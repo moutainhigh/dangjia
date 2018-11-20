@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.basics.IGoodsAttributeMapper">
+
+	<sql id="all_columns">
+		id,
+		name,
+		type,
+		create_date,
+		modify_date
+	</sql>
+	<!-- 删除对象 -->
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM dj_basics_goods_attribute
+		WHERE id=#{id}
+	</delete>
+    <!-- 查询所有 -->
+	<select id="query" resultType="com.dangjia.acg.modle.attribute.GoodsAttribute">
+		SELECT
+			id,
+			name,
+			type,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_basics_goods_attribute
+		ORDER BY create_date desc
+	</select>
+	<!-- 批量插入数据 -->
+    <insert id="insertBatch" parameterType="java.util.List" >
+        insert into dj_basics_goods_attribute
+           (<include refid="all_columns" />)
+        values
+        <foreach collection="list" item="goods" index="index" separator=",">
+            (
+              #{goods.id}, #{goods.name}, #{goods.type},SYSDATE(),SYSDATE()
+            )
+        </foreach>
+    </insert>
+    <!-- 批量更新数据 -->
+    <update id="updateBatch" parameterType="java.util.List">
+        update dj_basics_goods_attribute set
+        name =
+        <foreach collection="list" item="goods" index="index"
+            separator=" " open="case id" close="end">
+            when #{goods.id} then #{goods.name}
+        </foreach>
+        ,type =
+        <foreach collection="list" item="goods" index="index"
+            separator=" " open="case id" close="end">
+            when #{goods.id} then #{goods.type}
+        </foreach>        
+        ,modify_date=SYSDATE()
+        where id in
+        <foreach collection="list" item="goods" index="index" 
+            separator="," open="(" close=")">
+             #{goods.id}
+        </foreach>
+    </update>
+    <!-- 根据id查询属性对象 -->
+	<select id="queryById" resultType="com.dangjia.acg.modle.attribute.GoodsAttribute">
+		SELECT
+			id,
+			name,
+			type,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_basics_goods_attribute
+		where 
+		     id =#{id}
+		ORDER BY create_date desc
+	</select>
+	 <!-- 根据名称模糊查询属性对象 -->
+	<select id="queryGoodsAttributelikeName" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.attribute.GoodsAttribute">
+		SELECT
+			id,
+			name,
+			type,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_basics_goods_attribute
+		where 
+		     name like CONCAT('%',#{name},'%')
+		ORDER BY create_date desc
+	</select>
+    <!-- 根据商品类别查询关联属性 -->
+	<select id="queryCategoryAttribute" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.attribute.GoodsAttribute">
+		select
+			id,
+			name,
+			type,
+			create_date as createDate,
+			modify_date as modifyDate
+		from
+		dj_basics_goods_attribute
+		where
+		   id in(
+				SELECT 
+				   attribute_id
+				FROM dj_basics_category_attribute
+				where category_id =#{categoryId}
+			)
+		   ORDER BY create_date desc
+	</select>
+	<!-- 新增商品类别和属性关联 -->
+	<insert id="insertCategoryAttribute" parameterType="com.dangjia.acg.modle.attribute.CategoryAttribute">
+		INSERT INTO dj_basics_category_attribute(
+		    id,category_id,attribute_id,create_date,modify_date
+		) 
+		VALUES (#{id}, #{categoryId},#{attributeId},SYSDATE(),SYSDATE())
+	</insert>
+	<!-- 删除商品类别和属性关联 -->
+	<delete id="deleteCategoryAttribute" parameterType="java.lang.String">
+		DELETE FROM dj_basics_category_attribute
+		WHERE attribute_id=#{attribute_id}
+	</delete>
+</mapper>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.basics.IBrandSeriesMapper">
+
+	<sql id="all_columns">
+		id,
+		name,
+		brand_id,
+		content,
+		image,
+		create_date,
+		modify_date
+	</sql>
+	<!-- 查询所有 -->
+	<select id="queryBrandSeries" resultType="com.dangjia.acg.modle.brand.BrandSeries">
+		SELECT
+			id,
+			name,
+		    brand_id as brandId,
+			content,
+		    image,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_basics_brand_series
+		<if test="brand_id!=null">
+		where
+			brand_id=#{brand_id}
+		</if>
+		ORDER BY create_date desc
+	</select>
+	<!-- 删除对象 -->
+	<delete id="deleteById" parameterType="String">
+		DELETE FROM dj_basics_brand_series
+		WHERE id=#{id}
+	</delete>
+</mapper>
+

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.matter.IRenovationManualMapper">
+    <sql id="basic_columns">
+        id,
+        name,
+        url,
+        url_name,
+        worker_type_id,
+        order_number,
+        state,
+        types,
+        data_status,
+        create_date,
+        modify_date
+    </sql>
+    <sql id="new_columns">
+        id,
+        name,
+        url,
+        url_name as urlName,
+        worker_type_id as workerTypeId,
+        order_number as orderNumber,
+        state,
+        types,
+        data_status as dataStatus,
+        create_date as createDate,
+        modify_date as modifyDate
+    </sql>
+    <select id="getRenovationManualByWorkertyId" resultType="com.dangjia.acg.modle.matter.RenovationManual">
+        select <include refid="new_columns"/>
+        from dj_matter_renovation_manual
+        where state=0
+        and worker_type_id = #{workerTypeId}
+        order by order_number asc
+    </select>
+
+</mapper>
+

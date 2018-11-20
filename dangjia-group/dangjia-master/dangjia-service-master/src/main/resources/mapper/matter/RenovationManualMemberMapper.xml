@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.matter.IRenovationManualMemberMapper">
+    <sql id="basic_columns">
+        id,
+        house_id,
+        member_id,
+        renovation_manual_id,
+        state,
+        data_status,
+        create_date,
+        modify_date,
+    </sql>
+    <sql id="new_columns">
+        id,
+        house_id as houseId,
+        member_id as memberId,
+        renovation_manual_id as renovationManualId,
+        state,
+        data_status as dataStatus,
+        create_date as createDate,
+        modify_date as modifyDate
+    </sql>
+
+</mapper>
+

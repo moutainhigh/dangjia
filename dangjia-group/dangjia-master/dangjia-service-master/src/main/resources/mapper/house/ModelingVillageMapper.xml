@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.house.IModelingVillageMapper">
+    <sql id="basic_columns">
+        id,
+        address,
+        collection_state AS collectionState,
+        layout_sum as layoutSum,
+        locationx,
+        locationy,
+        name,
+        village_image as villageImage,
+        village_state as villageState,
+        city_id as cityId,
+        initials,
+        state,
+        area_name as areaName,
+        data_status as dataStatus,
+        create_date as createDate,
+        modify_date as modifyDate
+    </sql>
+    <select id="getVillageList" resultType="map" >
+        SELECT
+            id,
+            name
+        FROM dj_house_modeling_village
+        WHERE
+            city_id=#{cityId}
+        ORDER by
+            create_date
+    </select>
+    <!--根据城市id查询小区按字母排序-->
+    <select id="getAllVillage" resultType="com.dangjia.acg.modle.house.ModelingVillage" >
+        SELECT
+        <include refid="basic_columns"/>
+        FROM dj_house_modeling_village
+        WHERE
+        city_id=#{cityId}
+        and state=0
+        ORDER by
+        initials asc ,layout_sum desc
+    </select>
+    <!--统计根据城市id查询小区按字母排序-->
+    <select id="getAllVillageCount" resultType="java.lang.Integer" >
+        SELECT
+        COUNT(*)
+        FROM dj_house_modeling_village
+        WHERE
+        city_id=#{cityId}
+        and state=0
+        ORDER by
+        initials asc ,layout_sum desc
+    </select>
+</mapper>
+

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.user.UserMapper">
+	<resultMap id="BaseResultMap" type="com.dangjia.acg.modle.user.MainUser">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="username" jdbcType="VARCHAR" property="username" />
+		<result column="mobile" jdbcType="VARCHAR" property="mobile" />
+		<result column="email" jdbcType="VARCHAR" property="email" />
+		<result column="password" jdbcType="VARCHAR" property="password" />
+		<result column="insert_uid" jdbcType="VARCHAR" property="insertUid" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+		<result column="modify_date" property="modifyDate" jdbcType="TIMESTAMP" />
+		<result column="is_del" jdbcType="BIT" property="isDel" />
+		<result column="is_job" jdbcType="BIT" property="isJob" />
+		<result column="department" jdbcType="VARCHAR" property="department" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, username, mobile, email, password, insert_uid insertUid,
+		create_date createDate,
+		modify_date modifyDate, is_del isDel,
+		is_job isJob, department
+	</sql>
+
+	<!--=Start getUsers 分页查询用户列表userSearch -->
+	<select id="getUsers" resultType="com.dangjia.acg.dto.user.UserRoleDTO">
+		select
+		<include refid="Base_Column_List" />
+		from dj_user
+		<where>
+			<if test="userSearch.umobile!=null and userSearch.umobile!=''">
+				AND mobile =#{userSearch.umobile}
+			</if>
+			<if test="userSearch.uname!=null and userSearch.uname!=''">
+				AND username like CONCAT('%',#{userSearch.uname}),
+				'%')
+			</if>
+			<if
+				test="userSearch.insertTimeStart!=null and userSearch.insertTimeStart!=''">
+				AND create_date &gt;= #{userSearch.insertTimeStart}
+			</if>
+			<if test="userSearch.insertTimeEnd!=null and userSearch.insertTimeEnd!=''">
+				AND create_date &lt;= #{userSearch.insertTimeEnd}
+			</if>
+		</where>
+		ORDER BY create_date DESC
+	</select>
+	<!--=End getUsers 分页查询用户列表 -->
+
+	<!--=Start setJobUser 设置用户是否离职 -->
+	<update id="setJobUser">
+		update dj_user
+		set
+		is_job = #{isJob,jdbcType=INTEGER},
+		insert_uid = #{insertUid},
+		modify_date=NOW()
+		where id =
+		#{id,jdbcType=VARCHAR} AND is_del=0
+	</update>
+	<!--=Start setJobUser 设置用户是否离职 -->
+
+	<!--=Start setDelUser 删除用户 -->
+	<update id="setDelUser">
+		update dj_user
+		set
+		is_del = #{isDel,jdbcType=INTEGER},
+		insert_uid = #{insertUid},
+		modify_date=NOW()
+		where id =
+		#{id,jdbcType=VARCHAR}
+	</update>
+	<!--=Start setDelUser 删除用户 -->
+
+	<!--=Start getUserAndRoles 查询用户及他对应的角色ids -->
+	<resultMap id="getUserRoles" type="com.dangjia.acg.dto.user.UserRolesVO">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="username" jdbcType="VARCHAR" property="username" />
+		<result column="mobile" jdbcType="VARCHAR" property="mobile" />
+		<result column="email" jdbcType="VARCHAR" property="email" />
+		<result column="insert_uid" jdbcType="VARCHAR" property="insertUid" />
+		<result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+		<result column="modify_date" jdbcType="TIMESTAMP" property="modifyDate" />
+		<result column="is_del" jdbcType="BIT" property="isDel" />
+		<result column="is_job" jdbcType="BIT" property="isJob" />
+
+		<collection property="userRoles" ofType="com.dangjia.acg.modle.user.UserRoleKey">
+			<result column="user_id" property="userId" />
+			<result column="role_id" property="roleId" />
+		</collection>
+
+	</resultMap>
+	<select id="getUserAndRoles" resultMap="getUserRoles">
+		select
+		u.id, u.username,
+		u.mobile, u.email, u.insert_uid ,u.create_date ,
+		u.modify_date , u.is_del ,u.is_job,
+		ur.user_id ,ur.role_id
+		from dj_user u
+		LEFT JOIN dj_user_user_role ur ON
+		u.id=ur.user_id
+		WHERE u.id=#{id} AND u.is_del=0 and u.is_job=0
+	</select>
+	<!--=End getUserAndRoles 查询用户及他对应的角色ids -->
+
+	<!--=Start findUser 根据用户名和密码查找用户 -->
+	<select id="findUser" resultType="com.dangjia.acg.modle.user.MainUser">
+		select
+		<include refid="Base_Column_List" />
+		from dj_user
+		WHERE username=#{username} AND password =#{password} and
+		is_del=0 and
+		is_job=0
+	</select>
+	<!--=End findUser 根据用户名和密码查找用户 -->
+	<!--=Start findUserByMobile 根据手机号获取用户数据 -->
+	<select id="findUserByMobile" resultType="com.dangjia.acg.modle.user.MainUser">
+		select
+		<include refid="Base_Column_List" />
+		from dj_user
+		WHERE
+		mobile=#{mobile} and is_del=0
+	</select>
+	<!--=End findUserByMobile 根据手机号查找用户 -->
+	<!--=Start findUserByName 根据用户名获取用户数据 -->
+	<select id="findUserByName" resultType="com.dangjia.acg.modle.user.MainUser">
+		select
+		<include refid="Base_Column_List" />
+		from dj_user
+		WHERE username=#{username} and is_del=0
+	</select>
+	<!--=End findUserByName 根据用户名查找用户 -->
+	<!--=Start updatePwd 修改用户密码 -->
+	<update id="updatePwd">
+		update dj_user
+		set
+		password = #{password},
+		modify_date=NOW()
+		where id = #{id,jdbcType=VARCHAR} and is_del=0 AND
+		is_job=0
+	</update>
+	<!--=Start updatePwd 修改用户密码 -->
+	<!--=Start setUserLockNum 锁定用户 -->
+	<!-- <update id="setUserLockNum"> update member set is_lock = #{isLock}, lock_time=NOW()
+		where id = #{id,jdbcType=INTEGER} and is_del=0 AND is_job=0 </update> -->
+	<!--=Start setUserLockNum 锁定用户 -->
+</mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.worker.IBankCardMapper">
+    <sql id="basic_columns">
+        id,
+        bank_name,
+        bank_card_image,
+        bk_max_amt,
+        bk_min_amt,
+        sign,
+        create_date,
+        modify_date
+    </sql>
+    <sql id="new_columns">
+        id,
+        bank_name as bankName,
+        bank_card_image as bankCardImage,
+        bk_max_amt as bkMaxAmt,
+        bk_min_amt as bkMinAmt,
+        sign,
+        create_date as createDate,
+        modify_date as modifyDate
+    </sql>
+</mapper>
+

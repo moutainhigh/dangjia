@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: dangjia-eureka
+  cloud:
+    config:
+      uri: http://172.16.30.95:6010
+  profiles:
+    active: dev
+endpoints:
+  shutdown:
+    enabled: true
+    sensitive: false

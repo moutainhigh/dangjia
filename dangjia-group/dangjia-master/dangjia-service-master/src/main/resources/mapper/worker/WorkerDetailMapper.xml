@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.worker.IWorkerDetailMapper">
+<sql id="basic_columns">
+    id,
+    house_id,
+    money,
+    name,
+    state,
+    worker_id,
+    worker_name,
+    defined_worker_id,
+    istest,
+    create_date,
+    modify_date
+</sql>
+<sql id="new_columns">
+    id,
+    house_id as houseId,
+    money,
+    name,
+    state,
+    worker_id as workerId,
+    worker_name as workerName,
+    defined_worker_id as definedWorkerId,
+    istest,
+    create_date as createDate,
+    modify_date as modifyDate
+</sql>
+    <!--统计工人所有流水 -->
+    <select id="getCountWorkerDetailByWid" resultType="com.dangjia.acg.modle.worker.WorkerDetail">
+        select sum(wd.money)
+        from dj_worker_worker_detail as wd
+        where wd.state=0
+        and wd.worker_id=#{workerId}
+    </select>
+    <!--查询有记录的历史月 -->
+    <select id="getHistoryMonth" resultType="java.lang.String">
+        select
+            DATE_FORMAT(d.create_date, '%Y-%m') month
+        from
+			dj_worker_worker_detail as d
+		where
+		    d.worker_id=#{workerId}
+		and
+			DATE_FORMAT(d.create_date, '%Y-%m') &gt; DATE_FORMAT( date_sub(curdate(), INTERVAL 12 month),'%Y-%m')
+		GROUP BY month
+		ORDER BY d.create_date DESC
+    </select>
+    <!--根据年月查询对应历史月流水 -->
+    <select id="getHistoryMonthByWorkerId" resultType="com.dangjia.acg.modle.worker.WorkerDetail">
+        select <include refid="new_columns" />
+        from dj_worker_worker_detail
+        where worker_id=#{workerId}
+		and date_format(create_date, '%Y-%m') = #{createDate}
+		ORDER BY create_date DESC
+    </select>
+</mapper>
+

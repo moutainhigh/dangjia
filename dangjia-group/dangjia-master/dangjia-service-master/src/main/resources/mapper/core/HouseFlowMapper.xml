@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.core.IHouseFlowMapper">
+    <sql id="basic_columns">
+            id,
+            house_id,
+            sort,
+            state,
+            worker_type_id,
+            worker_type,
+            work_type,
+            safe,
+            safe_shop_state,
+            material_price,
+            total_price,
+            evaluate_steta,
+            work_steta,
+            grab_number,
+            refuse_number,
+            member_id,
+            grab_lock,
+            work_price,
+            house_worker_id,
+            house_worker_order_id,
+            worker_id,
+            safe_id,
+            repair_state,
+            choose,
+            pause,
+            lock_worker,
+            self_price,
+            worker_repair_state,
+            release_time,
+            check_money,
+            patrol,
+            patrol_money,
+            scan_code,
+            supervisor_start,
+            past,
+            latitude,
+            longitude,
+            city_id,
+            create_date,
+            modify_date
+    </sql>
+    <sql id="new_columns">
+            id,
+            house_id as houseId,
+            sort,
+            state,
+            worker_type_id as workerTypeId,
+            worker_type as workerType,
+            work_type as workType,
+            safe,
+            safe_shop_state as safeShopState,
+            material_price as materialPrice,
+            total_price as totalPrice,
+            evaluate_steta as evaluateSteta,
+            work_steta as workSteta,
+            grab_number as grabNumber,
+            refuse_number as refuseNumber,
+            member_id as memberId,
+            grab_lock as grabLock,
+            work_price as workPrice,
+            house_worker_id as houseWorkerId,
+            house_worker_order_id as houseWorkerOrderId,
+            worker_id as workerId,
+            safe_id as safeId,
+            repair_state as repairState,
+            choose,
+            pause,
+            lock_worker as lockWorker,
+            self_price as selfPrice,
+            worker_repair_state as workerRepairState,
+            release_time as releaseTime,
+            check_money as checkMoney,
+            patrol,
+            patrol_money as patrolMoney,
+            scan_code as scanCode,
+            supervisor_start as supervisorStart,
+            past,
+            latitude,
+            longitude,
+            city_id as cityId,
+            create_date as createDate,
+            modify_date as modifyDate
+    </sql>
+    <!--根据工人id查询已支付未完工并默认的施工任务 -->
+    <select id="getAllFlowByHouseId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlow">
+       select
+        <include refid="new_columns" />
+       from dj_core_house_flow
+       where house_id=#{houseId}
+	   and state=0
+	   order by sort asc
+    </select>
+    <!--其它工人整体完工申请 检测还有没有其它整体完工的申请 -->
+    <select id="checkAllFinish" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlow">
+        select
+        <include refid="new_columns" />
+        from dj_core_house_flow
+        where house_id=#{houseId}
+        and state=0
+        and work_steta !=2
+        and worker_type &gt; 3
+        and id != #{houseFlowId}
+    </select>
+
+    <!--根据houseId查询是否此房子是否开工 -->
+    <select id="getHouseIsStart" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlow">
+        select
+        <include refid="new_columns" />
+        from dj_core_house_flow
+        where house_id=#{houseId}
+        and worker_type not in(1,2,3)
+        and work_type in(2,4)
+    </select>
+    <!--根据houseId和工种类型查询HouseFlow -->
+    <select id="getHouseFlowByHidAndWty" resultType="com.dangjia.acg.modle.core.HouseFlow">
+        select
+        <include refid="new_columns" />
+        from dj_core_house_flow
+        where  house_id=#{houseId}
+        and worker_type =#{workerType}
+    </select>
+    <!--找出启用工种 给大管家算审核钱 -->
+    <select id="getForCheckMoney" resultType="com.dangjia.acg.modle.core.HouseFlow">
+        select
+        <include refid="new_columns" />
+        from dj_core_house_flow
+        where house_id=#{houseId}
+        and state = 0
+        and worker_type &gt; 3
+        order by sort asc
+    </select>
+
+    <!--根据当前工序查下一工序-->
+    <select id="getNextTopHouseFlow" resultType="com.dangjia.acg.modle.core.HouseFlow">
+        select
+        <include refid="new_columns" />
+        from dj_core_house_flow
+        where sort &gt; #{sort}
+        and house_id=#{houseId}
+        and state= 0 order by sort asc
+    </select>
+
+    <!--根据houseId查询施工中的任务-->
+    <select id="getHouseNot0" resultType="com.dangjia.acg.modle.core.HouseFlow">
+        select
+        <include refid="new_columns" />
+        from dj_core_house_flow
+        where house_id=#{houseId}
+        and worker_type not in(1,2,3)
+        and work_type=4
+        and work_steta !=2
+    </select>
+
+    <!--根据houseId查询除设计精算外的可用工序-->
+    <select id="getFlowByhouseIdNot12" resultType="com.dangjia.acg.modle.core.HouseFlow">
+        select
+        <include refid="new_columns" />
+        from dj_core_house_flow
+        where 1=1
+        and house_id=#{houseId}
+        and state=0
+        and worker_type not in (1,2)
+        order by sort asc
+    </select>
+</mapper>
+

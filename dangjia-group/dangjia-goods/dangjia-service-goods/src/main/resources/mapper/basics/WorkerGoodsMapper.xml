@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.basics.IWorkerGoodsMapper">
+    <sql id="Base_Column_List">
+        id,
+        name,
+        worker_goods_sn,
+        image,
+        unit_id,
+        price,
+        sales,
+        work_explain,
+        worker_dec,
+        worker_standard,
+        worker_type_id,
+        show_goods,
+        create_date,
+        modify_date
+  </sql>
+
+    <select id="selectList" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
+        SELECT
+        id,
+        name,
+        worker_goods_sn as workerGoodsSn,
+        image,
+        unit_id as unitId,
+        price,
+        sales,
+        work_explain as workExplain,
+        worker_dec as workerDec,
+        worker_standard as workerStandard,
+        worker_type_id as workerTypeId,
+        show_goods as showGoods,
+        create_date as createDate,
+        modify_date as modifyDate
+        from dj_basics_worker_goods
+        where 1=1
+        <if test="workerTypeId != null">
+            AND worker_type_id=#{workerTypeId}
+        </if>
+        <if test="searchKey != null">
+            AND (worker_goods_sn like CONCAT('%',#{searchKey},'%')
+            OR name like CONCAT('%',#{searchKey},'%'))
+        </if>
+        <if test="showGoods != null">
+            AND show_goods=#{showGoods}
+        </if>
+        ORDER BY create_date desc
+    </select>
+    <select id="selectLists" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
+        SELECT
+        <include refid="Base_Column_List"/>
+        from dj_basics_worker_goods
+        ORDER BY create_date desc
+    </select>
+    <!--每工种未删除 或 已支付工钱-->
+    <select id="getWorkertoCheck" resultType="java.lang.Double">
+        select sum(wg.price*abm.shopcount)
+        from dj_basics_worker_goods wg,dj_actuary_budget_worker abw
+        where 1=1
+        and wg.id = abw.workergoods_id
+        and abw.house_id=#{houseId}
+        and abw.deletestate!=1
+        and abw.deletestate!=2
+        and abw.houseflow_id=#{houseFlowId}
+    </select>
+    <!--每工种未删除 或 已支付工钱-->
+    <select id="getPayedWorker" resultType="java.lang.Double">
+        select sum(wg.price*abm.shopcount)
+        from dj_basics_worker_goods wg,dj_actuary_budget_worker abw
+        where 1=1
+        and wg.id = abw.workergoods_id
+        and abw.house_id=#{houseId}
+        and abw.deletestate =3
+        and abw.houseflow_id=#{houseFlowId}
+    </select>
+    <!-- 根据名称模糊查询 -->
+    <select id="queryByName" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
+        SELECT
+        id,
+        name,
+        worker_goods_sn as workerGoodsSn,
+        image,
+        unit_id as unitId,
+        price,
+        sales,
+        work_explain as workExplain,
+        worker_dec as workerDec,
+        worker_standard as workerStandard,
+        worker_type_id as workerTypeId,
+        show_goods as showGoods,
+        create_date as createDate,
+        modify_date as modifyDate
+        from dj_basics_worker_goods
+        where 1=1
+        <if test="name!=null">
+            and
+            name LIKE CONCAT('%',#{name},'%')
+        </if>
+        ORDER BY create_date desc
+    </select>
+</mapper>

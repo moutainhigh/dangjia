@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.user.PermissionMapper" >
+  <sql id="Base_Column_List" >
+    p.id,
+    p.name,
+    p.pid,
+    p.zindex,
+    p.istype,
+    p.descpt,
+    p.code,
+    p.icon,
+    p.page,
+    p.sys_id sysId,
+    p.domain_id domainId,
+    p.create_date createDate,
+    p.modify_date modifyDate,
+    s.`name` sysName,
+    d.`name` domainName,
+    d.domain_path domainPath
+  </sql>
+
+
+  <!--=Start findAll 查找所有权限-->
+  <select id="findAll" resultType="com.dangjia.acg.dto.user.PermissionVO">
+    select
+    <include refid="Base_Column_List" />
+    from dj_user_permission p
+    INNER JOIN dj_user_sys s on p.sys_id=s.id
+    INNER JOIN dj_user_domain d on p.domain_id=d.id
+    ORDER BY p.zindex
+  </select>
+  <!--=End findAll 查找所有权限-->
+
+  <!--=Start findChildPerm 查找所有子节点权限-->
+  <select id="findChildPerm" resultType="com.dangjia.acg.dto.user.PermissionVO">
+    select
+    <include refid="Base_Column_List" />
+    from dj_user_permission p
+    INNER JOIN dj_user_sys s on p.sys_id=s.id
+    INNER JOIN dj_user_domain d on p.domain_id=d.id
+    where p.pid=#{pid}
+  </select>
+  <!--=End findChildPerm 查找所有子节点权限-->
+
+  <!--=Start findPerms 查找权限树列表-->
+  <resultMap id="findPermission" type="com.dangjia.acg.dto.user.PermissionVO">
+    <id property="id" column="id"/>
+    <result property="name" column="name"/>
+    <result property="pid" column="pid"/>
+    <result property="istype" column="istype"/>
+    <result property="code" column="code"/>
+    <result property="page" column="page"/>
+
+    <collection property="children" column="pid" ofType="com.dangjia.acg.modle.user.Permission">
+      <id property="id" column="id"/>
+      <result property="name" column="name"/>
+      <result property="pid" column="pid"/>
+      <result property="istype" column="istype"/>
+      <result property="code" column="code"/>
+      <result property="page" column="page"/>
+    </collection>
+  </resultMap>
+
+  <sql id="PermColumn" >
+    p.id, p.name,p.pid pId, p.zindex, p.istype, p.code, p.icon, p.page
+  </sql>
+  <!--=Start findPerms 查找权限树列表-->
+  <select id="findPerms" resultType="com.dangjia.acg.dto.user.PermissionVO">
+    select
+    <include refid="PermColumn" />
+    from dj_user_permission p
+
+  </select>
+  <!--=End findPerms 查找权限树列表-->
+  <!--=Start findPermsByRole 根据角色ID查找权限树列表-->
+  <select id="findPermsByRole" resultType="com.dangjia.acg.modle.user.Permission">
+    select
+    <include refid="PermColumn" />
+    from dj_user_permission p
+    LEFT JOIN dj_user_role_permission rp ON rp.permit_id=p.id
+    WHERE rp.role_id=#{roleId}
+  </select>
+  <!--=End findPermsByRole 根据角色ID查找权限树列表-->
+  <!--=Start getUserPerms 根据用户ID查找权限树列表-->
+  <select id="getUserPerms" resultType="com.dangjia.acg.dto.user.PermissionVO">
+    select
+    p.id, p.name,p.pid pId, p.zindex, p.istype, p.code, p.icon, p.page
+    from dj_user_permission p
+    LEFT JOIN dj_user_role_permission rp ON rp.permit_id=p.id
+    LEFT JOIN dj_user_role r ON r.id=rp.role_id
+    LEFT JOIN dj_user_user_role ur ON ur.role_id=r.id
+    WHERE ur.user_id=#{userId} AND p.sys_id=#{source}
+    GROUP BY p.id
+    order by p.zindex
+  </select>
+  <!--=End getUserPerms 根据用户ID查找权限树列表-->
+</mapper>

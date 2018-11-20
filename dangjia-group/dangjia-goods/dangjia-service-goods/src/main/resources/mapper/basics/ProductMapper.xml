@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.basics.IProductMapper">
+
+	<sql id="all_columns">
+		id,
+		name,
+		goods_id,
+		category_id,
+		product_sn,
+		image,
+		unit,
+		weight,
+		type,
+		maket,
+		cost,
+		price,
+		profit,
+		brand_id,
+        brand_series_id,
+        attribute_id_arr,
+        attribute_name_arr,
+        convert_unit,
+        convert_quality,
+		create_date,
+		modify_date
+	</sql>
+	<sql id="all_PaColumns">
+		id,
+		name,
+		product_id,
+		attribute_id,
+		value_id,
+		create_date,
+		modify_date
+	</sql>
+	<!-- 删除对象 -->
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM dj_basics_product
+		WHERE id=#{id}
+	</delete>
+    <!-- 查询所有 -->
+	<select id="query" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Product">
+		SELECT
+			id,
+			name,
+			goods_id as goodsId,
+			category_id as categoryId,
+			product_sn as productSn,
+			image,
+			unit,
+			weight,
+			type,
+			maket,
+			cost,
+			price,
+			profit,
+			brand_id as brandId,
+			brand_series_id as brandSeriesId,
+		    attribute_id_arr as attributeIdArr,
+		    attribute_name_arr as attributeNameArr,
+            convert_unit as convertUnit,
+            convert_quality as convertQuality,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_basics_product
+		<if test="category_id!=null">
+		where
+			category_id=#{category_id}
+		</if>
+		ORDER BY create_date desc
+	</select>
+    <!-- 根据货品查询所有关联属性 -->
+    <select id="queryProductAttributeByPid" resultType="com.dangjia.acg.modle.attribute.AttributeValue">
+		select
+			id,
+			name,
+			attribute_id as attributeId,
+			introduction,
+			image,
+			create_date as createDate,
+			modify_date as modifyDate
+		from 
+		    dj_basics_attribute_value
+		where
+		    id in(
+				SELECT 
+				   value_id
+				FROM dj_basics_product_attribute
+				where product_id=#{product_id})
+		ORDER BY create_date desc
+	</select>
+	<!-- 根据商品Id查询所有货品 -->
+    <select id="queryByGoodsId" resultType="com.dangjia.acg.modle.basics.Product">
+		SELECT
+			id,
+			name,
+			goods_id as goodsId,
+			category_id as categoryId,
+			product_sn as productSn,
+			image,
+			unit,
+			weight,
+			type,
+			maket,
+			cost,
+			price,
+			profit,
+			brand_id as brandId,
+			brand_series_id as brandSeriesId,
+			attribute_arr as  attributeArr,
+			convert_unit as convertUnit,
+            convert_quality as convertQuality,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_basics_product
+		where goods_id=#{goods_id}
+		ORDER BY create_date desc
+	</select>
+	<!-- 根据货品id查询货品对象 -->
+    <select id="getById" resultType="com.dangjia.acg.modle.basics.Product">
+		SELECT
+			id,
+			name,
+			goods_id as goodsId,
+			category_id as categoryId,
+			product_sn as productSn,
+			image,
+			unit,
+			weight,
+			type,
+			maket,
+			cost,
+			price,
+			profit,
+			brand_id as brandId,
+			brand_series_id as brandSeriesId,
+			attribute_arr as  attributeArr,
+			convert_unit as convertUnit,
+            convert_quality as convertQuality,
+			create_date as createDate,
+			modify_date as modifyDate
+		FROM dj_basics_product
+		where id=#{id}
+		ORDER BY create_date desc
+	</select>
+
+	<!-- 根据名称模糊查询 -->
+	<select id="queryByName" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Product">
+		SELECT
+		id,
+		name,
+		goods_id as goodsId,
+		category_id as categoryId,
+		product_sn as productSn,
+		image,
+		unit,
+		weight,
+		type,
+		maket,
+		cost,
+		price,
+		profit,
+		brand_id as brandId,
+		brand_series_id as brandSeriesId,
+		attribute_arr as  attributeArr,
+		convert_unit as convertUnit,
+		convert_quality as convertQuality,
+		create_date as createDate,
+		modify_date as modifyDate
+		FROM dj_basics_product
+		where 1=1
+		<if test="name!=null">
+			and
+			name LIKE CONCAT('%',#{name},'%')
+		</if>
+		ORDER BY create_date desc
+	</select>
+</mapper>

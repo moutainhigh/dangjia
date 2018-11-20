@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.IResourceFileMapper" >
+    <select id="getResourceList" resultType="com.dangjia.acg.dto.ResourceFileDTO">
+        SELECT *  FROM dj_resource_file
+        <trim prefix="WHERE" prefixOverrides="AND|OR">
+            <if test="fileName != null and fileName != ''">
+                AND file_name LIKE CONCAT('%',#{fileName},'%')
+            </if>
+            <if test="path != null and path != ''">
+                AND address LIKE CONCAT('%',#{path},'%')
+            </if>
+        </trim>
+    </select>
+</mapper>

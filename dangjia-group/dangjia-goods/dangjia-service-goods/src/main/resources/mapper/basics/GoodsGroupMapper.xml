@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.basics.IGoodsGroupMapper">
+
+   <resultMap id="GoodsCategoryMap" type="java.util.Map">
+      <result column="id" property="id"></result>
+      <result column="name" property="name"></result>
+   </resultMap>
+
+	<sql id="all_columns">
+		id,
+		name,
+		state,
+		create_date,
+		modify_date
+	</sql>
+	<sql id="selete_columns">
+		id,
+		name
+	</sql>
+    <!-- 查询列表 -->
+    <select id="getAllList" resultType="com.dangjia.acg.modle.basics.GoodsGroup">
+        SELECT
+			id,
+			name,
+			state,
+			create_date as createDate,
+			modify_date as modifyDate
+        from dj_basics_goods_group
+        where 1=1
+		<if test="name!=null and name!=''">
+			and
+			name like CONCAT('%',#{name},'%')
+		</if>
+		<if test="state!=null and state!=''">
+			and
+			state =#{state}
+		</if>
+        ORDER BY create_date desc
+    </select>
+    
+    <!-- 插入对象 -->
+    <insert id="addGoodsGroup" parameterType="com.dangjia.acg.modle.basics.GoodsGroup">
+        INSERT INTO dj_basics_goods_group(
+		    <include refid="all_columns" />
+		) 
+		VALUES (#{id},#{name}, #{state},SYSDATE(),SYSDATE())
+    </insert>
+    
+
+    <!-- 查询所有顶级分类 -->
+	<select id="getParentTopList" resultMap="GoodsCategoryMap" parameterType="java.util.Map">	
+		SELECT id,name 
+		FROM dj_basics_goods_category 
+		where parent_id=1
+		ORDER BY create_date desc
+	</select>
+	
+	<!-- 查询所有子分类 -->
+	<select id="getChildList" resultMap="GoodsCategoryMap" parameterType="java.util.Map">	
+		SELECT id,name 
+		FROM dj_basics_goods_category 
+		where parent_id=#{id}
+		ORDER BY create_date desc
+	</select>
+	
+	<!-- 根据分类id查询所有商品 -->
+	<select id="getGoodsList" resultMap="GoodsCategoryMap" parameterType="java.util.Map">	
+		SELECT id,name 
+		FROM dj_basics_goods
+		where category_id=#{id}
+		ORDER BY create_date desc
+	</select>
+	
+	<!-- 根据商品id查询所有货品 -->
+	<select id="getProductList" resultMap="GoodsCategoryMap" parameterType="java.util.Map">	
+		SELECT id,name 
+		FROM dj_basics_product
+		where goods_id=#{id}
+		ORDER BY create_date desc
+	</select>
+	
+	<!-- 新增关联组和货品关系-->
+	<insert id="addGroupLink" parameterType="com.dangjia.acg.modle.basics.GroupLink">
+		INSERT INTO dj_basics_group_link(
+		id,
+		group_id,
+		product_id,
+		product_name,
+		goods_id,
+		goods_name,
+		group_name,
+		state,
+		is_switch,
+		create_date,
+		modify_date
+		)
+		VALUES (
+		#{id},
+		#{groupId},
+		#{productId},
+		#{productName},
+		#{goodsId},
+		#{goodsName},
+		#{groupName},
+		#{state},
+		#{isSwitch},
+		SYSDATE(),
+		SYSDATE()
+		)
+	</insert>
+	<!-- 根据关联组id删除货品关联关系 -->
+	<delete id="deleteGroupLink" parameterType="java.lang.String">
+		DELETE FROM dj_basics_group_link
+		WHERE group_id=#{groupId}
+	</delete>
+	<!-- 根据关联组id和货品id修改关联关系-->
+	<update id="updateGroupLink" parameterType="com.dangjia.acg.modle.basics.GroupLink">
+		UPDATE dj_basics_group_link
+		SET state=#{state}，modify_date=#{modifyDate}
+		where group_id=#{groupId}
+		and  product_id=#{productId}
+	</update>
+	<!-- 根据关联组id查询关联货品关系 -->
+	<select id="queryGroupLinkByGid" resultType="com.dangjia.acg.modle.basics.GroupLink">
+		SELECT
+		 id,
+		 group_id as groupId,
+		 product_id as productId,
+		 product_name as productName,
+		 goods_id as goodsId,
+		 goods_name as goodsName,
+		 group_name as groupName,
+		 state,
+		 is_switch as isSwitch,
+		 create_date as createDate,
+		 modify_date as modifyDate
+		FROM dj_basics_group_link
+		where group_id=#{groupId}
+		ORDER BY create_date desc
+	</select>
+	<!-- 根据关联组id和货品id查询关联关系 -->
+	<select id="queryGroupLinkByGidAndPid" resultType="com.dangjia.acg.modle.basics.GroupLink">
+		SELECT
+		 id,
+		 group_id as groupId,
+		 product_id as productId,
+		 product_name as productName,
+		 goods_id as goodsId,
+		 goods_name as goodsName,
+		 group_name as groupName,
+		 state,
+		 is_switch as isSwitch,
+		 create_date as createDate,
+		 modify_date as modifyDate
+		FROM dj_basics_group_link
+		where group_id=#{groupId}
+		and product_id=#{productId}
+		ORDER BY create_date desc
+	</select>
+
+	<!-- 根据货品id查询关联关系 -->
+	<select id="queryGroupLinkByPid" resultType="com.dangjia.acg.modle.basics.GroupLink">
+		SELECT
+		 id,
+		 group_id as groupId,
+		 product_id as productId,
+		 product_name as productName,
+		 goods_id as goodsId,
+		 goods_name as goodsName,
+		 group_name as groupName,
+		 state,
+		 is_switch as isSwitch,
+		 create_date as createDate,
+		 modify_date as modifyDate
+		FROM dj_basics_group_link
+		where
+		product_id=#{productId}
+		ORDER BY create_date desc
+	</select>
+
+	<!--根据货品id修改所有关联组货品可切换性-->
+	<update id="updateGLinkByPid">
+        UPDATE dj_basics_group_link
+		SET is_switch=#{isSwitch},modify_date=SYSDATE()
+		where product_id=#{productId}
+	</update>
+</mapper>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.IConfigMapper">
+
+    <!-- 查询基础配置信息 -->
+    <select id="queryBasicConfig" resultType="com.dangjia.acg.model.Config" parameterType="com.dangjia.acg.model.Config">
+        SELECT id,param_key paramKey,param_value paramValue,param_desc paramDesc,app_type appType FROM t_config
+        WHERE 1 = 1
+        <if test="appType != null">
+            AND app_type = #{appType}
+        </if>
+        <if test="paramValue != null and paramValue != ''">
+            AND param_value LIKE concat("%",#{paramValue},"%")
+        </if>
+        <if test="paramDesc != null and paramDesc != ''">
+            AND param_desc LIKE concat(concat("%",#{paramDesc}),"%")
+        </if>
+    </select>
+</mapper>

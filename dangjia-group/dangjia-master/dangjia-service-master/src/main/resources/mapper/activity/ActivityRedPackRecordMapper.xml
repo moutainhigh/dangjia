@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper">
+    <resultMap id="getRedPackRecords" type="com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO">
+        <id column="id" jdbcType="VARCHAR" property="id" />
+        <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+        <result column="modify_date" jdbcType="TIMESTAMP" property="modifyDate" />
+        <result column="member_id" jdbcType="VARCHAR" property="memberId" />
+        <result column="phone" jdbcType="VARCHAR" property="phone" />
+        <result column="house_id" jdbcType="VARCHAR" property="houseId" />
+        <result column="have_receive" jdbcType="VARCHAR" property="haveReceive" />
+        <result column="red_pack_id" jdbcType="VARCHAR" property="redPackId" />
+        <result column="red_pack_rule_id" jdbcType="VARCHAR" property="redPackRuleId" />
+        <result column="business_order_number" jdbcType="VARCHAR" property="businessOrderNumber" />
+
+        <collection property="redPack" ofType="com.dangjia.acg.modle.activity.ActivityRedPack">
+            <result column="name" property="name" />
+            <result column="from_object" property="fromObject" />
+            <result column="from_object_type" property="fromObjectType" />
+            <result column="start_date" property="startDate" />
+            <result column="end_date" property="endDate" />
+            <result column="city_id" property="cityId" />
+            <result column="num" property="num" />
+            <result column="surplus_nums" property="surplusNums" />
+            <result column="receive_count" property="receiveCount" />
+            <result column="is_share" property="isShare" />
+            <result column="type" property="type" />
+            <result column="remake" property="remake" />
+        </collection>
+        <collection property="redPackRule" ofType="com.dangjia.acg.modle.activity.ActivityRedPackRule">
+            <result column="rnum" property="num" />
+            <result column="rmoney" property="money" />
+            <result column="rsatisfy_money" property="satisfyMoney" />
+        </collection>
+    </resultMap>
+    <select id="queryActivityRedPackRecords" parameterType="com.dangjia.acg.modle.activity.ActivityRedPackRecord" resultMap="getRedPackRecords">
+		SELECT
+            rpr.*,
+            rp.name,
+            rp.from_object,
+            rp.from_object_type,
+            rp.start_date,
+            rp.end_date,
+            rp.city_id,
+            rp.num,
+            rp.surplus_nums,
+            rp.receive_count,
+            rp.is_share,
+            rp.type,
+            rp.remake,
+            r.num rnum,
+            r.money rmoney,
+            r.satisfy_money rsatisfy_money
+        FROM
+            `dj_activity_red_pack_record` rpr
+        INNER JOIN dj_activity_red_pack rp ON rp.id = rpr.red_pack_id
+        INNER JOIN dj_activity_red_pack_rule r ON r.id = rpr.red_pack_rule_id
+		WHERE rpr.data_status=0 and rp.data_status=0 AND rp.delete_state=0
+        <if test="redPackId!=null">
+            AND rpr.red_pack_id=#{redPackId}
+        </if>
+        <if test="redPackRuleId!=null">
+            AND rpr.red_pack_rule_id=#{redPackRuleId}
+        </if>
+        <if test="memberId!=null">
+            AND rpr.member_id=#{memberId}
+        </if>
+        <if test="haveReceive!=null">
+            <if test="haveReceive!=2">
+                AND rpr.have_receive=#{haveReceive}
+            </if>
+            <if test="haveReceive==2">
+                AND (rpr.have_receive!=0 OR rpr.have_receive!=1)
+            </if>
+            AND rpr.have_receive=#{haveReceive}
+        </if>
+        <if test="modifyDate!=null">
+           AND rp.end_date >=#{modifyDate}
+       </if>
+	</select>
+
+</mapper>
+

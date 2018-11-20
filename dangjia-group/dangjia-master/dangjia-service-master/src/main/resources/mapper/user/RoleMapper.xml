@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.user.RoleMapper" >
+  <resultMap id="BaseResultMap" type="com.dangjia.acg.modle.user.Role" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="role_name" property="roleName" jdbcType="VARCHAR" />
+    <result column="descpt" property="descpt" jdbcType="VARCHAR" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="insert_uid" property="insertUid" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="modify_date" property="modifyDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, role_name, descpt, code, insert_uid, create_date, modify_date
+  </sql>
+
+  <!--=Start findList 分页查询角色列表-->
+  <select id="findList" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from dj_user_role
+  </select>
+  <!--=End findList 分页查询角色列表-->
+
+  <!--=Start findRoleAndPerms 查询角色列表-->
+  <resultMap id="findRolePerms" type="com.dangjia.acg.dto.user.RoleVO" >
+    <id column="id" property="id" />
+    <result column="role_name" property="roleName"/>
+    <result column="code" property="code"/>
+    <result column="descpt" property="descpt"/>
+    <result column="insert_uid" property="insertUid"/>
+    <result column="create_date" property="createDate"/>
+    <collection property="rolePerms" ofType="com.dangjia.acg.modle.user.RolePermission">
+      <result  column="role_id" property="roleId"/>
+      <result column="permit_id" property="permitId"/>
+    </collection>
+  </resultMap>
+
+  <select id="findRoleAndPerms" resultMap="findRolePerms">
+    select
+    r.*,rp.role_id ,rp.permit_id
+    from dj_user_role r
+    INNER JOIN dj_user_role_permission rp ON r.id=rp.role_id
+    WHERE r.id=#{id}
+  </select>
+  <!--=End findRoleAndPerms 查询角色列表-->
+
+  <!--=Start getRoleByUserId 根据用户id查询角色数据-->
+  <select id="getRoleByUserId" resultType="com.dangjia.acg.modle.user.Role">
+    select
+    ur.role_id id,r.role_name roleName,r.code
+    from dj_user_user_role ur
+    INNER JOIN dj_user_role r ON r.id=ur.role_id
+    WHERE ur.user_id=#{userId}
+  </select>
+  <!--=End getRoleByUserId 根据用户id查询角色数据-->
+
+  <!--=Start getRoles 查询角色列表-->
+  <select id="getRoles" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from dj_user_role
+  </select>
+  <!--=End getRoles 查询角色列表-->
+</mapper>

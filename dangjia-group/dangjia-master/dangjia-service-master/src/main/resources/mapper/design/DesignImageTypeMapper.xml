@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.design.IDesignImageTypeMapper">
+
+	<!-- 查询HouseDesignImage -->
+	<select id="getHouseDesignImage" resultType="com.dangjia.acg.modle.design.HouseDesignImage">
+		select
+		    *
+		from  dj_design_house_design_image
+		where
+		    house_id=#{houseId} and design_image_type_id=#{designImageTypeId}
+	</select>
+
+    <!-- 查询风格关联的设计类型图id -->
+    <select id="getDesignImageIdList" resultType="java.lang.String">
+		select
+		    hst.design_image_list
+		from  dj_design_house_style_type hst
+		where
+		    hst.name = (select h.style from dj_house h where h.id=#{houseId});
+	</select>
+
+    <!-- 查询风格所有关联风格图类型 -->
+    <select id="getDesignImageTypeList" resultType="com.dangjia.acg.modle.design.DesignImageType">
+		select
+		    *
+		from  dj_design_design_image_type dit
+		where
+		    dit.id in
+        <foreach collection="typeList" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>;
+	</select>
+
+</mapper>
+

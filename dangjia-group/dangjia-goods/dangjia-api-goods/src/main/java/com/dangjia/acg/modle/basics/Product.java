@@ -1,0 +1,76 @@
+package com.dangjia.acg.modle.basics;
+
+import com.dangjia.acg.common.model.BaseEntity;
+import io.swagger.annotations.ApiModel;
+import lombok.Data;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+/**
+ * 商品货品实体类
+ * @author Ronalcheng
+ */
+@Data
+@Entity
+@Table(name = "dj_basics_product")
+@ApiModel(description = "商品货品")
+public class Product extends BaseEntity {
+
+	@Column(name = "name")
+    private String name;
+
+	@Column(name = "category_id")
+    private String categoryId;//分类id
+
+	@Column(name = "goods_id")
+    private String goodsId;//商品id
+
+	@Column(name = "product_sn")
+    private String productSn;//货号编号
+
+	@Column(name = "image")
+    private String image;//图片
+
+	@Column(name = "unit")
+    private String unit;//单位
+
+    @Column(name = "convert_quality")
+    private Double convertQuality;//换算量
+
+    @Column(name = "convert_unit")
+    private String convertUnit;//换算单位
+
+	@Column(name = "weight")
+    private String weight;//重量
+
+	@Column(name = "type")
+    private Integer type;//是否禁用0：禁用；1不禁用
+
+	@Column(name = "maket")
+    private Integer maket;//是否上架  0:未上架；1已上架
+
+	@Column(name = "cost")
+    private Double cost;//平均成本价
+
+	@Column(name = "price")
+    private Double price;//销售价
+
+	@Column(name = "profit")
+    private Double profit;//利润率
+
+	@Column(name = "brand_id")
+    private String brandId;//品牌id
+
+	@Column(name = "brand_series_id")
+    private String brandSeriesId;//品牌系列
+
+	@Column(name = "attribute_name_arr")
+    private String attributeNameArr;// 属性选项选中值名称集合
+
+    @Column(name = "attribute_id_arr")
+    private String attributeIdArr;// 属性选项选中值Id集合
+
+    
+}

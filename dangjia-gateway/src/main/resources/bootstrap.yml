@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: dangjia-gateway
+  cloud:
+    config:
+      uri: http://172.16.30.95:6010
+  profiles:
+    active: dev
+  http:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 100MB
+zuul.SendErrorFilter.error.disable: true
+zuul.debug.request: true
+zuul.SendResponseFilter.post.disabled: true
+encrypt:
+  key: UDkdaXKdHDgqieUDpoijjDkqnc
+zuul:
+  ignored-services: dangjia-service-**                        # 需要忽视的服务(配置后将不会被路由)
+
+endpoints:
+  shutdown:
+    enabled: true
+    sensitive: false

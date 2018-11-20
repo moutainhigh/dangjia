@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.house.IHouseMapper">
+    <sql id="basic_columns">
+        id,
+        building,
+        city_name as cityName,
+        residential,
+        type,
+        unit,
+        member_id as memberId,
+        task_number as taskNumber,
+        square,
+        number,
+        style,
+        designer_ok as designerOk,
+        budget_ok as budgetOk,
+        image,
+        decoration_type as decorationType,
+        repair_state as repairState,
+        city_id as cityId,
+        modeling_layout_id as modelingLayoutId,
+        money,
+        pause,
+        show_house as showHouse,
+        village_id as villageId,
+        refer_house_id as referHouseId,
+        have_complete as haveComplete,
+        istest,
+        record_type as recordType,
+        repair_work_state as repairWorkState,
+        build_square as buildSquare,
+        again,
+        house_type as houseType,
+        drawings,
+        is_select as isSelect,
+        visit_state as visitState,
+        data_status as dataStatus,
+        create_date as createDate,
+        modify_date as modifyDate
+    </sql>
+    <select id="getDesignList" resultType="com.dangjia.acg.dto.house.DesignDTO" >
+        SELECT
+        house.id as houseId,
+        house.designer_ok as designerOk,
+        house.residential as residential,
+        house.building as building,
+        house.unit as unit,
+        house.number as number,
+        member.name as name,
+        member.mobile as mobile
+        FROM dj_house house ,dj_member member
+        <where>
+            house.designer_ok=#{designerOk}
+            AND house.visit_state=1
+            AND member.id = house.member_id
+            <if test="residential!=null and residential!=''">
+                AND house.residential like #{residential}
+            </if>
+            <if test="number!=null and number!=''">
+                AND house.number like #{number}
+            </if>
+            <if test="userName!=null and userName!=''">
+                AND member.mobile like #{mobile}
+            </if>
+        </where>
+        ORDER BY house.create_date DESC
+    </select>
+
+    <select id="startWorkPage" resultType="com.dangjia.acg.dto.house.HouseDTO" >
+        SELECT
+            id as houseId,
+            city_id as cityId,
+            city_name as cityName,
+            village_id as villageId,
+            residential,
+            modeling_layout_id as modelingLayoutId,
+            building,
+            unit,
+            number,
+            square,
+            refer_house_id as referHouseId,
+            style,
+            house_type as houseType,
+            drawings,
+            decoration_type as decorationType
+        FROM dj_house
+        WHERE
+            id=#{houseId}
+    </select>
+
+    <select id="getStatisticsByDate" resultType="com.dangjia.acg.modle.house.House" >
+        SELECT
+            id,
+            budget_ok as budgetOk
+        FROM dj_house
+        WHERE
+        designer_ok = 3
+        AND
+        modify_date BETWEEN #{start} AND #{end}
+        ORDER BY create_date ASC
+    </select>
+
+    <select id="getList" resultType="map" >
+        SELECT
+            id,
+            residential,
+            building,
+            unit,
+            city_name AS cityName,
+            number,
+            show_house AS showHouse,
+            visit_state AS visitState,
+            create_date AS createDate
+        FROM dj_house
+        WHERE
+            member_id=#{memberId}
+        ORDER by
+            create_date
+    </select>
+    <!--根据城市、小区，最大最小面积搜索-->
+    <select id="getSameLayout" resultType="com.dangjia.acg.modle.house.House">
+        SELECT
+        <include refid="basic_columns" />
+        from dj_house
+        where 1=1
+        <if test="cityId!=null and cityId!=''">
+            and city_id = #{cityId}
+        </if>
+        <if test="villageId!=null and villageId!=''">
+            and village_id = #{villageId}
+        </if>
+        <if test="minSquare!=null and minSquare!=''">
+            and build_square &gt;= #{minSquare}
+        </if>
+        <if test="maxSquare!=null and maxSquare!=''">
+            and build_square &lt;= #{maxSquare}
+        </if>
+        and ((decoration_type in (1,2) and budget_ok=3) or (decoration_type=3 and visit_state=1))
+        and show_house!=1
+        order by create_date desc
+    </select>
+</mapper>
+

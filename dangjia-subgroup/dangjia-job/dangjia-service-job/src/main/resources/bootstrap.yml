@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: dangjia-service-job
+  cloud:
+    config:
+      uri: http://172.16.30.95:6010
+  profiles:
+    active: dev
+  http:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 100MB
+logging:
+  config: classpath:logback-spring.xml
+spring.sleuth.feign.enabled: false
+management.security.enabled: false
+endpoints:
+  shutdown:
+    enabled: true
+    sensitive: false

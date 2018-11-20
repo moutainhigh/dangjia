@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.basics.ITechnologyMapper">
+
+    <sql id="all_columns">
+		id,
+		name,
+		content,
+		worker_type_id,
+		type,
+		image,
+		material_or_worker,
+        create_date,
+        modify_date
+	</sql>
+    <sql id="all_WokerTechnology">
+		id,
+		worker_goods_id,
+		technology_id,
+        create_date,
+        modify_date
+	</sql>
+    <!-- 删除对象 -->
+    <delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM dj_basics_technology 
+		WHERE id=#{id}
+	</delete>
+    <!-- 查询所有 -->
+    <select id="query" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Technology">
+        SELECT
+            id,
+            name,
+            content,
+            type,
+            image,
+            worker_type_id as workerTypeId,
+            material_or_worker as materialOrWorker,
+            create_date as createDate,
+            modify_date as modifyDate
+        FROM dj_basics_technology
+        where 1=1
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            and
+            worker_type_id=#{workerTypeId}
+        </if>
+        <if test="name!=null and name!=''">
+            and
+            name LIKE CONCAT('%',#{name},'%')
+        </if>
+        <if test="materialOrWorker!=null and materialOrWorker!=''">
+            and
+            material_or_worker=#{materialOrWorker}
+        </if>
+        ORDER BY create_date desc
+    </select>
+    <select id="queryById" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Technology">
+        SELECT
+            id,
+            name,
+            content,
+            type,
+            image,
+            worker_type_id as workerTypeId,
+            material_or_worker as materialOrWorker,
+            create_date as createDate,
+            modify_date as modifyDate
+        FROM dj_basics_technology
+        <if test="id!=null">
+            where
+            id=#{id}
+        </if>
+        ORDER BY create_date desc
+    </select>
+    <!-- 新增人工商品关联工艺 -->
+    <insert id="insertWokerTechnology" parameterType="com.dangjia.acg.modle.basics.WorkerTechnology">
+        INSERT INTO dj_basics_worker_technology(
+        <include refid="all_WokerTechnology"/>
+        )
+        VALUES (#{id}, #{workerGoodsId},#{technologyId},SYSDATE(),SYSDATE())
+    </insert>
+    <!-- 删除人工商品关联工艺-->
+    <delete id="deleteWokerTechnologyByWgId" parameterType="java.lang.String">
+		DELETE FROM dj_basics_worker_technology
+		WHERE worker_goods_id=#{worker_goods_id}
+	</delete>
+    <!-- 根据商品id查询人工商品关联工艺关系 -->
+    <select id="queryWokerTechnologyByWgId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.WorkerTechnology">
+        SELECT
+            id,
+            worker_goods_id as workerGoodsId,
+            technology_id as technologyId,
+            create_date as createDate,
+            modify_date as modifyDate
+        FROM dj_basics_worker_technology
+        <if test="worker_goods_id!=null">
+            where
+            worker_goods_id=#{worker_goods_id}
+        </if>
+        ORDER BY create_date desc
+    </select>
+     <!-- 根据商品id查询人工商品关联工艺实体 -->
+    <select id="queryTechnologyByWgId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Technology">
+       select
+        id,
+        name,
+        content,
+        type,
+        image,
+        worker_type_id as workerTypeId,
+        material_or_worker as materialOrWorker,
+        create_date as createDate,
+        modify_date as modifyDate
+       from 
+          dj_basics_technology
+       where 
+          id in(
+	        SELECT
+	             technology_id
+	        FROM dj_basics_worker_technology
+	        where
+	            worker_goods_id=#{worker_goods_id}
+	        )
+	    ORDER BY create_date desc
+    </select>
+    <!-- 根据名称模糊查询 -->
+    <select id="queryByName" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Technology">
+        SELECT
+        id,
+        name,
+        content,
+        type,
+        image,
+        worker_type_id as workerTypeId,
+        material_or_worker as materialOrWorker,
+        create_date as createDate,
+        modify_date as modifyDate
+        FROM dj_basics_technology
+        where 1=1
+        <if test="name!=null">
+            and
+            name LIKE CONCAT('%',#{name},'%')
+        </if>
+        ORDER BY create_date desc
+    </select>
+</mapper>

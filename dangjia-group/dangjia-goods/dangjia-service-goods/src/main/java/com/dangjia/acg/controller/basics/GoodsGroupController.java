@@ -1,0 +1,119 @@
+package com.dangjia.acg.controller.basics;
+
+import com.dangjia.acg.api.basics.GoodsGroupAPI;
+import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
+import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.basics.GoodsGroup;
+import com.dangjia.acg.service.basics.GoodsGroupService;
+import com.github.pagehelper.PageInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * 商品关联组
+ * @author Ronalcheng
+ */
+@RestController
+public class GoodsGroupController implements GoodsGroupAPI {
+
+	@Autowired
+    private GoodsGroupService goodsGroupService;
+	/*
+	 * 获取所有关联组
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse<PageInfo> getAllList(PageDTO pageDTO,String name,Integer state){
+		return goodsGroupService.getAllList(pageDTO.getPageNum(),pageDTO.getPageSize(),name,state);
+	}
+	
+	/*
+	 * 添加关联组和货品关联关系
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse addGroupLink(String goodsGroupId,String listOfProductId){
+		return goodsGroupService.addGroupLink(goodsGroupId,listOfProductId);
+	}
+	/*
+	 * 修改货品关联组关系
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse updateGroupLink(String listOfProductId,String goodsGroupId,int state,String name){
+		return goodsGroupService.updateGroupLink(listOfProductId, goodsGroupId,state,name);
+	}
+	/*
+	 * 根据关联组id查询货品关联关系
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse getGoodsGroupById(String goodsGroupId) {
+		return goodsGroupService.getGoodsGroupById(goodsGroupId);
+	}
+	
+	/*
+	 * 查找所有顶级分类列表
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse getGoodsCategoryList(){
+		return goodsGroupService.getGoodsCategoryList();
+	}
+	
+	/*
+	 * 查找所有子分类列表
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse getChildrenGoodsCategoryList(String id){
+		return goodsGroupService.getChildrenGoodsCategoryList(id);
+	}
+	
+	/*                                
+	 * 查找所有商品列表
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse getGoodsListByCategoryId(String id){
+		return goodsGroupService.getGoodsListByCategoryId(id);
+	}
+	
+	/*
+	 * 查找所有货品列表
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse getProductListByGoodsId(String id){
+		return goodsGroupService.getProductListByGoodsId(id);
+	}
+
+	/*
+	 * 添加关联组
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse addGoodsGroup(GoodsGroup goodsGroup){
+		System.out.println(goodsGroup.getName());
+		return goodsGroupService.addGoodsGroup(goodsGroup);
+	}
+
+	/*
+	 * 修改关联组
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse updateGoodsGroup(GoodsGroup goodsGroup){
+		return goodsGroupService.updateGoodsGroup(goodsGroup);
+	}
+
+	/*
+	 * 根据关联组id删除关联组和货品关联关系
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse deleteGoodsGroupById(String goodsGroupId){
+		return goodsGroupService.deleteGoodsGroupById(goodsGroupId);
+	}
+}

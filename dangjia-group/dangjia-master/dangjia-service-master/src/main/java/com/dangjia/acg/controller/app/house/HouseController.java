@@ -1,0 +1,132 @@
+package com.dangjia.acg.controller.app.house;
+
+import com.dangjia.acg.api.app.house.HouseAPI;
+import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
+import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.service.house.HouseService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * author: Ronalcheng
+ * Date: 2018/11/2 0002
+ * Time: 19:52
+ */
+@RestController
+public class HouseController implements HouseAPI {
+
+    @Autowired
+    private HouseService houseService;
+
+    /**
+     * 切换房产
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse setSelectHouse(String userToken, String cityId, String houseId){
+        return houseService.setSelectHouse(userToken,cityId,houseId);
+    }
+
+    /**
+     * 房产列表
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseList(String userToken, String cityId){
+        return houseService.getHouseList(userToken,cityId);
+    }
+
+    /**
+     * 我的房产
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getMyHouse(String userToken, String cityId){
+        return houseService.getMyHouse(userToken,cityId);
+    }
+
+    /**
+     * @param userToken
+     * @param houseType 装修的房子类型0：新房；1：老房
+     * @param drawings 有无图纸0：无图纸；1：有图纸
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse setStartHouse(String userToken,String cityId,int houseType,int drawings){
+        return houseService.setStartHouse(userToken,cityId,houseType,drawings);
+    }
+
+    /**
+     * 修改房子精算状态
+     * @param houseId
+     * @param budgetOk
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse setHouseBudgetOk(String houseId, Integer budgetOk){
+        return houseService.setHouseBudgetOk(houseId,budgetOk);
+    }
+
+    /**
+     * app修改房子精算状态
+     * @param houseId
+     * @param budgetOk
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse setHouseBudgetOk(String userToken,String houseId, Integer budgetOk){
+        return houseService.setHouseBudgetOk(houseId,budgetOk);
+    }
+
+    //根据城市，小区，最小最大面积查询房子
+    @Override
+    @ApiMethod
+    public ServerResponse queryHouseByCity(String userToken,String cityId, String villageId, Double minSquare, Double maxSquare, PageDTO pageDTO) {
+        return houseService.queryHouseByCity(userToken,cityId,villageId,minSquare,maxSquare,pageDTO.getPageNum(),pageDTO.getPageSize());
+    }
+
+    //装修指南
+    @Override
+    @ApiMethod
+    public ServerResponse getRenovationManual(Integer type,String houseId) {
+        return houseService.getRenovationManual(type,houseId);
+    }
+
+    /**
+     * 保存装修指南
+     * @param houseId
+     * @param savaList
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse savaRenovationManual(String houseId,String savaList){
+        return houseService.savaRenovationManual(houseId,savaList);
+    }
+
+    /**
+     * 施工记录
+     * @param houseId
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO) {
+        return houseService.queryConstructionRecord(houseId, pageDTO.getPageNum(), pageDTO.getPageSize());
+    }
+
+    /**
+     * 根据id查询房子信息
+     * @param houseId
+     * @return
+     */
+    public House getHouseById(String houseId){
+        return houseService.getHouseById(houseId);
+    }
+}

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.basics.IBrandMapper">
+
+	<sql id="all_columns">
+		id,
+		name,
+		create_date,
+		modify_date
+	</sql>
+	<!-- 查询所有 -->
+	<select id="getBrand" resultType="map">
+		SELECT
+		<include refid="all_columns" />
+		FROM dj_basics_brand
+		ORDER BY create_date desc
+	</select>
+	<!-- 查询所有 -->
+	<select id="getBrands" resultType="com.dangjia.acg.modle.brand.Brand">
+		SELECT
+			id,
+			name,
+			create_date as  createDate,
+			modify_date as modifyDate
+		FROM dj_basics_brand
+		ORDER BY create_date desc
+	</select>
+	<!-- 根据品牌名称查询 -->
+	<select id="getBrandByName" parameterType="String" resultType="com.dangjia.acg.modle.brand.Brand">
+		SELECT
+			id,
+			name,
+			create_date as  createDate,
+			modify_date as modifyDate
+		FROM dj_basics_brand WHERE name=#{name}
+		ORDER BY create_date desc
+	</select>
+	<!-- 根据品牌名称查询 -->
+	<select id="getBrandByNames" parameterType="String" resultType="com.dangjia.acg.modle.brand.Brand">
+		SELECT
+			id,
+			name,
+			create_date as  createDate,
+			modify_date as modifyDate
+		FROM dj_basics_brand WHERE  name LIKE CONCAT('%',#{name},'%')
+		ORDER BY create_date desc
+	</select>
+	<!-- 删除对象 -->
+	<delete id="deleteById" parameterType="String">
+		DELETE FROM dj_basics_brand 
+		WHERE id=#{id}
+	</delete>
+</mapper>

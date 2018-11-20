@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.sup.ISupplierMapper">
+
+	<sql id="all_columns">
+		id,
+		name,
+		address,
+		telephone,
+		checkpeople,
+		gender,
+		email,
+		notice,
+		supplier_level,
+		state,
+		create_date,
+		modify_date
+	</sql>
+	<sql id="all_supplierProduct">
+		 id,
+		 product_id,
+		 supplier_id,
+		 price,
+		 stock,
+		 is_supply,
+		 create_date,
+		 modify_date
+	</sql>
+	<!-- 删除对象 -->
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM dj_sup_supplier
+		WHERE id=#{id}
+	</delete>
+    <!-- 查询所有 -->
+	<select id="query" resultType="com.dangjia.acg.modle.sup.Supplier">
+		SELECT
+		id,
+		name,
+		address,
+		telephone,
+		checkpeople,
+		gender,
+		email,
+		notice,
+		supplier_level as supplierLevel,
+		state,
+		create_date as createDate,
+		modify_date as modifyDate
+		FROM dj_sup_supplier
+		ORDER BY create_date desc
+	</select>
+    <!-- 批量更新数据 -->
+    <update id="updateBatch" parameterType="java.util.List">
+        update dj_sup_supplier set
+        name =
+        <foreach collection="list" item="supplier" index="index"
+            separator=" " open="case id" close="end">
+            when #{supplier.id} then #{supplier.name}
+        </foreach>
+        ,address =
+        <foreach collection="list" item="supplier" index="index"
+            separator=" " open="case id" close="end">
+            when #{supplier.id} then #{supplier.address}
+        </foreach>        
+        ,telephone =
+        <foreach collection="list" item="supplier" index="index"
+            separator=" " open="case id" close="end">
+            when #{supplier.id} then #{supplier.telephone}
+        </foreach>
+        ,checkpeople =
+        <foreach collection="list" item="supplier" index="index"
+            separator=" " open="case id" close="end">
+            when #{supplier.id} then #{supplier.checkpeople}
+        </foreach>
+        ,gender =
+        <foreach collection="list" item="supplier" index="index"
+            separator=" " open="case id" close="end">
+            when #{supplier.id} then #{supplier.gender}
+        </foreach>
+        ,email =
+        <foreach collection="list" item="supplier" index="index"
+            separator=" " open="case id" close="end">
+            when #{supplier.id} then #{supplier.email}
+        </foreach>
+        ,notice =
+        <foreach collection="list" item="supplier" index="index"
+            separator=" " open="case id" close="end">
+            when #{supplier.id} then #{supplier.notice}
+        </foreach>
+        ,supplier_level =
+        <foreach collection="list" item="supplier" index="index"
+            separator=" " open="case id" close="end">
+            when #{supplier.id} then #{supplier.supplier_level}
+        </foreach>
+        ,state =
+        <foreach collection="list" item="supplier" index="index"
+            separator=" " open="case id" close="end">
+            when #{supplier.id} then #{supplier.state}
+        </foreach>
+        ,modify_date=SYSDATE()
+        where id in
+        <foreach collection="list" item="supplier" index="index" 
+            separator="," open="(" close=")">
+             #{supplier.id}
+        </foreach>
+    </update>
+    <!-- 新增供应商和商品关系 -->
+    <insert id="insertSupplierProduct" parameterType="com.dangjia.acg.modle.sup.SupplierProduct" >
+		INSERT INTO dj_sup_supplier_product(
+			id,
+			product_id,
+			supplier_id,
+			price,
+			stock,
+			is_supply,
+			create_date,
+			modify_date
+		) 
+		VALUES (#{id}, #{productId},#{supplierId}, #{price}, #{stock},#{isSupply},
+		SYSDATE(),SYSDATE())
+    </insert>
+    <!-- 修改供应商和商品关系 -->
+    <update id="updateSupplierProduct" parameterType="com.dangjia.acg.modle.sup.SupplierProduct" >
+        UPDATE dj_sup_supplier_product 
+		SET 
+		<if test="productId!=null">
+			product_id=#{productId},
+		</if>
+		<if test="supplierId!=null">
+			supplier_id=#{supplierId},
+		</if>
+		<if test="price!=null">
+			price=#{price},
+		</if>
+		<if test="stock!=null">
+			stock=#{stock},
+		</if>
+		<if test="isSupply!=null">
+			is_supply=#{isSupply},
+		</if>
+		    modify_date=SYSDATE()
+		WHERE 
+		    product_id=#{productId}
+		    and 
+		    supplier_id=#{supplierId}
+    </update>
+    <!-- 根据供应商查询自己所供应的商品-->
+    <select id="querySupplierProduct" resultType="com.dangjia.acg.modle.basics.Product" >
+		select
+			id,
+			name,
+			goods_id as goodsId,
+			category_id as categoryId,
+			product_sn as productSn,
+			image,
+			unit,
+			weight,
+			type,
+			maket,
+			cost,
+			price,
+			profit,
+			brand_id as brandId,
+			brand_series_id as brandSeriesId,
+			attribute_arr as  attributeArr,
+			convert_unit as convertUnit,
+            convert_quality as convertQuality,
+			create_date as createDate,
+			modify_date as modifyDate
+		from
+		    dj_basics_product
+		where
+		    id in
+				(select 
+				    product_id
+				 from dj_sup_supplier_product
+				 WHERE 
+				    supplier_id=#{supplier_id} and is_supply=1
+				)
+		ORDER BY create_date desc
+    </select>
+    <!-- 根据供应商查询在供应的货品种类-->
+    <select id="getSupplierProductByGid" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select 
+		     count(*)
+		from dj_sup_supplier_product
+		WHERE
+		     supplier_id=#{supplier_id}
+		     and
+		     is_supply=1
+    </select>
+    <!-- 根据供应商查询在供应的商品种类-->
+    <select id="getSupplierProductByAid" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select 
+		 count(*)
+		from dj_sup_supplier_product
+		WHERE 
+		    supplier_id=#{supplier_id}
+		    and
+		    is_supply=1
+    </select>
+    <!-- 根据供应商查询在供应的库存小于50的商品-->
+    <select id="getSupplierProductByStock" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select 
+		 count(*)
+		from dj_sup_supplier_product
+		WHERE 
+		    supplier_id=#{supplier_id}
+		    and
+		    is_supply=1
+		    and
+		    stock <![CDATA[<]]>50 
+    </select>
+      <!-- 根据供应商、商品、属性查询对应关系-->
+    <select id="querySupplierProductRelation" resultType="com.dangjia.acg.modle.sup.SupplierProduct" >
+	    select
+			id,
+			product_id as productId,
+			supplier_id as supplierId,
+			price,
+			stock,
+			is_supply as isSupply,
+			create_date as createDate,
+			modify_date as modifyDate
+	    from dj_sup_supplier_product
+	    WHERE 
+		    product_id=#{productId}
+		    and 
+		    supplier_id=#{supplierId}
+		ORDER BY create_date desc
+    </select>
+</mapper>
