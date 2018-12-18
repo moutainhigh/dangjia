@@ -35,5 +35,5 @@ public interface WorkerTypeAPI {
 
     @PostMapping("/data/workerType/getWorkerType")
     @ApiOperation(value = "根据workerTypeId返回工种对象", notes = "根据workerTypeId返回工种对象")
-    ServerResponse getWorkerType(String workerTypeId);
+    ServerResponse getWorkerType(@RequestParam("workerTypeId")String workerTypeId);
 }

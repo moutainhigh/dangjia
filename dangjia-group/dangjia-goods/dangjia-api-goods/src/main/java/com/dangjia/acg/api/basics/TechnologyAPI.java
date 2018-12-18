@@ -7,8 +7,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 
@@ -33,9 +34,9 @@ public interface TechnologyAPI {
      */
     @PostMapping("/basics/technology/insertTechnology")
     @ApiOperation(value = "新增工艺说明", notes = "新增工艺说明")
-    public ServerResponse insertTechnology(@RequestParam("name")String name, @RequestParam("content")String content,
-                                           @RequestParam("workerTypeId")String workerTypeId,@RequestParam("type")Integer type,
-                                           @RequestParam("image")String image,@RequestParam("materialOrWorker")Integer materialOrWorker);
+    public ServerResponse insertTechnology(@RequestParam("request") HttpServletRequest request, @RequestParam("name")String name, @RequestParam("content")String content,
+                                           @RequestParam("workerTypeId")String workerTypeId, @RequestParam("type")Integer type,
+                                           @RequestParam("image")String image, @RequestParam("materialOrWorker")Integer materialOrWorker);
     /**
     * 修改工艺说明
     * @Title: updateTechnology
@@ -49,7 +50,7 @@ public interface TechnologyAPI {
     */
     @PostMapping("/basics/technology/updateTechnology")
     @ApiOperation(value = "修改工艺说明", notes = "修改工艺说明")
-    public ServerResponse updateTechnology(@RequestParam("id")String id,@RequestParam("name")String name,
+    public ServerResponse updateTechnology(@RequestParam("request") HttpServletRequest request, @RequestParam("id")String id,@RequestParam("name")String name,
                                            @RequestParam("content")String content,@RequestParam("type")Integer type,
                                            @RequestParam("image")String image);
     /**
@@ -63,7 +64,7 @@ public interface TechnologyAPI {
      */
     @PostMapping("/basics/technology/deleteTechnology")
     @ApiOperation(value = "删除工艺说明", notes = "删除工艺说明")
-    public ServerResponse deleteTechnology(String id);
+    public ServerResponse deleteTechnology(@RequestParam("request") HttpServletRequest request,@RequestParam("id") String id);
     /**
      * 查询所有工艺说明
      * @Title: queryTechnology
@@ -76,7 +77,7 @@ public interface TechnologyAPI {
      */
     @PostMapping("/basics/technology/queryTechnology")
     @ApiOperation(value = "查询所有工艺说明", notes = "查询所有工艺说明")
-    public ServerResponse<PageInfo> queryTechnology(@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("workerTypeId") String workerTypeId,@RequestParam("name")String name,
+    public ServerResponse<PageInfo> queryTechnology(@RequestParam("request") HttpServletRequest request,@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("workerTypeId") String workerTypeId,@RequestParam("name")String name,
                                                     @RequestParam("materialOrWorker")Integer materialOrWorker);
    /**
     * 新增人工商品关联工艺
@@ -90,7 +91,8 @@ public interface TechnologyAPI {
     */
    @PostMapping("/basics/technology/insertWokerTechnology")
    @ApiOperation(value = "新增人工商品关联工艺", notes = "新增人工商品关联工艺")
-    public ServerResponse insertWokerTechnology(String workerGoodsId,String tIdArr);
+    public ServerResponse insertWokerTechnology(@RequestParam("request") HttpServletRequest request,@RequestParam("workerGoodsId")String workerGoodsId,
+                                                @RequestParam("tIdArr")String tIdArr);
 
    /**
     * 根据商品id查询人工商品关联工艺实体
@@ -103,13 +105,6 @@ public interface TechnologyAPI {
     */
    @PostMapping("/basics/technology/queryTechnologyByWgId")
    @ApiOperation(value = "根据商品id查询人工商品关联工艺实体", notes = "根据商品id查询人工商品关联工艺实体")
-    public ServerResponse queryTechnologyByWgId(String workerGoodsId);
+    public ServerResponse queryTechnologyByWgId(@RequestParam("request") HttpServletRequest request,@RequestParam("workerGoodsId")String workerGoodsId);
 
-    /**
-     * 根据houseFlow查询精算下的验收工艺
-     */
-
-
-
-    
 }

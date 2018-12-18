@@ -4,6 +4,7 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.http.JsonResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.core.MethodParameter;
@@ -24,7 +25,7 @@ import static com.dangjia.acg.common.util.AES.encrypt;
  * Created by QiYuXiang on 2018/3/20.
  */
 @ControllerAdvice
-public class JsonResponseAdvice implements ResponseBodyAdvice<Object>{
+public class JsonResponseAdvice implements ResponseBodyAdvice<Object> {
     @Override
     public boolean supports(MethodParameter methodParameter, Class<? extends HttpMessageConverter<?>> aClass) {
 
@@ -36,27 +37,25 @@ public class JsonResponseAdvice implements ResponseBodyAdvice<Object>{
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                 .getRequest();
-       ApiMethod api = methodParameter.getMethodAnnotation(ApiMethod.class);
-        if(null != api){
+        ApiMethod api = methodParameter.getMethodAnnotation(ApiMethod.class);
+        if (null != api) {
             String header = request.getHeader("feign-sign");
-
-            if(request.getAttribute("information") != null && !"".equals(request.getAttribute("information"))){
-               return o;
+            if (request.getAttribute("information") != null && !"".equals(request.getAttribute("information"))) {
+                return o;
             }
-
-          if(StringUtils.isEmpty(header)) {
-              Gson gson = new Gson();
-              JsonResponse jsonResponse = new JsonResponse(ServerCode.SUCCESS.getCode(), o);
-              String toString = gson.toJson(jsonResponse);
-            try {
-//              AES7 aes = new AES7();
-//              System.out.println("!!!!!!!!!!!!!! "+aes.encrypt(toString.getBytes(), AES7.iv));
-//              return new String(Hex.encode(aes.encrypt(toString.getBytes(), AES7.iv)));
-              return encrypt(toString, Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
-            } catch (Exception e) {
-              e.printStackTrace();
+            if (StringUtils.isEmpty(header)) {
+                Gson gson = new Gson();
+                if (o != null) {
+                    o = BeanUtils.beanToMap(o);
+                }
+                JsonResponse jsonResponse = new JsonResponse(ServerCode.SUCCESS.getCode(), o);
+                String toString = gson.toJson(jsonResponse);
+                try {
+                    return encrypt(toString, Constants.DANGJIA_SESSION_KEY, Constants.DANGJIA_IV);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-          }
         }
         return o;
     }

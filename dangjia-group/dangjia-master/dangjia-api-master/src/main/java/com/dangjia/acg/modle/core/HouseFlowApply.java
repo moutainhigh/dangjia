@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,6 +18,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "dj_core_house_flow_apply")
 @ApiModel(description = "任务进程/申请表")
+@FieldNameConstants(prefix = "")
 public class HouseFlowApply extends BaseEntity {
 
 	@Column(name = "house_flow_id")
@@ -57,12 +59,12 @@ public class HouseFlowApply extends BaseEntity {
 	@Column(name = "apply_type")
 	@Desc(value = "0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查")
 	@ApiModelProperty("0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查")
-	private int applyType;//applytype
+	private Integer applyType;//applytype
 
 	@Column(name = "suspend_day")
 	@Desc(value = "申请停工多少天")
 	@ApiModelProperty("申请停工多少天")
-	private int suspendDay;//suspendDay
+	private Integer suspendDay;//suspendDay
 
 	@Column(name = "apply_dec")
 	@Desc(value = "每日描述 审核停工的原因")
@@ -82,7 +84,7 @@ public class HouseFlowApply extends BaseEntity {
 	@Column(name = "work_evaluat")
 	@Desc(value = "大管家对工人的评价，0未评价，1已评价")
 	@ApiModelProperty("大管家对工人的评价，0未评价，1已评价")
-	private int workEvaluat; //workevaluat
+	private Integer workEvaluat; //workevaluat
 
 	@Column(name = "apply_money")
 	@Desc(value = "申请得到的钱")

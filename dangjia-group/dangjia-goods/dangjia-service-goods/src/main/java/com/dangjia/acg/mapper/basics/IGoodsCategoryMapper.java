@@ -17,6 +17,7 @@ import java.util.List;
 public interface IGoodsCategoryMapper extends Mapper<GoodsCategory> {
 	void deleteById(String id);
 	List<GoodsCategory> query();
+
 	//根据父id查询下属商品类型
 	List<GoodsCategory> queryCategoryByParentId(String parentId);
 }

@@ -84,17 +84,12 @@ public class WorkerTypeSafeOrderRecord extends BaseEntity {
 	@Column(name = "state")
 	@Desc(value = "支付状态0未支付1已支付")
 	@ApiModelProperty("支付状态0未支付1已支付")
-	private int state;//
+	private Integer state;//
 
 	@Column(name = "price")
 	@Desc(value = "价格")
 	@ApiModelProperty("价格")
 	private BigDecimal price;
-
-	@Column(name = "istest")
-	@Desc(value = "是否测试1测试,0不是测试默认为0")
-	@ApiModelProperty("是否测试1测试,0不是测试默认为0")
-	private int istest;//
 
 	@Column(name = "shop_date")
 	@Desc(value = "购买时间")

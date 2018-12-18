@@ -1,5 +1,6 @@
 package com.dangjia.acg.controller.actuary;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.GetForBudgetAPI;
@@ -8,6 +9,8 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.actuary.BudgetWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 
@@ -26,13 +29,14 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	 private BudgetWorkerService budgetWorkerService;
 	 @Autowired
 	 private GetForBudgetAPI getForBudgetAPI;
+
 	 /**
 	  * 查询所有精算
 	  * @return
 	  */
 	 @Override
 	 @ApiMethod
-	 public ServerResponse getAllBudgetWorker(){
+	 public ServerResponse getAllBudgetWorker(HttpServletRequest request){
 		 return budgetWorkerService.getAllBudgetWorker();
 	 }
 	 /**
@@ -41,7 +45,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	  */
 	 @Override
 	 @ApiMethod
-	 public ServerResponse getBudgetWorkerById(String id){
+	 public ServerResponse getBudgetWorkerById(HttpServletRequest request,String id){
 		 return budgetWorkerService.getBudgetWorkerByMyId(id);
 	 }
 	 /**
@@ -50,7 +54,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	  */
 	 @Override
 	 @ApiMethod
-	 public ServerResponse getAllBudgetWorkerById(String houseId,String workerTypeId){
+	 public ServerResponse getAllBudgetWorkerById(HttpServletRequest request,String houseId,String workerTypeId){
 		 return budgetWorkerService.getAllBudgetWorkerById(houseId,workerTypeId);
 	 }
 	 /**
@@ -59,7 +63,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	  */
 	 @Override
 	 @ApiMethod
-	 public ServerResponse getAllWorkerGoods(){
+	 public ServerResponse getAllWorkerGoods(HttpServletRequest request){
 		 return budgetWorkerService.getAllWorkerGoods();
 	 }
 	 /**
@@ -71,7 +75,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	  */
 	 @Override
 	 @ApiMethod
-	 public ServerResponse budgetTemplates(String listOfGoods,String workerTypeId,String templateId){
+	 public ServerResponse budgetTemplates(HttpServletRequest request,String listOfGoods,String workerTypeId,String templateId){
 		 return budgetWorkerService.makeBudgetTemplate(listOfGoods,workerTypeId,templateId);
 	 }
 	 /**
@@ -83,7 +87,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	  */
 	 @Override
 	 @ApiMethod
-	 public ServerResponse updateBudgetTemplates(String listOfGoods,String workerTypeId,String templateId){
+	 public ServerResponse updateBudgetTemplates(HttpServletRequest request,String listOfGoods,String workerTypeId,String templateId){
 		 return budgetWorkerService.updateBudgetTemplate(listOfGoods, workerTypeId, templateId);
 	 }
 	 /**
@@ -93,7 +97,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	  */
 	 @Override
 	 @ApiMethod
-	 public ServerResponse getAllbudgetTemplates(String templateId){
+	 public ServerResponse getAllbudgetTemplates(HttpServletRequest request,String templateId){
 		 return  budgetWorkerService.getAllbudgetTemplates(templateId);
 	 }
 	 /**
@@ -103,7 +107,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	  */
 	 @Override
 	 @ApiMethod
-	 public ServerResponse useTheBudget(String id){
+	 public ServerResponse useTheBudget(HttpServletRequest request,String id){
 		 return budgetWorkerService.useuseTheBudget(id);
 	 }
 	 /**
@@ -116,7 +120,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	 @SuppressWarnings("static-access")
 	 @Override
 	 @ApiMethod
-	 public ServerResponse makeBudgets(String houseId,String workerTypeId,String listOfGoods){
+	 public ServerResponse makeBudgets(HttpServletRequest request,String houseId,String workerTypeId,String listOfGoods){
 		 ServerResponse serverResponse = getForBudgetAPI.actuarialForBudget(houseId, workerTypeId);
 		 if(serverResponse.isSuccess()){
 			 JSONObject obj=JSONObject.parseObject(serverResponse.getResultObj().toString());
@@ -136,7 +140,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	@SuppressWarnings("static-access")
 	@Override
 	@ApiMethod
-	public ServerResponse getWorkerTotalPrice(String houseId,String workerTypeId){
+	public ServerResponse getWorkerTotalPrice(HttpServletRequest request,String houseId,String workerTypeId){
 			return budgetWorkerService.getWorkerTotalPrice(houseId, workerTypeId);
 	}
 
@@ -148,7 +152,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	@SuppressWarnings("static-access")
 	@Override
 	@ApiMethod
-	public ServerResponse doModifyBudgets(String listOfGoods){
+	public ServerResponse doModifyBudgets(HttpServletRequest request,String listOfGoods){
 			return budgetWorkerService.doModifyBudgets(listOfGoods);
 	}
 
@@ -159,7 +163,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse gatEstimateBudgetByHId(String houseId){
+	public ServerResponse gatEstimateBudgetByHId(HttpServletRequest request,String houseId){
 		return budgetWorkerService.gatEstimateBudgetByHId(houseId);
 	}
 
@@ -170,7 +174,18 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse gatBudgetResultByHouse(String houseId){
+	public ServerResponse gatBudgetResultByHouse(HttpServletRequest request,String houseId){
 		return budgetWorkerService.gatBudgetResultByHouse(houseId);
+	}
+
+	/**
+	 *  根据houseId查询所有验收节点
+	 * @param houseId
+	 * @return
+	 */
+	@Override
+	@ApiMethod
+	public JSONArray getAllTechnologyByHouseId(HttpServletRequest request,String houseId){
+		return budgetWorkerService.getAllTechnologyByHouseId(houseId);
 	}
 }

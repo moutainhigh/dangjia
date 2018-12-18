@@ -9,6 +9,8 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 
  * 
@@ -32,7 +34,7 @@ public class UnitController implements UnitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> getAllUnit(PageDTO pageDTO){
+    public ServerResponse<PageInfo> getAllUnit(HttpServletRequest request, PageDTO pageDTO){
     	return unitService.getAllUnit(pageDTO.getPageNum(),pageDTO.getPageSize());
     }
     
@@ -44,7 +46,7 @@ public class UnitController implements UnitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateUnit(String unitId,String unitName){
+    public ServerResponse updateUnit(HttpServletRequest request,String unitId,String unitName){
     	return unitService.update(unitId, unitName);
     }
     /**
@@ -54,13 +56,13 @@ public class UnitController implements UnitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertUnit(String unitName){
+    public ServerResponse insertUnit(HttpServletRequest request,String unitName){
     	return unitService.insert( unitName);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse selectunitById(String unitId){
+    public ServerResponse selectunitById(HttpServletRequest request,String unitId){
     	return unitService.selectById(unitId);
     }
     /**
@@ -70,7 +72,7 @@ public class UnitController implements UnitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse deleteById(String unitId){
+    public ServerResponse deleteById(HttpServletRequest request,String unitId){
     	return unitService.deleteById(unitId);
     }
 }

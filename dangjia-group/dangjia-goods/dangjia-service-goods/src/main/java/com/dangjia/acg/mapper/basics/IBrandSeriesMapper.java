@@ -16,8 +16,13 @@ import java.util.List;
  */
 @Repository
 public interface IBrandSeriesMapper extends Mapper<BrandSeries> {
+
+	/**根据货品id查询品牌系列名*/
+	String brandSeriesName(@Param("productId")String productId);
 	/**查询所有品牌*/
-	List<BrandSeries> queryBrandSeries(@Param("brand_id") String brand_id);
+	List<BrandSeries> queryBrandSeries(@Param("brandId") String brandId);
 	/**根据拿到的Id删除品牌*/
 	void deleteById(String brandExplainId);
+	/**根据商品id查询关联品牌系列*/
+	List<BrandSeries> queryBrandByGid(@Param("goodsId") String goodsId);
 }

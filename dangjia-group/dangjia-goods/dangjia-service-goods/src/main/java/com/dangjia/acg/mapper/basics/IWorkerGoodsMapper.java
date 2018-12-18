@@ -22,7 +22,12 @@ public interface IWorkerGoodsMapper extends Mapper<WorkerGoods> {
     
     List<WorkerGoods> selectList(@Param("workerTypeId") String workerTypeId, @Param("searchKey") String searchKey, @Param("showGoods") String showGoods);
     
-    List<WorkerGoods> queryByName(@Param("name") String name);
+    List<WorkerGoods> queryByName(@Param("name") String name,@Param("workerTypeId") String workerTypeId);//模糊查询
+    List<WorkerGoods> selectByName(@Param("name") String name,@Param("workerTypeId") String workerTypeId);//非模糊查询name
+    List<WorkerGoods> selectByWorkerGoodsSn(@Param("workerGoodsSn") String name,@Param("workerTypeId") String workerTypeId);
+
+    WorkerGoods queryById(@Param("id") String id);
     Double getWorkertoCheck(@Param("houseId") String houseId,@Param("houseFlowId") String houseFlowId);
     Double getPayedWorker(@Param("houseId") String houseId,@Param("houseFlowId") String houseFlowId);
+    List<WorkerGoods> queryRepairBudgetWorker(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId,@Param("name") String name);
 }

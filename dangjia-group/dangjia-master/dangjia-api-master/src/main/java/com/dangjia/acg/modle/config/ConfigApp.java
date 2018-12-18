@@ -10,8 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.math.BigDecimal;
-import java.util.Date;
 
 /**
  * 实体类 - APP版本表

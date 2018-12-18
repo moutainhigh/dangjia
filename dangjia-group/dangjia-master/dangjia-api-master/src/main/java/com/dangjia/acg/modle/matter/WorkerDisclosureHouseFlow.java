@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,12 +19,13 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_matter_worker_disclosure_house_flow")
 @ApiModel(description = "交底事项关联工序")
+@FieldNameConstants(prefix = "")
 public class WorkerDisclosureHouseFlow extends BaseEntity {
 
 	@Column(name = "state")
 	@Desc(value = "状态1选择,2扫码成功,3删除")
 	@ApiModelProperty("状态1选择,2扫码成功,3删除")
-	private int state;//
+	private Integer state;//
 
 	@Column(name = "worker_disclo_id")
 	@Desc(value = "交底事项")

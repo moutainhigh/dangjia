@@ -6,18 +6,19 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.math.BigDecimal;
-import java.util.Date;
 
 /**
  * 实体类 - 优惠券拆分规则
  */
 @Data
 @Entity
+@FieldNameConstants(prefix = "")
 @Table(name = "dj_activity_red_pack_rule")
 @ApiModel(description = "优惠券拆分规则")
 public class ActivityRedPackRule extends BaseEntity {
@@ -33,7 +34,7 @@ public class ActivityRedPackRule extends BaseEntity {
 	@Column(name = "num")
 	@Desc(value = "数量")
 	@ApiModelProperty("数量")
-	private int num;//
+	private Integer num;//
 
 
 	@Column(name = "money")

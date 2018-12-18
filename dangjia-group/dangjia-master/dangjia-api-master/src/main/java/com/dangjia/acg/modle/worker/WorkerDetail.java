@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "dj_worker_worker_detail")
 @ApiModel(description = "工人流水明细")
+@FieldNameConstants(prefix = "")
 public class WorkerDetail extends BaseEntity {
 
 	@Column(name = "name")
@@ -48,15 +50,11 @@ public class WorkerDetail extends BaseEntity {
 	@Column(name = "state")
 	@Desc(value = "0为进账 1为出账 自定义流水状态  2 增加金额 3减少金额")
 	@ApiModelProperty("0为进账 1为出账 自定义流水状态  2 增加金额 3减少金额")
-	private int state;//
+	private Integer state;//
 
 	@Column(name = "defined_worker_id")
 	@Desc(value = "自定义工人流水id")
 	@ApiModelProperty("自定义工人流水id")
 	private String definedWorkerId; //
 
-	@Column(name = "istest")
-	@Desc(value = "0不是，1是测试")
-	@ApiModelProperty("0不是，1是测试")
-	private int istest;//
 }

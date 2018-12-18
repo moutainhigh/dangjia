@@ -1,11 +1,9 @@
 package com.dangjia.acg.controller.member;
 
-import com.dangjia.acg.api.app.design.HouseDesignImageAPI;
 import com.dangjia.acg.api.member.CustomerAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.member.Customer;
-import com.dangjia.acg.service.design.HouseDesignImageService;
 import com.dangjia.acg.service.member.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;

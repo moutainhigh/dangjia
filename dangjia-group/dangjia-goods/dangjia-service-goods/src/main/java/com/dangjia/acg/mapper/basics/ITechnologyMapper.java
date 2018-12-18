@@ -19,6 +19,9 @@ import java.util.List;
 @Repository
 public interface ITechnologyMapper extends Mapper<Technology> {
 
+    /**根据商品id查询商品关联节点工艺 人工材料共用*/
+    List<Technology> queryTechnologyList(@Param("goodsId") String goodsId);
+
     void deleteById(String id);
 
     List<Technology> query(@Param("workerTypeId") String workerTypeId ,@Param("name") String name,@Param("materialOrWorker")Integer materialOrWorker);
@@ -38,4 +41,5 @@ public interface ITechnologyMapper extends Mapper<Technology> {
     Technology queryById(@Param("id") String id);
     //根据内容模糊搜索工艺 
     List<Technology> queryByName(@Param("name") String name);
+
 }

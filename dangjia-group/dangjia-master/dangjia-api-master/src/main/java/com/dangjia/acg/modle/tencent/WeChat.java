@@ -59,17 +59,17 @@ public class WeChat extends BaseEntity {
 	@Column(name = "state")
 	@Desc(value = "是否支付1已支付0未支付")
 	@ApiModelProperty("是否支付1已支付0未支付")
-	private int state;//
+	private Integer state;//
 
 	@Column(name = "price")
 	@Desc(value = "支付价格")
 	@ApiModelProperty("支付价格")
-	private double price;//
+	private Double price;//
 
 	@Column(name = "type")
 	@Desc(value = "1验房活动 2..")
 	@ApiModelProperty("1验房活动 2..")
-	private int type;//
+	private Integer type;//
 
 	@Column(name = "superior_id")
 	@Desc(value = "上级id")

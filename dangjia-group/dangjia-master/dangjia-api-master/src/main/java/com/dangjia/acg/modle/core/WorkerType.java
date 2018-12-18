@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,6 +18,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_core_worker_type")
 @ApiModel(description = "工种")
+@FieldNameConstants(prefix = "")
 public class WorkerType extends BaseEntity {
 
 	@Column(name = "name")
@@ -27,7 +29,7 @@ public class WorkerType extends BaseEntity {
 	@Column(name = "type")
 	@Desc(value = "1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工")
 	@ApiModelProperty("1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工")
-	private int type;
+	private Integer type;
 
 	@Column(name = "state")
 	@Desc(value = "0可用排期，2禁用")
@@ -37,27 +39,27 @@ public class WorkerType extends BaseEntity {
 	@Column(name = "methods")
 	@Desc(value = "可抢单数")
 	@ApiModelProperty("可抢单数")
-	private int methods;
+	private Integer methods;
 
 	@Column(name = "sort")
 	@Desc(value = "默认排期")
 	@ApiModelProperty("默认排期")
-	private int sort;
+	private Integer sort;
 
 	@Column(name = "safe_state")
 	@Desc(value = "1启用,0不启用")
 	@ApiModelProperty("1启用,0不启用")
-	private int safeState;//safestate
-
-	@Column(name = "technical")
-	@Desc(value = "工艺说明url")
-	@ApiModelProperty("工艺说明url")
-	private String technical;
+	private Integer safeState;//safestate
 
 	@Column(name = "inspect_number")
 	@Desc(value = " 标准巡查次数")
 	@ApiModelProperty("标准巡查次数")
 	private Integer inspectNumber;//inspectnumber
+
+	@Column(name = "image")
+	@Desc(value = "图标")
+	@ApiModelProperty("图标")
+	private String image;
 
 	@Column(name = "color")
 	@Desc(value = "颜色")

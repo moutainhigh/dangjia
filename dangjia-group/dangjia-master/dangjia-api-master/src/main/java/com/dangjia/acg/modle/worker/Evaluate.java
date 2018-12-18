@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +19,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_worker_evaluate")
 @ApiModel(description = "评价记录")
+@FieldNameConstants(prefix = "")
 public class Evaluate extends BaseEntity {
 
 	@Column(name = "content")
@@ -73,5 +75,5 @@ public class Evaluate extends BaseEntity {
 	@Column(name = "apply_type")
 	@Desc(value = "1为阶段完工评价，2为整体完工评价")
 	@ApiModelProperty("1为阶段完工评价，2为整体完工评价")
-	private int applyType;//applytype
+	private Integer applyType;//applytype
 }

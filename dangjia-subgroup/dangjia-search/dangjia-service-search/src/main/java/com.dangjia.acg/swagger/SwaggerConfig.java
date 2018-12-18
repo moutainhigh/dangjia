@@ -1,7 +1,7 @@
 package com.dangjia.acg.swagger;
 
-import com.google.common.base.Predicate;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.google.common.base.Predicate;
 import org.springframework.boot.autoconfigure.web.BasicErrorController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,7 +50,7 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-            .title("用户接口文档")//大标题
+            .title("搜索引擎管理接口")//大标题
             .version("1.0")//版本
             .build();
     }

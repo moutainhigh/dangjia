@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.deliver.IOrderMapper">
+    <sql id="all_columns">
+        id,
+        house_id as houseId,
+        business_order_number as businessOrderNumber,
+        total_amount as totalAmount,
+        worker_type_name as workerTypeName,
+        worker_type_id as workerTypeId,
+        style_name as styleName,
+        type,
+        payment,
+        create_date as createDate,
+        modify_date as modifyDate,
+        data_status as dataStatus
+    </sql>
+
+    <!-- 查询材料订单列表 -->
+    <select id="orderList" resultType="com.dangjia.acg.dto.deliver.OrderDTO">
+        SELECT
+            id,
+            worker_type_name as name
+        from dj_deliver_order
+        where
+            house_id = #{houseId}
+    </select>
+</mapper>
+

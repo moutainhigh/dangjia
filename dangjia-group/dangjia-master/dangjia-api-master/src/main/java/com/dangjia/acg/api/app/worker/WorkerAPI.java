@@ -1,11 +1,15 @@
 package com.dangjia.acg.api.app.worker;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.worker.WorkerBankCard;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * author: Ronalcheng
@@ -16,28 +20,48 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(value = "工匠管理接口", description = "工匠管理关联接口")
 public interface WorkerAPI {
 
+    @PostMapping("app/worker/getMailList")
+    @ApiOperation(value = "通讯录", notes = "通讯录")
+    ServerResponse getMailList(@RequestParam("userToken")String userToken, @RequestParam("houseId")String houseId);
+
     @PostMapping("app/worker/getWorker")
     @ApiOperation(value = "我的资料", notes = "我的资料")
     ServerResponse getWorker(@RequestParam("userToken") String userToken );
 
     @PostMapping("app/worker/getWithdrawDeposit")
     @ApiOperation(value = "提现记录", notes = "提现记录")
-    public ServerResponse getWithdrawDeposit(@RequestParam("userToken")String userToken);
+    ServerResponse getWithdrawDeposit(@RequestParam("userToken")String userToken,@RequestParam("pageDTO")PageDTO pageDTO);
 
-    @PostMapping("app/worker/gethouseWorkerList")
+    @PostMapping("app/worker/getHouseWorkerList")
     @ApiOperation(value = "我的任务", notes = "我的任务")
-    public ServerResponse gethouseWorkerList(@RequestParam("userToken")String userToken);
+    ServerResponse getHouseWorkerList(@RequestParam("userToken")String userToken,@RequestParam("pageDTO") PageDTO pageDTO);
 
+    @PostMapping("app/worker/getHouseWorkerDetail")
+    @ApiOperation(value = "我的任务-详细流水", notes = "我的任务-详细流水")
+    ServerResponse getHouseWorkerDetail(String userToken,PageDTO pageDTO,String houseId);
     @PostMapping("app/worker/getMyBankCard")
     @ApiOperation(value = "我的银行卡", notes = "我的银行卡")
-    public ServerResponse getMyBankCard(@RequestParam("userToken")String userToken);
+    ServerResponse getMyBankCard(@RequestParam("userToken")String userToken);
+
+    @PostMapping("app/worker/addMyBankCard")
+    @ApiOperation(value = "添加银行卡", notes = "添加银行卡")
+    ServerResponse addMyBankCard(HttpServletRequest request, String userToken, WorkerBankCard bankCard);
 
     @PostMapping("app/worker/getRanking")
     @ApiOperation(value = "邀请排行榜", notes = "邀请排行榜")
-    public ServerResponse getRanking(@RequestParam("userToken")String userToken);
+    ServerResponse getRanking(@RequestParam("userToken")String userToken);
 
     @PostMapping("app/worker/getTakeOrder")
     @ApiOperation(value = "接单记录", notes = "接单记录")
-    public ServerResponse getTakeOrder(@RequestParam("userToken")String userToken);
+    ServerResponse getTakeOrder(@RequestParam("userToken")String userToken);
+
+    @PostMapping("/app/rewardPunish/list")
+    @ApiOperation(value = "奖罚记录", notes = "奖罚记录")
+    ServerResponse queryRewardPunishRecord(@RequestParam("userToken")String userToken, @RequestParam("pageDTO")PageDTO pageDTO);
+
+
+    @PostMapping("/app/rewardPunish/get")
+    @ApiOperation(value = "奖罚详情", notes = "奖罚详情")
+    ServerResponse getRewardPunishRecord(@RequestParam("recordId")String recordId);
 
 }

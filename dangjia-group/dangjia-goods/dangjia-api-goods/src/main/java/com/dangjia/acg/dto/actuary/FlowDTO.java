@@ -12,5 +12,7 @@ import java.util.List;
 @Data
 public class FlowDTO {
     private String name;
+    private int type;//type 人工1 材料2 服务3
+    private String sumTotal;//合计
     private List<FlowActuaryDTO> flowActuaryDTOList;
 }

@@ -30,6 +30,11 @@ public class ConfigMessage extends BaseEntity {
     @ApiModelProperty("消息内容")
     private String text;
 
+    @Column(name = "speak")
+    @Desc(value = "语音内容")
+    @ApiModelProperty("语音内容")
+    private String speak;
+
     @Column(name = "icon")
     @Desc(value = "消息图标")
     @ApiModelProperty("消息图标")

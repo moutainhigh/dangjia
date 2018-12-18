@@ -1,7 +1,7 @@
 package com.dangjia.acg.swagger;
 
-import com.google.common.base.Predicate;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.google.common.base.Predicate;
 import org.springframework.boot.autoconfigure.web.BasicErrorController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

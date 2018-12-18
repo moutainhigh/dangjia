@@ -11,7 +11,6 @@ import lombok.Data;
 public class AttributeValueDTO {
 
     private String attributeValueId;//属性值id
-    private String attributeId;//属性选项id
     private String name;//名称
-    private int state;//1选择,2未选,3不能选
+    private int state;//0未选,1选择
 }

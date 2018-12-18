@@ -11,7 +11,9 @@
 		category_id,
 		product_sn,
 		image,
-		unit,
+		unitId,
+		labelId,
+		unitName,
 		weight,
 		type,
 		maket,
@@ -21,12 +23,40 @@
 		brand_id,
         brand_series_id,
         attribute_id_arr,
-        attribute_name_arr,
+        value_name_arr,
+        value_id_arr,
         convert_unit,
         convert_quality,
 		create_date,
 		modify_date
 	</sql>
+	<sql id="new_columns">
+		id,
+		name,
+		goods_id as goodsId,
+		category_id as categoryId,
+		product_sn as productSn,
+		image,
+		unit_id as unitId,
+		label_id as labelId,
+        unit_name as unitName,
+		weight,
+		type,
+		maket,
+		cost,
+		price,
+		profit,
+		brand_id as brandId,
+		brand_series_id as brandSeriesId,
+		attribute_id_arr as attributeIdArr,
+		value_name_arr as valueNameArr,
+		value_id_arr as valueIdArr,
+		convert_unit as convertUnit,
+		convert_quality as convertQuality,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
 	<sql id="all_PaColumns">
 		id,
 		name,
@@ -43,105 +73,26 @@
 	</delete>
     <!-- 查询所有 -->
 	<select id="query" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Product">
-		SELECT
-			id,
-			name,
-			goods_id as goodsId,
-			category_id as categoryId,
-			product_sn as productSn,
-			image,
-			unit,
-			weight,
-			type,
-			maket,
-			cost,
-			price,
-			profit,
-			brand_id as brandId,
-			brand_series_id as brandSeriesId,
-		    attribute_id_arr as attributeIdArr,
-		    attribute_name_arr as attributeNameArr,
-            convert_unit as convertUnit,
-            convert_quality as convertQuality,
-			create_date as createDate,
-			modify_date as modifyDate
+		SELECT <include refid="new_columns"/>
 		FROM dj_basics_product
-		<if test="category_id!=null">
+		<if test="category_id!=null and category_id!=''">
 		where
 			category_id=#{category_id}
 		</if>
 		ORDER BY create_date desc
 	</select>
-    <!-- 根据货品查询所有关联属性 -->
-    <select id="queryProductAttributeByPid" resultType="com.dangjia.acg.modle.attribute.AttributeValue">
-		select
-			id,
-			name,
-			attribute_id as attributeId,
-			introduction,
-			image,
-			create_date as createDate,
-			modify_date as modifyDate
-		from 
-		    dj_basics_attribute_value
-		where
-		    id in(
-				SELECT 
-				   value_id
-				FROM dj_basics_product_attribute
-				where product_id=#{product_id})
-		ORDER BY create_date desc
-	</select>
+
+
 	<!-- 根据商品Id查询所有货品 -->
     <select id="queryByGoodsId" resultType="com.dangjia.acg.modle.basics.Product">
-		SELECT
-			id,
-			name,
-			goods_id as goodsId,
-			category_id as categoryId,
-			product_sn as productSn,
-			image,
-			unit,
-			weight,
-			type,
-			maket,
-			cost,
-			price,
-			profit,
-			brand_id as brandId,
-			brand_series_id as brandSeriesId,
-			attribute_arr as  attributeArr,
-			convert_unit as convertUnit,
-            convert_quality as convertQuality,
-			create_date as createDate,
-			modify_date as modifyDate
+		SELECT <include refid="new_columns"/>
 		FROM dj_basics_product
-		where goods_id=#{goods_id}
+		where goods_id=#{goodsId}
 		ORDER BY create_date desc
 	</select>
 	<!-- 根据货品id查询货品对象 -->
     <select id="getById" resultType="com.dangjia.acg.modle.basics.Product">
-		SELECT
-			id,
-			name,
-			goods_id as goodsId,
-			category_id as categoryId,
-			product_sn as productSn,
-			image,
-			unit,
-			weight,
-			type,
-			maket,
-			cost,
-			price,
-			profit,
-			brand_id as brandId,
-			brand_series_id as brandSeriesId,
-			attribute_arr as  attributeArr,
-			convert_unit as convertUnit,
-            convert_quality as convertQuality,
-			create_date as createDate,
-			modify_date as modifyDate
+		SELECT <include refid="new_columns"/>
 		FROM dj_basics_product
 		where id=#{id}
 		ORDER BY create_date desc
@@ -149,27 +100,7 @@
 
 	<!-- 根据名称模糊查询 -->
 	<select id="queryByName" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Product">
-		SELECT
-		id,
-		name,
-		goods_id as goodsId,
-		category_id as categoryId,
-		product_sn as productSn,
-		image,
-		unit,
-		weight,
-		type,
-		maket,
-		cost,
-		price,
-		profit,
-		brand_id as brandId,
-		brand_series_id as brandSeriesId,
-		attribute_arr as  attributeArr,
-		convert_unit as convertUnit,
-		convert_quality as convertQuality,
-		create_date as createDate,
-		modify_date as modifyDate
+		SELECT <include refid="new_columns"/>
 		FROM dj_basics_product
 		where 1=1
 		<if test="name!=null">
@@ -177,5 +108,88 @@
 			name LIKE CONCAT('%',#{name},'%')
 		</if>
 		ORDER BY create_date desc
+	</select>
+	<!-- 查询product -->
+	<select id="selectProduct" resultType="com.dangjia.acg.modle.basics.Product">
+		select
+		p.id as id,
+		p.name as name,
+		p.goods_id as goodsId,
+		p.category_id as categoryId,
+		p.product_sn as productSn,
+		p.image as image,
+		p.unit_id as unitId,
+		p.label_id as labelId,
+		p.unit_name as unitName,
+		p.type as type,
+		p.price as price,
+		p.brand_id as brandId,
+		p.brand_series_id as brandSeriesId,
+		p.attribute_id_arr AS attributeIdArr,
+		p.value_name_arr AS valueNameArr,
+		p.value_id_arr AS valueIdArr
+		from  dj_basics_product p
+		where
+		    type=1 and maket=1
+		    and p.goods_id=#{goodsId}
+		    and p.brand_series_id=#{brandSeriesId}
+		<foreach collection="valueIdArr" item="valueId" index="index" >
+			and FIND_IN_SET(#{valueId},p.value_id_arr)
+		</foreach>;
+	</select>
+
+	<!--补货查询精算内商品-->
+	<select id="queryRepairBudgetMaterial" resultType="com.dangjia.acg.modle.basics.Product">
+		select
+		p.id,
+		p.NAME,
+		p.goods_id AS goodsId,
+		p.category_id AS categoryId,
+		p.product_sn AS productSn,
+		p.image,
+		p.unit_id as unitId,
+		p.label_id as labelId,
+		p.unit_name as unitName,
+		p.weight,
+		p.type,
+		p.maket,
+		p.cost,
+		p.price,
+		p.profit,
+		p.brand_id AS brandId,
+		p.brand_series_id AS brandSeriesId,
+		p.attribute_id_arr AS attributeIdArr,
+		p.value_name_arr AS valueNameArr,
+		p.value_id_arr AS valueIdArr,
+		p.convert_unit AS convertUnit,
+		p.convert_quality AS convertQuality,
+		p.create_date AS createDate,
+		p.modify_date AS modifyDate
+		from dj_actuary_budget_material abm ,dj_basics_product p
+		WHERE  abm.product_id =p.id
+		and abm.delete_state!=1
+		and abm.steta=1
+		and abm.house_id =#{houseId}
+		<if test="name!=null and name!=''">
+			AND
+			abm.product_name LIKE CONCAT('%',#{name},'%')
+		</if>
+		<if test="categoryId!=null and categoryId!=''">
+			AND
+			p.category_id =#{categoryId}
+		</if>
+	</select>
+
+	<!-- 根据系列和属性查询切换货品-->
+	<select id="getSwitchProduct" resultType="com.dangjia.acg.modle.basics.Product">
+		select
+		<include refid="new_columns"/>
+		from  dj_basics_product p
+		where
+		type=1 and maket=1
+		and p.brand_series_id=#{brandSeriesId}
+		<foreach collection="valueIdArr" item="valueId" index="index" >
+			and FIND_IN_SET(#{valueId},p.value_id_arr)
+		</foreach>;
 	</select>
 </mapper>

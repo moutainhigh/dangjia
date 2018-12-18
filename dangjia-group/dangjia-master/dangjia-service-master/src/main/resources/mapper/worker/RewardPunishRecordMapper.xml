@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper">
+    <resultMap id="findRewardPerms" type="com.dangjia.acg.dto.worker.RewardPunishRecordDTO" >
+        <id column="id" property="id" />
+        <result column="member_id" property="memberId"/>
+        <result column="reward_punish_correlation_id" property="rewardPunishCorrelationId"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="house_id" property="houseId"/>
+        <result column="house_name" property="houseName"/>
+        <result column="memberName" property="memberName"/>
+        <result column="type" property="type"/>
+        <result column="remarks" property="remarks"/>
+        <result column="state" property="state"/>
+        <result column="create_date" property="createDate"/>
+        <result column="modify_date" property="modifyDate"/>
+        <result column="data_status" property="dataStatus"/>
+        <association  property="correlation" javaType="com.dangjia.acg.dto.worker.RewardPunishCorrelationDTO">
+            <id column="tid" property="id" />
+            <result column="tname" property="name"/>
+            <result column="tcontent" property="content"/>
+            <result column="ttype" property="type"/>
+            <result column="tstate" property="state"/>
+            <collection property="conditionList" ofType="com.dangjia.acg.modle.worker.RewardPunishCondition">
+                <id column="mid" property="id" />
+                <result column="mreward_punish_correlation_id" property="rewardPunishCorrelationId"/>
+                <result column="mname" property="name"/>
+                <result column="mtype" property="type"/>
+                <result column="mquantity" property="quantity"/>
+                <result column="munits" property="units"/>
+                <result column="mstart_time" property="startTime"/>
+                <result column="mend_time" property="endTime"/>
+            </collection>
+        </association >
+    </resultMap>
+
+    <select id="queryRewardPunishRecord" resultMap="findRewardPerms">
+		SELECT
+            r.id,
+            r.reward_punish_correlation_id,
+            r.member_id,
+            r.operator_id,
+            r.house_id,
+            r.type,
+            r.state,
+            r.remarks,
+            r.create_date,
+            r.modify_date,
+            r.data_status,
+            CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') house_name,
+            u.nick_name memberName,
+            t.id tid,
+            t.`name` tname,
+            t.content tcontent,
+            t.type ttype,
+            t.state tstate,
+            m.`id` mid,
+            m.`reward_punish_correlation_id` mreward_punish_correlation_id,
+            m.`name` mname,
+            m.type mtype,
+            m.quantity mquantity,
+            m.units munits,
+            m.start_time mstart_time,
+            m.end_time mend_time
+        FROM
+            `dj_worker_reward_punish_record` r
+        INNER JOIN dj_house h ON r.house_id = h.id
+        INNER JOIN dj_member u ON r.member_id = u.id
+        INNER JOIN dj_worker_reward_punish_correlation t ON r.reward_punish_correlation_id = t.id
+        INNER JOIN dj_worker_reward_punish_condition m ON r.reward_punish_correlation_id = m.reward_punish_correlation_id
+        where r.data_status=0
+        <if test="memberId!=null">
+            AND r.member_id=#{memberId}
+        </if>
+        <if test="id!=null">
+            AND r.id=#{id}
+        </if>
+        <if test="houseId!=null">
+            AND r.house_id=#{houseId}
+        </if>
+        <if test="type!=null">
+            AND r.type=#{type}
+        </if>
+        <if test="rewardPunishCorrelationId!=null">
+            AND r.reward_punish_correlation_id=#{rewardPunishCorrelationId}
+        </if>
+	</select>
+</mapper>
+

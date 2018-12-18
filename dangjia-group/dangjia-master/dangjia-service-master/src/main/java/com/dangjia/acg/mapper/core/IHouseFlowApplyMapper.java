@@ -1,6 +1,5 @@
 package com.dangjia.acg.mapper.core;
 
-import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -13,6 +12,9 @@ import java.util.List;
  */
 @Repository
 public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
+    /**管家已审核业主未审核申请*/
+    List<HouseFlowApply> getMemberCheckList(@Param("houseId") String houseId);
+
     Long getCountValidPatrolByHouseId(@Param("houseId") String houseId,@Param("workerId") String workerId);
     HouseFlowApply getTodayStart(@Param("houseId") String houseId,@Param("workerId") String workerId);
     HouseFlowApply checkHouseFlowApply(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);

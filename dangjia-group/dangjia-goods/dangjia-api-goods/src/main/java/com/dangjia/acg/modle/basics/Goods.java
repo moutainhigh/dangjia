@@ -22,9 +22,6 @@ public class Goods extends BaseEntity{
 	@Column(name = "name")
     private String name;
 
-	@Column(name = "goods_sn")
-    private String goodsSn;//该字段没用用 商品没有编号
-
 	@Column(name = "category_id")
     private String categoryId;//分类id
 

@@ -1,10 +1,10 @@
 package com.dangjia.acg.api;
 
-import cn.jmessage.api.common.model.UserPayload;
 import cn.jmessage.api.user.UserInfoResult;
 import cn.jmessage.api.user.UserListResult;
 import cn.jmessage.api.user.UserStateListResult;
 import cn.jmessage.api.user.UserStateResult;
+import com.dangjia.acg.dto.UserInfoResultDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -49,7 +49,7 @@ public interface UserAPI {
      */
     @RequestMapping(value = "getUserInfo", method = RequestMethod.POST)
     @ApiOperation(value = "获取用户信息", notes = "获取用户信息")
-    UserInfoResult getUserInfo(
+    UserInfoResultDTO getUserInfo(
             @ApiParam(name ="appType",value = "应用类型（zx=当家装修，gj=当家工匠）")@RequestParam("appType") String appType,
             @ApiParam(name ="username",value = "用户名")@RequestParam("username") String username) ;
     /**
@@ -91,7 +91,6 @@ public interface UserAPI {
     /**
      * 更新用户信息
      * @param appType  应用类型（zx=当家装修，gj=当家工匠）
-     * @param payload 用户信息对象
      *                nickname （选填）用户昵称
      *                      不支持的字符：英文字符： \n \r\n
      *                avatar （选填）头像
@@ -102,18 +101,23 @@ public interface UserAPI {
      *                      支持的字符：全部，包括 Emoji
      *                gender （选填） 性别
      *                      0 - 未知， 1 - 男 ，2 - 女
-     *                region （选填）地区
-     *                      支持的字符：全部，包括 Emoji
+     *                phone （选填）手机号
      *                address （选填）地址
      *                      支持的字符：全部，包括 Emoji
-     *                extras (选填) 用户自定义json对象
      *
      */
     @RequestMapping(value = "updateUserInfo", method = RequestMethod.POST)
     @ApiOperation(value = "更新用户信息", notes = "更新用户信息")
     void updateUserInfo(
             @ApiParam(name ="appType",value = "应用类型（zx=当家装修，gj=当家工匠）")@RequestParam("appType") String appType,
-            @ApiParam(name ="payload",value = "用户信息对象")@RequestParam("payload") UserPayload payload);
+            @ApiParam(name ="username",value = "用户名")@RequestParam("username") String username,
+            @RequestParam("nickname") String nickname,
+            @RequestParam("birthday") String birthday,
+            @RequestParam("signature") String signature,
+            @RequestParam("gender") int gender,
+            @RequestParam("phone") String phone,
+            @RequestParam("address") String address,
+            @RequestParam("avatar") String avatar);
     /**
      *  获取用户列表
      * @param appType  应用类型（zx=当家装修，gj=当家工匠）

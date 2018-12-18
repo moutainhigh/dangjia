@@ -8,8 +8,9 @@ import com.dangjia.acg.service.basics.GoodsService;
 import com.dangjia.acg.service.basics.ProductService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 
@@ -20,9 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class ProductController implements ProductAPI {
-    /**
-     *service
-     */
     @Autowired
     private ProductService productService;
     @Autowired
@@ -39,7 +37,7 @@ public class ProductController implements ProductAPI {
      */
 	@Override
 	@ApiMethod
-    public ServerResponse<PageInfo> queryProduct(PageDTO pageDTO, String categoryId){
+    public ServerResponse<PageInfo> queryProduct(HttpServletRequest request, PageDTO pageDTO, String categoryId){
         return productService.queryProduct(pageDTO.getPageNum(),pageDTO.getPageSize(),categoryId);
     }
     
@@ -53,7 +51,7 @@ public class ProductController implements ProductAPI {
      */
 	@Override
 	@ApiMethod
-  	public ServerResponse queryUnit(){
+  	public ServerResponse queryUnit(HttpServletRequest request){
   		 return productService.queryUnit();
   	}
   	
@@ -67,7 +65,7 @@ public class ProductController implements ProductAPI {
      */
 	@Override
 	@ApiMethod
-  	public ServerResponse queryBrand(){
+  	public ServerResponse queryBrand(HttpServletRequest request){
   		 return productService.queryBrand();
   	}
   	
@@ -81,7 +79,7 @@ public class ProductController implements ProductAPI {
      */
 	@Override
 	@ApiMethod
-  	public ServerResponse queryBrandSeries(String brandId){
+  	public ServerResponse queryBrandSeries(HttpServletRequest request,String brandId){
   		 return productService.queryBrandSeries(brandId);
   	}
   	
@@ -90,7 +88,7 @@ public class ProductController implements ProductAPI {
   	 */
 	@Override
 	@ApiMethod
-  	public ServerResponse saveGoods(String name,String categoryId,Integer buy,
+  	public ServerResponse saveGoods(HttpServletRequest request,String name,String categoryId,Integer buy,
 			Integer sales,String unitId,Integer type,String arrString){
 		return goodsService.saveGoods(name, categoryId, buy, sales, unitId, type, arrString);
   		
@@ -101,7 +99,7 @@ public class ProductController implements ProductAPI {
   	 */
 	@Override
 	@ApiMethod
-  	public ServerResponse queryBrandByGid(String goodsId){
+  	public ServerResponse queryBrandByGid(HttpServletRequest request,String goodsId){
 		return goodsService.queryBrandByGid(goodsId);
   		
   	}
@@ -111,7 +109,7 @@ public class ProductController implements ProductAPI {
   	 */
 	@Override
 	@ApiMethod
-  	public ServerResponse queryBrandByGidAndBid(String goodsId,String brandId){
+  	public ServerResponse queryBrandByGidAndBid(HttpServletRequest request,String goodsId,String brandId){
 		return goodsService.queryBrandByGidAndBid(goodsId,brandId);
   		
   	}
@@ -120,7 +118,7 @@ public class ProductController implements ProductAPI {
   	 */
 	@Override
 	@ApiMethod
-  	public ServerResponse insertProduct(String productArr){
+  	public ServerResponse insertProduct(HttpServletRequest request,String productArr){
 		return productService.insertProduct(productArr);
   		
   	}
@@ -130,7 +128,7 @@ public class ProductController implements ProductAPI {
      */
 	@Override
 	@ApiMethod
-  	public ServerResponse getGoodsByGid(String goodsId){
+  	public ServerResponse getGoodsByGid(HttpServletRequest request,String goodsId){
 		return goodsService.getGoodsByGid(goodsId);
   		
   	}
@@ -140,7 +138,7 @@ public class ProductController implements ProductAPI {
      */
 	@Override
 	@ApiMethod
-  	public ServerResponse updateGoods(String id,String name,String categoryId,Integer buy,
+  	public ServerResponse updateGoods(HttpServletRequest request,String id,String name,String categoryId,Integer buy,
 			Integer sales,String unitId,Integer type,String arrString){
 		return goodsService.updateGoods(id,name, categoryId, buy, sales, unitId, type, arrString);
   		
@@ -150,9 +148,95 @@ public class ProductController implements ProductAPI {
   	 */
 	@Override
 	@ApiMethod
-  	public ServerResponse updateProduct(String productArr){
+  	public ServerResponse updateProduct(HttpServletRequest request,String productArr){
 		return productService.updateProduct(productArr);
   		
   	}
-    
+
+	/**
+	 * 根据货品id查询货品对象
+	 * @param id
+	 * @return
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse getProductById(HttpServletRequest request,String id){
+		return productService.getProductById(id);
+	}
+
+	/**
+	 * 根据货品id删除货品对象
+	 * @param id
+	 * @return
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse deleteProductById(HttpServletRequest request,String id){
+		return productService.deleteProductById(id);
+	}
+
+	/**
+	 * 根据id删除商品和下属货品
+	 * @param id
+	 * @return
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse deleteGoods(HttpServletRequest request,String id){
+		return goodsService.deleteGoods(id);
+	}
+
+	/**
+	 * 查询商品及下属货品
+	 * @param request
+	 * @param pageDTO
+	 * @param categoryId
+	 * @param name
+	 * @return
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse queryGoodsList(HttpServletRequest request,PageDTO pageDTO,String categoryId,String name){
+		return goodsService.queryGoodsList(pageDTO,categoryId,name);
+	}
+
+	/**
+	 * 查询商品及下属货品
+	 * @param request
+	 * @param pageDTO
+	 * @param categoryId
+	 * @param name
+	 * @return
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse queryGoodsListByCategoryLikeName(HttpServletRequest request,PageDTO pageDTO,String categoryId,String name){
+		return goodsService.queryGoodsListByCategoryLikeName(pageDTO,categoryId,name);
+	}
+
+	/**
+	 * 批量添加/修改货品标签
+	 * @param request
+	 * @param productLabelList
+	 * @return
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse updateProductLabelList(HttpServletRequest request,String productLabelList){
+		return productService.updateProductLabelList(productLabelList);
+	}
+
+	/**
+	 * 根据系列和属性查询切换货品
+	 * @param request
+	 * @param brandSeriesId
+	 * @param attributeIdArr
+	 * @return
+	 *//*
+	@Override
+	@ApiMethod
+	public  ServerResponse getSwitchProduct(HttpServletRequest request,String brandSeriesId, String attributeIdArr){
+		return productService.getSwitchProduct(brandSeriesId,attributeIdArr);
+	}*/
+
 }

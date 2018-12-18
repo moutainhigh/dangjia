@@ -6,11 +6,11 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -18,6 +18,7 @@ import java.util.Date;
  */
 @Data
 @Entity
+@FieldNameConstants(prefix = "")
 @Table(name = "dj_activity")
 @ApiModel(description = "活动主表")
 public class Activity extends BaseEntity {
@@ -32,7 +33,7 @@ public class Activity extends BaseEntity {
 	@Column(name = "activity_type")
 	@Desc(value = "优惠类型 0为直推 1为注册 2为邀请")
 	@ApiModelProperty("优惠类型 0为直推 1为注册 2为邀请")
-	private int redPacketType;//
+	private String activityType;//
 
 	@Column(name = "start_date")
 	@Desc(value = "活动开始时间")
@@ -70,6 +71,6 @@ public class Activity extends BaseEntity {
 	@Column(name = "delete_state")
 	@Desc(value = "状态，0正常，1停用")
 	@ApiModelProperty("状态，0正常，1停用")
-	private int deleteState;
+	private Integer deleteState;
 
 }

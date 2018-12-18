@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @author Ruking.Cheng
  * @descrilbe 工价商品Controller
@@ -33,7 +35,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> getWorkerGoodses(PageDTO pageDTO, String workerTypeId, String searchKey,String showGoods) {
+    public ServerResponse<PageInfo> getWorkerGoodses(HttpServletRequest request, PageDTO pageDTO, String workerTypeId, String searchKey, String showGoods) {
         try {
             return workerGoodsService.getWorkerGoodses(pageDTO.getPageNum(), pageDTO.getPageSize(), workerTypeId, searchKey,showGoods);
         } catch (Exception e) {
@@ -49,7 +51,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<String> setWorkerGoods(WorkerGoods workerGoods, String technologyIds) {
+    public ServerResponse<String> setWorkerGoods(HttpServletRequest request,WorkerGoods workerGoods, String technologyIds) {
         try {
             return workerGoodsService.setWorkerGoods(workerGoods, technologyIds);
         } catch (Exception e) {
@@ -65,7 +67,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getWorkertoCheck(String houseId,String houseFlowId) {
+    public ServerResponse getWorkertoCheck(HttpServletRequest request,String houseId,String houseFlowId) {
             return workerGoodsService.getWorkertoCheck(houseId, houseFlowId);
     }
 
@@ -77,7 +79,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getPayedWorker(String houseId,String houseFlowId) {
+    public ServerResponse getPayedWorker(HttpServletRequest request,String houseId,String houseFlowId) {
         return workerGoodsService.getPayedWorker(houseId, houseFlowId);
     }
 
@@ -87,9 +89,8 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse deleteWorkerGoods(@RequestParam("id")String id){
+    public ServerResponse deleteWorkerGoods(HttpServletRequest request,@RequestParam("id")String id){
         return workerGoodsService.deleteWorkerGoods(id);
     }
-
 
 }

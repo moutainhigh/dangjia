@@ -2,8 +2,6 @@ package com.dangjia.acg.dto.basics;
 
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
-
-import java.math.BigDecimal;
 @Data
 @ApiModel
 public class RlistResult {

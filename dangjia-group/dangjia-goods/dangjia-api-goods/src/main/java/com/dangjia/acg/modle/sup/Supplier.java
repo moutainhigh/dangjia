@@ -34,7 +34,7 @@ public class Supplier extends BaseEntity implements Serializable{
 	private String checkpeople;//联系人姓名
 
 	@Column(name = "gender")
-	private int gender;//联系人性别  1男 2女   0 未选
+	private Integer gender;//联系人性别  1男 2女   0 未选
 
 	@Column(name = "email")
 	private String email;//电子邮件
@@ -43,9 +43,9 @@ public class Supplier extends BaseEntity implements Serializable{
 	private String notice;//发货须知
 
 	@Column(name = "supplier_level")
-	private int supplierLevel;//供应商级别
+	private Integer supplierLevel;//供应商级别
 
 	@Column(name = "state")
-	private int state;//供应商状态  1正常供货 2停止供货
+	private Integer state;//供应商状态  1正常供货 2停止供货
 
 }

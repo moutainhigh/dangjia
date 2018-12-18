@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.house.IWarehouseMapper">
+
+    <sql id="all_columns">
+		id,
+		house_id as houseId,
+		shop_count as shopCount,
+		ask_count as askCount,
+		back_count as backCount,
+		product_id as productId,
+		product_sn as productSn,
+		product_name as productName,
+		price,
+		cost,
+		unit_name as unitName,
+		product_type as productType,
+		category_id as categoryId,
+		image,
+		pay_time as payTime,
+		ask_time as askTime,
+		rep_time as repTime,
+		back_time as backTime,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
+	<select id="getByProductId" resultType="com.dangjia.acg.modle.house.Warehouse" >
+        SELECT
+		<include refid="all_columns"/>
+        FROM dj_house_warehouse
+        WHERE
+		    product_id=#{productId}
+		and
+		    house_id=#{houseId}
+    </select>
+
+    <!-- 模糊查询 -->
+    <select id="warehouseList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.house.Warehouse">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_house_warehouse
+        where
+        house_id = #{houseId}
+        <if test = "name!=null and name!=''">
+            and
+            product_name LIKE CONCAT('%',#{name},'%')
+        </if>
+        <if test = "categoryId!=null and categoryId!=''">
+            and
+            category_id = #{categoryId}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
+</mapper>
+

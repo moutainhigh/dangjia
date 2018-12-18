@@ -1,7 +1,5 @@
 package com.dangjia.acg.dto.activity;
 
-import com.dangjia.acg.modle.activity.ActivityDiscount;
-import com.dangjia.acg.modle.activity.ActivityRedPack;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

@@ -1,7 +1,6 @@
 package com.dangjia.acg.mapper.worker;
 
 import com.dangjia.acg.modle.worker.WorkerBankCard;
-import com.dangjia.acg.modle.worker.WorkerDetail;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;

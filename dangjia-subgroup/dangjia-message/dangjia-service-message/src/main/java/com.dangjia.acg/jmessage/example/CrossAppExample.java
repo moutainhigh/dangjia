@@ -19,11 +19,11 @@ import java.util.List;
 public class CrossAppExample {
 
     private static Logger LOG = LoggerFactory.getLogger(CrossAppExample.class);
-    private static final String appkey = "242780bfdd7315dc1989fe2b";
-    private static final String masterSecret = "2f5ced2bef64167950e63d13";
+    private static final String appkey = "49957e786a91f9c55b223d58";
+    private static final String masterSecret = "238de1316d08743d12ac4603";
 
     public static void main(String[] args) {
-
+        testGetCrossGroupMembers();
     }
 
     public static void testAddOrRemoveMembersFromCrossGroup() {
@@ -50,7 +50,7 @@ public class CrossAppExample {
     public static void testGetCrossGroupMembers() {
         JMessageClient client = new JMessageClient(appkey, masterSecret);
         try {
-            MemberListResult result = client.getCrossGroupMembers(10004809);
+            MemberListResult result = client.getCrossGroupMembers(28702041);
             MemberResult[] members = result.getMembers();
             LOG.info("Member size " + members.length);
         } catch (APIConnectionException e) {

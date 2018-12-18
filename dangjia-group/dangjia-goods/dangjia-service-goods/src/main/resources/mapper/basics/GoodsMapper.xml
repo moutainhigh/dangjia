@@ -7,7 +7,6 @@
 	<sql id="all_columns">
 		id,
 		name,
-		goods_sn,
 		category_id,
 		type,
 		buy,
@@ -15,6 +14,18 @@
 		unit_id,
 		create_date,
 		modify_date
+	</sql>
+
+	<sql id="new_columns">
+		id,
+		name,
+		category_id as categoryId,
+		type,
+		buy,
+		sales,
+		unit_id as unitId,
+		create_date as createDate,
+		modify_date as modifyDate
 	</sql>
 	<!-- 删除对象 -->
 	<delete id="deleteById" parameterType="java.lang.String">
@@ -24,16 +35,7 @@
     <!-- 查询所有 -->
 	<select id="query" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Goods">
 		SELECT
-			id,
-			name,
-		    goods_sn as goodsSn,
-			category_id as categoryId,
-			type,
-			buy,
-			sales,
-			unit_id as unitId,
-			create_date as createDate,
-			modify_date as modifyDate
+		<include refid="new_columns"/>
 		FROM dj_basics_goods
 		<if test="category_id!=null">
 		where
@@ -44,16 +46,7 @@
 	 <!-- 根据id查询属性对象 -->
 	<select id="queryById" resultType="com.dangjia.acg.modle.basics.Goods">
 		SELECT
-			id,
-			name,
-		    goods_sn as goodsSn,
-			category_id as categoryId,
-			type,
-			buy,
-			sales,
-			unit_id as unitId,
-			create_date as createDate,
-			modify_date as modifyDate
+		<include refid="new_columns"/>
 		FROM dj_basics_goods
 		where 
 		     id =#{id}
@@ -141,21 +134,59 @@
 	 <!-- 根据类别id查询商品对象 -->
 	<select id="queryByCategoryId" resultType="com.dangjia.acg.modle.basics.Goods">
 		SELECT
-			id,
-			name,
-		    goods_sn as goodsSn,
-			category_id as categoryId,
-			type,
-			buy,
-			sales,
-			unit_id as unitId,
-			create_date as createDate,
-			modify_date as modifyDate
+		<include refid="new_columns"/>
 		FROM dj_basics_goods
 		<if test="categoryId!=null">
 			where
 			category_id=#{categoryId}
 		</if>
 		ORDER BY create_date desc
+	</select>
+
+	<!-- 根据条件查询商品集合 -->
+	<select id="queryGoodsList" resultType="com.dangjia.acg.modle.basics.Goods">
+		SELECT
+		<include refid="new_columns"/>
+		FROM dj_basics_goods
+		where 1=1
+		<if test="categoryId!=null and categoryId!=''">
+			and category_id=#{categoryId}
+		</if>
+		<if test="name!=null and name!=''">
+			and name=#{name}
+		</if>
+		ORDER BY create_date desc
+	</select>
+
+	<!-- 查询某个分类的商品 模糊name -->
+	<select id="queryGoodsListByCategoryLikeName" resultType="com.dangjia.acg.modle.basics.Goods">
+		SELECT
+		<include refid="new_columns"/>
+		FROM dj_basics_goods
+		where 1=1
+		<if test="categoryId!=null and categoryId!=''">
+			and category_id=#{categoryId}
+		</if>
+		<if test="name!=null and name!=''">
+			and name LIKE CONCAT('%',#{name},'%')
+		</if>
+		ORDER BY create_date desc
+	</select>
+
+	<!-- 补货查询商品库- -->
+	<select id="queryRepairGoods" resultType="com.dangjia.acg.modle.basics.Goods">
+		SELECT
+		<include refid="new_columns"/>
+		FROM dj_basics_goods
+		WHERE
+		1=1
+		<if test="name!=null and name!=''">
+			AND
+			name LIKE CONCAT('%',#{name},'%')
+		</if>
+		<if test="categoryId!=null and categoryId!=''">
+			AND
+			category_id =#{categoryId}
+		</if>
 	</select>
 </mapper>

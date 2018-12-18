@@ -3,6 +3,7 @@ package com.dangjia.acg.modle.basics;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,6 +17,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_basics_product")
 @ApiModel(description = "商品货品")
+@FieldNameConstants(prefix = "")
 public class Product extends BaseEntity {
 
 	@Column(name = "name")
@@ -33,11 +35,17 @@ public class Product extends BaseEntity {
 	@Column(name = "image")
     private String image;//图片
 
-	@Column(name = "unit")
-    private String unit;//单位
+	@Column(name = "unit_name")
+    private String unitName;//单位
+
+    @Column(name = "unit_id")
+    private String unitId;//单位id
+
+    @Column(name = "label_id")
+    private String labelId;//标签id
 
     @Column(name = "convert_quality")
-    private Double convertQuality;//换算量
+    private double convertQuality;//换算量
 
     @Column(name = "convert_unit")
     private String convertUnit;//换算单位
@@ -66,11 +74,14 @@ public class Product extends BaseEntity {
 	@Column(name = "brand_series_id")
     private String brandSeriesId;//品牌系列
 
-	@Column(name = "attribute_name_arr")
-    private String attributeNameArr;// 属性选项选中值名称集合
-
     @Column(name = "attribute_id_arr")
-    private String attributeIdArr;// 属性选项选中值Id集合
+    private String attributeIdArr;// 属性Id集合
+
+	@Column(name = "value_name_arr")
+    private String valueNameArr;// 属性选项选中值名称集合  AttributeValue
+
+    @Column(name = "value_id_arr")
+    private String valueIdArr;// 属性选项Id集合    AttributeValue
 
     
 }

@@ -2,12 +2,14 @@ package com.dangjia.acg.controller.web.red;
 
 import com.dangjia.acg.api.web.red.ActivityAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.activity.ActivityDTO;
 import com.dangjia.acg.dto.activity.ActivityRedPackDTO;
 import com.dangjia.acg.modle.activity.Activity;
 import com.dangjia.acg.modle.activity.ActivityRedPack;
+import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.service.activity.ActivityService;
 import com.dangjia.acg.service.activity.RedPackService;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * author: qiyuxaing
@@ -36,8 +39,8 @@ public class ActivityController  implements ActivityAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryActivitys(HttpServletRequest request, Activity activity) {
-        return activityService.queryActivitys(request,activity);
+    public ServerResponse queryActivitys(HttpServletRequest request,PageDTO pageDTO, Activity activity,String isEndTime) {
+        return activityService.queryActivitys(request,pageDTO,activity,isEndTime);
     }
 
     @Override
@@ -74,8 +77,8 @@ public class ActivityController  implements ActivityAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryActivityRedPacks(HttpServletRequest request, ActivityRedPack activityRedPack) {
-        return redPackService.queryActivityRedPacks(request,activityRedPack);
+    public ServerResponse queryActivityRedPacks(HttpServletRequest request, PageDTO pageDTO, ActivityRedPack activityRedPack,String isEndTime) {
+        return redPackService.queryActivityRedPacks(request,pageDTO,activityRedPack, isEndTime);
     }
 
     @Override
@@ -136,4 +139,32 @@ public class ActivityController  implements ActivityAPI {
         return redPackService.addActivityRedPack(request,activityRedPack,nums,moneys,satisfyMoneys);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse closeActivity(String id){
+        return activityService.closeActivity(id);
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse closeActivityRedPack(String id){
+        return redPackService.closeActivityRedPack(id);
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse closeActivityRedPackRecord(String id){
+        return redPackService.closeActivityRedPackRecord(id);
+    }
+    /**
+     * 获取所有优惠券客户未使用记录
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public List<ActivityRedPackRecord> queryRedPackRecord(){
+        return redPackService.queryRedPackRecord();
+    }
 }

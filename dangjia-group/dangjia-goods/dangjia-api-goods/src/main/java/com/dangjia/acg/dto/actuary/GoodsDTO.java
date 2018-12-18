@@ -13,8 +13,16 @@ import java.util.List;
 @Data
 public class GoodsDTO {
 
-    private String image;//图 1张
+    private String budgetMaterialId;
+    private String productId;
+    private String goodsId;
+    private String image;//product图 1张
     private String price;//价格加单位
     private String name;
+    private String unitName;//单位
+    private int productType;//0:材料；1：服务
     private List<String> imageList;//长图片 多图组合
+    private List<BrandSeriesDTO> brandDTOList;//品牌系列
+    private List<AttributeDTO> attributeDTOList;//属性
+
 }

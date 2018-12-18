@@ -1,10 +1,8 @@
 package com.dangjia.acg.controller.app.house;
 
-import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.app.house.ModelingVillageAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.house.ModelingVillageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;

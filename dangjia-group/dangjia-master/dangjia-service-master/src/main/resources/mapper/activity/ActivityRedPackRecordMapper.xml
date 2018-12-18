@@ -9,6 +9,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result column="modify_date" jdbcType="TIMESTAMP" property="modifyDate" />
         <result column="member_id" jdbcType="VARCHAR" property="memberId" />
         <result column="phone" jdbcType="VARCHAR" property="phone" />
+        <result column="city_id" jdbcType="VARCHAR" property="cityId" />
+        <result column="start_date" property="startDate" />
+        <result column="end_date" property="endDate" />
         <result column="house_id" jdbcType="VARCHAR" property="houseId" />
         <result column="have_receive" jdbcType="VARCHAR" property="haveReceive" />
         <result column="red_pack_id" jdbcType="VARCHAR" property="redPackId" />
@@ -67,18 +70,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="memberId!=null">
             AND rpr.member_id=#{memberId}
         </if>
+        <if test="cityId!=null">
+            AND rp.city_id=#{cityId}
+        </if>
+
         <if test="haveReceive!=null">
             <if test="haveReceive!=2">
                 AND rpr.have_receive=#{haveReceive}
             </if>
             <if test="haveReceive==2">
-                AND (rpr.have_receive!=0 OR rpr.have_receive!=1)
+                AND rpr.have_receive!=0
+                AND rpr.have_receive!=1
             </if>
-            AND rpr.have_receive=#{haveReceive}
         </if>
         <if test="modifyDate!=null">
            AND rp.end_date >=#{modifyDate}
        </if>
+        order by rpr.create_date
 	</select>
 
 </mapper>

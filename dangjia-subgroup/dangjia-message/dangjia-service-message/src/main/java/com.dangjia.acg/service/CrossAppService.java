@@ -12,7 +12,10 @@ import cn.jmessage.api.group.MemberListResult;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 /**
  * 跨域应用维护
  * @author: QiYuXiang
@@ -28,13 +31,13 @@ public class CrossAppService  extends BaseService{
      * @param addUsers 添加到群组的用户（任选）
      * @param delUsers 从群组删除的用户（任选）
      */
-    public  void addOrRemoveMembersFromCrossGroup(String appType,long gid, String[] addUsers,String[] delUsers) {
+    public  void addOrRemoveMembersFromCrossGroup(String appType,String myAppType,long gid, String[] addUsers,String[] delUsers) {
 
         JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
         try {
             List<CrossGroup> crossGroups = new ArrayList<CrossGroup>();
             CrossGroup crossGroup = new CrossGroup.Builder()
-                    .setAppKey(getAppkey(appType))
+                    .setAppKey(getAppkey(myAppType))
                     .setAddUsers(addUsers)
                     .setRemoveUsers(delUsers)
                     .build();
@@ -57,12 +60,18 @@ public class CrossAppService  extends BaseService{
      * @param gid 群组ID
      * @return
      */
-    public  MemberListResult getCrossGroupMembers(String appType,long gid) {
+    public  List<Map>  getCrossGroupMembers(String appType, long gid) {
         try {
-
+            List<Map> resultMap=new ArrayList<Map>();
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             MemberListResult result = client.getCrossGroupMembers(gid);
-            return result;
+            for (cn.jmessage.api.group.MemberResult memberResult:result.getMembers()) {
+                Map map=new HashMap();
+                map.put("nickname",memberResult.getNickname());
+                map.put("username",memberResult.getUsername());
+                resultMap.add(map);
+            }
+            return resultMap;
         } catch (APIConnectionException e) {
             LOG.error("Connection error. Should retry later. ", e);
             return null;

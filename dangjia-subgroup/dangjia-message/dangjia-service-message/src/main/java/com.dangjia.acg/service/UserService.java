@@ -12,6 +12,7 @@ import cn.jmessage.api.user.UserInfoResult;
 import cn.jmessage.api.user.UserListResult;
 import cn.jmessage.api.user.UserStateListResult;
 import cn.jmessage.api.user.UserStateResult;
+import com.dangjia.acg.dto.UserInfoResultDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -69,13 +70,16 @@ public class UserService extends BaseService {
      * @param username 用户名
      * @return
      */
-    public  UserInfoResult getUserInfo(String appType,String username) {
+    public  UserInfoResultDTO getUserInfo(String appType,String username) {
         try {
 
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             UserInfoResult res = client.getUserInfo(username);
+            UserInfoResultDTO resultDTO=new UserInfoResultDTO();
+            resultDTO.setUsername(res.getUsername());
+            resultDTO.setNickname(res.getNickname());
             LOG.info(res.getUsername());
-            return res;
+            return resultDTO;
         } catch (APIConnectionException e) {
             LOG.error("Connection error. Should retry later. ", e);
             return null;
@@ -154,30 +158,36 @@ public class UserService extends BaseService {
     /**
      * 更新用户信息
      * @param appType  应用类型（zx=当家装修，gj=当家工匠）
-     * @param payload 用户信息对象
-     *                nickname （选填）用户昵称
+     * @param nickname （选填）用户昵称
      *                      不支持的字符：英文字符： \n \r\n
-     *                avatar （选填）头像
+     * @param avatar （选填）头像
      *                      需要填上从文件上传接口获得的media_id
-     *                birthday （选填）生日 example: 1990-01-24
+     * @param birthday （选填）生日 example: 1990-01-24
      *                      yyyy-MM-dd
-     *                signature （选填）签名
+     * @param signature （选填）签名
      *                      支持的字符：全部，包括 Emoji
-     *                gender （选填） 性别
+     * @param gender （选填） 性别
      *                      0 - 未知， 1 - 男 ，2 - 女
-     *                region （选填）地区
+     * @param phone （选填）手机号
+     * @param address （选填）地址
      *                      支持的字符：全部，包括 Emoji
-     *                address （选填）地址
-     *                      支持的字符：全部，包括 Emoji
-     *                extras (选填) 用户自定义json对象
      *
      */
-    public  void updateUserInfo(String appType, UserPayload payload) {
+    public  void updateUserInfo(String appType,String username, String nickname, String birthday, String signature, int gender,
+                                String phone, String address, String avatar) {
         try {
 
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
-            client.updateUserInfo("test_user", payload);
-//            client.updateUserInfo("test_user", "test_nick", "2000-01-12", "help me!", 1, "shenzhen", "nanshan", "media id");
+            UserPayload payload = UserPayload.newBuilder()
+                    .setNickname(nickname)
+                    .setBirthday(birthday)
+                    .setSignature(signature)
+                    .setGender(gender)
+                    .setAddress(address)
+                    .setAvatar(avatar)
+                    .addExtra("phone",phone)
+                    .build();
+            client.updateUserInfo(username, payload);
         } catch (APIConnectionException e) {
             LOG.error("Connection error. Should retry later. ", e);
         } catch (APIRequestException e) {

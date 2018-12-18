@@ -133,4 +133,28 @@ public class MessageController implements MessageAPI {
     public  void retractMessage(String appType,String username,int msgid) {
         messageService.retractMessage( appType, username,  msgid);
     }
+    /**
+     * 系统通告，通知所有人
+     * @param appType  应用类型（zx=当家装修，gj=当家工匠）
+     * @param title 通知标题
+     * @param alert 通知内容
+     */
+    @Override
+    @ApiMethod
+    public  void sendSysPush(String appType,String title,String alert,String speak) {
+        messageService.sendSysPush( appType, title,  alert, speak);
+    }
+
+    /**
+     * 系统通告，通知指定注册ID
+     * @param appType  应用类型（zx=当家装修，gj=当家工匠）
+     * @param memberId memberID数组集合
+     * @param title 通知标题
+     * @param alert 通知内容
+     */
+    @Override
+    @ApiMethod
+    public  void sendMemberIdPush(String appType,String[] memberId,String title,String alert,String speak){
+        messageService.sendMemberIdPush( appType,memberId, title,  alert, speak);
+    }
 }

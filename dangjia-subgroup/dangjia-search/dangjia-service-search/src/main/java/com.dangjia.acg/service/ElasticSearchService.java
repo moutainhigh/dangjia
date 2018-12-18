@@ -61,20 +61,21 @@ public class ElasticSearchService {
   /**
    * 批量保存内容到ES
    */
-  public void saveESJsonList(List<String> jsonStr,String indexName,String tableTypeName) {
-
+  public List<String> saveESJsonList(List<String> jsonStr,String indexName,String tableTypeName) {
+    List<String> esidlist=new ArrayList<String>();
     try {
       for(int i = 0;i<jsonStr.size(); i++) {
-      JSONObject jsonObject =  JSONObject.parseObject(jsonStr.get(i));
-      Bulk.Builder bulk = new Bulk.Builder();
-        ElasticsearchConfiguration.client.prepareIndex(indexName,tableTypeName).setSource(jsonStr).get();
+        JSONObject.parseObject(jsonStr.get(i));
+        IndexResponse indexResponse= ElasticsearchConfiguration.client.prepareIndex(indexName,tableTypeName).setSource(jsonStr).get();
         LOGGER.info("ES 插入完成");
+        esidlist.add(indexResponse.getId());
       }
     }catch (RuntimeException e){
       throw new BaseException(ServerCode.JSON_TYPE_ERROR,"JSON格式不正确，请检查JSON");
     }catch(Exception e){
       throw new BaseException(ServerCode.ES_ERROR,"保存搜索引擎失败");
     }
+    return esidlist;
   }
 
   /**

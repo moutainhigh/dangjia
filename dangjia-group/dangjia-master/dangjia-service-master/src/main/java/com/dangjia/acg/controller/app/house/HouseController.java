@@ -7,7 +7,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -46,6 +45,14 @@ public class HouseController implements HouseAPI {
     @ApiMethod
     public ServerResponse getMyHouse(String userToken, String cityId){
         return houseService.getMyHouse(userToken,cityId);
+    }
+    /**
+     * 我的房产
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryMyHouse(String userToken){
+        return houseService.queryMyHouse(userToken);
     }
 
     /**
@@ -87,26 +94,26 @@ public class HouseController implements HouseAPI {
     @Override
     @ApiMethod
     public ServerResponse queryHouseByCity(String userToken,String cityId, String villageId, Double minSquare, Double maxSquare, PageDTO pageDTO) {
-        return houseService.queryHouseByCity(userToken,cityId,villageId,minSquare,maxSquare,pageDTO.getPageNum(),pageDTO.getPageSize());
+        return houseService.queryHouseByCity(userToken,cityId,villageId,minSquare,maxSquare,pageDTO);
     }
 
     //装修指南
     @Override
     @ApiMethod
-    public ServerResponse getRenovationManual(Integer type,String houseId) {
-        return houseService.getRenovationManual(type,houseId);
+    public ServerResponse getRenovationManual(String userToken,Integer type) {
+        return houseService.getRenovationManual(userToken,type);
     }
 
     /**
      * 保存装修指南
-     * @param houseId
+     * @param userToken
      * @param savaList
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse savaRenovationManual(String houseId,String savaList){
-        return houseService.savaRenovationManual(houseId,savaList);
+    public ServerResponse savaRenovationManual(String userToken,String savaList){
+        return houseService.savaRenovationManual(userToken,savaList);
     }
 
     /**
@@ -120,13 +127,35 @@ public class HouseController implements HouseAPI {
     public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO) {
         return houseService.queryConstructionRecord(houseId, pageDTO.getPageNum(), pageDTO.getPageSize());
     }
-
+    @Override
+    @ApiMethod
+    public ServerResponse queryHomeConstruction() {
+        return houseService.queryHomeConstruction();
+    }
     /**
      * 根据id查询房子信息
      * @param houseId
      * @return
      */
+    @Override
+    @ApiMethod
     public House getHouseById(String houseId){
         return houseService.getHouseById(houseId);
+    }
+
+    /**
+     * 参考报价
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getReferenceBudget(String villageId,Double square,Integer houseType){
+        if(square!=null&&!"".equals(square)){
+            Double minSquare=square-50;
+            Double maxSquare=square+50;
+            return houseService.getReferenceBudget(villageId,minSquare,maxSquare,houseType);
+        }else{
+            return ServerResponse.createByErrorMessage("请输入正确的面积");
+        }
     }
 }

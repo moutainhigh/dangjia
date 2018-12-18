@@ -47,6 +47,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         create_date as createDate,
         modify_date as modifyDate
     </sql>
+    <!--根据houseId查询待业主审核 -->
+    <select id="getMemberCheckList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        select <include refid="new_columns" />
+        from dj_core_house_flow_apply
+        where (apply_type=1 or apply_type=2 or apply_type=0)
+        and house_id = #{houseId}
+        and supervisor_check = 1
+        and member_check = 0
+    </select>
+
     <!--根据工人和房子id查询自己已经被巡查多少次 -->
     <select id="getCountValidPatrolByHouseId" parameterType="java.lang.String" resultType="java.lang.Long">
        select

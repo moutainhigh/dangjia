@@ -19,6 +19,6 @@ public class ShareDTO {
 	private String show;
 	private String image;//图片
 	private int showHouse;//是否展示 0展示，1不展示,默认生成 为0
-	private String biaoqian[];//房子标签
+	private List<String> biaoqian;//房子标签
 	private String url;//跳转h5
 }

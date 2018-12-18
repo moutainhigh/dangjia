@@ -4,26 +4,89 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper">
 
+
+	<!-- 模糊查询 -->
+	<select id="repairBudgetMaterial" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
+		SELECT
+		    <include refid="new_columns"/>
+		FROM dj_actuary_budget_material
+		where
+		house_id = #{houseId}
+		<if test = "productName!=null and productName!=''">
+			and
+			product_name LIKE CONCAT('%',#{productName},'%')
+		</if>
+		<if test = "workerTypeId!=null and workerTypeId!=''">
+			and
+			worker_type_id = #{workerTypeId}
+		</if>
+		<if test = "categoryId!=null and categoryId!=''">
+			and
+			category_id = #{categoryId}
+		</if>
+		ORDER BY create_date desc
+	</select>
+
+	<!--业主取消的又改为待付款-->
+	<update id="updateSelf" parameterType="java.lang.String">
+		update
+		    dj_actuary_budget_material bm
+		set
+		    bm.delete_state = 0
+		where
+		    bm.house_flow_id = #{houseFlowId}
+		and bm.delete_state = 2
+		and bm.steta = 1
+	</update>
+
+	<!--支付时工种材料总价-->
+	<select id="getBudgetSerPrice" resultType="java.lang.Double">
+		select
+		    sum(p.price * bm.shop_count)
+		from dj_basics_product p,dj_actuary_budget_material bm
+		where
+	        p.id = bm.product_id
+	    and bm.house_id = #{houseId}
+	    and bm.worker_type_id = #{workerTypeId}
+	    and bm.delete_state = 0
+	    and bm.steta = 1
+	    and bm.product_type = 1
+	</select>
+
+	<!--支付时工种材料总价-->
+	<select id="getBudgetCaiPrice" resultType="java.lang.Double">
+		select
+		    sum(p.price * bm.shop_count)
+		from dj_basics_product p,dj_actuary_budget_material bm
+		where
+	        p.id = bm.product_id
+	    and bm.house_id = #{houseId}
+	    and bm.worker_type_id = #{workerTypeId}
+	    and bm.delete_state = 0
+	    and bm.steta = 1
+	    and bm.product_type = 0
+	</select>
+
 	<select id="getBudgetCaiList" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
 		SELECT
-		    *
+		<include refid="new_columns"/>
 		FROM dj_actuary_budget_material
 		WHERE
 		   house_id=#{houseId}
 		   and worker_type_id =#{workerTypeId}
 		   and product_type = 0
-		   and delete_state not in (1,2);
+		   and delete_state in (0,2);
 	</select>
 
 	<select id="getBudgetSerList" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
 		SELECT
-		    *
+		<include refid="new_columns"/>
 		FROM dj_actuary_budget_material
 		WHERE
 		   house_id=#{houseId}
 		   and worker_type_id =#{workerTypeId}
 		   and product_type = 1
-		   and delete_state not in (1,2);
+		   and delete_state in (0,2);
 	</select>
 
 	<sql id="all_columns">
@@ -45,13 +108,41 @@
 		description,
 		shop_count,
 		actuarial_quantity,
-		unit,
+		unit_name as unitName,
 		total_price,
 		create_date,
 		modify_date,
 		group_type,
 		product_type,
 		goods_group_id
+	</sql>
+
+	<sql id="new_columns">
+		id,
+		house_flow_id as houseFlowId,
+		house_id as houseId,
+		worker_type_id as workerTypeId,
+		steta,
+		template_id as templateId,
+		delete_state as deleteState,
+		product_id as productId,
+		product_sn as productSn,
+		goods_id as goodsId,
+		goods_name as goodsName,
+		product_name as productName,
+		product_nick_name as productNickName,
+		price,
+		cost,
+		description,
+		shop_count as shopCount,
+		actuarial_quantity as actuarialQuantity,
+		unit_name as unitName,
+		total_price as totalPrice,
+		create_date as createDate,
+		modify_date as modifyDate,
+		group_type as groupType,
+		product_type as productType,
+		goods_group_id as goodsGroupId
 	</sql>
 	<!-- 查询所有 -->
 	<select id="getBudgetMaterial" resultType="java.util.Map">
@@ -74,7 +165,7 @@
 			description,
 			shop_count as shopCount,
 			actuarial_quantity as actuarialQuantity,
-			unit,
+			unit_name as unitName,
 			total_price as totalPrice,
 			create_date as createDate,
 			modify_date as modifyDate,
@@ -83,34 +174,10 @@
 			goods_group_id as goodsGroupId
 		FROM dj_actuary_budget_material ORDER BY create_date desc
 	</select>
-	<!-- 根据houseId和wokerTypeId查询房子材料精算 -->
+	<!-- 根据houseId和workerTypeId查询房子材料精算 -->
 	<select id="getBudgetMaterialById" resultType="java.util.Map">
-		SELECT 
-		    id,
-			house_flow_id as houseFlowId,
-			house_id as houseId,
-			worker_type_id as workerTypeId,
-			steta,
-			template_id as templateId,
-			delete_state as deleteState,
-			product_id as productId,
-			product_sn as productSn,
-			goods_id as goodsId,
-			goods_name as goodsName,
-			product_name as productName,
-			product_nick_name as productNickName,
-			price,
-			cost,
-			description,
-			shop_count as shopCount,
-			actuarial_quantity as actuarialQuantity,
-			unit,
-			total_price as totalPrice,
-			create_date as createDate,
-			modify_date as modifyDate,
-			group_type as groupType,
-			product_type as productType,
-			goods_group_id as goodsGroupId
+		SELECT
+		<include refid="new_columns"/>
 		FROM dj_actuary_budget_material
 		where house_id=#{houseId}
 		and worker_type_id =#{workerTypeId}
@@ -118,32 +185,8 @@
 	</select>
 	<!-- 根据template_id查询所有 -->
 	<select id="getAllbudgetTemplates" resultType="java.util.Map">
-		SELECT 
-			id,
-			house_flow_id as houseFlowId,
-			house_id as houseId,
-			worker_type_id as workerTypeId,
-			steta,
-			template_id as templateId,
-			delete_state as deleteState,
-			product_id as productId,
-			product_sn as productSn,
-			goods_id as goodsId,
-			goods_name as goodsName,
-			product_name as productName,
-			product_nick_name as productNickName,
-			price,
-			cost,
-			description,
-			shop_count as shopCount,
-			actuarial_quantity as actuarialQuantity,
-			unit,
-			total_price as totalPrice,
-			create_date as createDate,
-			modify_date as modifyDate,
-			group_type as groupType,
-			product_type as productType,
-			goods_group_id as goodsGroupId
+		SELECT
+		<include refid="new_columns"/>
 		FROM dj_actuary_budget_material WHERE template_id=#{template_id} and steta=3 ORDER BY create_date desc
 	</select>
 	<!-- 删除对象 -->
@@ -180,4 +223,5 @@
 		and abm.steta=1
         and abm.house_flow_id=#{houseFlowId}
 	</select>
+
 </mapper>

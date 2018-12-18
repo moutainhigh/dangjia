@@ -1,12 +1,12 @@
 package com.dangjia.acg.controller;
 
-import cn.jmessage.api.common.model.UserPayload;
 import cn.jmessage.api.user.UserInfoResult;
 import cn.jmessage.api.user.UserListResult;
 import cn.jmessage.api.user.UserStateListResult;
 import cn.jmessage.api.user.UserStateResult;
 import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.dto.UserInfoResultDTO;
 import com.dangjia.acg.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,7 +47,7 @@ public class UserController implements UserAPI {
      */
     @Override
     @ApiMethod
-    public  UserInfoResult getUserInfo(String appType,String username) {
+    public UserInfoResultDTO getUserInfo(String appType, String username) {
         return  userService.getUserInfo( appType, username);
     }
     /**
@@ -88,28 +88,28 @@ public class UserController implements UserAPI {
     /**
      * 更新用户信息
      * @param appType  应用类型（zx=当家装修，gj=当家工匠）
-     * @param payload 用户信息对象
-     *                nickname （选填）用户昵称
+     * @param                nickname （选填）用户昵称
      *                      不支持的字符：英文字符： \n \r\n
-     *                avatar （选填）头像
+     * @param                avatar （选填）头像
      *                      需要填上从文件上传接口获得的media_id
-     *                birthday （选填）生日 example: 1990-01-24
+     *  @param               birthday （选填）生日 example: 1990-01-24
      *                      yyyy-MM-dd
-     *                signature （选填）签名
+     *  @param               signature （选填）签名
      *                      支持的字符：全部，包括 Emoji
-     *                gender （选填） 性别
+     *  @param               gender （选填） 性别
      *                      0 - 未知， 1 - 男 ，2 - 女
-     *                region （选填）地区
+     *  @param               region （选填）地区
      *                      支持的字符：全部，包括 Emoji
-     *                address （选填）地址
+     *   @param              address （选填）地址
      *                      支持的字符：全部，包括 Emoji
-     *                extras (选填) 用户自定义json对象
      *
      */
     @Override
     @ApiMethod
-    public  void updateUserInfo(String appType, UserPayload payload) {
-        userService.updateUserInfo( appType, payload);
+    public  void updateUserInfo(String appType,String username, String nickname, String birthday, String signature, int gender,
+                                String phone, String address, String avatar) {
+        userService.updateUserInfo( appType, username,  nickname,  birthday,  signature,  gender,
+                phone,  address,  avatar);
     }
     /**
      *  获取用户列表

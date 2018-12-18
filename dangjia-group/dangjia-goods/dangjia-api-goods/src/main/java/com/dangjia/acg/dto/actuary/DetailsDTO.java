@@ -14,4 +14,5 @@ public class DetailsDTO {
     private String nameB;
     private String nameC;//按钮
     private String url;
+    private String type;
 }

@@ -1,6 +1,5 @@
 package com.dangjia.acg.controller.user;
 
-import com.alibaba.druid.support.json.JSONUtils;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.user.MainUserAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
@@ -8,16 +7,15 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.SessionUtils;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.dto.user.UserDTO;
 import com.dangjia.acg.dto.user.UserSearchDTO;
 import com.dangjia.acg.modle.user.MainUser;
+import com.dangjia.acg.service.member.GroupInfoService;
 import com.dangjia.acg.service.user.MainAuthService;
 import com.dangjia.acg.service.user.MainUserService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authc.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +34,8 @@ public class MainUserController implements MainUserAPI {
 	@Autowired
 	private MainAuthService mainAuthService;
 
+	@Autowired
+	private GroupInfoService groupInfoService;
 	/****
 	 * 注入配置
 	 */
@@ -49,7 +49,8 @@ public class MainUserController implements MainUserAPI {
 	@Override @ApiMethod
 	public ServerResponse sysSwitching(HttpServletRequest request, Integer source) {
 //		SessionUtils.setSession("sysSource",source);
-		redisClient.put("sysSource",source);
+		String userID = request.getParameter(Constants.USERID);
+		redisClient.put("sysSource:"+userID,source);
 		return ServerResponse.createBySuccessMessage("ok") ;
 	}
 
@@ -283,6 +284,8 @@ public class MainUserController implements MainUserAPI {
 		try {
 			logger.debug("用户登录，用户验证开始！member=" + user.getMobile());
 			redisClient.put(Constants.USER_KEY+existUser.getId(),existUser);
+
+			groupInfoService.registerJGUsers("gj", new String[]{existUser.getId()},new String[1]);
 			logger.info("用户登录，用户验证通过！member=" + user.getMobile());
 			msg= ServerResponse.createBySuccess("用户登录，用户验证通过！member=" + user.getMobile(),existUser.getId());
 		} catch (Exception e) {

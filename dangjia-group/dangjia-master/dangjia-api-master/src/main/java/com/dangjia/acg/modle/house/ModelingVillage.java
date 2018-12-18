@@ -79,4 +79,9 @@ public class ModelingVillage extends BaseEntity {
 	@Desc(value = "1代表已经删除，0代表可以使用")
 	@ApiModelProperty("1代表已经删除，0代表可以使用")
 	private Integer state;//
+
+	@Column(name = "esid")
+	@Desc(value = "搜索引擎ESID")
+	@ApiModelProperty("搜索引擎ESID")
+	private String esid;//
 }

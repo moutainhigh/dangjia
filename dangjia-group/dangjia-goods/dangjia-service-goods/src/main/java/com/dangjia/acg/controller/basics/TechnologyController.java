@@ -9,6 +9,8 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 
    * @类 名： TechnologyController
@@ -36,7 +38,7 @@ public class TechnologyController implements TechnologyAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertTechnology(String name, String content, String workerTypeId,Integer type,String image,Integer materialOrWorker){
+    public ServerResponse insertTechnology(HttpServletRequest request, String name, String content, String workerTypeId, Integer type, String image, Integer materialOrWorker){
         return technologyService.insertTechnology(name,content,workerTypeId,type,image,materialOrWorker);
     }
     /**
@@ -52,7 +54,7 @@ public class TechnologyController implements TechnologyAPI {
     */
     @Override
     @ApiMethod
-    public ServerResponse updateTechnology(String id,String name,String content,Integer type,String image){
+    public ServerResponse updateTechnology(HttpServletRequest request,String id,String name,String content,Integer type,String image){
         return technologyService.updateTechnology(id,name,content,type,image);
     }
     /**
@@ -66,7 +68,7 @@ public class TechnologyController implements TechnologyAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse deleteTechnology(String id){
+    public ServerResponse deleteTechnology(HttpServletRequest request,String id){
         return technologyService.deleteTechnology(id);
     }
     /**
@@ -81,7 +83,7 @@ public class TechnologyController implements TechnologyAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> queryTechnology(PageDTO pageDTO, String workerTypeId,String name,Integer materialOrWorker){
+    public ServerResponse<PageInfo> queryTechnology(HttpServletRequest request,PageDTO pageDTO, String workerTypeId,String name,Integer materialOrWorker){
         return technologyService.queryTechnology(pageDTO.getPageNum(),pageDTO.getPageSize(),workerTypeId,name,materialOrWorker);
     }
    /**
@@ -96,7 +98,7 @@ public class TechnologyController implements TechnologyAPI {
     */
    @Override
    @ApiMethod
-    public ServerResponse insertWokerTechnology(String workerGoodsId,String tIdArr){
+    public ServerResponse insertWokerTechnology(HttpServletRequest request,String workerGoodsId,String tIdArr){
         return technologyService.insertWokerTechnology(workerGoodsId,tIdArr);
     }
     
@@ -111,7 +113,7 @@ public class TechnologyController implements TechnologyAPI {
     */
    @Override
    @ApiMethod
-    public ServerResponse queryTechnologyByWgId(String workerGoodsId){
+    public ServerResponse queryTechnologyByWgId(HttpServletRequest request,String workerGoodsId){
         return technologyService.queryTechnologyByWgId(workerGoodsId);
     }
     

@@ -14,13 +14,14 @@ import javax.persistence.Table;
 @Data
 @Entity
 @Table(name = "dj_basics_category_attribute")
-@ApiModel(description = "属性分类")
+@ApiModel(description = "属性分类关联")
 public class CategoryAttribute extends BaseEntity {
 
 	@Column(name = "category_id")
     private String categoryId;//分类id
 
 	@Column(name = "attribute_id")
-    private String attributeId;//属性id
+    private String attributeId; //属性id  不是属性值
+
 
 }

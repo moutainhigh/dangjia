@@ -10,6 +10,8 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 商品关联组
  * @author Ronalcheng
@@ -24,7 +26,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse<PageInfo> getAllList(PageDTO pageDTO,String name,Integer state){
+	public ServerResponse<PageInfo> getAllList(HttpServletRequest request, PageDTO pageDTO, String name, Integer state){
 		return goodsGroupService.getAllList(pageDTO.getPageNum(),pageDTO.getPageSize(),name,state);
 	}
 	
@@ -33,7 +35,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse addGroupLink(String goodsGroupId,String listOfProductId){
+	public ServerResponse addGroupLink(HttpServletRequest request,String goodsGroupId,String listOfProductId){
 		return goodsGroupService.addGroupLink(goodsGroupId,listOfProductId);
 	}
 	/*
@@ -41,7 +43,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse updateGroupLink(String listOfProductId,String goodsGroupId,int state,String name){
+	public ServerResponse updateGroupLink(HttpServletRequest request,String listOfProductId,String goodsGroupId,int state,String name){
 		return goodsGroupService.updateGroupLink(listOfProductId, goodsGroupId,state,name);
 	}
 	/*
@@ -49,7 +51,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse getGoodsGroupById(String goodsGroupId) {
+	public ServerResponse getGoodsGroupById(HttpServletRequest request,String goodsGroupId) {
 		return goodsGroupService.getGoodsGroupById(goodsGroupId);
 	}
 	
@@ -58,7 +60,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse getGoodsCategoryList(){
+	public ServerResponse getGoodsCategoryList(HttpServletRequest request){
 		return goodsGroupService.getGoodsCategoryList();
 	}
 	
@@ -67,7 +69,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse getChildrenGoodsCategoryList(String id){
+	public ServerResponse getChildrenGoodsCategoryList(HttpServletRequest request,String id){
 		return goodsGroupService.getChildrenGoodsCategoryList(id);
 	}
 	
@@ -76,7 +78,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse getGoodsListByCategoryId(String id){
+	public ServerResponse getGoodsListByCategoryId(HttpServletRequest request,String id){
 		return goodsGroupService.getGoodsListByCategoryId(id);
 	}
 	
@@ -85,7 +87,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse getProductListByGoodsId(String id){
+	public ServerResponse getProductListByGoodsId(HttpServletRequest request,String id){
 		return goodsGroupService.getProductListByGoodsId(id);
 	}
 
@@ -94,7 +96,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse addGoodsGroup(GoodsGroup goodsGroup){
+	public ServerResponse addGoodsGroup(HttpServletRequest request,GoodsGroup goodsGroup){
 		System.out.println(goodsGroup.getName());
 		return goodsGroupService.addGoodsGroup(goodsGroup);
 	}
@@ -104,7 +106,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse updateGoodsGroup(GoodsGroup goodsGroup){
+	public ServerResponse updateGoodsGroup(HttpServletRequest request,GoodsGroup goodsGroup){
 		return goodsGroupService.updateGoodsGroup(goodsGroup);
 	}
 
@@ -113,7 +115,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse deleteGoodsGroupById(String goodsGroupId){
+	public ServerResponse deleteGoodsGroupById(HttpServletRequest request,String goodsGroupId){
 		return goodsGroupService.deleteGoodsGroupById(goodsGroupId);
 	}
 }

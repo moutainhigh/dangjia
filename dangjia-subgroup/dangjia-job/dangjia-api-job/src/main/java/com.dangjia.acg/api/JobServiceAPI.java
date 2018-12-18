@@ -17,8 +17,4 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface JobServiceAPI {
 
 
-  @RequestMapping(value = "createTask", method = RequestMethod.POST)
-  @ApiOperation(notes = "更新微信推送接口", value = "更新微信推送接口")
-  void createTask(@ApiParam(name = "templateCode", value = "templateCode") @RequestParam("templateCode") String templateCode,
-                                @ApiParam(name = "scheduled", value = "定时任务时间") @RequestParam("scheduled") String scheduled);
 }

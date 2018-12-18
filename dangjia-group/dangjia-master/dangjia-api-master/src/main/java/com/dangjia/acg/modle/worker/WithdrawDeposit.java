@@ -62,10 +62,6 @@ public class WithdrawDeposit extends BaseEntity {
 	@ApiModelProperty("处理时间")
     private Date processingDate;//
 
-	@Column(name = "istest")
-	@Desc(value = "0不是，1是测试")
-	@ApiModelProperty("0不是，1是测试")
-    private int istest;//
 }
 
 

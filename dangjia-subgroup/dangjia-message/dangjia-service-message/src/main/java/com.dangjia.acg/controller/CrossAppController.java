@@ -1,10 +1,12 @@
 package com.dangjia.acg.controller;
 
-import cn.jmessage.api.group.MemberListResult;
 import com.dangjia.acg.api.CrossAppAPI;
 import com.dangjia.acg.service.CrossAppService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 跨域应用维护
@@ -19,12 +21,13 @@ public class CrossAppController implements CrossAppAPI {
     /**
      * 跨应用管理群组成员
      * @param appType 应用类型（zx=当家装修，gj=当家工匠）
+     * @param myAppType 管理用户所属的appType 必填（zx=当家装修，gj=当家工匠）
      * @param gid 群组id
      * @param addUsers 添加到群组的用户（任选）
      * @param delUsers 从群组删除的用户（任选）
      */
-    public  void addOrRemoveMembersFromCrossGroup(String appType,long gid, String[] addUsers,String[] delUsers) {
-        crossAppService.addOrRemoveMembersFromCrossGroup( appType, gid,  addUsers, delUsers);
+    public  void addOrRemoveMembersFromCrossGroup(String appType,String myAppType,long gid, String[] addUsers,String[] delUsers) {
+        crossAppService.addOrRemoveMembersFromCrossGroup( appType, myAppType,gid,  addUsers, delUsers);
     }
 
     /**
@@ -33,7 +36,7 @@ public class CrossAppController implements CrossAppAPI {
      * @param gid 群组ID
      * @return
      */
-    public  MemberListResult getCrossGroupMembers(String appType,long gid) {
+    public List<Map> getCrossGroupMembers(String appType, long gid) {
         return crossAppService.getCrossGroupMembers( appType, gid);
     }
 

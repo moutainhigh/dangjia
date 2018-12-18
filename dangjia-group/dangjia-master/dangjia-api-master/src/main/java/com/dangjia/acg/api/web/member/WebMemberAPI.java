@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.web.member;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,7 +22,5 @@ public interface WebMemberAPI {
 
     @PostMapping("web/member/getMemberList")
     @ApiOperation(value = "获取业主列表", notes = "获取业主列表")
-    ServerResponse getMemberList(@RequestParam("request") HttpServletRequest request,
-                                           @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
-                                           @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize);
+    ServerResponse getMemberList(@RequestParam("request") HttpServletRequest request,@RequestParam("pageDTO")  PageDTO pageDTO);
 }

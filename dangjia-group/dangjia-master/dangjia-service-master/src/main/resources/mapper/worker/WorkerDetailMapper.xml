@@ -12,7 +12,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     worker_id,
     worker_name,
     defined_worker_id,
-    istest,
     create_date,
     modify_date
 </sql>
@@ -25,7 +24,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     worker_id as workerId,
     worker_name as workerName,
     defined_worker_id as definedWorkerId,
-    istest,
     create_date as createDate,
     modify_date as modifyDate
 </sql>

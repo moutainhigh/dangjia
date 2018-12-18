@@ -8,6 +8,8 @@ import com.dangjia.acg.service.actuary.BudgetMaterialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
    * @类 名： BudgetMaterialController.java
    * @功能描述：  
@@ -28,13 +30,13 @@ public class BudgetMaterialController implements BudgetMaterialAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse getAllBudgetMaterial(){
+	public ServerResponse getAllBudgetMaterial(HttpServletRequest request){
 		return budgetMaterialService.getAllBudgetMaterial();
 	}
 	//根据HouseFlowId查询房子材料精算
 	@Override
 	@ApiMethod
-	public ServerResponse queryBudgetMaterialByHouseFlowId(String houseFlowId){
+	public ServerResponse queryBudgetMaterialByHouseFlowId(HttpServletRequest request,String houseFlowId){
 		return budgetMaterialService.queryBudgetMaterialByHouseFlowId(houseFlowId);
 	}
 	/**
@@ -43,7 +45,7 @@ public class BudgetMaterialController implements BudgetMaterialAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse getAllBudgetMaterialById(String houseId,String workerTypeId){
+	public ServerResponse getAllBudgetMaterialById(HttpServletRequest request,String houseId,String workerTypeId){
 		return budgetMaterialService.getAllBudgetMaterialById(houseId,workerTypeId);
 	}
 	/**
@@ -52,7 +54,7 @@ public class BudgetMaterialController implements BudgetMaterialAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse getBudgetMaterialById(String id){
+	public ServerResponse getBudgetMaterialById(HttpServletRequest request,String id){
 		return budgetMaterialService.getBudgetMaterialByMyId(id);
 	}
 	/**
@@ -61,7 +63,7 @@ public class BudgetMaterialController implements BudgetMaterialAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse getAllGoodsByCategoryId(String categoryId){
+	public ServerResponse getAllGoodsByCategoryId(HttpServletRequest request,String categoryId){
 		return budgetMaterialService.getAllGoodsByCategoryId(categoryId);
 	}
 	/**
@@ -71,7 +73,7 @@ public class BudgetMaterialController implements BudgetMaterialAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse  getAllProductByGoodsId(String goodsId){
+	public ServerResponse  getAllProductByGoodsId(HttpServletRequest request,String goodsId){
 		return budgetMaterialService.getAllProductByGoodsId(goodsId);
 	}
 }

@@ -1,24 +1,27 @@
 package com.dangjia.acg.dto.activity;
 
 
-import com.dangjia.acg.common.annotation.Desc;
-import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import java.util.Date;
 
 /**
  * 实体类 - 优惠券记录
  */
 @Data
 public class ActivityRedPackRecordDTO {
+	protected String id;
 
+	@ApiModelProperty("创建时间")
+	protected Date createDate;// 创建日期
+
+	@ApiModelProperty("修改时间")
+	protected Date modifyDate;// 修改日期
+	@ApiModelProperty("可用城市ID")
+	private String cityId;//
 	@ApiModelProperty("会员ID")
 	private String memberId; //memberid
 
@@ -52,4 +55,12 @@ public class ActivityRedPackRecordDTO {
 	private String validTime;//格式:  有效期
 	private String share;//是否公用说明
 	private String selected;//是否选中
+
+
+	@ApiModelProperty("有效开始时间")
+	private Date startDate;//
+
+	@ApiModelProperty("有效结束时间")
+	private Date endDate;//
+
 }

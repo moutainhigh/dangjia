@@ -51,6 +51,30 @@
 		FROM dj_sup_supplier
 		ORDER BY create_date desc
 	</select>
+
+	<!-- 按照名字模糊查询所有供应商 -->
+	<select id="querySupplierListLikeByName" resultType="com.dangjia.acg.modle.sup.Supplier">
+		SELECT
+		id,
+		name,
+		address,
+		telephone,
+		checkpeople,
+		gender,
+		email,
+		notice,
+		supplier_level as supplierLevel,
+		state,
+		create_date as createDate,
+		modify_date as modifyDate
+		FROM dj_sup_supplier
+		where 1=1
+		<if test="name!=null and name!=''">
+			and name like CONCAT('%',#{name},'%')
+		</if>
+		ORDER BY create_date desc
+	</select>
+
     <!-- 批量更新数据 -->
     <update id="updateBatch" parameterType="java.util.List">
         update dj_sup_supplier set
@@ -155,7 +179,8 @@
 			category_id as categoryId,
 			product_sn as productSn,
 			image,
-			unit,
+			unit_name,
+			unit_id,
 			weight,
 			type,
 			maket,
@@ -164,7 +189,11 @@
 			profit,
 			brand_id as brandId,
 			brand_series_id as brandSeriesId,
-			attribute_arr as  attributeArr,
+			attribute_id_arr as attributeIdArr,
+			value_name_arr as valueNameArr,
+			value_id_arr as valueIdArr,
+-- 		    attribute_name_arr as attributeNameArr,
+-- 		    goods_attribute_id_arr as goodsAttributeIdArr,
 			convert_unit as convertUnit,
             convert_quality as convertQuality,
 			create_date as createDate,
@@ -182,7 +211,7 @@
 		ORDER BY create_date desc
     </select>
     <!-- 根据供应商查询在供应的货品种类-->
-    <select id="getSupplierProductByGid" parameterType="java.lang.String" resultType="java.lang.Integer">
+    <select id="getSupplierProductByProductId" parameterType="java.lang.String" resultType="java.lang.Integer">
 		select 
 		     count(*)
 		from dj_sup_supplier_product
@@ -192,12 +221,12 @@
 		     is_supply=1
     </select>
     <!-- 根据供应商查询在供应的商品种类-->
-    <select id="getSupplierProductByAid" parameterType="java.lang.String" resultType="java.lang.Integer">
+    <select id="getSupplierProductByGoodId" parameterType="java.lang.String" resultType="java.lang.Integer">
 		select 
 		 count(*)
 		from dj_sup_supplier_product
 		WHERE 
-		    supplier_id=#{supplier_id}
+		    goods_id=#{goods_id}
 		    and
 		    is_supply=1
     </select>

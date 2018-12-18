@@ -1,12 +1,12 @@
 package com.dangjia.acg.controller;
 
-import cn.jmessage.api.group.CreateGroupResult;
 import cn.jmessage.api.group.GroupInfoResult;
 import cn.jmessage.api.group.GroupListResult;
 import cn.jmessage.api.group.MemberListResult;
 import cn.jmessage.api.user.UserGroupsResult;
 import com.dangjia.acg.api.GroupAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.dto.CreateGroupResultDTO;
 import com.dangjia.acg.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,7 +38,7 @@ public class GroupController implements GroupAPI {
      */
     @Override
     @ApiMethod
-    public  CreateGroupResult createGroup(String appType,String owner_username,String name,String[] members_username,String avatar,String desc ,int flag) {
+    public CreateGroupResultDTO createGroup(String appType, String owner_username, String name, String[] members_username, String avatar, String desc , int flag) {
       return groupService.createGroup( appType, owner_username, name, members_username, avatar, desc , flag);
     }
 
@@ -89,8 +89,9 @@ public class GroupController implements GroupAPI {
      */
     @Override
     @ApiMethod
-    public  void manageGroup(String appType,int groupId, String[] addList,String[] removeList) {
+    public  String manageGroup(String appType,int groupId, String[] addList,String[] removeList) {
          groupService.manageGroup( appType, groupId, addList, removeList);
+         return "ok";
     }
 
     /**

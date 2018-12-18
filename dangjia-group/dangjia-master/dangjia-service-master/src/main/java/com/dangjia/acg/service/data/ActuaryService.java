@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.data;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.house.House;
@@ -9,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -52,7 +51,7 @@ public class ActuaryService {
      */
     public ServerResponse getActuaryConfirm(){
         Example example = new Example(House.class);
-        example.createCriteria().andEqualTo("budgetOk", 2).andEqualTo("designerOk", 3);
+        example.createCriteria().andCondition("(budget_ok =2 || budget_ok = 4)").andEqualTo("designerOk", 3);
         List<House> houseList = houseMapper.selectByExample(example);
         return ServerResponse.createBySuccess("查询成功", listResult(houseList));
     }
@@ -82,15 +81,9 @@ public class ActuaryService {
      */
     public ServerResponse getStatisticsByDate(String startDate, String endDate){
         //将时分秒转换为年月日
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        List<House> houseList = null;
-        try {
-            Date start = sdf.parse(startDate);
-            Date end = sdf.parse(endDate);
-            houseList = houseMapper.getStatisticsByDate(start,end);
-        } catch (ParseException e){
-            e.printStackTrace();
-        }
+        Date start =  DateUtil.toDate(startDate);
+        Date end = DateUtil.toDate(endDate);
+        List<House> houseList = houseMapper.getStatisticsByDate(start,end);
         return ServerResponse.createBySuccess("查询成功", mapResult(houseList));
     }
 
@@ -124,11 +117,12 @@ public class ActuaryService {
         for(House house : houseList){
             Map<String, Object> map=new HashMap<String, Object>();
             Member user = userMapper.selectByPrimaryKey(house.getMemberId());
-            map.put("houseName", house.getResidential() + "小区" + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber()+"号");
+            map.put("houseName", house.getHouseName());
             map.put("name", user.getName());
             map.put("mobile",user.getMobile());
             map.put("square", house.getSquare());
             map.put("houseId", house.getId());
+            map.put("budgetOk", house.getBudgetOk());
             list.add(map);
         }
         return list;

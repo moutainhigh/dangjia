@@ -14,7 +14,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		methods,
 		sort,
 		safe_state AS safeState,
-		technical,
+		image,
 		inspect_number AS inspectNumber
 	</sql>
 

@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.design;
 
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.design.HouseDesignImageDTO;
 import com.dangjia.acg.dto.house.DesignDTO;
@@ -9,6 +10,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.modle.design.DesignImageType;
 import com.dangjia.acg.modle.design.HouseDesignImage;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,8 @@ import java.util.List;
 public class DesignService {
 
     @Autowired
+    private ConfigMessageService configMessageService;
+    @Autowired
     private IHouseMapper houseMapper;
     @Autowired
     private IDesignImageTypeMapper designImageTypeMapper;
@@ -46,10 +50,15 @@ public class DesignService {
         if (designerOk == 1 || designerOk == 6){
             house.setDesignerOk(5);//平面图发给业主
             houseMapper.updateByPrimaryKeySelective(house);
+            //app推送给业主
+            configMessageService.addConfigMessage(null,"gj",house.getMemberId(),"0","设计图上传提醒",String.format(DjConstants.PushMessage.PLANE_UPLOADING,house.getHouseName()) ,"");
             return ServerResponse.createBySuccessMessage("发送成功");
         }else if (designerOk == 7 || designerOk==8){
             house.setDesignerOk(2);//施工图(其它图)发给业主
             houseMapper.updateByPrimaryKeySelective(house);
+            //app推送给业主
+            configMessageService.addConfigMessage(null,"gj",house.getMemberId(),"0","设计图上传提醒",String.format(DjConstants.PushMessage.CONSTRUCTION_UPLOADING,house.getHouseName()) ,"");
+
             return ServerResponse.createBySuccessMessage("发送成功");
         }
         return ServerResponse.createByErrorMessage("参数异常,发送失败");

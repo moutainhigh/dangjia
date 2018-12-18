@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper">
+
+    <update id="setSupplierId" >
+        update dj_deliver_order_split_item
+        set split_deliver_id = #{splitDeliverId}
+        where id = #{id}
+    </update>
+
+    <!--确认收货更新收货数量-->
+    <update id="affirmSplitDeliver" >
+        update dj_deliver_order_split_item
+        set receive = num
+        where split_deliver_id = #{splitDeliverId}
+    </update>
+
+</mapper>
+

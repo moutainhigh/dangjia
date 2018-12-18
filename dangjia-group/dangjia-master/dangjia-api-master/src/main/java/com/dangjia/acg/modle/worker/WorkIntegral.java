@@ -41,14 +41,19 @@ public class WorkIntegral extends BaseEntity {
 	private Integer star;//
 
 	@Column(name = "status")
-	@Desc(value = "类型每日积分0，业主积分1，大管家积分2")
-	@ApiModelProperty("类型每日积分0，业主积分1，大管家积分2")
-	private int status;//
+	@Desc(value = "得分类型每日积分0，业主积分1，大管家积分2")
+	@ApiModelProperty("得分类型每日积分0，业主积分1，大管家积分2")
+	private Integer status;//
 
 	@Column(name = "house_id")
 	@Desc(value = "房子ID")
 	@ApiModelProperty("房子ID")
 	private String houseId;//houseid
+
+	@Column(name = "briefed")
+	@Desc(value = "评分描述")
+	@ApiModelProperty("评分描述")
+	private String briefed;
 
 	@Column(name = "integral")
 	@Desc(value = "积分增减分数")

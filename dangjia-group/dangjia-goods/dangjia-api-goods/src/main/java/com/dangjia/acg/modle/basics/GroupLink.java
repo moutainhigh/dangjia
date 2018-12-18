@@ -45,10 +45,10 @@ public class GroupLink extends BaseEntity {
 
 	//状态0：启用；1：禁用
 	@Column(name = "state")
-	private int state;
+	private Integer state;
 
 	//可切换性0:可切换；1不可切换
 	@Column(name = "is_switch")
-	private int isSwitch;
+	private Integer isSwitch;
 	
 }

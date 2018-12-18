@@ -9,6 +9,8 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 
  * 
@@ -30,7 +32,7 @@ public class BrandSeriesController implements BrandSeriesAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo>  getAllBrandExplain(PageDTO pageDTO){
+    public ServerResponse<PageInfo>  getAllBrandExplain(HttpServletRequest request, PageDTO pageDTO){
     	return brandExplainService.getAllBrandExplain(pageDTO.getPageNum(),pageDTO.getPageSize());
     }
     /**
@@ -40,7 +42,7 @@ public class BrandSeriesController implements BrandSeriesAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateBrandExplain(String id,String name,String content){
+    public ServerResponse updateBrandExplain(HttpServletRequest request,String id,String name,String content){
     	return brandExplainService.update(id, name,content);
     }
     /**
@@ -50,7 +52,7 @@ public class BrandSeriesController implements BrandSeriesAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insetBrandExplain(String name,String content,String brandId){
+    public ServerResponse insetBrandExplain(HttpServletRequest request,String name,String content,String brandId){
     	return brandExplainService.insert(name,content, brandId);
     }
     /**
@@ -60,7 +62,7 @@ public class BrandSeriesController implements BrandSeriesAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse deleteBrandExplain(String id){
+    public ServerResponse deleteBrandExplain(HttpServletRequest request,String id){
         return brandExplainService.deleteBrandExplain(id);
     }
 }

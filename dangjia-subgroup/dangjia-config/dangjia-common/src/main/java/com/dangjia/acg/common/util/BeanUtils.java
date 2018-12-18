@@ -13,10 +13,8 @@ import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.Map.Entry;
 
 /**
@@ -32,6 +30,32 @@ public class BeanUtils {
 
   public static ObjectMapper mapper = new ObjectMapper();
 
+  public static Object getResult(Object result){
+    Object resultValue =null;
+    if(result==null){
+        return resultValue;
+    }
+    if (result instanceof Collection) {
+      Collection<?> lstObj = listToMap((Collection<?>) result);
+      resultValue=lstObj;
+    } else if (result instanceof Map) {
+      Map<Object, Object> lstObj = mapToMap((Map<Object, Object>) result);
+      resultValue=lstObj;
+    }else if (result instanceof Date) {
+      Date date=(Date) result;
+      resultValue=date.getTime();
+    } else {
+      if (result instanceof BigDecimal ||result instanceof String || result instanceof Boolean || result instanceof Byte || result instanceof Short || result instanceof Integer || result instanceof Long || result instanceof Float
+              || result instanceof Double || result instanceof Enum) {
+        if (result != null) {
+          resultValue = result;
+        }
+      } else {
+        resultValue = beanToMap(result);
+      }
+    }
+    return resultValue;
+  }
   /**
    * Bean转Map 忽略_ignore 结尾的字段
    *
@@ -50,6 +74,9 @@ public class BeanUtils {
         String propertyName = descriptor.getName();
         if (!propertyName.equals("class")) {
           Method readMethod = descriptor.getReadMethod();
+          if(readMethod==null){
+            continue;
+          }
           Object result = readMethod.invoke(obj, new Object[0]);
           // 有忽略标识的字段不转换
           if (propertyName.indexOf("_ignore") >= 0 || result == null) {
@@ -57,23 +84,7 @@ public class BeanUtils {
           }
           //判断是否为 基础类型 String,Boolean,Byte,Short,Integer,Long,Float,Double
           //判断是否集合类，COLLECTION,MAP
-          if (result instanceof String || result instanceof Boolean || result instanceof Byte || result instanceof Short || result instanceof Integer || result instanceof Long
-              || result instanceof Float || result instanceof Double || result instanceof Enum) {
-            if (result != null) {
-              returnMap.put(propertyName, result);
-            }
-          } else if (result instanceof Collection) {
-            Collection<?> lstObj = listToMap((Collection<?>) result);
-            returnMap.put(propertyName, lstObj);
-
-          } else if (result instanceof Map) {
-            Map<Object, Object> lstObj = mapToMap((Map<Object, Object>) result);
-            returnMap.put(propertyName, lstObj);
-          } else {
-            Map mapResult = beanToMap(result);
-            returnMap.put(propertyName, mapResult);
-          }
-
+          returnMap.put(propertyName, getResult(result));
         }
       }
       return returnMap;
@@ -123,6 +134,9 @@ public class BeanUtils {
         String propertyName = descriptor.getName();
         if (!propertyName.equals("class")) {
           Method readMethod = descriptor.getReadMethod();
+          if(readMethod==null){
+            continue;
+          }
           Object result = readMethod.invoke(obj, new Object[0]);
           // 有忽略标识的字段不转换
           if (result == null) {
@@ -130,23 +144,7 @@ public class BeanUtils {
           }
           //判断是否为 基础类型 String,Boolean,Byte,Short,Integer,Long,Float,Double
           //判断是否集合类，COLLECTION,MAP
-          if (result instanceof String || result instanceof Boolean || result instanceof Byte || result instanceof Short || result instanceof Integer || result instanceof Long
-              || result instanceof Float || result instanceof Double || result instanceof Enum) {
-            if (result != null) {
-              returnMap.put(propertyName, result);
-            }
-          } else if (result instanceof Collection) {
-            Collection<?> lstObj = listToMap((Collection<?>) result);
-            returnMap.put(propertyName, lstObj);
-
-          } else if (result instanceof Map) {
-            Map<Object, Object> lstObj = mapToMap((Map<Object, Object>) result);
-            returnMap.put(propertyName, lstObj);
-          } else {
-            Map mapResult = beanToMap(result);
-            returnMap.put(propertyName, mapResult);
-          }
-
+          returnMap.put(propertyName, getResult(result));
         }
       }
       return returnMap;
@@ -159,39 +157,8 @@ public class BeanUtils {
   public static Map<Object, Object> mapToMap(Map<Object, Object> orignMap) {
     Map<Object, Object> resultMap = new HashMap<Object, Object>();
     for (Entry<Object, Object> entry : orignMap.entrySet()) {
-      Object key = entry.getKey();
-      Object resultKey = null;
-      if (key instanceof Collection) {
-        resultKey = listToMap((Collection) key);
-      } else if (key instanceof Map) {
-        resultKey = mapToMap((Map) key);
-      } else {
-        if (key instanceof String || key instanceof Boolean || key instanceof Byte || key instanceof Short || key instanceof Integer || key instanceof Long || key instanceof Float
-            || key instanceof Double || key instanceof Enum) {
-          if (key != null) {
-            resultKey = key;
-          }
-        } else {
-          resultKey = beanToMap(key);
-        }
-      }
-      Object value = entry.getValue();
-      Object resultValue = null;
-      if (value instanceof Collection) {
-        resultValue = listToMap((Collection) value);
-      } else if (value instanceof Map) {
-        resultValue = mapToMap((Map) value);
-      } else {
-        if (value instanceof String || value instanceof Boolean || value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long || value instanceof Float
-            || value instanceof Double || value instanceof Enum) {
-          if (value != null) {
-            resultValue = value;
-          }
-        } else {
-          resultValue = beanToMap(value);
-        }
-      }
-
+      Object resultKey = getResult(entry.getKey());
+      Object resultValue =  getResult(entry.getValue());
       resultMap.put(resultKey, resultValue);
     }
     return resultMap;
@@ -201,23 +168,7 @@ public class BeanUtils {
   public static Collection listToMap(Collection lstObj) {
     ArrayList arrayList = new ArrayList();
     for (Object t : lstObj) {
-      if (t instanceof Collection) {
-        Collection result = listToMap((Collection) t);
-        arrayList.add(result);
-      } else if (t instanceof Map) {
-        Map result = mapToMap((Map) t);
-        arrayList.add(result);
-      } else {
-        if (t instanceof String || t instanceof Boolean || t instanceof Byte || t instanceof Short || t instanceof Integer || t instanceof Long || t instanceof Float || t instanceof Double
-            || t instanceof Enum) {
-          if (t != null) {
-            arrayList.add(t);
-          }
-        } else {
-          Object result = beanToMap(t);
-          arrayList.add(result);
-        }
-      }
+      arrayList.add(getResult(t));
     }
     return arrayList;
   }

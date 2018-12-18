@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.house.IHouseExpendMapper">
+
+    <select id="getByHouseId" resultType="com.dangjia.acg.modle.house.HouseExpend" >
+        SELECT
+            id,
+            house_id as houseId,
+            tol_money as tolMoney,
+            pay_money as payMoney,
+            dis_money as disMoney,
+            back_money as backMoney,
+            material_money as materialMoney,
+            worker_money as workerMoney,
+            material_kind as materialKind,
+            create_date AS createDate,
+            modify_date AS modifyDate
+
+        FROM dj_house_house_expend
+        WHERE
+            house_id=#{houseId}
+    </select>
+
+</mapper>
+

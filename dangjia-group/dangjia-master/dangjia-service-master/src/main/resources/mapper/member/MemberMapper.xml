@@ -5,53 +5,58 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.dangjia.acg.mapper.member.IMemberMapper">
 
     <sql id="all_columns">
-		id,
-        user_name AS userName ,
-        password,
-        nick_name AS nickName ,
-        name,
-        mobile,
-        qrcode,
-        superiorId,
-        invite_num AS inviteNum,
-        gift,
-        invitation_code AS invitationCode,
-        others_invitation_code AS othersInvitationCode,
-        user_role AS userRole,
-        head,
-        idcaoda,
-        idcaodb,
-        idcaodall,
-        worker_type AS workerType,
-        worker_type_id AS workerTypeId,
-        idnumber,
-        worker_price AS workerPrice,
-        have_money AS haveMoney,
-        surplus_money AS surplusMoney,
-        retention_money AS retentionMoney,
-        deposit,
-        check_type AS checkType,
-        praise_rate AS praiseRate,
-        volume,
-        evaluation_score AS evaluationScore,
-        is_crowned AS isCrowned,
-        smscode,
-        paycode,
-        referrals,
-        workyears,
-        nativeplace,
-        address,
-        self_assessment as selfAssessment,
-        specialty,
-        create_date AS createDate,
-        modify_date AS modifyDate
-
+		w.id,
+        w.user_name AS userName ,
+        w.password,
+        w.nick_name AS nickName ,
+        w.name,
+        w.mobile,
+        w.qrcode,
+        w.superiorId,
+        w.invite_num AS inviteNum,
+        w.gift,
+        w.invitation_code AS invitationCode,
+        w.others_invitation_code AS othersInvitationCode,
+        w.user_role AS userRole,
+        w.head,
+        w.idcaoda,
+        w.idcaodb,
+        w.idcaodall,
+        w.worker_type AS workerType,
+        w.worker_type_id AS workerTypeId,
+        w.idnumber,
+        w.worker_price AS workerPrice,
+        w.have_money AS haveMoney,
+        w.surplus_money AS surplusMoney,
+        w.retention_money AS retentionMoney,
+        w.deposit,
+        w.check_type AS checkType,
+        w.praise_rate AS praiseRate,
+        w.volume,
+        w.evaluation_score AS evaluationScore,
+        w.is_crowned AS isCrowned,
+        w.smscode,
+        w.paycode,
+        w.referrals,
+        w.create_date AS createDate,
+        w.modify_date AS modifyDate
 	</sql>
+
+    <select id="getSupervisor" resultType="com.dangjia.acg.modle.member.Member">
+        SELECT
+            <include refid="all_columns" />
+        FROM dj_member w
+        where
+        w.id = (select hw.worker_id from dj_core_house_worker hw
+            where hw.house_id = #{houseId}
+            and hw.worker_type = 3
+            and hw.work_type = 6)
+    </select>
 
     <select id="getUser" parameterType="com.dangjia.acg.modle.member.Member" resultType="com.dangjia.acg.modle.member.Member">
         SELECT
         <include refid="all_columns" />
-        FROM dj_member
+        FROM dj_member w
         where 1=1
         <if test="password!=null">
             AND password=#{password}
@@ -75,6 +80,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             visit_state AS visitState,
             create_date AS createDate
         FROM dj_member
+        WHERE
+            1=1
         ORDER by
             create_date
     </select>

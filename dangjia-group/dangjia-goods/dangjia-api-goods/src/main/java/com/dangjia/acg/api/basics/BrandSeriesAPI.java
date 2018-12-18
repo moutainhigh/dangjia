@@ -7,8 +7,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 
@@ -27,7 +28,7 @@ public interface BrandSeriesAPI {
      */
     @PostMapping("/basics/brandSeries/getAllBrandExplain")
     @ApiOperation(value = "查询所有", notes = "查询所有")
-    public ServerResponse<PageInfo> getAllBrandExplain(@RequestParam("pageDTO") PageDTO pageDTO);
+    public ServerResponse<PageInfo> getAllBrandExplain(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO);
     /**
      * 修改
      * @param id
@@ -35,7 +36,8 @@ public interface BrandSeriesAPI {
      */
     @PostMapping("/basics/brandSeries/updateBrandExplain")
     @ApiOperation(value = "修改", notes = "修改")
-    public ServerResponse updateBrandExplain(String id,String name,String content);
+    public ServerResponse updateBrandExplain(@RequestParam("request") HttpServletRequest request,@RequestParam("id")String id,
+                                             @RequestParam("name")String name,@RequestParam("content")String content);
     /**
      * 新增
      * @param brandId
@@ -43,7 +45,8 @@ public interface BrandSeriesAPI {
      */
     @PostMapping("/basics/brandSeries/insetBrandExplain")
     @ApiOperation(value = "新增", notes = "新增")
-    public ServerResponse insetBrandExplain(String name,String content,String brandId);
+    public ServerResponse insetBrandExplain(@RequestParam("request") HttpServletRequest request,@RequestParam("name")String name,
+                                            @RequestParam("content")String content,@RequestParam("brandId")String brandId);
     /**
      * 删除
      * @param id
@@ -51,5 +54,5 @@ public interface BrandSeriesAPI {
      */
     @PostMapping("/basics/brandSeries/deleteBrandExplain")
     @ApiOperation(value = "删除", notes = "删除")
-    public ServerResponse deleteBrandExplain(String id);
+    public ServerResponse deleteBrandExplain(@RequestParam("request") HttpServletRequest request,@RequestParam("id")String id);
 }

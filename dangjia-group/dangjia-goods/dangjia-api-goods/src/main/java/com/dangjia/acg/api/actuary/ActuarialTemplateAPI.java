@@ -7,7 +7,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,7 +42,7 @@ public interface ActuarialTemplateAPI {
     //新增精算模板
     @PostMapping("/actuary/actuary/insertActuarialTemplate")
     @ApiOperation(value = "新增精算模板风格", notes = "新增精算模板风格")
-    public ServerResponse insertActuarialTemplate(@RequestParam("userId")String userId, @RequestParam("name") String name,@RequestParam("styleType") String styleType,
+    public ServerResponse insertActuarialTemplate(@RequestParam("request") HttpServletRequest request,@RequestParam("userId")String userId, @RequestParam("name") String name,@RequestParam("styleType") String styleType,
                                                   @RequestParam("applicableArea") String applicableArea,
                                                   @RequestParam("stateType")Integer stateType,@RequestParam("workerTypeName") String workerTypeName,
                                                   @RequestParam("workerTypeId")Integer workerTypeId);
@@ -51,12 +50,12 @@ public interface ActuarialTemplateAPI {
     //修改精算模板
     @PostMapping("/actuary/actuary/updateActuarialTemplate")
     @ApiOperation(value = "修改精算模板风格", notes = "修改精算模板风格")
-    public ServerResponse updateActuarialTemplate(String id,String name,String styleType,String applicableArea,Integer stateType,String workingProcedure);
+    public ServerResponse updateActuarialTemplate(@RequestParam("request") HttpServletRequest request,String id,String name,String styleType,String applicableArea,Integer stateType,String workingProcedure);
 
     //删除精算模板
     @PostMapping("/actuary/actuary/deleteActuarialTemplate")
     @ApiOperation(value = "删除精算模板", notes = "删除精算模板")
-    public ServerResponse deleteActuarialTemplate(String id);
+    public ServerResponse deleteActuarialTemplate(@RequestParam("request") HttpServletRequest request,String id);
 
 
 

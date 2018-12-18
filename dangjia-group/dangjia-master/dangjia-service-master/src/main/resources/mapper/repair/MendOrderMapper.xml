@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.repair.IMendOrderMapper">
+
+    <sql id="all_columns">
+		id,
+		number,
+		business_order_number as businessOrderNumber,
+		order_name as orderName,
+		house_id as houseId,
+		worker_type_id as workerTypeId,
+		apply_member_id as applyMemberId,
+		type,
+		material_order_state as materialOrderState,
+		worker_order_state as workerOrderState,
+		material_back_state as materialBackState,
+		worker_back_state as workerBackState,
+		audits_member_id as auditsMemberId,
+		total_amount as totalAmount,
+		data_status as dataStatus,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
+    <!-- 查询未处理退人工 -->
+    <select id="backWorker" resultType="com.dangjia.acg.modle.repair.MendOrder">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_repair_mend_order
+        where
+        type = 3
+        AND  house_id = #{houseId}
+        AND (worker_back_state=1 or worker_back_state=3)
+    </select>
+
+    <!-- 查询未处理补人工 -->
+    <select id="untreatedWorker" resultType="com.dangjia.acg.modle.repair.MendOrder">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_repair_mend_order
+        where
+            type = 1
+        AND  house_id = #{houseId}
+        AND (worker_order_state=1 or worker_order_state=3 or worker_order_state=5)
+    </select>
+
+    <!-- 查询退货单 -->
+    <select id="materialBackState" resultType="com.dangjia.acg.modle.repair.MendOrder">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_repair_mend_order
+        where
+            type = 2
+        and
+            material_back_state > 0
+        <if test = "houseId!=null and houseId!=''">
+            and
+            house_id = #{houseId}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
+    <!-- 查询补货单 -->
+    <select id="materialOrderState" resultType="com.dangjia.acg.modle.repair.MendOrder">
+        SELECT
+            <include refid="all_columns"/>
+        FROM dj_repair_mend_order
+        where
+            type = 0
+        and
+            material_order_state > 0
+        <if test = "houseId!=null and houseId!=''">
+            and
+            house_id = #{houseId}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
+</mapper>
+

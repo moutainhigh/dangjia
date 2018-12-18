@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.repair.IMendWorkerMapper">
+
+    <sql id="all_columns">
+        id,
+        mend_order_id as mendOrderId,
+        worker_goods_id as workerGoodsId,
+        worker_goods_sn as workerGoodsSn,
+        worker_goods_name as workerGoodsName,
+        price,
+        unit_name as unitName,
+        shop_count as shopCount,
+        total_price as totalPrice,
+        image,
+	    create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
+    <!-- 根据mendOrderId查询所有 -->
+    <select id="byMendOrderId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.repair.MendWorker">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_repair_mend_worker
+        where
+        mend_order_id = #{mendOrderId}
+        ORDER BY create_date desc
+    </select>
+
+</mapper>
+

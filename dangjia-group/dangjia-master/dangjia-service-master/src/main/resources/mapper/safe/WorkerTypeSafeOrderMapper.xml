@@ -4,5 +4,35 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper">
 
+    <sql id="all_columns">
+		id,
+		business_order_number as businessOrderNumber,
+		worker_type_safe_id as workerTypeSafeId,
+		house_id as houseId,
+		member_id as memberId,
+		worker_type_id as workerTypeId,
+		worker_type as workerType,
+		house_flow_id as houseFlowId,
+		state,
+		price as price,
+		shop_date as shop_date,
+		force_time as forceTime,
+		expiration_date as expirationDate,
+		service_state as serviceState,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
+    <!--查保险-->
+    <select id="getByWorkerTypeId" resultType="com.dangjia.acg.modle.safe.WorkerTypeSafeOrder">
+        select
+        <include refid="all_columns"/>
+        from dj_safe_worker_type_safe_order
+        where
+            worker_type_id = #{workerTypeId}
+        and house_id = #{houseId}
+        and state = 1
+    </select>
+
 </mapper>
 

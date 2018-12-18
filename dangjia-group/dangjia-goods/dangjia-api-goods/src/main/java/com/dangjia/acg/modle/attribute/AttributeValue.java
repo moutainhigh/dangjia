@@ -1,14 +1,15 @@
 package com.dangjia.acg.modle.attribute;
 
 import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.basics.Goods;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.Set;
+
 /**
- *  基础 属性值
+ * 基础 属性值
  */
 @Data
 @Entity
@@ -16,16 +17,15 @@ import javax.persistence.Table;
 @ApiModel(description = "属性选项")
 public class AttributeValue extends BaseEntity {
 
-	@Column(name = "attribute_id")
+    @Column(name = "attribute_id")
     private String attributeId;//属性id
 
-	@Column(name = "name")
+    @Column(name = "name")
     private String name;//名称
 
-	@Column(name = "image")
+    @Column(name = "image")
     private String image;//图片
 
-	@Column(name = "introduction")
-    private String introduction;//说明 
-
+    @Column(name = "introduction")
+    private String introduction;//说明
 }

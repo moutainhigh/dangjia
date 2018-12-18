@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 import org.apache.commons.lang.StringUtils;
 
 import javax.persistence.Column;
@@ -15,6 +16,7 @@ import java.math.BigDecimal;
 @Data
 @Entity
 @Table(name = "dj_member")
+@FieldNameConstants(prefix = "")
 @ApiModel(description = "当家用户表")
 public class Member extends BaseEntity {
 
@@ -56,7 +58,7 @@ public class Member extends BaseEntity {
     @Column(name = "invite_num")
     @Desc(value = "存放邀约人数")
     @ApiModelProperty("存放邀约人数")
-    private int inviteNum;//存放邀约人数
+    private Integer inviteNum;//存放邀约人数
 
     @Column(name = "visit_state")
     @Desc(value = "阶段0未回访，1已开工已下单，2有意向继续跟进，3无装修需求，4恶意操作")
@@ -114,7 +116,7 @@ public class Member extends BaseEntity {
     @Column(name = "worker_type")
     @Desc(value = "工种类型")
     @ApiModelProperty("工种类型：【1设计师，2精算师，3大管家,4拆除，5打孔，6水电工，7防水，8泥工,9木工，10油漆工，11安装】")
-    private int workerType;//工种类型1设计师，2精算师，3大管家,4拆除，5打孔，6水电工，7防水，8泥工,9木工，10油漆工，11安装
+    private Integer workerType;//工种类型1设计师，2精算师，3大管家,4拆除，5打孔，6水电工，7防水，8泥工,9木工，10油漆工，11安装
 
 
     @Column(name = "idnumber")
@@ -151,7 +153,7 @@ public class Member extends BaseEntity {
     @Column(name = "check_type")//type
     @Desc(value = "审核状态")
     @ApiModelProperty("审核状态")
-    private int checkType;//审核状态:  0审核中，1审核未通过不能抢单不能发申请,  2审核已通过 可抢单可发申请, 3账户已禁用 不能抢单不能发申请,  4账户冻结可发申请 不能抢单,5未提交资料
+    private Integer checkType;//审核状态:  0审核中，1审核未通过不能抢单不能发申请,  2审核已通过 可抢单可发申请, 3账户已禁用 不能抢单不能发申请,  4账户冻结可发申请 不能抢单,5未提交资料
 
     @Column(name = "praise_rate")//favorable
     @Desc(value = "好评率")
@@ -172,26 +174,24 @@ public class Member extends BaseEntity {
     @Column(name = "is_crowned")//crowned
     @Desc(value = "是否是皇冠")
     @ApiModelProperty("是否是皇冠，0不是，1是")
-    private int isCrowned;//是否是皇冠，0不是，1是
-
+    private Integer isCrowned;//是否是皇冠，0不是，1是
 
     @Column(name = "smscode")
     @Desc(value = "验证码")
     @ApiModelProperty("验证码")
-    private int smscode;//验证码
+    private Integer smscode;//验证码
 
     @Column(name = "paycode")
     @Desc(value = "提现验证码")
     @ApiModelProperty("提现验证码")
-    private int paycode;//提现验证码
-
+    private Integer paycode;//提现验证码
 
     @Column(name = "referrals")
     @Desc(value = "推荐人ID")
     @ApiModelProperty("推荐人ID")
     private String referrals;//推荐人ID superior
 
-    @Column(name = "workyears")
+    /*@Column(name = "workyears")
     @Desc(value = "工作年限")
     @ApiModelProperty("工作年限")
     private String workyears;//工作年限
@@ -214,18 +214,8 @@ public class Member extends BaseEntity {
     @Column(name = "specialty")//goodwork
     @Desc(value = "擅长工作")
     @ApiModelProperty("擅长工作")
-    private String specialty;//擅长工作
+    private String specialty;//擅长工作*/
 
-    public Member(){
-        this.praiseRate=new BigDecimal(1);//好评率
-        this.evaluationScore=new BigDecimal(60);//积分
-        this.checkType=5;//未提交资料
-        this.workerPrice=new BigDecimal(0);
-        this.haveMoney=new BigDecimal(0);
-        this.surplusMoney=new BigDecimal(0);
-        this.retentionMoney=new BigDecimal(0);
-        this.visitState = 0;
-    }
 
     //所有图片字段加入域名和端口，形成全路径
     public void initPath(String address){

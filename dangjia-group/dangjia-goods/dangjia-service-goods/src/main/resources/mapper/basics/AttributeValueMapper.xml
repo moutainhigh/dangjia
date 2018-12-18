@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.basics.IAttributeValueMapper">
 
-	<sql id="all_columns">
+    <sql id="all_columns">
 		id,
 		name,
 		attribute_id,
@@ -13,33 +13,60 @@
         create_date,
         modify_date
 	</sql>
+    <resultMap type="com.dangjia.acg.pojo.attribute.AttributeValuePO" id="attributeValueResultMap">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="attributeId" column="attributeId"/>
+        <result property="image" column="image"/>
+        <result property="introduction" column="introduction"/>
+        <result property="createDate" column="createDate"/>
+        <result property="modifyDate" column="modifyDate"/>
 
-	<!-- 删除对象 -->
-	<delete id="deleteById" parameterType="java.lang.String">
+        <association property="attribute" javaType="com.dangjia.acg.modle.attribute.Attribute">
+            <id property="id" column="id"/>
+            <result property="name" column="name"/>
+            <result property="type" column="type"/>
+            <result property="createDate" column="createDate"/>
+            <result property="modifyDate" column="modifyDate"/>
+        </association>
+    </resultMap>
+
+    <!-- 如果这里不写一遍，就会用到ItemMapper.getById的定义，resultMap就不会是ItemEx-->
+    <select id="getPOById" resultMap="attributeValueResultMap">
+        select
+        *
+        from dj_basics_attribute_value WHERE id=#{id}
+      </select>
+
+    <!-- 根据属性id查询所有属性选项 -->
+    <select id="queryPOByAttributeId" resultMap="attributeValueResultMap">
+		SELECT
+            *
+		FROM dj_basics_attribute_value
+		where attribute_id= #{attributeId}
+		ORDER BY create_date desc
+	</select>
+
+    <!-- 删除对象 -->
+    <delete id="deleteById" parameterType="java.lang.String">
 		DELETE FROM dj_basics_attribute_value 
 		WHERE id=#{id}
 	</delete>
     <!-- 查询所有 -->
-	<select id="query" resultType="com.dangjia.acg.modle.attribute.AttributeValue">
+    <select id="query" resultType="com.dangjia.acg.modle.attribute.AttributeValue">
 		SELECT
-            id,
-            name,
-            attribute_id as attributeId,
-            introduction,
-            image,
-            create_date as createDate,
-            modify_date as modifyDate
+          *
 		FROM dj_basics_attribute_value
 		ORDER BY create_date desc
 	</select>
-	<!-- 批量插入数据 -->
-    <insert id="insertBatch" parameterType="java.util.List" >
+    <!-- 批量插入数据 -->
+    <insert id="insertBatch" parameterType="java.util.List">
         insert into dj_basics_attribute_value
-           (<include refid="all_columns" />)
+        (<include refid="all_columns"/>)
         values
         <foreach collection="list" item="attributeValue" index="index" separator=",">
             (
-              #{id}, #{name},#{attributeId}, #{introduction}, #{image},SYSDATE(),SYSDATE()
+            #{id}, #{name},#{attributeId}, #{introduction}, #{image},SYSDATE(),SYSDATE()
             )
         </foreach>
     </insert>
@@ -48,48 +75,56 @@
         update dj_basics_attribute_value set
         name =
         <foreach collection="list" item="attributeValue" index="index"
-            separator=" " open="case id" close="end">
+                 separator=" " open="case id" close="end">
             when #{attributeValue.id} then #{attributeValue.name}
         </foreach>
         ,attribute_id =
         <foreach collection="list" item="attributeValue" index="index"
-            separator=" " open="case id" close="end">
+                 separator=" " open="case id" close="end">
             when #{attributeValue.id} then #{attributeValue.attribute_id}
-        </foreach>        
+        </foreach>
         ,introduction =
         <foreach collection="list" item="attributeValue" index="index"
-            separator=" " open="case id" close="end">
+                 separator=" " open="case id" close="end">
             when #{attributeValue.id} then #{attributeValue.introduction}
         </foreach>
         ,image =
         <foreach collection="list" item="attributeValue" index="index"
-            separator=" " open="case id" close="end">
+                 separator=" " open="case id" close="end">
             when #{attributeValue.id} then #{attributeValue.image}
         </foreach>
         ,modify_date=SYSDATE()
         where id in
-        <foreach collection="list" item="attributeValue" index="index" 
-            separator="," open="(" close=")">
-             #{attributeValue.id}
+        <foreach collection="list" item="attributeValue" index="index"
+                 separator="," open="(" close=")">
+            #{attributeValue.id}
         </foreach>
     </update>
+
     <!-- 根据属性id查询所有属性选项 -->
+    <!--<select id="queryByAttributeId" resultMap="attributeValueResultMap">-->
     <select id="queryByAttributeId" resultType="com.dangjia.acg.modle.attribute.AttributeValue">
 		SELECT
-            id,
-            name,
-            attribute_id as attributeId,
-            introduction,
-            image,
-            create_date as createDate,
-            modify_date as modifyDate
+           *
 		FROM dj_basics_attribute_value
-		where attribute_id= #{attribute_id}
+		where attribute_id= #{attributeId}
 		ORDER BY create_date desc
 	</select>
-	<!-- 根据属性id删除所有属性选项 -->
+
+    <!-- 根据id查询属性选项对象 -->
+    <!--<select id="queryById" resultMap="attributeValueResultMap">-->
+    <select id="queryById" resultType="com.dangjia.acg.modle.attribute.AttributeValue">
+		SELECT
+		  *
+		FROM dj_basics_attribute_value
+		where
+		     id =#{id}
+		ORDER BY create_date desc
+	</select>
+
+    <!-- 根据属性id删除所有属性选项 -->
     <delete id="deleteByAttributeId" parameterType="java.lang.String">
 		delete FROM dj_basics_attribute_value
-		where attribute_id= #{attribute_id}
+		where attribute_id= #{attributeId}
 	</delete>
 </mapper>

@@ -16,13 +16,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         worker_type_id,
         have_money,
         every_money,
-        order_id,
         total_price,
         material_price,
         retention_money,
-        get_state,
         taked_money,
-        istest,
         discounts,
         payment,
         safe_price,
@@ -48,13 +45,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         worker_type_id as workerTypeId,
         have_money as haveMoney,
         every_money as everyMoney,
-        order_id as orderId,
         total_price as totalPrice,
         material_price as materialPrice,
         retention_money as retentionMoney,
-        get_state as getState,
         taked_money as takedMoney,
-        istest,
         discounts,
         payment,
         safe_price as safePrice,
@@ -67,13 +61,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         create_date as createDate,
         modify_date as modifyDate
     </sql>
+
+    <!--查询精算订单 -->
+    <select id="getByHouseIdAndWorkerTypeId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseWorkerOrder">
+        select
+        <include refid="new_columns" />
+        from dj_core_house_worker_order
+        where house_id = #{houseId}
+        and worker_type_id = #{workerTypeId}
+    </select>
+
     <!--根据工人id查询已支付未完工并默认的施工任务 -->
     <select id="getHouseWorkerOrder" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseWorkerOrder">
-       select
+        select
         <include refid="new_columns" />
-       from dj_core_house_worker_order
-       where house_flow_id = #{houseFlowId}
-       and worker_id= #{workerId}
+        from dj_core_house_worker_order
+        where house_flow_id = #{houseFlowId}
+        and worker_id= #{workerId}
     </select>
 </mapper>
 

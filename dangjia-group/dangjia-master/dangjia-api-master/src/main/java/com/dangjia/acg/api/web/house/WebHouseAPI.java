@@ -29,5 +29,5 @@ public interface WebHouseAPI {
 
     @PostMapping("web/house/startWork")
     @ApiOperation(value = "确认开工", notes = "确认开工")
-    ServerResponse startWork(@RequestParam("request") HttpServletRequest request,@RequestParam("house") HouseDTO houseDTO);
+    ServerResponse startWork(@RequestParam("request") HttpServletRequest request,@RequestParam("house") HouseDTO houseDTO,@RequestParam("members") String members,@RequestParam("prefixs") String prefixs);
 }

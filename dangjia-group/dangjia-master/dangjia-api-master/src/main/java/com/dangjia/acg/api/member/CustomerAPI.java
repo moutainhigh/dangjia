@@ -4,7 +4,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.member.Customer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;

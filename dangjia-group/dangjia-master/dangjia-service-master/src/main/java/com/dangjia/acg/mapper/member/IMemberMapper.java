@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.member;
 
 import com.dangjia.acg.modle.member.Member;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -15,9 +16,11 @@ import java.util.Map;
  */
 @Repository
 public interface IMemberMapper extends Mapper<Member> {
+    /**通过评价表的houseId获得大管家*/
+    Member getSupervisor(@Param("houseId") String houseId);
+
     Member getUser(Member member);
 
     List<Map<String,Object>> getMemberList();
-
 }
 

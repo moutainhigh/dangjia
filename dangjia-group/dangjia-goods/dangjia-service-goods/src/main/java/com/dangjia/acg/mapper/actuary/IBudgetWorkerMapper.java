@@ -18,11 +18,11 @@ import java.util.Map;
  */
 @Repository
 public interface IBudgetWorkerMapper extends Mapper<BudgetWorker> {
-	/**
-	 * 未删除人工精算
-	 */
-	List<BudgetWorker> getBudgetWorkerList(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 
+	/**支付时工种人工总价*/
+	Double getBudgetWorkerPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+	/**未支付人工精算*/
+	List<BudgetWorker> getBudgetWorkerList(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	/**查询所有精算*/
 	List<Map<String,Object>> getBudgetWorker();
 	/**根据风格查询所有精算*/

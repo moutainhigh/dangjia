@@ -33,7 +33,7 @@ public class HouseAccounts extends BaseEntity {
 	@Column(name = "state")
 	@Desc(value = "0为进账1为出账")
 	@ApiModelProperty("0为进账1为出账")
-	private int state;//
+	private Integer state;//
 
 	@Column(name = "pay_money")
 	@Desc(value = "每次数额")
@@ -65,8 +65,4 @@ public class HouseAccounts extends BaseEntity {
 	@ApiModelProperty("支付方式1微信, 2支付宝,3后台回调")
 	private String payment;//
 
-	@Column(name = "istest")
-	@Desc(value = "0不是，1 是测试")
-	@ApiModelProperty("0不是，1 是测试")
-	private int istest;//
 }

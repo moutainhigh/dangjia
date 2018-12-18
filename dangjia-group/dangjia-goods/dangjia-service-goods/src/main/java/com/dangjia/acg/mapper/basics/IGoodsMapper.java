@@ -1,8 +1,8 @@
 package com.dangjia.acg.mapper.basics;
 
+import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.BrandSeries;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.brand.GoodsSeries;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -31,4 +31,9 @@ public interface IGoodsMapper extends Mapper<Goods> {
 	//根据商品id和品牌id查询关联品牌系列 
 	List<BrandSeries> queryBrandByGidAndBid(@Param("goodsId") String goodsId, @Param("brandId") String brandId);
 	List<Goods> queryByCategoryId(@Param("categoryId")String categoryId);
+	List<Goods> queryRepairGoods(@Param("name")String name,@Param("categoryId")String categoryId);
+	List<Goods> queryGoodsList(@Param("categoryId")String categoryId,@Param("name")String name);
+
+	//查询某个分类的商品 模糊name（如果categoryId 为null，查询全部材料商品 ）
+	List<Goods> queryGoodsListByCategoryLikeName(@Param("categoryId")String categoryId,@Param("name")String name);
 }

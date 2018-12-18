@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,6 +18,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_design_house_design_image")
 @ApiModel(description = "设计图与房子关联")
+@FieldNameConstants(prefix = "")
 public class HouseDesignImage extends BaseEntity {
 
 	@Column(name = "house_id")
@@ -42,5 +44,5 @@ public class HouseDesignImage extends BaseEntity {
 	@Column(name = "sell")
 	@Desc(value = "额外付费图 1是, 0不是")
 	@ApiModelProperty("额外付费图 1是, 0不是")
-	private int sell;//
+	private Integer sell;//
 }

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.worker.IRewardPunishCorrelationMapper">
+    <resultMap id="findCorrelationPerms" type="com.dangjia.acg.dto.worker.RewardPunishCorrelationDTO" >
+        <id column="id" property="id" />
+        <result column="create_date" property="createDate"/>
+        <result column="modify_date" property="modifyDate"/>
+        <result column="data_status" property="dataStatus"/>
+        <result column="name" property="name"/>
+        <result column="content" property="content"/>
+        <result column="type" property="type"/>
+        <result column="state" property="state"/>
+        <collection property="conditionList" ofType="com.dangjia.acg.modle.worker.RewardPunishCondition">
+            <id column="mid" property="id" />
+            <result column="mreward_punish_correlation_id" property="rewardPunishCorrelationId"/>
+            <result column="mname" property="name"/>
+            <result column="mtype" property="type"/>
+            <result column="mquantity" property="quantity"/>
+            <result column="munits" property="units"/>
+            <result column="mstart_time" property="startTime"/>
+            <result column="mend_time" property="endTime"/>
+        </collection>
+    </resultMap>
+    <sql id="new_columns">
+        id,
+        name,
+        content,
+        type,
+        state,
+        create_date as createDate,
+        modify_date as modifyDate,
+        data_status as dataStatus
+    </sql>
+    <!--查询奖罚条件-->
+    <select id="queryCorrelation" resultMap="findCorrelationPerms">
+        SELECT
+        r.id,
+        r.create_date,
+        r.modify_date,
+        r.data_status,
+        r.`name`,
+        r.content,
+        r.type,
+        r.state,
+        m.`id` mid,
+        m.`reward_punish_correlation_id` mreward_punish_correlation_id,
+        m.`name` mname,
+        m.type mtype,
+        m.quantity mquantity,
+        m.units munits,
+        m.start_time mstart_time,
+        m.end_time mend_time
+        FROM dj_worker_reward_punish_correlation r
+        INNER JOIN dj_worker_reward_punish_condition m ON r.id = m.reward_punish_correlation_id
+        where r.data_status=0
+        <if test="name!=null and name!=''">
+            AND r.name LIKE CONCAT('%',#{name},'%')
+        </if>
+        <if test="state!=null">
+            AND r.state=#{state}
+        </if>
+    </select>
+</mapper>
+

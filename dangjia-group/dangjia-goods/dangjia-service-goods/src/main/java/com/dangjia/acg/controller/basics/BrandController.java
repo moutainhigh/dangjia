@@ -10,6 +10,8 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 
  * @类 名： BrandController
@@ -27,7 +29,7 @@ public class BrandController implements BrandAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<Brand> selectBrandById(String brandId){
+    public ServerResponse<Brand> selectBrandById(HttpServletRequest request,String brandId){
     	return brandService.select(brandId);
     }
 
@@ -39,7 +41,7 @@ public class BrandController implements BrandAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> selectBrandByName(PageDTO pageDTO, String name){
+    public ServerResponse<PageInfo> selectBrandByName(HttpServletRequest request,PageDTO pageDTO, String name){
     	return brandService.getBrandByName(pageDTO.getPageNum(),pageDTO.getPageSize(),name);
     }
     /**
@@ -48,7 +50,7 @@ public class BrandController implements BrandAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> getAllBrand(PageDTO pageDTO){
+    public ServerResponse<PageInfo> getAllBrand(HttpServletRequest request,PageDTO pageDTO){
     	return  brandService.getAllBrand(pageDTO.getPageNum(),pageDTO.getPageSize());
     	
     }
@@ -58,7 +60,7 @@ public class BrandController implements BrandAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateBrand(String id,String name,String brandSeriesList){
+    public ServerResponse updateBrand(HttpServletRequest request,String id,String name,String brandSeriesList){
     	return brandService.update(id,name,brandSeriesList);
     	
     }
@@ -68,7 +70,7 @@ public class BrandController implements BrandAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertBrand(String brandSeriesList,String name){
+    public ServerResponse insertBrand(HttpServletRequest request,String brandSeriesList,String name){
     	return brandService.insert(brandSeriesList,name);
     	
     }
@@ -78,7 +80,7 @@ public class BrandController implements BrandAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse deleteBrand(String id){
+    public ServerResponse deleteBrand(HttpServletRequest request,String id){
         return brandService.deleteBrand(id);
     }
 }

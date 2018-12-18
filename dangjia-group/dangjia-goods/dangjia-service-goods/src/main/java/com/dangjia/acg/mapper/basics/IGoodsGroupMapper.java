@@ -16,7 +16,10 @@ public interface IGoodsGroupMapper extends Mapper<GoodsGroup> {
 	 * 获取所有关联组
 	 */
 	List<GoodsGroup> getAllList(@Param("name") String name,@Param("state") Integer state);
-	
+
+	List<GoodsGroup> selectByName(@Param("name") String name);
+
+
 	void addGoodsGroup(GoodsGroup goodsGroup);
 
 	List<Map<String, Object>> getParentTopList();

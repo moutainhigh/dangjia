@@ -22,7 +22,7 @@ import javax.persistence.Table;
 public class WorkerTechnology extends BaseEntity {
 
     @Column(name = "worker_goods_id")
-    private String workerGoodsId;//人工商品id
+    private String workerGoodsId;//人工商品id  服务商品productId
 
     @Column(name = "technology_id")
     private String technologyId;//工艺说明id

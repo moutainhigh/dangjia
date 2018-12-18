@@ -23,10 +23,10 @@ public class BaseService {
     @Value("${spring.data.jmessage.zhuangxiu.masterSecret}")
     private String zx_masterSecret;
 
-    @Value("${spring.data.jmessage.zhuangxiu.appkey}")
+    @Value("${spring.data.jmessage.gongjiang.appkey}")
     private String gj_appkey;
 
-    @Value("${spring.data.jmessage.zhuangxiu.masterSecret}")
+    @Value("${spring.data.jmessage.gongjiang.masterSecret}")
     private String gj_masterSecret;
 
 

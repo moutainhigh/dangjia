@@ -5,7 +5,6 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.core.HouseWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -20,28 +19,38 @@ public class HouseWorkerController implements HouseWorkerAPI {
     private HouseWorkerService houseWorkerService;
 
     /**
+     *  根据工人id查询所有房子任务
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryWorkerHouse(String userToken){
+        return houseWorkerService.queryWorkerHouse(userToken);
+    }
+    /**
      * 抢单
      */
     @Override
     @ApiMethod
-    public ServerResponse setWorkerGrab(String userToken,String houseFlowId){
-        return houseWorkerService.setWorkerGrab(userToken,houseFlowId);
+    public ServerResponse setWorkerGrab(String userToken, String cityId, String houseFlowId) {
+        return houseWorkerService.setWorkerGrab(userToken, cityId, houseFlowId);
     }
+
     /**
      * 业主换人
      */
     @Override
     @ApiMethod
-    public ServerResponse setChangeWorker(String userToken,String houseWorkerId){
-        return houseWorkerService.setChangeWorker(userToken,houseWorkerId);
+    public ServerResponse setChangeWorker(String userToken, String houseWorkerId) {
+        return houseWorkerService.setChangeWorker(userToken, houseWorkerId);
     }
+
     /**
      * 根据工人id查询自己的施工界面
      */
     @Override
     @ApiMethod
-    public ServerResponse getConstructionByWorkerId(String userToken ){
-        return houseWorkerService.getConstructionByWorkerId(userToken);
+    public ServerResponse getConstructionByWorkerId(String userToken, String cityId) {
+        return houseWorkerService.getConstructionByWorkerId(userToken, cityId);
     }
 
     /**
@@ -49,32 +58,35 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getMyHomePage(String userToken ){
-        return houseWorkerService.getMyHomePage(userToken);
+    public ServerResponse getMyHomePage(String userToken, String cityId) {
+        return houseWorkerService.getMyHomePage(userToken, cityId);
     }
+
     /**
      * 提现列表
      */
     @Override
     @ApiMethod
-    public ServerResponse getExtractMoney(String userToken){
+    public ServerResponse getExtractMoney(String userToken) {
         return houseWorkerService.getExtractMoney(userToken);
     }
+
     /**
      * 提现详情
      */
     @Override
     @ApiMethod
-    public ServerResponse getExtractMoneyDetail(String userToken,String workerDetailId){
-        return houseWorkerService.getExtractMoneyDetail(userToken,workerDetailId);
+    public ServerResponse getExtractMoneyDetail(String userToken, String workerDetailId) {
+        return houseWorkerService.getExtractMoneyDetail(userToken, workerDetailId);
     }
+
     /**
      * 获取验提现证码
      */
     @Override
     @ApiMethod
-    public ServerResponse getPaycode(String userToken, String phone){
-        return houseWorkerService.getPaycode(userToken,phone);
+    public ServerResponse getPaycode(String userToken, String phone) {
+        return houseWorkerService.getPaycode(userToken, phone);
     }
 
     /**
@@ -82,12 +94,13 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse checkFinish(String userToken, String smscode,String money){
-        return houseWorkerService.checkFinish(userToken,smscode,money);
+    public ServerResponse checkFinish(String userToken, String smscode, String money) {
+        return houseWorkerService.checkFinish(userToken, smscode, money);
     }
 
     /**
      * 提交审核、停工
+     *
      * @param userToken
      * @param applyType
      * @param houseFlowId
@@ -99,14 +112,14 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setHouseFlowApply(String userToken,Integer applyType,String houseFlowId,Integer  suspendDay,
-                                            String applyDec ,String imageList ,String houseFlowId2){
-       try {
-           return houseWorkerService.setHouseFlowApply(userToken, applyType, houseFlowId, suspendDay, applyDec, imageList, houseFlowId2);
-       }catch (Exception e){
-           e.printStackTrace();
-           return ServerResponse.createByErrorMessage("提交审核失败,图片数组转换失败");
-       }
+    public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId, Integer suspendDay,
+                                            String applyDec, String imageList, String houseFlowId2) {
+        try {
+            return houseWorkerService.setHouseFlowApply(userToken, applyType, houseFlowId, suspendDay, applyDec, imageList, houseFlowId2);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("提交审核失败,图片数组转换失败");
+        }
     }
 
     /**
@@ -114,8 +127,8 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getAdvanceInAdvance(String userToken, String houseFlowId){
-        return houseWorkerService.getAdvanceInAdvance(userToken,houseFlowId);
+    public ServerResponse getAdvanceInAdvance(String userToken, String houseFlowId) {
+        return houseWorkerService.getAdvanceInAdvance(userToken, houseFlowId);
     }
 
     /**
@@ -123,7 +136,7 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getHouseFlowList(String userToken){
+    public ServerResponse getHouseFlowList(String userToken) {
         return houseWorkerService.getHouseFlowList(userToken);
     }
 
@@ -132,27 +145,8 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setSwitchHouseFlow(String userToken,String houseFlowId){
-        return houseWorkerService.setSwitchHouseFlow(userToken,houseFlowId);
-    }
-
-    /**
-     * 校验交底二维码
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse telCode(String userToken,String code){
-        return houseWorkerService.telCode(userToken,code);
-    }
-
-    /**
-     * 校验巡查二维码
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse scanCode(String userToken,String code,
-                                       String longitude,String latitude){
-        return houseWorkerService.scanCode(userToken,code,longitude,latitude);
+    public ServerResponse setSwitchHouseFlow(String userToken, String houseFlowId) {
+        return houseWorkerService.setSwitchHouseFlow(userToken, houseFlowId);
     }
 
     /**
@@ -160,17 +154,8 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setSupervisorApply(String userToken,String houseFlowId){
-        return houseWorkerService.setSupervisorApply(userToken,houseFlowId);
-    }
-
-    /**
-     * 进程详情
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse getCourse(String userToken,String houseFlowId){
-        return houseWorkerService.getCourse(userToken,houseFlowId);
+    public ServerResponse setSupervisorApply(String userToken, String houseFlowId) {
+        return houseWorkerService.setSupervisorApply(userToken, houseFlowId);
     }
 
     /*
@@ -178,16 +163,8 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getWithdrawalInformation(String userToken){
+    public ServerResponse getWithdrawalInformation(String userToken) {
         return houseWorkerService.getWithdrawalInformation(userToken);
     }
 
-    /*
-     * 根据工匠id和houseFlowid查询通讯录
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse getMailList(String userToken,String houseFlowId){
-        return houseWorkerService.getMailList(userToken,houseFlowId);
-    }
 }

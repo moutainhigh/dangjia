@@ -147,4 +147,33 @@ public interface MessageAPI {
             @ApiParam(name ="appType",value = "应用类型（zx=当家装修，gj=当家工匠）")@RequestParam("appType") String appType,
             @ApiParam(name ="username",value = "发送此msg的用户名")@RequestParam("username") String username,
             @ApiParam(name ="msgid",value = "消息msgid")@RequestParam("msgid") int msgid) ;
+
+    /**
+     * 系统通告，通知所有人
+     * @param appType  应用类型（zx=当家装修，gj=当家工匠）
+     * @param title 通知标题
+     * @param alert 通知内容
+     */
+    @RequestMapping(value = "sendSysPush", method = RequestMethod.POST)
+    @ApiOperation(value = "系统通告，通知所有人", notes = "系统通告，通知所有人")
+    void sendSysPush(
+            @ApiParam(name ="appType",value = "应用类型（zx=当家装修，gj=当家工匠）")@RequestParam("appType")String appType,
+            @ApiParam(name ="title",value = "通知标题")@RequestParam("title")String title,
+            @ApiParam(name ="alert",value = "通知内容")@RequestParam("alert")String alert,
+            @ApiParam(name ="speak",value = "语音内容")@RequestParam("speak")String speak);
+    /**
+     * 系统通告，通知指定注册ID
+     * @param appType  应用类型（zx=当家装修，gj=当家工匠）
+     * @param memberId memberID数组集合
+     * @param title 通知标题
+     * @param alert 通知内容
+     */
+    @RequestMapping(value = "sendMemberIdPush", method = RequestMethod.POST)
+    @ApiOperation(value = "系统通告，通知指定注册ID", notes = "系统通告，通知指定注册ID")
+    void sendMemberIdPush(
+            @ApiParam(name ="appType",value = "应用类型（zx=当家装修，gj=当家工匠）")@RequestParam("appType")String appType,
+            @ApiParam(name ="memberId",value = "memberID数组集合")@RequestParam("memberId")String[] memberId,
+            @ApiParam(name ="title",value = "通知标题")@RequestParam("title")String title,
+            @ApiParam(name ="alert",value = "通知内容")@RequestParam("alert")String alert,
+            @ApiParam(name ="speak",value = "语音内容")@RequestParam("speak")String speak);
 }

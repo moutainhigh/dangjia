@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,6 +20,7 @@ import java.util.Date;
 @Entity
 @Table(name = "dj_safe_worker_type_safe_order")
 @ApiModel(description = "保险订单")
+@FieldNameConstants(prefix = "")
 public class WorkerTypeSafeOrder extends BaseEntity {
 
 	@Column(name = "business_order_number")
@@ -59,17 +61,13 @@ public class WorkerTypeSafeOrder extends BaseEntity {
 	@Column(name = "state")
 	@Desc(value = "支付状态0未支付1已支付")
 	@ApiModelProperty("支付状态0未支付1已支付")
-	private int state;
+	private Integer state;
 
 	@Column(name = "price")
 	@Desc(value = "价格")
 	@ApiModelProperty("价格")
 	private BigDecimal price;
 
-	@Column(name = "istest")
-	@Desc(value = "是否测试1测试,0不是测试默认为0")
-	@ApiModelProperty("是否测试1测试,0不是测试默认为0")
-	private int istest;
 
 	@Column(name = "shop_date")
 	@Desc(value = "购买时间")

@@ -7,7 +7,6 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.config.IConfigAppHistoryMapper;
 import com.dangjia.acg.mapper.config.IConfigAppMapper;
-import com.dangjia.acg.modle.config.ConfigAdvert;
 import com.dangjia.acg.modle.config.ConfigApp;
 import com.dangjia.acg.modle.config.ConfigAppHistory;
 import com.github.pagehelper.PageHelper;

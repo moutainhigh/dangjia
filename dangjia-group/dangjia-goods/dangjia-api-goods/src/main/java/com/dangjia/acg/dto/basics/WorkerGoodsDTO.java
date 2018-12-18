@@ -21,13 +21,12 @@ public class WorkerGoodsDTO {
     private String id;
     @ApiModelProperty("name")
     private String name;
-    @ApiModelProperty("workergoodssn")
-    private String workergoodssn;
+    private String workerGoodsSn;
     @ApiModelProperty("image")
     private String image;
-    @ApiModelProperty("unitId")
+    @ApiModelProperty("imageUrl")
+    private String imageUrl;
     private String unitId;
-    @ApiModelProperty("unitName")
     private String unitName;
     @ApiModelProperty("price")
     private Double price;
@@ -37,6 +36,8 @@ public class WorkerGoodsDTO {
     private String workExplain;
     @ApiModelProperty("workerDec")
     private String workerDec;
+    @ApiModelProperty("workerDecUrl")
+    private String workerDecUrl;
     @ApiModelProperty("workerStandard")
     private String workerStandard;
     @ApiModelProperty("workerTypeId")

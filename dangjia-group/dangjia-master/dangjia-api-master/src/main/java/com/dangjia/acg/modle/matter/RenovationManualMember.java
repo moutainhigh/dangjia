@@ -28,12 +28,7 @@ public class RenovationManualMember extends BaseEntity {
 	@Column(name = "state")
 	@Desc(value = "状态0:未勾选；1:已勾选")
 	@ApiModelProperty("状态0:未勾选；1:已勾选")
-	private int state;//
-
-	@Column(name = "house_id")
-	@Desc(value = "房子id")
-	@ApiModelProperty("房子id")
-	private String houseId;//
+	private Integer state;//
 
 	@Column(name = "member_id")
 	@Desc(value = "业主id")

@@ -5,110 +5,89 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
+import org.apache.commons.lang.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.math.BigDecimal;
 
 @Data
 @Entity
 @Table(name = "dj_deliver_order_split_item")
-@ApiModel(description = "拆分单的子项")
+@ApiModel(description = "要货单明细")
+@FieldNameConstants(prefix = "")
 public class OrderSplitItem extends BaseEntity {
-
-	@Column(name = "shipping_status")
-	@Desc(value = "配送状态（刚拆分、提交给供应商,已发货,已收货,已发货退货,取消,生成拆货单）0,1,2,3,4,5,6")
-	@ApiModelProperty("配送状态（刚拆分、提交给供应商,已发货,已收货,已发货退货,取消,生成拆货单）0,1,2,3,4,5,6")
-	private int shippingStatus;//
-
-	@Column(name = "state")
-	@Desc(value = "2业主未发退货")
-	@ApiModelProperty("2业主未发退货")
-	private int state;//
-
-	@Column(name = "order_id")
-	@Desc(value = "总材料单id")
-	@ApiModelProperty("总材料单id")
-	private String orderId;//
-
-	@Column(name = "order_item_id")
-	@Desc(value = "对应子项id")
-	@ApiModelProperty("对应子项id")
-	private String orderItemId;//
 
 	@Column(name = "order_split_id")
 	@Desc(value = "拆分单id")
 	@ApiModelProperty("拆分单id")
-	private String orderSplitId;//
+	private String orderSplitId;
 
-	@Column(name = "house_id")
-	@Desc(value = "房子ID")
-	@ApiModelProperty("房子ID")
-	private String houseId;//houseid
+	@Column(name = "warehouse_id")
+	@Desc(value = "仓库子项id")
+	@ApiModelProperty("仓库子项id")
+	private String warehouseId;
 
-	@Column(name = "goods_sn")
-	@Desc(value = "商品编号")
-	@ApiModelProperty("商品编号")
-	private String goodsSn;//
+	@Column(name = "product_id")
+	@Desc(value = "货品id")
+	@ApiModelProperty("货品id")
+	private String productId;
 
 	@Column(name = "product_sn")
-	@Desc(value = "货号")
-	@ApiModelProperty("货号")
-	private String productSn;//
+	@Desc(value = "货品编号")
+	@ApiModelProperty("货品编号")
+	private String productSn;
 
-	@Column(name = "product_price")
-	@Desc(value = "商品价格")
-	@ApiModelProperty("商品价格")
-	private BigDecimal productPrice;//
+	@Column(name = "product_name")
+	@Desc(value = "货品名称")
+	@ApiModelProperty("货品名称")
+	private String productName;
+
+	@Column(name = "product_nick_name")
+	private String productNickName;//货品昵称
+
+	@Column(name = "price")
+	private Double price;// 销售价
 
 	@Column(name = "cost")
-	@Desc(value = "成本价")
-	@ApiModelProperty("成本价")
-	private BigDecimal cost;//
+	private Double cost;// 成本价
 
-	@Column(name = "name")
-	@Desc(value = "名称")
-	@ApiModelProperty("名称")
-	private String name;//
+	@Column(name = "shop_count")
+	private Double shopCount;//购买总数
 
-	@Column(name = "meta_description")
-	@Desc(value = "精算 备注")
-	@ApiModelProperty("精算 备注")
-	private String metaDescription;//
+	@Column(name = "ask_count")
+	private Double askCount;//已要总数
 
-	@Column(name = "unit")
-	@Desc(value = "单位")
-	@ApiModelProperty("单位")
-	private String unit;//
+	@Column(name = "num")
+	private Double num;//本次发货数量
 
-	@Column(name = "brand")
-	@Desc(value = "品牌")
-	@ApiModelProperty("品牌")
-	private String brand;//
+	@Column(name = "receive")
+	private Double receive;//收货数量
 
-	@Column(name = "buy_num")
-	@Desc(value = "购买数量")
-	@ApiModelProperty("购买数量")
-	private Double buyNum;//
+	@Column(name = "unit_name")
+	private String unitName;//单位
 
-	@Column(name = "ship_num")
-	@Desc(value = "已发数量")
-	@ApiModelProperty("已发数量")
-	private Double shipNum;//
+	@Column(name = "total_price")
+	private Double totalPrice; //总价
 
-	@Column(name = "surplus_num")
-	@Desc(value = "剩余数量")
-	@ApiModelProperty("剩余数量")
-	private Double surplusNum;//
+	@Column(name = "product_type")
+	private Integer productType; //0：材料；1：服务
 
-	@Column(name = "this_ship_num")
-	@Desc(value = "本次发货数量")
-	@ApiModelProperty("本次发货数量")
-	private Double thisShipNum;//
+	@Column(name = "category_id")
+	private String categoryId;//分类id
 
-	@Column(name = "this_surplus_num")
-	@Desc(value = "本次剩余数量")
-	@ApiModelProperty("本次剩余数量")
-	private Double thisSurplusNum;//
+	@Column(name = "image")
+	private String image;//图片
+
+	@Column(name = "house_id")
+	private String houseId;//房子id
+
+	@Column(name = "split_deliver_id")
+	private String splitDeliverId;//发货单id
+
+	public void initPath(String address){
+		this.image = StringUtils.isEmpty(this.image)?null:address+this.image;
+	}
+
 }

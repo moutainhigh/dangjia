@@ -7,8 +7,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 
@@ -27,7 +28,7 @@ public interface UnitAPI {
      */
     @PostMapping("/basics/unit/getAllUnit")
     @ApiOperation(value = "查询所有商品单位", notes = "查询所有商品单位")
-    public ServerResponse<PageInfo> getAllUnit(@RequestParam("pageDTO") PageDTO pageDTO);
+    public ServerResponse<PageInfo> getAllUnit(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO);
     
     /**
      * 修改商品单位
@@ -37,7 +38,7 @@ public interface UnitAPI {
      */
     @PostMapping("/basics/unit/updateUnit")
     @ApiOperation(value = "修改商品单位", notes = "修改商品单位")
-    public ServerResponse updateUnit(@RequestParam("unitId") String unitId, @RequestParam("unitName") String unitName);
+    public ServerResponse updateUnit(@RequestParam("request") HttpServletRequest request,@RequestParam("unitId") String unitId, @RequestParam("unitName") String unitName);
     /**
      * 新增商品单位
      * @param unitName 单位名称
@@ -45,7 +46,7 @@ public interface UnitAPI {
      */
     @PostMapping("/basics/unit/insertUnit")
     @ApiOperation(value = "新增商品单位", notes = "新增商品单位")
-    public ServerResponse insertUnit(@RequestParam("unitName") String unitName);
+    public ServerResponse insertUnit(@RequestParam("request") HttpServletRequest request,@RequestParam("unitName") String unitName);
 
     /**
      * 根据id查询单位对象
@@ -54,7 +55,7 @@ public interface UnitAPI {
      */
     @PostMapping("/basics/unit/selectunitById")
     @ApiOperation(value = "根据id查询单位对象", notes = "根据id查询单位对象")
-    public ServerResponse selectunitById(@RequestParam("unitId") String unitId);
+    public ServerResponse selectunitById(@RequestParam("request") HttpServletRequest request,@RequestParam("unitId") String unitId);
     /**
      * 根据ID删除商品单位
      * @param unitId
@@ -62,5 +63,5 @@ public interface UnitAPI {
      */
     @PostMapping("/basics/unit/deleteById")
     @ApiOperation(value = "根据ID删除商品单位", notes = "根据ID删除商品单位")
-    public ServerResponse deleteById(@RequestParam("unitId") String unitId);
+    public ServerResponse deleteById(@RequestParam("request") HttpServletRequest request,@RequestParam("unitId") String unitId);
 }

@@ -7,6 +7,7 @@
         worker_goods_sn,
         image,
         unit_id,
+        unit_name,
         price,
         sales,
         work_explain,
@@ -25,6 +26,7 @@
         worker_goods_sn as workerGoodsSn,
         image,
         unit_id as unitId,
+        unit_name as unitName,
         price,
         sales,
         work_explain as workExplain,
@@ -56,24 +58,24 @@
     </select>
     <!--每工种未删除 或 已支付工钱-->
     <select id="getWorkertoCheck" resultType="java.lang.Double">
-        select sum(wg.price*abm.shopcount)
+        select sum(wg.price*abw.shop_count)
         from dj_basics_worker_goods wg,dj_actuary_budget_worker abw
         where 1=1
-        and wg.id = abw.workergoods_id
+        and wg.id = abw.worker_goods_id
         and abw.house_id=#{houseId}
-        and abw.deletestate!=1
-        and abw.deletestate!=2
-        and abw.houseflow_id=#{houseFlowId}
+        and abw.delete_state!=1
+        and abw.delete_state!=2
+        and abw.house_flow_id=#{houseFlowId}
     </select>
-    <!--每工种未删除 或 已支付工钱-->
+    <!--从精算表查每工种已支付工钱-->
     <select id="getPayedWorker" resultType="java.lang.Double">
-        select sum(wg.price*abm.shopcount)
+        select sum(wg.price*abw.shop_count)
         from dj_basics_worker_goods wg,dj_actuary_budget_worker abw
         where 1=1
-        and wg.id = abw.workergoods_id
+        and wg.id = abw.worker_goods_id
         and abw.house_id=#{houseId}
-        and abw.deletestate =3
-        and abw.houseflow_id=#{houseFlowId}
+        and abw.delete_state =3
+        and abw.house_flow_id=#{houseFlowId}
     </select>
     <!-- 根据名称模糊查询 -->
     <select id="queryByName" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
@@ -83,6 +85,7 @@
         worker_goods_sn as workerGoodsSn,
         image,
         unit_id as unitId,
+        unit_name as unitName,
         price,
         sales,
         work_explain as workExplain,
@@ -94,10 +97,133 @@
         modify_date as modifyDate
         from dj_basics_worker_goods
         where 1=1
-        <if test="name!=null">
+        <if test="name!=null and workerTypeId!=''">
             and
             name LIKE CONCAT('%',#{name},'%')
         </if>
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            AND
+            w.worker_type_id =#{workerTypeId}
+        </if>
         ORDER BY create_date desc
+    </select>
+
+    <!-- 根据商品编号查询 -->
+    <select id="selectByWorkerGoodsSn" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
+        SELECT
+        id,
+        name,
+        worker_goods_sn as workerGoodsSn,
+        image,
+        unit_id as unitId,
+        unit_name as unitName,
+        price,
+        sales,
+        work_explain as workExplain,
+        worker_dec as workerDec,
+        worker_standard as workerStandard,
+        worker_type_id as workerTypeId,
+        show_goods as showGoods,
+        create_date as createDate,
+        modify_date as modifyDate
+        from dj_basics_worker_goods as w
+        where 1=1
+        <if test="workerGoodsSn!=null and workerGoodsSn!=''">
+            and
+            w.worker_goods_sn =#{workerGoodsSn}
+        </if>
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            AND
+            w.worker_type_id =#{workerTypeId}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
+    <!-- 根据名称查询 -->
+    <select id="selectByName" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
+        SELECT
+        id,
+        name,
+        worker_goods_sn as workerGoodsSn,
+        image,
+        unit_id as unitId,
+        unit_name as unitName,
+        price,
+        sales,
+        work_explain as workExplain,
+        worker_dec as workerDec,
+        worker_standard as workerStandard,
+        worker_type_id as workerTypeId,
+        show_goods as showGoods,
+        create_date as createDate,
+        modify_date as modifyDate
+        from dj_basics_worker_goods  as w
+        where 1=1
+        <if test="name!=null and name!=''">
+            and
+            w.name =#{name}
+        </if>
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            AND
+            w.worker_type_id =#{workerTypeId}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
+    <!-- 根据id查询 -->
+    <select id="queryById" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
+        SELECT
+        id,
+        name,
+        worker_goods_sn as workerGoodsSn,
+        image,
+        unit_id as unitId,
+        unit_name as unitName,
+        price,
+        sales,
+        work_explain as workExplain,
+        worker_dec as workerDec,
+        worker_standard as workerStandard,
+        worker_type_id as workerTypeId,
+        show_goods as showGoods,
+        create_date as createDate,
+        modify_date as modifyDate
+        from dj_basics_worker_goods
+        where
+         id =#{id}
+        ORDER BY create_date desc
+    </select>
+
+    <!--补货查询精算内人工商品-->
+    <select id="queryRepairBudgetWorker" resultType="com.dangjia.acg.modle.basics.WorkerGoods">
+        select
+        w.id,
+        w.name,
+        w.worker_goods_sn as workerGoodsSn,
+        w.image,
+        w.unit_id as unitId,
+        w.unit_name as unitName,
+        w.price,
+        w.sales,
+        w.work_explain as workExplain,
+        w.worker_dec as workerDec,
+        w.worker_standard as workerStandard,
+        w.worker_type_id as workerTypeId,
+        w.show_goods as showGoods,
+        w.create_date as createDate,
+        w.modify_date as modifyDate
+        from dj_actuary_budget_worker abw ,dj_basics_worker_goods w
+        WHERE  abw.worker_goods_id =w.id
+        and abw.delete_state!=1
+        and abw.steta=1
+        and abw.house_id =#{houseId}
+        <if test="name!=null and name!=''">
+            AND
+            abw.name LIKE CONCAT('%',#{name},'%')
+        </if>
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            AND
+            w.worker_type_id =#{workerTypeId}
+        </if>
     </select>
 </mapper>

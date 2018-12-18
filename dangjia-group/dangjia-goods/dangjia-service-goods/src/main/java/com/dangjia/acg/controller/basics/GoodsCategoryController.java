@@ -4,12 +4,13 @@ import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.service.basics.GoodsAttributeService;
+import com.dangjia.acg.service.basics.AttributeService;
 import com.dangjia.acg.service.basics.GoodsCategoryService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
    * @类 名： GoodsCategoryController
@@ -25,14 +26,14 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
     @Autowired
     private GoodsCategoryService goodsCategoryService;
     @Autowired
-    private GoodsAttributeService goodsAttributeService;
+    private AttributeService goodsAttributeService;
 
     /**新增商品类别
      * @Title: getProduct 
      */
     @Override
     @ApiMethod
-    public ServerResponse insertGoodsCategory(String name, String parentID, String parentTop){
+    public ServerResponse insertGoodsCategory(HttpServletRequest request, String name, String parentID, String parentTop){
         return goodsCategoryService.insertGoodsCategory(name,parentID,parentTop);
     }
     /**修改商品类别
@@ -40,7 +41,7 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse doModifyGoodsCategory(String id,String name,String parentID,String parentTop){
+    public ServerResponse doModifyGoodsCategory(HttpServletRequest request,String id,String name,String parentID,String parentTop){
         return goodsCategoryService.doModifyGoodsCategory(id,name,parentID,parentTop);
     }
     /**查询商品类别列表
@@ -48,7 +49,7 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse  queryGoodsCategory( String parentId ){
+    public ServerResponse  queryGoodsCategory(HttpServletRequest request, String parentId ){
         return goodsCategoryService.queryGoodsCategory(parentId);
     }
     
@@ -57,7 +58,7 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo>  queryGoodsAttribute(PageDTO pageDTO,String goodsCategoryId){
+    public ServerResponse<PageInfo>  queryGoodsAttribute(HttpServletRequest request,PageDTO pageDTO,String goodsCategoryId){
         return goodsAttributeService.queryGoodsAttribute(pageDTO.getPageNum(),pageDTO.getPageSize(),goodsCategoryId);
     }
     
@@ -66,7 +67,7 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo>  queryGoodsAttributelikeName(PageDTO pageDTO,String name){
+    public ServerResponse<PageInfo>  queryGoodsAttributelikeName(HttpServletRequest request,PageDTO pageDTO,String name){
         return goodsAttributeService.queryGoodsAttributelikeName(pageDTO.getPageNum(),pageDTO.getPageSize(),name);
     }
     
@@ -75,7 +76,7 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryAttributeValue(String goodsAttributeId){
+    public ServerResponse queryAttributeValue(HttpServletRequest request,String goodsAttributeId){
         return goodsAttributeService.queryAttributeValue(goodsAttributeId);
     }
     
@@ -84,7 +85,7 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertGoodsAttribute(String goodsCategoryId,String attributeName,Integer type,String jsonStr){
+    public ServerResponse insertGoodsAttribute(HttpServletRequest request,String goodsCategoryId,String attributeName,Integer type,String jsonStr){
         return goodsAttributeService.insertGoodsAttribute(goodsCategoryId,attributeName,type,jsonStr);
     }
     
@@ -93,7 +94,7 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse doModifyGoodsAttribute(String attributeId,String attributeName,Integer type,String jsonStr){
+    public ServerResponse doModifyGoodsAttribute(HttpServletRequest request,String attributeId,String attributeName,Integer type,String jsonStr){
         return goodsAttributeService.doModifyGoodsAttribute(attributeId,attributeName,type,jsonStr);
     }
     
@@ -102,7 +103,7 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse deleteGoodsAttribute(String goodsAttributeId){
+    public ServerResponse deleteGoodsAttribute(HttpServletRequest request,String goodsAttributeId){
         return goodsAttributeService.deleteGoodsAttribute(goodsAttributeId);
     }
     
@@ -111,7 +112,7 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse deleteByAttributeId(String attributeValueId){
+    public ServerResponse deleteByAttributeId(HttpServletRequest request,String attributeValueId){
         return goodsAttributeService.deleteByAttributeId(attributeValueId);
     }
 
@@ -120,7 +121,7 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse deleteGoodsCategory(String id){
+    public ServerResponse deleteGoodsCategory(HttpServletRequest request,String id){
         return goodsCategoryService.deleteGoodsCategory(id);
     }
 
@@ -129,7 +130,17 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryAttributeListById(String goodsCategoryId){
+    public ServerResponse queryAttributeListById(HttpServletRequest request,String goodsCategoryId){
         return goodsCategoryService.queryAttributeListById(goodsCategoryId);
+    }
+
+    /**
+     * 查询两级商品分类
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse  queryGoodsCategoryTwo(HttpServletRequest request) {
+        return goodsCategoryService.queryGoodsCategoryTwo();
     }
 }

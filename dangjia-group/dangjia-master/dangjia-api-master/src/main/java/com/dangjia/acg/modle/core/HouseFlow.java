@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +19,7 @@ import java.util.Date;
 @Entity
 @Table(name = "dj_core_house_flow")
 @ApiModel(description = "工序")
+@FieldNameConstants(prefix = "")
 public class HouseFlow extends BaseEntity {
 
     @Column(name = "city_id")
@@ -33,7 +35,7 @@ public class HouseFlow extends BaseEntity {
     @Column(name = "worker_type")
     @Desc(value = "工种类型")
     @ApiModelProperty("工种类型")
-    private int workerType;//workertype
+    private Integer workerType;//workertype
 
 	@Column(name = "member_id")
 	@Desc(value = "用户ID")
@@ -73,7 +75,7 @@ public class HouseFlow extends BaseEntity {
 	@Column(name = "sort")
 	@Desc(value = "实际排期顺序")
 	@ApiModelProperty("实际排期顺序")
-	private int sort;
+	private Integer sort;
 
 	@Column(name = "refuse_number")
 	@Desc(value = "被拒人数")
@@ -133,12 +135,12 @@ public class HouseFlow extends BaseEntity {
     @Column(name = "choose")
     @Desc(value = "选择保险")
     @ApiModelProperty("选择保险")
-	private int choose;//choose
+	private Integer choose;//choose
 
     @Column(name = "pause")
     @Desc(value = "施工状态0正常,1暂停")
     @ApiModelProperty("施工状态0正常,1暂停")
-	private int pause;
+	private Integer pause;
 
     @Column(name = "lock_worker")
     @Desc(value = "指定工匠 1已指定")
@@ -168,12 +170,7 @@ public class HouseFlow extends BaseEntity {
     @Column(name = "supervisor_start")
     @Desc(value = "工种为大管家时：0未开工；1已开工")
     @ApiModelProperty("工种为大管家时：0未开工；1已开工")
-	private int supervisorStart;
-
-    @Column(name = "scan_code")
-    @Desc(value = "扫码图片地址")
-    @ApiModelProperty("扫码图片地址")
-	private String scanCode;//
+	private Integer supervisorStart;
 
     @Column(name = "past")
     @Desc(value = "二维码生成时间")
@@ -193,7 +190,7 @@ public class HouseFlow extends BaseEntity {
     @Column(name = "patrol")
     @Desc(value = "巡查次数")
     @ApiModelProperty("巡查次数")
-	private int patrol;//
+	private Integer patrol;//
 
     @Column(name = "patrol_money")
     @Desc(value = "每次巡查拿钱 这里只针对大管家")
@@ -206,20 +203,25 @@ public class HouseFlow extends BaseEntity {
 	private BigDecimal checkMoney;//
 
     public HouseFlow(){
-        this.grablock = 0;
-        this.refuseNumber = 0;
-        this.grabNumber = 0;
-        this.workSteta = 0;//0未开始
-        this.evaluateSteta = 0;
-        this.repairState = 0;
-        this.workerRepairState = 0;
-        this.safeShopState = 0;
-        this.pause = 0;
-        this.lockWorker = 0;//0未指定工匠
-        this.materialPrice = new BigDecimal(0.0);//材料钱
-        this.workPrice = new BigDecimal(0.0);//工钱总数
-        this.totalPrice = new BigDecimal(0.0);// 工钱加材料
-        this.selfPrice = new BigDecimal(0.0);//自购材料钱
-        this.supervisorStart = 0;
+
+    }
+    public HouseFlow(Boolean isInit){
+        if(isInit){
+            this.grablock = 0;
+            this.refuseNumber = 0;
+            this.grabNumber = 0;
+            this.workSteta = 0;//0未开始
+            this.evaluateSteta = 0;
+            this.repairState = 0;
+            this.workerRepairState = 0;
+            this.safeShopState = 0;
+            this.pause = 0;
+            this.lockWorker = 0;//0未指定工匠
+            this.materialPrice = new BigDecimal(0.0);//材料钱
+            this.workPrice = new BigDecimal(0.0);//工钱总数
+            this.totalPrice = new BigDecimal(0.0);// 工钱加材料
+            this.selfPrice = new BigDecimal(0.0);//自购材料钱
+            this.supervisorStart = 0;
+        }
     }
 }

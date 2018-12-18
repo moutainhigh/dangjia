@@ -13,6 +13,15 @@
 		create_date,
 		modify_date
 	</sql>
+	<!--根据货品id查询品牌系列名-->
+	<select id="brandSeriesName" resultType="java.lang.String">
+        select bs.name
+		From dj_basics_brand_series bs, dj_basics_product p
+		where
+		    p.brand_series_id = bs.id
+		and
+		    p.id = #{productId}
+	</select>
 	<!-- 查询所有 -->
 	<select id="queryBrandSeries" resultType="com.dangjia.acg.modle.brand.BrandSeries">
 		SELECT
@@ -24,9 +33,9 @@
 			create_date as createDate,
 			modify_date as modifyDate
 		FROM dj_basics_brand_series
-		<if test="brand_id!=null">
+		<if test="brandId!=null">
 		where
-			brand_id=#{brand_id}
+			brand_id=#{brandId}
 		</if>
 		ORDER BY create_date desc
 	</select>
@@ -35,5 +44,26 @@
 		DELETE FROM dj_basics_brand_series
 		WHERE id=#{id}
 	</delete>
+
+	<!-- 根据商品id查询关联品牌系列 -->
+	<select id="queryBrandByGid" resultType="com.dangjia.acg.modle.brand.BrandSeries">
+		SELECT
+		id,
+		name,
+		brand_id as brandId,
+		content,
+		image
+		FROM dj_basics_brand_series
+		where
+		id in(
+		select
+		series_id
+		from dj_basics_goods_series
+		where
+		goods_id=#{goodsId}
+		)
+		ORDER BY create_date desc
+	</select>
+
 </mapper>
 

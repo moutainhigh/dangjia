@@ -15,12 +15,17 @@ import java.util.List;
  */
 @Repository
 public interface IHouseFlowMapper extends Mapper<HouseFlow> {
+    /**查询houseFlowId*/
+    String selectHouseFlowId(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
+
     List<HouseFlow> getAllFlowByHouseId(@Param("houseId")String houseId);
     List<HouseFlow> checkAllFinish (@Param("houseId")String houseId,@Param("houseFlowId")String houseFlowId);
     List<HouseFlow> getHouseIsStart(@Param("houseId")String houseId);
     HouseFlow getHouseFlowByHidAndWty(@Param("houseId")String houseId,@Param("workerType")Integer workerType);
+    /**找出启用工种给大管家算审核钱*/
     List<HouseFlow> getForCheckMoney(@Param("houseId")String houseId);
-    List<HouseFlow> getNextTopHouseFlow(@Param("houseId")String houseId);
+    /**查下个未开工的工种*/
+    List<HouseFlow> getNextHouseFlow(@Param("sort")int sort,@Param("houseId")String houseId);
     List<HouseFlow> getHouseNot0(@Param("houseId")String houseId);
     List<HouseFlow> getFlowByhouseIdNot12(@Param("houseId")String houseId);
 }

@@ -1,6 +1,5 @@
 package com.dangjia.acg.api.config;
 
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.config.ConfigAppLogo;
 import io.swagger.annotations.Api;

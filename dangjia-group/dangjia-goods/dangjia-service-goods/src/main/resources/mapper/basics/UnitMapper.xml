@@ -12,4 +12,12 @@
         ORDER BY create_date desc
     </select>
 
+    <!-- 根据单位名称查询 -->
+    <select id="getUnitByName" parameterType="String" resultType="com.dangjia.acg.modle.brand.Unit">
+		SELECT
+			id, name, create_date as createDate, modify_date as modifyDate
+		FROM dj_basics_unit WHERE name=#{name}
+		ORDER BY create_date desc
+	</select>
+
 </mapper>

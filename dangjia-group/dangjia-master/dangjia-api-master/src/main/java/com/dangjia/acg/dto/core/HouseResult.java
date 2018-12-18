@@ -16,5 +16,5 @@ public class HouseResult {
     private int again;//几套房
     private int task;//其它房产待处理任务
     private String state;//列表状态
-    private List<Course> courseList;
+    private List<NodeDTO> courseList;
 }

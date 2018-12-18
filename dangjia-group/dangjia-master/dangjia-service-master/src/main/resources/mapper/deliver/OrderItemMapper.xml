@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.deliver.IOrderItemMapper">
+
+    <sql id="all_columns">
+		id,
+		order_id as orderId,
+		house_id as houseId,
+		product_id as productId,
+		product_sn as productSn,
+		product_name as productName,
+		product_nick_name as productNickName,
+		price,
+		cost,
+		shop_count as shopCount,
+		ask_count as askCount,
+		unit_name as unitName,
+		total_price as totalPrice,
+		product_type as productType,
+		category_id as categoryId,
+		worker_goods_name as workerGoodsName,
+		worker_goods_sn as workerGoodsSn,
+		worker_goods_id as workerGoodsId,
+		image,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
+    <!-- 模糊查询 -->
+    <select id="orderItemList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.deliver.OrderItem">
+        SELECT
+            <include refid="all_columns"/>
+        FROM dj_deliver_order_item
+        where
+            house_id = #{houseId}
+		<if test = "orderId!=null and orderId!=''">
+			and
+			order_id = #{orderId}
+		</if>
+        <if test = "name!=null and name!=''">
+            and
+            product_name LIKE CONCAT('%',#{name},'%')
+        </if>
+        <if test = "categoryId!=null and categoryId!=''">
+            and
+            category_id = #{categoryId}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
+</mapper>
+

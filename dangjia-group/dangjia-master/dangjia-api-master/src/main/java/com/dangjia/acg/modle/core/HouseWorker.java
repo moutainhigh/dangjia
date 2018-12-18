@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,6 +18,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_core_house_worker")
 @ApiModel(description = "工序")
+@FieldNameConstants(prefix = "")
 public class HouseWorker extends BaseEntity {
 
 	@Column(name = "house_id")
@@ -42,7 +44,7 @@ public class HouseWorker extends BaseEntity {
 	@Column(name = "worker_type")
 	@Desc(value = "工种类型")
 	@ApiModelProperty("工种类型")
-	private int workerType;//workertype
+	private Integer workerType;//workertype
 
 	@Column(name = "house_worker_order_id")
 	@Desc(value = "工人订单")
@@ -67,7 +69,7 @@ public class HouseWorker extends BaseEntity {
 	@Column(name = "has_evaluate")
 	@Desc(value = "用于单独判断业主对工人的评价状态,0未开始，1已评价")
 	@ApiModelProperty("用于单独判断业主对工人的评价状态,0未开始，1已评价")
-	private int hasEvaluate;//hasevaluate
+	private Integer hasEvaluate;//hasevaluate
 
 	@Column(name = "apply")
 	@Desc(value = "申请的状态为1 表示没有发起完工申请可退单,默认0")

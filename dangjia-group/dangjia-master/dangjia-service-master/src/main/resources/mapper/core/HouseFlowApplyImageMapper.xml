@@ -3,6 +3,29 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper">
+    <sql id="new_columns">
+        img.id,
+        img.create_date createDate,
+        img.modify_date modifyDate,
+        img.house_flow_apply_id houseFlowApplyId,
+        img.image_url imageUrl,
+        img.image_sign imageSign,
+        img.image_type imageType,
+        img.data_status dataStatus,
+        img.image_type_id imageTypeId,
+        img.image_type_name imageTypeName
 
+    </sql>
+    <!--根据workerTypeId,workerType,houseId,houseFlowId,imageSign查询管理图片 -->
+    <select id="getHouseFlowApplyImageList" resultType="com.dangjia.acg.modle.core.HouseFlowApplyImage">
+        select <include refid="new_columns" />
+        from `dj_core_house_flow_apply_image` img
+        INNER JOIN `dj_core_house_flow_apply` ap ON ap.id=img.house_flow_apply_id
+        WHERE ap.worker_type_id= #{workerTypeId}
+        and ap.worker_type=#{workerType}
+        and ap.house_id=#{houseId}
+        and ap.house_flow_id=#{houseFlowId}
+        and img.image_sign=#{imageSign}
+    </select>
 </mapper>
 

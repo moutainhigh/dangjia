@@ -4,6 +4,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.IBrandSeriesMapper;
 import com.dangjia.acg.modle.brand.BrandSeries;
@@ -12,7 +13,10 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -40,17 +44,14 @@ public class BrandSeriesService{
 			if (pageSize == null) {
 				pageSize = 10;
 			}
-			String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + configUtil.getValue(SysConfig.PUBLIC_TEMPORARY_FILE_ADDRESS, String.class);
+			String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
 			PageHelper.startPage(pageNum, pageSize);
 			List<Map<String, Object>> mapList=new ArrayList<Map<String,Object>>();
 			List<BrandSeries> BrandExList = iBrandSeriesMapper.queryBrandSeries(null);
 			for (BrandSeries brandExplain : BrandExList) {
-				Map<String, Object> map=new HashMap<String, Object>();
-				map.put("id", brandExplain.getId());
-				map.put("name",brandExplain.getName());
-				map.put("content",brandExplain.getContent());
+				Map<String, Object> map=BeanUtils.beanToMap(brandExplain);
 				map.put("image",address+brandExplain.getImage());
-				map.put("brandId",brandExplain.getBrandId());
+				map.put("imageUrl",brandExplain.getImage());
 				mapList.add(map);
 			}
 			PageInfo pageResult = new PageInfo(BrandExList);
@@ -84,8 +85,6 @@ public class BrandSeriesService{
 			brandEx.setName(name);
 			brandEx.setContent(content);
 			brandEx.setBrandId(brandId);
-			brandEx.setCreateDate(new Date());
-			brandEx.setModifyDate(new Date());
 			iBrandSeriesMapper.insert(brandEx);
 			return ServerResponse.createBySuccessMessage("新增成功");
 		} catch (Exception e) {

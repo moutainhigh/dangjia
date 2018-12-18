@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.safe;
 
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -11,4 +12,6 @@ import tk.mybatis.mapper.common.Mapper;
  */
 @Repository
 public interface IWorkerTypeSafeOrderMapper extends Mapper<WorkerTypeSafeOrder> {
+
+    WorkerTypeSafeOrder getByWorkerTypeId(@Param("workerTypeId")String workerTypeId,@Param("houseId")String houseId);
 }

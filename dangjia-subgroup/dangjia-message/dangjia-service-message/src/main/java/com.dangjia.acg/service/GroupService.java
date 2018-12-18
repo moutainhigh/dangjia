@@ -8,6 +8,8 @@ import cn.jmessage.api.group.GroupInfoResult;
 import cn.jmessage.api.group.GroupListResult;
 import cn.jmessage.api.group.MemberListResult;
 import cn.jmessage.api.user.UserGroupsResult;
+import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.dto.CreateGroupResultDTO;
 import org.springframework.stereotype.Service;
 /**
  * 群组维护
@@ -32,14 +34,16 @@ public class GroupService  extends BaseService{
      *              2 - 公开群
      *              不指定标志，默认为1
      */
-    public  CreateGroupResult createGroup(String appType,String owner_username,String name,String[] members_username,String avatar,String desc ,int flag) {
+    public  CreateGroupResultDTO createGroup(String appType,String owner_username,String name,String[] members_username,String avatar,String desc ,int flag) {
       
         try {
 
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             CreateGroupResult res = client.createGroup(owner_username, name, desc, avatar, flag, members_username);
-            LOG.info(res.getName());
-            return res;
+            CreateGroupResultDTO result=new CreateGroupResultDTO();
+            BeanUtils.beanToBean(res,result);
+            LOG.info(result.getName());
+            return result;
         } catch (APIConnectionException e) {
             LOG.error("Connection error. Should retry later. ", e);
             return null;

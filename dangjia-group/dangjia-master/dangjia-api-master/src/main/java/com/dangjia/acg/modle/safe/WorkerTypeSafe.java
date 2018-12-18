@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "dj_safe_worker_type_safe")
 @ApiModel(description = "补材料表")
+@FieldNameConstants(prefix = "")
 public class WorkerTypeSafe extends BaseEntity {
 
 	@Column(name = "name")
@@ -33,7 +35,7 @@ public class WorkerTypeSafe extends BaseEntity {
 	@Column(name = "worker_type")
 	@Desc(value = "工种类型1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆")
 	@ApiModelProperty("工种类型1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆")
-	private int workerType;//workertype
+	private Integer workerType;//workertype
 
 	@Column(name = "price")
 	@Desc(value = "价格")

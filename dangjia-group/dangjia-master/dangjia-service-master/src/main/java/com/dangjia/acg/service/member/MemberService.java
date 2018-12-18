@@ -4,29 +4,41 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
-import com.dangjia.acg.common.qrcode.QRCodeUtil;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.house.IHouseAccountsMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.house.HouseAccounts;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.util.*;
+import com.dangjia.acg.service.activity.RedPackPayService;
+import com.dangjia.acg.util.RKIDCardUtil;
+import com.dangjia.acg.util.TokenUtil;
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,15 +47,22 @@ import java.util.Map;
  */
 @Service
 public class MemberService {
+	private Logger logger = LoggerFactory.getLogger(MemberService.class);
 	@Autowired
 	private ConfigUtil configUtil;
-
+	@Autowired
+	private RedPackPayService redPackPayService;
 	@Autowired
 	private IMemberMapper memberMapper;
 	@Autowired
 	private ISmsMapper smsMapper;
 	@Autowired
 	private IWorkerTypeMapper workerTypeMapper;
+    @Autowired
+    private IHouseAccountsMapper houseAccountsMapper;
+    @Autowired
+    private GroupInfoService groupInfoService;
+
 
 	/****
 	 * 注入配置
@@ -94,6 +113,12 @@ public class MemberService {
 		if (user == null) {
 			return ServerResponse.createByErrorMessage("电话号码或者密码错误");
 		} else {
+			userRole="role"+userRole+":"+user.getId();
+			String  token=redisClient.getCache(userRole,String.class);
+			//如果用户存在usertoken则清除原来的token数据
+			if(!CommonUtil.isEmpty(token)){
+				redisClient.deleteCache(token+ Constants.SESSIONUSERID);
+			}
 			user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
 			AccessToken accessToken= TokenUtil.generateAccessToken(user);
 			if(!StringUtils.isEmpty(user.getWorkerTypeId())) {
@@ -103,6 +128,8 @@ public class MemberService {
 				}
 			}
 			redisClient.put(accessToken.getUserToken()+ Constants.SESSIONUSERID,accessToken);
+			redisClient.put(userRole,accessToken.getUserToken());
+            groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()},new String[1]);
 			return ServerResponse.createBySuccess("登录成功，正在跳转",accessToken);
 		}
 	}
@@ -139,6 +166,8 @@ public class MemberService {
 	 * 校验验证码并保存密码
 	 */
 	public ServerResponse checkRegister(String phone, int smscode,String password,String invitationCode,Integer userRole) {
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+				.getRequest();
 		Integer registerCode=redisClient.getCache(Constants.SMS_CODE+ phone,Integer.class);
 		if (smscode != registerCode) {
 			return ServerResponse.createByErrorMessage("验证码错误");
@@ -147,26 +176,37 @@ public class MemberService {
 			user.setMobile(phone);
 			user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
             //生成二维码
-            if(StringUtils.isEmpty(user.getQrcode())){//二维码为空 生成二维码
-                //根据配置文件设置路径
-                //图片放项目目录下
-				String fileName=new Date().getTime()+".png";
-				String visitRoot=configUtil.getValue(SysConfig.PUBLIC_DANGJIA_PATH, String.class)+configUtil.getValue(SysConfig.PUBLIC_QRCODE_PATH, String.class);
-				String logoPath = visitRoot+"logo.png";
-                String encoderContent =  "/app/app_invite!workRegister.action?memberid="+user.getId();
-				try{
-					QRCodeUtil.encode(encoderContent, logoPath, visitRoot, fileName, true);
-				}catch (Exception e){
-					return ServerResponse.createByErrorMessage("二维码生成错误！");
-				}
-				String imgurl=configUtil.getValue(SysConfig.PUBLIC_QRCODE_PATH, String.class)+"/"+fileName;
-				user.setQrcode(imgurl);
-            }
+//            if(StringUtils.isEmpty(user.getQrcode())){//二维码为空 生成二维码
+//                //根据配置文件设置路径
+//                //图片放项目目录下
+//				String fileName=new Date().getTime()+".png";
+//				String visitRoot=configUtil.getValue(SysConfig.PUBLIC_DANGJIA_PATH, String.class)+configUtil.getValue(SysConfig.PUBLIC_QRCODE_PATH, String.class);
+//				String logoPath = visitRoot+"logo.png";
+//                String encoderContent =  configUtil.getValue(SysConfig.PUBLIC_DANGJIA_APP_ADDRESS, String.class)+"/app/app_invite!workRegister.action?memberid="+user.getId();
+//				try{
+//					QRCodeUtil.encode(encoderContent, logoPath, visitRoot, fileName, true);
+//				}catch (Exception e){
+//					return ServerResponse.createByErrorMessage("二维码生成错误！");
+//				}
+//				String imgurl=configUtil.getValue(SysConfig.PUBLIC_QRCODE_PATH, String.class)+"/"+fileName;
+//				user.setQrcode(imgurl);
+//            }
+			user.setPraiseRate(new BigDecimal(1));//好评率
+			user.setEvaluationScore(new BigDecimal(60));//积分
+			user.setCheckType(5);//未提交资料
+			user.setWorkerPrice(new BigDecimal(0));
+			user.setHaveMoney(new BigDecimal(0));
+			user.setSurplusMoney(new BigDecimal(0));
+			user.setRetentionMoney(new BigDecimal(0));
+			user.setVisitState(0);
 			user.setUserRole(0);
 			user.setUserName(user.getMobile());
-			user.setName(user.getMobile());
-			user.setInvitationCode(invitationCode);
+			user.setName("");
+			user.setOthersInvitationCode(invitationCode);
+			user.setInvitationCode(CommonUtil.randomString(6));
 			user.setNickName("当家-"+ CommonUtil.randomString(6));
+			user.setInviteNum(0);
+			user.setIsCrowned(0);
 			memberMapper.insertSelective(user);
 //			memberMapper.updateByPrimaryKeySelective(user);
 			user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
@@ -179,6 +219,13 @@ public class MemberService {
 			}
 			redisClient.put(accessToken.getUserToken()+ Constants.SESSIONUSERID,accessToken);
 			redisClient.deleteCache(Constants.SMS_CODE+ phone);
+
+			try {
+				//检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
+				redPackPayService.checkUpActivity(request,user.getMobile(),"1");
+			}catch (Exception e){
+				logger.error("注册送优惠券活动异常-zhuce：原因："+e.getMessage(),e);
+			}
 			return ServerResponse.createBySuccess("注册成功",accessToken);
 		}
 	}
@@ -187,17 +234,14 @@ public class MemberService {
 	 * 工匠提交详细资料
 	 */
 	public ServerResponse updateWokerRegister(Member user, String userToken, String userRole){
-//		if(StringUtils.isEmpty(user.getName())){
-//			return ServerResponse.createByErrorMessage("名称不能为空");
-//		}
-//		if(StringUtils.isEmpty(user.getIdnumber())){
-//			return ServerResponse.createByErrorMessage("身份证号不能为空");
-//		}
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+				.getRequest();
 		AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
 		if(accessToken==null){//无效的token
 			return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(),"无效的token,请重新登录或注册！");
 		}
 		user.setId(accessToken.getMember().getId());
+		user.setCheckType(accessToken.getMember().getCheckType());//提交资料，审核中
 		if(!StringUtils.isEmpty(user.getIdnumber())) {
 			String idCard = RKIDCardUtil.getIDCardValidate(user.getIdnumber());
 			if (!"".equals(idCard)) {//验证身份证
@@ -226,6 +270,14 @@ public class MemberService {
 			accessToken.setTimestamp(accessToken.getTimestamp());
             if (wt != null) {accessToken.setWorkerTypeName(wt.getName());}
             redisClient.put(accessToken.getUserToken()+ Constants.SESSIONUSERID,accessToken);
+            if(!CommonUtil.isEmpty(user.getReferrals())) {
+				try {
+					//检查是否有推荐送优惠券活动，并给推荐的用户发放优惠券
+					redPackPayService.checkUpActivity(request, user.getReferrals(), "2");
+				} catch (Exception e) {
+					logger.error("注册送优惠券活动异常 -tuijian：原因：" + e.getMessage(), e);
+				}
+			}
 			return ServerResponse.createBySuccessMessage("提交资料成功！");
 		}else{
 			return ServerResponse.createByErrorMessage("不存在注册信息,请重新注册！");
@@ -333,15 +385,143 @@ public class MemberService {
 	/**
 	 * 业主列表
 	 */
-	public ServerResponse getMemberList(HttpServletRequest request,Integer pageNum, Integer pageSize){
-		if(pageNum == null){
-			pageNum = 1;
+	public ServerResponse getMemberList(HttpServletRequest request, PageDTO pageDTO){
+		PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+		Example example = new Example(Member.class);
+		Example.Criteria criteria=example.createCriteria();
+		criteria.andEqualTo(Member.DATA_STATUS,"0");
+		example.orderBy(Member.CREATE_DATE).desc();
+		List<Member> list = memberMapper.selectByExample(example);
+		PageInfo pageResult = new PageInfo(list);
+		return ServerResponse.createBySuccess("查询用户列表成功", pageResult);
+	}
+
+	/**
+	 * 统计我的钱包
+	 * <p>Title: getMyWallet</p>
+	 * <p>Description: </p>
+	 * @return
+	 */
+	public ServerResponse getMyWallet(String userToken){
+		try{
+			AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+			Member member=accessToken.getMember();
+			Map<String, Object> rMap=new HashMap<>();
+			rMap.put("deposit", member.getSurplusMoney()==null?0.00:member.getSurplusMoney());//账户余额
+			//总收入
+			BigDecimal allIncome=new BigDecimal(0.00);
+			//总支出
+			BigDecimal allSpend=new BigDecimal(0.00);
+			Example example =new Example(HouseAccounts.class);
+			example.createCriteria().andEqualTo("state",0).andEqualTo("memberId",member.getId());
+			List<HouseAccounts> listIncome=houseAccountsMapper.selectByExample(example);//总收入
+			for(HouseAccounts haccount:listIncome){
+				allIncome=allIncome.add(haccount.getMoney());
+			}
+			Example example2 =new Example(HouseAccounts.class);
+			example2.createCriteria().andEqualTo("state",1).andEqualTo("memberId",member.getId());
+			List<HouseAccounts> listSpend =houseAccountsMapper.selectByExample(example);//总支出
+			for(HouseAccounts haccount:listSpend){
+				allSpend=allSpend.add(haccount.getMoney());
+			}
+			rMap.put("allSpend", allSpend);//总支出
+			rMap.put("allIncome", allIncome);//总收入
+			return ServerResponse.createBySuccess("统计我的钱包成功",rMap);
+		}catch (Exception e) {
+			e.printStackTrace();
+			return ServerResponse.createByErrorMessage("统计我的钱包失败");
 		}
-		if(pageSize == null){
-			pageSize = 10;
+	}
+
+	/**
+	 * 我的钱包-收入-支出
+	 * <p>Title: getMyWallet</p>
+	 * <p>Description: </p>
+	 * @return
+	 */
+	public ServerResponse getMyBillDetail(String userToken,Integer type,Integer pageNum, Integer pageSize){
+		try{
+			AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+			Member member=accessToken.getMember();
+			List<Map<String, Object>> listSmap=new ArrayList<>();//总支出
+			List<Map<String, Object>> listIMap=new ArrayList<>();//总收入
+			//总收入
+			BigDecimal allIncome=new BigDecimal(0.00);
+			//总支出
+			BigDecimal allSpend=new BigDecimal(0.00);
+			if(pageNum==null){
+				pageNum=1;
+			}
+			if(pageSize==null){
+				pageSize=10;
+			}
+			PageHelper.startPage(pageNum, pageSize);
+			if(type!=null&&type==0){
+				Example example =new Example(HouseAccounts.class);
+				example.createCriteria().andEqualTo("state",0).andEqualTo("memberId",member.getId());
+				List<HouseAccounts> listIncome=houseAccountsMapper.selectByExample(example);//总收入
+				PageInfo pageResult = new PageInfo(listIncome);
+				for(HouseAccounts haccount:listIncome){
+					Map<String,Object> Map=new HashMap<String, Object>();
+					Map.put("name", haccount.getName());//收款人名字
+					Map.put("time", haccount.getCreateDate().getTime());//流水时间
+					if("1".equals(haccount.getPayment())){
+						Map.put("payment", "微信支付");//支付方式1微信, 2支付宝,3后台回调
+					}else if("2".equals(haccount.getPayment())){
+						Map.put("payment", "支付宝支付");//支付方式1微信, 2支付宝,3后台回调
+					}else{
+						Map.put("payment", "后台回调");//支付方式1微信, 2支付宝,3后台回调
+					}
+					Map.put("money", haccount.getMoney());//金额
+					Map.put("orderNo", haccount.getId());//订单号
+					Map.put("houseName", haccount.getHouseName());//房子名称
+					listIMap.add(Map);
+					allIncome=allIncome.add(haccount.getMoney());
+				}
+				pageResult.setList(listIMap);
+				return ServerResponse.createBySuccess("获取流水信息成功",pageResult);
+			}else{
+				Example example =new Example(HouseAccounts.class);
+				example.createCriteria().andEqualTo("state",1).andEqualTo("memberId",member.getId());
+				List<HouseAccounts> listSpend =houseAccountsMapper.selectByExample(example);//总支出
+				PageInfo pageResult = new PageInfo(listSpend);
+				for(HouseAccounts haccount:listSpend){
+					Map<String,Object> Map=new HashMap<String, Object>();
+					Map.put("name", haccount.getName());//收款人名字
+					Map.put("time", haccount.getCreateDate().getTime());//流水时间
+					if("1".equals(haccount.getPayment())){
+						Map.put("payment", "微信支付");//支付方式1微信, 2支付宝,3后台回调
+					}else if("2".equals(haccount.getPayment())){
+						Map.put("payment", "支付宝支付");//支付方式1微信, 2支付宝,3后台回调
+					}else{
+						Map.put("payment", "后台回调");//支付方式1微信, 2支付宝,3后台回调
+					}
+					Map.put("money", haccount.getMoney());//金额
+					Map.put("orderNo", haccount.getId());//订单号
+					Map.put("houseName", haccount.getHouseName());//房子名称
+					listSmap.add(Map);
+					allSpend=allSpend.add(haccount.getMoney());
+				}
+				pageResult.setList(listSmap);
+				return ServerResponse.createBySuccess("获取流水信息成功",pageResult);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+			return ServerResponse.createByErrorMessage("获取流水信息失败");
 		}
-		PageHelper.startPage(pageNum, pageSize);
-		List<Map<String,Object>> list = memberMapper.getMemberList();
-		return ServerResponse.createBySuccess("查询用户列表成功", list);
+	}
+
+	/**
+	 * 我的邀请码
+	 * @return
+	 */
+	public ServerResponse getMyInvitation(String userToken){
+		AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+		Member member=accessToken.getMember();
+		Example example =new Example(Member.class);
+		example.createCriteria().andEqualTo(Member.OTHERS_INVITATION_CODE,member.getInvitationCode());
+		Map memberMap= BeanUtils.beanToMap(member);
+		memberMap.put("invitationNum",memberMapper.selectCountByExample(example));
+		return ServerResponse.createBySuccess("ok",memberMap);
 	}
 }

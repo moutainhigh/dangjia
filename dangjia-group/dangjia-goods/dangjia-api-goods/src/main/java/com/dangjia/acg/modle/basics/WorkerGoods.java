@@ -3,6 +3,7 @@ package com.dangjia.acg.modle.basics;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,6 +18,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_basics_worker_goods")
 @ApiModel(description = "人工商品")
+@FieldNameConstants(prefix = "")
 public class WorkerGoods extends BaseEntity {
 
     @Column(name = "name")
@@ -28,6 +30,9 @@ public class WorkerGoods extends BaseEntity {
     @Column(name = "image")
     private String image;//图片  多图
 
+    @Column(name = "unit_name")
+    private String unitName;//单位
+
     @Column(name = "unit_id")
     private String unitId;//单位id
 
@@ -35,7 +40,7 @@ public class WorkerGoods extends BaseEntity {
     private Double price;//单价
 
     @Column(name = "sales")
-    private Integer sales;//退货性质
+    private Integer sales;//退货性质0：可退；1不可退
 
     @Column(name = "work_explain")
     private String workExplain;//工作说明

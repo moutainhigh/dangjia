@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "dj_pay_business_order")
 @ApiModel(description = "房子")
+@FieldNameConstants(prefix = "")
 public class BusinessOrder extends BaseEntity {
 
 	@Column(name = "member_id")
@@ -47,15 +49,15 @@ public class BusinessOrder extends BaseEntity {
 	@ApiModelProperty("房子ID")
 	private String houseId;//houseid
 
-	@Column(name = "houseflow_ids")
-	@Desc(value = "houseflowid json串")
-	@ApiModelProperty("houseflowid json串")
-	private String houseflowIds;//
+	@Column(name = "task_id")
+	@Desc(value = "任务id")
+	@ApiModelProperty("任务id")
+	private String taskId;//工序支付   补货补人工  提前付
 
 	@Column(name = "state")
 	@Desc(value = "处理状态  1刚生成(可编辑),2去支付(不修改),3已支付")
 	@ApiModelProperty("处理状态  1刚生成(可编辑),2去支付(不修改),3已支付")
-	private int state;//
+	private Integer state;//
 
 	@Column(name = "total_price")
 	@Desc(value = "该订单总价")
@@ -71,4 +73,9 @@ public class BusinessOrder extends BaseEntity {
 	@Desc(value = "实付")
 	@ApiModelProperty("实付")
 	private BigDecimal payPrice;//
+
+	@Column(name = "type")
+	@Desc(value = "支付类型")
+	@ApiModelProperty("支付类型")
+	private Integer type; // 1工序支付任务,2补货补人工 ,4待付款进来只付材料
 }

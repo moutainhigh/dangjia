@@ -27,7 +27,7 @@ public interface ElasticSearchAPI {
 
   @RequestMapping(value = "saveESJsonList", method = RequestMethod.POST)
   @ApiOperation(value = "保存多条数据", notes = "保存多条数据")
-  String saveESJsonList(@ApiParam(name ="jsonStrList",value = "JSONList数据")@RequestBody List<String> jsonStr,@ApiParam(name ="indexName",value = "数据库")@RequestParam("indexName") String indexName,@ApiParam(name ="tableTypeName",value = "表")@RequestParam("tableTypeName") String tableTypeName);
+  List<String> saveESJsonList(@ApiParam(name ="jsonStrList",value = "JSONList数据")@RequestBody List<String> jsonStr,@ApiParam(name ="indexName",value = "数据库")@RequestParam("indexName") String indexName,@ApiParam(name ="tableTypeName",value = "表")@RequestParam("tableTypeName") String tableTypeName);
 
    @RequestMapping(value = "searchESJson", method = RequestMethod.POST)
   @ApiOperation(value = "模糊搜索", notes = "模糊搜索")
@@ -52,11 +52,11 @@ public interface ElasticSearchAPI {
   List<String> searchPreciseJson(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
 
   @RequestMapping(value = "deleteResponse", method = RequestMethod.POST)
-  @ApiOperation(value = "根据ID删除", notes = "根据ID删除")
+  @ApiOperation(value = "根据ESID删除", notes = "根据ESID删除")
   String deleteResponse(@ApiParam(name ="indexName",value = "数据库")@RequestParam("indexName")String indexName,@ApiParam(name ="tableTypeName",value = "表")@RequestParam("tableTypeName") String tableTypeName,@ApiParam(name ="prepareId",value = "ID")@RequestParam("prepareId")String prepareId);
 
   @RequestMapping(value = "updateResponse", method = RequestMethod.POST)
-  @ApiOperation(value = "根据ID删除", notes = "根据ID删除")
+  @ApiOperation(value = "根据ESID更新", notes = "根据ESID更新")
   String updateResponse(@ApiParam(name ="jsonStr",value = "JSON数据")@RequestParam("jsonStr") String jsonStr,@ApiParam(name ="indexName",value = "数据库")@RequestParam("indexName")String indexName,@ApiParam(name ="tableTypeName",value = "表")@RequestParam("tableTypeName") String tableTypeName,@ApiParam(name ="prepareId",value = "ID")@RequestParam("prepareId")String prepareId);
 
   @RequestMapping(value = "getSearchJsonId", method = RequestMethod.POST)

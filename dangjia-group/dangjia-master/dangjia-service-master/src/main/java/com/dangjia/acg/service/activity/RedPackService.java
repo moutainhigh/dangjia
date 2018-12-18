@@ -1,20 +1,27 @@
 package com.dangjia.acg.service.activity;
 
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.activity.ActivityRedPackDTO;
 import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
 import com.dangjia.acg.mapper.activity.IActivityRedPackMapper;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRuleMapper;
+import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
+import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.github.pagehelper.PageHelper;
@@ -26,7 +33,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -48,6 +55,10 @@ public class RedPackService {
     private IActivityRedPackRuleMapper activityRedPackRuleMapper;
 
     @Autowired
+    private IWorkerTypeMapper workerTypeMapper;
+    @Autowired
+    private ProductAPI productAPI;
+    @Autowired
     private IMemberMapper memberMapper;
     @Autowired
     private ConfigUtil configUtil;
@@ -58,7 +69,7 @@ public class RedPackService {
      * @param activityRedPack
      * @return
      */
-    public ServerResponse queryActivityRedPacks(HttpServletRequest request, ActivityRedPack activityRedPack) {
+    public ServerResponse queryActivityRedPacks(HttpServletRequest request, PageDTO pageDTO,ActivityRedPack activityRedPack,String isEndTime) {
         Example example = new Example(ActivityRedPack.class);
         Example.Criteria criteria=example.createCriteria();
         if (!CommonUtil.isEmpty(activityRedPack.getName())) {
@@ -67,9 +78,14 @@ public class RedPackService {
         if(!CommonUtil.isEmpty(activityRedPack.getCityId())) {
             criteria.andEqualTo("cityId",activityRedPack.getCityId());
         }
-        Integer pageNum=request.getAttribute("pageNum")==null?1:(Integer)request.getAttribute("pageNum");
-        Integer pageSize=request.getAttribute("pageSize")==null?10:(Integer)request.getAttribute("pageSize");
-        PageHelper.startPage(pageNum, pageSize);
+        if(!CommonUtil.isEmpty(isEndTime)&&"0".equals(isEndTime)) {
+            criteria.andLessThanOrEqualTo("endDate",new Date());
+        }
+        if(!CommonUtil.isEmpty(activityRedPack.getDeleteState())) {
+            criteria.andEqualTo("deleteState",activityRedPack.getDeleteState());
+        }
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        example.orderBy("modifyDate").desc();
         List<ActivityRedPack> list = activityRedPackMapper.selectByExample(example);
         PageInfo pageResult = new PageInfo(list);
         return ServerResponse.createBySuccess("ok",pageResult);
@@ -86,13 +102,14 @@ public class RedPackService {
         String[] haveReceives=new String[]{"0","1","2,3"};
         String[] counts=new String[]{"0","0","0"};
         for (int i = 0; i < haveReceives.length; i++) {
-            Example example = new Example(ActivityRedPack.class);
+            Example example = new Example(ActivityRedPackRecord.class);
             Example.Criteria criteria=example.createCriteria();
             if(!CommonUtil.isEmpty(activityRedPackRecord.getMemberId())) {
                 criteria.andEqualTo("memberId",activityRedPackRecord.getMemberId());
             }
             if(haveReceives[i].length()>2){
-                criteria.andCondition(" (have_receive!=0 OR have_receive!=1) ");
+                criteria.andNotEqualTo("haveReceive", "0");
+                criteria.andNotEqualTo("haveReceive", "1");
             }else {
                 criteria.andEqualTo("haveReceive", haveReceives[i]);
             }
@@ -114,17 +131,73 @@ public class RedPackService {
         Integer pageSize=request.getAttribute("pageSize")==null?10:(Integer)request.getAttribute("pageSize");
         PageHelper.startPage(pageNum, pageSize);
         List<ActivityRedPackRecordDTO> list = activityRedPackRecordMapper.queryActivityRedPackRecords(activityRedPackRecord);
+        //格式化有效优惠券集合
+        for (ActivityRedPackRecordDTO redPacetResult:list) {
+            if (redPacetResult.getRedPack().getType() == 0) {
+                redPacetResult.setNameType("满减券");
+                redPacetResult.setRedPackRuleId("满"+redPacetResult.getRedPackRule().getSatisfyMoney().setScale(2,BigDecimal.ROUND_HALF_UP)+"可用");
+            }else if(redPacetResult.getRedPack().getType() == 1){
+                redPacetResult.setNameType("折扣券");
+            }else{
+                redPacetResult.setNameType("代金券");
+            }
+            redPacetResult.setValidTime(
+                    "有效期:"
+                            + DateUtil.getDateString2(redPacetResult.getRedPack().getStartDate().getTime())
+                            +"至"
+                            + DateUtil.getDateString2(redPacetResult.getRedPack().getEndDate().getTime())
+            );
+            if (redPacetResult.getRedPack().getIsShare() == 0) {
+                redPacetResult.setShare("可与其他优惠券共同使用");
+            }else{
+                redPacetResult.setShare("不可与其他优惠券共同使用");
+            }
+            redPacetResult.setName(redPacetResult.getRedPack().getName());
+
+            //上一次选中优惠券标记
+            if(!StringUtils.isEmpty(redPacetResult.getBusinessOrderNumber())){
+                redPacetResult.setSelected("1");
+            }else{
+                redPacetResult.setSelected("0");
+            }
+        }
         return list;
     }
 
 
     public ServerResponse getActivityRedPack(HttpServletRequest request, ActivityRedPackDTO activityRedPackDTO) {
         ActivityRedPack activityRedPack = activityRedPackMapper.selectByPrimaryKey(activityRedPackDTO.getId());
+        request.setAttribute(Constants.CITY_ID,activityRedPack.getCityId());
         BeanUtils.beanToBean(activityRedPack,activityRedPackDTO);
         Example example = new Example(ActivityRedPackRule.class);
         example.createCriteria().andEqualTo("activityRedPackId",activityRedPackDTO.getId());
         List<ActivityRedPackRule> redPackRule=activityRedPackRuleMapper.selectByExample(example);
         activityRedPackDTO.setRedPackRule(redPackRule);
+        if(activityRedPackDTO.getFromObjectType()==0){
+            WorkerType workerType= workerTypeMapper.selectByPrimaryKey(activityRedPackDTO.getFromObject());
+            if(workerType!=null){
+                activityRedPackDTO.setFromObjectName(workerType.getName());
+            }
+        }
+        if(activityRedPackDTO.getFromObjectType()==1){
+
+            ServerResponse serverResponse=productAPI.getGoodsByGid(request,activityRedPackDTO.getFromObject());
+            if(serverResponse!=null&&serverResponse.getResultObj()!=null){
+                if(serverResponse.getResultObj() instanceof JSONObject){
+                    JSONObject goods= (JSONObject)serverResponse.getResultObj();
+                    activityRedPackDTO.setFromObjectName(goods.getString("name"));
+                }
+            }
+        }
+        if(activityRedPackDTO.getFromObjectType()==2){
+            ServerResponse serverResponse=productAPI.getProductById(request,activityRedPackDTO.getFromObject());
+            if(serverResponse!=null&&serverResponse.getResultObj()!=null){
+                if(serverResponse.getResultObj() instanceof Product){
+                    Product product= (Product)serverResponse.getResultObj();
+                    activityRedPackDTO.setFromObjectName(product.getName());
+                }
+            }
+        }
         return ServerResponse.createBySuccess("ok",activityRedPackDTO);
     }
     /**
@@ -133,6 +206,7 @@ public class RedPackService {
      * @return
      */
     public ServerResponse editActivityRedPack(HttpServletRequest request, ActivityRedPack activityRedPack,int[] num, BigDecimal[] money,  BigDecimal[] satisfyMoney) {
+        activityRedPack.setModifyDate(new Date());
         if(this.activityRedPackMapper.updateByPrimaryKeySelective(activityRedPack)>0){
             if(!CommonUtil.isEmpty(num)&&num.length>0) {
                 addActivityRedPackRule(activityRedPack,num,money,satisfyMoney);
@@ -143,11 +217,43 @@ public class RedPackService {
         }
     }
     /**
+     * 关闭
+     * @param id
+     * @return
+     */
+    public ServerResponse closeActivityRedPack(String id) {
+        ActivityRedPack activity=new ActivityRedPack();
+        activity.setId(id);
+        activity.setDeleteState(1);
+        if(this.activityRedPackMapper.updateByPrimaryKeySelective(activity)>0){
+            return ServerResponse.createBySuccessMessage("ok");
+        }else{
+            return ServerResponse.createByErrorMessage("关闭失败，请您稍后再试");
+        }
+    }
+
+    /**
+     * 关闭
+     * @param id
+     * @return
+     */
+    public ServerResponse closeActivityRedPackRecord(String id) {
+        ActivityRedPackRecord activity=new ActivityRedPackRecord();
+        activity.setId(id);
+        activity.setHaveReceive(2);
+        if(this.activityRedPackRecordMapper.updateByPrimaryKeySelective(activity)>0){
+            return ServerResponse.createBySuccessMessage("ok");
+        }else{
+            return ServerResponse.createByErrorMessage("关闭失败，请您稍后再试");
+        }
+    }
+    /**
      * 新增
      * @param activityRedPack
      * @return
      */
     public ServerResponse addActivityRedPack(HttpServletRequest request,ActivityRedPack activityRedPack,int[] num, BigDecimal[] money,  BigDecimal[] satisfyMoney) {
+        activityRedPack.setDeleteState(0);
         if(this.activityRedPackMapper.insertSelective(activityRedPack)>0){
             addActivityRedPackRule(activityRedPack,num,money,satisfyMoney);
             return ServerResponse.createBySuccessMessage("ok");
@@ -250,11 +356,25 @@ public class RedPackService {
                 //开始发放优惠券
                 activityRedPackRecord.setHaveReceive(0);
                 activityRedPackRecord.setPhone(member.getMobile());
+                activityRedPackRecord.setCityId(activityRedPack.getCityId());
+                activityRedPackRecord.setEndDate(activityRedPack.getEndDate());
+                activityRedPackRecord.setStartDate(activityRedPack.getStartDate());
                 activityRedPackRecordMapper.insert(activityRedPackRecord);
             }
         }
         return msg.toString();
     }
-
+    /**
+     * 获取所有优惠券客户未使用记录
+     * @return
+     */
+    public List<ActivityRedPackRecord> queryRedPackRecord() {
+        Example example = new Example(ActivityRedPackRecord.class);
+        Example.Criteria criteria=example.createCriteria();
+        criteria.andEqualTo("haveReceive", 0);
+        criteria.andLessThanOrEqualTo("endDate",new Date());
+        List<ActivityRedPackRecord> count = activityRedPackRecordMapper.selectByExample(example);
+        return count;
+    }
 
 }

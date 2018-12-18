@@ -37,7 +37,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         create_date as createDate,
         modify_date as modifyDate
     </sql>
-
+    <!-- 根据工人id查询所有房子任务-->
+    <select id="queryWorkerHouse" resultType="com.dangjia.acg.dto.core.HouseWorkerDTO">
+        SELECT
+        hw.id,
+        hw.house_id as houseId,
+        hw.worker_id as workerId,
+        hw.worker_type_id as workerTypeId,
+        hw.worker_type as workerType,
+        hw.evaluate_steta as evaluateSteta,
+        hw.work_steta as workSteta,
+        hw.work_type as workType,
+        hw.house_flow_id as houseFlowId,
+        hw.house_worker_order_id as houseWorkerOrderId,
+        hw.apply,
+        hw.has_evaluate as hasEvaluate,
+        hw.is_select as isSelect,
+        hw.create_date as createDate,
+        hw.modify_date as modifyDate,
+        CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') houseName
+        from `dj_core_house_worker` hw
+        INNER JOIN dj_house h ON hw.house_id=h.id
+        WHERE
+        hw.worker_id =  #{workerId}
+        and hw.work_type not in(7,2,3)
+        GROUP BY hw.house_id
+    </select>
     <!-- 根据工人id查询未完工任务-->
     <select id="grabControl" resultType="com.dangjia.acg.modle.core.HouseWorker">
         SELECT
@@ -98,6 +123,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where house_id = #{houseId}
         and worker_type = #{workerType}
         and work_type=6
+        ORDER BY create_date DESC LIMIT 1
     </select>
     <!--根据工人id查询统计已完成的任务单数-->
     <select id="getCountOrderByWorkerId"  resultType="java.lang.Long">

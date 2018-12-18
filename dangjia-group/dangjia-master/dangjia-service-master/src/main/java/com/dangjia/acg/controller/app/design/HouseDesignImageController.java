@@ -18,6 +18,16 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
     @Autowired
     private HouseDesignImageService houseDesignImageService;
 
+
+    /**
+     * 查看施工图
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse designImageList(String houseId){
+        return houseDesignImageService.designImageList(houseId);
+    }
+
     @Override
     @ApiMethod
     public ServerResponse checkPass(String userToken,String houseId,int type){

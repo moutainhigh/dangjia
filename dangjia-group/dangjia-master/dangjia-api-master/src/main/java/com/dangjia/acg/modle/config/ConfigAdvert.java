@@ -25,6 +25,11 @@ public class ConfigAdvert extends BaseEntity {
     @ApiModelProperty("来源应用（1:业主端，2:工匠端）")
     private String appType;
 
+    @Column(name = "name")
+    @Desc(value = "广告名称")
+    @ApiModelProperty("广告名称")
+    private String name;
+
     @Column(name = "city_id")
     @Desc(value = "城市ID")
     @ApiModelProperty("城市ID")
@@ -52,7 +57,8 @@ public class ConfigAdvert extends BaseEntity {
 
     //所有图片字段加入域名和端口，形成全路径
     public void initPath(String address){
-        this.image= StringUtils.isEmpty(this.image)?null:address+this.image;//二维码
+        this.image= StringUtils.isEmpty(this.image)?null:address+this.image;
+        this.data= StringUtils.isEmpty(this.data)?null:this.data+"&title="+this.name;
     };
 
 }

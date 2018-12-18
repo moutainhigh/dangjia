@@ -21,30 +21,34 @@ public interface HouseFlowAPI {
 
     @PostMapping("app/core/houseFlow/getGrabList")
     @ApiOperation(value = "抢单列表", notes = "抢单列表")
-    ServerResponse getGrabList(@RequestParam("userToken")String userToken,@RequestParam("cityId")String cityId);
+    ServerResponse getGrabList(@RequestParam("userToken") String userToken, @RequestParam("cityId") String cityId);
 
     @PostMapping("app/core/houseFlow/setGrabVerification")
     @ApiOperation(value = "抢单验证", notes = "抢单验证")
-    ServerResponse setGrabVerification(@RequestParam("userToken")String userToken,@RequestParam("houseFlowId")String houseFlowId);
+    ServerResponse setGrabVerification(@RequestParam("userToken") String userToken, @RequestParam("cityId") String cityId, @RequestParam("houseFlowId") String houseFlowId);
 
     @PostMapping("app/core/houseFlow/setGiveUpOrder")
     @ApiOperation(value = "放弃此单", notes = "放弃此单")
-    ServerResponse setGiveUpOrder(@RequestParam("userToken")String userToken,@RequestParam("houseFlowId")String houseFlowId);
+    ServerResponse setGiveUpOrder(@RequestParam("userToken") String userToken, @RequestParam("houseFlowId") String houseFlowId);
 
     @PostMapping("app/core/houseFlow/setRefuse")
     @ApiOperation(value = "拒单", notes = "拒单")
-    ServerResponse setRefuse(@RequestParam("userToken")String userToken,@RequestParam("houseFlowId")String houseFlowId);
+    ServerResponse setRefuse(@RequestParam("userToken") String userToken, @RequestParam("cityId") String cityId, @RequestParam("houseFlowId") String houseFlowId);
 
     @PostMapping("app/core/houseFlow/setConfirmStart")
     @ApiOperation(value = "确认开工", notes = "确认开工")
-    ServerResponse setConfirmStart(@RequestParam("userToken")String userToken,@RequestParam("houseFlowId")String houseFlowId);
+    ServerResponse setConfirmStart(@RequestParam("userToken") String userToken, @RequestParam("houseFlowId") String houseFlowId);
 
     @PostMapping("app/core/houseFlow/getFlowByhouseIdNot12")
     @ApiOperation(value = "根据houseId查询除设计精算外的可用工序", notes = "根据houseId查询除设计精算外的可用工序")
-    List<HouseFlow> getFlowByhouseIdNot12(@RequestParam("houseId")String houseId);
+    List<HouseFlow> getFlowByhouseIdNot12(@RequestParam("houseId") String houseId);
 
     @PostMapping("app/core/houseFlow/getHouseFlowByHidAndWty")
     @ApiOperation(value = "根据houseId和工种类型查询HouseFlow", notes = "根据houseId和工种类型查询HouseFlow")
-    HouseFlow  getHouseFlowByHidAndWty(@RequestParam("houseId")String houseId,@RequestParam("workerType")Integer workerType);
+    HouseFlow getHouseFlowByHidAndWty(@RequestParam("houseId") String houseId, @RequestParam("workerType") Integer workerType);
+
+    @PostMapping("app/core/houseFlow/getCheckTechnologyList")
+    @ApiOperation(value = "根据houseFlowId查询验收节点", notes = "根据houseFlowId查询验收节点")
+    ServerResponse getCheckTechnologyList(@RequestParam("houseFlowId") String houseFlowId, @RequestParam("applyType") Integer applyType);
 
 }

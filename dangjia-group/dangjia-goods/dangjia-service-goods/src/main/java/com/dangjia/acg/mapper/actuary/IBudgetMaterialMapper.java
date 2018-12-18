@@ -18,15 +18,20 @@ import java.util.Map;
  */
 @Repository
 public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
-	/**
-	 * 未删除材料精算
-	 */
-	List<BudgetMaterial> getBudgetCaiList(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
-	/**
-	 * 未删除服务精算
-	 */
-	List<BudgetMaterial> getBudgetSerList(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 
+	/**查询精算内商品*/
+	List<BudgetMaterial> repairBudgetMaterial(@Param("workerTypeId")String workerTypeId,@Param("houseId")String houseId,
+											  @Param("categoryId")String categoryId,@Param("productName")String productName);
+	/**修改业主取消的精算去自购*/
+	int updateSelf(@Param("houseFlowId") String houseFlowId);
+	/**支付时工种服务总价*/
+	Double getBudgetSerPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+	/**支付时工种材料总价*/
+	Double getBudgetCaiPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+	/**未支付材料精算*/
+	List<BudgetMaterial> getBudgetCaiList(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+	/**未支付服务精算*/
+	List<BudgetMaterial> getBudgetSerList(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	/**查询所有商品精算*/
 	List<Map<String,Object>> getBudgetMaterial();
 	/**根据风格查询所有精算*/

@@ -28,5 +28,7 @@ public class TechnologyDTO {
     @ApiModelProperty("modifyDate")
     private String modifyDate;
     @ApiModelProperty("image")
-    private String image;//图片
+    private String image;//全链接图片
+    @ApiModelProperty("imageUrl")
+    private String imageUrl;//半链接图片
 }

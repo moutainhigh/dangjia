@@ -1,17 +1,10 @@
 package com.dangjia.acg.dto.activity;
 
 
-import com.dangjia.acg.common.annotation.Desc;
-import com.dangjia.acg.common.model.BaseEntity;
-import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 import java.util.List;
 
@@ -35,6 +28,8 @@ public class ActivityRedPackDTO{
 
 	@ApiModelProperty("来源数据ID")
 	private String fromObject;//workertypeid
+	@ApiModelProperty("来源数据name")
+	private String fromObjectName;//workertypeid
 
 	@ApiModelProperty("来源数据类型 0为人工 1为材料 2为单品")
 	private int fromObjectType;//

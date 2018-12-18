@@ -5,6 +5,8 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
+import org.apache.commons.lang.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,6 +17,7 @@ import javax.persistence.Table;
  */
 @Data
 @Entity
+@FieldNameConstants(prefix = "")
 @Table(name = "dj_other_bank_card")
 @ApiModel(description = "银行卡类型")
 public class BankCard extends BaseEntity {
@@ -35,7 +38,7 @@ public class BankCard extends BaseEntity {
 	private String bkMinAmt;//
 
 	@Column(name = "bank_card_image")
-	@Desc(value = "保险名称")
+	@Desc(value = "图片路径")
 	@ApiModelProperty("图片路径")
 	private String bankCardImage;//
 
@@ -43,4 +46,8 @@ public class BankCard extends BaseEntity {
 	@Desc(value = "标识")
 	@ApiModelProperty("标识")
 	private String sign;//
+	//所有图片字段加入域名和端口，形成全路径
+	public void initPath(String address){
+		this.bankCardImage= StringUtils.isEmpty(this.bankCardImage)?null:address+this.bankCardImage;
+	};
 }

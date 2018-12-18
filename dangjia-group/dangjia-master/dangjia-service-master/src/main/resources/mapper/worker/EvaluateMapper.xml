@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.worker.IEvaluateMapper">
+
+    <sql id="all_columns">
+		id,
+		content,
+		member_id as memberId,
+		house_id as houseId,
+		butler_id as butlerId,
+		star,
+		house_flow_apply_id as houseFlowApplyId,
+		house_flow_id as houseFlowId,
+		worker_id as workerId,
+		worker_name as workerName,
+		state,
+		apply_type as applyType,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
+    <!--查工匠被管家的评价-->
+    <select id="getForCountMoneySup" resultType="com.dangjia.acg.modle.worker.Evaluate">
+		select
+            <include refid="all_columns"/>
+		from dj_worker_evaluate
+		where
+            house_flow_id = #{houseFlowId}
+	    and worker_id = #{workerId}
+	    and apply_type = #{applyType}
+	    and state = 3
+		ORDER BY create_date DESC
+		LIMIT 1
+	</select>
+
+    <!--查工匠被业主的评价-->
+    <select id="getForCountMoney" resultType="com.dangjia.acg.modle.worker.Evaluate">
+        select
+        <include refid="all_columns"/>
+        from dj_worker_evaluate
+        where
+        house_flow_id = #{houseFlowId}
+        and worker_id = #{workerId}
+        and apply_type = #{applyType}
+        and state = 1
+		ORDER BY create_date DESC
+		LIMIT 1
+    </select>
+
+</mapper>
+

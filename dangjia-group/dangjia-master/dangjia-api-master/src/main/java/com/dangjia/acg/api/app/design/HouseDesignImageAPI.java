@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(value = "设计图接口", description = "设计图接口")
 public interface HouseDesignImageAPI {
 
+    @PostMapping("app/design/houseDesignImage/designImageList")
+    @ApiOperation(value = "查看施工图", notes = "查看施工图")
+    ServerResponse designImageList(@RequestParam("houseId")String houseId);
+
     @PostMapping("app/design/houseDesignImage/checkPass")
     @ApiOperation(value = "设计通过", notes = "设计通过")
     ServerResponse checkPass(@RequestParam("userToken")String userToken, @RequestParam("houseId")String houseId,@RequestParam("type")int type);

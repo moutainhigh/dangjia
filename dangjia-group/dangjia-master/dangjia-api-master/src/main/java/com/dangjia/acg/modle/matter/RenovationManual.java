@@ -47,11 +47,11 @@ public class RenovationManual extends BaseEntity {
 	@Column(name = "state")
 	@Desc(value = "状态0:可用；1:不可用")
 	@ApiModelProperty("状态0:可用；1:不可用")
-	private int state;//
+	private Integer state;//
 
 	@Column(name = "order_number")
 	@Desc(value = "排序序号")
 	@ApiModelProperty("排序序号")
-	private int orderNumber;//
+	private Integer orderNumber;//
 
 }

@@ -6,17 +6,21 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.dto.activity.ActivityDTO;
+import com.dangjia.acg.dto.activity.ActivityRedPackDTO;
 import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
 import com.dangjia.acg.dto.activity.RedPageResult;
-import com.dangjia.acg.mapper.activity.IActivityRedPackMapper;
-import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
-import com.dangjia.acg.mapper.activity.IActivityRedPackRuleMapper;
+import com.dangjia.acg.mapper.activity.*;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
+import com.dangjia.acg.modle.activity.Activity;
 import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.github.pagehelper.PageHelper;
@@ -27,7 +31,6 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -43,6 +46,14 @@ import java.util.List;
 public class RedPackPayService {
 
     @Autowired
+    private ActivityService activityService;
+    @Autowired
+    private RedPackService redPackService;
+    @Autowired
+    private IActivityMapper activityMapper;
+    @Autowired
+    private IActivityDiscountMapper activityDiscountMapper;
+    @Autowired
     private IActivityRedPackMapper activityRedPackMapper;
     @Autowired
     private IActivityRedPackRecordMapper activityRedPackRecordMapper;
@@ -55,10 +66,59 @@ public class RedPackPayService {
     @Autowired
     private BudgetMaterialAPI budgetMaterialAPI;
     @Autowired
-    private RedPackService redPackService;
-    @Autowired
     private RedisClient redisClient;
+    @Autowired
+    private IHouseMapper houseMapper;
 
+    /**
+     * 可用优惠券数据
+     * @param request
+     * @param phones 手机号
+     * @param activityType 活动类型  0为直推  1为注册 2为邀请
+     * @return
+     */
+    public void checkUpActivity(HttpServletRequest request,String phones,String activityType){
+        String cityId = request.getParameter(Constants.CITY_ID);
+        if(!CommonUtil.isEmpty(cityId)) {
+            //检查是否存在有效活动
+            ActivityDTO activity = validActivity(request,cityId, activityType);
+            //检查优惠券是否有效
+            if(activity!=null&&activity.getDiscounts()!=null&&activity.getDiscounts().size()>0){
+                List<ActivityRedPackDTO> discounts=activity.getDiscounts();
+                for (ActivityRedPackDTO red:discounts) {
+                    //判断优惠券是否过期，或优惠券未关闭
+                    if(red.getDeleteState()==0&&red.getEndDate().getTime()>new Date().getTime()){
+                        List<String> redPackRuleIds=new ArrayList<>();
+                        for (ActivityRedPackRule rule:red.getRedPackRule()) {
+                            redPackRuleIds.add(rule.getId());
+                        }
+                        //开始发送红包
+                        if(redPackRuleIds!=null&&redPackRuleIds.size()>0) {
+                            redPackService.sendMemberPadPackBatch(phones, red.getId(), StringUtils.join(redPackRuleIds, ","));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public ActivityDTO validActivity(HttpServletRequest request,String cityId,String activityType){
+        ActivityDTO activity=new ActivityDTO();
+        Example example = new Example(Activity.class);
+        Example.Criteria criteria=example.createCriteria();
+        criteria.andEqualTo(Activity.ACTIVITY_TYPE,activityType);
+        criteria.andEqualTo(Activity.CITY_ID,cityId);
+        criteria.andLessThanOrEqualTo(Activity.END_DATE,new Date());
+        criteria.andEqualTo(Activity.DELETE_STATE,"0");
+        example.orderBy(Activity.MODIFY_DATE).desc();
+        PageHelper.startPage(0, 1);
+        List<Activity> list = activityMapper.selectByExample(example);
+        if(list!=null&&list.size()>0){
+            activity.setId(list.get(0).getId());
+            ServerResponse response= activityService.getActivity(request,activity);
+            activity=(ActivityDTO)response.getResultObj();
+        }
+        return activity;
+    }
     /**
      * 可用优惠券数据
      * @param request
@@ -77,9 +137,11 @@ public class RedPackPayService {
         List<ActivityRedPackRecordDTO> redPacetResultList = new ArrayList<>();
         List<ActivityRedPackRecordDTO> redPacetNotList = new ArrayList<>();
         BusinessOrder businessOrder = businessOrderList.get(0);
+        House house=houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
         ActivityRedPackRecord activityRedPackRecord=new ActivityRedPackRecord();
         activityRedPackRecord.setModifyDate(new Date());
         activityRedPackRecord.setMemberId(businessOrder.getMemberId());
+        activityRedPackRecord.setCityId(house.getCityId());
         activityRedPackRecord.setHaveReceive(0);
         List<ActivityRedPackRecordDTO> redPacketRecordList=activityRedPackRecordMapper.queryActivityRedPackRecords(activityRedPackRecord);
 
@@ -92,8 +154,9 @@ public class RedPackPayService {
         if (redPacketRecordList.size() == 0) {
             return ServerResponse.createByErrorMessage("无可用优惠券");
         }
-        String houseFlowId = businessOrder.getHouseflowIds();
-        ServerResponse serverResponse=budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(houseFlowId);
+        String houseFlowId = businessOrder.getTaskId();
+        request.setAttribute(Constants.CITY_ID,house.getCityId());
+        ServerResponse serverResponse=budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(request,houseFlowId);
         if(serverResponse.getResultObj()!=null){
             List<BudgetMaterial> budgetMaterialList=(List<BudgetMaterial>)serverResponse.getResultObj();
 
@@ -148,6 +211,7 @@ public class RedPackPayService {
         for (ActivityRedPackRecordDTO redPacetResult:redPacetResultList) {
             if (redPacetResult.getRedPack().getType() == 0) {
                 redPacetResult.setNameType("满减券");
+                redPacetResult.setRedPackRuleId("满"+redPacetResult.getRedPackRule().getSatisfyMoney().setScale(2,BigDecimal.ROUND_HALF_UP)+"可用");
             }else if(redPacetResult.getRedPack().getType() == 1){
                 redPacetResult.setNameType("折扣券");
             }else{
@@ -155,9 +219,9 @@ public class RedPackPayService {
             }
             redPacetResult.setValidTime(
                     "有效期:"
-                    +new SimpleDateFormat("yyyy-MM-dd").format(redPacetResult.getRedPack().getStartDate())
+                    + DateUtil.getDateString2(redPacetResult.getRedPack().getStartDate().getTime())
                     +"至"
-                    +new SimpleDateFormat("yyyy-MM-dd").format(redPacetResult.getRedPack().getEndDate())
+                    + DateUtil.getDateString2(redPacetResult.getRedPack().getEndDate().getTime())
             );
             if (redPacetResult.getRedPack().getIsShare() == 0) {
                 redPacetResult.setShare("可与其他优惠券共同使用");
@@ -193,6 +257,7 @@ public class RedPackPayService {
         String userToken = request.getParameter(Constants.USER_TOKEY);
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         BusinessOrder businessOrder = businessOrderList.get(0);
+        House house=houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
         //还原历史记录的优惠券
         ActivityRedPackRecord activityRedPackRecord=new ActivityRedPackRecord();
         activityRedPackRecord.setMemberId(businessOrder.getMemberId());
@@ -221,8 +286,9 @@ public class RedPackPayService {
                 ActivityRedPackRecord redPacketRecord=activityRedPackRecordMapper.selectByPrimaryKey(redPacketRecordId);
                 ActivityRedPack redPack=activityRedPackMapper.selectByPrimaryKey(redPacketRecord.getRedPackId());
                 ActivityRedPackRule redPackRule=activityRedPackRuleMapper.selectByPrimaryKey(redPacketRecord.getRedPackRuleId());
-                String houseFlowId = businessOrder.getHouseflowIds();
-                ServerResponse serverResponse=budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(houseFlowId);
+                String houseFlowId = businessOrder.getTaskId();
+                request.setAttribute(Constants.CITY_ID,house.getCityId());
+                ServerResponse serverResponse=budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(request,houseFlowId);
                 BigDecimal workerTotal=new BigDecimal(0);
                 BigDecimal goodsTotal=new BigDecimal(0);
                 BigDecimal productTotal=new BigDecimal(0);

@@ -76,7 +76,7 @@ public class ReturnAspect {
         } catch (Throwable e) {
             long end = System.currentTimeMillis();
             if (log.isInfoEnabled()) {
-                log.info("around " + joinPoint + "\tUse time : "
+                log.error("around " + joinPoint + "\tUse time : "
                         + (end - start) + " ms with exception : "
                         + e.getMessage());
             }
@@ -98,6 +98,7 @@ public class ReturnAspect {
     public void afterThrow(JoinPoint joinPoint, Exception ex) {
         String name = joinPoint.getSignature().getName();// 获得目标方法名
         log.info("<=============" + name + "方法--AOP 异常后通知=============>");
+        ex.printStackTrace();
         log.info(name + "方法抛出异常为：" + "\t" + ex.getMessage());
     }
 

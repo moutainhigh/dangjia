@@ -3,5 +3,25 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.sup.ISupplierProductMapper">
-
+    <sql id="new_columns">
+        id,
+        product_id as productId,
+        supplier_id as supplierId,
+        price,
+        stock,
+        is_supply as isSupply,
+        goods_id as goodsId,
+        create_date as createDate,
+        modify_date as modifyDate,
+        data_status as dataStatus
+    </sql>
+    <!--根据货品id查询供应商货品供应关系-->
+    <select id="querySupplierProduct" resultType="com.dangjia.acg.modle.sup.SupplierProduct">
+        select <include refid="new_columns"/>
+        from dj_sup_supplier_product
+        where
+        product_id =#{productId}
+        and is_supply =1
+        order by price asc
+    </select>
 </mapper>

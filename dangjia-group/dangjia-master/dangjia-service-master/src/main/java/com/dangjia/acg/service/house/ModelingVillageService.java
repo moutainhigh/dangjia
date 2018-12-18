@@ -1,7 +1,5 @@
 package com.dangjia.acg.service.house;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.house.VillageDTO;

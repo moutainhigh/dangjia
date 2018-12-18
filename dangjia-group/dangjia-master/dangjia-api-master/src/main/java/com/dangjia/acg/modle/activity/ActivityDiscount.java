@@ -6,17 +6,18 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.Date;
 
 /**
  * 实体类 - 活动优惠券关系表
  */
 @Data
 @Entity
+@FieldNameConstants(prefix = "")
 @Table(name = "dj_activity_discount")
 @ApiModel(description = "活动优惠券关系表")
 public class ActivityDiscount extends BaseEntity {

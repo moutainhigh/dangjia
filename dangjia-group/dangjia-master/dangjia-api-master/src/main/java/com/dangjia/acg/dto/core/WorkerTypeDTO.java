@@ -1,22 +1,12 @@
 package com.dangjia.acg.dto.core;
 
-import com.dangjia.acg.common.annotation.Desc;
-import com.dangjia.acg.common.model.BaseEntity;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
 /**
- * 实体类 - 工种类
+ * 工种
  */
 @Data
-@Entity
-@Table(name = "dj_core_worker_type")
-@ApiModel(description = "工种")
 public class WorkerTypeDTO {
 
 	private String workerTypeId;
@@ -41,11 +31,11 @@ public class WorkerTypeDTO {
 	@ApiModelProperty("1启用,0不启用")
 	private int safeState;//safestate
 
-	@ApiModelProperty("工艺说明url")
-	private String technical;
-
 	@ApiModelProperty("标准巡查次数")
 	private Integer inspectNumber;//inspectnumber
+
+	@ApiModelProperty("图标")
+	private String image;
 
 	@ApiModelProperty("颜色")
 	private String color;

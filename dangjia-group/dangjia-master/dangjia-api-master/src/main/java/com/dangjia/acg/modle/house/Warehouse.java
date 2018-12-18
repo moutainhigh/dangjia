@@ -1,0 +1,113 @@
+package com.dangjia.acg.modle.house;
+
+import com.dangjia.acg.common.annotation.Desc;
+import com.dangjia.acg.common.model.BaseEntity;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.experimental.FieldNameConstants;
+import org.apache.commons.lang.StringUtils;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+/**
+ * 实体类 - 材料仓库统计
+ */
+@Data
+@Entity
+@Table(name = "dj_house_warehouse")
+@ApiModel(description = "材料仓库统计")
+@FieldNameConstants(prefix = "")
+public class Warehouse extends BaseEntity {
+
+	@Column(name = "house_id")
+	@Desc(value = "房子ID")
+	@ApiModelProperty("房子ID")
+	private String houseId;
+
+	@Column(name = "shop_count")
+	@Desc(value = "买总数")
+	@ApiModelProperty("买总数")
+	private Double shopCount;
+
+	@Column(name = "ask_count")
+	@Desc(value = "已要总数")
+	@ApiModelProperty("已要总数")
+	private Double askCount;
+
+	@Column(name = "back_count")
+	@Desc(value = "退总数")
+	@ApiModelProperty("退总数")
+	private Double backCount;
+
+	@Column(name = "product_id")
+	@Desc(value = "货品id")
+	@ApiModelProperty("货品id")
+	private String productId;
+
+	@Column(name = "product_sn")
+	@Desc(value = "货号编号")
+	@ApiModelProperty("货号编号")
+	private String productSn;
+
+	@Column(name = "product_name")
+	@Desc(value = "货号名称")
+	@ApiModelProperty("货号名称")
+	private String productName;
+
+	@Column(name = "price")
+	@Desc(value = "销售价")
+	@ApiModelProperty("销售价")
+	private Double price;
+
+	@Column(name = "cost")
+	@Desc(value = "成本价")
+	@ApiModelProperty("成本价")
+	private Double cost;
+
+	@Column(name = "unit_name")
+	@Desc(value = "单位")
+	@ApiModelProperty("单位")
+	private String unitName;
+
+	@Column(name = "product_type")
+	@Desc(value = "0：材料；1：服务")
+	@ApiModelProperty("0：材料；1：服务")
+	private Integer productType; //0：材料；1：服务
+
+	@Column(name = "category_id")
+	@Desc(value = "分类id")
+	@ApiModelProperty("分类id")
+	private String categoryId;
+
+	@Column(name = "image")
+	@Desc(value = "货品图片")
+	@ApiModelProperty("货品图片")
+	private String image;
+
+	@Column(name = "pay_time")
+	@Desc(value = "支付次数")
+	@ApiModelProperty("支付次数")
+	private Integer payTime;//支付次数
+
+	@Column(name = "ask_time")
+	@Desc(value = "要货次数")
+	@ApiModelProperty("要货次数")
+	private Integer askTime;//要货次数
+
+	@Column(name = "rep_time")
+	@Desc(value = "补次数")
+	@ApiModelProperty("补次数")
+	private Integer repTime;
+
+	@Column(name = "back_time")
+	@Desc(value = "退次数")
+	@ApiModelProperty("退次数")
+	private Integer backTime;//退次数
+
+	public void initPath(String address){
+		this.image = StringUtils.isEmpty(this.image)?null:address+this.image;
+	}
+}

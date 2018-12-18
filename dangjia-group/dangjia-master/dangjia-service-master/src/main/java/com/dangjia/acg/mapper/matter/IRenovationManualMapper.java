@@ -1,7 +1,6 @@
 package com.dangjia.acg.mapper.matter;
 
 import com.dangjia.acg.modle.matter.RenovationManual;
-import com.dangjia.acg.modle.matter.WorkerDisclosure;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 

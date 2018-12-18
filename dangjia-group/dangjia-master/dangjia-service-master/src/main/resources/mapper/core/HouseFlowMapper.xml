@@ -3,48 +3,6 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.core.IHouseFlowMapper">
-    <sql id="basic_columns">
-            id,
-            house_id,
-            sort,
-            state,
-            worker_type_id,
-            worker_type,
-            work_type,
-            safe,
-            safe_shop_state,
-            material_price,
-            total_price,
-            evaluate_steta,
-            work_steta,
-            grab_number,
-            refuse_number,
-            member_id,
-            grab_lock,
-            work_price,
-            house_worker_id,
-            house_worker_order_id,
-            worker_id,
-            safe_id,
-            repair_state,
-            choose,
-            pause,
-            lock_worker,
-            self_price,
-            worker_repair_state,
-            release_time,
-            check_money,
-            patrol,
-            patrol_money,
-            scan_code,
-            supervisor_start,
-            past,
-            latitude,
-            longitude,
-            city_id,
-            create_date,
-            modify_date
-    </sql>
     <sql id="new_columns">
             id,
             house_id as houseId,
@@ -84,10 +42,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             latitude,
             longitude,
             city_id as cityId,
+            data_status as dataStatus,
             create_date as createDate,
             modify_date as modifyDate
     </sql>
-    <!--根据工人id查询已支付未完工并默认的施工任务 -->
+
+    <!--根据工种id,houseId查询houseFlowId -->
+    <select id="selectHouseFlowId" parameterType="java.lang.String" resultType="java.lang.String">
+        select
+            id
+        from dj_core_house_flow
+        where house_id = #{houseId}
+        and worker_type_id = #{workerTypeId}
+    </select>
+
+    <!--根据houseId查询所有用工序 -->
     <select id="getAllFlowByHouseId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlow">
        select
         <include refid="new_columns" />
@@ -96,6 +65,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	   and state=0
 	   order by sort asc
     </select>
+
     <!--其它工人整体完工申请 检测还有没有其它整体完工的申请 -->
     <select id="checkAllFinish" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlow">
         select
@@ -137,7 +107,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <!--根据当前工序查下一工序-->
-    <select id="getNextTopHouseFlow" resultType="com.dangjia.acg.modle.core.HouseFlow">
+    <select id="getNextHouseFlow" resultType="com.dangjia.acg.modle.core.HouseFlow">
         select
         <include refid="new_columns" />
         from dj_core_house_flow

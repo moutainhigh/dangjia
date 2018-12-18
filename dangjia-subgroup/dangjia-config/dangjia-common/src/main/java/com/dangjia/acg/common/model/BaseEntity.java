@@ -2,6 +2,8 @@ package com.dangjia.acg.common.model;
 
 import com.dangjia.acg.common.annotation.Desc;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -12,7 +14,10 @@ import java.util.Date;
 /**
  * Created by QiYuXiang
  */
+
+@Data
 @MappedSuperclass
+@FieldNameConstants(prefix = "")
 public class BaseEntity implements Serializable {
 
     @Id
@@ -35,42 +40,10 @@ public class BaseEntity implements Serializable {
     protected int dataStatus;
 
     public BaseEntity() {
-        this.id = (int)(Math.random() * 100000000) + "" + System.currentTimeMillis();
+        this.id = (int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis();
         this.createDate = new Date();
         this.modifyDate = new Date();
         this.dataStatus=0;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-
-    public Date getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(Date createDate) {
-        this.createDate = createDate;
-    }
-
-    public Date getModifyDate() {
-        return modifyDate;
-    }
-
-    public void setModifyDate(Date modifyDate) {
-        this.modifyDate = modifyDate;
-    }
-
-    public int getDataStatus() {
-        return dataStatus;
-    }
-
-    public void setDataStatus(int dataStatus) {
-        this.dataStatus = dataStatus;
-    }
 }

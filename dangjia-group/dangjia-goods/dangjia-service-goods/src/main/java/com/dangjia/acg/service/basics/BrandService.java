@@ -6,6 +6,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.IBrandMapper;
 import com.dangjia.acg.mapper.basics.IBrandSeriesMapper;
@@ -15,8 +16,8 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -46,7 +47,7 @@ public class BrandService {
 			if (pageSize == null) {
 				pageSize = 10;
 			}
-			String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + configUtil.getValue(SysConfig.PUBLIC_TEMPORARY_FILE_ADDRESS, String.class);
+			String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
 			PageHelper.startPage(pageNum, pageSize);
 			List<Brand> Brandlist = iBrandMapper.getBrands();
 			List<Map<String, Object>> list=new ArrayList<Map<String, Object>>();
@@ -55,14 +56,16 @@ public class BrandService {
 				Map<String, Object> map=new HashMap<String, Object>();
 				map.put("id", brand.getId());
 				map.put("name", brand.getName());
-				SimpleDateFormat  sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				map.put("createDate",sdf.format(brand.getCreateDate()));
-				map.put("modifyDate", sdf.format(brand.getModifyDate()));
+				map.put("createDate", brand.getCreateDate().getTime());
+				map.put("modifyDate", brand.getModifyDate().getTime());
 				List<BrandSeries> mapList=iBrandSeriesMapper.queryBrandSeries(brand.getId());
-				List<BrandSeries> mapList2=new ArrayList<>();
+				List<Map<String,Object>> mapList2=new ArrayList<>();
 				for(BrandSeries bs:mapList){
+					String imageUrl=bs.getImage();
 					bs.setImage(address+bs.getImage());
-					mapList2.add(bs);
+					Map<String,Object> mapSeries = CommonUtil.beanToMap(bs);
+					mapSeries.put("imageUrl",imageUrl);
+					mapList2.add(mapSeries);
 				}
 				obj.put("mapList", mapList2);
 				obj.put("brand", map);
@@ -80,14 +83,17 @@ public class BrandService {
 	//根据Id查询品牌
 	public ServerResponse select(String brandId){
 		try {
-			String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + configUtil.getValue(SysConfig.PUBLIC_TEMPORARY_FILE_ADDRESS, String.class);
+			String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
 			Map<String, Object> obj=new HashMap<String, Object>();
 			Brand brand = iBrandMapper.selectByPrimaryKey(brandId);
 			List<BrandSeries> mapList=iBrandSeriesMapper.queryBrandSeries(brand.getId());
-			List<BrandSeries> mapList2=new ArrayList<>();
+			List<Map<String,Object>> mapList2=new ArrayList<>();
 			for(BrandSeries bs:mapList){
+				String imageUrl=bs.getImage();
 				bs.setImage(address+bs.getImage());
-				mapList2.add(bs);
+				Map<String,Object> mapSeries = CommonUtil.beanToMap(bs);
+				mapSeries.put("imageUrl",imageUrl);
+				mapList2.add(mapSeries);
 			}
 			obj.put("brand", brand);
 			obj.put("mapList", mapList2);
@@ -103,12 +109,11 @@ public class BrandService {
 		try {
 		    	Brand br=iBrandMapper.getBrandByName(name);
 		    	if(br!=null&&!br.getId().equals(id)){
-					return ServerResponse.createByErrorMessage("名称重复");
+					return ServerResponse.createByErrorMessage("品牌名称重复");
 				}
 				Brand brand = new Brand();
 			    brand.setId(id);
 				brand.setName(name);
-			    brand.setCreateDate(new Date());
 			    brand.setModifyDate(new Date());
 			    iBrandMapper.updateByPrimaryKeySelective(brand);
 				JSONArray brandSeriesLists = JSONArray.parseArray(brandSeriesList);
@@ -118,18 +123,13 @@ public class BrandService {
 					String brandSeriesName = brandSeries.getString("name");
 					String content = brandSeries.getString("content");
 					String image = brandSeries.getString("image");
-
 					BrandSeries bSeries = new BrandSeries();
 					bSeries.setBrandId(brand.getId());
 					bSeries.setContent(content);
 					bSeries.setName(brandSeriesName);
-					int first4 = image.indexOf("/20");
-					String imgStr="";
-					if (first4 >= 0) {
-						imgStr = image.substring(first4);
+					if(image!=null && !"".equals(image)){
+						bSeries.setImage(image);
 					}
-					bSeries.setImage(imgStr);
-					bSeries.setCreateDate(new Date());
 					bSeries.setModifyDate(new Date());
 					if(brandSeriesId==null||"".equals(brandSeriesId)){
 						iBrandSeriesMapper.insert(bSeries);
@@ -147,9 +147,11 @@ public class BrandService {
 	//新增品牌
 	public ServerResponse insert(String brandSeriesList,String name){
 		try {
-			List<Brand> bList=iBrandMapper.getBrandByNames(name);
+			Example example = new Example(Brand.class);
+			example.createCriteria().andEqualTo("name",name);
+			List<Brand> bList=iBrandMapper.selectByExample(example);
 			if(bList!=null&&bList.size()>0){
-				return ServerResponse.createByErrorMessage("名称重复");
+				return ServerResponse.createByErrorMessage("品牌名称重复");
 			}
 			Brand brand = new Brand();
 			brand.setName(name);
@@ -167,12 +169,7 @@ public class BrandService {
 				bSeries.setBrandId(brand.getId());
 				bSeries.setContent(content);
 				bSeries.setName(brandSeriesName);
-				int first4 = image.indexOf("/20");
-				String imgStr="";
-				if (first4 >= 0) {
-					imgStr = image.substring(first4);
-				}
-				bSeries.setImage(imgStr);
+				bSeries.setImage(image);
 				bSeries.setCreateDate(new Date());
 				bSeries.setModifyDate(new Date());
 				iBrandSeriesMapper.insert(bSeries);
@@ -197,11 +194,14 @@ public class BrandService {
 			List<Map<String, Object>> list=new ArrayList<Map<String, Object>>();
 			for (Brand brand : Brandlist) {
 				List<BrandSeries> mapList=iBrandSeriesMapper.queryBrandSeries(brand.getId());
-				String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + configUtil.getValue(SysConfig.PUBLIC_TEMPORARY_FILE_ADDRESS, String.class);
-				List<BrandSeries> mapList2=new ArrayList<>();
-				for(BrandSeries bs:mapList){
+				String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+				List<Map<String,Object>> mapList2=new ArrayList<>();
+				for(BrandSeries bs:mapList) {
+					String imageUrl=bs.getImage();
 					bs.setImage(address+bs.getImage());
-					mapList2.add(bs);
+					Map<String,Object> mapSeries = CommonUtil.beanToMap(bs);
+					mapSeries.put("imageUrl",imageUrl);
+					mapList2.add(mapSeries);
 				}
 				Map<String, Object> map=new HashMap<String, Object>();
 				map.put("brand", brand);

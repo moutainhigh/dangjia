@@ -52,6 +52,6 @@ public class SupplierProduct extends BaseEntity implements Serializable{
 	@Column(name = "is_supply")
 	@Desc(value = "是否供应")
 	@ApiModelProperty("是否供应")
-	private int isSupply;//是否供应；0停供，1供应
+	private Integer isSupply;//是否供应；0停供，1供应
 
 }

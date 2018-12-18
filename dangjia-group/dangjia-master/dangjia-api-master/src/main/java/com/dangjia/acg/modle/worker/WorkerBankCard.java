@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,6 +16,7 @@ import javax.persistence.Table;
  */
 @Data
 @Entity
+@FieldNameConstants(prefix = "")
 @Table(name = "dj_worker_worker_bank_card")
 @ApiModel(description = "银行卡类型")
 public class WorkerBankCard extends BaseEntity {

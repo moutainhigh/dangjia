@@ -1,10 +1,10 @@
 package com.dangjia.acg.api;
 
-import cn.jmessage.api.group.CreateGroupResult;
 import cn.jmessage.api.group.GroupInfoResult;
 import cn.jmessage.api.group.GroupListResult;
 import cn.jmessage.api.group.MemberListResult;
 import cn.jmessage.api.user.UserGroupsResult;
+import com.dangjia.acg.dto.CreateGroupResultDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -39,7 +39,7 @@ public interface GroupAPI {
      */
     @RequestMapping(value = "createGroup", method = RequestMethod.POST)
     @ApiOperation(value = "创建群组", notes = "创建群组")
-    CreateGroupResult createGroup(
+    CreateGroupResultDTO createGroup(
             @ApiParam(name ="appType",value = "应用类型（zx=当家装修，gj=当家工匠）")@RequestParam("appType") String appType,
             @ApiParam(name ="owner_username",value = "（必填）群主用户名")@RequestParam("owner_username") String owner_username,
             @ApiParam(name ="name",value = "（必填）群组名字  支持的字符：全部，包括表情符号。")@RequestParam("name") String name,
@@ -95,7 +95,7 @@ public interface GroupAPI {
      */
     @RequestMapping(value = "manageGroup", method = RequestMethod.POST)
     @ApiOperation(value = "更新群组成员", notes = "更新群组成员， 两者至少要有一个")
-    void manageGroup(
+    String manageGroup(
             @ApiParam(name ="appType",value = "应用类型（zx=当家装修，gj=当家工匠）")@RequestParam("appType") String appType,
             @ApiParam(name ="groupId",value = "gid群组ID")@RequestParam("groupId") int groupId,
             @ApiParam(name ="addList",value = "dd json数组表示要添加到群组的用户（任选）")@RequestParam("addList") String[] addList,

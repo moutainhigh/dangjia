@@ -11,25 +11,33 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
- * 工人奖罚关系表
+ *  奖罚条件
  *  原表 WorkerRewardAndPunishCorrelation
  */
 @Data
 @Entity
 @Table(name = "dj_worker_reward_punish_correlation")
-@ApiModel(description = "工人奖罚关系表")
+@ApiModel(description = "奖罚条件")
 public class RewardPunishCorrelation extends BaseEntity {
 
-	@Column(name = "reward_punish_id")
-	@Desc(value = "奖罚id")
-	@ApiModelProperty("奖罚id")
-	private String rewardPunishId; //workerRewardandPunishid
+	@Column(name = "name")
+	@Desc(value = "奖罚条件名称")
+	@ApiModelProperty("奖罚条件名称")
+	private String name;
 
-	@Column(name = "condition_id")
-	@Desc(value = "奖罚条件id")
-	@ApiModelProperty("奖罚条件id")
-	private String conditionId; //
+	@Column(name = "content")
+	@Desc(value = "详细描述")
+	@ApiModelProperty("详细描述")
+	private String content;
 
-	
+	@Column(name = "type")
+	@Desc(value = "奖罚类型")
+	@ApiModelProperty("奖罚类型")
+	private Integer type;//0:奖励;1:处罚
+
+	@Column(name = "state")
+	@Desc(value = "启用状态")
+	@ApiModelProperty("启用状态")
+	private Integer state;//0:启用;1:不启用
 
 }

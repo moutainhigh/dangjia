@@ -55,7 +55,7 @@ public class PayOrder extends BaseEntity {
 	@Column(name = "state")
 	@Desc(value = "0未支付,2已支付")
 	@ApiModelProperty("0未支付,2已支付")
-	private int state;//
+	private Integer state;//
 
 	@Column(name = "price")
 	@Desc(value = "该笔支付钱")

@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.activity;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -23,6 +24,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -52,22 +54,26 @@ public class ActivityService {
      * @param activity
      * @return
      */
-    public ServerResponse queryActivitys(HttpServletRequest request, Activity activity) {
+    public ServerResponse queryActivitys(HttpServletRequest request, PageDTO pageDTO, Activity activity,String isEndTime) {
         Example example = new Example(Activity.class);
         Example.Criteria criteria=example.createCriteria();
-        if(!CommonUtil.isEmpty(activity.getRedPacketType())) {
-            criteria.andEqualTo("redPacketType",activity.getRedPacketType());
+        if(!CommonUtil.isEmpty(activity.getActivityType())) {
+            criteria.andEqualTo(Activity.ACTIVITY_TYPE,activity.getActivityType());
         }
         if (!CommonUtil.isEmpty(activity.getName())) {
-            criteria.andLike("name", "%" + activity.getName() + "%");
+            criteria.andLike(Activity.NAME, "%" + activity.getName() + "%");
         }
         if(!CommonUtil.isEmpty(activity.getCityId())) {
-            criteria.andEqualTo("cityId",activity.getCityId());
+            criteria.andEqualTo(Activity.CITY_ID,activity.getCityId());
         }
-
-        Integer pageNum=request.getAttribute("pageNum")==null?1:(Integer)request.getAttribute("pageNum");
-        Integer pageSize=request.getAttribute("pageSize")==null?10:(Integer)request.getAttribute("pageSize");
-        PageHelper.startPage(pageNum, pageSize);
+        if(!CommonUtil.isEmpty(isEndTime)&&"0".equals(isEndTime)) {
+            criteria.andLessThanOrEqualTo(Activity.END_DATE,new Date());
+        }
+        if(!CommonUtil.isEmpty(activity.getDeleteState())) {
+            criteria.andEqualTo(Activity.DELETE_STATE,activity.getDeleteState());
+        }
+        example.orderBy(Activity.MODIFY_DATE).desc();
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Activity> list = activityMapper.selectByExample(example);
         PageInfo pageResult = new PageInfo(list);
         return ServerResponse.createBySuccess("ok",pageResult);
@@ -77,7 +83,7 @@ public class ActivityService {
         Activity activity = activityMapper.selectByPrimaryKey(activityDTO.getId());
         BeanUtils.beanToBean(activity,activityDTO);
         Example example = new Example(ActivityDiscount.class);
-        example.createCriteria().andEqualTo("activityId",activity.getId());
+        example.createCriteria().andEqualTo(ActivityDiscount.ACTIVITY_ID,activity.getId());
         List<ActivityDiscount> discounts=activityDiscountMapper.selectByExample(example);
         List<ActivityRedPackDTO> redPacks=new ArrayList<>();
         for (ActivityDiscount discount:discounts) {
@@ -86,7 +92,7 @@ public class ActivityService {
                ActivityRedPackDTO activityRedPackDTO=new  ActivityRedPackDTO();
                BeanUtils.beanToBean(activityRedPack,activityRedPackDTO);
                Example exampleRule = new Example(ActivityRedPackRule.class);
-               exampleRule.createCriteria().andEqualTo("activityRedPackId",activityRedPackDTO.getId());
+               exampleRule.createCriteria().andEqualTo(ActivityRedPackRule.ACTIVITY_RED_PACK_ID,activityRedPackDTO.getId());
                List<ActivityRedPackRule> redPackRule=activityRedPackRuleMapper.selectByExample(exampleRule);
                activityRedPackDTO.setRedPackRule(redPackRule);
                redPacks.add(activityRedPackDTO);
@@ -102,6 +108,7 @@ public class ActivityService {
      * @return
      */
     public ServerResponse editActivity(HttpServletRequest request, Activity activity,String discount) {
+        activity.setModifyDate(new Date());
         if(this.activityMapper.updateByPrimaryKeySelective(activity)>0){
             if(!CommonUtil.isEmpty(discount)) {
                 addActivityDiscounts(activity, discount);
@@ -112,11 +119,27 @@ public class ActivityService {
         }
     }
     /**
+     * 关闭活动
+     * @param id
+     * @return
+     */
+    public ServerResponse closeActivity(String id) {
+        Activity activity=new Activity();
+        activity.setId(id);
+        activity.setDeleteState(1);
+        if(this.activityMapper.updateByPrimaryKeySelective(activity)>0){
+            return ServerResponse.createBySuccessMessage("ok");
+        }else{
+            return ServerResponse.createByErrorMessage("关闭失败，请您稍后再试");
+        }
+    }
+    /**
      * 新增
      * @param activity
      * @return
      */
     public ServerResponse addActivity(HttpServletRequest request,Activity activity,String discount) {
+        activity.setDeleteState(1);
         if(this.activityMapper.insertSelective(activity)>0){
             addActivityDiscounts(activity,discount);
             return ServerResponse.createBySuccessMessage("ok");
@@ -131,7 +154,7 @@ public class ActivityService {
      * @return
      */
     public void addActivityDiscounts(Activity activity,String discount) {
-        Example example = new Example(Activity.class);
+        Example example = new Example(ActivityDiscount.class);
         Example.Criteria criteria=example.createCriteria();
         criteria.andEqualTo("activityId",activity.getId());
         activityDiscountMapper.deleteByExample(example);

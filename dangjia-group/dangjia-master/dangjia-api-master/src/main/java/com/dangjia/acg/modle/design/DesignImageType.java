@@ -30,22 +30,22 @@ public class DesignImageType extends BaseEntity {
 	@Column(name = "state")
 	@Desc(value = "1可用，2禁用，3删除")
 	@ApiModelProperty("1可用，2禁用，3删除")
-	private int state;//
+	private Integer state;//
 
 	@Column(name = "upload")
 	@Desc(value = "0非必传，1必传")
 	@ApiModelProperty("0非必传，1必传")
-	private int upload;//
+	private Integer upload;//
 
 	@Column(name = "type")
 	@Desc(value = "1施工图,2效果图")
 	@ApiModelProperty("1施工图,2效果图")
-	private int type;//
+	private Integer type;//
 
 	@Column(name = "sell")
 	@Desc(value = "额外付费 1是, 0不是")
 	@ApiModelProperty("额外付费 1是, 0不是")
-	private int sell;//
+	private Integer sell;//
 
 	@Column(name = "price")
 	@Desc(value = "价格")

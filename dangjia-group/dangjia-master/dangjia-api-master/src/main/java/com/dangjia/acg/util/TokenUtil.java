@@ -27,6 +27,7 @@ public class TokenUtil {
 		accessToken.setUserToken(getRandom());
 		// 设置时间戳
 		accessToken.setTimestamp(getTimeStamp());
+		member.setPassword(null);
 		accessToken.setMember(member);
 		//设置工种类型名称
 //			accessToken.setUserTypeName(userTypeName);

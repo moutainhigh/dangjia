@@ -1,7 +1,7 @@
 package com.dangjia.acg.mapper.core;
 
+import com.dangjia.acg.dto.core.HouseWorkerDTO;
 import com.dangjia.acg.modle.core.HouseWorker;
-import com.dangjia.acg.modle.core.WorkerType;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -23,4 +23,6 @@ public interface IHouseWorkerMapper extends Mapper<HouseWorker> {
     HouseWorker getHwByHidAndWtype(@Param("houseId")String houseId,@Param("workerType")Integer workerType);
     Long getCountOrderByWorkerId(@Param("workerId")String workerId);
     List<HouseWorker> getWorktype6ByHouseid(@Param("houseId")String houseId);
+
+    List<HouseWorkerDTO> queryWorkerHouse(@Param("workerId")String workerId);
 }

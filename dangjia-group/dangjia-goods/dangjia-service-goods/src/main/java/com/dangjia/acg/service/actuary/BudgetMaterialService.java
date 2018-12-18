@@ -1,21 +1,22 @@
 package com.dangjia.acg.service.actuary;
 
-import com.dangjia.acg.common.exception.BaseException;
-import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
+import com.dangjia.acg.mapper.basics.ILabelMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Goods;
+import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
-import com.dangjia.acg.modle.pay.BusinessOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.math.BigDecimal;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -30,9 +31,12 @@ public class BudgetMaterialService {
 
 	@Autowired
 	private IGoodsMapper iGoodsMapper;
-
+	@Autowired
+	private ILabelMapper iLabelMapper;
 	@Autowired
 	private IProductMapper iProductMapper;
+	@Autowired
+	private ConfigUtil configUtil;
 
 	//查询所有精算
 	public ServerResponse getAllBudgetMaterial(){
@@ -41,7 +45,7 @@ public class BudgetMaterialService {
 			return ServerResponse.createBySuccess("查询成功",mapList);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
+			return ServerResponse.createByErrorMessage("查询失败");
 		}
 	}
 	//根据HouseFlowId查询房子材料精算
@@ -53,17 +57,17 @@ public class BudgetMaterialService {
 			return ServerResponse.createBySuccess("查询成功",budgetMaterialist);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
+			return ServerResponse.createByErrorMessage("查询失败");
 		}
 	}
-	//根据houseId和wokerTypeId查询房子材料精算
+	//根据houseId和workerTypeId查询房子材料精算
 	public ServerResponse getAllBudgetMaterialById(String houseId,String workerTypeId){
 		try {
 			List<Map<String, Object>> mapList=iBudgetMaterialMapper.getBudgetMaterialById(houseId,workerTypeId);
 			return ServerResponse.createBySuccess("查询成功",mapList);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
+			return ServerResponse.createByErrorMessage("查询失败");
 		}
 	}
 	//根据Id查询到精算
@@ -73,7 +77,7 @@ public class BudgetMaterialService {
 			return ServerResponse.createBySuccess("查询成功",budgetMaterial);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
+			return ServerResponse.createByErrorMessage("查询失败");
 		}
 	}
 	//根据ID删除精算
@@ -83,7 +87,7 @@ public class BudgetMaterialService {
 			return ServerResponse.createBySuccessMessage("删除成功");
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new BaseException(ServerCode.WRONG_PARAM, "删除失败");
+			return ServerResponse.createByErrorMessage("删除失败");
 		}
 	}
 
@@ -94,17 +98,50 @@ public class BudgetMaterialService {
 			return ServerResponse.createBySuccess("查询成功",mapList);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
+			return ServerResponse.createByErrorMessage("查询失败");
 		}
 	}
 	//根据商品Id查货品
 	public ServerResponse getAllProductByGoodsId(String goodsId){
 		try {
-			List<Product> mapList = iProductMapper.queryByGoodsId(goodsId);
+			String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+			List<Product> pList = iProductMapper.queryByGoodsId(goodsId);
+			List<Map<String,Object>> mapList=new ArrayList<>();
+			for(Product p:pList){
+				if(p.getImage()==null){
+					continue;
+				}
+				String[] imgArr=p.getImage().split(",");
+				String imgStr="";
+				String imgUrlStr="";
+				for(int i=0;i<imgArr.length;i++){
+					if(i==imgArr.length-1) {
+						imgStr += address+imgArr[i];
+						imgUrlStr += imgArr[i];
+					}else{
+						imgStr += address+imgArr[i]+",";
+						imgUrlStr += imgArr[i]+",";
+				}
+				}
+				p.setImage(imgStr);
+				Map<String,Object> map = CommonUtil.beanToMap(p);
+				map.put("imageUrl",imgUrlStr);
+				if (p.getLabelId() == null) {
+					map.put("labelId", "");
+					map.put("labelName", "");
+				} else {
+					map.put("labelId", p.getLabelId());
+					Label label = iLabelMapper.selectByPrimaryKey(p.getLabelId());
+					if (label.getName() != null)
+						map.put("labelName", label.getName());
+				}
+				mapList.add(map);
+			}
 			return ServerResponse.createBySuccess("查询成功",mapList);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
+			return ServerResponse.createByErrorMessage("查询失败");
 		}
 	}
+
 }

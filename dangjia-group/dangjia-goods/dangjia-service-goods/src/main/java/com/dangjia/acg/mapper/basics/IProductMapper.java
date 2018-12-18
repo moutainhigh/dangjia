@@ -1,10 +1,10 @@
 package com.dangjia.acg.mapper.basics;
 
-import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.Product;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
+
 import java.util.List;
 
 /**
@@ -16,12 +16,17 @@ import java.util.List;
  */
 @Repository
 public interface IProductMapper extends Mapper<Product> {
+
 	void deleteById(String id);
 	Product getById(String id);
+
 	List<Product> query(@Param("category_id") String category_id);
-	//根据货品id查询所有关联属性
-	List<AttributeValue> queryProductAttributeByPid(String product_id);
+
 	//根据商品Id查货品
-	List<Product> queryByGoodsId(String goods_id);
+	List<Product> queryByGoodsId(@Param("goodsId")String goodsId);
 	List<Product> queryByName(@Param("name") String name);
+	/**查询product*/
+	Product selectProduct(@Param("goodsId")String goodsId, @Param("brandSeriesId")String brandSeriesId, @Param("valueIdArr")String[] valueIdArr);
+	List<Product> queryRepairBudgetMaterial(@Param("houseId") String houseId,@Param("name") String name,@Param("categoryId")String categoryId);
+	Product getSwitchProduct(@Param("brandSeriesId")String brandSeriesId, @Param("valueIdArr")String[] valueIdArr);
 }

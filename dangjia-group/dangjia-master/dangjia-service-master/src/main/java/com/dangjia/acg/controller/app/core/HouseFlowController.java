@@ -5,6 +5,7 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.service.core.HouseFlowService;
+import com.dangjia.acg.service.matter.TechnologyRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,81 +21,101 @@ public class HouseFlowController implements HouseFlowAPI {
 
     @Autowired
     private HouseFlowService houseFlowService;
+    @Autowired
+    private TechnologyRecordService technologyRecordService;
 
     /**
      * 抢单列表
+     *
      * @param userToken
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse getGrabList(String userToken,String cityId){
-        return houseFlowService.getGrabList(userToken,cityId);
+    public ServerResponse getGrabList(String userToken, String cityId) {
+        return houseFlowService.getGrabList(userToken, cityId);
     }
 
     /**
      * 抢单验证
+     *
      * @param userToken
      * @param houseFlowId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse setGrabVerification(String userToken,String houseFlowId){
-        return houseFlowService.setGrabVerification(userToken,houseFlowId);
+    public ServerResponse setGrabVerification(String userToken, String cityId, String houseFlowId) {
+        return houseFlowService.setGrabVerification(userToken, cityId, houseFlowId);
     }
 
     /**
      * 放弃此单
+     *
      * @param userToken
      * @param houseFlowId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse setGiveUpOrder(String userToken,String houseFlowId){
-        return houseFlowService.setGiveUpOrder(userToken,houseFlowId);
+    public ServerResponse setGiveUpOrder(String userToken, String houseFlowId) {
+        return houseFlowService.setGiveUpOrder(userToken, houseFlowId);
     }
 
     /**
      * 拒单
+     *
      * @param userToken
      * @param houseFlowId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse setRefuse(String userToken,String houseFlowId){
-        return houseFlowService.setRefuse(userToken,houseFlowId);
+    public ServerResponse setRefuse(String userToken, String cityId, String houseFlowId) {
+        return houseFlowService.setRefuse(userToken, cityId, houseFlowId);
     }
 
     /**
      * 确认开工
+     *
      * @param userToken
      * @param houseFlowId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse setConfirmStart(String userToken,String houseFlowId){
-        return houseFlowService.setConfirmStart(userToken,houseFlowId);
+    public ServerResponse setConfirmStart(String userToken, String houseFlowId) {
+        return houseFlowService.setConfirmStart(userToken, houseFlowId);
     }
+
     /**
      * 根据houseId查询除设计精算外的可用工序
+     *
      * @param houseId
      * @return
      */
     @Override
     @ApiMethod
-    public List<HouseFlow> getFlowByhouseIdNot12(String houseId){
+    public List<HouseFlow> getFlowByhouseIdNot12(String houseId) {
         return houseFlowService.getFlowByhouseIdNot12(houseId);
     }
 
     /**
      * 根据houseId和工种类型查询HouseFlow
      */
-    public HouseFlow  getHouseFlowByHidAndWty(String houseId,Integer workerType){
-        return houseFlowService.getHouseFlowByHidAndWty(houseId,workerType);
+    @Override
+    @ApiMethod
+    public HouseFlow getHouseFlowByHidAndWty(String houseId, Integer workerType) {
+        return houseFlowService.getHouseFlowByHidAndWty(houseId, workerType);
+    }
+
+    /**
+     * 根据houseFlowId查询验收节点
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getCheckTechnologyList(String houseFlowId, Integer applyType) {
+        return technologyRecordService.getCheckTechnologyList(houseFlowId, applyType);
     }
 
 }

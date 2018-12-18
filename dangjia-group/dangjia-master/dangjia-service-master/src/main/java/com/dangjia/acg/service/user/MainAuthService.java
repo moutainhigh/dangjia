@@ -2,7 +2,6 @@ package com.dangjia.acg.service.user;
 
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.SessionUtils;
 import com.dangjia.acg.dto.user.PermissionVO;
 import com.dangjia.acg.dto.user.RoleVO;
 import com.dangjia.acg.mapper.user.*;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import java.util.ArrayList;
 import java.util.List;
 @Service
 public class MainAuthService {
@@ -184,7 +182,7 @@ public class MainAuthService {
 
 	
 	public ServerResponse getUserPerms(String id) {
-		Integer source= redisClient.getCache("sysSource",Integer.class);
+		Integer source= redisClient.getCache("sysSource:"+id,Integer.class);
 		if(source==null){
 			source=1;
 		}

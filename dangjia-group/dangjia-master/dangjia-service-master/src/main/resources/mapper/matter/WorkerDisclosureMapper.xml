@@ -4,5 +4,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.matter.IWorkerDisclosureMapper">
 
+    <!--查询保存的交底内容-->
+    <select id="getWorkerDisclosureList" resultType="com.dangjia.acg.modle.matter.WorkerDisclosure">
+		select
+		    name,
+		    details
+		from dj_matter_worker_disclosure wd
+		where
+	        wd.id in
+	        (select wdh.worker_disclo_id
+	         from dj_matter_worker_disclosure_house_flow wdh
+	         where wdh.house_flow_id = #{houseFlowId})
+	</select>
+
 </mapper>
 

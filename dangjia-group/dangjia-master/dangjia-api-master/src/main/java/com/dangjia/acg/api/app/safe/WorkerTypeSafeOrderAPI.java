@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.app.safe;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -20,4 +21,12 @@ public interface WorkerTypeSafeOrderAPI {
     @ApiOperation(value = "切换工序保险", notes = "切换工序保险")
     ServerResponse changeSafeType(@RequestParam("userToken")String userToken, @RequestParam("houseFlowId")String houseFlowId,
                                   @RequestParam("workerTypeSafeId")String workerTypeSafeId, @RequestParam("selected")int selected);
+
+    @PostMapping("app/safe/order/list")
+    @ApiOperation(value = "我的质保卡", notes = "我的质保卡")
+    ServerResponse queryMySafeTypeOrder(String userToken, String houseId, PageDTO pageDTO);
+
+    @PostMapping("app/safe/order/detail")
+    @ApiOperation(value = "我的质保卡明细", notes = "我的质保卡明细")
+    ServerResponse getMySafeTypeOrderDetail(String id);
 }

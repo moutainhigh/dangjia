@@ -30,8 +30,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.concurrent.TimeoutException;
 
-import static com.dangjia.acg.common.util.AES.encrypt;
-
 
 /**
  * @author
@@ -76,6 +74,7 @@ public class ErrorAdvice {
     Gson gson = new Gson();
     JsonResponse jsonResponse = new JsonResponse(e.getCode(),e.getAttachment() == null ? e.getDesc() : e.getAttachment(),pm);
     String toString = gson.toJson(jsonResponse);
+    //return  toString;
     return  AES.encrypt(toString, Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
   }
 
@@ -87,7 +86,8 @@ public class ErrorAdvice {
     Gson gson = new Gson();
     JsonResponse jsonResponse = new JsonResponse(ServerCode.CLIENT_EXCEPTION.getCode() ,ServerCode.CLIENT_EXCEPTION.getDesc(),platform);
     String toString = gson.toJson(jsonResponse);
-    return  encrypt(toString,Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
+   // return  toString;
+  return  AES.encrypt(toString,Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
   }
 
   @ResponseBody
@@ -99,7 +99,8 @@ public class ErrorAdvice {
     Gson gson = new Gson();
     JsonResponse jsonResponse = new JsonResponse(ServerCode.ILLEGAL_ARGUMENT_ERROR.getCode(), e.getMessage(),platform);
     String toString = gson.toJson(jsonResponse);
-    return  encrypt(toString,Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
+   // return  toString;
+  return  AES.encrypt(toString,Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
   }
 
 
@@ -122,7 +123,8 @@ public class ErrorAdvice {
       Gson gson = new Gson();
       JsonResponse jsonResponse = new JsonResponse(-1,"访问异常,请重新登录");
       String toString = gson.toJson(jsonResponse);
-      return encrypt(toString,Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
+     // return  toString;
+     return AES.encrypt(toString,Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
     }
 
 
@@ -136,7 +138,8 @@ public class ErrorAdvice {
     Gson gson = new Gson();
     JsonResponse jsonResponse = new JsonResponse(ServerCode.PERMISSION_UNLOGIN.getCode(),"未登录");
     String toString = gson.toJson(jsonResponse);
-    return encrypt(toString,Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
+    //return  toString;
+    return AES.encrypt(toString,Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
   }
 
   @ResponseBody
@@ -146,7 +149,8 @@ public class ErrorAdvice {
     JsonResponse jsonResponse = new JsonResponse(ServerCode.PERMISSION_DENIED.getCode(),"授权失败");
     Gson gson = new Gson();
     String toString = gson.toJson(jsonResponse);
-    return encrypt(toString,Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
+   // return  toString;
+   return AES.encrypt(toString,Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
   }
 
   @ResponseBody
@@ -172,7 +176,8 @@ public class ErrorAdvice {
     }
     Gson gson = new Gson();
     String toString = gson.toJson(error);
-    return encrypt(toString,Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
+    //return  toString;
+  return AES.encrypt(toString,Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
   }
 
   @ResponseBody
@@ -191,7 +196,8 @@ public class ErrorAdvice {
     }
     Gson gson = new Gson();
     String toString = gson.toJson(error);
-    return encrypt(toString,Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
+   // return  toString;
+  return AES.encrypt(toString,Constants.DANGJIA_SESSION_KEY,Constants.DANGJIA_IV);
   }
 
 }

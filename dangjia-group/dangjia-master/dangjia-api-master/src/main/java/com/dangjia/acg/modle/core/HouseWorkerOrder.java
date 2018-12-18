@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "dj_core_house_worker_order")
 @ApiModel(description = "工人订单表")
+@FieldNameConstants(prefix = "")
 public class HouseWorkerOrder extends BaseEntity {
 
 	@Column(name = "business_order_number")
@@ -58,22 +60,12 @@ public class HouseWorkerOrder extends BaseEntity {
 	@Column(name = "worker_type")
 	@Desc(value = "工种类型")
 	@ApiModelProperty("工种类型")
-	private int workerType;//workertype
-
-	@Column(name = "istest")
-	@Desc(value = "是否测试 1测试，0不是测试 默认为0")
-	@ApiModelProperty("是否测试 1测试，0不是测试 默认为0")
-	private int istest;//
+	private Integer workerType;//workertype
 
 	@Column(name = "pay_state")
 	@Desc(value = "支付状态0未支付，1已经支付")
 	@ApiModelProperty("支付状态0未支付，1已经支付")
 	private Integer payState;//paystate
-
-	@Column(name = "get_state")
-	@Desc(value = "取现状态 为1表示有未审核提现")
-	@ApiModelProperty("取现状态 为1表示有未审核提现")
-	private int getState;//getstate
 
 	@Column(name = "payment")
 	@Desc(value = "支付方式1微信, 2支付宝,3后台回调")
@@ -150,24 +142,24 @@ public class HouseWorkerOrder extends BaseEntity {
 	@ApiModelProperty("大管家每次巡查得到的钱 累计")
 	private BigDecimal checkMoney;
 
-	@Column(name = "order_id")
-	@Desc(value = "订单id")
-	@ApiModelProperty("订单id")
-	private String orderId;//orderid
-
 	public HouseWorkerOrder(){
-		this.payState = 0;
-		this.safePrice = new BigDecimal(0);//保险费
-		this.discounts = new BigDecimal(0);
-		this.retentionMoney = new BigDecimal(0);//retentionmoney
-		this.afterChange = new BigDecimal(0);//afterchange
-		this.takedMoney = new BigDecimal(0);//takedmoney
-		this.repairPrice = new BigDecimal(0);//repairprice
-		this.haveMoney = new BigDecimal(0);//havemaoney
-		this.everyMoney = new BigDecimal(0);//everydaypaymaoney
-		this.checkMoney = new BigDecimal(0);
-		this.workPrice = new BigDecimal(0);
-		this.materialPrice = new BigDecimal(0);
-		this.totalPrice = new BigDecimal(0);
+
+	}
+	public HouseWorkerOrder(Boolean isInit){
+		if(isInit) {
+			this.payState = 0;
+			this.safePrice = new BigDecimal(0);//保险费
+			this.discounts = new BigDecimal(0);
+			this.retentionMoney = new BigDecimal(0);//retentionmoney
+			this.afterChange = new BigDecimal(0);//afterchange
+			this.takedMoney = new BigDecimal(0);//takedmoney
+			this.repairPrice = new BigDecimal(0);//repairprice
+			this.haveMoney = new BigDecimal(0);//havemaoney
+			this.everyMoney = new BigDecimal(0);//everydaypaymaoney
+			this.checkMoney = new BigDecimal(0);
+			this.workPrice = new BigDecimal(0);
+			this.materialPrice = new BigDecimal(0);
+			this.totalPrice = new BigDecimal(0);
+		}
 	}
 }
