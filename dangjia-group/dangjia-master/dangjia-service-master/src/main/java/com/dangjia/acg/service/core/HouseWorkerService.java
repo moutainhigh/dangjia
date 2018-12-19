@@ -12,40 +12,33 @@ import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
-import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.ConstructionByWorkerIdBean;
 import com.dangjia.acg.dto.core.HomePageBean;
-import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.matter.IWorkerEverydayMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.other.IBankCardMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
-import com.dangjia.acg.mapper.worker.*;
-import com.dangjia.acg.modle.config.Sms;
+import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.other.BankCard;
 import com.dangjia.acg.modle.other.WorkDeposit;
-import com.dangjia.acg.modle.worker.*;
+import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
-import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.util.*;
 
 /**
@@ -77,12 +70,6 @@ public class HouseWorkerService {
     @Autowired
     private IWorkerDetailMapper workerDetailMapper;
     @Autowired
-    private IWorkerBankCardMapper workerBankCardMapper;
-    @Autowired
-    private IBankCardMapper bankCardMapper;
-    @Autowired
-    private IWithdrawDepositMapper withdrawDepositMapper;
-    @Autowired
     private WorkerGoodsAPI workerGoodsAPI;
     @Autowired
     private IWorkDepositMapper workDepositMapper;
@@ -90,12 +77,6 @@ public class HouseWorkerService {
     private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
     @Autowired
     private ConfigUtil configUtil;
-    @Autowired
-    private IRewardPunishRecordMapper rewardPunishRecordMapper;
-    @Autowired
-    private IRewardPunishConditionMapper rewardPunishConditionMapper;
-    @Autowired
-    private ISmsMapper smsMapper;
     @Autowired
     private ITechnologyRecordMapper technologyRecordMapper;
     @Autowired
@@ -294,7 +275,7 @@ public class HouseWorkerService {
                             wfr.setIsStart(1);//今日是否开工0:否；1：是；
                             houseIsStart = true;
                         }
-                        String url=String.format(DjConstants.GJPageAddress.GJMANAGERISOK,userToken,cityId,houseName)+"&houseId=" + house.getId() + "&houseFlowId="+hfl.getId();
+                        String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.GJMANAGERISOK,userToken,cityId,houseName)+"&houseId=" + house.getId() + "&houseFlowId="+hfl.getId();
                         wfr.setDetailUrl(url);//进程详情链接
                         HouseFlowApply houseFlowApp = houseFlowApplyMapper.checkHouseFlowApply(hfl.getId(), worker2 == null ? "" : worker2.getId());//根据工种任务id和工人id查询此工人待审核
                         if (houseFlowApp != null && houseFlowApp.getApplyType() == 1) {//阶段完工申请
@@ -519,7 +500,7 @@ public class HouseWorkerService {
             String name = edNames[i];
             ConstructionByWorkerIdBean.BigListBean.ListMapBean mapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
             mapBean.setName(name);
-            mapBean.setUrl(getH5Url(edUrls[i], userToken, cityId, name) + "&houseId=" + house.getId());
+            mapBean.setUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + getH5Url(edUrls[i], userToken, cityId, name) + "&houseId=" + house.getId());
             mapBean.setImage(address + "/gongjiang/" + edImages[i]);
             mapBean.setType(edTypes[i]);
             listMap.add(mapBean);
@@ -531,10 +512,11 @@ public class HouseWorkerService {
         int[] qtTypes = {0, 0, 1, 0, 0, 0};
         int[] qtShowTypes = {1, 1, 2, 2, 0, 0};//1：大管家有的，2：工匠有的，0：都有
         String[] qtImages = {"artisan_22.png", "artisan_23.png", "erweima.png", "artisan_31.png", "artisan_24.png", "artisan_30.png"};
-        String[] qtUrls = {DjConstants.GJPageAddress.HPMANAGE, DjConstants.GJPageAddress.RECIVEGOODSLIST, DjConstants.GJPageAddress.QRCODE, DjConstants.GJPageAddress.BTPEOPLE, DjConstants.GJPageAddress.BTRECORDLIST, DjConstants.GJPageAddress.PROJECTADRESSLIST};//H5路由
+        String[] qtUrls = {DjConstants.GJPageAddress.HPMANAGE, DjConstants.GJPageAddress.RECIVEGOODSLIST, DjConstants.GJPageAddress.QRCODE, DjConstants.GJPageAddress.CONFIRMBTWORKER, DjConstants.GJPageAddress.BTRECORDLIST, DjConstants.GJPageAddress.PROJECTADRESSLIST};//H5路由
         bigListBean = new ConstructionByWorkerIdBean.BigListBean();
         bigListBean.setName(worker.getWorkerType() == 3 ? "材料人工" : "其他");
         listMap = new ArrayList<>();
+        String houseFlowId = houseFlowMapper.selectHouseFlowId(house.getId(),worker.getWorkerTypeId());
         for (int i = 0; i < qtNames.length; i++) {
             if (worker.getWorkerType() == 3) {
                 if (qtShowTypes[i] == 2) continue;
@@ -544,7 +526,7 @@ public class HouseWorkerService {
             String name = qtNames[i];
             ConstructionByWorkerIdBean.BigListBean.ListMapBean mapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
             mapBean.setName(name);
-            mapBean.setUrl(getH5Url(qtUrls[i], userToken, cityId, name) + "&houseId=" + house.getId());
+            mapBean.setUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + getH5Url(qtUrls[i], userToken, cityId, name) + "&houseId=" + house.getId() +"&houseFlowId="+houseFlowId);
             mapBean.setImage(address + "/gongjiang/" + qtImages[i]);
             mapBean.setType(qtTypes[i]);
             listMap.add(mapBean);
@@ -684,7 +666,7 @@ public class HouseWorkerService {
                 String name = names[i];
                 HomePageBean.ListBean listBean = new HomePageBean.ListBean();
                 listBean.setName(name);
-                listBean.setUrl(getH5Url(urls[i], userToken, cityId, name));
+                listBean.setUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + getH5Url(urls[i], userToken, cityId, name));
                 listBean.setImageUrl(address + "/gongjiang/" + imageUrls[i]);
                 listBean.setType(urls[i].equals("") ? 1 : 0);
                 list.add(listBean);
@@ -694,186 +676,6 @@ public class HouseWorkerService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "获取我的界面信息失败！");
-        }
-    }
-
-    /**
-     * 提现列表
-     *
-     * @param userToken
-     * @return
-     */
-    public ServerResponse getExtractMoney(String userToken) {
-        try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
-            Map<String, Object> returnMap = new HashMap<String, Object>();
-            BigDecimal surplusMoney = worker.getSurplusMoney();
-            BigDecimal surplusMoney2 = new BigDecimal(0);
-            if (surplusMoney == null) {
-                returnMap.put("surplusprice", "0.00");
-            } else if ((surplusMoney.compareTo(surplusMoney2)) == -1) {
-                returnMap.put("surplusprice", "0.00");
-            } else {
-                returnMap.put("surplusprice", surplusMoney);
-            }
-            returnMap.put("retentionmoney", worker.getRetentionMoney() == null ? "0.00" : worker.getRetentionMoney());//滞留金
-            Double allmoney = workerDetailMapper.getCountWorkerDetailByWid(worker.getId());
-            returnMap.put("havemaoney", allmoney);//总金额
-            Long countFinishOrder = houseWorkerMapper.getCountOrderByWorkerId(worker.getId());//查询个人所有已经完工的单
-            returnMap.put("countOrder", countFinishOrder);//总单数
-            /**************查询有记录的历史月****************/
-            List<Map<String, Object>> monthBillList = new ArrayList<Map<String, Object>>();//月流水list
-            List<String> monthList = workerDetailMapper.getHistoryMonth(worker.getId());//有流水月的list
-            for (String month : monthList) {//遍历有数据的月份,根据月份查询对应的流水
-                Map<String, Object> monthMap = new HashMap<String, Object>();
-                List<WorkerDetail> wdlist = workerDetailMapper.getHistoryMonthByWorkerId(worker.getId(), month);
-                List<Map<String, Object>> thisMonList = new ArrayList<Map<String, Object>>();//本月流水
-                Double allMoney = 0.00;
-                for (WorkerDetail wd : wdlist) {
-                    if ("提取现金".equals(wd.getName())) {//提取现金的记录不显示
-                        continue;
-                    }
-                    Map<String, Object> wdMap = new HashMap<String, Object>();
-                    wdMap.put("id", wd.getId());//流水详情id
-                    if (wd.getId() != null) {
-                        House house = houseMapper.selectByPrimaryKey(wd.getHouseId());
-                        if (house != null) {
-                            wdMap.put("name", house.getHouseName());//流水描述
-                        } else {
-                            wdMap.put("name", "自定义流水");
-                        }
-                    } else {
-                        wdMap.put("name", wd.getName());//流水描述
-                    }
-                    if (wd.getState() == 0 || wd.getState() == 2) {
-                        wdMap.put("money", "+" + wd.getMoney());//流水金额(加)
-                    } else {
-                        wdMap.put("money", "-" + wd.getMoney());//流水金额(减)
-                    }
-                    allMoney += Double.parseDouble(wd.getMoney().toString());//累加此月流水
-                    thisMonList.add(wdMap);
-                }
-
-                monthMap.put("billList", thisMonList);//流水详细List
-                monthMap.put("month", month);//流水月份
-                monthMap.put("allMoney", allMoney);//此月总流水
-                monthMap.put("number", thisMonList.size());//单数
-                monthBillList.add(monthMap);
-            }
-            returnMap.put("monthBillList", monthBillList);
-            return ServerResponse.createBySuccess("获取流水信息成功！", returnMap);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "获取流水信息失败！");
-        }
-    }
-
-    /**
-     * 提现详情
-     */
-    public ServerResponse getExtractMoneyDetail(String userToken, String workerDetailId) {
-        try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
-            WorkerDetail workerDetail = workerDetailMapper.selectByPrimaryKey(workerDetailId);//根据流水id查询流水详情
-            Map<String, Object> returnMap = new HashMap<String, Object>();
-            returnMap.put("id", workerDetail.getId());//id
-            returnMap.put("typeName", workerDetail.getName());//流水详情描述
-            House house = houseMapper.selectByPrimaryKey(workerDetail.getHouseId());
-            String houseName = "自定义流水";
-            if (house != null) {
-                houseName = house.getHouseName();//流水描述
-            }
-            returnMap.put("name", houseName);//流水来源
-            if (workerDetail.getState() == 0 || workerDetail.getState() == 2) {
-                returnMap.put("money", "+" + workerDetail.getMoney());//流水金额(加)
-            } else {
-                returnMap.put("money", "-" + workerDetail.getMoney());//流水金额(减)
-            }
-            returnMap.put("time", workerDetail.getCreateDate().getTime());//流水时间
-            return ServerResponse.createBySuccess("获取流水详情成功！", returnMap);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "获取流水详细失败！");
-        }
-    }
-
-    /*
-     * 提现验证码
-     */
-    public ServerResponse getPaycode(String userToken, String phone) {
-        try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
-            int registerCode = (int) (Math.random() * 9000 + 1000);
-            JsmsUtil.SMS(registerCode, phone);
-            //记录短信发送
-            Sms sms = new Sms();
-            sms.setCode(String.valueOf(registerCode));
-            sms.setMobile(phone);
-            smsMapper.insert(sms);
-            return ServerResponse.createBySuccessMessage("验证码已发送！");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "系统出错，获取验证码失败！");
-        }
-    }
-
-    /*
-     * 完成验证提现
-     */
-    public ServerResponse checkFinish(String userToken, String smscode, String money) {
-        try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (StringUtil.isEmpty(money)) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "money不能为空，提现失败！");
-            }
-            Member worker = accessToken.getMember();
-            if (worker.getSurplusMoney().compareTo(new BigDecimal(0)) <= 0) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "可取余额不足，提现失败！");
-            }
-
-            List<WorkerBankCard> wbcList = workerBankCardMapper.getByWorkerid(worker.getId());//查有么有填银行卡
-            WorkerBankCard workerBankCard = null;
-            if (wbcList.size() == 0) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "您还未绑定银行卡，提现失败！");
-            } else {
-                workerBankCard = wbcList.get(0);
-            }
-            if (!smscode.equals(worker.getPaycode())) {//验证码错误
-                return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "验证码错误！");
-            }
-            //生成提现订单
-            BankCard bankCard = bankCardMapper.selectByPrimaryKey(workerBankCard.getBankCardId());
-            bankCard.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-            WithdrawDeposit wd = new WithdrawDeposit();
-            wd.setName(worker.getName());
-            wd.setWorkerId(worker.getId());
-            wd.setWorkerTypeId(worker.getWorkerTypeId());
-            wd.setMoney(new BigDecimal(money));
-            wd.setBankName(bankCard == null ? "" : bankCard.getBankName());
-            wd.setCardNumber(workerBankCard.getBankCardNumber());
-            wd.setState(0);//未处理
-            withdrawDepositMapper.insert(wd);
-
-            //记录流水
-            WorkerDetail workerDetail = new WorkerDetail();
-            workerDetail.setName("提取现金");
-            workerDetail.setWorkerId(worker.getId());
-            workerDetail.setWorkerName(worker.getName());
-            workerDetail.setMoney(new BigDecimal(money));
-            workerDetail.setState(1);//出
-            workerDetailMapper.insert(workerDetail);
-
-            worker.setHaveMoney(worker.getHaveMoney().subtract(new BigDecimal(money)));//更新已有钱
-            worker.setSurplusMoney(worker.getSurplusMoney().subtract(new BigDecimal(money)));
-            worker.setPaycode(0);//验证码置0
-            memberMapper.updateByPrimaryKeySelective(worker);
-            return ServerResponse.createBySuccessMessage("提现成功！");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "系统出错，提现失败！");
         }
     }
 
@@ -977,9 +779,10 @@ public class HouseWorkerService {
             }
 
             List<HouseFlowApply> todayApply = houseFlowApplyMapper.getTodayHouseFlowApply2(houseFlowId, workerId);
-            if (applyType != 5 && todayApply != null && todayApply.size() > 0) {
+            //TODO 测试先注释掉
+            /*if (applyType != 5 && todayApply != null && todayApply.size() > 0) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "您今日已发过申请,请改天再发申请！");
-            }
+            }*/
             //提交申请进行控制
             if (applyType != 0 && applyType != 4 && applyType != 5 && houseFlowApplyMapper.checkHouseFlowApply(houseFlowId, workerId) != null) {
                 //有未审核申请就修改申请
@@ -1093,9 +896,9 @@ public class HouseWorkerService {
                 hfa.setApplyDec("业主您好,我是" + workType.getName() + ",大管家已经巡查了");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
-                Example example2 = new Example(HouseFlow.class);
-                example2.createCriteria().andEqualTo("houseId", houseFlow.getHouseId())
-                        .andEqualTo("workerType", worker.getWorkerType()).andEqualTo("applyType", 5);
+                Example example2 = new Example(HouseFlowApply.class);
+                example2.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseFlow.getHouseId())
+                        .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId()).andEqualTo(HouseFlowApply.APPLY_TYPE, 5);
                 List<HouseFlowApply> hfalist = houseFlowApplyMapper.selectByExample(example2);
                 //工人houseflow
                 if (hfalist.size() < houseFlow.getPatrol()) {//该工种没有巡查够，每次要拿钱
@@ -1339,65 +1142,4 @@ public class HouseWorkerService {
             return ServerResponse.createByErrorMessage("系统出错，申请验收失败");
         }
     }
-
-    /*
-     * 获取提现信息
-     */
-    public ServerResponse getWithdrawalInformation(String userToken) {
-        try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            Member worker = accessToken.getMember();
-            Example example = new Example(RewardPunishRecord.class);
-            example.createCriteria().andEqualTo("memberId", worker.getId());
-            List<RewardPunishRecord> recordList = rewardPunishRecordMapper.selectByExample(example);
-            //通过查看奖罚限制抢单时间限制抢单
-            for (RewardPunishRecord record : recordList) {
-                example = new Example(RewardPunishCondition.class);
-                example.createCriteria().andEqualTo("rewardPunishCorrelationId", record.getRewardPunishCorrelationId());
-                List<RewardPunishCondition> conditionList = rewardPunishConditionMapper.selectByExample(example);
-                for (RewardPunishCondition rewardPunishCondition : conditionList) {
-                    if (rewardPunishCondition.getType() == 4) {
-                        Date wraprDate = rewardPunishCondition.getEndTime();
-                        DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
-                        Date date = new Date();
-                        if (date.getTime() < wraprDate.getTime()) {
-                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + longDateFormat.format(wraprDate) + "以后才能提现,如有疑问请致电400-168-1231！");
-                        }
-                    }
-                }
-            }
-            //工匠关联银卡
-            Example example2 = new Example(WorkerBankCard.class);
-            example2.createCriteria().andEqualTo("workerId", worker.getId());
-            List<WorkerBankCard> wbcList = workerBankCardMapper.selectByExample(example2);
-            if (wbcList == null || wbcList.size() == 0) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "请绑定银行卡!");
-            }
-            WorkerBankCard wbc = wbcList.get(0);
-            //卡号
-            String bankcardnumber = wbc.getBankCardNumber();
-
-            //具体银卡名字图片
-            BankCard bc = bankCardMapper.selectByPrimaryKey(wbc.getBankCardId());
-            bc.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-            Map<String, Object> map = new HashMap<>();
-            map.put("telphone", worker.getMobile());
-            map.put("bankPictures", address + bc.getBankCardImage());//银行图标
-            //名字+卡号后4位
-            bankcardnumber = bankcardnumber.replaceAll("\\s*", "");
-            map.put("bandDescribe", bc.getBankName() + bankcardnumber.substring(bankcardnumber.length() - 4, bankcardnumber.length()));
-            map.put("surplusprice", worker.getSurplusMoney());
-            if (bc.getBkMinAmt() == null || bc.getBkMaxAmt() == null) {
-                return ServerResponse.createByErrorMessage("请设置" + bc.getBankName() + "的最大最小限额!");
-            }
-            map.put("min", new BigDecimal(bc.getBkMinAmt()));
-            map.put("max", new BigDecimal(bc.getBkMaxAmt()));
-            return ServerResponse.createBySuccess("获取成功", map);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("获取失败");
-        }
-    }
-
 }

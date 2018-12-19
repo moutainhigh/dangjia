@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.List;
 
 /** 补退货管理
@@ -66,7 +67,7 @@ public class MendOrderService {
                 return ServerResponse.createByErrorMessage("生成多个未提交退人工单,异常联系平台部");
             }else {
                 MendOrder mendOrder = mendOrderList.get(0);
-                mendOrder.setWorkerOrderState(1);//工匠审核中
+                mendOrder.setWorkerBackState(1);//工匠审核中
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
@@ -139,7 +140,7 @@ public class MendOrderService {
                 mendOrder.setType(3);//退人工
                 mendOrder.setOrderName("退人工");
                 mendOrder.setWorkerTypeId(workerTypeId);
-                mendOrder.setWorkerOrderState(0);//工匠审核中
+                mendOrder.setWorkerBackState(0);//工匠审核中
                 mendOrder.setTotalAmount(0.0);
                 mendOrderMapper.insert(mendOrder);
             }
@@ -259,7 +260,7 @@ public class MendOrderService {
             return  ServerResponse.createByErrorMessage("保存失败");
         }
     }
-    /**保存mendWorker*/
+    /**保存补退人工明细mendWorker*/
     private boolean addMendWorker(String workerGoodsArr, MendOrder mendOrder,String workerTypeId){
         try{
             JSONArray jsonArray = JSONArray.parseArray(workerGoodsArr);
@@ -309,7 +310,8 @@ public class MendOrderService {
                 return ServerResponse.createByErrorMessage("生成多个未提交退货单,异常联系平台部");
             }else {
                 MendOrder mendOrder = mendOrderList.get(0);
-                mendOrder.setMaterialOrderState(1);//平台审核
+                mendOrder.setMaterialBackState(1);//平台审核
+                mendOrder.setModifyDate(new Date());//更新退货
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
@@ -402,6 +404,7 @@ public class MendOrderService {
             }else {
                 MendOrder mendOrder = mendOrderList.get(0);
                 mendOrder.setMaterialOrderState(1);//平台审核
+                mendOrder.setModifyDate(new Date());
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                 return ServerResponse.createBySuccessMessage("操作成功");
             }

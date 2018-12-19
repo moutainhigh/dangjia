@@ -341,7 +341,7 @@ public class ActuaryOperationService {
                 flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + workerGoods.getImage());
                 flowActuaryDTO.setTypeName(typsValue);
                 flowActuaryDTO.setShopCount(bw.getShopCount());
-                String url=String.format(DjConstants.YZPageAddress.COMMO,userToken,cityId,flowActuaryDTO.getTypeName()+"商品详情")+"&gId="+bw.getId()+"&type="+type;
+                String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO,userToken,cityId,flowActuaryDTO.getTypeName()+"商品详情")+"&gId="+bw.getId()+"&type="+type;
                 flowActuaryDTO.setUrl(url);
                 flowActuaryDTO.setPrice("￥"+workerGoods.getPrice()+"/"+unitMapper.selectByPrimaryKey(workerGoods.getUnitId()).getName());
                 flowActuaryDTO.setTotalPrice("￥"+ workerGoods.getPrice() * bw.getShopCount());
@@ -370,7 +370,7 @@ public class ActuaryOperationService {
                 flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
                 flowActuaryDTO.setTypeName(typsValue);
                 flowActuaryDTO.setShopCount(bm.getShopCount());
-                String url=String.format(DjConstants.YZPageAddress.COMMO,userToken,cityId,flowActuaryDTO.getTypeName()+"商品详情")+"&gId="+bm.getId()+"&type="+type;
+                String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO,userToken,cityId,flowActuaryDTO.getTypeName()+"商品详情")+"&gId="+bm.getId()+"&type="+type;
                 flowActuaryDTO.setUrl(url);
                 if(bm.getDeleteState() == 2){
                     flowActuaryDTO.setBuy(3);//可选没选中(业主已取消)
@@ -448,7 +448,7 @@ public class ActuaryOperationService {
                     detailsDTO.setNameB(name + "阶段"+names);
                     detailsDTO.setNameC(names+"明细");
                     detailsDTO.setType(key);
-                    String url=String.format(DjConstants.YZPageAddress.CONFIRMACTUARYDETAIL,userToken,cityId,names+"明细")+"&houseId="+houseId+"&workerTypeId="+workerTypeId+"&type="+key;
+                    String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.CONFIRMACTUARYDETAIL,userToken,cityId,names+"明细")+"&houseId="+houseId+"&workerTypeId="+workerTypeId+"&type="+key;
                     detailsDTO.setUrl(url);
                     detailsDTOList.add(detailsDTO);
                 }

@@ -85,11 +85,12 @@ public class AttributeService {
 //                    LOG.info(" AttributeValue list:::" + attributeValue.getAttribute().getName() + " name:" + attributeValue.getName());
 //                }
 
+//                List<AttributeValue> avList = iAttributeValueMapper.queryByAttributeId(ca.getId());
                 List<AttributeValuePO> avList = iAttributeValueMapper.queryPOByAttributeId(ca.getId());
                 List<Map<String, Object>> avListMap = new ArrayList<Map<String, Object>>();
                 for (AttributeValuePO av : avList) {
                     AttributeValuePO sss = iAttributeValueMapper.getPOById(av.getId());
-//                    LOG.info("myGetById :" + " name:" + sss.getName() + " image:" + sss.getImage());
+//                    LOG.info("myGetById :" + " name:" + sss.getName   () + " image:" + sss.getImage());
 //                    LOG.info("myGetById getAttributeId :" + sss.getAttributeId());
 //                    LOG.info("myGetById getName:" + sss.getAttribute().getName() + " id:" + sss.getAttribute().getId());
                     Map<String, Object> avMap = new HashMap<String, Object>();
@@ -218,7 +219,7 @@ public class AttributeService {
             attribute.setName(attributeName);
             attribute.setType(type);
             attribute.setCategoryId(goodsCategoryId);
-//            iAttributeMapper.insert(attribute);
+            iAttributeMapper.insert(attribute);
 
 //			//保存商品类别和属性的关联
 //			CategoryAttribute ca = new CategoryAttribute();
@@ -319,7 +320,7 @@ public class AttributeService {
             goodsAttribute.setName(attributeName);
             goodsAttribute.setType(type);
             goodsAttribute.setModifyDate(new Date());
-//            iAttributeMapper.updateByPrimaryKeySelective(goodsAttribute);
+            iAttributeMapper.updateByPrimaryKeySelective(goodsAttribute);
             for (int i = 0; i < jsonArr.size(); i++) {
                 JSONObject obj = jsonArr.getJSONObject(i);
                 AttributeValue attributeValue = new AttributeValue();

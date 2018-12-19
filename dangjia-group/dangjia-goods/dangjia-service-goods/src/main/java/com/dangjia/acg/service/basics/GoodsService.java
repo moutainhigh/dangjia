@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.basics;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -18,14 +19,14 @@ import com.dangjia.acg.modle.brand.BrandSeries;
 import com.dangjia.acg.modle.brand.GoodsSeries;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 商品业务层
@@ -37,7 +38,7 @@ import java.util.Map;
  */
 @Service
 public class GoodsService {
-
+    private static Logger LOG = LoggerFactory.getLogger(GoodsService.class);
     @Autowired
     private IGoodsMapper iGoodsMapper;
     @Autowired
@@ -415,5 +416,73 @@ public class GoodsService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+
+    /**
+     * 根据商品id和标签id ，找出对应的货品对象集合
+     * @param goodsArr :  goodsArr  数组
+     * @param srcLabelId :   srcLabelId
+     * @return
+     */
+    public ServerResponse queryProductListByGoodsIdAndLabelId(String goodsArr,String srcLabelId) {
+        try {
+//queryProductListByGoodsIdAndLabelId goodsArr::["706035601543908463510","296139461543570236505"] id:997366631545133559322
+//            goodsArr.split(",");
+            JSONArray arr = JSONArray.parseArray(JSON.toJSONString(goodsArr));
+            for (int i = 0; i < arr.size(); i++) {
+                JSONObject obj = arr.getJSONObject(i);
+                LOG.info("queryProductListByGoodsIdAndLabelId  obj goodsId::" + obj.getString("goodsId") );
+            }
+
+            List<String> goodsList = Arrays.asList(goodsArr);
+
+            for (String goodsId: goodsList)
+            {
+                LOG.info("queryProductListByGoodsIdAndLabelId goodsId::" + goodsId );
+            }
+            LOG.info("queryProductListByGoodsIdAndLabelId goodsArr::" + goodsArr +" id:" + srcLabelId);
+
+            if (!StringUtils.isNotBlank(srcLabelId))
+                return ServerResponse.createByErrorMessage("标签id不能为空");
+
+            List<Map<String, Object>> gMapList = new ArrayList<>();
+
+            JSONArray json = JSONArray.parseArray(goodsArr);
+            for (int i = 0; i < json.size(); i++) {
+                JSONObject jsonObject = json.getJSONObject(i);
+                String srcGoodsId = jsonObject.getString("goodsId");
+
+                if (!StringUtils.isNotBlank(srcGoodsId))
+                    return ServerResponse.createByErrorMessage("商品id不能为空");
+
+                Goods goods = iGoodsMapper.selectByPrimaryKey(srcGoodsId);
+                if (goods == null)
+                    return ServerResponse.createByErrorMessage("商品不存在");
+
+                List<Product> products = iProductMapper.queryByGoodsId(goods.getId());
+                for (Product product : products) {
+                    if (product.getLabelId() != null) {
+//                        Map<String, Object> map = CommonUtil.beanToMap(p);
+                        Map<String, Object> map = new HashMap<>();
+                        Label label = iLabelMapper.selectByPrimaryKey(product.getLabelId());
+                        if (label != null) {
+                            map.put("goodsId", goods.getId());
+                            map.put("productId", product.getId());
+                            map.put("productName", product.getName());
+                            map.put("labelId", product.getLabelId());
+                            map.put("labelName", label.getName());
+                            map.put("unitName", product.getUnitName());
+                            gMapList.add(map);
+                        }
+                    }
+                }
+            }
+            return ServerResponse.createBySuccess("查询成功", gMapList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
 
 }

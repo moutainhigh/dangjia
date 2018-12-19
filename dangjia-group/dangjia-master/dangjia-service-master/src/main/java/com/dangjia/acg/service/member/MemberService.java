@@ -13,11 +13,9 @@ import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
-import com.dangjia.acg.mapper.house.IHouseAccountsMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.WorkerType;
-import com.dangjia.acg.modle.house.HouseAccounts;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.activity.RedPackPayService;
@@ -37,8 +35,6 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,8 +54,6 @@ public class MemberService {
 	private ISmsMapper smsMapper;
 	@Autowired
 	private IWorkerTypeMapper workerTypeMapper;
-    @Autowired
-    private IHouseAccountsMapper houseAccountsMapper;
     @Autowired
     private GroupInfoService groupInfoService;
 
@@ -182,7 +176,7 @@ public class MemberService {
 //				String fileName=new Date().getTime()+".png";
 //				String visitRoot=configUtil.getValue(SysConfig.PUBLIC_DANGJIA_PATH, String.class)+configUtil.getValue(SysConfig.PUBLIC_QRCODE_PATH, String.class);
 //				String logoPath = visitRoot+"logo.png";
-//                String encoderContent =  configUtil.getValue(SysConfig.PUBLIC_DANGJIA_APP_ADDRESS, String.class)+"/app/app_invite!workRegister.action?memberid="+user.getId();
+//                String encoderContent =  configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"/app/app_invite!workRegister.action?memberid="+user.getId();
 //				try{
 //					QRCodeUtil.encode(encoderContent, logoPath, visitRoot, fileName, true);
 //				}catch (Exception e){
@@ -396,120 +390,6 @@ public class MemberService {
 		return ServerResponse.createBySuccess("查询用户列表成功", pageResult);
 	}
 
-	/**
-	 * 统计我的钱包
-	 * <p>Title: getMyWallet</p>
-	 * <p>Description: </p>
-	 * @return
-	 */
-	public ServerResponse getMyWallet(String userToken){
-		try{
-			AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-			Member member=accessToken.getMember();
-			Map<String, Object> rMap=new HashMap<>();
-			rMap.put("deposit", member.getSurplusMoney()==null?0.00:member.getSurplusMoney());//账户余额
-			//总收入
-			BigDecimal allIncome=new BigDecimal(0.00);
-			//总支出
-			BigDecimal allSpend=new BigDecimal(0.00);
-			Example example =new Example(HouseAccounts.class);
-			example.createCriteria().andEqualTo("state",0).andEqualTo("memberId",member.getId());
-			List<HouseAccounts> listIncome=houseAccountsMapper.selectByExample(example);//总收入
-			for(HouseAccounts haccount:listIncome){
-				allIncome=allIncome.add(haccount.getMoney());
-			}
-			Example example2 =new Example(HouseAccounts.class);
-			example2.createCriteria().andEqualTo("state",1).andEqualTo("memberId",member.getId());
-			List<HouseAccounts> listSpend =houseAccountsMapper.selectByExample(example);//总支出
-			for(HouseAccounts haccount:listSpend){
-				allSpend=allSpend.add(haccount.getMoney());
-			}
-			rMap.put("allSpend", allSpend);//总支出
-			rMap.put("allIncome", allIncome);//总收入
-			return ServerResponse.createBySuccess("统计我的钱包成功",rMap);
-		}catch (Exception e) {
-			e.printStackTrace();
-			return ServerResponse.createByErrorMessage("统计我的钱包失败");
-		}
-	}
-
-	/**
-	 * 我的钱包-收入-支出
-	 * <p>Title: getMyWallet</p>
-	 * <p>Description: </p>
-	 * @return
-	 */
-	public ServerResponse getMyBillDetail(String userToken,Integer type,Integer pageNum, Integer pageSize){
-		try{
-			AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-			Member member=accessToken.getMember();
-			List<Map<String, Object>> listSmap=new ArrayList<>();//总支出
-			List<Map<String, Object>> listIMap=new ArrayList<>();//总收入
-			//总收入
-			BigDecimal allIncome=new BigDecimal(0.00);
-			//总支出
-			BigDecimal allSpend=new BigDecimal(0.00);
-			if(pageNum==null){
-				pageNum=1;
-			}
-			if(pageSize==null){
-				pageSize=10;
-			}
-			PageHelper.startPage(pageNum, pageSize);
-			if(type!=null&&type==0){
-				Example example =new Example(HouseAccounts.class);
-				example.createCriteria().andEqualTo("state",0).andEqualTo("memberId",member.getId());
-				List<HouseAccounts> listIncome=houseAccountsMapper.selectByExample(example);//总收入
-				PageInfo pageResult = new PageInfo(listIncome);
-				for(HouseAccounts haccount:listIncome){
-					Map<String,Object> Map=new HashMap<String, Object>();
-					Map.put("name", haccount.getName());//收款人名字
-					Map.put("time", haccount.getCreateDate().getTime());//流水时间
-					if("1".equals(haccount.getPayment())){
-						Map.put("payment", "微信支付");//支付方式1微信, 2支付宝,3后台回调
-					}else if("2".equals(haccount.getPayment())){
-						Map.put("payment", "支付宝支付");//支付方式1微信, 2支付宝,3后台回调
-					}else{
-						Map.put("payment", "后台回调");//支付方式1微信, 2支付宝,3后台回调
-					}
-					Map.put("money", haccount.getMoney());//金额
-					Map.put("orderNo", haccount.getId());//订单号
-					Map.put("houseName", haccount.getHouseName());//房子名称
-					listIMap.add(Map);
-					allIncome=allIncome.add(haccount.getMoney());
-				}
-				pageResult.setList(listIMap);
-				return ServerResponse.createBySuccess("获取流水信息成功",pageResult);
-			}else{
-				Example example =new Example(HouseAccounts.class);
-				example.createCriteria().andEqualTo("state",1).andEqualTo("memberId",member.getId());
-				List<HouseAccounts> listSpend =houseAccountsMapper.selectByExample(example);//总支出
-				PageInfo pageResult = new PageInfo(listSpend);
-				for(HouseAccounts haccount:listSpend){
-					Map<String,Object> Map=new HashMap<String, Object>();
-					Map.put("name", haccount.getName());//收款人名字
-					Map.put("time", haccount.getCreateDate().getTime());//流水时间
-					if("1".equals(haccount.getPayment())){
-						Map.put("payment", "微信支付");//支付方式1微信, 2支付宝,3后台回调
-					}else if("2".equals(haccount.getPayment())){
-						Map.put("payment", "支付宝支付");//支付方式1微信, 2支付宝,3后台回调
-					}else{
-						Map.put("payment", "后台回调");//支付方式1微信, 2支付宝,3后台回调
-					}
-					Map.put("money", haccount.getMoney());//金额
-					Map.put("orderNo", haccount.getId());//订单号
-					Map.put("houseName", haccount.getHouseName());//房子名称
-					listSmap.add(Map);
-					allSpend=allSpend.add(haccount.getMoney());
-				}
-				pageResult.setList(listSmap);
-				return ServerResponse.createBySuccess("获取流水信息成功",pageResult);
-			}
-		}catch (Exception e) {
-			e.printStackTrace();
-			return ServerResponse.createByErrorMessage("获取流水信息失败");
-		}
-	}
 
 	/**
 	 * 我的邀请码

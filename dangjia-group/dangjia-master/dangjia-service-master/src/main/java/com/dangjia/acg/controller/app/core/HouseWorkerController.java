@@ -63,42 +63,6 @@ public class HouseWorkerController implements HouseWorkerAPI {
     }
 
     /**
-     * 提现列表
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse getExtractMoney(String userToken) {
-        return houseWorkerService.getExtractMoney(userToken);
-    }
-
-    /**
-     * 提现详情
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse getExtractMoneyDetail(String userToken, String workerDetailId) {
-        return houseWorkerService.getExtractMoneyDetail(userToken, workerDetailId);
-    }
-
-    /**
-     * 获取验提现证码
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse getPaycode(String userToken, String phone) {
-        return houseWorkerService.getPaycode(userToken, phone);
-    }
-
-    /**
-     * 验证并提现
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse checkFinish(String userToken, String smscode, String money) {
-        return houseWorkerService.checkFinish(userToken, smscode, money);
-    }
-
-    /**
      * 提交审核、停工
      *
      * @param userToken
@@ -157,14 +121,4 @@ public class HouseWorkerController implements HouseWorkerAPI {
     public ServerResponse setSupervisorApply(String userToken, String houseFlowId) {
         return houseWorkerService.setSupervisorApply(userToken, houseFlowId);
     }
-
-    /*
-     * 获取提现信息
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse getWithdrawalInformation(String userToken) {
-        return houseWorkerService.getWithdrawalInformation(userToken);
-    }
-
 }

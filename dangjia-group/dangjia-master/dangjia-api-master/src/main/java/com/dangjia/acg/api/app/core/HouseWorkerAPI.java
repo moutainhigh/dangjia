@@ -36,21 +36,6 @@ public interface HouseWorkerAPI {
     @ApiOperation(value = "获取我的界面", notes = "获取我的界面")
     public ServerResponse getMyHomePage(@RequestParam("userToken") String userToken, @RequestParam("cityId") String cityId);
 
-    @PostMapping("app/core/houseWorker/getExtractMoney")
-    @ApiOperation(value = "提现列表", notes = "提现列表")
-    public ServerResponse getExtractMoney(@RequestParam("userToken") String userToken);
-
-    @PostMapping("app/core/houseWorker/getExtractMoneyDetail")
-    @ApiOperation(value = "提现详情", notes = "提现详情")
-    public ServerResponse getExtractMoneyDetail(@RequestParam("userToken") String userToken, @RequestParam("workerDetailId") String workerDetailId);
-
-    @PostMapping("app/core/houseWorker/getPaycode")
-    @ApiOperation(value = "获取验提现证码", notes = "获取验提现证码")
-    public ServerResponse getPaycode(@RequestParam("userToken") String userToken, @RequestParam("phone") String phone);
-
-    @PostMapping("app/core/houseWorker/checkFinish")
-    @ApiOperation(value = "验证并提现", notes = "验证并提现")
-    public ServerResponse checkFinish(@RequestParam("userToken") String userToken, @RequestParam("smscode") String smscode, @RequestParam("money") String money);
 
     @PostMapping("app/core/houseWorker/setHouseFlowApply")
     @ApiOperation(value = "提交审核、停工", notes = "提交审核、停工")
@@ -73,9 +58,5 @@ public interface HouseWorkerAPI {
     @PostMapping("app/core/houseWorker/setSupervisorApply")
     @ApiOperation(value = "大管家申请验收", notes = "大管家申请验收")
     public ServerResponse setSupervisorApply(@RequestParam("userToken") String userToken, @RequestParam("houseFlowId") String houseFlowId);
-
-    @PostMapping("app/core/houseWorker/getWithdrawalInformation")
-    @ApiOperation(value = "获取提现信息", notes = "获取提现信息")
-    public ServerResponse getWithdrawalInformation(@RequestParam("userToken") String userToken);
 
 }

@@ -48,7 +48,9 @@ public class TechnologyService {
     @Autowired
     private ConfigUtil configUtil;
 
-    //新增工艺说明
+    /**
+     * 添加人工工艺和添加服务节点
+     */
     public ServerResponse insertTechnology(String name, String content, String workerTypeId, Integer type, String image, Integer materialOrWorker) {
         try {
             List<Technology> technologyList = iTechnologyMapper.query(workerTypeId, name, materialOrWorker);
@@ -288,7 +290,7 @@ public class TechnologyService {
                     object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + t.getImage());
                     object.put("price", t.getPrice() + "/" + t.getUnitName());
                     object.put("name", t.getName());
-                    String url = String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") + "&gId=" + t.getId() + "&type=" + DjConstants.GXType.CAILIAO;
+                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") + "&gId=" + t.getId() + "&type=" + DjConstants.GXType.CAILIAO;
                     object.put("url", url);//0:工艺；1：商品；2：人工
                     arr.add(object);
                 }
@@ -303,7 +305,7 @@ public class TechnologyService {
                     object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + wg.getImage());
                     object.put("price", wg.getPrice() + "/" + wg.getUnitName());
                     object.put("name", wg.getName());
-                    String url = String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") + "&gId=" + wg.getId() + "&type=" + DjConstants.GXType.RENGGONG;
+                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") + "&gId=" + wg.getId() + "&type=" + DjConstants.GXType.RENGGONG;
                     object.put("url", url);//0:工艺；1：商品；2：人工
                     arr.add(object);
                 }

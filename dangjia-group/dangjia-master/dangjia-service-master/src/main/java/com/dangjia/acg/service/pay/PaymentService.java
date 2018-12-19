@@ -1039,7 +1039,7 @@ public class PaymentService {
                         actuaryDTO.setName(workerType.getName() + "阶段人工花费");
                         actuaryDTO.setPrice("¥" + workerPrice);
                         actuaryDTO.setButton("人工明细");
-                        String url=String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL,userToken,house.getCityId(),"待付款明细")+"&houseId="+houseId+"&workerTypeId="+houseFlow.getWorkerTypeId()+"&type="+1;
+                        String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL,userToken,house.getCityId(),"待付款明细")+"&houseId="+houseId+"&workerTypeId="+houseFlow.getWorkerTypeId()+"&type="+1;
                         actuaryDTO.setUrl(url);
                         actuaryDTO.setType(1);
                         actuaryDTOList.add(actuaryDTO);
@@ -1051,7 +1051,7 @@ public class PaymentService {
                         actuaryDTO.setName(workerType.getName() + "阶段材料花费");
                         actuaryDTO.setPrice("¥" + caiPrice);
                         actuaryDTO.setButton("材料明细");
-                        String url=String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL,userToken,house.getCityId(),"待付款明细")+"&houseId="+houseId+"&workerTypeId="+houseFlow.getWorkerTypeId()+"&type="+2;
+                        String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL,userToken,house.getCityId(),"待付款明细")+"&houseId="+houseId+"&workerTypeId="+houseFlow.getWorkerTypeId()+"&type="+2;
                         actuaryDTO.setUrl(url);
                         actuaryDTO.setType(2);
                         actuaryDTOList.add(actuaryDTO);
@@ -1063,7 +1063,7 @@ public class PaymentService {
                         actuaryDTO.setName(workerType.getName() + "阶段服务花费");
                         actuaryDTO.setPrice("¥" + serPrice);
                         actuaryDTO.setButton("服务明细");
-                        String url=String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL,userToken,house.getCityId(),"待付款明细")+"&houseId="+houseId+"&workerTypeId="+houseFlow.getWorkerTypeId()+"&type="+3;
+                        String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL,userToken,house.getCityId(),"待付款明细")+"&houseId="+houseId+"&workerTypeId="+houseFlow.getWorkerTypeId()+"&type="+3;
                         actuaryDTO.setUrl(url);
                         actuaryDTO.setType(3);
                         actuaryDTOList.add(actuaryDTO);
@@ -1152,7 +1152,7 @@ public class PaymentService {
                     actuaryDTO.setName(workerType.getName() + "阶段材料花费");
                     actuaryDTO.setPrice("¥" + caiPrice);
                     actuaryDTO.setButton("材料明细");
-                    String url=String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL,userToken,house.getCityId(),"待付款明细")+"&houseId="+houseId+"&workerTypeId="+houseFlow.getWorkerTypeId()+"&type="+2;
+                    String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL,userToken,house.getCityId(),"待付款明细")+"&houseId="+houseId+"&workerTypeId="+houseFlow.getWorkerTypeId()+"&type="+2;
                     actuaryDTO.setUrl(url);
                     actuaryDTO.setType(2);
                     actuaryDTOList.add(actuaryDTO);
@@ -1164,7 +1164,7 @@ public class PaymentService {
                     actuaryDTO.setName(workerType.getName() + "阶段服务花费");
                     actuaryDTO.setPrice("¥" + serPrice);
                     actuaryDTO.setButton("服务明细");
-                    String url=String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL,userToken,house.getCityId(),"待付款明细")+"&houseId="+houseId+"&workerTypeId="+houseFlow.getWorkerTypeId()+"&type="+2;
+                    String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL,userToken,house.getCityId(),"待付款明细")+"&houseId="+houseId+"&workerTypeId="+houseFlow.getWorkerTypeId()+"&type="+2;
                     actuaryDTO.setUrl(url);
                     actuaryDTO.setType(3);
                     actuaryDTOList.add(actuaryDTO);
@@ -1198,7 +1198,7 @@ public class PaymentService {
         for (HouseFlow hf : houseFlowList){
             Map<String,Object> map = new HashMap<String, Object>();
             map.put("name" , workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId()).getName());
-            map.put("image" , "");
+            map.put("image" , configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class)+"icon/youqi.png");
             map.put("houseId" , hf.getWorkerTypeId());
             map.put("taskId", hf.getId());
             map.put("type", 4);

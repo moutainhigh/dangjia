@@ -38,7 +38,7 @@ public class FillWorkerService {
      *
      *   补人工,退人工共用此接口(精算内)
      */
-    public ServerResponse repairBudgetWorker(int type, String workerTypeId, String houseFlowId, String name,Integer pageNum, Integer pageSize){
+    public ServerResponse repairBudgetWorker(int type, String workerTypeId, String houseId, String name,Integer pageNum, Integer pageSize){
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         if(StringUtil.isEmpty(workerTypeId)){
             return ServerResponse.createByErrorMessage("workerTypeId不能为空");
@@ -46,12 +46,18 @@ public class FillWorkerService {
         if(name == ""){
             name = null;
         }
+        if(pageNum == null){
+            pageNum = 1;
+        }
+        if(pageSize == null){
+            pageSize = 10;
+        }
         List<BudgetWorkerDTO> budgetWorkerDTOList = new ArrayList<BudgetWorkerDTO>();
+        PageInfo pageResult = new PageInfo();
         try {
-            PageInfo pageResult =null;
             if(type == 0){//精算内
                 Example example = new Example(BudgetWorker.class);
-                example.createCriteria().andEqualTo(BudgetWorker.WORKER_TYPE_ID,workerTypeId).andEqualTo(BudgetWorker.HOUSE_FLOW_ID,houseFlowId)
+                example.createCriteria().andEqualTo(BudgetWorker.WORKER_TYPE_ID,workerTypeId).andEqualTo(BudgetWorker.HOUSE_ID,houseId)
                         .andLike(BudgetWorker.NAME, name);
                 PageHelper.startPage(pageNum, pageSize);
                 List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.selectByExample(example);

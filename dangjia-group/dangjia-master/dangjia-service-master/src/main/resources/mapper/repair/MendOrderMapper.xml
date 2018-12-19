@@ -19,10 +19,44 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		worker_back_state as workerBackState,
 		audits_member_id as auditsMemberId,
 		total_amount as totalAmount,
+		carriage,
 		data_status as dataStatus,
 		create_date as createDate,
 		modify_date as modifyDate
 	</sql>
+
+    <!-- 查询退人工单 -->
+    <select id="workerBackState" resultType="com.dangjia.acg.modle.repair.MendOrder">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_repair_mend_order
+        where
+            type = 3
+        and
+        worker_back_state > 0
+        <if test = "houseId!=null and houseId!=''">
+            and
+            house_id = #{houseId}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
+
+    <!-- 查询补人工单 -->
+    <select id="workerOrderState" resultType="com.dangjia.acg.modle.repair.MendOrder">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_repair_mend_order
+        where
+        type = 1
+        and
+        worker_order_state > 0
+        <if test = "houseId!=null and houseId!=''">
+            and
+            house_id = #{houseId}
+        </if>
+        ORDER BY create_date desc
+    </select>
 
     <!-- 查询未处理退人工 -->
     <select id="backWorker" resultType="com.dangjia.acg.modle.repair.MendOrder">
@@ -52,9 +86,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="all_columns"/>
         FROM dj_repair_mend_order
         where
-            type = 2
+        type = 2
         and
-            material_back_state > 0
+        material_back_state > 0
         <if test = "houseId!=null and houseId!=''">
             and
             house_id = #{houseId}

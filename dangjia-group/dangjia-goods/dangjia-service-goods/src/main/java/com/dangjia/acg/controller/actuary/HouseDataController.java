@@ -49,8 +49,8 @@ public class HouseDataController implements HouseDataAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getBudgetWorker(String cityId, String houseFlowId, String workerTypeId, PageDTO pageDTO){
-        return fillWorkerService.repairBudgetWorker(0,workerTypeId,houseFlowId,"",pageDTO.getPageNum(),pageDTO.getPageSize());
+    public ServerResponse getBudgetWorker(String cityId, String houseId, String workerTypeId, PageDTO pageDTO){
+        return fillWorkerService.repairBudgetWorker(0,workerTypeId,houseId,"",pageDTO.getPageNum(),pageDTO.getPageSize());
     }
 
     /**

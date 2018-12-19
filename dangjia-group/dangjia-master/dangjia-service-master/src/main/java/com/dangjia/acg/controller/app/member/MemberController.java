@@ -2,7 +2,6 @@ package com.dangjia.acg.controller.app.member;
 
 import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
-import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.member.MemberService;
@@ -118,29 +117,6 @@ public class MemberController implements MemberAPI {
         return memberService.updateForgotPassword(phone,password, token);
     }
 
-    /**
-     * 统计我的钱包
-     * @param userToken
-     * @return
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse getMyWallet(String userToken){
-        return memberService.getMyWallet(userToken);
-    }
-
-    /**
-     * 我的钱包-收入-支出
-     * @param userToken
-     * @param type
-     * @param pageDTO
-     * @return
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse getMyBillDetail(String userToken, Integer type, PageDTO pageDTO){
-        return memberService.getMyBillDetail(userToken,type,pageDTO.getPageNum(),pageDTO.getPageSize());
-    }
     /**
      * 我的邀请码
      * @return

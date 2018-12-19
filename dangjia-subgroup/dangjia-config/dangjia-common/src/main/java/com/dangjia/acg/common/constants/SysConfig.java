@@ -10,7 +10,16 @@ import com.dangjia.acg.common.model.ConfigBean;
  * @author QiYuXiang
  */
 abstract public  class SysConfig {
-
+    /**
+     * 图片路径
+     */
+    public static final ConfigBean<String> PUBLIC_APP_ADDRESS = new ConfigBean<String>("PUBLIC_DANGJIA_APP_ADDRESS",
+            "http://172.16.30.95:7001/#/", "静态页面访问路径（APP）", DictionaryConstants.APP_TYPE);
+    /**
+     * 图片路径
+     */
+    public static final ConfigBean<String> PUBLIC_WEB_ADDRESS = new ConfigBean<String>("PUBLIC_DANGJIA_WEB_ADDRESS",
+            "http://172.16.30.95:7002/#/", "静态页面访问路径（WEB）", DictionaryConstants.APP_TYPE);
     /**
      * 图片路径
      */

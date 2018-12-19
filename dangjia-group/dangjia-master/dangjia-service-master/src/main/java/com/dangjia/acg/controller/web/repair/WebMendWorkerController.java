@@ -35,8 +35,8 @@ public class WebMendWorkerController implements WebMendWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse workerBackState(String houseId){
-        return mendWorkerService.workerBackState(houseId);
+    public ServerResponse workerBackState(String houseId, Integer pageNum,Integer pageSize){
+        return mendWorkerService.workerBackState(houseId,pageNum,pageSize);
     }
 
     /**
@@ -64,7 +64,7 @@ public class WebMendWorkerController implements WebMendWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse workerOrderState(String houseId){
-        return mendWorkerService.workerOrderState(houseId);
+    public ServerResponse workerOrderState(String houseId,Integer pageNum, Integer pageSize){
+        return mendWorkerService.workerOrderState(houseId,pageNum,pageSize);
     }
 }

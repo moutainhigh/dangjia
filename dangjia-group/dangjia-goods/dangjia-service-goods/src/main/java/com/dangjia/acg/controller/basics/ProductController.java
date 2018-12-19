@@ -226,6 +226,16 @@ public class ProductController implements ProductAPI {
 		return productService.updateProductLabelList(productLabelList);
 	}
 
+	/*
+	 * 查找所有货品列表
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse queryProductListByGoodsIdAndLabelId(HttpServletRequest request,String goodsArr,String labelId){
+		return goodsService.queryProductListByGoodsIdAndLabelId(goodsArr,labelId);
+	}
+
+
 	/**
 	 * 根据系列和属性查询切换货品
 	 * @param request

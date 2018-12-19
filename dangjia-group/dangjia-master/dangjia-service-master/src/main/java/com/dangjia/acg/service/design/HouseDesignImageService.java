@@ -63,6 +63,9 @@ public class HouseDesignImageService {
      */
     public ServerResponse designImageList(String houseId){
         try{
+            if (StringUtil.isEmpty(houseId)){
+                return ServerResponse.createByErrorMessage("houseId不能为空");
+            }
             Example example = new Example(HouseFlow.class);
             example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId);
             List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);

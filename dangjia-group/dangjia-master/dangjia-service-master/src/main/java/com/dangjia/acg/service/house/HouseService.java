@@ -239,7 +239,7 @@ public class HouseService {
                 course.setNameA(workerType.getName());
                 course.setNameB("各种节点名");
                 course.setNameC("工序详情");
-                String url=String.format(DjConstants.YZPageAddress.WORKINGDETAILS,userToken,cityId,"工序详情")+"&houseFlowId="+houseFlow.getId();
+                String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WORKINGDETAILS,userToken,cityId,"工序详情")+"&houseFlowId="+houseFlow.getId();
                 course.setUrl(url);
                 course.setTotal(4);
                 course.setRank(2);
@@ -563,7 +563,7 @@ public class HouseService {
                 shareDTO.setVillageName(house.getResidential());//小区名
                 shareDTO.setLayoutId(house.getModelingLayoutId());//户型id
                 shareDTO.setLayoutleft(ml == null ? "" : ml.getName());//户型名称
-                String jobLocationDetail=String.format(DjConstants.YZPageAddress.JOBLOCATIONDETAIL,userToken,cityId,"施工现场")+"&houseId=" + house.getId();
+                String jobLocationDetail=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.JOBLOCATIONDETAIL,userToken,cityId,"施工现场")+"&houseId=" + house.getId();
                 shareDTO.setUrl(jobLocationDetail);
                 Example example = new Example(HouseDesignImage.class);
                 example.createCriteria().andEqualTo("houseId", house.getId());

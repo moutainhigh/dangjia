@@ -190,7 +190,7 @@ public class TaskService {
             task.setDate(DateUtil.dateToString(house.getModifyDate(), "yyyy-MM-dd HH:mm"));
             task.setName("平面图审核");
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/sheji.png");
-            String url = String.format(DjConstants.YZPageAddress.DESIGNLIST, userToken, house.getCityId(), "平面图审核") + "&houseId=" + house.getId();
+            String url =configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +  String.format(DjConstants.YZPageAddress.DESIGNLIST, userToken, house.getCityId(), "平面图审核") + "&houseId=" + house.getId();
             task.setHtmlUrl(url);
             task.setType(3);
             task.setTaskId("");
@@ -201,7 +201,7 @@ public class TaskService {
             task.setDate(DateUtil.dateToString(house.getModifyDate(), "yyyy-MM-dd HH:mm"));
             task.setName("施工图审核");
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/sheji.png");
-            String url = String.format(DjConstants.YZPageAddress.DESIGNLIST, userToken, house.getCityId(), "施工图审核") + "&houseId=" + house.getId();
+            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.DESIGNLIST, userToken, house.getCityId(), "施工图审核") + "&houseId=" + house.getId();
             task.setHtmlUrl(url);
             task.setType(3);
             task.setTaskId("");
@@ -213,7 +213,7 @@ public class TaskService {
             task.setDate(DateUtil.dateToString(house.getModifyDate(), "yyyy-MM-dd HH:mm"));
             task.setName("精算审核");
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/jingsuan.png");
-            String url = String.format(DjConstants.YZPageAddress.CONFIRMACTUARY, userToken, house.getCityId(), "精算审核") + "&houseId=" + house.getId();
+            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.CONFIRMACTUARY, userToken, house.getCityId(), "精算审核") + "&houseId=" + house.getId();
             task.setHtmlUrl(url);
             task.setType(3);
             task.setTaskId("");
@@ -233,7 +233,7 @@ public class TaskService {
                 task.setName(workerType.getName() + "整体完工待验收");
             }
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/chaichu.png");
-            task.setHtmlUrl(String.format(DjConstants.YZPageAddress.CONFIRMAPPLY + "&houseFlowApplyId=%s",
+            task.setHtmlUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.CONFIRMAPPLY + "&houseFlowApplyId=%s",
                     userToken, house.getCityId(), "验收工匠完工申请", houseFlowApply.getId()));
             task.setType(3);
             task.setTaskId("");

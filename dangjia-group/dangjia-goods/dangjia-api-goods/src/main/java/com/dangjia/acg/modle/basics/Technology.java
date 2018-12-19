@@ -26,7 +26,7 @@ public class Technology extends BaseEntity {
     private String name;
 
     @Column(name = "material_or_worker")
-    private Integer materialOrWorker;//0:材料工艺;1:人工工艺
+    private Integer materialOrWorker; // 0服务工艺;1:人工工艺
 
     @Column(name = "worker_type_id")
     private String workerTypeId;//工种id

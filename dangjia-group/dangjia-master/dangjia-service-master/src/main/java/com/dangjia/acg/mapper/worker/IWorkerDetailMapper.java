@@ -12,6 +12,14 @@ import java.util.List;
  */
 @Repository
 public interface IWorkerDetailMapper extends Mapper<WorkerDetail> {
+    /**总收入*/
+    Double incomeMoney(@Param("workerId")String workerId);
+    /**总支出*/
+    Double outMoney(@Param("workerId")String workerId);
+
+    List<WorkerDetail> incomeDetail(@Param("workerId")String workerId);
+    List<WorkerDetail> outDetail(@Param("workerId")String workerId);
+
     Double getCountWorkerDetailByWid(@Param("workerId")String workerId);
     List<String> getHistoryMonth(@Param("workerId")String workerId);
     List<WorkerDetail> getHistoryMonthByWorkerId(@Param("workerId")String workerId,@Param("createDate")String createDate);

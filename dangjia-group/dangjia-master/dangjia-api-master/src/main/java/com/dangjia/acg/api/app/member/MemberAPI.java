@@ -1,6 +1,5 @@
 package com.dangjia.acg.api.app.member;
 
-import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.member.Member;
 import io.swagger.annotations.Api;
@@ -123,14 +122,6 @@ public interface MemberAPI {
             @ApiParam(name = "password", value = "密码") @RequestParam("password")String password,
             @ApiParam(name = "token", value = "checkForgotPasswordCode返回的临时token") @RequestParam("token") String token
     );
-
-     @RequestMapping(value = "member/getMyWallet", method = RequestMethod.POST)
-     @ApiOperation(value = "统计我的钱包", notes = "统计我的钱包")
-    ServerResponse getMyWallet(@RequestParam("userToken")String userToken);
-
-     @RequestMapping(value = "member/getMyBillDetail", method = RequestMethod.POST)
-     @ApiOperation(value = "我的钱包-收入-支出", notes = "我的钱包-收入-支出")
-    ServerResponse getMyBillDetail(@RequestParam("userToken")String userToken,@RequestParam("type") Integer type,@RequestParam("pageDTO") PageDTO pageDTO);
 
     @RequestMapping(value = "member/getMyInvitation", method = RequestMethod.POST)
     @ApiOperation(value = "我的邀请码", notes = "我的邀请码")

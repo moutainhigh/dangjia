@@ -94,7 +94,8 @@ public interface ProductAPI {
 	@ApiOperation(value = "根据商品id和品牌id查询关联品牌系列", notes = "根据商品id和品牌id查询关联品牌系列")
   	public ServerResponse queryBrandByGidAndBid(@RequestParam("request") HttpServletRequest request,@RequestParam("goodsId") String goodsId,
 												  @RequestParam("brandId")String brandId);
-    /**
+
+	/**
   	 * 新增货品
   	 */
 	@PostMapping("/basics/product/insertProduct")
@@ -158,6 +159,13 @@ public interface ProductAPI {
 	@PostMapping("/basics/product/updateProductLabelList")
 	@ApiOperation(value = "批量添加/修改货品标签", notes = "批量添加/修改货品标签")
 	public ServerResponse updateProductLabelList(@RequestParam("request") HttpServletRequest request,@RequestParam("productLabeList") String productLabeList);
+
+	/**
+	 * 根据商品id和标签id ，查出对应的货品对象集合
+	 */
+	@PostMapping("/basics/product/queryProductListByGoodsIdAndLabelId")
+	@ApiOperation(value = "根据商品id和标签id ，查出对应的货品对象集合", notes = "根据商品id和标签id ，查出对应的货品对象集合")
+	ServerResponse queryProductListByGoodsIdAndLabelId(@RequestParam("request") HttpServletRequest request,@RequestParam("jsonArr") String goodsArr,@RequestParam("labelId") String labelId);
 
 	/*@PostMapping("/basics/product/getSwitchProduct")
 	@ApiOperation(value = "根据系列和属性查询切换货品", notes = "根据系列和属性查询切换货品")

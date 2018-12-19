@@ -111,9 +111,9 @@ public class StewardService {
             Double locationy = Double.parseDouble(village.getLocationy()==null?"0":village.getLocationy());//小区维度
             System.out.println("小区坐标:经度"+locationx+",小区纬度:"+locationy);
 
-            if(locationx == 0 || locationy == 0){
+            /*if(locationx == 0 || locationy == 0){
                return ServerResponse.createByErrorMessage("请配置该房子所在小区地理位置");
-            }
+            }*/
 
             double distance = GetShortDistance(locationx, locationy, Double.valueOf(y), Double.valueOf(x));//计算距离
             System.out.println("工匠与小区的距离:"+distance+"米*********************");
@@ -256,7 +256,7 @@ public class StewardService {
             if(!hf.getWorkerId().equals(worker.getId())){
                 return ServerResponse.createByErrorMessage("交底人不匹配");
             }
-            String url=String.format(DjConstants.GJPageAddress.READPROJECTINFO,userToken,hf.getCityId(),"交底详情")+"&houseFlowId=" +houseFlowId;
+            String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.READPROJECTINFO,userToken,hf.getCityId(),"交底详情")+"&houseFlowId=" +houseFlowId;
             return ServerResponse.createBySuccess("交底成功", url);
         }catch (Exception e){
             return ServerResponse.createByErrorMessage("扫码失败");
@@ -305,7 +305,7 @@ public class StewardService {
             courseDTO.setHouseFlowId(houseFlowId);
             courseDTO.setHouseFlowApplyId("");
             String  userToken=redisClient.getCache("role2:"+houseFlow.getWorkerId(),String.class);
-            courseDTO.setRewardUrl(String.format(DjConstants.GJPageAddress.JFREGULATIONS,userToken,houseFlow.getCityId(),"选择奖罚条例"));//奖罚页面
+            courseDTO.setRewardUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.JFREGULATIONS,userToken,houseFlow.getCityId(),"选择奖罚条例"));//奖罚页面
             if(houseFlow.getWorkType() == 4 && houseFlow.getWorkSteta() == 3){//待交底
                 Example example = new Example(WorkerDisclosure.class);
                 example.createCriteria().andEqualTo("state", 1);

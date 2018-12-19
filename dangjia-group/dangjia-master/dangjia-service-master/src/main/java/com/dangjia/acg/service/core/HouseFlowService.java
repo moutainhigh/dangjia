@@ -6,6 +6,7 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -155,6 +156,7 @@ public class HouseFlowService {
                         continue;
                     }
                     House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+                    if(house == null) continue;
                     AllgrabBean allgrabBean = new AllgrabBean();
                     example = new Example(HouseFlowCountDownTime.class);
                     example.createCriteria().andEqualTo("workerId", member.getId()).andEqualTo("houseFlowId", houseFlow.getId());
@@ -259,10 +261,8 @@ public class HouseFlowService {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member member = accessToken.getMember();
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
-            Example example = new Example(HouseFlowCountDownTime.class);
-            example.createCriteria().andEqualTo("workerId", member.getId()).andEqualTo("houseFlowId", hf.getId());
-            List<HouseFlowCountDownTime> houseFlowDownTimeList = houseFlowCountDownTimeMapper.selectByExample(example);
-            example = new Example(RewardPunishRecord.class);
+
+            Example example = new Example(RewardPunishRecord.class);
             example.createCriteria().andEqualTo("memberId", member.getId());
             List<RewardPunishRecord> recordList = rewardPunishRecordMapper.selectByExample(example);
             if (hf.getGrablock() == 2) {
@@ -325,7 +325,8 @@ public class HouseFlowService {
                     return ServerResponse.createByErrorMessage("每天只能抢一单哦！");
                 }
             }
-            String url=String.format(DjConstants.GJPageAddress.AFFIRMGRAB,userToken,cityId,"确认")+"&houseFlowId="+houseFlowId+"&workerTypeId="+member.getWorkerTypeId();
+            String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.AFFIRMGRAB,userToken,cityId,"确认")+"&houseFlowId="+houseFlowId+"&workerTypeId="+member.getWorkerTypeId()
+                    +"&houseId="+hf.getHouseId();
 
             // 抢单详情
             return ServerResponse.createBySuccess("通过验证", url);

@@ -27,8 +27,43 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     create_date as createDate,
     modify_date as modifyDate
 </sql>
+
+    <!--统计总收入钱 -->
+    <select id="incomeMoney" resultType="java.lang.Double">
+        select sum(money)
+        from dj_worker_worker_detail
+        where worker_id=#{workerId}
+        and (state=0 or state=2)
+    </select>
+
+    <!--收入 -->
+    <select id="incomeDetail" resultType="com.dangjia.acg.modle.worker.WorkerDetail">
+        select <include refid="new_columns" />
+        from dj_worker_worker_detail
+        where worker_id=#{workerId}
+        and (state=0 or state=2)
+        ORDER BY create_date DESC
+    </select>
+
+    <!--统计总支出钱 -->
+    <select id="outMoney" resultType="java.lang.Double">
+        select sum(money)
+        from dj_worker_worker_detail
+        where worker_id=#{workerId}
+        and (state=1 or state=3)
+    </select>
+    <!--支出 -->
+    <select id="outDetail" resultType="com.dangjia.acg.modle.worker.WorkerDetail">
+        select <include refid="new_columns" />
+        from dj_worker_worker_detail
+        where worker_id=#{workerId}
+        and (state=1 or state=3)
+        ORDER BY create_date DESC
+    </select>
+
+
     <!--统计工人所有流水 -->
-    <select id="getCountWorkerDetailByWid" resultType="com.dangjia.acg.modle.worker.WorkerDetail">
+    <select id="getCountWorkerDetailByWid" resultType="java.lang.Double">
         select sum(wd.money)
         from dj_worker_worker_detail as wd
         where wd.state=0

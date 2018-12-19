@@ -22,8 +22,8 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse checkMaterialBackState(String mendOrderId,int state){
-        return mendMaterielService.checkMaterialBackState(mendOrderId, state);
+    public ServerResponse checkMaterialBackState(String mendOrderId,int state,Double carriage){
+        return mendMaterielService.checkMaterialBackState(mendOrderId, state, carriage);
     }
 
     /**
@@ -42,8 +42,8 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse checkMaterialOrderState(String mendOrderId, int state){
-        return mendMaterielService.checkMaterialOrderState(mendOrderId, state);
+    public ServerResponse checkMaterialOrderState(String mendOrderId, int state, Double carriage){
+        return mendMaterielService.checkMaterialOrderState(mendOrderId, state ,carriage);
     }
 
     /**

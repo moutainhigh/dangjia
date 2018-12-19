@@ -4,6 +4,60 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.basics.IProductMapper">
 
+	<resultMap type="com.dangjia.acg.pojo.basics.LabelPO" id="labelPOPOMap">
+		<id property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="type" column="type"/>
+		<result property="createDate" column="createDate"/>
+		<result property="modifyDate" column="modifyDate"/>
+		<collection property="productPOLists" javaType="ArrayList"
+					column="id" ofType="com.dangjia.acg.pojo.basics.LabelPO"
+					select="com.dangjia.acg.mapper.basics.IProductMapper.queryPOByLabelId"
+					fetchType="lazy">
+			<association property="productPO" javaType="com.dangjia.acg.pojo.basics.ProductPO">
+				<id property="id" column="id"/>
+				<result property="goodsId" column="goods_id"/>
+			</association>
+		</collection>
+	</resultMap>
+
+	<!-- 一对多查询，查询用户及订单明细和商品信息 -->
+	<resultMap type="com.dangjia.acg.pojo.basics.ProductPO" id="productPOMap">
+		<!-- 用户信息映射 -->
+		<id property="id" column="id"/>
+		<result property="name" column="name"/>
+
+		<!-- 分类信息 -->
+		<association property="goodsCategory" javaType="com.dangjia.acg.pojo.attribute.GoodsCategoryPO">
+			<id property="id" column="id"/>
+			<result property="name" column="name"/>
+		</association>
+
+		<!-- 商品信息 -->
+		<association property="goods" javaType="com.dangjia.acg.pojo.basics.GoodsPO">
+			<id property="id" column="id"/>
+			<result property="name" column="name"/>
+		</association>
+
+		<!-- 单元信息 -->
+		<association property="unit" javaType="com.dangjia.acg.pojo.basics.UnitPO">
+			<id property="id" column="id"/>
+			<result property="name" column="name"/>
+		</association>
+
+		<!-- 标签信息 -->
+		<association property="label" javaType="com.dangjia.acg.pojo.basics.LabelPO">
+			<id property="id" column="id"/>
+			<result property="name" column="name"/>
+		</association>
+
+		<!-- 品牌信息 -->
+		<association property="brand" javaType="com.dangjia.acg.modle.brand.Brand">
+			<id property="id" column="id"/>
+			<result property="name" column="name"/>
+		</association>
+	</resultMap>
+
 	<sql id="all_columns">
 		id,
 		name,
@@ -95,6 +149,25 @@
 		SELECT <include refid="new_columns"/>
 		FROM dj_basics_product
 		where id=#{id}
+		ORDER BY create_date desc
+	</select>
+
+
+
+
+	<!-- 根据标签id查询货品对象 -->
+	<select id="queryByLabelId" resultType="com.dangjia.acg.modle.basics.Product">
+		SELECT <include refid="new_columns"/>
+		FROM dj_basics_product
+		where label_id=#{labelId}
+		ORDER BY create_date desc
+	</select>
+
+	<!-- 根据标签id查询货品对象 -->
+	<select id="queryPOByLabelId" resultMap="productPOMap">
+		SELECT <include refid="new_columns"/>
+		FROM dj_basics_product
+		where label_id=#{labelId}
 		ORDER BY create_date desc
 	</select>
 

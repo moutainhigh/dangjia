@@ -22,7 +22,7 @@
         <result property="createDate" column="createDate"/>
         <result property="modifyDate" column="modifyDate"/>
 
-        <association property="attribute" javaType="com.dangjia.acg.modle.attribute.Attribute">
+        <association property="attribute" javaType="com.dangjia.acg.modle.attribute.Attribute" >
             <id property="id" column="id"/>
             <result property="name" column="name"/>
             <result property="type" column="type"/>

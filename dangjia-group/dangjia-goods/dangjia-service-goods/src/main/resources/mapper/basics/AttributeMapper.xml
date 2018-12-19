@@ -22,6 +22,7 @@
 			<result property="introduction" column="introduction"/>
 			<result property="createDate" column="createDate"/>
 			<result property="modifyDate" column="modifyDate"/>
+
 		</collection>
     </resultMap>
 

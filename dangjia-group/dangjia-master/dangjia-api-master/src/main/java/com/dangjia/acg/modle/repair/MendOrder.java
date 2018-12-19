@@ -86,4 +86,9 @@ public class MendOrder extends BaseEntity {
 	@Desc(value = "订单总额")
 	@ApiModelProperty("订单总额")
 	private Double totalAmount;
+
+	@Column(name = "carriage")
+	@Desc(value = "运费")
+	@ApiModelProperty("运费")
+	private Double carriage;
 }
