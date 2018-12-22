@@ -109,7 +109,7 @@ public interface BudgetWorkerAPI {
 	 */
 	@PostMapping("/actuary/budgetWorker/getWorkerTotalPrice")
 	@ApiOperation(value = "根据houseId和wokerTypeId查询房子人工精算总价", notes = "根据houseId和wokerTypeId查询房子人工精算总价")
-	public ServerResponse getWorkerTotalPrice(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId")String houseId, @RequestParam("workerTypeId")String workerTypeId );
+	ServerResponse getWorkerTotalPrice(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId")String houseId, @RequestParam("workerTypeId")String workerTypeId );
 
 	/**
 	 * 业主修改精算
@@ -118,7 +118,7 @@ public interface BudgetWorkerAPI {
 	 */
 	@PostMapping("/actuary/budgetWorker/doModifyBudgets")
 	@ApiOperation(value = "业主修改精算", notes = "业主修改精算")
-	public ServerResponse doModifyBudgets(@RequestParam("request") HttpServletRequest request,@RequestParam("listOfGoods")String listOfGoods);
+	ServerResponse doModifyBudgets(@RequestParam("request") HttpServletRequest request,@RequestParam("listOfGoods")String listOfGoods);
 
 	/**
 	 * 估价
@@ -127,16 +127,8 @@ public interface BudgetWorkerAPI {
 	 */
 	@PostMapping("/actuary/budgetWorker/gatEstimateBudgetByHId")
 	@ApiOperation(value = "估价", notes = "估价")
-	public ServerResponse gatEstimateBudgetByHId(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId")String houseId);
+	ServerResponse gatEstimateBudgetByHId(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId")String houseId);
 
-	/**
-	 * 房子精算
-	 * @param houseId
-	 * @return
-	 */
-	@PostMapping("/actuary/budgetWorker/gatBudgetResultByHouse")
-	@ApiOperation(value = "房子精算", notes = "房子精算")
-	public ServerResponse gatBudgetResultByHouse(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId")String houseId);
 
 	/**
 	 * 根据houseId查询所有验收节点

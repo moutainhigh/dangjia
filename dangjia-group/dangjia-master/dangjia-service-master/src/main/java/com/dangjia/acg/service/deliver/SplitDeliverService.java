@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -70,6 +71,7 @@ public class SplitDeliverService {
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
             splitDeliver.setShipState(2);//收货
             splitDeliver.setImage(image);//收货图片
+            splitDeliver.setModifyDate(new Date());//收货时间
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
 
             orderSplitItemMapper.affirmSplitDeliver(splitDeliverId);
@@ -111,7 +113,9 @@ public class SplitDeliverService {
                 splitDeliverDTO.setNumber(splitDeliver.getNumber());
                 splitDeliverDTO.setSendTime(splitDeliver.getSendTime());
                 splitDeliverDTO.setSubmitTime(splitDeliver.getSubmitTime());
+                splitDeliverDTO.setModifyDate(splitDeliver.getModifyDate());//收货时间
                 splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
+                splitDeliverDTO.setSupState(splitDeliver.getSupState());//大管家收货状态
 
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());

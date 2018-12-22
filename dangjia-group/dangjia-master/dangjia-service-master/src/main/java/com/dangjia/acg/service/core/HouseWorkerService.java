@@ -33,6 +33,8 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
@@ -717,6 +719,7 @@ public class HouseWorkerService {
     /**
      * 今日开工，今日完工，阶段完工，整体完工，停工申请，巡查,无人巡查
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse setHouseFlowApply(Integer applyType, String houseFlowId, String workerId, Integer suspendDay, String applyDec,
                                             String imageList) {
         try {
@@ -769,9 +772,15 @@ public class HouseWorkerService {
                     moneySup = supervisorHF.getWorkPrice();
                 }
                 //算管家每次巡查钱
-                BigDecimal patrolMoney = moneySup.multiply(new BigDecimal(0.2)).divide(new BigDecimal(check), 2, BigDecimal.ROUND_HALF_UP);
+                BigDecimal patrolMoney = new BigDecimal(0);
+                if(check>0){
+                    patrolMoney = moneySup.multiply(new BigDecimal(0.2)).divide(new BigDecimal(check), 2, BigDecimal.ROUND_HALF_UP);
+                }
                 //算管家每次验收钱
-                BigDecimal checkMoney = moneySup.multiply(new BigDecimal(0.3)).divide(new BigDecimal(time), 2, BigDecimal.ROUND_HALF_UP);
+                BigDecimal checkMoney = new BigDecimal(0);
+                if(time>0){
+                    checkMoney = moneySup.multiply(new BigDecimal(0.3)).divide(new BigDecimal(time), 2, BigDecimal.ROUND_HALF_UP);
+                }
                 //保存到大管家的houseflow
                 supervisorHF.setPatrolMoney(patrolMoney);//巡查钱
                 supervisorHF.setCheckMoney(checkMoney);//验收钱
@@ -986,6 +995,7 @@ public class HouseWorkerService {
             }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }

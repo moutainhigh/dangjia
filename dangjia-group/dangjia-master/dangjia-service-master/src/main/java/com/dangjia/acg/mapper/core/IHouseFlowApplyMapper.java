@@ -7,9 +7,6 @@ import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
 
-/**发申请
- *zmj
- */
 @Repository
 public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
     /**管家已审核业主未审核申请*/
@@ -30,5 +27,8 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
     List<HouseFlowApply> waitHouseFlowApply(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
     List<HouseFlowApply> getTodayStartByHouseId(@Param("houseId") String houseId);
     HouseFlowApply getSupervisorCheck(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
+    /**根据houseId查询所有施工记录*/
     List<HouseFlowApply> queryAllHfaByHouseId(@Param("houseId") String houseId);
+    /**查询工序记录*/
+    List<HouseFlowApply> queryFlowRecord(@Param("houseFlowId")String houseFlowId);
 }

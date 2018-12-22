@@ -52,6 +52,6 @@ public class ProductPO extends Product {
 //    private BrandSeries brandSeries;//品牌系列
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "ProductPO")
-    @JoinColumn(name = "attribute_id_arr")
+//    @JoinColumn(name = "attribute_id_arr")
     private List<AttributePO> attributeValueLists;//属性Id集合
 }

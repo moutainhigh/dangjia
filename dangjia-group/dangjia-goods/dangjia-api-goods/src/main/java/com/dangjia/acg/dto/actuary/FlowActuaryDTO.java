@@ -20,4 +20,5 @@ public class FlowActuaryDTO {
     private String attribute;//属性
     private String price;//销售价跟单位拼在一起   最新价格
     private String totalPrice;//总价    最新价格
+    private String unitName;//单位
 }

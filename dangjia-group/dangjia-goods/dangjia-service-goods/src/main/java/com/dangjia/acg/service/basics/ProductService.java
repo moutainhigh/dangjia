@@ -85,7 +85,7 @@ public class ProductService {
                 p.setImage(imgStr);
                 Map<String, Object> map = CommonUtil.beanToMap(p);
                 map.put("imageUrl", imgUrlStr);
-                if (p.getLabelId() == null) {
+                if (!StringUtils.isNotBlank( p.getLabelId())) {
                     map.put("labelId", "");
                     map.put("labelName", "");
                 } else {
@@ -255,7 +255,6 @@ public class ProductService {
      * 修改货品
      * <p>Title: updateProduct</p>
      * <p>Description: </p>
-     *
      * @param productArr
      * @return
      */

@@ -83,14 +83,18 @@ public interface HouseAPI {
 
     @PostMapping("app/house/house/queryConstructionRecord")
     @ApiOperation(value = "施工记录", notes = "施工记录")
-    public ServerResponse queryConstructionRecord(@RequestParam("houseId")String houseId,@RequestParam("pageDTO")  PageDTO pageDTO);
+    ServerResponse queryConstructionRecord(@RequestParam("houseId")String houseId,@RequestParam("pageDTO")  PageDTO pageDTO);
 
     /**
      * 施工记录（首页滚动）
      */
     @PostMapping("app/house/house/queryHomeConstruction")
     @ApiOperation(value = "施工记录(首页文字滚动)", notes = "首页文字滚动")
-    public ServerResponse queryHomeConstruction();
+    ServerResponse queryHomeConstruction();
+
+    @PostMapping("app/house/house/queryFlowRecord")
+    @ApiOperation(value = "工序详情", notes = "工序详情")
+    ServerResponse queryFlowRecord(@RequestParam("houseFlowId")String houseFlowId);
 
     @PostMapping("app/house/house/setBudgetOk")
     @ApiOperation(value = "APP修改精算状态", notes = "APP修改精算状态")

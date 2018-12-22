@@ -232,7 +232,7 @@ public class WalletService {
             } else {
                 returnMap.put("money", "-" + workerDetail.getMoney());//流水金额(减)
             }
-            returnMap.put("time", workerDetail.getCreateDate().getTime());//流水时间
+            returnMap.put("createDate", workerDetail.getCreateDate().getTime());//流水时间
 
             return ServerResponse.createBySuccess("获取流水详情成功", returnMap);
         } catch (Exception e) {
@@ -308,7 +308,7 @@ public class WalletService {
             walletDTO.setWorkerPrice(workerPrice == null ? 0 : workerPrice);//总赚到
             walletDTO.setSurplusMoney(member.getSurplusMoney() == null ? new BigDecimal(0) : member.getSurplusMoney());//可取
             walletDTO.setRetentionMoney(member.getRetentionMoney() == null ? new BigDecimal(0) : member.getRetentionMoney());//滞留金
-            walletDTO.setOut(out == null ? 0 : out);//总支出
+            walletDTO.setOutAll(out == null ? 0 : out);//总支出
             walletDTO.setIncome(income == null ? 0 : income);//总收入
             Example example = new Example(HouseWorker.class);
             example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId());

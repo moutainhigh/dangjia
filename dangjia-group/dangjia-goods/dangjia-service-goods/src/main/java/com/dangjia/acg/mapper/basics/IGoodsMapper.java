@@ -22,6 +22,7 @@ public interface IGoodsMapper extends Mapper<Goods> {
 	void deleteById(String id);
 	List<Goods> query(@Param("categoryId") String categoryId);
 	Goods queryById(String id);
+	List<Goods> queryByName(@Param("name")String name);
 	//新增商品关联品牌系列
 	void insertGoodsSeries(GoodsSeries goodsSeries);
 	//删除商品关联品牌系列

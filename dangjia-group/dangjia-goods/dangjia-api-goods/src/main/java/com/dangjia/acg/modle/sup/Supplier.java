@@ -7,7 +7,6 @@ import lombok.Data;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.io.Serializable;
 
 /**
   * @类 名： Supplier
@@ -19,7 +18,7 @@ import java.io.Serializable;
 @Entity
 @Table(name = "dj_sup_supplier")
 @ApiModel(description = "供应商")
-public class Supplier extends BaseEntity implements Serializable{
+public class Supplier extends BaseEntity{
 
 	@Column(name = "name")
 	private String name;//供应商名称

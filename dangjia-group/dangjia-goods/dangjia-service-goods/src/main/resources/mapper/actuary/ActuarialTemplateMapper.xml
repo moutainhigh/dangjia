@@ -46,6 +46,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ORDER BY create_date desc
     </select>
 
+    <!-- 查询所有 -->
+    <select id="queryByName" resultType="com.dangjia.acg.modle.actuary.ActuarialTemplate">
+        SELECT
+         *
+        FROM dj_actuary_actuarial_template
+        where 1=1
+        <if test="workerTypeId!=-1">
+            AND
+            worker_type_id=#{workerTypeId}
+        </if>
+        <if test="name!=null and name!=''">
+            AND
+            name=#{name}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
     <!-- 添加使用次数 -->
     <update id="useById" parameterType="java.lang.String">
         UPDATE dj_actuary_actuarial_template

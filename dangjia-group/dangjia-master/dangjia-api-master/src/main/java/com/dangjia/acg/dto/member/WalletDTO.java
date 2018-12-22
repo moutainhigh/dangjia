@@ -18,6 +18,6 @@ public class WalletDTO {
     private BigDecimal retentionMoney;//实际滞留金
     private Integer houseOrder;//所有接单量
 
-    private Double out;//支出总钱
+    private Double outAll;//支出总钱
     private Double income;//收入总钱
 }

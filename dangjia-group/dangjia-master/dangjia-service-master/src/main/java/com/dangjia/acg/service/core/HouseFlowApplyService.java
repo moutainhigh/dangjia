@@ -1,7 +1,7 @@
 package com.dangjia.acg.service.core;
 
 import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
@@ -18,7 +18,6 @@ import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
@@ -36,10 +35,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * author: Ronalcheng
@@ -89,25 +85,48 @@ public class HouseFlowApplyService {
      * 工匠端工地记录
      */
     public ServerResponse houseRecord(String userToken, String houseId, Integer pageNum, Integer pageSize){
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        Member worker = accessToken.getMember();
-        if(pageNum==null){
-            pageNum=1;
-        }
-        if(pageSize==null){
-            pageSize=10;
-        }
-        PageHelper.startPage(pageNum, pageSize);
-        Example example = new Example(HouseFlowApply.class);
-        example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID,houseId).andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
-        List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
-        List<HouseFlowApplyDTO> houseFlowApplyDTOList = new ArrayList<HouseFlowApplyDTO>();
+//        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         try{
-            for(HouseFlowApply hfa : houseFlowApplyList){
+    //        Member worker = accessToken.getMember();
+            if(pageNum==null){
+                pageNum=1;
+            }
+            if(pageSize==null){
+                pageSize=10;
+            }
+            Map<Integer, String> applyTypeMap = new HashMap<>();
+            applyTypeMap.put(DjConstants.ApplyType.MEIRI_WANGGONG, "每日完工");
+            applyTypeMap.put(DjConstants.ApplyType.JIEDUAN_WANGONG, "阶段完工");
+            applyTypeMap.put(DjConstants.ApplyType.ZHENGTI_WANGONG, "整体完工");
+            applyTypeMap.put(DjConstants.ApplyType.TINGGONG, "停工");
+            applyTypeMap.put(DjConstants.ApplyType.MEIRI_KAIGONG, "每日开工");
+            applyTypeMap.put(DjConstants.ApplyType.YOUXIAO_XUNCHA, "巡查");
+            applyTypeMap.put(DjConstants.ApplyType.WUREN_XUNCHA, "巡查");
+            applyTypeMap.put(DjConstants.ApplyType.ZUIJIA_XUNCHA, "巡查");
+
+            List<HouseFlowApplyDTO> houseFlowApplyDTOList = new ArrayList<HouseFlowApplyDTO>();
+            HouseWorker gjhouseWorker = houseWorkerMapper.getHwByHidAndWtype(houseId, 3);
+            Member worker2 = memberMapper.selectByPrimaryKey(gjhouseWorker.getWorkerId());//根据工匠id查询工匠信息详情
+            PageHelper.startPage(pageNum, pageSize);
+            List<HouseWorker> listHouseWorker = houseWorkerMapper.getWorktype6ByHouseid(houseId);
+            for(HouseWorker houseWorker : listHouseWorker){
+                Member member=memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
                 HouseFlowApplyDTO houseFlowApplyDTO = new HouseFlowApplyDTO();
-                houseFlowApplyDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId()).getName());
-                houseFlowApplyDTO.setNameA(memberMapper.selectByPrimaryKey(hfa.getWorkerId()).getName());
-                houseFlowApplyDTO.setApplyType(hfa.getApplyType());
+                houseFlowApplyDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(houseWorker.getWorkerTypeId()).getName());
+                houseFlowApplyDTO.setNameA(member.getName());
+                houseFlowApplyDTO.setMobileB(member.getMobile());
+                Example example = new Example(HouseFlowApply.class);
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID,houseId).andEqualTo(HouseFlowApply.WORKER_ID,member.getId());
+                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
+                List<Map> mapList=new ArrayList<>();
+                for(HouseFlowApply hfa : houseFlowApplyList){
+                    Map map=new HashMap();
+                    map.put(HouseFlowApply.CREATE_DATE,hfa.getCreateDate());
+                    map.put(Member.NAME,worker2.getName());
+                    map.put(HouseFlowApply.APPLY_TYPE+"Name",applyTypeMap.get(hfa.getApplyType()));
+                    mapList.add(map);
+                }
+                houseFlowApplyDTO.setList(mapList);
                 houseFlowApplyDTOList.add(houseFlowApplyDTO);
             }
             PageInfo pageResult = new PageInfo(houseFlowApplyDTOList);

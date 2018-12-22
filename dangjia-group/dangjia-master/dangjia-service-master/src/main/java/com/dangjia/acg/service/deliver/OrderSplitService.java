@@ -6,6 +6,8 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.DeliverHouseDTO;
+import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
+import com.dangjia.acg.dto.deliver.SplitDeliverDetailDTO;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
@@ -64,6 +66,50 @@ public class OrderSplitService {
     }
 
     /**
+     * 发货单明细
+     */
+    public ServerResponse splitDeliverDetail(String splitDeliverId){
+        try{
+            SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+            SplitDeliverDetailDTO detailDTO = new SplitDeliverDetailDTO();
+            detailDTO.setNumber(splitDeliver.getNumber());
+            detailDTO.setShipName(splitDeliver.getShipName());
+            detailDTO.setShipAddress(splitDeliver.getShipAddress());
+            detailDTO.setShipMobile(splitDeliver.getShipMobile());
+            Member sup = memberMapper.selectByPrimaryKey(splitDeliver.getSupervisorId());//管家
+            detailDTO.setSupMobile(sup.getMobile());
+            detailDTO.setSupName(sup.getName());
+            detailDTO.setMemo(splitDeliver.getMemo());
+            detailDTO.setReason(splitDeliver.getReason());
+            detailDTO.setTotalAmount(splitDeliver.getTotalAmount());
+
+
+            Example example = new Example(OrderSplitItem.class);
+            example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliverId);
+            List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+            List<OrderSplitItemDTO> orderSplitItemDTOS = new ArrayList<>();
+            for (OrderSplitItem orderSplitItem : orderSplitItemList){
+                OrderSplitItemDTO orderSplitItemDTO = new OrderSplitItemDTO();
+                orderSplitItemDTO.setProductName(orderSplitItem.getProductName());
+                orderSplitItemDTO.setNum(orderSplitItem.getNum());
+                orderSplitItemDTO.setCost(orderSplitItem.getCost());
+                orderSplitItemDTO.setUnitName(orderSplitItem.getUnitName());
+                orderSplitItemDTO.setTotalPrice(orderSplitItem.getCost() * orderSplitItem.getNum());//成本价 * 数量
+                orderSplitItemDTO.setBrandName("品牌名");
+                orderSplitItemDTOS.add(orderSplitItemDTO);
+            }
+
+            detailDTO.setSize(orderSplitItemList.size());
+            detailDTO.setOrderSplitItemDTOS(orderSplitItemDTOS);
+
+            return ServerResponse.createBySuccess("查询成功", detailDTO);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
      * 供应商端发货列表
      * shipState  0待发货,1已发待收货,2已收货,3取消,4部分收
      */
@@ -107,7 +153,7 @@ public class OrderSplitService {
                     splitDeliver.setTotalAmount(0.0);
                     splitDeliver.setDeliveryFee(0.0);
                     splitDeliver.setApplyMoney(0.0);
-                    splitDeliver.setShipName(member.getName() == null ? member.getNickName() : member.getName());
+                    splitDeliver.setShipName(member.getNickName() == null ? member.getName() : member.getNickName());
                     splitDeliver.setShipMobile(member.getMobile());
                     splitDeliver.setShipAddress(house.getHouseName());
                     splitDeliver.setSupplierId(supplierId);//供应商id

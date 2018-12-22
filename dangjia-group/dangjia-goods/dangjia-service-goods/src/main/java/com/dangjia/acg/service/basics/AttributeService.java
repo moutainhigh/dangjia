@@ -286,8 +286,10 @@ public class AttributeService {
             }
 
             List<Goods> goodsList = iGoodsMapper.queryByCategoryId(srcAttribute.getCategoryId());//根据分类id查询是否有关联商品
-            if (goodsList.size() > 0)
-                return ServerResponse.createByErrorMessage("修改失败，该分类属性已被其他商品使用");
+//            if (goodsList.size() > 0)
+//                return ServerResponse.createByErrorMessage("修改失败，该分类属性已被其他商品使用");
+
+
 //				//检查该分类中的所有商品，是否有商品使用 该属性名和属性选项名
 //				for(Goods gs: goodsList)
 //				{
@@ -397,8 +399,11 @@ public class AttributeService {
      */
     public ServerResponse deleteByAttributeId(String attributeValueId) {
         try {
-            AttributeValue srcAttributeValue = iAttributeValueMapper.queryById(attributeValueId);
-            Attribute srcAe = iAttributeMapper.queryById(srcAttributeValue.getAttributeId());
+//            AttributeValue srcAttributeValue = iAttributeValueMapper.queryById(attributeValueId);
+//            Attribute srcAe = iAttributeMapper.queryById(srcAttributeValue.getAttributeId());
+            AttributeValue srcAttributeValue = iAttributeValueMapper.selectByPrimaryKey(attributeValueId);
+            Attribute srcAe = iAttributeMapper.selectByPrimaryKey(srcAttributeValue.getAttributeId());
+            LOG.info("deleteByAttributeId  :" + srcAe.getCategoryId());
             List<Goods> goodsList = iGoodsMapper.queryByCategoryId(srcAe.getCategoryId());//根据分类id查询是否有关联商品
             if (goodsList.size() > 0)
                 return ServerResponse.createByErrorMessage("该商品属性有关联商品不能删除");

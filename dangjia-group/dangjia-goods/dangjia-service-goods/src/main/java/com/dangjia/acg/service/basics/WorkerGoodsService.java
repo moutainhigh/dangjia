@@ -165,14 +165,7 @@ public class WorkerGoodsService {
     public ServerResponse<String> setWorkerGoods(WorkerGoods workerGoods, String technologyIds) {
 
         List<WorkerGoods> workerGoodsList = iWorkerGoodsMapper.selectByName(workerGoods.getName(), workerGoods.getWorkerTypeId());
-        if (workerGoodsList.size() > 0) {
-            return ServerResponse.createBySuccessMessage("商品名称不能重复");
-        }
-
         List<WorkerGoods> workerGoodsList1 = iWorkerGoodsMapper.selectByWorkerGoodsSn(workerGoods.getWorkerGoodsSn(), workerGoods.getWorkerTypeId());
-        if (workerGoodsList1.size() > 0) {
-            return ServerResponse.createBySuccessMessage("商品编号不能重复");
-        }
 
         if (workerGoods != null) {
             if (workerGoods.getImage() != null && !"".equals(workerGoods.getImage())) {
@@ -203,6 +196,11 @@ public class WorkerGoodsService {
             }
             WorkerGoods workerG = iWorkerGoodsMapper.selectByPrimaryKey(workerGoods.getId());
             if (StringUtils.isNotBlank(workerGoods.getId()) && workerG != null) {
+                if (workerGoodsList.size() > 1)
+                    return ServerResponse.createBySuccessMessage("商品名称不能重复");
+                if (workerGoodsList1.size() > 1)
+                    return ServerResponse.createBySuccessMessage("商品编号不能重复");
+
                 workerGoods.setModifyDate(new Date());
                 int rowCount = iWorkerGoodsMapper.updateByPrimaryKeySelective(workerGoods);
                 if (rowCount > 0) {
@@ -213,6 +211,11 @@ public class WorkerGoodsService {
                 }
                 return ServerResponse.createByErrorMessage("更新工价商品失败");
             } else {
+                if (workerGoodsList.size() > 0)
+                    return ServerResponse.createBySuccessMessage("商品名称不能重复");
+                if (workerGoodsList1.size() > 0)
+                    return ServerResponse.createBySuccessMessage("商品编号不能重复");
+
                 workerGoods.setCreateDate(new Date());
                 workerGoods.setModifyDate(new Date());
                 int rowCount = iWorkerGoodsMapper.insert(workerGoods);

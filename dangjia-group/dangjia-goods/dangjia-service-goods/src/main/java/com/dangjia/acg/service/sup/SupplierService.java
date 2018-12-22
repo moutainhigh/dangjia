@@ -10,8 +10,6 @@ import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * @类 名： SupplierServiceImpl
- * @功能描述： TODO
- * @作者信息： zmj
- * @创建时间： 2018-9-17下午3:28:20
+ * 供应商
  */
 @Service
 public class SupplierService {
@@ -32,21 +27,27 @@ public class SupplierService {
     private IProductMapper iProductMapper;
     @Autowired
     private IGoodsMapper goodsMapper;
-    private static Logger LOG = LoggerFactory.getLogger(SupplierService.class);
+
+    /**
+     * 供应商登录
+     */
+    public ServerResponse byTelephone(String telephone){
+        try{
+            Supplier supplier = iSupplierMapper.byTelephone(telephone);
+            if (supplier == null){
+                return ServerResponse.createByErrorMessage("查询失败");
+            }else {
+                return ServerResponse.createBySuccess("查询成功", supplier.getId());
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
     /**
      * 新增供应商
-     * <p>Title: insertSupplier</p>
-     * <p>Description: </p>
-     *
-     * @param name
-     * @param address
-     * @param telephone
-     * @param checkPeople
-     * @param gender
-     * @param email
-     * @param notice
-     * @param supplierLevel
-     * @param state
      */
     public ServerResponse insertSupplier(String name, String address, String telephone, String checkPeople, Integer gender,
                                          String email, String notice, Integer supplierLevel, Integer state) {
@@ -73,18 +74,6 @@ public class SupplierService {
 
     /**
      * 修改供应商
-     * <p>Title: insertSupplier</p>
-     * <p>Description: </p>
-     *
-     * @param name
-     * @param address
-     * @param telephone
-     * @param checkPeople
-     * @param gender
-     * @param email
-     * @param notice
-     * @param supplier_level
-     * @param state
      */
     public ServerResponse updateSupplier(String id, String name, String address, String telephone, String checkPeople, Integer gender,
                                          String email, String notice, Integer supplier_level, Integer state) {

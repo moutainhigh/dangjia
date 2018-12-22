@@ -18,5 +18,9 @@ import java.util.List;
 public interface IActuarialTemplateMapper  extends Mapper<ActuarialTemplate> {
     List<ActuarialTemplate> query(@Param("workerTypeId") String userId, @Param("stateType") String stateType,@Param("name")String name);
     int useById(String id);
+
+    //workerTypeId = -1  说明忽略 查询条件
+    List<ActuarialTemplate> queryByName(@Param("workerTypeId") Integer workerTypeId, @Param("name")String name);
+
 }
 

@@ -28,6 +28,15 @@ public class HouseDataController implements HouseDataAPI {
     @Autowired
     private ActuaryOperationService actuaryOperationService;
 
+
+    /**
+     * 自购
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse selfBuyingList(String houseId){
+        return houseDataService.selfBuyingList(houseId);
+    }
     /**
      * 工匠工艺查询商品库人工
      */

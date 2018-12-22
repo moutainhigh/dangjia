@@ -3,6 +3,7 @@ package com.dangjia.acg.dto.core;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -23,4 +24,7 @@ public class HouseFlowApplyDTO {
     private String nameB;//大管家名字
     private String mobileB;//大管家手机
     private String date;
+    private List<Map> list;
+
+
 }

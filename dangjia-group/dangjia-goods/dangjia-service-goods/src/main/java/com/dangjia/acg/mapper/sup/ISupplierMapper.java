@@ -18,6 +18,10 @@ import java.util.List;
  */
 @Repository
 public interface ISupplierMapper extends Mapper<Supplier> {
+
+	/**根据电话号码查询*/
+	Supplier byTelephone(@Param("telephone")String telephone);
+
 	void deleteById(String id);
 	List<Supplier> query();
 

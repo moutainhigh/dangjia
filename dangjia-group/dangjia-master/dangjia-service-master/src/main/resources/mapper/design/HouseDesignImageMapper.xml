@@ -3,6 +3,29 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.design.IHouseDesignImageMapper">
+    <sql id="all_columns">
+		id,
+		house_id as houseId,
+		business_order_number as businessOrderNumber,
+		design_image_type_id as designImageTypeId,
+		imageurl,
+		sell,
+		data_status as dataStatus,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
+
+    <!-- 根据orderId查询 -->
+    <select id="byNumber" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.design.HouseDesignImage">
+        SELECT
+            <include refid="all_columns"/>
+        FROM dj_design_house_design_image
+        where
+            sell = 1
+        and business_order_number = #{businessOrderNumber}
+        and house_id = #{houseId}
+    </select>
 
 </mapper>
 

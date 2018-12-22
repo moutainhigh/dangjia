@@ -12,19 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
-/**
- * 
- * 
-   * @类 名： BudgetWorkerController.java
-   * @功能描述：  
-   * @作者信息： hb
-   * @创建时间： 2018-9-18下午3:52:43
- */
 @RestController
 public class BudgetWorkerController implements BudgetWorkerAPI {
-	/**
-	 * 注入service
-	 */
 	 @Autowired
 	 private BudgetWorkerService budgetWorkerService;
 	 @Autowired
@@ -76,7 +65,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	 @Override
 	 @ApiMethod
 	 public ServerResponse budgetTemplates(HttpServletRequest request,String listOfGoods,String workerTypeId,String templateId){
-		 return budgetWorkerService.makeBudgetTemplate(listOfGoods,workerTypeId,templateId);
+		 return budgetWorkerService.budgetTemplates(listOfGoods,workerTypeId,templateId);
 	 }
 	 /**
 	  * 修改精算模板
@@ -165,17 +154,6 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	@ApiMethod
 	public ServerResponse gatEstimateBudgetByHId(HttpServletRequest request,String houseId){
 		return budgetWorkerService.gatEstimateBudgetByHId(houseId);
-	}
-
-	/**
-	 *  房子精算
-	 * @param houseId
-	 * @return
-	 */
-	@Override
-	@ApiMethod
-	public ServerResponse gatBudgetResultByHouse(HttpServletRequest request,String houseId){
-		return budgetWorkerService.gatBudgetResultByHouse(houseId);
 	}
 
 	/**

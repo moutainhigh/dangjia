@@ -25,10 +25,13 @@ import java.util.Map;
 public interface SupplierProductAPI {
 
 
+    @PostMapping("/sup/supplierProduct/byTelephone")
+    @ApiOperation(value = "供应商登录", notes = "供应商登录")
+    ServerResponse byTelephone(@RequestParam("telephone")String telephone);
+
     @PostMapping("/sup/supplierProduct/supplierList")
     @ApiOperation(value = "查询供应商", notes = "查询供应商")
     ServerResponse supplierList(@RequestParam("request") HttpServletRequest request,@RequestParam("productId") String productId);
-
 
     @PostMapping("/sup/supplierProduct/insertSupplier")
     @ApiOperation(value = "新增供应商", notes = "新增供应商")

@@ -65,6 +65,12 @@ public class GoodsService {
     public ServerResponse saveGoods(String name, String categoryId, Integer buy,
                                     Integer sales, String unitId, Integer type, String arrString) {
         try {
+            if (!StringUtils.isNotBlank(name))
+                return ServerResponse.createByErrorMessage("商品不能为空");
+            List<Goods> goodsList = iGoodsMapper.queryByName(name);
+            if (goodsList.size() > 1)
+                return ServerResponse.createByErrorMessage("该商品已存在");
+
             Goods goods = new Goods();
             goods.setName(name);
             goods.setCategoryId(categoryId);//分类
@@ -166,6 +172,12 @@ public class GoodsService {
     public ServerResponse updateGoods(String id, String name, String categoryId, Integer buy,
                                       Integer sales, String unitId, Integer type, String arrString) {
         try {
+            if (!StringUtils.isNotBlank(name))
+                return ServerResponse.createByErrorMessage("商品不能为空");
+            List<Goods> goodsList = iGoodsMapper.queryByName(name);
+            if (goodsList.size() > 1)
+                return ServerResponse.createByErrorMessage("该商品已存在");
+
             Goods goods = new Goods();
             goods.setId(id);
             goods.setName(name);
@@ -204,8 +216,8 @@ public class GoodsService {
      */
     public ServerResponse deleteGoods(String id) {
         try {
-            if (true)
-                return ServerResponse.createByErrorMessage("不能执行删除操作");
+//            if (true)
+//                return ServerResponse.createByErrorMessage("不能执行删除操作");
             iGoodsMapper.deleteByPrimaryKey(id);
             Example example = new Example(Product.class);
             example.createCriteria().andEqualTo("goodsId", id);
@@ -262,7 +274,7 @@ public class GoodsService {
                     p.setImage(imgStr);
                     Map<String, Object> map = CommonUtil.beanToMap(p);
                     map.put("imageUrl", imgUrlStr);
-                    if (p.getLabelId() == null) {
+                    if (!StringUtils.isNotBlank(p.getLabelId())) {
                         map.put("labelId", "");
                         map.put("labelName", "");
                     } else {
@@ -307,38 +319,43 @@ public class GoodsService {
             List<Map<String, Object>> gMapList = new ArrayList<>();
             for (Goods goods : goodsList) {
                 Map<String, Object> gMap = CommonUtil.beanToMap(goods);
-                List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
                 List<Map<String, Object>> mapList = new ArrayList<>();
-                for (Product p : productList) {
-                    if (p.getImage() == null) {
-                        continue;
-                    }
-                    String[] imgArr = p.getImage().split(",");
-                    String imgStr = "";
-                    String imgUrlStr = "";
-                    for (int i = 0; i < imgArr.length; i++) {
-                        if (i == imgArr.length - 1) {
-                            imgStr += address + imgArr[i];
-                            imgUrlStr += imgArr[i];
-                        } else {
-                            imgStr += address + imgArr[i] + ",";
-                            imgUrlStr += imgArr[i] + ",";
+
+                if (2 != goods.getBuy())//非自购
+                {
+                    List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
+                    for (Product p : productList) {
+                        if (p.getImage() == null) {
+                            continue;
                         }
+                        String[] imgArr = p.getImage().split(",");
+                        String imgStr = "";
+                        String imgUrlStr = "";
+                        for (int i = 0; i < imgArr.length; i++) {
+                            if (i == imgArr.length - 1) {
+                                imgStr += address + imgArr[i];
+                                imgUrlStr += imgArr[i];
+                            } else {
+                                imgStr += address + imgArr[i] + ",";
+                                imgUrlStr += imgArr[i] + ",";
+                            }
+                        }
+                        p.setImage(imgStr);
+                        Map<String, Object> map = CommonUtil.beanToMap(p);
+                        map.put("imageUrl", imgUrlStr);
+                        if (!StringUtils.isNotBlank(p.getLabelId())) {
+                            map.put("labelId", "");
+                            map.put("labelName", "");
+                        } else {
+                            map.put("labelId", p.getLabelId());
+                            Label label = iLabelMapper.selectByPrimaryKey(p.getLabelId());
+                            if (label.getName() != null)
+                                map.put("labelName", label.getName());
+                        }
+                        mapList.add(map);
                     }
-                    p.setImage(imgStr);
-                    Map<String, Object> map = CommonUtil.beanToMap(p);
-                    map.put("imageUrl", imgUrlStr);
-                    if (p.getLabelId() == null) {
-                        map.put("labelId", "");
-                        map.put("labelName", "");
-                    } else {
-                        map.put("labelId", p.getLabelId());
-                        Label label = iLabelMapper.selectByPrimaryKey(p.getLabelId());
-                        if (label.getName() != null)
-                            map.put("labelName", label.getName());
-                    }
-                    mapList.add(map);
                 }
+
                 gMap.put("productList", mapList);
                 gMapList.add(gMap);
             }
@@ -373,38 +390,43 @@ public class GoodsService {
             List<Map<String, Object>> gMapList = new ArrayList<>();
             for (Goods goods : goodsList) {
                 Map<String, Object> gMap = CommonUtil.beanToMap(goods);
-                List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
                 List<Map<String, Object>> mapList = new ArrayList<>();
-                for (Product p : productList) {
-                    if (p.getImage() == null) {
-                        continue;
-                    }
-                    String[] imgArr = p.getImage().split(",");
-                    String imgStr = "";
-                    String imgUrlStr = "";
-                    for (int i = 0; i < imgArr.length; i++) {
-                        if (i == imgArr.length - 1) {
-                            imgStr += address + imgArr[i];
-                            imgUrlStr += imgArr[i];
-                        } else {
-                            imgStr += address + imgArr[i] + ",";
-                            imgUrlStr += imgArr[i] + ",";
+
+                if (2 != goods.getBuy())//非自购
+                {
+                    List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
+                    for (Product p : productList) {
+                        if (p.getImage() == null) {
+                            continue;
                         }
+                        String[] imgArr = p.getImage().split(",");
+                        String imgStr = "";
+                        String imgUrlStr = "";
+                        for (int i = 0; i < imgArr.length; i++) {
+                            if (i == imgArr.length - 1) {
+                                imgStr += address + imgArr[i];
+                                imgUrlStr += imgArr[i];
+                            } else {
+                                imgStr += address + imgArr[i] + ",";
+                                imgUrlStr += imgArr[i] + ",";
+                            }
+                        }
+                        p.setImage(imgStr);
+                        Map<String, Object> map = CommonUtil.beanToMap(p);
+                        map.put("imageUrl", imgUrlStr);
+                        if (!StringUtils.isNotBlank(p.getLabelId())) {
+                            map.put("labelId", "");
+                            map.put("labelName", "");
+                        } else {
+                            map.put("labelId", p.getLabelId());
+                            Label label = iLabelMapper.selectByPrimaryKey(p.getLabelId());
+                            if (label.getName() != null)
+                                map.put("labelName", label.getName());
+                        }
+                        mapList.add(map);
                     }
-                    p.setImage(imgStr);
-                    Map<String, Object> map = CommonUtil.beanToMap(p);
-                    map.put("imageUrl", imgUrlStr);
-                    if (p.getLabelId() == null) {
-                        map.put("labelId", "");
-                        map.put("labelName", "");
-                    } else {
-                        map.put("labelId", p.getLabelId());
-                        Label label = iLabelMapper.selectByPrimaryKey(p.getLabelId());
-                        if (label.getName() != null)
-                            map.put("labelName", label.getName());
-                    }
-                    mapList.add(map);
                 }
+
                 gMap.put("productList", mapList);
                 gMapList.add(gMap);
             }
@@ -420,41 +442,27 @@ public class GoodsService {
 
     /**
      * 根据商品id和标签id ，找出对应的货品对象集合
-     * @param goodsArr :  goodsArr  数组
+     *
+     * @param goodsArr   :  goodsArr  数组
      * @param srcLabelId :   srcLabelId
      * @return
      */
-    public ServerResponse queryProductListByGoodsIdAndLabelId(String goodsArr,String srcLabelId) {
+    public ServerResponse queryProductListByGoodsIdAndLabelId(String goodsArr, String srcLabelId) {
         try {
-//queryProductListByGoodsIdAndLabelId goodsArr::["706035601543908463510","296139461543570236505"] id:997366631545133559322
-//            goodsArr.split(",");
-            JSONArray arr = JSONArray.parseArray(JSON.toJSONString(goodsArr));
-            for (int i = 0; i < arr.size(); i++) {
-                JSONObject obj = arr.getJSONObject(i);
-                LOG.info("queryProductListByGoodsIdAndLabelId  obj goodsId::" + obj.getString("goodsId") );
-            }
-
-            List<String> goodsList = Arrays.asList(goodsArr);
-
-            for (String goodsId: goodsList)
-            {
-                LOG.info("queryProductListByGoodsIdAndLabelId goodsId::" + goodsId );
-            }
-            LOG.info("queryProductListByGoodsIdAndLabelId goodsArr::" + goodsArr +" id:" + srcLabelId);
-
+            LOG.info("queryProductListByGoodsIdAndLabelId goodsArr::" + goodsArr + " id:" + srcLabelId);
+//            List<String> goodsList = Arrays.asList(goodsArr);
+            String[] goodsList = goodsArr.split(",");
             if (!StringUtils.isNotBlank(srcLabelId))
                 return ServerResponse.createByErrorMessage("标签id不能为空");
 
+            if (!StringUtils.isNotBlank(goodsArr))
+                return ServerResponse.createByErrorMessage("查询商品id不能为空");
+
             List<Map<String, Object>> gMapList = new ArrayList<>();
-
-            JSONArray json = JSONArray.parseArray(goodsArr);
-            for (int i = 0; i < json.size(); i++) {
-                JSONObject jsonObject = json.getJSONObject(i);
-                String srcGoodsId = jsonObject.getString("goodsId");
-
+            for (String srcGoodsId : goodsList) {
                 if (!StringUtils.isNotBlank(srcGoodsId))
                     return ServerResponse.createByErrorMessage("商品id不能为空");
-
+//                LOG.info("for srcGoodsId:" + srcGoodsId);
                 Goods goods = iGoodsMapper.selectByPrimaryKey(srcGoodsId);
                 if (goods == null)
                     return ServerResponse.createByErrorMessage("商品不存在");
@@ -462,6 +470,8 @@ public class GoodsService {
                 List<Product> products = iProductMapper.queryByGoodsId(goods.getId());
                 for (Product product : products) {
                     if (product.getLabelId() != null) {
+                        if (!product.getLabelId().equals(srcLabelId))
+                            break;
 //                        Map<String, Object> map = CommonUtil.beanToMap(p);
                         Map<String, Object> map = new HashMap<>();
                         Label label = iLabelMapper.selectByPrimaryKey(product.getLabelId());

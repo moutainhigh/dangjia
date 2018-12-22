@@ -36,12 +36,12 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -123,14 +123,9 @@ public class HouseFlowService {
 
     /**
      * 抢单列表
-     *
-     * @param userToken 用户userToken
-     * @param cityId    城市ID
-     * @return List<AllgrabBean>
      */
     public ServerResponse getGrabList(String userToken, String cityId) {
         try {
-            //待设计师抢单列表
             if (CommonUtil.isEmpty(userToken)) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), EventStatus.USER_TOKEN_ERROR.getDesc());
             }
@@ -139,16 +134,18 @@ public class HouseFlowService {
             List<AllgrabBean> grabList = new ArrayList<>();//返回的任务list
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member member = accessToken.getMember();
-            Example example = new Example(HouseFlow.class);
             String workerTypeId = "4";
-            if (member.getWorkerTypeId() != null) {
+            if(StringUtil.isNotEmpty(member.getWorkerTypeId())){
                 workerTypeId = member.getWorkerTypeId();
             }
-            example.createCriteria().andEqualTo("workType", 2).andEqualTo("workerTypeId", workerTypeId)
-                    .andEqualTo("cityId", cityId);
+            /*待抢单*/
+            Example example = new Example(HouseFlow.class);
+            example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 2).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
+                    .andEqualTo(HouseFlow.CITY_ID, cityId);
             List<HouseFlow> hfList = houseFlowMapper.selectByExample(example);
+
             example = new Example(HouseWorker.class);
-            example.createCriteria().andEqualTo("workerId", member.getId());
+            example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId());
             List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的所有已抢单
             if (hfList != null)
                 for (HouseFlow houseFlow : hfList) {
@@ -265,8 +262,11 @@ public class HouseFlowService {
             Example example = new Example(RewardPunishRecord.class);
             example.createCriteria().andEqualTo("memberId", member.getId());
             List<RewardPunishRecord> recordList = rewardPunishRecordMapper.selectByExample(example);
+            if(hf.getWorkType() >= 3){
+                return ServerResponse.createByErrorMessage("订单已经被抢了！");
+            }
             if (hf.getGrablock() == 2) {
-                return ServerResponse.createByErrorMessage("项目已经被抢了！");
+                return ServerResponse.createByErrorMessage("订单已经被抢了！");
             }
             if (member.getCheckType() == 0) {
                 //审核中的人不能抢单
@@ -523,6 +523,7 @@ public class HouseFlowService {
     public List<Map<String, String>> getFlowList(String houseId) {
         Example example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo("houseId", houseId).andEqualTo("state", 0).andGreaterThan("workerType", 2);
+        example.orderBy(HouseFlow.SORT).desc();
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         List<Map<String, String>> mapList = new ArrayList<Map<String, String>>();
         for (HouseFlow hf : houseFlowList) {
@@ -562,8 +563,7 @@ public class HouseFlowService {
     /**
      * 根据houseId获取所有验收节点并保存
      */
-    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, timeout = 30000, rollbackFor = {
-            RuntimeException.class, Exception.class })
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse getAllTechnologyByHouseId(String houseId) {
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
@@ -588,6 +588,7 @@ public class HouseFlowService {
             return ServerResponse.createBySuccess("保存成功", null);
         } catch (Exception e) {
             e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ServerResponse.createByErrorMessage("保存失败");
         }
     }

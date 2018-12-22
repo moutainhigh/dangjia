@@ -6,6 +6,7 @@ import com.dangjia.acg.mapper.actuary.IActuarialTemplateMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.modle.actuary.ActuarialTemplate;
+import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -76,6 +77,11 @@ public class ActuarialTemplateService {
      */
     public ServerResponse<String> insertActuarialTemplate(String userId, String name, String styleType, String applicableArea,
                                                           Integer stateType, String workerTypeName,Integer workerTypeId) {
+
+        List<ActuarialTemplate> actuarialTemplateList = iActuarialTemplateMapper.queryByName(workerTypeId, name);
+        if(actuarialTemplateList.size() > 0)
+            return ServerResponse.createByErrorMessage("精算名字不能重复");
+
         ActuarialTemplate t = new ActuarialTemplate();
         t.setUserId(userId);
         t.setName(name);
@@ -94,6 +100,11 @@ public class ActuarialTemplateService {
     //修改精算模版
     public ServerResponse<String> updateActuarialTemplate(String id, String name, String styleType, String applicableArea, Integer stateType, String workingProcedure) {
       try {
+
+          List<ActuarialTemplate> actuarialTemplateList = iActuarialTemplateMapper.queryByName(-1, name);
+          if(actuarialTemplateList.size() > 1)
+              return ServerResponse.createByErrorMessage("精算名字不能重复");
+
           if (!StringUtils.isNotBlank(id)) {
               return ServerResponse.createByErrorMessage("修改精算模版参数错误");
           }

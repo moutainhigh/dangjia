@@ -29,7 +29,7 @@ import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.util.StringTool;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -117,11 +117,11 @@ public class BudgetWorkerService {
 	public ServerResponse updateBudgetTemplate(String listOfGoods,String workerTypeId,String templateId){
 		iBudgetMaterialMapper.deleteBytemplateId(templateId);
 		iBudgetWorkerMapper.deleteBytemplateId(templateId);
-		return makeBudgetTemplate(listOfGoods,workerTypeId,templateId);
+		return budgetTemplates(listOfGoods,workerTypeId,templateId);
 	}
 
 	//生成精算模板
-	public ServerResponse makeBudgetTemplate(String listOfGoods,String workerTypeId,String templateId){
+	public ServerResponse budgetTemplates(String listOfGoods,String workerTypeId,String templateId){
 		JSONArray goodsList = JSONArray.parseArray(listOfGoods);
 		for (int i = 0; i < goodsList.size(); i++) {
 			JSONObject job = goodsList.getJSONObject(i);
@@ -129,39 +129,63 @@ public class BudgetWorkerService {
 			if (jobT.getProductType()!=2){//材料或者服务
 				try {
 					BudgetMaterial budgetMaterial = new BudgetMaterial();
-					Product pro =iProductMapper.getById(jobT.getProductId());
-					if(pro==null){
-						continue;
-					}
-					Goods goods = iGoodsMapper.queryById(pro.getGoodsId());
+//					Product pro =iProductMapper.getById(jobT.getProductId());
+//					if(pro==null){
+//						continue;
+//					}
+//					Goods goods = iGoodsMapper.queryById(pro.getGoodsId());
+					Goods goods = iGoodsMapper.queryById(jobT.getGoodsId());
 					if(goods==null){
 						continue;
 					}
+					if(goods.getBuy() == 2 && !StringUtils.isNoneBlank(jobT.getProductId()))//2自购
+					{
+						budgetMaterial.setProductId("");
+						budgetMaterial.setProductSn("");
+						budgetMaterial.setGoodsId("");
+						budgetMaterial.setProductName("");
+						budgetMaterial.setUnitName("");
+						budgetMaterial.setPrice(0.0);
+						budgetMaterial.setCost(0.0);
+						budgetMaterial.setImage("");//货品图片
+						budgetMaterial.setShopCount(0.0);
+						budgetMaterial.setUnitName("");
+//						BigDecimal b1 = new BigDecimal(Double.toString(pro.getPrice()));
+//						BigDecimal b2 = new BigDecimal(Double.toString(shopCount));
+//						Double totalprice = b1.multiply(b2).doubleValue();
+						budgetMaterial.setTotalPrice(0.0);
+					}else{
+						Product pro =iProductMapper.getById(jobT.getProductId());
+						if(pro==null){
+							continue;
+						}
+						budgetMaterial.setProductId(pro.getId());
+						budgetMaterial.setProductSn(pro.getProductSn());
+						budgetMaterial.setGoodsId(pro.getGoodsId());
+						budgetMaterial.setProductName(pro.getName());
+						budgetMaterial.setUnitName(pro.getUnitName());
+						budgetMaterial.setPrice(pro.getPrice());
+						budgetMaterial.setCost(pro.getCost());
+						budgetMaterial.setImage(pro.getImage());//货品图片
+						double a=jobT.getActuarialQuantity()/pro.getConvertQuality();
+						double shopCount = Math.ceil(a);
+						budgetMaterial.setShopCount(shopCount);
+						budgetMaterial.setUnitName(pro.getUnitName());
+						BigDecimal b1 = new BigDecimal(Double.toString(pro.getPrice()));
+						BigDecimal b2 = new BigDecimal(Double.toString(shopCount));
+						Double totalprice = b1.multiply(b2).doubleValue();
+						budgetMaterial.setTotalPrice(totalprice);
+					}
+
 					budgetMaterial.setWorkerTypeId(workerTypeId);
 					budgetMaterial.setSteta(3);
 					budgetMaterial.setTemplateId(templateId);
 					budgetMaterial.setDeleteState(0);
-					budgetMaterial.setProductId(pro.getId());
-					budgetMaterial.setProductSn(pro.getProductSn());
-					budgetMaterial.setGoodsId(pro.getGoodsId());
 					budgetMaterial.setGoodsName(goods.getName());
-					budgetMaterial.setProductName(pro.getName());
-					budgetMaterial.setUnitName(pro.getUnitName());
-					budgetMaterial.setPrice(pro.getPrice());
-					budgetMaterial.setCost(pro.getCost());
-					budgetMaterial.setImage(pro.getImage());//货品图片
 					budgetMaterial.setCategoryId(goods.getCategoryId());//商品分类
-
-					double a=jobT.getActuarialQuantity()/pro.getConvertQuality();
-					double shopCount = Math.ceil(a);
-					budgetMaterial.setShopCount(shopCount);
 					budgetMaterial.setActuarialQuantity(jobT.getActuarialQuantity());
-					budgetMaterial.setUnitName(pro.getUnitName());
 					budgetMaterial.setDescription("材料精算模板");
-					BigDecimal b1 = new BigDecimal(Double.toString(pro.getPrice()));
-					BigDecimal b2 = new BigDecimal(Double.toString(shopCount));
-					Double totalprice = b1.multiply(b2).doubleValue();
-					budgetMaterial.setTotalPrice(totalprice);
+
 					budgetMaterial.setProductType(jobT.getProductType());
 					budgetMaterial.setGroupType(jobT.getGroupType());
 					budgetMaterial.setGoodsGroupId(jobT.getGoodsGroupId());
@@ -266,38 +290,48 @@ public class BudgetWorkerService {
 						if(goods==null){
 							continue;
 						}
-						Product pro = iProductMapper.getById(productId);
-						if(pro==null){
-							List<Product> pList=iProductMapper.queryByGoodsId(goods.getId());
-							if(pList.size()>0){
-								pro=pList.get(0);
-							}
-						}
 						budgetMaterial.setWorkerTypeId(workerTypeId);
 						budgetMaterial.setHouseFlowId(houseFlowId);
 						budgetMaterial.setHouseId(houseId);
 						if(goods.getBuy()==0||goods.getBuy()==1){//0：必买；1可选；2自购
 							budgetMaterial.setSteta(1);//我们购
+
+							Product pro = iProductMapper.getById(productId);
+							if(pro==null){
+								List<Product> pList=iProductMapper.queryByGoodsId(goods.getId());
+								if(pList.size()>0){
+									pro=pList.get(0);
+								}
+							}
+							budgetMaterial.setProductId(pro.getId().toString());
+							budgetMaterial.setProductSn(pro.getProductSn());
+							budgetMaterial.setProductName(pro.getName());
+							budgetMaterial.setUnitName(pro.getUnitName());
+							budgetMaterial.setPrice(pro.getPrice());
+							budgetMaterial.setCost(pro.getCost());
+							budgetMaterial.setImage(pro.getImage());//货品图片
+							double a=actuarialQuantity/pro.getConvertQuality();
+							double shopCount = Math.ceil(a);
+							budgetMaterial.setShopCount(shopCount);
+							budgetMaterial.setUnitName(pro.getUnitName());
 						}else{
 							budgetMaterial.setSteta(2);//自购
+							budgetMaterial.setProductId("");
+							budgetMaterial.setProductSn("");
+							budgetMaterial.setProductName("");
+							budgetMaterial.setUnitName("");
+							budgetMaterial.setPrice(0.0);
+							budgetMaterial.setCost(0.0);
+							budgetMaterial.setImage("");//货品图片
+							budgetMaterial.setShopCount(0.0);
+							budgetMaterial.setUnitName("");
 						}
+
 						budgetMaterial.setDeleteState(0);
-						budgetMaterial.setProductId(pro.getId().toString());
-						budgetMaterial.setProductSn(pro.getProductSn());
 						budgetMaterial.setGoodsId(goodsId);
 						budgetMaterial.setGoodsName(goods.getName());
-						budgetMaterial.setProductName(pro.getName());
-						budgetMaterial.setUnitName(pro.getUnitName());
-						budgetMaterial.setPrice(pro.getPrice());
-						budgetMaterial.setCost(pro.getCost());
-						budgetMaterial.setImage(pro.getImage());//货品图片
 						budgetMaterial.setCategoryId(goods.getCategoryId());//商品分类
-
-						double a=actuarialQuantity/pro.getConvertQuality();
-						double shopCount = Math.ceil(a);
-						budgetMaterial.setShopCount(shopCount);
 						budgetMaterial.setActuarialQuantity(actuarialQuantity);
-						budgetMaterial.setUnitName(pro.getUnitName());
 						budgetMaterial.setCreateDate(new Date());
 						budgetMaterial.setModifyDate(new Date());
 						budgetMaterial.setProductType(productType);
@@ -562,100 +596,6 @@ public class BudgetWorkerService {
 		}catch (Exception e) {
 			e.printStackTrace();
 			return ServerResponse.createByErrorMessage("系统出错，查询估价失败");
-		}
-	}
-
-	/**
-	 *  1.3.0 房子精算
-	 *  已支付工种 hflist.get(i).getWorktype() == 4 查精算表里价格
-	 *  未支付查商品库价格
-	 * @param houseId
-	 */
-	public ServerResponse gatBudgetResultByHouse(String houseId){
-		Map<String, Object> returnMap=new HashMap<String, Object>();
-		try{
-			House house=houseAPI.getHouseById(houseId);
-			HttpServletRequest request = ((ServletRequestAttributes )RequestContextHolder.getRequestAttributes()).getRequest();
-			HouseFlow houseFlow = houseFlowAPI.getHouseFlowByHidAndWty(house.getId(), 2);
-			if(houseFlow!=null){
-				List<HouseFlow> hflist = houseFlowAPI.getFlowByhouseIdNot12(house.getId());
-				List<Map<String, Object>> workList=new ArrayList<Map<String,Object>>();//工序list
-				List<Map<String, Object>> sList=new ArrayList<Map<String,Object>>();//准备阶段list
-				Map<String, Object> wMap=new HashMap<String, Object>();
-				wMap.put("workTypeName", "准备阶段");
-				Map<String, Object> aMap=new HashMap<String, Object>();
-				aMap.put("name", "设计费");
-				aMap.put("pirce", "0");
-				aMap.put("aUrl","");
-				sList.add(aMap);
-				aMap=new HashMap<String, Object>();
-				aMap.put("name", "精算费");
-				aMap.put("pirce", "0");
-				aMap.put("aUrl","");
-				sList.add(aMap);
-				wMap.put("wList", sList);
-				workList.add(wMap);
-				for(int i=0; i<hflist.size(); i++){
-					WorkerType workType=new WorkerType();
-					ServerResponse serverResponse = workerTypeAPI.getWorkerType(hflist.get(i).getWorkerTypeId());
-					if(serverResponse.isSuccess()) {
-						workType = JSON.parseObject(serverResponse.getResultObj().toString(),WorkerType.class);
-					}
-					wMap=new HashMap<String, Object>();
-					wMap.put("workTypeName", workType.getName());
-					Example example=new Example(BudgetWorker.class);
-					example.createCriteria().andEqualTo("houseFlowId",hflist.get(i).getId()).andCondition("delete_state!=1");
-					List<BudgetWorker> abwlist=iBudgetWorkerMapper.selectByExample(example);
-					Example example2=new Example(BudgetMaterial.class);
-					example2.createCriteria().andEqualTo("houseFlowId",hflist.get(i).getId()).andCondition("delete_state!=1");
-					List<BudgetMaterial> abmList = iBudgetMaterialMapper.selectByExample(example);//获取每个工序对应的材料表
-					BigDecimal rgzj=new BigDecimal(0);
-					BigDecimal clzj=new BigDecimal(0);
-					BigDecimal fwzj=new BigDecimal(0);
-					for(BudgetWorker abw : abwlist){//增加一层循环遍历存储下级子项目
-						WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
-						BigDecimal r=(new BigDecimal(abw.getShopCount()).multiply(new BigDecimal(wg.getPrice()))).setScale(2, BigDecimal.ROUND_HALF_UP);
-						rgzj=rgzj.add(r);
-					}
-					for(BudgetMaterial abm : abmList){//每个商品
-						Product product = iProductMapper.selectByPrimaryKey(abm.getProductId());
-						Goods goods = iGoodsMapper.selectByPrimaryKey(product.getGoodsId());
-						BigDecimal c=(new BigDecimal(abm.getShopCount()).multiply(abm.getPrice()==null?new BigDecimal(product.getPrice()):new BigDecimal(abm.getPrice()))).setScale(2, BigDecimal.ROUND_HALF_UP);
-						if(goods.getType()==0) {//材料
-							clzj = clzj.add(c);
-						}else{
-							fwzj= fwzj.add(c);
-						}
-					}
-					List<Map<String, Object>> aList=new ArrayList<Map<String,Object>>();//子工序list
-					aMap=new HashMap<String, Object>();
-					aMap.put("aName", workType.getName()+"人工费");//人工费名称
-					aMap.put("aPirce",rgzj);//人工费总计
-					aMap.put("aUrl", StringTool.getUrl(request)+"/app/app_budget_material!index.action?houseflow.id="+
-							hflist.get(i).getId()+"&title"+workType.getName());//人工费详情链接
-					aList.add(aMap);
-					aMap=new HashMap<String, Object>();
-					aMap.put("aName",workType.getName()+"材料费");//材料费
-					aMap.put("aPirce", clzj);//材料费总计
-					aMap.put("aUrl", StringTool.getUrl(request)+"/app/app_budget_material!list.action?houseflow.id="+
-							hflist.get(i).getId()+"&title"+workType.getName());//材料费详情链接
-					aList.add(aMap);
-					aMap=new HashMap<String, Object>();
-					aMap.put("aName", "服务费");//服务费
-					aMap.put("aPirce", fwzj);//服务费总计
-					aMap.put("aUrl","");
-					aList.add(aMap);
-					wMap.put("wList", aList);
-					workList.add(wMap);
-				}
-				returnMap.put("workList", workList);
-			}else{
-				return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(),"暂无数据");
-			}
-			return ServerResponse.createBySuccess("查询精算成功",returnMap);
-		}catch (Exception e) {
-			e.printStackTrace();
-			return ServerResponse.createByErrorMessage("系统出错,查询精算失败");
 		}
 	}
 

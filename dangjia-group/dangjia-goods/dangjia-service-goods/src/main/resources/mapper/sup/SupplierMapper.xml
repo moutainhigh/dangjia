@@ -13,41 +13,30 @@
 		gender,
 		email,
 		notice,
-		supplier_level,
+		supplier_level as supplierLevel,
 		state,
-		create_date,
-		modify_date
+		create_date as createDate,
+		modify_date as modifyDate
 	</sql>
-	<sql id="all_supplierProduct">
-		 id,
-		 product_id,
-		 supplier_id,
-		 price,
-		 stock,
-		 is_supply,
-		 create_date,
-		 modify_date
-	</sql>
+
+	<!-- 根据telephone查询 -->
+	<select id="byTelephone" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.sup.Supplier">
+		SELECT
+		     <include refid="all_columns"/>
+		FROM dj_sup_supplier
+		where telephone = #{telephone}
+	</select>
+
 	<!-- 删除对象 -->
 	<delete id="deleteById" parameterType="java.lang.String">
 		DELETE FROM dj_sup_supplier
 		WHERE id=#{id}
 	</delete>
+
     <!-- 查询所有 -->
 	<select id="query" resultType="com.dangjia.acg.modle.sup.Supplier">
 		SELECT
-		id,
-		name,
-		address,
-		telephone,
-		checkpeople,
-		gender,
-		email,
-		notice,
-		supplier_level as supplierLevel,
-		state,
-		create_date as createDate,
-		modify_date as modifyDate
+		    <include refid="all_columns"/>
 		FROM dj_sup_supplier
 		ORDER BY create_date desc
 	</select>
@@ -55,18 +44,7 @@
 	<!-- 按照名字模糊查询所有供应商 -->
 	<select id="querySupplierListLikeByName" resultType="com.dangjia.acg.modle.sup.Supplier">
 		SELECT
-		id,
-		name,
-		address,
-		telephone,
-		checkpeople,
-		gender,
-		email,
-		notice,
-		supplier_level as supplierLevel,
-		state,
-		create_date as createDate,
-		modify_date as modifyDate
+		    <include refid="all_columns"/>
 		FROM dj_sup_supplier
 		where 1=1
 		<if test="name!=null and name!=''">

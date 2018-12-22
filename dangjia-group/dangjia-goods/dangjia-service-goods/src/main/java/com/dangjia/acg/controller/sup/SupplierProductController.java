@@ -30,12 +30,21 @@ public class SupplierProductController  implements SupplierProductAPI {
     private SupplierProductService supplierProductService;
 
 
+
+    /**
+     * 供应商登录
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse byTelephone(String telephone){
+        return supplierService.byTelephone(telephone);
+    }
+
     @Override
     @ApiMethod
     public ServerResponse supplierList(HttpServletRequest request, String productId){
         return supplierProductService.supplierList(productId);
     }
-
 
     /**
      * @Description:新增供应商

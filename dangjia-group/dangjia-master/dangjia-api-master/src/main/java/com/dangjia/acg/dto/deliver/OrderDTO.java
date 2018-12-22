@@ -1,7 +1,9 @@
 package com.dangjia.acg.dto.deliver;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * author: Ronalcheng
@@ -11,8 +13,10 @@ import lombok.Data;
 @Data
 public class OrderDTO {
 
-    @ApiModelProperty("订单ID")
-    private String id;
-    @ApiModelProperty("订单名字")
-    private String name;
+    private String orderId;//订单id  订单号
+    private String houseName;//
+    private Date createDate;// 创建日期
+    private String image;
+    private String name;//各种名
+    private BigDecimal totalAmount;//合计
 }

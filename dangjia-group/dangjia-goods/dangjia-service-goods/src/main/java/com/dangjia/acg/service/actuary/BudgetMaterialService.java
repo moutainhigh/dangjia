@@ -12,6 +12,7 @@ import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -126,7 +127,7 @@ public class BudgetMaterialService {
 				p.setImage(imgStr);
 				Map<String,Object> map = CommonUtil.beanToMap(p);
 				map.put("imageUrl",imgUrlStr);
-				if (p.getLabelId() == null) {
+				if (!StringUtils.isNotBlank( p.getLabelId())) {
 					map.put("labelId", "");
 					map.put("labelName", "");
 				} else {

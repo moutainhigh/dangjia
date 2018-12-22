@@ -127,6 +127,15 @@ public class HouseController implements HouseAPI {
     public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO) {
         return houseService.queryConstructionRecord(houseId, pageDTO.getPageNum(), pageDTO.getPageSize());
     }
+    /**
+     * 工序记录
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryFlowRecord(String houseFlowId){
+        return houseService.queryFlowRecord(houseFlowId);
+    }
+
     @Override
     @ApiMethod
     public ServerResponse queryHomeConstruction() {

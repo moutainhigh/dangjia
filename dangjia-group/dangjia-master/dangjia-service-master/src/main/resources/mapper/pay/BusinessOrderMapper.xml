@@ -3,6 +3,32 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.pay.IBusinessOrderMapper">
+    <sql id="all_columns">
+		id,
+		member_id as memberId,
+		number,
+		red_packet_pay_money_id as redPacketPayMoneyId,
+		pay_order_number as payOrderNumber,
+		house_id as houseId,
+		task_id as taskId,
+		state,
+		total_price as totalPrice,
+		discounts_price as discountsPrice,
+		pay_price as payPrice,
+		type,
+		data_status as dataStatus,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
+
+    <!-- 根据orderId查询 -->
+    <select id="byNumber" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.pay.BusinessOrder">
+        SELECT
+            <include refid="all_columns"/>
+        FROM dj_pay_business_order
+        where number = #{number}
+    </select>
 
 </mapper>
 

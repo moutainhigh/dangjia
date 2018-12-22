@@ -18,4 +18,6 @@ public interface IOrderItemMapper extends Mapper<OrderItem> {
     List<OrderItem> orderItemList(@Param("houseId")String houseId,@Param("orderId")String orderId, @Param("categoryId")String categoryId,
                                   @Param("name")String name);
 
+    List<OrderItem> byOrderIdList(@Param("orderId")String orderId);
+
 }

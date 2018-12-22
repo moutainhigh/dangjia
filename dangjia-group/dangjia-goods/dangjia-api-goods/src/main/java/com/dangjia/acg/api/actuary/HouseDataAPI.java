@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(description = "工程资料")
 @FeignClient("dangjia-service-goods")
 public interface HouseDataAPI {
+    @PostMapping("/actuary/houseData/selfBuyingList")
+    @ApiOperation(value = "自购清单", notes = "自购清单")
+    ServerResponse selfBuyingList(@RequestParam("houseId")String houseId);
 
     @PostMapping("/actuary/houseData/workerGoodsAll")
     @ApiOperation(value = "工匠工艺查询商品库人工", notes = "工匠工艺查询商品库人工")
@@ -27,7 +30,8 @@ public interface HouseDataAPI {
 
     @PostMapping("/actuary/houseData/getBudgetWorker")
     @ApiOperation(value = "查询工序人工", notes = "查询工序人工")
-    ServerResponse getBudgetWorker(@RequestParam("cityId") String cityId, @RequestParam("houseId")String houseId, @RequestParam("workerTypeId")String workerTypeId,@RequestParam("pageDTO") PageDTO pageDTO);
+    ServerResponse getBudgetWorker(@RequestParam("cityId") String cityId, @RequestParam("houseId")String houseId,
+                                   @RequestParam("workerTypeId")String workerTypeId,@RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping("/actuary/houseData/goodsDetail")
     @ApiOperation(value = "材料详情", notes = "材料详情")
@@ -35,5 +39,6 @@ public interface HouseDataAPI {
 
     @PostMapping("/actuary/houseData/getBudgetMaterial")
     @ApiOperation(value = "查询工序材料", notes = "查询工序材料")
-    ServerResponse getBudgetMaterial(@RequestParam("cityId")String cityId,@RequestParam("houseId")String houseId, @RequestParam("workerTypeId")String workerTypeId,@RequestParam("pageDTO") PageDTO pageDTO);
+    ServerResponse getBudgetMaterial(@RequestParam("cityId")String cityId,@RequestParam("houseId")String houseId,
+                                     @RequestParam("workerTypeId")String workerTypeId,@RequestParam("pageDTO") PageDTO pageDTO);
 }

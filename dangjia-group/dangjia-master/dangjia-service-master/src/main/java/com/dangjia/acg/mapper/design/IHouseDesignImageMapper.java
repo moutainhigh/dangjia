@@ -1,8 +1,11 @@
 package com.dangjia.acg.mapper.design;
 
 import com.dangjia.acg.modle.design.HouseDesignImage;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
+
+import java.util.List;
 
 /**
  * author: Ronalcheng
@@ -11,4 +14,6 @@ import tk.mybatis.mapper.common.Mapper;
  */
 @Repository
 public interface IHouseDesignImageMapper extends Mapper<HouseDesignImage> {
+
+    List<HouseDesignImage> byNumber(@Param("houseId")String houseId, @Param("businessOrderNumber")String businessOrderNumber);
 }

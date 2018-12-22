@@ -3,6 +3,7 @@ package com.dangjia.acg.pojo.attribute;
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.modle.attribute.Attribute;
 import com.dangjia.acg.modle.attribute.CategoryAttribute;
+import com.dangjia.acg.pojo.basics.ProductPO;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
@@ -26,6 +27,10 @@ public class AttributePO extends Attribute {
     @JoinColumn(name = "category_id")
     private CategoryAttribute categoryAttribute;//分类对象
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    @JoinColumn(name = "product_id")
+    private ProductPO productPO;//货品对象
+
     /*
      * 一对多关联关系
      * 级联关系：cascade=CascadeType.ALL
@@ -34,5 +39,8 @@ public class AttributePO extends Attribute {
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "AttributePO")
     private List<AttributeValuePO> attributeValueLists;//属性选项集合
+
+
+
 
 }

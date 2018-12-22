@@ -208,5 +208,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         order by create_date DESC
     </select>
 
+    <!--根据houseId查询所有工序记录-->
+    <select id="queryFlowRecord"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        select <include refid="new_columns" />
+        from dj_core_house_flow_apply
+        where house_flow_id = #{houseFlowId}
+        order by create_date DESC
+    </select>
+
 </mapper>
 

@@ -16,6 +16,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(value = "要货管理类", description = "要货管理类")
 public interface OrderAPI {
 
+    @PostMapping("app/order/orderDetail")
+    @ApiOperation(value = "订单详情", notes = "订单详情")
+    ServerResponse orderDetail(@RequestParam("orderId")String orderId);
+
+    @PostMapping("app/order/orderList")
+    @ApiOperation(value = "查询所有订单", notes = "查询所有订单")
+    ServerResponse orderList( @RequestParam("userToken")String userToken);
+
     @PostMapping("app/deliver/order/confirmOrderSplit")
     @ApiOperation(value = "管家确认要货", notes = "管家确认要货")
     ServerResponse confirmOrderSplit(@RequestParam("houseId")String houseId, @RequestParam("userToken")String userToken);

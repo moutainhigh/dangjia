@@ -18,6 +18,22 @@ public class OrderController implements OrderAPI {
     @Autowired
     private OrderService orderService;
 
+
+    /**
+     * 订单详情
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse orderDetail(String orderId){
+        return orderService.orderDetail(orderId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse orderList(String userToken){
+        return orderService.orderList(userToken);
+    }
+
     /**
      * 管家确认要货
      *  提交到后台材料员审核

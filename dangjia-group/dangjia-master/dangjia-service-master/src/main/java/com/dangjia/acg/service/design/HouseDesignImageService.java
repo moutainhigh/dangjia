@@ -139,6 +139,7 @@ public class HouseDesignImageService {
                     houseFlow.setSafe(workerType.getSafeState());
                     houseFlow.setWorkType(3);//自动抢单待支付精算费
                     houseFlow.setCityId(house.getCityId());
+                    houseFlow.setWorkerId("2c911c24606f21720160726f5e6a00df");
                     //这里算出精算费
                     houseFlow.setWorkPrice(house.getSquare().multiply(new BigDecimal(3.5)));
                     houseFlowMapper.insert(houseFlow);

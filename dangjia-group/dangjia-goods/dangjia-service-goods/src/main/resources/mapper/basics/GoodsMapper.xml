@@ -52,6 +52,17 @@
 		     id =#{id}
 		ORDER BY create_date desc
 	</select>
+
+	<!-- 根据name查询属性对象 -->
+	<select id="queryByName" resultType="com.dangjia.acg.modle.basics.Goods">
+		SELECT
+		<include refid="new_columns"/>
+		FROM dj_basics_goods
+		where
+		name =#{name}
+		ORDER BY create_date desc
+	</select>
+
 	<sql id="all_GSColumns">
 		id,
 		goods_id,

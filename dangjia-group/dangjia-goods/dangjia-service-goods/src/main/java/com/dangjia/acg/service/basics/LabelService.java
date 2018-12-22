@@ -6,6 +6,7 @@ import com.dangjia.acg.mapper.basics.ILabelMapper;
 import com.dangjia.acg.modle.basics.Label;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,7 +47,7 @@ public class LabelService {
             List<Label> labelList = iLabelMapper.getLabel();
             for (Label label : labelList) {
                 Map<String, Object> map = new HashMap<String, Object>();
-                if (label.getId() == null) {
+                if (!StringUtils.isNotBlank( label.getId())) {
                     map.put("labelId", "");
                     map.put("labelName", "");
                 } else {
