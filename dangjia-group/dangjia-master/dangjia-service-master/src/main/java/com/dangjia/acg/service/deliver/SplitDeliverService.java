@@ -6,7 +6,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
-import com.dangjia.acg.mapper.deliver.IOrderItemMapper;
+import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
@@ -33,8 +33,6 @@ public class SplitDeliverService {
     private IOrderSplitItemMapper orderSplitItemMapper;
     @Autowired
     private ConfigUtil configUtil;
-    @Autowired
-    private IOrderItemMapper orderItemMapper;
 
 
     /**
@@ -97,31 +95,68 @@ public class SplitDeliverService {
     }
 
     /**
+     * 发货单明细
+     */
+    public ServerResponse splitDeliverDetail(String splitDeliverId){
+        try{
+            SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            SplitDeliverDTO splitDeliverDTO = new SplitDeliverDTO();
+            splitDeliverDTO.setShipState(splitDeliver.getShipState());//发货状态
+            splitDeliverDTO.setNumber(splitDeliver.getNumber());
+            splitDeliverDTO.setCreateDate(splitDeliver.getCreateDate());
+            splitDeliverDTO.setSendTime(splitDeliver.getSendTime());
+            splitDeliverDTO.setSubmitTime(splitDeliver.getSubmitTime());
+            splitDeliverDTO.setModifyDate(splitDeliver.getModifyDate());//收货时间
+            splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
+            splitDeliverDTO.setSupState(splitDeliver.getSupState());//大管家收货状态
+
+            Example example = new Example(OrderSplitItem.class);
+            example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());
+            List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+            List<SplitDeliverItemDTO> splitDeliverItemDTOList = new ArrayList<>();
+            for (OrderSplitItem orderSplitItem : orderSplitItemList){
+                SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
+                splitDeliverItemDTO.setImage(address + orderSplitItem.getImage());
+                splitDeliverItemDTO.setProductName(orderSplitItem.getProductName());
+                splitDeliverItemDTO.setTotalPrice(orderSplitItem.getTotalPrice());
+                splitDeliverItemDTO.setShopCount(orderSplitItem.getShopCount());
+                splitDeliverItemDTO.setNum(orderSplitItem.getNum());
+                splitDeliverItemDTO.setUnitName(orderSplitItem.getUnitName());
+                splitDeliverItemDTOList.add(splitDeliverItemDTO);
+            }
+            splitDeliverDTO.setSplitDeliverItemDTOList(splitDeliverItemDTOList);//明细
+
+            return ServerResponse.createBySuccess("查询成功", splitDeliverDTO);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
      * 收货列表
-     * shipState  0待发货,1已发待收货,2已收货,3取消,4部分收
+     * shipState  0待发货,1已发待收货,2已收货,3取消
      */
     public ServerResponse splitDeliverList(String houseId, int shipState){
         try{
             Example example = new Example(SplitDeliver.class);
             example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId).andEqualTo(SplitDeliver.SHIP_STATE,shipState);
             List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
-            List<SplitDeliverDTO> splitDeliverDTOList = new ArrayList<SplitDeliverDTO>();
+            List<SplitDeliverDTO> splitDeliverDTOList = new ArrayList<>();
             for (SplitDeliver splitDeliver : splitDeliverList){
                 SplitDeliverDTO splitDeliverDTO = new SplitDeliverDTO();
                 splitDeliverDTO.setSplitDeliverId(splitDeliver.getId());
+                splitDeliverDTO.setCreateDate(splitDeliver.getCreateDate());
                 splitDeliverDTO.setShipState(splitDeliver.getShipState());
                 splitDeliverDTO.setNumber(splitDeliver.getNumber());
-                splitDeliverDTO.setSendTime(splitDeliver.getSendTime());
-                splitDeliverDTO.setSubmitTime(splitDeliver.getSubmitTime());
-                splitDeliverDTO.setModifyDate(splitDeliver.getModifyDate());//收货时间
                 splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
-                splitDeliverDTO.setSupState(splitDeliver.getSupState());//大管家收货状态
 
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
-                splitDeliverDTO.setOrderSplitItemList(orderSplitItemList);//所有子项明细
-                splitDeliverDTO.setTol(orderSplitItemList.size());
+
+                splitDeliverDTO.setTol(orderSplitItemList.size());//几种
                 splitDeliverDTO.setName(orderSplitItemList.get(0).getProductName());
                 splitDeliverDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + orderSplitItemList.get(0).getImage());
                 splitDeliverDTOList.add(splitDeliverDTO);

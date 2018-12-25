@@ -5,6 +5,7 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.http.JsonResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.core.MethodParameter;
@@ -45,7 +46,7 @@ public class JsonResponseAdvice implements ResponseBodyAdvice<Object> {
             }
             if (StringUtils.isEmpty(header)) {
                 Gson gson = new Gson();
-                if (o != null) {
+                if (o != null&& CommonUtil.isEmpty(request.getAttribute("isShow"))) {
                     o = BeanUtils.beanToMap(o);
                 }
                 JsonResponse jsonResponse = new JsonResponse(ServerCode.SUCCESS.getCode(), o);

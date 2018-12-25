@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
+
 
 /**
  * 用户
@@ -19,8 +21,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient("dangjia-service-master")
 @Api(value = "用户接口", description = "用户接口")
 public interface MemberAPI {
-
-
+    @RequestMapping(value = "member/mobile", method = RequestMethod.POST)
+    @ApiOperation(value = "获取用户手机资料", notes = "获取用户手机资料")
+    ServerResponse getMemberMobile(@ApiParam(name = "request", value = "请求") @RequestParam("request")HttpServletRequest request,
+                                   @ApiParam(name = "id", value = "来源ID") @RequestParam("id")String id,
+                                   @ApiParam(name = "idType", value = "来源类型：1=房屋ID, 2=用户ID") @RequestParam("idType")String idType);
     /**
      * 获取用户详细资料
      * @param userToken  token

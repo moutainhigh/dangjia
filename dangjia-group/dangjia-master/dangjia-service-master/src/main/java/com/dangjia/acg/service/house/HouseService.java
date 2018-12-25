@@ -521,8 +521,26 @@ public class HouseService {
     /**
      * 房子装修列表
      */
-    public ServerResponse getList(HttpServletRequest request, String memberId) {
-        List<Map<String, Object>> mapList = iHouseMapper.getList(memberId);
+    public ServerResponse getList(String memberId) {
+        Member member = memberMapper.selectByPrimaryKey(memberId);
+        List<House> houseList = iHouseMapper.getList(memberId);
+        List<Map<String,Object>> mapList = new ArrayList<>();
+        for (House house : houseList){
+            Map<String,Object> map = new HashMap<>();
+            map.put("houseId", house.getId());
+            map.put("cityName", house.getCityName());
+            map.put("address", house.getHouseName());
+            map.put("memberName", member.getNickName() == null ? member.getName() : member.getNickName());
+            map.put("mobile", member.getMobile());
+            map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工
+            map.put("showHouse", house.getShowHouse());//0不是，1是 是否精选
+            map.put("style", house.getStyle());//设计风格
+            map.put("square", house.getSquare());//外框面积
+            map.put("buildSquare", house.getSquare()); //建筑面积
+            map.put("decorationType", house.getDecorationType()); //装修类型  0表示没有开始，1远程设计，2自带设计，3共享装修
+            map.put("houseType", house.getHouseType()); //0：新房；1：老房
+            mapList.add(map);
+        }
         return ServerResponse.createBySuccess("查询用户列表成功", mapList);
     }
 
@@ -848,7 +866,7 @@ public class HouseService {
                 if(houseWorker.getWorkType() == 1){
                     map.put("workerName", member.getName() + "(待支付)");//工人名称
                 }else if(houseWorker.getWorkType() == 6){
-                    map.put("workerName", member.getName() + "(支付采纳)");//工人名称
+                    map.put("workerName", member.getName());//工人名称
                 }else {
                     map.put("workerName", member.getName() + "(已更换)");//2被换人,4已开工被换人,7抢单后放弃
                 }

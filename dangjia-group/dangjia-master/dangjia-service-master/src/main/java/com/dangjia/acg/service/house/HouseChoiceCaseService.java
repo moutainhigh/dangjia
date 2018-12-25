@@ -44,7 +44,13 @@ public class HouseChoiceCaseService {
         if(!CommonUtil.isEmpty(houseChoiceCase.getCityId())) {
             criteria.andEqualTo("cityId", houseChoiceCase.getCityId());
         }
-        example.orderBy(Activity.MODIFY_DATE).desc();
+//        //随机排序
+        if(request.getParameter("isRand")!=null){
+            example.setOrderByClause(" rand() ");
+            pageDTO.setPageNum(0);
+        }else {
+            example.orderBy(Activity.MODIFY_DATE).desc();
+        }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<HouseChoiceCase> list = houseChoiceCaseMapper.selectByExample(example);
         List<Map> listmap = new  ArrayList();

@@ -28,23 +28,24 @@ public class HouseDataController implements HouseDataAPI {
     @Autowired
     private ActuaryOperationService actuaryOperationService;
 
+    /**
+     * 工匠工艺查询商品库人工
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse workerGoodsAll(String cityId, String workerTypeId,PageDTO pageDTO){
+        return fillWorkerService.repairBudgetWorker(1,workerTypeId,null,null,pageDTO.getPageNum(),pageDTO.getPageSize());
+    }
 
     /**
-     * 自购
+     * 自购清单
      */
     @Override
     @ApiMethod
     public ServerResponse selfBuyingList(String houseId){
         return houseDataService.selfBuyingList(houseId);
     }
-    /**
-     * 工匠工艺查询商品库人工
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse workerGoodsAll(String cityId, Integer pageNum, Integer pageSize){
-        return fillWorkerService.repairBudgetWorker(1,null,null,null,pageNum,pageSize);
-    }
+
     /**
      * 人工详情
      */

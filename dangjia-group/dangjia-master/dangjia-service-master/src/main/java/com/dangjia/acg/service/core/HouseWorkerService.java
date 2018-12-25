@@ -494,7 +494,7 @@ public class HouseWorkerService {
         String[] edNames = {"施工图", "精算", "工价工艺", "工地记录"};
         int[] edTypes = {0, 0, 0, 0};
         String[] edImages = {"artisan_25.png", "artisan_26.png", "artisan_27.png", "artisan_29.png"};
-        String[] edUrls = {DjConstants.GJPageAddress.PROJECTDRAWINGLIST, DjConstants.GJPageAddress.GJJINGSUANLIST, DjConstants.GJPageAddress.GJGYLIST, DjConstants.GJPageAddress.PROJECTRECORD};//H5路由
+        String[] edUrls = {DjConstants.GJPageAddress.PROJECTDRAWINGLIST, DjConstants.GJPageAddress.GJJINGSUANLIST, DjConstants.GJPageAddress.GJPRICE, DjConstants.GJPageAddress.PROJECTRECORD};//H5路由
         ConstructionByWorkerIdBean.BigListBean bigListBean = new ConstructionByWorkerIdBean.BigListBean();
         bigListBean.setName("工程资料");
         List<ConstructionByWorkerIdBean.BigListBean.ListMapBean> listMap = new ArrayList<>();

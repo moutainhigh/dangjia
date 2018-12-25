@@ -1,6 +1,5 @@
 package com.dangjia.acg.pojo.basics;
 
-import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.modle.brand.Unit;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;

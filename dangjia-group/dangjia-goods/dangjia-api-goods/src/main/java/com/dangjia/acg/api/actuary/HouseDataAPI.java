@@ -16,13 +16,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(description = "工程资料")
 @FeignClient("dangjia-service-goods")
 public interface HouseDataAPI {
-    @PostMapping("/actuary/houseData/selfBuyingList")
-    @ApiOperation(value = "自购清单", notes = "自购清单")
-    ServerResponse selfBuyingList(@RequestParam("houseId")String houseId);
 
     @PostMapping("/actuary/houseData/workerGoodsAll")
     @ApiOperation(value = "工匠工艺查询商品库人工", notes = "工匠工艺查询商品库人工")
-    ServerResponse workerGoodsAll(@RequestParam("cityId")String cityId,@RequestParam("pageNum")Integer pageNum,@RequestParam("pageSize") Integer pageSize);
+    ServerResponse workerGoodsAll(@RequestParam("cityId")String cityId,@RequestParam("workerTypeId")String workerTypeId,@RequestParam("pageDTO") PageDTO pageDTO);
+
+    @PostMapping("/actuary/houseData/selfBuyingList")
+    @ApiOperation(value = "自购清单", notes = "自购清单")
+    ServerResponse selfBuyingList(@RequestParam("houseId")String houseId);
 
     @PostMapping("/actuary/houseData/workerGoodsDetail")
     @ApiOperation(value = "人工详情", notes = "人工详情")

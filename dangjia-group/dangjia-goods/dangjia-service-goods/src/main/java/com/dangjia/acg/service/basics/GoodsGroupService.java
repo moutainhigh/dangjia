@@ -2,17 +2,21 @@ package com.dangjia.acg.service.basics;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.IGoodsGroupMapper;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
+import com.dangjia.acg.mapper.basics.ILabelMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
-import com.dangjia.acg.modle.basics.GoodsGroup;
-import com.dangjia.acg.modle.basics.GroupLink;
-import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.basics.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +36,11 @@ public class GoodsGroupService {
     @Autowired
     private IProductMapper iProductMapper;
     @Autowired
-    private IGoodsMapper goodsMapper;
+    private IGoodsMapper iGoodsMapper;
+    @Autowired
+    private ILabelMapper iLabelMapper;
+    @Autowired
+    private ConfigUtil configUtil;
 
     protected static final Logger LOG = LoggerFactory.getLogger(GoodsGroupService.class);
 
@@ -59,7 +67,7 @@ public class GoodsGroupService {
                 groupLink.setProductName(product.getName());//货品名称
                 groupLink.setIsSwitch(0);//可切换性0:可切换；不可切换
                 groupLink.setGoodsId(product.getGoodsId());
-                groupLink.setGoodsName(goodsMapper.selectByPrimaryKey(product.getGoodsId()) == null ? "" : goodsMapper.selectByPrimaryKey(product.getGoodsId()).getName());
+                groupLink.setGoodsName(iGoodsMapper.selectByPrimaryKey(product.getGoodsId()) == null ? "" : iGoodsMapper.selectByPrimaryKey(product.getGoodsId()).getName());
                 iGoodsGroupMapper.addGroupLink(groupLink);//新增关联组货品关系
                 List<GroupLink> groupLinkList = iGoodsGroupMapper.queryGroupLinkByPid(product.getId());
                 if (groupLinkList.size() >= 2) {//根据货品查询关联关系，超过两条则都修改为不可切换
@@ -126,8 +134,6 @@ public class GoodsGroupService {
             GoodsGroup goodsGroup = iGoodsGroupMapper.selectByPrimaryKey(goodsGroupId);
 
             List<GoodsGroup> goodsGroups = iGoodsGroupMapper.selectByName(name);//要修改的name
-            LOG.info("listOfProductId::"+ listOfProductId +" goodsGroupId"+ goodsGroupId+" name:"+name + " namess:"+ goodsGroup.getName());
-            LOG.info("listOfProductId  size::"+ goodsGroups.size());
             if (goodsGroups.size() > 1)
                 return ServerResponse.createByErrorMessage("不能修改，该关联组已存在");
 
@@ -151,7 +157,7 @@ public class GoodsGroupService {
                 groupLink.setProductId(id);//货品id
                 groupLink.setProductName(product.getName());//货品名称
                 groupLink.setGoodsId(product.getGoodsId());
-                groupLink.setGoodsName(goodsMapper.selectByPrimaryKey(product.getGoodsId()) == null ? "" : goodsMapper.selectByPrimaryKey(product.getGoodsId()).getName());
+                groupLink.setGoodsName(iGoodsMapper.selectByPrimaryKey(product.getGoodsId()) == null ? "" : iGoodsMapper.selectByPrimaryKey(product.getGoodsId()).getName());
                 iGoodsGroupMapper.addGroupLink(groupLink);//新增关联组货品关系
                 List<GroupLink> groupLinkList = iGoodsGroupMapper.queryGroupLinkByPid(product.getId());
                 if (groupLinkList.size() >= 2) {//根据货品查询关联关系，超过两条则都修改为不可切换
@@ -202,6 +208,84 @@ public class GoodsGroupService {
             throw new BaseException(ServerCode.WRONG_PARAM, "修改失败");
         }
     }
+
+    /**
+     * 模糊查询商品关联组的商品及下属货品
+     * 去除条件 ：自购 ，服务，禁用，查询 product 为空
+     *
+     * @param pageDTO
+     * @param categoryId
+     * @param name
+     * @return
+     */
+    public ServerResponse queryGoodsGroupListByCategoryLikeName(PageDTO pageDTO, String categoryId, String name) {
+        try {
+            LOG.info("queryGoodsGroupListByCategoryLikeName type :");
+            if (pageDTO.getPageNum() == null) {
+                pageDTO.setPageNum(1);
+            }
+            if (pageDTO.getPageSize() == null) {
+                pageDTO.setPageSize(10);
+            }
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+//            List<Goods> goodsList = iGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
+
+            // 去除商品是 服务类型的 或者 是自购的
+            List<Goods> goodsList = iGoodsMapper.queryGoodsGroupListByCategoryLikeName(categoryId, name,"0","2");
+
+            LOG.info("goodsList:::" + goodsList.size());
+            List<Map<String, Object>> gMapList = new ArrayList<>();
+            for (Goods goods : goodsList) {
+                List<Map<String, Object>> mapList = new ArrayList<>();
+                List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
+                for (Product p : productList) {
+                    LOG.info("p :" + p);
+                    if (p.getImage() == null)
+                        continue;
+                    String[] imgArr = p.getImage().split(",");
+                    String imgStr = "";
+                    String imgUrlStr = "";
+                    for (int i = 0; i < imgArr.length; i++) {
+                        if (i == imgArr.length - 1) {
+                            imgStr += address + imgArr[i];
+                            imgUrlStr += imgArr[i];
+                        } else {
+                            imgStr += address + imgArr[i] + ",";
+                            imgUrlStr += imgArr[i] + ",";
+                        }
+                    }
+                    p.setImage(imgStr);
+                    Map<String, Object> map = CommonUtil.beanToMap(p);
+                    map.put("imageUrl", imgUrlStr);
+                    if (!StringUtils.isNotBlank(p.getLabelId())) {
+                        map.put("labelId", "");
+                        map.put("labelName", "");
+                    } else {
+                        map.put("labelId", p.getLabelId());
+                        Label label = iLabelMapper.selectByPrimaryKey(p.getLabelId());
+                        if (label.getName() != null)
+                            map.put("labelName", label.getName());
+                    }
+                    mapList.add(map);
+                }
+                LOG.info("mapList:::" + mapList.size());
+//                if (mapList.size() > 0)// 有product的商品 才返回给前端
+//                {
+                Map<String, Object> gMap = CommonUtil.beanToMap(goods);
+                gMap.put("productList", mapList);
+                gMapList.add(gMap);
+//                }
+            }
+            PageInfo pageResult = new PageInfo(goodsList);
+            pageResult.setList(gMapList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
 
     /**
      * 新增关联组

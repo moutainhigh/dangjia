@@ -1,8 +1,6 @@
 package com.dangjia.acg.pojo.basics;
 
-import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.modle.basics.Label;
-import com.dangjia.acg.pojo.attribute.AttributePO;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 

@@ -20,6 +20,8 @@ import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.basics.WorkerTechnology;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -47,6 +49,8 @@ public class TechnologyService {
     private ISearchBoxMapper searchBoxMapper;
     @Autowired
     private ConfigUtil configUtil;
+
+    private static Logger LOG = LoggerFactory.getLogger(TechnologyService.class);
 
     /**
      * 添加人工工艺和添加服务节点
@@ -97,6 +101,7 @@ public class TechnologyService {
             if (t == null) {
                 return ServerResponse.createByErrorMessage("不存在此工艺,修改失败");
             }
+
             List<Technology> technologyList = iTechnologyMapper.query(t.getWorkerTypeId(), t.getName(), t.getMaterialOrWorker());
             if (technologyList.size() > 0) {
                 return ServerResponse.createBySuccessMessage("工艺名称已存在");

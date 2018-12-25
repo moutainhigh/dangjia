@@ -207,7 +207,7 @@ public class ProductService {
                     return ServerResponse.createByErrorMessage("货品图片不能为空");
                 product.setImage(imgStr);//图片地址
                 product.setUnitId(obj.getString("unitId"));//单位
-                product.setLabelId(obj.getString("labelId"));//标签
+//                product.setLabelId(obj.getString("labelId"));//标签
                 product.setUnitName(obj.getString("unitName"));//单位
                 product.setWeight(obj.getString("weight"));//重量
                 product.setConvertQuality(obj.getDouble("convertQuality"));//换算量
@@ -290,7 +290,7 @@ public class ProductService {
                 }
                 product.setUnitName(obj.getString("unitName"));//单位
                 product.setUnitId(obj.getString("unitId"));//单位
-                product.setLabelId(obj.getString("labelId"));//标签
+//                product.setLabelId(obj.getString("labelId"));//标签
                 product.setWeight(obj.getString("weight"));//重量
                 product.setConvertQuality(obj.getDouble("convertQuality"));//换算量
                 product.setConvertUnit(obj.getString("convertUnit"));//换算单位

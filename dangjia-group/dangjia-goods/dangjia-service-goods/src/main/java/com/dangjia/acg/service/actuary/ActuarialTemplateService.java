@@ -6,7 +6,6 @@ import com.dangjia.acg.mapper.actuary.IActuarialTemplateMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.modle.actuary.ActuarialTemplate;
-import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;

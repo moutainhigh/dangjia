@@ -10,6 +10,8 @@ import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +19,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * 供应商
+ * @类 名： SupplierServiceImpl
+ * @功能描述： TODO
+ * @作者信息： zmj
+ * @创建时间： 2018-9-17下午3:28:20
  */
 @Service
 public class SupplierService {
@@ -27,6 +32,7 @@ public class SupplierService {
     private IProductMapper iProductMapper;
     @Autowired
     private IGoodsMapper goodsMapper;
+    private static Logger LOG = LoggerFactory.getLogger(SupplierService.class);
 
     /**
      * 供应商登录
@@ -45,13 +51,32 @@ public class SupplierService {
         }
     }
 
-
     /**
      * 新增供应商
+     * <p>Title: insertSupplier</p>
+     * <p>Description: </p>
+     *
+     * @param name
+     * @param address
+     * @param telephone
+     * @param checkPeople
+     * @param gender
+     * @param email
+     * @param notice
+     * @param supplierLevel
+     * @param state
      */
     public ServerResponse insertSupplier(String name, String address, String telephone, String checkPeople, Integer gender,
                                          String email, String notice, Integer supplierLevel, Integer state) {
         try {
+            List<Supplier>  list =  iSupplierMapper.queryByName(name);
+            if(list.size() > 0)
+                return ServerResponse.createByErrorMessage("该供应商已存在");
+
+            List<Supplier> telephoneList =  iSupplierMapper.queryByTelephone(telephone);
+            if(telephoneList.size() > 0)
+                return ServerResponse.createByErrorMessage("手机号已存在");
+
             Supplier supplier = new Supplier();
             supplier.setName(name);//名称
             supplier.setAddress(address);//地址
@@ -74,10 +99,30 @@ public class SupplierService {
 
     /**
      * 修改供应商
+     * <p>Title: insertSupplier</p>
+     * <p>Description: </p>
+     *
+     * @param name
+     * @param address
+     * @param telephone
+     * @param checkPeople
+     * @param gender
+     * @param email
+     * @param notice
+     * @param supplier_level
+     * @param state
      */
     public ServerResponse updateSupplier(String id, String name, String address, String telephone, String checkPeople, Integer gender,
                                          String email, String notice, Integer supplier_level, Integer state) {
         try {
+            List<Supplier>  list =  iSupplierMapper.queryByName(name);
+            if(list.size() > 1)
+                return ServerResponse.createByErrorMessage("该供应商已存在");
+
+            List<Supplier> telephoneList =  iSupplierMapper.queryByTelephone(telephone);
+            if(telephoneList.size() > 1)
+                return ServerResponse.createByErrorMessage("手机号已存在");
+
             Supplier supplier = new Supplier();
             supplier.setId(id);
             supplier.setName(name);//名称

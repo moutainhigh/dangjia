@@ -1,6 +1,5 @@
 package com.dangjia.acg.pojo.basics;
 
-import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.brand.Unit;

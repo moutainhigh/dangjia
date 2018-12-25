@@ -77,7 +77,7 @@
             and
             name LIKE CONCAT('%',#{name},'%')
         </if>
-        <if test="materialOrWorker!=null">
+        <if test="materialOrWorker!=null and materialOrWorker!=''">
             and
             material_or_worker=#{materialOrWorker}
         </if>

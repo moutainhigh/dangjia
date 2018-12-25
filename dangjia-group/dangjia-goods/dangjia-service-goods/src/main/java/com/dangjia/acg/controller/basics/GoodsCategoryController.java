@@ -33,16 +33,16 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertGoodsCategory(HttpServletRequest request, String name, String parentID, String parentTop){
-        return goodsCategoryService.insertGoodsCategory(name,parentID,parentTop);
+    public ServerResponse insertGoodsCategory(HttpServletRequest request, String name, String parentId, String parentTop){
+        return goodsCategoryService.insertGoodsCategory(name,parentId,parentTop);
     }
     /**修改商品类别
      * @Title: getProduct 
      */
     @Override
     @ApiMethod
-    public ServerResponse doModifyGoodsCategory(HttpServletRequest request,String id,String name,String parentID,String parentTop){
-        return goodsCategoryService.doModifyGoodsCategory(id,name,parentID,parentTop);
+    public ServerResponse doModifyGoodsCategory(HttpServletRequest request,String id,String name,String parentId,String parentTop){
+        return goodsCategoryService.doModifyGoodsCategory(id,name,parentId,parentTop);
     }
     /**查询商品类别列表
      * @Title: getProduct 

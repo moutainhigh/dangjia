@@ -4,8 +4,9 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
-import javax.persistence.*;
-import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 /**
  * 属性  中间层

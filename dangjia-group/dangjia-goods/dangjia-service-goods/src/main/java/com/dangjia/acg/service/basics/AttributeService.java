@@ -11,7 +11,7 @@ import com.dangjia.acg.mapper.basics.IAttributeMapper;
 import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
-import com.dangjia.acg.modle.attribute.*;
+import com.dangjia.acg.modle.attribute.Attribute;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;

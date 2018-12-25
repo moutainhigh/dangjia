@@ -5,11 +5,11 @@ spring:
     config:
       server:
         git:
-          uri: 'http://172.16.30.95:7999/git/fengjiang/dangjia-server.git'
+          uri: 'https://codehub-cn-south-1.devcloud.huaweicloud.com/djzx/dangjia-server.git'
           searchPaths: 'config'
           clone-on-start: true
           username: 'qiyuxiang'
-          password: 'qiyuxiang123'
+          password: 'Xinxin813806'
           default-label: master
           timeout: 10
         encrypt:

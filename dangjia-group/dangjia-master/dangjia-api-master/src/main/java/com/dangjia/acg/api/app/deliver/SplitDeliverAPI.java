@@ -39,6 +39,13 @@ public interface SplitDeliverAPI {
     ServerResponse supState(@RequestParam("splitDeliverId")String splitDeliverId);
 
     /**
+     * 发货单明细
+     */
+    @PostMapping("app/deliver/splitDeliver/splitDeliverDetail")
+    @ApiOperation(value = "发货单明细", notes = "发货单明细")
+    ServerResponse splitDeliverDetail(@RequestParam("splitDeliverId")String splitDeliverId);
+
+    /**
      * 收货列表
      * shipState  0待发货,1已发待收货,2已收货,3取消,4部分收
      */

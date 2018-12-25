@@ -1,12 +1,12 @@
 package com.dangjia.acg.modle.attribute;
 
 import com.dangjia.acg.common.model.BaseEntity;
-import com.dangjia.acg.modle.basics.Goods;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
-import javax.persistence.*;
-import java.util.Set;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 /**
  * 基础 属性值

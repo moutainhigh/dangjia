@@ -48,7 +48,13 @@ public class BeanUtils {
       if (result instanceof BigDecimal ||result instanceof String || result instanceof Boolean || result instanceof Byte || result instanceof Short || result instanceof Integer || result instanceof Long || result instanceof Float
               || result instanceof Double || result instanceof Enum) {
         if (result != null) {
-          resultValue = result;
+          if (result instanceof BigDecimal) {
+            resultValue =((BigDecimal) result).setScale(2,BigDecimal.ROUND_HALF_UP);
+          }else  if (result instanceof String && Validator.isMobileNo((String)result)) {
+            resultValue = ((String)result).replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2");
+          }else {
+            resultValue = result;
+          }
         }
       } else {
         resultValue = beanToMap(result);

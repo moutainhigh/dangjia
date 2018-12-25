@@ -113,7 +113,7 @@ public class FillMaterielService {
             PageHelper.startPage(pageNum, pageSize);
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(workerTypeId,houseId,categoryId,productName);
             PageInfo pageResult = new PageInfo(budgetMaterialList);
-            List<BudgetMaterialDTO> budgetMaterialDTOS = new ArrayList<BudgetMaterialDTO>();
+            List<BudgetMaterialDTO> budgetMaterialDTOS = new ArrayList<>();
             for (BudgetMaterial budgetMaterial : budgetMaterialList){
                 BudgetMaterialDTO budgetMaterialDTO = new BudgetMaterialDTO();
                 budgetMaterialDTO.setId(budgetMaterial.getId());
@@ -127,7 +127,7 @@ public class FillMaterielService {
                 budgetMaterialDTO.setUnitName(budgetMaterial.getUnitName());
                 budgetMaterialDTO.setProductType(budgetMaterial.getProductType());
                 budgetMaterialDTO.setCategoryId(budgetMaterial.getCategoryId());
-                budgetMaterialDTO.setImage(address + budgetMaterial.getImage());
+                budgetMaterialDTO.setImage(budgetMaterial.getImage() == null ? "" : address + budgetMaterial.getImage());
                 budgetMaterialDTOS.add(budgetMaterialDTO);
             }
             pageResult.setList(budgetMaterialDTOS);

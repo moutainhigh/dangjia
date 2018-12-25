@@ -184,6 +184,29 @@
 		ORDER BY create_date desc
 	</select>
 
+	<!-- 查询某个分类的商品 模糊name -->
+	<select id="queryGoodsGroupListByCategoryLikeName" resultType="com.dangjia.acg.modle.basics.Goods">
+		SELECT
+		<include refid="new_columns"/>
+		FROM dj_basics_goods as g
+		where 1=1
+		<if test="categoryId!=null and categoryId!=''">
+			and category_id=#{categoryId}
+		</if>
+		<if test="type!=null and type!=''">
+			and type =#{type}
+		</if>
+		<if test="buy!=null and buy!=''">
+			and buy !=#{buy}
+		</if>
+		<if test="buy!=null and buy!=''">
+			and (SELECT COUNT(*) as num FROM dj_basics_product p WHERE p.goods_id = g.id ) > 1
+		</if>
+		<if test="name!=null and name!=''">
+			and name LIKE CONCAT('%',#{name},'%')
+		</if>
+		ORDER BY create_date desc
+	</select>
 	<!-- 补货查询商品库- -->
 	<select id="queryRepairGoods" resultType="com.dangjia.acg.modle.basics.Goods">
 		SELECT

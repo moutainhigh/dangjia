@@ -1,12 +1,12 @@
 package com.dangjia.acg.common.util.excel;
 
 import com.dangjia.acg.common.annotation.ExcelField;
+import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.util.ClazzUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
@@ -75,17 +75,24 @@ public class ExportExcel {
 
     /**
      * 构造函数
-     * @param title 表格标题，传“空值”，表示无标题
-     * @param cls 实体对象，通过annotation.ExportField获取标题
      */
-    public ExportExcel(String title, Class<?> cls){
-        // Get annotation field
+    public ExportExcel(){
+        this.wb = new SXSSFWorkbook(500);
+    }
+
+
+    /**
+     * 初始化函数
+     * @param title 表格标题，传“空值”，表示无标题
+     */
+    private void initialize(String title,  Class<?> cls) {
+        rownum=0;
         Field[] fs = cls.getDeclaredFields();
         for (Field f : fs){
             ExcelField ef = f.getAnnotation(ExcelField.class);
             if (ef != null && (ef.type()==0)){
 
-                    annotationList.add(new Object[]{ef, f});
+                annotationList.add(new Object[]{ef, f});
             }
         }
         // Get annotation method
@@ -94,46 +101,24 @@ public class ExportExcel {
             ExcelField ef = m.getAnnotation(ExcelField.class);
             if (ef != null && (ef.type()==0 )){
 
-                    annotationList.add(new Object[]{ef, m});
+                annotationList.add(new Object[]{ef, m});
 
             }
         }
-        Collections.sort(annotationList, new Comparator<Object[]>() {
-            public int compare(Object[] o1, Object[] o2) {
-                return new Integer(((ExcelField)o1[0]).offset()).compareTo(
-                        new Integer(((ExcelField)o2[0]).offset()));
-            };
-        });
         // Initialize
         List<String> headerList = Lists.newArrayList();
         for (Object[] os : annotationList){
             String t = ((ExcelField)os[0]).titile();
             headerList.add(t);
         }
-        initialize(title, headerList);
-    }
-
-
-    /**
-     * 初始化函数
-     * @param title 表格标题，传“空值”，表示无标题
-     * @param headerList 表头列表
-     */
-    private void initialize(String title, List<String> headerList) {
-        this.wb = new SXSSFWorkbook(500);
-        this.sheet = wb.createSheet("Export");
+        Collections.sort(annotationList, new Comparator<Object[]>() {
+            public int compare(Object[] o1, Object[] o2) {
+                return new Integer(((ExcelField)o1[0]).offset()).compareTo(
+                        new Integer(((ExcelField)o2[0]).offset()));
+            }
+        });
+        this.sheet = wb.createSheet(title);
         this.styles = createStyles(wb);
-        // Create title
-        if (StringUtils.isNotBlank(title)){
-            Row titleRow = sheet.createRow(rownum++);
-            titleRow.setHeightInPoints(30);
-            Cell titleCell = titleRow.createCell(0);
-            titleCell.setCellStyle(styles.get("title"));
-            titleCell.setCellValue(title);
-            sheet.addMergedRegion(new CellRangeAddress(titleRow.getRowNum(),
-                    titleRow.getRowNum(), titleRow.getRowNum(), headerList.size()-1));
-        }
-        // Create header
         if (headerList == null){
             throw new RuntimeException("headerList not null!");
         }
@@ -244,15 +229,13 @@ public class ExportExcel {
                 cell.setCellValue((String) val);
             } else if (val instanceof Integer) {
                 cell.setCellValue((Integer) val);
-            } else if (val instanceof Long) {
-                if(StringUtils.isNotBlank(dateformat)) {
-                    Long lVal = (Long)val;
-                    String vs = new Date(lVal).toLocaleString();
-                    System.out.println("时间:"+lVal+"---"+vs);
-
-                    String dateStr = DateUtil.convert(new Date(lVal),dateformat);
-                    cell.setCellValue((String) dateStr);
+            } else if (val instanceof Date) {
+                if(StringUtils.isBlank(dateformat)) {
+                    dateformat=DateUtil.FORMAT2;
                 }
+                Date date=(Date) val;
+                String dateStr = DateUtil.convert(date,dateformat);
+                cell.setCellValue(dateStr);
             } else if (val instanceof Double) {
                 cell.setCellValue((Double) val);
             } else if (val instanceof Float) {
@@ -275,10 +258,15 @@ public class ExportExcel {
 
 
     /**
-     * 添加数据（通过annotation.ExportField添加数据）
-     * @return list 数据列表
+     *  添加数据（通过annotation.ExportField添加数据）
+     * @param title sheet标题
+     * @param cls 实体对象
+     * @param list 数据列表
+     * @param <T>
+     * @return
      */
-    public <T> ExportExcel setDataList(List<T> list){
+    public <T> ExportExcel setDataList(String title,  Class<?> cls,List<T> list){
+        initialize(title,cls);
         for (T t : list){
             int colunm = 0;
             Row row = this.addRow();
@@ -336,5 +324,15 @@ public class ExportExcel {
         FileOutputStream os = new FileOutputStream(name);
         this.write(os);
         return this;
+    }
+
+    public static void main(String[] args,HttpServletResponse response) throws Exception{
+        ExportExcel exportExcel=new ExportExcel();//创建表格实例
+        List<BaseEntity> baseEntities1=new ArrayList<>();//数据结果集
+        List<BaseEntity> baseEntities2=new ArrayList<>();//数据结果集
+        exportExcel.setDataList("精算", BaseEntity.class,baseEntities1);
+        exportExcel.setDataList("概括", BaseEntity.class,baseEntities2);
+        exportExcel.write(response,"文件名称.xls");//创建文件并输出
+        exportExcel.writeFile("E;//文件名称.xls");//指定本地文件输出
     }
 }

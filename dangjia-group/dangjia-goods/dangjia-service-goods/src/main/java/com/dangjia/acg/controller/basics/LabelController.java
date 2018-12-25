@@ -12,22 +12,22 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * 
- * 
-   * @类 名： LabelController.java
-   * @功能描述：  
-   * @作者信息： ysl
-   * @创建时间： 2018-12-11下午2:55:12
+ *
+ *
+ * @类 名： LabelController.java
+ * @功能描述：
+ * @作者信息： ysl
+ * @创建时间： 2018-12-11下午2:55:12
  */
 @RestController
 public class LabelController implements LabelAPI {
-	/**
+    /**
      *service
      */
     @Autowired
     private LabelService labelService;
-    
-    
+
+
     /**
      * 查询所有商品标签
      * @return
@@ -35,9 +35,9 @@ public class LabelController implements LabelAPI {
     @Override
     @ApiMethod
     public ServerResponse<PageInfo> getAllLabel(HttpServletRequest request, PageDTO pageDTO){
-    	return labelService.getAllLabel(pageDTO);
+        return labelService.getAllLabel(pageDTO);
     }
-    
+
     /**
      * 修改商品标签
      * @param labelId 标签ID
@@ -47,7 +47,7 @@ public class LabelController implements LabelAPI {
     @Override
     @ApiMethod
     public ServerResponse updateLabel(HttpServletRequest request,String labelId,String labelName){
-    	return labelService.update(labelId, labelName);
+        return labelService.update(labelId, labelName);
     }
     /**
      * 新增商品标签
@@ -57,7 +57,7 @@ public class LabelController implements LabelAPI {
     @Override
     @ApiMethod
     public ServerResponse insertLabel(HttpServletRequest request,String labelName){
-    	return labelService.insert( labelName);
+        return labelService.insert( labelName);
     }
 
     /**
@@ -68,7 +68,7 @@ public class LabelController implements LabelAPI {
     @Override
     @ApiMethod
     public ServerResponse selectLabelById(HttpServletRequest request,String labelId){
-    	return labelService.selectById(labelId);
+        return labelService.selectById(labelId);
     }
     /**
      * 根据ID删除商品标签
@@ -78,6 +78,17 @@ public class LabelController implements LabelAPI {
     @Override
     @ApiMethod
     public ServerResponse deleteById(HttpServletRequest request,String labelId){
-    	return labelService.deleteById(labelId);
+        return labelService.deleteById(labelId);
+    }
+
+    /**
+     * 批量保存货品的标签
+     * @param productLabeList
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveProductLabelList(HttpServletRequest request,String productLabeList){
+        return labelService.saveProductLabel(productLabeList);
     }
 }

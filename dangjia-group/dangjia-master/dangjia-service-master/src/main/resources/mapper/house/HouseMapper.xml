@@ -19,7 +19,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         budget_ok as budgetOk,
         image,
         decoration_type as decorationType,
-        repair_state as repairState,
         city_id as cityId,
         modeling_layout_id as modelingLayoutId,
         money,
@@ -29,7 +28,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         refer_house_id as referHouseId,
         have_complete as haveComplete,
         record_type as recordType,
-        repair_work_state as repairWorkState,
         build_square as buildSquare,
         again,
         house_type as houseType,
@@ -102,17 +100,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ORDER BY create_date ASC
     </select>
 
-    <select id="getList" resultType="map" >
+    <select id="getList" resultType="com.dangjia.acg.modle.house.House" >
         SELECT
-            id,
-            residential,
-            building,
-            unit,
-            city_name AS cityName,
-            number,
-            show_house AS showHouse,
-            visit_state AS visitState,
-            create_date AS createDate
+            <include refid="basic_columns" />
         FROM dj_house
         WHERE
             member_id=#{memberId}

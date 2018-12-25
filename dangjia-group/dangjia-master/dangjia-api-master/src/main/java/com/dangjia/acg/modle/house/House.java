@@ -98,21 +98,10 @@ public class House extends BaseEntity {
     @ApiModelProperty("是否展示 0展示，1不展示,默认0")
     private Integer showHouse;//showhouse
 
-
     @Column(name = "task_number")
     @Desc(value = "未处理任务数,默认生成为0")
     @ApiModelProperty("未处理任务数,默认生成为0")
     private Integer taskNumber;//tasknumber
-
-    @Column(name = "repair_state")
-    @Desc(value = "0代表没有补货要审核，1代表有有补货要审核，2代表补货已经处理")
-    @ApiModelProperty("0代表没有补货要审核，1代表有有补货要审核，2代表补货已经处理")
-    private Integer repairState;//replenishmentstate
-
-    @Column(name = "repair_work_state")
-    @Desc(value = "0代表没有补人工要审核，1代表有补人工要审核，2代表补人工已经处理")
-    @ApiModelProperty("0代表没有补人工要审核，1代表有补人工要审核，2代表补人工已经处理")
-    private Integer repairWorkState;//workerreplenishmentstate
 
     @Column(name = "visit_state")
     @Desc(value = "0待确认开工,1装修中,2休眠中,3已完工")
@@ -123,13 +112,13 @@ public class House extends BaseEntity {
     @Desc(value = "设计状态,默认0未确定设计师,4有设计抢单待支付,1已支付设计师待发平面图,5平面图发给业主,6平面图审核不通过,7通过平面图待发施工图,2已发给业主施工图" +
             ",8施工图片审核不通过,3施工图(全部图)审核通过")
     @ApiModelProperty("设计状态,默认0未确定设计师,4有设计抢单待支付,1已支付设计师待发平面图,5平面图发给业主,6平面图审核不通过,7通过平面图待发施工图,2已发给业主施工图" +
-            ",8施工图片审核不通过,3施工图(全部visitstate图)审核通过")
+            ",8施工图片审核不通过,3施工图(全部图)审核通过")
     private Integer designerOk;
 
     @Column(name = "budget_ok")
     @Desc(value = "精算状态:-1已精算没有发给业主,默认0未开始,1已开始精算,2已发给业主,3审核通过,4审核不通过")
     @ApiModelProperty("精算状态:-1已精算没有发给业主,默认0未开始,1已开始精算,2已发给业主,3审核通过,4审核不通过")
-    private Integer budgetOk;//
+    private Integer budgetOk;
 
     @Column(name = "decoration_type")
     @Desc(value = "装修类型: 0表示没有开始，1远程设计，2自带设计，3共享装修")
@@ -179,7 +168,7 @@ public class House extends BaseEntity {
     @Column(name = "is_select")
     @Desc(value = "是否选中当前房产0:未选中,1选中")
     @ApiModelProperty("是否选中当前房产0:未选中,1选中")
-    private Integer isSelect;//
+    private Integer isSelect;
 
     @Column(name = "liang_dian")
     @Desc(value = "亮点标签")
@@ -199,8 +188,6 @@ public class House extends BaseEntity {
             this.designerOk = 0;// 设计师操作 ,0未确定设计师,1已确定设计师,2已发给业主,3审核通过,默认生成 为0
             this.budgetOk = 0;// 精算操作// ，-1已经精算，但是没有发给业主,0未刚才这一环节,1已开始精算,2已发给业主,3审核通过,默认生成为0
             this.decorationType = 0;//装修类型: 0表示没有开始，1远程设计，2自带设计，3共享装修
-            this.repairState = 0;// 0代表没有补货要审核，1代表有有补货要审核，2代表补货已经处理,默认生成为0
-            this.repairWorkState = 0;//0代表没有补人工要审核，1代表有补人工要审核，2代表补人工已经处理
             this.haveComplete = 0;//房子装修是否已经完成，0未完成，1已完成
             this.money = new BigDecimal(0);
             this.isSelect = 1;//默认选中

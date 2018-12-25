@@ -209,6 +209,7 @@ public class BudgetWorkerService {
 					budgetWorker.setPrice(workerGoods.getPrice());
 					budgetWorker.setShopCount(shopCount);
 					budgetWorker.setUnitName(workerGoods.getUnitName());
+					budgetWorker.setImage(workerGoods.getImage());
 					BigDecimal b1 = new BigDecimal(Double.toString(workerGoods.getPrice()));
 					BigDecimal b2 = new BigDecimal(Double.toString(shopCount));
 					Double totalprice = b1.multiply(b2).doubleValue();
@@ -359,6 +360,7 @@ public class BudgetWorkerService {
 						budgetWorker.setWorkerGoodsSn(workerGoods.getWorkerGoodsSn());
 						budgetWorker.setName(workerGoods.getName());
 						budgetWorker.setPrice(workerGoods.getPrice());
+						budgetWorker.setImage(workerGoods.getImage());
 						budgetWorker.setShopCount(shopCount);
 						budgetWorker.setUnitName(workerGoods.getUnitName());
 						BigDecimal b1 = new BigDecimal(Double.toString(workerGoods.getPrice()));

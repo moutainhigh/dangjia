@@ -1,6 +1,5 @@
 package com.dangjia.acg.pojo.attribute;
 
-import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.modle.attribute.Attribute;
 import com.dangjia.acg.modle.attribute.CategoryAttribute;
 import com.dangjia.acg.pojo.basics.ProductPO;

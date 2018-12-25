@@ -25,6 +25,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from dj_deliver_order
         where
             house_id = #{houseId}
+        ORDER BY create_date desc
     </select>
 </mapper>
 

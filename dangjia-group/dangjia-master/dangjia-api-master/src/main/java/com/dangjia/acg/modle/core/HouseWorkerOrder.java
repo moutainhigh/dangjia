@@ -13,12 +13,12 @@ import javax.persistence.Table;
 import java.math.BigDecimal;
 
 /**
- * 实体类 - 工人订单表
+ * 实体类 - 工人订单记录
  */
 @Data
 @Entity
 @Table(name = "dj_core_house_worker_order")
-@ApiModel(description = "工人订单表")
+@ApiModel(description = "工人订单记录")
 @FieldNameConstants(prefix = "")
 public class HouseWorkerOrder extends BaseEntity {
 
@@ -67,11 +67,6 @@ public class HouseWorkerOrder extends BaseEntity {
 	@ApiModelProperty("支付状态0未支付，1已经支付")
 	private Integer payState;//paystate
 
-	@Column(name = "payment")
-	@Desc(value = "支付方式1微信, 2支付宝,3后台回调")
-	@ApiModelProperty("支付方式1微信, 2支付宝,3后台回调")
-	private String payment;
-
 	@Column(name = "worker_type_safe_id")
 	@Desc(value = "保险类型id")
 	@ApiModelProperty("保险类型id")
@@ -87,11 +82,6 @@ public class HouseWorkerOrder extends BaseEntity {
 	@ApiModelProperty("保险费")
 	private BigDecimal safePrice;//保险费
 
-	@Column(name = "discounts")
-	@Desc(value = "优惠金额")
-	@ApiModelProperty("优惠金额")
-    private BigDecimal discounts;
-
 	@Column(name = "retention_money")
 	@Desc(value = "该订单所收的滞留金")
 	@ApiModelProperty("该订单所收的滞留金")
@@ -101,11 +91,6 @@ public class HouseWorkerOrder extends BaseEntity {
 	@Desc(value = "换人后剩余钱")
 	@ApiModelProperty("换人后剩余钱")
 	private BigDecimal afterChange;//afterchange
-
-	@Column(name = "taked_money")
-	@Desc(value = "记录红包抵消金额")
-	@ApiModelProperty("记录红包抵消金额")
-	private BigDecimal takedMoney;//takedmoney
 
 	@Column(name = "total_price")
 	@Desc(value = "要支付的总钱工钱+材料")
@@ -149,10 +134,8 @@ public class HouseWorkerOrder extends BaseEntity {
 		if(isInit) {
 			this.payState = 0;
 			this.safePrice = new BigDecimal(0);//保险费
-			this.discounts = new BigDecimal(0);
 			this.retentionMoney = new BigDecimal(0);//retentionmoney
 			this.afterChange = new BigDecimal(0);//afterchange
-			this.takedMoney = new BigDecimal(0);//takedmoney
 			this.repairPrice = new BigDecimal(0);//repairprice
 			this.haveMoney = new BigDecimal(0);//havemaoney
 			this.everyMoney = new BigDecimal(0);//everydaypaymaoney

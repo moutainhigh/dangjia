@@ -99,4 +99,17 @@ public interface GoodsGroupAPI {
 	@ApiOperation(value = "根据关联组id删除关联组和货品关联关系", notes = "根据关联组id删除关联组和货品关联关系")
 	public ServerResponse deleteGoodsGroupById(@RequestParam("request") HttpServletRequest request,@RequestParam("goodsGroupId")String goodsGroupId);
 
+	/**
+	 * 模糊查询商品关联组的商品及下属货品
+	 * @param request
+	 * @param pageDTO
+	 * @param categoryId
+	 * @param name
+	 * @return
+	 */
+	@PostMapping("/basics/goodsGroup/queryGoodsGroupListByCategoryLikeName")
+	@ApiOperation(value = "按照name模糊查询商品及下属货品", notes = "按照name模糊查询商品及下属货品")
+	public ServerResponse queryGoodsGroupListByCategoryLikeName(@RequestParam("request")HttpServletRequest request,@RequestParam("pageDTO")PageDTO pageDTO,
+																@RequestParam("categoryId")String categoryId,@RequestParam("name")String name);
+
 }

@@ -9,7 +9,6 @@ import tk.mybatis.mapper.common.Mapper;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -22,7 +21,7 @@ public interface IHouseMapper extends Mapper<House> {
 
     List<House> getStatisticsByDate(@Param("start")Date start, @Param("end")Date end);
 
-    List<Map<String,Object>> getList(@Param("memberId")String memberId);
+    List<House> getList(@Param("memberId")String memberId);
 
     HouseDTO startWorkPage(@Param("houseId")String houseId);
 

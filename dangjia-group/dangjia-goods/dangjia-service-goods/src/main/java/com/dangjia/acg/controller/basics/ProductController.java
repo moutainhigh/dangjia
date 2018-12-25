@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
    * @类 名： ProductController
    * @功能描述： TODO
    * @作者信息： zmj
-   * @创建时间： 2018-9-10上午9:25:10
+   * @创建时间： 2018-9-10上午9:25:10queryGoodsListByCategoryLikeName
  */
 @RestController
 public class ProductController implements ProductAPI {
@@ -196,8 +196,8 @@ public class ProductController implements ProductAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse queryGoodsList(HttpServletRequest request,PageDTO pageDTO,String categoryId,String name){
-		return goodsService.queryGoodsList(pageDTO,categoryId,name);
+	public ServerResponse queryGoodsList(HttpServletRequest request,PageDTO pageDTO,String categoryId,String name,Integer type){
+		return goodsService.queryGoodsList(pageDTO,categoryId,name,type);
 	}
 
 	/**
@@ -210,8 +210,8 @@ public class ProductController implements ProductAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse queryGoodsListByCategoryLikeName(HttpServletRequest request,PageDTO pageDTO,String categoryId,String name){
-		return goodsService.queryGoodsListByCategoryLikeName(pageDTO,categoryId,name);
+	public ServerResponse queryGoodsListByCategoryLikeName(HttpServletRequest request,PageDTO pageDTO,String categoryId,String name,Integer type){
+		return goodsService.queryGoodsListByCategoryLikeName(pageDTO,categoryId,name,type);
 	}
 
 	/**

@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.basics;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -305,7 +304,7 @@ public class GoodsService {
      * @param name
      * @return
      */
-    public ServerResponse queryGoodsList(PageDTO pageDTO, String categoryId, String name) {
+    public ServerResponse queryGoodsList(PageDTO pageDTO, String categoryId, String name,Integer type) {
         try {
             if (pageDTO.getPageNum() == null) {
                 pageDTO.setPageNum(1);
@@ -325,9 +324,12 @@ public class GoodsService {
                 {
                     List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
                     for (Product p : productList) {
-                        if (p.getImage() == null) {
+                        //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
+                        if (type != p.getType() && -1 != type) //不等于 type 的不返回给前端
                             continue;
-                        }
+                        if (p.getImage() == null)
+                            continue;
+
                         String[] imgArr = p.getImage().split(",");
                         String imgStr = "";
                         String imgUrlStr = "";
@@ -374,10 +376,12 @@ public class GoodsService {
      * @param pageDTO
      * @param categoryId
      * @param name
+     * @param type 是否禁用  0：禁用；1不禁用 ;  -1全部默认
      * @return
      */
-    public ServerResponse queryGoodsListByCategoryLikeName(PageDTO pageDTO, String categoryId, String name) {
+    public ServerResponse queryGoodsListByCategoryLikeName(PageDTO pageDTO, String categoryId, String name,Integer type) {
         try {
+            LOG.info("tqueryGoodsListByCategoryLikeName type :" + type);
             if (pageDTO.getPageNum() == null) {
                 pageDTO.setPageNum(1);
             }
@@ -396,9 +400,16 @@ public class GoodsService {
                 {
                     List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
                     for (Product p : productList) {
-                        if (p.getImage() == null) {
+                        LOG.info("p :" + p);
+                        LOG.info("p name :" + p.getName());
+                        LOG.info("p getType :" + p.getType());
+                        //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
+                        if (type != p.getType() && -1 != type) //不等于 type 的不返回给前端
                             continue;
-                        }
+
+                        if (p.getImage() == null)
+                            continue;
+
                         String[] imgArr = p.getImage().split(",");
                         String imgStr = "";
                         String imgUrlStr = "";
@@ -458,6 +469,7 @@ public class GoodsService {
             if (!StringUtils.isNotBlank(goodsArr))
                 return ServerResponse.createByErrorMessage("查询商品id不能为空");
 
+            boolean isFindLabel = false; //是否找到 标签  false: 没有找到
             List<Map<String, Object>> gMapList = new ArrayList<>();
             for (String srcGoodsId : goodsList) {
                 if (!StringUtils.isNotBlank(srcGoodsId))
@@ -471,7 +483,7 @@ public class GoodsService {
                 for (Product product : products) {
                     if (product.getLabelId() != null) {
                         if (!product.getLabelId().equals(srcLabelId))
-                            break;
+                            continue;
 //                        Map<String, Object> map = CommonUtil.beanToMap(p);
                         Map<String, Object> map = new HashMap<>();
                         Label label = iLabelMapper.selectByPrimaryKey(product.getLabelId());
@@ -483,10 +495,15 @@ public class GoodsService {
                             map.put("labelName", label.getName());
                             map.put("unitName", product.getUnitName());
                             gMapList.add(map);
+                            isFindLabel = true;
                         }
                     }
                 }
             }
+
+            if(!isFindLabel)
+                return ServerResponse.createByErrorMessage("列表中的商品里面没有该标签的货品");
+
             return ServerResponse.createBySuccess("查询成功", gMapList);
         } catch (Exception e) {
             e.printStackTrace();

@@ -164,6 +164,9 @@ public class ActuaryOperationService {
                 wGoodsDTO.setName(workerGoods.getName());
                 wGoodsDTO.setWorkerDec(workerGoods.getWorkerDec());
                 List<Technology> technologyList = technologyMapper.queryTechnologyByWgId(workerGoods.getId());
+                for (Technology technology:technologyList) {
+                    technology.setImage(getImage(technology.getImage()));//图一张
+                }
                 wGoodsDTO.setTechnologyList(technologyList);
                 return ServerResponse.createBySuccess("查询成功",wGoodsDTO);
             }else if(type == 2 || type == 3){//材料商品  服务商品
@@ -200,6 +203,9 @@ public class ActuaryOperationService {
                 wGoodsDTO.setName(workerGoods.getName());
                 wGoodsDTO.setWorkerDec(workerGoods.getWorkerDec());
                 List<Technology> technologyList = technologyMapper.queryTechnologyByWgId(workerGoods.getId());
+                for (Technology technology:technologyList) {
+                    technology.setImage(getImage(technology.getImage()));//图一张
+                }
                 wGoodsDTO.setTechnologyList(technologyList);
                 return ServerResponse.createBySuccess("查询成功",wGoodsDTO);
             }else if(type == 2 || type == 3){//材料商品  服务商品

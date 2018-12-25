@@ -13,12 +13,15 @@ import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.activity.RedPackPayService;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.util.RKIDCardUtil;
 import com.dangjia.acg.util.TokenUtil;
 import com.github.pagehelper.PageHelper;
@@ -53,9 +56,13 @@ public class MemberService {
 	@Autowired
 	private ISmsMapper smsMapper;
 	@Autowired
+	private IHouseMapper houseMapper;
+	@Autowired
 	private IWorkerTypeMapper workerTypeMapper;
-    @Autowired
-    private GroupInfoService groupInfoService;
+	@Autowired
+	private GroupInfoService groupInfoService;
+	@Autowired
+	private ConfigMessageService configMessageService;
 
 
 	/****
@@ -63,6 +70,32 @@ public class MemberService {
 	 */
 	@Autowired
 	private RedisClient redisClient;
+
+	/**
+	 * 获取用户手机号
+	 * @param request
+	 * @param id 来源ID
+	 * @param idType 1=房屋ID, 2=用户ID
+	 * @return
+	 */
+	public ServerResponse getMemberMobile(HttpServletRequest request,String id,String idType){
+		String mobile="";
+		request.setAttribute("isShow","true");
+		if(idType.equals("1")){
+			House house=houseMapper.selectByPrimaryKey(id);
+			if(house!=null){
+				Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+				mobile = member==null?"":member.getMobile();
+			}
+		}else{
+			Member member = memberMapper.selectByPrimaryKey(id);
+			mobile = member==null?"":member.getMobile();
+		}
+		if(CommonUtil.isEmpty(mobile)){
+			return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(),EventStatus.NO_DATA.getDesc());
+		}
+		return ServerResponse.createBySuccess("OK",mobile);
+	}
 	/**
 	 * 获取用户详细资料
 	 */
@@ -217,6 +250,7 @@ public class MemberService {
 			try {
 				//检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
 				redPackPayService.checkUpActivity(request,user.getMobile(),"1");
+				configMessageService.addConfigMessage(request,"zx",user.getId(),"0","注册通知","业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。",null);
 			}catch (Exception e){
 				logger.error("注册送优惠券活动异常-zhuce：原因："+e.getMessage(),e);
 			}

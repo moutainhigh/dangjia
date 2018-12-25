@@ -29,7 +29,7 @@ public class DjConstants {
         public final static String QRCODE ="qrCode?userToken=%s&cityId=%s&title=%s";//二维码
         public final static String PROJECTRECORD ="projectRecord?userToken=%s&cityId=%s&title=%s";//工地记录
         public final static String PROJECTADRESSLIST ="projectAdressList?userToken=%s&cityId=%s&title=%s";//工地通讯录
-        public final static String GJJINGSUANLIST ="gjJingSuanList?userToken=%s&cityId=%s&title=%s";//精算
+        public final static String GJJINGSUANLIST ="jsCraftsman?userToken=%s&cityId=%s&title=%s";//精算
         public final static String CONFIRMQIANGDAN ="confirmQiangdan?userToken=%s&cityId=%s&title=%s";//抢单确认
         public final static String GJMANAGERJINGSUAN ="gjManagerJingSuan?userToken=%s&cityId=%s&title=%s";//精算
         public final static String GJMANAGERISOK ="gjManagerIsOk?userToken=%s&cityId=%s&title=%s";//已抢单

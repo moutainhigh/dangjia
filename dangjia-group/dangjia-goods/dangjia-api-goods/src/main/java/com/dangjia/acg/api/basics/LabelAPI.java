@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * 
- * 
-   * @类 名： LabelController.java
-   * @功能描述：  
-   * @作者信息： ysl
-   * @创建时间： 2018-12-11下午1:55:12
+ *
+ *
+ * @类 名： LabelController.java
+ * @功能描述：
+ * @作者信息： ysl
+ * @创建时间： 2018-12-11下午1:55:12
  */
 @Api(description = "label管理接口")
 @FeignClient("dangjia-service-goods")
@@ -64,4 +64,14 @@ public interface LabelAPI {
     @PostMapping("/basics/label/deleteById")
     @ApiOperation(value = "根据ID删除商品标签", notes = "根据ID删除商品标签")
     public ServerResponse deleteById(@RequestParam("request") HttpServletRequest request, @RequestParam("labelId") String labelId);
+
+    /**
+     * 批量添加/修改货品标签
+     * @param request
+     * @param productLabeList
+     * @return
+     */
+    @PostMapping("/basics/label/saveProductLabelList")
+    @ApiOperation(value = "批量添加/修改货品标签", notes = "批量添加/修改货品标签")
+    public ServerResponse saveProductLabelList(@RequestParam("request") HttpServletRequest request,@RequestParam("productLabeList") String productLabeList);
 }

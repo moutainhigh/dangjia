@@ -8,6 +8,8 @@ import com.dangjia.acg.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 
 /**
  * 用户维护
@@ -19,7 +21,18 @@ public class MemberController implements MemberAPI {
 
     @Autowired
     private MemberService memberService;
-
+    /**
+     * 获取用户手机号
+     * @param request
+     * @param id 来源ID
+     * @param idType 1=房屋ID, 2=用户ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType){
+        return memberService.getMemberMobile(request, id, idType);
+    }
     /**
      * 获取用户详细资料
      * @param userToken  token

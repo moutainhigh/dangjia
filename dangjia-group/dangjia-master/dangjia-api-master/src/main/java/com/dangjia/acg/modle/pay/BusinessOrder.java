@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 /**
  * 实体类
  * @author Ronalcheng
- * 业务订单
+ * 业务订单  联系所有订单
  */
 @Data
 @Entity

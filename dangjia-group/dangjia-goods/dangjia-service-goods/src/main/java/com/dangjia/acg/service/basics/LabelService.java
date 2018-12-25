@@ -1,19 +1,20 @@
 package com.dangjia.acg.service.basics;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.basics.ILabelMapper;
+import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.modle.basics.Label;
+import com.dangjia.acg.modle.basics.Product;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @类 名： LabelServiceImpl.java
@@ -30,6 +31,10 @@ public class LabelService {
     @Autowired
     private ILabelMapper iLabelMapper;
 
+    @Autowired
+    private IProductMapper iProductMapper;
+
+
     //查询所有的标签
     public ServerResponse<PageInfo> getAllLabel(PageDTO pageDTO) {
         try {
@@ -42,12 +47,12 @@ public class LabelService {
             if (pageDTO.getPageSize() == null) {
                 pageDTO.setPageSize(10);
             }
-            PageHelper.startPage(pageDTO.getPageNum(),pageDTO.getPageSize());
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
             List<Label> labelList = iLabelMapper.getLabel();
             for (Label label : labelList) {
                 Map<String, Object> map = new HashMap<String, Object>();
-                if (!StringUtils.isNotBlank( label.getId())) {
+                if (!StringUtils.isNotBlank(label.getId())) {
                     map.put("labelId", "");
                     map.put("labelName", "");
                 } else {
@@ -99,6 +104,42 @@ public class LabelService {
             return ServerResponse.createByErrorMessage("修改失败");
         }
     }
+
+    /**
+     * 保存货品的标签
+     * @param productArr
+     * @return
+     */
+    public ServerResponse saveProductLabel(String productArr) {
+        try {
+            JSONArray jsonArr = JSONArray.parseArray(productArr);
+            for (int i = 0; i < jsonArr.size(); i++) {
+                JSONObject obj = jsonArr.getJSONObject(i);
+                String labelId = obj.getString("labelId");//标签id
+                Label label = iLabelMapper.selectByPrimaryKey(labelId);
+                if(label == null)
+                    return ServerResponse.createByErrorMessage("标签不存在");
+            }
+
+            for (int i = 0; i < jsonArr.size(); i++) {
+                JSONObject obj = jsonArr.getJSONObject(i);
+                String productId = obj.getString("productId");//货品id
+                String labelId = obj.getString("labelId");//标签id
+
+                Product product = iProductMapper.selectByPrimaryKey(productId);
+//                product.setCreateDate(new Date());
+                product.setModifyDate(new Date());
+                product.setLabelId(labelId);
+                iProductMapper.updateByPrimaryKeySelective(product);
+            }
+            return ServerResponse.createBySuccessMessage("保存成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("保存失败");
+        }
+
+    }
+
 
     //根据id查询商品标签
     public ServerResponse selectById(String id) {

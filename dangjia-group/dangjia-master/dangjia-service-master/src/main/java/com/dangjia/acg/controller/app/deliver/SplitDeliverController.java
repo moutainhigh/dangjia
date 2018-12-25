@@ -47,6 +47,15 @@ public class SplitDeliverController implements SplitDeliverAPI {
     }
 
     /**
+     * 发货单明细
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse splitDeliverDetail(String splitDeliverId){
+        return splitDeliverService.splitDeliverDetail(splitDeliverId);
+    }
+
+    /**
      * 收货列表
      * shipState  0待发货,1已发待收货,2已收货,3取消,4部分收
      */

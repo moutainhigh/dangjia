@@ -1,8 +1,8 @@
 package com.dangjia.acg.mapper.basics;
 
 import com.dangjia.acg.modle.attribute.Attribute;
-import com.dangjia.acg.pojo.attribute.AttributePO;
 import com.dangjia.acg.modle.attribute.CategoryAttribute;
+import com.dangjia.acg.pojo.attribute.AttributePO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;

@@ -353,7 +353,6 @@ public class PaymentService {
         }
         HouseWorkerOrder hwo = houseWorkerOrderMapper.selectByPrimaryKey(houseFlow.getHouseWorkerOrderId());
         hwo.setPayState(1);
-        hwo.setPayment(payState);//统计支付方式
         houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
         HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(hwo.getHouseWorkerId());
         houseWorker.setWorkType(6);
@@ -489,6 +488,7 @@ public class PaymentService {
                 orderItem.setWorkerGoodsName(budgetWorker.getName());
                 orderItem.setWorkerGoodsSn(budgetWorker.getWorkerGoodsSn());
                 orderItem.setWorkerGoodsId(budgetWorker.getWorkerGoodsId());
+                orderItem.setImage(budgetWorker.getImage());
                 orderItemMapper.insert(orderItem);
             }
         }catch (Exception e){

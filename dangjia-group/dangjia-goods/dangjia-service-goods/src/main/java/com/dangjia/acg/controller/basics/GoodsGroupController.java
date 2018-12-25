@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 public class GoodsGroupController implements GoodsGroupAPI {
 
 	@Autowired
-    private GoodsGroupService goodsGroupService;
+	private GoodsGroupService goodsGroupService;
 	/*
 	 * 获取所有关联组
 	 */
@@ -29,7 +29,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	public ServerResponse<PageInfo> getAllList(HttpServletRequest request, PageDTO pageDTO, String name, Integer state){
 		return goodsGroupService.getAllList(pageDTO.getPageNum(),pageDTO.getPageSize(),name,state);
 	}
-	
+
 	/*
 	 * 添加关联组和货品关联关系
 	 */
@@ -54,7 +54,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	public ServerResponse getGoodsGroupById(HttpServletRequest request,String goodsGroupId) {
 		return goodsGroupService.getGoodsGroupById(goodsGroupId);
 	}
-	
+
 	/*
 	 * 查找所有顶级分类列表
 	 */
@@ -63,7 +63,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	public ServerResponse getGoodsCategoryList(HttpServletRequest request){
 		return goodsGroupService.getGoodsCategoryList();
 	}
-	
+
 	/*
 	 * 查找所有子分类列表
 	 */
@@ -72,8 +72,8 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	public ServerResponse getChildrenGoodsCategoryList(HttpServletRequest request,String id){
 		return goodsGroupService.getChildrenGoodsCategoryList(id);
 	}
-	
-	/*                                
+
+	/*
 	 * 查找所有商品列表
 	 */
 	@Override
@@ -81,7 +81,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	public ServerResponse getGoodsListByCategoryId(HttpServletRequest request,String id){
 		return goodsGroupService.getGoodsListByCategoryId(id);
 	}
-	
+
 	/*
 	 * 查找所有货品列表
 	 */
@@ -117,5 +117,19 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	@ApiMethod
 	public ServerResponse deleteGoodsGroupById(HttpServletRequest request,String goodsGroupId){
 		return goodsGroupService.deleteGoodsGroupById(goodsGroupId);
+	}
+
+	/**
+	 * 查询商品及下属货品
+	 * @param request
+	 * @param pageDTO
+	 * @param categoryId
+	 * @param name
+	 * @return
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse queryGoodsGroupListByCategoryLikeName(HttpServletRequest request,PageDTO pageDTO,String categoryId,String name){
+		return goodsGroupService.queryGoodsGroupListByCategoryLikeName(pageDTO,categoryId,name);
 	}
 }
