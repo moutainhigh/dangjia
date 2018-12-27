@@ -1,9 +1,9 @@
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://172.16.30.95:3306/dangjia_basic_pre?useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://192.168.0.202:3306/dangjia_master?useUnicode=true&characterEncoding=utf-8
     username: dangjia
-    password: dangjia@int
+    password: Fengjiang123!
     driverClassName: com.mysql.jdbc.Driver
     initialSize: 10
     minIdle: 10
@@ -17,23 +17,27 @@ spring:
     testOnBorrow: false
     testOnReturn: false
     poolPreparedStatements: true
+    logAbandoned: true
+    removeAbandoned: true
+    removeAbandonedTimeout: 60
     maxPoolPreparedStatementPerConnectionSize: 20
     filters: stat,wall,log4j
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
 
 server:
-  port: 9005
+  port: 8005
 
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://172.16.30.95:9999/eureka/   # 指定注册中心的地址
+      defaultZone: http://192.168.0.229:8888/eureka/   # 指定注册中心的地址
   instance:
     preferIpAddress: true
-hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 60000
-hystrix.threadpool.default.coreSize: 2000
+hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 20000
+hystrix.threadpool.default.coreSize: 500
 ribbon:
-  ConnectTimeout: 20000
-  ReadTimeout: 60000
+  ConnectTimeout: 10000
+  ReadTimeout: 20000
   MaxAutoRetriesNextServer: 1
   OkToRetryOnAllOperations: true
+

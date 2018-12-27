@@ -11,6 +11,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         worker_type_name as workerTypeName,
         worker_type_id as workerTypeId,
         style_name as styleName,
+        style_price as stylePrice,
+        budget_cost as budgetCost,
         type,
         payment,
         create_date as createDate,

@@ -1,14 +1,14 @@
 spring:
   data:
     elasticsearch:
-      cluster-name: dangjia-test-es
-      cluster-nodes: 134.175.187.54:9300
+      cluster-name: elasticsearch
+      cluster-nodes: 172.16.30.95:9300
 server:
-  port: 9012
+  port: 8012
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://172.16.30.95:9999/eureka/   # 指定注册中心的地址
+      defaultZone: http://192.168.0.229:8888/eureka/   # 指定注册中心的地址
   instance:
     preferIpAddress: true
 hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 20000

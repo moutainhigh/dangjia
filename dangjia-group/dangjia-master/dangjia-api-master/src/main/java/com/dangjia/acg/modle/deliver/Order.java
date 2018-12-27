@@ -52,6 +52,16 @@ public class Order extends BaseEntity {
 	@ApiModelProperty("设计风格")
 	private String styleName;
 
+	@Column(name = "style_price")
+	@Desc(value = "风格价格")
+	@ApiModelProperty("风格价格")
+	private BigDecimal stylePrice;
+
+	@Column(name = "budget_cost")
+	@Desc(value = "精算价格")
+	@ApiModelProperty("精算价格")
+	private BigDecimal budgetCost;
+
 	@Column(name = "type")
 	@Desc(value = "1人工订单 2材料订单")
 	@ApiModelProperty("1人工订单 2材料订单")

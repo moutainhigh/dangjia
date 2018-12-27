@@ -3,7 +3,7 @@ spring:
     name: dangjia-service-master
   cloud:
     config:
-      uri: http://172.16.30.95:6010
+      uri: http://config.fengjiangit.com
     loadbalancer:
       retry:
         enabled: true

@@ -3,42 +3,45 @@ spring:
     sampler:
       percentage: 1.0
 server:
-  port: 7001
+  port: 8001
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://172.16.30.95:7777/eureka/
+      defaultZone: http://192.168.0.229:8888/eureka/
 zuul:
   maxTotalConnections: 20000 #配置路由连接数默认200
   ignored-services: dangjia-service-**                        # 需要忽视的服务(配置后将不会被路由)
   routes:
-      user:
-        path: /member/**
-        service-id: dangjia-service-member
-      basic:
-        path: /basic/**
-        service-id: dangjia-service-basic
-      cache:
-        path: /cache/**
-        service-id: dangjia-service-cache
-      task:
-        path: /task/**
-        service-id: dangjia-service-task
-      job:
-        path: /job/**
-        service-id: dangjia-service-job
-      upload:
-          path: /upload/**
-          service-id: dangjia-service-upload
-      classroom:
-        path: /classroom/**
-        service-id: dangjia-service-classroom
-      store:
-        path: /store/**
-        service-id: dangjia-service-store
-      inset:
-        path: /inset/**
-        service-id: dangjia-service-inset
+    cache:
+      path: /cache/**
+      service-id: dangjia-service-cache
+    basic:
+      path: /basic/**
+      service-id: dangjia-service-basic
+    job:
+      path: /job/**
+      service-id: dangjia-service-job
+    upload:
+      path: /upload/**
+      service-id: dangjia-service-upload
+    goods:
+      path: /goods/**
+      service-id: dangjia-service-goods
+    master:
+      path: /master/**
+      service-id: dangjia-service-master
+    message:
+      path: /message/**
+      service-id: dangjia-service-message
+    store:
+      path: /store/**
+      service-id: dangjia-service-store
 hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 20000
 hystrix.threadpool.default.coreSize: 500
+ribbon:
+  ConnectTimeout: 10000
+  ReadTimeout: 20000
+  MaxAutoRetriesNextServer: 1
+  OkToRetryOnAllOperations: true
 zuul.sensitive-headers: true
+

@@ -13,6 +13,7 @@ import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.design.IDesignImageTypeMapper;
 import com.dangjia.acg.mapper.design.IHouseDesignImageMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
@@ -20,13 +21,13 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.design.DesignImageType;
 import com.dangjia.acg.modle.design.HouseDesignImage;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,11 +54,14 @@ public class HouseDesignImageService {
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private ConfigUtil configUtil;
-
     @Autowired
     private IHouseWorkerOrderMapper houseWorkerOrderMapper;
     @Autowired
     private ConfigMessageService configMessageService;
+    @Autowired
+    private IWorkDepositMapper workDepositMapper;
+
+
     /**
      * 查看施工图
      */
@@ -141,7 +145,8 @@ public class HouseDesignImageService {
                     houseFlow.setCityId(house.getCityId());
                     houseFlow.setWorkerId("2c911c24606f21720160726f5e6a00df");
                     //这里算出精算费
-                    houseFlow.setWorkPrice(house.getSquare().multiply(new BigDecimal(3.5)));
+                    WorkDeposit workDeposit = workDepositMapper.selectAll().get(0);//结算比例表
+                    houseFlow.setWorkPrice(house.getSquare().multiply(workDeposit.getBudgetCost()));
                     houseFlowMapper.insert(houseFlow);
                     HouseWorker houseWorker = new HouseWorker();
                     houseWorker.setHouseId(house.getId());

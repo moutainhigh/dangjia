@@ -22,6 +22,7 @@ import com.dangjia.acg.mapper.design.IHouseDesignImageMapper;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.pay.IPayOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
@@ -44,6 +45,7 @@ import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
 import com.dangjia.acg.modle.repair.MendMateriel;
@@ -127,6 +129,8 @@ public class PaymentService {
     private IWarehouseMapper warehouseMapper;//仓库
     @Autowired
     private IWarehouseDetailMapper warehouseDetailMapper;//流水
+    @Autowired
+    private IWorkDepositMapper workDepositMapper;
 
     /**
      * 移动端支付成功回调
@@ -383,7 +387,9 @@ public class PaymentService {
             order.setTotalAmount(hwo.getWorkPrice());//设计费
             order.setWorkerTypeName("设计订单");
             order.setWorkerTypeId(hwo.getWorkerTypeId());
+            HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
             order.setStyleName(house.getStyle());
+            order.setStylePrice(houseStyleType.getPrice());//风格价格
             order.setType(1);//人工订单
             order.setPayment(payState);
             orderMapper.insert(order);
@@ -393,6 +399,8 @@ public class PaymentService {
 
         } else if(hwo.getWorkerType() == 2){//精算费用处理
             Order order = new Order();
+            WorkDeposit workDeposit = workDepositMapper.selectAll().get(0);//结算比例表
+            order.setBudgetCost(workDeposit.getBudgetCost());//精算价格
             order.setHouseId(hwo.getHouseId());
             order.setBusinessOrderNumber(businessOrderNumber);
             order.setTotalAmount(hwo.getWorkPrice());//精算费

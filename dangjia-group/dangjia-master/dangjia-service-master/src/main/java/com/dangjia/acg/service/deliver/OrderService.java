@@ -17,7 +17,6 @@ import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.design.IDesignImageTypeMapper;
 import com.dangjia.acg.mapper.design.IHouseDesignImageMapper;
-import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
@@ -29,7 +28,6 @@ import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.design.DesignImageType;
 import com.dangjia.acg.modle.design.HouseDesignImage;
-import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.house.WarehouseDetail;
@@ -78,8 +76,6 @@ public class OrderService {
     @Autowired
     private IHouseDesignImageMapper houseDesignImageMapper;
     @Autowired
-    private IHouseStyleTypeMapper houseStyleTypeMapper;
-    @Autowired
     private IDesignImageTypeMapper designImageTypeMapper;
 
     /**
@@ -96,11 +92,10 @@ public class OrderService {
 
             List<ItemDTO> itemDTOList = new ArrayList<>();
             if(order.getWorkerTypeId().equals("1")){//设计
-                HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
                 ItemDTO itemDTO = new ItemDTO();
                 itemDTO.setName(house.getStyle());
                 itemDTO.setImage(address + "icon/shejiF.png");
-                itemDTO.setPrice("￥"+houseStyleType.getPrice()+"/㎡");
+                itemDTO.setPrice("￥"+order.getStylePrice()+"/㎡");
                 itemDTO.setShopCount(house.getSquare().doubleValue());
                 itemDTO.setProductType(3);
                 itemDTOList.add(itemDTO);
@@ -120,7 +115,7 @@ public class OrderService {
                 ItemDTO itemDTO = new ItemDTO();
                 itemDTO.setName("当家精算");
                 itemDTO.setImage(address + "icon/jingsuanF.png");
-                itemDTO.setPrice("￥3.5/㎡");
+                itemDTO.setPrice("￥"+order.getBudgetCost()+"/㎡");
                 itemDTO.setShopCount(house.getSquare().doubleValue());
                 itemDTO.setProductType(3);
                 itemDTOList.add(itemDTO);
@@ -182,6 +177,7 @@ public class OrderService {
         try{
             AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
             Member member = accessToken.getMember();
+
             List<BusinessOrder> businessOrderList = businessOrderMapper.byMemberId(member.getId());
             List<BusinessOrderDTO> businessOrderDTOS = new ArrayList<>();
             for (BusinessOrder businessOrder : businessOrderList){

@@ -3,7 +3,7 @@ spring:
     name: dangjia-service-cache
   cloud:
     config:
-      uri: http://172.16.30.95:6010
+      uri: http://config.fengjiangit.com
     inetutils:
       default-ip-address: discovery
   profiles:

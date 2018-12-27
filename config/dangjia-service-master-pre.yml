@@ -1,9 +1,9 @@
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://172.16.30.95:3306/sesame_classroom_pre?useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://192.168.0.202:3306/dangjia_master?useUnicode=true&characterEncoding=utf-8
     username: dangjia
-    password: dangjia@int
+    password: Fengjiang123!
     driverClassName: com.mysql.jdbc.Driver
     initialSize: 10
     minIdle: 10
@@ -20,16 +20,20 @@ spring:
     maxPoolPreparedStatementPerConnectionSize: 20
     filters: stat,wall,log4j
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+    changsha:
+      url: jdbc:mysql://114.116.77.199:3306/dj_changsha?useUnicode=true&characterEncoding=utf-8
+      username: root
+      password: root
   elasticsearch:
     jest:
       uris: http://172.16.30.95:9200
       read-timeout: 5000
 server:
-  port: 9013
+  port: 8014
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://172.16.16.7:9999/eureka/   # 指定注册中心的地址
+      defaultZone: http://192.168.0.229:8888/eureka/    # 指定注册中心的地址
   instance:
     preferIpAddress: true
 hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 20000
