@@ -61,7 +61,12 @@ public class HouseWorker extends BaseEntity {
 	@ApiModelProperty("施工状态,默认0  1阶段完工通过，2整体完工通过 ,3待交底,4已放弃")
 	private Integer workSteta;//worksteta
 
-	@Column(name = "evaluate_steta")
+	@Column(name = "is_select")
+	@Desc(value = "是否选中当前任务(0:未选中；1：选中)")
+	@ApiModelProperty("是否选中当前任务(0:未选中；1：选中)")
+	private Integer isSelect;
+
+	/*@Column(name = "evaluate_steta")
 	@Desc(value = "业主或大管家对工人的评价状态,0未开始，1已评价，没有评价")
 	@ApiModelProperty("业主或大管家对工人的评价状态,0未开始，1已评价，没有评价")
 	private Integer evaluateSteta;//evaluatesteta
@@ -69,16 +74,11 @@ public class HouseWorker extends BaseEntity {
 	@Column(name = "has_evaluate")
 	@Desc(value = "用于单独判断业主对工人的评价状态,0未开始，1已评价")
 	@ApiModelProperty("用于单独判断业主对工人的评价状态,0未开始，1已评价")
-	private Integer hasEvaluate;//hasevaluate
+	private Integer hasEvaluate;//hasevaluate*/
 
-	@Column(name = "apply")
+	/*@Column(name = "apply")
 	@Desc(value = "申请的状态为1 表示没有发起完工申请可退单,默认0")
 	@ApiModelProperty("申请的状态为1 表示没有发起完工申请可退单,默认0")
-	private Integer apply;//
-
-	@Column(name = "is_select")
-	@Desc(value = "是否选中当前任务(0:未选中；1：选中)")
-	@ApiModelProperty("是否选中当前任务(0:未选中；1：选中)")
-	private Integer isSelect;//
+	private Integer apply;//*/
 
 }

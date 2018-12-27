@@ -3,6 +3,7 @@ package com.dangjia.acg.common.util.excel;
 import com.dangjia.acg.common.annotation.ExcelField;
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.util.ClazzUtil;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
@@ -14,13 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -33,7 +34,7 @@ public class ExportExcel {
     /**
      * 工作薄对象
      */
-    private SXSSFWorkbook wb;
+    private Workbook wb;
 
     /**
      * 工作表对象
@@ -77,7 +78,7 @@ public class ExportExcel {
      * 构造函数
      */
     public ExportExcel(){
-        this.wb = new SXSSFWorkbook(500);
+        this.wb = new SXSSFWorkbook();
     }
 
 
@@ -87,6 +88,7 @@ public class ExportExcel {
      */
     private void initialize(String title,  Class<?> cls) {
         rownum=0;
+        annotationList = Lists.newArrayList();
         Field[] fs = cls.getDeclaredFields();
         for (Field f : fs){
             ExcelField ef = f.getAnnotation(ExcelField.class);
@@ -118,6 +120,7 @@ public class ExportExcel {
             }
         });
         this.sheet = wb.createSheet(title);
+
         this.styles = createStyles(wb);
         if (headerList == null){
             throw new RuntimeException("headerList not null!");
@@ -152,19 +155,9 @@ public class ExportExcel {
      * @return 样式列表
      */
     private Map<String, CellStyle> createStyles(Workbook wb) {
-        Map<String, CellStyle> styles = new HashMap<String, CellStyle>();
+        Map<String, CellStyle> styles = new HashMap<>();
 
         CellStyle style = wb.createCellStyle();
-        style.setAlignment(CellStyle.ALIGN_CENTER);
-        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-        Font titleFont = wb.createFont();
-        titleFont.setFontName("Arial");
-        titleFont.setFontHeightInPoints((short) 16);
-        titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
-        style.setFont(titleFont);
-        styles.put("title", style);
-
-        style = wb.createCellStyle();
         style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
         style.setBorderRight(CellStyle.BORDER_THIN);
         style.setRightBorderColor(IndexedColors.GREY_50_PERCENT.getIndex());
@@ -174,35 +167,18 @@ public class ExportExcel {
         style.setTopBorderColor(IndexedColors.GREY_50_PERCENT.getIndex());
         style.setBorderBottom(CellStyle.BORDER_THIN);
         style.setBottomBorderColor(IndexedColors.GREY_50_PERCENT.getIndex());
+        style.setAlignment(CellStyle.ALIGN_CENTER);
         Font dataFont = wb.createFont();
-        dataFont.setFontName("Arial");
         dataFont.setFontHeightInPoints((short) 10);
         style.setFont(dataFont);
         styles.put("data", style);
 
-        style = wb.createCellStyle();
-        style.cloneStyleFrom(styles.get("data"));
-        style.setAlignment(CellStyle.ALIGN_LEFT);
-        styles.put("data1", style);
 
         style = wb.createCellStyle();
         style.cloneStyleFrom(styles.get("data"));
-        style.setAlignment(CellStyle.ALIGN_CENTER);
-        styles.put("data2", style);
-
-        style = wb.createCellStyle();
-        style.cloneStyleFrom(styles.get("data"));
-        style.setAlignment(CellStyle.ALIGN_RIGHT);
-        styles.put("data3", style);
-
-        style = wb.createCellStyle();
-        style.cloneStyleFrom(styles.get("data"));
-//		style.setWrapText(true);
-        style.setAlignment(CellStyle.ALIGN_CENTER);
         style.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
         style.setFillPattern(CellStyle.SOLID_FOREGROUND);
         Font headerFont = wb.createFont();
-        headerFont.setFontName("Arial");
         headerFont.setFontHeightInPoints((short) 10);
         headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
         headerFont.setColor(IndexedColors.WHITE.getIndex());
@@ -221,7 +197,7 @@ public class ExportExcel {
      */
     public Cell addCell(Row row, int column, Object val, int align, Class<?> fieldType,String dateformat){
         Cell cell = row.createCell(column);
-        CellStyle style = styles.get("data"+(align>=1&&align<=3?align:""));
+        CellStyle style = styles.get("data");
         try {
             if (val == null){
                 cell.setCellValue("");
@@ -285,7 +261,7 @@ public class ExportExcel {
 
                 }catch(Exception ex) {
                     // Failure to ignore
-                    log.info(ex.toString());
+                    log.error(ex.toString());
                     val = "";
                 }
                 this.addCell(row, colunm++, val, 0, ef.fieldType(),ef.dateFormat());
@@ -318,14 +294,66 @@ public class ExportExcel {
 
     /**
      * 输出到文件
-     * @param name 输出文件名
+     * @param filePath 输出文件名
      */
-    public ExportExcel writeFile(String name) throws FileNotFoundException, IOException{
-        FileOutputStream os = new FileOutputStream(name);
+    public ExportExcel writeFile(String filePath) throws  IOException{
+        FileOutputStream os = new FileOutputStream(filePath);
         this.write(os);
         return this;
     }
+    /**
+     * 输出到文件并下载
+     * @param fileFullPath 输出指定文件（物理地址）
+     * @param fileName 输出文件名
+     */
+    public ExportExcel writeFileDownload(HttpServletResponse response,String fileFullPath, String fileName) throws  IOException{
+        FileOutputStream os = new FileOutputStream(fileFullPath);
+        this.write(os);
+        download(response,fileFullPath,fileName);
+        return this;
+    }
+    /**
+     * 下载文件
+     * @param fileFullPath 文件全路径
+     * @param response
+     * @throws IOException
+     */
+    public static void download(HttpServletResponse response,String fileFullPath, String fileName) throws IOException {
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
+        Path path = Paths.get(fileFullPath);
+        String contenType = Files.probeContentType(path);
+        if(CommonUtil.isEmpty(contenType)){
+            contenType="application/octet-stream";
+        }
+        File f = new File(fileFullPath);
+        long fileLength = f.length();
+        response.setContentType(contenType+";charset=utf-8");
+        response.setHeader("Content-disposition", "attachment;filename="
+                + new String(fileName.getBytes("utf-8"), "ISO8859-1"));
+        response.setHeader("Content-Length", String.valueOf(fileLength));
+        try{
+            bis = new BufferedInputStream(new FileInputStream(fileFullPath));
+            bos = new BufferedOutputStream(response.getOutputStream());
+            byte[] buff = new byte[2048];
+            int bytesRead;
+            while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+                bos.write(buff, 0, bytesRead);
+            }
+            bos.flush();
+        }catch(IOException e){
+            throw e;
+        }finally{
+            if(bis!=null){
+                bis.close();
+            }
+            if(bos!=null){
+                bos.close();
+            }
+        }
 
+
+    }
     public static void main(String[] args,HttpServletResponse response) throws Exception{
         ExportExcel exportExcel=new ExportExcel();//创建表格实例
         List<BaseEntity> baseEntities1=new ArrayList<>();//数据结果集

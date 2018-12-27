@@ -60,14 +60,10 @@ public class GoodsCategoryService {
     //修改商品类别
     public ServerResponse doModifyGoodsCategory(String id, String name, String parentId, String parentTop) {
         try {
-            int count = 0;
             List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId(parentId);//根据id查询是否有下级类别
             for (GoodsCategory goodsCategory : goodsCategoryList) {
-                if (goodsCategory.getName().equals(name)) {
-                    count++;
-                    if (count > 1)
-                        return ServerResponse.createByErrorMessage("该类别已存在");
-                }
+                if (goodsCategory.getName().equals(name))
+                    return ServerResponse.createByErrorMessage("该类别已存在");
             }
 
             GoodsCategory category = new GoodsCategory();

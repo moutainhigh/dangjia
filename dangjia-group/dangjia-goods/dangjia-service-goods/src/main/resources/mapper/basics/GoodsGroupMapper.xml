@@ -6,6 +6,20 @@
       <result column="id" property="id"></result>
       <result column="name" property="name"></result>
    </resultMap>
+	<resultMap id="GoodsLinkMap" type="java.util.Map">
+		<result column="id" property="id"></result>
+		<result column="groupId" property="groupId"></result>
+		<result column="productId" property="productId"></result>
+		<result column="productName" property="productName"></result>
+		<result column="goodsId" property="goodsId"></result>
+		<result column="goodsName" property="goodsName"></result>
+		<result column="groupName" property="groupName"></result>
+		<result column="state" property="state"></result>
+		<result column="isSwitch" property="isSwitch"></result>
+		<result column="createDate" property="createDate"></result>
+		<result column="modifyDate" property="modifyDate"></result>
+		<result column="unitName" property="unitName"></result>
+	</resultMap>
 
 	<sql id="all_columns">
 		id,
@@ -155,6 +169,26 @@
 		FROM dj_basics_group_link
 		where group_id=#{groupId}
 		ORDER BY create_date desc
+	</select>
+	<!-- 根据关联组id查询关联货品关系 多返回了一个 unitName -->
+	<!--<select id="queryMapGroupLinkByGid" resultType="com.dangjia.acg.modle.basics.GroupLink">-->
+	<select id="queryMapGroupLinkByGid" resultMap="GoodsLinkMap" parameterType="java.util.Map">
+		SELECT
+		 g.id as id,
+		 g.group_id as groupId,
+		 g.product_id as productId,
+		 g.product_name as productName,
+		 g.goods_id as goodsId,
+		 g.goods_name as goodsName,
+		 g.group_name as groupName,
+		 g.state as state,
+		 g.is_switch as isSwitch,
+		 g.create_date as createDate,
+		 g.modify_date as modifyDate,
+		 p.unit_name as unitName
+		FROM dj_basics_group_link as g, dj_basics_product as p
+		where group_id= #{groupId} and p.id = g.product_id
+		ORDER BY g.create_date desc
 	</select>
 	<!-- 根据关联组id和货品id查询关联关系 -->
 	<select id="queryGroupLinkByGidAndPid" resultType="com.dangjia.acg.modle.basics.GroupLink">

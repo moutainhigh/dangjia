@@ -42,15 +42,15 @@ public interface ActuarialTemplateAPI {
     //新增精算模板
     @PostMapping("/actuary/actuary/insertActuarialTemplate")
     @ApiOperation(value = "新增精算模板风格", notes = "新增精算模板风格")
-    public ServerResponse insertActuarialTemplate(@RequestParam("request") HttpServletRequest request,@RequestParam("userId")String userId, @RequestParam("name") String name,@RequestParam("styleType") String styleType,
-                                                  @RequestParam("applicableArea") String applicableArea,
+    public ServerResponse insertActuarialTemplate(@RequestParam("request") HttpServletRequest request,@RequestParam("userId")String userId, @RequestParam("name") String name,@RequestParam("styleId") String styleId,
+                                                  @RequestParam("styleName") String styleName,@RequestParam("applicableArea") String applicableArea,
                                                   @RequestParam("stateType")Integer stateType,@RequestParam("workerTypeName") String workerTypeName,
                                                   @RequestParam("workerTypeId")Integer workerTypeId);
 
     //修改精算模板
     @PostMapping("/actuary/actuary/updateActuarialTemplate")
     @ApiOperation(value = "修改精算模板风格", notes = "修改精算模板风格")
-    public ServerResponse updateActuarialTemplate(@RequestParam("request") HttpServletRequest request,String id,String name,String styleType,String applicableArea,Integer stateType,String workingProcedure);
+    public ServerResponse updateActuarialTemplate(@RequestParam("request") HttpServletRequest request,String id,String name,String styleId,String styleName,String applicableArea,Integer stateType,String workingProcedure);
 
     //删除精算模板
     @PostMapping("/actuary/actuary/deleteActuarialTemplate")

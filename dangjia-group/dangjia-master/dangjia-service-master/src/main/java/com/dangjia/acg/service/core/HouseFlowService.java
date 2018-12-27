@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.core;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
@@ -18,7 +17,6 @@ import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
@@ -27,7 +25,6 @@ import com.dangjia.acg.modle.core.HouseFlowCountDownTime;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
@@ -36,8 +33,6 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
@@ -81,8 +76,6 @@ public class HouseFlowService {
     private IRewardPunishRecordMapper rewardPunishRecordMapper;
     @Autowired
     private IRewardPunishConditionMapper rewardPunishConditionMapper;
-    @Autowired
-    private ITechnologyRecordMapper technologyRecordMapper;
 
     /**
      * 判断是否存在自己抢过的包括被拒的
@@ -557,39 +550,6 @@ public class HouseFlowService {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
-        }
-    }
-
-    /**
-     * 根据houseId获取所有验收节点并保存
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public ServerResponse getAllTechnologyByHouseId(String houseId) {
-        try {
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-            House house = houseMapper.selectByPrimaryKey(houseId);
-            request.setAttribute(Constants.CITY_ID, house.getCityId());
-            JSONArray technologyList = budgetWorkerAPI.getAllTechnologyByHouseId(request, houseId);
-            if (technologyList != null) {
-                for (int i = 0; i < technologyList.size(); i++) {
-                    JSONObject object = technologyList.getJSONObject(i);
-                    TechnologyRecord technologyRecord = new TechnologyRecord();
-                    technologyRecord.setTechnologyId(object.getString("technologyId"));
-                    technologyRecord.setName(object.getString("technologyName"));
-                    technologyRecord.setContent(object.getString("technologyContent"));
-                    technologyRecord.setType(object.getInteger("technologyType"));
-                    technologyRecord.setImage(object.getString("technologyImage"));
-                    technologyRecord.setMaterialOrWorker(object.getInteger("materialOrWorker"));
-                    technologyRecord.setWorkerTypeId(object.getString("workerTypeId"));
-                    technologyRecord.setHouseFlowId(object.getString("houseFlowId"));
-                    technologyRecordMapper.insertSelective(technologyRecord);
-                }
-            }
-            return ServerResponse.createBySuccess("保存成功", null);
-        } catch (Exception e) {
-            e.printStackTrace();
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return ServerResponse.createByErrorMessage("保存失败");
         }
     }
 }

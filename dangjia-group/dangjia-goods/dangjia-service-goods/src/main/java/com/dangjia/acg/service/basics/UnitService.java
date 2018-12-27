@@ -2,9 +2,13 @@ package com.dangjia.acg.service.basics;
 
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
+import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +30,9 @@ public class UnitService {
     @Autowired
     private IUnitMapper iUnitMapper;
 
-    //查询所有的品牌
+    protected static final Logger LOG = LoggerFactory.getLogger(UnitService.class);
+
+    //查询所有的单位
     public ServerResponse<PageInfo> getAllUnit(Integer pageNum, Integer pageSize) {
         try {
             if (pageNum == null) {
@@ -44,6 +50,16 @@ public class UnitService {
                 map.put("id", unit.getId());
                 map.put("creatDate", dateStr);
                 map.put("name", unit.getName());
+                List<Unit> linkUnitList = new ArrayList<>();
+                if (unit.getLinkUnitIdArr() != null) {
+                    String[] linkUnitIdArr = unit.getLinkUnitIdArr().split(",");
+                    for (int i = 0; i < linkUnitIdArr.length; i++) {
+                        String linkUnitId = linkUnitIdArr[i];
+                        Unit linkUnit = iUnitMapper.selectByPrimaryKey(linkUnitId);
+                        linkUnitList.add(linkUnit);
+                    }
+                }
+                map.put("linkUnitList", linkUnitList);
                 mapList.add(map);
             }
             PageInfo pageResult = new PageInfo(unitList);
@@ -56,7 +72,7 @@ public class UnitService {
     }
 
     //新增商品单位
-    public ServerResponse insert(String unitName) {
+    public ServerResponse insert(String unitName, String linkUnitIdArr) {
         try {
             List<Unit> unitList = iUnitMapper.getUnitByName(unitName);
             if (unitList != null && unitList.size() > 0) {
@@ -64,6 +80,12 @@ public class UnitService {
             }
             Unit unit = new Unit();
             unit.setName(unitName);
+
+            if (!StringUtils.isNotBlank(linkUnitIdArr))
+                unit.setLinkUnitIdArr(unit.getId());//包括本身  如果为null ，就只关联 自己本身
+            else
+                unit.setLinkUnitIdArr(unit.getId() + "," + linkUnitIdArr);//包括本身
+
             unit.setCreateDate(new Date());
             unit.setModifyDate(new Date());
             iUnitMapper.insert(unit);
@@ -75,15 +97,27 @@ public class UnitService {
     }
 
     //修改商品单位
-    public ServerResponse update(String unitId, String unitName) {
+    public ServerResponse update(String unitId, String unitName, String linkUnitIdArr) {
         try {
-            List<Unit> unitList = iUnitMapper.getUnitByName(unitName);
-            if (unitList != null && unitList.size() > 0) {
-                return ServerResponse.createByErrorMessage("单位名称重复");
+            LOG.info("linkUnitIdArr :" + linkUnitIdArr);
+            if (!StringUtils.isNotBlank(unitName))
+                return ServerResponse.createByErrorMessage("单位名称不能为空");
+
+            Unit unit = iUnitMapper.selectByPrimaryKey(unitId);
+            if (unit == null)
+                return ServerResponse.createByErrorMessage("不存在此单位,修改失败");
+
+            if (!unit.getName().equals(unitName))//如果修改了名称 就判断，修改的名字 是否已经存在
+            {
+                if (iUnitMapper.getUnitByName(unitName).size() > 0)
+                    return ServerResponse.createByErrorMessage("单位名称已存在");
             }
-            Unit unit = new Unit();
-            unit.setId(unitId);
+//            unit.setId(unitId);
             unit.setName(unitName);
+            if (!StringUtils.isNotBlank(linkUnitIdArr))
+                unit.setLinkUnitIdArr(unit.getId());//包括本身  如果为null ，就只关联 自己本身
+            else
+                unit.setLinkUnitIdArr(unit.getId() + "," + linkUnitIdArr);//包括本身
             unit.setModifyDate(new Date());
             iUnitMapper.updateByPrimaryKeySelective(unit);
             return ServerResponse.createBySuccessMessage("修改成功");

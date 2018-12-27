@@ -3,7 +3,6 @@ package com.dangjia.acg.dto.deliver;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -13,14 +12,7 @@ import java.util.List;
  */
 @Data
 public class OrderItemDTO {
-    private String orderId;//订单id  订单号
-    private String houseName;//
-    private Date createDate;// 创建日期
-
-    private BigDecimal totalPrice;//该订单总价
-    private BigDecimal discountsPrice;//优惠钱
-    private BigDecimal payPrice;//实付
-    private Double carriage;//运费
-
+    private String orderId;//流水号
+    private BigDecimal totalAmount;//该订单总价
     private List<ItemDTO> itemDTOList;
 }

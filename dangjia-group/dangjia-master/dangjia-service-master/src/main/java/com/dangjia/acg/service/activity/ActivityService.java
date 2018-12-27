@@ -80,7 +80,13 @@ public class ActivityService {
     }
 
     public ServerResponse getActivity(HttpServletRequest request, ActivityDTO activityDTO) {
+
         Activity activity = activityMapper.selectByPrimaryKey(activityDTO.getId());
+        if(!CommonUtil.isEmpty(request.getParameter("isCheck"))){
+            if(activity.getDeleteState()==1||activity.getEndDate().getTime() < new Date().getTime()){
+                return ServerResponse.createByErrorMessage("活动已结束！");
+            }
+        }
         BeanUtils.beanToBean(activity,activityDTO);
         Example example = new Example(ActivityDiscount.class);
         example.createCriteria().andEqualTo(ActivityDiscount.ACTIVITY_ID,activity.getId());

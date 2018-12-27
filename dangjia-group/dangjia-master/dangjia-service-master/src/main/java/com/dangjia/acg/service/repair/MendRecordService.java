@@ -46,10 +46,10 @@ public class MendRecordService {
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
             mendOrderDetail.setNumber(mendOrder.getNumber());
             mendOrderDetail.setType(mendOrder.getType());
-            mendOrderDetail.setMaterialOrderState(mendOrder.getMaterialOrderState()==null?0:mendOrder.getMaterialOrderState());
-            mendOrderDetail.setWorkerOrderState(mendOrder.getWorkerOrderState()==null?0:mendOrder.getWorkerOrderState());
-            mendOrderDetail.setMaterialBackState(mendOrder.getMaterialBackState()==null?0:mendOrder.getMaterialBackState());
-            mendOrderDetail.setWorkerBackState(mendOrder.getWorkerBackState()==null?0:mendOrder.getWorkerBackState());
+            mendOrderDetail.setMaterialOrderState(mendOrder.getMaterialOrderState());
+            mendOrderDetail.setWorkerOrderState(mendOrder.getWorkerOrderState());
+            mendOrderDetail.setMaterialBackState(mendOrder.getMaterialBackState());
+            mendOrderDetail.setWorkerBackState(mendOrder.getWorkerBackState());
             mendOrderDetail.setTotalAmount(mendOrder.getTotalAmount());
             mendOrderDetail.setCreateDate(mendOrder.getCreateDate());
             mendOrderDetail.setModifyDate(mendOrder.getModifyDate());
@@ -133,7 +133,8 @@ public class MendRecordService {
             List<Map<String,Object>> returnMap = new ArrayList<>();
 
             Example example = new Example(MendOrder.class);
-            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,0);
+            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,0)
+            .andNotEqualTo(MendOrder.MATERIAL_ORDER_STATE,0);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if(mendOrderList.size() > 0){
                 Map<String,Object> map = new HashMap<>();
@@ -145,7 +146,8 @@ public class MendRecordService {
                 returnMap.add(map);
             }
             example = new Example(MendOrder.class);
-            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,1);
+            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,1)
+                    .andNotEqualTo(MendOrder.WORKER_ORDER_STATE,0);
             mendOrderList = mendOrderMapper.selectByExample(example);
             if(mendOrderList.size() > 0){
                 Map<String,Object> map = new HashMap<>();
@@ -157,7 +159,8 @@ public class MendRecordService {
                 returnMap.add(map);
             }
             example = new Example(MendOrder.class);
-            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,2);
+            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,2)
+                    .andNotEqualTo(MendOrder.MATERIAL_BACK_STATE,0);
             mendOrderList = mendOrderMapper.selectByExample(example);
             if(mendOrderList.size() > 0){
                 Map<String,Object> map = new HashMap<>();
@@ -169,7 +172,8 @@ public class MendRecordService {
                 returnMap.add(map);
             }
             example = new Example(MendOrder.class);
-            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,3);
+            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,3)
+                    .andNotEqualTo(MendOrder.WORKER_BACK_STATE,0);
             mendOrderList = mendOrderMapper.selectByExample(example);
             if(mendOrderList.size() > 0){
                 Map<String,Object> map = new HashMap<>();

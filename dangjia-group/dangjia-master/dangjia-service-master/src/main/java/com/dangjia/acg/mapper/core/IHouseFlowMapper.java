@@ -15,6 +15,9 @@ import java.util.List;
  */
 @Repository
 public interface IHouseFlowMapper extends Mapper<HouseFlow> {
+    HouseFlow getByWorkerTypeId(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
+    /**根据houseId查询已进场未完工工序*/
+    List<HouseFlow> unfinishedFlow(@Param("houseId")String houseId);
     /**查询houseFlowId*/
     String selectHouseFlowId(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
 

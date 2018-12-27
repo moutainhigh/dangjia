@@ -74,7 +74,7 @@ public class WorkerService {
             List<Map<String, Object>> listMap = new ArrayList<Map<String, Object>>();//返回通讯录list
             if (worker != null) {
                 if (worker.getWorkerType() == 3) {//大管家
-                    List<HouseWorker> listHouseWorker = houseWorkerMapper.getWorktype6ByHouseid(houseId);
+                    List<HouseWorker> listHouseWorker = houseWorkerMapper.paidListByHouseId(houseId);
                     for (HouseWorker houseWorker : listHouseWorker) {
                         Map<String, Object> map = new HashMap<String, Object>();
                         Member worker2 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
@@ -84,6 +84,7 @@ public class WorkerService {
                         map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(worker2.getWorkerTypeId()).getName());
                         map.put("workerName", worker2.getName());
                         map.put("workerPhone", worker2.getMobile());
+                        map.put("workerId", worker2.getId());
                         listMap.add(map);
                     }
                 } else {//普通工匠
@@ -93,11 +94,13 @@ public class WorkerService {
                     map.put("workerTypeName", "大管家");
                     map.put("workerName", worker2.getName());//大管家
                     map.put("workerPhone", worker2.getMobile());
+                    map.put("workerId", worker2.getId());
                     Member member = memberMapper.selectByPrimaryKey(house.getMemberId());//房主
                     Map<String, Object> map2 = new HashMap<String, Object>();
                     map2.put("workerTypeName", "业主");
                     map2.put("workerName", member.getNickName() == null ? member.getName() : member.getNickName());
                     map2.put("workerPhone", member.getMobile());
+                    map2.put("workerId", member.getId());
                     listMap.add(map);
                     listMap.add(map2);
                 }

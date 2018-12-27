@@ -30,8 +30,17 @@ public class OrderController implements OrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse orderList(String userToken){
-        return orderService.orderList(userToken);
+    public ServerResponse orderList(String businessOrderId){
+        return orderService.orderList(businessOrderId);
+    }
+
+    /**
+     * 业务订单列表
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse businessOrderList(String userToken){
+        return orderService.businessOrderList(userToken);
     }
 
     /**

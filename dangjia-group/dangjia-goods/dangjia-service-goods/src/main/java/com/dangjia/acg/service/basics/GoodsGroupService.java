@@ -195,7 +195,7 @@ public class GoodsGroupService {
                 map.put("state", goodsGroup.getState());
                 map.put("createDate", goodsGroup.getCreateDate().getTime());
                 map.put("modifyDate", goodsGroup.getModifyDate().getTime());
-                List<GroupLink> mapList = iGoodsGroupMapper.queryGroupLinkByGid(goodsGroup.getId());
+                List<Map<String, Object>> mapList = iGoodsGroupMapper.queryMapGroupLinkByGid(goodsGroup.getId());
                 obj.put("goodsGroup", map);
                 obj.put("mapList", mapList);
                 list.add(obj);
@@ -220,7 +220,6 @@ public class GoodsGroupService {
      */
     public ServerResponse queryGoodsGroupListByCategoryLikeName(PageDTO pageDTO, String categoryId, String name) {
         try {
-            LOG.info("queryGoodsGroupListByCategoryLikeName type :");
             if (pageDTO.getPageNum() == null) {
                 pageDTO.setPageNum(1);
             }

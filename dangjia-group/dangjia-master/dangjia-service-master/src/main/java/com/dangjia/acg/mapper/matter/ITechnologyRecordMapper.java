@@ -18,5 +18,8 @@ public interface ITechnologyRecordMapper extends Mapper<TechnologyRecord> {
 
     /**已验收*/
     List<TechnologyRecord> allChecked(@Param("houseFlowId")String houseFlowId);
+
+    /**未验收*/
+    List<TechnologyRecord> allNotChecked(@Param("houseFlowId")String houseFlowId);
 }
 

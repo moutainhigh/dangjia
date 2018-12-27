@@ -47,6 +47,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             modify_date as modifyDate
     </sql>
 
+    <!--根据houseId和工种类型id-->
+    <select id="getByWorkerTypeId" resultType="com.dangjia.acg.modle.core.HouseFlow">
+        select
+        <include refid="new_columns" />
+        from dj_core_house_flow
+        where  house_id=#{houseId}
+        and worker_type_id =#{workerTypeId}
+    </select>
+
+    <!--根据houseId查询已进场未完工工序-->
+    <select id="unfinishedFlow" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlow">
+        select
+            <include refid="new_columns" />
+        from dj_core_house_flow
+        where house_id=#{houseId}
+        and state = 0
+        and work_type = 4
+        and work_steta != 2
+        order by sort asc
+    </select>
+
     <!--根据工种id,houseId查询houseFlowId -->
     <select id="selectHouseFlowId" parameterType="java.lang.String" resultType="java.lang.String">
         select

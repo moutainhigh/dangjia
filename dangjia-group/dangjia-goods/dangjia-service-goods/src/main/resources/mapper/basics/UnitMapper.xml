@@ -2,12 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.dangjia.acg.mapper.basics.IUnitMapper">
     <sql id="Base_Column_List">
-    id, name, create_date, modify_date
+    id, name, link_unit_id_arr as linkUnitIdArr,create_date, modify_date
   </sql>
 
     <select id="getUnit" resultType="com.dangjia.acg.modle.brand.Unit">
         SELECT
-           id, name, create_date as createDate, modify_date as modifyDate
+           id, name,link_unit_id_arr as linkUnitIdArr, create_date as createDate, modify_date as modifyDate
         from dj_basics_unit
         ORDER BY create_date desc
     </select>
@@ -15,7 +15,7 @@
     <!-- 根据单位名称查询 -->
     <select id="getUnitByName" parameterType="String" resultType="com.dangjia.acg.modle.brand.Unit">
 		SELECT
-			id, name, create_date as createDate, modify_date as modifyDate
+			id, name,link_unit_id_arr as linkUnitIdArr, create_date as createDate, modify_date as modifyDate
 		FROM dj_basics_unit WHERE name=#{name}
 		ORDER BY create_date desc
 	</select>

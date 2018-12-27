@@ -3,55 +3,35 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.core.IHouseWorkerMapper">
-    <sql id="basic_columns">
+
+    <sql id="all_columns">
         id,
-        house_id,
-        worker_id,
-        worker_type_id,
-        worker_type,
-        evaluate_steta,
-        work_steta,
-        work_type,
-        house_flow_id,
-        house_worker_order_id,
-        apply,
-        has_evaluate,
-        is_select,
-        create_date,
-        modify_date
-    </sql>
-    <sql id="new_columns">
-       id,
         house_id as houseId,
         worker_id as workerId,
+        house_flow_id as houseFlowId,
         worker_type_id as workerTypeId,
         worker_type as workerType,
-        evaluate_steta as evaluateSteta,
-        work_steta as workSteta,
-        work_type as workType,
-        house_flow_id as houseFlowId,
         house_worker_order_id as houseWorkerOrderId,
-        apply,
-        has_evaluate as hasEvaluate,
+        work_type as workType,
+        work_steta as workSteta,
         is_select as isSelect,
+        data_status as dataStatus,
         create_date as createDate,
         modify_date as modifyDate
     </sql>
+
     <!-- 根据工人id查询所有房子任务-->
     <select id="queryWorkerHouse" resultType="com.dangjia.acg.dto.core.HouseWorkerDTO">
         SELECT
         hw.id,
         hw.house_id as houseId,
         hw.worker_id as workerId,
+        hw.house_flow_id as houseFlowId,
         hw.worker_type_id as workerTypeId,
         hw.worker_type as workerType,
-        hw.evaluate_steta as evaluateSteta,
-        hw.work_steta as workSteta,
-        hw.work_type as workType,
-        hw.house_flow_id as houseFlowId,
         hw.house_worker_order_id as houseWorkerOrderId,
-        hw.apply,
-        hw.has_evaluate as hasEvaluate,
+        hw.work_type as workType,
+        hw.work_steta as workSteta,
         hw.is_select as isSelect,
         hw.create_date as createDate,
         hw.modify_date as modifyDate,
@@ -63,10 +43,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and hw.work_type not in(7,2,3)
         GROUP BY hw.house_id
     </select>
+
     <!-- 根据工人id查询未完工任务-->
     <select id="grabControl" resultType="com.dangjia.acg.modle.core.HouseWorker">
         SELECT
-        <include refid="new_columns" />
+        <include refid="all_columns" />
         from
             dj_core_house_worker
         where
@@ -74,10 +55,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and
             worker_type &gt;3 and (work_type=1 or (work_type =6 and work_steta &lt;1))
     </select>
+
     <!-- 查询当天是否抢单-->
     <select id="grabOneDayOneTime" resultType="com.dangjia.acg.modle.core.HouseWorker">
         SELECT
-        <include refid="new_columns" />
+        <include refid="all_columns" />
         from
             dj_core_house_worker
         where
@@ -85,6 +67,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and worker_id = #{workerId}
         and TO_DAYS(NOW( )) - TO_DAYS(create_date) &lt;1
      </select>
+
     <!--根据工匠id将所有houseWorker选中状态改为0未选中 -->
     <update id="doModifyAllByWorkerId" parameterType="java.lang.String">
 		update dj_core_house_worker
@@ -94,10 +77,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		where
 		   worker_id =#{workerId}
 	</update>
+
     <!--根据工人id查询已支付未完工并默认的施工任务 -->
     <select id="getDetailHouseWorker" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseWorker">
        SELECT
-        <include refid="new_columns" />
+        <include refid="all_columns" />
         from dj_core_house_worker
         where worker_id = #{workerId}
         and work_steta in(0,1,3)
@@ -105,26 +89,29 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and is_select=1
 		order by modify_date desc
     </select>
+
     <!--根据工人id查出未整体完工的订单 -->
     <select id="getAllHouseWorker" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseWorker">
        SELECT
-        <include refid="new_columns" />
+        <include refid="all_columns" />
         from dj_core_house_worker
         where worker_id = #{workerId}
         and work_steta in(0,1,3)
         and work_type in(1,6)
 		order by modify_date desc
     </select>
+
     <!--根据房子id和工匠type查询houseWorker -->
     <select id="getHwByHidAndWtype"  resultType="com.dangjia.acg.modle.core.HouseWorker">
         select
-        <include refid="new_columns" />
+        <include refid="all_columns" />
         from dj_core_house_worker
         where house_id = #{houseId}
         and worker_type = #{workerType}
         and work_type=6
         ORDER BY create_date DESC LIMIT 1
     </select>
+
     <!--根据工人id查询统计已完成的任务单数-->
     <select id="getCountOrderByWorkerId"  resultType="java.lang.Long">
         select count(*)
@@ -134,9 +121,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and work_type=6
 		order by modify_date desc
     </select>
-    <!--根据houseId 找出已支付已采纳的任务-->
-    <select id="getWorktype6ByHouseid"  resultType="com.dangjia.acg.modle.core.HouseWorker">
-        select  <include refid="new_columns" />
+
+    <!--house已支付已采纳的普通工匠-->
+    <select id="paidListByHouseId"  resultType="com.dangjia.acg.modle.core.HouseWorker">
+        select  <include refid="all_columns" />
         from dj_core_house_worker
         where house_id = #{houseId}
         and worker_type not in(1,2,3)

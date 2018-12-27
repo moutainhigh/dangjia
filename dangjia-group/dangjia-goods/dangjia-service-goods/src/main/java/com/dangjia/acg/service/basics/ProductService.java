@@ -368,7 +368,7 @@ public class ProductService {
      * @return
      */
     public ServerResponse updateProductLabel(String id,String labelId) {
-        Label oldLabel = iLabelMapper.getLabelByName(labelId);
+        Label oldLabel = iLabelMapper.selectByPrimaryKey(labelId);
         Product pt = iProductMapper.getById(id);
         if (oldLabel == null)
             return ServerResponse.createBySuccessMessage("标签不存在");
@@ -406,7 +406,7 @@ public class ProductService {
         JSONArray productLabelLists = JSONArray.parseArray(productLabelList);
         for (int i = 0; i < productLabelLists.size(); i++) {
             JSONObject productLabel = productLabelLists.getJSONObject(i);
-            Label oldLabel = iLabelMapper.getLabelByName(productLabel.getString("labelId"));
+            Label oldLabel = iLabelMapper.selectByPrimaryKey(productLabel.getString("labelId"));
             Product pt = iProductMapper.getById(productLabel.getString("id"));
             if (oldLabel == null)
                 return ServerResponse.createBySuccessMessage("标签不存在");

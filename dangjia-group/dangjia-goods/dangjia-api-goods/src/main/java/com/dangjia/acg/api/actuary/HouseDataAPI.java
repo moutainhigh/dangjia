@@ -5,8 +5,11 @@ import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * author: Ronalcheng
@@ -42,4 +45,9 @@ public interface HouseDataAPI {
     @ApiOperation(value = "查询工序材料", notes = "查询工序材料")
     ServerResponse getBudgetMaterial(@RequestParam("cityId")String cityId,@RequestParam("houseId")String houseId,
                                      @RequestParam("workerTypeId")String workerTypeId,@RequestParam("pageDTO") PageDTO pageDTO);
+
+    @GetMapping("/actuary/houseData/export/actuary/exportActuaryTotal")
+    @ApiOperation(value = "导出精算汇总表", notes = "导出精算汇总表", produces = "*/*,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream")
+    ServerResponse exportActuaryTotal(@RequestParam("response")HttpServletResponse response,@RequestParam("houseId")String houseId);
+
 }

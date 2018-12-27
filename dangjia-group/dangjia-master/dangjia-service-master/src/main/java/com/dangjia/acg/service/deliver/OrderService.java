@@ -7,6 +7,7 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.deliver.BusinessOrderDTO;
 import com.dangjia.acg.dto.deliver.ItemDTO;
 import com.dangjia.acg.dto.deliver.OrderDTO;
 import com.dangjia.acg.dto.deliver.OrderItemDTO;
@@ -42,7 +43,6 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,15 +90,9 @@ public class OrderService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             Order order = orderMapper.selectByPrimaryKey(orderId);
             House house = houseMapper.selectByPrimaryKey(order.getHouseId());
-            BusinessOrder businessOrder = businessOrderMapper.byNumber(order.getBusinessOrderNumber());
             OrderItemDTO orderItemDTO = new OrderItemDTO();
             orderItemDTO.setOrderId(order.getId());
-            orderItemDTO.setHouseName(house.getHouseName());
-            orderItemDTO.setCreateDate(order.getCreateDate());
-            orderItemDTO.setTotalPrice(businessOrder.getTotalPrice());
-            orderItemDTO.setDiscountsPrice(businessOrder.getDiscountsPrice() == null ? new BigDecimal(0) :businessOrder.getDiscountsPrice());
-            orderItemDTO.setPayPrice(businessOrder.getPayPrice());
-            orderItemDTO.setCarriage(0.0);
+            orderItemDTO.setTotalAmount(order.getTotalAmount());
 
             List<ItemDTO> itemDTOList = new ArrayList<>();
             if(order.getWorkerTypeId().equals("1")){//设计
@@ -155,51 +149,99 @@ public class OrderService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
     /**
-     * 所有订单
+     * 订单详情
      */
-    public ServerResponse orderList(String userToken){
+    public ServerResponse orderList(String businessOrderId){
         try{
-            AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-            Member member = accessToken.getMember();
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            BusinessOrder businessOrder = businessOrderMapper.selectByPrimaryKey(businessOrderId);
+            House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+            BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
+            businessOrderDTO.setHouseName(house.getHouseName());
+            businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
+            businessOrderDTO.setNumber(businessOrder.getNumber());
+            List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(),house.getStyle());
+            businessOrderDTO.setOrderDTOList(orderDTOList);
+            businessOrderDTO.setTotalPrice(businessOrder.getTotalPrice());
+            businessOrderDTO.setDiscountsPrice(businessOrder.getDiscountsPrice());
+            businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
+            businessOrderDTO.setCarriage(0.0);//运费
 
-            Example example = new Example(House.class);
-            example.createCriteria().andEqualTo(House.MEMBER_ID, member.getId()).andEqualTo(House.VISIT_STATE,1);
-            List<House> houseList = houseMapper.selectByExample(example);
-            List<OrderDTO> orderDTOList = new ArrayList<>();
-            for (House house : houseList){
-                List<Order> orderList =  orderMapper.orderList(house.getId());
-                for (Order order : orderList){
-                    OrderDTO orderDTO = new OrderDTO();
-                    orderDTO.setOrderId(order.getId());
-                    orderDTO.setHouseName(house.getHouseName());
-                    orderDTO.setCreateDate(order.getCreateDate());
-                    orderDTO.setTotalAmount(order.getTotalAmount());
-                    if(order.getWorkerTypeId().equals("1")){//设计
-                        orderDTO.setName(house.getStyle());
-                        orderDTO.setImage(address + "icon/shejiF.png");
-                    }else if (order.getWorkerTypeId().equals("2")){
-                        orderDTO.setName("当家精算");
-                        orderDTO.setImage(address + "icon/jingsuanF.png");
-                    }else {
-                        List<OrderItem> orderItemList = orderItemMapper.byOrderIdList(order.getId());
-                        orderDTO.setImage(address + orderItemList.get(0).getImage());
-                        if (order.getType() == 1){//人工
-                            orderDTO.setName(orderItemList.get(0).getWorkerGoodsName());
-                        }else if(order.getType() == 2){//材料
-                            orderDTO.setName(orderItemList.get(0).getProductName());
-                        }
-                    }
-                    orderDTOList.add(orderDTO);
-                }
-            }
-
-            return ServerResponse.createBySuccess("查询成功", orderDTOList);
+            return ServerResponse.createBySuccess("查询成功", businessOrderDTO);
         }catch (Exception e){
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+
+    /**
+     * 业务订单列表
+     */
+    public ServerResponse businessOrderList(String userToken){
+        try{
+            AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+            Member member = accessToken.getMember();
+            List<BusinessOrder> businessOrderList = businessOrderMapper.byMemberId(member.getId());
+            List<BusinessOrderDTO> businessOrderDTOS = new ArrayList<>();
+            for (BusinessOrder businessOrder : businessOrderList){
+                House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+                BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
+                businessOrderDTO.setBusinessOrderId(businessOrder.getId());
+                businessOrderDTO.setHouseName(house.getHouseName());
+                businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
+                businessOrderDTO.setNumber(businessOrder.getNumber());
+                List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(),house.getStyle());
+                businessOrderDTO.setOrderDTOList(orderDTOList);
+                businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
+                businessOrderDTOS.add(businessOrderDTO);
+            }
+
+            return ServerResponse.createBySuccess("查询成功",businessOrderDTOS);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+    /*订单流水*/
+    private List<OrderDTO> orderDTOList(String businessOrderNumber,String style){
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        List<OrderDTO> orderDTOList = new ArrayList<>();
+        List<Order> orderList = orderMapper.byBusinessOrderNumber(businessOrderNumber);
+        for (Order order : orderList){
+            OrderDTO orderDTO = new OrderDTO();
+            orderDTO.setOrderId(order.getId());
+            orderDTO.setTotalAmount(order.getTotalAmount());
+            orderDTO.setWorkerTypeName(order.getWorkerTypeName());
+            if (StringUtil.isEmpty(order.getWorkerTypeId())){
+                if(order.getType() == 2){//材料
+                    orderDTO.setImage(address + "icon/bucailiao.png");
+                    orderDTO.setName("补材料商品");
+                }else {
+                    orderDTO.setImage(address + "icon/burengong.png");
+                    orderDTO.setName("人工商品");
+                }
+            }else if(order.getWorkerTypeId().equals("1")){//设计
+                orderDTO.setName(style);
+                orderDTO.setImage(address + "icon/shejiF.png");
+            }else if (order.getWorkerTypeId().equals("2")){
+                orderDTO.setName("当家精算");
+                orderDTO.setImage(address + "icon/jingsuanF.png");
+            }else {
+                List<OrderItem> orderItemList = orderItemMapper.byOrderIdList(order.getId());
+                if(orderItemList.size() > 0){
+                    if (order.getType() == 1){//人工
+                        orderDTO.setImage(address + "icon/Arengong.png");
+                        orderDTO.setName("人工类商品");
+                    }else if(order.getType() == 2){//材料
+                        orderDTO.setImage(address + "icon/Acailiao.png");
+                        orderDTO.setName("材料类商品");
+                    }
+                }
+            }
+            orderDTOList.add(orderDTO);
+        }
+        return orderDTOList;
     }
 
     /**

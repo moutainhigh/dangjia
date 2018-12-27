@@ -81,11 +81,6 @@ public class HouseFlowApply extends BaseEntity {
 	@ApiModelProperty("大管家审核结果,0未审核，1审核通过，2审核不通过")
 	private Integer supervisorCheck;//supervisorcheck
 
-	@Column(name = "work_evaluat")
-	@Desc(value = "大管家对工人的评价，0未评价，1已评价")
-	@ApiModelProperty("大管家对工人的评价，0未评价，1已评价")
-	private Integer workEvaluat; //workevaluat
-
 	@Column(name = "apply_money")
 	@Desc(value = "申请得到的钱")
 	@ApiModelProperty("申请得到的钱")

@@ -400,9 +400,6 @@ public class GoodsService {
                 {
                     List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
                     for (Product p : productList) {
-                        LOG.info("p :" + p);
-                        LOG.info("p name :" + p.getName());
-                        LOG.info("p getType :" + p.getType());
                         //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
                         if (type != p.getType() && -1 != type) //不等于 type 的不返回给前端
                             continue;
@@ -460,7 +457,7 @@ public class GoodsService {
      */
     public ServerResponse queryProductListByGoodsIdAndLabelId(String goodsArr, String srcLabelId) {
         try {
-            LOG.info("queryProductListByGoodsIdAndLabelId goodsArr::" + goodsArr + " id:" + srcLabelId);
+//            LOG.info("queryProductListByGoodsIdAndLabelId goodsArr::" + goodsArr + " id:" + srcLabelId);
 //            List<String> goodsList = Arrays.asList(goodsArr);
             String[] goodsList = goodsArr.split(",");
             if (!StringUtils.isNotBlank(srcLabelId))

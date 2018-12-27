@@ -12,5 +12,5 @@ public interface ILabelMapper extends Mapper<Label> {
     /**c查找所有的单位*/
     List<Label> getLabel();
     /**根据拿到的name拿到单位对象*/
-    Label getLabelByName(String name);
+    List<Label> getLabelByName(String name);
 }

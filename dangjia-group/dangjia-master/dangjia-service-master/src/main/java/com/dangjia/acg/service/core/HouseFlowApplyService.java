@@ -108,13 +108,15 @@ public class HouseFlowApplyService {
             HouseWorker gjhouseWorker = houseWorkerMapper.getHwByHidAndWtype(houseId, 3);
             Member worker2 = memberMapper.selectByPrimaryKey(gjhouseWorker.getWorkerId());//根据工匠id查询工匠信息详情
             PageHelper.startPage(pageNum, pageSize);
-            List<HouseWorker> listHouseWorker = houseWorkerMapper.getWorktype6ByHouseid(houseId);
+            List<HouseWorker> listHouseWorker = houseWorkerMapper.paidListByHouseId(houseId);
             for(HouseWorker houseWorker : listHouseWorker){
                 Member member=memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
                 HouseFlowApplyDTO houseFlowApplyDTO = new HouseFlowApplyDTO();
                 houseFlowApplyDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(houseWorker.getWorkerTypeId()).getName());
                 houseFlowApplyDTO.setNameA(member.getName());
                 houseFlowApplyDTO.setMobileB(member.getMobile());
+                houseFlowApplyDTO.setWorkerId(houseWorker.getWorkerId());
+                houseFlowApplyDTO.setManagerId(member.getId());
                 Example example = new Example(HouseFlowApply.class);
                 example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID,houseId).andEqualTo(HouseFlowApply.WORKER_ID,member.getId());
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
@@ -153,7 +155,7 @@ public class HouseFlowApplyService {
 
             if(hfa.getApplyType() == 2){//整体完工
                 /**验证未处理补人工订单*/
-                Example example = new Example(MendOrder.class);
+               /* Example example = new Example(MendOrder.class);
                 example.createCriteria()
                         .andEqualTo(MendOrder.HOUSE_ID, hfa.getHouseId())
                         .andEqualTo(MendOrder.TYPE, 1).andEqualTo(MendOrder.WORKER_TYPE_ID,hfa.getWorkerTypeId());//补人工
@@ -164,9 +166,18 @@ public class HouseFlowApplyService {
                 List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
                 if(mendOrderList.size() > 0){
                     return ServerResponse.createByErrorMessage("该工种有未处理补人");
+                }*/
+                List<MendOrder> mendOrderList = mendOrderMapper.untreatedWorker(hfa.getHouseId());
+                if (mendOrderList.size() > 0) {
+                    return ServerResponse.createByErrorMessage("有未处理补人工单");
                 }
+                mendOrderList = mendOrderMapper.backWorker(hfa.getHouseId());
+                if(mendOrderList.size() > 0){
+                    return ServerResponse.createByErrorMessage("有未处理退人工单");
+                }
+
                 /**结算补人工钱,生成流水*/
-                this.settleMendOrker(hfa,hwo);
+                this.settleMendWorker(hfa,hwo);
 
                 //修改进程
                 HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(hwo.getHouseWorkerId());
@@ -207,6 +218,15 @@ public class HouseFlowApplyService {
                 }
 
             }else if(hfa.getApplyType() == 1){//阶段完工
+                List<MendOrder> mendOrderList = mendOrderMapper.untreatedWorker(hfa.getHouseId());
+                if (mendOrderList.size() > 0) {
+                    return ServerResponse.createByErrorMessage("有未处理补人工单");
+                }
+                mendOrderList = mendOrderMapper.backWorker(hfa.getHouseId());
+                if(mendOrderList.size() > 0){
+                    return ServerResponse.createByErrorMessage("有未处理退人工单");
+                }
+
                 //修改进程
                 HouseWorker hw = houseWorkerMapper.selectByPrimaryKey(hwo.getHouseWorkerId());
                 hw.setWorkSteta(1);
@@ -286,7 +306,7 @@ public class HouseFlowApplyService {
     }
 
     /**结算补人工钱,生成流水*/
-    private void settleMendOrker(HouseFlowApply hfa,HouseWorkerOrder hwo){
+    private void settleMendWorker(HouseFlowApply hfa,HouseWorkerOrder hwo){
         Example example = new Example(MendOrder.class);
         example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, hfa.getHouseId()).andEqualTo(MendOrder.TYPE, 1)//补人工
                 .orEqualTo(MendOrder.WORKER_TYPE_ID,hfa.getWorkerTypeId()).orEqualTo(MendOrder.WORKER_ORDER_STATE, 6);
@@ -787,6 +807,8 @@ public class HouseFlowApplyService {
             HouseFlow houseFlow = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);
             Member steward = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());//管家
 
+            houseFlowApplyDTO.setWorkerId(worker.getId());
+            houseFlowApplyDTO.setManagerId(steward.getId());
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
             houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());
             houseFlowApplyDTO.setHeadA(local+worker.getHead());

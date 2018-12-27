@@ -109,12 +109,12 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	 @SuppressWarnings("static-access")
 	 @Override
 	 @ApiMethod
-	 public ServerResponse makeBudgets(HttpServletRequest request,String houseId,String workerTypeId,String listOfGoods){
+	 public ServerResponse makeBudgets(HttpServletRequest request,String actuarialTemplateId,String houseId,String workerTypeId,String listOfGoods){
 		 ServerResponse serverResponse = getForBudgetAPI.actuarialForBudget(houseId, workerTypeId);
 		 if(serverResponse.isSuccess()){
 			 JSONObject obj=JSONObject.parseObject(serverResponse.getResultObj().toString());
 			 String houseFlowId=obj.getString("houseFlowId");
-			 return budgetWorkerService.makeBudgets(houseFlowId, houseId, workerTypeId, listOfGoods);
+			 return budgetWorkerService.makeBudgets(actuarialTemplateId,houseFlowId, houseId, workerTypeId, listOfGoods);
 		 }else{
 			 return ServerResponse.createByErrorMessage("新增人工精算失败。原因:查询houseFlow失败！");
 		 }

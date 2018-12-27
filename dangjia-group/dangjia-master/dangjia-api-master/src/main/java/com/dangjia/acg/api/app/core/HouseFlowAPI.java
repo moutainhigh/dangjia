@@ -47,8 +47,4 @@ public interface HouseFlowAPI {
     @ApiOperation(value = "根据houseId和工种类型查询HouseFlow", notes = "根据houseId和工种类型查询HouseFlow")
     HouseFlow getHouseFlowByHidAndWty(@RequestParam("houseId") String houseId, @RequestParam("workerType") Integer workerType);
 
-    @PostMapping("app/core/houseFlow/getCheckTechnologyList")
-    @ApiOperation(value = "根据houseFlowId查询验收节点", notes = "根据houseFlowId查询验收节点")
-    ServerResponse getCheckTechnologyList(@RequestParam("houseFlowId") String houseFlowId, @RequestParam("applyType") Integer applyType);
-
 }

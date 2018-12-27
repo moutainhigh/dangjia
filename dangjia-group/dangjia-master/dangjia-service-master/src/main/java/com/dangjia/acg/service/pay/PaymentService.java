@@ -270,6 +270,7 @@ public class PaymentService {
                     if(flag){//累计数量
                         Warehouse warehouse = warehouseMapper.selectByPrimaryKey(warehouseId);
                         warehouse.setShopCount(warehouse.getShopCount() + mendMateriel.getShopCount());//数量
+                        warehouse.setRepairCount(warehouse.getRepairCount() + mendMateriel.getShopCount());
                         warehouse.setPrice(mendMateriel.getPrice());
                         warehouse.setCost(mendMateriel.getCost());
                         warehouse.setImage(mendMateriel.getImage());
@@ -279,6 +280,9 @@ public class PaymentService {
                         Warehouse warehouse = new Warehouse();
                         warehouse.setHouseId(businessOrder.getHouseId());
                         warehouse.setShopCount(mendMateriel.getShopCount());
+                        warehouse.setRepairCount(mendMateriel.getShopCount());
+                        warehouse.setStayCount(0.0);
+                        warehouse.setRobCount(0.0);
                         warehouse.setAskCount(0.0);//已要数量
                         warehouse.setBackCount(0.0);//退总数
                         warehouse.setProductId(mendMateriel.getProductId());
@@ -318,6 +322,7 @@ public class PaymentService {
                 example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, businessOrder.getHouseId()).andEqualTo(MendOrder.TYPE,1)
                         .andEqualTo(MendOrder.WORKER_ORDER_STATE, 6);
                 order.setWorkerTypeName("大管家补人工" + "00" + (mendOrderMapper.selectCountByExample(example) + 1));
+                order.setWorkerTypeId(mendOrder.getWorkerTypeId());//补人工记录工种
                 order.setPayment(payState);// 支付方式
                 order.setType(1);//人工
                 orderMapper.insert(order);
@@ -453,7 +458,7 @@ public class PaymentService {
                 order.setPayment(payState);// 支付方式
                 orderMapper.insert(order);
 
-                this.addWarehouse(budgetMaterialList, businessOrder.getHouseId(), order.getId());
+                this.addWarehouse(budgetMaterialList, businessOrder.getHouseId(), order.getId(),2);
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -463,33 +468,35 @@ public class PaymentService {
     /**处理精算人工生成人工订单*/
     private void renGong(String businessOrderNumber,HouseWorkerOrder hwo,String payState,String houseFlowId){
         try{
-            House house = houseMapper.selectByPrimaryKey(hwo.getHouseId());
-            WorkerType wt = workerTypeMapper.selectByPrimaryKey(hwo.getWorkerTypeId());
-            Order order = new Order();
-            order.setHouseId(house.getId());
-            order.setBusinessOrderNumber(businessOrderNumber);//业务订单
-            order.setTotalAmount(hwo.getWorkPrice());// 订单总额(工钱)
-            order.setWorkerTypeName(wt.getName() + "订单");
-            order.setWorkerTypeId(hwo.getWorkerTypeId());
-            order.setType(1);//人工
-            order.setPayment(payState);// 支付方式
-            orderMapper.insert(order);
-
             //处理人工
             List<BudgetWorker> budgetWorkerList = forMasterAPI.renGong(houseFlowId);
-            for(BudgetWorker budgetWorker : budgetWorkerList){
-                OrderItem orderItem = new OrderItem();
-                orderItem.setOrderId(order.getId());
-                orderItem.setHouseId(hwo.getHouseId());
-                orderItem.setPrice(budgetWorker.getPrice());//销售价
-                orderItem.setShopCount(budgetWorker.getShopCount());//购买总数
-                orderItem.setUnitName(budgetWorker.getUnitName());//单位
-                orderItem.setTotalPrice(budgetWorker.getTotalPrice());//总价
-                orderItem.setWorkerGoodsName(budgetWorker.getName());
-                orderItem.setWorkerGoodsSn(budgetWorker.getWorkerGoodsSn());
-                orderItem.setWorkerGoodsId(budgetWorker.getWorkerGoodsId());
-                orderItem.setImage(budgetWorker.getImage());
-                orderItemMapper.insert(orderItem);
+            if (budgetWorkerList.size() > 0){
+                House house = houseMapper.selectByPrimaryKey(hwo.getHouseId());
+                WorkerType wt = workerTypeMapper.selectByPrimaryKey(hwo.getWorkerTypeId());
+                Order order = new Order();
+                order.setHouseId(house.getId());
+                order.setBusinessOrderNumber(businessOrderNumber);//业务订单
+                order.setTotalAmount(hwo.getWorkPrice());// 订单总额(工钱)
+                order.setWorkerTypeName(wt.getName() + "订单");
+                order.setWorkerTypeId(hwo.getWorkerTypeId());
+                order.setType(1);//人工
+                order.setPayment(payState);// 支付方式
+                orderMapper.insert(order);
+
+                for(BudgetWorker budgetWorker : budgetWorkerList){
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setOrderId(order.getId());
+                    orderItem.setHouseId(hwo.getHouseId());
+                    orderItem.setPrice(budgetWorker.getPrice());//销售价
+                    orderItem.setShopCount(budgetWorker.getShopCount());//购买总数
+                    orderItem.setUnitName(budgetWorker.getUnitName());//单位
+                    orderItem.setTotalPrice(budgetWorker.getTotalPrice());//总价
+                    orderItem.setWorkerGoodsName(budgetWorker.getName());
+                    orderItem.setWorkerGoodsSn(budgetWorker.getWorkerGoodsSn());
+                    orderItem.setWorkerGoodsId(budgetWorker.getWorkerGoodsId());
+                    orderItem.setImage(budgetWorker.getImage());
+                    orderItemMapper.insert(orderItem);
+                }
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -513,14 +520,18 @@ public class PaymentService {
                 order.setPayment(payState);//支付方式
                 orderMapper.insert(order);
 
-                this.addWarehouse(budgetMaterialList, hwo.getHouseId(), order.getId());
+                this.addWarehouse(budgetMaterialList, hwo.getHouseId(), order.getId(),1);
             }
         }catch(Exception e){
             e.printStackTrace();
         }
     }
-    /**生成仓库*/
-    private void addWarehouse(List<BudgetMaterial> budgetMaterialList,String houseId, String orderId){
+    /**
+     * 生成仓库
+     * type 1 工序抢单任务进来的
+     *      2 未购买待付款进来的
+     * */
+    private void addWarehouse(List<BudgetMaterial> budgetMaterialList,String houseId, String orderId, int type){
         WarehouseDetail warehouseDetail = new WarehouseDetail();
         warehouseDetail.setHouseId(houseId);
         warehouseDetail.setRecordType(0);//支付精算
@@ -560,6 +571,11 @@ public class PaymentService {
             if(flag){//累计数量
                 Warehouse warehouse = warehouseMapper.selectByPrimaryKey(warehouseId);
                 warehouse.setShopCount(warehouse.getShopCount() + budgetMaterial.getShopCount());//数量
+                if(type == 1){//抢
+                    warehouse.setRobCount(warehouse.getRobCount() + budgetMaterial.getShopCount());
+                }else if (type == 2){//未 待
+                    warehouse.setStayCount(warehouse.getStayCount() + budgetMaterial.getShopCount());
+                }
                 warehouse.setPrice(budgetMaterial.getPrice());
                 warehouse.setCost(budgetMaterial.getCost());
                 warehouse.setImage(budgetMaterial.getImage());
@@ -569,6 +585,14 @@ public class PaymentService {
                 Warehouse warehouse = new Warehouse();
                 warehouse.setHouseId(houseId);
                 warehouse.setShopCount(budgetMaterial.getShopCount());
+                if (type == 1){
+                    warehouse.setRobCount(budgetMaterial.getShopCount());//抢单任务进来总数
+                    warehouse.setStayCount(0.0);
+                }else {
+                    warehouse.setRobCount(0.0);
+                    warehouse.setStayCount(budgetMaterial.getShopCount());
+                }
+                warehouse.setRepairCount(0.0);
                 warehouse.setAskCount(0.0);//已要数量
                 warehouse.setBackCount(0.0);//退总数
                 warehouse.setProductId(budgetMaterial.getProductId());

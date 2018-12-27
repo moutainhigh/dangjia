@@ -94,26 +94,18 @@ public interface SupplierProductAPI {
     public ServerResponse querySupplierProduct(@RequestParam("request") HttpServletRequest request,@RequestParam("type")int type,
                                                @RequestParam("supplierId")String supplierId,@RequestParam("categoryId")String categoryId,
                                                @RequestParam("pageDTO") PageDTO pageDTO);
-    
+
     /**
      * 保存供应商与货品供应关系
      * @Title: saveSupplierProduct
      * @Description: TODO
      * @param: @param product_id
-     * @param: @param supplier_id
-     * @param: @param attribute_id
-     * @param: @param price
-     * @param: @param stock
-     * @param: @param is_supply
-     * @param: @return   
      * @return: JsonResult   7
      * @throws
      */
     @PostMapping("/sup/supplierProduct/saveSupplierProduct")
     @ApiOperation(value = "保存供应商与货品供应关系", notes = "保存供应商与货品供应关系")
-    public ServerResponse saveSupplierProduct(@RequestParam("request") HttpServletRequest request,@RequestParam("productId") String productId,
-                                              @RequestParam("supplierId")String supplierId,@RequestParam("attributeId")String attributeId,
-                                              @RequestParam("price")Double price,@RequestParam("stock")Double stock,@RequestParam("isSupply")Integer isSupply);
+    public ServerResponse saveSupplierProduct(@RequestParam("arrString")String arrString);
 
     @PostMapping("/sup/supplierProduct/querySupplierProductByPid")
     @ApiOperation(value = "根据货品查询相应供应商", notes = "根据货品查询相应供应商")

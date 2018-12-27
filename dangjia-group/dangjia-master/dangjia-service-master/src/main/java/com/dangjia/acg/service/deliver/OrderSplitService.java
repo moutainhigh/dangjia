@@ -59,10 +59,16 @@ public class OrderSplitService {
      * 供应商发货
      */
     public ServerResponse sentSplitDeliver(String splitDeliverId){
-        SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
-        splitDeliver.setSendTime(new Date());
-        splitDeliver.setShipState(1);//已发待收
-        return ServerResponse.createBySuccessMessage("操作成功");
+        try {
+            SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+            splitDeliver.setSendTime(new Date());
+            splitDeliver.setShipState(1);//已发待收
+            splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
     }
 
     /**

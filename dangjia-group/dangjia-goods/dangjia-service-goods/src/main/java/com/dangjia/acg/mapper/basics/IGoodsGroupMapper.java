@@ -36,6 +36,7 @@ public interface IGoodsGroupMapper extends Mapper<GoodsGroup> {
     //根据关联组id和货品id修改关联关系
 	void updateGroupLink(GroupLink groupLink);
     //根据关联组id查询关联货品关系
+	List<Map<String, Object>> queryMapGroupLinkByGid(String groupId);
 	List<GroupLink> queryGroupLinkByGid(String groupId);
 	//根据关联组id和货品id查询关联关系
 	List<GroupLink> queryGroupLinkByGidAndPid(@Param("groupId")String groupId , @Param("productId")String productId);

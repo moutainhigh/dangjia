@@ -5,6 +5,8 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
+import java.util.List;
+
 /**
  * author: Ronalcheng
  * Date: 2018/11/8 0008
@@ -12,6 +14,8 @@ import tk.mybatis.mapper.common.Mapper;
  */
 @Repository
 public interface IBusinessOrderMapper extends Mapper<BusinessOrder> {
+
+    List<BusinessOrder> byMemberId(@Param("memberId")String memberId);
 
     BusinessOrder byNumber(@Param("number")String number);
 }

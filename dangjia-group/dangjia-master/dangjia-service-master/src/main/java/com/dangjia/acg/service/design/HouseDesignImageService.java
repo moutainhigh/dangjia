@@ -151,9 +151,6 @@ public class HouseDesignImageService {
                     houseWorker.setWorkerType(houseFlow.getWorkerType());
                     houseWorker.setWorkType(1);//已抢单
                     houseWorker.setWorkSteta(0);
-                    houseWorker.setEvaluateSteta(0);
-                    houseWorker.setHasEvaluate(0);
-                    houseWorker.setApply(0);
                     houseWorker.setIsSelect(1);
                     houseWorkerMapper.insert(houseWorker);
                 }

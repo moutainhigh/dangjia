@@ -9,13 +9,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         img.modify_date modifyDate,
         img.house_flow_apply_id houseFlowApplyId,
         img.image_url imageUrl,
-        img.image_sign imageSign,
         img.image_type imageType,
         img.data_status dataStatus,
-        img.image_type_id imageTypeId,
         img.image_type_name imageTypeName
-
     </sql>
+
     <!--根据workerTypeId,workerType,houseId,houseFlowId,imageSign查询管理图片 -->
     <select id="getHouseFlowApplyImageList" resultType="com.dangjia.acg.modle.core.HouseFlowApplyImage">
         select <include refid="new_columns" />

@@ -14,4 +14,5 @@ import java.util.Map;
 public class FlowRecordDTO {
     private List<Map<String, Object>> houseWorkerMap;
     private List<Map<String, Object>> flowApplyMap;
+    private List<Map<String, Object>> nodeMap;//节点
 }

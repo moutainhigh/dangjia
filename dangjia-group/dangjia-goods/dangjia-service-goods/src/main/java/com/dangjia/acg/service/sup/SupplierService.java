@@ -1,15 +1,20 @@
 package com.dangjia.acg.service.sup;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.sup.ISupplierMapper;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.basics.Technology;
+import com.dangjia.acg.modle.basics.WorkerTechnology;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,15 +42,15 @@ public class SupplierService {
     /**
      * 供应商登录
      */
-    public ServerResponse byTelephone(String telephone){
-        try{
+    public ServerResponse byTelephone(String telephone) {
+        try {
             Supplier supplier = iSupplierMapper.byTelephone(telephone);
-            if (supplier == null){
+            if (supplier == null) {
                 return ServerResponse.createByErrorMessage("查询失败");
-            }else {
+            } else {
                 return ServerResponse.createBySuccess("查询成功", supplier.getId());
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -69,12 +74,12 @@ public class SupplierService {
     public ServerResponse insertSupplier(String name, String address, String telephone, String checkPeople, Integer gender,
                                          String email, String notice, Integer supplierLevel, Integer state) {
         try {
-            List<Supplier>  list =  iSupplierMapper.queryByName(name);
-            if(list.size() > 0)
+            List<Supplier> list = iSupplierMapper.queryByName(name);
+            if (list.size() > 0)
                 return ServerResponse.createByErrorMessage("该供应商已存在");
 
-            List<Supplier> telephoneList =  iSupplierMapper.queryByTelephone(telephone);
-            if(telephoneList.size() > 0)
+            List<Supplier> telephoneList = iSupplierMapper.queryByTelephone(telephone);
+            if (telephoneList.size() > 0)
                 return ServerResponse.createByErrorMessage("手机号已存在");
 
             Supplier supplier = new Supplier();
@@ -90,7 +95,8 @@ public class SupplierService {
             supplier.setCreateDate(new Date());
             supplier.setModifyDate(new Date());
             iSupplierMapper.insert(supplier);
-            return ServerResponse.createBySuccessMessage("新增成功");
+
+            return ServerResponse.createBySuccess("新增成功", supplier);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("新增失败");
@@ -99,7 +105,7 @@ public class SupplierService {
 
     /**
      * 修改供应商
-     * <p>Title: insertSupplier</p>
+     * <p>Title:</p>
      * <p>Description: </p>
      *
      * @param name
@@ -115,19 +121,31 @@ public class SupplierService {
     public ServerResponse updateSupplier(String id, String name, String address, String telephone, String checkPeople, Integer gender,
                                          String email, String notice, Integer supplier_level, Integer state) {
         try {
-            List<Supplier>  list =  iSupplierMapper.queryByName(name);
-            if(list.size() > 1)
-                return ServerResponse.createByErrorMessage("该供应商已存在");
+            Supplier t = iSupplierMapper.selectByPrimaryKey(id);
+            if (t == null) {
+                return ServerResponse.createByErrorMessage("不存在此供应商,修改失败");
+            }
 
-            List<Supplier> telephoneList =  iSupplierMapper.queryByTelephone(telephone);
-            if(telephoneList.size() > 1)
-                return ServerResponse.createByErrorMessage("手机号已存在");
+            if (!t.getName().equals(name))//如果修改了名称 就判断，修改的名字 是否已经存在
+            {
+                List<Supplier> list = iSupplierMapper.queryByName(name);
+                if (list.size() > 0)
+                    return ServerResponse.createByErrorMessage("该供应商名字已存在");
+            }
 
             Supplier supplier = new Supplier();
             supplier.setId(id);
             supplier.setName(name);//名称
             supplier.setAddress(address);//地址
-            supplier.setTelephone(telephone);//联系电话
+            if (StringUtils.isNotBlank(telephone)) { //不为空时，
+                if (!t.getTelephone().equals(telephone))//如果修改了电话 就判断，修改的电话 是否已经存在
+                {
+                    List<Supplier> telephoneList = iSupplierMapper.queryByTelephone(telephone);
+                    if (telephoneList.size() > 0)
+                        return ServerResponse.createByErrorMessage("手机号已存在");
+                    supplier.setTelephone(telephone);//联系电话
+                }
+            }
             supplier.setCheckpeople(checkPeople);//联系人姓名
             supplier.setGender(gender);//1男 2女   0 未选
             supplier.setEmail(email);
@@ -315,38 +333,96 @@ public class SupplierService {
         }
     }
 
+//    /**
+//     * 保存供应商与货品供应关系
+//     */
+//    public ServerResponse saveSupplierProduct(String productId, String supplierId,
+//                                              Double price, Double stock, Integer isSupply) {
+//        try {
+//            //根据供应商、商品、属性查询对应关系
+//            SupplierProduct supplierProduct = iSupplierMapper.querySupplierProductRelation(productId, supplierId);
+//            if (supplierProduct == null) {//新增
+//                SupplierProduct sp = new SupplierProduct();
+//                sp.setProductId(productId);
+//                sp.setSupplierId(supplierId);
+//                sp.setPrice(price);//价格
+//                sp.setStock(stock);//库存
+//                sp.setIsSupply(isSupply);//是否供应；0停供，1供应
+//                sp.setCreateDate(new Date());
+//                sp.setModifyDate(new Date());
+//                iSupplierMapper.insertSupplierProduct(sp);
+//            } else {//保存
+//                SupplierProduct sp = new SupplierProduct();
+//                sp.setProductId(productId);
+//                sp.setSupplierId(supplierId);
+//                sp.setPrice(price);//价格
+//                sp.setStock(stock);//库存
+//                sp.setIsSupply(isSupply);//是否供应；0停供，1供应
+//                sp.setModifyDate(new Date());
+//                iSupplierMapper.updateSupplierProduct(sp);
+//            }
+//            return ServerResponse.createBySuccessMessage("保存成功");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ServerResponse.createByErrorMessage("保存失败");
+//        }
+//    }
+
     /**
      * 保存供应商与货品供应关系
      */
-    public ServerResponse saveSupplierProduct(String productId, String supplierId,
-                                              Double price, Double stock, Integer isSupply) {
+    public ServerResponse saveSupplierProduct(String arrString) {
         try {
-            //根据供应商、商品、属性查询对应关系
-            SupplierProduct supplierProduct = iSupplierMapper.querySupplierProductRelation(productId, supplierId);
-            if (supplierProduct == null) {//新增
-                SupplierProduct sp = new SupplierProduct();
-                sp.setProductId(productId);
-                sp.setSupplierId(supplierId);
-                sp.setPrice(price);//价格
-                sp.setStock(stock);//库存
-                sp.setIsSupply(isSupply);//是否供应；0停供，1供应
-                sp.setCreateDate(new Date());
-                sp.setModifyDate(new Date());
-                iSupplierMapper.insertSupplierProduct(sp);
-            } else {//保存
-                SupplierProduct sp = new SupplierProduct();
-                sp.setProductId(productId);
-                sp.setSupplierId(supplierId);
-                sp.setPrice(price);//价格
-                sp.setStock(stock);//库存
-                sp.setIsSupply(isSupply);//是否供应；0停供，1供应
-                sp.setModifyDate(new Date());
-                iSupplierMapper.updateSupplierProduct(sp);
+//            String productId, String supplierId,
+//                    Double price, Double stock, Integer isSupply
+            JSONArray jsonArr = JSONArray.parseArray(arrString);
+
+            for (int i = 0; i < jsonArr.size(); i++) {
+                JSONObject obj = jsonArr.getJSONObject(i);
+                String productId = obj.getString("productId");
+                String supplierId = obj.getString("supplierId");
+                if (!StringUtils.isNotBlank(productId) || !StringUtils.isNotBlank(supplierId))
+                    return ServerResponse.createByErrorMessage("参数不能为空");
             }
+
+            for (int i = 0; i < jsonArr.size(); i++) {
+                JSONObject obj = jsonArr.getJSONObject(i);
+                String productId = obj.getString("productId");
+                String supplierId = obj.getString("supplierId");
+                Double price = Double.parseDouble(obj.getString("price"));
+                Double stock = Double.parseDouble(obj.getString("stock"));
+                Integer isSupply = Integer.parseInt(obj.getString("isSupply"));
+
+                //根据供应商、商品、属性查询对应关系
+                SupplierProduct supplierProduct = iSupplierMapper.querySupplierProductRelation(productId, supplierId);
+                if (supplierProduct == null) {//新增
+                    SupplierProduct sp = new SupplierProduct();
+                    sp.setProductId(productId);
+                    sp.setSupplierId(supplierId);
+                    sp.setPrice(price);//价格
+                    sp.setStock(stock);//库存
+                    sp.setIsSupply(isSupply);//是否供应；0停供，1供应
+                    sp.setCreateDate(new Date());
+                    sp.setModifyDate(new Date());
+                    iSupplierMapper.insertSupplierProduct(sp);
+                } else {//保存
+                    SupplierProduct sp = new SupplierProduct();
+                    sp.setProductId(productId);
+                    sp.setSupplierId(supplierId);
+                    sp.setPrice(price);//价格
+                    sp.setStock(stock);//库存
+                    sp.setIsSupply(isSupply);//是否供应；0停供，1供应
+                    sp.setModifyDate(new Date());
+                    iSupplierMapper.updateSupplierProduct(sp);
+                }
+            }
+
             return ServerResponse.createBySuccessMessage("保存成功");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("保存失败");
         }
     }
+
+
 }

@@ -3,53 +3,42 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.core.IHouseFlowApplyMapper">
-    <sql id="basic_columns">
+
+    <sql id="all_columns">
         id,
-        apply_dec,
-        apply_type,
-        house_flow_id,
-        house_id,
-        member_check,
-        member_id,
-        supervisor_check,
-        worker_type_id,
-        worker_type,
-        worker_id,
-        apply_money,
-        pay_state,
-        house_worker_order_id,
-        supervisor_money,
-        other_money,
-        work_evaluat,
-        suspend_day,
-        create_date,
-        modify_date
-    </sql>
-    <sql id="new_columns">
-        id,
-        apply_dec as applyDec,
-        apply_type as applyType,
         house_flow_id as houseFlowId,
-        house_id as houseId,
-        member_check as memberCheck,
-        member_id as memberId,
-        supervisor_check as supervisorCheck,
+        house_worker_order_id as houseWorkerOrderId,
+        worker_id as workerId,
         worker_type_id as workerTypeId,
         worker_type as workerType,
-        worker_id as workerId,
+        house_id as houseId,
+        member_id as memberId,
+        apply_type as applyType,
+        suspend_day as suspendDay,
+        apply_dec as applyDec,
+        member_check as memberCheck,
+        supervisor_check as supervisorCheck,
         apply_money as applyMoney,
         pay_state as payState,
-        house_worker_order_id as houseWorkerOrderId,
-        supervisor_money as supervisorMoney,
         other_money as otherMoney,
-        work_evaluat as workEvaluat,
-        suspend_day as suspendDay,
+        supervisor_money as supervisorMoney,
         create_date as createDate,
         modify_date as modifyDate
     </sql>
+
+    <!--查询待审核的申请-->
+    <select id="checkPendingApply" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        select <include refid="all_columns" />
+        from dj_core_house_flow_apply
+        where 1=1
+        and house_flow_id = #{houseFlowId}
+        and (supervisor_check = 0 or (supervisor_check = 1 and member_check = 0))
+        and worker_id = #{workerId}
+    </select>
+
     <!--根据houseId查询待业主审核 -->
     <select id="getMemberCheckList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="new_columns" />
+        select <include refid="all_columns" />
         from dj_core_house_flow_apply
         where (apply_type=1 or apply_type=2 or apply_type=0)
         and house_id = #{houseId}
@@ -70,10 +59,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             AND worker_id=#{workerId}
         </if>
     </select>
+
     <!--根据工人id和houid查询今日是否开工 -->
     <select id="getTodayStart" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select
-        <include refid="new_columns" />
+        <include refid="all_columns" />
         from dj_core_house_flow_apply
         where 1=1
         and house_id = #{houseId}
@@ -81,9 +71,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and apply_type = 4
         and to_days(create_date) = to_days(now())
     </select>
+
     <!--查询待审核的申请(不算每日完工) -->
     <select id="checkHouseFlowApply" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="new_columns" />
+        select <include refid="all_columns" />
         from dj_core_house_flow_apply
         where 1=1
 		and house_flow_id = #{houseFlowId}
@@ -91,35 +82,39 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		and apply_type !=0
 		and worker_id = #{workerId}
     </select>
+
     <!--根据houseid查询待大管家审核 -->
     <select id="getSupervisorCheckList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="new_columns" />
+        select <include refid="all_columns" />
         from dj_core_house_flow_apply
         where (apply_type=1 or apply_type=2 or apply_type=3)
         and house_id = #{houseId}
         and supervisor_check = 0
     </select>
+
     <!--大管家查询自己今天是否已上传过巡查 -->
     <select id="getTodayHouseFlowApplyBy56" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="new_columns" />
+        select <include refid="all_columns" />
         from dj_core_house_flow_apply as hfa where 1=1
         and to_days(create_date) = to_days(now())
         and house_id = #{houseId}
         and apply_type in(5,6)
         order by create_date desc
     </select>
+
     <!--根据houseflowid和工匠id查询待业主审核-->
     <select id="checkSupervisorApply" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="new_columns" />
+        select <include refid="all_columns" />
         from dj_core_house_flow_apply
         where 1=1
         and house_flow_id = #{houseFlowId}
         and member_check = 0
         and worker_id = #{workerId}
     </select>
+
     <!--根据申请类别查询自己今天是否发过此申请-->
     <select id="getTodayHouseFlowApply"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="new_columns" />
+        select <include refid="all_columns" />
         from dj_core_house_flow_apply as hfa where 1=1
         and to_days(create_date) = to_days(now())
         and house_flow_id = #{houseFlowId}
@@ -128,9 +123,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and supervisor_check !=2
         order by create_date desc
     </select>
+
     <!--查询最早的每日开工申请-->
     <select id="getEarliestTimeHouseApply"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="new_columns" />
+        select <include refid="all_columns" />
         from dj_core_house_flow_apply
         where 1=1
         and house_id = #{houseId}
@@ -138,6 +134,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and worker_id = #{workerId}
         order by create_date asc
     </select>
+
     <!--查询所有审核通过的暂停天数-->
     <select id="getSuspendApply"  resultType="java.lang.Long">
         select sum(suspend_day)
@@ -157,9 +154,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		and apply_type =0
 		and worker_id = #{workerId}
     </select>
+
     <!--查询是否今天发过申请-->
     <select id="getTodayHouseFlowApply2"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="new_columns" />
+        select <include refid="all_columns" />
         from dj_core_house_flow_apply
         where 1=1
         and to_days(create_date) = to_days(now())
@@ -169,9 +167,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and supervisor_check !=2
         order by create_date desc
     </select>
+
     <!--查询大管家已审核，业主未审核的数据-->
     <select id="waitHouseFlowApply"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="new_columns" />
+        select <include refid="all_columns" />
         from dj_core_house_flow_apply
         where 1=1
         and house_flow_id = #{houseFlowId}
@@ -181,7 +180,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
     <!--根据houid查询今日是否开工-->
     <select id="getTodayStartByHouseId"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="new_columns" />
+        select <include refid="all_columns" />
         from dj_core_house_flow_apply
         where 1=1
         and house_id = #{houseId}
@@ -191,7 +190,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!--根据houseflowid和工匠id查询待管家审核-->
     <select id="getSupervisorCheck"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="new_columns" />
+        select <include refid="all_columns" />
         from dj_core_house_flow_apply
         where 1=1
         and (apply_type=1 or apply_type=2 or apply_type=3)
@@ -199,9 +198,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and supervisor_check = 0
         and worker_id = #{workerId}
     </select>
+
     <!--根据houseId查询所有施工记录-->
     <select id="queryAllHfaByHouseId"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="new_columns" />
+        select <include refid="all_columns" />
         from dj_core_house_flow_apply
         where 1=1
         and  house_id = #{houseId}
@@ -210,7 +210,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!--根据houseId查询所有工序记录-->
     <select id="queryFlowRecord"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="new_columns" />
+        select <include refid="all_columns" />
         from dj_core_house_flow_apply
         where house_flow_id = #{houseFlowId}
         order by create_date DESC

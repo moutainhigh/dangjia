@@ -20,6 +20,7 @@ import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.basics.WorkerTechnology;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,7 @@ public class TechnologyService {
         try {
             List<Technology> technologyList = iTechnologyMapper.query(workerTypeId, name, materialOrWorker);
             if (technologyList.size() > 0) {
-                return ServerResponse.createBySuccessMessage("工艺名称不能重复");
+                return ServerResponse.createByErrorMessage("工艺名称不能重复");
             }
 
             Technology t = new Technology();
@@ -97,17 +98,23 @@ public class TechnologyService {
     //修改工艺说明
     public ServerResponse updateTechnology(String id, String name, String content, Integer type, String image) {
         try {
+            if (!StringUtils.isNotBlank(name))
+                return ServerResponse.createByErrorMessage("名称不能为空");
+
             Technology t = iTechnologyMapper.selectByPrimaryKey(id);
             if (t == null) {
                 return ServerResponse.createByErrorMessage("不存在此工艺,修改失败");
             }
 
-            List<Technology> technologyList = iTechnologyMapper.query(t.getWorkerTypeId(), t.getName(), t.getMaterialOrWorker());
-            if (technologyList.size() > 0) {
-                return ServerResponse.createBySuccessMessage("工艺名称已存在");
+            if(!t.getName().equals(name))//如果修改了名称 就判断，修改的名字 是否已经存在
+            {
+                List<Technology> technologyList = iTechnologyMapper.query(t.getWorkerTypeId(), name, t.getMaterialOrWorker());
+                if (technologyList.size() > 0) {
+                    return ServerResponse.createByErrorMessage("工艺名称已存在");
+                }
             }
 
-            t.setId(id);
+//            t.setId(id);//id 不能修改
             t.setName(name);
             t.setModifyDate(new Date());
             t.setContent(content);

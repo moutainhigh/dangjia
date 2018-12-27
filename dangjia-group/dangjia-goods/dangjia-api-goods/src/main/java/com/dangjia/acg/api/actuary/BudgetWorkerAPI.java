@@ -2,6 +2,7 @@ package com.dangjia.acg.api.actuary;
 
 import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.actuary.ActuarialTemplate;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -99,7 +100,7 @@ public interface BudgetWorkerAPI {
 	  */
 	 @PostMapping("/actuary/budgetWorker/makeBudgets")
 	 @ApiOperation(value = "生成精算", notes = "生成精算")
-	public ServerResponse makeBudgets(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId")String houseId,@RequestParam("workerTypeId")String workerTypeId,
+	public ServerResponse makeBudgets(@RequestParam("request") HttpServletRequest request, @RequestParam("actuarialTemplateId")String actuarialTemplateId ,@RequestParam("houseId")String houseId, @RequestParam("workerTypeId")String workerTypeId,
 									  @RequestParam("listOfGoods")String listOfGoods);
 	/**
 	 * 根据houseId和wokerTypeId查询房子人工精算总价

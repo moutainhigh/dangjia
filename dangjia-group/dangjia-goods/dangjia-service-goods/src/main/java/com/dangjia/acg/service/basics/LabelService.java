@@ -11,6 +11,8 @@ import com.dangjia.acg.modle.basics.Product;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +36,7 @@ public class LabelService {
     @Autowired
     private IProductMapper iProductMapper;
 
+    protected static final Logger LOG = LoggerFactory.getLogger(LabelService.class);
 
     //查询所有的标签
     public ServerResponse<PageInfo> getAllLabel(PageDTO pageDTO) {
@@ -73,10 +76,9 @@ public class LabelService {
     //新增商品标签
     public ServerResponse insert(String labelName) {
         try {
-            Label oldLabel = iLabelMapper.getLabelByName(labelName);
-            if (oldLabel != null) {
-                return ServerResponse.createByErrorMessage("标签名称重复");
-            }
+            if (iLabelMapper.getLabelByName(labelName).size() > 0)
+                return ServerResponse.createByErrorMessage("标签名称已存在");
+
             Label label = new Label();
             label.setName(labelName);
             iLabelMapper.insert(label);
@@ -90,14 +92,18 @@ public class LabelService {
     //修改商品标签
     public ServerResponse update(String labelId, String labelName) {
         try {
-            Label oldLabel = iLabelMapper.getLabelByName(labelName);
-            if (oldLabel != null) {
-                return ServerResponse.createByErrorMessage("标签名称重复");
+            Label oldLabel = iLabelMapper.selectByPrimaryKey(labelId);
+            if (oldLabel == null)
+                return ServerResponse.createByErrorMessage("没有该商品标签");
+
+            if (!oldLabel.getName().equals(labelName)) {
+                if (iLabelMapper.getLabelByName(labelName).size() > 0)
+                    return ServerResponse.createByErrorMessage("标签名称已存在");
             }
-            Label label = new Label();
-            label.setId(labelId);
-            label.setName(labelName);
-            iLabelMapper.updateByPrimaryKeySelective(label);
+//            oldLabel.setId(labelId);
+            oldLabel.setName(labelName);
+            oldLabel.setModifyDate(new Date());
+            iLabelMapper.updateByPrimaryKeySelective(oldLabel);
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -107,6 +113,7 @@ public class LabelService {
 
     /**
      * 保存货品的标签
+     *
      * @param productArr
      * @return
      */
@@ -117,7 +124,7 @@ public class LabelService {
                 JSONObject obj = jsonArr.getJSONObject(i);
                 String labelId = obj.getString("labelId");//标签id
                 Label label = iLabelMapper.selectByPrimaryKey(labelId);
-                if(label == null)
+                if (label == null)
                     return ServerResponse.createByErrorMessage("标签不存在");
             }
 
@@ -127,7 +134,6 @@ public class LabelService {
                 String labelId = obj.getString("labelId");//标签id
 
                 Product product = iProductMapper.selectByPrimaryKey(productId);
-//                product.setCreateDate(new Date());
                 product.setModifyDate(new Date());
                 product.setLabelId(labelId);
                 iProductMapper.updateByPrimaryKeySelective(product);

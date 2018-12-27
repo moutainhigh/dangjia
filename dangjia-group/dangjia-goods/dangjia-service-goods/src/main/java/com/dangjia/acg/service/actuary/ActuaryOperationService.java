@@ -162,7 +162,7 @@ public class ActuaryOperationService {
                 wGoodsDTO.setImage(getImage(workerGoods.getImage()));
                 wGoodsDTO.setPrice("￥"+workerGoods.getPrice()+"/"+unitMapper.selectByPrimaryKey(workerGoods.getUnitId()).getName());
                 wGoodsDTO.setName(workerGoods.getName());
-                wGoodsDTO.setWorkerDec(workerGoods.getWorkerDec());
+                wGoodsDTO.setWorkerDec(getImage(workerGoods.getWorkerDec()));
                 List<Technology> technologyList = technologyMapper.queryTechnologyByWgId(workerGoods.getId());
                 for (Technology technology:technologyList) {
                     technology.setImage(getImage(technology.getImage()));//图一张
@@ -201,7 +201,7 @@ public class ActuaryOperationService {
                 }
                 wGoodsDTO.setPrice("￥"+workerGoods.getPrice()+"/"+unitMapper.selectByPrimaryKey(workerGoods.getUnitId()).getName());
                 wGoodsDTO.setName(workerGoods.getName());
-                wGoodsDTO.setWorkerDec(workerGoods.getWorkerDec());
+                wGoodsDTO.setWorkerDec(getImage(workerGoods.getWorkerDec()));
                 List<Technology> technologyList = technologyMapper.queryTechnologyByWgId(workerGoods.getId());
                 for (Technology technology:technologyList) {
                     technology.setImage(getImage(technology.getImage()));//图一张
@@ -292,13 +292,18 @@ public class ActuaryOperationService {
 
     //判断该货品是不是该属性
     private boolean isValue(String valueId,String valueIdArr){
-        String[] valueIdList = valueIdArr.split(",");
-        for (int i=0; i<valueIdList.length; i++){
-            if (valueId.equals(valueIdList[i])){
-                return true;
+        try{
+            String[] valueIdList = valueIdArr.split(",");
+            for (int i=0; i<valueIdList.length; i++){
+                if (valueId.equals(valueIdList[i])){
+                    return true;
+                }
             }
+            return false;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
         }
-        return false;
     }
     //取第一张图
     private String getImage(String images){

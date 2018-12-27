@@ -9,12 +9,14 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendMateriel;
@@ -50,6 +52,8 @@ public class MendOrderService {
     private ForMasterAPI forMasterAPI;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
 
 
     /**
@@ -111,6 +115,11 @@ public class MendOrderService {
         try{
             AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
             Member steward = accessToken.getMember();//管家
+
+            HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseId,workerTypeId);
+            if(houseFlow.getWorkSteta() == 1 || houseFlow.getWorkSteta() ==2){
+                return ServerResponse.createByErrorMessage("该工种已阶段完工,不能退人工!");
+            }
 
             List<MendOrder> mendOrderList = mendOrderMapper.backWorker(houseId);
             if(mendOrderList.size() > 0){

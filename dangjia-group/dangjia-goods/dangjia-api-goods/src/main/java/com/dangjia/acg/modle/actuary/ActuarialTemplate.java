@@ -1,6 +1,7 @@
 package com.dangjia.acg.modle.actuary;
 
 import com.dangjia.acg.common.annotation.Desc;
+import com.dangjia.acg.common.annotation.ExcelField;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -43,10 +44,15 @@ public class ActuarialTemplate extends BaseEntity {
     @ApiModelProperty("工序类型ID")
     private Integer workerTypeId;
 
-    @Column(name = "style_type")
-    @Desc(value = "风格")
-    @ApiModelProperty("风格")
-    private String styleType;
+    @Column(name = "style_id")
+    @Desc(value = "风格Id")
+    @ApiModelProperty("风格Id")
+    private String styleId;
+
+    @Column(name = "style_name")
+    @Desc(value = "风格name")
+    @ApiModelProperty("风格name")
+    private String styleName;
 
     @Column(name = "applicable_area")
     @Desc(value = "适用面积")

@@ -27,7 +27,7 @@
         SELECT
            id, name, create_date as createDate, modify_date as modifyDate
         from dj_basics_label
-        ORDER BY create_date desc
+        ORDER BY createDate desc
     </select>
 
     <!-- 根据标签名称查询 -->

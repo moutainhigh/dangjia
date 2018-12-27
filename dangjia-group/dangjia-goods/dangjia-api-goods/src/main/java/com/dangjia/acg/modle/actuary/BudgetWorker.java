@@ -25,7 +25,7 @@ public class BudgetWorker extends BaseEntity {
 	private String houseId;
 
 	@Column(name = "worker_type_id")
-	private String workerTypeId;//工种id
+	private String workerTypeId;//工种id   3: 大管家 ，4：拆除 ，5：  ，6：水电 ，7：泥工 ，8：木工 ，9：油漆
 
 	@Column(name = "steta")
 	private Integer steta;//1代表我们购,2代表自购,3代表模板

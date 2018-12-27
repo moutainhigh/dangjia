@@ -13,6 +13,8 @@ import java.util.Map;
 @Data
 public class HouseFlowApplyDTO {
 
+    private String workerId;
+    private String managerId;
     private String houseFlowApplyId;
     private int applyType;//0每日完工申请，1阶段完工申请，2整体完工申请, 3大管家申请直接调用业主对大管家审核
     private String headA;//工匠头像

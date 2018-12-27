@@ -38,6 +38,8 @@ public class BeanUtils {
     if (result instanceof Collection) {
       Collection<?> lstObj = listToMap((Collection<?>) result);
       resultValue=lstObj;
+    }else if(result.getClass().isArray()){
+      resultValue=result;
     } else if (result instanceof Map) {
       Map<Object, Object> lstObj = mapToMap((Map<Object, Object>) result);
       resultValue=lstObj;

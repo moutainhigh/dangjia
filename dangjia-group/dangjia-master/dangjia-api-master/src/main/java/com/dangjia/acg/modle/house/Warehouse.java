@@ -32,6 +32,21 @@ public class Warehouse extends BaseEntity {
 	@ApiModelProperty("买总数")
 	private Double shopCount;
 
+	@Column(name = "repair_count")
+	@Desc(value = "补总数")
+	@ApiModelProperty("补总数")
+	private Double repairCount;
+
+	@Column(name = "stay_count")
+	@Desc(value = "待付款进来总数")
+	@ApiModelProperty("待付款进来总数")
+	private Double stayCount;
+
+	@Column(name = "rob_count")
+	@Desc(value = "抢单任务进来总数")
+	@ApiModelProperty("抢单任务进来总数")
+	private Double robCount;
+
 	@Column(name = "ask_count")
 	@Desc(value = "已要总数")
 	@ApiModelProperty("已要总数")

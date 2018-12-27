@@ -336,6 +336,7 @@ public class StewardService {
             Member worker = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());//查询工种
             workerDetailDTO.setWorkerTypeName(workerType.getName());
+            workerDetailDTO.setWorkerId(worker.getId());
             workerDetailDTO.setHead(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class)+worker.getHead());
             workerDetailDTO.setName(worker.getName());
             workerDetailDTO.setMobile(worker.getMobile());

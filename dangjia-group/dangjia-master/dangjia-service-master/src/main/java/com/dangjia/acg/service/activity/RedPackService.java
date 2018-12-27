@@ -338,12 +338,17 @@ public class RedPackService {
             msg.append("已领取，无法重复领取！");
             return msg.toString();
         }
+        //检验优惠券发放数量是否有剩余
+        ActivityRedPack activityRedPack = activityRedPackMapper.selectByPrimaryKey(redPackId);
+        if (activityRedPack.getEndDate().getTime() < new Date().getTime()) {
+            msg.append("已失效，无法领取！");
+            return msg.toString();
+        }
         ActivityRedPackRule activityRedPackRule=activityRedPackRuleMapper.selectByPrimaryKey(redPackRuleId);
         if(activityRedPackRule!=null) {
+
             //得到指定红包规则发放的数量
             for (int i = 0; i < activityRedPackRule.getNum(); i++) {
-                //检验优惠券发放数量是否有剩余
-                ActivityRedPack activityRedPack = activityRedPackMapper.selectByPrimaryKey(redPackId);
                 if (activityRedPack.getSurplusNums() > 0) {
                     activityRedPack.setSurplusNums(activityRedPack.getSurplusNums() - 1);
                 } else {

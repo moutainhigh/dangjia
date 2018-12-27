@@ -63,10 +63,10 @@ public class ActuarialTemplateController  implements ActuarialTemplateAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<String> insertActuarialTemplate(HttpServletRequest request,String userId, String name, String styleType, String applicableArea,
+    public ServerResponse<String> insertActuarialTemplate(HttpServletRequest request,String userId, String name, String styleId,String styleName, String applicableArea,
                                                           Integer stateType, String workerTypeName,Integer workerTypeId){
         try {
-            return actuarialTemplateService.insertActuarialTemplate(userId,name,styleType,applicableArea,
+            return actuarialTemplateService.insertActuarialTemplate(userId,name,styleId,styleName,applicableArea,
                     stateType,workerTypeName,workerTypeId);
         }
         catch (Exception e) {
@@ -87,9 +87,9 @@ public class ActuarialTemplateController  implements ActuarialTemplateAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<String> updateActuarialTemplate(HttpServletRequest request,String id,String name,String styleType,String applicableArea,Integer stateType,String workingProcedure) {
+    public ServerResponse<String> updateActuarialTemplate(HttpServletRequest request,String id,String name,String styleId,String styleName,String applicableArea,Integer stateType,String workingProcedure) {
         try {
-            return actuarialTemplateService.updateActuarialTemplate(id, name, styleType, applicableArea, stateType, workingProcedure);
+            return actuarialTemplateService.updateActuarialTemplate(id, name, styleId,styleName, applicableArea, stateType, workingProcedure);
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("修改精算模版失败");
         }

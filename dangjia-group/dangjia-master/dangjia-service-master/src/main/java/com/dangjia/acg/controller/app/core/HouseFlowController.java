@@ -108,14 +108,4 @@ public class HouseFlowController implements HouseFlowAPI {
     public HouseFlow getHouseFlowByHidAndWty(String houseId, Integer workerType) {
         return houseFlowService.getHouseFlowByHidAndWty(houseId, workerType);
     }
-
-    /**
-     * 根据houseFlowId查询验收节点
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse getCheckTechnologyList(String houseFlowId, Integer applyType) {
-        return technologyRecordService.getCheckTechnologyList(houseFlowId, applyType);
-    }
-
 }

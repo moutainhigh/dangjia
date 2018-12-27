@@ -21,4 +21,7 @@ public class Unit extends BaseEntity {
     @Column(name = "name")
     private String name;//名称
 
+    @Column(name = "link_unit_id_arr")
+    private String linkUnitIdArr;// 关联多个换算单位Id集合
+
 }

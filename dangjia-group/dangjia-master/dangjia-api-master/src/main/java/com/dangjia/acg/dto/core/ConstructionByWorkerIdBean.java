@@ -14,6 +14,7 @@ import java.util.List;
  */
 @Data
 public class ConstructionByWorkerIdBean {
+    private String userId;//大管家查询时为业主ID,工匠查询是为大管家ID
     private int taskNumber;//任务数量
     private String allPatrol;//总巡查次数
     private BigDecimal alreadyMoney;//已得钱

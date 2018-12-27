@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 @Data
 public class WorkerDetailDTO {
 
+    private String workerId;
     private String workerTypeName;
     private String head;//工匠头像
     private String praiseRate;//好评率

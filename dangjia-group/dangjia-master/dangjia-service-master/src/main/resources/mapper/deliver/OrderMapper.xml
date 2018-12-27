@@ -18,6 +18,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         data_status as dataStatus
     </sql>
 
+    <!-- 根据订单号查询订单 -->
+    <select id="byBusinessOrderNumber" resultType="com.dangjia.acg.modle.deliver.Order">
+        SELECT
+        <include refid="all_columns"/>
+        from dj_deliver_order
+        where
+            business_order_number = #{businessOrderNumber}
+        ORDER BY create_date desc
+    </select>
     <!-- 查询所有订单 -->
     <select id="orderList" resultType="com.dangjia.acg.modle.deliver.Order">
         SELECT

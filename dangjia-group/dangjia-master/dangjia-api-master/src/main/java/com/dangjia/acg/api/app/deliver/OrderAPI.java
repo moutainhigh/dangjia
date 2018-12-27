@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * Time: 10:55
  */
 @FeignClient("dangjia-service-master")
-@Api(value = "要货管理类", description = "要货管理类")
+@Api(value = "订单要货操作", description = "订单要货操作")
 public interface OrderAPI {
 
     @PostMapping("app/order/orderDetail")
@@ -21,8 +21,12 @@ public interface OrderAPI {
     ServerResponse orderDetail(@RequestParam("orderId")String orderId);
 
     @PostMapping("app/order/orderList")
-    @ApiOperation(value = "查询所有订单", notes = "查询所有订单")
-    ServerResponse orderList( @RequestParam("userToken")String userToken);
+    @ApiOperation(value = "订单详情", notes = "订单详情")
+    ServerResponse orderList( @RequestParam("businessOrderId")String businessOrderId);
+
+    @PostMapping("app/order/businessOrderList")
+    @ApiOperation(value = "订单列表", notes = "订单列表")
+    ServerResponse businessOrderList(String userToken);
 
     @PostMapping("app/deliver/order/confirmOrderSplit")
     @ApiOperation(value = "管家确认要货", notes = "管家确认要货")

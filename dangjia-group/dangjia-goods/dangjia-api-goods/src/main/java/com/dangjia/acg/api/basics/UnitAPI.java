@@ -38,7 +38,7 @@ public interface UnitAPI {
      */
     @PostMapping("/basics/unit/updateUnit")
     @ApiOperation(value = "修改商品单位", notes = "修改商品单位")
-    public ServerResponse updateUnit(@RequestParam("request") HttpServletRequest request,@RequestParam("unitId") String unitId, @RequestParam("unitName") String unitName);
+    public ServerResponse updateUnit(@RequestParam("request") HttpServletRequest request,@RequestParam("unitId") String unitId, @RequestParam("unitName") String unitName,@RequestParam("linkUnitIdArr") String linkUnitIdArr);
     /**
      * 新增商品单位
      * @param unitName 单位名称
@@ -46,7 +46,7 @@ public interface UnitAPI {
      */
     @PostMapping("/basics/unit/insertUnit")
     @ApiOperation(value = "新增商品单位", notes = "新增商品单位")
-    public ServerResponse insertUnit(@RequestParam("request") HttpServletRequest request,@RequestParam("unitName") String unitName);
+    public ServerResponse insertUnit(@RequestParam("request") HttpServletRequest request,@RequestParam("unitName") String unitName,@RequestParam("linkUnitIdArr") String linkUnitIdArr);
 
     /**
      * 根据id查询单位对象
