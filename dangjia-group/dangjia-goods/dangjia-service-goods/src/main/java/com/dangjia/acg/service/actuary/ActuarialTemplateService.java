@@ -93,6 +93,7 @@ public class ActuarialTemplateService {
         t.setStyleName(styleName);
         t.setApplicableArea(applicableArea);
         t.setStateType(stateType);
+        t.setNumberOfUse(0);
         t.setWorkerTypeName(workerTypeName);
         t.setWorkerTypeId(workerTypeId);
         int isok = iActuarialTemplateMapper.insert(t);

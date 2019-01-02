@@ -13,13 +13,10 @@ import java.util.List;
 @Repository
 public interface ITechnologyRecordMapper extends Mapper<TechnologyRecord> {
 
-    /**未退*/
-    List<TechnologyRecord> allUse(@Param("houseFlowId")String houseFlowId);
-
     /**已验收*/
-    List<TechnologyRecord> allChecked(@Param("houseFlowId")String houseFlowId);
+    List<TechnologyRecord> allChecked(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
 
-    /**未验收*/
-    List<TechnologyRecord> allNotChecked(@Param("houseFlowId")String houseFlowId);
+    /**查询节点*/
+    List<TechnologyRecord> checkByTechnologyId(@Param("houseId")String houseId,@Param("technologyId")String technologyId);
 }
 

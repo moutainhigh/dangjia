@@ -25,6 +25,30 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		modify_date as modifyDate
 	</sql>
 
+    <!-- 查询工种未处理补人工 -->
+    <select id="unCheckRepWorker" resultType="com.dangjia.acg.modle.repair.MendOrder">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_repair_mend_order
+        where
+        type = 1
+        AND  house_id = #{houseId}
+        and  worker_type_id = #{workerTypeId}
+        AND (worker_order_state=1 or worker_order_state=3 or worker_order_state=5)
+    </select>
+
+    <!-- 查询工种未处理退人工 -->
+    <select id="unCheckBackWorker" resultType="com.dangjia.acg.modle.repair.MendOrder">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_repair_mend_order
+        where
+        type = 3
+        AND  house_id = #{houseId}
+        and  worker_type_id = #{workerTypeId}
+        AND (worker_back_state=1 or worker_back_state=3)
+    </select>
+
     <!-- 查询退人工单 -->
     <select id="workerBackState" resultType="com.dangjia.acg.modle.repair.MendOrder">
         SELECT

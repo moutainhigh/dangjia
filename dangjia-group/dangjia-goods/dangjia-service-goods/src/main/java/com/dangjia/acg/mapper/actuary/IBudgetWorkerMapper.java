@@ -19,6 +19,11 @@ import java.util.Map;
 @Repository
 public interface IBudgetWorkerMapper extends Mapper<BudgetWorker> {
 
+	BudgetWorker byWorkerGoodsId(@Param("houseId")String houseId, @Param("workerGoodsId")String workerGoodsId);
+
+	/**getByHouseFlowId*/
+	List<BudgetWorker> getByHouseFlowId(@Param("houseId")String houseId, @Param("houseFlowId")String houseFlowId);
+
 	/**支付时工种人工总价*/
 	Double getBudgetWorkerPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	/**未支付人工精算*/

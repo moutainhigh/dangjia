@@ -46,14 +46,15 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
     /**
      * 新增或更新工价商品
      * @param workerGoods
-     * @param technologyIds
+     * @param technologyJsonList
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse<String> setWorkerGoods(HttpServletRequest request,WorkerGoods workerGoods, String technologyIds) {
+    public ServerResponse<String> setWorkerGoods(HttpServletRequest request,WorkerGoods workerGoods, String technologyJsonList) {
+//    public ServerResponse<String> setWorkerGoods(HttpServletRequest request,WorkerGoods workerGoods, String technologyListJson) {
         try {
-            return workerGoodsService.setWorkerGoods(workerGoods, technologyIds);
+            return workerGoodsService.setWorkerGoods(workerGoods, technologyJsonList);
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("新增或更新工价商品失败");
         }

@@ -561,7 +561,6 @@ public class HouseService {
                 return ServerResponse.createByErrorMessage("修改房子精算状态失败");
             }
             if (budgetOk == 3) {//精算审核通过，调用此方法查询所有验收节点并保存
-                technologyRecordService.getAllTechnologyByHouseId(houseId);//根据houseId获取所有验收节点并保存
                 HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, "2");
                 hwo.setHaveMoney(hwo.getWorkPrice());
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
@@ -882,8 +881,9 @@ public class HouseService {
             }
             flowRecordDTO.setHouseWorkerMap(houseWorkerMap);
 
+            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             //已验收节点
-            List<TechnologyRecord> checkList = technologyRecordMapper.allChecked(houseFlowId);
+            List<TechnologyRecord> checkList = technologyRecordMapper.allChecked(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
             List<Map<String, Object>> nodeMap = new ArrayList<>();
             for (TechnologyRecord technologyRecord : checkList){
                 Map<String, Object> map = new HashMap<>();

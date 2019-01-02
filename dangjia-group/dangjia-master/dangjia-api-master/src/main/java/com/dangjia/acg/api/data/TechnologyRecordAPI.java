@@ -1,12 +1,15 @@
 package com.dangjia.acg.api.data;
 
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.matter.TechnologyRecord;
+import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.house.Warehouse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 /**
  * author: Ronalcheng
@@ -26,7 +29,12 @@ public interface TechnologyRecordAPI {
     @ApiOperation(value = "查询节点", notes = "查询节点")
     ServerResponse technologyRecordList(@RequestParam("userToken")String userToken, @RequestParam("houseFlowId")String houseFlowId);
 
-    @PostMapping("/data/technologyRecord/addTechnologyRecord")
-    @ApiOperation(value = "添加工艺验收节点", notes = "添加工艺验收节点")
-    void addTechnologyRecord(@RequestParam("technologyRecord") TechnologyRecord technologyRecord);
+    @PostMapping("/data/technologyRecord/unfinishedFlow")
+    @ApiOperation(value = "已进场未完工", notes = "已进场未完工")
+    List<HouseFlow> unfinishedFlow(@RequestParam("houseId")String houseId);
+
+    @PostMapping("/data/technologyRecord/warehouseList")
+    @ApiOperation(value = "已购买材料", notes = "已购买材料")
+    List<Warehouse> warehouseList(@RequestParam("houseId")String houseId);
+
 }

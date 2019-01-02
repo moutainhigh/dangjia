@@ -2,7 +2,6 @@ package com.dangjia.acg.api.actuary;
 
 import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.actuary.ActuarialTemplate;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -132,11 +131,11 @@ public interface BudgetWorkerAPI {
 
 
 	/**
-	 * 根据houseId查询所有验收节点
-	 * @param houseId
-	 * @return
+	 * 根据houseId查询所有
+	 * 已进场未完工工艺节点
+	 * 和所有材料工艺节点
 	 */
 	@PostMapping("/actuary/budgetWorker/getAllTechnologyByHouseId")
 	@ApiOperation(value = "根据houseId查询所有验收节点", notes = "根据houseId查询所有验收节点")
-	JSONArray getAllTechnologyByHouseId(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId")String houseId);
+	JSONArray getAllTechnologyByHouseId(@RequestParam("houseId")String houseId);
 }

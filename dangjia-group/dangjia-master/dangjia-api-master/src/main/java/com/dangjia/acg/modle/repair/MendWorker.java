@@ -53,8 +53,8 @@ public class MendWorker extends BaseEntity {
 	private String unitName;
 
 	@Column(name = "shop_count")
-	@Desc(value = "购买总数")
-	@ApiModelProperty("购买总数")
+	@Desc(value = "总数")
+	@ApiModelProperty("总数")
 	private Double shopCount;
 
 	@Column(name = "total_price")

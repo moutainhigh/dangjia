@@ -36,10 +36,10 @@ public class HouseStyleType extends BaseEntity {
 	@ApiModelProperty("关联设计图json串")
 	private String designImageList;//esignimagetypelist
 
-	@Column(name = "delete_state")
-	@Desc(value = "0表示正常，1表示删除")
-	@ApiModelProperty("0表示正常，1表示删除")
-	private Integer deleteState;//deletestate
+//	@Column(name = "delete_state")
+//	@Desc(value = "0表示正常，1表示删除")
+//	@ApiModelProperty("0表示正常，1表示删除")
+//	private Integer deleteState;//deletestate
 
 	@Column(name = "order_list")
 	@Desc(value = "排序")

@@ -19,12 +19,35 @@
 		price,
 		description,
 		shop_count as shopCount,
+		repair_count as repairCount,
+		back_count as backCount,
 		unit_name as unitName,
 		total_price as totalPrice,
 		data_status as dataStatus,
 		create_date as createDate,
 		modify_date as modifyDate
 	</sql>
+
+	<select id="byWorkerGoodsId" resultType="com.dangjia.acg.modle.actuary.BudgetWorker" >
+		SELECT
+		    <include refid="all_columns"/>
+		FROM dj_actuary_budget_worker
+		WHERE
+			worker_goods_id=#{workerGoodsId}
+		and
+			house_id=#{houseId}
+	</select>
+
+	<!--根据houseFlowId-->
+	<select id="getByHouseFlowId" resultType="com.dangjia.acg.modle.actuary.BudgetWorker">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_actuary_budget_worker
+		WHERE
+		    house_id=#{houseId}
+		and house_flow_id = #{houseFlowId}
+		and delete_state = 3;
+	</select>
 
 	<!--支付时工种人工总价-->
 	<select id="getBudgetWorkerPrice" resultType="java.lang.Double">

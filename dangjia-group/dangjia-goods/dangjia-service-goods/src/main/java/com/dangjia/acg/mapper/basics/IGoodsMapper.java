@@ -39,7 +39,7 @@ public interface IGoodsMapper extends Mapper<Goods> {
 	List<Goods> queryGoodsListByCategoryLikeName(@Param("categoryId")String categoryId,@Param("name")String name);
 
 	/**
-	 * 查询某个分类的商品 模糊name（如果categoryId 为null，查询全部材料商品 ）  // 去除商品是 服务类型的 或者 是自购的
+	 * 查询某个分类的商品 模糊name（如果categoryId 为null，查询全部材料商品 ）  // 去除：自购 服务 禁用 查询 product 为空
 	 * @param categoryId
 	 * @param name
 	 * @param type /0:材料；1：服务

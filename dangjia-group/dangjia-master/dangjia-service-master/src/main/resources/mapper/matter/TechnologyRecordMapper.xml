@@ -5,55 +5,40 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.dangjia.acg.mapper.matter.ITechnologyRecordMapper">
     <sql id="all_columns">
 		id,
+		house_id as houseId,
 		technology_Id as technologyId,
 		name,
 		material_or_worker as materialOrWorker,
 		worker_type_id as workerTypeId,
-		content,
-		type,
 		image,
 		state,
-		house_flow_id as houseFlowId,
 		data_status as dataStatus,
 		create_date as createDate,
 		modify_date as modifyDate
 	</sql>
 
 
-    <!-- 根据houseFlow查询所有未退节点 -->
-    <select id="allUse" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.matter.TechnologyRecord">
-        SELECT
-             <include refid="all_columns"/>
-        FROM dj_matter_technology_record
-        where
-            state != 2
-        and
-            house_flow_id = #{houseFlowId}
-		ORDER BY modify_date desc
-    </select>
-
-    <!-- 根据houseFlow查询所有已验收节点 -->
+    <!-- 根据workerTypeId查询所有已验收节点 -->
 	<select id="allChecked" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.matter.TechnologyRecord">
 		SELECT
 		<include refid="all_columns"/>
 		FROM dj_matter_technology_record
 		where
-		state = 1
+		    house_id = #{houseId}
 		and
-		house_flow_id = #{houseFlowId}
+		    worker_type_id = #{workerTypeId}
 		ORDER BY modify_date desc
 	</select>
 
-	<!-- 根据houseFlow查询所有未验收节点 -->
-	<select id="allNotChecked" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.matter.TechnologyRecord">
+	<!-- 查节点 -->
+	<select id="checkByTechnologyId" resultType="com.dangjia.acg.modle.matter.TechnologyRecord">
 		SELECT
-		<include refid="all_columns"/>
+		     <include refid="all_columns"/>
 		FROM dj_matter_technology_record
 		where
-		state = 0
+		    house_id = #{houseId}
 		and
-		house_flow_id = #{houseFlowId}
-		ORDER BY modify_date desc
+		technology_Id = #{technologyId}
 	</select>
 
 </mapper>

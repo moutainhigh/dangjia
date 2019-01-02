@@ -143,41 +143,41 @@
 		   ORDER BY create_date desc
 	</select>
 
-    <!-- 根据商品类别查询关联属性 -->
-    <select id="queryCategoryAttribute" parameterType="java.lang.String"
-            resultType="com.dangjia.acg.modle.attribute.Attribute">
-		select
-			*
-		from
-		dj_basics_attribute
-		where
-		   id in(
-				SELECT
-				   attribute_id
-				FROM dj_basics_category_attribute
-				where category_id =#{categoryId}
-			)
-		   ORDER BY create_date desc
-	</select>
+    <!--&lt;!&ndash; 根据商品类别查询关联属性 &ndash;&gt;-->
+    <!--<select id="queryCategoryAttribute" parameterType="java.lang.String"-->
+            <!--resultType="com.dangjia.acg.modle.attribute.Attribute">-->
+		<!--select-->
+			<!--*-->
+		<!--from-->
+		<!--dj_basics_attribute-->
+		<!--where-->
+		   <!--id in(-->
+				<!--SELECT-->
+				   <!--attribute_id-->
+				<!--FROM dj_basics_category_attribute-->
+				<!--where category_id =#{categoryId}-->
+			<!--)-->
+		   <!--ORDER BY create_date desc-->
+	<!--</select>-->
 
-    <!-- 查询商品类别和属性关联表 -->
-    <select id="selectAllCategoryAttribute" resultType="com.dangjia.acg.modle.attribute.CategoryAttribute">
-        SELECT
-           id, category_id as categoryId, attribute_id as attributeId, create_date as createDate, modify_date as modifyDate
-        from dj_basics_category_attribute
-        ORDER BY create_date desc
-    </select>
+    <!--&lt;!&ndash; 查询商品类别和属性关联表 &ndash;&gt;-->
+    <!--<select id="selectAllCategoryAttribute" resultType="com.dangjia.acg.modle.attribute.CategoryAttribute">-->
+        <!--SELECT-->
+           <!--id, category_id as categoryId, attribute_id as attributeId, create_date as createDate, modify_date as modifyDate-->
+        <!--from dj_basics_category_attribute-->
+        <!--ORDER BY create_date desc-->
+    <!--</select>-->
 
-    <!-- 新增商品类别和属性关联 -->
-    <insert id="insertCategoryAttribute" parameterType="com.dangjia.acg.modle.attribute.CategoryAttribute">
-		INSERT INTO dj_basics_category_attribute(
-		    id,category_id,attribute_id,create_date,modify_date
-		) 
-		VALUES (#{id}, #{categoryId},#{attributeId},SYSDATE(),SYSDATE())
-	</insert>
-    <!-- 删除商品类别和属性关联 -->
-    <delete id="deleteCategoryAttribute" parameterType="java.lang.String">
-		DELETE FROM dj_basics_category_attribute
-		WHERE attribute_id=#{attribute_id}
-	</delete>
+    <!--&lt;!&ndash; 新增商品类别和属性关联 &ndash;&gt;-->
+    <!--<insert id="insertCategoryAttribute" parameterType="com.dangjia.acg.modle.attribute.CategoryAttribute">-->
+		<!--INSERT INTO dj_basics_category_attribute(-->
+		    <!--id,category_id,attribute_id,create_date,modify_date-->
+		<!--) -->
+		<!--VALUES (#{id}, #{categoryId},#{attributeId},SYSDATE(),SYSDATE())-->
+	<!--</insert>-->
+    <!--&lt;!&ndash; 删除商品类别和属性关联 &ndash;&gt;-->
+    <!--<delete id="deleteCategoryAttribute" parameterType="java.lang.String">-->
+		<!--DELETE FROM dj_basics_category_attribute-->
+		<!--WHERE attribute_id=#{attribute_id}-->
+	<!--</delete>-->
 </mapper>

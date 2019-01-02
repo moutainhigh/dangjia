@@ -92,7 +92,8 @@ public class MemberService {
 			mobile = member==null?"":member.getMobile();
 		}
 		if(CommonUtil.isEmpty(mobile)){
-			return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(),EventStatus.NO_DATA.getDesc());
+			mobile="4001681231";
+//			return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(),EventStatus.NO_DATA.getDesc());
 		}
 		return ServerResponse.createBySuccess("OK",mobile);
 	}

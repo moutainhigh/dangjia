@@ -4,6 +4,7 @@ import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,13 +24,23 @@ import java.util.List;
 @FeignClient("dangjia-service-goods")
 public interface ForMasterAPI {
 
+    @PostMapping("/data/forMaster/backCount")
+    @ApiOperation(value = "增加退数量", notes = "增加退数量")
+    void backCount (@RequestParam("houseId")String houseId,@RequestParam("workerGoodsId")String workerGoodsId,
+                    @RequestParam("num")Double num);
+
+    @PostMapping("/data/forMaster/repairCount")
+    @ApiOperation(value = "增加补数量", notes = "增加补数量")
+    void repairCount(@RequestParam("houseId")String houseId,@RequestParam("workerGoodsId")String workerGoodsId,
+                     @RequestParam("num")Double num);
+
+    @PostMapping("/data/forMaster/byTechnologyId")
+    @ApiOperation(value = "查工艺", notes = "查工艺")
+    Technology byTechnologyId(@RequestParam("technologyId")String technologyId);
+
     @PostMapping("/data/forMaster/brandSeriesName")
     @ApiOperation(value = "查询品牌系列名", notes = "查询品牌系列名")
     String brandSeriesName(@RequestParam("productId") String productId);
-
-    @PostMapping("/data/forMaster/addTechnologyRecord")
-    @ApiOperation(value = "保存验收节点", notes = "保存验收节点")
-    void addTechnologyRecord(@RequestParam("goodsId")String goodsId, @RequestParam("houseFlowId")String houseFlowId);
 
     @PostMapping("/data/forMaster/getWorkerGoods")
     @ApiOperation(value = "工价商品信息", notes = "工价商品信息")

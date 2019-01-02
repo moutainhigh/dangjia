@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.core.HouseFlowAPI;
 import com.dangjia.acg.api.app.house.HouseAPI;
+import com.dangjia.acg.api.data.TechnologyRecordAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.exception.BaseException;
@@ -30,6 +31,7 @@ import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.Warehouse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +68,8 @@ public class BudgetWorkerService {
     private HouseAPI houseAPI;
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
+    @Autowired
+    private TechnologyRecordAPI technologyRecordAPI;
 
     private static Logger LOG = LoggerFactory.getLogger(BudgetWorkerService.class);
 
@@ -125,6 +129,7 @@ public class BudgetWorkerService {
 
     //修改精算模板
     public ServerResponse updateBudgetTemplate(String listOfGoods, String workerTypeId, String templateId) {
+        LOG.info("listOfGoods :" + listOfGoods + " workerTypeId:" +workerTypeId +" templateId:" +templateId );
         iBudgetMaterialMapper.deleteBytemplateId(templateId);
         iBudgetWorkerMapper.deleteBytemplateId(templateId);
         return budgetTemplates(listOfGoods, workerTypeId, templateId);
@@ -207,6 +212,8 @@ public class BudgetWorkerService {
                     WorkerGoods workerGoods = iWorkerGoodsMapper.selectByPrimaryKey(jobT.getProductId());
                     budgetWorker.setWorkerTypeId(workerTypeId);
                     budgetWorker.setSteta(3);
+                    budgetWorker.setRepairCount(0.0);
+                    budgetWorker.setBackCount(0.0);
                     budgetWorker.setTemplateId(templateId);
                     budgetWorker.setDeleteState(0);
                     budgetWorker.setWorkerGoodsId(workerGoods.getId());
@@ -283,11 +290,7 @@ public class BudgetWorkerService {
     public ServerResponse makeBudgets(String actuarialTemplateId, String houseFlowId, String houseId, String workerTypeId, String listOfGoods) {
         try {
             LOG.info("makeBudgets ***** :" + actuarialTemplateId);
-            ActuarialTemplate actuarialTemplate = iActuarialTemplateMapper.selectByPrimaryKey(actuarialTemplateId);
-            if (actuarialTemplate != null) {
-                LOG.info("makeBudgets :" + actuarialTemplate.getNumberOfUse());
-                actuarialTemplate.setNumberOfUse(actuarialTemplate.getNumberOfUse() + 1);
-            }
+
 
             iBudgetMaterialMapper.deleteByhouseId(houseId, workerTypeId);
             iBudgetWorkerMapper.deleteByhouseId(houseId, workerTypeId);
@@ -375,6 +378,8 @@ public class BudgetWorkerService {
                         budgetWorker.setWorkerTypeId(workerTypeId);
                         budgetWorker.setSteta(1);
                         budgetWorker.setDeleteState(0);
+                        budgetWorker.setRepairCount(0.0);
+                        budgetWorker.setBackCount(0.0);
                         budgetWorker.setWorkerGoodsId(workerGoods.getId().toString());
                         budgetWorker.setWorkerGoodsSn(workerGoods.getWorkerGoodsSn());
                         budgetWorker.setName(workerGoods.getName());
@@ -397,6 +402,13 @@ public class BudgetWorkerService {
                     continue;
                 }
             }
+
+            ActuarialTemplate actuarialTemplate = iActuarialTemplateMapper.selectByPrimaryKey(actuarialTemplateId);
+            if (actuarialTemplate != null) {
+                actuarialTemplate.setNumberOfUse(actuarialTemplate.getNumberOfUse() + 1);
+                iActuarialTemplateMapper.updateByPrimaryKeySelective(actuarialTemplate);
+            }
+
             return ServerResponse.createBySuccessMessage("生成精算成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -624,52 +636,43 @@ public class BudgetWorkerService {
     }
 
     /**
-     * 根据houseId查询所有验收节点
-     *
-     * @param houseId
-     * @return
+     * 根据houseId查询所有
+     * 已进场未完工工艺节点
+     * 和所有材料工艺节点
      */
     public JSONArray getAllTechnologyByHouseId(String houseId) {
         try {
-            Example example = new Example(BudgetWorker.class);
-            example.createCriteria().andEqualTo("houseId", houseId).andCondition("delete_state!=1");
-            List<BudgetWorker> abwlist = iBudgetWorkerMapper.selectByExample(example);//根据houseId查询所有人工精算
-            Example example2 = new Example(BudgetMaterial.class);
-            example2.createCriteria().andEqualTo("houseId", houseId).andCondition("delete_state!=1");
-            List<BudgetMaterial> abmList = iBudgetMaterialMapper.selectByExample(example);//根据houseId查询所有材料精算
             JSONArray jsonArray = new JSONArray();
-            for (BudgetWorker abw : abwlist) {
-                WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
-                List<Technology> tList = iTechnologyMapper.queryTechnologyByWgId(wg.getId());
-                for (Technology t : tList) {
-                    JSONObject map = new JSONObject();
-                    map.put("technologyId", t.getId());
-                    map.put("technologyName", t.getName());
-                    map.put("technologyContent", t.getContent());
-                    map.put("technologyType", t.getType());
-                    map.put("technologyImage", t.getImage());
-                    map.put("materialOrWorker", t.getMaterialOrWorker());
-                    map.put("workerTypeId", t.getWorkerTypeId());
-                    map.put("houseFlowId", abw.getHouseFlowId());
-                    map.put("houseId", abw.getHouseId());
-                    jsonArray.add(map);
+            List<HouseFlow> houseFlowList = technologyRecordAPI.unfinishedFlow(houseId);
+            for (HouseFlow houseFlow : houseFlowList){
+                List<BudgetWorker> budgetWorkerList = iBudgetWorkerMapper.getByHouseFlowId(houseFlow.getHouseId(),houseFlow.getId());
+                for (BudgetWorker abw : budgetWorkerList) {
+                    if(abw.getShopCount() + abw.getRepairCount() - abw.getBackCount() > 0){
+                        WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
+                        // TODO 该方法需修改
+                        List<Technology> tList = iTechnologyMapper.queryTechnologyByWgId(wg.getId());
+                        for (Technology t : tList) {
+                            JSONObject map = new JSONObject();
+                            map.put("technologyId", t.getId());
+                            map.put("technologyName", t.getName());
+                            jsonArray.add(map);
+                        }
+                    }
                 }
             }
-            for (BudgetMaterial abm : abmList) {//每个商品
-                Product product = iProductMapper.selectByPrimaryKey(abm.getProductId());
-                List<Technology> tList = iTechnologyMapper.queryTechnologyByWgId(product.getId());
-                for (Technology t : tList) {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("technologyId", t.getId());
-                    map.put("technologyName", t.getName());
-                    map.put("technologyContent", t.getContent());
-                    map.put("technologyType", t.getType());
-                    map.put("technologyImage", t.getImage());
-                    map.put("materialOrWorker", t.getMaterialOrWorker());
-                    map.put("workerTypeId", t.getWorkerTypeId());
-                    map.put("houseFlowId", abm.getHouseFlowId());
-                    map.put("houseId", abm.getHouseId());
-                    jsonArray.add(map);
+
+            List<Warehouse> warehouseList = technologyRecordAPI.warehouseList(houseId);
+            for (Warehouse warehouse : warehouseList) {//每个商品
+                if(warehouse.getShopCount() - warehouse.getBackCount() > 0){
+                    Product product = iProductMapper.selectByPrimaryKey(warehouse.getProductId());
+                    // TODO 该方法需修改
+                    List<Technology> tList = iTechnologyMapper.queryTechnologyByWgId(product.getId());
+                    for (Technology t : tList) {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("technologyId", t.getId());
+                        map.put("technologyName", t.getName());
+                        jsonArray.add(map);
+                    }
                 }
             }
             return jsonArray;

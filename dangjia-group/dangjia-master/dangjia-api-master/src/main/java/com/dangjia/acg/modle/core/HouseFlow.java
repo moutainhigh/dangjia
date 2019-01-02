@@ -48,13 +48,13 @@ public class HouseFlow extends BaseEntity {
 	private String houseId;//houseid
 
 	@Column(name = "house_worker_id")
-	@Desc(value = "houseWorkerId")
-	@ApiModelProperty("houseWorkerId")
+	@Desc(value = "工序工人ID")
+	@ApiModelProperty("工序工人ID")
 	private String houseWorkerId;//housewokerid
 
 	@Column(name = "house_worker_order_id")
-	@Desc(value = "houseWorkerOrderId")
-	@ApiModelProperty("houseWorkerOrderId")
+	@Desc(value = "工序工人订单ID")
+	@ApiModelProperty("工序工人订单ID")
 	private String houseWorkerOrderId;  //housewokerorderid
 
 	@Column(name = "worker_id")

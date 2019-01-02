@@ -16,7 +16,7 @@ import javax.persistence.Table;
 @Data
 @Entity
 @Table(name = "dj_house_modeling_layout")
-@ApiModel(description = "房子")
+@ApiModel(description = "户型")
 public class ModelingLayout extends BaseEntity {
 
 	@Column(name = "name")

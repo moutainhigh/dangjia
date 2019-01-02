@@ -9,14 +9,17 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
-import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendMateriel;
@@ -28,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -45,7 +49,7 @@ public class MendOrderService {
     @Autowired
     private IMendWorkerMapper mendWorkerMapper;
     @Autowired
-    private IHouseMapper houseMapper;
+    private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
     private RedisClient redisClient;
     @Autowired
@@ -54,6 +58,8 @@ public class MendOrderService {
     private ConfigUtil configUtil;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
+    @Autowired
+    private IHouseWorkerOrderMapper houseWorkerOrderMapper;
 
 
     /**
@@ -96,6 +102,16 @@ public class MendOrderService {
                 return ServerResponse.createByErrorMessage("生成多个未提交退人工单,异常联系平台部");
             }else {
                 MendOrder mendOrder = mendOrderList.get(0);
+                /*限制金额不能退多了*/
+                HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId,mendOrder.getWorkerTypeId());
+                if (houseWorkerOrder != null){
+                    BigDecimal totalAmount = new BigDecimal(mendOrder.getTotalAmount());//退的钱
+                    BigDecimal remain = houseWorkerOrder.getWorkPrice().add(houseWorkerOrder.getRepairPrice()).subtract(houseWorkerOrder.getHaveMoney());//剩下的
+                    if(remain.compareTo(totalAmount) < 0){
+                        return ServerResponse.createByErrorMessage("工钱退超过剩余,退多了");
+                    }
+                }
+
                 List<MendWorker> mendWorkerList = mendWorkerMapper.byMendOrderId(mendOrder.getId());
                 for (MendWorker v : mendWorkerList){
                     v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
@@ -124,6 +140,10 @@ public class MendOrderService {
             List<MendOrder> mendOrderList = mendOrderMapper.backWorker(houseId);
             if(mendOrderList.size() > 0){
                 return ServerResponse.createByErrorMessage("有未处理退人工单");
+            }
+            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId,workerTypeId);
+            if (houseFlowApplyList.size() > 0){
+                return ServerResponse.createByErrorMessage("该工种有未处理完工申请");
             }
 
             Example example = new Example(MendOrder.class);
@@ -229,6 +249,10 @@ public class MendOrderService {
             List<MendOrder> mendOrderList = mendOrderMapper.untreatedWorker(houseId);//补人工 1 3 5都查限制提交
             if (mendOrderList.size() > 0) {
                 return ServerResponse.createByErrorMessage("有未处理补人工单");
+            }
+            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId,workerTypeId);
+            if (houseFlowApplyList.size() > 0){
+                return ServerResponse.createByErrorMessage("该工种有未处理完工申请");
             }
 
             Example example = new Example(MendOrder.class);

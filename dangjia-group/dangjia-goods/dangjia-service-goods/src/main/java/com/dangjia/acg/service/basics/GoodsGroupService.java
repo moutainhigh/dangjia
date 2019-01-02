@@ -231,7 +231,7 @@ public class GoodsGroupService {
 //            List<Goods> goodsList = iGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
 
             // 去除商品是 服务类型的 或者 是自购的
-            List<Goods> goodsList = iGoodsMapper.queryGoodsGroupListByCategoryLikeName(categoryId, name,"0","2");
+            List<Goods> goodsList = iGoodsMapper.queryGoodsGroupListByCategoryLikeName(categoryId, name, "0", "2");
 
             LOG.info("goodsList:::" + goodsList.size());
             List<Map<String, Object>> gMapList = new ArrayList<>();
@@ -239,7 +239,9 @@ public class GoodsGroupService {
                 List<Map<String, Object>> mapList = new ArrayList<>();
                 List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
                 for (Product p : productList) {
-                    LOG.info("p :" + p);
+//                    LOG.info("p :" + p);
+                    if (p.getType() == 0)//去除禁用的
+                        continue;
                     if (p.getImage() == null)
                         continue;
                     String[] imgArr = p.getImage().split(",");
@@ -269,12 +271,9 @@ public class GoodsGroupService {
                     mapList.add(map);
                 }
                 LOG.info("mapList:::" + mapList.size());
-//                if (mapList.size() > 0)// 有product的商品 才返回给前端
-//                {
                 Map<String, Object> gMap = CommonUtil.beanToMap(goods);
                 gMap.put("productList", mapList);
                 gMapList.add(gMap);
-//                }
             }
             PageInfo pageResult = new PageInfo(goodsList);
             pageResult.setList(gMapList);

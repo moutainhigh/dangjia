@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.basics.WorkerGoodsAPI;
+import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -21,7 +22,9 @@ import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.matter.IWorkerEverydayMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
+import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
@@ -29,6 +32,7 @@ import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.WorkDeposit;
+import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +88,10 @@ public class HouseWorkerService {
     private ITechnologyRecordMapper technologyRecordMapper;
     @Autowired
     private HouseFlowService houseFlowService;
-
+    @Autowired
+    private IMendOrderMapper mendOrderMapper;
+    @Autowired
+    private ForMasterAPI forMasterAPI;
     @Autowired
     private ConfigMessageService configMessageService;
 
@@ -786,8 +793,17 @@ public class HouseWorkerService {
                 houseFlowMapper.updateByPrimaryKeySelective(supervisorHF);
             }
 
-            List<HouseFlowApply> todayApply = houseFlowApplyMapper.getTodayHouseFlowApply2(houseFlowId, workerId);
             /*提交申请进行控制*/
+            List<MendOrder> mendOrderList = mendOrderMapper.unCheckBackWorker(house.getId(),houseFlow.getWorkerTypeId());
+            if(mendOrderList.size() > 0){
+                return ServerResponse.createByErrorMessage("有未处理退人工单");
+            }
+            mendOrderList = mendOrderMapper.unCheckRepWorker(house.getId(),houseFlow.getWorkerTypeId());
+            if(mendOrderList.size() > 0){
+                return ServerResponse.createByErrorMessage("有未处理补人工单");
+            }
+
+            List<HouseFlowApply> todayApply = houseFlowApplyMapper.getTodayHouseFlowApply2(houseFlowId, workerId);
             //TODO 测试先注释掉
             /*if (applyType != 5 && todayApply != null && todayApply.size() > 0) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "您今日已发过申请,请改天再发申请！");
@@ -847,6 +863,8 @@ public class HouseWorkerService {
             if (applyType == 0) {//每日完工申请
                 if (workDeposit.getEverydayPay().compareTo(limitpay.subtract(haveMoney)) <= 0) {//每日上限减已获 大于等于 100
                     hfa.setApplyMoney(workDeposit.getEverydayPay());
+                }else {
+                    hfa.setApplyMoney(new BigDecimal(0));
                 }
                 hfa.setOtherMoney((workPrice).subtract(haveMoney).subtract(hfa.getApplyMoney()));
                 hfa.setApplyDec("我是" + workType.getName() + ",我今天已经完工了");//描述
@@ -854,7 +872,13 @@ public class HouseWorkerService {
                 //***阶段完工申请***//
             } else if (applyType == 1) {
                 //算阶段完工所有的钱
-                hfa.setApplyMoney(workPrice.multiply((workDeposit.getStagePay().add(workDeposit.getLimitPay()))).subtract(haveMoney)); //stagepay阶段完工比例百分比
+                BigDecimal stage = workPrice.multiply((workDeposit.getStagePay().add(workDeposit.getLimitPay()))).subtract(haveMoney);
+                if(stage.compareTo(new BigDecimal(0)) > 0 ){
+                    hfa.setApplyMoney(stage); //stagepay阶段完工比例百分比
+                }else {
+                    hfa.setApplyMoney(new BigDecimal(0));
+                }
+
                 //剩下钱
                 hfa.setOtherMoney(workPrice.subtract(haveMoney).subtract(hfa.getApplyMoney()));
                 hfa.setApplyDec("我是" + workType.getName() + ",我已经阶段完工了");//描述
@@ -865,13 +889,7 @@ public class HouseWorkerService {
 
                 //***整体完工申请***//
             } else if (applyType == 2) {
-                hfa.setApplyMoney(new BigDecimal(0));
-                if (hfa.getWorkerType() == 4) {//如果是拆除(直接完工拿全部钱)
-                    hfa.setApplyMoney(workPrice);
-                } else {
-                    hfa.setApplyMoney(workPrice.multiply(workDeposit.getWholePay()));
-                    hfa.setOtherMoney(workPrice.subtract(haveMoney).subtract(hfa.getApplyMoney()));
-                }
+                hfa.setApplyMoney(workPrice.subtract(haveMoney));
                 hfa.setApplyDec("我是" + workType.getName() + ",我已经整体完工了");//描述
                 houseFlowApplyMapper.insert(hfa);
 
@@ -979,11 +997,23 @@ public class HouseWorkerService {
 
                     if(imageType == 3){//节点图
                         String imageTypeId = imageObj.getString("imageTypeId");
-                        TechnologyRecord technologyRecord = technologyRecordMapper.selectByPrimaryKey(imageTypeId);
+                        String imageTypeName = imageObj.getString("imageTypeName");
+
+                        Technology technology = forMasterAPI.byTechnologyId(imageTypeId);
+                        TechnologyRecord technologyRecord = new TechnologyRecord();
+                        technologyRecord.setHouseId(house.getId());
+                        technologyRecord.setTechnologyId(technology.getId());
+                        technologyRecord.setName(imageTypeName);//工艺节点名
+                        technologyRecord.setMaterialOrWorker(technology.getMaterialOrWorker());
+                        if (technology.getMaterialOrWorker() == 0){
+                            technologyRecord.setWorkerTypeId("3");//暂时放管家那里看这些节点
+                        }else {
+                            technologyRecord.setWorkerTypeId(technology.getWorkerTypeId());
+                        }
                         technologyRecord.setImage(imageUrl);
                         technologyRecord.setState(1);//已验收
                         technologyRecord.setModifyDate(new Date());
-                        technologyRecordMapper.updateByPrimaryKeySelective(technologyRecord);
+                        technologyRecordMapper.insert(technologyRecord);
                     }else {
                         String[] imageArr = imageUrl.split(",");
                         for(int j = 0; j < imageArr.length; j++){

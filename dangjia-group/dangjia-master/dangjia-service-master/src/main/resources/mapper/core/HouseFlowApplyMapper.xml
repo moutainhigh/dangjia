@@ -26,6 +26,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         modify_date as modifyDate
     </sql>
 
+    <!--查询待处理完工申请-->
+    <select id="unCheckByWorkerTypeId" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        select <include refid="all_columns" />
+        from dj_core_house_flow_apply
+        where
+            house_id = #{houseId}
+        and (supervisor_check = 0 or (supervisor_check = 1 and member_check = 0))
+        and worker_type_id = #{workerTypeId}
+        and apply_type in (0,1,2)
+    </select>
+
     <!--查询待审核的申请-->
     <select id="checkPendingApply" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select <include refid="all_columns" />

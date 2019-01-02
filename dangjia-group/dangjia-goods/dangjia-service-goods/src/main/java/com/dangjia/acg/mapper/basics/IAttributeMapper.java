@@ -1,7 +1,6 @@
 package com.dangjia.acg.mapper.basics;
 
 import com.dangjia.acg.modle.attribute.Attribute;
-import com.dangjia.acg.modle.attribute.CategoryAttribute;
 import com.dangjia.acg.pojo.attribute.AttributePO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -37,8 +36,8 @@ public interface IAttributeMapper extends Mapper<Attribute> {
 	//根据属性名称模糊查询属性
 	List<Attribute> queryGoodsAttributelikeName(String name);
 
-	//查询所有的类别和属性关联表数据
-	List<CategoryAttribute>  selectAllCategoryAttribute();
+//	//查询所有的类别和属性关联表数据
+//	List<CategoryAttribute>  selectAllCategoryAttribute();
 //	//新增类别和属性关联
 //	void insertCategoryAttribute(CategoryAttribute categoryAttribute);//弃用
 //	//删除商品类别和属性关联

@@ -26,6 +26,10 @@ public interface WebModelingVillageAPI {
     @ApiOperation(value = "根据城市获取小区列表", notes = "根据城市获取小区列表")
     ServerResponse getVillageList(@RequestParam("request") HttpServletRequest request, @RequestParam("cityId") String cityId);
 
+    @PostMapping("web/village/setVillage")
+    @ApiOperation(value = "新增或更新小区", notes = "新增或更新小区")
+    ServerResponse setVillage(@RequestParam("request") HttpServletRequest request,@RequestParam("jsonStr")String jsonStr);
+
     @PostMapping("web/village/getLayoutList")
     @ApiOperation(value = "根据小区获取户型列表", notes = "根据小区获取户型列表")
     ServerResponse getLayoutList(@RequestParam("request") HttpServletRequest request, @RequestParam("villageId") String villageId);

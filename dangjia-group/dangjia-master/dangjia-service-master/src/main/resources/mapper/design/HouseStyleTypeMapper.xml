@@ -8,7 +8,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             *
         FROM dj_design_house_style_type
         WHERE
-        name = #{style}
+        name = #{name}
     </select>
 
 </mapper>

@@ -190,6 +190,7 @@
 		<include refid="new_columns"/>
 		FROM dj_basics_goods as g
 		where 1=1
+
 		<if test="categoryId!=null and categoryId!=''">
 			and category_id=#{categoryId}
 		</if>
@@ -200,7 +201,7 @@
 			and buy !=#{buy}
 		</if>
 		<if test="buy!=null and buy!=''">
-			and (SELECT COUNT(*) as num FROM dj_basics_product p WHERE p.goods_id = g.id ) > 1
+			and (SELECT COUNT(*) > 0 as num FROM dj_basics_product p WHERE p.goods_id = g.id and p.type =1)
 		</if>
 		<if test="name!=null and name!=''">
 			and name LIKE CONCAT('%',#{name},'%')

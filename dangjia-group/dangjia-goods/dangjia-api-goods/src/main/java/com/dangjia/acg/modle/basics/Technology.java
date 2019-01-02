@@ -40,5 +40,12 @@ public class Technology extends BaseEntity {
     @Column(name = "image")
     private String image;//图片
 
+    @Column(name = "goods_id")
+    private String goodsId;//人工id ,服务货品productId  :  根据 materialOrWorker字段决定：  0:服务productId;  1:人工商品
 
+//    @Column(name = "worker_goods_id")
+////    private String workerGoodsId;//人工id
+
+//    @Column(name = "product_id")
+//    private String productId;//服务货品productId
 }

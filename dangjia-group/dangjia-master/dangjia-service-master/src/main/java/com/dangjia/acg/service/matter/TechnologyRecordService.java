@@ -3,25 +3,23 @@ package com.dangjia.acg.service.matter;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
-import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.matter.TechnologyRecordDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
+import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.util.StringUtil;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +40,10 @@ public class TechnologyRecordService {
     private IHouseMapper houseMapper;
     @Autowired
     private BudgetWorkerAPI budgetWorkerAPI;
+    @Autowired
+    private IWarehouseMapper warehouseMapper;
+    @Autowired
+    private ForMasterAPI forMasterAPI;
 
     /**
      * 获取上传图片列表
@@ -56,10 +58,10 @@ public class TechnologyRecordService {
                 String[] idArr = nodeArr.split(",");
                 for(int i=0; i<idArr.length; i++){
                     String id = idArr[i];
-                    TechnologyRecord technologyRecord = technologyRecordMapper.selectByPrimaryKey(id);
+                    Technology technology = forMasterAPI.byTechnologyId(id);
                     map = new HashMap<>();
                     map.put("imageTypeId", id);
-                    map.put("imageTypeName", technologyRecord.getName());
+                    map.put("imageTypeName", technology.getName());
                     map.put("imageType", 3);  //节点照片
                     listMap.add(map);
                 }
@@ -103,16 +105,20 @@ public class TechnologyRecordService {
                     return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "该房子已暂停施工,请勿提交申请！");
                 }
             }
+
             //所有已进场未完工工序的节点
             List<TechnologyRecordDTO> technologyRecordDTOS = new ArrayList<>();
-            List<HouseFlow> houseFlowList =  houseFlowMapper.unfinishedFlow(house.getId());
-            for (HouseFlow hf : houseFlowList){
-                List<TechnologyRecord> useList = technologyRecordMapper.allUse(hf.getId());//未退所有节点
-                for (TechnologyRecord technologyRecord : useList){
+            JSONArray jsonArray = budgetWorkerAPI.getAllTechnologyByHouseId(house.getId());
+            for(int i=0;i<jsonArray.size();i++){
+                JSONObject object = jsonArray.getJSONObject(i);
+                String technologyId = object.getString("technologyId");
+                String technologyName = object.getString("technologyName");
+                List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(house.getId(),technologyId);
+                if (technologyRecordList.size() == 0){
                     TechnologyRecordDTO dto = new TechnologyRecordDTO();
-                    dto.setId(technologyRecord.getId());
-                    dto.setName(technologyRecord.getName());
-                    dto.setState(technologyRecord.getState());
+                    dto.setId(technologyId);
+                    dto.setName(technologyName);
+                    dto.setState(0);//未验收
                     technologyRecordDTOS.add(dto);
                 }
             }
@@ -125,45 +131,17 @@ public class TechnologyRecordService {
     }
 
     /**
-     * 精算审核通过后
-     * 根据houseId获取所有验收节点并保存
+     * 已进场未完工
      */
-    @Transactional(rollbackFor = Exception.class)
-    public ServerResponse getAllTechnologyByHouseId(String houseId) {
-        try {
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-            House house = houseMapper.selectByPrimaryKey(houseId);
-            request.setAttribute(Constants.CITY_ID, house.getCityId());
-            JSONArray technologyList = budgetWorkerAPI.getAllTechnologyByHouseId(request, houseId);
-            if (technologyList != null) {
-                for (int i = 0; i < technologyList.size(); i++) {
-                    JSONObject object = technologyList.getJSONObject(i);
-                    TechnologyRecord technologyRecord = new TechnologyRecord();
-                    technologyRecord.setTechnologyId(object.getString("technologyId"));
-                    technologyRecord.setName(object.getString("technologyName"));
-                    technologyRecord.setContent(object.getString("technologyContent"));
-                    technologyRecord.setType(object.getInteger("technologyType"));
-                    technologyRecord.setImage(object.getString("technologyImage"));
-                    technologyRecord.setMaterialOrWorker(object.getInteger("materialOrWorker"));
-                    technologyRecord.setWorkerTypeId(object.getString("workerTypeId"));
-                    technologyRecord.setHouseFlowId(object.getString("houseFlowId"));
-                    technologyRecord.setState(0);
-                    technologyRecordMapper.insertSelective(technologyRecord);
-                }
-            }
-            return ServerResponse.createBySuccessMessage("保存成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return ServerResponse.createByErrorMessage("保存失败");
-        }
+    public List<HouseFlow> unfinishedFlow(String houseId){
+        return houseFlowMapper.unfinishedFlow(houseId);
     }
 
     /**
-     * 补人工
-     * 添加工艺验收节点
+     * 所有购买材料
      */
-    public void addTechnologyRecord(TechnologyRecord technologyRecord){
-        technologyRecordMapper.insert(technologyRecord);
+    public List<Warehouse> warehouseList(String houseId){
+        return warehouseMapper.warehouseList(houseId,null,null);
     }
+
 }

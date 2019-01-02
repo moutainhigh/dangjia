@@ -30,7 +30,7 @@ public class Warehouse extends BaseEntity {
 	@Column(name = "shop_count")
 	@Desc(value = "买总数")
 	@ApiModelProperty("买总数")
-	private Double shopCount;
+	private Double shopCount; //买总数 = repairCount + stayCount + robCount
 
 	@Column(name = "repair_count")
 	@Desc(value = "补总数")

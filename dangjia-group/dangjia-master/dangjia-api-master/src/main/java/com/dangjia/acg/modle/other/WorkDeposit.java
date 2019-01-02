@@ -24,30 +24,30 @@ public class WorkDeposit extends BaseEntity {
 	@Column(name = "everyday_pay")
 	@Desc(value = "普通工种每日完工支付的钱")
 	@ApiModelProperty("普通工种每日完工支付的钱")
-	private BigDecimal everydayPay;//everydaypay
+	private BigDecimal everydayPay;//everydaypay       100
 
 	@Column(name = "limit_pay")
 	@Desc(value = "每日完工支付上限百分比")
 	@ApiModelProperty("每日完工支付上限百分比")
-	private BigDecimal limitPay;//limitpay
+	private BigDecimal limitPay;//limitpay          0.30
 
 	@Column(name = "stage_pay")
 	@Desc(value = "阶段完工比例百分比")
 	@ApiModelProperty("阶段完工比例百分比")
-	private BigDecimal stagePay;//stagepay
+	private BigDecimal stagePay;//stagepay       0.45
 
 	@Column(name = "whole_pay")
 	@Desc(value = "整体完工比例")
 	@ApiModelProperty("整体完工比例")
-	private BigDecimal wholePay;//wholepay
+	private BigDecimal wholePay;//wholepay       0.25
 
 	@Column(name = "deposit")
 	@Desc(value = "最终押金比例")
 	@ApiModelProperty("最终押金比例")
-	private BigDecimal deposit;//
+	private BigDecimal deposit;//          0.05
 
 	@Column(name = "budget_cost")
 	@Desc(value = "精算多少钱一平方")
 	@ApiModelProperty("精算多少钱一平方")
-	private BigDecimal budgetCost;//budgetcost
+	private BigDecimal budgetCost;//budgetcost       3.5
 }

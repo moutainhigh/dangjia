@@ -14,7 +14,7 @@ import javax.persistence.Table;
 @Data
 @Entity
 @Table(name = "dj_actuary_search_box")
-@ApiModel(description = "人工精算")
+@ApiModel(description = "搜索记录")
 public class SearchBox extends BaseEntity{
 	@Column(name = "content")
 	private String content;//内容

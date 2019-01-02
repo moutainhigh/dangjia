@@ -1,7 +1,6 @@
 package com.dangjia.acg.mapper.basics;
 
 import com.dangjia.acg.modle.basics.Technology;
-import com.dangjia.acg.modle.basics.WorkerTechnology;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -20,23 +19,28 @@ import java.util.List;
 public interface ITechnologyMapper extends Mapper<Technology> {
 
     /**根据商品id查询商品关联节点工艺 人工材料共用*/
+    /**
+     * 根据商品 goodsId 查询商品对应的多个工艺
+     * @param goodsId  人工id ,服务货品productId  :  根据 materialOrWorker字段决定：  0:服务productId;  1:人工商品
+     * @return
+     */
     List<Technology> queryTechnologyList(@Param("goodsId") String goodsId);
 
     void deleteById(String id);
 
     List<Technology> query(@Param("workerTypeId") String workerTypeId ,@Param("name") String name,@Param("materialOrWorker")Integer materialOrWorker);
 
-    //新增人工商品关联工艺
-    void insertWokerTechnology(WorkerTechnology workerTechnology);
+//    //新增人工商品关联工艺
+//    void insertWokerTechnology(WorkerTechnology workerTechnology);
 
-    //删除人工商品关联工艺
-    void deleteWokerTechnologyByWgId(@Param("worker_goods_id") String worker_goods_id);
+//    //删除人工商品关联工艺
+//    void deleteWokerTechnologyByWgId(@Param("worker_goods_id") String worker_goods_id);
 
-    //根据商品id查询人工商品关联工艺关系
-    List<WorkerTechnology> queryWokerTechnologyByWgId(@Param("worker_goods_id") String worker_goods_id);
-    
+//    //根据商品id查询人工商品关联工艺关系
+//    List<WorkerTechnology> queryWokerTechnologyByWgId(@Param("worker_goods_id") String worker_goods_id);
+
     //根据商品id查询人工商品关联工艺实体
-    List<Technology> queryTechnologyByWgId(@Param("worker_goods_id") String worker_goods_id);
+    List<Technology> queryTechnologyByWgId(@Param("goodsId") String goodsId);
 
     Technology queryById(@Param("id") String id);
     //根据内容模糊搜索工艺 

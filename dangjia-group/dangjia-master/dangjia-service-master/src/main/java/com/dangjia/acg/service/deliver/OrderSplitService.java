@@ -12,11 +12,13 @@ import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -50,6 +52,8 @@ public class OrderSplitService {
     private IMemberMapper memberMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private IWarehouseMapper warehouseMapper;
 
 
 
@@ -186,9 +190,20 @@ public class OrderSplitService {
 
     /**
      * 取消(打回)
+     * 返回数量
      */
     public ServerResponse cancelOrderSplit(String orderSplitId){
         try{
+            OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(orderSplitId);
+            Example example = new Example(OrderSplitItem.class);
+            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplitId);
+            List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+            for(OrderSplitItem orderSplitItem : orderSplitItemList){
+                Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(),orderSplit.getHouseId());
+                warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());
+                warehouseMapper.updateByPrimaryKeySelective(warehouse);
+            }
+
             orderSplitMapper.cancelOrderSplit(orderSplitId);
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){

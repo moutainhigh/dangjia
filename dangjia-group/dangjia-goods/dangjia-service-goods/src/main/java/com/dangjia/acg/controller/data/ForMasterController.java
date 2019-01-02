@@ -6,6 +6,7 @@ import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.service.data.ForMasterService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +25,30 @@ public class ForMasterController implements ForMasterAPI {
     @Autowired
     private ForMasterService forMasterService;
 
+    /**
+     * 增加退数量
+     */
+    public void backCount (String houseId,String workerGoodsId,Double num){
+        forMasterService.backCount(houseId,workerGoodsId,num);
+    }
+
+    /**
+     * 增加补数量
+     */
+    public void repairCount(String houseId,String workerGoodsId,Double num){
+        forMasterService.repairCount(houseId,workerGoodsId,num);
+    }
+
+    @Override
+    @ApiMethod
+    public Technology byTechnologyId(String technologyId){
+        return forMasterService.byTechnologyId(technologyId);
+    }
+
     @Override
     @ApiMethod
     public String brandSeriesName(String productId){
         return forMasterService.brandSeriesName(productId);
-    }
-    @Override
-    @ApiMethod
-    public void addTechnologyRecord(String goodsId, String houseFlowId){
-        forMasterService.addTechnologyRecord(goodsId,houseFlowId);
     }
     @Override
     @ApiMethod

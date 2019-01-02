@@ -1,7 +1,6 @@
 package com.dangjia.acg.pojo.attribute;
 
 import com.dangjia.acg.modle.attribute.Attribute;
-import com.dangjia.acg.modle.attribute.CategoryAttribute;
 import com.dangjia.acg.pojo.basics.ProductPO;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
@@ -22,9 +21,9 @@ public class AttributePO extends Attribute {
      * 延迟加载：fetch = FetchType.LAZY
      * 引用外键：category_id
      */
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "category_id")
-    private CategoryAttribute categoryAttribute;//分类对象
+//    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    @JoinColumn(name = "category_id")
+//    private CategoryAttribute categoryAttribute;//分类对象
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 //    @JoinColumn(name = "product_id")

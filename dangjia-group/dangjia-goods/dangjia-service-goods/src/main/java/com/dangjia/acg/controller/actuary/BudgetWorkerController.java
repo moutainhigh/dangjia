@@ -157,13 +157,13 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 	}
 
 	/**
-	 *  根据houseId查询所有验收节点
-	 * @param houseId
-	 * @return
+	 *  根据houseId查询所有
+	 *  已进场未完工工艺节点
+	 *  和所有材料工艺节点
 	 */
 	@Override
 	@ApiMethod
-	public JSONArray getAllTechnologyByHouseId(HttpServletRequest request,String houseId){
+	public JSONArray getAllTechnologyByHouseId(String houseId){
 		return budgetWorkerService.getAllTechnologyByHouseId(houseId);
 	}
 }

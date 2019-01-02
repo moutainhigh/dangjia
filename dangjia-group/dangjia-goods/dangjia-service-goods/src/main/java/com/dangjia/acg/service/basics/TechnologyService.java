@@ -17,7 +17,7 @@ import com.dangjia.acg.modle.actuary.SearchBox;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
-import com.dangjia.acg.modle.basics.WorkerTechnology;
+import com.dangjia.acg.modle.house.ModelingVillage;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +52,114 @@ public class TechnologyService {
     private ConfigUtil configUtil;
 
     private static Logger LOG = LoggerFactory.getLogger(TechnologyService.class);
+
+
+    /**
+     * 添加多个人工工艺和添加服务节点
+     *
+     * @param jsonStr          多个工艺对象list的json
+     * @param workerTypeId     工序id : 如果是 服务product类型的 传递 空 。查询的时候忽略 该字段
+     * @param materialOrWorker 0服务工艺;1:人工工艺
+     * @param goodsId          根据 materialOrWorker字段决定：  0:服务productId;  1:人工商品
+     * @return
+     */
+    public String insertTechnologyList(String jsonStr, String workerTypeId, Integer materialOrWorker, String goodsId) {
+        try {
+            LOG.info("insertTechnologyList jsonStr:" + jsonStr + "  workerTypeId:" + workerTypeId + " goodsId:" + goodsId);
+            if (!StringUtils.isNotBlank(jsonStr))
+                return "jsonStr不能为空";
+//                return ServerResponse.createByErrorMessage("jsonStr不能为空");
+//            JSONObject villageObj = JSONObject.parseObject(jsonStr);
+//            JSONArray technologyArr = JSONArray.parseArray(villageObj.getString("technologyList"));
+            JSONArray technologyArr = JSONArray.parseArray(jsonStr);
+
+            for (int i = 0; i < technologyArr.size(); i++) {//遍历工艺
+                JSONObject obj = technologyArr.getJSONObject(i);
+                String id = obj.getString("id");//
+                String name = obj.getString("name");//
+
+                for (int j = i + 1; j < technologyArr.size(); j++) {//不能重复
+                    JSONObject objJ = technologyArr.getJSONObject(j);
+                    String nameJ = objJ.getString("name");//
+                    if (nameJ.equals(name))
+                        return "工艺名称不能有重复的";
+                }
+
+                List<Technology> technologyList = iTechnologyMapper.query(workerTypeId, name, materialOrWorker);
+                if (!StringUtils.isNotBlank(id))//为空 ： 就是新增
+                {
+                    if (technologyList.size() > 0)
+                        return "工艺名称已经存在";
+                } else { //修改
+                    Technology technology = iTechnologyMapper.selectByPrimaryKey(id);
+                    if (!technology.getName().equals(name))//是修改了名字 ，
+                    {
+                        if (technologyList.size() > 0)
+                            return "工艺名称已经存在";
+                    }
+                }
+            }
+
+            for (int j = 0; j < technologyArr.size(); j++) {//遍历工艺
+                JSONObject obj = technologyArr.getJSONObject(j);
+                String id = obj.getString("id");//
+                String name = obj.getString("name");//
+                String content = obj.getString("content");//
+                Integer type = obj.getInteger("type");//
+                String image = obj.getString("image");//
+
+                Technology t = new Technology();
+                t.setName(name);
+                t.setContent(content);
+                t.setGoodsId(goodsId);//根据 materialOrWorker字段决定：  0:服务productId;  1:人工商品
+                String[] imgArr = image.split(",");
+                String imgStr = "";
+                for (int i = 0; i < imgArr.length; i++) {
+                    String img = imgArr[i];
+                    if (i == imgArr.length - 1) {
+                        imgStr += img;
+                    } else {
+                        imgStr += img + ",";
+                    }
+                }
+                t.setImage(imgStr);
+                //0服务工艺;1:人工工艺
+                if (materialOrWorker == 1) { //1人工工艺
+                    t.setWorkerTypeId(workerTypeId);
+                    t.setType(type);
+                    t.setMaterialOrWorker(1);
+                } else {//0服务工艺
+                    t.setType(1);
+                    t.setMaterialOrWorker(0);
+                }
+
+                if (!StringUtils.isNotBlank(id))//为空 ： 就是新增
+                {
+                    iTechnologyMapper.insertSelective(t);
+                    LOG.info("新增成功" + t.getId() + " name:" + t.getName());
+                    return "1";
+                } else { //修改
+                    Technology technology = iTechnologyMapper.selectByPrimaryKey(id);
+                    technology.setName(t.getName());
+                    technology.setContent(t.getContent());
+                    technology.setGoodsId(t.getGoodsId());
+                    technology.setImage(t.getImage());
+
+                    technology.setWorkerTypeId(t.getWorkerTypeId());
+                    technology.setType(t.getType());
+                    technology.setMaterialOrWorker(t.getMaterialOrWorker());
+                    technology.setModifyDate(new Date());
+                    iTechnologyMapper.updateByPrimaryKeySelective(technology);
+                    LOG.info("修改成功" + t.getId() + " name:" + t.getName());
+                    return "1";
+                }
+            }
+            return "操作工艺失败";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "操作工艺失败";
+        }
+    }
 
     /**
      * 添加人工工艺和添加服务节点
@@ -106,12 +214,11 @@ public class TechnologyService {
                 return ServerResponse.createByErrorMessage("不存在此工艺,修改失败");
             }
 
-            if(!t.getName().equals(name))//如果修改了名称 就判断，修改的名字 是否已经存在
+            if (!t.getName().equals(name))//如果修改了名称 就判断，修改的名字 是否已经存在
             {
                 List<Technology> technologyList = iTechnologyMapper.query(t.getWorkerTypeId(), name, t.getMaterialOrWorker());
-                if (technologyList.size() > 0) {
+                if (technologyList.size() > 0)
                     return ServerResponse.createByErrorMessage("工艺名称已存在");
-                }
             }
 
 //            t.setId(id);//id 不能修改
@@ -215,17 +322,18 @@ public class TechnologyService {
     //新增人工商品关联工艺
     public ServerResponse insertWokerTechnology(String workerGoodsId, String tIdArr) {
         try {
-            JSONArray arr = JSONArray.parseArray(JSON.toJSONString(tIdArr));
-            for (int i = 0; i < arr.size(); i++) {
-                JSONObject obj = arr.getJSONObject(i);
-                WorkerTechnology wt = new WorkerTechnology();
-                wt.setWorkerGoodsId(workerGoodsId);
-                wt.setTechnologyId(obj.getString("technologyId"));
-                wt.setCreateDate(new Date());
-                wt.setModifyDate(new Date());
-                iTechnologyMapper.insertWokerTechnology(wt);
-            }
-            return ServerResponse.createBySuccessMessage("新增成功");
+//            JSONArray arr = JSONArray.parseArray(JSON.toJSONString(tIdArr));
+//            for (int i = 0; i < arr.size(); i++) {
+//                JSONObject obj = arr.getJSONObject(i);
+//                WorkerTechnology wt = new WorkerTechnology();
+//                wt.setWorkerGoodsId(workerGoodsId);
+//                wt.setTechnologyId(obj.getString("technologyId"));
+//                wt.setCreateDate(new Date());
+//                wt.setModifyDate(new Date());
+//                iTechnologyMapper.insertWokerTechnology(wt);
+//            }
+//            return ServerResponse.createBySuccessMessage("新增成功");
+            return ServerResponse.createBySuccessMessage("接口弃用");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("新增失败");
@@ -264,10 +372,10 @@ public class TechnologyService {
                 map.put("materialOrWorker", t.getMaterialOrWorker());
                 mapList.add(map);
             }
-            return ServerResponse.createBySuccess("新增成功", mapList);
+            return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("新增失败");
+            return ServerResponse.createByErrorMessage("查询失败");
         }
     }
 

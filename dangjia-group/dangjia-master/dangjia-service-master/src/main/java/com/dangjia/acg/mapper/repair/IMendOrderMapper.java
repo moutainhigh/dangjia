@@ -10,6 +10,12 @@ import java.util.List;
 @Repository
 public interface IMendOrderMapper extends Mapper<MendOrder>{
 
+    /**查询工种未处理补人工*/
+    List<MendOrder> unCheckRepWorker(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId);
+
+    /**查询工种未处理退人工*/
+    List<MendOrder> unCheckBackWorker(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId);
+
     /**查询退人工单*/
     List<MendOrder> workerBackState(@Param("houseId") String houseId);
 

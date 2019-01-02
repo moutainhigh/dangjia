@@ -311,8 +311,11 @@ public class PaymentService {
 
                 mendOrder.setWorkerOrderState(6);//业主已支付补人工
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-                /**补人工增加节点*/
-                String houseFlowId = houseFlowMapper.selectHouseFlowId(businessOrder.getHouseId(),mendOrder.getWorkerTypeId());
+
+                HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(mendOrder.getHouseId(),mendOrder.getWorkerTypeId());
+                houseWorkerOrder.setRepairPrice(houseWorkerOrder.getRepairPrice().add(new BigDecimal(mendOrder.getTotalAmount())));
+                houseWorkerOrderMapper.updateByPrimaryKeySelective(houseWorkerOrder);
+
                 Example example = new Example(MendWorker.class);
                 example.createCriteria().andEqualTo(MendWorker.MEND_ORDER_ID, mendOrder.getId());
                 List<MendWorker> mendWorkerList = mendWorkerMapper.selectByExample(example);
@@ -331,7 +334,6 @@ public class PaymentService {
                 order.setType(1);//人工
                 orderMapper.insert(order);
                 for (MendWorker mendWorker : mendWorkerList){
-                    forMasterAPI.addTechnologyRecord(mendWorker.getWorkerGoodsId(), houseFlowId);
                     OrderItem orderItem = new OrderItem();
                     orderItem.setOrderId(order.getId());
                     orderItem.setHouseId(businessOrder.getHouseId());
@@ -344,6 +346,8 @@ public class PaymentService {
                     orderItem.setWorkerGoodsId(mendWorker.getWorkerGoodsId());
                     orderItem.setImage(mendWorker.getImage());
                     orderItemMapper.insert(orderItem);
+                    /*记录补数量*/
+                    forMasterAPI.repairCount(mendOrder.getHouseId(), mendWorker.getWorkerGoodsId(), mendWorker.getShopCount());
                 }
             }
         }catch (Exception e){

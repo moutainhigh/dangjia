@@ -31,6 +31,13 @@ public class WebModelingVillageController implements WebModelingVillageAPI {
     public ServerResponse getVillageList(HttpServletRequest request,String cityId){
         return modelingVillageService.getVillageList(request,cityId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setVillage(HttpServletRequest request, String jsonStr) {
+        return modelingVillageService.setVillage(request,jsonStr);
+    }
+
     @Override
     @ApiMethod
     public ServerResponse getLayoutList(HttpServletRequest request,String villageId){

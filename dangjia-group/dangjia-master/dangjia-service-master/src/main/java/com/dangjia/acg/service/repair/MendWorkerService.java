@@ -1,13 +1,16 @@
 package com.dangjia.acg.service.repair;
 
+import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDTO;
+import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
+import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -16,7 +19,10 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,19 +44,40 @@ public class MendWorkerService {
     private IHouseMapper houseMapper;
     @Autowired
     private IMemberMapper memberMapper;
-
-
+    @Autowired
+    private IHouseWorkerOrderMapper houseWorkerOrderMapper;
+    @Autowired
+    private ForMasterAPI forMasterAPI;
 
     /**
+     * 平台审核退人工
      * 通过 不通过
      * 1工匠审核中，2工匠审核不通过，3工匠审核通过即平台审核中，4平台不同意，5平台审核通过,6管家取消
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse checkWorkerBackState(String mendOrderId,int state){
-        MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
-        mendOrder.setWorkerBackState(state);
-        mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-        return ServerResponse.createBySuccessMessage("操作成功");
+        try {
+            MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
+            mendOrder.setWorkerBackState(state);
+            mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+            if(state == 5){//通过 退工钱
+                HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(mendOrder.getHouseId(), mendOrder.getWorkerTypeId());
+                BigDecimal refund = new BigDecimal(mendOrder.getTotalAmount());
+                houseWorkerOrder.setWorkPrice(houseWorkerOrder.getWorkPrice().subtract(refund));//减掉工钱
+                houseWorkerOrderMapper.updateByPrimaryKeySelective(houseWorkerOrder);
 
+                List<MendWorker> mendWorkerList = mendWorkerMapper.byMendOrderId(mendOrderId);
+                /*记录退数量*/
+                for (MendWorker mendWorker : mendWorkerList){
+                    forMasterAPI.backCount(mendOrder.getHouseId(), mendWorker.getWorkerGoodsId(), mendWorker.getShopCount());
+                }
+            }
+            return ServerResponse.createBySuccessMessage("操作成功");
+        }catch (Exception e){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
     }
 
     /**

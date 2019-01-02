@@ -155,29 +155,14 @@ public class HouseFlowApplyService {
 
             if(hfa.getApplyType() == 2){//整体完工
                 /**验证未处理补人工订单*/
-               /* Example example = new Example(MendOrder.class);
-                example.createCriteria()
-                        .andEqualTo(MendOrder.HOUSE_ID, hfa.getHouseId())
-                        .andEqualTo(MendOrder.TYPE, 1).andEqualTo(MendOrder.WORKER_TYPE_ID,hfa.getWorkerTypeId());//补人工
-                example.createCriteria()
-                        .orEqualTo(MendOrder.WORKER_ORDER_STATE, 1)
-                        .orEqualTo(MendOrder.WORKER_ORDER_STATE, 3)
-                        .orEqualTo(MendOrder.WORKER_ORDER_STATE, 5); // 1 3 5都查限制提交
-                List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
-                if(mendOrderList.size() > 0){
-                    return ServerResponse.createByErrorMessage("该工种有未处理补人");
-                }*/
-                List<MendOrder> mendOrderList = mendOrderMapper.untreatedWorker(hfa.getHouseId());
-                if (mendOrderList.size() > 0) {
-                    return ServerResponse.createByErrorMessage("有未处理补人工单");
-                }
-                mendOrderList = mendOrderMapper.backWorker(hfa.getHouseId());
+                List<MendOrder> mendOrderList = mendOrderMapper.unCheckBackWorker(hwo.getHouseId(),hwo.getWorkerTypeId());
                 if(mendOrderList.size() > 0){
                     return ServerResponse.createByErrorMessage("有未处理退人工单");
                 }
-
-                /**结算补人工钱,生成流水*/
-                this.settleMendWorker(hfa,hwo);
+                mendOrderList = mendOrderMapper.unCheckRepWorker(hwo.getHouseId(),hwo.getWorkerTypeId());
+                if(mendOrderList.size() > 0){
+                    return ServerResponse.createByErrorMessage("有未处理补人工单");
+                }
 
                 //修改进程
                 HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(hwo.getHouseWorkerId());
@@ -305,48 +290,6 @@ public class HouseFlowApplyService {
         }
     }
 
-    /**结算补人工钱,生成流水*/
-    private void settleMendWorker(HouseFlowApply hfa,HouseWorkerOrder hwo){
-        Example example = new Example(MendOrder.class);
-        example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, hfa.getHouseId()).andEqualTo(MendOrder.TYPE, 1)//补人工
-                .orEqualTo(MendOrder.WORKER_TYPE_ID,hfa.getWorkerTypeId()).orEqualTo(MendOrder.WORKER_ORDER_STATE, 6);
-        List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
-        for(MendOrder mendOrder : mendOrderList){
-            hwo.setRepairPrice(hwo.getRepairPrice().add(new BigDecimal(mendOrder.getTotalAmount())));
-            houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
-
-            /*记录流水*/
-            Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
-            WorkerDetail workerDetail = new WorkerDetail();
-            workerDetail.setName("补人工钱");
-            workerDetail.setWorkerId(hwo.getWorkerId());
-            workerDetail.setWorkerName(worker.getName());
-            workerDetail.setHouseId(hwo.getHouseId());
-            workerDetail.setMoney(new BigDecimal(mendOrder.getTotalAmount()));
-            workerDetail.setState(0);//进钱
-            workerDetailMapper.insert(workerDetail);
-
-            //处理工钱
-            if(worker.getHaveMoney() == null){//工人已获取
-                worker.setHaveMoney(new BigDecimal(0.0));
-            }
-            worker.setHaveMoney(worker.getHaveMoney().add(new BigDecimal(mendOrder.getTotalAmount())));
-
-            if(worker.getSurplusMoney() == null){//可取余额 赋初始值为0
-                worker.setSurplusMoney(new BigDecimal(0.0));
-            }
-            if(worker.getRetentionMoney() == null){
-                worker.setRetentionMoney(new BigDecimal(0.0));
-            }
-            BigDecimal mid = worker.getHaveMoney().subtract(worker.getRetentionMoney());
-            if(mid.compareTo(BigDecimal.ZERO) == 1){//大于0
-                worker.setSurplusMoney(mid);
-            }else{
-                worker.setSurplusMoney(BigDecimal.ZERO);
-            }
-            memberMapper.updateByPrimaryKeySelective(worker);
-        }
-    }
     /**每日完工计分*/
     private void updateDayIntegral(HouseFlowApply houseFlowApply){
         try{
@@ -597,8 +540,8 @@ public class HouseFlowApplyService {
             if(hfa.getApplyType() == 2){//整体完工申请
                 workerDetail.setName("整体完工");
                 if(hwo.getRepairPrice().compareTo(new BigDecimal(0)) > 0){
-                    //有补的人工钱加入工人流水
-                    workerDetailRepair(hwo);
+                    /*有补的人工钱加入工人流水*/
+                    this.workerDetailRepair(hwo);
                 }
             }else{
                 workerDetail.setName("阶段完工");
@@ -639,7 +582,7 @@ public class HouseFlowApplyService {
         }
     }
     /**补人工算钱*/
-    public void workerDetailRepair(HouseWorkerOrder hwo){
+    private void workerDetailRepair(HouseWorkerOrder hwo){
         Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
         WorkerDetail workerDetail = new WorkerDetail();
         workerDetail.setName("补人工钱");

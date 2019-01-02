@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.data;
 
-import com.dangjia.acg.api.data.TechnologyRecordAPI;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
@@ -10,7 +9,6 @@ import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
-import com.dangjia.acg.modle.matter.TechnologyRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -37,12 +35,31 @@ public class ForMasterService {
     @Autowired
     private ITechnologyMapper technologyMapper;
     @Autowired
-    private TechnologyRecordAPI technologyRecordAPI;
-    @Autowired
     private IGoodsMapper goodsMapper;
     @Autowired
     private IBrandSeriesMapper brandSeriesMapper;
 
+    /**
+     * 增加退数量
+     */
+    public void backCount (String houseId,String workerGoodsId,Double num){
+        BudgetWorker budgetWorker = budgetWorkerMapper.byWorkerGoodsId(houseId,workerGoodsId);
+        budgetWorker.setBackCount(budgetWorker.getBackCount() + num);
+        budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
+    }
+
+    /**
+     * 增加补数量
+     */
+    public void repairCount(String houseId,String workerGoodsId,Double num){
+        BudgetWorker budgetWorker = budgetWorkerMapper.byWorkerGoodsId(houseId,workerGoodsId);
+        budgetWorker.setRepairCount(budgetWorker.getRepairCount() + num);
+        budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
+    }
+
+    public Technology byTechnologyId(String technologyId){
+        return technologyMapper.selectByPrimaryKey(technologyId);
+    }
 
     public String brandSeriesName(String productId){
         return brandSeriesMapper.brandSeriesName(productId);
@@ -75,11 +92,7 @@ public class ForMasterService {
             budgetMaterial.setTotalPrice(budgetMaterial.getShopCount() * product.getPrice());//已支付 记录总价
             budgetMaterial.setDeleteState(3);//已支付
             budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
-
-            //查询验收节点加入节点记录
-            addTechnologyRecord(product.getId(), houseFlowId);
         }
-
         return budgetMaterialList;
     }
 
@@ -97,35 +110,11 @@ public class ForMasterService {
             budgetWorker.setTotalPrice(budgetWorker.getShopCount() * wg.getPrice());
             budgetWorker.setDeleteState(3);//已支付
             budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
-
-            //查询验收节点加入节点记录
-            addTechnologyRecord(wg.getId(), houseFlowId);
         }
 
         //业主取消的材料又改为待付款
         budgetMaterialMapper.updateSelf(houseFlowId);
-
         return budgetWorkerList;
-    }
-    /**
-     * 保存工艺验收节点
-     * productId  workerGoodsId 共用 goodsId
-     * */
-    public void addTechnologyRecord(String goodsId, String houseFlowId){
-        List<Technology> technologyList = technologyMapper.queryTechnologyList(goodsId);
-        for (Technology technology : technologyList){
-            TechnologyRecord technologyRecord = new TechnologyRecord();
-            technologyRecord.setTechnologyId(technology.getId());
-            technologyRecord.setName(technology.getName());
-            technologyRecord.setMaterialOrWorker(technology.getMaterialOrWorker());
-            technologyRecord.setWorkerTypeId(technology.getWorkerTypeId());
-            technologyRecord.setContent(technology.getContent());
-            technologyRecord.setType(technology.getType());
-            technologyRecord.setImage(technology.getImage());
-            technologyRecord.setState(0);//初始状态
-            technologyRecord.setHouseFlowId(houseFlowId);
-            technologyRecordAPI.addTechnologyRecord(technologyRecord);//保存验收节点
-        }
     }
 
     /**

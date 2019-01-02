@@ -9,6 +9,9 @@ import java.util.List;
 
 @Repository
 public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
+
+    /**待处理申请*/
+    List<HouseFlowApply> unCheckByWorkerTypeId(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
     /**待审核申请*/
     List<HouseFlowApply> checkPendingApply(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
     /**管家已审核业主未审核申请*/
