@@ -12,8 +12,8 @@ spring:
           password: 'Xinxin813806'
           default-label: master
           timeout: 10
-        encrypt:
-          enabled: false
+      encrypt:
+        enabled: false
   application:
     name: 'config'
 logging:
