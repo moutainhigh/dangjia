@@ -3,7 +3,7 @@ spring:
     name: dangjia-service-goods
   cloud:
     config:
-      uri: http://config.fengjiangit.com
+      uri: http://192.168.0.229:6010
     loadbalancer:
       retry:
         enabled: true

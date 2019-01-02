@@ -13,6 +13,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		worker_type_id as workerTypeId,
 		apply_member_id as applyMemberId,
 		type,
+		landlord_state as landlordState,
 		material_order_state as materialOrderState,
 		worker_order_state as workerOrderState,
 		material_back_state as materialBackState,
@@ -102,6 +103,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             type = 1
         AND  house_id = #{houseId}
         AND (worker_order_state=1 or worker_order_state=3 or worker_order_state=5)
+    </select>
+
+    <!-- 查询业主申请退货单 -->
+    <select id="landlordState" resultType="com.dangjia.acg.modle.repair.MendOrder">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_repair_mend_order
+        where
+            type = 4
+        and
+        landlord_state > 0
+        <if test = "houseId!=null and houseId!=''">
+            and
+            house_id = #{houseId}
+        </if>
+        ORDER BY create_date desc
     </select>
 
     <!-- 查询退货单 -->

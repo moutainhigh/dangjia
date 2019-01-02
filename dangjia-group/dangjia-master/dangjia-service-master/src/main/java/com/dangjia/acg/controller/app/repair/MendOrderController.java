@@ -19,6 +19,32 @@ public class MendOrderController implements MendOrderAPI {
     private MendOrderService mendOrderService;
 
 
+
+    /**
+     * 业主确认退货
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse confirmLandlordState(String houseId){
+        return mendOrderService.confirmLandlordState(houseId);
+    }
+    /**
+     *   业主已添加退货单明细
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse landlordBackDetail(String houseId){
+        return mendOrderService.landlordBackDetail(houseId);
+    }
+    /**
+     * 业主退材料
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse landlordBack(String userToken,String houseId,String productArr){
+        return mendOrderService.landlordBack(userToken,houseId,productArr);
+    }
+
     /**
      * 确认退人工
      */

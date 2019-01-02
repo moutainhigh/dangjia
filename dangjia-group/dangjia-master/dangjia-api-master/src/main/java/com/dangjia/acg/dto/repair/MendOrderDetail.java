@@ -15,6 +15,7 @@ import java.util.Map;
 public class MendOrderDetail {
     private String number;//单号
     private Integer type;
+    private Integer landlordState;
     private Integer materialOrderState;
     private Integer workerOrderState;
     private Integer materialBackState;

@@ -9,8 +9,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 @FeignClient("dangjia-service-master")
-@Api(value = "管家端补退操作", description = "管家端补退操作")
+@Api(value = "补退提交", description = "补退提交")
 public interface MendOrderAPI {
+
+    @PostMapping(value = "app/repair/mendOrder/confirmLandlordState")
+    @ApiOperation(value = "业主确认退货", notes = "业主确认退货")
+    ServerResponse confirmLandlordState(@RequestParam("houseId")String houseId);
+
+    @PostMapping(value = "app/repair/mendOrder/landlordBackDetail")
+    @ApiOperation(value = "业主已添加退货单明细", notes = "业主已添加退货单明细")
+    ServerResponse landlordBackDetail(@RequestParam("houseId")String houseId);
+
+    @PostMapping(value = "app/repair/mendOrder/landlordBack")
+    @ApiOperation(value = "业主退材料", notes = "业主退材料")
+    ServerResponse landlordBack(@RequestParam("userToken")String userToken,@RequestParam("houseId")String houseId,
+                                @RequestParam("productArr")String productArr);
 
     @PostMapping(value = "app/repair/mendOrder/confirmBackMendWorker")
     @ApiOperation(value = "确认退人工", notes = "确认退人工")

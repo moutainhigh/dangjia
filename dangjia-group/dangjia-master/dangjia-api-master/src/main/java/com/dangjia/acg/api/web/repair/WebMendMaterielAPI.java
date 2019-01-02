@@ -17,6 +17,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(value = "Web端补退货", description = "Web端补退货")
 public interface WebMendMaterielAPI {
 
+    /**
+     * 通过不通过业主退货单
+     */
+    @PostMapping(value = "web/repair/webMendMateriel/checkLandlordState")
+    @ApiOperation(value = "审核业主退货单", notes = "审核业主退货单")
+    ServerResponse checkLandlordState(@RequestParam("mendOrderId")String mendOrderId, @RequestParam("state")int state,@RequestParam("carriage")Double carriage);
+
+    /**
+     * 业主退货单列表
+     */
+    @PostMapping(value = "web/repair/webMendMateriel/landlordState")
+    @ApiOperation(value = "业主退货单列表", notes = "业主退货单列表")
+    ServerResponse landlordState(@RequestParam("houseId")String houseId,@RequestParam("pageNum")Integer pageNum, @RequestParam("pageSize")Integer pageSize);
 
     /**
      * 通过不通过退货单

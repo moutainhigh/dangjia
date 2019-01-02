@@ -53,9 +53,14 @@ public class MendOrder extends BaseEntity {
 	private String applyMemberId;
 
 	@Column(name = "type")
-	@Desc(value = "0:补材料;1:补人工;2:退材料;3:退人工")
-	@ApiModelProperty("0:补材料;1:补人工;2:退材料;3:退人工")
+	@Desc(value = "0:补材料;1:补人工;2:退材料;3:退人工,4:业主退材料")
+	@ApiModelProperty("0:补材料;1:补人工;2:退材料;3:退人工,4:业主退材料")
 	private Integer type;
+
+	@Column(name = "landlord_state")
+	@Desc(value = "业主退材料状态")
+	@ApiModelProperty("0生成中,1平台审核中,2不通过,3通过")
+	private Integer landlordState;
 
 	@Column(name = "material_order_state")
 	@Desc(value = "补材料审核状态")

@@ -649,8 +649,7 @@ public class BudgetWorkerService {
                 for (BudgetWorker abw : budgetWorkerList) {
                     if(abw.getShopCount() + abw.getRepairCount() - abw.getBackCount() > 0){
                         WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
-                        // TODO 该方法需修改
-                        List<Technology> tList = iTechnologyMapper.queryTechnologyByWgId(wg.getId());
+                        List<Technology> tList = iTechnologyMapper.queryTechnologyList(wg.getId());
                         for (Technology t : tList) {
                             JSONObject map = new JSONObject();
                             map.put("technologyId", t.getId());
@@ -665,8 +664,7 @@ public class BudgetWorkerService {
             for (Warehouse warehouse : warehouseList) {//每个商品
                 if(warehouse.getShopCount() - warehouse.getBackCount() > 0){
                     Product product = iProductMapper.selectByPrimaryKey(warehouse.getProductId());
-                    // TODO 该方法需修改
-                    List<Technology> tList = iTechnologyMapper.queryTechnologyByWgId(product.getId());
+                    List<Technology> tList = iTechnologyMapper.queryTechnologyList(product.getId());
                     for (Technology t : tList) {
                         Map<String, Object> map = new HashMap<>();
                         map.put("technologyId", t.getId());

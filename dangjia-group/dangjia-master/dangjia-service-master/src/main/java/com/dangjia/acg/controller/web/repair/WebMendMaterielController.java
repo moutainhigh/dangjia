@@ -17,6 +17,27 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
     @Autowired
     private MendMaterielService mendMaterielService;
 
+
+    /**
+     * 通过 不通过
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse checkLandlordState(String mendOrderId,int state,Double carriage){
+        return mendMaterielService.checkLandlordState(mendOrderId,state,carriage);
+    }
+
+    /**
+     * 房子id查询业主退货单列表
+     * landlordState
+     * 0生成中,1平台审核中,2不通过,3通过
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse landlordState(String houseId,Integer pageNum, Integer pageSize){
+        return mendMaterielService.landlordState(houseId,pageNum,pageSize);
+    }
+
     /**
      * 通过 不通过
      */

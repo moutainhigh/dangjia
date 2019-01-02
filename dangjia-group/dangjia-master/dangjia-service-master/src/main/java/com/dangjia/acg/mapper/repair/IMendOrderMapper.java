@@ -28,6 +28,9 @@ public interface IMendOrderMapper extends Mapper<MendOrder>{
     /**查询未处理补人工*/
     List<MendOrder> untreatedWorker(@Param("houseId") String houseId);
 
+    /**查询业主退货单*/
+    List<MendOrder> landlordState(@Param("houseId") String houseId);
+
     /**查询退货单*/
     List<MendOrder> materialBackState(@Param("houseId") String houseId);
 

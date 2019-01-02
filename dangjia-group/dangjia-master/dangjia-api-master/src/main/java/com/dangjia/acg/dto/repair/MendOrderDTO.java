@@ -30,8 +30,11 @@ public class MendOrderDTO {
     private String applyName;//管家姓名
     private String applyMobile;
 
-    @ApiModelProperty("0:补材料;1:补人工;2:退材料;3:退人工")
+    @ApiModelProperty("0:补材料;1:补人工;2:退材料;3:退人工,4业主申请退货")
     private Integer type;
+
+    @ApiModelProperty("0生成中,1平台审核中,2不通过,3通过")
+    private Integer landlordState;//
 
     @ApiModelProperty("0生成中,1平台审核中，2平台审核不通过，3平台审核通过待业主支付,4业主已支付，5业主不同意，6管家取消")
     private Integer materialOrderState; //补材料审核状态

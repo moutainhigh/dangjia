@@ -63,6 +63,99 @@ public class MendOrderService {
 
 
     /**
+     * 业主确认退货
+     */
+    public ServerResponse confirmLandlordState(String houseId){
+        try{
+            Example example = new Example(MendOrder.class);
+            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 4)
+                    .andEqualTo(MendOrder.LANDLORD_STATE, 0);
+            List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
+            if (mendOrderList.size() == 0){
+                return ServerResponse.createBySuccessMessage("没有退货单");
+            }else if (mendOrderList.size() > 1){
+                return ServerResponse.createByErrorMessage("生成多个退货单,异常联系平台部");
+            }else {
+                MendOrder mendOrder = mendOrderList.get(0);
+                mendOrder.setLandlordState(1);//平台审核
+                mendOrder.setModifyDate(new Date());//更新时间
+                mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+                return ServerResponse.createBySuccessMessage("操作成功");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     *   业主已添加退货单明细
+     */
+    public ServerResponse landlordBackDetail(String houseId){
+        try{
+            Example example = new Example(MendOrder.class);
+            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 4)
+                    .andEqualTo(MendOrder.LANDLORD_STATE, 0);
+            List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
+            if (mendOrderList.size() == 0){
+                return ServerResponse.createBySuccessMessage("未生成退货单");
+            }else if (mendOrderList.size() > 1){
+                return ServerResponse.createByErrorMessage("生成多个退货单,异常联系平台部");
+            }else {
+                List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderList.get(0).getId());
+                for (MendMateriel mendMateriel : mendMaterielList){
+                    mendMateriel.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                }
+                return ServerResponse.createBySuccess("查询成功", mendMaterielList);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 业主退材料
+     */
+    public ServerResponse landlordBack(String userToken,String houseId,String productArr){
+        try{
+            AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+            Member member = accessToken.getMember();//业主
+
+            Example example = new Example(MendOrder.class);
+            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 4)//业主退材料
+                    .andLessThan(MendOrder.LANDLORD_STATE, 2);//小于2 包括审核中状态
+            List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
+            MendOrder mendOrder;
+            if (mendOrderList.size() > 0){
+                mendOrder = mendOrderList.get(0);
+                /*删除之前子项*/
+                example = new Example(MendMateriel.class);
+                example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, mendOrder.getId());
+                mendMaterialMapper.deleteByExample(example);
+            }else {
+                mendOrder = new MendOrder();
+                mendOrder.setNumber(DateUtil.dateToString(mendOrder.getModifyDate(),"yyyy-MM-dd HH:mm:ss"));//订单号
+                mendOrder.setHouseId(houseId);
+                mendOrder.setApplyMemberId(member.getId());
+                mendOrder.setType(4);//业主退材料
+                mendOrder.setLandlordState(0);//生成中
+                mendOrder.setTotalAmount(0.0);
+                mendOrderMapper.insert(mendOrder);
+            }
+
+            if (this.addMendMateriel(productArr,mendOrder)){
+                return  ServerResponse.createBySuccessMessage("保存成功");
+            }else {
+                return  ServerResponse.createByErrorMessage("添加明细失败");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return  ServerResponse.createByErrorMessage("保存失败");
+        }
+    }
+
+    /**
      * 确认退人工
      */
     public ServerResponse confirmBackMendWorker(String houseId){

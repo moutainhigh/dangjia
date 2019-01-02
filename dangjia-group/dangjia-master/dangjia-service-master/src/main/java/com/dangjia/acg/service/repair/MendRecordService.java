@@ -46,6 +46,7 @@ public class MendRecordService {
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
             mendOrderDetail.setNumber(mendOrder.getNumber());
             mendOrderDetail.setType(mendOrder.getType());
+            mendOrderDetail.setLandlordState(mendOrder.getLandlordState());//业主退材料状态
             mendOrderDetail.setMaterialOrderState(mendOrder.getMaterialOrderState());
             mendOrderDetail.setWorkerOrderState(mendOrder.getWorkerOrderState());
             mendOrderDetail.setMaterialBackState(mendOrder.getMaterialBackState());
@@ -113,6 +114,7 @@ public class MendRecordService {
                 map.put("workerOrderState", mendOrder.getWorkerOrderState());
                 map.put("materialBackState", mendOrder.getMaterialBackState());
                 map.put("workerBackState", mendOrder.getWorkerBackState());
+                map.put("landlordState", mendOrder.getLandlordState());
                 returnMap.add(map);
             }
 
@@ -181,6 +183,20 @@ public class MendRecordService {
                 map.put("type", 3);
                 map.put("image", address + "iconWork/three.png");
                 map.put("name", "退人工记录");
+                map.put("size", "共"+mendOrderList.size()+"条");
+                returnMap.add(map);
+            }
+
+            example = new Example(MendOrder.class);
+            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,4)
+                    .andNotEqualTo(MendOrder.LANDLORD_STATE,0);
+            mendOrderList = mendOrderMapper.selectByExample(example);
+            if(mendOrderList.size() > 0){
+                Map<String,Object> map = new HashMap<>();
+                map.put("houseId", houseId);
+                map.put("type", 4);
+                map.put("image", address + "iconWork/four.png");
+                map.put("name", "业主退货");
                 map.put("size", "共"+mendOrderList.size()+"条");
                 returnMap.add(map);
             }
