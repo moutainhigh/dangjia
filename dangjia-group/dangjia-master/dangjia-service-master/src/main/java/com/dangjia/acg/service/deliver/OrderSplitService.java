@@ -157,8 +157,9 @@ public class OrderSplitService {
                 if (splitDeliverList.size() > 0){
                     splitDeliver = splitDeliverList.get(0);
                 }else {
+                    example = new Example(SplitDeliver.class);
                     splitDeliver = new SplitDeliver();
-                    splitDeliver.setNumber(orderSplit.getNumber() + "00" + splitDeliverMapper.selectCount(splitDeliver));//发货单号
+                    splitDeliver.setNumber(orderSplit.getNumber() + "00" + splitDeliverMapper.selectCountByExample(example));//发货单号
                     splitDeliver.setHouseId(house.getId());
                     splitDeliver.setTotalAmount(0.0);
                     splitDeliver.setDeliveryFee(0.0);

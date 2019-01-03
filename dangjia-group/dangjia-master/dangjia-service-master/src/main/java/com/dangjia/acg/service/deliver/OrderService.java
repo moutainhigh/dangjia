@@ -331,8 +331,9 @@ public class OrderService {
                 example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
                 orderSplitItemMapper.deleteByExample(example);
             }else {
+                example = new Example(OrderSplit.class);
                 orderSplit = new OrderSplit();
-                orderSplit.setNumber("dj" + 200000 + orderSplitMapper.selectCount(orderSplit));//要货单号
+                orderSplit.setNumber("dj" + 200000 + orderSplitMapper.selectCountByExample(example));//要货单号
                 orderSplit.setHouseId(houseId);
                 orderSplit.setApplyStatus(0);//后台审核状态：0生成中, 1申请中, 2通过, 3不通过 后台(材料员)
                 orderSplit.setSupervisorId(supervisor.getId());

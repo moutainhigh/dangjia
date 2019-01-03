@@ -56,7 +56,7 @@ public class MendRecordService {
             mendOrderDetail.setModifyDate(mendOrder.getModifyDate());
 
             List<Map<String,Object>> mapList = new ArrayList<>();
-            if (mendOrder.getType() == 0 || mendOrder.getType() == 2){
+            if (mendOrder.getType() == 0 || mendOrder.getType() == 2 || mendOrder.getType() == 4){
                 List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderId);
                 for (MendMateriel mendMateriel : mendMaterielList){
                     Map<String,Object> map = new HashMap<>();
@@ -103,6 +103,7 @@ public class MendRecordService {
 
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,type);
+            example.orderBy(MendOrder.CREATE_DATE).desc();
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             for (MendOrder mendOrder : mendOrderList){
                 Map<String,Object> map = new HashMap<>();

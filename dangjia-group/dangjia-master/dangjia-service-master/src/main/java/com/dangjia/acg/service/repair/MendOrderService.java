@@ -7,7 +7,6 @@ import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -129,16 +128,19 @@ public class MendOrderService {
             MendOrder mendOrder;
             if (mendOrderList.size() > 0){
                 mendOrder = mendOrderList.get(0);
+                mendOrder.setLandlordState(0);//生成中
                 /*删除之前子项*/
                 example = new Example(MendMateriel.class);
                 example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, mendOrder.getId());
                 mendMaterialMapper.deleteByExample(example);
             }else {
+                example = new Example(MendOrder.class);
                 mendOrder = new MendOrder();
-                mendOrder.setNumber(DateUtil.dateToString(mendOrder.getModifyDate(),"yyyy-MM-dd HH:mm:ss"));//订单号
+                mendOrder.setNumber("DJZX" + 40000 + mendOrderMapper.selectCountByExample(example));//订单号
                 mendOrder.setHouseId(houseId);
                 mendOrder.setApplyMemberId(member.getId());
                 mendOrder.setType(4);//业主退材料
+                mendOrder.setOrderName("业主退材料");
                 mendOrder.setLandlordState(0);//生成中
                 mendOrder.setTotalAmount(0.0);
                 mendOrderMapper.insert(mendOrder);
@@ -255,8 +257,9 @@ public class MendOrderService {
                 example.createCriteria().andEqualTo(MendWorker.MEND_ORDER_ID, mendOrder.getId());
                 mendWorkerMapper.deleteByExample(example);
             }else {
+                example = new Example(MendOrder.class);
                 mendOrder = new MendOrder();
-                mendOrder.setNumber(DateUtil.dateToString(mendOrder.getModifyDate(),"yyyy-MM-dd HH:mm:ss"));//订单号
+                mendOrder.setNumber("DJZX" + 30000 + mendOrderMapper.selectCountByExample(example));//订单号
                 mendOrder.setHouseId(houseId);
                 mendOrder.setApplyMemberId(steward.getId());
                 mendOrder.setType(3);//退人工
@@ -363,8 +366,9 @@ public class MendOrderService {
                 example.createCriteria().andEqualTo(MendWorker.MEND_ORDER_ID, mendOrder.getId());
                 mendWorkerMapper.deleteByExample(example);
             }else {
+                example = new Example(MendOrder.class);
                 mendOrder = new MendOrder();
-                mendOrder.setNumber(DateUtil.dateToString(mendOrder.getModifyDate(),"yyyy-MM-dd HH:mm:ss"));//订单号
+                mendOrder.setNumber("DJZX" + 20000 + mendOrderMapper.selectCountByExample(example));//订单号
                 mendOrder.setHouseId(houseId);
                 mendOrder.setApplyMemberId(steward.getId());
                 mendOrder.setType(1);//补人工
@@ -389,6 +393,7 @@ public class MendOrderService {
     /**保存补退人工明细mendWorker*/
     private boolean addMendWorker(String workerGoodsArr, MendOrder mendOrder,String workerTypeId){
         try{
+            mendOrder.setTotalAmount(0.0);
             JSONArray jsonArray = JSONArray.parseArray(workerGoodsArr);
             for(int i=0; i<jsonArray.size(); i++){
                 JSONObject obj = jsonArray.getJSONObject(i);
@@ -488,16 +493,19 @@ public class MendOrderService {
             MendOrder mendOrder;
             if (mendOrderList.size() > 0){
                 mendOrder = mendOrderList.get(0);
+                mendOrder.setMaterialBackState(0);//生成中
                 /*删除之前子项*/
                 example = new Example(MendMateriel.class);
                 example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, mendOrder.getId());
                 mendMaterialMapper.deleteByExample(example);
             }else {
+                example = new Example(MendOrder.class);
                 mendOrder = new MendOrder();
-                mendOrder.setNumber(DateUtil.dateToString(mendOrder.getModifyDate(),"yyyy-MM-dd HH:mm:ss"));//订单号
+                mendOrder.setNumber("DJZX" + 10000 + mendOrderMapper.selectCountByExample(example));//订单号
                 mendOrder.setHouseId(houseId);
                 mendOrder.setApplyMemberId(steward.getId());
                 mendOrder.setType(2);//退材料
+                mendOrder.setOrderName("退材料");
                 mendOrder.setMaterialBackState(0);//生成中
                 mendOrder.setTotalAmount(0.0);
                 mendOrderMapper.insert(mendOrder);
@@ -581,16 +589,19 @@ public class MendOrderService {
             MendOrder mendOrder;
             if (mendOrderList.size() > 0){
                 mendOrder = mendOrderList.get(0);
+                mendOrder.setMaterialOrderState(0);//生成中
                 /*删除之前子项*/
                 example = new Example(MendMateriel.class);
                 example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, mendOrder.getId());
                 mendMaterialMapper.deleteByExample(example);
             }else {
+                example = new Example(MendOrder.class);
                 mendOrder = new MendOrder();
-                mendOrder.setNumber(DateUtil.dateToString(mendOrder.getModifyDate(),"yyyy-MM-dd HH:mm:ss"));//订单号
+                mendOrder.setNumber("DJZX" + 00000 + mendOrderMapper.selectCountByExample(example));//订单号
                 mendOrder.setHouseId(houseId);
                 mendOrder.setApplyMemberId(steward.getId());
                 mendOrder.setType(0);//补材料
+                mendOrder.setOrderName("补材料");
                 mendOrder.setMaterialOrderState(0);//生成中
                 mendOrder.setTotalAmount(0.0);
                 mendOrderMapper.insert(mendOrder);
@@ -610,6 +621,7 @@ public class MendOrderService {
     /**保存mendMateriel*/
     private boolean addMendMateriel(String productArr, MendOrder mendOrder){
         try{
+            mendOrder.setTotalAmount(0.0);
             JSONArray jsonArray = JSONArray.parseArray(productArr);
             for(int i=0; i<jsonArray.size(); i++){
                 JSONObject obj = jsonArray.getJSONObject(i);
