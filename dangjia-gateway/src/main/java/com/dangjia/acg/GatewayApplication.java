@@ -1,7 +1,6 @@
 package com.dangjia.acg;
 
 
-import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.error.ErrorAdvice;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -32,7 +31,7 @@ public class GatewayApplication {
 	@Bean
 	MultipartConfigElement multipartConfigElement() {
 		MultipartConfigFactory factory = new MultipartConfigFactory();
-		factory.setLocation(String.valueOf(SysConfig.PUBLIC_DANGJIA_PATH.defaultValue)+String.valueOf(SysConfig.PUBLIC_TEMPORARY_FILE_ADDRESS.defaultValue));
+		factory.setLocation("/data/dangjia/temporary/");
 		return factory.createMultipartConfig();
 	}
 	@Bean
