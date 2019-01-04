@@ -34,7 +34,7 @@ public interface ISupplierMapper extends Mapper<Supplier> {
 	void insertSupplierProduct(SupplierProduct supplierGoods);
 	void updateSupplierProduct(SupplierProduct supplierGoods);
 	//根据供应商查询自己所供应的商品
-	List<Product> querySupplierProduct(String supplier_id);
+	List<Product> querySupplierProduct(@Param("supplier_id")String supplier_id,@Param("likeProductName")String likeProductName);
 	//根据供应商查询在供应的商品种类
 	Integer getSupplierProductByGoodId(String goods_id);
 	//根据供应商查询在供应的货品种类

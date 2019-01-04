@@ -104,8 +104,8 @@ public class SupplierProductController implements SupplierProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse querySupplierProduct(HttpServletRequest request, int type, String supplierId, String categoryId, PageDTO pageDTO) {
-        return supplierService.querySupplierProduct(type, supplierId, categoryId, pageDTO.getPageNum(), pageDTO.getPageSize());
+    public ServerResponse querySupplierProduct(HttpServletRequest request, int type, String supplierId, String categoryId,String likeProductName, PageDTO pageDTO) {
+        return supplierService.querySupplierProduct(type, supplierId, categoryId,likeProductName, pageDTO.getPageNum(), pageDTO.getPageSize());
     }
 
     /**

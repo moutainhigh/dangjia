@@ -28,8 +28,6 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
     List<HouseFlowApply> getEarliestTimeHouseApply(@Param("houseId") String houseId,@Param("workerId") String workerId);
     Long getSuspendApply(@Param("houseId") String houseId,@Param("workerId") String workerId);
     Long getEveryDayApply(@Param("houseId") String houseId,@Param("workerId") String workerId);
-    List<HouseFlowApply> getTodayHouseFlowApply2(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
-    List<HouseFlowApply> waitHouseFlowApply(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
     List<HouseFlowApply> getTodayStartByHouseId(@Param("houseId") String houseId);
     HouseFlowApply getSupervisorCheck(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
     /**根据houseId查询所有施工记录*/

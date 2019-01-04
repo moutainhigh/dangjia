@@ -65,14 +65,11 @@ public class TechnologyService {
      */
     public String insertTechnologyList(String jsonStr, String workerTypeId, Integer materialOrWorker, String goodsId) {
         try {
-            LOG.info("insertTechnologyList jsonStr:" + jsonStr + "  workerTypeId:" + workerTypeId + " goodsId:" + goodsId);
+//            LOG.info("insertTechnologyList jsonStr:" + jsonStr + "  workerTypeId:" + workerTypeId + " goodsId:" + goodsId);
             if (!StringUtils.isNotBlank(jsonStr))
-                return "jsonStr不能为空";
-//                return ServerResponse.createByErrorMessage("jsonStr不能为空");
-//            JSONObject villageObj = JSONObject.parseObject(jsonStr);
-//            JSONArray technologyArr = JSONArray.parseArray(villageObj.getString("technologyList"));
+                return "1";
+//                return "jsonStr不能为空";
             JSONArray technologyArr = JSONArray.parseArray(jsonStr);
-
             for (int i = 0; i < technologyArr.size(); i++) {//遍历工艺
                 JSONObject obj = technologyArr.getJSONObject(i);
                 String id = obj.getString("id");//
@@ -100,13 +97,15 @@ public class TechnologyService {
                 }
             }
 
-            for (int j = 0; j < technologyArr.size(); j++) {//遍历工艺
+            for (int j = 0; j < technologyArr.size(); j++) //遍历工艺
+            {
                 JSONObject obj = technologyArr.getJSONObject(j);
                 String id = obj.getString("id");//
                 String name = obj.getString("name");//
                 String content = obj.getString("content");//
                 Integer type = obj.getInteger("type");//
                 String image = obj.getString("image");//
+                String sampleImage = obj.getString("sampleImage");//
 
                 Technology t = new Technology();
                 t.setName(name);
@@ -123,13 +122,17 @@ public class TechnologyService {
                     }
                 }
                 t.setImage(imgStr);
+                t.setSampleImage(sampleImage);
+
+                t.setType(type);
+
                 //0服务工艺;1:人工工艺
                 if (materialOrWorker == 1) { //1人工工艺
                     t.setWorkerTypeId(workerTypeId);
-                    t.setType(type);
+//                    t.setType(type);
                     t.setMaterialOrWorker(1);
                 } else {//0服务工艺
-                    t.setType(1);
+//                    t.setType(1);
                     t.setMaterialOrWorker(0);
                 }
 
@@ -137,13 +140,13 @@ public class TechnologyService {
                 {
                     iTechnologyMapper.insertSelective(t);
                     LOG.info("新增成功" + t.getId() + " name:" + t.getName());
-                    return "1";
                 } else { //修改
                     Technology technology = iTechnologyMapper.selectByPrimaryKey(id);
                     technology.setName(t.getName());
                     technology.setContent(t.getContent());
                     technology.setGoodsId(t.getGoodsId());
                     technology.setImage(t.getImage());
+                    technology.setSampleImage(t.getSampleImage());
 
                     technology.setWorkerTypeId(t.getWorkerTypeId());
                     technology.setType(t.getType());
@@ -151,10 +154,9 @@ public class TechnologyService {
                     technology.setModifyDate(new Date());
                     iTechnologyMapper.updateByPrimaryKeySelective(technology);
                     LOG.info("修改成功" + t.getId() + " name:" + t.getName());
-                    return "1";
                 }
             }
-            return "操作工艺失败";
+            return "1";
         } catch (Exception e) {
             e.printStackTrace();
             return "操作工艺失败";

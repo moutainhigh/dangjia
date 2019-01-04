@@ -93,7 +93,7 @@ public interface SupplierProductAPI {
     @ApiOperation(value = "查询所有货品供应关系", notes = "查询所有货品供应关系")
     public ServerResponse querySupplierProduct(@RequestParam("request") HttpServletRequest request,@RequestParam("type")int type,
                                                @RequestParam("supplierId")String supplierId,@RequestParam("categoryId")String categoryId,
-                                               @RequestParam("pageDTO") PageDTO pageDTO);
+                                               @RequestParam("likeProductName")String likeProductName,@RequestParam("pageDTO") PageDTO pageDTO);
 
     /**
      * 保存供应商与货品供应关系
