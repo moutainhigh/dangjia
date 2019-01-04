@@ -222,14 +222,20 @@
 			modify_date as modifyDate
 		from
 		    dj_basics_product
-		where
+		where 1=1
+			and
 		    id in
 				(select 
 				    product_id
-				 from dj_sup_supplier_product
-				 WHERE 
-				    supplier_id=#{supplier_id} and is_supply=1
+				 from dj_sup_supplier_product as product
+				 WHERE  1=1
+					<if test="supplier_id!=null and supplier_id!=''">
+						and supplier_id=#{supplier_id} and is_supply=1
+					</if>
 				)
+			<if test="likeProductName!=null and likeProductName!=''">
+				and name like CONCAT('%',#{likeProductName},'%')
+			</if>
 		ORDER BY create_date desc
     </select>
 	<!-- 根据供应商查询在供应的货品种类-->

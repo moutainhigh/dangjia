@@ -185,7 +185,7 @@ public class SupplierService {
                 map.put("supplierLevel", supplier.getSupplierLevel());//供应商级别
                 map.put("gender", supplier.getGender());//联系人性别 1男 2女
                 //查找所有的货品 供应商
-                List<Product> pList = iSupplierMapper.querySupplierProduct(supplier.getId());
+                List<Product> pList = iSupplierMapper.querySupplierProduct(supplier.getId(), "");
                 Set goodsSet = new HashSet();
                 for (Product product : pList)
                     goodsSet.add(product.getGoodsId());
@@ -235,7 +235,7 @@ public class SupplierService {
                 map.put("gender", supplier.getGender());//联系人性别 1男 2女
 
                 //查找所有的货品 供应商
-                List<Product> pList = iSupplierMapper.querySupplierProduct(supplier.getId());
+                List<Product> pList = iSupplierMapper.querySupplierProduct(supplier.getId(), "");
                 Set<String> goodsSet = new HashSet();
                 for (Product product : pList)
                     goodsSet.add(product.getGoodsId());
@@ -259,7 +259,7 @@ public class SupplierService {
     /**
      * 查询所有商品供应关系0:仅供应商品;1:所有商品
      */
-    public ServerResponse querySupplierProduct(int type, String supplierId, String categoryId, Integer pageNum, Integer pageSize) {
+    public ServerResponse querySupplierProduct(int type, String supplierId, String categoryId, String likeProductName, Integer pageNum, Integer pageSize) {
         try {
             if (pageNum == null) {
                 pageNum = 1;
@@ -270,7 +270,7 @@ public class SupplierService {
             PageHelper.startPage(pageNum, pageSize);
             List<Map<String, Object>> listMap = new ArrayList<>();
             if (type == 0) {//仅供应商品
-                List<Product> pList = iSupplierMapper.querySupplierProduct(supplierId);
+                List<Product> pList = iSupplierMapper.querySupplierProduct(supplierId, likeProductName);
                 PageInfo pageResult = new PageInfo(pList);
                 for (Product product : pList) {
                     Map<String, Object> gmap = new HashMap<String, Object>();
@@ -292,7 +292,10 @@ public class SupplierService {
                 pageResult.setList(listMap);
                 return ServerResponse.createBySuccess("查询成功", pageResult);
             } else {//所有商品
-                List<Product> pList = iProductMapper.query(categoryId);//查询所有货品
+//                List<Product> pList = iProductMapper.query(categoryId);//查询所有货品
+//                List<Product> pList = iSupplierMapper.querySupplierProduct("",likeProductName);
+                List<Product> pList = iSupplierMapper.querySupplierProduct("", likeProductName);
+                LOG.info("size: " + pList.size() + " supplierId:" + supplierId + " likeProductName:"+ likeProductName);
                 PageInfo pageResult = new PageInfo(pList);
                 for (Product product : pList) {
                     Map<String, Object> gmap = new HashMap<String, Object>();
@@ -309,16 +312,6 @@ public class SupplierService {
                         gmap.put("price", supplierProduct.getPrice());//供应价格
                         gmap.put("stock", supplierProduct.getStock());//库存
                     }
-					/*List<AttributeValue> aveList=iProductMapper.queryProductAttributeByPid(product.getId());//查询货品关联属性
-					StringBuffer aveString=new StringBuffer();
-					for(int i=0;i<aveList.size();i++){//拼接属性选项
-						if(i==aveList.size()-1){
-						    aveString.append(aveList.get(i).getName());
-						}else{
-							aveString.append(aveList.get(i).getName());
-							aveString.append(",");
-						}
-				    }*/
                     gmap.put("aveString", product.getValueNameArr());//属性选项选中值名称集合
                     listMap.add(gmap);
                 }

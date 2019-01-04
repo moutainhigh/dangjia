@@ -13,10 +13,12 @@ import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.basics.ILabelMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
+import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.basics.Technology;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +48,8 @@ public class BudgetMaterialService {
     private ILabelMapper iLabelMapper;
     @Autowired
     private IProductMapper iProductMapper;
+    @Autowired
+    private ITechnologyMapper iTechnologyMapper;
     @Autowired
     private ConfigUtil configUtil;
 
@@ -125,11 +129,38 @@ public class BudgetMaterialService {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<Product> pList = iProductMapper.queryByGoodsId(goodsId);
+
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (Product p : pList) {
                 if (p.getImage() == null) {
                     continue;
                 }
+
+                List<Technology> pTechnologyList = iTechnologyMapper.queryTechnologyByWgId(p.getId());
+                List<Map<String, Object>> tTechnologymMapList = new ArrayList<>();
+                for (Technology t : pTechnologyList) {
+                    if (t.getImage() == null) {
+                        continue;
+                    }
+                    String[] imgArr = t.getImage().split(",");
+                    String imgStr = "";
+                    String imgUrlStr = "";
+                    for (int i = 0; i < imgArr.length; i++) {
+                        if (i == imgArr.length - 1) {
+                            imgStr += address + imgArr[i];
+                            imgUrlStr += imgArr[i];
+                        } else {
+                            imgStr += address + imgArr[i] + ",";
+                            imgUrlStr += imgArr[i] + ",";
+                        }
+                    }
+                    t.setImage(imgUrlStr);
+                    Map<String, Object> map = CommonUtil.beanToMap(t);
+                    map.put("imageUrl", imgStr);
+                    map.put("sampleImageUrl", address + t.getSampleImage());
+                    tTechnologymMapList.add(map);
+                }
+
                 String[] imgArr = p.getImage().split(",");
                 String imgStr = "";
                 String imgUrlStr = "";
@@ -154,6 +185,7 @@ public class BudgetMaterialService {
                     if (label.getName() != null)
                         map.put("labelName", label.getName());
                 }
+                map.put("tTechnologymMapList", tTechnologymMapList);
                 mapList.add(map);
             }
             return ServerResponse.createBySuccess("查询成功", mapList);

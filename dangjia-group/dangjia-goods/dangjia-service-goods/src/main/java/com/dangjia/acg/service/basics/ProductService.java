@@ -239,6 +239,15 @@ public class ProductService {
                 String ret = technologyService.insertTechnologyList(obj.getString("technologyList"), "0", 0, product.getId());
                 if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
                     return ServerResponse.createByErrorMessage(ret);
+
+                String[] deleteTechnologyIdArr = obj.getString("attributeIdArr").split(",");//选中的属性id字符串
+                for (int j = 0; j < deleteTechnologyIdArr.length; j++) {
+                    if(iTechnologyMapper.selectByPrimaryKey(deleteTechnologyIdArr[j])!= null)
+                    {
+                        if (iTechnologyMapper.deleteByPrimaryKey(deleteTechnologyIdArr[j]) < 0)
+                            return ServerResponse.createByErrorMessage("删除id：" + deleteTechnologyIdArr[j] + "失败");
+                    }
+                }
 //                iTechnologyMapper.deleteWokerTechnologyByWgId(product.getId());
 //                for (String id : technologyIds) {
 //                    if (StringUtils.isNotBlank(id)) {
