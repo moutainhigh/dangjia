@@ -27,11 +27,11 @@ public class ConfigUtil {
 
     public <T> T getValue(ConfigBean<T> bean, Class<T> targetClass) {
 
-        String str = redisClient.getCache(Constants.CONFIG_KEY + bean.name, String.class);
-
-        if (null != str) {
-            return (T) convert(str, targetClass);
-        }
+//        String str = redisClient.getCache(Constants.CONFIG_KEY + bean.name, String.class);
+//
+//        if (null != str) {
+//            return (T) convert(str, targetClass);
+//        }
 
         byte[] byt = configServiceAPI.getValue(bean.name, bean.appType);
         Object val = null;
