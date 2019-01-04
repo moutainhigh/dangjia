@@ -22,7 +22,7 @@ spring:
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
   redis:
     database: 0
-    host: 192.168.0.245
+    host: 192.168.0.83
     port: 6379
     password: Fengjiang123
     pool:
