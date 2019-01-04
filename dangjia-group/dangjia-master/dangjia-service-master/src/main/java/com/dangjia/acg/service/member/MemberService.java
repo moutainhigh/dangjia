@@ -193,9 +193,7 @@ public class MemberService {
 	/**
 	 * 校验验证码并保存密码
 	 */
-	public ServerResponse checkRegister(String phone, int smscode,String password,String invitationCode,Integer userRole) {
-		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-				.getRequest();
+	public ServerResponse checkRegister(HttpServletRequest request,String phone, int smscode,String password,String invitationCode,Integer userRole) {
 		Integer registerCode=redisClient.getCache(Constants.SMS_CODE+ phone,Integer.class);
 		if (smscode != registerCode) {
 			return ServerResponse.createByErrorMessage("验证码错误");
