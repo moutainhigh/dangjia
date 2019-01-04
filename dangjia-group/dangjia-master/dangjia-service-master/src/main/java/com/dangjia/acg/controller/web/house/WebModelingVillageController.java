@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.web.house;
 
 import com.dangjia.acg.api.web.house.WebModelingVillageAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.house.ModelingVillageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,12 @@ public class WebModelingVillageController implements WebModelingVillageAPI {
     @ApiMethod
     public ServerResponse getVillageList(HttpServletRequest request,String cityId){
         return modelingVillageService.getVillageList(request,cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getVillageAllListByCityId(HttpServletRequest request, PageDTO pageDTO, String cityId,String likeVillageName){
+        return modelingVillageService.getVillageAllListByCityId(request,pageDTO,cityId,likeVillageName);
     }
 
     @Override

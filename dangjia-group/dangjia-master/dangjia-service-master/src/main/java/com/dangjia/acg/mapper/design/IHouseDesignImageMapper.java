@@ -15,5 +15,8 @@ import java.util.List;
 @Repository
 public interface IHouseDesignImageMapper extends Mapper<HouseDesignImage> {
 
+    /**查询平面图*/
+    HouseDesignImage planeGraph(@Param("houseId")String houseId);
+
     List<HouseDesignImage> byNumber(@Param("houseId")String houseId, @Param("businessOrderNumber")String businessOrderNumber);
 }

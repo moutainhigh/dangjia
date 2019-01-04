@@ -39,35 +39,30 @@ public class HouseChoiceCaseService {
      * @return
      */
     public ServerResponse getHouseChoiceCases(HttpServletRequest request, PageDTO pageDTO,HouseChoiceCase houseChoiceCase) {
-        try {
-            Example example = new Example(HouseChoiceCase.class);
-            Example.Criteria criteria=example.createCriteria();
-            if(!CommonUtil.isEmpty(houseChoiceCase.getCityId())) {
-                criteria.andEqualTo("cityId", houseChoiceCase.getCityId());
-            }
-    //        //随机排序
-            if(request.getParameter("isRand")!=null){
-                example.setOrderByClause(" rand() ");
-                pageDTO.setPageNum(0);
-            }else {
-                example.orderBy(Activity.MODIFY_DATE).desc();
-            }
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<HouseChoiceCase> list = houseChoiceCaseMapper.selectByExample(example);
-            List<Map> listmap = new  ArrayList();
-            PageInfo pageResult = new PageInfo(list);
-            for (HouseChoiceCase v:list){
-                Map map= BeanUtils.beanToMap(v);
-                map.put("imageUrl",v.getImage());
-                map.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+v.getImage());
-                listmap.add(map);
-            }
-            pageResult.setList(listmap);
-            return ServerResponse.createBySuccess("ok",pageResult);
-        }catch (Exception e){
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("请求失败，请您稍后再试");
+        Example example = new Example(HouseChoiceCase.class);
+        Example.Criteria criteria=example.createCriteria();
+        if(!CommonUtil.isEmpty(houseChoiceCase.getCityId())) {
+            criteria.andEqualTo("cityId", houseChoiceCase.getCityId());
         }
+//        //随机排序
+        if(request.getParameter("isRand")!=null){
+            example.setOrderByClause(" rand() ");
+            pageDTO.setPageNum(0);
+        }else {
+            example.orderBy(Activity.MODIFY_DATE).desc();
+        }
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<HouseChoiceCase> list = houseChoiceCaseMapper.selectByExample(example);
+        List<Map> listmap = new  ArrayList();
+        PageInfo pageResult = new PageInfo(list);
+        for (HouseChoiceCase v:list){
+            Map map= BeanUtils.beanToMap(v);
+            map.put("imageUrl",v.getImage());
+            map.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+v.getImage());
+            listmap.add(map);
+        }
+        pageResult.setList(listmap);
+        return ServerResponse.createBySuccess("ok",pageResult);
     }
     /**
      * 删除
