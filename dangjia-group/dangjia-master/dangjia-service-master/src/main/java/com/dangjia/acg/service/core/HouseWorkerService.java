@@ -201,6 +201,9 @@ public class HouseWorkerService {
             if (worker == null) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), EventStatus.USER_TOKEN_ERROR.getDesc());
             }
+            if (worker.getWorkerType() == null) {
+                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "请上传资料");
+            }
             if (worker.getWorkerType() == 1 || worker.getWorkerType() == 2) {//设计师/精算师不支持直接返回
                 return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "设计师/精算师请在后台管理中查看施工详情");
             }
@@ -660,7 +663,8 @@ public class HouseWorkerService {
             } else {
                 stringBuffer.append("皇冠");
             }
-            stringBuffer.append(worker.getWorkerType() == 3 ? "大管家" : "工匠");
+
+            stringBuffer.append(worker.getWorkerType() != null&&worker.getWorkerType() == 3 ? "大管家" : "工匠");
             homePageBean.setGradeName(stringBuffer.toString());
             String[] names = {"我的资料", "我的任务", "我的银行卡", "提现记录",
                     "接单记录", "奖罚记录", "我的邀请码",  "帮助中心"};

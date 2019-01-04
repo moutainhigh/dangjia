@@ -70,7 +70,7 @@ public interface MemberAPI {
 
     @RequestMapping(value = "member/checkRegister", method = RequestMethod.POST)
     @ApiOperation(value = "校验验证码并保存密码", notes = "校验验证码并保存密码")
-    ServerResponse checkRegister(
+    ServerResponse checkRegister(@RequestParam("request") HttpServletRequest request,
             @ApiParam(name = "phone", value = "手机号") @RequestParam("phone") String phone,
             @ApiParam(name = "password", value = "密码") @RequestParam("password")String password,
             @ApiParam(name = "smscode", value = "验证码Code") @RequestParam("smscode") int smscode,

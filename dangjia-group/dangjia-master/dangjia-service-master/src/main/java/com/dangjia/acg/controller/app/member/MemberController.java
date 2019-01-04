@@ -77,8 +77,8 @@ public class MemberController implements MemberAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse checkRegister(String phone, String password,int smscode,String invitationCode,Integer userRole) {
-        return memberService.checkRegister( phone,smscode,password,invitationCode,userRole);
+    public ServerResponse checkRegister(HttpServletRequest request,String phone, String password,int smscode,String invitationCode,Integer userRole) {
+        return memberService.checkRegister(request, phone,smscode,password,invitationCode,userRole);
     }
 
     /**
