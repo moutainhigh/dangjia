@@ -151,8 +151,12 @@ public class WorkerGoodsService {
                         }
                     }
                 }
-                technologyResult.setImage(imgStr3);
-                technologyResult.setImageUrl(imgUrlStr3);
+                technologyResult.setImage(imgUrlStr3);
+                technologyResult.setImageUrl(imgStr3);
+                technologyResult.setSampleImage(technology.getSampleImage());
+                technologyResult.setSampleImageUrl(address + technology.getSampleImage());
+                technologyResult.setType(technology.getType());
+
                 technologyResult.setCreateDate(DateUtils.timedate(String.valueOf(technology.getCreateDate().getTime())));
                 technologyResult.setModifyDate(DateUtils.timedate(String.valueOf(technology.getModifyDate().getTime())));
                 technologies.add(technologyResult);
@@ -254,16 +258,12 @@ public class WorkerGoodsService {
 //    }
 
 
-    public ServerResponse<String> setWorkerGoods(WorkerGoods workerGoods, String technologyJsonList) {
+    public ServerResponse<String> setWorkerGoods(WorkerGoods workerGoods, String technologyJsonList, String deleteTechnologyIds) {
 
         LOG.info("insertTechnologyList workerGoods:" + workerGoods + "  technologyJsonList:" + technologyJsonList);
         List<WorkerGoods> workerGoodsList = iWorkerGoodsMapper.selectByName(workerGoods.getName(), workerGoods.getWorkerTypeId());
         List<WorkerGoods> workerGoodsSnList = iWorkerGoodsMapper.selectByWorkerGoodsSn(workerGoods.getWorkerGoodsSn(), workerGoods.getWorkerTypeId());
 
-        for (WorkerGoods  wos:workerGoodsList)
-        {
-            LOG.info(" workerGoods name:" + wos.getName());
-        }
         if (workerGoods != null) {
             if (workerGoods.getImage() != null && !"".equals(workerGoods.getImage())) {
                 String[] imgArr = workerGoods.getImage().split(",");
@@ -318,32 +318,26 @@ public class WorkerGoodsService {
                 return ServerResponse.createByErrorMessage(ret);
 
             if (StringUtils.isNotBlank(workerGoods.getId()) && workerG != null) {
-                WorkerGoods srcWorkerGoods = iWorkerGoodsMapper.selectByPrimaryKey(workerGoods.getId());
-
                 workerGoods.setModifyDate(new Date());
-                int rowCount = iWorkerGoodsMapper.updateByPrimaryKeySelective(workerGoods);
-//                if (rowCount > 0) {
-//                    ServerResponse<String> serverResponse = setTechnologyId(workerGoods.getId(), technologyListJson);
-//                    if (serverResponse.isSuccess()) {
-//                        return ServerResponse.createBySuccessMessage("更新工价商品成功");
-//                    }
-//                }
-                if (rowCount < 0)
+                if (iWorkerGoodsMapper.updateByPrimaryKeySelective(workerGoods) < 0)
                     return ServerResponse.createByErrorMessage("更新工价商品失败");
             } else {
                 workerGoods.setCreateDate(new Date());
                 workerGoods.setModifyDate(new Date());
-                int rowCount = iWorkerGoodsMapper.insert(workerGoods);
-//                if (rowCount > 0) {
-//                    ServerResponse<String> serverResponse = setTechnologyId(workerGoods.getId(), technologyListJson);
-//                    if (serverResponse.isSuccess()) {
-//                        return ServerResponse.createBySuccessMessage("新增工价商品成功");
-//                    }
-//                }
-                if (rowCount < 0)
+                if (iWorkerGoodsMapper.insert(workerGoods) < 0)
                     return ServerResponse.createByErrorMessage("新增工价商品失败");
             }
-            return ServerResponse.createBySuccess("操作工价商品成功");
+
+            String[] deleteTechnologyIdArr = deleteTechnologyIds.split(",");
+            for (int i = 0; i < deleteTechnologyIdArr.length; i++) {
+                if(iTechnologyMapper.selectByPrimaryKey(deleteTechnologyIdArr[i])!= null)
+                {
+                    if (iTechnologyMapper.deleteByPrimaryKey(deleteTechnologyIdArr[i]) < 0)
+                        return ServerResponse.createByErrorMessage("删除id：" + deleteTechnologyIdArr[i] + "失败");
+                }
+            }
+
+            return ServerResponse.createBySuccessMessage("操作工价商品成功");
         }
         return ServerResponse.createByErrorMessage("新增或更新工价商品参数不正确");
     }

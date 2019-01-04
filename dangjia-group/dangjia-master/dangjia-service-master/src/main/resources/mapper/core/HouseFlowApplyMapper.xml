@@ -37,16 +37,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and apply_type in (0,1,2)
     </select>
 
-    <!--查询待审核的申请-->
-    <select id="checkPendingApply" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="all_columns" />
-        from dj_core_house_flow_apply
-        where 1=1
-        and house_flow_id = #{houseFlowId}
-        and (supervisor_check = 0 or (supervisor_check = 1 and member_check = 0))
-        and worker_id = #{workerId}
-    </select>
-
     <!--根据houseId查询待业主审核 -->
     <select id="getMemberCheckList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select <include refid="all_columns" />
@@ -71,7 +61,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </if>
     </select>
 
-    <!--根据工人id和houid查询今日是否开工 -->
+    <!--根据工人id和houseId查询今日是否开工 -->
     <select id="getTodayStart" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select
         <include refid="all_columns" />
@@ -106,8 +96,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!--大管家查询自己今天是否已上传过巡查 -->
     <select id="getTodayHouseFlowApplyBy56" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select <include refid="all_columns" />
-        from dj_core_house_flow_apply as hfa where 1=1
-        and to_days(create_date) = to_days(now())
+        from dj_core_house_flow_apply
+        where
+            to_days(create_date) = to_days(now())
         and house_id = #{houseId}
         and apply_type in(5,6)
         order by create_date desc
@@ -121,18 +112,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and house_flow_id = #{houseFlowId}
         and member_check = 0
         and worker_id = #{workerId}
-    </select>
-
-    <!--根据申请类别查询自己今天是否发过此申请-->
-    <select id="getTodayHouseFlowApply"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="all_columns" />
-        from dj_core_house_flow_apply as hfa where 1=1
-        and to_days(create_date) = to_days(now())
-        and house_flow_id = #{houseFlowId}
-        and apply_type =#{applyType}
-        and worker_id = #{workerId}
-        and supervisor_check !=2
-        order by create_date desc
     </select>
 
     <!--查询最早的每日开工申请-->
@@ -166,30 +145,30 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		and worker_id = #{workerId}
     </select>
 
-    <!--查询是否今天发过申请-->
-    <select id="getTodayHouseFlowApply2"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+    <!--根据申请类别查询自己今天是否发过此申请-->
+    <select id="getTodayHouseFlowApply"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select <include refid="all_columns" />
         from dj_core_house_flow_apply
-        where 1=1
-        and to_days(create_date) = to_days(now())
+        where
+            to_days(create_date) = to_days(now())
         and house_flow_id = #{houseFlowId}
-        and apply_type in(0,1,2,3)
+        and apply_type =#{applyType}
         and worker_id = #{workerId}
         and supervisor_check !=2
         order by create_date desc
     </select>
 
-    <!--查询大管家已审核，业主未审核的数据-->
-    <select id="waitHouseFlowApply"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+    <!--查询待审核的申请-->
+    <select id="checkPendingApply" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select <include refid="all_columns" />
         from dj_core_house_flow_apply
         where 1=1
         and house_flow_id = #{houseFlowId}
-        and member_check = 0
-        and supervisor_check = 1
+        and (supervisor_check = 0 or (supervisor_check = 1 and member_check = 0))
         and worker_id = #{workerId}
     </select>
-    <!--根据houid查询今日是否开工-->
+
+    <!--根据houseId查询今日是否开工-->
     <select id="getTodayStartByHouseId"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select <include refid="all_columns" />
         from dj_core_house_flow_apply

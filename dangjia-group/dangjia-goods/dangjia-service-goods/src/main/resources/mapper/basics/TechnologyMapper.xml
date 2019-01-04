@@ -12,6 +12,7 @@
 		goods_id as goodsId,
 		type,
 		image,
+		sample_image as sampleImage,
 		material_or_worker,
         create_date,
         modify_date
@@ -19,6 +20,7 @@
     <sql id="all_WokerTechnology">
 		id,
 		goods_id,
+		sample_image as sampleImage,
 		technology_id,
         create_date,
         modify_date
@@ -33,6 +35,7 @@
         content,
         type,
         image,
+        sample_image as sampleImage,
         worker_type_id as workerTypeId,
         material_or_worker as materialOrWorker,
         goods_id as goodsId,
@@ -42,7 +45,7 @@
         dj_basics_technology
         where 1=1
         and goods_id = #{goodsId}
-        and type = 1
+
         <!--<if test="workerTypeId!=null and workerTypeId!=''">-->
         <!--and-->
         <!--worker_type_id=#{workerTypeId}-->
@@ -94,6 +97,7 @@
         content,
         type,
         image,
+        sample_image as sampleImage,
         worker_type_id as workerTypeId,
         material_or_worker as materialOrWorker,
         goods_id as goodsId,
@@ -122,6 +126,7 @@
         content,
         type,
         image,
+        sample_image as sampleImage,
         worker_type_id as workerTypeId,
         material_or_worker as materialOrWorker,
         goods_id as goodsId,
@@ -195,6 +200,7 @@
         content,
         type,
         image,
+        sample_image as sampleImage,
         worker_type_id as workerTypeId,
         material_or_worker as materialOrWorker,
         goods_id as goodsId,
@@ -214,6 +220,7 @@
         content,
         type,
         image,
+        sample_image as sampleImage,
         worker_type_id as workerTypeId,
         material_or_worker as materialOrWorker,
         goods_id as goodsId,

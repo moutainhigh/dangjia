@@ -33,7 +33,7 @@ public interface WorkerGoodsAPI {
 
     @PostMapping("/basics/workerGoods/setWorkerGoods")
     @ApiOperation(value = "新增或更新工价商品", notes = "新增或更新工价商品")
-    ServerResponse setWorkerGoods(@RequestParam("request") HttpServletRequest request,@RequestParam("workerGoods")WorkerGoods workerGoods, @RequestParam("technologyJsonList")String technologyJsonList);
+    ServerResponse setWorkerGoods(@RequestParam("request") HttpServletRequest request,@RequestParam("workerGoods")WorkerGoods workerGoods, @RequestParam("technologyJsonList")String technologyJsonList,  @RequestParam("deleteTechnologyIds")String deleteTechnologyIds);
 
     @PostMapping("/basics/workerGoods/getWorkertoCheck")
     @ApiOperation(value = "每工种未删除或已支付工钱", notes = "每工种未删除或已支付工钱")

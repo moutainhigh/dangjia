@@ -394,7 +394,10 @@ public class HouseService {
         if (houseDTO.getSquare() <= 0) {
             return ServerResponse.createByErrorMessage("面积错误");
         }
+        ModelingLayout modelingLayout = modelingLayoutMapper.selectByPrimaryKey(houseDTO.getModelingLayoutId());
+
         House house = iHouseMapper.selectByPrimaryKey(houseDTO.getHouseId());
+        house.setBuildSquare(new BigDecimal(modelingLayout.getBuildSquare()));//建筑面积
         house.setCityId(houseDTO.getCityId());
         house.setCityName(houseDTO.getCityName());
         house.setVillageId(houseDTO.getVillageId());
@@ -633,7 +636,22 @@ public class HouseService {
         }
     }
 
-    //根据城市，小区，最小最大面积查询房子
+    /**
+     * 施工现场
+     */
+    public ServerResponse houseDetails(String houseId){
+        try {
+
+            return ServerResponse.createBySuccess("查询成功",null);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
+        }
+    }
+
+    /**
+     *  根据城市，小区，最小最大面积查询房子
+     */
     public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId, Double minSquare, Double maxSquare, PageDTO pageDTO) {
         try {
             if (pageDTO == null) {
@@ -649,8 +667,8 @@ public class HouseService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<ShareDTO> srlist = new ArrayList<>();
-            List<House> hlist = iHouseMapper.getSameLayout(cityId, villageId, minSquare, maxSquare);
-            for (House house : hlist) {
+            List<House> houseList = iHouseMapper.getSameLayout(cityId, villageId, minSquare, maxSquare);
+            for (House house : houseList) {
                 ModelingLayout ml = modelingLayoutMapper.selectByPrimaryKey(house.getModelingLayoutId());
                 ShareDTO shareDTO = new ShareDTO();
                 shareDTO.setType("1");
@@ -700,7 +718,7 @@ public class HouseService {
                 }
                 srlist.add(shareDTO);
             }
-            PageInfo pageResult = new PageInfo(hlist);
+            PageInfo pageResult = new PageInfo(houseList);
             pageResult.setList(srlist);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
