@@ -3,16 +3,14 @@ package com.dangjia.acg.service;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
-import com.dangjia.acg.common.http.HttpUtil;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.ByteToInputStream;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
-import com.dangjia.acg.common.util.ImageUtil;
-import com.dangjia.acg.common.wechat.AccessTokenUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.IResourceFileMapper;
 import com.dangjia.acg.model.ResourceFile;
+import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -77,8 +75,15 @@ public class FileCommonService {
         file.transferTo(dest);
 
         try {
+          if (file.getSize() >= 1*1024*1024)
+          {
+            Thumbnails.of(address + fileName)
+                    .scale(1f)
+                    .outputQuality(0.5d)
+                    .toFile(address + fileName);
+          }
           //压缩图片
-          ImageUtil.generateThumbnail3Directory(address, address + fileName);
+//          ImageUtil.generateThumbnail3Directory(address, address + fileName);
         }catch (Exception e){
           logger.error(e.getMessage(),e);
         }
