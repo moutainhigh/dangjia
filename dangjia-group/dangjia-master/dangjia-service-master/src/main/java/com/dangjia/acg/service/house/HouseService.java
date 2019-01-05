@@ -44,7 +44,6 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
-import com.dangjia.acg.service.matter.TechnologyRecordService;
 import com.dangjia.acg.service.member.GroupInfoService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -114,9 +113,6 @@ public class HouseService {
     private IHouseExpendMapper houseExpendMapper;
     @Autowired
     private ITechnologyRecordMapper technologyRecordMapper;
-    @Autowired
-    private TechnologyRecordService technologyRecordService;
-
 
     /**
      * 切换房产
@@ -633,19 +629,6 @@ public class HouseService {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ServerResponse.createByErrorMessage("修改房子精算状态失败");
-        }
-    }
-
-    /**
-     * 施工现场
-     */
-    public ServerResponse houseDetails(String houseId){
-        try {
-
-            return ServerResponse.createBySuccess("查询成功",null);
-        }catch (Exception e){
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
         }
     }
 

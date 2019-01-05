@@ -24,7 +24,7 @@ spring:
     database: 0
     host: 192.168.0.83
     port: 6379
-    password: Fengjiang123
+    password:
     pool:
       max-active: -1
       max-wait: -1

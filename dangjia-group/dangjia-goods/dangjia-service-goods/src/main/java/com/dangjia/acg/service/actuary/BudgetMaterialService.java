@@ -1,13 +1,9 @@
 package com.dangjia.acg.service.actuary;
 
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.WorkTypeEnums;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.excel.ExportExcel;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.export.actuary.TActuaryGoods;
-import com.dangjia.acg.export.actuary.TActuaryGoodsTotal;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
@@ -27,7 +23,6 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

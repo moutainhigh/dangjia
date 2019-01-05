@@ -36,11 +36,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         SELECT
         <include refid="basic_columns"/>
         FROM dj_house_modeling_village
-        WHERE
-        city_id=#{cityId}
-        and state=0
+        WHERE 1=1
+        <if test="cityId!=null and cityId!=''">
+            and city_id=#{cityId}
+        </if>
+        <if test="likeVillageName!=null and likeVillageName!=''">
+            and name LIKE CONCAT('%',#{likeVillageName},'%')
+        </if>
         ORDER by
-        initials asc ,layout_sum desc
+        initials asc
     </select>
     <!--统计根据城市id查询小区按字母排序-->
     <select id="getAllVillageCount" resultType="java.lang.Integer" >
