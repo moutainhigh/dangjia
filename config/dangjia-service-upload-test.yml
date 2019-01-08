@@ -35,4 +35,9 @@ ribbon:
   ReadTimeout: 60000
   MaxAutoRetriesNextServer: 1
   OkToRetryOnAllOperations: true
-
+huawei:
+  obs:
+    endPoint: https://obs.cn-south-1.myhuaweicloud.com
+    keyId: KU8IPBQCNKNDOPMVDRDM
+    keySecret: d2T2CFKnjY9FqTkxqqD0wDOTV8h5lQFvf7OhxTIV
+    bucketName: dangjia_test
