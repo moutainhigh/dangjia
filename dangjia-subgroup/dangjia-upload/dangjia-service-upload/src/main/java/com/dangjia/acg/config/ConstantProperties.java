@@ -12,16 +12,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConstantProperties implements InitializingBean {
 
-    @Value("${huaWei.obs.endPoint}")
+    @Value("${huawei.obs.endPoint}")
     private String huawei_file_endpoint;
 
-    @Value("${huaWei.obs.keyId}")
+    @Value("${huawei.obs.keyId}")
     private String huawei_file_keyid;
 
-    @Value("${huaWei.obs.keySecret}")
+    @Value("${huawei.obs.keySecret}")
     private String huawei_file_keysecret;
 
-    @Value("${huaWei.obs.bucketName}")
+    @Value("${huawei.obs.bucketName}")
     private String huawei_file_bucketname;
 
 
