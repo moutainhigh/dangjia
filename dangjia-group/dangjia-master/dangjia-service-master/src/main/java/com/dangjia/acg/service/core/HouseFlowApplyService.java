@@ -165,10 +165,7 @@ public class HouseFlowApplyService {
                 }
 
                 //修改进程
-                HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(hwo.getHouseWorkerId());
-                houseWorker.setWorkSteta(2);
-                houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-                HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseWorker.getHouseFlowId());
+                HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(),hwo.getWorkerTypeId());
                 houseFlow.setWorkSteta(2);
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                 //处理工人拿钱
@@ -178,7 +175,7 @@ public class HouseFlowApplyService {
 
                 //设置保险时间
                 WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByWorkerTypeId(hwo.getWorkerTypeId(), hwo.getHouseId());
-                if(wtso != null && houseFlow.getSafeId() != null){
+                if(wtso != null){
                     WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());//获得类型算出时间
                     int month = (wts.getMonth()); //获取保险时长(月)
                     Calendar cal = Calendar.getInstance();
@@ -213,10 +210,7 @@ public class HouseFlowApplyService {
                 }
 
                 //修改进程
-                HouseWorker hw = houseWorkerMapper.selectByPrimaryKey(hwo.getHouseWorkerId());
-                hw.setWorkSteta(1);
-                houseWorkerMapper.updateByPrimaryKeySelective(hw);
-                HouseFlow hf = houseFlowMapper.selectByPrimaryKey(hw.getHouseFlowId());
+                HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(),hwo.getWorkerTypeId());
                 hf.setWorkSteta(1);
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
 
@@ -373,7 +367,6 @@ public class HouseFlowApplyService {
         //押金处理
         HouseFlowApply houseFlowApply = new HouseFlowApply();
         houseFlowApply.setWorkerType(3);
-        houseFlowApply.setHouseWorkerOrderId(hwo.getId());
         houseFlowApply.setWorkerId(worker.getId());
         deposit(houseFlowApply);
 
@@ -411,7 +404,7 @@ public class HouseFlowApplyService {
     /**处理工人押金*/
     public void deposit(HouseFlowApply hfa){
         if(hfa.getWorkerType() > 5 || hfa.getWorkerType() == 3){//收滞留金
-            HouseWorkerOrder hwo = houseWorkerOrderMapper.selectByPrimaryKey(hfa.getHouseWorkerOrderId());
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());
             Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
             /*
              * 工匠积分70分以下每单滞留金无上限,70以上含80以下2000元
@@ -504,11 +497,12 @@ public class HouseFlowApplyService {
             if(hwo.getHaveMoney() == null){
                 hwo.setHaveMoney(new BigDecimal(0.0));
             }
+            HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(),hwo.getWorkerTypeId());
 
             //查工匠被管家的评价
-            Evaluate e1 = evaluateMapper.getForCountMoneySup(hwo.getHouseFlowId(), hfa.getApplyType(), hwo.getWorkerId());
+            Evaluate e1 = evaluateMapper.getForCountMoneySup(hf.getId(), hfa.getApplyType(), hwo.getWorkerId());
             //查工匠被业主的评价
-            Evaluate e2 = evaluateMapper.getForCountMoney(hwo.getHouseFlowId(), hfa.getApplyType(), hwo.getWorkerId());
+            Evaluate e2 = evaluateMapper.getForCountMoney(hf.getId(), hfa.getApplyType(), hwo.getWorkerId());
             int star1;
             int star2;
             if(e1 == null){
@@ -631,10 +625,6 @@ public class HouseFlowApplyService {
             hf.setWorkSteta(2);
             houseFlowMapper.updateByPrimaryKeySelective(hf);
 
-            HouseWorker hw = houseWorkerMapper.selectByPrimaryKey(hf.getHouseWorkerId());//这是查的大管家houseworker
-            hw.setWorkSteta(2);
-            houseWorkerMapper.updateByPrimaryKeySelective(hw);
-
             //查大管家被业主的评价
             //查工匠被业主的评价
             Evaluate evaluate = evaluateMapper.getForCountMoney(hfa.getHouseFlowId(), hfa.getApplyType(), hfa.getWorkerId());
@@ -655,7 +645,7 @@ public class HouseFlowApplyService {
             }
 
             //计算大管家整体完工金额
-            HouseWorkerOrder hwo = houseWorkerOrderMapper.selectByPrimaryKey(hw.getHouseWorkerOrderId());
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());
             //处理worker表中大管家
             Member worker = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
             //记录流水

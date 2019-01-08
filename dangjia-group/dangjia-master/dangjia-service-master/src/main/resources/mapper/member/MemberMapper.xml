@@ -17,7 +17,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         w.gift,
         w.invitation_code AS invitationCode,
         w.others_invitation_code AS othersInvitationCode,
-        w.user_role AS userRole,
         w.head,
         w.idcaoda,
         w.idcaodb,

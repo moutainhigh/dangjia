@@ -69,9 +69,9 @@ public class ActuaryOperationService {
     private IAttributeValueMapper valueMapper;
     @Autowired
     private IAttributeValueMapper attributeValueMapper;
-
     @Autowired
     private HouseAPI houseAPI;
+
     /**
      * 选择取消精算
      * buy": 0必买；1可选选中；2自购; 3可选没选中(业主已取消)
@@ -87,9 +87,9 @@ public class ActuaryOperationService {
                 String budgetMaterialId = obj.getString("budgetMaterialId");
 
                 BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
-                if(buy == 1){
+                if(buy == 3){
                     budgetMaterial.setDeleteState(2);//取消
-                }else if (buy == 3){
+                }else if (buy == 1){
                     budgetMaterial.setDeleteState(0);//选回来
                 }else {
                     return ServerResponse.createByErrorMessage("操作失败,参数错误");
@@ -355,22 +355,22 @@ public class ActuaryOperationService {
                 String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO,userToken,cityId,flowActuaryDTO.getTypeName()+"商品详情")+"&gId="+bw.getId()+"&type="+type;
                 flowActuaryDTO.setUrl(url);
                 flowActuaryDTO.setPrice("￥"+workerGoods.getPrice()+"/"+unitMapper.selectByPrimaryKey(workerGoods.getUnitId()).getName());
-                flowActuaryDTO.setTotalPrice("￥"+ workerGoods.getPrice() * bw.getShopCount());
+                flowActuaryDTO.setTotalPrice(workerGoods.getPrice() * bw.getShopCount());
                 flowActuaryDTOList.add(flowActuaryDTO);
             }
             Double workerPrice = budgetWorkerMapper.getBudgetWorkerPrice(houseId,workerTypeId);//精算工钱
-            flowDTO.setSumTotal("￥" + workerPrice);//合计
+            flowDTO.setSumTotal(workerPrice);//合计
         }else{
             List<BudgetMaterial> budgetMaterialList =null;
             if (type == DjConstants.GXType.CAILIAO){
                 budgetMaterialList = budgetMaterialMapper.getBudgetCaiList(houseId,workerTypeId);
                 Double caiPrice = budgetMaterialMapper.getBudgetCaiPrice(houseId,workerTypeId);
-                flowDTO.setSumTotal("￥" + caiPrice);//合计
+                flowDTO.setSumTotal(caiPrice);//合计
             }
             if (type == DjConstants.GXType.FUWU){
                 budgetMaterialList = budgetMaterialMapper.getBudgetSerList(houseId,workerTypeId);
                 Double serPrice = budgetMaterialMapper.getBudgetSerPrice(houseId,workerTypeId);
-                flowDTO.setSumTotal("￥" + serPrice);//合计
+                flowDTO.setSumTotal(serPrice);//合计
             }
             for (BudgetMaterial bm : budgetMaterialList){
                 Goods goods = goodsMapper.selectByPrimaryKey(bm.getGoodsId());
@@ -390,7 +390,7 @@ public class ActuaryOperationService {
                 }
                 flowActuaryDTO.setAttribute(getAttributes(product));//拼接属性品牌
                 flowActuaryDTO.setPrice("￥"+product.getPrice()+"/"+product.getUnitName());
-                flowActuaryDTO.setTotalPrice("￥"+ product.getPrice() * bm.getShopCount());
+                flowActuaryDTO.setTotalPrice(product.getPrice() * bm.getShopCount());
                 flowActuaryDTOList.add(flowActuaryDTO);
             }
         }

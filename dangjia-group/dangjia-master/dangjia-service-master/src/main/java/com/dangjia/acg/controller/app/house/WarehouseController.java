@@ -18,7 +18,7 @@ public class WarehouseController implements WarehouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse warehouseList(Integer pageNum, Integer pageSize, String houseId, String categoryId, String name){
-        return warehouseService.warehouseList(pageNum,pageSize,houseId,categoryId,name);
+    public ServerResponse warehouseList(Integer pageNum, Integer pageSize, String houseId, String categoryId, String name,Integer type){
+        return warehouseService.warehouseList(pageNum,pageSize,houseId,categoryId,name,type);
     }
 }

@@ -99,7 +99,9 @@ public class HouseDesignImageService {
         examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.WORKER_TYPE, "1");
         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(examples);
         HouseWorkerOrder hwo =null;
-        if(houseFlows.size()>0) { hwo = houseWorkerOrderMapper.selectByPrimaryKey(houseFlows.get(0).getHouseWorkerOrderId()); }
+        if(houseFlows.size()>0) {
+            hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlows.get(0).getHouseId(),houseFlows.get(0).getWorkerTypeId());
+        }
         if (house.getDesignerOk() == 5){
             if (type == 1){//通过
                 house.setDesignerOk(7);
@@ -134,15 +136,13 @@ public class HouseDesignImageService {
                     return ServerResponse.createByErrorMessage("设计通过生成精算houseFlow异常");
                 }else if(houseFlowList.size() == 0){
                     HouseFlow houseFlow = new HouseFlow(true);
+                    houseFlow.setCityId(house.getCityId());
                     houseFlow.setWorkerTypeId(workerType.getId());
                     houseFlow.setWorkerType(workerType.getType());
-                    houseFlow.setMemberId(house.getMemberId());
                     houseFlow.setHouseId(house.getId());
                     houseFlow.setState(workerType.getState());
                     houseFlow.setSort(workerType.getSort());
-                    houseFlow.setSafe(workerType.getSafeState());
                     houseFlow.setWorkType(3);//自动抢单待支付精算费
-                    houseFlow.setCityId(house.getCityId());
                     houseFlow.setWorkerId("2c911c24606f21720160726f5e6a00df");
                     //这里算出精算费
                     WorkDeposit workDeposit = workDepositMapper.selectAll().get(0);//结算比例表
@@ -151,11 +151,9 @@ public class HouseDesignImageService {
                     HouseWorker houseWorker = new HouseWorker();
                     houseWorker.setHouseId(house.getId());
                     houseWorker.setWorkerId("2c911c24606f21720160726f5e6a00df");//当家精算
-                    houseWorker.setHouseFlowId(houseFlow.getId());
                     houseWorker.setWorkerTypeId(houseFlow.getWorkerTypeId());
                     houseWorker.setWorkerType(houseFlow.getWorkerType());
                     houseWorker.setWorkType(1);//已抢单
-                    houseWorker.setWorkSteta(0);
                     houseWorker.setIsSelect(1);
                     houseWorkerMapper.insert(houseWorker);
                 }

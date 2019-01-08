@@ -22,7 +22,7 @@ public class TokenUtil {
 		//用户id
 		accessToken.setMemberId(member.getId());
 		accessToken.setPhone(member.getMobile());
-		accessToken.setMemberType(member.getUserRole());
+		accessToken.setMemberType(0);
 		//设置系统token
 		accessToken.setUserToken(getRandom());
 		// 设置时间戳

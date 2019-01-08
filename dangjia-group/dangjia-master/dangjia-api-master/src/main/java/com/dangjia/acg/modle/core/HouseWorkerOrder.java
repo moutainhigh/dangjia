@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 
 /**
  * 实体类 - 工人订单记录
+ * 主要是钱记录
  */
 @Data
 @Entity
@@ -27,25 +28,10 @@ public class HouseWorkerOrder extends BaseEntity {
 	@ApiModelProperty("业务订单号")
 	private String businessOrderNumber;//
 
-	@Column(name = "member_id")
-	@Desc(value = "用户ID")
-	@ApiModelProperty("用户ID")
-	private String memberId;//memberid
-
 	@Column(name = "house_id")
 	@Desc(value = "房子ID")
 	@ApiModelProperty("房子ID")
 	private String houseId;//houseid
-
-	@Column(name = "house_flow_id")
-	@Desc(value = "工序ID")
-	@ApiModelProperty("工序ID")
-	private String houseFlowId;//houseflowid
-
-	@Column(name = "house_worker_id")
-	@Desc(value = "工人与房子关联")
-	@ApiModelProperty("工人与房子关联")
-	private String houseWorkerId;//houseworkerid
 
 	@Column(name = "worker_id")
 	@Desc(value = "工人ID")
@@ -66,16 +52,6 @@ public class HouseWorkerOrder extends BaseEntity {
 	@Desc(value = "支付状态0未支付，1已经支付")
 	@ApiModelProperty("支付状态0未支付，1已经支付")
 	private Integer payState;//paystate
-
-	@Column(name = "worker_type_safe_id")
-	@Desc(value = "保险类型id")
-	@ApiModelProperty("保险类型id")
-	private String workerTypeSafeId;//wtsid
-
-	@Column(name = "worker_type_safe_order_id")
-	@Desc(value = "保险订单id")
-	@ApiModelProperty("保险订单id")
-	private String workerTypeSafeOrderId;//wtsoId
 
 	@Column(name = "safe_price")
 	@Desc(value = "保险费")

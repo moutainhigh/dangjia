@@ -115,7 +115,8 @@ public class HouseWorkerService {
             }
             houseWorker.setWorkType(2);//被换
             houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseWorker.getHouseFlowId());
+
+            HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(),houseWorker.getWorkerTypeId());
             String workerId=houseFlow.getWorkerId();
             houseFlow.setWorkerId("");
             houseFlow.setWorkType(2);
@@ -159,11 +160,9 @@ public class HouseWorkerService {
             HouseWorker houseWorker = new HouseWorker();
             houseWorker.setHouseId(house.getId());
             houseWorker.setWorkerId(worker.getId());
-            houseWorker.setHouseFlowId(houseFlowId);
             houseWorker.setWorkerTypeId(houseFlow.getWorkerTypeId());
             houseWorker.setWorkerType(houseFlow.getWorkerType());
             houseWorker.setWorkType(1);//已抢单
-            houseWorker.setWorkSteta(0);
             houseWorker.setIsSelect(1);
             houseWorkerMapper.insert(houseWorker);
 
@@ -220,7 +219,7 @@ public class HouseWorkerService {
             }
             List<HouseFlow> hfList = houseFlowMapper.getAllFlowByHouseId(hw.getHouseId());
             House house = houseMapper.selectByPrimaryKey(hw.getHouseId());//查询房产信息
-            HouseFlow hf = houseFlowMapper.selectByPrimaryKey(hw.getHouseFlowId());//查询自己的任务状态
+            HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hw.getHouseId(),hw.getWorkerTypeId());//查询自己的任务状态
             ConstructionByWorkerIdBean bean = new ConstructionByWorkerIdBean();
             bean.setWorkerType(worker.getWorkerType() == 3 ? 0 : 1);
             bean.setHouseFlowId(hf.getId());
@@ -401,7 +400,7 @@ public class HouseWorkerService {
                 bean.setSuspendDay("暂停天数" + (suspendDay == null ? "0" : suspendDay));
                 if (hw.getWorkType() == 1) {
                     bean.setIfDisclose(0);
-                } else if (hw.getWorkSteta() == 3) {
+                } else if (hf.getWorkSteta() == 3) {
                     bean.setIfDisclose(1);
                 } else {
                     bean.setIfDisclose(2);
@@ -769,18 +768,14 @@ public class HouseWorkerService {
             WorkerType workType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());//查询工种
             WorkDeposit workDeposit = workDepositMapper.selectAll().get(0);//结算比例表
 
-            Example example = new Example(HouseWorkerOrder.class);
-            example.createCriteria().andEqualTo(HouseWorkerOrder.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseWorkerOrder.WORKER_ID, workerId);
-            HouseWorkerOrder hwo = houseWorkerOrderMapper.selectByExample(example).get(0);
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
 
             HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
             hfa.setHouseFlowId(houseFlowId);//工序id
-            hfa.setHouseWorkerOrderId(hwo == null ? "" : hwo.getId());
             hfa.setWorkerId(workerId);//工人id
             hfa.setWorkerTypeId(worker.getWorkerTypeId());//工种id
             hfa.setWorkerType(worker.getWorkerType());//工种类型
             hfa.setHouseId(houseFlow.getHouseId());//房子id
-            hfa.setMemberId(houseFlow.getMemberId());//房主id
             hfa.setApplyType(applyType);//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
             hfa.setSuspendDay(suspendDay);//申请停工天数
             hfa.setApplyDec(applyDec);//描述
@@ -979,6 +974,7 @@ public class HouseWorkerService {
     /*算管家巡查验收拿钱*/
     private void calculateSup(HouseFlow supervisorHF){
         try{
+            House house = houseMapper.selectByPrimaryKey(supervisorHF.getHouseId());
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             List<HouseFlow> houseFlowList = houseFlowMapper.getForCheckMoney(supervisorHF.getHouseId());
             int check = 0;//累计大管家总巡查次数
@@ -986,7 +982,7 @@ public class HouseWorkerService {
             for (HouseFlow houseflow : houseFlowList) {
                 //查出该工种工钱
                 Double workerTotal = 0.0;
-                request.setAttribute(Constants.CITY_ID, houseflow.getCityId());
+                request.setAttribute(Constants.CITY_ID, house.getCityId());
                 ServerResponse serverResponse = workerGoodsAPI.getWorkertoCheck(request, supervisorHF.getHouseId(), houseflow.getId());
                 if (serverResponse.isSuccess()) {
                     JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
@@ -1011,7 +1007,7 @@ public class HouseWorkerService {
             //拿到这个大管家已支付工钱
             BigDecimal moneySup = new BigDecimal(0);
             if (supervisorHF.getWorkPrice().compareTo(new BigDecimal(0)) == 0) {
-                request.setAttribute(Constants.CITY_ID, supervisorHF.getCityId());
+                request.setAttribute(Constants.CITY_ID, house.getCityId());
                 ServerResponse serverResponse = workerGoodsAPI.getWorkertoCheck(request, supervisorHF.getHouseId(), supervisorHF.getId());
                 if (serverResponse.isSuccess()) {
                     JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
@@ -1090,11 +1086,11 @@ public class HouseWorkerService {
             Member worker = accessToken.getMember();
             List<HouseWorker> listHouseWorker = houseWorkerMapper.getAllHouseWorker(worker.getId());
             List<Map<String, Object>> listMap = new ArrayList<>();//返回通讯录list
-            if (listHouseWorker != null)
+            if (listHouseWorker != null) {
                 for (HouseWorker houseWorker : listHouseWorker) {
+                    HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(),houseWorker.getWorkerTypeId());
                     Map<String, Object> map = new HashMap<>();
-                    map.put("houseFlowId", houseWorker.getHouseFlowId());//任务id
-                    HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseWorker.getHouseFlowId());
+                    map.put("houseFlowId",houseFlow.getId());//任务id
                     if (houseFlow == null) continue;
                     House house = houseMapper.selectByPrimaryKey(houseWorker.getHouseId());//查询房产信息.
                     if (house == null) continue;
@@ -1102,7 +1098,7 @@ public class HouseWorkerService {
                     map.put("houseName", house.getHouseName());//地址
                     map.put("releaseTime", houseFlow.getReleaseTime() == null ? "" : houseFlow.getReleaseTime().getTime());//发布时间
                     map.put("square", (house.getSquare() == null ? "0" : house.getSquare()) + "m²");//面积
-                    map.put("memberName", memberMapper.selectByPrimaryKey(houseFlow.getMemberId()).getName());//业主姓名
+                    map.put("memberName", memberMapper.selectByPrimaryKey(house.getMemberId()).getName());//业主姓名
                     map.put("price", "￥" + (houseFlow.getWorkPrice() == null ? "0" : houseFlow.getWorkPrice()));//价格
                     if (houseFlow.getPause() == 0) {//正常施工
                         map.put("isItNormal", "正常施工");
@@ -1119,6 +1115,7 @@ public class HouseWorkerService {
                     map.put("taskNumber", supervisorCheckList.size());//任务数量
                     listMap.add(map);
                 }
+            }
             if (listMap.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), EventStatus.NO_DATA.getDesc());
             return ServerResponse.createBySuccess("获取施工列表成功", listMap);
@@ -1137,7 +1134,8 @@ public class HouseWorkerService {
             Member worker = accessToken.getMember();
             List<HouseWorker> listHouseWorker = houseWorkerMapper.getAllHouseWorker(worker.getId());
             for (HouseWorker houseWorker : listHouseWorker) {
-                if (houseWorker.getHouseFlowId().equals(houseFlowId)) {//选中的任务isSelect改为1
+                HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(),houseWorker.getWorkerTypeId());
+                if (houseFlow.getId().equals(houseFlowId)) {//选中的任务isSelect改为1
                     houseWorker.setIsSelect(1);
                     houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 } else {//其他改为0
@@ -1162,14 +1160,13 @@ public class HouseWorkerService {
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);//查询houseFlow
             HouseWorker hw = houseWorkerMapper.getHwByHidAndWtype(houseFlow.getHouseId(), worker.getWorkerType());//这是查的大管家houseworker
             //新生成大管家hfa
-            HouseWorkerOrder supervisor = houseWorkerOrderMapper.selectByPrimaryKey(hw.getHouseWorkerOrderId());
+            HouseWorkerOrder supervisor = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hw.getHouseId(), hw.getWorkerTypeId());
             HouseFlowApply hfa = new HouseFlowApply();
             hfa.setHouseFlowId(houseFlow.getId());
             hfa.setWorkerId(hw.getWorkerId());
             hfa.setWorkerTypeId(hw.getWorkerTypeId());
             hfa.setWorkerType(hw.getWorkerType());
             hfa.setHouseId(hw.getHouseId());
-            hfa.setMemberId(houseFlow.getMemberId());
             hfa.setPayState(0);
             hfa.setApplyType(2);//大管家没有阶段完工，直接整体完工
             hfa.setApplyDec("亲爱的业主，您的房子已经全部完工，大吉大利!");

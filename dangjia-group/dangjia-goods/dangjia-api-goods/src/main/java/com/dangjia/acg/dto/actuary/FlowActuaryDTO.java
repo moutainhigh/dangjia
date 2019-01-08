@@ -19,6 +19,6 @@ public class FlowActuaryDTO {
     private int buy;//购买性质0：必买；1可取消；2自购
     private String attribute;//属性
     private String price;//销售价跟单位拼在一起   最新价格
-    private String totalPrice;//总价    最新价格
+    private Double totalPrice;//总价    最新价格
     private String unitName;//单位
 }

@@ -40,10 +40,4 @@ public interface OrderAPI {
     @ApiOperation(value = "提交到要货", notes = "提交到要货")
     ServerResponse saveOrderSplit(@RequestParam("productArr")String productArr, @RequestParam("houseId")String houseId,
                                   @RequestParam("userToken")String userToken);
-
-    @PostMapping("app/deliver/order/warehouseList")
-    @ApiOperation(value = "模糊搜仓库", notes = "模糊搜仓库")
-    ServerResponse warehouseList(@RequestParam("pageNum")Integer pageNum,@RequestParam("pageSize") Integer pageSize,@RequestParam("houseId")String houseId,
-                                 @RequestParam("categoryId")String categoryId, @RequestParam("name")String name);
-
 }

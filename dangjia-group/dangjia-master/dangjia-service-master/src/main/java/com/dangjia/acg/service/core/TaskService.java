@@ -71,7 +71,7 @@ public class TaskService {
 
         //该城市该用户所有房产
         Example example = new Example(House.class);
-        example.createCriteria().andEqualTo("memberId", member.getId());
+        example.createCriteria().andEqualTo(House.MEMBER_ID, member.getId());
         List<House> houseList = houseMapper.selectByExample(example);
         for(House house : houseList){
             //if(house.getType() == 2){//老用户
@@ -138,7 +138,7 @@ public class TaskService {
         List<Task> taskList = new ArrayList<Task>();
         //查询待支付工序
         Example example = new Example(HouseFlow.class);
-        example.createCriteria().andEqualTo("workType", 3).andEqualTo("houseId", houseId);
+        example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 3).andEqualTo(HouseFlow.HOUSE_ID, houseId);
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         for (HouseFlow houseFlow : houseFlowList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());

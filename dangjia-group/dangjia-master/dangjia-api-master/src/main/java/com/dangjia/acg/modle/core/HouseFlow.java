@@ -21,11 +21,15 @@ import java.util.Date;
 @ApiModel(description = "工序")
 @FieldNameConstants(prefix = "")
 public class HouseFlow extends BaseEntity {
-
     @Column(name = "city_id")
-    @Desc(value = "城市ID")
-    @ApiModelProperty("城市ID")
-    private String cityId;
+    @Desc(value = "城市id")
+    @ApiModelProperty("城市id")
+    private String cityId;//cityid
+
+    @Column(name = "house_id")
+    @Desc(value = "房间ID")
+    @ApiModelProperty("房间ID")
+    private String houseId;//houseid
 
 	@Column(name = "worker_type_id")
     @Desc(value = "工种类型ID")
@@ -37,29 +41,9 @@ public class HouseFlow extends BaseEntity {
     @ApiModelProperty("工种类型")
     private Integer workerType;//workertype
 
-	@Column(name = "member_id")
-	@Desc(value = "用户ID")
-	@ApiModelProperty("用户ID")
-	private String memberId;//memberid
-
-	@Column(name = "house_id")
-	@Desc(value = "房间ID")
-	@ApiModelProperty("房间ID")
-	private String houseId;//houseid
-
-	@Column(name = "house_worker_id")
-	@Desc(value = "工序工人ID")
-	@ApiModelProperty("工序工人ID")
-	private String houseWorkerId;//housewokerid
-
-	@Column(name = "house_worker_order_id")
-	@Desc(value = "工序工人订单ID")
-	@ApiModelProperty("工序工人订单ID")
-	private String houseWorkerOrderId;  //housewokerorderid
-
 	@Column(name = "worker_id")
-	@Desc(value = "工人Id")
-	@ApiModelProperty("工人Id")
+	@Desc(value = "抢单的工人Id")
+	@ApiModelProperty("抢单的工人Id")
 	private String workerId;//workerid
 
 	@Column(name = "state")
@@ -68,11 +52,16 @@ public class HouseFlow extends BaseEntity {
 	private Integer state;
 
 	@Column(name = "grab_lock")
-	@Desc(value = "抢单锁·0可抢，2不可以抢")
-	@ApiModelProperty("抢单锁·0可抢，2不可以抢")
-	private Integer grablock;
+	@Desc(value = "抢单锁·0可抢，1已指定工人 2不可以抢")
+	@ApiModelProperty("抢单锁·0可抢，1指定工人 2不可以抢")
+	private Integer grabLock;
 
-	@Column(name = "sort")
+    @Column(name = "nominator")
+    @Desc(value = "指定的工人id")
+    @ApiModelProperty("指定的工人id")
+    private String nominator;
+
+    @Column(name = "sort")
 	@Desc(value = "实际排期顺序")
 	@ApiModelProperty("实际排期顺序")
 	private Integer sort;
@@ -83,8 +72,8 @@ public class HouseFlow extends BaseEntity {
 	private Integer refuseNumber;//refusemumber
 
     @Column(name = "grab_number")
-    @Desc(value = "抢单人数")
-    @ApiModelProperty("抢单人数")
+    @Desc(value = "抢过单人数")
+    @ApiModelProperty("抢过单人数")
 	private Integer grabNumber;//grabmumber
 
     @Column(name = "work_type")
@@ -102,50 +91,10 @@ public class HouseFlow extends BaseEntity {
     @ApiModelProperty("施工状态，0未开始 ，1阶段完工通过，2整体完工通过，3待交底，4施工中，5收尾施工??")
 	private Integer workSteta;//worksteta
 
-    @Column(name = "evaluate_steta")
-    @Desc(value = "评价状态,0未开始，1已评价，没有评价")
-    @ApiModelProperty("评价状态,0未开始，1已评价，没有评价")
-	private Integer evaluateSteta;//evaluatesteta
-
-    @Column(name = "repair_state")
-    @Desc(value = "0代表没有补货要审核，1代表有有补货要审核，2代表补货已经处理")
-    @ApiModelProperty("0代表没有补货要审核，1代表有有补货要审核，2代表补货已经处理")
-	private Integer repairState;//replenishmentstate
-
-    @Column(name = "worker_repair_state")
-    @Desc(value = "0代表没有补人工要审核，1代表有补人工要审核，2代表补人工已经处理")
-    @ApiModelProperty("0代表没有补人工要审核，1代表有补人工要审核，2代表补人工已经处理")
-	private Integer workerRepairState;//workerreplenishmentstate
-
-    @Column(name = "safe")
-    @Desc(value = "0没有，1有")
-    @ApiModelProperty("0没有，1有")
-	private Integer safe;
-
-    @Column(name = "safe_shop_state")
-    @Desc(value = "是否购买保险，0没有，1有")
-    @ApiModelProperty("是否购买保险，0没有，1有")
-	private Integer safeShopState;//safeshopstate
-
-    @Column(name = "safe_id")
-    @Desc(value = "保险类型")
-    @ApiModelProperty("保险类型")
-	private String safeId;//safeid
-
-    @Column(name = "choose")
-    @Desc(value = "选择保险")
-    @ApiModelProperty("选择保险")
-	private Integer choose;//choose
-
     @Column(name = "pause")
     @Desc(value = "施工状态0正常,1暂停")
     @ApiModelProperty("施工状态0正常,1暂停")
 	private Integer pause;
-
-    @Column(name = "lock_worker")
-    @Desc(value = "指定工匠 1已指定")
-    @ApiModelProperty("指定工匠 1已指定")
-	private Integer lockWorker;//
 
     @Column(name = "material_price")
     @Desc(value = "材料钱 支付后才会保存")
@@ -207,16 +156,11 @@ public class HouseFlow extends BaseEntity {
     }
     public HouseFlow(Boolean isInit){
         if(isInit){
-            this.grablock = 0;
+            this.grabLock = 0;
             this.refuseNumber = 0;
             this.grabNumber = 0;
             this.workSteta = 0;//0未开始
-            this.evaluateSteta = 0;
-            this.repairState = 0;
-            this.workerRepairState = 0;
-            this.safeShopState = 0;
             this.pause = 0;
-            this.lockWorker = 0;//0未指定工匠
             this.materialPrice = new BigDecimal(0.0);//材料钱
             this.workPrice = new BigDecimal(0.0);//工钱总数
             this.totalPrice = new BigDecimal(0.0);// 工钱加材料

@@ -7,15 +7,20 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.ByteToInputStream;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.config.ConstantProperties;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.IResourceFileMapper;
 import com.dangjia.acg.model.ResourceFile;
+import com.obs.services.ObsClient;
+import com.obs.services.model.AccessControlList;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,6 +37,7 @@ import static java.lang.System.currentTimeMillis;
  * @date: 2018/4/17
  */
 @Service
+@Component
 public class FileCommonService {
 
   private Logger logger = LoggerFactory.getLogger(FileCommonService.class);
@@ -44,7 +50,8 @@ public class FileCommonService {
 
   private String updateTime = "";
 
-
+  @Value("${spring.profiles.active}")
+  private String active;
 
 
   /**
@@ -73,7 +80,6 @@ public class FileCommonService {
         }
         File dest = new File(address + fileName);
         file.transferTo(dest);
-
         try {
           if (file.getSize() >= 1*1024*1024)
           {
@@ -84,6 +90,16 @@ public class FileCommonService {
           }
           //压缩图片
 //          ImageUtil.generateThumbnail3Directory(address, address + fileName);
+          //上传至华为云OBS
+          if(active!=null&&(active.equals("pre")||active.equals("test"))){
+            // 创建ObsClient实例
+            ObsClient obsClient = new ObsClient(ConstantProperties.HUAWEI_ACCESS_KEY_ID, ConstantProperties.HUAWEI_ACCESS_KEY_SECRET, ConstantProperties.HUAWEI_END_POINT);
+            obsClient.putObject(ConstantProperties.HUAWEI_BUCKET_NAME, webAddress+"/"+fileName,  new File(address + fileName));
+            //设置权限 这里是公开读
+            obsClient.setBucketAcl(ConstantProperties.HUAWEI_BUCKET_NAME, AccessControlList.REST_CANNED_PUBLIC_READ);
+            //删除服务器临时文件
+            dest.delete();
+          }
         }catch (Exception e){
           logger.error(e.getMessage(),e);
         }

@@ -81,12 +81,6 @@ public class Member extends BaseEntity {
     @ApiModelProperty("他人邀请码")
     private String othersInvitationCode;//他人邀请码
 
-    @Column(name = "user_role")
-    @Desc(value = "用户角色")
-    @ApiModelProperty("用户角色 1为业主角色，2为工匠角色，0为业主和工匠双重身份角色")
-    private Integer userRole;//用户角色
-
-
     //工匠字段
     @Column(name = "head")
     @Desc(value = "头像")
@@ -190,6 +184,12 @@ public class Member extends BaseEntity {
     @Desc(value = "推荐人ID")
     @ApiModelProperty("推荐人ID")
     private String referrals;//推荐人ID superior
+
+    /*@Column(name = "user_role")
+    @Desc(value = "用户角色")
+    @ApiModelProperty("用户角色 1为业主角色，2为工匠角色，0为业主和工匠双重身份角色")
+    private Integer userRole;//用户角色*/
+
 
     /*@Column(name = "workyears")
     @Desc(value = "工作年限")

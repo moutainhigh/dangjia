@@ -38,11 +38,6 @@ public class WorkerTypeSafeOrder extends BaseEntity {
 	@ApiModelProperty("房间ID")
 	private String houseId;//houseid
 
-	@Column(name = "member_id")
-	@Desc(value = "会员ID")
-	@ApiModelProperty("会员ID")
-	private String memberId;//memberid
-
 	@Column(name = "worker_type_id")
 	@Desc(value = "工种ID")
 	@ApiModelProperty("工种ID")
@@ -53,11 +48,6 @@ public class WorkerTypeSafeOrder extends BaseEntity {
 	@ApiModelProperty("工种类型1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工")
 	private Integer workerType;//workertype
 
-	@Column(name = "house_flow_id")
-	@Desc(value = "进程ID")
-	@ApiModelProperty("进程ID")
-	private String houseFlowId;//houseflowid
-
 	@Column(name = "state")
 	@Desc(value = "支付状态0未支付1已支付")
 	@ApiModelProperty("支付状态0未支付1已支付")
@@ -67,7 +57,6 @@ public class WorkerTypeSafeOrder extends BaseEntity {
 	@Desc(value = "价格")
 	@ApiModelProperty("价格")
 	private BigDecimal price;
-
 
 	@Column(name = "shop_date")
 	@Desc(value = "购买时间")

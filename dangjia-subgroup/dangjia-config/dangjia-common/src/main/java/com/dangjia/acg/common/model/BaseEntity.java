@@ -38,8 +38,8 @@ public class BaseEntity implements Serializable {
     @Desc(value = "数据状态 0=正常，1=删除")
     @ApiModelProperty("数据状态 0=正常，1=删除")
     protected int dataStatus;
-
     public BaseEntity() {
+
         this.id = (int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis();
         this.createDate = new Date();
         this.modifyDate = new Date();

@@ -420,23 +420,20 @@ public class HouseService {
                 } else if (houseFlowList.size() == 1) {
                     houseFlow = houseFlowList.get(0);
                     houseFlow.setReleaseTime(new Date());//发布时间
-                    houseFlow.setMemberId(house.getMemberId());
                     houseFlow.setState(workerType.getState());
                     houseFlow.setSort(workerType.getSort());
-                    houseFlow.setSafe(workerType.getSafeState());
                     houseFlow.setWorkType(2);//开始设计等待被抢
                     houseFlow.setCityId(house.getCityId());
                     houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                 } else {
                     houseFlow = new HouseFlow(true);
+                    houseFlow.setCityId(house.getCityId());
                     houseFlow.setReleaseTime(new Date());//发布时间
                     houseFlow.setWorkerTypeId(workerType.getId());
                     houseFlow.setWorkerType(workerType.getType());
-                    houseFlow.setMemberId(house.getMemberId());
                     houseFlow.setHouseId(house.getId());
                     houseFlow.setState(workerType.getState());
                     houseFlow.setSort(workerType.getSort());
-                    houseFlow.setSafe(workerType.getSafeState());
                     houseFlow.setWorkType(2);//开始设计等待被抢
                     houseFlow.setCityId(house.getCityId());
                     houseFlowMapper.insert(houseFlow);
@@ -859,8 +856,10 @@ public class HouseService {
             List<Map<String, Object>> listMap = this.houseFlowApplyDetail(hfaList);
             flowRecordDTO.setFlowApplyMap(listMap);
 
+            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(HouseWorker.class);
-            example.createCriteria().andEqualTo(HouseWorker.HOUSE_FLOW_ID, houseFlowId).andNotEqualTo(HouseWorker.WORK_TYPE,5);
+            example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId())
+                    .andEqualTo(HouseWorker.WORKER_TYPE_ID,houseFlow.getWorkerTypeId()).andNotEqualTo(HouseWorker.WORK_TYPE,5);
             List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
             List<Map<String, Object>> houseWorkerMap = new ArrayList<>();
             for(HouseWorker houseWorker : houseWorkerList){
@@ -882,7 +881,6 @@ public class HouseService {
             }
             flowRecordDTO.setHouseWorkerMap(houseWorkerMap);
 
-            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             //已验收节点
             List<TechnologyRecord> checkList = technologyRecordMapper.allChecked(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
             List<Map<String, Object>> nodeMap = new ArrayList<>();

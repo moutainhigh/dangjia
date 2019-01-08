@@ -14,4 +14,12 @@ public interface IWarehouseMapper extends Mapper<Warehouse> {
 
     List<Warehouse> warehouseList(@Param("houseId")String houseId, @Param("categoryId")String categoryId,
                                   @Param("name")String name);
+
+    /**服务类商品*/
+    List<Warehouse> serverList(@Param("houseId")String houseId, @Param("categoryId")String categoryId,
+                               @Param("name")String name);
+
+    /**材料类商品*/
+    List<Warehouse> materialsList(@Param("houseId")String houseId, @Param("categoryId")String categoryId,
+                               @Param("name")String name);
 }

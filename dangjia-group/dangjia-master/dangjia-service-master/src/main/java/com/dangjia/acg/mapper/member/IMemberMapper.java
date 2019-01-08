@@ -22,5 +22,9 @@ public interface IMemberMapper extends Mapper<Member> {
     Member getUser(Member member);
 
     List<Map<String,Object>> getMemberList();
+//    //查询所有业主关联客服的所有数据
+//    List<Map<String,Object>> getMemberAndCustomerList();
+
+
 }
 
