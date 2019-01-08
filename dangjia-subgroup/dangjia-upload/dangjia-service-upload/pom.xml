@@ -22,6 +22,12 @@
     </properties>
 
     <dependencies>
+        <!-- OBS Java SDK -->
+        <dependency>
+            <groupId>com.huawei.storage</groupId>
+            <artifactId>esdk-obs-java</artifactId>
+            <version>3.0.2</version>
+        </dependency>
         <dependency>
             <groupId>net.coobird</groupId>
             <artifactId>thumbnailator</artifactId>

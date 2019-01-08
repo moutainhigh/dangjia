@@ -26,11 +26,6 @@ public class HouseFlowApply extends BaseEntity {
 	@ApiModelProperty("进程ID")
 	private String houseFlowId;//houseflowid
 
-	@Column(name = "house_worker_order_id")
-	@Desc(value = "houseWorkerOrderId")
-	@ApiModelProperty("houseWorkerOrderId")
-	private String houseWorkerOrderId;//houseworkerorderid
-
 	@Column(name = "worker_id")
 	@Desc(value = "工人ID")
 	@ApiModelProperty("工人ID")
@@ -50,11 +45,6 @@ public class HouseFlowApply extends BaseEntity {
 	@Desc(value = "房子/项目ID")
 	@ApiModelProperty("房子/项目ID")
 	private String houseId;//houseid
-
-	@Column(name = "member_id")
-	@Desc(value = "会员ID")
-	@ApiModelProperty("会员ID")
-	private String memberId;//memberid
 
 	@Column(name = "apply_type")
 	@Desc(value = "0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查")
@@ -87,8 +77,8 @@ public class HouseFlowApply extends BaseEntity {
 	private BigDecimal applyMoney;//applymoney
 
 	@Column(name = "pay_state")
-	@Desc(value = "支付状态 ，0未支付")
-	@ApiModelProperty("支付状态 ，0未支付")
+	@Desc(value = "0未处理, 1已处理")
+	@ApiModelProperty("0未处理, 1已处理")
 	private Integer payState;//paystate
 
 	@Column(name = "other_money")

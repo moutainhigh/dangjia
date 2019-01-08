@@ -11,7 +11,8 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
- * 客服基础类 - 这个类只用于接收客服的申请，如有其它业务，请以其它表补充。
+ * 客服跟进表（记录每个业主的跟进阶段）
+ * at ysl 2019-1-5
  */
 @Data
 @Entity
@@ -20,42 +21,32 @@ import javax.persistence.Table;
 public class Customer extends BaseEntity {
 
 	@Column(name = "member_id")
-	@Desc(value = "申请会员ID")
-	@ApiModelProperty("申请会员ID")
-	private String memberId;//memberid
+	@Desc(value = "业主id")
+	@ApiModelProperty("业主id")
+	private String memberId;
 
-	@Column(name = "house_id")
-	@Desc(value = "房间id")
-	@ApiModelProperty("房间id")
-	private String houseId;//houseid
+    @Column(name = "user_id")
+    @Desc(value = "当前客服id")
+    @ApiModelProperty("当前客服id")
+    private String userId;
 
-	@Column(name = "worker_type_id")
-	@Desc(value = "审核工种")
-	@ApiModelProperty("审核工种")
-	private String workerTypeId;//workertypeid
+	@Column(name = "label_id")
+	@Desc(value = "标签id")
+	@ApiModelProperty("标签id")
+	private String labelId;
 
-	@Column(name = "worker_type")
-	@Desc(value = "审核工种")
-	@ApiModelProperty("审核工种")
-	private Integer workerType;//workertype
+	@Column(name = "stage")
+	@Desc(value = "阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单")
+	@ApiModelProperty("阶段")
+	private Integer stage;
 
-	@Column(name = "customerdes")
-	@Desc(value = "描述")
-	@ApiModelProperty("描述")
-	private String customerdes;//
+	@Column(name = "curr_record_id")
+	@Desc(value = "最新沟通记录id")
+	@ApiModelProperty("最新沟通记录id")
+	private String currRecordId;
 
-	@Column(name = "state")
-	@Desc(value = "审核状态,0已经提交等审核，1用户自己撤回，2，已受理，3、受理完成，告知业主，4，业主审核通过，全部完成。")
-	@ApiModelProperty("审核状态,0已经提交等审核，1用户自己撤回，2，已受理，3、受理完成，告知业主，4，业主审核通过，全部完成。")
-	private Integer state;//
-
-	@Column(name = "state_result")
-	@Desc(value = "审核结果")
-	@ApiModelProperty("审核结果")
-	private String stateResult;//stateresult
-
-	@Column(name = "state_name")
-	@Desc(value = "审核人")
-	@ApiModelProperty("审核人")
-	private String stateName;//statename
+    @Column(name = "remind_record_id")
+    @Desc(value = "最近的提醒沟通记录id")
+    @ApiModelProperty("最近的提醒沟通记录id")
+    private String remindRecordId;
 }

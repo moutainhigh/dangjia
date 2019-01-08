@@ -5,10 +5,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper">
     <sql id="new_columns">
         id,
-        house_flow_id as houseFlowId,
         house_id as houseId,
-        house_worker_id as houseWorkerId,
-        member_id as memberId,
         work_price as workPrice,
         pay_state as payState,
         worker_id as workerId,
@@ -20,12 +17,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         material_price as materialPrice,
         retention_money as retentionMoney,
         safe_price as safePrice,
-        worker_type_safe_id as workerTypeSafeId,
         after_change as afterChange,
         check_money as checkMoney,
         business_order_number as businessOrderNumber,
         repair_price as repairPrice,
-        worker_type_safe_order_id as workerTypeSafeOrderId,
         create_date as createDate,
         modify_date as modifyDate
     </sql>

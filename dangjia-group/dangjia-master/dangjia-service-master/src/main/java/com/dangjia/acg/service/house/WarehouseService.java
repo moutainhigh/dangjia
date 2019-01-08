@@ -29,12 +29,14 @@ public class WarehouseService {
 
     /**
      * 查询仓库材料
+     * type 0材料 1服务 2所有
      */
-    public ServerResponse warehouseList(Integer pageNum, Integer pageSize,String houseId,String categoryId, String name){
+    public ServerResponse warehouseList(Integer pageNum, Integer pageSize,String houseId,String categoryId, String name,Integer type){
         try{
             if(StringUtil.isEmpty(houseId)){
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             if(pageNum == null){
                 pageNum = 1;
             }
@@ -42,12 +44,19 @@ public class WarehouseService {
                 pageSize = 5;
             }
             PageHelper.startPage(pageNum, pageSize);
-            List<Warehouse> warehouseList = warehouseMapper.warehouseList(houseId,categoryId,name);
+            List<Warehouse> warehouseList;
+            if(type == 0){//材料
+                warehouseList = warehouseMapper.materialsList(houseId,categoryId,name);
+            }else if (type == 1){//服务
+                warehouseList = warehouseMapper.serverList(houseId,categoryId,name);
+            }else {
+                warehouseList = warehouseMapper.warehouseList(houseId,categoryId,name);
+            }
             PageInfo pageResult = new PageInfo(warehouseList);
             List<WarehouseDTO> warehouseDTOS = new ArrayList<WarehouseDTO>();
             for (Warehouse warehouse : warehouseList){
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
-                warehouseDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + warehouse.getImage());
+                warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
                 warehouseDTO.setAskCount(warehouse.getAskCount());
                 warehouseDTO.setBackCount(warehouse.getBackCount());

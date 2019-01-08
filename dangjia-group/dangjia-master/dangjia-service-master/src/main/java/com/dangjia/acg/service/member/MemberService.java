@@ -11,14 +11,19 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.member.MemberCustomerDTO;
 import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.member.ICustomerMapper;
+import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.member.Customer;
+import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.activity.RedPackPayService;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -38,6 +43,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +59,10 @@ public class MemberService {
 	private RedPackPayService redPackPayService;
 	@Autowired
 	private IMemberMapper memberMapper;
+	@Autowired
+	private ICustomerRecordMapper iCustomerRecordMapper;
+	@Autowired
+	private ICustomerMapper iCustomerMapper;
 	@Autowired
 	private ISmsMapper smsMapper;
 	@Autowired
@@ -225,7 +235,6 @@ public class MemberService {
 			user.setSurplusMoney(new BigDecimal(0));
 			user.setRetentionMoney(new BigDecimal(0));
 			user.setVisitState(0);
-			user.setUserRole(0);
 			user.setUserName(user.getMobile());
 			user.setName("");
 			user.setOthersInvitationCode(invitationCode);
@@ -418,8 +427,38 @@ public class MemberService {
 		Example.Criteria criteria=example.createCriteria();
 		criteria.andEqualTo(Member.DATA_STATUS,"0");
 		example.orderBy(Member.CREATE_DATE).desc();
+
+		List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
 		List<Member> list = memberMapper.selectByExample(example);
-		PageInfo pageResult = new PageInfo(list);
+		for(Member member: list)
+		{
+			Customer customer = iCustomerMapper.getCustomerByMemberId(member.getId());
+
+			//每个业主增加关联 客服跟进
+			if(customer == null)
+			{
+				customer  = new Customer();
+				customer.setMemberId(member.getId());
+				customer.setStage(0);
+				iCustomerMapper.insertSelective(customer);
+			}
+			CustomerRecord currCustomerRecord = null;
+			if(customer.getCurrRecordId() != null)
+				currCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getCurrRecordId());
+
+			CustomerRecord remindCustomerRecord = null;
+			if(customer.getRemindRecordId() != null)
+				remindCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getRemindRecordId());
+
+			MemberCustomerDTO mcDTO = new MemberCustomerDTO();
+			mcDTO.setMember(member);
+			mcDTO.setCustomer(customer);
+			mcDTO.setCurrCustomerRecord(currCustomerRecord);
+			mcDTO.setRemindCustomerRecord(remindCustomerRecord);
+			mcDTOList.add(mcDTO);
+		}
+//		PageInfo pageResult = new PageInfo(list);
+		PageInfo pageResult = new PageInfo(mcDTOList);
 		return ServerResponse.createBySuccess("查询用户列表成功", pageResult);
 	}
 

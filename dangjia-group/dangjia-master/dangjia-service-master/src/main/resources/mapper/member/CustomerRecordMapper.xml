@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.member.ICustomerRecordMapper">
+
+    <sql id="all_columns">
+		id,
+        name,
+        describe,
+        member_id AS memberId,
+        user_id AS userId,
+        remind_time AS remindTime,
+        create_date AS createDate,
+        modify_date AS modifyDate
+	</sql>
+
+    <!-- 根据业主id查询 ，业主id 为 null 查所有-->
+    <select id="getCustomerRecordByMemberId" parameterType="String" resultType="com.dangjia.acg.modle.member.CustomerRecord">
+        SELECT
+        <include refid="all_columns" />
+        FROM dj_member_customer_record
+        WHERE 1=1
+        <if test="memberId!=null and memberId!=''">
+            and member_id=#{memberId}
+        </if>
+        ORDER by create_date
+    </select>
+
+</mapper>
+

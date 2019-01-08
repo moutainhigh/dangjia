@@ -62,7 +62,6 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
-import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -352,100 +351,103 @@ public class PaymentService {
             }
         }catch (Exception e){
             e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
     }
 
     /**支付工序*/
     private void payWorkerType(String businessOrderNumber,String houseFlowId,String payState){
-         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-            .getRequest();
-        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
-        House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
-        if(house.getMoney() == null){
-            house.setMoney(new BigDecimal(0));
+        try{
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                    .getRequest();
+            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+            House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+            if(house.getMoney() == null){
+                house.setMoney(new BigDecimal(0));
+            }
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlow.getHouseId(),houseFlow.getWorkerTypeId());
+            hwo.setPayState(1);
+            houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
+
+            HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(),houseFlow.getWorkerTypeId(),1);
+            houseWorker.setWorkType(6);
+            houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+
+            houseFlow.setWorkerId(hwo.getWorkerId());
+            houseFlow.setWorkType(4);
+            houseFlow.setMaterialPrice(hwo.getMaterialPrice());
+            houseFlow.setWorkPrice(hwo.getWorkPrice());
+            houseFlow.setTotalPrice(hwo.getTotalPrice());
+            houseFlow.setWorkSteta(3);//待交底
+            houseFlow.setModifyDate(new Date());
+            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+
+            if(hwo.getWorkerType() == 1){ //设计费用处理
+                Order order = new Order();
+                order.setHouseId(hwo.getHouseId());
+                order.setBusinessOrderNumber(businessOrderNumber);
+                order.setTotalAmount(hwo.getWorkPrice());//设计费
+                order.setWorkerTypeName("设计订单");
+                order.setWorkerTypeId(hwo.getWorkerTypeId());
+                HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
+                order.setStyleName(house.getStyle());
+                order.setStylePrice(houseStyleType.getPrice());//风格价格
+                order.setType(1);//人工订单
+                order.setPayment(payState);
+                orderMapper.insert(order);
+
+                house.setDesignerOk(1);
+                houseMapper.updateByPrimaryKeySelective(house);
+
+            } else if(hwo.getWorkerType() == 2){//精算费用处理
+                Order order = new Order();
+                WorkDeposit workDeposit = workDepositMapper.selectAll().get(0);//结算比例表
+                order.setBudgetCost(workDeposit.getBudgetCost());//精算价格
+                order.setHouseId(hwo.getHouseId());
+                order.setBusinessOrderNumber(businessOrderNumber);
+                order.setTotalAmount(hwo.getWorkPrice());//精算费
+                order.setWorkerTypeName("精算订单");
+                order.setWorkerTypeId(hwo.getWorkerTypeId());
+                order.setType(1);//人工订单
+                order.setPayment(payState);
+                orderMapper.insert(order);
+
+                house.setBudgetOk(1);//房间工种表里标记开始精算
+                houseMapper.updateByPrimaryKeySelective(house);
+            }else{//其它工种
+                /*不统计设计精算人工*/
+                HouseExpend houseExpend = houseExpendMapper.getByHouseId(hwo.getHouseId());
+                houseExpend.setMaterialMoney(houseExpend.getMaterialMoney() + hwo.getMaterialPrice().doubleValue());//材料
+                houseExpend.setWorkerMoney(houseExpend.getWorkerMoney() + hwo.getWorkPrice().doubleValue());//人工
+                houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
+
+
+                /*处理人工和取消的材料改到自购精算*/
+                this.renGong(businessOrderNumber,hwo,payState,houseFlowId);
+                /*处理材料*/
+                this.caiLiao(businessOrderNumber,hwo,payState,houseFlowId);
+                /*处理保险订单*/
+                this.insurance(hwo,payState);
+            }
+            /*记录项目流水工钱+材料钱*/
+            //liuShui(businessOrderNumber,house,hwo,paystate);
+
+            //app推送和发送短信给工匠
+            if (houseWorker.getWorkerType() == 1) {//设计师
+                configMessageService.addConfigMessage(null,"gj",houseWorker.getWorkerId(),"0","业主支付提醒",String.format(DjConstants.PushMessage.PAYMENT_OF_DESIGN_FEE,house.getHouseName()) ,"");
+            }
+            if (houseWorker.getWorkerType() == 3) {//大管家
+                configMessageService.addConfigMessage(null,"gj",houseWorker.getWorkerId(),"0","业主支付提醒",String.format(DjConstants.PushMessage.STEWARD_PAYMENT,house.getHouseName()) ,"");
+            }
+            if (houseWorker.getWorkerType() >3) {//其它工种
+                configMessageService.addConfigMessage(null,"gj",houseWorker.getWorkerId(),"0","业主支付提醒",String.format(DjConstants.PushMessage.CRAFTSMAN_PAYMENT,house.getHouseName()) ,"");
+            }
+            /*支付完成后将工人拉入激光群组内，方便交流*/
+            addGroupMember(request,houseFlow.getHouseId(),houseFlow.getWorkerId());
+        }catch (Exception e){
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
-        HouseWorkerOrder hwo = houseWorkerOrderMapper.selectByPrimaryKey(houseFlow.getHouseWorkerOrderId());
-        hwo.setPayState(1);
-        houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
-        HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(hwo.getHouseWorkerId());
-        houseWorker.setWorkType(6);
-        houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-
-        houseFlow.setWorkerId(hwo.getWorkerId());
-        houseFlow.setWorkType(4);
-        houseFlow.setHouseWorkerId(hwo.getHouseWorkerId());
-        houseFlow.setMaterialPrice(hwo.getMaterialPrice());
-        houseFlow.setWorkPrice(hwo.getWorkPrice());
-        houseFlow.setTotalPrice(hwo.getTotalPrice());
-        houseFlow.setWorkSteta(3);//待交底
-        if(StringUtil.isNotEmpty(hwo.getWorkerTypeSafeId())){
-            houseFlow.setSafeId(hwo.getWorkerTypeSafeId());
-        }
-        houseFlow.setModifyDate(new Date());
-        houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-
-        if(hwo.getWorkerType() == 1){ //设计费用处理
-            Order order = new Order();
-            order.setHouseId(hwo.getHouseId());
-            order.setBusinessOrderNumber(businessOrderNumber);
-            order.setTotalAmount(hwo.getWorkPrice());//设计费
-            order.setWorkerTypeName("设计订单");
-            order.setWorkerTypeId(hwo.getWorkerTypeId());
-            HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
-            order.setStyleName(house.getStyle());
-            order.setStylePrice(houseStyleType.getPrice());//风格价格
-            order.setType(1);//人工订单
-            order.setPayment(payState);
-            orderMapper.insert(order);
-
-            house.setDesignerOk(1);
-            houseMapper.updateByPrimaryKeySelective(house);
-
-        } else if(hwo.getWorkerType() == 2){//精算费用处理
-            Order order = new Order();
-            WorkDeposit workDeposit = workDepositMapper.selectAll().get(0);//结算比例表
-            order.setBudgetCost(workDeposit.getBudgetCost());//精算价格
-            order.setHouseId(hwo.getHouseId());
-            order.setBusinessOrderNumber(businessOrderNumber);
-            order.setTotalAmount(hwo.getWorkPrice());//精算费
-            order.setWorkerTypeName("精算订单");
-            order.setWorkerTypeId(hwo.getWorkerTypeId());
-            order.setType(1);//人工订单
-            order.setPayment(payState);
-            orderMapper.insert(order);
-
-            house.setBudgetOk(1);//房间工种表里标记开始精算
-            houseMapper.updateByPrimaryKeySelective(house);
-        }else{//其它工种
-            /*不统计设计精算人工*/
-            HouseExpend houseExpend = houseExpendMapper.getByHouseId(hwo.getHouseId());
-            houseExpend.setMaterialMoney(houseExpend.getMaterialMoney() + hwo.getMaterialPrice().doubleValue());//材料
-            houseExpend.setWorkerMoney(houseExpend.getWorkerMoney() + hwo.getWorkPrice().doubleValue());//人工
-            houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
-
-
-            /*处理人工和取消的材料改到自购精算*/
-            this.renGong(businessOrderNumber,hwo,payState,houseFlowId);
-            /*处理材料*/
-            this.caiLiao(businessOrderNumber,hwo,payState,houseFlowId);
-            /*处理保险订单*/
-            this.insurance(hwo,payState);
-        }
-        /*记录项目流水工钱+材料钱*/
-        //liuShui(businessOrderNumber,house,hwo,paystate);
-
-        //app推送和发送短信给工匠
-        if (houseWorker.getWorkerType() == 1) {//设计师
-            configMessageService.addConfigMessage(null,"gj",houseWorker.getWorkerId(),"0","业主支付提醒",String.format(DjConstants.PushMessage.PAYMENT_OF_DESIGN_FEE,house.getHouseName()) ,"");
-        }
-        if (houseWorker.getWorkerType() == 3) {//大管家
-            configMessageService.addConfigMessage(null,"gj",houseWorker.getWorkerId(),"0","业主支付提醒",String.format(DjConstants.PushMessage.STEWARD_PAYMENT,house.getHouseName()) ,"");
-        }
-        if (houseWorker.getWorkerType() >3) {//其它工种
-            configMessageService.addConfigMessage(null,"gj",houseWorker.getWorkerId(),"0","业主支付提醒",String.format(DjConstants.PushMessage.CRAFTSMAN_PAYMENT,house.getHouseName()) ,"");
-        }
-        /*支付完成后将工人拉入激光群组内，方便交流*/
-        addGroupMember(request,houseFlow.getHouseId(),houseFlow.getWorkerId());
     }
 
     /**处理待付款提前付生成订单*/
@@ -474,6 +476,7 @@ public class PaymentService {
             }
         }catch(Exception e){
             e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
     }
 
@@ -512,6 +515,7 @@ public class PaymentService {
             }
         }catch (Exception e){
             e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
     }
 
@@ -536,6 +540,7 @@ public class PaymentService {
             }
         }catch(Exception e){
             e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
     }
     /**
@@ -544,84 +549,89 @@ public class PaymentService {
      *      2 未购买待付款进来的
      * */
     private void addWarehouse(List<BudgetMaterial> budgetMaterialList,String houseId, String orderId, int type){
-        WarehouseDetail warehouseDetail = new WarehouseDetail();
-        warehouseDetail.setHouseId(houseId);
-        warehouseDetail.setRecordType(0);//支付精算
-        warehouseDetail.setRelationId(orderId);
-        warehouseDetailMapper.insert(warehouseDetail);
-        Example example = new Example(Warehouse.class);
-        example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId);
-        List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
+        try{
+            WarehouseDetail warehouseDetail = new WarehouseDetail();
+            warehouseDetail.setHouseId(houseId);
+            warehouseDetail.setRecordType(0);//支付精算
+            warehouseDetail.setRelationId(orderId);
+            warehouseDetailMapper.insert(warehouseDetail);
+            Example example = new Example(Warehouse.class);
+            example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId);
+            List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
 
-        for(BudgetMaterial budgetMaterial : budgetMaterialList){
-            OrderItem orderItem = new OrderItem();
-            orderItem.setOrderId(orderId);
-            orderItem.setHouseId(houseId);
-            orderItem.setProductId(budgetMaterial.getProductId());//货品id
-            orderItem.setProductSn(budgetMaterial.getProductSn());//货品编号
-            orderItem.setProductName(budgetMaterial.getProductName());//货品名称
-            orderItem.setProductNickName(budgetMaterial.getProductNickName());//货品昵称
-            orderItem.setPrice(budgetMaterial.getPrice());//销售价
-            orderItem.setCost(budgetMaterial.getCost());//成本价
-            orderItem.setShopCount(budgetMaterial.getShopCount());//购买总数
-            orderItem.setUnitName(budgetMaterial.getUnitName());//单位
-            orderItem.setTotalPrice(budgetMaterial.getTotalPrice());//总价
-            orderItem.setProductType(budgetMaterial.getProductType());//0：材料；1：服务
-            orderItem.setCategoryId(budgetMaterial.getCategoryId());
-            orderItem.setImage(budgetMaterial.getImage());
-            orderItemMapper.insert(orderItem);
+            for(BudgetMaterial budgetMaterial : budgetMaterialList){
+                OrderItem orderItem = new OrderItem();
+                orderItem.setOrderId(orderId);
+                orderItem.setHouseId(houseId);
+                orderItem.setProductId(budgetMaterial.getProductId());//货品id
+                orderItem.setProductSn(budgetMaterial.getProductSn());//货品编号
+                orderItem.setProductName(budgetMaterial.getProductName());//货品名称
+                orderItem.setProductNickName(budgetMaterial.getProductNickName());//货品昵称
+                orderItem.setPrice(budgetMaterial.getPrice());//销售价
+                orderItem.setCost(budgetMaterial.getCost());//成本价
+                orderItem.setShopCount(budgetMaterial.getShopCount());//购买总数
+                orderItem.setUnitName(budgetMaterial.getUnitName());//单位
+                orderItem.setTotalPrice(budgetMaterial.getTotalPrice());//总价
+                orderItem.setProductType(budgetMaterial.getProductType());//0：材料；1：服务
+                orderItem.setCategoryId(budgetMaterial.getCategoryId());
+                orderItem.setImage(budgetMaterial.getImage());
+                orderItemMapper.insert(orderItem);
 
-            boolean flag = false;
-            String warehouseId = null;
-            for (Warehouse warehouse : warehouseList){
-                if (budgetMaterial.getProductId().equals(warehouse.getProductId())){//有相同货
-                    flag = true;
-                    warehouseId = warehouse.getId();
-                    continue;
+                boolean flag = false;
+                String warehouseId = null;
+                for (Warehouse warehouse : warehouseList){
+                    if (budgetMaterial.getProductId().equals(warehouse.getProductId())){//有相同货
+                        flag = true;
+                        warehouseId = warehouse.getId();
+                        continue;
+                    }
+                }
+                if(flag){//累计数量
+                    Warehouse warehouse = warehouseMapper.selectByPrimaryKey(warehouseId);
+                    warehouse.setShopCount(warehouse.getShopCount() + budgetMaterial.getShopCount());//数量
+                    if(type == 1){//抢
+                        warehouse.setRobCount(warehouse.getRobCount() + budgetMaterial.getShopCount());
+                    }else if (type == 2){//未 待
+                        warehouse.setStayCount(warehouse.getStayCount() + budgetMaterial.getShopCount());
+                    }
+                    warehouse.setPrice(budgetMaterial.getPrice());
+                    warehouse.setCost(budgetMaterial.getCost());
+                    warehouse.setImage(budgetMaterial.getImage());
+                    warehouse.setPayTime(warehouse.getPayTime() + 1);//买次数
+                    warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                }else {//增加一条
+                    Warehouse warehouse = new Warehouse();
+                    warehouse.setHouseId(houseId);
+                    warehouse.setShopCount(budgetMaterial.getShopCount());
+                    if (type == 1){
+                        warehouse.setRobCount(budgetMaterial.getShopCount());//抢单任务进来总数
+                        warehouse.setStayCount(0.0);
+                    }else {
+                        warehouse.setRobCount(0.0);
+                        warehouse.setStayCount(budgetMaterial.getShopCount());
+                    }
+                    warehouse.setRepairCount(0.0);
+                    warehouse.setAskCount(0.0);//已要数量
+                    warehouse.setBackCount(0.0);//退总数
+                    warehouse.setProductId(budgetMaterial.getProductId());
+                    warehouse.setProductSn(budgetMaterial.getProductSn());
+                    warehouse.setProductName(budgetMaterial.getProductName());
+                    warehouse.setPrice(budgetMaterial.getPrice());
+                    warehouse.setCost(budgetMaterial.getCost());
+                    warehouse.setUnitName(budgetMaterial.getUnitName());
+                    warehouse.setProductType(budgetMaterial.getProductType());
+                    warehouse.setCategoryId(budgetMaterial.getCategoryId());
+                    warehouse.setImage(budgetMaterial.getImage());
+                    warehouse.setPayTime(1);//买次数
+                    warehouse.setAskTime(0);
+                    warehouse.setRepTime(0);
+                    warehouse.setBackTime(0);
+                    warehouseMapper.insert(warehouse);
                 }
             }
-            if(flag){//累计数量
-                Warehouse warehouse = warehouseMapper.selectByPrimaryKey(warehouseId);
-                warehouse.setShopCount(warehouse.getShopCount() + budgetMaterial.getShopCount());//数量
-                if(type == 1){//抢
-                    warehouse.setRobCount(warehouse.getRobCount() + budgetMaterial.getShopCount());
-                }else if (type == 2){//未 待
-                    warehouse.setStayCount(warehouse.getStayCount() + budgetMaterial.getShopCount());
-                }
-                warehouse.setPrice(budgetMaterial.getPrice());
-                warehouse.setCost(budgetMaterial.getCost());
-                warehouse.setImage(budgetMaterial.getImage());
-                warehouse.setPayTime(warehouse.getPayTime() + 1);//买次数
-                warehouseMapper.updateByPrimaryKeySelective(warehouse);
-            }else {//增加一条
-                Warehouse warehouse = new Warehouse();
-                warehouse.setHouseId(houseId);
-                warehouse.setShopCount(budgetMaterial.getShopCount());
-                if (type == 1){
-                    warehouse.setRobCount(budgetMaterial.getShopCount());//抢单任务进来总数
-                    warehouse.setStayCount(0.0);
-                }else {
-                    warehouse.setRobCount(0.0);
-                    warehouse.setStayCount(budgetMaterial.getShopCount());
-                }
-                warehouse.setRepairCount(0.0);
-                warehouse.setAskCount(0.0);//已要数量
-                warehouse.setBackCount(0.0);//退总数
-                warehouse.setProductId(budgetMaterial.getProductId());
-                warehouse.setProductSn(budgetMaterial.getProductSn());
-                warehouse.setProductName(budgetMaterial.getProductName());
-                warehouse.setPrice(budgetMaterial.getPrice());
-                warehouse.setCost(budgetMaterial.getCost());
-                warehouse.setUnitName(budgetMaterial.getUnitName());
-                warehouse.setProductType(budgetMaterial.getProductType());
-                warehouse.setCategoryId(budgetMaterial.getCategoryId());
-                warehouse.setImage(budgetMaterial.getImage());
-                warehouse.setPayTime(1);//买次数
-                warehouse.setAskTime(0);
-                warehouse.setRepTime(0);
-                warehouse.setBackTime(0);
-                warehouseMapper.insert(warehouse);
-            }
+        }catch (Exception e){
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
     }
 
@@ -647,37 +657,38 @@ public class PaymentService {
     }
     /**保险订单*/
     private void insurance(HouseWorkerOrder hwo,String payState){
-        if(StringUtil.isNotEmpty(hwo.getWorkerTypeSafeOrderId())){
-            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(hwo.getHouseFlowId());
-            House house = houseMapper.selectByPrimaryKey(hwo.getHouseId());
-            WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.selectByPrimaryKey(hwo.getWorkerTypeSafeOrderId());
-            wtso.setWorkerTypeId(hwo.getWorkerTypeId()); // 工种id
-            wtso.setWorkerType(hwo.getWorkerType());
-            wtso.setHouseFlowId(houseFlow.getId());
-            wtso.setState(1);  //已支付
-            wtso.setShopDate(new Date());  //设置购买时间
-            workerTypeSafeOrderMapper.updateByPrimaryKeySelective(wtso);
-            hwo.setSafePrice(wtso.getPrice());
-            houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);//记录保险费
+        try{
+            WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByWorkerTypeId(hwo.getWorkerTypeId(),hwo.getHouseId());
+            if(wtso != null){
+                wtso.setState(1);  //已支付
+                wtso.setShopDate(new Date());  //设置购买时间
+                workerTypeSafeOrderMapper.updateByPrimaryKeySelective(wtso);
+                hwo.setSafePrice(wtso.getPrice());
+                houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);//记录保险费
 
-            WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());
-            if(house.getMoney() == null){
-                house.setMoney(new BigDecimal(0));
+                House house = houseMapper.selectByPrimaryKey(hwo.getHouseId());
+                WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());
+                if(house.getMoney() == null){
+                    house.setMoney(new BigDecimal(0));
+                }
+                //记录项目流水 保险
+                HouseAccounts ha = new HouseAccounts();
+                ha.setReason("收入"+wts.getName()+"费用");
+                ha.setMoney(house.getMoney().add(hwo.getSafePrice()));//项目总钱
+                ha.setState(0);//进
+                ha.setPayMoney(hwo.getSafePrice());//本次数额
+                ha.setHouseId(house.getId());
+                ha.setHouseName(house.getHouseName());
+                ha.setMemberId(house.getMemberId());
+                ha.setName("业主支付");
+                ha.setPayment(payState);//统计支付方式
+                houseAccountsMapper.insert(ha);
+                house.setMoney(house.getMoney().add(hwo.getSafePrice()));//累计项目钱
+                houseMapper.updateByPrimaryKeySelective(house);
             }
-            //记录项目流水 保险
-            HouseAccounts ha = new HouseAccounts();
-            ha.setReason("收入"+wts.getName()+"费用");
-            ha.setMoney(house.getMoney().add(hwo.getSafePrice()));//项目总钱
-            ha.setState(0);//进
-            ha.setPayMoney(hwo.getSafePrice());//本次数额
-            ha.setHouseId(house.getId());
-            ha.setHouseName(house.getHouseName());
-            ha.setMemberId(hwo.getMemberId());
-            ha.setName("业主支付");
-            ha.setPayment(payState);//统计支付方式
-            houseAccountsMapper.insert(ha);
-            house.setMoney(house.getMoney().add(hwo.getSafePrice()));//累计项目钱
-            houseMapper.updateByPrimaryKeySelective(house);
+        }catch (Exception e){
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
     }
 
@@ -722,14 +733,11 @@ public class PaymentService {
             if(houseFlow.getWorkType() != 3){
                 return ServerResponse.createByErrorMessage("该工序订单异常");
             }
-            example = new Example(HouseWorker.class);
-            example.createCriteria().andEqualTo(HouseWorker.HOUSE_FLOW_ID, houseFlow.getId()).andEqualTo(HouseWorker.WORK_TYPE, 1);
-            List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
-            HouseWorker houseWorker = houseWorkerList.get(0);
+            HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseId,houseFlow.getWorkerTypeId(),1);
             Member worker = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId()); //查工匠
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
             WorkerDTO workerDTO = new WorkerDTO();
-            workerDTO.setHouseWorkerId(houseWorkerList.get(0).getId());//换人参数
+            workerDTO.setHouseWorkerId(houseWorker.getId());//换人参数
             workerDTO.setHead(imageAddress + worker.getHead());
             workerDTO.setWorkerTypeName(workerType.getName());
             workerDTO.setName(worker.getName());
@@ -741,8 +749,8 @@ public class PaymentService {
              */
             HouseWorkerOrder hwo = null;
             example = new Example(HouseWorkerOrder.class);
-            example.createCriteria().andEqualTo(HouseWorkerOrder.HOUSE_FLOW_ID, houseFlow.getId())
-                    .andEqualTo(HouseWorkerOrder.WORKER_TYPE, houseFlow.getWorkerType());
+            example.createCriteria().andEqualTo(HouseWorkerOrder.HOUSE_ID, houseId)
+                    .andEqualTo(HouseWorkerOrder.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
             List<HouseWorkerOrder> houseWorkerOrderList = houseWorkerOrderMapper.selectByExample(example);
             if (houseWorkerOrderList.size() == 1){
                 hwo = houseWorkerOrderList.get(0);
@@ -751,24 +759,14 @@ public class PaymentService {
             }
             if(hwo == null){
                 hwo = new HouseWorkerOrder(true);
-                hwo.setMemberId(houseFlow.getMemberId());
                 hwo.setHouseId(houseFlow.getHouseId());
-                hwo.setHouseFlowId(houseFlow.getId());
-                hwo.setHouseWorkerId(houseWorker.getId());
                 hwo.setWorkerId(worker.getId());
                 hwo.setWorkerTypeId(worker.getWorkerTypeId());
                 hwo.setWorkerType(worker.getWorkerType());
                 hwo.setBusinessOrderNumber(businessOrder.getNumber());//业务订单号
                 houseWorkerOrderMapper.insert(hwo);
-                houseFlow.setHouseWorkerOrderId(hwo.getId());
-                houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-                houseWorker.setHouseWorkerOrderId(hwo.getId());
-                houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
             }else{
-                hwo.setMemberId(houseFlow.getMemberId());
                 hwo.setHouseId(houseFlow.getHouseId());
-                hwo.setHouseFlowId(houseFlow.getId());
-                hwo.setHouseWorkerId(houseWorker.getId());
                 hwo.setWorkerId(worker.getId());
                 hwo.setWorkerTypeId(worker.getWorkerTypeId());
                 hwo.setWorkerType(worker.getWorkerType());
@@ -864,7 +862,7 @@ public class PaymentService {
 
                 //查出有没有生成保险订单
                 example = new Example(WorkerTypeSafeOrder.class);
-                example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_FLOW_ID, houseFlow.getId());
+                example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId).andEqualTo(WorkerTypeSafeOrder.WORKER_TYPE_ID,houseFlow.getWorkerTypeId());
                 List<WorkerTypeSafeOrder> wtsoList = workerTypeSafeOrderMapper.selectByExample(example);
                 if(wtsoList.size() == 1){
                     WorkerTypeSafeOrder workerTypeSafeOrder = wtsoList.get(0);
@@ -999,7 +997,8 @@ public class PaymentService {
                     return ServerResponse.createByErrorMessage("该订单已支付");
                 }
                 example = new Example(HouseWorker.class);
-                example.createCriteria().andEqualTo("houseFlowId", houseFlow.getId()).andEqualTo("workType", 1);
+                example.createCriteria().andEqualTo(HouseWorker.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
+                        .andEqualTo(HouseWorker.HOUSE_ID,houseId).andEqualTo(HouseWorker.WORK_TYPE, 1);
                 List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
                 if(houseWorkerList.size() != 1){
                     return ServerResponse.createByErrorMessage("抢单异常,联系平台部");
@@ -1117,7 +1116,8 @@ public class PaymentService {
                     if(wtsList.size() > 0){
                         //查出有没有生成保险订单
                         example = new Example(WorkerTypeSafeOrder.class);
-                        example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_FLOW_ID, houseFlow.getId());
+                        example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId)
+                                .andEqualTo(WorkerTypeSafeOrder.WORKER_TYPE_ID,houseFlow.getWorkerTypeId());
                         List<WorkerTypeSafeOrder> wtsoList = workerTypeSafeOrderMapper.selectByExample(example);
                         UpgradeSafeDTO upgradeSafeDTO = new UpgradeSafeDTO();//保险服务
                         upgradeSafeDTO.setTitle("保险服务");
@@ -1132,7 +1132,7 @@ public class PaymentService {
                             safeTypeDTO.setHouseFlowId(houseFlow.getId());
                             for(WorkerTypeSafeOrder wtso : wtsoList){
                                 if(wts.getId().equals(wtso.getWorkerTypeSafeId())){
-                                    safeTypeDTO.setSelected(0);
+                                    safeTypeDTO.setSelected(1);//勾上
                                     totalPrice = totalPrice.add(wts.getPrice().multiply(house.getSquare()));
                                     break;
                                 }

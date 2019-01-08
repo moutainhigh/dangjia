@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.member.IMemberLabelMapper">
+
+    <sql id="all_columns">
+		id,
+        name,
+        valueArr,
+        create_date AS createDate,
+        modify_date AS modifyDate
+	</sql>
+
+    <select id="getLabel" resultType="com.dangjia.acg.modle.member.MemberLabel">
+        SELECT
+        <include refid="all_columns" />
+        from dj_member_label
+        ORDER by create_date
+    </select>
+
+    <!-- 根据标签名称查询 -->
+    <select id="getLabelByName" parameterType="String" resultType="com.dangjia.acg.modle.member.MemberLabel">
+		SELECT
+        <include refid="all_columns" />
+		FROM dj_member_label WHERE name=#{name}
+        ORDER by create_date
+	</select>
+
+</mapper>
+

@@ -8,8 +8,8 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.house.VillageClassifyDTO;
 import com.dangjia.acg.dto.house.VillageDTO;
-import com.dangjia.acg.dto.house.VillageListDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingLayoutMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
@@ -149,10 +149,7 @@ public class ModelingVillageService {
                 modelingVillage.setLocationy(villageObj.getString("locationy"));//百度定位目标y
                 modelingVillage.setModifyDate(new Date());
                 modelingVillageMapper.updateByPrimaryKeySelective(modelingVillage);
-//                return ServerResponse.createBySuccessMessage("修改小区成功");
             }
-
-            ModelingVillage srcModelingVillage = modelingVillageMapper.selectByPrimaryKey(villageId);
 
 //            遍历户型对象 数组  ， 一个小区 对应 多个户型
             String modelingLayoutList = villageObj.getString("modelingLayoutList");
@@ -178,6 +175,9 @@ public class ModelingVillageService {
                     modelingLayout.setImage(obj.getString("image"));//户型图片
                     modelingLayout.setBuildSquare(obj.getString("buildSquare"));//建筑面积
                     modelingLayoutMapper.insert(modelingLayout);
+                    modelingVillage.setLayoutSum(modelingVillage.getLayoutSum() + 1);//累计小区户型总数
+                    modelingVillage.setModifyDate(new Date());
+                    modelingVillageMapper.updateByPrimaryKeySelective(modelingVillage);
                 } else {
                     modelingLayout = modelingLayoutMapper.selectByPrimaryKey(layoutId);
                     if (!modelingLayout.getName().equals(name)) {
@@ -195,8 +195,7 @@ public class ModelingVillageService {
 
             String[] deleteLayoutIds = villageObj.getString("deleteLayoutIds").split(",");//要删除的户型id数组，逗号分隔
             for (int j = 0; j < deleteLayoutIds.length; j++) {
-                if(modelingLayoutMapper.selectByPrimaryKey(deleteLayoutIds[j])!= null)
-                {
+                if (modelingLayoutMapper.selectByPrimaryKey(deleteLayoutIds[j]) != null) {
                     if (modelingLayoutMapper.deleteByPrimaryKey(deleteLayoutIds[j]) < 0)
                         return ServerResponse.createByErrorMessage("删除id：" + deleteLayoutIds[j] + "失败");
                 }
@@ -230,9 +229,9 @@ public class ModelingVillageService {
      * @return
      */
     public ServerResponse getAllVillageByCity(String cityId) {
-        List<VillageListDTO> vrlist = new ArrayList<>();//小区数组
-        List<VillageListDTO> rvrlist = new ArrayList<>();//热门小区数组
-        List<VillageDTO> vresultlist = new ArrayList<>();//热门小区数组
+        List<VillageDTO> letterList = new ArrayList<>();//字母集合
+        List<VillageDTO> hotList = new ArrayList<>();//热门小区集合
+        List<VillageClassifyDTO> villageClassifyDTOList = new ArrayList<>();//返回集
         try {
             List<ModelingVillage> mvlist = redisClient.getListCache("vresult:" + cityId, ModelingVillage.class);
             Integer number = modelingVillageMapper.getAllVillageCount(cityId);//统计根据城市id查询小区按字母排序
@@ -240,47 +239,56 @@ public class ModelingVillageService {
                 mvlist = modelingVillageMapper.getAllVillage(cityId, "");
             }
             if (mvlist != null) {
-                VillageDTO vresult = new VillageDTO(); //字母对象
+                VillageClassifyDTO villageClassifyDTO = new VillageClassifyDTO();//字母小区对象
                 for (int m = 0; m < mvlist.size(); m++) {
                     char c = mvlist.get(m).getInitials().charAt(0);
                     int i = c;
                     if ((i >= 65 && i <= 90) || (i >= 97 && i <= 122)) {
-                        VillageListDTO vr = new VillageListDTO();//小区对象
-                        vr.setVillageId(mvlist.get(m).getId());
-                        vr.setInitials(mvlist.get(m).getInitials().toUpperCase());
-                        vr.setName(mvlist.get(m).getName());
+                        VillageDTO villageDTO = new VillageDTO();//小区对象
+                        villageDTO.setVillageId(mvlist.get(m).getId());
+                        villageDTO.setInitials(mvlist.get(m).getInitials().toUpperCase());
+                        villageDTO.setName(mvlist.get(m).getName());
+
+                        if (mvlist.get(m).getLayoutSum() != null && mvlist.get(m).getLayoutSum() > 0) {
+                            hotList.add(villageDTO);//热门搜索小区
+                        }
+
                         if (m > 0) {//第一个直接存储，后面需要比较与前一个字母是否相同
                             if (mvlist.get(m).getInitials().toUpperCase().equals(mvlist.get(m - 1).getInitials().toUpperCase())) {
                                 //如果与前一个字母相同则不用new新的字母对象，直接存储
-                                vrlist.add(vr);//存放小区集合
-                                vresult.setInitials(mvlist.get(m).getInitials().toUpperCase());
-                                vresult.setVlist(vrlist);//小区集合放入对应字母对象
+                                letterList.add(villageDTO);//存放小区集合
+                                villageClassifyDTO.setInitials(mvlist.get(m).getInitials().toUpperCase());
+                                villageClassifyDTO.setVillageDTOList(letterList);
                             } else {
                                 //如果与前一个字母不相同则new新的字母对象，再存储
-                                vresultlist.add(vresult);//存放字母集合
-                                vresult = new VillageDTO(); //字母对象
-                                vrlist = new ArrayList<VillageListDTO>();//小区数组
-                                vrlist.add(vr);//存放小区集合
-                                vresult.setInitials(mvlist.get(m).getInitials().toUpperCase());
-                                vresult.setVlist(vrlist);//小区集合放入对应字母对象
+                                villageClassifyDTOList.add(villageClassifyDTO);//存放字母集合
+                                villageClassifyDTO = new VillageClassifyDTO(); //字母对象
+                                letterList = new ArrayList<VillageDTO>();//小区数组
+                                letterList.add(villageDTO);//存放小区集合
+                                villageClassifyDTO.setInitials(mvlist.get(m).getInitials().toUpperCase());
+                                villageClassifyDTO.setVillageDTOList(letterList);//小区分类集合放入对应字母分类
                             }
                         } else {
                             //如果与前一个字母相同则不用new新的字母对象，直接存储
-                            vrlist.add(vr);//存放小区集合
-                            vresult.setInitials(mvlist.get(m).getInitials().toUpperCase());
-                            vresult.setVlist(vrlist);//小区集合放入对应字母对象
+                            letterList.add(villageDTO);//存放小区集合
+                            villageClassifyDTO.setInitials(mvlist.get(m).getInitials().toUpperCase());
+                            villageClassifyDTO.setVillageDTOList(letterList);//小区集合放入对应字母对象
                         }
                     }
                 }
             }
+
+            VillageClassifyDTO villageClassifyDTO = new VillageClassifyDTO(); //按热门分类对象
+            villageClassifyDTO.setInitials("热");
+            villageClassifyDTO.setVillageDTOList(hotList);//热门集合
+            villageClassifyDTOList.add(0, villageClassifyDTO);
+
             redisClient.putListCaches("vresult:" + cityId, mvlist);
-            return ServerResponse.createBySuccess("根据城市查询小区成功", vresultlist);
+            return ServerResponse.createBySuccess("根据城市查询小区成功", villageClassifyDTOList);
         } catch (Exception e) {
             redisClient.deleteCache("vresult:" + cityId);
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询出错");
         }
-//        }
-//        return ServerResponse.createBySuccess("根据城市查询小区成功", vresultlist);
     }
 }

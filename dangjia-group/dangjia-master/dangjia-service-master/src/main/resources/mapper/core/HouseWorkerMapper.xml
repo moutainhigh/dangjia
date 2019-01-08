@@ -8,12 +8,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         id,
         house_id as houseId,
         worker_id as workerId,
-        house_flow_id as houseFlowId,
         worker_type_id as workerTypeId,
         worker_type as workerType,
-        house_worker_order_id as houseWorkerOrderId,
         work_type as workType,
-        work_steta as workSteta,
         is_select as isSelect,
         data_status as dataStatus,
         create_date as createDate,
@@ -26,12 +23,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         hw.id,
         hw.house_id as houseId,
         hw.worker_id as workerId,
-        hw.house_flow_id as houseFlowId,
         hw.worker_type_id as workerTypeId,
         hw.worker_type as workerType,
-        hw.house_worker_order_id as houseWorkerOrderId,
         hw.work_type as workType,
-        hw.work_steta as workSteta,
         hw.is_select as isSelect,
         hw.create_date as createDate,
         hw.modify_date as modifyDate,
@@ -42,6 +36,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         hw.worker_id =  #{workerId}
         and hw.work_type not in(7,2,3)
         GROUP BY hw.house_id
+    </select>
+
+    <!--根据workerTypeId和workType-->
+    <select id="getByWorkerTypeId" resultType="com.dangjia.acg.modle.core.HouseWorker">
+        SELECT
+        <include refid="all_columns" />
+        from
+            dj_core_house_worker
+        where
+            work_type = #{workType}
+        and
+            worker_type_id = #{workerTypeId}
+        and
+            house_id = #{houseId}
     </select>
 
     <!-- 根据工人id查询未完工任务-->
