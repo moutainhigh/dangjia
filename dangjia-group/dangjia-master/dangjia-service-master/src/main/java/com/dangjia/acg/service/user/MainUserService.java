@@ -3,6 +3,7 @@ package com.dangjia.acg.service.user;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.user.UserRoleDTO;
 import com.dangjia.acg.dto.user.UserRolesVO;
@@ -101,22 +102,26 @@ public class MainUserService {
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, timeout = 30000, rollbackFor = {
 			RuntimeException.class, Exception.class })
 	public ServerResponse setUser(MainUser user, String roleIds) {
-		String userId;
-		if (user.getId() != null) {
-			// 判断用户是否已经存在
+
+		// 判断用户是否已经存在
+		if(!CommonUtil.isEmpty(user.getMobile())) {
 			MainUser existUser = this.userMapper.findUserByMobile(user.getMobile());
-			if (null != existUser
-					&& !String.valueOf(existUser.getId()).equals(
+			if (null != existUser && !String.valueOf(existUser.getId()).equals(
 					String.valueOf(user.getId()))) {
 				return ServerResponse.createByErrorMessage("该手机号已经存在");
 			}
+		}
+		if(!CommonUtil.isEmpty(user.getUsername())) {
 			MainUser exist = this.userMapper.findUserByName(user.getUsername());
 			if (null != exist
 					&& !String.valueOf(exist.getId()).equals(
 					String.valueOf(user.getId()))) {
 				return ServerResponse.createByErrorMessage("该用户名已经存在");
 			}
-//			Member dataUser = this.userMapper.selectByPrimaryKey(member.getId());
+		}
+		String userId;
+		if (user.getId() != null) {
+			MainUser dataUser = this.userMapper.selectByPrimaryKey(user.getId());
 			// 更新用户
 			userId = user.getId();
 			user.setModifyDate(new Date());
@@ -124,7 +129,10 @@ public class MainUserService {
 			if (!StringUtils.isEmpty(user.getPassword())) {
 				user.setPassword(DigestUtils.md5Hex(user.getPassword()));
 			}else{
-				user.setPassword(existUser.getPassword());
+				user.setPassword(dataUser.getPassword());
+			}
+			if(CommonUtil.isEmpty(user.getMobile())) {
+				user.setMobile(dataUser.getMobile());
 			}
 			this.userMapper.updateByPrimaryKeySelective(user);
 			// 删除之前的角色
@@ -145,15 +153,6 @@ public class MainUserService {
 
 			logger.debug("清除所有用户权限缓存！！！");
 		} else {
-			// 判断用户是否已经存在
-			MainUser existUser = this.userMapper.findUserByMobile(user.getMobile());
-			if (null != existUser) {
-				return ServerResponse.createByErrorMessage("该手机号已经存在");
-			}
-			MainUser exist = this.userMapper.findUserByName(user.getUsername());
-			if (null != exist) {
-				return ServerResponse.createByErrorMessage("该用户名已经存在");
-			}
 			// 新增用户
 			user.setCreateDate(new Date());
 			user.setIsDel(false);

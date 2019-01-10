@@ -1,11 +1,14 @@
 package com.dangjia.acg.dto.activity;
 
 
+import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -63,4 +66,33 @@ public class ActivityRedPackRecordDTO {
 	@ApiModelProperty("有效结束时间")
 	private Date endDate;//
 
+	public void toConvert(){
+		if (this.getRedPack().getType() == 0) {
+			this.setNameType("满减券");
+			this.setRedPackRuleId("满"+this.getRedPackRule().getSatisfyMoney().setScale(2, BigDecimal.ROUND_HALF_UP)+"可用");
+		}else if(this.getRedPack().getType() == 1){
+			this.setNameType("折扣券");
+		}else{
+			this.setNameType("代金券");
+		}
+		this.setValidTime(
+				"有效期:"
+						+ DateUtil.getDateString2(this.getRedPack().getStartDate().getTime())
+						+"至"
+						+ DateUtil.getDateString2(this.getRedPack().getEndDate().getTime())
+		);
+		if (this.getRedPack().getIsShare() == 0) {
+			this.setShare("可与其他优惠券共同使用");
+		}else{
+			this.setShare("不可与其他优惠券共同使用");
+		}
+		this.setName(this.getRedPack().getName());
+
+		//上一次选中优惠券标记
+		if(!CommonUtil.isEmpty(this.getBusinessOrderNumber())){
+			this.setSelected("1");
+		}else{
+			this.setSelected("0");
+		}
+	}
 }

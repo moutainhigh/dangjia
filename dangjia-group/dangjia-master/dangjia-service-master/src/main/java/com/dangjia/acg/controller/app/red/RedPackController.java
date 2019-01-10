@@ -2,8 +2,8 @@ package com.dangjia.acg.controller.app.red;
 
 import com.dangjia.acg.api.app.red.RedPackAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.service.activity.ActivityService;
 import com.dangjia.acg.service.activity.RedPackPayService;
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 /**
  * author: qiyuxaing
@@ -60,9 +59,8 @@ public class RedPackController  implements RedPackAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryActivityRedPackRecords(HttpServletRequest request, ActivityRedPackRecord activityRedPackRecord){
-        List<ActivityRedPackRecordDTO> list =redPackService.queryActivityRedPackRecords(request,activityRedPackRecord);
-        PageInfo pageResult = new PageInfo(list);
+    public ServerResponse queryActivityRedPackRecords(HttpServletRequest request, ActivityRedPackRecord activityRedPackRecord, PageDTO pageDTO){
+        PageInfo pageResult =redPackService.queryActivityRedPackRecords(request,activityRedPackRecord,pageDTO);
         return ServerResponse.createBySuccess("ok",pageResult);
     }
 

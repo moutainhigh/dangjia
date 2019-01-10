@@ -21,11 +21,11 @@ spring:
     filters: stat,wall,log4j
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
     changsha:
-      url: jdbc:mysql://192.168.0.202:3306/dangjia_changsha_pro?useUnicode=true&characterEncoding=utf-8
+      url: jdbc:mysql://192.168.0.202:3306/dangjia_changsha_test?useUnicode=true&characterEncoding=utf-8
       username: dangjia
       password: Fengjiang123!
     shenzhen:
-      url: jdbc:mysql://192.168.0.202:3306/dj_shenzhen?useUnicode=true&characterEncoding=utf-8
+      url: jdbc:mysql://192.168.0.202:3306/dangjia_shenzhen_test?useUnicode=true&characterEncoding=utf-8
       username: dangjia
       password: Fengjiang123!
   elasticsearch:
@@ -37,7 +37,7 @@ server:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.168.0.229:8888/eureka/    # 指定注册中心的地址
+      defaultZone: http://192.168.0.83:8888/eureka/    # 指定注册中心的地址
   instance:
     preferIpAddress: true
 hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 20000

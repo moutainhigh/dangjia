@@ -25,7 +25,7 @@ server:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.168.0.229:8888/eureka/   # 指定注册中心的地址
+      defaultZone: http://192.168.0.83:8888/eureka/   # 指定注册中心的地址
   instance:
     preferIpAddress: true
 hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 60000
@@ -35,4 +35,9 @@ ribbon:
   ReadTimeout: 60000
   MaxAutoRetriesNextServer: 1
   OkToRetryOnAllOperations: true
-
+huawei:
+  obs:
+    endPoint: https://obs.cn-south-1.myhuaweicloud.com
+    keyId: KU8IPBQCNKNDOPMVDRDM
+    keySecret: d2T2CFKnjY9FqTkxqqD0wDOTV8h5lQFvf7OhxTIV
+    bucketName: dangjia-tests

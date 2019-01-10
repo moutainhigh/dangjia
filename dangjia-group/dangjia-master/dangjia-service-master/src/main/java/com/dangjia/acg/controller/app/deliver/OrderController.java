@@ -70,14 +70,4 @@ public class OrderController implements OrderAPI {
     public ServerResponse saveOrderSplit(String productArr, String houseId, String userToken){
         return orderService.saveOrderSplit(productArr,houseId,userToken);
     }
-
-    /**
-     * 模糊搜仓库
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse warehouseList(Integer pageNum, Integer pageSize,String houseId,String categoryId, String name){
-        return orderService.warehouseList(pageNum,pageSize,houseId,categoryId,name);
-    }
-
 }

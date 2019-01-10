@@ -2,10 +2,9 @@ package com.dangjia.acg.dto.house;
 
 import lombok.Data;
 
-import java.util.List;
 @Data
 public class VillageDTO {
+	private String villageId;
 	private String initials;//abcd
-	private List<VillageListDTO>	vlist;
-	
+	private String name;//小区名称
 }

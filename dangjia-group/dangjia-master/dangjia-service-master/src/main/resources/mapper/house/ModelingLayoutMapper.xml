@@ -4,5 +4,46 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.house.IModelingLayoutMapper">
 
+    <sql id="basic_columns">
+        id,
+        name,
+        image,
+        village_id as villageId,
+        build_square as buildSquare,
+        data_status as dataStatus,
+        create_date as createDate,
+        modify_date as modifyDate
+    </sql>
+
+    <!--根据小区id查询户型实体-->
+    <select id="queryModelingLayoutByVillageId" resultType="com.dangjia.acg.modle.house.ModelingLayout" >
+        SELECT
+        <include refid="basic_columns"/>
+        FROM dj_house_modeling_layout
+        WHERE 1=1
+        and village_id=#{villageId}
+        ORDER by
+        create_date
+    </select>
+
+
+    <!--根据小区id查询户型实体-->
+    <select id="queryModelingLayoutByName" resultType="com.dangjia.acg.modle.house.ModelingLayout" >
+        SELECT
+        <include refid="basic_columns"/>
+        FROM dj_house_modeling_layout
+        WHERE 1=1
+        <if test="villageId=null and villageId!=''">
+            and village_id=#{villageId}
+        </if>
+        <if test="name!=null and name!=''">
+            and name=#{name}
+        </if>
+        ORDER by
+        create_date
+    </select>
+
+
+
 </mapper>
 

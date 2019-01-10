@@ -3,6 +3,32 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.member.ICustomerMapper">
+    <sql id="all_columns">
+		id,
+        stage,
+        member_id AS memberId,
+        user_id AS userId,
+        label_id_arr AS labelIdArr,
+        curr_record_id AS currRecordId,
+        remind_record_id AS remindRecordId,
+        create_date AS createDate,
+        modify_date AS modifyDate
+	</sql>
+
+    <!-- 根据标签名称查询 -->
+    <select id="getCustomerByMemberId" parameterType="String" resultType="com.dangjia.acg.modle.member.Customer">
+        SELECT
+        <include refid="all_columns" />
+        FROM dj_member_customer
+        WHERE 1=1
+        <if test="memberId!=null and memberId!=''">
+            and member_id=#{memberId}
+        </if>
+        <if test="stage >= 0">
+            and stage=#{stage}
+        </if>
+        ORDER by create_date
+    </select>
 
 </mapper>
 

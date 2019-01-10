@@ -86,7 +86,8 @@ public class HouseFlowService {
      */
     private boolean isHouseWorker(List<HouseWorker> hwList, HouseFlow hf) {
         for (HouseWorker houseWorker : hwList) {
-            if (hf.getId().equals(houseWorker.getHouseFlowId())) {
+            HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(),houseWorker.getWorkerTypeId());
+            if (hf.getId().equals(houseFlow.getId())) {
                 return true;
             }
         }
@@ -225,11 +226,9 @@ public class HouseFlowService {
             HouseFlow houseFlow = new HouseFlow(true);
             houseFlow.setWorkerTypeId(workerTypeId);
             houseFlow.setWorkerType(workerType.getType());
-            houseFlow.setMemberId(house.getMemberId());
             houseFlow.setHouseId(house.getId());
             houseFlow.setState(workerType.getState());
             houseFlow.setSort(workerType.getSort());
-            houseFlow.setSafe(workerType.getSafeState());
             houseFlow.setWorkType(1);//生成默认房产，工匠还不能抢
             houseFlow.setCityId(house.getCityId());
             houseFlowMapper.insert(houseFlow);
@@ -258,7 +257,7 @@ public class HouseFlowService {
             if(hf.getWorkType() >= 3){
                 return ServerResponse.createByErrorMessage("订单已经被抢了！");
             }
-            if (hf.getGrablock() == 2) {
+            if (hf.getGrabLock() >0 ) {
                 return ServerResponse.createByErrorMessage("订单已经被抢了！");
             }
             if (member.getCheckType() == 0) {
@@ -351,7 +350,6 @@ public class HouseFlowService {
                     hf.setReleaseTime(new Date());//set发布时间
                     houseFlowMapper.updateByPrimaryKeySelective(hf);
                     houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
-                    houseWorker.setWorkSteta(4);//修改此单为放弃
                     houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 } else {
                     if (hf.getSupervisorStart() != 0) {//已开工的状态不可放弃
@@ -370,7 +368,6 @@ public class HouseFlowService {
                             memberMapper.updateByPrimaryKeySelective(member);
                             //修改此单为放弃
                             houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
-                            houseWorker.setWorkSteta(4);
                             houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                         }
                     }
@@ -402,7 +399,6 @@ public class HouseFlowService {
                 }
                 //修改此单为放弃
                 houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
-                houseWorker.setWorkSteta(4);
                 houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
                 WorkerType workerType=workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
@@ -485,6 +481,7 @@ public class HouseFlowService {
     public ServerResponse setConfirmStart(String userToken, String houseFlowId) {
         try {
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);//查询大管家houseFlow
+            House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             houseFlow.setSupervisorStart(1);//大管家进度改为已开工
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
             List<HouseFlow> houseFlowList = houseFlowMapper.getNextHouseFlow(houseFlow.getSort(), houseFlow.getHouseId());//根据当前工序查下一工序
@@ -501,7 +498,7 @@ public class HouseFlowService {
                 configMessageService.addConfigMessage(null,"gj", StringUtils.join(workerTypes,","),"0","新的装修订单",DjConstants.PushMessage.SNAP_UP_ORDER ,"");
 
             }
-            configMessageService.addConfigMessage(null,"zx", houseFlow.getMemberId(),"0","大管家开工",DjConstants.PushMessage.STEWARD_CONSTRUCTION ,"");
+            configMessageService.addConfigMessage(null,"zx", house.getMemberId(),"0","大管家开工",DjConstants.PushMessage.STEWARD_CONSTRUCTION ,"");
 
             return ServerResponse.createBySuccessMessage("确认开工成功");
         } catch (Exception e) {

@@ -34,8 +34,6 @@ import com.dangjia.acg.modle.house.WarehouseDetail;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -374,35 +372,5 @@ public class OrderService {
             return ServerResponse.createByErrorMessage("提交失败");
         }
     }
-
-    /**
-     * 模糊搜仓库
-     */
-    public ServerResponse warehouseList(Integer pageNum, Integer pageSize,String houseId,String categoryId, String name){
-        try{
-            if(StringUtil.isEmpty(houseId)){
-                return ServerResponse.createByErrorMessage("houseId不能为空");
-            }
-            if(pageNum == null){
-                pageNum = 1;
-            }
-            if(pageSize == null){
-                pageSize = 5;
-            }
-            PageHelper.startPage(pageNum, pageSize);
-            List<Warehouse> warehouseList = warehouseMapper.warehouseList(houseId,categoryId,name);
-            PageInfo pageResult = new PageInfo(warehouseList);
-            for (Warehouse v : warehouseList){
-                v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-            }
-            pageResult.setList(warehouseList);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        }catch (Exception e){
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
-        }
-    }
-
-
 
 }

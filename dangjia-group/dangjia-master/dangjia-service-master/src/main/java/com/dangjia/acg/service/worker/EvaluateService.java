@@ -163,13 +163,14 @@ public class EvaluateService {
         try{
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
+            House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             if(houseFlowApply.getSupervisorCheck() == 1){//大管家已审核通过过 不要重复
                 return ServerResponse.createByErrorMessage("重复审核");
             }
             Member supervisor = memberMapper.getSupervisor(houseFlowApply.getHouseId());//houseId获得大管家
             Evaluate evaluate = new Evaluate();
             evaluate.setContent(content);
-            evaluate.setMemberId(houseFlowApply.getMemberId());
+            evaluate.setMemberId(house.getMemberId());
             evaluate.setHouseId(houseFlowApply.getHouseId());
             evaluate.setButlerId(supervisor.getId());//存管家id
             if(star == 0){
@@ -203,7 +204,7 @@ public class EvaluateService {
                 hf.setPause(1);
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
             }
-            House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+
             configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_PASS,house.getHouseName()) ,"");
 
             return ServerResponse.createBySuccessMessage("操作成功");
@@ -219,13 +220,14 @@ public class EvaluateService {
     public ServerResponse saveEvaluateSupervisor(String houseFlowApplyId,String content,int star){
         try{
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+            House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             if(houseFlowApply.getMemberCheck() == 1){
                 return ServerResponse.createByErrorMessage("重复审核");
             }
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             Evaluate evaluate = new Evaluate();
             evaluate.setContent(content);
-            evaluate.setMemberId(houseFlowApply.getMemberId());
+            evaluate.setMemberId(house.getMemberId());
             evaluate.setHouseId(houseFlowApply.getHouseId());
             evaluate.setButlerId("");
             evaluate.setStar(star);//管家
@@ -245,7 +247,6 @@ public class EvaluateService {
             //业主审核管家
             houseFlowApplyService.checkSupervisor(houseFlowApplyId);
 
-            House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","业主评价",String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE,house.getHouseName()) ,"");
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
@@ -262,6 +263,7 @@ public class EvaluateService {
             ,String sContent, int sStar){
         try{
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+            House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             if(houseFlowApply.getMemberCheck() == 1){
                 return ServerResponse.createByErrorMessage("重复审核");
             }
@@ -274,7 +276,7 @@ public class EvaluateService {
             if(evaluate == null){
                 evaluate = new Evaluate();
                 evaluate.setContent(wContent);
-                evaluate.setMemberId(houseFlowApply.getMemberId());
+                evaluate.setMemberId(house.getMemberId());
                 evaluate.setHouseId(houseFlowApply.getHouseId());
                 evaluate.setButlerId(supervisor.getId());
                 evaluate.setStar(wStar);//工人
@@ -297,7 +299,7 @@ public class EvaluateService {
             if (evaluate == null){
                 evaluate = new Evaluate();
                 evaluate.setContent(sContent);
-                evaluate.setMemberId(houseFlowApply.getMemberId());
+                evaluate.setMemberId(house.getMemberId());
                 evaluate.setHouseId(houseFlowApply.getHouseId());
                 evaluate.setStar(sStar);//管家
                 evaluate.setHouseFlowApplyId(houseFlowApplyId);
@@ -326,7 +328,7 @@ public class EvaluateService {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return serverResponse;
             }
-            House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+
             configMessageService.addConfigMessage(null,"gj",worker.getId(),"0","业主评价",String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE,house.getHouseName()) ,"");
             configMessageService.addConfigMessage(null,"gj",supervisor.getId(),"0","业主评价",String.format(DjConstants.PushMessage.STEWARD_EVALUATE,house.getHouseName()) ,"");
 

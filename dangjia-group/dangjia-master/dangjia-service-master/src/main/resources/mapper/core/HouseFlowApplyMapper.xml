@@ -7,12 +7,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <sql id="all_columns">
         id,
         house_flow_id as houseFlowId,
-        house_worker_order_id as houseWorkerOrderId,
         worker_id as workerId,
         worker_type_id as workerTypeId,
         worker_type as workerType,
         house_id as houseId,
-        member_id as memberId,
         apply_type as applyType,
         suspend_day as suspendDay,
         apply_dec as applyDec,

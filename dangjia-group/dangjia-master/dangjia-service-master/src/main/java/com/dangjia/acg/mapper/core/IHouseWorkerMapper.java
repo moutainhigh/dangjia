@@ -15,6 +15,10 @@ import java.util.List;
  */
 @Repository
 public interface IHouseWorkerMapper extends Mapper<HouseWorker> {
+    /**根据workerTypeId和workType*/
+    HouseWorker getByWorkerTypeId(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId,
+                                  @Param("workType")Integer workType);
+
     List<HouseWorker> grabControl(@Param("workerId")String workerId);
     List<HouseWorker> grabOneDayOneTime(@Param("workerId")String workerId);
     int doModifyAllByWorkerId(@Param("workerId")String workerId);

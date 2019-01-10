@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.web.house;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,6 +26,10 @@ public interface WebModelingVillageAPI {
     @PostMapping("web/village/getVillageList")
     @ApiOperation(value = "根据城市获取小区列表", notes = "根据城市获取小区列表")
     ServerResponse getVillageList(@RequestParam("request") HttpServletRequest request, @RequestParam("cityId") String cityId);
+
+    @PostMapping("web/village/getVillageAllListByCityId")
+    @ApiOperation(value = "指定城市id查询小区", notes = "指定城市id查询小区")
+    ServerResponse getVillageAllListByCityId(@RequestParam("request") HttpServletRequest request,@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("cityId") String cityId,@RequestParam("likeVillageName")String likeVillageName);
 
     @PostMapping("web/village/setVillage")
     @ApiOperation(value = "新增或更新小区", notes = "新增或更新小区")

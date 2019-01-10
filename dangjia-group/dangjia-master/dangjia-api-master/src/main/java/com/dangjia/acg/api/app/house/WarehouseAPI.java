@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(value = "材料仓库统计", description = "材料仓库统计")
 public interface WarehouseAPI {
 
-
     @PostMapping("app/house/warehouse/warehouseList")
     @ApiOperation(value = "我购买的材料", notes = "我购买的材料")
-    ServerResponse warehouseList(@RequestParam("pageNum")Integer pageNum, @RequestParam("pageSize")Integer pageSize,
-                                 @RequestParam("houseId")String houseId,@RequestParam("categoryId") String categoryId, @RequestParam("name")String name);
+    ServerResponse warehouseList(@RequestParam("pageNum")Integer pageNum, @RequestParam("pageSize")Integer pageSize,@RequestParam("houseId")String houseId,
+                                 @RequestParam("categoryId") String categoryId, @RequestParam("name")String name,@RequestParam("type")Integer type);
 }

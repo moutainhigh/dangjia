@@ -37,21 +37,10 @@ public class HouseFlowApplyImage extends BaseEntity {
 	@ApiModelProperty("图片类型 0：材料照片；1：进度照片；2:其他")
 	private Integer imageType; //
 
-	/*@Column(name = "image_type_id")
-	@Desc(value = "图片类型id 例如：关联验收节点的id")
-	@ApiModelProperty("图片类型id 例如：关联验收节点的id")
-	private String imageTypeId;*/
-
-	/*@Column(name = "image_sign")
-	@Desc(value = "图片标记 0已标记 1未标记")
-	@ApiModelProperty("图片标记 0已标记 1未标记")
-	private String imageSign;*/
-
 	@Column(name = "image_type_name")
 	@Desc(value = "图片类型名称 例如：材料照片；进度照片")
 	@ApiModelProperty("图片类型名称 例如：材料照片；进度照片")
 	private String imageTypeName;
-
 
 	//所有图片字段加入域名和端口，形成全路径
 	public void initPath(String address){

@@ -23,8 +23,8 @@ public class ActuaryOperationController implements ActuaryOperationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse choiceGoods(HttpServletRequest request,String budgetMaterialId){
-        return actuaryOperationService.choiceGoods(budgetMaterialId);
+    public ServerResponse choiceGoods(HttpServletRequest request,String budgetIdList){
+        return actuaryOperationService.choiceGoods(budgetIdList);
     }
 
     @Override

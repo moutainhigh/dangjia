@@ -8,7 +8,6 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.activity.ActivityRedPackDTO;
 import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
@@ -123,47 +122,20 @@ public class RedPackService {
      * @param activityRedPackRecord
      * @return
      */
-    public List<ActivityRedPackRecordDTO> queryActivityRedPackRecords(HttpServletRequest request,ActivityRedPackRecord activityRedPackRecord) {
+    public PageInfo queryActivityRedPackRecords(HttpServletRequest request,ActivityRedPackRecord activityRedPackRecord,PageDTO pageDTO) {
         String userToken = request.getParameter(Constants.USER_TOKEY);
         AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
         activityRedPackRecord.setMemberId(accessToken.getMemberId());
-        Integer pageNum=request.getAttribute("pageNum")==null?1:(Integer)request.getAttribute("pageNum");
-        Integer pageSize=request.getAttribute("pageSize")==null?10:(Integer)request.getAttribute("pageSize");
-        PageHelper.startPage(pageNum, pageSize);
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<ActivityRedPackRecordDTO> list = activityRedPackRecordMapper.queryActivityRedPackRecords(activityRedPackRecord);
+        PageInfo pageResult = new PageInfo(list);
         //格式化有效优惠券集合
         for (ActivityRedPackRecordDTO redPacetResult:list) {
-            if (redPacetResult.getRedPack().getType() == 0) {
-                redPacetResult.setNameType("满减券");
-                redPacetResult.setRedPackRuleId("满"+redPacetResult.getRedPackRule().getSatisfyMoney().setScale(2,BigDecimal.ROUND_HALF_UP)+"可用");
-            }else if(redPacetResult.getRedPack().getType() == 1){
-                redPacetResult.setNameType("折扣券");
-            }else{
-                redPacetResult.setNameType("代金券");
-            }
-            redPacetResult.setValidTime(
-                    "有效期:"
-                            + DateUtil.getDateString2(redPacetResult.getRedPack().getStartDate().getTime())
-                            +"至"
-                            + DateUtil.getDateString2(redPacetResult.getRedPack().getEndDate().getTime())
-            );
-            if (redPacetResult.getRedPack().getIsShare() == 0) {
-                redPacetResult.setShare("可与其他优惠券共同使用");
-            }else{
-                redPacetResult.setShare("不可与其他优惠券共同使用");
-            }
-            redPacetResult.setName(redPacetResult.getRedPack().getName());
-
-            //上一次选中优惠券标记
-            if(!StringUtils.isEmpty(redPacetResult.getBusinessOrderNumber())){
-                redPacetResult.setSelected("1");
-            }else{
-                redPacetResult.setSelected("0");
-            }
+            redPacetResult.toConvert();
         }
-        return list;
+        pageResult.setList(list);
+        return pageResult;
     }
-
 
     public ServerResponse getActivityRedPack(HttpServletRequest request, ActivityRedPackDTO activityRedPackDTO) {
         ActivityRedPack activityRedPack = activityRedPackMapper.selectByPrimaryKey(activityRedPackDTO.getId());
@@ -207,6 +179,10 @@ public class RedPackService {
      */
     public ServerResponse editActivityRedPack(HttpServletRequest request, ActivityRedPack activityRedPack,int[] num, BigDecimal[] money,  BigDecimal[] satisfyMoney) {
         activityRedPack.setModifyDate(new Date());
+        if(activityRedPack.getNum()!=null&&activityRedPack.getNum()>0){
+            ActivityRedPack redPack=activityRedPackMapper.selectByPrimaryKey(activityRedPack.getId());
+            activityRedPack.setSurplusNums(redPack.getSurplusNums()+activityRedPack.getNum());
+        }
         if(this.activityRedPackMapper.updateByPrimaryKeySelective(activityRedPack)>0){
             if(!CommonUtil.isEmpty(num)&&num.length>0) {
                 addActivityRedPackRule(activityRedPack,num,money,satisfyMoney);
@@ -359,6 +335,10 @@ public class RedPackService {
                 //更新剩余数量
                 activityRedPackMapper.updateByPrimaryKeySelective(activityRedPack);
                 //开始发放优惠券
+                activityRedPackRecord=new ActivityRedPackRecord();
+                activityRedPackRecord.setMemberId(member.getId());
+                activityRedPackRecord.setRedPackId(redPackId);
+                activityRedPackRecord.setRedPackRuleId(redPackRuleId);
                 activityRedPackRecord.setHaveReceive(0);
                 activityRedPackRecord.setPhone(member.getMobile());
                 activityRedPackRecord.setCityId(activityRedPack.getCityId());

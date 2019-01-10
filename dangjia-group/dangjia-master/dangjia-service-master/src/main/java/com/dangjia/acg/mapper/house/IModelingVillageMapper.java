@@ -17,6 +17,6 @@ import java.util.Map;
 public interface IModelingVillageMapper extends Mapper<ModelingVillage> {
 
     List<Map<String,Object>> getVillageList(@Param("cityId")String cityId);
-    List<ModelingVillage> getAllVillage(@Param("cityId")String cityId);
+    List<ModelingVillage> getAllVillage(@Param("cityId")String cityId,@Param("likeVillageName")String likeVillageName);
     Integer getAllVillageCount(@Param("cityId")String cityId);
 }

@@ -29,8 +29,8 @@ public class Supplier extends BaseEntity{
 	@Column(name = "telephone")
 	private String telephone;//联系电话
 
-	@Column(name = "checkpeople")
-	private String checkpeople;//联系人姓名
+	@Column(name = "checkPeople")
+	private String checkPeople;//联系人姓名
 
 	@Column(name = "gender")
 	private Integer gender;//联系人性别  1男 2女   0 未选

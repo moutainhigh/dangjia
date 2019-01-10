@@ -40,6 +40,46 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		    house_id=#{houseId}
     </select>
 
+	<!-- 模糊查询材料类商品 -->
+	<select id="materialsList" resultType="com.dangjia.acg.modle.house.Warehouse">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_house_warehouse
+		where
+			house_id = #{houseId}
+		and
+			productType = 0
+		<if test = "name!=null and name!=''">
+			and
+			product_name LIKE CONCAT('%',#{name},'%')
+		</if>
+		<if test = "categoryId!=null and categoryId!=''">
+			and
+			category_id = #{categoryId}
+		</if>
+		ORDER BY create_date desc
+	</select>
+
+	<!-- 模糊查询服务类商品 -->
+	<select id="serverList" resultType="com.dangjia.acg.modle.house.Warehouse">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_house_warehouse
+		where
+		    house_id = #{houseId}
+		and
+			productType = 1
+		<if test = "name!=null and name!=''">
+			and
+			product_name LIKE CONCAT('%',#{name},'%')
+		</if>
+		<if test = "categoryId!=null and categoryId!=''">
+			and
+			category_id = #{categoryId}
+		</if>
+		ORDER BY create_date desc
+	</select>
+
     <!-- 模糊查询 -->
     <select id="warehouseList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.house.Warehouse">
         SELECT

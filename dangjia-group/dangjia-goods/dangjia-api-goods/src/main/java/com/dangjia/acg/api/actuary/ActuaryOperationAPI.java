@@ -24,7 +24,7 @@ public interface ActuaryOperationAPI {
      */
     @PostMapping("/actuary/actuaryOperation/choiceGoods")
     @ApiOperation(value = "选择取消精算", notes = "选择取消精算")
-    ServerResponse choiceGoods(@RequestParam("request") HttpServletRequest request,@RequestParam("budgetMaterialId")String budgetIdList);
+    ServerResponse choiceGoods(@RequestParam("request") HttpServletRequest request,@RequestParam("budgetIdList")String budgetIdList);
 
     /**
      * 更换货品

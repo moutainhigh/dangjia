@@ -14,6 +14,6 @@ public interface IHouseWorkerOrderMapper extends Mapper<HouseWorkerOrder> {
     /**查询精算人工订单*/
     HouseWorkerOrder getByHouseIdAndWorkerTypeId(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
 
-    HouseWorkerOrder getHouseWorkerOrder(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
+    HouseWorkerOrder getHouseWorkerOrder(@Param("houseId") String houseId,@Param("workerId") String workerId,@Param("workerTypeId")String workerTypeId);
 
 }
