@@ -31,13 +31,13 @@ public class CustomerRecord extends BaseEntity {
 	@ApiModelProperty("当前客服id")
 	private String userId;
 
-	@Column(name = "describe")
+	@Column(name = "describes")
 	@Desc(value = "沟通描述")
 	@ApiModelProperty("沟通描述")
-	private String describe;
+	private String describes;
 
 	@Column(name = "remind_time")
 	@Desc(value = "提醒时间")
 	@ApiModelProperty("提醒时间")
-	protected String remindDate;
+	protected Date remindTime;
 }

@@ -6,7 +6,6 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.activity.ActivityDTO;
 import com.dangjia.acg.dto.activity.ActivityRedPackDTO;
 import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
@@ -23,7 +22,6 @@ import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.pay.BusinessOrder;
-import com.github.pagehelper.PageHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -79,6 +77,9 @@ public class RedPackPayService {
      */
     public void checkUpActivity(HttpServletRequest request,String phones,String activityType){
         String cityId = request.getParameter(Constants.CITY_ID);
+        if(CommonUtil.isEmpty(cityId)) {
+            cityId = (String) request.getAttribute(Constants.CITY_ID);
+        }
         if(!CommonUtil.isEmpty(cityId)) {
             //检查是否存在有效活动
             ActivityDTO activity = validActivity(request,cityId, activityType);
@@ -107,15 +108,19 @@ public class RedPackPayService {
         Example.Criteria criteria=example.createCriteria();
         criteria.andEqualTo(Activity.ACTIVITY_TYPE,activityType);
         criteria.andEqualTo(Activity.CITY_ID,cityId);
-        criteria.andLessThanOrEqualTo(Activity.END_DATE,new Date());
         criteria.andEqualTo(Activity.DELETE_STATE,"0");
         example.orderBy(Activity.MODIFY_DATE).desc();
-        PageHelper.startPage(0, 1);
         List<Activity> list = activityMapper.selectByExample(example);
         if(list!=null&&list.size()>0){
-            activity.setId(list.get(0).getId());
-            ServerResponse response= activityService.getActivity(request,activity);
-            activity=(ActivityDTO)response.getResultObj();
+            for (Activity activity1:list) {
+                if(activity1.getEndDate().getTime()>new Date().getTime()) {
+                    activity.setId(activity1.getId());
+                    ServerResponse response = activityService.getActivity(request, activity);
+                    activity = (ActivityDTO) response.getResultObj();
+                    break;
+                }
+            }
+
         }
         return activity;
     }
@@ -209,33 +214,7 @@ public class RedPackPayService {
 
         //格式化有效优惠券集合
         for (ActivityRedPackRecordDTO redPacetResult:redPacetResultList) {
-            if (redPacetResult.getRedPack().getType() == 0) {
-                redPacetResult.setNameType("满减券");
-                redPacetResult.setRedPackRuleId("满"+redPacetResult.getRedPackRule().getSatisfyMoney().setScale(2,BigDecimal.ROUND_HALF_UP)+"可用");
-            }else if(redPacetResult.getRedPack().getType() == 1){
-                redPacetResult.setNameType("折扣券");
-            }else{
-                redPacetResult.setNameType("代金券");
-            }
-            redPacetResult.setValidTime(
-                    "有效期:"
-                    + DateUtil.getDateString2(redPacetResult.getRedPack().getStartDate().getTime())
-                    +"至"
-                    + DateUtil.getDateString2(redPacetResult.getRedPack().getEndDate().getTime())
-            );
-            if (redPacetResult.getRedPack().getIsShare() == 0) {
-                redPacetResult.setShare("可与其他优惠券共同使用");
-            }else{
-                redPacetResult.setShare("不可与其他优惠券共同使用");
-            }
-            redPacetResult.setName(redPacetResult.getRedPack().getName());
-
-            //上一次选中优惠券标记
-            if(!StringUtils.isEmpty(redPacetResult.getBusinessOrderNumber())){
-                redPacetResult.setSelected("1");
-            }else{
-                redPacetResult.setSelected("0");
-            }
+            redPacetResult.toConvert();
         }
         redPageResult.setBusinessOrderNumber(businessOrderNumber);
         redPageResult.setRedPacetResultList(redPacetResultList);

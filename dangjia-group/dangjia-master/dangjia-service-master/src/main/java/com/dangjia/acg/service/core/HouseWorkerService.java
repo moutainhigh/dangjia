@@ -188,10 +188,6 @@ public class HouseWorkerService {
 
     /**
      * 根据工人id查询自己的施工界面
-     *
-     * @param userToken 用户Token
-     * @param cityId    城市ID
-     * @return
      */
     public ServerResponse getConstructionByWorkerId(String userToken, String cityId) {
         try {
@@ -206,17 +202,20 @@ public class HouseWorkerService {
             if (worker.getWorkerType() == 1 || worker.getWorkerType() == 2) {//设计师/精算师不支持直接返回
                 return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "设计师/精算师请在后台管理中查看施工详情");
             }
-            HouseWorker hw = houseWorkerMapper.getDetailHouseWorker(worker.getId());//根据工人id查询已支付未完工并默认的施工任务
-            List<HouseWorker> houseWorkerList = houseWorkerMapper.getAllHouseWorker(worker.getId());//查询所有施工中的订单
-            if (hw == null) {//没有施工中的任务
-                if (houseWorkerList.size() > 0) {
-                    hw = houseWorkerList.get(0);
-                    hw.setIsSelect(1);//设置成默认
-                    houseWorkerMapper.updateByPrimaryKeySelective(hw);
-                } else {
-                    return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "您暂无施工中的记录,快去接单吧！");
-                }
+
+            HouseWorker hw;
+            List<HouseWorker> houseWorkerList = houseWorkerMapper.getAllHouseWorker(worker.getId());//查询所有已抢待支付和已支付
+            if(houseWorkerList.size() == 0){
+                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "您暂无施工中的记录,快去接单吧！");
+            }else {
+                hw = houseWorkerMapper.getDetailHouseWorker(worker.getId());
             }
+            if (hw == null) {//没有选中的任务
+                hw = houseWorkerList.get(0);
+                hw.setIsSelect(1);//设置成默认
+                houseWorkerMapper.updateByPrimaryKeySelective(hw);
+            }
+
             List<HouseFlow> hfList = houseFlowMapper.getAllFlowByHouseId(hw.getHouseId());
             House house = houseMapper.selectByPrimaryKey(hw.getHouseId());//查询房产信息
             HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hw.getHouseId(),hw.getWorkerTypeId());//查询自己的任务状态
@@ -225,7 +224,7 @@ public class HouseWorkerService {
             bean.setHouseFlowId(hf.getId());
             String houseName = house.getHouseName();
             bean.setHouseName(houseName);
-            HouseWorkerOrder hwo = houseWorkerOrderMapper.getHouseWorkerOrder(hf.getId(), worker.getId());
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getHouseWorkerOrder(hw.getHouseId(), worker.getId(),hw.getWorkerTypeId());
             if (hwo == null) {
                 bean.setAlreadyMoney(new BigDecimal(0));//已得钱
                 bean.setAlsoMoney(new BigDecimal(0));//还可得钱
@@ -412,7 +411,9 @@ public class HouseWorkerService {
                 bean.setSupervisorPhone(workerSup == null ? "无" : workerSup.getMobile());
                 bean.setUserId(workerSup == null ? "无" : workerSup.getId());
                 bean.setSupervisorEvation("积分 " + (workerSup == null ? "0.00" : workerSup.getEvaluationScore()));//大管家积分
+
                 Long supervisorCountOrder = houseWorkerMapper.getCountOrderByWorkerId(workerSup == null ? "" : workerSup.getId());
+
                 bean.setSupervisorCountOrder("总单数 " + (supervisorCountOrder == null ? "0" : supervisorCountOrder));//大管家总单数
                 bean.setSupervisorPraiseRate("好评率 " + ((workerSup != null ? workerSup.getPraiseRate().multiply(new BigDecimal(100)) : 0) + "%"));//大管家好评率
                 if (hf.getWorkType() == 3) {//如果是已抢单待支付。则提醒业主支付
@@ -868,7 +869,7 @@ public class HouseWorkerService {
                 //工人houseflow
                 if (hfalist.size() < houseFlow.getPatrol()) {//该工种没有巡查够，每次要拿钱
                     Member supervisor = memberMapper.selectByPrimaryKey(supervisorHF.getWorkerId());//找出大管家
-                    HouseWorkerOrder supervisorHWO = houseWorkerOrderMapper.getHouseWorkerOrder(supervisorHF.getId(), supervisor.getId());
+                    HouseWorkerOrder supervisorHWO = houseWorkerOrderMapper.getHouseWorkerOrder(supervisorHF.getHouseId(), supervisor.getId(),supervisorHF.getWorkerTypeId());
                     if (supervisorHWO.getCheckMoney() == null) {
                         supervisorHWO.setCheckMoney(new BigDecimal(0));
                     }

@@ -30,11 +30,11 @@ public class Member extends BaseEntity {
     @ApiModelProperty("密码,MD5加密")
     private String password;// 密码
 
+
     @Column(name = "nick_name")
     @Desc(value = "昵称")
     @ApiModelProperty("昵称")
     private String nickName;//昵称
-
     @Column(name = "name")
     @Desc(value = "姓名")
     @ApiModelProperty("姓名")

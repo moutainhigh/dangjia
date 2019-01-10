@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.app.red;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import io.swagger.annotations.Api;
@@ -40,7 +41,7 @@ public interface RedPackAPI {
      */
     @PostMapping("app/member/red/list")
     @ApiOperation(value = "获取当前优惠券客户使用记录", notes = "获取当前优惠券客户使用记录")
-     ServerResponse queryActivityRedPackRecords(@RequestParam("request") HttpServletRequest request,@RequestParam("activityRedPackRecord") ActivityRedPackRecord activityRedPackRecord);
+     ServerResponse queryActivityRedPackRecords(@RequestParam("request") HttpServletRequest request,@RequestParam("activityRedPackRecord") ActivityRedPackRecord activityRedPackRecord,@RequestParam("pageDTO") PageDTO pageDTO);
 
     /**
      * 多用户推送优惠券

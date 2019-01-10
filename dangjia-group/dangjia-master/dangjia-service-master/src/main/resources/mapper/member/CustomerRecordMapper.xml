@@ -6,8 +6,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <sql id="all_columns">
 		id,
-        name,
-        describe,
+        describes,
         member_id AS memberId,
         user_id AS userId,
         remind_time AS remindTime,
@@ -24,7 +23,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="memberId!=null and memberId!=''">
             and member_id=#{memberId}
         </if>
-        ORDER by create_date
+        ORDER by create_date desc
     </select>
 
 </mapper>

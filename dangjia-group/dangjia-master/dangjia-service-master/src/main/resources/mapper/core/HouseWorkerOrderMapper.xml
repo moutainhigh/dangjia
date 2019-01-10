@@ -39,8 +39,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select
         <include refid="new_columns" />
         from dj_core_house_worker_order
-        where house_flow_id = #{houseFlowId}
+        where house_id = #{houseId}
         and worker_id= #{workerId}
+        and worker_type_id = #{workerTypeId}
     </select>
 </mapper>
 
