@@ -30,10 +30,10 @@ public class Customer extends BaseEntity {
     @ApiModelProperty("当前客服id")
     private String userId;
 
-	@Column(name = "label_id")
-	@Desc(value = "标签id")
-	@ApiModelProperty("标签id")
-	private String labelId;
+	@Column(name = "label_id_arr")
+	@Desc(value = "标签id数组")
+	@ApiModelProperty("标签id数组")
+	private String labelIdArr;
 
 	@Column(name = "stage")
 	@Desc(value = "阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单")

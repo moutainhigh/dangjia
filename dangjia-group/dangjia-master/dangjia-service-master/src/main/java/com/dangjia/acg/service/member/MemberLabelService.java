@@ -1,12 +1,18 @@
 package com.dangjia.acg.service.member;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.member.MemberCustomerDTO;
+import com.dangjia.acg.dto.member.MemberLabelDTO;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
+import com.dangjia.acg.modle.member.Customer;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberLabel;
 import com.dangjia.acg.service.core.WorkerTypeService;
 import com.github.pagehelper.PageHelper;
@@ -25,54 +31,25 @@ import java.util.*;
 @Service
 public class MemberLabelService {
     @Autowired
-    private ConfigUtil configUtil;
-
-    @Autowired
-    private ICustomerMapper customerMapper;
-    @Autowired
-    private ICustomerRecordMapper customerImageMapper;
-    @Autowired
     private IMemberLabelMapper iMemberLabelMapper;
-    @Autowired
-    private WorkerTypeService workerTypeService;
-    @Autowired
-    private RedisClient redisClient;
-
     protected static final Logger LOG = LoggerFactory.getLogger(MemberLabelService.class);
 
     //查询所有的标签
     public ServerResponse<PageInfo> getMemberLabelList(PageDTO pageDTO) {
         try {
-            if (pageDTO == null) {
-                pageDTO = new PageDTO();
-            }
-            if (pageDTO.getPageNum() == null) {
-                pageDTO.setPageNum(1);
-            }
-            if (pageDTO.getPageSize() == null) {
-                pageDTO.setPageSize(10);
-            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
-
-            List<MemberLabel> memberLabelList = iMemberLabelMapper.getLabel();
-
-            LOG.info("memberLabelList:" + memberLabelList.size());
-            for (MemberLabel memberLabel : memberLabelList) {
-                Map<String, Object> map = new HashMap<String, Object>();
-                if (!StringUtils.isNotBlank(memberLabel.getId())) {
-                    map.put("id", "");
-                    map.put("name", "");
-                    map.put("valueArr", "");
-                } else {
-                    map.put("id", memberLabel.getId());
-                    map.put("name", memberLabel.getName());
-                    map.put("valueArr", memberLabel.getValueArr());
-                }
-                mapList.add(map);
+            List<MemberLabel> parentMemberLabelList = iMemberLabelMapper.getAllParentLabel();
+            LOG.info("parentMemberLabelList:" + parentMemberLabelList.size());
+            List<MemberLabelDTO> mlDTOList = new ArrayList<>();
+            for (MemberLabel member : parentMemberLabelList) {
+                MemberLabelDTO memberLabelDTO = new MemberLabelDTO();
+                memberLabelDTO.setParentId(member.getParentId());
+                memberLabelDTO.setParentName(member.getParentName());
+                List<MemberLabel> childMemberLabelList = iMemberLabelMapper.getChildLabelByParentId(member.getParentId());
+                memberLabelDTO.setChildMemberLabelList(childMemberLabelList);
+                mlDTOList.add(memberLabelDTO);
             }
-            PageInfo pageResult = new PageInfo(memberLabelList);
-            pageResult.setList(mapList);
+            PageInfo pageResult = new PageInfo(mlDTOList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
@@ -83,46 +60,86 @@ public class MemberLabelService {
     /**
      * 添加/修改商品标签
      *
-     * @param memberLabel
+     * @param jsonStr
      * @return
      */
-    public ServerResponse setMemberLabel(MemberLabel memberLabel) {
+    public ServerResponse setMemberLabel(String jsonStr) {
         try {
-            MemberLabel tmpMemberLabel = null;
-            LOG.info("memberLabel:" + memberLabel);
-            LOG.info("memberLabel:" + memberLabel.getId());
-            LOG.info("memberLabel getName:" + memberLabel.getName());
-            LOG.info("memberLabel:" + memberLabel.getValueArr());
-            LOG.info("memberLabel:" + iMemberLabelMapper);
+            LOG.info("jsonStr :" + jsonStr);
+            JSONObject jsonObject = JSONObject.parseObject(jsonStr);
+            String parentId = jsonObject.getString("parentId");
+            String parentName = jsonObject.getString("parentName");
 
-            List<MemberLabel> sll = iMemberLabelMapper.getLabel();
-            LOG.info("sll:" + sll);
-            if (!StringUtils.isNotBlank(memberLabel.getId()))//没有id则新增
+            JSONArray childLabelList = JSONArray.parseArray(jsonObject.getString("childLabelList"));
+            MemberLabel childMemberLabel = null;
+            MemberLabel parentMemberLabel = null;  //数据库里存在的 父标签对象
+            if (!StringUtils.isNotBlank(parentId))//没有id则新增
             {
-                if (iMemberLabelMapper.getLabelByName(memberLabel.getName()) != null) {
-                    if (iMemberLabelMapper.getLabelByName(memberLabel.getName()).size() > 0)
+                if (iMemberLabelMapper.getLabelByParentName(parentName) != null) {
+                    if (iMemberLabelMapper.getLabelByParentName(parentName).size() > 0)
                         return ServerResponse.createByErrorMessage("标签名称已存在");
                 }
-
-                tmpMemberLabel = new MemberLabel();
-                tmpMemberLabel.setName(memberLabel.getName());
-                tmpMemberLabel.setValueArr(memberLabel.getValueArr());
-                iMemberLabelMapper.insert(tmpMemberLabel);
+                parentMemberLabel = new MemberLabel();
+                parentMemberLabel.setParentId(parentMemberLabel.getId());
+                parentMemberLabel.setParentName(parentName);
+                if (childLabelList.size() == 0) //如果增加 标签值就需要 直接插入 父标签
+                    iMemberLabelMapper.insertSelective(parentMemberLabel);
             } else {//修改
-                tmpMemberLabel = iMemberLabelMapper.selectByPrimaryKey(memberLabel.getId());
-                if (tmpMemberLabel == null)
+                List<MemberLabel> memberLabelList = iMemberLabelMapper.getChildLabelByParentId(parentId);
+                if (memberLabelList.size() == 0)
                     return ServerResponse.createByErrorMessage("没有该标签");
-
-                if (!tmpMemberLabel.getName().equals(memberLabel.getName())) {
-                    if (iMemberLabelMapper.getLabelByName(memberLabel.getName()).size() > 0)
-                        return ServerResponse.createByErrorMessage("标签名称已存在");
+                else {
+                    parentMemberLabel = memberLabelList.get(0);//数据库里存在的 父标签对象
                 }
-                tmpMemberLabel.setName(memberLabel.getName());
-                tmpMemberLabel.setValueArr(memberLabel.getValueArr());
-                tmpMemberLabel.setModifyDate(new Date());
-                iMemberLabelMapper.updateByPrimaryKeySelective(tmpMemberLabel);
+
+                //查询 要修改的名字 是否已存在
+                List<MemberLabel> memberLabelNameList = iMemberLabelMapper.getLabelByParentName(parentName);
+                //遍历 查找 不能重复修改 ，， 标签名称已经存在
+                for (MemberLabel memberLabel : memberLabelNameList) {
+                    //如果 要修改的 name 和 数据库里的不一样 才是修改
+                    if(!parentName.equals(parentMemberLabel.getParentName()))
+                    {
+                        //查找 所有父标签名字相同的， 并且  存在不同 父标签id
+                        if (memberLabel.getName().equals(parentMemberLabel.getParentName())
+                                && memberLabel.getId().equals(parentId)) {
+                            return ServerResponse.createByErrorMessage("标签名称已存在");
+                        }
+                    }
+                }
+
+                for (MemberLabel memberLabel : memberLabelList) {
+                    memberLabel.setParentName(parentName);
+                    iMemberLabelMapper.updateByPrimaryKeySelective(memberLabel);
+                    parentMemberLabel = memberLabel;
+                }
             }
-//            return ServerResponse.createBySuccessMessage("ok");
+
+            for (int i = 0; i < childLabelList.size(); i++) {
+                JSONObject obj = childLabelList.getJSONObject(i);
+                String childId = obj.getString("childId");//子标签id
+                String childName = obj.getString("childName");//子标签name
+                if (!StringUtils.isNotBlank(childId))//没有id则新增
+                {
+                    childMemberLabel = new MemberLabel();
+                    childMemberLabel.setName(childName);
+                    childMemberLabel.setParentId(parentMemberLabel.getParentId());
+                    childMemberLabel.setParentName(parentMemberLabel.getParentName());
+                    iMemberLabelMapper.insertSelective(childMemberLabel);
+                } else {//修改
+                    childMemberLabel = iMemberLabelMapper.selectByPrimaryKey(childId);
+                    if (childMemberLabel == null)
+                        return ServerResponse.createByErrorMessage("没有该标签值");
+
+                    if (!childMemberLabel.getName().equals(childName)) {
+                        if (iMemberLabelMapper.getLabelByName(childName).size() > 0)
+                            return ServerResponse.createByErrorMessage("标签值名称已存在");
+                    }
+                    childMemberLabel.setName(childName);
+                    childMemberLabel.setModifyDate(new Date());
+                    iMemberLabelMapper.updateByPrimaryKeySelective(childMemberLabel);
+                }
+            }
+
             return ServerResponse.createBySuccessMessage("操作成功！");
         } catch (Exception e) {
             e.printStackTrace();

@@ -27,6 +27,7 @@ import com.dangjia.acg.mapper.house.IModelingLayoutMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMemberMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
+import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
@@ -40,6 +41,7 @@ import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.matter.RenovationManualMember;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.worker.WorkerDetail;
@@ -113,7 +115,8 @@ public class HouseService {
     private IHouseExpendMapper houseExpendMapper;
     @Autowired
     private ITechnologyRecordMapper technologyRecordMapper;
-
+    @Autowired
+    private ICustomerMapper iCustomerMapper;
     /**
      * 切换房产
      */
@@ -474,6 +477,10 @@ public class HouseService {
 
             }
 
+            //确认开工后，要修改 业主客服阶段 为已下单
+            Customer customer = iCustomerMapper.getCustomerByMemberId(house.getMemberId(),-1);
+            customer.setStage(4);//阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单
+            iCustomerMapper.updateByPrimaryKeySelective(customer);
         } catch (Exception e) {
             System.out.println("建群失败，异常：" + e.getMessage());
         }

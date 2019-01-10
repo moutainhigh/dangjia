@@ -24,8 +24,23 @@ public interface IMemberLabelMapper extends Mapper<MemberLabel> {
     List<MemberLabel> getLabel();
 
     /**
+     * 查找所有的父标签 ，按 parent_id 进行分组
+     */
+    List<MemberLabel> getAllParentLabel();
+
+    /**
+     * 指定父标签id，查找所有的子标签
+     */
+    List<MemberLabel> getChildLabelByParentId(@Param("parentId")String parentId);
+
+    /**
      * 根据拿到的name拿到标签对象
      */
     List<MemberLabel> getLabelByName(@Param("name") String name);
+
+    /**
+     * 根据拿到的父name拿到标签对象
+     */
+    List<MemberLabel> getLabelByParentName(@Param("parentName") String parentName);
 }
 

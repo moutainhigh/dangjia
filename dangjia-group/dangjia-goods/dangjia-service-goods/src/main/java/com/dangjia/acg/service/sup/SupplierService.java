@@ -84,7 +84,7 @@ public class SupplierService {
             supplier.setName(name);//名称
             supplier.setAddress(address);//地址
             supplier.setTelephone(telephone);//联系电话
-            supplier.setCheckpeople(checkPeople);//联系人姓名
+            supplier.setCheckPeople(checkPeople);//联系人姓名
             supplier.setGender(gender);//1男 2女   0 未选
             supplier.setEmail(email);
             supplier.setNotice(notice);
@@ -144,7 +144,7 @@ public class SupplierService {
                     supplier.setTelephone(telephone);//联系电话
                 }
             }
-            supplier.setCheckpeople(checkPeople);//联系人姓名
+            supplier.setCheckPeople(checkPeople);//联系人姓名
             supplier.setGender(gender);//1男 2女   0 未选
             supplier.setEmail(email);
             supplier.setNotice(notice);
@@ -179,7 +179,7 @@ public class SupplierService {
                 map.put("name", supplier.getName());//供应商名称
                 map.put("address", supplier.getAddress());//地址
                 map.put("telephone", supplier.getTelephone());//联系电话
-                map.put("checkpeople", supplier.getCheckpeople());//联系人
+                map.put("checkPeople", supplier.getCheckPeople());//联系人
                 map.put("email", supplier.getEmail());//电子邮件
                 map.put("notice", supplier.getNotice());//发货须知
                 map.put("supplierLevel", supplier.getSupplierLevel());//供应商级别
@@ -228,7 +228,7 @@ public class SupplierService {
                 map.put("name", supplier.getName());//供应商名称
                 map.put("address", supplier.getAddress());//地址
                 map.put("telephone", supplier.getTelephone());//联系电话
-                map.put("checkpeople", supplier.getCheckpeople());//联系人
+                map.put("checkPeople", supplier.getCheckPeople());//联系人
                 map.put("email", supplier.getEmail());//电子邮件
                 map.put("notice", supplier.getNotice());//发货须知
                 map.put("supplierLevel", supplier.getSupplierLevel());//供应商级别
@@ -294,7 +294,8 @@ public class SupplierService {
             } else {//所有商品
 //                List<Product> pList = iProductMapper.query(categoryId);//查询所有货品
 //                List<Product> pList = iSupplierMapper.querySupplierProduct("",likeProductName);
-                List<Product> pList = iSupplierMapper.querySupplierProduct("", likeProductName);
+//                List<Product> pList = iSupplierMapper.querySupplierProduct("", likeProductName);
+                List<Product> pList = iProductMapper.queryByName(likeProductName);//查询所有货品
                 LOG.info("size: " + pList.size() + " supplierId:" + supplierId + " likeProductName:"+ likeProductName);
                 PageInfo pageResult = new PageInfo(pList);
                 for (Product product : pList) {

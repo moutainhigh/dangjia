@@ -26,8 +26,13 @@ public class MemberLabel extends BaseEntity {
 	@ApiModelProperty("标签名字")
 	private String name;
 
-	@Column(name = "valueArr")
-	@Desc(value = "标签值")
-	@ApiModelProperty("标签值")
-	private String valueArr;
+	@Column(name = "parent_id")
+	@Desc(value = "父标签id")
+	@ApiModelProperty("父标签id")
+	private String parentId;
+
+	@Column(name = "parent_name")
+	@Desc(value = "父标签名字")
+	@ApiModelProperty("父标签名字")
+	private String parentName;
 }

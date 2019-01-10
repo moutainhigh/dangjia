@@ -86,25 +86,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		   worker_id =#{workerId}
 	</update>
 
-    <!--根据工人id查询已支付未完工并默认的施工任务 -->
+    <!--查询已支付或待支付选中的施工任务 -->
     <select id="getDetailHouseWorker" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseWorker">
        SELECT
         <include refid="all_columns" />
         from dj_core_house_worker
         where worker_id = #{workerId}
-        and work_steta in(0,1,3)
         and work_type in(1,6)
-        and is_select=1
+        and is_select = 1
 		order by modify_date desc
     </select>
 
-    <!--根据工人id查出未整体完工的订单 -->
+    <!--查出所有 -->
     <select id="getAllHouseWorker" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseWorker">
        SELECT
         <include refid="all_columns" />
         from dj_core_house_worker
         where worker_id = #{workerId}
-        and work_steta in(0,1,3)
         and work_type in(1,6)
 		order by modify_date desc
     </select>
@@ -123,10 +121,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!--根据工人id查询统计已完成的任务单数-->
     <select id="getCountOrderByWorkerId"  resultType="java.lang.Long">
         select count(*)
-        from dj_core_house_worker
+        from dj_core_house_flow
         where worker_id = #{workerId}
-        and work_steta=2
-        and work_type=6
+        and work_steta = 2
+        and work_type = 4
 		order by modify_date desc
     </select>
 

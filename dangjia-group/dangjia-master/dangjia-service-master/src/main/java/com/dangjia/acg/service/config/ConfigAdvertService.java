@@ -2,6 +2,7 @@ package com.dangjia.acg.service.config;
 
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.config.IConfigAdvertMapper;
@@ -11,7 +12,9 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -44,10 +47,15 @@ public class ConfigAdvertService {
             criteria.andEqualTo("advertType", configAdvert.getAdvertType());
         }
         List<ConfigAdvert> list = configAdvertMapper.selectByExample(example);
+        List<Map> listMap=new ArrayList<>();
         for (ConfigAdvert v:list){
+            Map map= BeanUtils.beanToMap(v);
+            map.put(ConfigAdvert.IMAGE+"Url",v.getImage());
             v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+            map.put(ConfigAdvert.IMAGE,v.getImage());
+            listMap.add(map);
         }
-        return ServerResponse.createBySuccess("ok",list);
+        return ServerResponse.createBySuccess("ok",listMap);
     }
     /**
      * 删除

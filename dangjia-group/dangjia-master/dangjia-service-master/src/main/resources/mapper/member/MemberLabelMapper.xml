@@ -7,7 +7,8 @@
     <sql id="all_columns">
 		id,
         name,
-        valueArr,
+        parent_id AS parentId,
+        parent_name AS parentName,
         create_date AS createDate,
         modify_date AS modifyDate
 	</sql>
@@ -18,6 +19,34 @@
         from dj_member_label
         ORDER by create_date
     </select>
+
+
+    <select id="getAllParentLabel" resultType="com.dangjia.acg.modle.member.MemberLabel">
+        SELECT
+        <include refid="all_columns" />
+        from dj_member_label
+        group by parent_id
+        ORDER by create_date
+    </select>
+
+    <!-- 指定父标签id，查找所有的子标签 -->
+    <select id="getChildLabelByParentId" parameterType="String" resultType="com.dangjia.acg.modle.member.MemberLabel">
+        SELECT
+        <include refid="all_columns" />
+        FROM dj_member_label
+        WHERE parent_id=#{parentId}
+        ORDER by create_date
+    </select>
+
+    <!-- 指定父标签name，查找所有的子标签 -->
+    <select id="getLabelByParentName" parameterType="String" resultType="com.dangjia.acg.modle.member.MemberLabel">
+        SELECT
+        <include refid="all_columns" />
+        FROM dj_member_label
+        WHERE parent_name=#{parentName}
+        ORDER by create_date
+    </select>
+
 
     <!-- 根据标签名称查询 -->
     <select id="getLabelByName" parameterType="String" resultType="com.dangjia.acg.modle.member.MemberLabel">

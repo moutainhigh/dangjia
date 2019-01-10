@@ -9,7 +9,7 @@
 		name,
 		address,
 		telephone,
-		checkpeople,
+		checkPeople,
 		gender,
 		email,
 		notice,
@@ -40,7 +40,7 @@
 		name,
 		address,
 		telephone,
-		checkpeople,
+		checkPeople,
 		gender,
 		email,
 		notice,
@@ -59,7 +59,7 @@
 		name,
 		address,
 		telephone,
-		checkpeople,
+		checkPeople,
 		gender,
 		email,
 		notice,
@@ -115,10 +115,10 @@
 				 separator=" " open="case id" close="end">
 			when #{supplier.id} then #{supplier.telephone}
 		</foreach>
-		,checkpeople =
+		,checkPeople =
 		<foreach collection="list" item="supplier" index="index"
 				 separator=" " open="case id" close="end">
-			when #{supplier.id} then #{supplier.checkpeople}
+			when #{supplier.id} then #{supplier.checkPeople}
 		</foreach>
 		,gender =
 		<foreach collection="list" item="supplier" index="index"
@@ -214,8 +214,6 @@
 			attribute_id_arr as attributeIdArr,
 			value_name_arr as valueNameArr,
 			value_id_arr as valueIdArr,
--- 		    attribute_name_arr as attributeNameArr,
--- 		    goods_attribute_id_arr as goodsAttributeIdArr,
 			convert_unit as convertUnit,
             convert_quality as convertQuality,
 			create_date as createDate,
@@ -229,8 +227,8 @@
 				    product_id
 				 from dj_sup_supplier_product as product
 				 WHERE  1=1
-					<if test="supplier_id!=null and supplier_id!=''">
-						and supplier_id=#{supplier_id} and is_supply=1
+					<if test="supplierId!=null and supplierId!=''">
+						and supplier_id=#{supplierId} and is_supply=1
 					</if>
 				)
 			<if test="likeProductName!=null and likeProductName!=''">
