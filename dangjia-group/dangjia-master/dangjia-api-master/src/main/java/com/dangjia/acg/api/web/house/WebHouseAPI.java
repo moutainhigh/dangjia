@@ -2,6 +2,7 @@ package com.dangjia.acg.api.web.house;
 
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.house.HouseDTO;
+import com.dangjia.acg.modle.house.House;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -30,4 +31,8 @@ public interface WebHouseAPI {
     @PostMapping("web/house/startWork")
     @ApiOperation(value = "确认开工", notes = "确认开工")
     ServerResponse startWork(@RequestParam("request") HttpServletRequest request,@RequestParam("house") HouseDTO houseDTO,@RequestParam("members") String members,@RequestParam("prefixs") String prefixs);
+
+    @PostMapping("web/house/setHouseInfo")
+    @ApiOperation(value = "设置房子为精选或者休眠", notes = "设置房子为精选或者休眠")
+    ServerResponse setHouseInfo(@RequestParam("request") HttpServletRequest request,@RequestParam("house") House house);
 }

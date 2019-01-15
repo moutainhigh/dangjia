@@ -21,9 +21,11 @@ public class UserRoleDTO {
 
 	private Date modifyDate;// 修改日期
 
-	private boolean isDel;
+	private Boolean isDel;
 
-	private boolean isJob;
+	private Boolean isJob;
+
+	private Boolean isReceive;
 
 	private String roleNames;
 

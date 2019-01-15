@@ -239,20 +239,18 @@ public class HouseFlowService {
 
     /**
      * 抢单验证
-     *
      * @param userToken   用户登录信息
      * @param cityId      城市ID
-     * @param houseFlowId 房子ID
      * @return 抢单确认H5页面
      */
     public ServerResponse setGrabVerification(String userToken, String cityId, String houseFlowId) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member member = accessToken.getMember();
-            HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
 
+            HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(RewardPunishRecord.class);
-            example.createCriteria().andEqualTo("memberId", member.getId());
+            example.createCriteria().andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId());
             List<RewardPunishRecord> recordList = rewardPunishRecordMapper.selectByExample(example);
             if(hf.getWorkType() >= 3){
                 return ServerResponse.createByErrorMessage("订单已经被抢了！");
@@ -307,15 +305,17 @@ public class HouseFlowService {
                 if (hf.getPause() == 1) {
                     return ServerResponse.createByErrorMessage("该房子已暂停施工！");
                 }
-                List<HouseWorker> hwList = houseWorkerMapper.grabControl(member.getId());//查询未完工工地
+                long num = houseWorkerMapper.grabControl(member.getId());//查询未完工工地
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                if (member.getWorkerType() != 7 && hwList.size() >= wt.getMethods()) {
+                if (member.getWorkerType() != 7 && num >= wt.getMethods()) {
                     return ServerResponse.createByErrorMessage("您有工地还未完工,暂不能抢单！");
                 }
-                List<HouseWorker> hwlist = houseWorkerMapper.grabOneDayOneTime(member.getId());
+
+                //暂时注释
+                /*List<HouseWorker> hwlist = houseWorkerMapper.grabOneDayOneTime(member.getId());
                 if (hwlist.size() > 0) {
                     return ServerResponse.createByErrorMessage("每天只能抢一单哦！");
-                }
+                }*/
             }
             String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.AFFIRMGRAB,userToken,cityId,"确认")+"&houseFlowId="+houseFlowId+"&workerTypeId="+member.getWorkerTypeId()
                     +"&houseId="+hf.getHouseId();

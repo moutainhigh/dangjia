@@ -1,7 +1,6 @@
 package com.dangjia.acg.service.member;
 
 import com.dangjia.acg.api.*;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -22,7 +21,6 @@ import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.group.GroupNotifyInfo;
 import com.dangjia.acg.modle.group.GroupUserConfig;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.user.MainUser;
 import com.github.pagehelper.PageHelper;
@@ -265,16 +263,20 @@ public class GroupInfoService {
 	 * @return
 	 */
 	public ServerResponse getOnlineService(HttpServletRequest request,String userToken) {
-		AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-		Example example = new Example(GroupUserConfig.class);
+		Example example = new Example(MainUser.class);
+		example.createCriteria().andEqualTo(MainUser.IS_RECEIVE,true);
 		example.orderBy(GroupUserConfig.CREATE_DATE).desc();
-		List<GroupUserConfig> list = groupUserConfigMapper.selectByExample(example);
-		GroupUserConfig croupUserConfig=list.get(0);
-		Map map =new HashMap();
-		map.put("targetId",croupUserConfig.getUserId());
-		map.put("targetAppKey","49957e786a91f9c55b223d58");
-		map.put("text","业主您好！我是您的当家客服！");
-		return ServerResponse.createBySuccess("ok",map);
+		List<MainUser> list = userMapper.selectByExample(example);
+		if(list!=null&&list.size()>0) {
+			MainUser user = list.get(0);
+			Map map = new HashMap();
+			map.put("targetId", user.getId());
+			map.put("targetAppKey", "49957e786a91f9c55b223d58");
+			map.put("text", "业主您好！我是您的当家客服！");
+			return ServerResponse.createBySuccess("ok", map);
+		}else{
+			return ServerResponse.createByErrorMessage("暂无在线客服，如有疑问请致电400-168-1231 ");
+		}
 	}
 	/**
 	 * 获取群组客服成员配置表

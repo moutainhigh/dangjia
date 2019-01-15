@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.dangjia.acg.mapper.basics.IGoodsGroupMapper">
+<mapper namespace="com.dangjia.acg.mapper.basics.IGroupLinkMapper">
 
    <resultMap id="GoodsCategoryMap" type="java.util.Map">
       <result column="id" property="id"></result>
@@ -47,44 +47,6 @@
 		id,
 		name
 	</sql>
-    <!-- 查询列表 -->
-    <select id="getAllList" resultType="com.dangjia.acg.modle.basics.GoodsGroup">
-        SELECT
-		<include refid="all_columns" />
-        from dj_basics_goods_group
-        where 1=1
-		<if test="name!=null and name!=''">
-			and
-			name like CONCAT('%',#{name},'%')
-		</if>
-		<if test="state!=null and state!=''">
-			and
-			state =#{state}
-		</if>
-        ORDER BY create_date desc
-    </select>
-
-	<!-- 查询列表 -->
-	<select id="selectByName" resultType="com.dangjia.acg.modle.basics.GoodsGroup">
-		SELECT
-		<include refid="all_columns" />
-		from dj_basics_goods_group
-		where 1=1
-		<if test="name!=null and name!=''">
-			and
-			name =#{name}
-		</if>
-		ORDER BY create_date desc
-	</select>
-
-    <!-- 插入对象 -->
-    <insert id="addGoodsGroup" parameterType="com.dangjia.acg.modle.basics.GoodsGroup">
-        INSERT INTO dj_basics_goods_group(
-		    <include refid="all_columns" />
-		) 
-		VALUES (#{id},#{name}, #{state},#{switch_arr},SYSDATE(),SYSDATE())
-    </insert>
-    
 
     <!-- 查询所有顶级分类 -->
 	<select id="getParentTopList" resultMap="GoodsCategoryMap" parameterType="java.util.Map">	

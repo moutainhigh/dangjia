@@ -49,7 +49,8 @@ public class MemberLabelService {
                 memberLabelDTO.setChildMemberLabelList(childMemberLabelList);
                 mlDTOList.add(memberLabelDTO);
             }
-            PageInfo pageResult = new PageInfo(mlDTOList);
+            PageInfo pageResult = new PageInfo(parentMemberLabelList);
+            pageResult.setList(mlDTOList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();

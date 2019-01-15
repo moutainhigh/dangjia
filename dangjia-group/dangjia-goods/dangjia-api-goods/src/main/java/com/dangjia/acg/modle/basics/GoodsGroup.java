@@ -24,5 +24,8 @@ public class GoodsGroup extends BaseEntity {
 
 	@Column(name = "state")
 	private Integer state;//是否启用 1启用2不启用
+
+	@Column(name = "switch_arr")
+	private String switchArr;//可切换的所有组id（逗号分隔）
 	
 }

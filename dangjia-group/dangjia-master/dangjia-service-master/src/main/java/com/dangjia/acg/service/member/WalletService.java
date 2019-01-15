@@ -100,7 +100,6 @@ public class WalletService {
             WithdrawDeposit wd = new WithdrawDeposit();
             wd.setName(worker.getName());
             wd.setWorkerId(worker.getId());
-            wd.setWorkerTypeId(worker.getWorkerTypeId());
             wd.setMoney(new BigDecimal(money));
             wd.setBankName(bankCard == null ? "" : bankCard.getBankName());
             wd.setCardNumber(workerBankCard.getBankCardNumber());

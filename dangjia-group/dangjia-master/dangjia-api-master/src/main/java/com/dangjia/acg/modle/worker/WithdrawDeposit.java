@@ -32,10 +32,10 @@ public class WithdrawDeposit extends BaseEntity {
 	@ApiModelProperty("工人id")
 	private String workerId;//workerid
 
-	@Column(name = "worker_type_id")
+	/*@Column(name = "worker_type_id")
 	@Desc(value = "工种类型id")
 	@ApiModelProperty("工种类型id")
-	private String workerTypeId;//workertypeid
+	private String workerTypeId;//workertypeid*/
 
 	@Column(name = "state")
 	@Desc(value = "0未处理,1已处理")

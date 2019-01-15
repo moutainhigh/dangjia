@@ -107,7 +107,11 @@ public interface SupplierProductAPI {
     @ApiOperation(value = "保存供应商与货品供应关系", notes = "保存供应商与货品供应关系")
     public ServerResponse saveSupplierProduct(@RequestParam("arrString")String arrString);
 
+//    @PostMapping("/sup/supplierProduct/querySupplierProductByPid")
+//    @ApiOperation(value = "根据货品查询相应供应商", notes = "根据货品查询相应供应商")
+//    List<Map<String,Object>> querySupplierProductByPid(@RequestParam("productId")String productId);
+
     @PostMapping("/sup/supplierProduct/querySupplierProductByPid")
     @ApiOperation(value = "根据货品查询相应供应商", notes = "根据货品查询相应供应商")
-    List<Map<String,Object>> querySupplierProductByPid(@RequestParam("productId")String productId);
+    public ServerResponse querySupplierProductByPid(@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("productId")String productId);
 }

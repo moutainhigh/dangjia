@@ -27,7 +27,7 @@ public class UserRolesVO {
 	private boolean isDel;
 
 	private boolean isJob;
-
+	private boolean isReceive;
 	private List<UserRoleKey> userRoles;
 	private List<Role> roles;
 

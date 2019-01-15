@@ -35,14 +35,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and apply_type in (0,1,2)
     </select>
 
-    <!--根据houseId查询待业主审核 -->
+    <!--管家已审核业主未审核申请 -->
     <select id="getMemberCheckList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select <include refid="all_columns" />
         from dj_core_house_flow_apply
-        where (apply_type=1 or apply_type=2 or apply_type=0)
+        where member_check = 0
         and house_id = #{houseId}
-        and supervisor_check = 1
-        and member_check = 0
+
+        and ( ((apply_type=1 or apply_type=2) and (supervisor_check = 1))
+              or apply_type=0 )
     </select>
 
     <!--根据工人和房子id查询自己已经被巡查多少次 -->
