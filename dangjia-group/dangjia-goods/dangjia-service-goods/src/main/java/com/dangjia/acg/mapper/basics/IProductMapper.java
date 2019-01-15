@@ -27,6 +27,9 @@ public interface IProductMapper extends Mapper<Product> {
 	List<Product> queryByGoodsId(@Param("goodsId")String goodsId);
 
 	List<Product> queryByName(@Param("name") String name);
+	List<Product> queryByProductSn(@Param("productSn") String productSn);
+
+	List<Product> queryByLikeName(@Param("name") String name);
 
 	//根据标签Id查货品
 	List<Product> queryByLabelId(@Param("labelId")String labelId);

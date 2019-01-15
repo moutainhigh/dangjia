@@ -28,7 +28,7 @@ import tk.mybatis.mapper.entity.Example;
 import java.util.*;
 
 /**
- * 商品业务层
+ * goods业务层
  *
  * @ClassName: GoodsServiceImpl
  * @Description: TODO
@@ -48,7 +48,7 @@ public class GoodsService {
     private ConfigUtil configUtil;
 
     /**
-     * 保存商品
+     * 保存goods
      * <p>Title: saveGoods</p>
      * <p>Description: </p>
      *
@@ -64,11 +64,9 @@ public class GoodsService {
     public ServerResponse saveGoods(String name, String categoryId, Integer buy,
                                     Integer sales, String unitId, Integer type, String arrString) {
         try {
-            if (!StringUtils.isNotBlank(name))
-                return ServerResponse.createByErrorMessage("商品不能为空");
             List<Goods> goodsList = iGoodsMapper.queryByName(name);
-            if (goodsList.size() > 1)
-                return ServerResponse.createByErrorMessage("该商品已存在");
+            if (goodsList.size() > 0)
+                return ServerResponse.createByErrorMessage("该goods 名字不能重复");
 
             Goods goods = new Goods();
             goods.setName(name);
@@ -76,21 +74,25 @@ public class GoodsService {
             goods.setBuy(buy);//购买性质
             goods.setSales(sales);//退货性质
             goods.setUnitId(unitId);//单位
-            goods.setType(type);//商品性质
+            goods.setType(type);//goods性质
             goods.setCreateDate(new Date());
             goods.setModifyDate(new Date());
             iGoodsMapper.insert(goods);
-            JSONArray arr = JSONArray.parseArray(arrString);
-            for (int i = 0; i < arr.size(); i++) {//新增商品关联品牌系列
-                JSONObject obj = arr.getJSONObject(i);
-                GoodsSeries gs = new GoodsSeries();
-                gs.setGoodsId(goods.getId());
-                gs.setBrandId(obj.getString("brandId"));
-                gs.setSeriesId(obj.getString("seriesId"));
-                gs.setCreateDate(new Date());
-                gs.setModifyDate(new Date());
-                iGoodsMapper.insertGoodsSeries(gs);
+            if (buy != 2) //非自购
+            {
+                JSONArray arr = JSONArray.parseArray(arrString);
+                for (int i = 0; i < arr.size(); i++) {//新增goods关联品牌系列
+                    JSONObject obj = arr.getJSONObject(i);
+                    GoodsSeries gs = new GoodsSeries();
+                    gs.setGoodsId(goods.getId());
+                    gs.setBrandId(obj.getString("brandId"));
+                    gs.setSeriesId(obj.getString("seriesId"));
+                    gs.setCreateDate(new Date());
+                    gs.setModifyDate(new Date());
+                    iGoodsMapper.insertGoodsSeries(gs);
+                }
             }
+
             return ServerResponse.createBySuccess("新增成功", goods.getId());
         } catch (Exception e) {
             e.printStackTrace();
@@ -99,7 +101,7 @@ public class GoodsService {
     }
 
     /**
-     * 根据商品id查询关联品牌
+     * 根据goodsid查询关联品牌
      * <p>Title: queryBrandByGid</p>
      * <p>Description: </p>
      *
@@ -117,7 +119,7 @@ public class GoodsService {
     }
 
     /**
-     * 根据商品id和品牌id查询关联品牌系列
+     * 根据goodsid和品牌id查询关联品牌系列
      * <p>Title: queryBrandByGid</p>
      * <p>Description: </p>
      *
@@ -135,7 +137,7 @@ public class GoodsService {
     }
 
     /**
-     * 根据商品id查询对应商品
+     * 根据goodsid查询对应goods
      * <p>Title: getGoodsByGid</p>
      * <p>Description: </p>
      *
@@ -154,7 +156,7 @@ public class GoodsService {
     }
 
     /**
-     * 修改商品
+     * 修改goods
      * <p>Title: updateGoods</p>
      * <p>Description: </p>
      *
@@ -171,11 +173,12 @@ public class GoodsService {
     public ServerResponse updateGoods(String id, String name, String categoryId, Integer buy,
                                       Integer sales, String unitId, Integer type, String arrString) {
         try {
-            if (!StringUtils.isNotBlank(name))
-                return ServerResponse.createByErrorMessage("商品不能为空");
-            List<Goods> goodsList = iGoodsMapper.queryByName(name);
-            if (goodsList.size() > 1)
-                return ServerResponse.createByErrorMessage("该商品已存在");
+            Goods oldGoods = iGoodsMapper.selectByPrimaryKey(id);
+            if (!oldGoods.getName().equals(name)) {
+                List<Goods> goodsList = iGoodsMapper.queryByName(name);
+                if (goodsList.size() > 0)
+                    return ServerResponse.createByErrorMessage("该goods已存在");
+            }
 
             Goods goods = new Goods();
             goods.setId(id);
@@ -184,21 +187,25 @@ public class GoodsService {
             goods.setBuy(buy);//购买性质
             goods.setSales(sales);//退货性质
             goods.setUnitId(unitId);//单位
-            goods.setType(type);//商品性质
+            goods.setType(type);//goods性质
             goods.setModifyDate(new Date());
             iGoodsMapper.updateByPrimaryKeySelective(goods);
-            JSONArray arr = JSONArray.parseArray(arrString);
-            iGoodsMapper.deleteGoodsSeries(id);//先删除商品所有跟品牌关联
-            for (int i = 0; i < arr.size(); i++) {//新增商品关联品牌系列
-                JSONObject obj = arr.getJSONObject(i);
-                GoodsSeries gs = new GoodsSeries();
-                gs.setGoodsId(id);
-                gs.setBrandId(obj.getString("brandId"));
-                gs.setSeriesId(obj.getString("seriesId"));
-                gs.setCreateDate(new Date());
-                gs.setModifyDate(new Date());
-                iGoodsMapper.insertGoodsSeries(gs);
+            if (buy != 2) //非自购goods ，有品牌
+            {
+                JSONArray arr = JSONArray.parseArray(arrString);
+                iGoodsMapper.deleteGoodsSeries(id);//先删除goods所有跟品牌关联
+                for (int i = 0; i < arr.size(); i++) {//新增goods关联品牌系列
+                    JSONObject obj = arr.getJSONObject(i);
+                    GoodsSeries gs = new GoodsSeries();
+                    gs.setGoodsId(id);
+                    gs.setBrandId(obj.getString("brandId"));
+                    gs.setSeriesId(obj.getString("seriesId"));
+                    gs.setCreateDate(new Date());
+                    gs.setModifyDate(new Date());
+                    iGoodsMapper.insertGoodsSeries(gs);
+                }
             }
+
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -208,7 +215,7 @@ public class GoodsService {
     }
 
     /**
-     * 根据id删除商品和下属货品
+     * 根据id删除goods和下属product
      *
      * @param id
      * @return
@@ -230,7 +237,7 @@ public class GoodsService {
 
 
     /**
-     * 查询商品及下属货品
+     * 查询goods及下属product
      *
      * @param pageNum
      * @param pageSize
@@ -297,14 +304,14 @@ public class GoodsService {
     }
 
     /**
-     * 查询商品及下属货品
+     * 查询goods及下属product
      *
      * @param pageDTO
      * @param categoryId
      * @param name
      * @return
      */
-    public ServerResponse queryGoodsList(PageDTO pageDTO, String categoryId, String name,Integer type) {
+    public ServerResponse queryGoodsList(PageDTO pageDTO, String categoryId, String name, Integer type) {
         try {
             if (pageDTO.getPageNum() == null) {
                 pageDTO.setPageNum(1);
@@ -371,15 +378,15 @@ public class GoodsService {
     }
 
     /**
-     * 模糊查询商品及下属货品
+     * 模糊查询goods及下属product
      *
      * @param pageDTO
      * @param categoryId
      * @param name
-     * @param type 是否禁用  0：禁用；1不禁用 ;  -1全部默认
+     * @param type       是否禁用  0：禁用；1不禁用 ;  -1全部默认
      * @return
      */
-    public ServerResponse queryGoodsListByCategoryLikeName(PageDTO pageDTO, String categoryId, String name,Integer type) {
+    public ServerResponse queryGoodsListByCategoryLikeName(PageDTO pageDTO, String categoryId, String name, Integer type) {
         try {
             LOG.info("tqueryGoodsListByCategoryLikeName type :" + type);
             if (pageDTO.getPageNum() == null) {
@@ -449,7 +456,7 @@ public class GoodsService {
 
 
     /**
-     * 根据商品id和标签id ，找出对应的货品对象集合
+     * 根据goodsid和标签id ，找出对应的product对象集合
      *
      * @param goodsArr   :  goodsArr  数组
      * @param srcLabelId :   srcLabelId
@@ -464,17 +471,17 @@ public class GoodsService {
                 return ServerResponse.createByErrorMessage("标签id不能为空");
 
             if (!StringUtils.isNotBlank(goodsArr))
-                return ServerResponse.createByErrorMessage("查询商品id不能为空");
+                return ServerResponse.createByErrorMessage("查询goodsid不能为空");
 
             boolean isFindLabel = false; //是否找到 标签  false: 没有找到
             List<Map<String, Object>> gMapList = new ArrayList<>();
             for (String srcGoodsId : goodsList) {
                 if (!StringUtils.isNotBlank(srcGoodsId))
-                    return ServerResponse.createByErrorMessage("商品id不能为空");
+                    return ServerResponse.createByErrorMessage("goodsid不能为空");
 //                LOG.info("for srcGoodsId:" + srcGoodsId);
                 Goods goods = iGoodsMapper.selectByPrimaryKey(srcGoodsId);
                 if (goods == null)
-                    return ServerResponse.createByErrorMessage("商品不存在");
+                    return ServerResponse.createByErrorMessage("goods不存在");
 
                 List<Product> products = iProductMapper.queryByGoodsId(goods.getId());
                 for (Product product : products) {
@@ -498,8 +505,8 @@ public class GoodsService {
                 }
             }
 
-            if(!isFindLabel)
-                return ServerResponse.createByErrorMessage("列表中的商品里面没有该标签的货品");
+            if (!isFindLabel)
+                return ServerResponse.createByErrorMessage("列表中的goods里面没有该标签的product");
 
             return ServerResponse.createBySuccess("查询成功", gMapList);
         } catch (Exception e) {

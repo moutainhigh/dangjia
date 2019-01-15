@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.repair;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,5 +28,10 @@ public interface MendMaterielAPI {
     @PostMapping("/repair/mendMateriel/repairLibraryMaterial")
     @ApiOperation(value = "补货查询商品库商品", notes = "补货查询商品库商品")
     ServerResponse repairLibraryMaterial(@RequestParam("request") HttpServletRequest request, @RequestParam("categoryId")String categoryId,
-                                        @RequestParam("name")String name, @RequestParam("pageNum")Integer pageNum,@RequestParam("pageSize") Integer pageSize);
+                                         @RequestParam("name")String name, @RequestParam("pageDTO") PageDTO pageDTO);
+
+    @PostMapping("/repair/mendMateriel/workerTypeBudget")
+    @ApiOperation(value = "补退要查询工种精算商品", notes = "补退要查询工种精算商品")
+    ServerResponse workerTypeBudget(@RequestParam("userToken")String userToken, @RequestParam("houseId")String houseId, @RequestParam("categoryId")String categoryId,
+                                    @RequestParam("name")String name, @RequestParam("pageDTO")PageDTO pageDTO);
 }

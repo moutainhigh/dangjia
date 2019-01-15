@@ -124,6 +124,18 @@ public class SupplierProductController implements SupplierProductAPI {
         return supplierService.saveSupplierProduct(arrString);
     }
 
+//    /**
+//     * 根据货品查询相应供应商
+//     *
+//     * @param productId
+//     * @return
+//     */
+//    @Override
+//    @ApiMethod
+//    public List<Map<String, Object>> querySupplierProductByPid(PageDTO pageDTO,String productId) {
+//        return supplierProductService.querySupplierProductByPid(pageDTO,productId);
+//    }
+
     /**
      * 根据货品查询相应供应商
      *
@@ -132,7 +144,7 @@ public class SupplierProductController implements SupplierProductAPI {
      */
     @Override
     @ApiMethod
-    public List<Map<String, Object>> querySupplierProductByPid(String productId) {
-        return supplierProductService.querySupplierProductByPid(productId);
+    public ServerResponse querySupplierProductByPid(PageDTO pageDTO,String productId) {
+        return supplierProductService.querySupplierProductByPid(pageDTO,productId);
     }
 }

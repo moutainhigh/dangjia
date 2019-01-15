@@ -19,7 +19,7 @@ public interface IHouseWorkerMapper extends Mapper<HouseWorker> {
     HouseWorker getByWorkerTypeId(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId,
                                   @Param("workType")Integer workType);
 
-    List<HouseWorker> grabControl(@Param("workerId")String workerId);
+    Long grabControl(@Param("workerId")String workerId);
     List<HouseWorker> grabOneDayOneTime(@Param("workerId")String workerId);
     int doModifyAllByWorkerId(@Param("workerId")String workerId);
     HouseWorker getDetailHouseWorker(@Param("workerId")String workerId);

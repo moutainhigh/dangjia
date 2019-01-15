@@ -29,6 +29,11 @@ public class ChangeOrder extends BaseEntity {
     @ApiModelProperty("房子id")
     private String houseId;
 
+    @Column(name = "worker_type_id")
+    @Desc(value = "工种id")
+    @ApiModelProperty("工种id")
+    private String workerTypeId;
+
     @Column(name = "member_id")
     @Desc(value = "业主id")
     @ApiModelProperty("业主id")
@@ -38,6 +43,11 @@ public class ChangeOrder extends BaseEntity {
     @Desc(value = "工匠id")
     @ApiModelProperty("工匠id")
     private String workerId;
+
+    @Column(name = "sup_id")
+    @Desc(value = "管家id")
+    @ApiModelProperty("管家id")
+    private String supId;
 
     @Column(name = "type")
     @Desc(value = "类型,1补人工,2退人工")
@@ -54,15 +64,23 @@ public class ChangeOrder extends BaseEntity {
     @ApiModelProperty("描叙")
     private String contentB;
 
-    @Column(name = "member_check")
-    @Desc(value = "用户审核结果,0未审核，1审核通过，2审核不通过，3自动审核")
-    @ApiModelProperty("用户审核结果,0未审核，1审核通过，2审核不通过，3自动审核")
+  /*  @Column(name = "member_check")
+    @Desc(value = "用户审核结果,0未审核，1审核通过，2审核不通过")
+    @ApiModelProperty("用户审核结果,0未审核，1审核通过，2审核不通过")
     private Integer memberCheck;
 
     @Column(name = "worker_check")
     @Desc(value = "工匠审核结果,0未审核，1审核通过，2审核不通过")
     @ApiModelProperty("工匠审核结果,0未审核，1审核通过，2审核不通过")
-    private Integer workerCheck;
+    private Integer workerCheck;*/
 
+   /* @Column(name = "sup_check")
+    @Desc(value = "管家审核结果,0未审核，1审核通过，2审核不通过")
+    @ApiModelProperty("管家审核结果,0未审核，1审核通过，2审核不通过")
+    private Integer supCheck;*/
 
+    @Column(name = "state")
+    @Desc(value = "初始0处理中,1被取消,2全部通过,3管家补退人工操作被取消重新提交,4补人工支付完成或退人工退款完成")
+    @ApiModelProperty("初始0处理中,1被取消,2全部通过,3管家补退人工操作被取消重新提交,4补人工支付完成或退人工退款完成")
+    private Integer state;
 }

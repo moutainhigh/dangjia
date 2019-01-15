@@ -94,8 +94,8 @@ public class House extends BaseEntity {
     private Integer type;
 
     @Column(name = "show_house")
-    @Desc(value = "是否展示 0展示，1不展示,默认0")
-    @ApiModelProperty("是否展示 0展示，1不展示,默认0")
+    @Desc(value = "是否展示 0不展示，1展示,默认0")
+    @ApiModelProperty("是否展示 0不展示，1展示,默认0")
     private Integer showHouse;//showhouse
 
     @Column(name = "task_number")

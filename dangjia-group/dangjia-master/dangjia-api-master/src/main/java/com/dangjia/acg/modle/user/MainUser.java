@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,6 +16,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_user")
 @ApiModel(description = "用户表")
+@FieldNameConstants(prefix = "")
 public class MainUser extends BaseEntity {
 
 	@Column(name = "username")
@@ -51,6 +53,11 @@ public class MainUser extends BaseEntity {
 	@Desc(value = "是否在职（0：正常；1，离职）")
 	@ApiModelProperty("是否在职（0：正常；1，离职）")
 	private Boolean isJob;
+
+	@Column(name = "is_receive")
+	@Desc(value = "是否坐席（0：不是坐席；1，是坐席）")
+	@ApiModelProperty("是否坐席（0：不是坐席；1，是坐席）")
+	private Boolean isReceive;
 
 	@Column(name = "department")
 	@Desc(value = "部门")

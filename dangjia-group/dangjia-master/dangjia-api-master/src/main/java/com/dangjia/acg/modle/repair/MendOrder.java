@@ -53,8 +53,8 @@ public class MendOrder extends BaseEntity {
 	private String applyMemberId;
 
 	@Column(name = "type")
-	@Desc(value = "0:补材料;1:补人工;2:退材料;3:退人工,4:业主退材料")
-	@ApiModelProperty("0:补材料;1:补人工;2:退材料;3:退人工,4:业主退材料")
+	@Desc(value = "0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料")
+	@ApiModelProperty("0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料")
 	private Integer type;
 
 	@Column(name = "landlord_state")
@@ -63,23 +63,23 @@ public class MendOrder extends BaseEntity {
 	private Integer landlordState;
 
 	@Column(name = "material_order_state")
-	@Desc(value = "补材料审核状态")
-	@ApiModelProperty("0生成中,1平台审核中，2平台审核不通过，3平台审核通过待业主支付,4业主已支付，5业主不同意，6管家取消")
+	@Desc(value = "补工序材料状态")
+	@ApiModelProperty("0生成中,1业主审核中，2业主审核不通过，3业主已支付")
 	private Integer materialOrderState;
 
 	@Column(name = "worker_order_state")
 	@Desc(value = "补人工审核状态")
-	@ApiModelProperty("0生成中,1工匠审核中，2工匠不同意，3工匠同意即平台审核中，4平台不同意,5平台同意即待业主支付，6业主已支付，7业主不同意, 8管家取消")
+	@ApiModelProperty("0生成中,1工匠审核中，2工匠不同意，3工匠同意即业主审核中，4业主不同意,5业主已支付")
 	private Integer workerOrderState;
 
 	@Column(name = "material_back_state")
-	@Desc(value = "退材料审核状态")
-	@ApiModelProperty("0生成中,1平台审核中，2平台审核不通过，3审核通过，4管家取消")
+	@Desc(value = "工匠退剩余材料状态")
+	@ApiModelProperty("0生成中,1管家审核中，2管家审核不通过，3管家审核通过即材料员审核，4材料员不通过,5材料员通过即业主审核中,6业主不通过,7业主通过退钱")
 	private Integer materialBackState;
 
 	@Column(name = "worker_back_state")
 	@Desc(value = "退人工审核状态")
-	@ApiModelProperty("0生成中,1工匠审核中，2工匠审核不通过，3工匠审核通过即平台审核中，4平台不同意，5平台审核通过,6管家取消")
+	@ApiModelProperty("0生成中,1业主审核中，2业主审核不通过，3工匠审核通过退款，4工匠不同意")
 	private Integer workerBackState;
 
 	@Column(name = "audits_member_id")

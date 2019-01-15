@@ -20,4 +20,7 @@ public interface IGoodsCategoryMapper extends Mapper<GoodsCategory> {
 
 	//根据父id查询下属商品类型
 	List<GoodsCategory> queryCategoryByParentId(String parentId);
+
+	//根据name查询商品对象
+	List<GoodsCategory> queryCategoryByName(String name);
 }

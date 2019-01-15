@@ -61,6 +61,15 @@ public interface ActivityAPI {
     @PostMapping("web/activity/red/list")
     @ApiOperation(value = "获取所有优惠券列表", notes = "获取所有优惠券列表")
    ServerResponse queryActivityRedPacks(@RequestParam("request") HttpServletRequest request,@RequestParam("pageDTO")  PageDTO pageDTO, @RequestParam("activityRedPack") ActivityRedPack activityRedPack,@RequestParam("isEndTime")  String isEndTime) ;
+    /**
+     * 获取所有有效的优惠券
+     * @param cityId
+     * @param memberId 指定用户是否已经领取该优惠券
+     * @return
+     */
+    @PostMapping("web/activity/red/myList")
+    @ApiOperation(value = "获取所有有效的优惠券", notes = "获取所有有效的优惠券")
+    ServerResponse getActivityRedPacks(HttpServletRequest request, PageDTO pageDTO,String cityId,String memberId);
 
     @PostMapping("web/activity/red/get")
     @ApiOperation(value = "获取优惠券明细", notes = "获取优惠券明细")

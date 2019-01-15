@@ -45,6 +45,15 @@ public interface MainUserAPI {
                              @RequestParam("isJob") boolean isJob) ;
 
     /**
+     * 指定某个用户为坐席
+     * @return ok/fail
+     */
+    @RequestMapping(value = "/user/setReceiveUser", method = RequestMethod.POST)
+    @ApiOperation(value = "指定某个用户为坐席", notes = "指定某个用户为坐席")
+    ServerResponse setReceiveUser(@RequestParam("request") HttpServletRequest request,
+                              @RequestParam("id") String id);
+
+    /**
      * 设置用户[更新]
      * @return ok/fail
      */

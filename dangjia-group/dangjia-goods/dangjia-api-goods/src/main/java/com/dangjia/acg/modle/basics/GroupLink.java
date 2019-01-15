@@ -24,9 +24,9 @@ public class GroupLink extends BaseEntity {
 	private String groupId;
 
 	//货品id
+
 	@Column(name = "product_id")
 	private String productId;
-
 	//货品名称
 	@Column(name = "product_name")
 	private String productName;

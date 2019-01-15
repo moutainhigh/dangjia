@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.repair;
 
 import com.dangjia.acg.api.repair.MendMaterielAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.repair.FillMaterielService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,17 +19,26 @@ import javax.servlet.http.HttpServletRequest;
 public class MendMaterielController implements MendMaterielAPI {
 
     @Autowired
-    private FillMaterielService mendMaterielService;
+    private FillMaterielService fillMaterielService;
 
     @Override
     @ApiMethod
     public ServerResponse selectProduct(HttpServletRequest request,String goodsId,String brandSeriesId,String attributeIdArr){
-        return mendMaterielService.selectProduct(goodsId,brandSeriesId,attributeIdArr);
+        return fillMaterielService.selectProduct(goodsId,brandSeriesId,attributeIdArr);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse repairLibraryMaterial(HttpServletRequest request, String categoryId,String name,Integer pageNum,Integer pageSize){
-        return mendMaterielService.repairLibraryMaterial(categoryId,name,pageNum,pageSize);
+    public ServerResponse repairLibraryMaterial(HttpServletRequest request, String categoryId,String name,PageDTO pageDTO){
+        return fillMaterielService.repairLibraryMaterial(categoryId,name,pageDTO.getPageNum(),pageDTO.getPageSize());
+    }
+
+    /**
+     * 工匠补退要货查询精算内货品
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse workerTypeBudget(String userToken, String houseId, String categoryId, String name, PageDTO pageDTO){
+        return fillMaterielService.workerTypeBudget(userToken,houseId,categoryId,name,pageDTO.getPageNum(),pageDTO.getPageSize());
     }
 }

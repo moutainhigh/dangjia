@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.repair.IChangeOrderMapper">
+    <sql id="all_columns">
+		id,
+		house_id as houseId,
+		worker_type_id as workerTypeId,
+		member_id as memberId,
+		worker_id as workerId,
+		type,
+		state,
+		content_a as contentA,
+		content_b as contentB,
+		data_status as dataStatus,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
+    <!-- 查询变更单单 -->
+    <select id="getList" resultType="com.dangjia.acg.modle.repair.ChangeOrder">
+        SELECT
+            <include refid="all_columns"/>
+        FROM dj_repair_change_order
+        where
+            house_id = #{houseId}
+        <if test = "workerTypeId!=null and workerTypeId!=''">
+            and
+            worker_type_id = #{workerTypeId}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
+    <!-- 查询未处理变更单 -->
+    <select id="unCheckOrder" resultType="com.dangjia.acg.modle.repair.ChangeOrder">
+        SELECT
+            <include refid="all_columns"/>
+        FROM dj_repair_change_order
+        where  worker_type_id = #{workerTypeId}
+        and  house_id = #{houseId}
+        and  state=0
+    </select>
+
+</mapper>
+

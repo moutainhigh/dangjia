@@ -33,7 +33,7 @@ public interface GoodsGroupAPI {
 	 */
 	@PostMapping("/basics/goodsGroup/addGoodsGroup")
 	@ApiOperation(value = "获取所有关联组", notes = "获取所有关联组")
-	public ServerResponse addGoodsGroup(@RequestParam("request") HttpServletRequest request,@RequestParam("goodsGroup") GoodsGroup goodsGroup);
+	public ServerResponse addGoodsGroup(@RequestParam("request") HttpServletRequest request,@RequestParam("jsonStr") String jsonStr);
 
 	/*
 	 * 修改关联组

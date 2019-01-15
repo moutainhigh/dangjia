@@ -761,7 +761,8 @@ public class HouseWorkerService {
             }*/
 
             /*待审核申请*/
-            if (applyType < 4 && houseFlowApplyMapper.checkPendingApply(houseFlowId, workerId).size() > 0) {
+            List<HouseFlowApply> hfaList = houseFlowApplyMapper.checkPendingApply(houseFlowId, workerId);
+            if (applyType < 4 && hfaList.size() > 0) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "您有待审核的申请,请联系管家业主审核后再提交");
             }
 
