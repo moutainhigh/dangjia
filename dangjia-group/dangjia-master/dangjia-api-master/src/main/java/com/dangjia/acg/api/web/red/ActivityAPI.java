@@ -69,7 +69,7 @@ public interface ActivityAPI {
      */
     @PostMapping("web/activity/red/myList")
     @ApiOperation(value = "获取所有有效的优惠券", notes = "获取所有有效的优惠券")
-    ServerResponse getActivityRedPacks(HttpServletRequest request, PageDTO pageDTO,String cityId,String memberId);
+    ServerResponse getActivityRedPacks(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("cityId") String cityId,@RequestParam("memberId") String memberId);
 
     @PostMapping("web/activity/red/get")
     @ApiOperation(value = "获取优惠券明细", notes = "获取优惠券明细")
