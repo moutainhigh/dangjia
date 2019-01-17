@@ -2,6 +2,7 @@ package com.dangjia.acg.modle.member;
 
 import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
+import com.google.gson.FieldNamingStrategy;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -20,30 +21,30 @@ import javax.persistence.Table;
 @ApiModel(description = "客服基础类")
 public class Customer extends BaseEntity {
 
-	@Column(name = "member_id")
-	@Desc(value = "业主id")
-	@ApiModelProperty("业主id")
-	private String memberId;
+    @Column(name = "member_id")
+    @Desc(value = "业主id")
+    @ApiModelProperty("业主id")
+    private String memberId;
 
     @Column(name = "user_id")
     @Desc(value = "当前客服id")
     @ApiModelProperty("当前客服id")
     private String userId;
 
-	@Column(name = "label_id_arr")
-	@Desc(value = "标签id数组")
-	@ApiModelProperty("标签id数组")
-	private String labelIdArr;
+    @Column(name = "label_id_arr")
+    @Desc(value = "标签id数组")
+    @ApiModelProperty("标签id数组")
+    private String labelIdArr;
 
-	@Column(name = "stage")
-	@Desc(value = "阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单")
-	@ApiModelProperty("阶段")
-	private Integer stage;
+    @Column(name = "stage")
+    @Desc(value = "阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单")
+    @ApiModelProperty("阶段")
+    private Integer stage;
 
-	@Column(name = "curr_record_id")
-	@Desc(value = "最新沟通记录id")
-	@ApiModelProperty("最新沟通记录id")
-	private String currRecordId;
+    @Column(name = "curr_record_id")
+    @Desc(value = "最新沟通记录id")
+    @ApiModelProperty("最新沟通记录id")
+    private String currRecordId;
 
     @Column(name = "remind_record_id")
     @Desc(value = "最近的提醒沟通记录id")

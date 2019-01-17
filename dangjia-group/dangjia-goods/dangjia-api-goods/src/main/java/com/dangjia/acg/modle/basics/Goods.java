@@ -9,14 +9,14 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 /**
  * @ClassName: Goods
- * @Description: 商品对象
+ * @Description: 货品对象
  * @author: zmj
  * @date: 2018-9-18上午9:34:42
  */
 @Data
 @Entity
 @Table(name = "dj_basics_goods")
-@ApiModel(description = "商品")
+@ApiModel(description = "货品")
 public class Goods extends BaseEntity{
 
 	@Column(name = "name")

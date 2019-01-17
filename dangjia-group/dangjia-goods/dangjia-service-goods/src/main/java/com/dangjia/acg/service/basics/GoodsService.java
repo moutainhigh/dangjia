@@ -66,7 +66,7 @@ public class GoodsService {
         try {
             List<Goods> goodsList = iGoodsMapper.queryByName(name);
             if (goodsList.size() > 0)
-                return ServerResponse.createByErrorMessage("该goods 名字不能重复");
+                return ServerResponse.createByErrorMessage("该货品名字不能重复");
 
             Goods goods = new Goods();
             goods.setName(name);
@@ -177,7 +177,7 @@ public class GoodsService {
             if (!oldGoods.getName().equals(name)) {
                 List<Goods> goodsList = iGoodsMapper.queryByName(name);
                 if (goodsList.size() > 0)
-                    return ServerResponse.createByErrorMessage("该goods已存在");
+                    return ServerResponse.createByErrorMessage("该货品已存在");
             }
 
             Goods goods = new Goods();
@@ -471,17 +471,17 @@ public class GoodsService {
                 return ServerResponse.createByErrorMessage("标签id不能为空");
 
             if (!StringUtils.isNotBlank(goodsArr))
-                return ServerResponse.createByErrorMessage("查询goodsid不能为空");
+                return ServerResponse.createByErrorMessage("查询货品id不能为空");
 
             boolean isFindLabel = false; //是否找到 标签  false: 没有找到
             List<Map<String, Object>> gMapList = new ArrayList<>();
             for (String srcGoodsId : goodsList) {
                 if (!StringUtils.isNotBlank(srcGoodsId))
-                    return ServerResponse.createByErrorMessage("goodsid不能为空");
+                    return ServerResponse.createByErrorMessage("货品id不能为空");
 //                LOG.info("for srcGoodsId:" + srcGoodsId);
                 Goods goods = iGoodsMapper.selectByPrimaryKey(srcGoodsId);
                 if (goods == null)
-                    return ServerResponse.createByErrorMessage("goods不存在");
+                    return ServerResponse.createByErrorMessage("货品不存在");
 
                 List<Product> products = iProductMapper.queryByGoodsId(goods.getId());
                 for (Product product : products) {
@@ -506,7 +506,7 @@ public class GoodsService {
             }
 
             if (!isFindLabel)
-                return ServerResponse.createByErrorMessage("列表中的goods里面没有该标签的product");
+                return ServerResponse.createByErrorMessage("列表中的货品里面没有该标签的商品");
 
             return ServerResponse.createBySuccess("查询成功", gMapList);
         } catch (Exception e) {

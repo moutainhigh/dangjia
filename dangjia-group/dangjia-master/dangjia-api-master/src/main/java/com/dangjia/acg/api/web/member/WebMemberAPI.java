@@ -25,7 +25,9 @@ public interface WebMemberAPI {
 
     @PostMapping("web/member/getMemberList")
     @ApiOperation(value = "获取业主列表", notes = "获取业主列表")
-    ServerResponse getMemberList(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO, @RequestParam("stage") Integer stage);
+    ServerResponse getMemberList(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO,
+                                 @RequestParam("stage") Integer stage, @RequestParam("memberNickName") String memberNickName,
+                                 @RequestParam("parentId") String parentId, @RequestParam("childId") String childId);
 
     @PostMapping("web/member/setMember")
     @ApiOperation(value = "修改业主信息", notes = "修改业主信息")

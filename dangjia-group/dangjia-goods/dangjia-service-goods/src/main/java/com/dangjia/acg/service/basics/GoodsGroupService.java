@@ -336,7 +336,7 @@ public class GoodsGroupService {
                     String productId = addProductIdsArr[i];
                     Product product = iProductMapper.selectByPrimaryKey(productId);//根据商品id查询商品对象
                     if (product == null)
-                        return ServerResponse.createByErrorMessage("该product不存在");
+                        return ServerResponse.createByErrorMessage("该货品不存在");
                     GroupLink groupLink = new GroupLink();
                     groupLink.setGroupId(goodsGroup.getId());//关联组id
                     groupLink.setGroupName(goodsGroup.getName());//关联组名称

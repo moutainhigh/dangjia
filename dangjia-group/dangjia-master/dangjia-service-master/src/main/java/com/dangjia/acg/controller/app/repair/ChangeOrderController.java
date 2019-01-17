@@ -29,6 +29,15 @@ public class ChangeOrderController implements ChangeOrderAPI {
     }
 
     /**
+     * 变更单详情
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse changeOrderDetail(String changeOrderId){
+        return changeOrderService.changeOrderDetail(changeOrderId);
+    }
+
+    /**
      * 查询变更单列表
      * type 1工匠 2业主 3管家
      */
