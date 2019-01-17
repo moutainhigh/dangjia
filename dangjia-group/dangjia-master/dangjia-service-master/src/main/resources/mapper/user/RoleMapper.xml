@@ -19,6 +19,7 @@
     select
     <include refid="Base_Column_List" />
     from dj_user_role
+    ORDER BY create_date DESC
   </select>
   <!--=End findList 分页查询角色列表-->
 
@@ -42,6 +43,7 @@
     from dj_user_role r
     INNER JOIN dj_user_role_permission rp ON r.id=rp.role_id
     WHERE r.id=#{id}
+    ORDER BY r.create_date DESC
   </select>
   <!--=End findRoleAndPerms 查询角色列表-->
 
@@ -52,6 +54,7 @@
     from dj_user_user_role ur
     INNER JOIN dj_user_role r ON r.id=ur.role_id
     WHERE ur.user_id=#{userId}
+
   </select>
   <!--=End getRoleByUserId 根据用户id查询角色数据-->
 
@@ -60,6 +63,7 @@
     select
     <include refid="Base_Column_List" />
     from dj_user_role
+    ORDER BY create_date DESC
   </select>
   <!--=End getRoles 查询角色列表-->
 </mapper>

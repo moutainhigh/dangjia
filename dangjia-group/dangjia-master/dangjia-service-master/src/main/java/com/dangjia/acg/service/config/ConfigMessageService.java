@@ -42,12 +42,26 @@ public class ConfigMessageService {
     @Autowired
     private RedisClient redisClient;
     /**
+     * 获取所有公共消息(web端列表)
+     * @param configMessage
+     * @return
+     */
+    public ServerResponse queryConfigMessages(HttpServletRequest request, PageDTO pageDTO, ConfigMessage configMessage) {
+        Example example = new Example(ConfigMessage.class);
+        example.orderBy("createDate").desc();
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<ConfigMessage> list = configMessageMapper.selectByExample(example);
+        PageInfo pageResult = new PageInfo(list);
+        return ServerResponse.createBySuccess("ok",pageResult);
+    }
+    /**
      * 获取所有公共消息
      * @param configMessage
      * @return
      */
     public ServerResponse getConfigMessages(HttpServletRequest request, PageDTO pageDTO, ConfigMessage configMessage) {
         String userToken = request.getParameter(Constants.USER_TOKEY);
+        String cityId = request.getParameter(Constants.CITY_ID);
         Example example = new Example(ConfigMessage.class);
         Example.Criteria criteria=example.createCriteria();
         criteria.andEqualTo("appType", configMessage.getAppType());
@@ -56,7 +70,7 @@ public class ConfigMessageService {
             if(accessToken == null){//无效的token
                 return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(),"无效的token,请重新登录或注册！");
             }
-            criteria.andCondition("(target_uid='"+accessToken.getMemberId()+"' or target_type=1)");
+            criteria.andCondition("(target_uid='"+accessToken.getMemberId()+"' or target_type=1  or target_uid='workerTypeId"+accessToken.getMember().getWorkerTypeId()+","+cityId+"')");
 //            criteria.andEqualTo("targetUid", accessToken.getMember().getId()).orEqualTo("targetType","1");
         }else {
             criteria.andEqualTo("targetType", "1");

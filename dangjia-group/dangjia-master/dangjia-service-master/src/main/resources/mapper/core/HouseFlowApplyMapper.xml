@@ -46,14 +46,26 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
               or apply_type=0 )
     </select>
 
+    <!--查询待审核的申请-->
+    <select id="checkPendingApply" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        select <include refid="all_columns" />
+        from dj_core_house_flow_apply
+        where
+            apply_type &lt; 4
+        and house_flow_id = #{houseFlowId}
+        and worker_id = #{workerId}
+
+        and ((supervisor_check=0 and apply_type!=0) or (supervisor_check=1 and member_check=0))
+    </select>
+
     <!--根据工人和房子id查询自己已经被巡查多少次 -->
     <select id="getCountValidPatrolByHouseId" parameterType="java.lang.String" resultType="java.lang.Long">
        select
        count(*)
        from
          dj_core_house_flow_apply
-       where 1=1
-	   and house_id = #{houseId}
+       where
+	       house_id = #{houseId}
 	   and apply_type = 5
         <if test="workerId != null">
             AND worker_id=#{workerId}
@@ -155,16 +167,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and worker_id = #{workerId}
         and supervisor_check !=2
         order by create_date desc
-    </select>
-
-    <!--查询待审核的申请-->
-    <select id="checkPendingApply" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
-        select <include refid="all_columns" />
-        from dj_core_house_flow_apply
-        where 1=1
-        and house_flow_id = #{houseFlowId}
-        and (supervisor_check = 0 or (supervisor_check = 1 and member_check = 0))
-        and worker_id = #{workerId}
     </select>
 
     <!--根据houseId查询今日是否开工-->

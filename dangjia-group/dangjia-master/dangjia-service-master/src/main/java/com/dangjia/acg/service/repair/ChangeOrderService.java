@@ -51,6 +51,18 @@ public class ChangeOrderService {
     }
 
     /**
+     * 变更单详情
+     */
+    public ServerResponse changeOrderDetail(String changeOrderId){
+        ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(changeOrderId);
+        if(changeOrder != null){
+            return ServerResponse.createBySuccess("查询成功",changeOrder);
+        }else {
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
      * 查询变更单列表
      * type 1工匠 2业主 3管家
      */

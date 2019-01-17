@@ -53,7 +53,7 @@ public class MainAuthService {
 
 	public ServerResponse addPermission(Permission permission) {
 		this.permissionMapper.insert(permission);
-		return ServerResponse.createBySuccess("ok",permission.getId());
+		return ServerResponse.createBySuccess("添加成功",permission.getId());
 	}
 
 	
@@ -64,7 +64,7 @@ public class MainAuthService {
 
 	 public ServerResponse updatePerm(Permission permission) {
 		  this.permissionMapper.updateByPrimaryKeySelective(permission);
-		 return ServerResponse.createBySuccess("ok",permission.getId());
+		 return ServerResponse.createBySuccess("更新成功",permission.getId());
 	}
 
 	 public ServerResponse getPermission(String id) {
@@ -79,7 +79,7 @@ public class MainAuthService {
 			return ServerResponse.createByErrorMessage("删除失败，请您先删除该权限的子节点");
 		}
 		if(this.permissionMapper.deleteByPrimaryKey(String.valueOf(id))>0){
-			return ServerResponse.createBySuccessMessage("ok");
+			return ServerResponse.createBySuccessMessage("删除成功");
 		}else{
 			return ServerResponse.createByErrorMessage("删除失败，请您稍后再试");
 		}
@@ -104,7 +104,7 @@ public class MainAuthService {
 		String[] arrays=permIds.split(",");
 		logger.debug("权限id =arrays="+arrays.toString());
 		setRolePerms(roleId, arrays);
-		return ServerResponse.createBySuccessMessage("ok");
+		return ServerResponse.createBySuccessMessage("新增成功");
 	}
 
 	 public ServerResponse findRoleAndPerms(String id) {

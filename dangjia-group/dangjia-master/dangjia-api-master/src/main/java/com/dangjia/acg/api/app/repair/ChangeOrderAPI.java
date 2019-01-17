@@ -21,6 +21,10 @@ public interface ChangeOrderAPI {
     ServerResponse supCheckChangeOrder(@RequestParam("userToken")String userToken,@RequestParam("changeOrderId")String changeOrderId,
                                        @RequestParam("check")Integer check);
 
+    @PostMapping(value = "app/repair/changeOrder/changeOrderDetail")
+    @ApiOperation(value = "变更单详情", notes = "变更单详情")
+    ServerResponse changeOrderDetail(@RequestParam("changeOrderId")String changeOrderId);
+
     @PostMapping(value = "app/repair/changeOrder/queryChangeOrder")
     @ApiOperation(value = "查询变更单列表", notes = "查询变更单列表")
     ServerResponse queryChangeOrder(@RequestParam("userToken")String userToken,@RequestParam("houseId")String houseId,
