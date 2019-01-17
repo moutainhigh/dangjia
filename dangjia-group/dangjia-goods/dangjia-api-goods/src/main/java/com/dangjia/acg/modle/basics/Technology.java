@@ -12,7 +12,6 @@ import javax.persistence.Table;
  * 工艺说明
  *
  * @ClassName: Technology
- * @Description: TODO
  * @author: zmj
  * @date: 2018-9-19下午3:33:07
  */

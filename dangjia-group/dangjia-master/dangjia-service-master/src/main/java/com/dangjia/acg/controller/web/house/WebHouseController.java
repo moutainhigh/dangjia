@@ -4,6 +4,7 @@ import com.dangjia.acg.api.web.house.WebHouseAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.house.HouseDTO;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,4 +39,12 @@ public class WebHouseController implements WebHouseAPI {
     public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO,String members,String prefixs){
         return houseService.startWork(request,houseDTO, members, prefixs);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setHouseInfo(HttpServletRequest request, House house) {
+        return houseService.setHouseInfo(house);
+    }
+
+
 }

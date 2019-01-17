@@ -368,6 +368,8 @@ public class HouseFlowApplyService {
         HouseFlowApply houseFlowApply = new HouseFlowApply();
         houseFlowApply.setWorkerType(3);
         houseFlowApply.setWorkerId(worker.getId());
+        houseFlowApply.setWorkerTypeId(worker.getWorkerTypeId());
+        houseFlowApply.setHouseId(hwo.getHouseId());
         deposit(houseFlowApply);
 
         //记录流水

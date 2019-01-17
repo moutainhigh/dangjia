@@ -10,7 +10,7 @@ import javax.persistence.Table;
 
 
 /**
- * 关联组和货品关系
+ * 关联组和商品关系
  * @author Ronalcheng
  */
 @Data
@@ -23,19 +23,18 @@ public class GroupLink extends BaseEntity {
 	@Column(name = "group_id")
 	private String groupId;
 
-	//货品id
+	//商品id
 	@Column(name = "product_id")
 	private String productId;
-
-	//货品名称
+	//商品名称
 	@Column(name = "product_name")
 	private String productName;
 
-	//商品id
+	//货品id
 	@Column(name = "goods_id")
 	private String goodsId;
 
-	//商品名称
+	//货品名称
 	@Column(name = "goods_name")
 	private String goodsName;
 

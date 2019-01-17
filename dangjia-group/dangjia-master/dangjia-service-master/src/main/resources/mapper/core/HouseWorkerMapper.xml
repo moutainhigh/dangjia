@@ -53,15 +53,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <!-- 根据工人id查询未完工任务-->
-    <select id="grabControl" resultType="com.dangjia.acg.modle.core.HouseWorker">
+    <select id="grabControl" resultType="java.lang.Long">
         SELECT
-        <include refid="all_columns" />
+            count(*)
         from
-            dj_core_house_worker
+            dj_core_house_flow
         where
             worker_id = #{workerId}
         and
-            worker_type &gt;3 and (work_type=1 or (work_type =6 and work_steta &lt;1))
+            state = 0
+        and
+            worker_type > 2
+        and
+            work_steta != 2
     </select>
 
     <!-- 查询当天是否抢单-->

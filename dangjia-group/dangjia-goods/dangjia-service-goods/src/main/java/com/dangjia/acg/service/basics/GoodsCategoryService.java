@@ -36,11 +36,14 @@ public class GoodsCategoryService {
     //新增商品类别
     public ServerResponse insertGoodsCategory(String name, String parentId, String parentTop) {
         try {
-            List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId(parentId);//根据id查询是否有下级类别
-            for (GoodsCategory goodsCategory : goodsCategoryList) {
-                if (goodsCategory.getName().equals(name))
-                    return ServerResponse.createByErrorMessage("不能重复添加类别");
-            }
+//            List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId(parentId);//根据id查询是否有下级类别
+//            for (GoodsCategory goodsCategory : goodsCategoryList) {
+//                if (goodsCategory.getName().equals(name))
+//                    return ServerResponse.createByErrorMessage("不能重复添加类别");
+//            }
+            List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByName(name);//根据name查询商品对象
+            if (goodsCategoryList.size() > 0)
+                return ServerResponse.createByErrorMessage("不能重复添加类别");
 
             GoodsCategory category = new GoodsCategory();
             category.setName(name);
@@ -60,9 +63,15 @@ public class GoodsCategoryService {
     //修改商品类别
     public ServerResponse doModifyGoodsCategory(String id, String name, String parentId, String parentTop) {
         try {
-            List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId(parentId);//根据id查询是否有下级类别
-            for (GoodsCategory goodsCategory : goodsCategoryList) {
-                if (goodsCategory.getName().equals(name))
+//            List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId(parentId);//根据id查询是否有下级类别
+//            for (GoodsCategory goodsCategory : goodsCategoryList) {
+//                if (goodsCategory.getName().equals(name))
+//                    return ServerResponse.createByErrorMessage("该类别已存在");
+//            }
+            GoodsCategory oldCategory = iGoodsCategoryMapper.selectByPrimaryKey(id);
+            if (!oldCategory.getName().equals(name)) { //如果 是修改name
+                List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByName(name);//根据name查询商品对象
+                if (goodsCategoryList.size() > 0)
                     return ServerResponse.createByErrorMessage("该类别已存在");
             }
 

@@ -95,6 +95,12 @@ public class MainUserController implements MainUserAPI {
 		return msg;
 	}
 
+	@Override
+	@ApiMethod
+	public ServerResponse setReceiveUser(HttpServletRequest request, String id) {
+		return userService.setReceiveUser(id);
+	}
+
 	/**
 	 * 设置用户[新增或更新]
 	 * @return ok/fail

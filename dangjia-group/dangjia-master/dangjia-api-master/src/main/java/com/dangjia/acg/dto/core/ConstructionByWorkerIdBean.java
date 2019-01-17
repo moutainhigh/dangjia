@@ -55,6 +55,7 @@ public class ConstructionByWorkerIdBean {
             private String name;
             private String url;
             private int type;
+            private int state;//0无 1有点
         }
     }
 

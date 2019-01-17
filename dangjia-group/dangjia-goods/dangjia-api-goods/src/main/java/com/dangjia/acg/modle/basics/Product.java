@@ -10,13 +10,13 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
- * 商品货品实体类
+ * 货品下的商品实体类
  * @author Ronalcheng
  */
 @Data
 @Entity
 @Table(name = "dj_basics_product")
-@ApiModel(description = "商品货品")
+@ApiModel(description = "货品下的商品")
 @FieldNameConstants(prefix = "")
 public class Product extends BaseEntity {
 

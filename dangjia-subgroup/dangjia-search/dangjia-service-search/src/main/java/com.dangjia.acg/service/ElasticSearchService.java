@@ -1,7 +1,6 @@
 package com.dangjia.acg.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.common.constants.DictionaryConstants;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageBean;
@@ -9,7 +8,6 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.config.ElasticsearchConfiguration;
-import io.searchbox.core.Bulk;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
@@ -246,11 +244,7 @@ public class ElasticSearchService {
          Map.Entry entry = (Map.Entry) it.next();
          Object key = entry.getKey();
          Object value = entry.getValue();
-         if(value.equals(DictionaryConstants.SCHOOL_ES_SORT_ASC)){
-           searchRequestBuilder.addSort(key.toString(), SortOrder.ASC);
-         }else{
-           searchRequestBuilder.addSort(key.toString(), SortOrder.DESC);
-         }
+         searchRequestBuilder.addSort(key.toString(), SortOrder.DESC);
        }
      }else{
        //searchRequestBuilder.addSort("id", SortOrder.DESC);
@@ -285,11 +279,7 @@ public class ElasticSearchService {
          Map.Entry entry = (Map.Entry) it.next();
          Object key = entry.getKey();
          Object value = entry.getValue();
-         if (value.equals(DictionaryConstants.SCHOOL_ES_SORT_ASC)) {
-           searchRequestBuilder.addSort(key.toString(), SortOrder.ASC);
-         } else {
-           searchRequestBuilder.addSort(key.toString(), SortOrder.DESC);
-         }
+         searchRequestBuilder.addSort(key.toString(), SortOrder.DESC);
        }
      }
      //分页

@@ -32,8 +32,10 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -87,6 +89,41 @@ public class RedPackService {
         example.orderBy("modifyDate").desc();
         List<ActivityRedPack> list = activityRedPackMapper.selectByExample(example);
         PageInfo pageResult = new PageInfo(list);
+        return ServerResponse.createBySuccess("ok",pageResult);
+    }
+
+    /**
+     * 获取所有有效的优惠券
+     * @param cityId
+     * @param memberId 指定用户是否已经领取该优惠券
+     * @return
+     */
+    public ServerResponse getActivityRedPacks(HttpServletRequest request, PageDTO pageDTO,String cityId,String memberId) {
+        Example example = new Example(ActivityRedPack.class);
+        Example.Criteria criteria=example.createCriteria();
+        criteria.andEqualTo(ActivityRedPack.CITY_ID,cityId);
+        criteria.andGreaterThan(ActivityRedPack.END_DATE,new Date());
+        criteria.andGreaterThan(ActivityRedPack.SURPLUS_NUMS,"0");
+        criteria.andEqualTo(ActivityRedPack.DELETE_STATE,"0");
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        example.orderBy(ActivityRedPack.MODIFY_DATE).desc();
+        List<ActivityRedPack> list = activityRedPackMapper.selectByExample(example);
+        List<Map> listMap = new ArrayList<>();
+        PageInfo pageResult = new PageInfo(list);
+
+        for (ActivityRedPack redPack:list) {
+            Map map=BeanUtils.beanToMap(redPack);
+            Example exampleRecord = new Example(ActivityRedPackRecord.class);
+            exampleRecord.createCriteria().andEqualTo(ActivityRedPackRecord.RED_PACK_ID,redPack.getId()).andEqualTo(ActivityRedPackRecord.MEMBER_ID,memberId);
+            map.put("receiveNum", activityRedPackRecordMapper.selectCountByExample(exampleRecord));
+
+            Example exampleRule = new Example(ActivityRedPackRule.class);
+            exampleRule.createCriteria().andEqualTo(ActivityRedPackRule.ACTIVITY_RED_PACK_ID,redPack.getId());
+            List<ActivityRedPackRule> red= activityRedPackRuleMapper.selectByExample(exampleRule);
+            map.put("redPackRules",red);
+            listMap.add(map);
+        }
+        pageResult.setList(listMap);
         return ServerResponse.createBySuccess("ok",pageResult);
     }
     /**
@@ -180,8 +217,7 @@ public class RedPackService {
     public ServerResponse editActivityRedPack(HttpServletRequest request, ActivityRedPack activityRedPack,int[] num, BigDecimal[] money,  BigDecimal[] satisfyMoney) {
         activityRedPack.setModifyDate(new Date());
         if(activityRedPack.getNum()!=null&&activityRedPack.getNum()>0){
-            ActivityRedPack redPack=activityRedPackMapper.selectByPrimaryKey(activityRedPack.getId());
-            activityRedPack.setSurplusNums(redPack.getSurplusNums()+activityRedPack.getNum());
+            activityRedPack.setSurplusNums(activityRedPack.getNum());
         }
         if(this.activityRedPackMapper.updateByPrimaryKeySelective(activityRedPack)>0){
             if(!CommonUtil.isEmpty(num)&&num.length>0) {
@@ -230,6 +266,9 @@ public class RedPackService {
      */
     public ServerResponse addActivityRedPack(HttpServletRequest request,ActivityRedPack activityRedPack,int[] num, BigDecimal[] money,  BigDecimal[] satisfyMoney) {
         activityRedPack.setDeleteState(0);
+        if(activityRedPack.getNum()!=null&&activityRedPack.getNum()>0){
+            activityRedPack.setSurplusNums(activityRedPack.getNum());
+        }
         if(this.activityRedPackMapper.insertSelective(activityRedPack)>0){
             addActivityRedPackRule(activityRedPack,num,money,satisfyMoney);
             return ServerResponse.createBySuccessMessage("ok");
@@ -277,6 +316,9 @@ public class RedPackService {
                     user.setMobile(phones);
                     user = memberMapper.getUser(user);
                     if(user==null){
+                        user = memberMapper.selectByPrimaryKey(phones);
+                    }
+                    if(user==null){
                         return ServerResponse.createByErrorMessage("用户（"+p+"）未注册！");
                     }
                     //指定优惠券规则发放
@@ -284,7 +326,7 @@ public class RedPackService {
                         String[] redPackRuleId = StringUtils.split(redPackRuleIds, ",");
                         for (String rprid : redPackRuleId) {
                             String msg=sendMemberRadPack(user,redPackId,rprid);
-                            if(StringUtils.isEmpty(msg)){
+                            if(!StringUtils.isEmpty(msg)){
                                 return ServerResponse.createByErrorMessage(msg);
                             }
                         }
@@ -292,7 +334,7 @@ public class RedPackService {
                 }
             }
         }
-        return ServerResponse.createBySuccessMessage("ok");
+        return ServerResponse.createBySuccessMessage("推送成功！");
     }
 
     /**

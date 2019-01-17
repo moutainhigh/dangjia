@@ -5,13 +5,13 @@
 <mapper namespace="com.dangjia.acg.mapper.basics.IGoodsCategoryMapper">
 
 	<sql id="all_columns">
-		id,
-		name,
-		parent_id,
-		parent_top,
-		image,
-        create_date,
-        modify_date
+        id,
+        name,
+        parent_id as parentId,
+        parent_top as parentTop,
+        image,
+        create_date as createDate,
+        modify_date as modifyDate
 	</sql>
 	<!-- 删除对象 -->
 	<delete id="deleteById" parameterType="java.lang.String">
@@ -76,14 +76,17 @@
     <!-- 根据父id查询下属商品类别 -->
 	<select id="queryCategoryByParentId" resultType="com.dangjia.acg.modle.attribute.GoodsCategory">
 		SELECT
-        id,
-        name,
-        parent_id as parentId,
-        parent_top as parentTop,
-        image,
-        create_date as createDate,
-        modify_date as modifyDate
+        <include refid="all_columns" />
 		FROM dj_basics_goods_category where parent_id =#{parentId}
 		ORDER BY create_date desc
 	</select>
+
+    <!-- 根据父id查询下属商品类别 -->
+    <select id="queryCategoryByName" resultType="com.dangjia.acg.modle.attribute.GoodsCategory">
+		SELECT
+        <include refid="all_columns" />
+		FROM dj_basics_goods_category where name =#{name}
+		ORDER BY create_date desc
+	</select>
+
 </mapper>

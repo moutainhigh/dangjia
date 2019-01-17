@@ -96,9 +96,8 @@ public class GoodsGroupController implements GoodsGroupAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse addGoodsGroup(HttpServletRequest request,GoodsGroup goodsGroup){
-		System.out.println(goodsGroup.getName());
-		return goodsGroupService.addGoodsGroup(goodsGroup);
+	public ServerResponse addGoodsGroup(HttpServletRequest request,String jsonStr){
+		return goodsGroupService.addGoodsGroup(jsonStr);
 	}
 
 	/*

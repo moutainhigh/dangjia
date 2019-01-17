@@ -11,12 +11,13 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.io.Serializable;
 
+
 /**
- * 
-   * @类 名： SupplierGoods
-   * @功能描述： 供应商关联货品表
-   * @作者信息： zmj
-   * @创建时间： 2018-9-17下午2:35:58
+ *
+ * @类 名： SupplierGoods
+ * @功能描述： 供应商关联货品表
+ * @作者信息： zmj
+ * @创建时间： 2018-9-17下午2:35:58
  */
 @Data
 @Entity

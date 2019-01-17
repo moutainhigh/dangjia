@@ -144,4 +144,8 @@ public class TechnologyRecordService {
         return warehouseMapper.warehouseList(houseId,null,null);
     }
 
+    public Warehouse getByProductId(String productId,String houseId){
+        return warehouseMapper.getByProductId(productId,houseId);
+    }
+
 }

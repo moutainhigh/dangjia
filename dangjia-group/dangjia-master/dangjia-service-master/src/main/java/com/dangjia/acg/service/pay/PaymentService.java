@@ -55,6 +55,7 @@ import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.member.GroupInfoService;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -646,7 +647,8 @@ public class PaymentService {
             //获取房子群组
             ServerResponse groups= groupInfoService.getGroups(request,pageDTO,group);
             if(groups.getResultCode()==EventStatus.SUCCESS.getCode()){
-                List<GroupDTO> listdto =(List<GroupDTO> )groups.getResultObj();
+                PageInfo pageInfo=(PageInfo)groups.getResultObj();
+                List<GroupDTO> listdto =pageInfo.getList();
                 if(listdto!=null&&listdto.size()>0){
                     groupInfoService.editManageGroup(Integer.parseInt(listdto.get(0).getGroupId()),memberid,"");
                 }

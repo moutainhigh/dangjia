@@ -70,7 +70,7 @@ public class CustomerService {
     public ServerResponse setMemberCustomer(Customer customer) {
         try {
             LOG.info("setMemberCustomer :" + customer);
-            if (!StringUtils.isNotBlank(customer.getUserId()))
+            if (!StringUtils.isNotBlank(customer.getMemberId()))
                 return ServerResponse.createByErrorMessage("业主id不能为null");
             Customer srcCustomer = iCustomerMapper.getCustomerByMemberId(customer.getMemberId(), -1);
             if (srcCustomer == null) {
@@ -88,6 +88,8 @@ public class CustomerService {
 //            if (StringUtils.isNotBlank(customer.getLabelIdArr()))
             if (customer.getLabelIdArr() != "noUpdate")
                 srcCustomer.setLabelIdArr(customer.getLabelIdArr());
+            if (!StringUtils.isNotBlank(customer.getLabelIdArr())) //如果为null 或者 “”，就删除
+                srcCustomer.setLabelIdArr(null);
             if (customer.getStage() >= 0) {
                 //如果是 放弃跟进 操作，
                 if (customer.getStage() == 2 && srcCustomer.getStage() != 1) {
@@ -96,7 +98,7 @@ public class CustomerService {
                 srcCustomer.setStage(customer.getStage());
             }
             srcCustomer.setModifyDate(new Date());
-            iCustomerMapper.updateByPrimaryKeySelective(srcCustomer);
+            iCustomerMapper.updateByPrimaryKey(srcCustomer);
             return ServerResponse.createBySuccessMessage("保存成功");
         } catch (Exception e) {
             e.printStackTrace();

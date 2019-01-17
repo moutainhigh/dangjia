@@ -1,16 +1,24 @@
 package com.dangjia.acg.service.repair;
 
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.api.data.TechnologyRecordAPI;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.GoodsDTO;
+import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.dto.repair.BudgetMaterialDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.actuary.ActuaryOperationService;
+import com.dangjia.acg.service.data.ForMasterService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +47,13 @@ public class FillMaterielService {
     private IBudgetMaterialMapper budgetMaterialMapper;
     @Autowired
     private ActuaryOperationService actuaryOperationService;
+    @Autowired
+    private RedisClient redisClient;
+    @Autowired
+    private TechnologyRecordAPI technologyRecordAPI;
+    @Autowired
+    private ForMasterService forMasterService;
+
 
 
     /**
@@ -103,9 +118,48 @@ public class FillMaterielService {
     }
 
     /**
-     *
-     * 补退货查询精算内货品
+     * 工匠补退要货查询精算内货品
      */
+    public ServerResponse workerTypeBudget(String userToken,String houseId,String categoryId,String name,Integer pageNum, Integer pageSize){
+        try{
+            AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+            Member worker = accessToken.getMember();
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            PageHelper.startPage(pageNum, pageSize);
+            List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(),houseId,categoryId,name);
+            PageInfo pageResult = new PageInfo(budgetMaterialList);
+            List<WarehouseDTO> warehouseDTOS = new ArrayList<WarehouseDTO>();
+            for (BudgetMaterial budgetMaterial : budgetMaterialList){
+                Warehouse warehouse = technologyRecordAPI.getByProductId(budgetMaterial.getProductId(),houseId);
+                WarehouseDTO warehouseDTO = new WarehouseDTO();
+                warehouseDTO.setImage(address + warehouse.getImage());
+                warehouseDTO.setShopCount(warehouse.getShopCount());
+                warehouseDTO.setAskCount(warehouse.getAskCount());
+                warehouseDTO.setBackCount(warehouse.getBackCount());
+                warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
+                warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getAskCount() - warehouse.getBackCount());
+                warehouseDTO.setProductName(warehouse.getProductName());
+                warehouseDTO.setPrice(warehouse.getPrice());
+                warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
+                warehouseDTO.setUnitName(warehouse.getUnitName());
+                warehouseDTO.setProductType(warehouse.getProductType());
+                warehouseDTO.setAskTime(warehouse.getAskTime());
+                warehouseDTO.setRepTime(warehouse.getRepTime());
+                warehouseDTO.setBackTime(warehouse.getBackTime());
+                warehouseDTO.setBrandSeriesName(forMasterService.brandSeriesName(warehouse.getProductId()));
+                warehouseDTO.setProductId(warehouse.getProductId());
+                warehouseDTOS.add(warehouseDTO);
+            }
+            pageResult.setList(warehouseDTOS);
+
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
     public ServerResponse repairBudgetMaterial(String workerTypeId,String categoryId, String houseId, String productName,
                                                Integer pageNum, Integer pageSize){
         try {

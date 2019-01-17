@@ -38,6 +38,12 @@ public interface UserMapper  extends Mapper<MainUser> {
                    @Param("insertUid") String insertUid);
 
 	/**
+	 * 查询当前坐席的用户
+	 * @return
+	 */
+	MainUser getUserByReceive();
+
+	/**
 	 * 查询用户及对应的角色
 	 * @param id
 	 * @return

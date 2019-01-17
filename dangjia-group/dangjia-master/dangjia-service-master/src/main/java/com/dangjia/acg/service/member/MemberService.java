@@ -39,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import sun.reflect.generics.reflectiveObjects.LazyReflectiveObjectGenerator;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
@@ -76,6 +75,8 @@ public class MemberService {
     private GroupInfoService groupInfoService;
     @Autowired
     private ConfigMessageService configMessageService;
+    @Autowired
+    private CustomerRecordService customerRecordService;
     @Autowired
     private UserMapper userMapper;
 
@@ -121,28 +122,7 @@ public class MemberService {
         if (accessToken == null) {//无效的token
             return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
         } else {
-            boolean flag;
-            try {
-                flag = TokenUtil.verifyAccessToken(accessToken.getTimestamp());
-            } catch (Exception e) {
-                e.printStackTrace();
-                return ServerResponse.createByErrorMessage("系统错误");
-            }//验证是否失效
-            if (flag) {//失效
-                return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "token已失效,请重新登录！");
-            } else {
-                Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
-                user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-                accessToken = TokenUtil.generateAccessToken(user);
-                if (!StringUtils.isEmpty(user.getWorkerTypeId())) {
-                    WorkerType wt = workerTypeMapper.selectByPrimaryKey(user.getWorkerTypeId());
-                    if (wt != null) {
-                        accessToken.setWorkerTypeName(wt.getName());
-                    }
-                }
-                redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
-                return ServerResponse.createBySuccess("有效！", accessToken);
-            }
+            return ServerResponse.createBySuccess("有效！", accessToken);
         }
     }
 
@@ -212,7 +192,7 @@ public class MemberService {
      */
     public ServerResponse checkRegister(HttpServletRequest request, String phone, int smscode, String password, String invitationCode, Integer userRole) {
         Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
-        if (smscode != registerCode) {
+        if (registerCode==null||smscode != registerCode) {
             return ServerResponse.createByErrorMessage("验证码错误");
         } else {
             Member user = new Member();
@@ -302,14 +282,16 @@ public class MemberService {
             }
             user.setVolume(new BigDecimal(0));
             user.setPraiseRate(new BigDecimal(1));
-            if (!CommonUtil.isEmpty(userRole) && Constants.USER_ROLE_GONGJIANG == Integer.parseInt(userRole)) {
+            //如果工匠端工匠角色提交资料则需要从新审核
+            if (!CommonUtil.isEmpty(userRole) && 2 == Integer.parseInt(userRole)) {
                 user.setCheckType(0);//提交资料，审核中
             }
 
             memberMapper.updateByPrimaryKeySelective(user);
+            user = memberMapper.selectByPrimaryKey(user.getId());
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             accessToken = TokenUtil.generateAccessToken(user);
-            accessToken.setUserToken(accessToken.getUserToken());
+            accessToken.setUserToken(userToken);
             accessToken.setTimestamp(accessToken.getTimestamp());
             if (wt != null) {
                 accessToken.setWorkerTypeName(wt.getName());
@@ -433,24 +415,41 @@ public class MemberService {
     /**
      * 业主列表
      */
-    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage) {
+    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String memberNickName, String parentId, String childId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Example example = new Example(Member.class);
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo(Member.DATA_STATUS, "0");
-            example.orderBy(Member.CREATE_DATE).desc();
-            List<Member> list = memberMapper.selectByExample(example);
+//            example.orderBy(Member.CREATE_DATE).desc();
+//            List<Member> list = memberMapper.selectByExample(example);
 
+            List<String> childsLabelIdList = new ArrayList<>();
+            if (StringUtils.isNotBlank(parentId)) {
+                if (!StringUtils.isNotBlank(childId)) {//如果 子标签为null ，就是父标签的所有标签
+                    List<MemberLabel> childsList = iMemberLabelMapper.getChildLabelByParentId(parentId);
+                    for (int i = 0; i < childsList.size(); i++)
+                        childsLabelIdList.add(childsList.get(i).getId());
+                } else {
+                    childsLabelIdList.add(childId);
+                }
+            }
+            String[] childsLabelIdArr = new String[childsLabelIdList.size()];
+            childsLabelIdList.toArray(childsLabelIdArr);
+
+            List<Member> list = memberMapper.getMemberListByName(memberNickName, stage, childsLabelIdArr);
+            List<MemberCustomerDTO> mcDTOListOrderBy = new ArrayList<>();
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
             for (Member member : list) {
-                logger.info("member.getId()：" + member.getId() + " stage:" + stage);
                 Customer customer = iCustomerMapper.getCustomerByMemberId(member.getId(), stage);
                 //每个业主增加关联 客服跟进
                 if (customer == null) {
                     customer = new Customer();
                     customer.setMemberId(member.getId());
                     customer.setStage(0);
+                } else {
+                    if (customer.getRemindRecordId() != null)//有提醒记录的 更新 为最新的更新沟通记录
+                        customerRecordService.updateMaxNearRemind(customer);
                 }
 
                 List<MemberLabel> memberLabelList = new ArrayList<>();
@@ -490,8 +489,10 @@ public class MemberService {
                 }
                 mcDTO.setMemberLabelList(memberLabelList);
                 mcDTOList.add(mcDTO);
+                mcDTOListOrderBy.add(mcDTO);
             }
-            logger.info("mcDTOList size:" + mcDTOList.size());
+//            logger.info(" mcDTOList getMemberNickName:" + mcDTOList.get(0).getMemberNickName());
+//            logger.info("mcDTOList size:" + mcDTOList.size() +" mcDTOListOrderBy:"+ mcDTOListOrderBy.size() + " list:"+ list.size());
             PageInfo pageResult = new PageInfo(list);
             pageResult.setList(mcDTOList);
             return ServerResponse.createBySuccess("查询用户列表成功", pageResult);
@@ -516,9 +517,8 @@ public class MemberService {
             if (StringUtils.isNotBlank(member.getMobile()))
                 srcMember.setMobile(member.getMobile());
 
-            int ret = memberMapper.updateByPrimaryKeySelective(srcMember);
-            logger.info("setMember srcMember: " + srcMember + " Id:" + ret);
-            return ServerResponse.createBySuccess("保存成功");
+            memberMapper.updateByPrimaryKeySelective(srcMember);
+            return ServerResponse.createBySuccessMessage("保存成功");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("修改失败");

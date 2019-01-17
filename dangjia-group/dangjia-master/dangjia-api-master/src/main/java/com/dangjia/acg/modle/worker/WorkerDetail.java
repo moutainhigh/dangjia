@@ -43,18 +43,34 @@ public class WorkerDetail extends BaseEntity {
 	private String houseId;//houseid
 
 	@Column(name = "money")
-	@Desc(value = "money")
-	@ApiModelProperty("money")
+	@Desc(value = "本次金额")
+	@ApiModelProperty("本次金额")
 	private BigDecimal money;
 
 	@Column(name = "state")
-	@Desc(value = "0为进账 1为出账 自定义流水状态  2 增加金额 3减少金额")
-	@ApiModelProperty("0为进账 1为出账 自定义流水状态  2 增加金额 3减少金额")
-	private Integer state;//
+	@Desc(value = "0为进账,1为出账,2自定义增加金额,3自定义减少金额")
+	@ApiModelProperty("0为进账,1为出账,2自定义增加金额,3自定义减少金额")
+	private Integer state;
 
 	@Column(name = "defined_worker_id")
 	@Desc(value = "自定义工人流水id")
 	@ApiModelProperty("自定义工人流水id")
-	private String definedWorkerId; //
+	private String definedWorkerId;
+
+	/*新增的三个字段*/
+	@Column(name = "defined_name")
+	@Desc(value = "自定义流水说明")
+	@ApiModelProperty("自定义流水说明")
+	private String definedName;
+
+	@Column(name = "have_money")
+	@Desc(value = "工匠订单当时拿到的钱")
+	@ApiModelProperty("工匠订单当时拿到的钱")
+	private BigDecimal haveMoney;
+
+	@Column(name = "wallet_money")
+	@Desc(value = "钱包当时钱")
+	@ApiModelProperty("钱包当时钱")
+	private BigDecimal walletMoney;//对应member表 haveMoney
 
 }

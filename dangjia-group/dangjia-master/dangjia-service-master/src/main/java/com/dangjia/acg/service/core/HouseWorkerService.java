@@ -502,14 +502,20 @@ public class HouseWorkerService {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         List<ConstructionByWorkerIdBean.BigListBean> bigList = new ArrayList<>();
         //添加工程资料菜单
-        String[] edNames = {"施工图", "精算", "工价工艺", "工地记录"};
-        int[] edTypes = {0, 0, 0, 0};
-        String[] edImages = {"artisan_25.png", "artisan_26.png", "artisan_27.png", "artisan_29.png"};
-        String[] edUrls = {DjConstants.GJPageAddress.PROJECTDRAWINGLIST, DjConstants.GJPageAddress.GJJINGSUANLIST, DjConstants.GJPageAddress.GJPRICE, DjConstants.GJPageAddress.PROJECTRECORD};//H5路由
+        String[] edNames = {"施工图", "精算", "工价工艺", "工地记录", "巡查二维码", "通讯录"};
+        int[] edTypes = {0, 0, 0, 0, 1, 0};//0=不需原生定位处理  1=需原生定位处理
+        int[] edShowTypes = {0, 0, 0, 0, 2, 0};//1：大管家有的，2：工匠有的，0：都有
+        String[] edImages = {"artisan_25.png", "artisan_26.png", "artisan_27.png", "artisan_29.png", "erweima.png", "artisan_30.png"};
+        String[] edUrls = {DjConstants.GJPageAddress.PROJECTDRAWINGLIST, DjConstants.GJPageAddress.GJJINGSUANLIST, DjConstants.GJPageAddress.GJPRICE, DjConstants.GJPageAddress.PROJECTRECORD, DjConstants.GJPageAddress.QRCODE, DjConstants.GJPageAddress.PROJECTADRESSLIST};//H5路由
         ConstructionByWorkerIdBean.BigListBean bigListBean = new ConstructionByWorkerIdBean.BigListBean();
         bigListBean.setName("工程资料");
         List<ConstructionByWorkerIdBean.BigListBean.ListMapBean> listMap = new ArrayList<>();
         for (int i = 0; i < edNames.length; i++) {
+            if (worker.getWorkerType() == 3) {
+                if (edShowTypes[i] == 2) continue;
+            } else {
+                if (edShowTypes[i] == 1) continue;
+            }
             String name = edNames[i];
             ConstructionByWorkerIdBean.BigListBean.ListMapBean mapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
             mapBean.setName(name);
@@ -521,13 +527,13 @@ public class HouseWorkerService {
         bigListBean.setListMap(listMap);
         bigList.add(bigListBean);
         //添加其他菜单
-        String[] qtNames = {"货品管理", "收货", "生成二维码", "补退人工", "补退记录", "通讯录"};
-        int[] qtTypes = {0, 0, 1, 0, 0, 0};
-        int[] qtShowTypes = {1, 1, 2, 2, 0, 0};//1：大管家有的，2：工匠有的，0：都有
-        String[] qtImages = {"artisan_22.png", "artisan_23.png", "erweima.png", "artisan_31.png", "artisan_24.png", "artisan_30.png"};
-        String[] qtUrls = {DjConstants.GJPageAddress.HPMANAGE, DjConstants.GJPageAddress.RECIVEGOODSLIST, DjConstants.GJPageAddress.QRCODE, DjConstants.GJPageAddress.CONFIRMBTWORKER, DjConstants.YZPageAddress.REFUNDLIST, DjConstants.GJPageAddress.PROJECTADRESSLIST};//H5路由
+        String[] qtNames = {"货品管理","材料用量", "收货",  "人工变更",  "补人工", "要补退记录","服务管理"};
+        int[] qtTypes = {0, 0, 0, 0, 0, 0, 0};
+        int[] qtShowTypes = {2, 1, 0, 1, 2, 0, 1};//1：大管家有的，2：工匠有的，0：都有
+        String[] qtImages = {"artisan_22.png", "artisan_37@2x.png", "artisan_38@2x.png", "artisan_54@3x.png", "artisan_54@3x.png", "artisan_24.png", "fuwuguanli@2x.png"};
+        String[] qtUrls = {DjConstants.GJPageAddress.HPMANAGE, DjConstants.GJPageAddress.MATERIALCONSUMPTION, DjConstants.GJPageAddress.RECIVEGOODSLIST, DjConstants.GJPageAddress.CHANGEARTIFICIAL, DjConstants.GJPageAddress.ADDARTIFICIAL, DjConstants.YZPageAddress.REFUNDLIST, DjConstants.GJPageAddress.SERVICEMANAGE};//H5路由
         bigListBean = new ConstructionByWorkerIdBean.BigListBean();
-        bigListBean.setName(worker.getWorkerType() == 3 ? "材料人工" : "其他");
+        bigListBean.setName("材料人工");
         listMap = new ArrayList<>();
         String houseFlowId = houseFlowMapper.selectHouseFlowId(house.getId(),worker.getWorkerTypeId());
         for (int i = 0; i < qtNames.length; i++) {
@@ -761,8 +767,11 @@ public class HouseWorkerService {
             }*/
 
             /*待审核申请*/
-            if (applyType < 4 && houseFlowApplyMapper.checkPendingApply(houseFlowId, workerId).size() > 0) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "您有待审核的申请,请联系管家业主审核后再提交");
+            if (applyType < 4) {
+                List<HouseFlowApply> hfaList = houseFlowApplyMapper.checkPendingApply(houseFlowId, workerId);
+                if (hfaList.size() > 0){
+                    return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "您有待审核的申请,请联系管家业主审核后再提交");
+                }
             }
 
             Member worker = memberMapper.selectByPrimaryKey(workerId);//查询对应的工人

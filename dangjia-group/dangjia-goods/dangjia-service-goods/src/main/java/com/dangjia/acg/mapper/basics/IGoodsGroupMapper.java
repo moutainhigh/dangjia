@@ -19,7 +19,6 @@ public interface IGoodsGroupMapper extends Mapper<GoodsGroup> {
 
 	List<GoodsGroup> selectByName(@Param("name") String name);
 
-
 	void addGoodsGroup(GoodsGroup goodsGroup);
 
 	List<Map<String, Object>> getParentTopList();
@@ -40,8 +39,20 @@ public interface IGoodsGroupMapper extends Mapper<GoodsGroup> {
 	List<GroupLink> queryGroupLinkByGid(String groupId);
 	//根据关联组id和货品id查询关联关系
 	List<GroupLink> queryGroupLinkByGidAndPid(@Param("groupId")String groupId , @Param("productId")String productId);
+
+	//根据关联组id和货品id查询关联关系
+	GroupLink queryGroupLinkByGroupIdAndPid(@Param("groupId")String groupId , @Param("productId")String productId);
+
 	//根据货品id查询关联关系
 	List<GroupLink> queryGroupLinkByPid(@Param("productId")String productId);
+	//根据商品id，查询对应的所有货品
+	List<GroupLink> queryGroupLinkByGoodsId(@Param("goodsId")String goodsId);
+	//根据货品id查询关联关系
+	List<GroupLink> queryGroupLinkByPidAndGid(@Param("productId")String productId,@Param("goodsId")String goodsId);
 	//根据货品id修改所有关联组货品可切换性
 	void updateGLinkByPid(@Param("productId")String productId,@Param("isSwitch")Integer isSwitch);
+
+	//根据关联组id删除货品关联关系
+	void deleteGroupLinkById(@Param("id") String id);
+
 }

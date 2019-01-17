@@ -16,7 +16,7 @@ import java.util.List;
  * 业主和客服的沟通记录进度
  */
 @Data
-public class MemberCustomerDTO {
+public class MemberCustomerDTO implements Comparable<MemberCustomerDTO> {
     private String memberId;//业主id
     private String memberName;//业主姓名
     private String memberNickName;//业主昵称
@@ -30,8 +30,19 @@ public class MemberCustomerDTO {
     private Date remindTime;//提醒时间
     private Date lastRecord;//上次跟进时间
     private List<MemberLabel> memberLabelList;//多个标签对象
-    //    private Member member;
-//    private Customer customer;
-//    private CustomerRecord currCustomerRecord;//最新沟通记录
-//    private CustomerRecord remindCustomerRecord;//最近的提醒沟通记录id
+
+    @Override
+    public int compareTo(MemberCustomerDTO m) {
+        if (remindTime.getTime() < m.getRemindTime().getTime()) {
+            return 1;
+        } else if (remindTime.getTime() == m.getRemindTime().getTime()) {
+            return 0;
+        }
+        return -1;
+    }
+
+    @Override
+    public String toString() {
+        return "MemberCustomerDTO [memberName=" + memberNickName + "]";
+    }
 }

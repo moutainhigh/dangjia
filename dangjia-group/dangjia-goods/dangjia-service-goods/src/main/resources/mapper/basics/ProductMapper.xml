@@ -168,8 +168,32 @@
 		ORDER BY create_date desc
 	</select>
 
-	<!-- 根据名称模糊查询 -->
+	<!-- 根据名称查询 -->
 	<select id="queryByName" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Product">
+		SELECT <include refid="new_columns"/>
+		FROM dj_basics_product
+		where 1=1
+		<if test="name!=null">
+			and
+			name=#{name}
+		</if>
+		ORDER BY create_date desc
+	</select>
+
+	<!-- 根据货号查询 -->
+	<select id="queryByProductSn" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Product">
+		SELECT <include refid="new_columns"/>
+		FROM dj_basics_product
+		where 1=1
+		<if test="productSn!=null and productSn!=''">
+			and
+			product_sn=#{productSn}
+		</if>
+		ORDER BY create_date desc
+	</select>
+
+	<!-- 根据名称模糊查询 -->
+	<select id="queryByLikeName" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Product">
 		SELECT <include refid="new_columns"/>
 		FROM dj_basics_product
 		where 1=1

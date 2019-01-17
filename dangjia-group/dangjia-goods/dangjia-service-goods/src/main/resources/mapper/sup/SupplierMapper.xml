@@ -228,7 +228,10 @@
 				 from dj_sup_supplier_product as product
 				 WHERE  1=1
 					<if test="supplierId!=null and supplierId!=''">
-						and supplier_id=#{supplierId} and is_supply=1
+						and supplier_id=#{supplierId}
+					</if>
+					<if test="isSupply!= -1">
+						and is_supply=#{isSupply}
 					</if>
 				)
 			<if test="likeProductName!=null and likeProductName!=''">

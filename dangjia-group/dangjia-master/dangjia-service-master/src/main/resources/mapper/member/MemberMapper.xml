@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.member.IMemberMapper">
 
     <sql id="all_columns">
@@ -38,23 +38,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         w.paycode,
         w.referrals,
         w.create_date AS createDate,
+        w.data_status AS dataStatus,
         w.modify_date AS modifyDate
 	</sql>
 
     <select id="getSupervisor" resultType="com.dangjia.acg.modle.member.Member">
         SELECT
-            <include refid="all_columns" />
+        <include refid="all_columns"/>
         FROM dj_member w
         where
         w.id = (select hw.worker_id from dj_core_house_worker hw
-            where hw.house_id = #{houseId}
-            and hw.worker_type = 3
-            and hw.work_type = 6)
+        where hw.house_id = #{houseId}
+        and hw.worker_type = 3
+        and hw.work_type = 6)
     </select>
 
-    <select id="getUser" parameterType="com.dangjia.acg.modle.member.Member" resultType="com.dangjia.acg.modle.member.Member">
+    <select id="getUser" parameterType="com.dangjia.acg.modle.member.Member"
+            resultType="com.dangjia.acg.modle.member.Member">
         SELECT
-        <include refid="all_columns" />
+        <include refid="all_columns"/>
         FROM dj_member w
         where 1=1
         <if test="password!=null">
@@ -70,7 +72,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         LIMIT 1
     </select>
 
-    <select id="getMemberList" resultType="map" >
+    <select id="getMemberList" resultType="map">
         SELECT
             id,
             user_name AS userName,
@@ -84,5 +86,70 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ORDER by
             create_date
     </select>
+
+    <select id="getMemberListByName" resultType="com.dangjia.acg.modle.member.Member">
+        SELECT
+        w.id,
+        w.user_name AS userName ,
+        w.password,
+        w.nick_name AS nickName ,
+        w.name,
+        w.mobile,
+        w.qrcode,
+        w.superiorId,
+        w.invite_num AS inviteNum,
+        w.gift,
+        w.invitation_code AS invitationCode,
+        w.others_invitation_code AS othersInvitationCode,
+        w.head,
+        w.idcaoda,
+        w.idcaodb,
+        w.idcaodall,
+        w.worker_type AS workerType,
+        w.worker_type_id AS workerTypeId,
+        w.idnumber,
+        w.worker_price AS workerPrice,
+        w.have_money AS haveMoney,
+        w.surplus_money AS surplusMoney,
+        w.retention_money AS retentionMoney,
+        w.deposit,
+        w.check_type AS checkType,
+        w.praise_rate AS praiseRate,
+        w.volume,
+        w.evaluation_score AS evaluationScore,
+        w.is_crowned AS isCrowned,
+        w.smscode,
+        w.paycode,
+        w.referrals,
+        w.create_date AS createDate,
+        w.data_status AS dataStatus,
+        w.modify_date AS modifyDate,
+        mc.stage,
+        mc.label_id_arr,
+        mc.remind_record_id,
+        mcr.remind_time
+        FROM dj_member w
+        LEFT JOIN dj_member_customer mc  on mc.member_id = w.id
+        LEFT JOIN dj_member_customer_record mcr  on mc.remind_record_id = mcr.id
+        WHERE 1=1
+        and w.data_status = 0
+        <if test="memberNickName!=null and memberNickName!=''">
+            AND w.nick_name LIKE CONCAT('%',#{memberNickName},'%')
+        </if>
+        <if test="stage >= 0">
+            and mc.stage=#{stage}
+        </if>
+        <if test="childsLabelIdArr!=null and childsLabelIdArr!=''">
+            <foreach collection="childsLabelIdArr" item="lableId" index="index" >
+                and FIND_IN_SET(#{lableId},mc.label_id_arr)
+            </foreach>
+        </if>
+
+        ORDER by
+        mcr.remind_time desc,
+        w.create_date
+
+    </select>
+
 </mapper>
 

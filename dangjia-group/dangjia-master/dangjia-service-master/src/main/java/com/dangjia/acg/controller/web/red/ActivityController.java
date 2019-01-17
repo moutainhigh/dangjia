@@ -80,7 +80,17 @@ public class ActivityController  implements ActivityAPI {
     public ServerResponse queryActivityRedPacks(HttpServletRequest request, PageDTO pageDTO, ActivityRedPack activityRedPack,String isEndTime) {
         return redPackService.queryActivityRedPacks(request,pageDTO,activityRedPack, isEndTime);
     }
-
+    /**
+     * 获取所有有效的优惠券
+     * @param cityId
+     * @param memberId 指定用户是否已经领取该优惠券
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getActivityRedPacks(HttpServletRequest request, PageDTO pageDTO,String cityId,String memberId){
+        return redPackService.getActivityRedPacks(request,pageDTO,cityId, memberId);
+    }
     @Override
     @ApiMethod
     public ServerResponse getActivityRedPack(HttpServletRequest request, ActivityRedPackDTO activityRedPackDTO) {

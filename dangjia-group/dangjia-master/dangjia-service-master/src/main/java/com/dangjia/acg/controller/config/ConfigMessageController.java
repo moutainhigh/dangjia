@@ -33,6 +33,17 @@ public class ConfigMessageController implements ConfigMessageAPI {
     public ServerResponse getConfigMessages(HttpServletRequest request, PageDTO pageDTO, ConfigMessage configMessage) {
         return configMessageService.getConfigMessages(request, pageDTO,configMessage);
     }
+    /**
+     * 获取所有公告消息(web端列表)
+     * @param configMessage
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryConfigMessages(HttpServletRequest request, PageDTO pageDTO, ConfigMessage configMessage) {
+        return configMessageService.queryConfigMessages(request, pageDTO,configMessage);
+    }
+
 
     /**
      * 新增公告消息

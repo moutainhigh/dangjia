@@ -118,7 +118,7 @@ public class ActuaryService {
             Map<String, Object> map=new HashMap<String, Object>();
             Member user = userMapper.selectByPrimaryKey(house.getMemberId());
             map.put("houseName", house.getHouseName());
-            map.put("name", user.getName());
+            map.put("name", user.getNickName());
             map.put("mobile",user.getMobile());
             map.put("square", house.getSquare());
             map.put("houseId", house.getId());
