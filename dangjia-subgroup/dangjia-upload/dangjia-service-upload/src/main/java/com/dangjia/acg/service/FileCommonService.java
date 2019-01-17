@@ -117,7 +117,8 @@ public class FileCommonService {
         list.add(paramMap);
       }
 
-    } catch (IOException e) {
+    } catch (Exception e) {
+      e.printStackTrace();
       throw new BaseException(ServerCode.SERVER_UNKNOWN_ERROR, "上传文件失败");
     }
     return ServerResponse.createBySuccess("上传文件成功",list);
