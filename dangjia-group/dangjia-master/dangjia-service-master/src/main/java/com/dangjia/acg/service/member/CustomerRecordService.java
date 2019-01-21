@@ -95,6 +95,9 @@ public class CustomerRecordService {
     public ServerResponse addCustomerRecord(CustomerRecord customerRecord) {
         try {
             LOG.info("addCustomerRecord:" + customerRecord);
+            if (!StringUtils.isNotBlank(customerRecord.getMemberId()))
+                return ServerResponse.createByErrorMessage("业主id不能为null");
+
             CustomerRecord newCustomerRecord = new CustomerRecord();
             newCustomerRecord.setMemberId(customerRecord.getMemberId());
             newCustomerRecord.setUserId(customerRecord.getUserId());
@@ -102,7 +105,7 @@ public class CustomerRecordService {
             newCustomerRecord.setRemindTime(customerRecord.getRemindTime());
             iCustomerRecordMapper.insertSelective(newCustomerRecord);
 
-            Customer customer = customerMapper.getCustomerByMemberId(newCustomerRecord.getMemberId(), -1);
+            Customer customer = customerMapper.getCustomerByMemberId(newCustomerRecord.getMemberId());
             if(customer == null)
             {
                 customer = new Customer();

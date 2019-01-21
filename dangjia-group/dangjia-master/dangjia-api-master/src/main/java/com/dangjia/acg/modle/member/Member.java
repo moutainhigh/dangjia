@@ -185,6 +185,11 @@ public class Member extends BaseEntity {
     @ApiModelProperty("推荐人ID")
     private String referrals;//推荐人ID superior
 
+    @Column(name = "remarks")
+    @Desc(value = "备注")
+    @ApiModelProperty("备注")
+    private String remarks;
+
     /*@Column(name = "user_role")
     @Desc(value = "用户角色")
     @ApiModelProperty("用户角色 1为业主角色，2为工匠角色，0为业主和工匠双重身份角色")

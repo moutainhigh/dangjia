@@ -15,8 +15,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         modify_date AS modifyDate
 	</sql>
 
-    <!-- 根据标签名称查询 -->
+    <!-- 根据业主id 查询 -->
     <select id="getCustomerByMemberId" parameterType="String" resultType="com.dangjia.acg.modle.member.Customer">
+        SELECT
+        <include refid="all_columns" />
+        FROM dj_member_customer
+        WHERE 1=1
+        <if test="memberId!=null and memberId!=''">
+            and member_id=#{memberId}
+        </if>
+        ORDER by create_date
+    </select>
+
+    <!-- 根据业主id 和 stage 查询 -->
+    <select id="getCustomerByMemberIdAndStage" parameterType="String" resultType="com.dangjia.acg.modle.member.Customer">
         SELECT
         <include refid="all_columns" />
         FROM dj_member_customer
@@ -29,6 +41,5 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </if>
         ORDER by create_date
     </select>
-
 </mapper>
 

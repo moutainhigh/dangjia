@@ -19,18 +19,7 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
 
 
     /**
-     * 通过 不通过
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse checkLandlordState(String mendOrderId,int state,Double carriage){
-        return mendMaterielService.checkLandlordState(mendOrderId,state,carriage);
-    }
-
-    /**
      * 房子id查询业主退货单列表
-     * landlordState
-     * 0生成中,1平台审核中,2不通过,3通过
      */
     @Override
     @ApiMethod
@@ -39,32 +28,12 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
     }
 
     /**
-     * 通过 不通过
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse checkMaterialBackState(String mendOrderId,int state,Double carriage){
-        return mendMaterielService.checkMaterialBackState(mendOrderId, state, carriage);
-    }
-
-    /**
      * 房子id查询退货单列表
-     * material_back_state
-     * 0生成中,1平台审核中，2平台审核不通过，3审核通过，4管家取消
      */
     @Override
     @ApiMethod
     public ServerResponse materialBackState(String houseId,Integer pageNum, Integer pageSize){
         return mendMaterielService.materialBackState(houseId,pageNum,pageSize);
-    }
-
-    /**
-     * 通过 不通过
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse checkMaterialOrderState(String mendOrderId, int state, Double carriage){
-        return mendMaterielService.checkMaterialOrderState(mendOrderId, state ,carriage);
     }
 
     /**
@@ -78,8 +47,6 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
 
     /**
      * 房子id查询补货单列表
-     * materialOrderState
-     * 0生成中,1平台审核中，2平台审核不通过，3平台审核通过待业主支付,4业主已支付，5业主不同意，6管家取消
      */
     @Override
     @ApiMethod

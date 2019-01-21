@@ -37,6 +37,7 @@
         w.smscode,
         w.paycode,
         w.referrals,
+        w.remarks,
         w.create_date AS createDate,
         w.data_status AS dataStatus,
         w.modify_date AS modifyDate
@@ -121,6 +122,7 @@
         w.smscode,
         w.paycode,
         w.referrals,
+        w.remarks,
         w.create_date AS createDate,
         w.data_status AS dataStatus,
         w.modify_date AS modifyDate,
@@ -129,8 +131,8 @@
         mc.remind_record_id,
         mcr.remind_time
         FROM dj_member w
-        LEFT JOIN dj_member_customer mc  on mc.member_id = w.id
-        LEFT JOIN dj_member_customer_record mcr  on mc.remind_record_id = mcr.id
+        LEFT JOIN dj_member_customer mc on mc.member_id = w.id
+        LEFT JOIN dj_member_customer_record mcr on mc.remind_record_id = mcr.id
         WHERE 1=1
         and w.data_status = 0
         <if test="memberNickName!=null and memberNickName!=''">
@@ -139,8 +141,12 @@
         <if test="stage >= 0">
             and mc.stage=#{stage}
         </if>
+        -- 如果是-1 查全部时，不看黑名单
+        <if test="stage == -1">
+            and ifnull(mc.stage,0) !=3
+        </if>
         <if test="childsLabelIdArr!=null and childsLabelIdArr!=''">
-            <foreach collection="childsLabelIdArr" item="lableId" index="index" >
+            <foreach collection="childsLabelIdArr" item="lableId" index="index">
                 and FIND_IN_SET(#{lableId},mc.label_id_arr)
             </foreach>
         </if>

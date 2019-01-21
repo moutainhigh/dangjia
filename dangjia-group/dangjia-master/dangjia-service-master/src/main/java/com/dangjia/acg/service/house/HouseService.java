@@ -503,7 +503,7 @@ public class HouseService {
             }
 
             //确认开工后，要修改 业主客服阶段 为已下单
-            Customer customer = iCustomerMapper.getCustomerByMemberId(house.getMemberId(), -1);
+            Customer customer = iCustomerMapper.getCustomerByMemberId(house.getMemberId());
             customer.setStage(4);//阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单
             iCustomerMapper.updateByPrimaryKeySelective(customer);
         } catch (Exception e) {
@@ -585,6 +585,9 @@ public class HouseService {
     public ServerResponse setHouseBudgetOk(String houseId, Integer budgetOk) {
         try {
             House house = iHouseMapper.selectByPrimaryKey(houseId);
+            if(house.getBudgetOk() == 3){
+                return ServerResponse.createBySuccessMessage("精算已审核通过");
+            }
             if (house == null) {
                 return ServerResponse.createByErrorMessage("修改房子精算状态失败");
             }

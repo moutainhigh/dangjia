@@ -86,7 +86,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="modifyDate!=null">
            AND rp.end_date >=#{modifyDate}
        </if>
-        order by rpr.create_date
+        order by rpr.have_receive DESC, rpr.create_date
 	</select>
 
 </mapper>

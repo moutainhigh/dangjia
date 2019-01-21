@@ -193,10 +193,13 @@ public class SupplierService {
                 List<Product> pList = iSupplierMapper.querySupplierProduct(supplier.getId(), "", -1);
                 Set goodsSet = new HashSet();
                 for (Product product : pList)
+                {
                     goodsSet.add(product.getGoodsId());
-//                    LOG.info("product name:" + product.getName() + " getGoodsId:"+ product.getGoodsId() + " productID:"+product.getId() + " siez:" + goodsSet.size());
-                map.put("countGoods", goodsSet.size());//供应的货品种类
-                map.put("countAttribute", iSupplierMapper.getSupplierProductByProductId(supplier.getId()) == null ? "0" : iSupplierMapper.getSupplierProductByProductId(supplier.getId()));//供应的商品种类
+                    LOG.info("product name:" + product.getName() + " getGoodsId:" + product.getGoodsId() + " productID:" + product.getId() + " siez:" + goodsSet.size());
+                }
+                   map.put("countGoods", goodsSet.size());//供应的货品种类
+                Integer countAttribute = iSupplierMapper.getSupplierProductByProductId(supplier.getId());
+                map.put("countAttribute", countAttribute == null ? "0" : countAttribute);//供应的商品种类
                 map.put("countStock", iSupplierMapper.getSupplierProductByStock(supplier.getId()));//库存小于50的
                 map.put("state", supplier.getState());//供应商状态  1正常供货 2停止供货
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

@@ -40,5 +40,9 @@ public class WorkerBankCard extends BaseEntity {
 	@Desc(value = "银行卡卡号")
 	@ApiModelProperty("银行卡卡号")
 	private String bankCardNumber; //bankcardnumber
-	
+
+	@Column(name = "status")
+	@Desc(value = "审核状态：0=待审核 1=审核未通过 2=审核通过")
+	@ApiModelProperty("审核状态：0=待审核 1=审核未通过 2=审核通过")
+	private Integer status;
 }

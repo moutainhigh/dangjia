@@ -97,7 +97,7 @@ public class DjConstants {
         public final static String MYWAREDETAILS ="myWareDetails?userToken=%s&cityId=%s&title=%s";//我购买的-商品详情
         public final static String MYGOODSAPPLYRETURN ="myGoodsApplyReturn?userToken=%s&cityId=%s&title=%s";//我的商品-申请退款
         public final static String COMFIRMAPPLYRETURN ="comfirmApplyReturn?userToken=%s&cityId=%s&title=%s";//我的商品-确认退款
-        public final static String REFUNDLIST ="refundList?userToken=%s&cityId=%s&title=%s";//我的商品-退款列表
+        public final static String REFUNDLIST ="refundList?userToken=%s&cityId=%s&title=%s";//要补退记录
         public final static String APPLYRETURNDETAIL ="applyReturnDetail?userToken=%s&cityId=%s&title=%s";//我的商品-退款记录详情
         public final static String RECEIVING ="receiving?userToken=%s&cityId=%s&title=%s";//收货
         public final static String CONSIGNMENTGOODS ="consignmentGoods?userToken=%s&cityId=%s&title=%s";//收货清单

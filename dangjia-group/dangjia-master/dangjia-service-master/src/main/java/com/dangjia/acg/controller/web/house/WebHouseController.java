@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.web.house;
 
 import com.dangjia.acg.api.web.house.WebHouseAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.modle.house.House;
@@ -44,6 +45,12 @@ public class WebHouseController implements WebHouseAPI {
     @ApiMethod
     public ServerResponse setHouseInfo(HttpServletRequest request, House house) {
         return houseService.setHouseInfo(house);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO) {
+        return houseService.queryConstructionRecord(houseId, pageDTO.getPageNum(), pageDTO.getPageSize());
     }
 
 

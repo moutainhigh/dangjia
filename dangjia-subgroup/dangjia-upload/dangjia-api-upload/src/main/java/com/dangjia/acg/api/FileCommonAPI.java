@@ -25,6 +25,10 @@ public interface FileCommonAPI {
   @ApiOperation(value = "保存文件至暂时目录", notes = "保存文件至暂时目录")
   ServerResponse saveFileList(@RequestParam("request") StandardMultipartHttpServletRequest request, @RequestParam("file") MultipartFile[] multipartFile, @RequestParam("address") String address);
 
+  @RequestMapping(value = "saveEditorFile", method = RequestMethod.POST)
+  @ApiOperation(value = "保存文件至暂时目录", notes = "保存文件至暂时目录")
+  String saveEditorFile(@RequestParam("imgFile") MultipartFile[] imgFile, String dir);
+
   @RequestMapping(value = "saveToImgByInputStream", method = RequestMethod.POST)
   @ApiOperation(value = "保存文件", notes = "保存文件")
   ServerResponse saveToImgByInputStream(@RequestParam("bytes") byte[] bytes, @RequestParam("imgPath") String imgPath, @RequestParam("imgName") String imgName);

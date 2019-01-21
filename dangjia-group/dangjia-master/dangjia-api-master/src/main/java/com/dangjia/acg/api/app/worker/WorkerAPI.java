@@ -45,7 +45,7 @@ public interface WorkerAPI {
 
     @PostMapping("app/worker/addMyBankCard")
     @ApiOperation(value = "添加银行卡", notes = "添加银行卡")
-    ServerResponse addMyBankCard(HttpServletRequest request, String userToken, WorkerBankCard bankCard);
+    ServerResponse addMyBankCard(HttpServletRequest request, String userToken, String bankCardId,WorkerBankCard bankCard);
 
     @PostMapping("app/worker/getRanking")
     @ApiOperation(value = "邀请排行榜", notes = "邀请排行榜")

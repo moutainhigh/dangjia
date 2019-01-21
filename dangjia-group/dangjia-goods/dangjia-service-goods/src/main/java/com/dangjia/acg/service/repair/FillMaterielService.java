@@ -128,7 +128,7 @@ public class FillMaterielService {
             PageHelper.startPage(pageNum, pageSize);
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(),houseId,categoryId,name);
             PageInfo pageResult = new PageInfo(budgetMaterialList);
-            List<WarehouseDTO> warehouseDTOS = new ArrayList<WarehouseDTO>();
+            List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
             for (BudgetMaterial budgetMaterial : budgetMaterialList){
                 Warehouse warehouse = technologyRecordAPI.getByProductId(budgetMaterial.getProductId(),houseId);
                 WarehouseDTO warehouseDTO = new WarehouseDTO();

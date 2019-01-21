@@ -13,9 +13,9 @@ import com.dangjia.acg.mapper.IResourceFileMapper;
 import com.dangjia.acg.model.ResourceFile;
 import com.obs.services.ObsClient;
 import com.obs.services.model.AccessControlList;
-import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.FileUtils;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,29 +80,9 @@ public class FileCommonService {
         }
         File dest = new File(address + fileName);
         file.transferTo(dest);
-        try {
-          if (file.getSize() >= 1*1024*1024)
-          {
-            Thumbnails.of(address + fileName)
-                    .scale(1f)
-                    .outputQuality(0.5d)
-                    .toFile(address + fileName);
-          }
-          //压缩图片
-//          ImageUtil.generateThumbnail3Directory(address, address + fileName);
-          //上传至华为云OBS
-          if(active!=null&&(active.equals("pre")||active.equals("test"))){
-            // 创建ObsClient实例
-            ObsClient obsClient = new ObsClient(ConstantProperties.HUAWEI_ACCESS_KEY_ID, ConstantProperties.HUAWEI_ACCESS_KEY_SECRET, ConstantProperties.HUAWEI_END_POINT);
-            obsClient.putObject(ConstantProperties.HUAWEI_BUCKET_NAME, webAddress+"/"+fileName,  new File(address + fileName));
-            //设置权限 这里是公开读
-            obsClient.setBucketAcl(ConstantProperties.HUAWEI_BUCKET_NAME, AccessControlList.REST_CANNED_PUBLIC_READ);
-            //删除服务器临时文件
-            dest.delete();
-          }
-        }catch (Exception e){
-          logger.error(e.getMessage(),e);
-        }
+
+        //压缩并上传华为云OBS
+        obsUpload( file, dest, address, fileName, webAddress);
         paramMap.put("address", webAddress+"/"+fileName);
         paramMap.put("url", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+webAddress+"/"+fileName);
         paramMap.put("fileName", fileName);
@@ -113,7 +93,7 @@ public class FileCommonService {
         resourceFile.setPath(String.valueOf(paramMap.get("address")));
         resourceFile.setFileName(fileName);
         resourceFileMapper.insert(resourceFile);
-
+        logger.info("上传成功：：："+JSONObject.toJSONString(paramMap));
         list.add(paramMap);
       }
 
@@ -124,6 +104,66 @@ public class FileCommonService {
     return ServerResponse.createBySuccess("上传文件成功",list);
   }
 
+  /**
+   * 保存文件到暂时目录
+   *
+   * @param files
+   * @return
+   */
+  public String saveEditorFile(MultipartFile[] files,String filePath) {
+    JSONObject paramMap=new JSONObject();
+    try {
+      if(CommonUtil.isEmpty(filePath)){
+        filePath=configUtil.getValue(SysConfig.PUBLIC_TEMPORARY_FILE_ADDRESS, String.class);
+      }else{
+        filePath=filePath+"/";
+      }
+      for (MultipartFile file : files) {
+        String webAddress = filePath+ DateUtil.convert(new Date(), DateUtil.FORMAT1);
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_PATH, String.class) +webAddress+"/";
+        String fileName = System.currentTimeMillis() + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+        fileName = new String(fileName.getBytes(), "UTF-8");
+        File path = new File(address);
+        if (!path.exists()) {
+          path.mkdirs();
+        }
+        File dest = new File(address + fileName);
+        file.transferTo(dest);
+        //压缩并上传华为云OBS
+        obsUpload( file, dest, address, fileName, webAddress);
+        paramMap.put("error", 0);
+        paramMap.put("message", "上传成功！");
+        paramMap.put("url", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+webAddress+"/"+fileName);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new BaseException(ServerCode.SERVER_UNKNOWN_ERROR, "上传文件失败");
+    }
+    return paramMap.toJSONString();
+  }
+  public void obsUpload(MultipartFile file,File dest,String address,String fileName,String webAddress){
+    try {
+//      if (file.getSize() >= 1*1024*1024)
+//      {
+//        Thumbnails.of(address + fileName)
+//                .scale(1f)
+//                .outputQuality(0.5d)
+//                .toFile(address + fileName);
+//      }
+      //上传至华为云OBS
+      if(active!=null&&(active.equals("pre")||active.equals("test"))){
+        // 创建ObsClient实例
+        ObsClient obsClient = new ObsClient(ConstantProperties.HUAWEI_ACCESS_KEY_ID, ConstantProperties.HUAWEI_ACCESS_KEY_SECRET, ConstantProperties.HUAWEI_END_POINT);
+        obsClient.putObject(ConstantProperties.HUAWEI_BUCKET_NAME, webAddress+"/"+fileName,  new File(address + fileName));
+        //设置权限 这里是公开读
+        obsClient.setBucketAcl(ConstantProperties.HUAWEI_BUCKET_NAME, AccessControlList.REST_CANNED_PUBLIC_READ);
+        //删除服务器临时文件
+        dest.delete();
+      }
+    }catch (Exception e){
+      logger.error(e.getMessage(),e);
+    }
+  }
   /**
    * 将二进制转换成文件保存
    *

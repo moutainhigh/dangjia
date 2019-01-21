@@ -9,6 +9,8 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.util.StringUtil;
@@ -25,36 +27,35 @@ public class WarehouseService {
     private ConfigUtil configUtil;
     @Autowired
     private ForMasterAPI forMasterAPI;
+    private static Logger LOG = LoggerFactory.getLogger(WarehouseService.class);
 
 
     /**
      * 查询仓库材料
      * type 0材料 1服务 2所有
      */
-    public ServerResponse warehouseList(Integer pageNum, Integer pageSize,String houseId,String categoryId, String name,Integer type){
-        try{
-            if(StringUtil.isEmpty(houseId)){
+    public ServerResponse warehouseList(Integer pageNum, Integer pageSize, String houseId, String categoryId, String name, Integer type) {
+        try {
+            if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            if(pageNum == null){
-                pageNum = 1;
-            }
-            if(pageSize == null){
-                pageSize = 5;
-            }
-            PageHelper.startPage(pageNum, pageSize);
             List<Warehouse> warehouseList;
-            if(type == 0){//材料
-                warehouseList = warehouseMapper.materialsList(houseId,categoryId,name);
-            }else if (type == 1){//服务
-                warehouseList = warehouseMapper.serverList(houseId,categoryId,name);
-            }else {
-                warehouseList = warehouseMapper.warehouseList(houseId,categoryId,name);
+
+            PageHelper.startPage(pageNum, pageSize);
+            if (type == 0) {//材料
+                warehouseList = warehouseMapper.materialsList(houseId, categoryId, name);
+            } else if (type == 1) {//服务
+                PageHelper.startPage(pageNum, pageSize);
+                warehouseList = warehouseMapper.serverList(houseId, categoryId, name);
+            } else {
+                PageHelper.startPage(pageNum, pageSize);
+                warehouseList = warehouseMapper.warehouseList(houseId, categoryId, name);
             }
+            LOG.info(" warehouseList size:" + warehouseList.size());
             PageInfo pageResult = new PageInfo(warehouseList);
             List<WarehouseDTO> warehouseDTOS = new ArrayList<WarehouseDTO>();
-            for (Warehouse warehouse : warehouseList){
+            for (Warehouse warehouse : warehouseList) {
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
@@ -76,7 +77,7 @@ public class WarehouseService {
             }
             pageResult.setList(warehouseDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
