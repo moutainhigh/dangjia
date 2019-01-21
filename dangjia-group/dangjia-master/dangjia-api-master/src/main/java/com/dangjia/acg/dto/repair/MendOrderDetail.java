@@ -13,17 +13,15 @@ import java.util.Map;
  */
 @Data
 public class MendOrderDetail {
+    private String mendOrderId;
     private String number;//单号
     private Integer type;
-    private Integer landlordState;
-    private Integer materialOrderState;
-    private Integer workerOrderState;
-    private Integer materialBackState;
-    private Integer workerBackState;
+    private Integer state;
     private Double totalAmount;
 
     private Date createDate;
     private Date modifyDate;
 
     private List<Map<String,Object>> mapList;
+    private List<String> imageList;
 }

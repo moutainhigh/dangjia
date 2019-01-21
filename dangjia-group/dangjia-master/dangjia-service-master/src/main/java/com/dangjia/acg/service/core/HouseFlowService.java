@@ -30,7 +30,6 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.service.config.ConfigMessageService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -492,10 +491,7 @@ public class HouseFlowService {
                 houseFlowMapper.updateByPrimaryKeySelective(nextHF);
 
                 //通知下一个工种 抢单
-                List<String> workerTypes = new ArrayList<>();
-                workerTypes.add("workerTypeId"+nextHF.getWorkerTypeId());
-                workerTypes.add(nextHF.getCityId());
-                configMessageService.addConfigMessage(null,"gj", StringUtils.join(workerTypes,","),"0","新的装修订单",DjConstants.PushMessage.SNAP_UP_ORDER ,"");
+                configMessageService.addConfigMessage(null,"gj", "workerTypeId"+nextHF.getWorkerTypeId()+nextHF.getCityId(),"0","新的装修订单",DjConstants.PushMessage.SNAP_UP_ORDER ,"");
 
             }
             configMessageService.addConfigMessage(null,"zx", house.getMemberId(),"0","大管家开工",DjConstants.PushMessage.STEWARD_CONSTRUCTION ,"");

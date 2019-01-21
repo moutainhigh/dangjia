@@ -18,8 +18,6 @@ public class MendOrderController implements MendOrderAPI {
     @Autowired
     private MendOrderService mendOrderService;
 
-
-
     /**
      * 业主确认退货
      */
@@ -50,48 +48,48 @@ public class MendOrderController implements MendOrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse confirmBackMendWorker(String houseId){
-        return mendOrderService.confirmBackMendWorker(houseId);
+    public ServerResponse confirmBackMendWorker(String houseId,String workerTypeId){
+        return mendOrderService.confirmBackMendWorker(houseId,workerTypeId);
     }
     /**
      * 已添加退人工单明细
      */
     @Override
     @ApiMethod
-    public ServerResponse backMendWorkerList(String houseId){
-        return mendOrderService.backMendWorkerList(houseId);
+    public ServerResponse backMendWorkerList(String houseId,String workerTypeId){
+        return mendOrderService.backMendWorkerList(houseId,workerTypeId);
     }
     /**
      * 提交退人工
      */
     @Override
     @ApiMethod
-    public ServerResponse backMendWorker(String userToken,String houseId, String workerGoodsArr,String workerTypeId){
-        return mendOrderService.backMendWorker(userToken,houseId,workerGoodsArr,workerTypeId);
+    public ServerResponse backMendWorker(String userToken,String houseId, String workerGoodsArr,String workerTypeId,String changeOrderId){
+        return mendOrderService.backMendWorker(userToken,houseId,workerGoodsArr,workerTypeId,changeOrderId);
     }
     /**
      * 确认补人工
      */
     @Override
     @ApiMethod
-    public ServerResponse confirmMendWorker(String houseId){
-        return mendOrderService.confirmMendWorker(houseId);
+    public ServerResponse confirmMendWorker(String houseId,String workerTypeId){
+        return mendOrderService.confirmMendWorker(houseId,workerTypeId);
     }
     /**
      * 已添加补人工单明细
      */
     @Override
     @ApiMethod
-    public ServerResponse getMendWorkerList(String houseId){
-        return mendOrderService.getMendWorkerList(houseId);
+    public ServerResponse getMendWorkerList(String houseId,String workerTypeId){
+        return mendOrderService.getMendWorkerList(houseId,workerTypeId);
     }
     /**
      * 提交补人工
      */
     @Override
     @ApiMethod
-    public ServerResponse saveMendWorker(String userToken,String houseId, String workerGoodsArr,String workerTypeId){
-        return mendOrderService.saveMendWorker(userToken,houseId,workerGoodsArr,workerTypeId);
+    public ServerResponse saveMendWorker(String userToken,String houseId, String workerGoodsArr,String workerTypeId,String changeOrderId){
+        return mendOrderService.saveMendWorker(userToken,houseId,workerGoodsArr,workerTypeId,changeOrderId);
     }
 
     /**
@@ -99,16 +97,16 @@ public class MendOrderController implements MendOrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse confirmBackMendMaterial(String houseId){
-        return mendOrderService.confirmBackMendMaterial(houseId);
+    public ServerResponse confirmBackMendMaterial(String userToken,String houseId,String imageArr){
+        return mendOrderService.confirmBackMendMaterial(userToken,houseId,imageArr);
     }
     /**
      * 已添加退货单明细
      */
     @Override
     @ApiMethod
-    public ServerResponse backMendMaterialList(String houseId){
-        return mendOrderService.backMendMaterialList(houseId);
+    public ServerResponse backMendMaterialList(String userToken,String houseId){
+        return mendOrderService.backMendMaterialList(userToken,houseId);
     }
     /**
      * 提交退货(退材料)
@@ -124,16 +122,16 @@ public class MendOrderController implements MendOrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse confirmMendMaterial(String houseId){
-        return mendOrderService.confirmMendMaterial(houseId);
+    public ServerResponse confirmMendMaterial(String userToken,String houseId){
+        return mendOrderService.confirmMendMaterial(userToken,houseId);
     }
     /**
      * 返回已添加补材料单明细
      */
     @Override
     @ApiMethod
-    public ServerResponse getMendMaterialList(String houseId){
-        return mendOrderService.getMendMaterialList(houseId);
+    public ServerResponse getMendMaterialList(String userToken,String houseId){
+        return mendOrderService.getMendMaterialList(userToken,houseId);
     }
     /**
      * 保存补材料

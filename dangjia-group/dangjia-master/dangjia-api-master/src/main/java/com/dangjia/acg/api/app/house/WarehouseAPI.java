@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.app.house;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -14,6 +15,6 @@ public interface WarehouseAPI {
 
     @PostMapping("app/house/warehouse/warehouseList")
     @ApiOperation(value = "我购买的材料", notes = "我购买的材料")
-    ServerResponse warehouseList(@RequestParam("pageNum")Integer pageNum, @RequestParam("pageSize")Integer pageSize,@RequestParam("houseId")String houseId,
-                                 @RequestParam("categoryId") String categoryId, @RequestParam("name")String name,@RequestParam("type")Integer type);
+    ServerResponse warehouseList(@RequestParam("pageDTO") PageDTO pageDTO, @RequestParam("houseId")String houseId,
+                                 @RequestParam("categoryId") String categoryId, @RequestParam("name")String name, @RequestParam("type")Integer type);
 }

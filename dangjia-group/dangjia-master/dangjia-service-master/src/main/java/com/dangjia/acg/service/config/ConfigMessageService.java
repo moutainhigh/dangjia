@@ -70,7 +70,13 @@ public class ConfigMessageService {
             if(accessToken == null){//无效的token
                 return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(),"无效的token,请重新登录或注册！");
             }
-            criteria.andCondition("(target_uid='"+accessToken.getMemberId()+"' or target_type=1  or target_uid='workerTypeId"+accessToken.getMember().getWorkerTypeId()+","+cityId+"')");
+            criteria.andCondition("(" +
+                    "target_uid='"+accessToken.getMemberId()+"' or " +
+                    "target_uid='"+cityId+"' or " +
+                    "target_uid='workerTypeId"+accessToken.getMember().getWorkerTypeId()+"' or " +
+                    "target_type=1  or " +
+                    "target_uid='workerTypeId"+accessToken.getMember().getWorkerTypeId()+cityId+"'" +
+                    ")");
 //            criteria.andEqualTo("targetUid", accessToken.getMember().getId()).orEqualTo("targetType","1");
         }else {
             criteria.andEqualTo("targetType", "1");

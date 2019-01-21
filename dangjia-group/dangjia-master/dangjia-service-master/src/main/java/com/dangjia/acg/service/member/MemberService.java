@@ -192,7 +192,7 @@ public class MemberService {
      */
     public ServerResponse checkRegister(HttpServletRequest request, String phone, int smscode, String password, String invitationCode, Integer userRole) {
         Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
-        if (registerCode==null||smscode != registerCode) {
+        if (registerCode == null || smscode != registerCode) {
             return ServerResponse.createByErrorMessage("验证码错误");
         } else {
             Member user = new Member();
@@ -418,9 +418,9 @@ public class MemberService {
     public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String memberNickName, String parentId, String childId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            Example example = new Example(Member.class);
-            Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo(Member.DATA_STATUS, "0");
+//            Example example = new Example(Member.class);
+//            Example.Criteria criteria = example.createCriteria();
+//            criteria.andEqualTo(Member.DATA_STATUS, "0");
 //            example.orderBy(Member.CREATE_DATE).desc();
 //            List<Member> list = memberMapper.selectByExample(example);
 
@@ -441,7 +441,8 @@ public class MemberService {
             List<MemberCustomerDTO> mcDTOListOrderBy = new ArrayList<>();
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
             for (Member member : list) {
-                Customer customer = iCustomerMapper.getCustomerByMemberId(member.getId(), stage);
+                logger.info("getMemberListByName id:" + member.getId());
+                Customer customer = iCustomerMapper.getCustomerByMemberId(member.getId());
                 //每个业主增加关联 客服跟进
                 if (customer == null) {
                     customer = new Customer();
@@ -487,6 +488,9 @@ public class MemberService {
                     if (currCustomerRecord != null)
                         mcDTO.setLastRecord(currCustomerRecord.getCreateDate());
                 }
+                if (member.getRemarks() != null) {
+                    mcDTO.setRemarks(member.getRemarks());//业主备注
+                }
                 mcDTO.setMemberLabelList(memberLabelList);
                 mcDTOList.add(mcDTO);
                 mcDTOListOrderBy.add(mcDTO);
@@ -516,6 +520,8 @@ public class MemberService {
                 srcMember.setNickName(member.getNickName());
             if (StringUtils.isNotBlank(member.getMobile()))
                 srcMember.setMobile(member.getMobile());
+            if (StringUtils.isNotBlank(member.getRemarks()))
+                srcMember.setRemarks(member.getRemarks());
 
             memberMapper.updateByPrimaryKeySelective(srcMember);
             return ServerResponse.createBySuccessMessage("保存成功");

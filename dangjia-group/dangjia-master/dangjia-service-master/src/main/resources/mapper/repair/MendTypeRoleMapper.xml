@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.repair.IMendTypeRoleMapper">
+
+    <sql id="all_columns">
+		id,
+		type,
+		role_arr as roleArr,
+		data_status as dataStatus,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
+	<select id="getByType" resultType="com.dangjia.acg.modle.repair.MendTypeRole">
+		SELECT
+			<include refid="all_columns"/>
+		FROM dj_repair_mend_type_role
+		where
+		    type = #{type}
+	</select>
+
+</mapper>
+

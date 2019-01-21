@@ -23,12 +23,15 @@ public interface ICustomerMapper extends Mapper<Customer> {
      */
     List<Customer> getAllCustomer();
 
+
+    Customer getCustomerByMemberId(@Param("memberId") String memberId);
+
     /**
      * 根据业主id查询
      * @param memberId
      * @param stage -1 表示 忽略该字段
      * @return
      */
-    Customer getCustomerByMemberId(@Param("memberId") String memberId,@Param("stage") Integer stage);
+    Customer getCustomerByMemberIdAndStage(@Param("memberId") String memberId,@Param("stage") Integer stage);
 }
 

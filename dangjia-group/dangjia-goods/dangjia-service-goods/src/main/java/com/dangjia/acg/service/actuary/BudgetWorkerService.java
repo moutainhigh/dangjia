@@ -334,6 +334,10 @@ public class BudgetWorkerService {
                             double a = actuarialQuantity / pro.getConvertQuality();
                             double shopCount = Math.ceil(a);
                             budgetMaterial.setShopCount(shopCount);
+                            BigDecimal b1 = new BigDecimal(Double.toString(budgetMaterial.getPrice()));
+                            BigDecimal b2 = new BigDecimal(Double.toString(shopCount));
+                            Double totalPrice = b1.multiply(b2).doubleValue();
+                            budgetMaterial.setTotalPrice(totalPrice);
                             budgetMaterial.setUnitName(pro.getUnitName());
                         } else {
                             budgetMaterial.setSteta(2);//自购
@@ -345,6 +349,7 @@ public class BudgetWorkerService {
                             budgetMaterial.setCost(0.0);
                             budgetMaterial.setImage("");//货品图片
                             budgetMaterial.setShopCount(0.0);
+                            budgetMaterial.setTotalPrice(0.0);
                             budgetMaterial.setUnitName("");
                         }
 

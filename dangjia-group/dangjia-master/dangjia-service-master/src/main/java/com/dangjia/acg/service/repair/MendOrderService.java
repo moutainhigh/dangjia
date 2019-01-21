@@ -11,9 +11,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
-import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
-import com.dangjia.acg.mapper.repair.IMendOrderMapper;
-import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
+import com.dangjia.acg.mapper.repair.*;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.HouseFlow;
@@ -21,9 +19,7 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.repair.MendMateriel;
-import com.dangjia.acg.modle.repair.MendOrder;
-import com.dangjia.acg.modle.repair.MendWorker;
+import com.dangjia.acg.modle.repair.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +55,10 @@ public class MendOrderService {
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IHouseWorkerOrderMapper houseWorkerOrderMapper;
+    @Autowired
+    private IMendTypeRoleMapper mendTypeRoleMapper;
+    @Autowired
+    private IMendOrderCheckMapper mendOrderCheckMapper;
 
 
     /**
@@ -68,7 +68,7 @@ public class MendOrderService {
         try{
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 4)
-                    .andEqualTo(MendOrder.LANDLORD_STATE, 0);
+                    .andEqualTo(MendOrder.STATE, 0);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0){
                 return ServerResponse.createBySuccessMessage("没有退货单");
@@ -76,7 +76,7 @@ public class MendOrderService {
                 return ServerResponse.createByErrorMessage("生成多个退货单,异常联系平台部");
             }else {
                 MendOrder mendOrder = mendOrderList.get(0);
-                mendOrder.setLandlordState(1);//平台审核
+                mendOrder.setState(1);//平台审核
                 mendOrder.setModifyDate(new Date());//更新时间
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                 return ServerResponse.createBySuccessMessage("操作成功");
@@ -94,7 +94,7 @@ public class MendOrderService {
         try{
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 4)
-                    .andEqualTo(MendOrder.LANDLORD_STATE, 0);
+                    .andEqualTo(MendOrder.STATE, 0);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0){
                 return ServerResponse.createBySuccessMessage("未生成退货单");
@@ -123,12 +123,12 @@ public class MendOrderService {
 
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 4)//业主退材料
-                    .andLessThan(MendOrder.LANDLORD_STATE, 2);//小于2 包括审核中状态
+                    .andLessThan(MendOrder.STATE, 2);//小于2 包括审核中状态
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             MendOrder mendOrder;
             if (mendOrderList.size() > 0){
                 mendOrder = mendOrderList.get(0);
-                mendOrder.setLandlordState(0);//生成中
+                mendOrder.setState(0);//生成中
                 /*删除之前子项*/
                 example = new Example(MendMateriel.class);
                 example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, mendOrder.getId());
@@ -141,8 +141,12 @@ public class MendOrderService {
                 mendOrder.setApplyMemberId(member.getId());
                 mendOrder.setType(4);//业主退材料
                 mendOrder.setOrderName("业主退材料");
-                mendOrder.setLandlordState(0);//生成中
+                mendOrder.setState(0);//生成中
                 mendOrder.setTotalAmount(0.0);
+
+                if (!this.createMendCheck(mendOrder)){
+                    return ServerResponse.createByErrorMessage("添加审核流程失败");
+                }
                 mendOrderMapper.insert(mendOrder);
             }
 
@@ -160,11 +164,12 @@ public class MendOrderService {
     /**
      * 确认退人工
      */
-    public ServerResponse confirmBackMendWorker(String houseId){
+    public ServerResponse confirmBackMendWorker(String houseId,String workerTypeId){
         try{
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 3)
-                    .andEqualTo(MendOrder.WORKER_BACK_STATE, 0);
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID,workerTypeId)
+                    .andEqualTo(MendOrder.STATE, 0);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0){
                 return ServerResponse.createBySuccessMessage("没有生成中退人工单");
@@ -172,7 +177,7 @@ public class MendOrderService {
                 return ServerResponse.createByErrorMessage("生成多个未提交退人工单,异常联系平台部");
             }else {
                 MendOrder mendOrder = mendOrderList.get(0);
-                mendOrder.setWorkerBackState(1);//工匠审核中
+                mendOrder.setState(1);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
@@ -185,11 +190,12 @@ public class MendOrderService {
     /**
      * 已添加退人工单明细
      */
-    public ServerResponse backMendWorkerList(String houseId){
+    public ServerResponse backMendWorkerList(String houseId,String workerTypeId){
         try{
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 3)//退人工
-                    .andEqualTo(MendOrder.WORKER_BACK_STATE, 0);
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID,workerTypeId)
+                    .andEqualTo(MendOrder.STATE, 0);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0){
                 return ServerResponse.createBySuccessMessage("没有生成中退人工单");
@@ -222,7 +228,7 @@ public class MendOrderService {
     /**
      * 提交退人工
      */
-    public ServerResponse backMendWorker(String userToken,String houseId, String workerGoodsArr,String workerTypeId){
+    public ServerResponse backMendWorker(String userToken,String houseId, String workerGoodsArr,String workerTypeId,String changeOrderId){
         try{
             AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
             Member steward = accessToken.getMember();//管家
@@ -232,10 +238,6 @@ public class MendOrderService {
                 return ServerResponse.createByErrorMessage("该工种已阶段完工,不能退人工!");
             }
 
-            List<MendOrder> mendOrderList = mendOrderMapper.backWorker(houseId);
-            if(mendOrderList.size() > 0){
-                return ServerResponse.createByErrorMessage("有未处理退人工单");
-            }
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId,workerTypeId);
             if (houseFlowApplyList.size() > 0){
                 return ServerResponse.createByErrorMessage("该工种有未处理完工申请");
@@ -243,12 +245,14 @@ public class MendOrderService {
 
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 3)
-                    .andEqualTo(MendOrder.WORKER_BACK_STATE, 0);
-            mendOrderList = mendOrderMapper.selectByExample(example);
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID,workerTypeId)
+                    .andEqualTo(MendOrder.STATE, 0);
+            List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
 
             MendOrder mendOrder;
             if (mendOrderList.size() > 0){
                 mendOrder = mendOrderList.get(0);
+                mendOrder.setChangeOrderId(changeOrderId);
                 mendOrder.setWorkerTypeId(workerTypeId);
                 mendOrder.setOrderName("退人工");
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
@@ -259,14 +263,19 @@ public class MendOrderService {
             }else {
                 example = new Example(MendOrder.class);
                 mendOrder = new MendOrder();
+                mendOrder.setChangeOrderId(changeOrderId);
                 mendOrder.setNumber("DJZX" + 30000 + mendOrderMapper.selectCountByExample(example));//订单号
                 mendOrder.setHouseId(houseId);
                 mendOrder.setApplyMemberId(steward.getId());
                 mendOrder.setType(3);//退人工
                 mendOrder.setOrderName("退人工");
                 mendOrder.setWorkerTypeId(workerTypeId);
-                mendOrder.setWorkerBackState(0);//工匠审核中
+                mendOrder.setState(0);
                 mendOrder.setTotalAmount(0.0);
+
+                if (!this.createMendCheck(mendOrder)){
+                    return ServerResponse.createByErrorMessage("添加审核流程失败");
+                }
                 mendOrderMapper.insert(mendOrder);
             }
 
@@ -284,11 +293,12 @@ public class MendOrderService {
     /**
      * 确认补人工
      */
-    public ServerResponse confirmMendWorker(String houseId){
+    public ServerResponse confirmMendWorker(String houseId,String workerTypeId){
         try{
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 1)
-                    .andEqualTo(MendOrder.WORKER_ORDER_STATE, 0);
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID,workerTypeId)
+                    .andEqualTo(MendOrder.STATE, 0);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0){
                 return ServerResponse.createBySuccessMessage("没有生成中补人工单");
@@ -296,7 +306,7 @@ public class MendOrderService {
                 return ServerResponse.createByErrorMessage("生成多个未提交补人工单,异常联系平台部");
             }else {
                 MendOrder mendOrder = mendOrderList.get(0);
-                mendOrder.setWorkerOrderState(1);//工匠审核中
+                mendOrder.setState(1);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
@@ -309,11 +319,12 @@ public class MendOrderService {
     /**
      * 已添加补人工单明细
      */
-    public ServerResponse getMendWorkerList(String houseId){
+    public ServerResponse getMendWorkerList(String houseId,String workerTypeId){
         try{
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 1)//补人工
-                    .andEqualTo(MendOrder.WORKER_ORDER_STATE, 0);
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID,workerTypeId)
+                    .andEqualTo(MendOrder.STATE, 0);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0){
                 return ServerResponse.createBySuccessMessage("没有生成中补人工单");
@@ -334,18 +345,15 @@ public class MendOrderService {
     }
 
     /**
+     * 管家
      * 提交补人工
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveMendWorker(String userToken,String houseId, String workerGoodsArr,String workerTypeId){
+    public ServerResponse saveMendWorker(String userToken,String houseId, String workerGoodsArr,String workerTypeId,String changeOrderId){
         try{
             AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
             Member steward = accessToken.getMember();//管家
 
-            List<MendOrder> mendOrderList = mendOrderMapper.untreatedWorker(houseId);//补人工 1 3 5都查限制提交
-            if (mendOrderList.size() > 0) {
-                return ServerResponse.createByErrorMessage("有未处理补人工单");
-            }
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId,workerTypeId);
             if (houseFlowApplyList.size() > 0){
                 return ServerResponse.createByErrorMessage("该工种有未处理完工申请");
@@ -353,11 +361,13 @@ public class MendOrderService {
 
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 1)
-                    .andEqualTo(MendOrder.WORKER_ORDER_STATE, 0);
-            mendOrderList = mendOrderMapper.selectByExample(example);
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID,workerTypeId)
+                    .andEqualTo(MendOrder.STATE, 0);
+            List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             MendOrder mendOrder;
             if (mendOrderList.size() > 0){
                 mendOrder = mendOrderList.get(0);
+                mendOrder.setChangeOrderId(changeOrderId);
                 mendOrder.setWorkerTypeId(workerTypeId);
                 mendOrder.setOrderName("补人工");
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
@@ -368,14 +378,19 @@ public class MendOrderService {
             }else {
                 example = new Example(MendOrder.class);
                 mendOrder = new MendOrder();
+                mendOrder.setChangeOrderId(changeOrderId);
                 mendOrder.setNumber("DJZX" + 20000 + mendOrderMapper.selectCountByExample(example));//订单号
                 mendOrder.setHouseId(houseId);
                 mendOrder.setApplyMemberId(steward.getId());
                 mendOrder.setType(1);//补人工
                 mendOrder.setOrderName("补人工");
                 mendOrder.setWorkerTypeId(workerTypeId);
-                mendOrder.setWorkerOrderState(0);//工匠审核中
+                mendOrder.setState(0);
                 mendOrder.setTotalAmount(0.0);
+
+                if (!this.createMendCheck(mendOrder)){
+                    return ServerResponse.createByErrorMessage("添加审核流程失败");
+                }
                 mendOrderMapper.insert(mendOrder);
             }
 
@@ -429,11 +444,14 @@ public class MendOrderService {
     /**
      * 确认退货
      */
-    public ServerResponse confirmBackMendMaterial(String houseId){
+    public ServerResponse confirmBackMendMaterial(String userToken, String houseId,String imageArr){
         try{
+            AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+            Member worker = accessToken.getMember();//工匠
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 2)
-                    .andEqualTo(MendOrder.MATERIAL_BACK_STATE, 0);
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID,worker.getWorkerTypeId())
+                    .andEqualTo(MendOrder.STATE, 0);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0){
                 return ServerResponse.createBySuccessMessage("没有生成中退货单");
@@ -441,7 +459,8 @@ public class MendOrderService {
                 return ServerResponse.createByErrorMessage("生成多个未提交退货单,异常联系平台部");
             }else {
                 MendOrder mendOrder = mendOrderList.get(0);
-                mendOrder.setMaterialBackState(1);//平台审核
+                mendOrder.setImageArr(imageArr);//照片
+                mendOrder.setState(1);//处理中
                 mendOrder.setModifyDate(new Date());//更新退货
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                 return ServerResponse.createBySuccessMessage("操作成功");
@@ -455,11 +474,14 @@ public class MendOrderService {
     /**
      * 已添加退货单明细
      */
-    public ServerResponse backMendMaterialList(String houseId){
+    public ServerResponse backMendMaterialList(String userToken,String houseId){
         try{
+            AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+            Member worker = accessToken.getMember();//工匠
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 2)
-                    .andEqualTo(MendOrder.MATERIAL_BACK_STATE, 0);
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID,worker.getWorkerTypeId())
+                    .andEqualTo(MendOrder.STATE, 0);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0){
                 return ServerResponse.createBySuccessMessage("没有生成中退货单");
@@ -479,21 +501,24 @@ public class MendOrderService {
     }
 
     /**
-     * 提交退货(退材料)
+     * 工匠
+     * 提交退货(登记剩余材料)
+     * WorkerTypeId 3 管家退服务
      */
     public ServerResponse backMendMaterial(String userToken,String houseId,String productArr){
         try{
             AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-            Member steward = accessToken.getMember();//管家
+            Member worker = accessToken.getMember();//工匠
 
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 2)//退材料
-                    .andLessThan(MendOrder.MATERIAL_BACK_STATE, 2);//小于2 包括审核中状态
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID,worker.getWorkerTypeId())
+                    .andLessThan(MendOrder.STATE, 2);//小于2 包括审核中状态
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             MendOrder mendOrder;
             if (mendOrderList.size() > 0){
                 mendOrder = mendOrderList.get(0);
-                mendOrder.setMaterialBackState(0);//生成中
+                mendOrder.setState(0);//生成中
                 /*删除之前子项*/
                 example = new Example(MendMateriel.class);
                 example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, mendOrder.getId());
@@ -503,11 +528,16 @@ public class MendOrderService {
                 mendOrder = new MendOrder();
                 mendOrder.setNumber("DJZX" + 10000 + mendOrderMapper.selectCountByExample(example));//订单号
                 mendOrder.setHouseId(houseId);
-                mendOrder.setApplyMemberId(steward.getId());
+                mendOrder.setWorkerTypeId(worker.getWorkerTypeId());
+                mendOrder.setApplyMemberId(worker.getId());
                 mendOrder.setType(2);//退材料
                 mendOrder.setOrderName("退材料");
-                mendOrder.setMaterialBackState(0);//生成中
+                mendOrder.setState(0);//生成中
                 mendOrder.setTotalAmount(0.0);
+
+                if (!this.createMendCheck(mendOrder)){
+                    return ServerResponse.createByErrorMessage("添加审核流程失败");
+                }
                 mendOrderMapper.insert(mendOrder);
             }
 
@@ -525,11 +555,14 @@ public class MendOrderService {
     /**
      * 确认补货
      */
-    public ServerResponse confirmMendMaterial(String houseId){
+    public ServerResponse confirmMendMaterial(String userToken,String houseId){
         try{
+            AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+            Member worker = accessToken.getMember();//工匠
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
-                    .andEqualTo(MendOrder.MATERIAL_ORDER_STATE, 0);
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID,worker.getWorkerTypeId())
+                    .andEqualTo(MendOrder.STATE, 0);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0){
                 return ServerResponse.createBySuccessMessage("没有生成中补货单");
@@ -537,7 +570,7 @@ public class MendOrderService {
                 return ServerResponse.createByErrorMessage("生成多个未提交补货单,异常联系平台部");
             }else {
                 MendOrder mendOrder = mendOrderList.get(0);
-                mendOrder.setMaterialOrderState(1);//平台审核
+                mendOrder.setState(1);//处理中
                 mendOrder.setModifyDate(new Date());
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                 return ServerResponse.createBySuccessMessage("操作成功");
@@ -551,11 +584,14 @@ public class MendOrderService {
     /**
      * 返回已添加补材料单明细
      */
-    public ServerResponse getMendMaterialList(String houseId){
+    public ServerResponse getMendMaterialList(String userToken,String houseId){
         try{
+            AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+            Member worker = accessToken.getMember();//工匠
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
-                    .andEqualTo(MendOrder.MATERIAL_ORDER_STATE, 0);
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID,worker.getWorkerTypeId())
+                    .andEqualTo(MendOrder.STATE, 0);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0){
                 return ServerResponse.createBySuccessMessage("没有生成中补货单");
@@ -575,21 +611,24 @@ public class MendOrderService {
     }
 
     /**
+     * 工匠
      * 提交补材料
+     * WorkerTypeId 3 管家补服务
      */
     public ServerResponse saveMendMaterial(String userToken,String houseId,String productArr){
         try{
             AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-            Member steward = accessToken.getMember();//管家
+            Member worker = accessToken.getMember();//工匠
 
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
-                    .andLessThan(MendOrder.MATERIAL_ORDER_STATE, 2);//小于2 包括审核中状态
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID,worker.getWorkerTypeId())
+                    .andLessThan(MendOrder.STATE, 2);//处理中
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             MendOrder mendOrder;
             if (mendOrderList.size() > 0){
                 mendOrder = mendOrderList.get(0);
-                mendOrder.setMaterialOrderState(0);//生成中
+                mendOrder.setState(0);//生成中
                 /*删除之前子项*/
                 example = new Example(MendMateriel.class);
                 example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, mendOrder.getId());
@@ -599,18 +638,22 @@ public class MendOrderService {
                 mendOrder = new MendOrder();
                 mendOrder.setNumber("DJZX" + 00000 + mendOrderMapper.selectCountByExample(example));//订单号
                 mendOrder.setHouseId(houseId);
-                mendOrder.setApplyMemberId(steward.getId());
+                mendOrder.setWorkerTypeId(worker.getWorkerTypeId());
+                mendOrder.setApplyMemberId(worker.getId());
                 mendOrder.setType(0);//补材料
                 mendOrder.setOrderName("补材料");
-                mendOrder.setMaterialOrderState(0);//生成中
+                mendOrder.setState(0);//生成中
                 mendOrder.setTotalAmount(0.0);
+                if (!this.createMendCheck(mendOrder)){
+                    return ServerResponse.createByErrorMessage("添加审核流程失败");
+                }
                 mendOrderMapper.insert(mendOrder);
             }
 
             if (this.addMendMateriel(productArr,mendOrder)){
-                return  ServerResponse.createBySuccessMessage("保存成功");
+                return ServerResponse.createBySuccessMessage("保存成功");
             }else {
-                return  ServerResponse.createByErrorMessage("添加明细失败");
+                return ServerResponse.createByErrorMessage("添加明细失败");
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -651,4 +694,25 @@ public class MendOrderService {
             return false;
         }
     }
+
+    /**生成审核流程*/
+    private boolean createMendCheck(MendOrder mendOrder){
+        try{
+            MendTypeRole mendTypeRole = mendTypeRoleMapper.getByType(mendOrder.getType());
+            String[] roleArr = mendTypeRole.getRoleArr().split(",");
+            for(int i=0; i<roleArr.length; i++){
+                MendOrderCheck mendOrderCheck = new MendOrderCheck();
+                mendOrderCheck.setMendOrderId(mendOrder.getId());
+                mendOrderCheck.setRoleType(roleArr[i]);
+                mendOrderCheck.setState(0);
+                mendOrderCheck.setSort(i+1);//顺序
+                mendOrderCheckMapper.insert(mendOrderCheck);
+            }
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

@@ -9,6 +9,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		worker_type_id as workerTypeId,
 		member_id as memberId,
 		worker_id as workerId,
+		sup_id as supId,
 		type,
 		state,
 		content_a as contentA,
@@ -39,7 +40,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         FROM dj_repair_change_order
         where  worker_type_id = #{workerTypeId}
         and  house_id = #{houseId}
-        and  state=0
+        and  state not in (1,4)
     </select>
 
 </mapper>

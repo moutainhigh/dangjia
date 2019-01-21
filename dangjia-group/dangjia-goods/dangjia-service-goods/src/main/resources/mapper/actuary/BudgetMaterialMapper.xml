@@ -40,6 +40,8 @@
 		    <include refid="all_columns"/>
 		FROM dj_actuary_budget_material
 		where
+		product_type = 0
+		and
 		house_id = #{houseId}
 		<if test = "productName!=null and productName!=''">
 			and

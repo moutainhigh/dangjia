@@ -13,18 +13,18 @@ import org.springframework.web.bind.annotation.RequestParam;
  * Time: 14:00
  */
 @FeignClient("dangjia-service-master")
-@Api(value = "补退记录", description = "补退记录")
+@Api(value = "要补退记录", description = "要补退记录")
 public interface MendRecordAPI {
 
     @PostMapping(value = "app/repair/mendRecord/mendOrderDetail")
     @ApiOperation(value = "补退明细", notes = "补退明细")
-    ServerResponse mendOrderDetail(@RequestParam("mendOrderId")String mendOrderId);
+    ServerResponse mendOrderDetail(@RequestParam("mendOrderId")String mendOrderId,@RequestParam("type")Integer type);
 
     @PostMapping(value = "app/repair/mendRecord/recordList")
     @ApiOperation(value = "记录列表", notes = "记录列表")
     ServerResponse recordList(@RequestParam("houseId")String houseId,@RequestParam("type")Integer type);
 
     @PostMapping(value = "app/repair/mendRecord/mendList")
-    @ApiOperation(value = "补退记录", notes = "补退记录")
+    @ApiOperation(value = "要补退记录", notes = "要补退记录")
     ServerResponse mendList(@RequestParam("userToken")String userToken,@RequestParam("houseId")String houseId);
 }

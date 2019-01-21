@@ -91,8 +91,8 @@ public class WorkerController implements WorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken, WorkerBankCard bankCard){
-        return  workerService.addMyBankCard(request,userToken,bankCard);
+    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken,String bankCardId, WorkerBankCard bankCard){
+        return  workerService.addMyBankCard(request,userToken,bankCardId,bankCard);
     }
 
                                           /**

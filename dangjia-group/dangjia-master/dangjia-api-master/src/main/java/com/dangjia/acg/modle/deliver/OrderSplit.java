@@ -12,12 +12,12 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
- * 管家提交要货单
+ * 要货单
  */
 @Data
 @Entity
 @Table(name = "dj_deliver_order_split")
-@ApiModel(description = "管家提交要货单")
+@ApiModel(description = "提交要货单")
 @FieldNameConstants(prefix = "")
 public class OrderSplit extends BaseEntity {
 
@@ -37,19 +37,24 @@ public class OrderSplit extends BaseEntity {
 	private Integer applyStatus;
 
 	@Column(name = "supervisor_id")
-	@Desc(value = "大管家id")
-	@ApiModelProperty("大管家id")
+	@Desc(value = "要货人id")
+	@ApiModelProperty("要货人id")
 	private String supervisorId;//
 
 	@Column(name = "supervisor_name")
-	@Desc(value = "大管家姓名")
-	@ApiModelProperty("大管家姓名")
+	@Desc(value = "要货人姓名")
+	@ApiModelProperty("要货人姓名")
 	private String supervisorName;//
 
 	@Column(name = "supervisor_tel")
-	@Desc(value = "大管家电话")
-	@ApiModelProperty("大管家电话")
+	@Desc(value = "要货人电话")
+	@ApiModelProperty("要货人电话")
 	private String supervisorTel;
+
+	@Column(name = "worker_type_id")
+	@Desc(value = "工种id")
+	@ApiModelProperty("工种id")
+	private String workerTypeId;
 }
 
 

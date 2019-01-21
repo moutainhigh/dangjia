@@ -27,6 +27,7 @@ public class MemberCustomerDTO implements Comparable<MemberCustomerDTO> {
     private String userId;//当前客服id
     private String userName;//当前客服名字
     private String remindContent;//提醒内容
+    private String remarks;//业主备注
     private Date remindTime;//提醒时间
     private Date lastRecord;//上次跟进时间
     private List<MemberLabel> memberLabelList;//多个标签对象

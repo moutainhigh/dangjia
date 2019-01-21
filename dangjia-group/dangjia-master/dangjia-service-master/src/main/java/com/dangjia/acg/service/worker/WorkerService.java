@@ -6,6 +6,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
@@ -216,7 +217,7 @@ public class WorkerService {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
             Example example = new Example(WorkerBankCard.class);
-            example.createCriteria().andEqualTo("workerId", worker.getId());
+            example.createCriteria().andEqualTo(WorkerBankCard.WORKER_ID, worker.getId());
             List<WorkerBankCard> wbList=workerBankCardMapper.selectByExample(example);
             List<Map<String,Object>> mapList=new ArrayList<>();
             for(WorkerBankCard wb:wbList){
@@ -238,19 +239,26 @@ public class WorkerService {
      * @param bankCard
      * @return
      */
-    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken,WorkerBankCard bankCard) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        bankCard.setWorkerId(accessToken.getMember().getId());
-        bankCard.setDataStatus(0);
-        Example example = new Example(WorkerBankCard.class);
-        example.createCriteria().andEqualTo(WorkerBankCard.BANK_CARD_NUMBER, bankCard.getBankCardNumber());
-        if (workerBankCardMapper.selectByExample(example).size() > 0) {
-            return ServerResponse.createByErrorMessage("添加失败，银行卡以被使用！");
-        }
-        if (this.workerBankCardMapper.insertSelective(bankCard) > 0) {
-            return ServerResponse.createBySuccessMessage("ok");
-        } else {
-            return ServerResponse.createByErrorMessage("添加失败，请您稍后再试");
+    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken,String bankCardId,WorkerBankCard bankCard) {
+        try {
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            bankCard.setWorkerId(accessToken.getMember().getId());
+            bankCard.setDataStatus(0);
+            bankCard.setStatus(0);
+            if(CommonUtil.isEmpty(bankCardId)) {
+                Example example = new Example(WorkerBankCard.class);
+                example.createCriteria().andEqualTo(WorkerBankCard.BANK_CARD_NUMBER, bankCard.getBankCardNumber());
+                if (workerBankCardMapper.selectByExample(example).size() > 0) {
+                    return ServerResponse.createByErrorMessage("添加失败，银行卡以被使用！");
+                }
+                this.workerBankCardMapper.insertSelective(bankCard);
+            }else{
+                bankCard.setId(bankCardId);
+                this.workerBankCardMapper.updateByPrimaryKeySelective(bankCard);
+            }
+            return ServerResponse.createBySuccessMessage("保存成功");
+        }catch (Exception e){
+            return ServerResponse.createByErrorMessage("操作失败，请您稍后再试");
         }
     }
     /**

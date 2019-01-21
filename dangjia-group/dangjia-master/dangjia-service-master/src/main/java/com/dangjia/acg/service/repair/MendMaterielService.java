@@ -5,25 +5,18 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
-import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
-import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.house.Warehouse;
-import com.dangjia.acg.modle.house.WarehouseDetail;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
-import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,65 +34,9 @@ public class MendMaterielService {
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
-    private IWarehouseDetailMapper warehouseDetailMapper;
-    @Autowired
-    private IWarehouseMapper warehouseMapper;
-    @Autowired
     private IHouseMapper houseMapper;
     @Autowired
     private IMemberMapper memberMapper;
-    @Autowired
-    private IWorkerDetailMapper workerDetailMapper;
-
-    /**
-     * 通过 不通过
-     */
-    public ServerResponse checkLandlordState(String mendOrderId,int state,Double carriage){
-        MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
-        if (state == 2){//不通过
-            mendOrder.setLandlordState(state);
-            mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-            return ServerResponse.createBySuccessMessage("操作成功");
-        }else if(state == 3){
-            /*审核通过修改仓库数量,记录流水*/
-            List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderId);
-            for (MendMateriel mendMateriel : mendMaterielList){
-                Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(), mendOrder.getHouseId());
-                warehouse.setBackCount(warehouse.getBackCount() + mendMateriel.getShopCount());//更新退数量
-                warehouse.setBackTime(warehouse.getBackTime() + 1);//更新退次数
-                warehouseMapper.updateByPrimaryKeySelective(warehouse);
-            }
-            mendOrder.setLandlordState(state);
-            mendOrder.setCarriage(carriage);//运费
-            mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-
-            WarehouseDetail warehouseDetail = new WarehouseDetail();
-            warehouseDetail.setHouseId(mendOrder.getHouseId());
-            warehouseDetail.setRelationId(mendOrder.getId());
-            warehouseDetail.setRecordType(3);//退货
-            warehouseDetailMapper.insert(warehouseDetail);
-
-            /*退钱给业主*/
-            Member member = memberMapper.selectByPrimaryKey(houseMapper.selectByPrimaryKey(mendOrder.getHouseId()).getMemberId());
-            //记录流水
-            WorkerDetail workerDetail = new WorkerDetail();
-            workerDetail.setName("退材料退款");
-            workerDetail.setWorkerId(member.getId());
-            workerDetail.setWorkerName(member.getName() == null?member.getNickName() : member.getName());
-            workerDetail.setHouseId(mendOrder.getHouseId());
-            workerDetail.setMoney(new BigDecimal(mendOrder.getTotalAmount()));
-            workerDetail.setState(0);//进钱
-            workerDetailMapper.insert(workerDetail);
-
-            member.setHaveMoney(member.getHaveMoney().add(new BigDecimal(mendOrder.getTotalAmount())));
-            member.setSurplusMoney(member.getSurplusMoney().add(new BigDecimal(mendOrder.getTotalAmount())));
-            memberMapper.updateByPrimaryKeySelective(member);
-
-            return ServerResponse.createBySuccessMessage("操作成功");
-        }else {
-            return ServerResponse.createByErrorMessage("操作失败");
-        }
-    }
 
     /**
      * 房子id查询业主退货单列表
@@ -133,7 +70,7 @@ public class MendMaterielService {
                 mendOrderDTO.setApplyName(worker.getName());
                 mendOrderDTO.setApplyMobile(worker.getMobile());
                 mendOrderDTO.setType(mendOrder.getType());
-                mendOrderDTO.setLandlordState(mendOrder.getLandlordState());//1平台审核中,2不通过,3通过
+                mendOrderDTO.setState(mendOrder.getState());
                 mendOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
                 mendOrderDTOS.add(mendOrderDTO);
             }
@@ -142,40 +79,6 @@ public class MendMaterielService {
         }catch (Exception e){
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
-        }
-    }
-
-    /**
-     * 通过 不通过
-     */
-    public ServerResponse checkMaterialBackState(String mendOrderId,int state,Double carriage){
-        MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
-        if (state == 2){//不通过
-            mendOrder.setMaterialBackState(state);
-            mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-            return ServerResponse.createBySuccessMessage("操作成功");
-        }else if(state == 3){
-            /*审核通过修改仓库数量,记录流水*/
-            List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderId);
-            for (MendMateriel mendMateriel : mendMaterielList){
-                Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(), mendOrder.getHouseId());
-                warehouse.setBackCount(warehouse.getBackCount() + mendMateriel.getShopCount());//更新退数量
-                warehouse.setBackTime(warehouse.getBackTime() + 1);//更新退次数
-                warehouseMapper.updateByPrimaryKeySelective(warehouse);
-            }
-            mendOrder.setMaterialBackState(state);
-            mendOrder.setCarriage(carriage);//运费
-            mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-
-            WarehouseDetail warehouseDetail = new WarehouseDetail();
-            warehouseDetail.setHouseId(mendOrder.getHouseId());
-            warehouseDetail.setRelationId(mendOrder.getId());
-            warehouseDetail.setRecordType(3);//退货
-            warehouseDetailMapper.insert(warehouseDetail);
-
-            return ServerResponse.createBySuccessMessage("操作成功");
-        }else {
-            return ServerResponse.createByErrorMessage("操作失败");
         }
     }
 
@@ -211,7 +114,7 @@ public class MendMaterielService {
                 mendOrderDTO.setApplyName(worker.getName());
                 mendOrderDTO.setApplyMobile(worker.getMobile());
                 mendOrderDTO.setType(mendOrder.getType());
-                mendOrderDTO.setMaterialBackState(mendOrder.getMaterialBackState());//退货审核状态 1平台审核中，2平台审核不通过，3审核通过，4管家取消
+                mendOrderDTO.setState(mendOrder.getState());
                 mendOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
                 mendOrderDTOS.add(mendOrderDTO);
             }
@@ -223,21 +126,6 @@ public class MendMaterielService {
         }
     }
 
-
-    /**
-     * 通过 不通过
-     */
-    public ServerResponse checkMaterialOrderState(String mendOrderId,int state, Double carriage){
-        MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
-        if (state == 2 || state == 3){
-            mendOrder.setMaterialOrderState(state);
-            mendOrder.setCarriage(carriage);//运费
-            mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-            return ServerResponse.createBySuccessMessage("操作成功");
-        }else {
-            return ServerResponse.createByErrorMessage("操作失败");
-        }
-    }
 
     /**
      * 根据mendOrderId查明细
@@ -282,7 +170,7 @@ public class MendMaterielService {
                 mendOrderDTO.setApplyName(worker.getName());
                 mendOrderDTO.setApplyMobile(worker.getMobile());
                 mendOrderDTO.setType(mendOrder.getType());
-                mendOrderDTO.setMaterialOrderState(mendOrder.getMaterialOrderState());
+                mendOrderDTO.setState(mendOrder.getState());
                 mendOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
                 mendOrderDTOS.add(mendOrderDTO);
             }
@@ -294,6 +182,5 @@ public class MendMaterielService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-
 
 }
