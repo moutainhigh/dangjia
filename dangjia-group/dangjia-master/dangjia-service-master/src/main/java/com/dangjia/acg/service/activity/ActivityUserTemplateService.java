@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.activity;
 
+import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -21,7 +22,10 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -124,7 +128,10 @@ public class ActivityUserTemplateService {
                     }
                     //开始发送红包
                     if(redPackRuleIds!=null&&redPackRuleIds.size()>0) {
-                        redPackService.sendMemberPadPackBatch(members, red.getId(), StringUtils.join(redPackRuleIds, ","));
+                        ServerResponse serverResponse= redPackService.sendMemberPadPackBatch(members, red.getId(), StringUtils.join(redPackRuleIds, ","));
+                        if(serverResponse.getResultCode()!= EventStatus.SUCCESS.getCode()){
+                            return serverResponse;
+                        }
                     }
                 }else{
                     return ServerResponse.createByErrorMessage("推送失败，请检查优惠券（"+red.getName()+"）是否过期！");

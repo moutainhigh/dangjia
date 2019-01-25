@@ -43,6 +43,18 @@
         w.modify_date AS modifyDate
 	</sql>
 
+    <select id="artisanList" resultType="com.dangjia.acg.modle.member.Member">
+        SELECT
+            <include refid="all_columns"/>
+        FROM dj_member w
+        WHERE
+            w.worker_type_id != null
+        or
+            w.worker_type_id != ''
+        ORDER by
+            w.create_date
+    </select>
+
     <select id="getSupervisor" resultType="com.dangjia.acg.modle.member.Member">
         SELECT
         <include refid="all_columns"/>

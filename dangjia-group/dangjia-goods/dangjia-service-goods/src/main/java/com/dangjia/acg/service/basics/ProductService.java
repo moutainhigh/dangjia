@@ -177,7 +177,7 @@ public class ProductService {
                         if (name.equals(objJ.getString("name"))) {
                             nameCount++;
                             if (nameCount > 1)
-                                return ServerResponse.createByErrorMessage("货品名称不能重复");
+                                return ServerResponse.createByErrorMessage("商品名称不能重复");
                         }
                     }
                 } else {//修改

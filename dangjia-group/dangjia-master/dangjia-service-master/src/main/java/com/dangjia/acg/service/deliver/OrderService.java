@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -34,6 +35,7 @@ import com.dangjia.acg.modle.house.WarehouseDetail;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -75,6 +77,8 @@ public class OrderService {
     private IHouseDesignImageMapper houseDesignImageMapper;
     @Autowired
     private IDesignImageTypeMapper designImageTypeMapper;
+    @Autowired
+    private ConfigMessageService configMessageService;
 
     /**
      * 订单详情
@@ -276,6 +280,15 @@ public class OrderService {
                 warehouseDetail.setRelationId(orderSplit.getId());//要货单
                 warehouseDetail.setRecordType(1);//要
                 warehouseDetailMapper.insert(warehouseDetail);
+
+                House house = houseMapper.selectByPrimaryKey(houseId);
+                if(worker.getWorkerType() == 3){
+                    configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","大管家要服务",
+                            String.format(DjConstants.PushMessage.STEWARD_Y_SERVER,house.getHouseName()) ,"");
+                }else {
+                    configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","工匠要材料",String.format
+                            (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL,house.getHouseName()) ,"");
+                }
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
 

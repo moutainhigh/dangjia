@@ -16,6 +16,9 @@ import java.util.Map;
  */
 @Repository
 public interface IMemberMapper extends Mapper<Member> {
+
+    List<Member> artisanList();
+
     /**通过评价表的houseId获得大管家*/
     Member getSupervisor(@Param("houseId") String houseId);
 
@@ -28,7 +31,7 @@ public interface IMemberMapper extends Mapper<Member> {
      * @param childsLabelIdArr
      * @return
      */
-    List<Member>  getMemberListByName(@Param("memberNickName") String memberNickName,
+    List<Member> getMemberListByName(@Param("memberNickName") String memberNickName,
                                       @Param("stage") Integer stage,
                                       @Param("childsLabelIdArr")String[] childsLabelIdArr);
 

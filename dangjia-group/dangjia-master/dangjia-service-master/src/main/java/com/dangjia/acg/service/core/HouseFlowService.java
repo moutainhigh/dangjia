@@ -229,10 +229,19 @@ public class HouseFlowService {
             houseFlow.setWorkerType(workerType.getType());
             houseFlow.setHouseId(house.getId());
             houseFlow.setState(workerType.getState());
+
             if (house.getCustomSort() == null)
                 houseFlow.setSort(workerType.getSort());
-            else
-                houseFlow.setSort(getCustomSortIndex(house.getCustomSort(), workerType.getType() + ""));
+            else {
+                if (workerType.getType() >= 3) {//只从 3 大管家 开始有自定排序
+                    int sort = getCustomSortIndex(house.getCustomSort(), workerType.getType() + "");
+                    if (sort == -1)
+                        return ServerResponse.createByErrorMessage("在自定义排序中，不存在 workerType" + workerType.getType());
+                    houseFlow.setSort(sort);
+                } else {
+                    houseFlow.setSort(workerType.getSort());
+                }
+            }
             houseFlow.setWorkType(1);//生成默认房产，工匠还不能抢
             houseFlow.setCityId(house.getCityId());
             houseFlowMapper.insert(houseFlow);
@@ -243,6 +252,7 @@ public class HouseFlowService {
 
     /**
      * 超找 自定义 施工顺序 ，找出某个 workerType 是从3（大管家） 开始的几个工序
+     *
      * @param customSort
      * @param workerType
      * @return
@@ -426,8 +436,8 @@ public class HouseFlowService {
 
 
                 HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(hf.getHouseId(), 3);
-                configMessageService.addConfigMessage(null,"gj", houseFlowDgj.getWorkerId(),"0","工匠放弃",
-                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_ABANDON,house.getHouseName()) ,"5");
+                configMessageService.addConfigMessage(null, "gj", houseFlowDgj.getWorkerId(), "0", "工匠放弃",
+                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_ABANDON, house.getHouseName()), "5");
 
             }
             return ServerResponse.createBySuccessMessage("放弃成功！");
