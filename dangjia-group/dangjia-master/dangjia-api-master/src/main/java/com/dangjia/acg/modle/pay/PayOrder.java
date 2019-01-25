@@ -42,7 +42,7 @@ public class PayOrder extends BaseEntity {
 	@Column(name = "business_order_type")
 	@Desc(value = "业务订单号类型")
 	@ApiModelProperty("业务订单号类型")
-	private String businessOrderType;//
+	private String businessOrderType;//订单类型：1人工订单 2材料订单 3验房订单
 
 	@Column(name = "zhifubao")
 	@Desc(value = "支付宝订单号")

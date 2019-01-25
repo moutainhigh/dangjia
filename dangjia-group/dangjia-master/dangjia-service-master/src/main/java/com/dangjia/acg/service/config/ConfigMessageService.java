@@ -74,9 +74,9 @@ public class ConfigMessageService {
             criteria.andCondition("(" +
                     "target_uid='"+accessToken.getMemberId()+"' or " +
                     "target_uid='"+cityId+"' or " +
-                    "target_uid='workerTypeId"+accessToken.getMember().getWorkerTypeId()+"' or " +
+                    "target_uid='wtId"+accessToken.getMember().getWorkerTypeId()+"' or " +
                     "target_type=1  or " +
-                    "target_uid='workerTypeId"+accessToken.getMember().getWorkerTypeId()+cityId+"'" +
+                    "target_uid='wtId"+accessToken.getMember().getWorkerTypeId()+cityId+"'" +
                     ")");
 //            criteria.andEqualTo("targetUid", accessToken.getMember().getId()).orEqualTo("targetType","1");
         }else {

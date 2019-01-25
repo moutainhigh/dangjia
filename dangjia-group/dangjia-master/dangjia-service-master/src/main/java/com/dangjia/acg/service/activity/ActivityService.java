@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.activity;
 
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -125,6 +126,8 @@ public class ActivityService {
      */
     public ServerResponse editActivity(HttpServletRequest request, Activity activity,String discount) {
         activity.setModifyDate(new Date());
+        String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "receiveCoupon?activityId=" + activity.getId();
+        activity.setVurl(url);
         if(this.activityMapper.updateByPrimaryKeySelective(activity)>0){
             if(!CommonUtil.isEmpty(discount)) {
                 addActivityDiscounts(activity, discount);
@@ -156,6 +159,8 @@ public class ActivityService {
      */
     public ServerResponse addActivity(HttpServletRequest request,Activity activity,String discount) {
         activity.setDeleteState(1);
+        String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "receiveCoupon?activityId=" + activity.getId();
+        activity.setVurl(url);
         if(this.activityMapper.insertSelective(activity)>0){
             addActivityDiscounts(activity,discount);
             return ServerResponse.createBySuccessMessage("ok");

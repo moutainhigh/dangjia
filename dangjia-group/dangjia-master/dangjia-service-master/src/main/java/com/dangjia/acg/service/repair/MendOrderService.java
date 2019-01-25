@@ -5,21 +5,25 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.*;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +63,10 @@ public class MendOrderService {
     private IMendTypeRoleMapper mendTypeRoleMapper;
     @Autowired
     private IMendOrderCheckMapper mendOrderCheckMapper;
+    @Autowired
+    private IHouseMapper houseMapper;
+    @Autowired
+    private ConfigMessageService configMessageService;
 
 
     /**
@@ -179,6 +187,10 @@ public class MendOrderService {
                 MendOrder mendOrder = mendOrderList.get(0);
                 mendOrder.setState(1);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+
+                House house = houseMapper.selectByPrimaryKey(houseId);
+                configMessageService.addConfigMessage(null,"gj",house.getMemberId(),"0","退人工变更",String.format
+                        (DjConstants.PushMessage.CRAFTSMAN_T_WORK,house.getHouseName()) ,"");
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
         }catch (Exception e){
@@ -291,6 +303,7 @@ public class MendOrderService {
     }
 
     /**
+     * 管家
      * 确认补人工
      */
     public ServerResponse confirmMendWorker(String houseId,String workerTypeId){
@@ -308,6 +321,10 @@ public class MendOrderService {
                 MendOrder mendOrder = mendOrderList.get(0);
                 mendOrder.setState(1);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+
+                House house = houseMapper.selectByPrimaryKey(houseId);
+                configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","补人工",String.format
+                        (DjConstants.PushMessage.CRAFTSMAN_B_WORK,house.getHouseName()) ,"");
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
         }catch (Exception e){
@@ -443,6 +460,7 @@ public class MendOrderService {
 
     /**
      * 确认退货
+     * 管家退服务
      */
     public ServerResponse confirmBackMendMaterial(String userToken, String houseId,String imageArr){
         try{
@@ -463,6 +481,15 @@ public class MendOrderService {
                 mendOrder.setState(1);//处理中
                 mendOrder.setModifyDate(new Date());//更新退货
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+
+                House house = houseMapper.selectByPrimaryKey(houseId);
+                if (worker.getWorkerType() == 3){
+                    configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","大管家退服务",String.format
+                            (DjConstants.PushMessage.STEWARD_T_SERVER,house.getHouseName()) ,"");
+                }else {
+                    configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","工匠退材料",String.format
+                            (DjConstants.PushMessage.CRAFTSMAN_T_MATERIAL,house.getHouseName()) ,"");
+                }
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
         }catch (Exception e){
@@ -539,6 +566,16 @@ public class MendOrderService {
                     return ServerResponse.createByErrorMessage("添加审核流程失败");
                 }
                 mendOrderMapper.insert(mendOrder);
+
+                if (worker.getWorkerType() == 3){//管家退服务
+                    MendOrderCheck mendOrderCheck = mendOrderCheckMapper.getByMendOrderId(mendOrder.getId(),"2");
+                    if(mendOrderCheck != null){
+                        mendOrderCheck.setState(2);
+                        mendOrderCheck.setAuditorId(worker.getId());//审核人
+                        mendOrderCheck.setModifyDate(new Date());
+                        mendOrderCheckMapper.updateByPrimaryKeySelective(mendOrderCheck);
+                    }
+                }
             }
 
             if (this.addMendMateriel(productArr,mendOrder)){
@@ -554,6 +591,7 @@ public class MendOrderService {
 
     /**
      * 确认补货
+     * 管家补服务
      */
     public ServerResponse confirmMendMaterial(String userToken,String houseId){
         try{
@@ -573,6 +611,15 @@ public class MendOrderService {
                 mendOrder.setState(1);//处理中
                 mendOrder.setModifyDate(new Date());
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+
+                House house = houseMapper.selectByPrimaryKey(houseId);
+                if(worker.getWorkerType() == 3){
+                    configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","大管家补服务",String.format
+                            (DjConstants.PushMessage.STEWARD_B_SERVER,house.getHouseName()) ,"");
+                }else {
+                    configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","工匠要材料",String.format
+                            (DjConstants.PushMessage.CRAFTSMAN_B_MATERIAL,house.getHouseName()) ,"");
+                }
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
         }catch (Exception e){

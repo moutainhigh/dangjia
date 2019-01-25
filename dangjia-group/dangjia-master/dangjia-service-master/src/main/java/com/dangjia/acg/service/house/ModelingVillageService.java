@@ -129,6 +129,7 @@ public class ModelingVillageService {
                 modelingVillage.setName(villageName);//小区名称
                 modelingVillage.setCityId(villageObj.getString("cityId"));//城市
                 modelingVillage.setAreaName(villageObj.getString("areaName"));//区域名称
+                modelingVillage.setLayoutSum(0);//户型总数
                 modelingVillage.setAddress(villageObj.getString("address"));//小区详细地址
                 modelingVillage.setInitials(villageObj.getString("initials"));//存放ABCD
                 modelingVillage.setLocationx(villageObj.getString("locationx"));//百度定位目标x
