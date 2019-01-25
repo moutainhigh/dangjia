@@ -313,10 +313,10 @@ public class RedPackService {
             if(phone!=null&&phone.length>0) {
                 for (String p :phone) {
                     Member user = new Member();
-                    user.setMobile(phones);
+                    user.setMobile(p);
                     user = memberMapper.getUser(user);
                     if(user==null){
-                        user = memberMapper.selectByPrimaryKey(phones);
+                        user = memberMapper.selectByPrimaryKey(p);
                     }
                     if(user==null){
                         return ServerResponse.createByErrorMessage("用户（"+p+"）未注册！");

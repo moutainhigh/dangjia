@@ -81,10 +81,13 @@ public class ActivityRedPackRecordDTO {
 						+"至"
 						+ DateUtil.getDateString2(this.getRedPack().getEndDate().getTime())
 		);
-		if (this.getRedPack().getIsShare() == 0) {
-			this.setShare("可与其他优惠券共同使用");
+		getRedPack().setIsShare(1);
+		if (this.getRedPack().getFromObjectType() == 0) {
+			this.setShare("限人工:此优惠券仅限某些工种使用");
+		}else if (this.getRedPack().getFromObjectType() == 1) {
+			this.setShare("限材料:仅可购买材料类指定商品");
 		}else{
-			this.setShare("不可与其他优惠券共同使用");
+			this.setShare("限商品:仅可购买指定商品");
 		}
 		this.setName(this.getRedPack().getName());
 

@@ -32,7 +32,7 @@ public class WarehouseDetail extends BaseEntity {
 	private String relationId;
 
 	@Column(name = "record_type")
-	@Desc(value = "记录类型 0支付精算;1要货;2补货;3退货")
+	@Desc(value = "记录类型 0支付精算;1要货;2补货;3退剩余材料,4业主退")
 	@ApiModelProperty("记录类型")
 	private Integer recordType;
 

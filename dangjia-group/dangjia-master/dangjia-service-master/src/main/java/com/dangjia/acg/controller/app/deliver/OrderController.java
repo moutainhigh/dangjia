@@ -50,7 +50,7 @@ public class OrderController implements OrderAPI {
     @Override
     @ApiMethod
     public ServerResponse confirmOrderSplit(String houseId, String userToken){
-        return orderService.confirmOrderSplit(houseId);
+        return orderService.confirmOrderSplit(userToken,houseId);
     }
 
     /**
@@ -58,8 +58,8 @@ public class OrderController implements OrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getOrderItemList(String houseId){
-        return orderService.getOrderItemList(houseId);
+    public ServerResponse getOrderItemList(String userToken,String houseId){
+        return orderService.getOrderItemList(userToken,houseId);
     }
 
     /**

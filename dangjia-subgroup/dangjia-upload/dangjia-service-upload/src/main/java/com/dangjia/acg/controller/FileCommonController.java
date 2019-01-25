@@ -30,14 +30,20 @@ public class FileCommonController implements FileCommonAPI {
       List<MultipartFile> allimg=new ArrayList<>();
       List<MultipartFile> images=request.getFiles("image");
       List<MultipartFile> files=request.getFiles("file");
+      List<MultipartFile> imgFile=request.getFiles("imgFile");
       allimg.addAll(images);
       allimg.addAll(files);
+      allimg.addAll(imgFile);
       multipartFiles=new MultipartFile[allimg.size()];
       multipartFiles=allimg.toArray(multipartFiles);
     }
    return  fileCommonService.saveFileList(multipartFiles,address);
   }
 
+  @Override
+  public String saveEditorFile(MultipartFile[] imgFile,String dir) {
+    return  fileCommonService.saveEditorFile(imgFile,dir);
+  }
   @Override
   public ServerResponse saveToImgByInputStream(byte[] bytes, String imgPath, String imgName) {
    return fileCommonService.saveToImgByInputStream(bytes, imgPath, imgName);

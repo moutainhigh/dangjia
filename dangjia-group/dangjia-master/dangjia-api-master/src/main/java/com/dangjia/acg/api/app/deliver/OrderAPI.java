@@ -34,7 +34,7 @@ public interface OrderAPI {
 
     @PostMapping("app/deliver/order/getOrderItemList")
     @ApiOperation(value = "已添加要货单明细", notes = "已添加要货单明细")
-    ServerResponse getOrderItemList(@RequestParam("houseId")String houseId);
+    ServerResponse getOrderItemList( @RequestParam("userToken")String userToken,@RequestParam("houseId")String houseId);
 
     @PostMapping("app/deliver/order/saveOrderSplit")
     @ApiOperation(value = "提交到要货", notes = "提交到要货")

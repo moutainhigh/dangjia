@@ -154,13 +154,13 @@ public class TaskService {
         //补材料补服务
         example = new Example(MendOrder.class);
         example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
-                .andEqualTo(MendOrder.MATERIAL_ORDER_STATE, 3);//补材料审核状态
+                .andEqualTo(MendOrder.STATE, 3);//补材料审核状态全通过
         List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
-        if (mendOrderList.size() > 0) {
-            MendOrder mendOrder = mendOrderList.get(0);
+        for (MendOrder mendOrder : mendOrderList){
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
-            task.setName("待支付补材料");
+            task.setName(workerType.getName() + "补材料");
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/buchailiao.png");
             task.setHtmlUrl("");
             task.setType(2);
@@ -170,13 +170,13 @@ public class TaskService {
         //补人工任务
         example = new Example(MendOrder.class);
         example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 1)
-                .andEqualTo(MendOrder.WORKER_ORDER_STATE, 5);//补人工审核状态MendOrder
+                .andEqualTo(MendOrder.STATE, 3);//审核状态
         mendOrderList = mendOrderMapper.selectByExample(example);
-        if (mendOrderList.size() > 0) {
-            MendOrder mendOrder = mendOrderList.get(0);
+        for (MendOrder mendOrder : mendOrderList){
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
-            task.setName("待支付补人工");
+            task.setName(workerType.getName() + "补人工");
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/burengong.png");
             task.setHtmlUrl("");
             task.setType(2);

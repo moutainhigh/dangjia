@@ -64,23 +64,8 @@ public class ChangeOrder extends BaseEntity {
     @ApiModelProperty("描叙")
     private String contentB;
 
-  /*  @Column(name = "member_check")
-    @Desc(value = "用户审核结果,0未审核，1审核通过，2审核不通过")
-    @ApiModelProperty("用户审核结果,0未审核，1审核通过，2审核不通过")
-    private Integer memberCheck;
-
-    @Column(name = "worker_check")
-    @Desc(value = "工匠审核结果,0未审核，1审核通过，2审核不通过")
-    @ApiModelProperty("工匠审核结果,0未审核，1审核通过，2审核不通过")
-    private Integer workerCheck;*/
-
-   /* @Column(name = "sup_check")
-    @Desc(value = "管家审核结果,0未审核，1审核通过，2审核不通过")
-    @ApiModelProperty("管家审核结果,0未审核，1审核通过，2审核不通过")
-    private Integer supCheck;*/
-
     @Column(name = "state")
-    @Desc(value = "初始0处理中,1被取消,2全部通过,3管家补退人工操作被取消重新提交,4补人工支付完成或退人工退款完成")
-    @ApiModelProperty("初始0处理中,1被取消,2全部通过,3管家补退人工操作被取消重新提交,4补人工支付完成或退人工退款完成")
+    @Desc(value = "初始0处理中,1被取消,2工人业主管家的全部通过,3管家补退人工操作被取消重新提交,4补人工支付完成或退人工退款完成")
+    @ApiModelProperty("初始0处理中,1被取消,2工人业主管家的全部通过,3管家补退人工操作被取消重新提交,4补人工支付完成或退人工退款完成")
     private Integer state;
 }

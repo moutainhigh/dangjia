@@ -1,7 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.worker.IWithdrawDepositMapper">
+    <sql id="Base_columns">
+    id,
+    name,
+    worker_id as workerId,
+    state,
+    money,
+    bank_name as bankName,
+    card_number as cardNumber,
+    processing_date as processingDate,
+    create_date as createDate,
+    modify_date as modifyDate
+    </sql>
+
+    <!--查询所有提现申请 -->
+    <select id="getAllWithdraw" resultType="com.dangjia.acg.modle.worker.WithdrawDeposit">
+        select
+        <include refid="Base_columns"/>
+        from dj_worker_withdraw_deposit
+        ORDER BY create_date DESC
+    </select>
+
 </mapper>
 

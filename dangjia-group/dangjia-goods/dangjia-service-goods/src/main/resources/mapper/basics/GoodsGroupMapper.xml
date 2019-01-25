@@ -160,7 +160,7 @@
 	<!-- 根据关联组id和货品id修改关联关系-->
 	<update id="updateGroupLink" parameterType="com.dangjia.acg.modle.basics.GroupLink">
 		UPDATE dj_basics_group_link
-		SET state=#{state}，modify_date=#{modifyDate}
+		SET state=#{state},modify_date=#{modifyDate}
 		where group_id=#{groupId}
 		and  product_id=#{productId}
 	</update>

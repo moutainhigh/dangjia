@@ -26,18 +26,12 @@ public interface ITechnologyMapper extends Mapper<Technology> {
      */
     List<Technology> queryTechnologyList(@Param("goodsId") String goodsId);
 
+    /**管家巡查验收工艺*/
+    List<Technology> patrolList(@Param("goodsId") String goodsId);
+
     void deleteById(String id);
 
     List<Technology> query(@Param("workerTypeId") String workerTypeId ,@Param("name") String name,@Param("materialOrWorker")Integer materialOrWorker);
-
-//    //新增人工商品关联工艺
-//    void insertWokerTechnology(WorkerTechnology workerTechnology);
-
-//    //删除人工商品关联工艺
-//    void deleteWokerTechnologyByWgId(@Param("worker_goods_id") String worker_goods_id);
-
-//    //根据商品id查询人工商品关联工艺关系
-//    List<WorkerTechnology> queryWokerTechnologyByWgId(@Param("worker_goods_id") String worker_goods_id);
 
     //根据商品id查询人工商品关联工艺实体
     List<Technology> queryTechnologyByWgId(@Param("goodsId") String goodsId);

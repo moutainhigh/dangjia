@@ -64,11 +64,11 @@ public class GoodsGroupService {
                 }
                 groupLink.setProductId(obj.getString("productId"));//货品id
                 groupLink.setProductName(product.getName());//货品名称
-                groupLink.setIsSwitch(0);//可切换性0:可切换；不可切换
+                groupLink.setIsSwitch(1);//可切换性0:可切换；不可切换
                 groupLink.setGoodsId(product.getGoodsId());
                 groupLink.setGoodsName(iGoodsMapper.selectByPrimaryKey(product.getGoodsId()) == null ? "" : iGoodsMapper.selectByPrimaryKey(product.getGoodsId()).getName());
-                iGoodsGroupMapper.addGroupLink(groupLink);//新增关联组货品关系
-                List<GroupLink> groupLinkList = iGoodsGroupMapper.queryGroupLinkByPid(product.getId());
+                iGroupLinkMapper.addGroupLink(groupLink);//新增关联组货品关系
+                List<GroupLink> groupLinkList = iGroupLinkMapper.queryGroupLinkByPid(product.getId());
                 if (groupLinkList.size() >= 2) {//根据货品查询关联关系，超过两条则都修改为不可切换
                     iGoodsGroupMapper.updateGLinkByPid(product.getId(), 1);
                 }
@@ -345,7 +345,7 @@ public class GoodsGroupService {
                     groupLink.setGoodsId(product.getGoodsId());
                     groupLink.setIsSwitch(1);//默认不可切换
                     groupLink.setGoodsName(iGoodsMapper.selectByPrimaryKey(product.getGoodsId()) == null ? "" : iGoodsMapper.selectByPrimaryKey(product.getGoodsId()).getName());
-                    iGoodsGroupMapper.addGroupLink(groupLink);//新增关联组货品关系
+                    iGroupLinkMapper.addGroupLink(groupLink);//新增关联组货品关系
 //                    iGoodsGroupMapper.insertSelective(groupLink);//新增关联组货品关系
                     isUpdateProduct = true;
                 }
@@ -358,8 +358,8 @@ public class GoodsGroupService {
             if (StringUtils.isNotBlank(deleteProductIds)) {
                 deleteProductIdArr = jsonObject.getString("deleteProductIds").split(",");
                 for (int i = 0; i < deleteProductIdArr.length; i++) {
-                    GroupLink deleteGL = iGoodsGroupMapper.queryGroupLinkByGroupIdAndPid(goodsGroup.getId(), deleteProductIdArr[i]);
-                    iGoodsGroupMapper.deleteGroupLinkById(deleteGL.getId());
+                    GroupLink deleteGL = iGroupLinkMapper.queryGroupLinkByGroupIdAndPid(goodsGroup.getId(), deleteProductIdArr[i]);
+                    iGroupLinkMapper.deleteGroupLinkById(deleteGL.getId());
                     isUpdateProduct = true;
                 }
             }
@@ -610,9 +610,9 @@ public class GoodsGroupService {
                 productList.add(iProductMapper.selectByPrimaryKey(groupLink.getProductId()));
             }
             iGoodsGroupMapper.deleteByPrimaryKey(goodsGroupId);
-            iGoodsGroupMapper.deleteGroupLink(goodsGroupId);
+            iGroupLinkMapper.deleteGroupLink(goodsGroupId);
             for (Product product : productList) {
-                List<GroupLink> groupLinkList = iGoodsGroupMapper.queryGroupLinkByPid(product.getId());
+                List<GroupLink> groupLinkList = iGroupLinkMapper.queryGroupLinkByPid(product.getId());
                 if (groupLinkList.size() >= 2) {//根据货品查询关联关系，超过两条则都修改为不可切换
                     iGoodsGroupMapper.updateGLinkByPid(product.getId(), 1);
                 } else {

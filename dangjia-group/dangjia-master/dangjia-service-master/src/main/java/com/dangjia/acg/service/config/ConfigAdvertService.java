@@ -38,14 +38,16 @@ public class ConfigAdvertService {
         Example example = new Example(ConfigAdvert.class);
         Example.Criteria criteria=example.createCriteria();
         if(!CommonUtil.isEmpty(configAdvert.getAppType())) {
-            criteria.andEqualTo("appType", configAdvert.getAppType());
+            criteria.andEqualTo(ConfigAdvert.APP_TYPE, configAdvert.getAppType());
+            criteria.andEqualTo(ConfigAdvert.IS_SHOW,true);
         }
         if(!CommonUtil.isEmpty(configAdvert.getCityId())) {
-            criteria.andEqualTo("cityId", configAdvert.getCityId());
+            criteria.andEqualTo(ConfigAdvert.CITY_ID, configAdvert.getCityId());
         }
         if(!CommonUtil.isEmpty(configAdvert.getAdvertType())) {
-            criteria.andEqualTo("advertType", configAdvert.getAdvertType());
+            criteria.andEqualTo(ConfigAdvert.ADVERT_TYPE, configAdvert.getAdvertType());
         }
+
         List<ConfigAdvert> list = configAdvertMapper.selectByExample(example);
         List<Map> listMap=new ArrayList<>();
         for (ConfigAdvert v:list){

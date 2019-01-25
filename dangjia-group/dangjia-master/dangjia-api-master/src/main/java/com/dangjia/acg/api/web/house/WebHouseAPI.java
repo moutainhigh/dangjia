@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.web.house;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.modle.house.House;
@@ -35,4 +36,8 @@ public interface WebHouseAPI {
     @PostMapping("web/house/setHouseInfo")
     @ApiOperation(value = "设置房子为精选或者休眠", notes = "设置房子为精选或者休眠")
     ServerResponse setHouseInfo(@RequestParam("request") HttpServletRequest request,@RequestParam("house") House house);
+
+    @PostMapping("web/house/queryConstructionRecord")
+    @ApiOperation(value = "施工记录", notes = "施工记录")
+    ServerResponse queryConstructionRecord(@RequestParam("houseId")String houseId,@RequestParam("pageDTO") PageDTO pageDTO);
 }

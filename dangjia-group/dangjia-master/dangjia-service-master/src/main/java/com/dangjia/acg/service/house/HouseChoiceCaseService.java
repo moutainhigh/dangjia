@@ -11,6 +11,7 @@ import com.dangjia.acg.modle.activity.Activity;
 import com.dangjia.acg.modle.house.HouseChoiceCase;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -39,6 +40,7 @@ public class HouseChoiceCaseService {
      * @return
      */
     public ServerResponse getHouseChoiceCases(HttpServletRequest request, PageDTO pageDTO,HouseChoiceCase houseChoiceCase) {
+        String jdAddress= configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Example example = new Example(HouseChoiceCase.class);
         Example.Criteria criteria=example.createCriteria();
         if(!CommonUtil.isEmpty(houseChoiceCase.getCityId())) {
@@ -46,6 +48,7 @@ public class HouseChoiceCaseService {
         }
 //        //随机排序
         if(request.getParameter("isRand")!=null){
+            criteria.andEqualTo(HouseChoiceCase.DATA_STATUS, 0);
             example.setOrderByClause(" rand() ");
             pageDTO.setPageNum(0);
         }else {
@@ -57,8 +60,19 @@ public class HouseChoiceCaseService {
         PageInfo pageResult = new PageInfo(list);
         for (HouseChoiceCase v:list){
             Map map= BeanUtils.beanToMap(v);
-            map.put("imageUrl",v.getImage());
-            map.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+v.getImage());
+            if(!CommonUtil.isEmpty(v.getAddress())) {
+                String[] address = StringUtils.split(v.getAddress(), ",");
+                String[] addressUrl = StringUtils.split(v.getAddress(), ",");
+                map.put("addressUrl", addressUrl);
+                for (int i = 0; i < address.length; i++) {
+                    address[i] = jdAddress + address[i];
+                }
+                map.put("address", address);
+            }
+            if(!CommonUtil.isEmpty(v.getImage())) {
+                map.put("imageUrl", v.getImage());
+                map.put("image", jdAddress + v.getImage());
+            }
             listmap.add(map);
         }
         pageResult.setList(listmap);
@@ -70,7 +84,9 @@ public class HouseChoiceCaseService {
      * @return
      */
     public ServerResponse delHouseChoiceCase(HttpServletRequest request, String id) {
-        if(this.houseChoiceCaseMapper.deleteByPrimaryKey(String.valueOf(id))>0){
+        Example example = new Example(HouseChoiceCase.class);
+        example.createCriteria().andEqualTo(HouseChoiceCase.HOUSE_ID,id);
+        if(this.houseChoiceCaseMapper.deleteByExample(example)>0){
             return ServerResponse.createBySuccessMessage("ok");
         }else{
             return ServerResponse.createByErrorMessage("删除失败，请您稍后再试");

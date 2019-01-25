@@ -22,7 +22,6 @@
 		cost,
 		description,
 		shop_count as shopCount,
-		actuarial_quantity as actuarialQuantity,
 		unit_name as unitName,
 		total_price as totalPrice,
 		group_type as groupType,
@@ -40,6 +39,8 @@
 		    <include refid="all_columns"/>
 		FROM dj_actuary_budget_material
 		where
+		product_type = 0
+		and
 		house_id = #{houseId}
 		<if test = "productName!=null and productName!=''">
 			and

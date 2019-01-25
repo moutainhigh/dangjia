@@ -239,16 +239,21 @@ public class OrderService {
     }
 
     /**
-     * 管家确认要货
+     * 管家要服务
+     * 工匠要工序材料
      * 提交到后台材料员审核
      */
-    public ServerResponse confirmOrderSplit(String houseId){
+    public ServerResponse confirmOrderSplit(String userToken,String houseId){
         try{
+            AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+            Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+
             Example example = new Example(OrderSplit.class);
-            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0);
+            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
+                    .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());;
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             if (orderSplitList.size() == 0){
-                return ServerResponse.createByErrorMessage("大管家还没有生成要货单");
+                return ServerResponse.createByErrorMessage("没有生成要货单");
             }else if (orderSplitList.size() > 1){
                 return ServerResponse.createByErrorMessage("生成多个未提交要货单,异常联系平台部");
             }else {
@@ -284,10 +289,14 @@ public class OrderService {
     /**
      * 返回已添加要货单明细
      */
-    public ServerResponse getOrderItemList(String houseId){
+    public ServerResponse getOrderItemList(String userToken,String houseId){
         try{
+            AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+            Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+
             Example example = new Example(OrderSplit.class);
-            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0);
+            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
+            .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             if (orderSplitList.size() == 0){
                 return ServerResponse.createBySuccessMessage("没有生成中要货单");
@@ -310,13 +319,14 @@ public class OrderService {
     }
 
     /**
+     * 管家要服务
+     * 工匠要工序材料
      * 提交到要货
      */
     public ServerResponse saveOrderSplit(String productArr, String houseId, String userToken){
         try{
             AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-            //管家信息
-            Member supervisor = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+            Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
 
             Example example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0);
@@ -334,9 +344,10 @@ public class OrderService {
                 orderSplit.setNumber("dj" + 200000 + orderSplitMapper.selectCountByExample(example));//要货单号
                 orderSplit.setHouseId(houseId);
                 orderSplit.setApplyStatus(0);//后台审核状态：0生成中, 1申请中, 2通过, 3不通过 后台(材料员)
-                orderSplit.setSupervisorId(supervisor.getId());
-                orderSplit.setSupervisorName(supervisor.getName());
-                orderSplit.setSupervisorTel(supervisor.getMobile());
+                orderSplit.setSupervisorId(worker.getId());
+                orderSplit.setSupervisorName(worker.getName());
+                orderSplit.setSupervisorTel(worker.getMobile());
+                orderSplit.setWorkerTypeId(worker.getWorkerTypeId());
                 orderSplitMapper.insert(orderSplit);
             }
 
@@ -358,7 +369,7 @@ public class OrderService {
                 orderSplitItem.setShopCount(warehouse.getShopCount());
                 orderSplitItem.setNum(num);
                 orderSplitItem.setUnitName(warehouse.getUnitName());
-                orderSplitItem.setTotalPrice(warehouse.getPrice() * num);//单项总价
+                orderSplitItem.setTotalPrice(warehouse.getPrice() * num);//单项总价 销售价
                 orderSplitItem.setProductType(warehouse.getProductType());
                 orderSplitItem.setCategoryId(warehouse.getCategoryId());
                 orderSplitItem.setImage(warehouse.getImage());//货品图片

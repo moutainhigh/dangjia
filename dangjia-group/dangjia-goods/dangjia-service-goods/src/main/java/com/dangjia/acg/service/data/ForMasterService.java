@@ -3,12 +3,14 @@ package com.dangjia.acg.service.data;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.sup.ISupplierMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.sup.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -38,6 +40,13 @@ public class ForMasterService {
     private IGoodsMapper goodsMapper;
     @Autowired
     private IBrandSeriesMapper brandSeriesMapper;
+    @Autowired
+    private ISupplierMapper supplierMapper;
+
+
+    public Supplier getSupplier(String supplierId){
+        return supplierMapper.selectByPrimaryKey(supplierId);
+    }
 
     /**
      * 增加退数量

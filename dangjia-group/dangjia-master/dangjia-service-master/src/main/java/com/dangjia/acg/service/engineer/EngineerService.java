@@ -4,6 +4,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.core.HouseWorker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,9 +23,18 @@ public class EngineerService {
     @Autowired
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
+    private IMemberMapper memberMapper;
+    @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IHouseWorkerOrderMapper houseWorkerOrderMapper;
+
+    /**
+     * 工匠列表
+     */
+    public ServerResponse artisanList(){
+        return null;
+    }
 
 
     /**

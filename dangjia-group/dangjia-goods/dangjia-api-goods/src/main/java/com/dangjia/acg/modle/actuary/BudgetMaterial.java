@@ -64,10 +64,10 @@ public class BudgetMaterial extends BaseEntity{
 	private String description; //页面描述 备注
 
 	@Column(name = "shop_count")
-	private Double shopCount;//购买总数
+	private Double shopCount;//数量
 
-	@Column(name = "actuarial_quantity")
-	private Double actuarialQuantity;//精算量
+	/*@Column(name = "actuarial_quantity")
+	private Double actuarialQuantity;*///精算量
 
 	@Column(name = "unit_name")
 	private String unitName;//单位
@@ -76,7 +76,7 @@ public class BudgetMaterial extends BaseEntity{
 	private Double totalPrice; //总价
 
 	@Column(name = "group_type")
-	private String groupType; //null：单品；有值：关联组合
+	private String groupType; //null：单品；有值：关联组合  （如果 null 并且 goods_group_id 不为null， 说明是关联组的单品则不参与关联组切换）
 
 	@Column(name = "product_type")
 	private Integer productType; //0：材料；1：服务

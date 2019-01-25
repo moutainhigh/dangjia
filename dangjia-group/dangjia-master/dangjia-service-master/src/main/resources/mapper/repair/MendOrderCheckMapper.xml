@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.repair.IMendOrderCheckMapper">
+
+    <sql id="all_columns">
+		id,
+		mend_order_id as mendOrderId,
+		role_type as roleType,
+		state,
+		auditor_id as auditorId,
+		sort,
+		data_status as dataStatus,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
+	<select id="getByMendOrderId" resultType="com.dangjia.acg.modle.repair.MendOrderCheck">
+		SELECT
+			<include refid="all_columns"/>
+		FROM dj_repair_mend_order_check
+		where
+			mend_order_id=#{mendOrderId}
+		and
+			role_type = #{roleType}
+	</select>
+
+
+</mapper>
+

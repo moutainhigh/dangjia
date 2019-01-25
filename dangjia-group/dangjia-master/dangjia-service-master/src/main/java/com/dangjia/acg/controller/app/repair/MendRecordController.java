@@ -23,8 +23,8 @@ public class MendRecordController implements MendRecordAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse mendOrderDetail(String mendOrderId){
-        return mendRecordService.mendOrderDetail(mendOrderId);
+    public ServerResponse mendOrderDetail(String mendOrderId,Integer type){
+        return mendRecordService.mendOrderDetail(mendOrderId,type);
     }
 
     /**
@@ -37,8 +37,7 @@ public class MendRecordController implements MendRecordAPI {
     }
 
     /**
-     * 补退记录
-     *     //0:补材料;1:补人工;2:退材料;3:退人工
+     * 要补退记录
      */
     @Override
     @ApiMethod

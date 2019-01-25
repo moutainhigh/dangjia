@@ -30,11 +30,13 @@ import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
+import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.design.HouseDesignImage;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.HouseChoiceCase;
 import com.dangjia.acg.modle.house.HouseExpend;
 import com.dangjia.acg.modle.house.ModelingLayout;
 import com.dangjia.acg.modle.matter.RenovationManual;
@@ -44,6 +46,7 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.City;
+import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.member.GroupInfoService;
@@ -117,6 +120,10 @@ public class HouseService {
     private ITechnologyRecordMapper technologyRecordMapper;
     @Autowired
     private ICustomerMapper iCustomerMapper;
+    @Autowired
+    private HouseChoiceCaseService houseChoiceCaseService;
+    @Autowired
+    private IMendOrderMapper mendOrderMapper;
 
     /**
      * 切换房产
@@ -166,7 +173,30 @@ public class HouseService {
         example.createCriteria().andEqualTo("workType", 3).andEqualTo("houseId", houseId);
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         task = houseFlowList.size();
-        //TODO 还有补货 补人工 待审核待查询
+
+        House house = iHouseMapper.selectByPrimaryKey(houseId);
+
+        example = new Example(MendOrder.class);
+        example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
+                .andEqualTo(MendOrder.STATE, 3);//补材料审核状态全通过
+        List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
+        task += mendOrderList.size();
+
+        example = new Example(MendOrder.class);
+        example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 1)
+                .andEqualTo(MendOrder.STATE, 3);//审核状态
+        mendOrderList = mendOrderMapper.selectByExample(example);
+        task += mendOrderList.size();
+
+        if(house.getDesignerOk() == 5 || house.getDesignerOk() == 2){
+            task ++;
+        }
+        if(house.getBudgetOk() == 2){
+            task ++;
+        }
+        //验收任务
+        List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getMemberCheckList(houseId);
+        task += houseFlowApplyList.size();
 
         return task;
     }
@@ -236,6 +266,41 @@ public class HouseService {
         /**展示各种进度*/
         List<HouseFlow> houseFlowList = houseFlowMapper.getAllFlowByHouseId(houseId);
         List<NodeDTO> courseList = new ArrayList<NodeDTO>();
+        if (house.getDecorationType() == 2) {
+            NodeDTO nodeDTO = new NodeDTO();
+            nodeDTO.setNameA("设计师");
+            nodeDTO.setColor("#F0643C");
+            nodeDTO.setNameC("自带设计");
+            nodeDTO.setState(0);
+            nodeDTO.setTotal(8);
+            if (house.getDesignerOk() == 1) {
+                nodeDTO.setRank(2);
+                nodeDTO.setNameB("待上传平面图");
+            } else if (house.getDesignerOk() == 5) {
+                nodeDTO.setRank(3);
+                nodeDTO.setNameB("待审核平面图");
+            } else if (house.getDesignerOk() == 6) {
+                nodeDTO.setRank(4);
+                nodeDTO.setNameB("修改平面图");
+            } else if (house.getDesignerOk() == 7) {
+                nodeDTO.setRank(5);
+                nodeDTO.setNameB("待上传施工图");
+            } else if (house.getDesignerOk() == 2) {
+                nodeDTO.setRank(6);
+                nodeDTO.setNameB("待审核施工图");
+            } else if (house.getDesignerOk() == 8) {
+                nodeDTO.setRank(7);
+                nodeDTO.setNameB("修改施工图");
+            } else if (house.getDesignerOk() == 3) {
+                nodeDTO.setRank(8);
+                nodeDTO.setNameB("设计完成");
+            } else {
+                nodeDTO.setRank(1);
+                nodeDTO.setNameB("未开始");
+            }
+            courseList.add(nodeDTO);
+        }
+
         for (HouseFlow houseFlow : houseFlowList) {
             NodeDTO nodeDTO = new NodeDTO();
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
@@ -314,12 +379,12 @@ public class HouseService {
                 } else if (houseFlow.getWorkType() == 3) {
                     nodeDTO.setRank(3);
                     nodeDTO.setNameB("待支付");
-                } else if (houseFlow.getWorkType() == 4) {
-                    nodeDTO.setRank(4);
-                    nodeDTO.setNameB("监工中");
                 } else if (houseFlow.getWorkSteta() == 2) {
                     nodeDTO.setRank(5);
                     nodeDTO.setNameB("整体完工");
+                } else if (houseFlow.getWorkType() == 4) {
+                    nodeDTO.setRank(4);
+                    nodeDTO.setNameB("监工中");
                 }
             } else {
                 //workType 1还没有发布,2等待被抢，3有工匠抢单,
@@ -388,13 +453,33 @@ public class HouseService {
      */
     public ServerResponse setHouseInfo(House house) {
         try {
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                    .getRequest();
             House srcHouse = iHouseMapper.selectByPrimaryKey(house.getId());
             if (srcHouse == null)
                 return ServerResponse.createByErrorMessage("没有该房子");
-            if (house.getShowHouse() != -1)
+            if (house.getShowHouse() != -1) {
                 srcHouse.setShowHouse(house.getShowHouse());
-            if (house.getVisitState() != -1)
+                if (house.getShowHouse() == 1) {
+                    HouseChoiceCase houseChoiceCase = new HouseChoiceCase();
+                    houseChoiceCase.setDataStatus(1);
+                    houseChoiceCase.setCityId(srcHouse.getCityId());
+                    houseChoiceCase.setHouseId(srcHouse.getId());
+                    houseChoiceCase.setImage(srcHouse.getImage());
+                    houseChoiceCase.setMoney(srcHouse.getMoney());
+                    houseChoiceCase.setTitle(srcHouse.getNoNumberHouseName());
+                    houseChoiceCase.setLabel(StringUtils.replaceAll(srcHouse.getStyle(), "、", "|"));
+                    houseChoiceCase.setSource("房源来自当家装修精选推荐");
+                    houseChoiceCaseService.addHouseChoiceCase(request, houseChoiceCase);
+                } else {
+                    houseChoiceCaseService.delHouseChoiceCase(request, house.getId());
+                }
+            }
+            if (house.getVisitState() != -1) {
                 srcHouse.setVisitState(house.getVisitState());
+            }
+            if (!house.getCustomSort().equals("ignore") && StringUtils.isNoneBlank(house.getCustomSort()))
+                srcHouse.setCustomSort(house.getCustomSort());
             iHouseMapper.updateByPrimaryKeySelective(srcHouse);
             return ServerResponse.createBySuccessMessage("保存成功");
         } catch (
@@ -503,7 +588,7 @@ public class HouseService {
             }
 
             //确认开工后，要修改 业主客服阶段 为已下单
-            Customer customer = iCustomerMapper.getCustomerByMemberId(house.getMemberId(), -1);
+            Customer customer = iCustomerMapper.getCustomerByMemberId(house.getMemberId());
             customer.setStage(4);//阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单
             iCustomerMapper.updateByPrimaryKeySelective(customer);
         } catch (Exception e) {
@@ -585,6 +670,9 @@ public class HouseService {
     public ServerResponse setHouseBudgetOk(String houseId, Integer budgetOk) {
         try {
             House house = iHouseMapper.selectByPrimaryKey(houseId);
+            if (house.getBudgetOk() == 3) {
+                return ServerResponse.createBySuccessMessage("精算已审核通过");
+            }
             if (house == null) {
                 return ServerResponse.createByErrorMessage("修改房子精算状态失败");
             }
@@ -599,7 +687,10 @@ public class HouseService {
                 workerDetail.setWorkerName(memberMapper.selectByPrimaryKey(hwo.getWorkerId()).getName());
                 workerDetail.setHouseId(hwo.getHouseId());
                 workerDetail.setMoney(hwo.getWorkPrice());
-                workerDetail.setState(0);//进钱
+                workerDetail.setState(0);//进工钱
+                workerDetail.setHaveMoney(hwo.getHaveMoney());
+                workerDetail.setHouseWorkerOrderId(hwo.getId());
+                workerDetail.setApplyMoney(hwo.getWorkPrice());
                 workerDetailMapper.insert(workerDetail);
 
                 //通知大管家抢单
@@ -607,6 +698,9 @@ public class HouseService {
                 houseFlow.setWorkType(2);//待抢单
                 houseFlow.setReleaseTime(new Date());//发布时间
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+                configMessageService.addConfigMessage(null,"gj", "workerTypeId3"+houseFlow.getCityId(),"0","新的装修订单",DjConstants.PushMessage.SNAP_UP_ORDER ,"4");
+               //推送消息给业主等待大管家抢单
+                configMessageService.addConfigMessage(null,"zx", house.getMemberId(),"0","等待大管家抢单",String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION,house.getHouseName()) ,"");
 
                 /**
                  * 在这里算出大管家每次巡查拿的钱 和 每次验收拿的钱 记录到大管家的 houseflow里 houseflow,新增两个字段.

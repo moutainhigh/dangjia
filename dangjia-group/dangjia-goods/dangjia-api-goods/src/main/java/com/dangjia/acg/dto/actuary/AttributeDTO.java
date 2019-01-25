@@ -12,6 +12,7 @@ import java.util.List;
 @Data
 public class AttributeDTO {
 
+    private String id;//id
     private String name;//名称
     private List<AttributeValueDTO> valueDTOList;//属性选项对应多个属性值
 }
