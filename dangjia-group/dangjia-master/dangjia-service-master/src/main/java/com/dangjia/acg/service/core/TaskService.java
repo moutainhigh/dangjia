@@ -87,7 +87,7 @@ public class TaskService {
         if (houseList.size() > 1) {
             buttonDTO.setState(2);
             for (House house : houseList) {
-                if (house.getVisitState() != 1) {
+                if (house.getVisitState() == 0 || house.getVisitState() == 2) {
                     buttonDTO.setState(3);
                     buttonDTO.setHouseType(house.getHouseType());
                     buttonDTO.setDrawings(house.getDrawings());
@@ -102,7 +102,7 @@ public class TaskService {
             buttonDTO.setHouseId(houseId);
             buttonDTO.setTaskList(getTask(houseId, userToken));
         } else if (houseList.size() == 1) {
-            buttonDTO = getButton(houseList.get(0).getId(), userToken);
+            buttonDTO = this.getButton(houseList.get(0).getId(), userToken);
         } else {
             buttonDTO.setState(0);
         }
@@ -115,7 +115,7 @@ public class TaskService {
     private ButtonDTO getButton(String houseId, String userToken) {
         ButtonDTO button = new ButtonDTO();
         House house = houseMapper.selectByPrimaryKey(houseId);
-        if (house.getVisitState() != 1) {//处于回访阶段
+        if (house.getVisitState() == 0 ) {//处于回访阶段
             button.setState(1);
             button.setHouseType(house.getHouseType());
             button.setDrawings(house.getDrawings());

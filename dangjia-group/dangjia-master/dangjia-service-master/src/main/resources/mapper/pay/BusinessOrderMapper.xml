@@ -30,6 +30,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		ORDER BY create_date desc
 	</select>
 
+	<!-- 根据所有订单查询 -->
+	<select id="getAllBusinessOrder" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.pay.BusinessOrder">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_pay_business_order
+		ORDER BY create_date desc
+	</select>
+
     <!-- 根据orderId查询 -->
     <select id="byNumber" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.pay.BusinessOrder">
         SELECT

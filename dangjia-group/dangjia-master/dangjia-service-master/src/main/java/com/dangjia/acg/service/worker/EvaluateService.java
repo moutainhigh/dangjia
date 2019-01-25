@@ -31,8 +31,6 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
@@ -157,8 +155,7 @@ public class EvaluateService {
     /**
      * 管家审核通过工匠完工申请
      */
-    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, timeout = 30000, rollbackFor = {
-            RuntimeException.class, Exception.class })
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse checkOk(String houseFlowApplyId,String content,int star){
         try{
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
@@ -211,6 +208,7 @@ public class EvaluateService {
 
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
@@ -219,6 +217,7 @@ public class EvaluateService {
     /**
      * 业主评价管家完工 最后完工
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveEvaluateSupervisor(String houseFlowApplyId,String content,int star){
         try{
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
@@ -252,6 +251,7 @@ public class EvaluateService {
             configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","业主评价",String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE,house.getHouseName()) ,"6");
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
@@ -336,15 +336,13 @@ public class EvaluateService {
 
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
-            e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }
 
     /**业主对工人评价之后计算积分*/
-    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, timeout = 30000, rollbackFor = {
-            RuntimeException.class, Exception.class })
     public void updateIntegral(Evaluate evaluate){
         Member worker = memberMapper.selectByPrimaryKey(evaluate.getWorkerId());
         String desc="";

@@ -17,4 +17,5 @@ import java.util.List;
 public interface IActivityRedPackRecordMapper extends Mapper<ActivityRedPackRecord> {
 
     List<ActivityRedPackRecordDTO> queryActivityRedPackRecords(ActivityRedPackRecord activityRedPackRecord);
+    ActivityRedPackRecord getRedPackRecordsByBusinessOrderNumber(String businessOrderNumber);
 }

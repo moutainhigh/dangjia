@@ -2,13 +2,18 @@ package com.dangjia.acg.service.repair;
 
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
+import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.ChangeOrder;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +34,10 @@ public class ChangeOrderService {
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private RedisClient redisClient;
+    @Autowired
+    private IHouseMapper houseMapper;
+    @Autowired
+    private ConfigMessageService configMessageService;
 
     /**
      * 管家审核变更单
@@ -43,6 +52,15 @@ public class ChangeOrderService {
             changeOrder.setSupId(member.getId());
             changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
 
+            House house = houseMapper.selectByPrimaryKey(changeOrder.getHouseId());
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(changeOrder.getWorkerTypeId());
+            if (changeOrder.getType() == 1){//补
+                configMessageService.addConfigMessage(null,"gj",house.getMemberId(),"0","工匠补人工申请",String.format
+                        (DjConstants.PushMessage.STEWARD_B_CHECK_WORK,house.getHouseName(),workerType.getName()) ,"");
+            }else {//退
+                configMessageService.addConfigMessage(null,"gj",house.getMemberId(),"0","业主退人工变更",String.format
+                        (DjConstants.PushMessage.STEWARD_T_CHECK_WORK,house.getHouseName()) ,"");
+            }
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
             e.printStackTrace();

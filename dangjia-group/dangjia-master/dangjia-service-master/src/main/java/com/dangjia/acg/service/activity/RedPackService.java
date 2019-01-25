@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -319,7 +320,7 @@ public class RedPackService {
                         user = memberMapper.selectByPrimaryKey(p);
                     }
                     if(user==null){
-                        return ServerResponse.createByErrorMessage("用户（"+p+"）未注册！");
+                        return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(),"用户（"+p+"）未注册！");
                     }
                     //指定优惠券规则发放
                     if(!StringUtils.isEmpty(redPackRuleIds)) {
