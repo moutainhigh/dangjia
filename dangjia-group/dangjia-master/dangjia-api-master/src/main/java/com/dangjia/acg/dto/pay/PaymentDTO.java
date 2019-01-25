@@ -24,5 +24,6 @@ public class PaymentDTO {
     private String businessOrderNumber;//订单号
     private String houseId;
     private String taskId;
+    private String info;//支付温馨提示用于
     private int type;
 }

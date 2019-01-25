@@ -113,6 +113,7 @@ public class WalletService {
             workerDetail.setWorkerName(worker.getName());
             workerDetail.setMoney(new BigDecimal(money));
             workerDetail.setState(1);//出
+            workerDetail.setWalletMoney(worker.getHaveMoney());
             workerDetailMapper.insert(workerDetail);
 
             worker.setHaveMoney(worker.getHaveMoney().subtract(new BigDecimal(money)));//更新已有钱
@@ -157,6 +158,7 @@ public class WalletService {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);//图片地址
             Member member = accessToken.getMember();
+            member = memberMapper.selectByPrimaryKey(member.getId());
             Example example = new Example(RewardPunishRecord.class);
             example.createCriteria().andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId());
             List<RewardPunishRecord> recordList = rewardPunishRecordMapper.selectByExample(example);
@@ -254,8 +256,8 @@ public class WalletService {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member member = accessToken.getMember();
             PageHelper.startPage(pageNum, pageSize);
-            PageInfo pageResult = new PageInfo();
-            List<WorkerDetail> outDetailList = new ArrayList<WorkerDetail>();
+            PageInfo pageResult;
+            List<WorkerDetail> outDetailList;
             List<DetailDTO> detailDTOList = new ArrayList<DetailDTO>();
             if(type == 0){//总支出
                 outDetailList = workerDetailMapper.outDetail(member.getId());
@@ -299,6 +301,7 @@ public class WalletService {
         try{
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member member = accessToken.getMember();
+            member = memberMapper.selectByPrimaryKey(member.getId());
             WalletDTO walletDTO = new WalletDTO();
             Double workerPrice = workerDetailMapper.getCountWorkerDetailByWid(member.getId());
             Double out = workerDetailMapper.outMoney(member.getId());

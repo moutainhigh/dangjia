@@ -2,6 +2,7 @@ package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -11,6 +12,7 @@ import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
+import com.dangjia.acg.modle.sup.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -33,6 +35,8 @@ public class SplitDeliverService {
     private IOrderSplitItemMapper orderSplitItemMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private ForMasterAPI forMasterAPI;
 
 
     /**
@@ -136,12 +140,16 @@ public class SplitDeliverService {
 
     /**
      * 收货列表
-     * shipState  0待发货,1已发待收货,2已收货,3取消
+     * shipState  0待发货,1已发待收货,2已收货,3取消  5所有
      */
     public ServerResponse splitDeliverList(String houseId, int shipState){
         try{
             Example example = new Example(SplitDeliver.class);
-            example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId).andEqualTo(SplitDeliver.SHIP_STATE,shipState);
+            if (shipState == 5){
+                example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId);
+            }else {
+                example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId).andEqualTo(SplitDeliver.SHIP_STATE,shipState);
+            }
             List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
             List<SplitDeliverDTO> splitDeliverDTOList = new ArrayList<>();
             for (SplitDeliver splitDeliver : splitDeliverList){
@@ -150,6 +158,11 @@ public class SplitDeliverService {
                 splitDeliverDTO.setCreateDate(splitDeliver.getCreateDate());
                 splitDeliverDTO.setShipState(splitDeliver.getShipState());
                 splitDeliverDTO.setNumber(splitDeliver.getNumber());
+                splitDeliverDTO.setSendTime(splitDeliver.getSendTime());//发货时间
+                splitDeliverDTO.setModifyDate(splitDeliver.getModifyDate());//收货时间
+                Supplier supplier = forMasterAPI.getSupplier(splitDeliver.getSupplierId());
+                splitDeliverDTO.setSupMobile(supplier.getTelephone());
+                splitDeliverDTO.setSupName(supplier.getName());
                 splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
 
                 example = new Example(OrderSplitItem.class);

@@ -48,14 +48,14 @@ public class HouseDistribution extends BaseEntity {
 	@ApiModelProperty("用户的性别，值为1时是男性，值为2时是女性，值为0时是未知")
 	private String sex;//
 
-	@Column(name = "province")
-	@Desc(value = "用户个人资料填写的省份")
-	@ApiModelProperty("用户个人资料填写的省份")
-	private String province;//
+	@Column(name = "number")
+	@Desc(value = "支付订单号")
+	@ApiModelProperty("支付订单号")
+	private String number;
 
 	@Column(name = "city")
-	@Desc(value = "普通用户个人资料填写的城市")
-	@ApiModelProperty("普通用户个人资料填写的城市")
+	@Desc(value = "用户所在的城市")
+	@ApiModelProperty("用户所在的城市")
 	private String city;//
 
 

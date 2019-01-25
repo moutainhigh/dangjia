@@ -6,6 +6,7 @@ import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.sup.Supplier;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -23,6 +24,10 @@ import java.util.List;
 @Api(description = "给master提供精算数据")
 @FeignClient("dangjia-service-goods")
 public interface ForMasterAPI {
+
+    @PostMapping("/data/forMaster/getSupplier")
+    @ApiOperation(value = "查询供应商", notes = "查询供应商")
+    Supplier getSupplier(@RequestParam("supplierId")String supplierId);
 
     @PostMapping("/data/forMaster/backCount")
     @ApiOperation(value = "增加退数量", notes = "增加退数量")

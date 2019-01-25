@@ -27,6 +27,11 @@ public class ConfigAdvert extends BaseEntity {
     @ApiModelProperty("来源应用（1:业主端，2:工匠端）")
     private String appType;
 
+    @Column(name = "is_show")
+    @Desc(value = "是否显示")
+    @ApiModelProperty("是否显示")
+    private boolean isShow;
+
     @Column(name = "name")
     @Desc(value = "广告名称")
     @ApiModelProperty("广告名称")
@@ -43,8 +48,8 @@ public class ConfigAdvert extends BaseEntity {
     private String advertType;
 
     @Column(name = "type")
-    @Desc(value = "动作类型 0:直接跳转URL，1:跳转支付，2:只显示")
-    @ApiModelProperty("动作类型 0:直接跳转URL，1:跳转支付，2:只显示")
+    @Desc(value = "动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面，5:工匠端施工界面）")
+    @ApiModelProperty("动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面，5:工匠端施工界面）")
     private Integer type;
 
     @Column(name = "data")

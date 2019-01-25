@@ -45,7 +45,7 @@ public class WorkerDetail extends BaseEntity {
 	@Column(name = "money")
 	@Desc(value = "本次金额")
 	@ApiModelProperty("本次金额")
-	private BigDecimal money;
+	private BigDecimal money;//实拿
 
 	@Column(name = "state")
 	@Desc(value = "0工钱收入,1提现,2自定义增加金额,3自定义减少金额,4退材料退款,5剩余材料退款,6退人工退款")
@@ -57,7 +57,7 @@ public class WorkerDetail extends BaseEntity {
 	@ApiModelProperty("自定义工人流水id")
 	private String definedWorkerId;
 
-	/*新增的三个字段*/
+	/*新增字段*/
 	@Column(name = "defined_name")
 	@Desc(value = "自定义流水说明")
 	@ApiModelProperty("自定义流水说明")
@@ -68,8 +68,18 @@ public class WorkerDetail extends BaseEntity {
 	@ApiModelProperty("工匠订单当时拿到的钱")
 	private BigDecimal haveMoney;
 
+	@Column(name = "house_worker_order_id")
+	@Desc(value = "工匠订单ID")
+	@ApiModelProperty("工匠订单ID")
+	private String houseWorkerOrderId;
+
+	@Column(name = "apply_money")
+	@Desc(value = "申请的钱")
+	@ApiModelProperty("申请的钱")
+	private BigDecimal applyMoney;//应拿
+
 	@Column(name = "wallet_money")
-	@Desc(value = "钱包当时钱")
+	@Desc(value = "钱包余额")
 	@ApiModelProperty("钱包当时钱")
 	private BigDecimal walletMoney;//对应member表 haveMoney
 

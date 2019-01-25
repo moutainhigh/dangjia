@@ -28,6 +28,10 @@ public class HouseChoiceCase extends BaseEntity {
     @ApiModelProperty("标题（如房屋名称）")
     private String title;
 
+    @Column(name = "house_id")
+    @Desc(value = "房子ID")
+    @ApiModelProperty("房子ID")
+    private String houseId;//houseid
 
     @Column(name = "city_id")
     @Desc(value = "城市id")

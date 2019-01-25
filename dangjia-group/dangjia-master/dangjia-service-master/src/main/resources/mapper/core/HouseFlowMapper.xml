@@ -51,10 +51,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select
             <include refid="new_columns" />
         from dj_core_house_flow
-        where house_id=#{houseId}
-        and state = 0
+        where state = 0
         and work_type = 4
         and work_steta != 2
+        <if test="houseId!=null">
+            AND house_id=#{houseId}
+        </if>
         order by sort asc
     </select>
 

@@ -30,23 +30,36 @@ public class PaymentController implements PaymentAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setPaySuccess(String userToken,String businessOrderNumber){
-        return paymentService.setPaySuccess(userToken,businessOrderNumber);
+    public ServerResponse setPaySuccess(String userToken,String businessOrderNumber,Integer type){
+        if(type==null){ type=0;}
+        return paymentService.setPaySuccess(userToken,businessOrderNumber, type);
     }
     @Override
     @ApiMethod
-    public ServerResponse getWeiXinSign(String userToken, String businessOrderNumber){
-        return payService.getWeiXinSign(userToken,businessOrderNumber);
+    public ServerResponse getWeiXinSign(String userToken, String businessOrderNumber,Integer type){
+        if(type==null){ type=0;}
+        return payService.getWeiXinSign(userToken,businessOrderNumber, type);
     }
     @Override
     @ApiMethod
-    public ServerResponse getAliSign(String userToken, String businessOrderNumber){
-        return payService.getAliSign(userToken,businessOrderNumber);
+    public ServerResponse getAliSign(String userToken, String businessOrderNumber,Integer type){
+        if(type==null){ type=0;}
+        return payService.getAliSign(userToken,businessOrderNumber, type);
     }
     @Override
     @ApiMethod
     public ServerResponse getPaymentOrder(String userToken, String houseId, String taskId,int type){
         return paymentService.getPaymentOrder(userToken,houseId,taskId,type);
+    }
+    /**
+     * 支付页面(通用)
+     */
+
+    @Override
+    @ApiMethod
+    public ServerResponse getPaymentAllOrder(String userToken, String businessOrderNumber,Integer type){
+        if(type==null){ type=0;}
+        return paymentService.getPaymentAllOrder(userToken,businessOrderNumber,type);
     }
     @Override
     @ApiMethod

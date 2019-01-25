@@ -7,7 +7,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		id,
 		member_id as memberId,
 		number,
-		red_packet_pay_money_id as redPacketPayMoneyId,
 		pay_order_number as payOrderNumber,
 		house_id as houseId,
 		task_id as taskId,

@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.core;
 
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -10,6 +9,7 @@ import com.dangjia.acg.dto.core.HouseFlowApplyDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
@@ -19,13 +19,12 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
-import com.dangjia.acg.service.config.ConfigMessageService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,10 +74,12 @@ public class HouseFlowApplyService {
     private ConfigUtil configUtil;
     @Autowired
     private IMendOrderMapper mendOrderMapper;
-    @Autowired
+    /*@Autowired
     private ConfigMessageService configMessageService;
     @Autowired
-    private RedisClient redisClient;
+    private RedisClient redisClient;*/
+    @Autowired
+    private IChangeOrderMapper changeOrderMapper;
 
 
     /**
@@ -155,13 +156,9 @@ public class HouseFlowApplyService {
 
             if(hfa.getApplyType() == 2){//整体完工
                 /**验证未处理补人工订单*/
-                List<MendOrder> mendOrderList = mendOrderMapper.unCheckBackWorker(hwo.getHouseId(),hwo.getWorkerTypeId());
-                if(mendOrderList.size() > 0){
-                    return ServerResponse.createByErrorMessage("有未处理退人工单");
-                }
-                mendOrderList = mendOrderMapper.unCheckRepWorker(hwo.getHouseId(),hwo.getWorkerTypeId());
-                if(mendOrderList.size() > 0){
-                    return ServerResponse.createByErrorMessage("有未处理补人工单");
+                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(hfa.getHouseId(),hfa.getWorkerTypeId());
+                if (changeOrderList.size() > 0){
+                    return ServerResponse.createByErrorMessage("该工种有未处理人工变更单,通知管家处理");
                 }
 
                 //修改进程
@@ -200,13 +197,9 @@ public class HouseFlowApplyService {
                 }
 
             }else if(hfa.getApplyType() == 1){//阶段完工
-                List<MendOrder> mendOrderList = mendOrderMapper.untreatedWorker(hfa.getHouseId());
-                if (mendOrderList.size() > 0) {
-                    return ServerResponse.createByErrorMessage("有未处理补人工单");
-                }
-                mendOrderList = mendOrderMapper.backWorker(hfa.getHouseId());
-                if(mendOrderList.size() > 0){
-                    return ServerResponse.createByErrorMessage("有未处理退人工单");
+                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(hfa.getHouseId(),hfa.getWorkerTypeId());
+                if (changeOrderList.size() > 0){
+                    return ServerResponse.createByErrorMessage("该工种有未处理人工变更单,通知管家处理");
                 }
 
                 //修改进程
@@ -249,6 +242,10 @@ public class HouseFlowApplyService {
                 workerDetail.setWorkerName(worker.getName());
                 workerDetail.setHouseId(hwo.getHouseId());
                 workerDetail.setMoney(hfa.getApplyMoney());
+                workerDetail.setHaveMoney(hwo.getHaveMoney());
+                workerDetail.setHouseWorkerOrderId(hwo.getId());
+                workerDetail.setApplyMoney(hfa.getApplyMoney());
+                workerDetail.setWalletMoney(worker.getHaveMoney());
                 workerDetail.setState(0);//进钱
                 workerDetailMapper.insert(workerDetail);
 
@@ -384,6 +381,10 @@ public class HouseFlowApplyService {
         workerDetail.setHouseId(hwo.getHouseId());
         workerDetail.setMoney(supervisorMoney);
         workerDetail.setState(0);//进钱
+        workerDetail.setHaveMoney(hwo.getHaveMoney());
+        workerDetail.setHouseWorkerOrderId(hwo.getId());
+        workerDetail.setApplyMoney(hfa.getApplyMoney());
+        workerDetail.setWalletMoney(worker.getHaveMoney());
         workerDetailMapper.insert(workerDetail);
         //处理工钱
         if(worker.getHaveMoney() == null){//工人已获取
@@ -418,14 +419,14 @@ public class HouseFlowApplyService {
                 BigDecimal bd = worker.getRetentionMoney().subtract(worker.getDeposit());
                 if(bd.compareTo(BigDecimal.ZERO) == 1){//实际多于2000元退押金
                     //记录流水
-                    WorkerDetail workerDetail = new WorkerDetail();
-                    workerDetail.setName("涨积分退滞留金");
+                    //WorkerDetail workerDetail = new WorkerDetail();
+                    /*workerDetail.setName("涨积分退滞留金");
                     workerDetail.setWorkerId(worker.getId());
                     workerDetail.setWorkerName(worker.getName());
                     workerDetail.setHouseId(hwo.getHouseId());
                     workerDetail.setMoney(bd);
                     workerDetail.setState(0);//进钱
-                    workerDetailMapper.insert(workerDetail);
+                    workerDetailMapper.insert(workerDetail);*/
                     worker.setRetentionMoney(worker.getDeposit());//实际2000元
                     worker.setSurplusMoney(worker.getSurplusMoney().add(bd));
                 }
@@ -435,14 +436,14 @@ public class HouseFlowApplyService {
                 BigDecimal bd = worker.getRetentionMoney().subtract(worker.getDeposit());
                 if(bd.compareTo(BigDecimal.ZERO) == 1){
                     //记录流水
-                    WorkerDetail workerDetail = new WorkerDetail();
+                    /*WorkerDetail workerDetail = new WorkerDetail();
                     workerDetail.setName("涨积分退滞留金 ");
                     workerDetail.setWorkerId(worker.getId());
                     workerDetail.setWorkerName(worker.getName());
                     workerDetail.setHouseId(hwo.getHouseId());
                     workerDetail.setMoney(bd);
                     workerDetail.setState(0);//进钱
-                    workerDetailMapper.insert(workerDetail);
+                    workerDetailMapper.insert(workerDetail);*/
                     worker.setRetentionMoney(worker.getDeposit());//实际2000元
                     worker.setSurplusMoney(worker.getSurplusMoney().add(bd));
                 }
@@ -451,7 +452,7 @@ public class HouseFlowApplyService {
                 //实际滞留金减上限
                 BigDecimal bd = worker.getRetentionMoney().subtract(worker.getDeposit());
                 if(bd.compareTo(BigDecimal.ZERO) == 1){
-                    //记录流水
+                   /* //记录流水
                     WorkerDetail workerDetail = new WorkerDetail();
                     workerDetail.setName(" 涨积分退滞留金");
                     workerDetail.setWorkerId(worker.getId());
@@ -459,7 +460,7 @@ public class HouseFlowApplyService {
                     workerDetail.setHouseId(hwo.getHouseId());
                     workerDetail.setMoney(bd);
                     workerDetail.setState(0);//进钱
-                    workerDetailMapper.insert(workerDetail);
+                    workerDetailMapper.insert(workerDetail);*/
                     worker.setRetentionMoney(worker.getDeposit());//实际2000元
                     worker.setSurplusMoney(worker.getSurplusMoney().add(bd));
                 }
@@ -547,6 +548,10 @@ public class HouseFlowApplyService {
             workerDetail.setHouseId(hwo.getHouseId());
             workerDetail.setMoney(applymoney);
             workerDetail.setState(0);//进钱
+            workerDetail.setHaveMoney(hwo.getHaveMoney());
+            workerDetail.setHouseWorkerOrderId(hwo.getId());
+            workerDetail.setApplyMoney(hfa.getApplyMoney());
+            workerDetail.setWalletMoney(worker.getHaveMoney());
             workerDetailMapper.insert(workerDetail);
 
 
@@ -587,6 +592,10 @@ public class HouseFlowApplyService {
         workerDetail.setHouseId(hwo.getHouseId());
         workerDetail.setMoney(hwo.getRepairPrice());
         workerDetail.setState(0);//进钱
+        workerDetail.setHaveMoney(hwo.getHaveMoney());
+        workerDetail.setHouseWorkerOrderId(hwo.getId());
+        workerDetail.setWalletMoney(worker.getHaveMoney());
+        workerDetail.setApplyMoney(hwo.getRepairPrice());
         workerDetailMapper.insert(workerDetail);
 
         //处理工钱
@@ -658,6 +667,10 @@ public class HouseFlowApplyService {
             workerDetail.setHouseId(hwo.getHouseId());
             workerDetail.setMoney(applyMoney);
             workerDetail.setState(0);//进钱
+            workerDetail.setHaveMoney(hwo.getHaveMoney());
+            workerDetail.setHouseWorkerOrderId(hwo.getId());
+            workerDetail.setApplyMoney(hfa.getApplyMoney());
+            workerDetail.setWalletMoney(worker.getHaveMoney());
             workerDetailMapper.insert(workerDetail);
 
             //记录项目流水

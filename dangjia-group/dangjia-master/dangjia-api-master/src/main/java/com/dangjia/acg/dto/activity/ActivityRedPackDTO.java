@@ -68,4 +68,6 @@ public class ActivityRedPackDTO{
 
 	@ApiModelProperty("优惠券拆分包")
 	private List<ActivityRedPackRule> redPackRule;
+	@ApiModelProperty("优惠券拆分包(文字说明)")
+	private List<ActivityRedPackRuleDTO> redPackRuleDTO;
 }

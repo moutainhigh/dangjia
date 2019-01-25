@@ -26,6 +26,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -87,14 +88,21 @@ public class MendOrderCheckService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse checkMendOrder(String userToken,String mendOrderId,String roleType,Integer state){
         try {
-            AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-            Member member = accessToken.getMember();
+            String auditorId;
+            if(roleType.equals("4")){
+                auditorId = "4";
+            }else {
+                AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+                Member member = accessToken.getMember();
+                auditorId = member.getId();
+            }
             MendOrderCheck mendOrderCheck = mendOrderCheckMapper.getByMendOrderId(mendOrderId,roleType);
             if(mendOrderCheck == null){
                 return ServerResponse.createByErrorMessage("审核流程不存在该角色");
             }
             mendOrderCheck.setState(state);
-            mendOrderCheck.setAuditorId(member.getId());//审核人
+            mendOrderCheck.setAuditorId(auditorId);//审核人
+            mendOrderCheck.setModifyDate(new Date());
             mendOrderCheckMapper.updateByPrimaryKeySelective(mendOrderCheck);
 
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
@@ -163,6 +171,8 @@ public class MendOrderCheckService {
                 workerDetail.setWorkerName(member.getName() == null?member.getNickName() : member.getName());
                 workerDetail.setHouseId(mendOrder.getHouseId());
                 workerDetail.setMoney(new BigDecimal(mendOrder.getTotalAmount()));
+                workerDetail.setApplyMoney(new BigDecimal(mendOrder.getTotalAmount()));
+                workerDetail.setWalletMoney(member.getHaveMoney());
                 workerDetail.setState(6);//退人工退款
                 workerDetailMapper.insert(workerDetail);
 
@@ -199,6 +209,8 @@ public class MendOrderCheckService {
                 workerDetail.setWorkerName(member.getName() == null?member.getNickName() : member.getName());
                 workerDetail.setHouseId(mendOrder.getHouseId());
                 workerDetail.setMoney(new BigDecimal(mendOrder.getTotalAmount()));
+                workerDetail.setApplyMoney(new BigDecimal(mendOrder.getTotalAmount()));
+                workerDetail.setWalletMoney(member.getHaveMoney());
                 if (mendOrder.getType() == 2){
                     workerDetail.setState(5);//进钱//工匠退 登记剩余
                 }else {

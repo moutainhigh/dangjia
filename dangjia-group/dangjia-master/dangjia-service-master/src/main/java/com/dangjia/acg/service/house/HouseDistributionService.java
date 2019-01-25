@@ -1,10 +1,15 @@
 package com.dangjia.acg.service.house;
 
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
+import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.modle.house.HouseDistribution;
+import com.dangjia.acg.modle.member.AccessToken;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +29,26 @@ public class HouseDistributionService {
     @Autowired
     private IHouseDistributionMapper iHouseDistributionMapper;
 
+    @Autowired
+    private RedisClient redisClient;
+
+    @Autowired
+    private ICityMapper iCityMapper;
     /**
      * 获取所有验房分销
      * @param houseDistribution
      * @return
      */
     public ServerResponse getHouseDistribution(HttpServletRequest request, PageDTO pageDTO, HouseDistribution houseDistribution) {
+        String userToken = request.getParameter(Constants.USER_TOKEY);
         Example example = new Example(HouseDistribution.class);
         Example.Criteria criteria=example.createCriteria();
         if(!CommonUtil.isEmpty(houseDistribution.getNickname())) {
             criteria.andLike(HouseDistribution.NICKNAME, "%" + houseDistribution.getNickname() + "%");
+        }
+        if(!CommonUtil.isEmpty(userToken)) {
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            criteria.andEqualTo(HouseDistribution.PHONE, accessToken.getPhone());
         }
         example.orderBy(HouseDistribution.CREATE_DATE).desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
@@ -48,8 +63,21 @@ public class HouseDistributionService {
      * @return
      */
     public ServerResponse addHouseDistribution(HttpServletRequest request,HouseDistribution houseDistribution) {
+
+        String userToken = request.getParameter(Constants.USER_TOKEY);
+        String cityId = request.getParameter(Constants.CITY_ID);
+        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+        houseDistribution.setId(System.currentTimeMillis()+"-"+(int)(Math.random()*9000+1000));
+        houseDistribution.setHead(accessToken.getMember().getHead());
+        houseDistribution.setNickname(accessToken.getMember().getNickName());
+        houseDistribution.setPhone(accessToken.getMember().getMobile());
+        houseDistribution.setCity(iCityMapper.selectByPrimaryKey(cityId).getName());
+        houseDistribution.setPrice(DjConstants.distribution.PRICE.doubleValue());
+        houseDistribution.setSex("0");
+        houseDistribution.setState(0);
+        houseDistribution.setType(1);
         if(this.iHouseDistributionMapper.insertSelective(houseDistribution)>0){
-            return ServerResponse.createBySuccessMessage("ok");
+            return ServerResponse.createBySuccess("ok",houseDistribution.getId());
         }else{
             return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");
         }

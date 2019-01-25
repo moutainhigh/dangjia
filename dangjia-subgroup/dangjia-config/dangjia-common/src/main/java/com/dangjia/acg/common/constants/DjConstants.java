@@ -1,5 +1,7 @@
 package com.dangjia.acg.common.constants;
 
+import java.math.BigDecimal;
+
 /**
  * 公共应用常量类
  */
@@ -139,7 +141,12 @@ public class DjConstants {
         public final static Integer CAILIAO = 2;// 材料
         public final static Integer FUWU = 3;// 服务
     }
-
+    /**
+     * Type 验房分销定金
+     */
+    public static class distribution {
+        public final static BigDecimal PRICE = new BigDecimal(88.8);
+    }
     public static class PushMessage{
         public final static String START_FITTING_UP ="业主您好！您的美宅【%s】开始装修啦！";
         public final static String SNAP_UP_ORDER ="您有一个新的装修订单，马上去抢！";
@@ -174,9 +181,6 @@ public class DjConstants {
         public final static String CRAFTSMAN_EVALUATE ="工匠您好！【%s】业主已对您进行评价，立即查看";
         public final static String CRAFTSMAN_ALL_FINISHED ="业主您好！【%s】所有工匠都已完工，大管家申请竣工验收，请查看。";
         public final static String STEWARD_EVALUATE ="大管家您好！【%s】业主已对您进行评价，立即查看";
-        public final static String MATERIAL_DELIVERY ="业主您好！【%s】大管家已为您安排了材料发货，请及时收货。";
-        public final static String MATERIAL_SUPPLEMENTARY ="业主您好！大管家根据【%s】装修施工情况判断现场需要补部分材料，请查看并支付";
-        public final static String MATERIAL_WITHDRAWAL ="业主您好！大管家根据【%s】装修施工情况判断现场需要退部分材料，请查看。（退材料成功后，您可在\"我购买的\"发起退款）";
         public final static String REFUND_SUCCESS ="业主您好！您发起的退款操作成功，请查看";
         public final static String REFUND_ERROR ="业主您好！您发起的退款操作未成功，请重新提交";
         public final static String WITHDRAW_CASH_SUCCESS ="您好！您发起的提现操作成功，请注意查收";
@@ -202,6 +206,22 @@ public class DjConstants {
 
         public final static String ACTUARIAL_COMPLETION ="业主您好！您的美宅【%s】精算已完成，请等待大管家抢单。";
         public final static String REPLACEMENT_OF_CRAFTSMEN ="工匠您好！经多方协调，【%s】已更换工匠，请查看!";
+
+
+
+
+        public final static String STEWARD_Y_SERVER ="业主您好！【%s】大管家已为您安排了服务发货，请知晓。";
+        public final static String STEWARD_T_SERVER ="业主您好！根据【%s】装修施工需要，现场退部分服务商品，请查看。";
+        public final static String STEWARD_B_SERVER ="业主您好！工匠根据【%s】装修施工需要，补部分服务商品，请查看并支付";
+        public final static String CRAFTSMAN_Y_MATERIAL ="业主您好！【%s】工匠已为您安排了材料发货，请及时收货。";
+        public final static String CRAFTSMAN_T_MATERIAL ="业主您好！根据【%s】装修施工需要，现场盘点部分材料退货，具体退货数量以卖家验货为准，请知晓。";
+        public final static String CRAFTSMAN_B_MATERIAL ="业主您好！工匠根据【%s】装修施工需要，补部分材料，请查看并支付";
+
+        public final static String CRAFTSMAN_B_WORK ="业主您好！工匠根据【%s】装修施工需要，补部分人工，请查看并支付";
+        public final static String CRAFTSMAN_T_WORK ="工匠您好！业主根据【%s】装修施工需要，退部分人工，请审核";
+
+        public final static String STEWARD_B_CHECK_WORK ="大管家您好！【%s】【%s】提出补人工变更，请审核并填写变更数量";
+        public final static String STEWARD_T_CHECK_WORK ="大管家您好！【%s】业主提出退人工变更，请审核并填写变更数量";
 
 
     }

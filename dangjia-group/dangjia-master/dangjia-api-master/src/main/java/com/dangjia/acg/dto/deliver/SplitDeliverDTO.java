@@ -27,4 +27,7 @@ public class SplitDeliverDTO {
     private String image;//一张图
     private Integer supState;//0:大管家不可收货;1:大管家可收货
     private List<SplitDeliverItemDTO> splitDeliverItemDTOList;
+
+    private String supMobile;//供货商电话
+    private String supName;//供应商名字
 }

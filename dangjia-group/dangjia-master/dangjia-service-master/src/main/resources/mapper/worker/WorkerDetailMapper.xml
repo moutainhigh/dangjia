@@ -3,27 +3,21 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.worker.IWorkerDetailMapper">
-<sql id="basic_columns">
-    id,
-    house_id,
-    money,
-    name,
-    state,
-    worker_id,
-    worker_name,
-    defined_worker_id,
-    create_date,
-    modify_date
-</sql>
+
 <sql id="new_columns">
     id,
-    house_id as houseId,
-    money,
     name,
-    state,
     worker_id as workerId,
     worker_name as workerName,
+    house_id as houseId,
+    money,
+    state,
     defined_worker_id as definedWorkerId,
+    defined_name as definedName,
+    have_money as haveMoney,
+    house_worker_order_id as houseWorkerOrderId,
+    apply_money as applyMoney,
+    wallet_money as walletMoney,
     create_date as createDate,
     modify_date as modifyDate
 </sql>
@@ -38,10 +32,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!--收入 -->
     <select id="incomeDetail" resultType="com.dangjia.acg.modle.worker.WorkerDetail">
-        select <include refid="new_columns" />
+        select
+            <include refid="new_columns" />
         from dj_worker_worker_detail
         where worker_id=#{workerId}
         and (state=0 or state=2)
+        ORDER BY create_date DESC
+    </select>
+
+    <!--所有订单流水 -->
+    <select id="getAllWallet" resultType="com.dangjia.acg.modle.worker.WorkerDetail">
+        select
+        <include refid="new_columns" />
+        from dj_worker_worker_detail
         ORDER BY create_date DESC
     </select>
 
@@ -54,7 +57,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
     <!--支出 -->
     <select id="outDetail" resultType="com.dangjia.acg.modle.worker.WorkerDetail">
-        select <include refid="new_columns" />
+        select
+            <include refid="new_columns" />
         from dj_worker_worker_detail
         where worker_id=#{workerId}
         and (state=1 or state=3)
@@ -84,7 +88,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
     <!--根据年月查询对应历史月流水 -->
     <select id="getHistoryMonthByWorkerId" resultType="com.dangjia.acg.modle.worker.WorkerDetail">
-        select <include refid="new_columns" />
+        select
+            <include refid="new_columns" />
         from dj_worker_worker_detail
         where worker_id=#{workerId}
 		and date_format(create_date, '%Y-%m') = #{createDate}
