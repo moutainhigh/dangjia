@@ -23,5 +23,8 @@ public interface IWorkerDetailMapper extends Mapper<WorkerDetail> {
     Double getCountWorkerDetailByWid(@Param("workerId")String workerId);
     List<String> getHistoryMonth(@Param("workerId")String workerId);
     List<WorkerDetail> getHistoryMonthByWorkerId(@Param("workerId")String workerId,@Param("createDate")String createDate);
+
+    //所有流水
+    List<WorkerDetail> getAllWallet();
 }
 

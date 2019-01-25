@@ -85,7 +85,7 @@ public class HouseFlowService {
      */
     private boolean isHouseWorker(List<HouseWorker> hwList, HouseFlow hf) {
         for (HouseWorker houseWorker : hwList) {
-            HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(),houseWorker.getWorkerTypeId());
+            HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
             if (hf.getId().equals(houseFlow.getId())) {
                 return true;
             }
@@ -128,7 +128,7 @@ public class HouseFlowService {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member member = accessToken.getMember();
             String workerTypeId = "4";
-            if(StringUtil.isNotEmpty(member.getWorkerTypeId())){
+            if (StringUtil.isNotEmpty(member.getWorkerTypeId())) {
                 workerTypeId = member.getWorkerTypeId();
             }
             /*待抢单*/
@@ -146,7 +146,7 @@ public class HouseFlowService {
                         continue;
                     }
                     House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
-                    if(house == null) continue;
+                    if (house == null) continue;
                     AllgrabBean allgrabBean = new AllgrabBean();
                     example = new Example(HouseFlowCountDownTime.class);
                     example.createCriteria().andEqualTo("workerId", member.getId()).andEqualTo("houseFlowId", houseFlow.getId());
@@ -206,6 +206,8 @@ public class HouseFlowService {
     public ServerResponse makeOfBudget(String houseId, String workerTypeId) {
         Map<String, Object> map = new HashMap<>();
         House house = houseMapper.selectByPrimaryKey(houseId);
+
+
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);
         if (house == null) {
             return ServerResponse.createByErrorMessage("根据houseId查询房产失败");
@@ -227,7 +229,10 @@ public class HouseFlowService {
             houseFlow.setWorkerType(workerType.getType());
             houseFlow.setHouseId(house.getId());
             houseFlow.setState(workerType.getState());
-            houseFlow.setSort(workerType.getSort());
+            if (house.getCustomSort() == null)
+                houseFlow.setSort(workerType.getSort());
+            else
+                houseFlow.setSort(getCustomSortIndex(house.getCustomSort(), workerType.getType() + ""));
             houseFlow.setWorkType(1);//生成默认房产，工匠还不能抢
             houseFlow.setCityId(house.getCityId());
             houseFlowMapper.insert(houseFlow);
@@ -237,9 +242,25 @@ public class HouseFlowService {
     }
 
     /**
+     * 超找 自定义 施工顺序 ，找出某个 workerType 是从3（大管家） 开始的几个工序
+     * @param customSort
+     * @param workerType
+     * @return
+     */
+    private int getCustomSortIndex(String customSort, String workerType) {
+        String[] strArr = customSort.split(",");
+        for (int i = 3; i < strArr.length; i++) {
+            if (strArr[i].equals(workerType))
+                return i;
+        }
+        return -1;
+    }
+
+    /**
      * 抢单验证
-     * @param userToken   用户登录信息
-     * @param cityId      城市ID
+     *
+     * @param userToken 用户登录信息
+     * @param cityId    城市ID
      * @return 抢单确认H5页面
      */
     public ServerResponse setGrabVerification(String userToken, String cityId, String houseFlowId) {
@@ -251,10 +272,10 @@ public class HouseFlowService {
             Example example = new Example(RewardPunishRecord.class);
             example.createCriteria().andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId());
             List<RewardPunishRecord> recordList = rewardPunishRecordMapper.selectByExample(example);
-            if(hf.getWorkType() >= 3){
+            if (hf.getWorkType() >= 3) {
                 return ServerResponse.createByErrorMessage("订单已经被抢了！");
             }
-            if (hf.getGrabLock() >0 ) {
+            if (hf.getGrabLock() > 0) {
                 return ServerResponse.createByErrorMessage("订单已经被抢了！");
             }
             if (member.getCheckType() == 0) {
@@ -316,8 +337,8 @@ public class HouseFlowService {
                     return ServerResponse.createByErrorMessage("每天只能抢一单哦！");
                 }*/
             }
-            String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.AFFIRMGRAB,userToken,cityId,"确认")+"&houseFlowId="+houseFlowId+"&workerTypeId="+member.getWorkerTypeId()
-                    +"&houseId="+hf.getHouseId();
+            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.AFFIRMGRAB, userToken, cityId, "确认") + "&houseFlowId=" + houseFlowId + "&workerTypeId=" + member.getWorkerTypeId()
+                    + "&houseId=" + hf.getHouseId();
 
             // 抢单详情
             return ServerResponse.createBySuccess("通过验证", url);
@@ -372,7 +393,7 @@ public class HouseFlowService {
                     }
                 }
                 House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
-                configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","大管家放弃",String.format(DjConstants.PushMessage.STEWARD_ABANDON,house.getHouseName()) ,"");
+                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家放弃", String.format(DjConstants.PushMessage.STEWARD_ABANDON, house.getHouseName()), "");
             } else {//普通工匠
                 if (hf.getWorkType() == 3) {//已抢单待支付(无责取消)
                     hf.setWorkType(2);//抢单状态更改为待抢单
@@ -400,8 +421,13 @@ public class HouseFlowService {
                 houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
                 houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
-                WorkerType workerType=workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
-                configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","工匠放弃",String.format(DjConstants.PushMessage.CRAFTSMAN_ABANDON,house.getHouseName(),workerType.getName()) ,"");
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
+                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠放弃", String.format(DjConstants.PushMessage.CRAFTSMAN_ABANDON, house.getHouseName(), workerType.getName()), "");
+
+
+                HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(hf.getHouseId(), 3);
+                configMessageService.addConfigMessage(null,"gj", houseFlowDgj.getWorkerId(),"0","工匠放弃",
+                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_ABANDON,house.getHouseName()) ,"5");
 
             }
             return ServerResponse.createBySuccessMessage("放弃成功！");
@@ -491,10 +517,10 @@ public class HouseFlowService {
                 houseFlowMapper.updateByPrimaryKeySelective(nextHF);
 
                 //通知下一个工种 抢单
-                configMessageService.addConfigMessage(null,"gj", "workerTypeId"+nextHF.getWorkerTypeId()+nextHF.getCityId(),"0","新的装修订单",DjConstants.PushMessage.SNAP_UP_ORDER ,"");
+                configMessageService.addConfigMessage(null, "gj", "workerTypeId" + nextHF.getWorkerTypeId() + nextHF.getCityId(), "0", "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "");
 
             }
-            configMessageService.addConfigMessage(null,"zx", house.getMemberId(),"0","大管家开工",DjConstants.PushMessage.STEWARD_CONSTRUCTION ,"");
+            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家开工", DjConstants.PushMessage.STEWARD_CONSTRUCTION, "");
 
             return ServerResponse.createBySuccessMessage("确认开工成功");
         } catch (Exception e) {

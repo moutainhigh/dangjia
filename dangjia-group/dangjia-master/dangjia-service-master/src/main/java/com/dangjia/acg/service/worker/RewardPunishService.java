@@ -218,7 +218,7 @@ public class RewardPunishService {
 
             if(rewardPunishRecord.getHouseId()!=null&&rewardPunishRecord.getMemberId()!=null) {
                 House house = houseMapper.selectByPrimaryKey(rewardPunishRecord.getHouseId());
-                configMessageService.addConfigMessage(null, "gj", rewardPunishRecord.getMemberId(), "0", "奖罚提醒", String.format(DjConstants.PushMessage.RECORD_OF_REWARDS_AND_PENALTIES, house.getHouseName()), "");
+                configMessageService.addConfigMessage(null, "gj", rewardPunishRecord.getMemberId(), "0", "奖罚提醒", String.format(DjConstants.PushMessage.RECORD_OF_REWARDS_AND_PENALTIES, house.getHouseName()), "7");
             }
             return ServerResponse.createBySuccessMessage("新增奖罚记录成功");
         }catch (Exception e){

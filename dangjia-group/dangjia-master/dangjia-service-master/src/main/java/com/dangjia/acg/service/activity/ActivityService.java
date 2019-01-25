@@ -7,6 +7,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.activity.ActivityDTO;
 import com.dangjia.acg.dto.activity.ActivityRedPackDTO;
+import com.dangjia.acg.dto.activity.ActivityRedPackRuleDTO;
 import com.dangjia.acg.mapper.activity.IActivityDiscountMapper;
 import com.dangjia.acg.mapper.activity.IActivityMapper;
 import com.dangjia.acg.mapper.activity.IActivityRedPackMapper;
@@ -100,7 +101,16 @@ public class ActivityService {
                Example exampleRule = new Example(ActivityRedPackRule.class);
                exampleRule.createCriteria().andEqualTo(ActivityRedPackRule.ACTIVITY_RED_PACK_ID,activityRedPackDTO.getId());
                List<ActivityRedPackRule> redPackRule=activityRedPackRuleMapper.selectByExample(exampleRule);
+               List<ActivityRedPackRuleDTO> redPackRuleDTOS=new ArrayList<>();
+               for (ActivityRedPackRule rule:redPackRule) {
+                   ActivityRedPackRuleDTO redPackRuleDTO=new  ActivityRedPackRuleDTO();
+                   BeanUtils.beanToBean(rule,redPackRuleDTO);
+                   redPackRuleDTO.setRedPack(activityRedPack);
+                   redPackRuleDTO.toConvert();
+                   redPackRuleDTOS.add(redPackRuleDTO);
+               }
                activityRedPackDTO.setRedPackRule(redPackRule);
+               activityRedPackDTO.setRedPackRuleDTO(redPackRuleDTOS);
                redPacks.add(activityRedPackDTO);
            }
         }

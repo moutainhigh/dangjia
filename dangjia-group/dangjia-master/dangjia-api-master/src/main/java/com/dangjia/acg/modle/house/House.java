@@ -175,6 +175,12 @@ public class House extends BaseEntity {
     @ApiModelProperty("亮点标签")
     private String liangDian;
 
+    @Column(name = "custom_sort")
+    @Desc(value = "自定义房子工序顺序 5,4,3逗号分隔")
+    @ApiModelProperty("自定义房子工序顺序 5,4,3逗号分隔")
+    private String customSort;
+
+
     public House() {
 
     }

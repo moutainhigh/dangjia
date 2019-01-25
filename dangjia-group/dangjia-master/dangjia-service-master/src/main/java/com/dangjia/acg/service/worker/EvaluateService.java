@@ -145,7 +145,7 @@ public class EvaluateService {
 
 
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS,house.getHouseName()) ,"");
+            configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS,house.getHouseName()) ,"5");
 
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
@@ -204,8 +204,10 @@ public class EvaluateService {
                 hf.setPause(1);
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
             }
-
-            configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_PASS,house.getHouseName()) ,"");
+            //推送工匠审核结果
+            configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_PASS,house.getHouseName()) ,"5");
+            //推送业主大管家的审核结果
+            configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","完工申请结果",String.format(DjConstants.PushMessage.OWNER_TWO_FINISHED,house.getHouseName()) ,"");
 
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
@@ -247,7 +249,7 @@ public class EvaluateService {
             //业主审核管家
             houseFlowApplyService.checkSupervisor(houseFlowApplyId);
 
-            configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","业主评价",String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE,house.getHouseName()) ,"");
+            configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","业主评价",String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE,house.getHouseName()) ,"6");
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
             e.printStackTrace();
@@ -329,8 +331,8 @@ public class EvaluateService {
                 return serverResponse;
             }
 
-            configMessageService.addConfigMessage(null,"gj",worker.getId(),"0","业主评价",String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE,house.getHouseName()) ,"");
-            configMessageService.addConfigMessage(null,"gj",supervisor.getId(),"0","业主评价",String.format(DjConstants.PushMessage.STEWARD_EVALUATE,house.getHouseName()) ,"");
+            configMessageService.addConfigMessage(null,"gj",worker.getId(),"0","业主评价",String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE,house.getHouseName()) ,"6");
+            configMessageService.addConfigMessage(null,"gj",supervisor.getId(),"0","业主评价",String.format(DjConstants.PushMessage.STEWARD_EVALUATE,house.getHouseName()) ,"6");
 
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){

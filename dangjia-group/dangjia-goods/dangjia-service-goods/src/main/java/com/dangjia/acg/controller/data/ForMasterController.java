@@ -8,6 +8,7 @@ import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.service.data.ForMasterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +25,10 @@ public class ForMasterController implements ForMasterAPI {
 
     @Autowired
     private ForMasterService forMasterService;
+
+    public Supplier getSupplier(String supplierId){
+        return forMasterService.getSupplier(supplierId);
+    }
 
     /**
      * 增加退数量

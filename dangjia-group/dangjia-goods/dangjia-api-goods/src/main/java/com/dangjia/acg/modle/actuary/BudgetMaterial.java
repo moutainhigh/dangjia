@@ -66,8 +66,8 @@ public class BudgetMaterial extends BaseEntity{
 	@Column(name = "shop_count")
 	private Double shopCount;//数量
 
-	@Column(name = "actuarial_quantity")
-	private Double actuarialQuantity;//精算量
+	/*@Column(name = "actuarial_quantity")
+	private Double actuarialQuantity;*///精算量
 
 	@Column(name = "unit_name")
 	private String unitName;//单位

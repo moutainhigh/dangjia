@@ -22,7 +22,6 @@
 		cost,
 		description,
 		shop_count as shopCount,
-		actuarial_quantity as actuarialQuantity,
 		unit_name as unitName,
 		total_price as totalPrice,
 		group_type as groupType,

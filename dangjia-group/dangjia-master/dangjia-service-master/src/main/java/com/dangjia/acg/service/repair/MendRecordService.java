@@ -268,7 +268,7 @@ public class MendRecordService {
             }
 
             /*要货单记录*/
-            example = new Example(OrderSplit.class);
+            /*example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andGreaterThan(OrderSplit.APPLY_STATUS,0);
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             if(orderSplitList.size() > 0){
@@ -279,7 +279,7 @@ public class MendRecordService {
                 map.put("name", "要货记录");
                 map.put("size", "共"+orderSplitList.size()+"条");
                 returnMap.add(map);
-            }
+            }*/
 
             return ServerResponse.createBySuccess("查询成功",returnMap);
         }catch (Exception e){

@@ -369,7 +369,7 @@ public class OrderService {
                 orderSplitItem.setShopCount(warehouse.getShopCount());
                 orderSplitItem.setNum(num);
                 orderSplitItem.setUnitName(warehouse.getUnitName());
-                orderSplitItem.setTotalPrice(warehouse.getPrice() * num);//单项总价
+                orderSplitItem.setTotalPrice(warehouse.getPrice() * num);//单项总价 销售价
                 orderSplitItem.setProductType(warehouse.getProductType());
                 orderSplitItem.setCategoryId(warehouse.getCategoryId());
                 orderSplitItem.setImage(warehouse.getImage());//货品图片

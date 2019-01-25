@@ -157,7 +157,6 @@ public class TaskService {
                 .andEqualTo(MendOrder.STATE, 3);//补材料审核状态全通过
         List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
         for (MendOrder mendOrder : mendOrderList){
-            mendOrder = mendOrderList.get(0);
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
@@ -174,7 +173,6 @@ public class TaskService {
                 .andEqualTo(MendOrder.STATE, 3);//审核状态
         mendOrderList = mendOrderMapper.selectByExample(example);
         for (MendOrder mendOrder : mendOrderList){
-            mendOrder = mendOrderList.get(0);
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));

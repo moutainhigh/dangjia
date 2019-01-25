@@ -3,6 +3,7 @@ package com.dangjia.acg.service.config;
 import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.model.PageDTO;
@@ -99,19 +100,31 @@ public class ConfigMessageService {
      * @param targetType 消息类型 0=个人推送  1=全推
      * @param title 推送标题
      * @param alert 推送内容
-     * @param speak 推送语音文字（选填）
+     * @param type 动作类型 动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面，5:工匠端施工界面，6:评价记录，7:奖罚记录）
      * @return
      */
-    public ServerResponse addConfigMessage(HttpServletRequest request,String appType,String memberId,String targetType,String title,String alert,String speak){
+    public ServerResponse addConfigMessage(HttpServletRequest request,String appType,String memberId,String targetType,String title,String alert,String type){
         ConfigMessage configMessage=new ConfigMessage();
         appType=(!CommonUtil.isEmpty(appType)&&appType.equals("zx"))?"1":"2";
+        type=(!CommonUtil.isEmpty(type))?type:"2";
         configMessage.setAppType(appType);
         configMessage.setTargetUid(memberId);
         configMessage.setTargetType(targetType);
         configMessage.setName(title);
-        configMessage.setSpeak(speak);
         configMessage.setText(alert);
-        configMessage.setType(2);
+        if(!CommonUtil.isEmpty(type)&&"6".equals(type)) {
+            String pingJia = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.JUGLELIST,
+                    "","","评价记录");
+            configMessage.setType(0);
+            configMessage.setData(pingJia);
+        }else if(!CommonUtil.isEmpty(type)&&"7".equals(type)) {
+            String pingJia = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.JIANGFALIST,
+                    "","","奖罚记录");
+            configMessage.setType(0);
+            configMessage.setData(pingJia);
+        }else{
+            configMessage.setType(Integer.parseInt(type));
+        }
         return addConfigMessage(request,configMessage);
     }
     /**

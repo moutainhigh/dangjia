@@ -32,6 +32,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         again,
         house_type as houseType,
         drawings,
+        custom_sort as customSort,
         is_select as isSelect,
         visit_state as visitState,
         data_status as dataStatus,

@@ -14,6 +14,9 @@ import java.util.List;
 public class GoodsDTO {
 
     private String budgetMaterialId;
+    private String srcGroupId;//该product所在的原关联组id
+    private int isSwitch;//可切换性0:可切换；1不可切换
+    private String targetGroupId;//可切换的目标关联组id
     private String productId;
     private String goodsId;
     private String image;//product图 1张
@@ -22,7 +25,7 @@ public class GoodsDTO {
     private String unitName;//单位
     private int productType;//0:材料；1：服务
     private List<String> imageList;//长图片 多图组合
-    private List<BrandSeriesDTO> brandDTOList;//品牌系列
-    private List<AttributeDTO> attributeDTOList;//属性
+    private  List<BrandDTO> brandDTOList;//品牌系列
+//    private List<AttributeDTO> attributeDTOList;//属性
 
 }

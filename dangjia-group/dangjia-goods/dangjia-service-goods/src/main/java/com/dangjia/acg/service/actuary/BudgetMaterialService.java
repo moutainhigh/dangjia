@@ -174,6 +174,7 @@ public class BudgetMaterialService {
                 if (!StringUtils.isNotBlank(p.getLabelId())) {
                     map.put("labelId", "");
                     map.put("labelName", "");
+
                 } else {
                     map.put("labelId", p.getLabelId());
                     Label label = iLabelMapper.selectByPrimaryKey(p.getLabelId());

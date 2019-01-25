@@ -47,8 +47,8 @@ public class ConfigMessage extends BaseEntity {
     private String appType;
 
     @Column(name = "type")
-    @Desc(value = "动作类型（0:直接跳转URL，1:跳转支付，2:只显示）")
-    @ApiModelProperty("动作类型（0:直接跳转URL，1:跳转支付，2:只显示）")
+    @Desc(value = "动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面，5:工匠端施工界面）")
+    @ApiModelProperty("动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面，5:工匠端施工界面）")
     private Integer type;
 
     @Column(name = "data")

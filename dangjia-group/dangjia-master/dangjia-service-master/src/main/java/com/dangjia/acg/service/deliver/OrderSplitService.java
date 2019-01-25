@@ -174,7 +174,7 @@ public class OrderSplitService {
                     splitDeliver.setShipState(0);//待发货状态
                     splitDeliverMapper.insert(splitDeliver);
                 }
-                splitDeliver.setTotalAmount(orderSplitItem.getTotalPrice() + splitDeliver.getTotalAmount());//累计总价
+                splitDeliver.setTotalAmount(orderSplitItem.getCost() * orderSplitItem.getNum() + splitDeliver.getTotalAmount());//累计成本总价
                 splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
                 orderSplitItemMapper.setSupplierId(id, splitDeliver.getId());
             }
