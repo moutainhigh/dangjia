@@ -30,7 +30,19 @@ public class JsmsUtil {
 	private static final String SEND_REGISTER_APPROVED="157268"; //注册通过审核
 	private static final String SEND_GRAB_OK="157267"; //注册通过审核
 
+	private static final String SEND_DESIGNER="160069"; //发给设计师业主支付设计费了
 
+
+	/**
+	 *  发给设计师业主支付设计费了
+	 */
+	public static String sendDesigner(String phone,String yzphone,String houseName) {
+		Map<String,String> temp_para=new HashMap();
+		temp_para.put("yzphone",yzphone);
+		temp_para.put("house_name",houseName);
+		String result =sendSMS(phone,SEND_DESIGNER,temp_para);
+		return result;
+	}
 	/**
      *  发给供应商下单了
      */

@@ -42,8 +42,8 @@ public class HouseWorker extends BaseEntity {
 	private Integer workerType;//workertype
 
 	@Column(name = "work_type")
-	@Desc(value = "抢单状态:1已抢单等待被采纳,2被换人，3被删除（别人不能再抢）,4已开工被换人,5拒单(工匠主动拒绝)，6被采纳支付,7抢单后放弃")
-	@ApiModelProperty("抢单状态:1已抢单等待被采纳,2被换人，3被删除（别人不能再抢）,4已开工被换人,5拒单(工匠主动拒绝)，6被采纳支付,7抢单后放弃")
+	@Desc(value = "抢单状态:1已抢单等待被采纳,2被业主换,3被平台换,4已支付被平台换,5拒单(工匠主动拒绝)，6被采纳支付,7抢单后放弃")
+	@ApiModelProperty("抢单状态:1已抢单等待被采纳,2被业主换,3被平台换,4已支付被平台换,5拒单(工匠主动拒绝)，6被采纳支付,7抢单后放弃")
 	private Integer workType; //worktype
 
 	@Column(name = "is_select")

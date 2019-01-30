@@ -1,14 +1,71 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.deliver.ISplitDeliverMapper">
 
+    <sql id="all_columns">
+		id,
+		number,
+		house_id as houseId,
+		total_amount as totalAmount,
+		delivery_fee as deliveryFee,
+		apply_money as applyMoney,
+		apply_state as applyState,
+		reason,
+		ship_name as shipName,
+		ship_mobile as shipMobile,
+		ship_address as shipAddress,
+		supplier_id as supplierId,
+		memo,
+		supervisor_id as supervisorId,
+		send_time as sendTime,
+		submit_time as submitTime,
+		sup_State as supState,
+		shipping_state as shippingState,
+		image,
+		data_status as dataStatus,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
     <!--授权大管家收货-->
-    <update id="supState" >
+    <update id="supState">
         update dj_deliver_split_deliver
         set supState = 1
         where id = #{splitDeliverId}
     </update>
+
+    <!-- 查询供应商发货订单 -->
+    <select id="getAllSplitDeliver" resultType="com.dangjia.acg.modle.deliver.SplitDeliver">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_deliver_split_deliver
+		where 1=1
+		<if test="applyState!= -1">
+			 and apply_state = #{applyState}
+		</if>
+		<if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+			and create_date between  #{beginDate}  and #{endDate}
+		</if>
+        ORDER BY create_date desc
+    </select>
+
+	<!-- 查询供应商 当前周的发货订单 -->
+	<select id="getAllCurWeek" resultType="com.dangjia.acg.modle.deliver.SplitDeliver">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_deliver_split_deliver
+		where 1=1
+		<if test="applyState!= -1">
+			and apply_state = #{applyState}
+		</if>
+		<if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+			and create_date between  #{beginDate}  and #{endDate}
+		</if>
+		ORDER BY create_date desc
+	</select>
+
+
 </mapper>
 

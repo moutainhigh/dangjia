@@ -10,6 +10,9 @@ import java.util.List;
 @Repository
 public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
 
+    /**删除未审核申请*/
+    void deleteNotMemberCheck(@Param("houseId")String houseId,@Param("workerId")String workerId);
+
     /**待处理申请*/
     List<HouseFlowApply> unCheckByWorkerTypeId(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
     /**待审核申请*/

@@ -77,9 +77,9 @@ public interface HouseAPI {
     @ApiOperation(value = "装修指南", notes = "装修指南")
     public ServerResponse getRenovationManual(@RequestParam("userToken")String userToken,@RequestParam("type")Integer type);
 
-    @PostMapping("app/house/house/savaRenovationManual")
+    @PostMapping("app/house/house/saveRenovationManual")
     @ApiOperation(value = "保存装修指南", notes = "保存装修指南")
-    public ServerResponse savaRenovationManual(@RequestParam("userToken")String userToken,@RequestParam("savaList")String savaList);
+    public ServerResponse saveRenovationManual(@RequestParam("userToken")String userToken,@RequestParam("saveList")String saveList);
 
     @PostMapping("app/house/house/queryConstructionRecord")
     @ApiOperation(value = "施工记录", notes = "施工记录")

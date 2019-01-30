@@ -127,6 +127,8 @@ public class SplitDeliverService {
                 splitDeliverItemDTO.setShopCount(orderSplitItem.getShopCount());
                 splitDeliverItemDTO.setNum(orderSplitItem.getNum());
                 splitDeliverItemDTO.setUnitName(orderSplitItem.getUnitName());
+                splitDeliverItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(orderSplitItem.getProductId()));
+                splitDeliverItemDTO.setPrice(orderSplitItem.getPrice());
                 splitDeliverItemDTOList.add(splitDeliverItemDTO);
             }
             splitDeliverDTO.setSplitDeliverItemDTOList(splitDeliverItemDTOList);//明细

@@ -32,6 +32,11 @@ public class WithdrawDeposit extends BaseEntity {
 	@ApiModelProperty("工人id")
 	private String workerId;//workerid
 
+	@Column(name = "role_type")
+	@Desc(value = "来源类型")
+	@ApiModelProperty("来源类型")
+	private Integer roleType;//roleType   1：业主端  2 大管家 3：工匠端
+
 	@Column(name = "state")
 	@Desc(value = "0未处理,1同意 2不同意(驳回)")
 	@ApiModelProperty("0未处理,1同意 2不同意(驳回)")
@@ -56,6 +61,21 @@ public class WithdrawDeposit extends BaseEntity {
 	@Desc(value = "处理时间")
 	@ApiModelProperty("处理时间")
     private Date processingDate;//
+
+	@Column(name = "image")
+	@Desc(value = "回执单图片")
+	@ApiModelProperty("回执单图片")
+	private String image;//
+
+	@Column(name = "reason")
+	@Desc(value = "不同意理由")
+	@ApiModelProperty("不同意理由")
+	private String reason;
+
+	@Column(name = "memo")
+	@Desc(value = "附言 可编辑")
+	@ApiModelProperty("附言 可编辑")
+	private String memo;//
 
 }
 

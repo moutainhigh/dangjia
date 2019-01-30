@@ -38,9 +38,9 @@ public interface RewardPunishAPI {
 
     @PostMapping("/web/rewardPunish/addRewardPunishRecord")
     @ApiOperation(value = "添加奖罚记录", notes = "添加奖罚记录")
-    ServerResponse addRewardPunishRecord(@RequestParam("userToken")String userToken, @RequestParam("rewardPunishRecord") RewardPunishRecord rewardPunishRecord);
+    ServerResponse addRewardPunishRecord(@RequestParam("userToken")String userToken,@RequestParam("userId")String userId, @RequestParam("rewardPunishRecord") RewardPunishRecord rewardPunishRecord);
 
     @PostMapping("/web/rewardPunish/updateRewardPunishRecord")
     @ApiOperation(value = "修改奖罚记录", notes = "修改奖罚记录")
-    ServerResponse updateRewardPunishRecord(@RequestParam("userToken") String userToken,@RequestParam("rewardPunishRecord") RewardPunishRecord rewardPunishRecord);
+    ServerResponse updateRewardPunishRecord(@RequestParam("userToken") String userToken,@RequestParam("userId") String userId,@RequestParam("rewardPunishRecord") RewardPunishRecord rewardPunishRecord);
 }

@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: QiYuXiang
@@ -27,7 +28,7 @@ public interface FileCommonAPI {
 
   @RequestMapping(value = "saveEditorFile", method = RequestMethod.POST)
   @ApiOperation(value = "保存文件至暂时目录", notes = "保存文件至暂时目录")
-  String saveEditorFile(@RequestParam("imgFile") MultipartFile[] imgFile, String dir);
+  Map saveEditorFile(@RequestParam("imgFile") MultipartFile[] imgFile, String dir);
 
   @RequestMapping(value = "saveToImgByInputStream", method = RequestMethod.POST)
   @ApiOperation(value = "保存文件", notes = "保存文件")

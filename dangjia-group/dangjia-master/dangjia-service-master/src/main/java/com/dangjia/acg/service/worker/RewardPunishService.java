@@ -9,6 +9,7 @@ import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.worker.RewardPunishCorrelationDTO;
 import com.dangjia.acg.dto.worker.RewardPunishRecordDTO;
@@ -208,15 +209,20 @@ public class RewardPunishService {
      * @param userToken
      * @return
      */
-    public ServerResponse addRewardPunishRecord(String userToken,RewardPunishRecord rewardPunishRecord){
+    public ServerResponse addRewardPunishRecord(String userToken,String userId,RewardPunishRecord rewardPunishRecord){
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member = accessToken.getMember();
-            rewardPunishRecord.setOperatorId(member.getId());
+            if(!CommonUtil.isEmpty(userToken)) {
+                AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+                Member member = accessToken.getMember();
+                rewardPunishRecord.setOperatorId(member.getId());
+            }
+            if(!CommonUtil.isEmpty(userId)) {
+                rewardPunishRecord.setOperatorId(userId);
+            }
             rewardPunishRecord.setState(0);//0:启用;1:不启用
             rewardPunishRecordMapper.insertSelective(rewardPunishRecord);
 
-            if(rewardPunishRecord.getHouseId()!=null&&rewardPunishRecord.getMemberId()!=null) {
+            if(!CommonUtil.isEmpty(rewardPunishRecord.getHouseId())&&rewardPunishRecord.getHouseId()!=null&&rewardPunishRecord.getMemberId()!=null) {
                 House house = houseMapper.selectByPrimaryKey(rewardPunishRecord.getHouseId());
                 configMessageService.addConfigMessage(null, "gj", rewardPunishRecord.getMemberId(), "0", "奖罚提醒", String.format(DjConstants.PushMessage.RECORD_OF_REWARDS_AND_PENALTIES, house.getHouseName()), "7");
             }
@@ -233,11 +239,16 @@ public class RewardPunishService {
      * @param rewardPunishRecord
      * @return
      */
-    public ServerResponse updateRewardPunishRecord(String userToken,RewardPunishRecord rewardPunishRecord){
+    public ServerResponse updateRewardPunishRecord(String userToken,String userId,RewardPunishRecord rewardPunishRecord){
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member = accessToken.getMember();
-            rewardPunishRecord.setOperatorId(member.getId());
+            if(!CommonUtil.isEmpty(userToken)) {
+                AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+                Member member = accessToken.getMember();
+                rewardPunishRecord.setOperatorId(member.getId());
+            }
+            if(!CommonUtil.isEmpty(userId)) {
+                rewardPunishRecord.setOperatorId(userId);
+            }
             rewardPunishRecordMapper.updateByPrimaryKeySelective(rewardPunishRecord);
             return ServerResponse.createBySuccessMessage("修改奖罚记录成功");
         }catch (Exception e){
@@ -251,16 +262,30 @@ public class RewardPunishService {
      * @param userToken
      * @return
      */
-    public ServerResponse queryRewardPunishRecord(String userToken, PageDTO pageDTO){
+    public ServerResponse queryRewardPunishRecord(String userToken,String workerId, PageDTO pageDTO){
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member = accessToken.getMember();
-            RewardPunishRecordDTO example=new RewardPunishRecordDTO();
-            example.setMemberId(member.getId());
+
+            Example example=new Example(RewardPunishRecord.class);
+            Example.Criteria criteria=example.createCriteria();
+            if(!CommonUtil.isEmpty(userToken)) {
+                AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+                Member member = accessToken.getMember();
+                criteria.andEqualTo(RewardPunishRecord.MEMBER_ID,member.getId());
+            }
+            if(!CommonUtil.isEmpty(workerId)) {
+                criteria.andEqualTo(RewardPunishRecord.MEMBER_ID,workerId);
+            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<RewardPunishRecordDTO> recordList=rewardPunishRecordMapper.queryRewardPunishRecord(example);
+            List<RewardPunishRecord> recordList=rewardPunishRecordMapper.selectByExample(example);
+            PageInfo pageResult = new PageInfo(recordList);
             if(recordList!=null&&recordList.size()>0){
-                PageInfo pageResult = new PageInfo(recordList);
+                List<RewardPunishRecordDTO> recordDTOS=new ArrayList<>();
+                for (RewardPunishRecord record:recordList) {
+                    RewardPunishRecordDTO rewardPunishRecordDTO=new RewardPunishRecordDTO();
+                    rewardPunishRecordDTO.setId(record.getId());
+                    recordDTOS.addAll(rewardPunishRecordMapper.queryRewardPunishRecord(rewardPunishRecordDTO));
+                }
+                pageResult.setList(recordDTOS);
                 return ServerResponse.createBySuccess("ok",pageResult);
             }else{
                 return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(),EventStatus.NO_DATA.getDesc());

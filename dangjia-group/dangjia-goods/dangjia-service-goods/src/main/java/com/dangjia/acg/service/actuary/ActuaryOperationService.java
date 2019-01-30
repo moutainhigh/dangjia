@@ -122,6 +122,8 @@ public class ActuaryOperationService {
             LOG.info("changeProduct houseId:" + houseId);
             LOG.info("changeProduct workerTypeId:" + workerTypeId);
 
+            int count = 0;
+            String ret = productId + " " + budgetMaterialId + " " + srcGroupId + " " + targetGroupId + " " + houseId + " " + workerTypeId;
             BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
             if (StringUtils.isNotBlank(targetGroupId) && StringUtils.isNoneBlank(srcGroupId))//不为空  可以切换
             {
@@ -178,6 +180,7 @@ public class ActuaryOperationService {
                                         srcBudgetMaterial.setTotalPrice(product.getPrice() * srcBudgetMaterial.getShopCount());
                                         LOG.info("srcBudgetMaterial 换后:" + srcBudgetMaterial);
                                         budgetMaterialMapper.updateByPrimaryKeySelective(srcBudgetMaterial);
+                                        count++;
                                     }
                                 }
                             }
@@ -195,8 +198,7 @@ public class ActuaryOperationService {
                 budgetMaterial.setTotalPrice(product.getPrice() * budgetMaterial.getShopCount());
                 budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
             }
-
-            return ServerResponse.createBySuccessMessage("操作成功");
+            return ServerResponse.createBySuccessMessage(count + "操作成功" + ret);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
@@ -500,7 +502,7 @@ public class ActuaryOperationService {
      * 支付时精算goods详情 查最新价格 共用此方法
      */
     public ServerResponse confirmActuaryDetail(String userToken, String houseId, String workerTypeId, int type, String cityId) {
-        try{
+        try {
             ServerResponse serverResponse = workerTypeAPI.getNameByWorkerTypeId(workerTypeId);
             String workerTypeName = "";
             if (serverResponse.isSuccess()) {
@@ -553,7 +555,8 @@ public class ActuaryOperationService {
                     Goods goods = goodsMapper.selectByPrimaryKey(bm.getGoodsId());
                     Product product = productMapper.selectByPrimaryKey(bm.getProductId());
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
-                    if (product != null){
+                    flowActuaryDTO.setTypeName(typsValue);
+                    if (product != null) {
                         flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
                         String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO, userToken,
                                 cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + type;
@@ -564,7 +567,6 @@ public class ActuaryOperationService {
                     }
                     flowActuaryDTO.setBudgetMaterialId(bm.getId());
                     flowActuaryDTO.setName(bm.getGoodsName());
-                    flowActuaryDTO.setTypeName(typsValue);
                     flowActuaryDTO.setShopCount(bm.getShopCount());
                     if (bm.getDeleteState() == 2) {
                         flowActuaryDTO.setBuy(3);//可选没选中(业主已取消)
@@ -576,7 +578,7 @@ public class ActuaryOperationService {
             }
             flowDTO.setFlowActuaryDTOList(flowActuaryDTOList);
             return ServerResponse.createBySuccess("查询成功", flowDTO);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }

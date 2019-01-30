@@ -16,14 +16,14 @@ import javax.servlet.http.HttpServletRequest;
  * Time: 10:52
  */
 @FeignClient("dangjia-service-master")
-@Api(value = "订单流水", description = "订单流水")
+@Api(value = "工人和业主支付订单流水", description = "工人和业主支付订单流水")
 public interface WebWalletAPI {
 
     /**
      * 所有订单流水
      */
     @PostMapping("web/finance/wallet/getAllWallet")
-    @ApiOperation(value = "所有订单流水", notes = "所有订单流水")
+    @ApiOperation(value = "工人和业主支付订单流水", notes = "工人和业主支付订单流水")
     ServerResponse getAllWallet(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO);
 
 

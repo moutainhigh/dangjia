@@ -33,20 +33,11 @@ import java.util.*;
 @Service
 public class CustomerRecordService {
     @Autowired
-    private ConfigUtil configUtil;
-    @Autowired
     private UserMapper userMapper;
-
     @Autowired
     private ICustomerMapper customerMapper;
     @Autowired
     private ICustomerRecordMapper iCustomerRecordMapper;
-    @Autowired
-    private IMemberLabelMapper iMemberLabelMapper;
-    @Autowired
-    private WorkerTypeService workerTypeService;
-    @Autowired
-    private RedisClient redisClient;
 
     protected static final Logger LOG = LoggerFactory.getLogger(CustomerRecordService.class);
 

@@ -2,6 +2,7 @@ package com.dangjia.acg.api.web.matter;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.matter.RenovationManual;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -18,8 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface WebRenovationManualAPI {
 
     @PostMapping("web/renovationManual/queryRenovationManual")
-    @ApiOperation(value = "根据工序id查询所有装修指南", notes = "根据工序id查询所有装修指南")
-    ServerResponse queryRenovationManual(@RequestParam("pageDTO") PageDTO pageDTO, @RequestParam("workerTypeId")String workerTypeId);
+    @ApiOperation(value = "查询所有装修指南", notes = "查询所有装修指南")
+    ServerResponse queryRenovationManual(@RequestParam("pageDTO") PageDTO pageDTO, @RequestParam("renovationManual") RenovationManual renovationManual);
 
     @PostMapping("web/renovationManual/addRenovationManual")
     @ApiOperation(value = "新增装修指南", notes = "新增装修指南")

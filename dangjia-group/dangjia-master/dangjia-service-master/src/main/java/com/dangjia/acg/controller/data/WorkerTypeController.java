@@ -60,8 +60,7 @@ public class WorkerTypeController implements WorkerTypeAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getWorkerType(String workerTypeId){
-        WorkerType workerType = workerTypeService.getWorkerTypeId(workerTypeId);
-        return ServerResponse.createBySuccess("查询成功", workerType);
+    public WorkerType getWorkerType(String workerTypeId){
+        return workerTypeService.getWorkerTypeId(workerTypeId);
     }
 }

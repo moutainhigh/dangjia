@@ -21,8 +21,31 @@
         select
         <include refid="Base_columns"/>
         from dj_worker_withdraw_deposit
+        where 1=1
+        <if test="state!=-1">
+            and state = #{state}
+        </if>
+        <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+            and create_date between  #{beginDate}  and #{endDate}
+        </if>
         ORDER BY create_date DESC
     </select>
+
+    <!--查询当前周所有提现申请 -->
+    <select id="getAllCurWeek" resultType="com.dangjia.acg.modle.worker.WithdrawDeposit">
+        select
+        <include refid="Base_columns"/>
+        from dj_worker_withdraw_deposit
+        where 1=1
+        <if test="state!=-1">
+            and state = #{state}
+        </if>
+        <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+            and create_date between  #{beginDate}  and #{endDate}
+        </if>
+        ORDER BY create_date DESC
+    </select>
+
 
 </mapper>
 

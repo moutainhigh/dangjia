@@ -3,6 +3,7 @@ package com.dangjia.acg.controller.web.deliver;
 import com.dangjia.acg.api.web.deliver.WebOrderSplitAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.service.deliver.OrderSplitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -75,5 +76,11 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     @ApiMethod
     public ServerResponse getOrderSplitList(String houseId){
         return orderSplitService.getOrderSplitList(houseId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setSplitDeliver(SplitDeliver splitDeliver) {
+        return orderSplitService.setSplitDeliver(splitDeliver);
     }
 }

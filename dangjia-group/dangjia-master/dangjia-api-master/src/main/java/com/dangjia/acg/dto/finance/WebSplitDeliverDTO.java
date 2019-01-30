@@ -1,8 +1,11 @@
 package com.dangjia.acg.dto.finance;
 
+import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.persistence.Column;
 import java.util.Date;
 import java.util.List;
 
@@ -14,22 +17,10 @@ import java.util.List;
  */
 @Data
 public class WebSplitDeliverDTO {
+    private Integer curWeekAddNum;//本周新增
+    private Integer curWeekSuccessNum;//本周 成功处理的
+    private Integer curWeekNoHandleNum;//本周 待处理的
+    private Integer allNoHandleNum;//所有待处理的
 
-    private String splitDeliverId;
-    private int shipState;//配送状态
-    private String number;
-    private Date createDate;// 创建日期
-    private Date sendTime; //发货时间
-    private Date submitTime;//下单时间
-    private Date modifyDate;//收货时间
-    private Double totalAmount;
-    private Integer tol;//多少种商品
-
-    private String name;//一件名
-    private String image;//一张图
-    private Integer supState;//0:大管家不可收货;1:大管家可收货
-    private List<SplitDeliverItemDTO> splitDeliverItemDTOList;
-
-    private String supMobile;//供货商电话
-    private String supName;//供应商名字
+    private List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists;
 }

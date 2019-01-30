@@ -17,7 +17,12 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
     @Autowired
     private BudgetWorkerService budgetWorkerService;
 
-
+    //根据HouseFlowId查询房子材料精算
+    @Override
+    @ApiMethod
+    public ServerResponse queryBudgetWorkerByHouseFlowId(HttpServletRequest request,String houseFlowId){
+        return budgetWorkerService.queryBudgetWorkerByHouseFlowId(houseFlowId);
+    }
     /**
      * 查询所有精算
      *

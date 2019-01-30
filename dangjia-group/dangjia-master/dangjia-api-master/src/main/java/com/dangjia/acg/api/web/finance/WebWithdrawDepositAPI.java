@@ -2,6 +2,7 @@ package com.dangjia.acg.api.web.finance;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.worker.WithdrawDeposit;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 /**
  * author: ysl
@@ -24,13 +26,15 @@ public interface WebWithdrawDepositAPI {
      */
     @PostMapping("web/finance/withdraw/getAllWithdraw")
     @ApiOperation(value = "查询所有提现申请", notes = "查询所有有提现申请")
-    ServerResponse getAllWithdraw(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO);
+    ServerResponse getAllWithdraw(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO,
+                                  @RequestParam("state") Integer state, @RequestParam("beginDate") String beginDate,
+                                  @RequestParam("endDate")  String endDate);
 
     /**
-     * 修改提现信息状态
+     * 修改提现信息
      */
-    @PostMapping("web/finance/withdraw/updateWithdraw")
+    @PostMapping("web/finance/withdraw/setWithdraw")
     @ApiOperation(value = "提醒申请驳回，同意", notes = "提醒申请驳回，同意")
-    ServerResponse updateWithdraw(@RequestParam("request") HttpServletRequest request, @RequestParam("workerId") String workerId);
+    ServerResponse setWithdraw(@RequestParam("request") HttpServletRequest request, @RequestParam("withdrawDeposit") WithdrawDeposit withdrawDeposit);
 
 }

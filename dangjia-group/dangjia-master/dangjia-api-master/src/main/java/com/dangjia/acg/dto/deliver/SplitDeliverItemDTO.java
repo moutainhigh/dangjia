@@ -15,4 +15,6 @@ public class SplitDeliverItemDTO {
     private Double shopCount;//购买总数
     private Double num;//本次发货数量
     private String unitName;//单位
+    private String brandSeriesName;//品牌系列
+    private Double price;//销售价
 }

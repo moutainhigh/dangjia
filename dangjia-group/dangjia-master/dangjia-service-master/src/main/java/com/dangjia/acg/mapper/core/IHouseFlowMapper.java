@@ -29,6 +29,5 @@ public interface IHouseFlowMapper extends Mapper<HouseFlow> {
     List<HouseFlow> getForCheckMoney(@Param("houseId")String houseId);
     /**查下个未开工的工种*/
     List<HouseFlow> getNextHouseFlow(@Param("sort")int sort,@Param("houseId")String houseId);
-    List<HouseFlow> getHouseNot0(@Param("houseId")String houseId);
-    List<HouseFlow> getFlowByhouseIdNot12(@Param("houseId")String houseId);
+    List<HouseFlow> getWorkerFlow(@Param("houseId")String houseId);
 }

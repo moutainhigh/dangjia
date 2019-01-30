@@ -39,9 +39,9 @@ public interface HouseFlowAPI {
     @ApiOperation(value = "确认开工", notes = "确认开工")
     ServerResponse setConfirmStart(@RequestParam("userToken") String userToken, @RequestParam("houseFlowId") String houseFlowId);
 
-    @PostMapping("app/core/houseFlow/getFlowByhouseIdNot12")
-    @ApiOperation(value = "根据houseId查询除设计精算外的可用工序", notes = "根据houseId查询除设计精算外的可用工序")
-    List<HouseFlow> getFlowByhouseIdNot12(@RequestParam("houseId") String houseId);
+    @PostMapping("app/core/houseFlow/getWorkerFlow")
+    @ApiOperation(value = "设计精算管家外可用工序", notes = "设计精算管家外可用工序")
+    List<HouseFlow> getWorkerFlow(@RequestParam("houseId") String houseId);
 
     @PostMapping("app/core/houseFlow/getHouseFlowByHidAndWty")
     @ApiOperation(value = "根据houseId和工种类型查询HouseFlow", notes = "根据houseId和工种类型查询HouseFlow")
