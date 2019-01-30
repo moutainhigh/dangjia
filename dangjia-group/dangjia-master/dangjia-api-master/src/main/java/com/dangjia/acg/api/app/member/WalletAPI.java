@@ -23,7 +23,8 @@ public interface WalletAPI {
     @PostMapping("app/member/wallet/checkFinish")
     @ApiOperation(value = "完成验证提现", notes = "完成验证提现")
     ServerResponse checkFinish(@RequestParam("userToken")String userToken, @RequestParam("paycode")Integer paycode,
-                               @RequestParam("money")Double money, @RequestParam("workerBankCardId")String workerBankCardId);
+                               @RequestParam("money")Double money, @RequestParam("workerBankCardId")String workerBankCardId,
+                               @RequestParam("roleType")Integer roleType);
     /**
      * 提现验证码
      */

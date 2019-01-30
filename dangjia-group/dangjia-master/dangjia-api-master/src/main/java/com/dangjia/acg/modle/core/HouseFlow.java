@@ -52,8 +52,8 @@ public class HouseFlow extends BaseEntity {
 	private Integer state;
 
 	@Column(name = "grab_lock")
-	@Desc(value = "抢单锁·0可抢，1已指定工人 2不可以抢")
-	@ApiModelProperty("抢单锁·0可抢，1指定工人 2不可以抢")
+	@Desc(value = "抢单锁·0可抢，1已指定工人")
+	@ApiModelProperty("抢单锁·0可抢，1指定工人")
 	private Integer grabLock;
 
     @Column(name = "nominator")
@@ -97,18 +97,18 @@ public class HouseFlow extends BaseEntity {
 	private Integer pause;
 
     @Column(name = "material_price")
-    @Desc(value = "材料钱 支付后才会保存")
-    @ApiModelProperty("材料钱 支付后才会保存")
+    @Desc(value = "材料钱 支付后更新")
+    @ApiModelProperty("材料钱 支付后更新")
 	private BigDecimal materialPrice; //goodstotal
 
     @Column(name = "work_price")
-    @Desc(value = "工钱 支付后才会保存")
-    @ApiModelProperty("工钱 支付后才会保存")
+    @Desc(value = "工钱 支付后更新")
+    @ApiModelProperty("工钱 支付后更新")
 	private BigDecimal workPrice;//workertotal
 
     @Column(name = "total_price")
-    @Desc(value = "总钱 工钱+材料 支付后才会保存")
-    @ApiModelProperty("总钱 工钱+材料 支付后才会保存")
+    @Desc(value = "总钱 工钱+材料 支付后更新")
+    @ApiModelProperty("总钱 工钱+材料 支付后更新")
 	private BigDecimal totalPrice;//goodstotalprice
 
     @Column(name = "self_price")

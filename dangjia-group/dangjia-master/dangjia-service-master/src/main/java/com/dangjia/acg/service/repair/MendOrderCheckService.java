@@ -3,6 +3,7 @@ package com.dangjia.acg.service.repair;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -19,6 +20,7 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +64,8 @@ public class MendOrderCheckService {
     private IWarehouseMapper warehouseMapper;
     @Autowired
     private IWorkerDetailMapper workerDetailMapper;
+    @Autowired
+    private ConfigMessageService configMessageService;
 
 
     /**
@@ -224,6 +228,10 @@ public class MendOrderCheckService {
 
                 mendOrder.setState(4);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+
+                if (mendOrder.getType() == 4){//业主退款成功即业主退材料
+                    configMessageService.addConfigMessage(null,"gj",member.getId(),"0","退款结果", DjConstants.PushMessage.REFUND_SUCCESS ,"");
+                }
             }
 
             return ServerResponse.createBySuccessMessage("流程全部通过");

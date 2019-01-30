@@ -129,26 +129,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and state= 0 order by sort asc
     </select>
 
-    <!--根据houseId查询施工中的任务-->
-    <select id="getHouseNot0" resultType="com.dangjia.acg.modle.core.HouseFlow">
+    <!--设计精算管家外可用工序-->
+    <select id="getWorkerFlow" resultType="com.dangjia.acg.modle.core.HouseFlow">
         select
-        <include refid="new_columns" />
+            <include refid="new_columns" />
         from dj_core_house_flow
-        where house_id=#{houseId}
-        and worker_type not in(1,2,3)
-        and work_type=4
-        and work_steta !=2
-    </select>
-
-    <!--根据houseId查询除设计精算外的可用工序-->
-    <select id="getFlowByhouseIdNot12" resultType="com.dangjia.acg.modle.core.HouseFlow">
-        select
-        <include refid="new_columns" />
-        from dj_core_house_flow
-        where 1=1
-        and house_id=#{houseId}
+        where house_id = #{houseId}
         and state=0
-        and worker_type not in (1,2)
+        and worker_type not in (1,2,3)
         order by sort asc
     </select>
 </mapper>

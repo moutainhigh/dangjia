@@ -12,6 +12,7 @@ import org.springframework.web.multipart.support.StandardMultipartHttpServletReq
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: QiYuXiang
@@ -41,7 +42,7 @@ public class FileCommonController implements FileCommonAPI {
   }
 
   @Override
-  public String saveEditorFile(MultipartFile[] imgFile,String dir) {
+  public Map saveEditorFile(MultipartFile[] imgFile, String dir) {
     return  fileCommonService.saveEditorFile(imgFile,dir);
   }
   @Override

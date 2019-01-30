@@ -107,13 +107,13 @@ public class HouseController implements HouseAPI {
     /**
      * 保存装修指南
      * @param userToken
-     * @param savaList
+     * @param saveList
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse savaRenovationManual(String userToken,String savaList){
-        return houseService.savaRenovationManual(userToken,savaList);
+    public ServerResponse saveRenovationManual(String userToken,String saveList){
+        return houseService.saveRenovationManual(userToken,saveList);
     }
 
     /**

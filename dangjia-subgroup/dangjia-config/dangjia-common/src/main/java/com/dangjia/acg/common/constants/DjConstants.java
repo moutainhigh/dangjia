@@ -151,7 +151,7 @@ public class DjConstants {
         public final static String START_FITTING_UP ="业主您好！您的美宅【%s】开始装修啦！";
         public final static String SNAP_UP_ORDER ="您有一个新的装修订单，马上去抢！";
         public final static String DESIGNER_GRABS_THE_BILL ="业主您好！您的美宅【%s】已有设计师抢单，赶快去看看吧~";
-        public final static String PAYMENT_OF_DESIGN_FEE ="设计师您好！业主已支付【%s】设计费，请及时查看";
+        public final static String PAYMENT_OF_DESIGN_FEE ="设计师您好！业主【%s】已支付【%s】设计费，请及时查看";
         public final static String PLANE_UPLOADING ="业主您好！您的美宅【%s】平面图已经上传，请确认。";
         public final static String PLANE_ERROR ="抱歉，您设计的【%s】平面图未通过，请联系业主修改后再上传。";
         public final static String PLANE_OK ="恭喜！您设计的【%s】平面图已通过，请联系业主设计施工图。";

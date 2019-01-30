@@ -1,6 +1,7 @@
 package com.dangjia.acg.api.data;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.core.WorkerType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -35,5 +36,5 @@ public interface WorkerTypeAPI {
 
     @PostMapping("/data/workerType/getWorkerType")
     @ApiOperation(value = "根据workerTypeId返回工种对象", notes = "根据workerTypeId返回工种对象")
-    ServerResponse getWorkerType(@RequestParam("workerTypeId")String workerTypeId);
+    WorkerType getWorkerType(@RequestParam("workerTypeId")String workerTypeId);
 }

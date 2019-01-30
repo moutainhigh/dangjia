@@ -3,6 +3,7 @@ package com.dangjia.acg.service.activity;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetMaterialAPI;
+import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -19,6 +20,7 @@ import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
+import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.pay.BusinessOrder;
@@ -63,6 +65,9 @@ public class RedPackPayService {
     private IBusinessOrderMapper businessOrderMapper;
     @Autowired
     private BudgetMaterialAPI budgetMaterialAPI;
+
+    @Autowired
+    private BudgetWorkerAPI budgetWorkerAPI;
     @Autowired
     private RedisClient redisClient;
     @Autowired
@@ -154,26 +159,37 @@ public class RedPackPayService {
             }
             String houseFlowId = businessOrder.getTaskId();
             request.setAttribute(Constants.CITY_ID,house.getCityId());
-            ServerResponse serverResponse=budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(request,houseFlowId);
-            if(serverResponse.getResultObj()!=null){
-                List<BudgetMaterial> budgetMaterialList=JSONObject.parseArray(serverResponse.getResultObj().toString(),BudgetMaterial.class);
+
+            ServerResponse retMaterial=budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(request,houseFlowId);
+            ServerResponse retWorker=budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(request,houseFlowId);
+
+            if(retMaterial.getResultObj()!=null||retWorker.getResultObj()!=null){
+                List<BudgetMaterial> budgetMaterialList= JSONObject.parseArray(retMaterial.getResultObj().toString(),BudgetMaterial.class);
+                List<BudgetWorker> budgetWorkerList= JSONObject.parseArray(retWorker.getResultObj().toString(),BudgetWorker.class);
 
                 for (ActivityRedPackRecordDTO redPacketRecord : redPacketRecordList) {
                     BigDecimal workerTotal=new BigDecimal(0);
                     BigDecimal goodsTotal=new BigDecimal(0);
                     BigDecimal productTotal=new BigDecimal(0);
-                    for (BudgetMaterial budgetMaterial:budgetMaterialList) {
-                        //判断工种的优惠券是否匹配
-                        if (budgetMaterial.getWorkerTypeId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 0) {
-                            workerTotal=workerTotal.add(new BigDecimal(budgetMaterial.getPrice()*budgetMaterial.getShopCount()));
+
+                    if(budgetWorkerList.size()>0){
+                        for (BudgetWorker budgetWorker:budgetWorkerList) {
+                            //判断工种的优惠券是否匹配
+                            if (budgetWorker.getWorkerTypeId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 0) {
+                                workerTotal=workerTotal.add(new BigDecimal(budgetWorker.getPrice()*budgetWorker.getShopCount()));
+                            }
                         }
-                        //判断材料优惠券是否匹配
-                        if (budgetMaterial.getGoodsId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 1) {
-                            goodsTotal=goodsTotal.add(new BigDecimal(budgetMaterial.getPrice()*budgetMaterial.getShopCount()));
-                        }
-                        //判断货品的优惠券是否匹配
-                        if (budgetMaterial.getProductId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 2) {
-                            productTotal=productTotal.add(new BigDecimal(budgetMaterial.getPrice()*budgetMaterial.getShopCount()));
+                    }
+                    if(budgetMaterialList.size()>0){
+                        for (BudgetMaterial budgetMaterial:budgetMaterialList) {
+                            //判断材料优惠券是否匹配
+                            if (budgetMaterial.getGoodsId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 1) {
+                                goodsTotal=goodsTotal.add(new BigDecimal(budgetMaterial.getPrice()*budgetMaterial.getShopCount()));
+                            }
+                            //判断货品的优惠券是否匹配
+                            if (budgetMaterial.getProductId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 2) {
+                                productTotal=productTotal.add(new BigDecimal(budgetMaterial.getPrice()*budgetMaterial.getShopCount()));
+                            }
                         }
                     }
                     //判断优惠券类型是否为满减券
@@ -208,6 +224,10 @@ public class RedPackPayService {
             //格式化有效优惠券集合
             for (ActivityRedPackRecordDTO redPacetResult:redPacetResultList) {
                 redPacetResult.toConvert();
+            }
+            //格式化有效优惠券集合
+            for (ActivityRedPackRecordDTO redPacetNot:redPacetNotList) {
+                redPacetNot.toConvert();
             }
             redPageResult.setBusinessOrderNumber(businessOrderNumber);
             redPageResult.setRedPacetResultList(redPacetResultList);
@@ -264,24 +284,33 @@ public class RedPackPayService {
                     ActivityRedPackRule redPackRule=activityRedPackRuleMapper.selectByPrimaryKey(redPacketRecord.getRedPackRuleId());
                     String houseFlowId = businessOrder.getTaskId();
                     request.setAttribute(Constants.CITY_ID,house.getCityId());
-                    ServerResponse serverResponse=budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(request,houseFlowId);
+                    ServerResponse retMaterial=budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(request,houseFlowId);
+                    ServerResponse retWorker=budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(request,houseFlowId);
                     BigDecimal workerTotal=new BigDecimal(0);
                     BigDecimal goodsTotal=new BigDecimal(0);
                     BigDecimal productTotal=new BigDecimal(0);
-                    if(serverResponse.getResultObj()!=null){
-                        List<BudgetMaterial> budgetMaterialList=JSONObject.parseArray(serverResponse.getResultObj().toString(),BudgetMaterial.class);
-                        for (BudgetMaterial budgetMaterial:budgetMaterialList) {
-                            //判断工种的优惠券是否匹配
-                            if (budgetMaterial.getWorkerTypeId().equals(redPack.getFromObject()) && redPack.getFromObjectType() == 0) {
-                                workerTotal=workerTotal.add(new BigDecimal(budgetMaterial.getTotalPrice()));
+                    if(retMaterial.getResultObj()!=null||retMaterial.getResultObj()!=null){
+                        List<BudgetMaterial> budgetMaterialList=JSONObject.parseArray(retMaterial.getResultObj().toString(),BudgetMaterial.class);
+                        List<BudgetWorker> budgetWorkerList=JSONObject.parseArray(retMaterial.getResultObj().toString(),BudgetWorker.class);
+
+                        if(budgetWorkerList.size()>0) {
+                            for (BudgetMaterial budgetMaterial : budgetMaterialList) {
+                                //判断工种的优惠券是否匹配
+                                if (budgetMaterial.getWorkerTypeId().equals(redPack.getFromObject()) && redPack.getFromObjectType() == 0) {
+                                    workerTotal = workerTotal.add(new BigDecimal(budgetMaterial.getTotalPrice()));
+                                }
                             }
-                            //判断材料优惠券是否匹配
-                            if (budgetMaterial.getGoodsId().equals(redPack.getFromObject()) && redPack.getFromObjectType() == 1) {
-                                goodsTotal= goodsTotal.add(new BigDecimal(budgetMaterial.getTotalPrice()));
-                            }
-                            //判断货品的优惠券是否匹配
-                            if (budgetMaterial.getProductId().equals(redPack.getFromObject()) && redPack.getFromObjectType() == 2) {
-                                productTotal=productTotal.add(new BigDecimal(budgetMaterial.getTotalPrice()));
+                        }
+                        if(budgetMaterialList.size()>0) {
+                            for (BudgetMaterial budgetMaterial : budgetMaterialList) {
+                                //判断材料优惠券是否匹配
+                                if (budgetMaterial.getGoodsId().equals(redPack.getFromObject()) && redPack.getFromObjectType() == 1) {
+                                    goodsTotal = goodsTotal.add(new BigDecimal(budgetMaterial.getTotalPrice()));
+                                }
+                                //判断货品的优惠券是否匹配
+                                if (budgetMaterial.getProductId().equals(redPack.getFromObject()) && redPack.getFromObjectType() == 2) {
+                                    productTotal = productTotal.add(new BigDecimal(budgetMaterial.getTotalPrice()));
+                                }
                             }
                         }
                     }

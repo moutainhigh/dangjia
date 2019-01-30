@@ -73,7 +73,7 @@ public class WalletService {
      * 完成验证提现
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse checkFinish(String userToken, Integer paycode, Double money,String workerBankCardId) {
+    public ServerResponse checkFinish(String userToken, Integer paycode, Double money, String workerBankCardId, Integer roleType) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
@@ -86,7 +86,7 @@ public class WalletService {
             }
             Double surplusMoney = worker.getSurplusMoney().doubleValue();//可取
 
-            if (surplusMoney-money < 0) {
+            if (surplusMoney - money < 0) {
                 return ServerResponse.createByErrorMessage("余额不足，提现失败");
             }
 
@@ -98,6 +98,7 @@ public class WalletService {
             //生成提现订单
             BankCard bankCard = bankCardMapper.selectByPrimaryKey(workerBankCard.getBankCardId());
             WithdrawDeposit wd = new WithdrawDeposit();
+            wd.setRoleType(roleType);
             wd.setName(worker.getName());
             wd.setWorkerId(worker.getId());
             wd.setMoney(new BigDecimal(money));
@@ -127,6 +128,7 @@ public class WalletService {
             return ServerResponse.createByErrorMessage("系统出错，提现失败！");
         }
     }
+
     /**
      * 获取验证码
      */
@@ -150,6 +152,7 @@ public class WalletService {
             return ServerResponse.createByErrorMessage("系统出错，获取验证码失败");
         }
     }
+
     /**
      * 获取提现信息
      */
@@ -187,12 +190,12 @@ public class WalletService {
             }
             WithdrawDTO withdrawDTO = new WithdrawDTO();
             String mobile = member.getMobile();//号码
-            String mob = mobile.substring(0,3) + "****" + mobile.substring(mobile.length() - 4, mobile.length());
+            String mob = mobile.substring(0, 3) + "****" + mobile.substring(mobile.length() - 4, mobile.length());
 
             withdrawDTO.setMobile(mob);//电话
             withdrawDTO.setSurplusMoney(member.getSurplusMoney());//可取
             List<BrandCardDTO> brandCardDTOList = new ArrayList<BrandCardDTO>();
-            for(WorkerBankCard workerBankCard : workerBankCardList){
+            for (WorkerBankCard workerBankCard : workerBankCardList) {
                 BrandCardDTO brandCardDTO = new BrandCardDTO();
                 String number = workerBankCard.getBankCardNumber();//卡号
                 BankCard bankCard = bankCardMapper.selectByPrimaryKey(workerBankCard.getBankCardId());//银行
@@ -215,13 +218,13 @@ public class WalletService {
     /**
      * 流水详情
      */
-    public ServerResponse getExtractDetail(String workerDetailId){
+    public ServerResponse getExtractDetail(String workerDetailId) {
         try {
             WorkerDetail workerDetail = workerDetailMapper.selectByPrimaryKey(workerDetailId);//根据流水id查询流水详情
             Map<String, Object> returnMap = new HashMap<String, Object>();
             returnMap.put("id", workerDetail.getId());//id
             returnMap.put("typeName", workerDetail.getName());//流水详情描述
-            returnMap.put("image",configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class)+"icon/rmb.png");
+            returnMap.put("image", configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/rmb.png");
             House house = houseMapper.selectByPrimaryKey(workerDetail.getHouseId());
             String houseName = "自定义流水";
             if (house != null) {
@@ -245,12 +248,12 @@ public class WalletService {
     /**
      * 支出 收入
      */
-    public ServerResponse workerDetail(String userToken,int type ,Integer pageNum, Integer pageSize){
-        try{
-            if(pageNum == null){
+    public ServerResponse workerDetail(String userToken, int type, Integer pageNum, Integer pageSize) {
+        try {
+            if (pageNum == null) {
                 pageNum = 1;
             }
-            if(pageSize == null){
+            if (pageSize == null) {
                 pageSize = 10;
             }
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
@@ -259,26 +262,26 @@ public class WalletService {
             PageInfo pageResult;
             List<WorkerDetail> outDetailList;
             List<DetailDTO> detailDTOList = new ArrayList<DetailDTO>();
-            if(type == 0){//总支出
+            if (type == 0) {//总支出
                 outDetailList = workerDetailMapper.outDetail(member.getId());
                 pageResult = new PageInfo(outDetailList);
-                for (WorkerDetail workerDetail : outDetailList){
+                for (WorkerDetail workerDetail : outDetailList) {
                     DetailDTO detailDTO = new DetailDTO();
                     detailDTO.setWorkerDetailId(workerDetail.getId());
-                    detailDTO.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class)+"icon/rmb.png");//图标
+                    detailDTO.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/rmb.png");//图标
                     detailDTO.setName(workerDetail.getName());
                     detailDTO.setCreateDate(workerDetail.getCreateDate());
                     detailDTO.setMoney("-" + workerDetail.getMoney());
                     detailDTOList.add(detailDTO);
                 }
                 pageResult.setList(detailDTOList);
-            }else{
+            } else {
                 outDetailList = workerDetailMapper.incomeDetail(member.getId());
                 pageResult = new PageInfo(outDetailList);
-                for (WorkerDetail workerDetail : outDetailList){
+                for (WorkerDetail workerDetail : outDetailList) {
                     DetailDTO detailDTO = new DetailDTO();
                     detailDTO.setWorkerDetailId(workerDetail.getId());
-                    detailDTO.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class)+"icon/rmb.png");//图标
+                    detailDTO.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/rmb.png");//图标
                     detailDTO.setName(workerDetail.getName());
                     detailDTO.setCreateDate(workerDetail.getCreateDate());
                     detailDTO.setMoney("+" + workerDetail.getMoney());
@@ -288,7 +291,7 @@ public class WalletService {
             }
 
             return ServerResponse.createBySuccess("获取成功", pageResult);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("获取失败");
         }
@@ -297,8 +300,8 @@ public class WalletService {
     /**
      * 钱包信息, 查询余额
      */
-    public ServerResponse walletInformation(String userToken){
-        try{
+    public ServerResponse walletInformation(String userToken) {
+        try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member member = accessToken.getMember();
             member = memberMapper.selectByPrimaryKey(member.getId());
@@ -318,7 +321,7 @@ public class WalletService {
             walletDTO.setHouseOrder(houseWorkerList.size());//接单量
 
             return ServerResponse.createBySuccess("获取成功", walletDTO);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("获取失败");
         }

@@ -28,6 +28,14 @@ public class HouseStyleTypeService {
     @Autowired
     private IHouseStyleTypeMapper houseStyleTypeMapper;
 
+
+    /**
+     * 获取风格
+     */
+    public HouseStyleType getStyleByName(String style) {
+        return houseStyleTypeMapper.getStyleByName(style);
+    }
+
     /**
      * 设计风格列表
      */

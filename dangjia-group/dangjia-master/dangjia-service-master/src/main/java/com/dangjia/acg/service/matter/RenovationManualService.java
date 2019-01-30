@@ -1,9 +1,12 @@
 package com.dangjia.acg.service.matter;
 
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
+import com.dangjia.acg.mapper.matter.IRenovationStageMapper;
 import com.dangjia.acg.modle.matter.RenovationManual;
+import com.dangjia.acg.modle.matter.RenovationStage;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +14,6 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,36 +27,31 @@ public class RenovationManualService {
     @Autowired
     private IRenovationManualMapper renovationManualMapper;
     @Autowired
-    private IWorkerTypeMapper workerTypeMapper;
+    private IRenovationStageMapper renovationStageMapper;
     /**
      * 根据工序id查询所有装修指南
-     * @param workerTypeId
+     * @param manual
      * @return
      */
-    public ServerResponse queryRenovationManual(Integer pageNum, Integer pageSize,String workerTypeId){
+    public ServerResponse queryRenovationManual(Integer pageNum, Integer pageSize,RenovationManual manual){
         try{
-            if(pageNum==null){
-                pageNum=1;
-            }
-            if(pageSize==null){
-                pageSize=10;
-            }
             PageHelper.startPage(pageNum, pageSize);
             Example example=new Example(RenovationManual.class);
-            example.createCriteria().andEqualTo("workerTypeId",workerTypeId);
+            Example.Criteria criteria=example.createCriteria();
+            if(!CommonUtil.isEmpty(manual.getWorkerTypeId())) {
+                criteria.andEqualTo("workerTypeId",manual.getWorkerTypeId());
+            }
+            if(!CommonUtil.isEmpty(manual.getName())) {
+                criteria.andLike("name","%"+manual.getName()+"%");
+            }
             List<RenovationManual> rmList = renovationManualMapper.selectByExample(example);
             List<Map<String,Object>> listMap=new ArrayList<>();
             for(RenovationManual renovationManual:rmList){
-                Map<String,Object> map = new HashMap<>();
-                map.put("id",renovationManual.getId());
-                map.put("name",renovationManual.getName());
-                map.put("workerTypeId",renovationManual.getWorkerTypeId());
-                map.put("workerTypeName",workerTypeMapper.selectByPrimaryKey(renovationManual.getWorkerTypeId()).getName());
-                map.put("url",renovationManual.getUrl());
-                map.put("urlName",renovationManual.getUrlName());
-                map.put("types",renovationManual.getTypes());
-                map.put("state",renovationManual.getState());
-                map.put("orderNumber",renovationManual.getOrderNumber());
+                Map<String,Object> map = BeanUtils.beanToMap(renovationManual);
+                RenovationStage renovationStage=renovationStageMapper.selectByPrimaryKey(renovationManual.getWorkerTypeId());
+                if(renovationStage!=null) {
+                    map.put("workerTypeName", renovationStage.getName());
+                }
                 listMap.add(map);
             }
             PageInfo pageResult = new PageInfo(rmList);

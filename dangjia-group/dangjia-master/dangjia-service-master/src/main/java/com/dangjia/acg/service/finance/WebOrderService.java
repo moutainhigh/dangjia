@@ -38,6 +38,8 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -73,6 +75,7 @@ public class WebOrderService {
     private IActivityRedPackRecordMapper iActivityRedPackRecordMapper;
     @Autowired
     private IActivityRedPackMapper iActivityRedPackMapper;
+    private static Logger LOG = LoggerFactory.getLogger(WebOrderService.class);
 
     /*所有订单流水*/
     public ServerResponse getAllOrders(PageDTO pageDTO) {
@@ -92,7 +95,13 @@ public class WebOrderService {
                 webOrderDTO.setCreateDate(businessOrder.getCreateDate());
                 webOrderDTO.setModifyDate(businessOrder.getModifyDate());
                 House house = iHouseMapper.selectByPrimaryKey(businessOrder.getHouseId());
-                webOrderDTO.setHouseName(house.getHouseName());
+                if (house != null) {
+//                    LOG.info("businessOrder.getHouseId() :" + businessOrder.getHouseId());
+//                    return ServerResponse.createByErrorMessage("找不到房子信息 houseId:" + businessOrder.getHouseId());
+                    webOrderDTO.setHouseName(house.getHouseName());
+                }
+
+
                 webOrderDTO.setPayOrderNumber(businessOrder.getPayOrderNumber());
                 webOrderDTO.setActualPayment(businessOrder.getPayPrice());
                 ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(businessOrder.getNumber());

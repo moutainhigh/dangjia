@@ -30,6 +30,9 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -75,6 +78,7 @@ public class HouseFlowService {
     private IRewardPunishRecordMapper rewardPunishRecordMapper;
     @Autowired
     private IRewardPunishConditionMapper rewardPunishConditionMapper;
+    private static Logger LOG = LoggerFactory.getLogger(HouseFlowService.class);
 
     /**
      * 判断是否存在自己抢过的包括被拒的
@@ -145,6 +149,9 @@ public class HouseFlowService {
                     if (isHouseWorker(hwList, houseFlow)) {
                         continue;
                     }
+                    if(houseFlow.getGrabLock() == 1 && !houseFlow.getNominator().equals(member.getId())){
+                        continue;
+                    }
                     House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
                     if (house == null) continue;
                     AllgrabBean allgrabBean = new AllgrabBean();
@@ -204,49 +211,55 @@ public class HouseFlowService {
      * 精算生成houseFlow
      */
     public ServerResponse makeOfBudget(String houseId, String workerTypeId) {
-        Map<String, Object> map = new HashMap<>();
-        House house = houseMapper.selectByPrimaryKey(houseId);
-
-
-        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);
-        if (house == null) {
-            return ServerResponse.createByErrorMessage("根据houseId查询房产失败");
-        } else if (workerType == null) {
-            return ServerResponse.createByErrorMessage("根据workerTypeId查询失败");
-        }
-        Example example = new Example(HouseFlow.class);
-        example.createCriteria().andEqualTo("houseId", houseId).andEqualTo("workerTypeId", workerTypeId);
-        List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
-        if (houseFlowList.size() > 1) {
-            return ServerResponse.createByErrorMessage("精算异常,请联系平台部");
-        } else if (houseFlowList.size() == 1) {
-            HouseFlow houseFlow = houseFlowList.get(0);
-            map.put("houseFlowId", houseFlow.getId());
-            return ServerResponse.createBySuccess("查询houseFlow成功", map);
-        } else {
-            HouseFlow houseFlow = new HouseFlow(true);
-            houseFlow.setWorkerTypeId(workerTypeId);
-            houseFlow.setWorkerType(workerType.getType());
-            houseFlow.setHouseId(house.getId());
-            houseFlow.setState(workerType.getState());
-
-            if (house.getCustomSort() == null)
-                houseFlow.setSort(workerType.getSort());
-            else {
-                if (workerType.getType() >= 3) {//只从 3 大管家 开始有自定排序
-                    int sort = getCustomSortIndex(house.getCustomSort(), workerType.getType() + "");
-                    if (sort == -1)
-                        return ServerResponse.createByErrorMessage("在自定义排序中，不存在 workerType" + workerType.getType());
-                    houseFlow.setSort(sort);
-                } else {
-                    houseFlow.setSort(workerType.getSort());
-                }
+        try {
+            Map<String, Object> map = new HashMap<>();
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);
+            if (house == null) {
+                return ServerResponse.createByErrorMessage("根据houseId查询房产失败");
+            } else if (workerType == null) {
+                return ServerResponse.createByErrorMessage("根据workerTypeId查询失败");
             }
-            houseFlow.setWorkType(1);//生成默认房产，工匠还不能抢
-            houseFlow.setCityId(house.getCityId());
-            houseFlowMapper.insert(houseFlow);
-            map.put("houseFlowId", houseFlow.getId());
-            return ServerResponse.createBySuccess("创建houseFlow成功", map);
+            Example example = new Example(HouseFlow.class);
+            example.createCriteria().andEqualTo("houseId", houseId).andEqualTo("workerTypeId", workerTypeId);
+            List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
+            if (houseFlowList.size() > 1) {
+                return ServerResponse.createByErrorMessage("精算异常,请联系平台部");
+            } else if (houseFlowList.size() == 1) {
+                HouseFlow houseFlow = houseFlowList.get(0);
+                map.put("houseFlowId", houseFlow.getId());
+                return ServerResponse.createBySuccess("查询houseFlow成功", map);
+            } else {
+                HouseFlow houseFlow = new HouseFlow(true);
+                houseFlow.setWorkerTypeId(workerTypeId);
+                houseFlow.setWorkerType(workerType.getType());
+                houseFlow.setHouseId(house.getId());
+                houseFlow.setState(workerType.getState());
+
+                if (!StringUtils.isNoneBlank(house.getCustomSort()))
+                    houseFlow.setSort(workerType.getSort());
+                else {
+                    if (workerType.getType() >= 3) {//只从 3 大管家 开始有自定排序
+                        int sort = getCustomSortIndex(house.getCustomSort(), workerType.getType() + "");
+                        if (sort == -1) {
+                            LOG.info("makeOfBudget sort:" + sort);
+                            return ServerResponse.createByErrorMessage("在自定义排序中，不存在 workerType" + workerType.getType());
+                        }
+
+                        houseFlow.setSort(sort);
+                    } else {
+                        houseFlow.setSort(workerType.getSort());
+                    }
+                }
+                houseFlow.setWorkType(1);//生成默认房产，工匠还不能抢
+                houseFlow.setCityId(house.getCityId());
+                houseFlowMapper.insert(houseFlow);
+                map.put("houseFlowId", houseFlow.getId());
+                return ServerResponse.createBySuccess("创建houseFlow成功", map);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,查询失败");
         }
     }
 
@@ -259,11 +272,17 @@ public class HouseFlowService {
      */
     private int getCustomSortIndex(String customSort, String workerType) {
         String[] strArr = customSort.split(",");
-        for (int i = 3; i < strArr.length; i++) {
-            if (strArr[i].equals(workerType))
-                return i;
+        int indexSort = 3;
+        if (strArr != null) {
+            for (int i = 0; i < strArr.length; i++) {
+                if (strArr[i].equals(workerType))
+                    return indexSort;
+                indexSort++;
+            }
         }
+        LOG.info("getCustomSortIndex 返回错误 -1 customSort:" + customSort + " workerType:" + workerType);
         return -1;
+
     }
 
     /**
@@ -285,7 +304,7 @@ public class HouseFlowService {
             if (hf.getWorkType() >= 3) {
                 return ServerResponse.createByErrorMessage("订单已经被抢了！");
             }
-            if (hf.getGrabLock() > 0) {
+            if (hf.getGrabLock() == 1 && !hf.getNominator().equals(member.getId())) {
                 return ServerResponse.createByErrorMessage("订单已经被抢了！");
             }
             if (member.getCheckType() == 0) {
@@ -560,9 +579,9 @@ public class HouseFlowService {
     /**
      * 根据houseId查询除设计精算外的可用工序
      */
-    public List<HouseFlow> getFlowByhouseIdNot12(String houseId) {
+    public List<HouseFlow> getWorkerFlow(String houseId) {
         try {
-            return houseFlowMapper.getFlowByhouseIdNot12(houseId);
+            return houseFlowMapper.getWorkerFlow(houseId);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

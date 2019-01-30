@@ -66,7 +66,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             m.end_time mend_time
         FROM
             `dj_worker_reward_punish_record` r
-        INNER JOIN dj_house h ON r.house_id = h.id
+        LEFT JOIN dj_house h ON r.house_id = h.id
         INNER JOIN dj_member u ON r.member_id = u.id
         INNER JOIN dj_worker_reward_punish_correlation t ON r.reward_punish_correlation_id = t.id
         INNER JOIN dj_worker_reward_punish_condition m ON r.reward_punish_correlation_id = m.reward_punish_correlation_id

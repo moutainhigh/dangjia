@@ -5,12 +5,14 @@ import com.dangjia.acg.api.web.finance.WebWithdrawDepositAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.worker.WithdrawDeposit;
 import com.dangjia.acg.service.finance.WebWalletService;
 import com.dangjia.acg.service.finance.WebWithdrawDepositService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 /**
  * author: ysl
@@ -25,13 +27,13 @@ public class WebWithdrawDepositController implements WebWithdrawDepositAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getAllWithdraw(HttpServletRequest request, PageDTO pageDTO) {
-        return webWithdrawDepositService.getAllWithdraw(pageDTO);
+    public ServerResponse getAllWithdraw(HttpServletRequest request, PageDTO pageDTO, Integer state, String beginDate, String endDate) {
+        return webWithdrawDepositService.getAllWithdraw(pageDTO,state,beginDate,endDate);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse updateWithdraw(HttpServletRequest request, String workerId) {
-        return webWithdrawDepositService.updateWithdraw(workerId);
+    public ServerResponse setWithdraw(HttpServletRequest request, WithdrawDeposit withdrawDeposit) {
+        return webWithdrawDepositService.setWithdraw(withdrawDeposit);
     }
 }
