@@ -30,27 +30,12 @@ import java.util.List;
 @Service
 public class WebWalletService {
     @Autowired
-    private ConfigUtil configUtil;
-    @Autowired
     private IMemberMapper iMemberMapper;
     @Autowired
     private IWorkerDetailMapper iWorkerDetailMapper;
     @Autowired
-    private IWithdrawDepositMapper iWithdrawDepositMapper;
-    @Autowired
-    private IHouseWorkerMapper iHouseWorkerMapper;
-    @Autowired
     private IHouseMapper iHouseMapper;
     @Autowired
-    private IWorkerBankCardMapper iWorkerBankCardMapper;
-    @Autowired
-    private IBankCardMapper iBankCardMapper;
-    @Autowired
-    private IRewardPunishRecordMapper iRewardPunishRecordMapper;
-    @Autowired
-    private IRewardPunishConditionMapper iRewardPunishConditionMapper;
-    @Autowired
-    private ISmsMapper iSmsMapper;
     private static Logger LOG = LoggerFactory.getLogger(WebWalletService.class);
 
     /**

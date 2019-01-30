@@ -18,6 +18,92 @@ public class WebEngineerController implements WebEngineerAPI {
     @Autowired
     private EngineerService engineerService;
 
+
+    /**
+     * 已支付换工匠
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse changePayed(String houseWorkerId,String workerId){
+        return engineerService.changePayed(houseWorkerId,workerId);
+    }
+
+    /**
+     * 抢单未支付
+     * 换工匠重新抢
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse changeWorker(String houseWorkerId){
+        return engineerService.changeWorker(houseWorkerId);
+    }
+
+    /**
+     * 取消指定
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse cancelLockWorker(String houseFlowId){
+        return engineerService.cancelLockWorker(houseFlowId);
+    }
+
+    /**
+     * 指定/修改指定工匠
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse setLockWorker(String houseFlowId,String workerId){
+        return engineerService.setLockWorker(houseFlowId,workerId);
+    }
+
+    /**
+     * 抢单记录
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse grabRecord(String houseId,String workerTypeId) {
+        return engineerService.grabRecord(houseId,workerTypeId);
+    }
+
+    /**
+     * 查看工匠订单
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse workerOrder(String houseId) {
+        return engineerService.workerOrder(houseId);
+    }
+
+    /**
+     * 查看工序
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse houseFlowList(String houseId) {
+        return engineerService.houseFlowList(houseId);
+    }
+
+    /**
+     * 工匠钱包 信息
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse workerMess(String workerId) {
+        return engineerService.workerMess(workerId);
+    }
+
+    /**
+     * 历史工地
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse historyHouse(String workerId) {
+        return engineerService.historyHouse(workerId);
+    }
+
+    /**
+     * 工地列表
+     */
     @Override
     @ApiMethod
     public ServerResponse getHouseList(PageDTO pageDTO){
@@ -28,7 +114,7 @@ public class WebEngineerController implements WebEngineerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse artisanList(PageDTO pageDTO){
-        return engineerService.artisanList(pageDTO.getPageNum(),pageDTO.getPageSize());
+    public ServerResponse artisanList(String name,String workerTypeId,PageDTO pageDTO){
+        return engineerService.artisanList(name,workerTypeId,pageDTO.getPageNum(),pageDTO.getPageSize());
     }
 }

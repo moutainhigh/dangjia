@@ -1,6 +1,7 @@
 package com.dangjia.acg.api.web.deliver;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.deliver.SplitDeliver;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -44,4 +45,9 @@ public interface WebOrderSplitAPI {
     @PostMapping("web/deliver/orderSplit/getOrderSplitList")
     @ApiOperation(value = "根据房子id查询要货单列表", notes = "根据房子id查询要货单列表")
     ServerResponse getOrderSplitList(@RequestParam("houseId")String houseId);
+
+    @PostMapping("web/deliver/orderSplit/setSplitDeliver")
+    @ApiOperation(value = "修改 供应商结算状态", notes = "修改 供应商结算状态")
+    ServerResponse setSplitDeliver(@RequestParam("splitDeliver") SplitDeliver splitDeliver);
+
 }

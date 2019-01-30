@@ -110,14 +110,16 @@ public class FileCommonService {
    * @param files
    * @return
    */
-  public String saveEditorFile(MultipartFile[] files,String filePath) {
-    JSONObject paramMap=new JSONObject();
+  public Map saveEditorFile(MultipartFile[] files,String filePath) {
+    Map paramMap=new HashMap();
     try {
       if(CommonUtil.isEmpty(filePath)){
-        filePath=configUtil.getValue(SysConfig.PUBLIC_TEMPORARY_FILE_ADDRESS, String.class);
+        filePath="editor/";
       }else{
         filePath=filePath+"/";
       }
+      paramMap.put("errno", "0");
+      List imgs=new ArrayList();
       for (MultipartFile file : files) {
         String webAddress = filePath+ DateUtil.convert(new Date(), DateUtil.FORMAT1);
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_PATH, String.class) +webAddress+"/";
@@ -131,15 +133,17 @@ public class FileCommonService {
         file.transferTo(dest);
         //压缩并上传华为云OBS
         obsUpload( file, dest, address, fileName, webAddress);
-        paramMap.put("error", 0);
-        paramMap.put("message", "上传成功！");
-        paramMap.put("url", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+webAddress+"/"+fileName);
+        imgs.add(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+webAddress+"/"+fileName);
+
       }
-    } catch (Exception e) {
+      paramMap.put("data", imgs.toArray());
+       } catch (Exception e) {
+      paramMap.put("errno", "1");
+      paramMap.put("fail", "上传文件失败");
       e.printStackTrace();
       throw new BaseException(ServerCode.SERVER_UNKNOWN_ERROR, "上传文件失败");
     }
-    return paramMap.toJSONString();
+    return paramMap;
   }
   public void obsUpload(MultipartFile file,File dest,String address,String fileName,String webAddress){
     try {

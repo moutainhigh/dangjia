@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.house.ISurplusWareHouseMapper">
+    <sql id="all_columns">
+		id,
+		house_id as houseId,
+		member_id as memberId,
+		state,
+		address,
+		data_status as dataStatus,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
+    <!-- 所有剩余材料的临时仓库 -->
+    <select id="getAllSurplusWareHouse" resultType="com.dangjia.acg.modle.house.SurplusWareHouse">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_house_surplus_ware_house
+        where 1=1
+        <if test="state!= -1">
+            and state = #{state}
+        </if>
+        <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+            and create_date between #{beginDate} and #{endDate}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
+    <!-- 所有剩余材料的临时仓库 -->
+    <select id="getAllSurplusWareHouseByHouseId" resultType="com.dangjia.acg.modle.house.SurplusWareHouse">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_house_surplus_ware_house
+        where 1=1
+        <if test="houseId!=null and houseId!=''">
+            and house_id = #{houseId}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
+
+    <!-- 所有剩余材料的临时仓库 当前周的临时仓库剩余 -->
+    <select id="getAllCurWeek" resultType="com.dangjia.acg.modle.house.SurplusWareHouse">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_house_surplus_ware_house
+        where 1=1
+        <if test="state!= -1">
+            and state = #{state}
+        </if>
+        <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+            and create_date between #{beginDate} and #{endDate}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
+
+</mapper>
+

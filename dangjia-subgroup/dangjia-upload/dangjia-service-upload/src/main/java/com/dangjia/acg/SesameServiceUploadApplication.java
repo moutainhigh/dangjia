@@ -19,8 +19,6 @@ public class SesameServiceUploadApplication {
   public static void main(String[] args) {
     SpringApplication.run(SesameServiceUploadApplication.class, args);
   }
-
-
   private CorsConfiguration buildConfig(){
     CorsConfiguration corsConfiguration=new CorsConfiguration();
     corsConfiguration.addAllowedOrigin("*");

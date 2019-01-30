@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.house.ISurplusWareHouseItemMapper">
+
+    <sql id="all_columns">
+		id,
+		surplus_ware_house_id as surplusWareHouseId,
+		product_id as productId,
+		product_count as productCount,
+		product_name as productName,
+		data_status as dataStatus,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
+	<!-- 获取某个临时仓库 的所有剩余材料 -->
+	<select id="getAllSurplusWareHouseItemById" resultType="com.dangjia.acg.modle.house.SurplusWareHouseItem">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_deliver_split_deliver
+		where 1=1
+		<if test="surplusWareHouseId!=null and surplusWareHouseId!=''">
+			and surplus_ware_house_id = #{surplusWareHouseId}
+		</if>
+		ORDER BY create_date desc
+	</select>
+
+
+	<!-- 获取某个临时仓库 的所有剩余材料 的某个 材料-->
+	<select id="getAllSurplusWareHouseItemByProductId" resultType="com.dangjia.acg.modle.house.SurplusWareHouseItem">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_deliver_split_deliver
+		where 1=1
+		<if test="surplusWareHouseId!=null and surplusWareHouseId!=''">
+			and surplus_ware_house_id = #{surplusWareHouseId}
+		</if>
+		<if test="productId!=null and productId!=''">
+			and product_id = #{productId}
+		</if>
+		ORDER BY create_date desc
+	</select>
+
+
+
+</mapper>
+

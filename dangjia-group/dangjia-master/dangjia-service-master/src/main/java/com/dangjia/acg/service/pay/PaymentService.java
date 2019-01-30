@@ -3,6 +3,7 @@ package com.dangjia.acg.service.pay;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetMaterialAPI;
+import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
@@ -10,6 +11,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
 import com.dangjia.acg.dto.group.GroupDTO;
@@ -142,6 +144,9 @@ public class PaymentService {
 
     @Autowired
     private BudgetMaterialAPI budgetMaterialAPI;
+
+    @Autowired
+    private BudgetWorkerAPI budgetWorkerAPI;
 
     @Autowired
     private IHouseDistributionMapper iHouseDistributionMapper;
@@ -459,11 +464,18 @@ public class PaymentService {
             }
             /*记录项目流水工钱+材料钱*/
             //liuShui(businessOrderNumber,house,hwo,paystate);
-
+            //业主信息
+            Member member=memberMapper.selectByPrimaryKey(house.getMemberId());
+            //工人信息
+            Member memberGr=memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
             //app推送和发送短信给工匠
             if (houseWorker.getWorkerType() == 1) {//设计师
+
                 configMessageService.addConfigMessage(null,"gj",houseWorker.getWorkerId(),"0","业主支付提醒",
-                        String.format(DjConstants.PushMessage.PAYMENT_OF_DESIGN_FEE,house.getHouseName()) ,"5");
+                        String.format(DjConstants.PushMessage.PAYMENT_OF_DESIGN_FEE,member.getMobile(),house.getHouseName()) ,"5");
+                //短信通知
+                JsmsUtil.sendDesigner(memberGr.getMobile(),member.getMobile(),house.getHouseName());
+
             }
             if (houseWorker.getWorkerType() == 3) {//大管家
                 configMessageService.addConfigMessage(null,"gj",houseWorker.getWorkerId(),"0","业主支付提醒",
@@ -1105,26 +1117,36 @@ public class PaymentService {
             }
             String houseFlowId = businessOrder.getTaskId();
             request.setAttribute(Constants.CITY_ID,house.getCityId());
-            ServerResponse serverResponse=budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(request,houseFlowId);
-            if(serverResponse.getResultObj()!=null){
-                List<BudgetMaterial> budgetMaterialList= JSONObject.parseArray(serverResponse.getResultObj().toString(),BudgetMaterial.class);
+            ServerResponse retMaterial=budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(request,houseFlowId);
+            ServerResponse retWorker=budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(request,houseFlowId);
+
+            if(retMaterial.getResultObj()!=null||retWorker.getResultObj()!=null){
+                List<BudgetMaterial> budgetMaterialList= JSONObject.parseArray(retMaterial.getResultObj().toString(),BudgetMaterial.class);
+                List<BudgetWorker> budgetWorkerList= JSONObject.parseArray(retWorker.getResultObj().toString(),BudgetWorker.class);
 
                 for (ActivityRedPackRecordDTO redPacketRecord : redPacketRecordList) {
                     BigDecimal workerTotal=new BigDecimal(0);
                     BigDecimal goodsTotal=new BigDecimal(0);
                     BigDecimal productTotal=new BigDecimal(0);
-                    for (BudgetMaterial budgetMaterial:budgetMaterialList) {
-                        //判断工种的优惠券是否匹配
-                        if (budgetMaterial.getWorkerTypeId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 0) {
-                            workerTotal=workerTotal.add(new BigDecimal(budgetMaterial.getPrice()*budgetMaterial.getShopCount()));
+
+                    if(budgetWorkerList.size()>0){
+                        for (BudgetWorker budgetWorker:budgetWorkerList) {
+                            //判断工种的优惠券是否匹配
+                            if (budgetWorker.getWorkerTypeId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 0) {
+                                workerTotal=workerTotal.add(new BigDecimal(budgetWorker.getPrice()*budgetWorker.getShopCount()));
+                            }
                         }
-                        //判断材料优惠券是否匹配
-                        if (budgetMaterial.getGoodsId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 1) {
-                            goodsTotal=goodsTotal.add(new BigDecimal(budgetMaterial.getPrice()*budgetMaterial.getShopCount()));
-                        }
-                        //判断货品的优惠券是否匹配
-                        if (budgetMaterial.getProductId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 2) {
-                            productTotal=productTotal.add(new BigDecimal(budgetMaterial.getPrice()*budgetMaterial.getShopCount()));
+                    }
+                    if(budgetMaterialList.size()>0){
+                        for (BudgetMaterial budgetMaterial:budgetMaterialList) {
+                            //判断材料优惠券是否匹配
+                            if (budgetMaterial.getGoodsId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 1) {
+                                goodsTotal=goodsTotal.add(new BigDecimal(budgetMaterial.getPrice()*budgetMaterial.getShopCount()));
+                            }
+                            //判断货品的优惠券是否匹配
+                            if (budgetMaterial.getProductId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 2) {
+                                productTotal=productTotal.add(new BigDecimal(budgetMaterial.getPrice()*budgetMaterial.getShopCount()));
+                            }
                         }
                     }
                     //判断优惠券类型是否为满减券

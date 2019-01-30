@@ -115,7 +115,7 @@ public class HouseWorkerService {
             if (houseWorker.getWorkType() == 6) {
                 return ServerResponse.createByErrorMessage("已支付不能换人,请联系当家装修");
             }
-            houseWorker.setWorkType(2);//被换
+            houseWorker.setWorkType(2);//被业主换
             houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
 
             HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(),houseWorker.getWorkerTypeId());

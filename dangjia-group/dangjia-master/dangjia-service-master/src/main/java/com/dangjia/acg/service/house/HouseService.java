@@ -837,8 +837,11 @@ public class HouseService {
     //装修指南
     public ServerResponse getRenovationManual(String userToken, Integer type) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member = accessToken.getMember();
+            Member member =null;
+            if(!CommonUtil.isEmpty(userToken)) {
+                AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+                member = accessToken.getMember();
+            }
             Map<String, Object> returnMap = new HashMap<String, Object>();//返回对象
             List<Map<String, Object>> workerTypeList = new ArrayList<Map<String, Object>>();
             Example example = new Example(WorkerType.class);
@@ -854,17 +857,15 @@ public class HouseService {
                 List<Map<String, Object>> listMap = new ArrayList<Map<String, Object>>();
                 for (RenovationManual r : listR) {
                     Map<String, Object> map = CommonUtil.beanToMap(r);
-                    example = new Example(RenovationManualMember.class);
-                    example.createCriteria().andEqualTo("renovationManualId", r.getId()).andEqualTo("memberId", member.getId());
-                    List<RenovationManualMember> rmList = renovationManualMemberMapper.selectByExample(example);
-                    RenovationManualMember rm = new RenovationManualMember();
-                    if (type == 1 && rmList.size() > 0) {//如果只查未勾选
-                        continue;
-                    }
-                    if (rmList.size() > 0) {
-                        map.put("isSelect", 1);//选中
-                    } else {
-                        map.put("isSelect", 0);//未选中
+                    if(member!=null) {
+                        example = new Example(RenovationManualMember.class);
+                        example.createCriteria().andEqualTo("renovationManualId", r.getId()).andEqualTo("memberId", member.getId());
+                        List<RenovationManualMember> rmList = renovationManualMemberMapper.selectByExample(example);
+                        if (rmList.size() > 0) {
+                            map.put("isSelect", 1);//选中
+                        } else {
+                            map.put("isSelect", 0);//未选中
+                        }
                     }
                     listMap.add(map);
                 }
@@ -883,18 +884,18 @@ public class HouseService {
      * 保存装修指南
      *
      * @param userToken
-     * @param savaList
+     * @param saveList
      * @return
      */
-    public ServerResponse savaRenovationManual(String userToken, String savaList) {
+    public ServerResponse saveRenovationManual(String userToken, String saveList) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member member = accessToken.getMember();
-            if (savaList != null) {
+            if (saveList != null) {
                 Example example = new Example(RenovationManualMember.class);
                 example.createCriteria().andEqualTo("memberId", member.getId());
                 renovationManualMemberMapper.deleteByExample(example);
-                JSONArray jsonArr = JSONArray.parseArray(savaList);//格式化jsonArr
+                JSONArray jsonArr = JSONArray.parseArray(saveList);//格式化jsonArr
                 for (int i = 0; i < jsonArr.size(); i++) {
                     JSONObject obj = jsonArr.getJSONObject(i);
                     if (obj.getInteger("state") == 1) {

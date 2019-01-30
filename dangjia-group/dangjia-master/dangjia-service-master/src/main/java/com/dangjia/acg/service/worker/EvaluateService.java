@@ -202,9 +202,9 @@ public class EvaluateService {
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
             }
             //推送工匠审核结果
-            configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_PASS,house.getHouseName()) ,"5");
+            //configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_PASS,house.getHouseName()) ,"5");
             //推送业主大管家的审核结果
-            configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","完工申请结果",String.format(DjConstants.PushMessage.OWNER_TWO_FINISHED,house.getHouseName()) ,"");
+            //configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","完工申请结果",String.format(DjConstants.PushMessage.OWNER_TWO_FINISHED,house.getHouseName()) ,"");
 
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){

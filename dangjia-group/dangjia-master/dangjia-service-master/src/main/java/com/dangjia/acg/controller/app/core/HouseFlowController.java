@@ -96,8 +96,8 @@ public class HouseFlowController implements HouseFlowAPI {
      */
     @Override
     @ApiMethod
-    public List<HouseFlow> getFlowByhouseIdNot12(String houseId) {
-        return houseFlowService.getFlowByhouseIdNot12(houseId);
+    public List<HouseFlow> getWorkerFlow(String houseId) {
+        return houseFlowService.getWorkerFlow(houseId);
     }
 
     /**

@@ -20,10 +20,15 @@ import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.service.finance.WebWalletService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sun.rmi.runtime.Log;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
@@ -34,7 +39,7 @@ import java.util.List;
  * author: Ronalcheng
  * Date: 2018/12/5 0005
  * Time: 14:30
- *
+ * <p>
  * 生成发货单 发货操作类
  */
 @Service
@@ -54,22 +59,54 @@ public class OrderSplitService {
     private ConfigUtil configUtil;
     @Autowired
     private IWarehouseMapper warehouseMapper;
-
+    private static Logger LOG = LoggerFactory.getLogger(OrderSplitService.class);
 
 
     //TODO 供应商其它功能  供应商结算
 
     /**
+     * 修改 供应商结算状态
+     * id 供应商结算id
+     * deliveryFee 配送费用
+     * applyMoney   供应商申请结算的价格
+     *
+     */
+    public ServerResponse setSplitDeliver(SplitDeliver splitDeliver) {
+        try {
+            if (!StringUtils.isNoneBlank(splitDeliver.getId()))
+                return ServerResponse.createByErrorMessage("id 不能为null");
+
+            SplitDeliver srcSplitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliver.getId());
+            if (srcSplitDeliver == null)
+                return ServerResponse.createByErrorMessage("无供应商结算单");
+
+            //配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收）
+            if (srcSplitDeliver.getShipState() != 2)
+                return ServerResponse.createByErrorMessage("当前为未收货状态，不能申请结算");
+
+            srcSplitDeliver.setDeliveryFee(splitDeliver.getDeliveryFee());
+            srcSplitDeliver.setApplyMoney(splitDeliver.getApplyMoney());
+            srcSplitDeliver.setApplyState(0);//供应商申请结算的状态0申请中；1不通过；2通过
+            splitDeliverMapper.updateByPrimaryKeySelective(srcSplitDeliver);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
+
+
+    /**
      * 供应商发货
      */
-    public ServerResponse sentSplitDeliver(String splitDeliverId){
+    public ServerResponse sentSplitDeliver(String splitDeliverId) {
         try {
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
             splitDeliver.setSendTime(new Date());
             splitDeliver.setShipState(1);//已发待收
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             return ServerResponse.createBySuccessMessage("操作成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
@@ -78,8 +115,8 @@ public class OrderSplitService {
     /**
      * 发货单明细
      */
-    public ServerResponse splitDeliverDetail(String splitDeliverId){
-        try{
+    public ServerResponse splitDeliverDetail(String splitDeliverId) {
+        try {
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
             SplitDeliverDetailDTO detailDTO = new SplitDeliverDetailDTO();
             detailDTO.setNumber(splitDeliver.getNumber());
@@ -98,7 +135,7 @@ public class OrderSplitService {
             example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliverId);
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             List<OrderSplitItemDTO> orderSplitItemDTOS = new ArrayList<>();
-            for (OrderSplitItem orderSplitItem : orderSplitItemList){
+            for (OrderSplitItem orderSplitItem : orderSplitItemList) {
                 OrderSplitItemDTO orderSplitItemDTO = new OrderSplitItemDTO();
                 orderSplitItemDTO.setProductName(orderSplitItem.getProductName());
                 orderSplitItemDTO.setNum(orderSplitItem.getNum());
@@ -113,7 +150,7 @@ public class OrderSplitService {
             detailDTO.setOrderSplitItemDTOS(orderSplitItemDTOS);
 
             return ServerResponse.createBySuccess("查询成功", detailDTO);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -123,9 +160,9 @@ public class OrderSplitService {
      * 供应商端发货列表
      * shipState  0待发货,1已发待收货,2已收货,3取消,4部分收
      */
-    public ServerResponse splitDeliverList(String supplierId, int shipState){
+    public ServerResponse splitDeliverList(String supplierId, int shipState) {
         Example example = new Example(SplitDeliver.class);
-        example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID,supplierId).andEqualTo(SplitDeliver.SHIP_STATE,shipState);
+        example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId).andEqualTo(SplitDeliver.SHIP_STATE, shipState);
         List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
         return ServerResponse.createBySuccess("查询成功", splitDeliverList);
     }
@@ -135,7 +172,7 @@ public class OrderSplitService {
      * 发送供应商
      * 分发不同供应商
      */
-    public ServerResponse sentSupplier(String orderSplitId, String splitItemList){
+    public ServerResponse sentSupplier(String orderSplitId, String splitItemList) {
         try {
             OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(orderSplitId);
             House house = houseMapper.selectByPrimaryKey(orderSplit.getHouseId());
@@ -143,20 +180,20 @@ public class OrderSplitService {
             Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
 
             JSONArray arr = JSONArray.parseArray(splitItemList);
-            for(int i=0; i<arr.size(); i++) {
+            for (int i = 0; i < arr.size(); i++) {
                 JSONObject obj = arr.getJSONObject(i);
                 String id = obj.getString("id");
                 String supplierId = obj.getString("supplierId");
                 OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
 
                 Example example = new Example(SplitDeliver.class);
-                example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId()).andEqualTo(SplitDeliver.SUPPLIER_ID,supplierId)
-                        .andEqualTo(SplitDeliver.SHIP_STATE,0);
+                example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId()).andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId)
+                        .andEqualTo(SplitDeliver.SHIP_STATE, 0);
                 List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
                 SplitDeliver splitDeliver;
-                if (splitDeliverList.size() > 0){
+                if (splitDeliverList.size() > 0) {
                     splitDeliver = splitDeliverList.get(0);
-                }else {
+                } else {
                     example = new Example(SplitDeliver.class);
                     splitDeliver = new SplitDeliver();
                     splitDeliver.setNumber(orderSplit.getNumber() + "00" + splitDeliverMapper.selectCountByExample(example));//发货单号
@@ -182,7 +219,7 @@ public class OrderSplitService {
             orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
 
             return ServerResponse.createBySuccessMessage("操作成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
@@ -193,21 +230,21 @@ public class OrderSplitService {
      * 取消(打回)
      * 返回数量
      */
-    public ServerResponse cancelOrderSplit(String orderSplitId){
-        try{
+    public ServerResponse cancelOrderSplit(String orderSplitId) {
+        try {
             OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(orderSplitId);
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplitId);
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
-            for(OrderSplitItem orderSplitItem : orderSplitItemList){
-                Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(),orderSplit.getHouseId());
+            for (OrderSplitItem orderSplitItem : orderSplitItemList) {
+                Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
                 warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
             }
 
             orderSplitMapper.cancelOrderSplit(orderSplitId);
             return ServerResponse.createBySuccessMessage("操作成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
@@ -217,20 +254,20 @@ public class OrderSplitService {
     /**
      * 要货单看明细
      */
-    public ServerResponse orderSplitItemList(String orderSplitId){
+    public ServerResponse orderSplitItemList(String orderSplitId) {
         Example example = new Example(OrderSplitItem.class);
         example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplitId);
         List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
-        for(OrderSplitItem v : orderSplitItemList){
+        for (OrderSplitItem v : orderSplitItemList) {
             v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
         }
-        return ServerResponse.createBySuccess("查询成功",orderSplitItemList);
+        return ServerResponse.createBySuccess("查询成功", orderSplitItemList);
     }
 
     /**
      * 材料员看房子列表
      */
-    public ServerResponse getHouseList(Integer pageNum,Integer pageSize){
+    public ServerResponse getHouseList(Integer pageNum, Integer pageSize) {
         if (pageNum == null) {
             pageNum = 1;
         }
@@ -242,7 +279,7 @@ public class OrderSplitService {
         PageInfo pageResult = new PageInfo(houseList);
 
         List<DeliverHouseDTO> deliverHouseDTOList = new ArrayList<DeliverHouseDTO>();
-        for (House house : houseList){
+        for (House house : houseList) {
             Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
             DeliverHouseDTO deliverHouseDTO = new DeliverHouseDTO();
             deliverHouseDTO.setHouseId(house.getId());
@@ -266,7 +303,7 @@ public class OrderSplitService {
     /**
      * 根据房子id查询要货单列表
      */
-    public ServerResponse getOrderSplitList(String houseId){
+    public ServerResponse getOrderSplitList(String houseId) {
         Example example = new Example(OrderSplit.class);
         example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andGreaterThan(OrderSplit.APPLY_STATUS, 0);//大于0
         List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);

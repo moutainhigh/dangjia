@@ -47,6 +47,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         house.building as building,
         house.unit as unit,
         house.number as number,
+        member.nick_name as nickName,
         member.name as name,
         member.mobile as mobile
         FROM dj_house house ,dj_member member
@@ -136,13 +137,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!--参考报价-->
     <select id="getReferenceBudget" resultType="com.dangjia.acg.modle.house.House">
         SELECT
-        <include refid="basic_columns" />
+            <include refid="basic_columns" />
         from dj_house
         where village_id = #{villageId}
         and build_square &gt;= #{minSquare}
         and build_square &lt;= #{maxSquare}
         and house_type = #{houseType}
-        and ((decoration_type in (1,2) and budget_ok=3) or (decoration_type=3 and visit_state !=0)) order by money asc
+        and budget_ok = 3
     </select>
 </mapper>
 

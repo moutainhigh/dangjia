@@ -31,6 +31,10 @@ public interface BudgetWorkerAPI {
 	 @ApiOperation(value = "查询所有精算", notes = "查询所有精算")
 	 ServerResponse getAllBudgetWorker(@RequestParam("request") HttpServletRequest request);
 
+	@PostMapping("/actuary/budgetWorker/queryBudgetWorkerByHouseFlowId")
+	@ApiOperation(value = "根据HouseFlowId查询房子人工精算", notes = "根据HouseFlowId查询房子人工精算")
+	ServerResponse queryBudgetWorkerByHouseFlowId(@RequestParam("request") HttpServletRequest request,@RequestParam("houseFlowId") String houseFlowId);
+
 	 /**
 	  * 根据Id查询精算
 	  * @return

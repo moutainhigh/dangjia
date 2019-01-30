@@ -24,6 +24,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         modify_date as modifyDate
     </sql>
 
+    <!--删除未审核申请-->
+    <delete id="deleteNotMemberCheck" parameterType="java.lang.String">
+        delete from dj_core_house_flow_apply
+        where
+            house_id = #{houseId}
+		and member_check = 0
+		and worker_id = #{workerId}
+    </delete>
+
     <!--查询待处理完工申请-->
     <select id="unCheckByWorkerTypeId" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select <include refid="all_columns" />

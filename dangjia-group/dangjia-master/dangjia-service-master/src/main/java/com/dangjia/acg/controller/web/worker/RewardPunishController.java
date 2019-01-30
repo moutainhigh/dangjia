@@ -78,8 +78,8 @@ public class RewardPunishController implements RewardPunishAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse addRewardPunishRecord(String userToken,RewardPunishRecord rewardPunishRecord){
-        return rewardPunishService.addRewardPunishRecord(userToken,rewardPunishRecord);
+    public ServerResponse addRewardPunishRecord(String userToken,String userId,RewardPunishRecord rewardPunishRecord){
+        return rewardPunishService.addRewardPunishRecord(userToken, userId,rewardPunishRecord);
     }
 
     /**
@@ -90,8 +90,8 @@ public class RewardPunishController implements RewardPunishAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateRewardPunishRecord(String userToken,RewardPunishRecord rewardPunishRecord){
-        return rewardPunishService.updateRewardPunishRecord(userToken,rewardPunishRecord);
+    public ServerResponse updateRewardPunishRecord(String userToken,String userId,RewardPunishRecord rewardPunishRecord){
+        return rewardPunishService.updateRewardPunishRecord(userToken, userId,rewardPunishRecord);
     }
 
 }

@@ -4,6 +4,7 @@ import com.dangjia.acg.api.web.matter.WebRenovationManualAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.service.matter.RenovationManualService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,8 +27,8 @@ public class RenovationManualController implements WebRenovationManualAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryRenovationManual(PageDTO pageDTO,String workerTypeId){
-        return renovationManualService.queryRenovationManual(pageDTO.getPageNum(), pageDTO.getPageSize(),workerTypeId);
+    public ServerResponse queryRenovationManual(PageDTO pageDTO, RenovationManual renovationManual){
+        return renovationManualService.queryRenovationManual(pageDTO.getPageNum(), pageDTO.getPageSize(),renovationManual);
     }
 
      /**

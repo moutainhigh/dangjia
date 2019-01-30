@@ -57,7 +57,7 @@ public interface WorkerAPI {
 
     @PostMapping("/app/rewardPunish/list")
     @ApiOperation(value = "奖罚记录", notes = "奖罚记录")
-    ServerResponse queryRewardPunishRecord(@RequestParam("userToken")String userToken, @RequestParam("pageDTO")PageDTO pageDTO);
+    ServerResponse queryRewardPunishRecord(@RequestParam("userToken")String userToken, @RequestParam("workerId")String workerId, @RequestParam("pageDTO")PageDTO pageDTO);
 
 
     @PostMapping("/app/rewardPunish/get")
