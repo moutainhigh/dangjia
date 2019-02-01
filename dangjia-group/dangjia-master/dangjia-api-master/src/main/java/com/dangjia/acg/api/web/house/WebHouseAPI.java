@@ -23,21 +23,31 @@ public interface WebHouseAPI {
 
     @PostMapping("web/house/getList")
     @ApiOperation(value = "装修列表", notes = "装修列表")
-    ServerResponse getList(@RequestParam("request") HttpServletRequest request,@RequestParam("memberId") String memberId);
+    ServerResponse getList(@RequestParam("request") HttpServletRequest request, @RequestParam("memberId") String memberId);
 
     @PostMapping("web/house/startWorkPage")
     @ApiOperation(value = "确认开工页面", notes = "确认开工页面")
-    ServerResponse startWorkPage(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId") String houseId);
+    ServerResponse startWorkPage(@RequestParam("request") HttpServletRequest request, @RequestParam("houseId") String houseId);
 
     @PostMapping("web/house/startWork")
     @ApiOperation(value = "确认开工", notes = "确认开工")
-    ServerResponse startWork(@RequestParam("request") HttpServletRequest request,@RequestParam("house") HouseDTO houseDTO,@RequestParam("members") String members,@RequestParam("prefixs") String prefixs);
+    ServerResponse startWork(@RequestParam("request") HttpServletRequest request, @RequestParam("house") HouseDTO houseDTO, @RequestParam("members") String members, @RequestParam("prefixs") String prefixs);
 
     @PostMapping("web/house/setHouseInfo")
     @ApiOperation(value = "设置房子为精选或者休眠", notes = "设置房子为精选或者休眠")
-    ServerResponse setHouseInfo(@RequestParam("request") HttpServletRequest request,@RequestParam("house") House house);
+    ServerResponse setHouseInfo(@RequestParam("request") HttpServletRequest request, @RequestParam("house") House house);
 
     @PostMapping("web/house/queryConstructionRecord")
     @ApiOperation(value = "施工记录", notes = "施工记录")
-    ServerResponse queryConstructionRecord(@RequestParam("houseId")String houseId,@RequestParam("pageDTO") PageDTO pageDTO);
+    ServerResponse queryConstructionRecord(@RequestParam("houseId") String houseId, @RequestParam("pageDTO") PageDTO pageDTO);
+
+    /**
+     * 根据房子装修状态查询所有的房子
+     *
+     * @param visitState 0待确认开工,1装修中,2休眠中,3已完工
+     * @return
+     */
+    @PostMapping("web/house/getAllHouseByVisitState")
+    @ApiOperation(value = "根据房子装修状态查询所有的房子", notes = "根据房子装修状态查询所有的房子")
+    ServerResponse getAllHouseByVisitState(@RequestParam("visitState") Integer visitState);
 }

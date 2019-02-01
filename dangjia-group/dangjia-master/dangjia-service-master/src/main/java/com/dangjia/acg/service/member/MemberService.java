@@ -122,6 +122,8 @@ public class MemberService {
         if (accessToken == null) {//无效的token
             return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
         } else {
+            Member member = memberMapper.selectByPrimaryKey(accessToken.getMemberId());
+            accessToken.setMember(member);
             return ServerResponse.createBySuccess("有效！", accessToken);
         }
     }

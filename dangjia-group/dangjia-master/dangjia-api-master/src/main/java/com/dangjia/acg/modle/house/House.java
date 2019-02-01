@@ -146,8 +146,8 @@ public class House extends BaseEntity {
     private BigDecimal money;//
 
     @Column(name = "pause")
-    @Desc(value = "施工状态,1暂停")
-    @ApiModelProperty("施工状态,1暂停")
+    @Desc(value = "施工状态: 0正常,1暂停")
+    @ApiModelProperty("施工状态: 0正常,1暂停")
     private Integer pause;//
 
     @Column(name = "again")

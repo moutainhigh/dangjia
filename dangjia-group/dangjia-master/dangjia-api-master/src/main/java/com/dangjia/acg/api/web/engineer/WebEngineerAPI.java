@@ -17,6 +17,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(value = "工程部功能", description = "工程部功能")
 public interface WebEngineerAPI {
 
+    @PostMapping(value = "web/engineer/checkWorker")
+    @ApiOperation(value = "工匠审核", notes = "工匠审核")
+    ServerResponse checkWorker(@RequestParam("workerId")String workerId,@RequestParam("checkType")Integer checkType);
+
     @PostMapping(value = "web/engineer/changePayed")
     @ApiOperation(value = "已支付换工匠", notes = "已支付换工匠")
     ServerResponse changePayed(@RequestParam("houseWorkerId")String houseWorkerId,@RequestParam("workerId")String workerId);
@@ -41,6 +45,10 @@ public interface WebEngineerAPI {
     @ApiOperation(value = "查看工匠订单", notes = "查看工匠订单")
     ServerResponse workerOrder(@RequestParam("houseId")String houseId);
 
+    @PostMapping(value = "web/engineer/setState")
+    @ApiOperation(value = "禁用启用工序", notes = "禁用启用工序")
+    ServerResponse setState(@RequestParam("houseFlowId")String houseFlowId);
+
     @PostMapping(value = "web/engineer/houseFlowList")
     @ApiOperation(value = "查看工序", notes = "查看工序")
     ServerResponse houseFlowList(@RequestParam("houseId")String houseId);
@@ -52,6 +60,10 @@ public interface WebEngineerAPI {
     @PostMapping(value = "web/engineer/historyHouse")
     @ApiOperation(value = "历史工地", notes = "历史工地")
     ServerResponse historyHouse(@RequestParam("workerId")String workerId);
+
+    @PostMapping(value = "web/engineer/setPause")
+    @ApiOperation(value = "暂停恢复施工", notes = "暂停恢复施工")
+    ServerResponse setPause(@RequestParam("houseId")String houseId);
 
     @PostMapping(value = "web/engineer/getHouseList")
     @ApiOperation(value = "工地列表", notes = "工地列表")

@@ -20,6 +20,15 @@ public class WebEngineerController implements WebEngineerAPI {
 
 
     /**
+     * 工匠审核
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse checkWorker(String workerId,Integer checkType){
+        return engineerService.checkWorker(workerId,checkType);
+    }
+
+    /**
      * 已支付换工匠
      */
     @Override
@@ -74,6 +83,16 @@ public class WebEngineerController implements WebEngineerAPI {
         return engineerService.workerOrder(houseId);
     }
 
+
+    /**
+     * 禁用启用工序
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse setState(String houseFlowId) {
+        return engineerService.setState(houseFlowId);
+    }
+
     /**
      * 查看工序
      */
@@ -99,6 +118,16 @@ public class WebEngineerController implements WebEngineerAPI {
     @ApiMethod
     public ServerResponse historyHouse(String workerId) {
         return engineerService.historyHouse(workerId);
+    }
+
+
+    /**
+     * 工地暂停施工
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse setPause(String houseId){
+        return engineerService.setPause(houseId);
     }
 
     /**

@@ -546,7 +546,7 @@ public class HouseFlowService {
                 houseFlowMapper.updateByPrimaryKeySelective(nextHF);
 
                 //通知下一个工种 抢单
-                configMessageService.addConfigMessage(null, "gj", "workerTypeId" + nextHF.getWorkerTypeId() + nextHF.getCityId(), "0", "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "");
+                configMessageService.addConfigMessage(null, "gj", "wtId" + nextHF.getWorkerTypeId() + nextHF.getCityId(), "0", "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "");
 
             }
             configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家开工", DjConstants.PushMessage.STEWARD_CONSTRUCTION, "");
