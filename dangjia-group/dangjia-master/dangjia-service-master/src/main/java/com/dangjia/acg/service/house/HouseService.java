@@ -26,6 +26,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingLayoutMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMemberMapper;
+import com.dangjia.acg.mapper.matter.IRenovationStageMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -41,6 +42,7 @@ import com.dangjia.acg.modle.house.HouseExpend;
 import com.dangjia.acg.modle.house.ModelingLayout;
 import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.matter.RenovationManualMember;
+import com.dangjia.acg.modle.matter.RenovationStage;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
@@ -94,6 +96,8 @@ public class HouseService {
     private ConfigUtil configUtil;
     @Autowired
     private IRenovationManualMapper renovationManualMapper;
+    @Autowired
+    private IRenovationStageMapper renovationStageMapper;
     @Autowired
     private IRenovationManualMemberMapper renovationManualMemberMapper;
     @Autowired
@@ -580,8 +584,8 @@ public class HouseService {
             List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
             for (WorkerType workerType : workerTypeList) {
                 List<String> workerTypes = new ArrayList<>();
-                workerTypes.add("workerTypeId" + workerType.getId());
-                workerTypes.add(house.getId());
+                workerTypes.add("wtId" + workerType.getId());
+//                workerTypes.add(house.getId());
                 configMessageService.addConfigMessage(request, "gj", StringUtils.join(workerTypes, ","), "0",
                         "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "");
 
@@ -698,7 +702,7 @@ public class HouseService {
                 houseFlow.setWorkType(2);//待抢单
                 houseFlow.setReleaseTime(new Date());//发布时间
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-                configMessageService.addConfigMessage(null,"gj", "workerTypeId3"+houseFlow.getCityId(),"0","新的装修订单",DjConstants.PushMessage.SNAP_UP_ORDER ,"4");
+                configMessageService.addConfigMessage(null,"gj", "wtId3"+houseFlow.getCityId(),"0","新的装修订单",DjConstants.PushMessage.SNAP_UP_ORDER ,"4");
                //推送消息给业主等待大管家抢单
                 configMessageService.addConfigMessage(null,"zx", house.getMemberId(),"0","等待大管家抢单",String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION,house.getHouseName()) ,"");
 
@@ -844,13 +848,8 @@ public class HouseService {
             }
             Map<String, Object> returnMap = new HashMap<String, Object>();//返回对象
             List<Map<String, Object>> workerTypeList = new ArrayList<Map<String, Object>>();
-            Example example = new Example(WorkerType.class);
-            example.createCriteria().andEqualTo("state", 0);
-            List<WorkerType> wtList = workerTypeMapper.selectByExample(example);
-            for (WorkerType wt : wtList) {
-                if (wt.getType() == 1 || wt.getType() == 2 || wt.getType() == 3) {
-                    continue;
-                }
+            List<RenovationStage> wtList = renovationStageMapper.selectAll();
+            for (RenovationStage wt : wtList) {
                 List<RenovationManual> listR = renovationManualMapper.getRenovationManualByWorkertyId(wt.getId());
                 Map<String, Object> wMap = new HashMap<String, Object>();
                 wMap.put("workerTypeName", wt.getName());
@@ -858,7 +857,7 @@ public class HouseService {
                 for (RenovationManual r : listR) {
                     Map<String, Object> map = CommonUtil.beanToMap(r);
                     if(member!=null) {
-                        example = new Example(RenovationManualMember.class);
+                        Example example = new Example(RenovationManualMember.class);
                         example.createCriteria().andEqualTo("renovationManualId", r.getId()).andEqualTo("memberId", member.getId());
                         List<RenovationManualMember> rmList = renovationManualMemberMapper.selectByExample(example);
                         if (rmList.size() > 0) {
@@ -1122,4 +1121,23 @@ public class HouseService {
             return ServerResponse.createByErrorMessage("系统出错,查询参考报价失败");
         }
     }
+
+    /**
+     * 根据房子装修状态查询所有的房子
+     * @param visitState   0待确认开工,1装修中,2休眠中,3已完工
+     * @return
+     */
+    public ServerResponse getAllHouseByVisitState(Integer visitState) {
+        List<House> houseList = iHouseMapper.getAllHouseByVisitState(1);//0待确认开工,1装修中,2休眠中,3已完工
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        for (House house : houseList) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("houseId", house.getId());
+            map.put("address", house.getHouseName());
+            map.put("visitState", house.getVisitState());
+            mapList.add(map);
+        }
+        return ServerResponse.createBySuccess("查询成功", mapList);
+    }
+
 }

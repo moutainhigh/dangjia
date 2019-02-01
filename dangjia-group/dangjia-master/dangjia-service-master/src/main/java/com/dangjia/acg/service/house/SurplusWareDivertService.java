@@ -3,11 +3,10 @@ package com.dangjia.acg.service.house;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.PageDTO;
-import com.dangjia.acg.common.pay.domain.Data;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dto.house.SurplusWareHouseDTO;
+import com.dangjia.acg.dto.house.SurplusWareHouseDivertDTO;
+import com.dangjia.acg.dto.house.SurplusWareHouseDivertDetailsDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareDivertMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseItemMapper;
@@ -18,18 +17,18 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareDivert;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
 import com.dangjia.acg.modle.house.SurplusWareHouseItem;
-import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.sup.Supplier;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.Column;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * author: ysl
@@ -61,7 +60,7 @@ public class SurplusWareDivertService {
             JSONObject jsonObject = JSONObject.parseObject(jsonStr);
             String srcSurplusWareHouseId = jsonObject.getString("srcSurplusWareHouseId");
             if (!StringUtils.isNoneBlank(srcSurplusWareHouseId))
-                return ServerResponse.createByErrorMessage("surplusWareHouseId 不能为null");
+                return ServerResponse.createByErrorMessage("srcSurplusWareHouseId 不能为null");
 
             String jsonSurplusWareDivertList = jsonObject.getString("jsonSurplusWareDivertList");
             JSONArray jsonSurplusWareDivertArr = JSONArray.parseArray(jsonSurplusWareDivertList);
@@ -86,18 +85,21 @@ public class SurplusWareDivertService {
                 if (isNew) {//新增
                     SurplusWareDivert item = new SurplusWareDivert();
                     item.setProductId(productId);
-                    item.setDivertCount(0);
+                    item.setDivertCount(divertCount);
                     itemList.add(item);
                 }
             }
 
             for (SurplusWareDivert item : itemList) {
                 SurplusWareHouseItem surplusWareHouseItem = iSurplusWareHouseItemMapper.getAllSurplusWareHouseItemByProductId(srcSurplusWareHouseId, item.getProductId());
+                //挪出的商品 数量 大于 库存数量 就提示  库存不足
                 if (item.getDivertCount() > surplusWareHouseItem.getProductCount()) {
                     String name = forMasterAPI.getProduct(item.getProductId()).getName();
                     return ServerResponse.createByErrorMessage(name + " 库存不足,剩余:" + surplusWareHouseItem.getProductCount());
                 }
             }
+
+            String address = null;
 
             for (int i = 0; i < jsonSurplusWareDivertArr.size(); i++) {//遍历户型
                 JSONObject obj = jsonSurplusWareDivertArr.getJSONObject(i);
@@ -107,30 +109,96 @@ public class SurplusWareDivertService {
                 String toSurplusWareHouseId = obj.getString("toSurplusWareHouseId");//目标仓库id
                 Date divertDate = obj.getDate("divertDate");//挪货日期
 
+                // 原仓库 库存数量减少
+                SurplusWareHouseItem srcSurplusWareHouseItem = iSurplusWareHouseItemMapper.getAllSurplusWareHouseItemByProductId(srcSurplusWareHouseId, productId);
+                if (divertCount <= srcSurplusWareHouseItem.getProductCount()) {
+                    srcSurplusWareHouseItem.setProductCount(srcSurplusWareHouseItem.getProductCount() - divertCount);
+                    iSurplusWareHouseItemMapper.updateByPrimaryKeySelective(srcSurplusWareHouseItem);
+                }
+                SurplusWareHouse toSurplusWareHouse = null;
+                //目标地：  1公司临时仓库 2供应商 3业主家的房子  ，库存数量增加
+                if (divertType == 1) {//公司仓库 这里是 公司仓库 id
+                    toSurplusWareHouse = iSurplusWareHouseMapper.selectByPrimaryKey(toSurplusWareHouseId);
+                    String retStr = divertProductToWareHouse(productId, divertCount, toSurplusWareHouse);
+                    if (!retStr.equals("ok"))
+                        return ServerResponse.createByErrorMessage(retStr);
+                    address = toSurplusWareHouse.getAddress();
+                } else if (divertType == 2) {//供应商  toSurplusWareHouseId : 是供应商id
+                    Supplier toSupplier = forMasterAPI.getSupplier(toSurplusWareHouseId);
+                    if (toSupplier != null)
+                        address = toSupplier.getName();
+
+                } else if (divertType == 3) {// 业主   toSurplusWareHouseId : 这里是 房子的id
+                    House house = iHouseMapper.selectByPrimaryKey(toSurplusWareHouseId);
+                    toSurplusWareHouse = iSurplusWareHouseMapper.getSurplusWareHouseByHouseId(house.getId());
+                    if (toSurplusWareHouse == null) { //创建 房子 临时仓库
+                        toSurplusWareHouse = new SurplusWareHouse();
+                        toSurplusWareHouse.setHouseId(house.getId());
+                        toSurplusWareHouse.setMemberId(house.getMemberId());
+                        toSurplusWareHouse.setState(1);//待清点0, 已清点1  默认：0
+                        toSurplusWareHouse.setType(2);// 1:公司仓库 2：业主房子的临时仓库
+                        toSurplusWareHouse.setAddress(house.getHouseName());
+                        iSurplusWareHouseMapper.insert(toSurplusWareHouse);
+                    }
+                    String retStr = divertProductToWareHouse(productId, divertCount, toSurplusWareHouse);
+                    if (!retStr.equals("ok"))
+                        return ServerResponse.createByErrorMessage(retStr);
+                    address = toSurplusWareHouse.getAddress();
+                }
+
+                //添加 挪货记录
                 SurplusWareDivert surplusWareDivert = new SurplusWareDivert();
+                //新增 挪货记录
+                surplusWareDivert.setToAddress(address);
                 surplusWareDivert.setDivertCount(divertCount);
                 if (divertDate == null)
                     surplusWareDivert.setDivertDate(new Date());
                 else
                     surplusWareDivert.setDivertDate(divertDate);
-                surplusWareDivert.setDivertType(divertType);//挪货去向类型： 1临时仓库 2供应商
+                surplusWareDivert.setDivertType(divertType);//挪货去向类型： 1公司临时仓库 2供应商 3业主家的房子
                 surplusWareDivert.setProductId(productId);
                 surplusWareDivert.setSrcSurplusWareHouseId(srcSurplusWareHouseId);
                 surplusWareDivert.setToSurplusWareHouseId(toSurplusWareHouseId);
                 iSurplusWareDivertMapper.insert(surplusWareDivert);
-
-                SurplusWareHouseItem surplusWareHouseItem = iSurplusWareHouseItemMapper.getAllSurplusWareHouseItemByProductId(srcSurplusWareHouseId, productId);
-                if (divertCount <= surplusWareHouseItem.getProductCount()) {
-                    surplusWareHouseItem.setProductCount(surplusWareHouseItem.getProductCount() - divertCount);
-                    iSurplusWareHouseItemMapper.updateByPrimaryKeySelective(surplusWareHouseItem);
-                }
             }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
+            return ServerResponse.createByErrorMessage("操作失败");
         }
 
+    }
+
+    /**
+     * 将 商品 挪货 到 目标仓库中
+     *
+     * @param productId
+     * @param divertCount
+     * @param toSurplusWareHouse
+     */
+    private String divertProductToWareHouse(String productId, Integer divertCount, SurplusWareHouse toSurplusWareHouse) {
+        try {
+            SurplusWareHouseItem toSurplusWareHouseItem = iSurplusWareHouseItemMapper.getAllSurplusWareHouseItemByProductId(toSurplusWareHouse.getId(), productId);
+            if (toSurplusWareHouseItem == null) {//如果仓库里没有 该清点商品 就新增
+                SurplusWareHouseItem newSurplusWareHouseItem = new SurplusWareHouseItem();
+                newSurplusWareHouseItem.setSurplusWareHouseId(toSurplusWareHouse.getId());
+                newSurplusWareHouseItem.setProductId(productId);
+                newSurplusWareHouseItem.setProductCount(divertCount);
+                Product product = forMasterAPI.getProduct(productId);
+                if (product != null)
+                    newSurplusWareHouseItem.setProductName(product.getName());
+
+                iSurplusWareHouseItemMapper.insert(newSurplusWareHouseItem);
+            } else {
+                toSurplusWareHouseItem.setProductCount(toSurplusWareHouseItem.getProductCount() + divertCount);
+                iSurplusWareHouseItemMapper.updateByPrimaryKeySelective(toSurplusWareHouseItem);
+            }
+
+            return "ok";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "操作失败";
+        }
     }
 
 
@@ -144,15 +212,52 @@ public class SurplusWareDivertService {
     public ServerResponse getAllSurplusWareDivertListBySId(PageDTO pageDTO, String surplusWareHouseId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<SurplusWareDivert> list = iSurplusWareDivertMapper.getAllSurplusWareDivertListBySId(surplusWareHouseId);
+            List<SurplusWareHouseDivertDetailsDTO> dtoList = new ArrayList<>();
 
-//            List<SurplusWareHouseItem> surplusWareHouseItemList = new ArrayList<>();
-            LOG.info(" getAllSurplusWareHouseItemBySId list:" + list);
-//            for (SurplusWareHouseItem surplusWareHouseItem : list) {
-//                surplusWareHouseDTOList
-//            }
-            PageInfo pageResult = new PageInfo(list);
-//            pageResult.setList(surplusWareHouseDTOList);
+            List<SurplusWareHouseItem> surplusWareHouseItemList = iSurplusWareHouseItemMapper.getAllSurplusWareHouseItemById(surplusWareHouseId);
+            for (SurplusWareHouseItem surplusWareHouseItem : surplusWareHouseItemList) {
+                SurplusWareHouseDivertDetailsDTO detailsDTO = new SurplusWareHouseDivertDetailsDTO();
+                detailsDTO.setProductId(surplusWareHouseItem.getProductId());
+                detailsDTO.setProductName(surplusWareHouseItem.getProductName());
+                detailsDTO.setProductCount(surplusWareHouseItem.getProductCount());
+                detailsDTO.setCreateDate(surplusWareHouseItem.getCreateDate());
+                Product product = forMasterAPI.getProduct(surplusWareHouseItem.getProductId());
+                if (product != null)
+                    detailsDTO.setProductUnit(product.getUnitName());
+                detailsDTO.setSurplusWareHouseId(surplusWareHouseItem.getSurplusWareHouseId());
+
+                List<SurplusWareHouseDivertDTO> divertDTOList = new ArrayList<>();
+                List<SurplusWareDivert> list = iSurplusWareDivertMapper.getAllSurplusWareDivertListBySIdAndPid(surplusWareHouseId, surplusWareHouseItem.getProductId());
+                for (SurplusWareDivert surplusWareDivert : list) {
+                    SurplusWareHouseDivertDTO divertDTO = new SurplusWareHouseDivertDTO();
+                    divertDTO.setCreateDate(surplusWareDivert.getCreateDate());
+                    divertDTO.setDivertCount(surplusWareDivert.getDivertCount());
+                    divertDTO.setDivertDate(surplusWareDivert.getDivertDate());
+                    divertDTO.setDivertType(surplusWareDivert.getDivertType());
+                    divertDTO.setProductId(surplusWareDivert.getProductId());
+                    divertDTO.setSrcSurplusWareHouseId(surplusWareDivert.getSrcSurplusWareHouseId());
+                    divertDTO.setToSurplusWareHouseId(surplusWareDivert.getToSurplusWareHouseId());
+                    divertDTO.setToAddress(surplusWareDivert.getToAddress());
+
+//                    // 1公司临时仓库 2供应商 3业主家的房子
+//                    if (surplusWareDivert.getDivertType() == 1 || surplusWareDivert.getDivertType() == 3) {
+//                        SurplusWareHouse toSurplusWareHouse = iSurplusWareHouseMapper.selectByPrimaryKey(surplusWareDivert.getToSurplusWareHouseId());
+//                        if (toSurplusWareHouse != null)
+//                            divertDTO.setToAddress(toSurplusWareHouse.getAddress());
+//                    } else if (surplusWareDivert.getDivertType() == 2) {
+//                        Supplier toSupplier = forMasterAPI.getSupplier(surplusWareDivert.getToSurplusWareHouseId());
+//                        if (toSupplier != null)
+//                            divertDTO.setToAddress(toSupplier.getName());
+//                    }
+
+                    divertDTOList.add(divertDTO);
+                }
+                detailsDTO.setSurplusWareHouseDivertDTOList(divertDTOList);
+                dtoList.add(detailsDTO);
+            }
+            LOG.info(" getAllSurplusWareDivertListBySId list:" + surplusWareHouseItemList);
+            PageInfo pageResult = new PageInfo(surplusWareHouseItemList);
+            pageResult.setList(dtoList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();

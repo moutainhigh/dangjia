@@ -25,20 +25,20 @@ public class WebHouseController implements WebHouseAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getList(HttpServletRequest request, String memberId){
+    public ServerResponse getList(HttpServletRequest request, String memberId) {
         return houseService.getList(memberId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse startWorkPage(HttpServletRequest request,String houseId){
-        return houseService.startWorkPage(request,houseId);
+    public ServerResponse startWorkPage(HttpServletRequest request, String houseId) {
+        return houseService.startWorkPage(request, houseId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO,String members,String prefixs){
-        return houseService.startWork(request,houseDTO, members, prefixs);
+    public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO, String members, String prefixs) {
+        return houseService.startWork(request, houseDTO, members, prefixs);
     }
 
     @Override
@@ -51,6 +51,12 @@ public class WebHouseController implements WebHouseAPI {
     @ApiMethod
     public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO) {
         return houseService.queryConstructionRecord(houseId, pageDTO.getPageNum(), pageDTO.getPageSize());
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getAllHouseByVisitState(Integer visitState) {
+        return houseService.getAllHouseByVisitState(visitState);
     }
 
 

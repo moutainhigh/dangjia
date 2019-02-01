@@ -6,12 +6,12 @@
 
     <sql id="all_columns">
 		id,
-		house_id as houseId,
 		product_id as productId,
 		divert_count as divertCount,
 		divert_type as divertType,
 		src_surplus_ware_house_id as srcSurplusWareHouseId,
 		to_surplus_ware_house_id as toSurplusWareHouseId,
+		to_address as toAddress,
 		divert_date as divertDate,
 		data_status as dataStatus,
 		create_date as createDate,
@@ -22,7 +22,7 @@
     <select id="getAllSurplusWareDivert" resultType="com.dangjia.acg.modle.house.SurplusWareDivert">
         SELECT
         <include refid="all_columns"/>
-        FROM dj_deliver_split_deliver
+        FROM dj_house_surplus_ware_divert
 		where 1=1
 		<if test="divertType!= -1">
 			 and divert_type = #{divertType}
@@ -34,22 +34,53 @@
     </select>
 
 	<!-- 获取某个临时仓库 的所有剩余材料 的某个 材料 -->
-	<select id="getAllSurplusWareDivertListBySId" resultType="com.dangjia.acg.modle.house.SurplusWareDivert">
+	<select id="getAllSurplusWareDivertListBySIdAndPid" resultType="com.dangjia.acg.modle.house.SurplusWareDivert">
 		SELECT
 		<include refid="all_columns"/>
-		FROM dj_deliver_split_deliver
+		FROM dj_house_surplus_ware_divert
 		where 1=1
 		<if test="surplusWareHouseId!=null and surplusWareHouseId!=''">
 			and src_surplus_ware_house_id = #{surplusWareHouseId}
 		</if>
+		<if test="productId!=null and productId!=''">
+			and product_id = #{productId}
+		</if>
 		ORDER BY create_date desc
 	</select>
+
+
+	<!-- 获取某个商品的 最近的挪货记录 -->
+	<select id="getDivertBySIdAndPidSortDate" resultType="com.dangjia.acg.modle.house.SurplusWareDivert">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_house_surplus_ware_divert
+		where 1=1
+		<if test="productId!=null and productId!=''">
+			and product_id = #{productId}
+		</if>
+		ORDER BY divert_date desc
+		LIMIT 1
+	</select>
+
+	<!-- 获取某个临时仓库的 最近的挪货记录 -->
+	<select id="getDivertBySIdAndWareHouseIdSortDate" resultType="com.dangjia.acg.modle.house.SurplusWareDivert">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_house_surplus_ware_divert
+		where 1=1
+		<if test="surplusWareHouseId!=null and surplusWareHouseId!=''">
+			and src_surplus_ware_house_id = #{surplusWareHouseId}
+		</if>
+		ORDER BY divert_date desc
+		LIMIT 1
+	</select>
+
 
 	<!-- 查询供应商 当前周的发货订单 -->
 	<select id="getAllCurWeek" resultType="com.dangjia.acg.modle.house.SurplusWareDivert">
 		SELECT
 		<include refid="all_columns"/>
-		FROM dj_deliver_split_deliver
+		FROM dj_house_surplus_ware_divert
 		where 1=1
 		<if test="divertType!= -1">
 			and divert_type = #{divertType}

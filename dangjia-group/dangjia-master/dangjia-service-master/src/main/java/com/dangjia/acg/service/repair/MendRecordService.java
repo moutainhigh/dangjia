@@ -6,11 +6,12 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDetail;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
+import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
 import com.dangjia.acg.modle.deliver.OrderSplit;
-import com.dangjia.acg.modle.deliver.OrderSplitItem;
+import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.repair.MendWorker;
@@ -44,6 +45,8 @@ public class MendRecordService {
     private IOrderSplitMapper orderSplitMapper;
     @Autowired
     private IOrderSplitItemMapper orderSplitItemMapper;
+    @Autowired
+    private IChangeOrderMapper changeOrderMapper;
 
     /**
      * 要补退明细
@@ -55,7 +58,7 @@ public class MendRecordService {
             MendOrderDetail mendOrderDetail = new MendOrderDetail();
 
             if(type == 5){
-                OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
+                /*OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
                 mendOrderDetail.setNumber(orderSplit.getNumber());
                 mendOrderDetail.setType(5);
                 mendOrderDetail.setState(orderSplit.getApplyStatus());
@@ -80,7 +83,7 @@ public class MendRecordService {
                     map.put("totalPrice", orderSplitItem.getTotalPrice());
                     mapList.add(map);
                 }
-                mendOrderDetail.setMapList(mapList);
+                mendOrderDetail.setMapList(mapList);*/
 
             }else {
                 MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
@@ -133,6 +136,11 @@ public class MendRecordService {
                         }
                         mendOrderDetail.setImageList(imageList);
                     }
+                }
+
+                if(mendOrder.getType() == 1 || mendOrder.getType() == 3){//补退人工
+                    ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
+                    mendOrderDetail.setChangeOrder(changeOrder);
                 }
             }
 
