@@ -33,8 +33,8 @@ public class SurplusWareDivert extends BaseEntity {
     private Integer divertCount;
 
     @Column(name = "divert_type")
-    @Desc(value = "挪货去向类型： 1临时仓库 2供应商")
-    @ApiModelProperty("挪货去向类型： 1临时仓库 2供应商")
+    @Desc(value = "挪货去向类型： 1公司临时仓库 2供应商 3业主家的房子")
+    @ApiModelProperty("挪货去向类型： 1公司临时仓库 2供应商 3业主家的房子")
     private Integer divertType;
 
     @Column(name = "src_surplus_ware_house_id")
@@ -46,6 +46,11 @@ public class SurplusWareDivert extends BaseEntity {
     @Desc(value = "挪货去向的临时仓库id (要根据 divert_type 判断是供应商id，还是临时仓库id )")
     @ApiModelProperty("挪货去向的临时仓库id (要根据 divert_type 判断是供应商id，还是临时仓库id ) ")
     private String toSurplusWareHouseId;
+
+    @Column(name = "to_address")
+    @Desc(value = "挪货去向的地址")
+    @ApiModelProperty("挪货去向的地址")
+    private String toAddress;
 
     @Column(name = "divert_date")
     @Desc(value = "挪货日期")

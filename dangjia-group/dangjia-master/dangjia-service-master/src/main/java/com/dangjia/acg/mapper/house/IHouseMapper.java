@@ -19,18 +19,25 @@ import java.util.List;
 @Repository
 public interface IHouseMapper extends Mapper<House> {
 
-    List<House> getStatisticsByDate(@Param("start")Date start, @Param("end")Date end);
+    List<House> getStatisticsByDate(@Param("start") Date start, @Param("end") Date end);
 
-    List<House> getList(@Param("memberId")String memberId);
+    List<House> getList(@Param("memberId") String memberId);
 
-    HouseDTO startWorkPage(@Param("houseId")String houseId);
+    HouseDTO startWorkPage(@Param("houseId") String houseId);
 
-    List<DesignDTO> getDesignList(@Param("designerOk")int designerOk,@Param("userName")String mobile,
-                                  @Param("residential")String residential,@Param("number")String number);
+    /***
+     * 根据房子装修状态查询所有的房子
+     * @param visitState 0待确认开工,1装修中,2休眠中,3已完工
+     * @return
+     */
+    List<House> getAllHouseByVisitState(@Param("visitState") Integer visitState);
 
-    List<House> getSameLayout(@Param("cityId")String cityId,@Param("villageId")String villageId,
-                                  @Param("minSquare")Double minSquare,@Param("maxSquare")Double maxSquare);
+    List<DesignDTO> getDesignList(@Param("designerOk") int designerOk, @Param("userName") String mobile,
+                                  @Param("residential") String residential, @Param("number") String number);
 
-    List<House> getReferenceBudget(@Param("villageId")String villageId,@Param("houseType")Integer houseType,
-                              @Param("minSquare")Double minSquare,@Param("maxSquare")Double maxSquare);
+    List<House> getSameLayout(@Param("cityId") String cityId, @Param("villageId") String villageId,
+                              @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare);
+
+    List<House> getReferenceBudget(@Param("villageId") String villageId, @Param("houseType") Integer houseType,
+                                   @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare);
 }

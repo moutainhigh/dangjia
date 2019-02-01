@@ -28,5 +28,7 @@ public class SurplusWareHouseDTO {
     private String memberName;//大管家名字
     private String memberPhone;//大管家电话
 
+    private Integer surplusWareHouseProductAllCount;//仓库的商品总数
+    private Date minDivertDate;// 最近挪货时间
 
 }

@@ -15,9 +15,17 @@ import java.util.List;
 @Repository
 public interface ISurplusWareHouseMapper extends Mapper<SurplusWareHouse> {
     //所有剩余材料的临时仓库
-    List<SurplusWareHouse> getAllSurplusWareHouse(@Param("state") Integer state, @Param("beginDate") String beginDate, @Param("endDate") String endDate);
+    List<SurplusWareHouse> getAllSurplusWareHouse(@Param("state") Integer state,
+                                                  @Param("address") String address,
+                                                  @Param("productName") String productName,
+                                                  @Param("beginDate") String beginDate,
+                                                  @Param("endDate") String endDate);
 
     //所有剩余材料的临时仓库
-    SurplusWareHouse getAllSurplusWareHouseByHouseId(String houseId);
+    SurplusWareHouse getSurplusWareHouseByHouseId(@Param("houseId")String houseId);
+
+    //按照 地址查询
+    SurplusWareHouse getSurplusWareHouseByAddress(@Param("address")String address);
+
 }
 

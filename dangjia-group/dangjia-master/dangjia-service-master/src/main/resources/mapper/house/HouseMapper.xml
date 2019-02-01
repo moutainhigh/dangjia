@@ -90,6 +90,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             id=#{houseId}
     </select>
 
+    <!--查询所有的房子 指定房子 装修状态-->
+    <select id="getAllHouseByVisitState" resultType="com.dangjia.acg.modle.house.House" >
+        SELECT
+        <include refid="basic_columns" />
+        FROM dj_house
+        WHERE
+         visit_state=#{visitState}
+    </select>
+
     <select id="getStatisticsByDate" resultType="com.dangjia.acg.modle.house.House" >
         SELECT
             id,

@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.util.StringUtil;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -247,6 +248,10 @@ public class MendOrderService {
      */
     public ServerResponse backMendWorker(String userToken, String houseId, String workerGoodsArr, String workerTypeId, String changeOrderId) {
         try {
+            if(StringUtil.isEmpty(changeOrderId)){
+                return ServerResponse.createByErrorMessage("未传变更单id");
+            }
+
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member steward = accessToken.getMember();//管家
 
@@ -373,6 +378,10 @@ public class MendOrderService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveMendWorker(String userToken, String houseId, String workerGoodsArr, String workerTypeId, String changeOrderId) {
         try {
+            if(StringUtil.isEmpty(changeOrderId)){
+                return ServerResponse.createByErrorMessage("未传变更单id");
+            }
+
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member steward = accessToken.getMember();//管家
 
@@ -500,7 +509,7 @@ public class MendOrderService {
                 }
 
                 //生成 退货材料的剩余临时仓库
-                SurplusWareHouse srcSurplusWareHouse = iSurplusWareHouseMapper.getAllSurplusWareHouseByHouseId(house.getId());
+                SurplusWareHouse srcSurplusWareHouse = iSurplusWareHouseMapper.getSurplusWareHouseByHouseId(house.getId());
                 if (srcSurplusWareHouse == null) {
 //                    return ServerResponse.createByErrorMessage("无该临时仓库");
                     SurplusWareHouse surplusWareHouse = new SurplusWareHouse();
@@ -508,7 +517,7 @@ public class MendOrderService {
                     surplusWareHouse.setMemberId(house.getMemberId());
                     surplusWareHouse.setState(0);//待清点0, 已清点1  默认：0
                     surplusWareHouse.setType(2);// 1:公司仓库 2：业主房子的临时仓库
-                    surplusWareHouse.setAddress(house.getResidential() + "#" + house.getBuilding() + "-" + house.getUnit() + "-" + house.getNumber());
+                    surplusWareHouse.setAddress(house.getHouseName());
                     iSurplusWareHouseMapper.insert(surplusWareHouse);
                 } else {
                     srcSurplusWareHouse.setState(0);

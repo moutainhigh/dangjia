@@ -8,12 +8,14 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.finance.WebWorkerDetailDTO;
 import com.dangjia.acg.dto.house.SurplusWareHouseDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.house.ISurplusWareDivertMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseItemMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.SurplusWareDivert;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
 import com.dangjia.acg.modle.house.SurplusWareHouseItem;
 import com.dangjia.acg.modle.member.Member;
@@ -44,6 +46,8 @@ public class SurplusWareHouseService {
     @Autowired
     private ISurplusWareHouseItemMapper iSurplusWareHouseItemMapper;
     @Autowired
+    private ISurplusWareDivertMapper iSurplusWareDivertMapper;
+    @Autowired
     private IHouseMapper iHouseMapper;
     @Autowired
     private ForMasterAPI forMasterAPI;
@@ -55,14 +59,15 @@ public class SurplusWareHouseService {
      *
      * @param pageDTO
      * @param state     状态类型 待清点0, 已清点1  默认：0
+     *                  //     * @param type      1:公司仓库 2：业主房子的临时仓库
      * @param beginDate
      * @param endDate
      * @return
      */
-    public ServerResponse getAllSurplusWareHouse(PageDTO pageDTO, Integer state, String beginDate, String endDate) {
+    public ServerResponse getAllSurplusWareHouse(PageDTO pageDTO, Integer state, String address, String productName, String beginDate, String endDate) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<SurplusWareHouse> list = iSurplusWareHouseMapper.getAllSurplusWareHouse(state, beginDate, endDate);
+            List<SurplusWareHouse> list = iSurplusWareHouseMapper.getAllSurplusWareHouse(state, address, productName, beginDate, endDate);
 
             List<SurplusWareHouseDTO> surplusWareHouseDTOList = new ArrayList<>();
             LOG.info(" getAllSurplusWareHouse list:" + list);
@@ -84,10 +89,21 @@ public class SurplusWareHouseService {
                     surplusWareHouseDTO.setMemberName(member.getName());
                     surplusWareHouseDTO.setMemberPhone(member.getMobile());
                 }
-
                 surplusWareHouseDTO.setState(surplusWareHouse.getState());
                 surplusWareHouseDTO.setCreateDate(surplusWareHouse.getCreateDate());
                 surplusWareHouseDTO.setModifyDate(surplusWareHouse.getModifyDate());
+
+                List<SurplusWareHouseItem> surplusWareHouseItems = iSurplusWareHouseItemMapper.getAllSurplusWareHouseItemById(surplusWareHouseDTO.getId());
+                int allProductCount = 0;
+                for (SurplusWareHouseItem item : surplusWareHouseItems) {
+                    allProductCount = allProductCount + item.getProductCount();
+                }
+                surplusWareHouseDTO.setSurplusWareHouseProductAllCount(allProductCount);
+
+                SurplusWareDivert surplusWareDivert = iSurplusWareDivertMapper.getDivertBySIdAndWareHouseIdSortDate(surplusWareHouseDTO.getId());
+                if (surplusWareDivert != null)
+                    surplusWareHouseDTO.setMinDivertDate(surplusWareDivert.getDivertDate());
+
                 surplusWareHouseDTOList.add(surplusWareHouseDTO);
             }
             PageInfo pageResult = new PageInfo(list);
@@ -109,6 +125,10 @@ public class SurplusWareHouseService {
 
             if (StringUtils.isNoneBlank(surplusWareHouse.getAddress()))//新增 仓库
             {
+                SurplusWareHouse srcSurplusWareHouse = iSurplusWareHouseMapper.getSurplusWareHouseByAddress(surplusWareHouse.getAddress());
+                if (srcSurplusWareHouse != null)
+                    return ServerResponse.createByErrorMessage("该仓库地址已存在");
+
                 SurplusWareHouse newSurplusWareHouse = new SurplusWareHouse();
                 newSurplusWareHouse.setMemberId(surplusWareHouse.getMemberId());
                 newSurplusWareHouse.setAddress(surplusWareHouse.getAddress());

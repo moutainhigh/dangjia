@@ -119,7 +119,7 @@ public class HouseWorkerService {
             houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
 
             HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(),houseWorker.getWorkerTypeId());
-            String workerId=houseFlow.getWorkerId();
+            String workerId=houseWorker.getWorkerId();
             houseFlow.setWorkerId("");
             houseFlow.setWorkType(2);
             houseFlow.setReleaseTime(new Date());//重新发布
@@ -131,8 +131,10 @@ public class HouseWorkerService {
                         String.format(DjConstants.PushMessage.STEWARD_REPLACE,house.getHouseName()) ,"5");
 
                 HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
-                configMessageService.addConfigMessage(null,"gj", houseFlowDgj.getWorkerId(),"0","业主换人提醒",
-                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_REPLACE,house.getHouseName()) ,"5");
+                if(houseFlowDgj!=null&&!CommonUtil.isEmpty(houseFlowDgj.getWorkerId())) {
+                    configMessageService.addConfigMessage(null, "gj", houseFlowDgj.getWorkerId(), "0", "业主换人提醒",
+                            String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_REPLACE, house.getHouseName()), "5");
+                }
             }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {

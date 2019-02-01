@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.repair;
 
+import com.dangjia.acg.modle.repair.ChangeOrder;
 import lombok.Data;
 
 import java.util.Date;
@@ -22,6 +23,7 @@ public class MendOrderDetail {
     private Date createDate;
     private Date modifyDate;
 
+    private ChangeOrder changeOrder;
     private List<Map<String,Object>> mapList;
     private List<String> imageList;
 }

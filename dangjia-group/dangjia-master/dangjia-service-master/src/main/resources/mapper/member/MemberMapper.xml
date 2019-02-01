@@ -48,18 +48,15 @@
         SELECT
             <include refid="all_columns"/>
         FROM dj_member w
-        WHERE
+        WHERE 1=1
         <if test = "name!=null and name!=''">
-            w.name LIKE CONCAT('%',#{name},'%')
             and
+            w.name LIKE CONCAT('%',#{name},'%')
         </if>
         <if test = "workerTypeId!=null and workerTypeId!=''">
-            w.worker_type_id = #{workerTypeId}
             and
+            w.worker_type_id = #{workerTypeId}
         </if>
-            w.worker_type_id != null
-        or
-            w.worker_type_id != ''
         ORDER by
             w.create_date
     </select>

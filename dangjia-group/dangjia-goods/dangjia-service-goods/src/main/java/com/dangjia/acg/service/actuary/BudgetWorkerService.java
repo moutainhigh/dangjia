@@ -433,7 +433,7 @@ public class BudgetWorkerService {
     }
 
     /**
-     * 根据houseId和wokerTypeId查询房子人工精算总价
+     * 根据houseId和workerTypeId查询房子人工精算总价
      */
     public ServerResponse getWorkerTotalPrice(String houseId, String workerTypeId) {
         try {

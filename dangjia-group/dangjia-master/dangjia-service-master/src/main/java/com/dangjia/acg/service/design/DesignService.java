@@ -47,17 +47,34 @@ public class DesignService {
      */
     public ServerResponse sendPictures(HttpServletRequest request,String houseId,int designerOk){
         House house = houseMapper.selectByPrimaryKey(houseId);
+        Example example = new Example(HouseDesignImage.class);
+        List<HouseDesignImage> houseDesignImageList;
         if (designerOk == 1 || designerOk == 6){
+            example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId).andEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID, "1");
+            houseDesignImageList = houseDesignImageMapper.selectByExample(example);
+            if(houseDesignImageList.size() == 0){
+                return ServerResponse.createByErrorMessage("请上传平面图");
+            }
+
             house.setDesignerOk(5);//平面图发给业主
             houseMapper.updateByPrimaryKeySelective(house);
             //app推送给业主
-            configMessageService.addConfigMessage(null,"gj",house.getMemberId(),"0","设计图上传提醒",String.format(DjConstants.PushMessage.PLANE_UPLOADING,house.getHouseName()) ,"");
+            configMessageService.addConfigMessage(null,"gj",house.getMemberId(),"0","设计图上传提醒",
+                    String.format(DjConstants.PushMessage.PLANE_UPLOADING,house.getHouseName()) ,"");
             return ServerResponse.createBySuccessMessage("发送成功");
         }else if (designerOk == 7 || designerOk==8){
+            example.createCriteria().andEqualTo("houseId", houseId).andNotEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID,"1")
+                    .andIsNotNull(HouseDesignImage.IMAGEURL);
+            houseDesignImageList = houseDesignImageMapper.selectByExample(example);
+            if(houseDesignImageList.size() == 0){
+                return ServerResponse.createByErrorMessage("请上传施工图");
+            }
+
             house.setDesignerOk(2);//施工图(其它图)发给业主
             houseMapper.updateByPrimaryKeySelective(house);
             //app推送给业主
-            configMessageService.addConfigMessage(null,"gj",house.getMemberId(),"0","设计图上传提醒",String.format(DjConstants.PushMessage.CONSTRUCTION_UPLOADING,house.getHouseName()) ,"");
+            configMessageService.addConfigMessage(null,"gj",house.getMemberId(),"0","设计图上传提醒",
+                    String.format(DjConstants.PushMessage.CONSTRUCTION_UPLOADING,house.getHouseName()) ,"");
 
             return ServerResponse.createBySuccessMessage("发送成功");
         }
