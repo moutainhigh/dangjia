@@ -26,6 +26,10 @@ public interface MemberAPI {
     ServerResponse getMemberMobile(@ApiParam(name = "request", value = "请求") @RequestParam("request")HttpServletRequest request,
                                    @ApiParam(name = "id", value = "来源ID") @RequestParam("id")String id,
                                    @ApiParam(name = "idType", value = "来源类型：1=房屋ID, 2=用户ID") @RequestParam("idType")String idType);
+
+    @RequestMapping(value = "member/sms", method = RequestMethod.POST)
+    @ApiOperation(value = "查询验证码", notes = "查询验证码")
+    String getSmsCode(String phone);
     /**
      * 获取用户详细资料
      * @param userToken  token
