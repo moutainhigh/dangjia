@@ -189,6 +189,22 @@ public class MemberService {
         }
     }
 
+    /*
+     * 查询验证码
+     */
+    public String getSmsCode(String phone) {
+        if (!Validator.isMobileNo(phone)) {
+            return "手机号不正确";
+        }
+        Example example = new Example(Sms.class);
+        example.createCriteria().andEqualTo("mobile",phone);
+        example.orderBy(Sms.CREATE_DATE).desc();
+        List<Sms>  sms =smsMapper.selectByExample(example);
+        if(sms==null||sms.size()==0){
+            return "无效验证码";
+        }
+        return sms.get(0).getCode();
+    }
     /**
      * 校验验证码并保存密码
      */
