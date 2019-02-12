@@ -33,6 +33,11 @@ public class MemberController implements MemberAPI {
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType){
         return memberService.getMemberMobile(request, id, idType);
     }
+
+    @Override
+    public String getSmsCode(String phone){
+        return memberService.getSmsCode(phone);
+    }
     /**
      * 获取用户详细资料
      * @param userToken  token
