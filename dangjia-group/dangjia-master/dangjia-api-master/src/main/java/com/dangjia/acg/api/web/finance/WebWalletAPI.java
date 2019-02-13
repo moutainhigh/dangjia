@@ -24,7 +24,8 @@ public interface WebWalletAPI {
      */
     @PostMapping("web/finance/wallet/getAllWallet")
     @ApiOperation(value = "工人和业主支付订单流水", notes = "工人和业主支付订单流水")
-    ServerResponse getAllWallet(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO);
+    ServerResponse getAllWallet(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO,
+                                @RequestParam("workerId")String workerId, @RequestParam("houseId")String houseId);
 
 
 }
