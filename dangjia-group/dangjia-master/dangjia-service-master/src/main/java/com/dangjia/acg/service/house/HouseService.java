@@ -192,11 +192,11 @@ public class HouseService {
         mendOrderList = mendOrderMapper.selectByExample(example);
         task += mendOrderList.size();
 
-        if(house.getDesignerOk() == 5 || house.getDesignerOk() == 2){
-            task ++;
+        if (house.getDesignerOk() == 5 || house.getDesignerOk() == 2) {
+            task++;
         }
-        if(house.getBudgetOk() == 2){
-            task ++;
+        if (house.getBudgetOk() == 2) {
+            task++;
         }
         //验收任务
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getMemberCheckList(houseId);
@@ -702,9 +702,9 @@ public class HouseService {
                 houseFlow.setWorkType(2);//待抢单
                 houseFlow.setReleaseTime(new Date());//发布时间
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-                configMessageService.addConfigMessage(null,"gj", "wtId3"+houseFlow.getCityId(),"0","新的装修订单",DjConstants.PushMessage.SNAP_UP_ORDER ,"4");
-               //推送消息给业主等待大管家抢单
-                configMessageService.addConfigMessage(null,"zx", house.getMemberId(),"0","等待大管家抢单",String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION,house.getHouseName()) ,"");
+                configMessageService.addConfigMessage(null, "gj", "wtId3" + houseFlow.getCityId(), "0", "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "4");
+                //推送消息给业主等待大管家抢单
+                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "等待大管家抢单", String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION, house.getHouseName()), "");
 
                 /**
                  * 在这里算出大管家每次巡查拿的钱 和 每次验收拿的钱 记录到大管家的 houseflow里 houseflow,新增两个字段.
@@ -841,8 +841,8 @@ public class HouseService {
     //装修指南
     public ServerResponse getRenovationManual(String userToken, Integer type) {
         try {
-            Member member =null;
-            if(!CommonUtil.isEmpty(userToken)) {
+            Member member = null;
+            if (!CommonUtil.isEmpty(userToken)) {
                 AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
                 member = accessToken.getMember();
             }
@@ -856,7 +856,7 @@ public class HouseService {
                 List<Map<String, Object>> listMap = new ArrayList<Map<String, Object>>();
                 for (RenovationManual r : listR) {
                     Map<String, Object> map = CommonUtil.beanToMap(r);
-                    if(member!=null) {
+                    if (member != null) {
                         Example example = new Example(RenovationManualMember.class);
                         example.createCriteria().andEqualTo("renovationManualId", r.getId()).andEqualTo("memberId", member.getId());
                         List<RenovationManualMember> rmList = renovationManualMemberMapper.selectByExample(example);
@@ -953,7 +953,7 @@ public class HouseService {
     /**
      * 施工记录
      */
-    public ServerResponse queryConstructionRecord(String houseId, Integer pageNum, Integer pageSize) {
+    public ServerResponse queryConstructionRecord(String houseId, Integer pageNum, Integer pageSize, String workerTypeId) {
         if (pageNum == null) {
             pageNum = 1;
         }
@@ -961,7 +961,7 @@ public class HouseService {
             pageSize = 10;
         }
         PageHelper.startPage(pageNum, pageSize);
-        List<HouseFlowApply> hfaList = houseFlowApplyMapper.queryAllHfaByHouseId(houseId);
+        List<HouseFlowApply> hfaList = houseFlowApplyMapper.queryAllHfaByHouseId(houseId, workerTypeId);
         PageInfo pageResult = new PageInfo(hfaList);
         List<Map<String, Object>> listMap = this.houseFlowApplyDetail(hfaList);
         if (listMap == null) {
@@ -1124,7 +1124,8 @@ public class HouseService {
 
     /**
      * 根据房子装修状态查询所有的房子
-     * @param visitState   0待确认开工,1装修中,2休眠中,3已完工
+     *
+     * @param visitState 0待确认开工,1装修中,2休眠中,3已完工
      * @return
      */
     public ServerResponse getAllHouseByVisitState(Integer visitState) {

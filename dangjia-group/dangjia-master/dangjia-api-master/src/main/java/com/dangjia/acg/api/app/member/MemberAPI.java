@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 
 
-/**
+/**9
  * 用户
  * @author: QiYuXiang
  * @date: 2018/10/24
@@ -27,9 +27,9 @@ public interface MemberAPI {
                                    @ApiParam(name = "id", value = "来源ID") @RequestParam("id")String id,
                                    @ApiParam(name = "idType", value = "来源类型：1=房屋ID, 2=用户ID") @RequestParam("idType")String idType);
 
-    @RequestMapping(value = "member/sms", method = RequestMethod.POST)
+    @RequestMapping(value = "member/sms", method = RequestMethod.GET)
     @ApiOperation(value = "查询验证码", notes = "查询验证码")
-    String getSmsCode(String phone);
+    String getSmsCode(@RequestParam("phone")String phone);
     /**
      * 获取用户详细资料
      * @param userToken  token
@@ -37,7 +37,7 @@ public interface MemberAPI {
      */
     @RequestMapping(value = "member/info", method = RequestMethod.POST)
     @ApiOperation(value = "获取用户详细资料", notes = "获取用户详细资料")
-    ServerResponse getMemberInfo(String userToken);
+    ServerResponse getMemberInfo(@RequestParam("userToken")String userToken);
     /**
      * 登录 接口
      * @param phone 手机号

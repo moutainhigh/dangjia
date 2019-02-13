@@ -41,13 +41,11 @@ public class WebWalletService {
     /**
      * 所有用户（工人和业主）流水
      */
-    public ServerResponse getAllWallet(PageDTO pageDTO) {
+    public ServerResponse getAllWallet(PageDTO pageDTO, String workerId, String houseId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<WorkerDetail> list = iWorkerDetailMapper.getAllWallet();
-
+            List<WorkerDetail> list = iWorkerDetailMapper.getAllWallet(workerId, houseId);
             List<WebWorkerDetailDTO> workerDetailDTOList = new ArrayList<>();
-            LOG.info(" getAllWallet list:" + list);
             for (WorkerDetail workerDetail : list) {
                 WebWorkerDetailDTO workerDetailDTO = new WebWorkerDetailDTO();
                 workerDetailDTO.setId(workerDetail.getId());

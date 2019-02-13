@@ -49,8 +49,8 @@ public class WebHouseController implements WebHouseAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO) {
-        return houseService.queryConstructionRecord(houseId, pageDTO.getPageNum(), pageDTO.getPageSize());
+    public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO,String workerTypeId) {
+        return houseService.queryConstructionRecord(houseId, pageDTO.getPageNum(), pageDTO.getPageSize(),workerTypeId);
     }
 
     @Override

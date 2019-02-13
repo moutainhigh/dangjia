@@ -24,7 +24,7 @@ public class WebWalletController implements WebWalletAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getAllWallet(HttpServletRequest request, PageDTO pageDTO) {
-        return webWalletService.getAllWallet(pageDTO);
+    public ServerResponse getAllWallet(HttpServletRequest request, PageDTO pageDTO, String workerId, String houseId) {
+        return webWalletService.getAllWallet(pageDTO, workerId, houseId);
     }
 }

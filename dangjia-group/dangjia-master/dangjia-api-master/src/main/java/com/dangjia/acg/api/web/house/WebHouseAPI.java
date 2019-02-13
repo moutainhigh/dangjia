@@ -39,7 +39,7 @@ public interface WebHouseAPI {
 
     @PostMapping("web/house/queryConstructionRecord")
     @ApiOperation(value = "施工记录", notes = "施工记录")
-    ServerResponse queryConstructionRecord(@RequestParam("houseId") String houseId, @RequestParam("pageDTO") PageDTO pageDTO);
+    ServerResponse queryConstructionRecord(@RequestParam("houseId") String houseId, @RequestParam("pageDTO") PageDTO pageDTO, @RequestParam("workerTypeId") String workerTypeId);
 
     /**
      * 根据房子装修状态查询所有的房子

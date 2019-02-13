@@ -25,8 +25,8 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setSelectHouse(String userToken, String cityId, String houseId){
-        return houseService.setSelectHouse(userToken,cityId,houseId);
+    public ServerResponse setSelectHouse(String userToken, String cityId, String houseId) {
+        return houseService.setSelectHouse(userToken, cityId, houseId);
     }
 
     /**
@@ -34,8 +34,8 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getHouseList(String userToken, String cityId){
-        return houseService.getHouseList(userToken,cityId);
+    public ServerResponse getHouseList(String userToken, String cityId) {
+        return houseService.getHouseList(userToken, cityId);
     }
 
     /**
@@ -43,81 +43,86 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getMyHouse(String userToken, String cityId){
-        return houseService.getMyHouse(userToken,cityId);
+    public ServerResponse getMyHouse(String userToken, String cityId) {
+        return houseService.getMyHouse(userToken, cityId);
     }
+
     /**
      * 我的房产
      */
     @Override
     @ApiMethod
-    public ServerResponse queryMyHouse(String userToken){
+    public ServerResponse queryMyHouse(String userToken) {
         return houseService.queryMyHouse(userToken);
     }
 
     /**
      * @param userToken
      * @param houseType 装修的房子类型0：新房；1：老房
-     * @param drawings 有无图纸0：无图纸；1：有图纸
+     * @param drawings  有无图纸0：无图纸；1：有图纸
      */
     @Override
     @ApiMethod
-    public ServerResponse setStartHouse(String userToken,String cityId,int houseType,int drawings){
-        return houseService.setStartHouse(userToken,cityId,houseType,drawings);
+    public ServerResponse setStartHouse(String userToken, String cityId, int houseType, int drawings) {
+        return houseService.setStartHouse(userToken, cityId, houseType, drawings);
     }
 
     /**
      * 修改房子精算状态
+     *
      * @param houseId
      * @param budgetOk
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse setHouseBudgetOk(String houseId, Integer budgetOk){
-        return houseService.setHouseBudgetOk(houseId,budgetOk);
+    public ServerResponse setHouseBudgetOk(String houseId, Integer budgetOk) {
+        return houseService.setHouseBudgetOk(houseId, budgetOk);
     }
 
     /**
      * app修改房子精算状态
+     *
      * @param houseId
      * @param budgetOk
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse setHouseBudgetOk(String userToken,String houseId, Integer budgetOk){
-        return houseService.setHouseBudgetOk(houseId,budgetOk);
+    public ServerResponse setHouseBudgetOk(String userToken, String houseId, Integer budgetOk) {
+        return houseService.setHouseBudgetOk(houseId, budgetOk);
     }
 
     //根据城市，小区，最小最大面积查询房子
     @Override
     @ApiMethod
-    public ServerResponse queryHouseByCity(String userToken,String cityId, String villageId, Double minSquare, Double maxSquare, PageDTO pageDTO) {
-        return houseService.queryHouseByCity(userToken,cityId,villageId,minSquare,maxSquare,pageDTO);
+    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId, Double minSquare, Double maxSquare, PageDTO pageDTO) {
+        return houseService.queryHouseByCity(userToken, cityId, villageId, minSquare, maxSquare, pageDTO);
     }
 
     //装修指南
     @Override
     @ApiMethod
-    public ServerResponse getRenovationManual(String userToken,Integer type) {
-        return houseService.getRenovationManual(userToken,type);
+    public ServerResponse getRenovationManual(String userToken, Integer type) {
+        return houseService.getRenovationManual(userToken, type);
     }
 
     /**
      * 保存装修指南
+     *
      * @param userToken
      * @param saveList
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse saveRenovationManual(String userToken,String saveList){
-        return houseService.saveRenovationManual(userToken,saveList);
+    public ServerResponse saveRenovationManual(String userToken, String saveList) {
+        return houseService.saveRenovationManual(userToken, saveList);
     }
 
     /**
      * 施工记录
+     *
      * @param houseId
      * @param pageDTO
      * @return
@@ -125,14 +130,15 @@ public class HouseController implements HouseAPI {
     @Override
     @ApiMethod
     public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO) {
-        return houseService.queryConstructionRecord(houseId, pageDTO.getPageNum(), pageDTO.getPageSize());
+        return houseService.queryConstructionRecord(houseId, pageDTO.getPageNum(), pageDTO.getPageSize(), null);
     }
+
     /**
      * 工序记录
      */
     @Override
     @ApiMethod
-    public ServerResponse queryFlowRecord(String houseFlowId){
+    public ServerResponse queryFlowRecord(String houseFlowId) {
         return houseService.queryFlowRecord(houseFlowId);
     }
 
@@ -141,29 +147,32 @@ public class HouseController implements HouseAPI {
     public ServerResponse queryHomeConstruction() {
         return houseService.queryHomeConstruction();
     }
+
     /**
      * 根据id查询房子信息
+     *
      * @param houseId
      * @return
      */
     @Override
     @ApiMethod
-    public House getHouseById(String houseId){
+    public House getHouseById(String houseId) {
         return houseService.getHouseById(houseId);
     }
 
     /**
      * 参考报价
+     *
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse getReferenceBudget(String villageId,Double square,Integer houseType){
-        if(square!=null&&!"".equals(square)){
-            Double minSquare=square-50;
-            Double maxSquare=square+50;
-            return houseService.getReferenceBudget(villageId,minSquare,maxSquare,houseType);
-        }else{
+    public ServerResponse getReferenceBudget(String villageId, Double square, Integer houseType) {
+        if (square != null && !"".equals(square)) {
+            Double minSquare = square - 50;
+            Double maxSquare = square + 50;
+            return houseService.getReferenceBudget(villageId, minSquare, maxSquare, houseType);
+        } else {
             return ServerResponse.createByErrorMessage("请输入正确的面积");
         }
     }
