@@ -34,8 +34,8 @@ public class RenovationStageController implements WebRenovationStageAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse addRenovationStage(String name){
-        return renovationStageService.addRenovationStage(name);
+    public ServerResponse addRenovationStage(String name,  String image){
+        return renovationStageService.addRenovationStage(name,image);
     }
 
     /**
@@ -46,8 +46,8 @@ public class RenovationStageController implements WebRenovationStageAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateRenovationStage(String id,String name){
-        return renovationStageService.updateRenovationStage(id,name);
+    public ServerResponse updateRenovationStage(String id,String name,  String image){
+        return renovationStageService.updateRenovationStage(id,name,image);
     }
 
     /**

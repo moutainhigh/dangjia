@@ -51,7 +51,8 @@ public class BeanUtils {
               || result instanceof Double || result instanceof Enum) {
         if (result != null) {
           if (result instanceof BigDecimal) {
-            resultValue =((BigDecimal) result).setScale(2,BigDecimal.ROUND_HALF_UP);
+            BigDecimal  value =((BigDecimal) result).setScale(2,BigDecimal.ROUND_HALF_UP);
+            resultValue = String.valueOf(value.doubleValue());
           }else  if (result instanceof String && Validator.isMobileNo((String)result)) {
             resultValue = ((String)result).replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2");
           }else {

@@ -59,7 +59,7 @@ public class RenovationManualService {
             return ServerResponse.createBySuccess("获取所有装修指南成功",pageResult);
         }catch (Exception e){
             e.printStackTrace();
-            return ServerResponse.createBySuccessMessage("获取所有装修指南失败");
+            return ServerResponse.createByErrorMessage("获取所有装修指南失败");
         }
     }
 
@@ -67,22 +67,15 @@ public class RenovationManualService {
      * 新增装修指南
      * @return
      */
-    public ServerResponse addRenovationManual(String name,String workerTypeId,Integer orderNumber,String types,
-                                              String url,String urlName){
+    public ServerResponse addRenovationManual(RenovationManual renovationManual){
         try{
-            RenovationManual renovationManual=new RenovationManual();
-            renovationManual.setName(name);
-            renovationManual.setWorkerTypeId(workerTypeId);
-            renovationManual.setOrderNumber(orderNumber);
-            renovationManual.setTypes(types);
+            renovationManual.setId(new RenovationManual().getId());
             renovationManual.setState(0);
-            renovationManual.setUrl(url);
-            renovationManual.setUrlName(urlName);
             renovationManualMapper.insertSelective(renovationManual);
             return ServerResponse.createBySuccessMessage("新增装修指南成功");
         }catch (Exception e){
             e.printStackTrace();
-            return ServerResponse.createBySuccessMessage("新增装修指南失败");
+            return ServerResponse.createByErrorMessage("新增装修指南失败");
         }
     }
 
@@ -90,22 +83,15 @@ public class RenovationManualService {
      * 修改装修指南
      * @return
      */
-    public ServerResponse updateRenovationManual(String id,String name,Integer orderNumber,String types,Integer state,
-                                              String url,String urlName){
+    public ServerResponse updateRenovationManual(RenovationManual renovationManual){
         try{
-            RenovationManual renovationManual=new RenovationManual();
-            renovationManual.setId(id);
-            renovationManual.setName(name);
-            renovationManual.setOrderNumber(orderNumber);
-            renovationManual.setTypes(types);
-            renovationManual.setState(state);
-            renovationManual.setUrl(url);
-            renovationManual.setUrlName(urlName);
-            renovationManualMapper.updateByPrimaryKeySelective(renovationManual);
+            if(!CommonUtil.isEmpty(renovationManual.getId())) {
+                renovationManualMapper.updateByPrimaryKeySelective(renovationManual);
+            }
             return ServerResponse.createBySuccessMessage("修改装修指南成功");
         }catch (Exception e){
             e.printStackTrace();
-            return ServerResponse.createBySuccessMessage("修改装修指南失败");
+            return ServerResponse.createByErrorMessage("修改装修指南失败");
         }
     }
 
@@ -122,7 +108,7 @@ public class RenovationManualService {
             return ServerResponse.createBySuccessMessage("删除装修指南成功");
         }catch (Exception e){
             e.printStackTrace();
-            return ServerResponse.createBySuccessMessage("删除装修指南失败");
+            return ServerResponse.createByErrorMessage("删除装修指南失败");
         }
     }
 
@@ -135,7 +121,7 @@ public class RenovationManualService {
             return ServerResponse.createBySuccess("根据id查询装修指南对象成功",renovationManualMapper.selectByPrimaryKey(id));
         }catch (Exception e){
             e.printStackTrace();
-            return ServerResponse.createBySuccessMessage("根据id查询装修指南对象失败");
+            return ServerResponse.createByErrorMessage("根据id查询装修指南对象失败");
         }
     }
 

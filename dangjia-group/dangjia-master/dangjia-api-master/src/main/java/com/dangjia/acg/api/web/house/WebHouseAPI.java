@@ -23,11 +23,15 @@ public interface WebHouseAPI {
 
     @PostMapping("web/house/getList")
     @ApiOperation(value = "装修列表", notes = "装修列表")
-    ServerResponse getList(@RequestParam("request") HttpServletRequest request, @RequestParam("memberId") String memberId);
+    ServerResponse getList(@RequestParam("request") HttpServletRequest request,
+                           @RequestParam("pageDTO") PageDTO pageDTO,
+                           @RequestParam("searchKey") String searchKey,
+                           @RequestParam("memberId") String memberId);
 
     @PostMapping("web/house/startWorkPage")
     @ApiOperation(value = "确认开工页面", notes = "确认开工页面")
-    ServerResponse startWorkPage(@RequestParam("request") HttpServletRequest request, @RequestParam("houseId") String houseId);
+    ServerResponse startWorkPage(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("houseId") String houseId);
 
     @PostMapping("web/house/startWork")
     @ApiOperation(value = "确认开工", notes = "确认开工")
@@ -39,7 +43,7 @@ public interface WebHouseAPI {
 
     @PostMapping("web/house/queryConstructionRecord")
     @ApiOperation(value = "施工记录", notes = "施工记录")
-    ServerResponse queryConstructionRecord(@RequestParam("houseId") String houseId, @RequestParam("pageDTO") PageDTO pageDTO);
+    ServerResponse queryConstructionRecord(@RequestParam("houseId") String houseId, @RequestParam("pageDTO") PageDTO pageDTO, @RequestParam("workerTypeId") String workerTypeId);
 
     /**
      * 根据房子装修状态查询所有的房子

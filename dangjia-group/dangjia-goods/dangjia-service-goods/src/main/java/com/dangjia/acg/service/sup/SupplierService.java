@@ -41,7 +41,13 @@ public class SupplierService {
     @Autowired
     private IGoodsMapper goodsMapper;
     private static Logger LOG = LoggerFactory.getLogger(SupplierService.class);
-
+    /**
+     * 查询指定供应商
+     */
+    public Supplier getSupplier(String productId) {
+        Supplier supplier = iSupplierMapper.selectByPrimaryKey(productId);
+        return supplier;
+    }
     /**
      * 供应商登录
      */

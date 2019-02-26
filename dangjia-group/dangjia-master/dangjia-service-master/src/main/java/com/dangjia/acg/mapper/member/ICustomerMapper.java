@@ -17,12 +17,6 @@ import java.util.List;
 @Repository
 public interface ICustomerMapper extends Mapper<Customer> {
 
-    /**
-     * 根据业主 查所有
-     * @return
-     */
-    List<Customer> getAllCustomer();
-
 
     Customer getCustomerByMemberId(@Param("memberId") String memberId);
 

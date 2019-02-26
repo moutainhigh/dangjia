@@ -51,7 +51,10 @@ public class OrderSplitItem extends BaseEntity {
 	private Double price;// 销售价
 
 	@Column(name = "cost")
-	private Double cost;// 成本价
+	private Double cost;//平均成本价
+
+	@Column(name = "sup_cost")
+	private Double supCost;//选择的供应商提供的单价
 
 	@Column(name = "shop_count")
 	private Double shopCount;//购买总数

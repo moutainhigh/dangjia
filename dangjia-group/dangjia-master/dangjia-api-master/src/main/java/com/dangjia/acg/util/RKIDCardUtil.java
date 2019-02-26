@@ -1,5 +1,6 @@
 package com.dangjia.acg.util;
 
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -26,7 +27,6 @@ public class RKIDCardUtil {
      * 2 （2）计算模 Y = mod(S, 11) （3）通过模得到对应的校验码 Y: 0 1 2 3 4 5 6 7 8 9 10 校验码: 1 0
      * X 9 8 7 6 5 4 3 2
      */
-
     /**
      * 功能：身份证的有效验证
      *
@@ -34,7 +34,7 @@ public class RKIDCardUtil {
      * @return 有效：返回"" 无效：返回String信息
      */
     public static String getIDCardValidate(String IDStr) {
-        String errorInfo = "";// 记录错误信息
+        String errorInfo;// 记录错误信息
         String[] ValCodeArr = {"1", "0", "x", "9", "8", "7", "6", "5", "4",
                 "3", "2"};
         String[] Wi = {"7", "9", "10", "5", "8", "4", "2", "1", "6", "3", "7",
@@ -48,12 +48,15 @@ public class RKIDCardUtil {
         // =======================(end)========================
 
         // ================ 数字 除最后以为都为数字 ================
-        if (IDStr.length() == 18) {
-            Ai = IDStr.substring(0, 17);
-        } else if (IDStr.length() == 15) {
-            Ai = IDStr.substring(0, 6) + "19" + IDStr.substring(6, 15);
+        switch (IDStr.length()) {
+            case 18:
+                Ai = IDStr.substring(0, 17);
+                break;
+            case 15:
+                Ai = IDStr.substring(0, 6) + "19" + IDStr.substring(6, 15);
+                break;
         }
-        if (isNumeric(Ai) == false) {
+        if (!isNumeric(Ai)) {
             errorInfo = "身份证15位号码都应为数字 ; 18位号码除最后一位外，都应为数字。";
             return errorInfo;
         }
@@ -63,7 +66,7 @@ public class RKIDCardUtil {
         String strYear = Ai.substring(6, 10);// 年份
         String strMonth = Ai.substring(10, 12);// 月份
         String strDay = Ai.substring(12, 14);// 月份
-        if (isDate(strYear + "-" + strMonth + "-" + strDay) == false) {
+        if (!isDate(strYear + "-" + strMonth + "-" + strDay)) {
             errorInfo = "身份证生日无效。";
             return errorInfo;
         }
@@ -111,7 +114,7 @@ public class RKIDCardUtil {
         Ai = Ai + strVerifyCode;
 
         if (IDStr.length() == 18) {
-            if (Ai.equals(IDStr) == false) {
+            if (!Ai.equals(IDStr)) {
                 errorInfo = "身份证无效，不是合法的身份证号码";
                 return errorInfo;
             }
@@ -127,7 +130,7 @@ public class RKIDCardUtil {
      *
      * @return Hashtable 对象
      */
-    public static  Hashtable getAreaCode() {
+    private static Hashtable getAreaCode() {
         Hashtable hashtable = new Hashtable();
         hashtable.put("11", "北京");
         hashtable.put("12", "天津");
@@ -176,11 +179,7 @@ public class RKIDCardUtil {
     private static boolean isNumeric(String str) {
         Pattern pattern = Pattern.compile("[0-9]*");
         Matcher isNum = pattern.matcher(str);
-        if (isNum.matches()) {
-            return true;
-        } else {
-            return false;
-        }
+        return isNum.matches();
     }
 
     /**
@@ -193,21 +192,17 @@ public class RKIDCardUtil {
         Pattern pattern = Pattern
                 .compile("^((\\d{2}(([02468][048])|([13579][26]))[\\-\\/\\s]?((((0?[13578])|(1[02]))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(3[01])))|(((0?[469])|(11))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(30)))|(0?2[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])))))|(\\d{2}(([02468][1235679])|([13579][01345789]))[\\-\\/\\s]?((((0?[13578])|(1[02]))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(3[01])))|(((0?[469])|(11))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(30)))|(0?2[\\-\\/\\s]?((0?[1-9])|(1[0-9])|(2[0-8]))))))(\\s(((0?[0-9])|([1-2][0-3]))\\:([0-5]?[0-9])((\\s)|(\\:([0-5]?[0-9])))))?$");
         Matcher m = pattern.matcher(strDate);
-        if (m.matches()) {
-            return true;
-        } else {
-            return false;
-        }
+        return m.matches();
     }
 
-//    public static void member(String[] args) throws ParseException {
-//        // String IDCardNum="210102820826411";
-//        // String IDCardNum="210102198208264114";
-//        String IDCardNum = "210181198807193116";
-//        RKIDCardUtil cc = new RKIDCardUtil();
-//        System.out.println(cc.getIDCardValidate(IDCardNum));
-//        // System.out.println(cc.isDate("1996-02-29"));
-//    }
+    public static void main(String[] args) {
+//         String IDCardNum="210102820826411";
+//         String IDCardNum="210102198208264114";
+        String IDCardNum = "210181198807193116";
+        RKIDCardUtil cc = new RKIDCardUtil();
+        System.out.println(cc.getIDCardValidate(IDCardNum));
+        // System.out.println(cc.isDate("1996-02-29"));
+    }
     //*********************************** 身份证验证结束 ****************************************/
 
 }

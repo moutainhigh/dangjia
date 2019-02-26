@@ -25,7 +25,7 @@ import java.util.List;
  */
 @Service
 public class ActuarialTemplateService {
-    
+
     @Autowired
     private IActuarialTemplateMapper iActuarialTemplateMapper;
     @Autowired
@@ -36,39 +36,41 @@ public class ActuarialTemplateService {
 
     /**
      * 查询精算模版
+     *
      * @param pageNum
      * @param pageSize
      * @param workerTypeId
      * @param stateType
      * @return
      */
-    public ServerResponse<PageInfo> queryActuarialTemplate(Integer pageNum, Integer pageSize, String workerTypeId, String stateType,String name) {
-       try {
-           if (pageNum == null) {
-               pageNum = 1;
-           }
-           if (pageSize == null) {
-               pageSize = 10;
-           }
-           PageHelper.startPage(pageNum, pageSize);
-           List<ActuarialTemplate> tList = iActuarialTemplateMapper.query(StringUtils.isBlank(workerTypeId) ? null : workerTypeId,
-                   StringUtils.isBlank(stateType) ? null : stateType,name);
-           if (tList == null || tList.size() <= 0) {
-               return ServerResponse.createByErrorMessage("查无数据！");
-           }
+    public ServerResponse<PageInfo> queryActuarialTemplate(Integer pageNum, Integer pageSize, String workerTypeId, String stateType, String name) {
+        try {
+            if (pageNum == null) {
+                pageNum = 1;
+            }
+            if (pageSize == null) {
+                pageSize = 10;
+            }
+            PageHelper.startPage(pageNum, pageSize);
+            List<ActuarialTemplate> tList = iActuarialTemplateMapper.query(StringUtils.isBlank(workerTypeId) ? null : workerTypeId,
+                    StringUtils.isBlank(stateType) ? null : stateType, name);
+            if (tList == null || tList.size() <= 0) {
+                return ServerResponse.createByErrorMessage("查无数据！");
+            }
 
-           List<ActuarialTemplateDTO> actuarialTemplateResults = new ArrayList<ActuarialTemplateDTO>();
-           PageInfo pageResult = new PageInfo(tList);
-           pageResult.setList(tList);
-           return ServerResponse.createBySuccess("查询精算模版成功", pageResult);
-       }catch (Exception e){
-           e.printStackTrace();
-           return ServerResponse.createByErrorMessage("查询精算模版失败");
-       }
+            List<ActuarialTemplateDTO> actuarialTemplateResults = new ArrayList<ActuarialTemplateDTO>();
+            PageInfo pageResult = new PageInfo(tList);
+            pageResult.setList(tList);
+            return ServerResponse.createBySuccess("查询精算模版成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询精算模版失败");
+        }
     }
 
     /**
      * 新增精算模板
+     *
      * @param userId
      * @param name
      * @param styleId
@@ -79,11 +81,11 @@ public class ActuarialTemplateService {
      * @param workerTypeId
      * @return
      */
-    public ServerResponse<String> insertActuarialTemplate(String userId, String name, String styleId,String styleName, String applicableArea,
-                                                          Integer stateType, String workerTypeName,Integer workerTypeId) {
+    public ServerResponse<String> insertActuarialTemplate(String userId, String name, String styleId, String styleName, String applicableArea,
+                                                          Integer stateType, String workerTypeName, Integer workerTypeId) {
 
         List<ActuarialTemplate> actuarialTemplateList = iActuarialTemplateMapper.queryByName(workerTypeId, name);
-        if(actuarialTemplateList.size() > 0)
+        if (actuarialTemplateList.size() > 0)
             return ServerResponse.createByErrorMessage("精算名字不能重复");
 
         ActuarialTemplate t = new ActuarialTemplate();
@@ -98,57 +100,67 @@ public class ActuarialTemplateService {
         t.setWorkerTypeId(workerTypeId);
         int isok = iActuarialTemplateMapper.insert(t);
         if (isok > 0) {
-            return ServerResponse.createBySuccess("新增精算模版成功",t.getId());
+            return ServerResponse.createBySuccess("新增精算模版成功", t.getId());
         }
         return ServerResponse.createByErrorMessage("新增精算模版失败");
 
     }
-    //修改精算模版
-    public ServerResponse<String> updateActuarialTemplate(String id, String name, String styleId,String styleName,String applicableArea, Integer stateType, String workingProcedure) {
-      try {
-          List<ActuarialTemplate> actuarialTemplateList = iActuarialTemplateMapper.queryByName(-1, name);
-          if(actuarialTemplateList.size() > 1)
-              return ServerResponse.createByErrorMessage("精算名字不能重复");
 
-          if (!StringUtils.isNotBlank(id)) {
-              return ServerResponse.createByErrorMessage("修改精算模版参数错误");
-          }
-          ActuarialTemplate t = new ActuarialTemplate();
-          t.setId(id);
-          t.setName(name);
-          t.setStyleId(styleId);
-          t.setStyleName(styleName);
-          t.setApplicableArea(applicableArea);
-          t.setStateType(stateType);
-          int isok = iActuarialTemplateMapper.updateByPrimaryKeySelective(t);
-          if (isok > 0) {
-              return ServerResponse.createBySuccessMessage("修改精算模版成功");
-          }
-          return ServerResponse.createByErrorMessage("修改精算模版失败");
-      }catch (Exception e){
-          e.printStackTrace();
-          return ServerResponse.createByErrorMessage("修改精算模版失败");
-      }
+    //修改精算模版
+    public ServerResponse<String> updateActuarialTemplate(String id, String name, String styleId, String styleName, String applicableArea, Integer stateType, String workingProcedure) {
+        try {
+            if (!StringUtils.isNotBlank(id)) {
+                return ServerResponse.createByErrorMessage("修改精算模版参数错误");
+            }
+            ActuarialTemplate oldActuarialTemplate = iActuarialTemplateMapper.selectByPrimaryKey(id);
+
+
+            List<ActuarialTemplate> actuarialTemplateList = iActuarialTemplateMapper.queryByName(oldActuarialTemplate.getWorkerTypeId(), name);
+            LOG.info("actuarialTemplateList:" + actuarialTemplateList.size());
+//            if (actuarialTemplateList.size() > 1)
+////                return ServerResponse.createByErrorMessage("精算名字不能重复");
+
+            if (!oldActuarialTemplate.getName().equals(name)) {
+                if (actuarialTemplateList.size() > 0)
+                    return ServerResponse.createByErrorMessage("精算名字已存在");
+            }
+
+            ActuarialTemplate t = new ActuarialTemplate();
+            t.setId(id);
+            t.setName(name);
+            t.setStyleId(styleId);
+            t.setStyleName(styleName);
+            t.setApplicableArea(applicableArea);
+            t.setStateType(stateType);
+            int isok = iActuarialTemplateMapper.updateByPrimaryKeySelective(t);
+            if (isok > 0) {
+                return ServerResponse.createBySuccessMessage("修改精算模版成功");
+            }
+            return ServerResponse.createByErrorMessage("修改精算模版失败");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("修改精算模版失败");
+        }
     }
 
     //删除精算模版
     public ServerResponse<String> deleteActuarialTemplate(String id) {
-       try {
-           if (!StringUtils.isNotBlank(id)) {
-               return ServerResponse.createByErrorMessage("删除精算模版参数错误");
-           }
-           int isok = iActuarialTemplateMapper.deleteByPrimaryKey(id);
-           if (isok > 0) {
-               iBudgetMaterialMapper.deleteBytemplateId(id);
-               iBudgetWorkerMapper.deleteBytemplateId(id);
-               return ServerResponse.createBySuccessMessage("删除精算模版成功");
-           }else{
-               return ServerResponse.createByErrorMessage("删除精算模版失败");
-           }
-       }catch (Exception e) {
-           e.printStackTrace();
-           return ServerResponse.createByErrorMessage("删除精算模版失败");
-       }
+        try {
+            if (!StringUtils.isNotBlank(id)) {
+                return ServerResponse.createByErrorMessage("删除精算模版参数错误");
+            }
+            int isok = iActuarialTemplateMapper.deleteByPrimaryKey(id);
+            if (isok > 0) {
+                iBudgetMaterialMapper.deleteBytemplateId(id);
+                iBudgetWorkerMapper.deleteBytemplateId(id);
+                return ServerResponse.createBySuccessMessage("删除精算模版成功");
+            } else {
+                return ServerResponse.createByErrorMessage("删除精算模版失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("删除精算模版失败");
+        }
     }
 
 }

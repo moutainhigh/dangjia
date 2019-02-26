@@ -6,7 +6,7 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.house.VillageClassifyDTO;
 import com.dangjia.acg.dto.house.VillageDTO;
@@ -90,11 +90,11 @@ public class ModelingVillageService {
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (int i = 0; i < allVillageList.size(); i++) {
                 ModelingVillage modelingVillage = allVillageList.get(i);
-                Map<String, Object> modelingVillageMap = CommonUtil.beanToMap(modelingVillage);
+                Map<String, Object> modelingVillageMap = BeanUtils.beanToMap(modelingVillage);
                 List<ModelingLayout> modelingLayoutList = modelingLayoutMapper.queryModelingLayoutByVillageId(modelingVillage.getId());
                 List<Map<String, Object>> modelingLayoutMapList = new ArrayList<>();
                 for (ModelingLayout modelingLayout : modelingLayoutList) {
-                    Map<String, Object> modelingLayoutMap = CommonUtil.beanToMap(modelingLayout);
+                    Map<String, Object> modelingLayoutMap = BeanUtils.beanToMap(modelingLayout);
                     modelingLayoutMap.put("imageUrl", address + modelingLayout.getImage());
                     modelingLayoutMapList.add(modelingLayoutMap);
                     modelingVillageMap.put("modelingLayoutList", modelingLayoutMapList);
@@ -218,7 +218,9 @@ public class ModelingVillageService {
 
     public ServerResponse getHouseList(HttpServletRequest request, String modelingLayoutId) {
         Example example = new Example(House.class);
-        example.createCriteria().andEqualTo("modelingLayoutId", modelingLayoutId);
+        example.createCriteria()
+                .andEqualTo(House.MODELING_LAYOUT_ID, modelingLayoutId)
+                .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = houseMapper.selectByExample(example);
         return ServerResponse.createBySuccess("查询列表成功", houseList);
     }

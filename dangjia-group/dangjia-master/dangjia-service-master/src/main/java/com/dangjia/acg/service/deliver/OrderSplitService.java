@@ -2,25 +2,30 @@ package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.DeliverHouseDTO;
 import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverDetailDTO;
+import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.service.finance.WebWalletService;
+import com.dangjia.acg.modle.sup.SupplierProduct;
+import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -28,9 +33,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.rmi.runtime.Log;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -59,6 +64,13 @@ public class OrderSplitService {
     private ConfigUtil configUtil;
     @Autowired
     private IWarehouseMapper warehouseMapper;
+    @Autowired
+    private ForMasterAPI forMasterAPI;
+    @Autowired
+    private IWorkerTypeMapper workerTypeMapper;
+    @Autowired
+    private IWorkerDetailMapper workerDetailMapper;
+
     private static Logger LOG = LoggerFactory.getLogger(OrderSplitService.class);
 
 
@@ -198,6 +210,7 @@ public class OrderSplitService {
                     splitDeliver = new SplitDeliver();
                     splitDeliver.setNumber(orderSplit.getNumber() + "00" + splitDeliverMapper.selectCountByExample(example));//发货单号
                     splitDeliver.setHouseId(house.getId());
+                    splitDeliver.setOrderSplitId(orderSplitId);
                     splitDeliver.setTotalAmount(0.0);
                     splitDeliver.setDeliveryFee(0.0);
                     splitDeliver.setApplyMoney(0.0);
@@ -211,12 +224,52 @@ public class OrderSplitService {
                     splitDeliver.setShipState(0);//待发货状态
                     splitDeliverMapper.insert(splitDeliver);
                 }
-                splitDeliver.setTotalAmount(orderSplitItem.getCost() * orderSplitItem.getNum() + splitDeliver.getTotalAmount());//累计成本总价
+
+                SupplierProduct supplierProduct = forMasterAPI.getSupplierProduct(house.getCityId(),supplierId,orderSplitItem.getProductId());
+                orderSplitItem.setSupCost(supplierProduct.getPrice());//供应价
+                orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
+
+                splitDeliver.setTotalAmount(supplierProduct.getPrice() * orderSplitItem.getNum() + splitDeliver.getTotalAmount());//累计供应商价总价
                 splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
                 orderSplitItemMapper.setSupplierId(id, splitDeliver.getId());
             }
             orderSplit.setApplyStatus(2);//发给供应商
             orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
+
+            /*
+             * 计算是否超过免费要货次数,收取工匠运费
+             */
+            Example example = new Example(OrderSplit.class);
+            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, orderSplit.getHouseId()).andEqualTo(OrderSplit.WORKER_TYPE_ID, orderSplit.getWorkerTypeId());
+            List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(orderSplit.getWorkerTypeId());
+            if (orderSplitList.size() > workerType.getSafeState()){//超过免费次数收工匠运费
+                //TODO 计算运费 暂无准确计算公式
+                Double yunFei = 0.0;
+                example = new Example(OrderSplitItem.class);
+                example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
+                List<OrderSplitItem> osiList = orderSplitItemMapper.selectByExample(example);
+                for(OrderSplitItem osi : osiList){
+                    //Product product = forMasterAPI.getProduct(osi.getProductId());
+                    yunFei += osi.getTotalPrice() * 0.1;
+                }
+
+                Member worker = memberMapper.selectByPrimaryKey(orderSplit.getSupervisorId());//要货人
+                WorkerDetail workerDetail = new WorkerDetail();
+                workerDetail.setName("要货运费");
+                workerDetail.setWorkerId(worker.getId());
+                workerDetail.setWorkerName(worker.getName());
+                workerDetail.setHouseId(orderSplit.getHouseId());
+                workerDetail.setMoney(new BigDecimal(yunFei));
+                workerDetail.setState(7);//收取运费
+                workerDetail.setWalletMoney(worker.getHaveMoney());
+                workerDetail.setApplyMoney(new BigDecimal(yunFei));
+                workerDetailMapper.insert(workerDetail);
+
+                worker.setHaveMoney(worker.getHaveMoney().subtract(new BigDecimal(yunFei)));
+                worker.setSurplusMoney(worker.getSurplusMoney().subtract(new BigDecimal(yunFei)));
+                memberMapper.updateByPrimaryKeySelective(worker);
+            }
 
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {

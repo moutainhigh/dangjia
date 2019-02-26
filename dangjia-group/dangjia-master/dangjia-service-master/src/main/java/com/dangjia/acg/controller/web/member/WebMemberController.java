@@ -7,7 +7,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.member.MemberLabel;
 import com.dangjia.acg.service.member.CustomerRecordService;
 import com.dangjia.acg.service.member.CustomerService;
 import com.dangjia.acg.service.member.MemberLabelService;
@@ -36,8 +35,8 @@ public class WebMemberController implements WebMemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getMemberList(HttpServletRequest request, PageDTO pageDTO, Integer stage, String memberNickName, String parentId, String childId) {
-        return memberService.getMemberList(pageDTO, stage, memberNickName, parentId, childId);
+    public ServerResponse getMemberList(HttpServletRequest request, PageDTO pageDTO, Integer stage, String searchKey, String parentId, String childId,String orderBy) {
+        return memberService.getMemberList(pageDTO, stage, searchKey, parentId, childId, orderBy);
     }
 
     @Override
@@ -74,5 +73,23 @@ public class WebMemberController implements WebMemberAPI {
     @ApiMethod
     public ServerResponse setMemberCustomer(HttpServletRequest request, Customer customer) {
         return customerService.setMemberCustomer(customer);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse certificationList(HttpServletRequest request, PageDTO pageDTO, String searchKey, Integer realNameState) {
+        return memberService.certificationList(pageDTO, searchKey, realNameState);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse certificationDetails(HttpServletRequest request, String userId) {
+        return memberService.certificationDetails(userId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse certificationAuditing(HttpServletRequest request, String userId, Integer realNameState, String realNameDescribe) {
+        return memberService.certificationAuditing(userId, realNameState, realNameDescribe);
     }
 }

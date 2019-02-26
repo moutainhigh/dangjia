@@ -7,6 +7,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         id,
         name,
         url,
+        test,
         url_name,
         worker_type_id,
         order_number,
@@ -19,6 +20,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <sql id="new_columns">
         id,
         name,
+        test,
         url,
         url_name as urlName,
         worker_type_id as workerTypeId,
@@ -34,7 +36,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from dj_matter_renovation_manual
         where state=0
         and worker_type_id = #{workerTypeId}
-        order by order_number asc
+        order by order_number asc,create_date DESC
     </select>
 
 </mapper>

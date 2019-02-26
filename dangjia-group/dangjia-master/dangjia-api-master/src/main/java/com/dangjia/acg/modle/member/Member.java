@@ -145,8 +145,8 @@ public class Member extends BaseEntity {
 
     @Column(name = "check_type")//type
     @Desc(value = "审核状态")
-    @ApiModelProperty("审核状态")
-    private Integer checkType;//审核状态:  0审核中，1审核未通过不能抢单不能发申请,  2审核已通过 可抢单可发申请, 3账户已禁用 不能抢单不能发申请,  4账户冻结可发申请 不能抢单,5未提交资料
+    @ApiModelProperty("审核状态:  0审核中，1审核未通过不能抢单不能发申请,  2审核已通过 可抢单可发申请, 3账户已禁用 不能抢单不能发申请,  4账户冻结可发申请 不能抢单,5未提交资料")
+    private Integer checkType;
 
     @Column(name = "praise_rate")//favorable
     @Desc(value = "好评率")
@@ -189,6 +189,21 @@ public class Member extends BaseEntity {
     @ApiModelProperty("备注")
     private String remarks;
 
+    @Column(name = "real_name_state")
+    @Desc(value = "实名认证状态")
+    @ApiModelProperty("实名认证状态:0:未提交，1:认证中，2:认证被驳回，3:认证通过")
+    private Integer realNameState;
+
+    @Column(name = "real_name_describe")
+    @Desc(value = "实名认证描述")
+    @ApiModelProperty("实名认证描述")
+    private String realNameDescribe;
+
+    @Column(name = "check_describe")
+    @Desc(value = "工匠审核描述")
+    @ApiModelProperty("工匠审核描述")
+    private String checkDescribe;
+
     /*@Column(name = "user_role")
     @Desc(value = "用户角色")
     @ApiModelProperty("用户角色 1为业主角色，2为工匠角色，0为业主和工匠双重身份角色")
@@ -222,11 +237,13 @@ public class Member extends BaseEntity {
 
 
     //所有图片字段加入域名和端口，形成全路径
-    public void initPath(String address){
-        this.qrcode= StringUtils.isEmpty(this.qrcode)?null:address+this.qrcode;//二维码
-        this.head=StringUtils.isEmpty(this.head)?null:address+this.head; //头像
-        this.idcaoda=StringUtils.isEmpty(this.idcaoda)?null:address+this.idcaoda;//身份证正面
-        this.idcaodb=StringUtils.isEmpty(this.idcaodb)?null:address+this.idcaodb;//身份证反面
-        this.idcaodall=StringUtils.isEmpty(this.idcaodall)?null:address+this.idcaodall;//半身照
-    };
+    public void initPath(String address) {
+        this.qrcode = StringUtils.isEmpty(this.qrcode) ? null : address + this.qrcode;//二维码
+        this.head = StringUtils.isEmpty(this.head) ? null : address + this.head; //头像
+        this.idcaoda = StringUtils.isEmpty(this.idcaoda) ? null : address + this.idcaoda;//身份证正面
+        this.idcaodb = StringUtils.isEmpty(this.idcaodb) ? null : address + this.idcaodb;//身份证反面
+        this.idcaodall = StringUtils.isEmpty(this.idcaodall) ? null : address + this.idcaodall;//半身照
+    }
+
+    ;
 }

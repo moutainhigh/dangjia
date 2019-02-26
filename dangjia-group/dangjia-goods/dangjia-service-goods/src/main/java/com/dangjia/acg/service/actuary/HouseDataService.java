@@ -74,6 +74,7 @@ public class HouseDataService {
                         flowActuaryDTO.setBuy(budgetMaterial.getProductType());//0:材料；1：服务
                         flowActuaryDTO.setName(budgetMaterial.getGoodsName());
                         flowActuaryDTO.setShopCount(budgetMaterial.getShopCount());
+                        flowActuaryDTO.setConvertCount(budgetMaterial.getConvertCount());
                         flowActuaryDTO.setUnitName(budgetMaterial.getUnitName());//单位
                         flowActuaryDTOList.add(flowActuaryDTO);
                     }
@@ -95,7 +96,7 @@ public class HouseDataService {
      * @param houseId
      * @return
      */
-    public ServerResponse exportActuaryTotal(HttpServletResponse response,String houseId) {
+    public ServerResponse exportActuaryTotal(HttpServletResponse response, String houseId) {
         try {
 //            LOG.info("exportActuaryTotal :" + houseId);
             List<TActuaryGoods> tActuaryGoodsList = new ArrayList<>();//商品基础数据结果集
@@ -139,7 +140,7 @@ public class HouseDataService {
                 List<Map<String, Object>> materialMapList = iBudgetMaterialMapper.getBudgetMaterialById(houseId, workerTypeId);
                 for (Map<String, Object> materialMap : materialMapList) {
                     Goods goods = iGoodsMapper.selectByPrimaryKey(materialMap.get("goodsId").toString());
-                    if(goods==null)continue;
+                    if (goods == null) continue;
                     TActuaryGoods tActuaryGoods = new TActuaryGoods();
                     String name = WorkTypeEnums.getInstance(Integer.parseInt(materialMap.get("workerTypeId").toString())).getDesc();
                     tActuaryGoods.setName(name);
@@ -198,7 +199,7 @@ public class HouseDataService {
             ExportExcel exportExcel = new ExportExcel();//创建表格实例
             exportExcel.setDataList("精算价格单", TActuaryGoods.class, tActuaryGoodsList);
             exportExcel.setDataList("精算价格汇总", TActuaryGoodsTotal.class, tActuaryGoodsTotalList);
-            exportExcel.write(response,houseId + ".xlsx");
+            exportExcel.write(response, houseId + ".xlsx");
 //            File file= ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX+"excel/template.xlsx");
 //            exportExcel.writeFileDownload(response, file.getPath(),houseId + ".xlsx");//创建文件并输出
             return ServerResponse.createBySuccess("导出Excel成功");

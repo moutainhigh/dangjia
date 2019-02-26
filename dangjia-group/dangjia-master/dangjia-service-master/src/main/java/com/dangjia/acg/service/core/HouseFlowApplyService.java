@@ -285,35 +285,36 @@ public class HouseFlowApplyService {
     private void updateDayIntegral(HouseFlowApply houseFlowApply){
         try{
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
-            BigDecimal evaluationx=new BigDecimal("0.05");
-            BigDecimal evaluationa=new BigDecimal("0.05");
+            BigDecimal score = new BigDecimal("0.05");
             if(worker.getEvaluationScore().compareTo(new BigDecimal("70"))==-1){
-                evaluationa=evaluationx.multiply(new BigDecimal("1.6"));
+
+                score = score.multiply(new BigDecimal("1.6"));
             }else if((worker.getEvaluationScore().compareTo(new BigDecimal("70"))==1||
                     worker.getEvaluationScore().compareTo(new BigDecimal("70"))==0)&&
                     worker.getEvaluationScore().compareTo(new BigDecimal("80"))==-1){
-                evaluationa=evaluationx.multiply(new BigDecimal("0.8"));
-            }else if((worker.getEvaluationScore().compareTo(new BigDecimal("80"))==1||
-                    worker.getEvaluationScore().compareTo(new BigDecimal("80"))==0)&&
+
+                score = score.multiply(new BigDecimal("0.8"));
+            }else if( worker.getEvaluationScore().compareTo(new BigDecimal("80")) >= 0 &&
                     worker.getEvaluationScore().compareTo(new BigDecimal("90"))==-1){
-                evaluationa=evaluationx.multiply(new BigDecimal("0.4"));
-            }else if(worker.getEvaluationScore().compareTo(new BigDecimal("90"))==1||
-                    worker.getEvaluationScore().compareTo(new BigDecimal("90"))==0){
-                evaluationa=evaluationx.multiply(new BigDecimal("0.2"));
+
+                score = score.multiply(new BigDecimal("0.4"));
+            }else if( worker.getEvaluationScore().compareTo(new BigDecimal("90")) >= 0){
+
+                score = score.multiply(new BigDecimal("0.2"));
             }
-            BigDecimal evaluationc = new  BigDecimal("60.0");
+
             if(worker.getEvaluationScore()==null){
-                worker.setEvaluationScore(evaluationc);
+                worker.setEvaluationScore(new BigDecimal("60.0"));
             }
-            worker.setEvaluationScore(worker.getEvaluationScore().add(evaluationa));
+            worker.setEvaluationScore(worker.getEvaluationScore().add(score));
             memberMapper.updateByPrimaryKeySelective(worker);
 
-            if(evaluationa.compareTo(new BigDecimal("0"))==1){
+            if(score.compareTo(new BigDecimal("0")) == 1){
                 WorkIntegral workIntegral=new WorkIntegral();
                 workIntegral.setWorkerId(worker.getId());
                 workIntegral.setHouseId(houseFlowApply.getHouseId());
                 workIntegral.setStatus(0);
-                workIntegral.setIntegral(evaluationa);
+                workIntegral.setIntegral(score);
                 workIntegral.setBriefed("每日完工");
                 workIntegralMapper.insert(workIntegral);
             }

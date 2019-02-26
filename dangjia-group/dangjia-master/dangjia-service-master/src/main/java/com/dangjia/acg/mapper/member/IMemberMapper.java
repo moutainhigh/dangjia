@@ -26,14 +26,14 @@ public interface IMemberMapper extends Mapper<Member> {
 
     /**
      * 按照条件查询
-     * @param memberNickName
+     * @param searchKey
      * @param stage
      * @param childsLabelIdArr
      * @return
      */
-    List<Member> getMemberListByName(@Param("memberNickName") String memberNickName,
+    List<Member> getMemberListByName(@Param("searchKey") String searchKey,
                                       @Param("stage") Integer stage,
-                                      @Param("childsLabelIdArr")String[] childsLabelIdArr);
+                                      @Param("childsLabelIdArr")String[] childsLabelIdArr,@Param("orderBy") String orderBy);
 
     List<Map<String,Object>> getMemberList();
 //    //查询所有业主关联客服的所有数据

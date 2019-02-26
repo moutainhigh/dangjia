@@ -17,4 +17,6 @@ public class SplitDeliverItemDTO {
     private String unitName;//单位
     private String brandSeriesName;//品牌系列
     private Double price;//销售价
+    private String id;
+    private Double receive;//收货数量
 }

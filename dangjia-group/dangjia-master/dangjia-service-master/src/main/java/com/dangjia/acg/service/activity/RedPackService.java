@@ -20,7 +20,6 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
@@ -202,9 +201,9 @@ public class RedPackService {
         if(activityRedPackDTO.getFromObjectType()==2){
             ServerResponse serverResponse=productAPI.getProductById(request,activityRedPackDTO.getFromObject());
             if(serverResponse!=null&&serverResponse.getResultObj()!=null){
-                if(serverResponse.getResultObj() instanceof Product){
-                    Product product= (Product)serverResponse.getResultObj();
-                    activityRedPackDTO.setFromObjectName(product.getName());
+                if(serverResponse.getResultObj() instanceof JSONObject){
+                    JSONObject goods= (JSONObject)serverResponse.getResultObj();
+                    activityRedPackDTO.setFromObjectName(goods.getString("name"));
                 }
             }
         }

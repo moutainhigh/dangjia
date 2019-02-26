@@ -41,8 +41,9 @@ public interface ActuaryOperationAPI {
      */
     @PostMapping("/actuary/actuaryOperation/selectProduct")
     @ApiOperation(value = "选择货", notes = "选择货")
-    ServerResponse selectProduct(@RequestParam("request") HttpServletRequest request, @RequestParam("goodsId") String goodsId, @RequestParam("brandSeriesId") String brandSeriesId
-            , @RequestParam("attributeIdArr") String attributeIdArr, @RequestParam("budgetMaterialId") String budgetMaterialId);
+    ServerResponse selectProduct(@RequestParam("request") HttpServletRequest request, @RequestParam("goodsId") String goodsId,
+                                 @RequestParam("brandId") String brandId, @RequestParam("brandSeriesId") String brandSeriesId,
+                                 @RequestParam("attributeIdArr") String attributeIdArr, @RequestParam("budgetMaterialId") String budgetMaterialId);
 
     /**
      * 精算商品详情

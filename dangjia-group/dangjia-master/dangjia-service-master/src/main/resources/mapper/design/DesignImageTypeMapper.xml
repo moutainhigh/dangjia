@@ -31,7 +31,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		    dit.id in
         <foreach collection="typeList" item="id" index="index" open="(" close=")" separator=",">
             #{id}
-        </foreach>;
+        </foreach>
+		order by create_date desc
 	</select>
 
 </mapper>

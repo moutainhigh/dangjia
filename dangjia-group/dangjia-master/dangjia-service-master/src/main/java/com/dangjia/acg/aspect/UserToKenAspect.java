@@ -46,7 +46,7 @@ public class UserToKenAspect {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(),"无效的token,请重新登录或注册！");
             }
         }
-        Object result = null;
+        Object result;
         try {
             result = joinPoint.proceed();
         } catch (Throwable e) {

@@ -15,6 +15,8 @@ import java.util.Date;
 public class WebOrderDTO {
     private String orderId;//订单号
     private String houseName;//房屋信息
+    private String memberId;//用户id
+    private String mobile;//电话
     private String redPackName;//优惠券名字
     private String payOrderNumber;//支付单号(业务订单号)
     private BigDecimal totalAmount;//订单总价

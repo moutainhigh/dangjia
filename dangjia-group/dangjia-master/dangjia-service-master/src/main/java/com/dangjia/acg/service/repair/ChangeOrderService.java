@@ -55,8 +55,8 @@ public class ChangeOrderService {
             House house = houseMapper.selectByPrimaryKey(changeOrder.getHouseId());
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(changeOrder.getWorkerTypeId());
             if (changeOrder.getType() == 1){//补
-                configMessageService.addConfigMessage(null,"gj",house.getMemberId(),"0","工匠补人工申请",String.format
-                        (DjConstants.PushMessage.STEWARD_B_CHECK_WORK,house.getHouseName(),workerType.getName()) ,"");
+                /*configMessageService.addConfigMessage(null,"gj",house.getMemberId(),"0","工匠补人工申请",String.format
+                        (DjConstants.PushMessage.STEWARD_B_CHECK_WORK,house.getHouseName(),workerType.getName()) ,"");*/
             }else {//退
                 configMessageService.addConfigMessage(null,"gj",house.getMemberId(),"0","业主退人工变更",String.format
                         (DjConstants.PushMessage.STEWARD_T_CHECK_WORK,house.getHouseName()) ,"");

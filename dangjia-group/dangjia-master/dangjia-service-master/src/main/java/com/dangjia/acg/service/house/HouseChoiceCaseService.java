@@ -99,6 +99,14 @@ public class HouseChoiceCaseService {
      * @return
      */
     public ServerResponse editHouseChoiceCase(HttpServletRequest request, HouseChoiceCase houseChoiceCase) {
+        if(!CommonUtil.isEmpty(houseChoiceCase.getTitle())) {
+            Example example = new Example(HouseChoiceCase.class);
+            example.createCriteria().andEqualTo(HouseChoiceCase.TITLE, houseChoiceCase.getTitle()).andNotEqualTo(HouseChoiceCase.ID, houseChoiceCase.getId());
+            List list = houseChoiceCaseMapper.selectByExample(example);
+            if(list.size()>0){
+                return ServerResponse.createByErrorMessage("修改失败，案例名称不能重复！");
+            }
+        }
         //查看该权限是否有子节点，如果有，先删除子节点
         if(this.houseChoiceCaseMapper.updateByPrimaryKeySelective(houseChoiceCase)>0){
             return ServerResponse.createBySuccessMessage("ok");
@@ -112,6 +120,14 @@ public class HouseChoiceCaseService {
      * @return
      */
     public ServerResponse addHouseChoiceCase(HttpServletRequest request,HouseChoiceCase houseChoiceCase) {
+        if(!CommonUtil.isEmpty(houseChoiceCase.getTitle())) {
+            Example example = new Example(HouseChoiceCase.class);
+            example.createCriteria().andEqualTo(HouseChoiceCase.TITLE, houseChoiceCase.getTitle());
+            List list = houseChoiceCaseMapper.selectByExample(example);
+            if(list.size()>0){
+                return ServerResponse.createByErrorMessage("新增失败，案例名称不能重复！");
+            }
+        }
         //查看该权限是否有子节点，如果有，先删除子节点
         if(this.houseChoiceCaseMapper.insertSelective(houseChoiceCase)>0){
             return ServerResponse.createBySuccessMessage("ok");

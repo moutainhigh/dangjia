@@ -9,6 +9,7 @@ import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.sup.Supplier;
+import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.service.data.ForMasterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +27,14 @@ public class ForMasterController implements ForMasterAPI {
     @Autowired
     private ForMasterService forMasterService;
 
+    @Override
+    @ApiMethod
+    public SupplierProduct getSupplierProduct(String cityId,String supplierId, String productId){
+        return forMasterService.getSupplierProduct(supplierId,productId);
+    }
+
+    @Override
+    @ApiMethod
     public Supplier getSupplier(String supplierId){
         return forMasterService.getSupplier(supplierId);
     }
@@ -33,6 +42,8 @@ public class ForMasterController implements ForMasterAPI {
     /**
      * 增加退数量
      */
+    @Override
+    @ApiMethod
     public void backCount (String houseId,String workerGoodsId,Double num){
         forMasterService.backCount(houseId,workerGoodsId,num);
     }
@@ -40,6 +51,8 @@ public class ForMasterController implements ForMasterAPI {
     /**
      * 增加补数量
      */
+    @Override
+    @ApiMethod
     public void repairCount(String houseId,String workerGoodsId,Double num){
         forMasterService.repairCount(houseId,workerGoodsId,num);
     }
@@ -98,7 +111,16 @@ public class ForMasterController implements ForMasterAPI {
     public Double getBudgetSerPrice(String houseId,String workerTypeId,String cityId){
         return forMasterService.getBudgetSerPrice(houseId,workerTypeId);
     }
+    @Override
+    @ApiMethod
+    public Double getNotSerPrice(String houseId,String workerTypeId,String cityId){
+        return forMasterService.getNotSerPrice(houseId,workerTypeId);
+    }
 
-
+    @Override
+    @ApiMethod
+    public Double getNotCaiPrice(String houseId, String workerTypeId,String cityId){
+        return forMasterService.getNotCaiPrice(houseId,workerTypeId);
+    }
 
 }

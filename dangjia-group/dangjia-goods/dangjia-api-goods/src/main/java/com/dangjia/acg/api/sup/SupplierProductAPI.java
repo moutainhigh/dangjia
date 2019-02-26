@@ -2,6 +2,7 @@ package com.dangjia.acg.api.sup;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.sup.Supplier;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -10,8 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 
@@ -24,6 +23,10 @@ import java.util.Map;
 @FeignClient("dangjia-service-goods")
 public interface SupplierProductAPI {
 
+
+    @PostMapping("/sup/supplierProduct/info")
+    @ApiOperation(value = "供应商明细", notes = "供应商明细")
+    Supplier getSupplier(@RequestParam("productId") String productId);
 
     @PostMapping("/sup/supplierProduct/byTelephone")
     @ApiOperation(value = "供应商登录", notes = "供应商登录")

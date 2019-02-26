@@ -61,6 +61,7 @@ public class WarehouseService {
                 warehouseDTO.setShopCount(warehouse.getShopCount());
                 warehouseDTO.setAskCount(warehouse.getAskCount());
                 warehouseDTO.setBackCount(warehouse.getBackCount());
+                warehouseDTO.setReceive(warehouse.getReceive());//收货数
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                 warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getAskCount() - warehouse.getBackCount());
                 warehouseDTO.setProductName(warehouse.getProductName());

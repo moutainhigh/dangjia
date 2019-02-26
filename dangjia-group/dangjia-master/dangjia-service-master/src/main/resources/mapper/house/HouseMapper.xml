@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.house.IHouseMapper">
     <sql id="basic_columns">
         id,
@@ -39,7 +39,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         create_date as createDate,
         modify_date as modifyDate
     </sql>
-    <select id="getDesignList" resultType="com.dangjia.acg.dto.house.DesignDTO" >
+    <select id="getDesignList" resultType="com.dangjia.acg.dto.house.DesignDTO">
         SELECT
         house.id as houseId,
         house.designer_ok as designerOk,
@@ -52,7 +52,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         member.mobile as mobile
         FROM dj_house house ,dj_member member
         <where>
-            house.designer_ok=#{designerOk}
+            house.data_status=0
+            AND house.designer_ok=#{designerOk}
             AND house.visit_state=1
             AND member.id = house.member_id
             <if test="residential!=null and residential!=''">
@@ -68,7 +69,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ORDER BY house.create_date DESC
     </select>
 
-    <select id="startWorkPage" resultType="com.dangjia.acg.dto.house.HouseDTO" >
+    <select id="startWorkPage" resultType="com.dangjia.acg.dto.house.HouseDTO">
         SELECT
             id as houseId,
             city_id as cityId,
@@ -87,19 +88,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             decoration_type as decorationType
         FROM dj_house
         WHERE
-            id=#{houseId}
+            data_status=0
+            AND id=#{houseId}
     </select>
 
     <!--查询所有的房子 指定房子 装修状态-->
-    <select id="getAllHouseByVisitState" resultType="com.dangjia.acg.modle.house.House" >
+    <select id="getAllHouseByVisitState" resultType="com.dangjia.acg.modle.house.House">
         SELECT
-        <include refid="basic_columns" />
+        <include refid="basic_columns"/>
         FROM dj_house
         WHERE
-         visit_state=#{visitState}
+        data_status=0
+        AND visit_state=#{visitState}
     </select>
 
-    <select id="getStatisticsByDate" resultType="com.dangjia.acg.modle.house.House" >
+    <select id="getStatisticsByDate" resultType="com.dangjia.acg.modle.house.House">
         SELECT
             id,
             budget_ok as budgetOk
@@ -107,25 +110,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE
         designer_ok = 3
         AND
-        modify_date BETWEEN #{start} AND #{end}
+        data_status=0
+        AND  modify_date BETWEEN #{start} AND #{end}
         ORDER BY create_date ASC
-    </select>
-
-    <select id="getList" resultType="com.dangjia.acg.modle.house.House" >
-        SELECT
-            <include refid="basic_columns" />
-        FROM dj_house
-        WHERE
-            member_id=#{memberId}
-        ORDER by
-            create_date
     </select>
     <!--根据城市、小区，最大最小面积搜索-->
     <select id="getSameLayout" resultType="com.dangjia.acg.modle.house.House">
         SELECT
-        <include refid="basic_columns" />
+        <include refid="basic_columns"/>
         from dj_house
-        where 1=1
+        where
+        data_status=0
         <if test="cityId!=null and cityId!=''">
             and city_id = #{cityId}
         </if>
@@ -138,6 +133,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="maxSquare!=null and maxSquare!=''">
             and build_square &lt;= #{maxSquare}
         </if>
+        <if test="houseType!=null and houseType!=''">
+            and house_type = #{houseType}
+        </if>
         and ((decoration_type in (1,2) and budget_ok=3) or (decoration_type=3 and visit_state=1))
         and show_house!=1
         order by create_date desc
@@ -146,13 +144,51 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!--参考报价-->
     <select id="getReferenceBudget" resultType="com.dangjia.acg.modle.house.House">
         SELECT
-            <include refid="basic_columns" />
+        <include refid="basic_columns"/>
         from dj_house
-        where village_id = #{villageId}
+        where
+        data_status=0
+        AND village_id = #{villageId}
         and build_square &gt;= #{minSquare}
         and build_square &lt;= #{maxSquare}
         and house_type = #{houseType}
         and budget_ok = 3
+    </select>
+
+    <select id="getHouseList" resultType="com.dangjia.acg.dto.house.HouseListDTO">
+        SELECT
+        h.id as houseId,
+        h.city_name as cityName,
+        m.id as memberId,
+        m.nick_name as memberName,
+        m.mobile as mobile,
+        h.visit_state as visitState,
+        h.show_house as showHouse,
+        h.style as style,
+        h.square as square,
+        h.square as buildSquare,
+        h.decoration_type as decorationType,
+        h.house_type as houseType,
+        h.residential as residential,
+        h.building as building,
+        h.unit as unit,
+        h.number as number
+        FROM
+        dj_house h
+        INNER JOIN dj_member m ON h.member_id = m.id
+        WHERE
+        h.data_status =0
+        <if test="memberId!=null and memberId!=''">
+            and m.id = #{memberId}
+        </if>
+        <if test="searchKey!=null and searchKey!=''">
+            and ( m.mobile like CONCAT('%',#{searchKey},'%')
+            or h.residential like CONCAT('%',#{searchKey},'%')
+            or h.unit like CONCAT('%',#{searchKey},'%')
+            or h.number like CONCAT('%',#{searchKey},'%'))
+        </if>
+        ORDER by
+        h.create_date
     </select>
 </mapper>
 

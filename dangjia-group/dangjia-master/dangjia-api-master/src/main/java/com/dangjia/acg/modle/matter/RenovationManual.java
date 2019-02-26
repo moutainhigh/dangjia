@@ -34,6 +34,11 @@ public class RenovationManual extends BaseEntity {
 	@ApiModelProperty("链接名称")
 	private String urlName;//
 
+	@Column(name = "test")
+	@Desc(value = "指南内容")
+	@ApiModelProperty("指南内容")
+	private String test;//
+
 	@Column(name = "url")
 	@Desc(value = "链接地址")
 	@ApiModelProperty("链接地址")

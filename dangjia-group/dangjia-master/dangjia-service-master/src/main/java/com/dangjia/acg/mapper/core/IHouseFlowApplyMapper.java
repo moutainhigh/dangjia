@@ -34,7 +34,7 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
     List<HouseFlowApply> getTodayStartByHouseId(@Param("houseId") String houseId);
     HouseFlowApply getSupervisorCheck(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
     /**根据houseId查询所有施工记录*/
-    List<HouseFlowApply> queryAllHfaByHouseId(@Param("houseId") String houseId);
+    List<HouseFlowApply> queryAllHfaByHouseId(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId);
     /**查询工序记录*/
     List<HouseFlowApply> queryFlowRecord(@Param("houseFlowId")String houseFlowId);
 }

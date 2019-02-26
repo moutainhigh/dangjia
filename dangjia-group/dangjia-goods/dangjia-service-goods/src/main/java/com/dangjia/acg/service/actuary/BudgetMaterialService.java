@@ -2,19 +2,17 @@ package com.dangjia.acg.service.actuary;
 
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
-import com.dangjia.acg.mapper.basics.IGoodsMapper;
-import com.dangjia.acg.mapper.basics.ILabelMapper;
-import com.dangjia.acg.mapper.basics.IProductMapper;
-import com.dangjia.acg.mapper.basics.ITechnologyMapper;
+import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
+import com.dangjia.acg.modle.brand.Unit;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,13 +34,14 @@ public class BudgetMaterialService {
     private IBudgetMaterialMapper iBudgetMaterialMapper;
     @Autowired
     private IBudgetWorkerMapper iBudgetWorkerMapper;
-
+    @Autowired
+    private IUnitMapper iUnitMapper;
     @Autowired
     private IGoodsMapper iGoodsMapper;
     @Autowired
     private ILabelMapper iLabelMapper;
     @Autowired
-    private IProductMapper iProductMapper;
+    private IProductMapper iProductMaper;
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
     @Autowired
@@ -79,6 +78,21 @@ public class BudgetMaterialService {
         try {
             List<Map<String, Object>> mapList = iBudgetMaterialMapper.getBudgetMaterialById(houseId, workerTypeId);
             LOG.info("getAllBudgetMaterialById houseId:" + houseId + " workerTypeId:" + workerTypeId + " size:" + mapList.size());
+            for (Map<String, Object> obj : mapList) {
+                String goodsId = obj.get("goodsId").toString();
+                Goods goods = iGoodsMapper.queryById(goodsId);
+                obj.put("goodsBuy", goods.getBuy());
+                if (goods.getBuy() == 0 || goods.getBuy() == 1) {//我们购  //0：必买；1可选；2自购
+                    String productId = obj.get("productId").toString();
+                    Product pro = iProductMaper.selectByPrimaryKey(productId);
+                    Unit unit = iUnitMapper.selectByPrimaryKey(pro.getConvertUnit());
+                    obj.put("convertUnitName", unit.getName());
+                } else {//自购
+                    Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
+                    if (unit != null)
+                        obj.put("goodsUnitName", unit.getName());
+                }
+            }
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             e.printStackTrace();
@@ -123,7 +137,7 @@ public class BudgetMaterialService {
     public ServerResponse getAllProductByGoodsId(String goodsId) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<Product> pList = iProductMapper.queryByGoodsId(goodsId);
+            List<Product> pList = iProductMaper.queryByGoodsId(goodsId);
 
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (Product p : pList) {
@@ -150,7 +164,7 @@ public class BudgetMaterialService {
                         }
                     }
                     t.setImage(imgUrlStr);
-                    Map<String, Object> map = CommonUtil.beanToMap(t);
+                    Map<String, Object> map = BeanUtils.beanToMap(t);
                     map.put("imageUrl", imgStr);
                     map.put("sampleImageUrl", address + t.getSampleImage());
                     tTechnologymMapList.add(map);
@@ -169,7 +183,7 @@ public class BudgetMaterialService {
                     }
                 }
                 p.setImage(imgStr);
-                Map<String, Object> map = CommonUtil.beanToMap(p);
+                Map<String, Object> map = BeanUtils.beanToMap(p);
                 map.put("imageUrl", imgUrlStr);
                 if (!StringUtils.isNotBlank(p.getLabelId())) {
                     map.put("labelId", "");

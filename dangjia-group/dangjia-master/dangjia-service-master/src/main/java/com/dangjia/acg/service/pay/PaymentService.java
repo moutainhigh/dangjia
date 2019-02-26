@@ -321,6 +321,7 @@ public class PaymentService {
                         warehouse.setRobCount(0.0);
                         warehouse.setAskCount(0.0);//已要数量
                         warehouse.setBackCount(0.0);//退总数
+                        warehouse.setReceive(0.0);
                         warehouse.setProductId(mendMateriel.getProductId());
                         warehouse.setProductSn(mendMateriel.getProductSn());
                         warehouse.setProductName(mendMateriel.getProductName());
@@ -661,6 +662,7 @@ public class PaymentService {
                     warehouse.setRepairCount(0.0);
                     warehouse.setAskCount(0.0);//已要数量
                     warehouse.setBackCount(0.0);//退总数
+                    warehouse.setReceive(0.0);
                     warehouse.setProductId(budgetMaterial.getProductId());
                     warehouse.setProductSn(budgetMaterial.getProductSn());
                     warehouse.setProductName(budgetMaterial.getProductName());
@@ -1133,7 +1135,7 @@ public class PaymentService {
                         for (BudgetWorker budgetWorker:budgetWorkerList) {
                             //判断工种的优惠券是否匹配
                             if (budgetWorker.getWorkerTypeId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 0) {
-                                workerTotal=workerTotal.add(new BigDecimal(budgetWorker.getPrice()*budgetWorker.getShopCount()));
+                                workerTotal=workerTotal.add(new BigDecimal(budgetWorker.getTotalPrice()));
                             }
                         }
                     }
@@ -1141,11 +1143,11 @@ public class PaymentService {
                         for (BudgetMaterial budgetMaterial:budgetMaterialList) {
                             //判断材料优惠券是否匹配
                             if (budgetMaterial.getGoodsId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 1) {
-                                goodsTotal=goodsTotal.add(new BigDecimal(budgetMaterial.getPrice()*budgetMaterial.getShopCount()));
+                                goodsTotal=goodsTotal.add(new BigDecimal(budgetMaterial.getTotalPrice()));
                             }
                             //判断货品的优惠券是否匹配
                             if (budgetMaterial.getProductId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 2) {
-                                productTotal=productTotal.add(new BigDecimal(budgetMaterial.getPrice()*budgetMaterial.getShopCount()));
+                                productTotal=productTotal.add(new BigDecimal(budgetMaterial.getTotalPrice()));
                             }
                         }
                     }
@@ -1267,6 +1269,9 @@ public class PaymentService {
                     Double workerPrice = forMasterAPI.getBudgetWorkerPrice(houseId,houseFlow.getWorkerTypeId(),house.getCityId());//精算工钱
                     Double caiPrice = forMasterAPI.getBudgetCaiPrice(houseId,houseFlow.getWorkerTypeId(),house.getCityId());//精算材料钱
                     Double serPrice = forMasterAPI.getBudgetSerPrice(houseId,houseFlow.getWorkerTypeId(),house.getCityId());//精算服务钱
+
+                    Double notCaiPrice = forMasterAPI.getNotCaiPrice(houseId,houseFlow.getWorkerTypeId(),house.getCityId());//未选择材料钱
+                    Double notSerPrice = forMasterAPI.getNotSerPrice(houseId,houseFlow.getWorkerTypeId(),house.getCityId());//未选择服务钱
                     if (workerPrice == null){
                         workerPrice = 0.0;
                     }
@@ -1275,6 +1280,12 @@ public class PaymentService {
                     }
                     if (serPrice == null){
                         serPrice = 0.0;
+                    }
+                    if (notCaiPrice == null){
+                        notCaiPrice = 0.0;
+                    }
+                    if (notSerPrice == null){
+                        notSerPrice = 0.0;
                     }
                     totalPrice = totalPrice.add(new BigDecimal(workerPrice));
                     totalPrice = totalPrice.add(new BigDecimal(caiPrice));
@@ -1305,12 +1316,39 @@ public class PaymentService {
                         actuaryDTO.setType(2);
                         actuaryDTOList.add(actuaryDTO);
                     }
+                    if (notCaiPrice > 0){
+                        ActuaryDTO actuaryDTO = new ActuaryDTO();
+                        actuaryDTO.setImage(imageAddress+"icon/Acailiao.png");
+                        actuaryDTO.setKind("材料");
+                        actuaryDTO.setName(workerType.getName() + "未选择的材料");
+                        actuaryDTO.setPrice("¥" + notCaiPrice);
+                        actuaryDTO.setButton("材料明细");
+                        String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL,userToken,house.getCityId(),"待付款明细")
+                                +"&houseId="+houseId+"&workerTypeId="+houseFlow.getWorkerTypeId()+"&type="+2;
+                        actuaryDTO.setUrl(url);
+                        actuaryDTO.setType(2);
+                        actuaryDTOList.add(actuaryDTO);
+                    }
+
                     if(serPrice > 0){
                         ActuaryDTO actuaryDTO = new ActuaryDTO();
                         actuaryDTO.setImage(imageAddress+"icon/Afuwu.png");
                         actuaryDTO.setKind("服务");
                         actuaryDTO.setName(workerType.getName() + "阶段服务花费");
                         actuaryDTO.setPrice("¥" + serPrice);
+                        actuaryDTO.setButton("服务明细");
+                        String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL,userToken,house.getCityId(),"待付款明细")
+                                +"&houseId="+houseId+"&workerTypeId="+houseFlow.getWorkerTypeId()+"&type="+3;
+                        actuaryDTO.setUrl(url);
+                        actuaryDTO.setType(3);
+                        actuaryDTOList.add(actuaryDTO);
+                    }
+                    if(notSerPrice > 0){
+                        ActuaryDTO actuaryDTO = new ActuaryDTO();
+                        actuaryDTO.setImage(imageAddress+"icon/Afuwu.png");
+                        actuaryDTO.setKind("服务");
+                        actuaryDTO.setName(workerType.getName() + "未选择的服务");
+                        actuaryDTO.setPrice("¥" + notSerPrice);
                         actuaryDTO.setButton("服务明细");
                         String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL,userToken,house.getCityId(),"待付款明细")
                                 +"&houseId="+houseId+"&workerTypeId="+houseFlow.getWorkerTypeId()+"&type="+3;
@@ -1449,6 +1487,7 @@ public class PaymentService {
         Example example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andEqualTo(HouseFlow.STATE, 0)
                 .andGreaterThan(HouseFlow.WORKER_TYPE,2);
+        example.orderBy(HouseFlow.SORT).asc();
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         List<Map<String,Object>> mapList = new ArrayList<Map<String,Object>>();
         House house = houseMapper.selectByPrimaryKey(houseId);

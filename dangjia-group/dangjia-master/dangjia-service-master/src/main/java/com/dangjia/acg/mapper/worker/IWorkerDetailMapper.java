@@ -7,24 +7,34 @@ import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
 
-/**工人流水明细
+/**
+ * 工人流水明细
  * zmj
  */
 @Repository
 public interface IWorkerDetailMapper extends Mapper<WorkerDetail> {
-    /**总收入*/
-    Double incomeMoney(@Param("workerId")String workerId);
-    /**总支出*/
-    Double outMoney(@Param("workerId")String workerId);
+    /**
+     * 总收入
+     */
+    Double incomeMoney(@Param("workerId") String workerId);
 
-    List<WorkerDetail> incomeDetail(@Param("workerId")String workerId);
-    List<WorkerDetail> outDetail(@Param("workerId")String workerId);
+    /**
+     * 总支出
+     */
+    Double outMoney(@Param("workerId") String workerId);
 
-    Double getCountWorkerDetailByWid(@Param("workerId")String workerId);
-    List<String> getHistoryMonth(@Param("workerId")String workerId);
-    List<WorkerDetail> getHistoryMonthByWorkerId(@Param("workerId")String workerId,@Param("createDate")String createDate);
+    List<WorkerDetail> incomeDetail(@Param("workerId") String workerId);
+
+    List<WorkerDetail> outDetail(@Param("workerId") String workerId);
+
+    Double getCountWorkerDetailByWid(@Param("workerId") String workerId);
+
+    List<String> getHistoryMonth(@Param("workerId") String workerId);
+
+    List<WorkerDetail> getHistoryMonthByWorkerId(@Param("workerId") String workerId, @Param("createDate") String createDate);
 
     //所有流水
-    List<WorkerDetail> getAllWallet();
+    List<WorkerDetail> getAllWallet(@Param("workerId") String workerId, @Param("houseId") String houseId,
+                                    @Param("likeMobile") String likeMobile, @Param("likeAddress") String likeAddress);
 }
 

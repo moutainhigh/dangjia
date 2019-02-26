@@ -16,6 +16,7 @@ import com.dangjia.acg.mapper.core.IHouseFlowCountDownTimeMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
@@ -24,6 +25,7 @@ import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowCountDownTime;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
@@ -78,6 +80,9 @@ public class HouseFlowService {
     private IRewardPunishRecordMapper rewardPunishRecordMapper;
     @Autowired
     private IRewardPunishConditionMapper rewardPunishConditionMapper;
+    @Autowired
+    private IHouseStyleTypeMapper houseStyleTypeMapper;
+
     private static Logger LOG = LoggerFactory.getLogger(HouseFlowService.class);
 
     /**
@@ -90,6 +95,7 @@ public class HouseFlowService {
     private boolean isHouseWorker(List<HouseWorker> hwList, HouseFlow hf) {
         for (HouseWorker houseWorker : hwList) {
             HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
+            if(houseFlow == null) continue;
             if (hf.getId().equals(houseFlow.getId())) {
                 return true;
             }
@@ -178,20 +184,28 @@ public class HouseFlowService {
                             houseFlowCountDownTimeMapper.insert(houseFlowCountDownTime);
                         }
                     }
+                    Member mem = memberMapper.selectByPrimaryKey(house.getMemberId());
                     allgrabBean.setWorkerTypeId(workerTypeId);
                     allgrabBean.setHouseFlowId(houseFlow.getId());
                     allgrabBean.setHouseName(house.getHouseName());
                     allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
-                    allgrabBean.setHouseMember("业主 " + member.getNickName());//业主名称
-                    ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(request, houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
+                    allgrabBean.setHouseMember("业主 " + mem.getNickName()==null?mem.getName():mem.getNickName());//业主名称
                     double totalPrice = 0;
-                    if (serverResponse.isSuccess()) {
-                        if (serverResponse.getResultObj() != null) {
-                            JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
-                            totalPrice = Double.parseDouble(obj.getString("totalPrice"));
+                    if (houseFlow.getWorkerType() == 1) {//设计师
+                        HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
+                        BigDecimal workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
+                        allgrabBean.setWorkertotal("￥" + workPrice);//工钱
+                    }else {
+                        ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(request, houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
+                        if (serverResponse.isSuccess()) {
+                            if (serverResponse.getResultObj() != null) {
+                                JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
+                                totalPrice = Double.parseDouble(obj.getString("totalPrice"));
+                            }
                         }
+                        allgrabBean.setWorkertotal("￥" + totalPrice);//工钱
                     }
-                    allgrabBean.setWorkertotal("￥" + totalPrice);//工钱
+
                     allgrabBean.setReleaseTime("时间 " + (houseFlow.getReleaseTime() == null ? "" :
                             DateUtil.getDateString(houseFlow.getReleaseTime().getTime())));//发布时间
                     long countDownTime = houseFlowCountDownTime.getCountDownTime().getTime() - new Date().getTime();//获取倒计时
@@ -264,13 +278,13 @@ public class HouseFlowService {
     }
 
     /**
-     * 超找 自定义 施工顺序 ，找出某个 workerType 是从3（大管家） 开始的几个工序
+     * 查找 自定义 施工顺序 ，找出某个 workerType 是从3（大管家） 开始的几个工序
      *
      * @param customSort
      * @param workerType
      * @return
      */
-    private int getCustomSortIndex(String customSort, String workerType) {
+    public int getCustomSortIndex(String customSort, String workerType) {
         String[] strArr = customSort.split(",");
         int indexSort = 3;
         if (strArr != null) {
@@ -390,7 +404,7 @@ public class HouseFlowService {
             Member member = accessToken.getMember();
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(HouseWorker.class);
-            example.createCriteria().andEqualTo("workerId", member.getId()).andEqualTo("houseFlowId", houseFlowId);
+            example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId()).andEqualTo(HouseWorker.HOUSE_ID, hf.getHouseId());
             List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的
             HouseWorker houseWorker = hwList.get(0);
             if (member.getWorkerType() == 3) {//大管家
@@ -546,7 +560,7 @@ public class HouseFlowService {
                 houseFlowMapper.updateByPrimaryKeySelective(nextHF);
 
                 //通知下一个工种 抢单
-                configMessageService.addConfigMessage(null, "gj", "wtId" + nextHF.getWorkerTypeId() + nextHF.getCityId(), "0", "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "");
+                configMessageService.addConfigMessage(null, "gj", "wtId" + nextHF.getWorkerTypeId() + nextHF.getCityId(), "0", "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "4");
 
             }
             configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家开工", DjConstants.PushMessage.STEWARD_CONSTRUCTION, "");

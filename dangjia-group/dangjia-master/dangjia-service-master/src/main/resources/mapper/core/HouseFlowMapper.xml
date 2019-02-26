@@ -69,6 +69,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and worker_type_id = #{workerTypeId}
     </select>
 
+    <!--查询某个房子的某个 顺序的工序的 HouseFlow 是否生成 -->
+    <select id="getHouseFlowBySort" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlow">
+        select
+        <include refid="new_columns" />
+        from dj_core_house_flow
+        where house_id=#{houseId}
+        and sort=#{sort}
+    </select>
+
     <!--根据houseId查询所有用工序 -->
     <select id="getAllFlowByHouseId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlow">
        select

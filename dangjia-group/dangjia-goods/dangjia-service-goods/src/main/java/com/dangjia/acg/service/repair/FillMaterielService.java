@@ -55,46 +55,45 @@ public class FillMaterielService {
     private ForMasterService forMasterService;
 
 
-
     /**
      * 选择货品
      */
-    public ServerResponse selectProduct(String goodsId, String brandSeriesId, String attributeIdArr){
-        return actuaryOperationService.selectProduct(goodsId,brandSeriesId,attributeIdArr,"");
+    public ServerResponse selectProduct(String goodsId, String brandId, String brandSeriesId, String attributeIdArr) {
+        return actuaryOperationService.selectProduct(goodsId, brandId, brandSeriesId, attributeIdArr, "");
     }
 
 
     /**
      * 补货查询商品库
      */
-    public ServerResponse repairLibraryMaterial(String categoryId,String name,Integer pageNum,Integer pageSize){
+    public ServerResponse repairLibraryMaterial(String categoryId, String name, Integer pageNum, Integer pageSize) {
         try {
-            if(name == ""){
+            if (name == "") {
                 name = null;
             }
-            if(pageNum == null){
+            if (pageNum == null) {
                 pageNum = 1;
             }
-            if(pageSize == null){
+            if (pageSize == null) {
                 pageSize = 5;
             }
             List<GoodsDTO> goodsDTOList = new ArrayList<GoodsDTO>();
             PageHelper.startPage(pageNum, pageSize);
             List<Product> productList;
-            if(StringUtil.isEmpty(categoryId)){
+            if (StringUtil.isEmpty(categoryId)) {
                 Example example = new Example(Product.class);
                 example.createCriteria().andLike(Product.NAME, name);
                 productList = iProductMapper.selectByExample(example);
-            }else {
+            } else {
                 Example example = new Example(Product.class);
                 example.createCriteria().andEqualTo(Product.CATEGORY_ID, categoryId).andLike(Product.NAME, name);
                 productList = iProductMapper.selectByExample(example);
             }
             PageInfo pageResult = new PageInfo(productList);
-            if(productList.size() > 0){
-                for(Product product : productList){
-                    GoodsDTO goodsDTO = actuaryOperationService.goodsDetail(product, "");
-                    if (goodsDTO != null){
+            if (productList.size() > 0) {
+                for (Product product : productList) {
+                    GoodsDTO goodsDTO = actuaryOperationService.goodsDetail(product, null, 1);
+                    if (goodsDTO != null) {
                         goodsDTOList.add(goodsDTO);
                     }
                 }
@@ -110,7 +109,7 @@ public class FillMaterielService {
                     goodsDTOList.add(goodsDTO);
                 }
             }*/
-            return ServerResponse.createBySuccess("查询成功",pageResult);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -120,17 +119,17 @@ public class FillMaterielService {
     /**
      * 工匠补退要货查询精算内货品
      */
-    public ServerResponse workerTypeBudget(String userToken,String houseId,String categoryId,String name,Integer pageNum, Integer pageSize){
-        try{
-            AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+    public ServerResponse workerTypeBudget(String userToken, String houseId, String categoryId, String name, Integer pageNum, Integer pageSize) {
+        try {
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageNum, pageSize);
-            List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(),houseId,categoryId,name);
+            List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name);
             PageInfo pageResult = new PageInfo(budgetMaterialList);
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
-            for (BudgetMaterial budgetMaterial : budgetMaterialList){
-                Warehouse warehouse = technologyRecordAPI.getByProductId(budgetMaterial.getProductId(),houseId);
+            for (BudgetMaterial budgetMaterial : budgetMaterialList) {
+                Warehouse warehouse = technologyRecordAPI.getByProductId(budgetMaterial.getProductId(), houseId);
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
@@ -153,22 +152,22 @@ public class FillMaterielService {
             pageResult.setList(warehouseDTOS);
 
             return ServerResponse.createBySuccess("查询成功", pageResult);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
 
 
-    public ServerResponse repairBudgetMaterial(String workerTypeId,String categoryId, String houseId, String productName,
-                                               Integer pageNum, Integer pageSize){
+    public ServerResponse repairBudgetMaterial(String workerTypeId, String categoryId, String houseId, String productName,
+                                               Integer pageNum, Integer pageSize) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageNum, pageSize);
-            List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(workerTypeId,houseId,categoryId,productName);
+            List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(workerTypeId, houseId, categoryId, productName);
             PageInfo pageResult = new PageInfo(budgetMaterialList);
             List<BudgetMaterialDTO> budgetMaterialDTOS = new ArrayList<>();
-            for (BudgetMaterial budgetMaterial : budgetMaterialList){
+            for (BudgetMaterial budgetMaterial : budgetMaterialList) {
                 BudgetMaterialDTO budgetMaterialDTO = new BudgetMaterialDTO();
                 budgetMaterialDTO.setId(budgetMaterial.getId());
                 budgetMaterialDTO.setProductId(budgetMaterial.getProductId());
@@ -185,7 +184,7 @@ public class FillMaterielService {
                 budgetMaterialDTOS.add(budgetMaterialDTO);
             }
             pageResult.setList(budgetMaterialDTOS);
-            return ServerResponse.createBySuccess("查询成功",pageResult);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

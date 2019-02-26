@@ -171,7 +171,7 @@ public class DjConstants {
         public final static String CRAFTSMAN_RUSH_TO_PURCHASE ="业主您好！您的美宅【%s】已有工匠抢单，赶快去看看吧~";
         public final static String CRAFTSMAN_ABANDON ="业主您好！您的美宅【%s】【%s】已放弃，请等待新工匠抢单。";
         public final static String CRAFTSMAN_PAYMENT ="工匠您好！业主已支付【%s】工匠费用，请及时查看";
-        public final static String STEWARD_CRAFTSMAN_FINISHED ="业主，您好！【%s】大管家已经与工匠完成开工交底，此工序施工正式开始";
+        public final static String STEWARD_CRAFTSMAN_FINISHED ="业主，您好！【%s】大管家已经与工匠完成开工交底，【%s】工序施工正式开始";
         public final static String CRAFTSMAN_NOT_START ="工匠您好！【%s】今日未开工，请在12点前开工，如有不便需要请假请申请停工。";
         public final static String STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE ="大管家您好！【%s】有工匠申请停工，请查看";
         public final static String CRAFTSMAN_NEW_REPLACE ="业主您好！经多方协调，当家装修已为您更换了新的工匠，立即查看";

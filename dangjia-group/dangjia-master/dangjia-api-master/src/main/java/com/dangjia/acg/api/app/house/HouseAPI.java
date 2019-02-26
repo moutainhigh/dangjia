@@ -56,6 +56,10 @@ public interface HouseAPI {
     ServerResponse setStartHouse(@RequestParam("userToken")String userToken, @RequestParam("cityId")String cityId,
                                  @RequestParam("houseType")int houseType, @RequestParam("drawings")int drawings);
 
+    @PostMapping("app/house/house/revokeHouse")
+    @ApiOperation(value = "撤销房子装修", notes = "撤销房子装修")
+    ServerResponse revokeHouse(@RequestParam("userToken")String userToken);
+
     /**
      * 修改房子精算状态
      */
@@ -69,7 +73,7 @@ public interface HouseAPI {
     @PostMapping("app/house/house/queryHouseByCity")
     @ApiOperation(value = "根据城市，小区，最小最大面积查询房子", notes = "根据城市，小区，最小最大面积查询房子")
     ServerResponse queryHouseByCity(@RequestParam("userToken")String userToken,@RequestParam("cityId")String cityId,@RequestParam("villageId") String villageId,@RequestParam("minSquare") Double minSquare,
-                                    @RequestParam("maxSquare") Double maxSquare, @RequestParam("pageDTO") PageDTO pageDTO);
+                                    @RequestParam("maxSquare") Double maxSquare,@RequestParam("houseType")  Integer houseType , @RequestParam("pageDTO") PageDTO pageDTO);
     /**
      * 装修指南
      */
@@ -80,6 +84,11 @@ public interface HouseAPI {
     @PostMapping("app/house/house/saveRenovationManual")
     @ApiOperation(value = "保存装修指南", notes = "保存装修指南")
     public ServerResponse saveRenovationManual(@RequestParam("userToken")String userToken,@RequestParam("saveList")String saveList);
+
+    @PostMapping("app/house/house/manualInfo")
+    @ApiOperation(value = "获取装修指南明细", notes = "获取装修指南明细")
+    ServerResponse getRenovationManualinfo(String id);
+
 
     @PostMapping("app/house/house/queryConstructionRecord")
     @ApiOperation(value = "施工记录", notes = "施工记录")
