@@ -47,9 +47,9 @@ public class WorkerType extends BaseEntity {
 	private Integer sort;
 
 	@Column(name = "safe_state")
-	@Desc(value = "1启用,0不启用")
-	@ApiModelProperty("1启用,0不启用")
-	private Integer safeState;//safestate
+	@Desc(value = "免费次数")
+	@ApiModelProperty("免费次数")
+	private Integer safeState;  //设置为工种免费要货次数
 
 	@Column(name = "inspect_number")
 	@Desc(value = " 标准巡查次数")

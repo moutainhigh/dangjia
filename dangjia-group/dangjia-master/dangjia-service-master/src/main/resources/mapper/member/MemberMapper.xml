@@ -38,6 +38,9 @@
         w.paycode,
         w.referrals,
         w.remarks,
+        w.real_name_state as realNameState,
+        w.real_name_describe as realNameDescribe,
+        w.check_describe as checkDescribe,
         w.create_date AS createDate,
         w.data_status AS dataStatus,
         w.modify_date AS modifyDate
@@ -46,19 +49,21 @@
     <!-- 工匠列表 -->
     <select id="artisanList" resultType="com.dangjia.acg.modle.member.Member">
         SELECT
-            <include refid="all_columns"/>
+        <include refid="all_columns"/>
         FROM dj_member w
         WHERE 1=1
-        <if test = "name!=null and name!=''">
+        <if test="name!=null and name!=''">
             and
             w.name LIKE CONCAT('%',#{name},'%')
         </if>
-        <if test = "workerTypeId!=null and workerTypeId!=''">
+        <if test="workerTypeId!=null and workerTypeId!=''">
             and
             w.worker_type_id = #{workerTypeId}
         </if>
+        and
+        w.worker_type_id is not null
         ORDER by
-            w.create_date
+        w.create_date
     </select>
 
     <select id="getSupervisor" resultType="com.dangjia.acg.modle.member.Member">
@@ -151,15 +156,14 @@
         FROM dj_member w
         LEFT JOIN dj_member_customer mc on mc.member_id = w.id
         LEFT JOIN dj_member_customer_record mcr on mc.remind_record_id = mcr.id
-        WHERE 1=1
-        and w.data_status = 0
-        <if test="memberNickName!=null and memberNickName!=''">
-            AND w.nick_name LIKE CONCAT('%',#{memberNickName},'%')
+        WHERE w.data_status = 0
+        <if test="searchKey!=null and searchKey!=''">
+            AND (w.nick_name LIKE CONCAT('%',#{searchKey},'%')
+            or w.mobile LIKE CONCAT('%',#{searchKey},'%'))
         </if>
         <if test="stage >= 0">
             and ifnull(mc.stage,0)=#{stage}
         </if>
-        -- 如果是-1 查全部时，不看黑名单
         <if test="stage == -1">
             and ifnull(mc.stage,0) !=3
         </if>
@@ -168,10 +172,11 @@
                 and FIND_IN_SET(#{lableId},mc.label_id_arr)
             </foreach>
         </if>
+        ORDER by  mcr.remind_time desc,w.create_date
+        <if test="orderBy!=null and orderBy!=''and orderBy=='desc'">
+            desc
+        </if>
 
-        ORDER by
-        mcr.remind_time desc,
-        w.create_date
 
     </select>
 

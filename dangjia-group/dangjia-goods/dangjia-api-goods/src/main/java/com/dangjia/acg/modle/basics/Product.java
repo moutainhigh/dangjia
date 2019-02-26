@@ -45,13 +45,13 @@ public class Product extends BaseEntity {
     private String labelId;//标签id
 
     @Column(name = "convert_quality")
-    private double convertQuality;//换算量
+    private Double convertQuality;//换算量
 
     @Column(name = "convert_unit")
     private String convertUnit;//换算单位
 
 	@Column(name = "weight")
-    private String weight;//重量
+    private String weight;//重量  单价乘数量乘此系数(运费)
 
 	@Column(name = "type")
     private Integer type;//是否禁用0：禁用；1不禁用

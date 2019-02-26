@@ -202,8 +202,9 @@ public class HouseDesignImageService {
             return ServerResponse.createBySuccess("查询成功",map);
         }
         if(house.getDesignerOk() == 2){
-            example.createCriteria().andEqualTo("houseId", houseId).andNotEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID,"1")
+            example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId).andNotEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID,"1")
                     .andIsNotNull(HouseDesignImage.IMAGEURL);
+            example.orderBy(HouseDesignImage.CREATE_DATE).desc();
             houseDesignImageList = houseDesignImageMapper.selectByExample(example);
             for (HouseDesignImage houseDesignImage : houseDesignImageList){
                 if(StringUtil.isNotEmpty(houseDesignImage.getImageurl())){

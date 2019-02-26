@@ -8,6 +8,7 @@
 		id,
 		number,
 		house_id as houseId,
+		order_split_id as orderSplitId,
 		total_amount as totalAmount,
 		delivery_fee as deliveryFee,
 		apply_money as applyMoney,

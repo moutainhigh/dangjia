@@ -58,12 +58,12 @@ public class WorkerTypeSafeOrderService {
             return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(),"无效的token,请重新登录或注册!");
         }
         try{
+            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(WorkerTypeSafeOrder.class);
-            example.createCriteria().andEqualTo("houseFlowId", houseFlowId);
+            example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseFlow.getHouseId()).andEqualTo(WorkerTypeSafeOrder.WORKER_TYPE_ID,houseFlow.getWorkerTypeId());
             workerTypeSafeOrderMapper.deleteByExample(example);
             if(selected == 0){//未勾选
                 WorkerTypeSafe workerTypeSafe = workerTypeSafeMapper.selectByPrimaryKey(workerTypeSafeId);
-                HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
                 House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
                 //生成工种保险服务订单
                 WorkerTypeSafeOrder workerTypeSafeOrder = new WorkerTypeSafeOrder();

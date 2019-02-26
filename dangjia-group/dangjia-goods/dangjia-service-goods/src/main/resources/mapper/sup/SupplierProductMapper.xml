@@ -15,6 +15,17 @@
         modify_date as modifyDate,
         data_status as dataStatus
     </sql>
+
+    <!--根据供应商id,货品id-->
+    <select id="getSupplierProduct" resultType="com.dangjia.acg.modle.sup.SupplierProduct">
+        select <include refid="new_columns"/>
+        from dj_sup_supplier_product
+        where
+            product_id = #{productId}
+        and
+            supplier_id = #{supplierId}
+    </select>
+
     <!--根据货品id查询供应商货品供应关系-->
     <select id="querySupplierProduct" resultType="com.dangjia.acg.modle.sup.SupplierProduct">
         select <include refid="new_columns"/>

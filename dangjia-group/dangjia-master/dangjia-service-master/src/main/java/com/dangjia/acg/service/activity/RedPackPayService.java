@@ -176,7 +176,7 @@ public class RedPackPayService {
                         for (BudgetWorker budgetWorker:budgetWorkerList) {
                             //判断工种的优惠券是否匹配
                             if (budgetWorker.getWorkerTypeId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 0) {
-                                workerTotal=workerTotal.add(new BigDecimal(budgetWorker.getPrice()*budgetWorker.getShopCount()));
+                                workerTotal=workerTotal.add(new BigDecimal(budgetWorker.getTotalPrice()));
                             }
                         }
                     }
@@ -184,11 +184,11 @@ public class RedPackPayService {
                         for (BudgetMaterial budgetMaterial:budgetMaterialList) {
                             //判断材料优惠券是否匹配
                             if (budgetMaterial.getGoodsId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 1) {
-                                goodsTotal=goodsTotal.add(new BigDecimal(budgetMaterial.getPrice()*budgetMaterial.getShopCount()));
+                                goodsTotal=goodsTotal.add(new BigDecimal(budgetMaterial.getTotalPrice()));
                             }
                             //判断货品的优惠券是否匹配
                             if (budgetMaterial.getProductId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 2) {
-                                productTotal=productTotal.add(new BigDecimal(budgetMaterial.getPrice()*budgetMaterial.getShopCount()));
+                                productTotal=productTotal.add(new BigDecimal(budgetMaterial.getTotalPrice()));
                             }
                         }
                     }
@@ -285,7 +285,7 @@ public class RedPackPayService {
                     String houseFlowId = businessOrder.getTaskId();
                     request.setAttribute(Constants.CITY_ID,house.getCityId());
                     ServerResponse retMaterial=budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(request,houseFlowId);
-                    ServerResponse retWorker=budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(request,houseFlowId);
+//                    ServerResponse retWorker=budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(request,houseFlowId);
                     BigDecimal workerTotal=new BigDecimal(0);
                     BigDecimal goodsTotal=new BigDecimal(0);
                     BigDecimal productTotal=new BigDecimal(0);
@@ -314,35 +314,44 @@ public class RedPackPayService {
                             }
                         }
                     }
+
+                    BigDecimal money = new BigDecimal(0);
                     if (redPack.getType() == 0 || redPack.getType() == 2 ) {
-                        BigDecimal money = redPackRule.getMoney();
-                        if (businessOrder.getDiscountsPrice()  != null ) {
-                            BigDecimal discountsPrice=businessOrder.getDiscountsPrice().add(money);
-                            businessOrder.setDiscountsPrice(discountsPrice);
-                        }else{
-                            businessOrder.setDiscountsPrice(money);
+                        ///判断人工，减免金额券,代金券金额计算
+                        if (redPack.getFromObjectType() == 0 && workerTotal.doubleValue()>0 ) {
+                            money = workerTotal.subtract(redPackRule.getMoney());
+                            if(money.doubleValue()<0){money=workerTotal;}
+                        }
+                        //判断材料，减免金额券,代金券金额计算
+                        if (redPack.getFromObjectType() == 1 && goodsTotal.doubleValue()>0 ) {
+                            money = goodsTotal.subtract(redPackRule.getMoney());
+                            if(money.doubleValue()<0){money=goodsTotal;}
+                        }
+                        //判断货品，减免金额券,代金券金额计算
+                        if (redPack.getFromObjectType() == 2 && productTotal.doubleValue()>0 ) {
+                            money = productTotal.subtract(redPackRule.getMoney());
+                            if(money.doubleValue()<0){money=productTotal;}
                         }
                     }
                     if (redPack.getType() == 1 ) {
-                        BigDecimal money = new BigDecimal(0);
                         ///判断人工，折扣金额计算
                         if (redPack.getFromObjectType() == 0 && workerTotal.doubleValue()>0 ) {
-                            money = workerTotal.subtract(workerTotal.multiply(redPackRule.getMoney().divide(new BigDecimal(10), 2, BigDecimal.ROUND_DOWN)));
+                            money = workerTotal.subtract(workerTotal.multiply(redPackRule.getMoney().divide(new BigDecimal(10))));
                         }
                         //判断材料，折扣金额计算
                         if (redPack.getFromObjectType() == 1 && goodsTotal.doubleValue()>0 ) {
-                            money = goodsTotal.subtract(goodsTotal.multiply(redPackRule.getMoney().divide(new BigDecimal(10), 2, BigDecimal.ROUND_DOWN)));
+                            money = goodsTotal.subtract(goodsTotal.multiply(redPackRule.getMoney().divide(new BigDecimal(10))));
                         }
                         //判断货品，折扣金额计算
                         if (redPack.getFromObjectType() == 2 && productTotal.doubleValue()>0 ) {
-                            money = productTotal.subtract(productTotal.multiply(redPackRule.getMoney().divide(new BigDecimal(10), 2, BigDecimal.ROUND_DOWN)));
+                            money = productTotal.subtract(productTotal.multiply(redPackRule.getMoney().divide(new BigDecimal(10))));
                         }
-                        if (businessOrder.getDiscountsPrice()  != null ) {
-                            BigDecimal discountsPrice=businessOrder.getDiscountsPrice().add(money);
-                            businessOrder.setDiscountsPrice(discountsPrice);
-                        }else{
-                            businessOrder.setDiscountsPrice(money);
-                        }
+                    }
+                    if (businessOrder.getDiscountsPrice()  != null ) {
+                        BigDecimal discountsPrice=businessOrder.getDiscountsPrice().add(money);
+                        businessOrder.setDiscountsPrice(discountsPrice);
+                    }else{
+                        businessOrder.setDiscountsPrice(money);
                     }
                     //更新使用到的优惠券为已使用
                     redPacketRecord.setHaveReceive(1);

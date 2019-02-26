@@ -250,8 +250,8 @@ public class HouseWorkerService {
             } else {
                 BigDecimal alsoMoney = (hwo.getWorkPrice() == null ? new BigDecimal(0) :
                         hwo.getWorkPrice()).subtract(hwo.getHaveMoney() == null ? new BigDecimal(0) : hwo.getHaveMoney());//还可得钱
-                bean.setAlreadyMoney((hwo.getHaveMoney().setScale(2, BigDecimal.ROUND_HALF_UP)));//已得钱
-                bean.setAlsoMoney(alsoMoney.setScale(2, BigDecimal.ROUND_HALF_UP));//还可得钱
+                bean.setAlreadyMoney(hwo.getHaveMoney());//已得钱
+                bean.setAlsoMoney(alsoMoney);//还可得钱
             }
             bean.setBigList(getBigList(userToken, cityId, house, worker));//添加菜单到返回体中
             List<String> promptList = new ArrayList<>();//消息提示list
@@ -706,14 +706,14 @@ public class HouseWorkerService {
 
             stringBuffer.append(worker.getWorkerType() != null&&worker.getWorkerType() == 3 ? "大管家" : "工匠");
             homePageBean.setGradeName(stringBuffer.toString());
-            String[] names = {"我的资料", "我的任务", "我的银行卡", "提现记录",
+            String[] names = {"我的任务", "我的银行卡", "提现记录",
                     "接单记录", "奖罚记录", "我的邀请码",  "帮助中心"};
 //            "工艺要求", "工匠报价",
-            String[] urls = {"", DjConstants.GJPageAddress.MYTASK, DjConstants.YZPageAddress.BANKCARDALREADYADD, DjConstants.GJPageAddress.CASHRECORD,
+            String[] urls = { DjConstants.GJPageAddress.MYTASK, DjConstants.YZPageAddress.BANKCARDALREADYADD, DjConstants.GJPageAddress.CASHRECORD,
                     DjConstants.GJPageAddress.ORDERRECORD, DjConstants.GJPageAddress.JIANGFALIST, DjConstants.GJPageAddress.MYINVITECODE, DjConstants.GJPageAddress.HELPCENTER};
 //            , DjConstants.GJPageAddress.PROCESSREQUIRE,DjConstants.GJPageAddress.GJPRICE
 //            "artisan_35.png","artisan_36.png",
-            String[] imageUrls = {"artisan_37.png", "artisan_40.png", "artisan_41.png", "artisan_39.png",
+            String[] imageUrls = {"artisan_40.png", "artisan_41.png", "artisan_39.png",
                     "artisan_61.png", "artisan_69.png", "artisan_42.png", "artisan_60.png"};
             List<HomePageBean.ListBean> list = new ArrayList<>();
             for (int i = 0; i < names.length; i++) {
@@ -774,6 +774,11 @@ public class HouseWorkerService {
                                             String imageList) {
         try {
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);//工序
+            if(applyType == 3){
+                if(houseFlow.getPause() == 1){
+                    return ServerResponse.createByErrorMessage("该工序已暂停施工,请勿重复申请");
+                }
+            }
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());//查询房子
             HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);//大管家的hf
             //****针对老工地管家兼容巡查拿钱和验收拿钱***//

@@ -55,7 +55,8 @@ public class ActivityUserTemplateService {
      * @return
      */
     public ServerResponse queryActivityUserTemplate(HttpServletRequest request, PageDTO pageDTO, ActivityUserTemplate activityUserTemplate) {
-        Example example = new Example(Activity.class);
+        Example example = new Example(ActivityUserTemplate.class);
+        example.createCriteria().andEqualTo(ActivityUserTemplate.DATA_STATUS,0);
         example.orderBy(Activity.MODIFY_DATE).desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<ActivityUserTemplate> list = activityUserTemplateMapper.selectByExample(example);

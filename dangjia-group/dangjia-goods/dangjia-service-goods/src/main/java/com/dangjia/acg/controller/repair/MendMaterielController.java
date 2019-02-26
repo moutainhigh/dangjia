@@ -23,8 +23,8 @@ public class MendMaterielController implements MendMaterielAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse selectProduct(HttpServletRequest request,String goodsId,String brandSeriesId,String attributeIdArr){
-        return fillMaterielService.selectProduct(goodsId,brandSeriesId,attributeIdArr);
+    public ServerResponse selectProduct(HttpServletRequest request,String goodsId,String brandId,String brandSeriesId,String attributeIdArr){
+        return fillMaterielService.selectProduct(goodsId,brandId,brandSeriesId,attributeIdArr);
     }
 
     @Override

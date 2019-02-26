@@ -351,47 +351,43 @@ public class EvaluateService {
         if(evaluate.getState()==1){desc=desc+" 业主";}
         if(evaluate.getState()==2){desc=desc+" 商品";}
         if(evaluate.getState()==3){desc=desc+" 大管家";}
+
         BigDecimal evaluationXA = new BigDecimal("1.0");
-        BigDecimal evaluationXB = new BigDecimal("2.0");
-        BigDecimal evaluationA = new BigDecimal("0.5");
-        BigDecimal evaluationb = new BigDecimal("2.0");
-        if (worker.getWorkerType() == 3) {
+        BigDecimal score = new BigDecimal(0);
+
+        if (worker.getWorkerType() == 3) {//管家加分
             if(worker.getEvaluationScore().compareTo(new BigDecimal("70"))==-1){
-                evaluationA = evaluationXA.multiply(new BigDecimal("0.6"));
-                evaluationb = evaluationXB.multiply(new BigDecimal("0.6"));
-            }else if((worker.getEvaluationScore().compareTo(new BigDecimal("70"))==1||
-                    worker.getEvaluationScore().compareTo(new BigDecimal("70"))==0)&&
-                    worker.getEvaluationScore().compareTo(new BigDecimal("80"))==-1){
-                evaluationA = evaluationXA.multiply(new BigDecimal("0.3"));
-                evaluationb = evaluationXB.multiply(new BigDecimal("0.6"));
-            }else if((worker.getEvaluationScore().compareTo(new BigDecimal("80"))==1||
-                    worker.getEvaluationScore().compareTo(new BigDecimal("80"))==0)&&
+                score = evaluationXA.multiply(new BigDecimal("0.6"));
+
+            }else if( worker.getEvaluationScore().compareTo(new BigDecimal("70")) >= 0 &&
+                    worker.getEvaluationScore().compareTo(new BigDecimal("80")) == -1){
+
+                score = evaluationXA.multiply(new BigDecimal("0.6"));
+            }else if( worker.getEvaluationScore().compareTo(new BigDecimal("80")) >= 0 &&
                     worker.getEvaluationScore().compareTo(new BigDecimal("90"))==-1){
-                evaluationA = evaluationXA.multiply(new BigDecimal("0.15"));
-                evaluationb = evaluationXB.multiply(new BigDecimal("0.15"));
-            }else if(worker.getEvaluationScore().compareTo(new BigDecimal("90"))==1||
-                    worker.getEvaluationScore().compareTo(new BigDecimal("90"))==0){
-                evaluationA = evaluationXA.multiply(new BigDecimal("0.07"));
-                evaluationb = evaluationXB.multiply(new BigDecimal("0.07"));
+
+                score = evaluationXA.multiply(new BigDecimal("0.15"));
+            }else if(worker.getEvaluationScore().compareTo(new BigDecimal("90")) >= 0){
+
+                score = evaluationXA.multiply(new BigDecimal("0.07"));
             }
         }else{
             if(worker.getEvaluationScore().compareTo(new BigDecimal("70"))==-1){
-                evaluationA = evaluationXA.multiply(new BigDecimal("1.6"));
-                evaluationb = evaluationXB.multiply(new BigDecimal("1.6"));
-            }else if((worker.getEvaluationScore().compareTo(new BigDecimal("70"))==1||
-                    worker.getEvaluationScore().compareTo(new BigDecimal("70"))==0)&&
+
+                score = evaluationXA.multiply(new BigDecimal("1.6"));
+            }else if( worker.getEvaluationScore().compareTo(new BigDecimal("70")) >= 0 &&
                     worker.getEvaluationScore().compareTo(new BigDecimal("80"))==-1){
-                evaluationA = evaluationXA.multiply(new BigDecimal("0.8"));
-                evaluationb = evaluationXB.multiply(new BigDecimal("0.8"));
+
+                score = evaluationXA.multiply(new BigDecimal("0.8"));
             }else if((worker.getEvaluationScore().compareTo(new BigDecimal("80"))==1||
                     worker.getEvaluationScore().compareTo(new BigDecimal("80"))==0)&&
                     worker.getEvaluationScore().compareTo(new BigDecimal("90"))==-1){
-                evaluationA = evaluationXA.multiply(new BigDecimal("0.4"));
-                evaluationb = evaluationXB.multiply(new BigDecimal("0.4"));
+
+                score = evaluationXA.multiply(new BigDecimal("0.4"));
             }else if(worker.getEvaluationScore().compareTo(new BigDecimal("90"))==1||
                     worker.getEvaluationScore().compareTo(new BigDecimal("90"))==0){
-                evaluationA = evaluationXA.multiply(new BigDecimal("0.2"));
-                evaluationb = evaluationXB.multiply(new BigDecimal("0.2"));
+
+                score = evaluationXA.multiply(new BigDecimal("0.2"));
             }
         }
 
@@ -399,7 +395,7 @@ public class EvaluateService {
             worker.setEvaluationScore(new BigDecimal("60.0"));
         }
         if(evaluate.getStar()==5){
-            worker.setEvaluationScore(worker.getEvaluationScore().add(evaluationA));
+            worker.setEvaluationScore(worker.getEvaluationScore().add(score));
             WorkIntegral workIntegral=new WorkIntegral();
             workIntegral.setWorkerId(worker.getId());
             workIntegral.setMemberId(evaluate.getMemberId());
@@ -407,12 +403,12 @@ public class EvaluateService {
             workIntegral.setStar(evaluate.getStar());
             workIntegral.setStatus(1);
             workIntegral.setHouseId(evaluate.getHouseId());
-            workIntegral.setIntegral(evaluationA);
+            workIntegral.setIntegral(score);
             workIntegral.setBriefed(desc+evaluate.getStar()+"星评价");
 
             workIntegralMapper.insert(workIntegral);
         }else if (evaluate.getStar() == 1 || evaluate.getStar() == 2) {
-            worker.setEvaluationScore(worker.getEvaluationScore().subtract((evaluationb)));
+            worker.setEvaluationScore(worker.getEvaluationScore().subtract((score.multiply(new BigDecimal(2)))));//减双倍
             WorkIntegral workIntegral=new WorkIntegral();
             workIntegral.setWorkerId(worker.getId());
             workIntegral.setMemberId(evaluate.getMemberId());
@@ -420,7 +416,7 @@ public class EvaluateService {
             workIntegral.setStar(evaluate.getStar());
             workIntegral.setStatus(1);
             workIntegral.setHouseId(evaluate.getHouseId());
-            workIntegral.setIntegral(evaluationb.multiply(new BigDecimal("-1")));
+            workIntegral.setIntegral(score.multiply(new BigDecimal(-2)));
             workIntegral.setBriefed(desc+evaluate.getStar()+"星评价");
             workIntegralMapper.insert(workIntegral);
         }else {
@@ -431,7 +427,7 @@ public class EvaluateService {
             workIntegral.setStar(evaluate.getStar());
             workIntegral.setStatus(1);//得分类型
             workIntegral.setHouseId(evaluate.getHouseId());
-            workIntegral.setIntegral(new BigDecimal(0));
+            workIntegral.setIntegral(new BigDecimal(0));  //不增不减
             workIntegral.setBriefed(desc+evaluate.getStar()+"星评价");
             workIntegralMapper.insert(workIntegral);
         }

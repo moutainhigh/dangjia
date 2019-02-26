@@ -71,23 +71,24 @@ public class TaskService {
 
         //该城市该用户所有房产
         Example example = new Example(House.class);
-        example.createCriteria().andEqualTo(House.MEMBER_ID, member.getId());
+        example.createCriteria().andEqualTo(House.MEMBER_ID, member.getId())
+                .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = houseMapper.selectByExample(example);
-        for(House house : houseList){
+        for (House house : houseList) {
             //if(house.getType() == 2){//老用户
-                HouseExpend houseExpend = houseExpendMapper.getByHouseId(house.getId());
-                if (houseExpend == null){
-                    houseExpend = new HouseExpend(true);
-                    houseExpend.setHouseId(house.getId());
-                    houseExpendMapper.insert(houseExpend);
-                }
+            HouseExpend houseExpend = houseExpendMapper.getByHouseId(house.getId());
+            if (houseExpend == null) {
+                houseExpend = new HouseExpend(true);
+                houseExpend.setHouseId(house.getId());
+                houseExpendMapper.insert(houseExpend);
+            }
             //}
         }
         String houseId = null;
         if (houseList.size() > 1) {
             buttonDTO.setState(2);
             for (House house : houseList) {
-                if (house.getVisitState() == 0 || house.getVisitState() == 2) {
+                if (house.getVisitState() == 0) {//0待确认开工,1装修中,2休眠中,3已完工
                     buttonDTO.setState(3);
                     buttonDTO.setHouseType(house.getHouseType());
                     buttonDTO.setDrawings(house.getDrawings());
@@ -115,7 +116,7 @@ public class TaskService {
     private ButtonDTO getButton(String houseId, String userToken) {
         ButtonDTO button = new ButtonDTO();
         House house = houseMapper.selectByPrimaryKey(houseId);
-        if (house.getVisitState() == 0 ) {//处于回访阶段
+        if (house.getVisitState() == 0) {//处于回访阶段
             button.setState(1);
             button.setHouseType(house.getHouseType());
             button.setDrawings(house.getDrawings());
@@ -156,7 +157,7 @@ public class TaskService {
         example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
                 .andEqualTo(MendOrder.STATE, 3);//补材料审核状态全通过
         List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
-        for (MendOrder mendOrder : mendOrderList){
+        for (MendOrder mendOrder : mendOrderList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
@@ -172,7 +173,7 @@ public class TaskService {
         example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 1)
                 .andEqualTo(MendOrder.STATE, 3);//审核状态
         mendOrderList = mendOrderMapper.selectByExample(example);
-        for (MendOrder mendOrder : mendOrderList){
+        for (MendOrder mendOrder : mendOrderList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
@@ -190,7 +191,7 @@ public class TaskService {
             task.setDate(DateUtil.dateToString(house.getModifyDate(), "yyyy-MM-dd HH:mm"));
             task.setName("平面图审核");
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/sheji.png");
-            String url =configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +  String.format(DjConstants.YZPageAddress.DESIGNLIST, userToken, house.getCityId(), "平面图审核") + "&houseId=" + house.getId();
+            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.DESIGNLIST, userToken, house.getCityId(), "平面图审核") + "&houseId=" + house.getId();
             task.setHtmlUrl(url);
             task.setType(3);
             task.setTaskId("");

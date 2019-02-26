@@ -20,5 +20,11 @@ public class ArtisanDTO {
     private Integer inviteNum;//存放邀约人数
     private Integer checkType;//状态:0审核中，1审核未通过,2审核已通过, 3账户已禁用, 4账户冻结, 5未提交资料
     private BigDecimal evaluationScore;//评价积分
+    private BigDecimal volume;//成交量
+    private String superior;//邀请人
+
+    private Integer realNameState;
+    private String realNameDescribe;
+    private String checkDescribe;
 
 }

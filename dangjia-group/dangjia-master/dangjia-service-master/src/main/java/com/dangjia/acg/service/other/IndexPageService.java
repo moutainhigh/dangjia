@@ -57,6 +57,8 @@ public class IndexPageService {
                 List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);
                 houseDesignImage = houseDesignImageList.get(0);
             }
+            houseDetailsDTO.setCityId(house.getCityId());
+            houseDetailsDTO.setHouseId(house.getId());
             houseDetailsDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + houseDesignImage.getImageurl());
             houseDetailsDTO.setHouseName(house.getResidential()+"***"+house.getNumber()+"房");
             String[] liangArr = {};
@@ -81,19 +83,20 @@ public class IndexPageService {
             }
             Order order = orderMapper.getWorkerOrder(houseId,"2");
             mapReady.put("typeB", "￥" + (order == null? 0 : order.getTotalAmount()));
-            order = orderMapper.getWorkerOrder(houseId,"3");
-            mapReady.put("typeC", "￥" + (order == null? 0 : order.getTotalAmount()));
             mapList.add(mapReady);
 
             Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andEqualTo(HouseFlow.WORK_TYPE,4).andGreaterThan(HouseFlow.WORKER_TYPE,3);
+            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andEqualTo(HouseFlow.WORK_TYPE,4).andGreaterThan(HouseFlow.WORKER_TYPE,2);
+            example.orderBy(HouseFlow.WORKER_TYPE);
             List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
             for (HouseFlow houseFlow : houseFlowList){
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
                 Map<String,Object> map = new HashMap<>();
                 map.put("name",workerType.getName());
-                order = orderMapper.getWorkerOrder(houseId,houseFlow.getWorkerTypeId());
-                map.put("typeE",  "￥" + (order == null? 0 : order.getTotalAmount()));
+                example = new Example(Order.class);
+                example.createCriteria().andEqualTo(Order.HOUSE_ID, houseId).andEqualTo(Order.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
+                List<Order> workerOrders = orderMapper.selectByExample(example);
+                map.put("workers",  workerOrders);
                 mapList.add(map);
             }
             houseDetailsDTO.setMapList(mapList);

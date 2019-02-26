@@ -143,4 +143,8 @@ public interface BudgetWorkerAPI {
 	@PostMapping("/actuary/budgetWorker/getAllTechnologyByHouseId")
 	@ApiOperation(value = "根据houseId查询所有验收节点", notes = "根据houseId查询所有验收节点")
 	JSONArray getAllTechnologyByHouseId(@RequestParam("houseId")String houseId);
+
+	@PostMapping("/actuary/budgetWorker/getTecByHouseFlowId")
+	@ApiOperation(value = "交底节点", notes = "交底节点")
+	JSONArray getTecByHouseFlowId(@RequestParam("houseId") String houseId,@RequestParam("houseFlowId") String houseFlowId);
 }

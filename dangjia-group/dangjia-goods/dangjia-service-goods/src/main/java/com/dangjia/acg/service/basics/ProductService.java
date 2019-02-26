@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.basics.Label;
@@ -79,7 +79,7 @@ public class ProductService {
                     }
                 }
                 p.setImage(imgStr);
-                Map<String, Object> map = CommonUtil.beanToMap(p);
+                Map<String, Object> map = BeanUtils.beanToMap(p);
                 map.put("imageUrl", imgUrlStr);
                 if (!StringUtils.isNotBlank(p.getLabelId())) {
                     map.put("labelId", "");
@@ -157,6 +157,10 @@ public class ProductService {
                 String id = obj.getString("id");//id
                 String productSn = obj.getString("productSn");//商品编号
                 String name = obj.getString("name");//product品名称
+                Double convertQuality = obj.getDouble("convertQuality");//换算量
+                LOG.info("insertProduct convertQuality:" + convertQuality);
+                if (convertQuality <= 0)
+                    return ServerResponse.createByErrorMessage("换算量必须大于0");
 
                 List<Product> nameList = iProductMapper.queryByName(name);
                 List<Product> productSnList = iProductMapper.queryByProductSn(productSn);
@@ -231,14 +235,47 @@ public class ProductService {
                 product.setCost(0.00);//平均成本价
                 product.setPrice(obj.getDouble("price"));//销售价
                 product.setProfit(obj.getDouble("profit"));//利润率
-                product.setBrandId(obj.getString("brandId"));//品牌id
-                String brandSeriesId = obj.getString("brandSeriesId");
-                if (!StringUtils.isNotBlank(brandSeriesId))
-                    return ServerResponse.createByErrorMessage("品牌系列id不能为空");
-                product.setBrandSeriesId(brandSeriesId);//品牌系列id
-                product.setValueNameArr(obj.getString("valueNameArr"));//选中的属性选项名称字符串
-                product.setValueIdArr(obj.getString("valueIdArr"));//选中的属性选项id串
-                product.setAttributeIdArr(obj.getString("attributeIdArr"));//选中的属性id字符串
+
+                if (!StringUtils.isNoneBlank(obj.getString("brandId"))) {
+                    product.setBrandId(null);
+                } else {
+                    product.setBrandId(obj.getString("brandId"));
+                }
+
+                if (!StringUtils.isNoneBlank(obj.getString("brandSeriesId"))) {
+                    product.setBrandSeriesId(null);
+                } else {
+                    product.setBrandSeriesId(obj.getString("brandSeriesId"));
+                }
+
+//                product.setBrandId(obj.getString("brandId"));//品牌id
+//                String brandSeriesId = obj.getString("brandSeriesId");
+//                if (!StringUtils.isNotBlank(brandSeriesId))
+//                    return ServerResponse.createByErrorMessage("品牌系列id不能为空");
+//                product.setBrandSeriesId(brandSeriesId);//品牌系列id
+
+
+                if (!StringUtils.isNoneBlank(obj.getString("valueNameArr"))) {
+                    product.setValueNameArr(null);
+                } else {
+                    product.setValueNameArr(obj.getString("valueNameArr"));
+                }
+
+                if (!StringUtils.isNoneBlank(obj.getString("valueIdArr"))) {
+                    product.setValueIdArr(null);
+                } else {
+                    product.setValueIdArr(obj.getString("valueIdArr"));
+                }
+
+                if (!StringUtils.isNoneBlank(obj.getString("attributeIdArr"))) {
+                    product.setAttributeIdArr(null);
+                } else {
+                    product.setAttributeIdArr(obj.getString("attributeIdArr"));
+                }
+
+//                product.setValueNameArr(obj.getString("valueNameArr"));//选中的属性选项名称字符串
+//                product.setValueIdArr(obj.getString("valueIdArr"));//选中的属性选项id串
+//                product.setAttributeIdArr(obj.getString("attributeIdArr"));//选中的属性id字符串
                 if (productId == null || "".equals(productId)) {//没有id则新增
                     product.setCreateDate(new Date());
                     product.setModifyDate(new Date());
@@ -246,7 +283,7 @@ public class ProductService {
                 } else {//修改
                     product.setId(productId);
                     product.setModifyDate(new Date());
-                    iProductMapper.updateByPrimaryKeySelective(product);
+                    iProductMapper.updateByPrimaryKey(product);
                 }
 
                 LOG.info("insertProduct productId:" + product.getId());

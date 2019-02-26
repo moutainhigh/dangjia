@@ -18,6 +18,7 @@ import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.core.NodeDTO;
 import com.dangjia.acg.dto.house.FlowRecordDTO;
 import com.dangjia.acg.dto.house.HouseDTO;
+import com.dangjia.acg.dto.house.HouseListDTO;
 import com.dangjia.acg.dto.house.ShareDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.design.IHouseDesignImageMapper;
@@ -51,11 +52,14 @@ import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.member.GroupInfoService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.util.TextUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -127,7 +131,10 @@ public class HouseService {
     @Autowired
     private HouseChoiceCaseService houseChoiceCaseService;
     @Autowired
+    private HouseFlowService houseFlowService;
+    @Autowired
     private IMendOrderMapper mendOrderMapper;
+    protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
 
     /**
      * 切换房产
@@ -135,7 +142,9 @@ public class HouseService {
     public ServerResponse setSelectHouse(String userToken, String cityId, String houseId) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         Example example = new Example(House.class);
-        example.createCriteria().andEqualTo("memberId", accessToken.getMember().getId());
+        example.createCriteria()
+                .andEqualTo(House.MEMBER_ID, accessToken.getMember().getId())
+                .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
         for (House house : houseList) {
             if (house.getId().equals(houseId)) {
@@ -154,11 +163,14 @@ public class HouseService {
     public ServerResponse getHouseList(String userToken, String cityId) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         Example example = new Example(House.class);
-        example.createCriteria().andEqualTo("memberId", accessToken.getMember().getId()).andEqualTo("visitState", 1);
+        example.createCriteria()
+                .andEqualTo(House.MEMBER_ID, accessToken.getMember().getId())
+                .andEqualTo(House.VISIT_STATE, 1)
+                .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
-        List<Map<String, String>> mapList = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> mapList = new ArrayList<>();
         for (House house : houseList) {
-            Map<String, String> map = new HashMap<String, String>();
+            Map<String, String> map = new HashMap<>();
             map.put("houseId", house.getId());
             map.put("houseName", house.getHouseName());
             map.put("task", this.getTask(house.getId()) + "");
@@ -211,7 +223,9 @@ public class HouseService {
     public ServerResponse queryMyHouse(String userToken) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         Example example = new Example(House.class);
-        example.createCriteria().andEqualTo("memberId", accessToken.getMember().getId());
+        example.createCriteria()
+                .andEqualTo(House.MEMBER_ID, accessToken.getMember().getId())
+                .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
         List<Map> mapList = new ArrayList<>();
         for (House house : houseList) {
@@ -230,8 +244,10 @@ public class HouseService {
         Member member = accessToken.getMember();
         //该城市该用户所有开工房产
         Example example = new Example(House.class);
-        example.createCriteria().andEqualTo("memberId", member.getId())
-                .andEqualTo("visitState", 1);
+        example.createCriteria()
+                .andEqualTo(House.MEMBER_ID, member.getId())
+                .andEqualTo(House.VISIT_STATE, 1)
+                .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
         String houseId = null;
         if (houseList.size() > 1) {
@@ -304,7 +320,6 @@ public class HouseService {
             }
             courseList.add(nodeDTO);
         }
-
         for (HouseFlow houseFlow : houseFlowList) {
             NodeDTO nodeDTO = new NodeDTO();
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
@@ -482,9 +497,61 @@ public class HouseService {
             if (house.getVisitState() != -1) {
                 srcHouse.setVisitState(house.getVisitState());
             }
-            if (!house.getCustomSort().equals("ignore") && StringUtils.isNoneBlank(house.getCustomSort()))
+            if (!house.getCustomSort().equals("ignore")) {
+                LOG.info("setHouseInfo getCustomSort:" + house.getCustomSort());
+                if (StringUtils.isNoneBlank(house.getCustomSort())
+                        && StringUtils.isNoneBlank(srcHouse.getCustomSort())) {//如果不问null ，说明已经排序过，就是修改顺序
+                    String[] oldWorkerTypeArr = srcHouse.getCustomSort().split(",");
+                    String[] newWorkerTypeArr = house.getCustomSort().split(",");
+                    LOG.info("setHouseInfo old getCustomSort:" + srcHouse.getCustomSort());
+
+                    Set<String> setNew = new HashSet<>();//新修改的工序类型 的集合
+                    Set<String> setDelete = new HashSet<>();//找出被删除的 工序类型 的集合
+                    Set<String> setUpdate = new HashSet<>();//找出要修改的 工序类型 的集合
+                    for (String newWorkerType : newWorkerTypeArr) {//找出老的，要么有修改，要么有删除的
+                        setNew.add(newWorkerType);
+                    }
+                    for (String oldWorkerType : oldWorkerTypeArr) {//找出老的，要么有修改，要么有删除的
+                        if (setNew.contains(oldWorkerType)) {
+                            setUpdate.add(oldWorkerType);//找出要修改的 工序类型
+                        } else
+                            setDelete.add(oldWorkerType);//找出被删除的 工序类型
+                    }
+
+                    LOG.info("删除前:" + setDelete + "  " + setDelete.size());
+                    for (String deleteWorkerType : setDelete) {//删除工序
+                        HouseFlow oldHouseFlow = houseFlowMapper.getHouseFlowByHidAndWty(house.getId(), Integer.parseInt(deleteWorkerType));
+//                        LOG.info("oldHouseFlow 删除前:" + oldHouseFlow + "  " + deleteWorkerType);
+                        if (oldHouseFlow != null) {
+                            int ret = houseFlowMapper.deleteByPrimaryKey(oldHouseFlow.getId());
+                            if (ret >= 1) {
+                                LOG.info("setDelete 删除成功:" + deleteWorkerType);
+                            }
+                        }
+                    }
+
+                    for (String updateWorkerType : setUpdate) {//删除工序
+                        HouseFlow oldHouseFlow = houseFlowMapper.getHouseFlowByHidAndWty(house.getId(), Integer.parseInt(updateWorkerType));
+                        LOG.info("setHouseInfo updateWorkerType：：" + updateWorkerType + " " + oldHouseFlow);
+                        if (oldHouseFlow != null) {
+                            int sortIndex = houseFlowService.getCustomSortIndex(house.getCustomSort(), updateWorkerType);
+//                            LOG.info("新排序：" + house.getCustomSort() + " oldWorkerType：" + updateWorkerType + " sortIndex:" + sortIndex);
+//                            LOG.info("oldHouseFlow 修改前:" + oldHouseFlow);
+                            if (sortIndex != -1 && oldHouseFlow.getSort() != sortIndex) {
+                                oldHouseFlow.setSort(sortIndex);
+                                oldHouseFlow.setModifyDate(new Date());
+                                int ret = houseFlowMapper.updateByPrimaryKeySelective(oldHouseFlow);
+                                if (ret >= 1) {
+                                    LOG.info("oldHouseFlow 修改成功:" + oldHouseFlow);
+                                }
+                            }
+                        }
+
+                    }
+                }
                 srcHouse.setCustomSort(house.getCustomSort());
-            iHouseMapper.updateByPrimaryKeySelective(srcHouse);
+            }
+            iHouseMapper.updateByPrimaryKey(srcHouse);
             return ServerResponse.createBySuccessMessage("保存成功");
         } catch (
                 Exception e) {
@@ -587,7 +654,7 @@ public class HouseService {
                 workerTypes.add("wtId" + workerType.getId());
 //                workerTypes.add(house.getId());
                 configMessageService.addConfigMessage(request, "gj", StringUtils.join(workerTypes, ","), "0",
-                        "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "");
+                        "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "4");
 
             }
 
@@ -601,6 +668,30 @@ public class HouseService {
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
+    public ServerResponse revokeHouse(String userToken) {
+        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+        String memberId = accessToken.getMemberId();
+        if (StringUtils.isEmpty(memberId)) {
+            return ServerResponse.createByErrorMessage("用户id不存在");
+        }
+        Example example = new Example(House.class);
+        example.createCriteria()
+                .andEqualTo(House.MEMBER_ID, memberId)
+                .andEqualTo(House.DATA_STATUS, 0);
+        List<House> houseList = iHouseMapper.selectByExample(example);
+        if (houseList.size() > 0) {
+            for (House house : houseList) {
+                if (house.getVisitState() == 0) { //0待确认开工,1装修中,2休眠中,3已完工
+                    //iHouseMapper.deleteByPrimaryKey(house);
+                    house.setDataStatus(1);
+                    iHouseMapper.updateByPrimaryKeySelective(house);
+                    return ServerResponse.createBySuccessMessage("操作成功");
+                }
+            }
+        }
+        return ServerResponse.createByErrorMessage("操作失败，无待开工的房子");
+    }
+
     /**
      * APP开始装修
      */
@@ -611,13 +702,15 @@ public class HouseService {
             return ServerResponse.createByErrorMessage("用户id不存在");
         }
         Example example = new Example(House.class);
-        example.createCriteria().andEqualTo("memberId", memberId);
+        example.createCriteria()
+                .andEqualTo(House.MEMBER_ID, memberId)
+                .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
         int again = 1;
         if (houseList.size() > 0) {
             again += houseList.size();
             for (House house : houseList) {
-                if (house.getVisitState() != 1) { //visitState 1开工，2有意向，3无装修需求，4恶意操作，默认为0
+                if (house.getVisitState() == 0) { //0待确认开工,1装修中,2休眠中,3已完工
                     return ServerResponse.createByErrorMessage("有房子未确认开工,不能再装");
                 }
             }
@@ -644,27 +737,24 @@ public class HouseService {
     /**
      * 房子装修列表
      */
-    public ServerResponse getList(String memberId) {
-        Member member = memberMapper.selectByPrimaryKey(memberId);
-        List<House> houseList = iHouseMapper.getList(memberId);
-        List<Map<String, Object>> mapList = new ArrayList<>();
-        for (House house : houseList) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("houseId", house.getId());
-            map.put("cityName", house.getCityName());
-            map.put("address", house.getHouseName());
-            map.put("memberName", member.getNickName() == null ? member.getName() : member.getNickName());
-            map.put("mobile", member.getMobile());
-            map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工
-            map.put("showHouse", house.getShowHouse());//0不是，1是 是否精选
-            map.put("style", house.getStyle());//设计风格
-            map.put("square", house.getSquare());//外框面积
-            map.put("buildSquare", house.getSquare()); //建筑面积
-            map.put("decorationType", house.getDecorationType()); //装修类型  0表示没有开始，1远程设计，2自带设计，3共享装修
-            map.put("houseType", house.getHouseType()); //0：新房；1：老房
-            mapList.add(map);
+    public ServerResponse getList(PageDTO pageDTO, String searchKey, String memberId) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<HouseListDTO> houseList = iHouseMapper.getHouseList(memberId, searchKey);
+            if (houseList.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+                        , "查无数据");
+            }
+            PageInfo pageResult = new PageInfo(houseList);
+            for (HouseListDTO houseListDTO : houseList) {
+                houseListDTO.setAddress(houseListDTO.getHouseName());
+            }
+            pageResult.setList(houseList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
         }
-        return ServerResponse.createBySuccess("查询用户列表成功", mapList);
     }
 
     /**
@@ -674,11 +764,17 @@ public class HouseService {
     public ServerResponse setHouseBudgetOk(String houseId, Integer budgetOk) {
         try {
             House house = iHouseMapper.selectByPrimaryKey(houseId);
-            if (house.getBudgetOk() == 3) {
-                return ServerResponse.createBySuccessMessage("精算已审核通过");
-            }
             if (house == null) {
                 return ServerResponse.createByErrorMessage("修改房子精算状态失败");
+            }
+            if (budgetOk == 2) {//打算发送给业主,验证精算完整性
+                Double price = forMasterAPI.getBudgetWorkerPrice(houseId, "3", house.getCityId());
+                if (price == 0) {
+                    return ServerResponse.createByErrorMessage("大管家没有精算人工费,请重新添加");
+                }
+            }
+            if (house.getBudgetOk() == 3) {
+                return ServerResponse.createBySuccessMessage("精算已审核通过");
             }
             if (budgetOk == 3) {//精算审核通过，调用此方法查询所有验收节点并保存
                 HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, "2");
@@ -762,7 +858,7 @@ public class HouseService {
     /**
      * 根据城市，小区，最小最大面积查询房子
      */
-    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId, Double minSquare, Double maxSquare, PageDTO pageDTO) {
+    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId, Double minSquare, Double maxSquare, Integer houseType, PageDTO pageDTO) {
         try {
             if (pageDTO == null) {
                 pageDTO = new PageDTO();
@@ -775,60 +871,12 @@ public class HouseService {
             }
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<ShareDTO> srlist = new ArrayList<>();
-            List<House> houseList = iHouseMapper.getSameLayout(cityId, villageId, minSquare, maxSquare);
-            for (House house : houseList) {
-                ModelingLayout ml = modelingLayoutMapper.selectByPrimaryKey(house.getModelingLayoutId());
-                ShareDTO shareDTO = new ShareDTO();
-                shareDTO.setType("1");
-                if (house.getShowHouse() == 0) {
-                    if (accessToken != null) {
-                        shareDTO.setName(house.getHouseName());
-                    } else {
-                        shareDTO.setName(house.getNoNumberHouseName());
-                    }
-                } else {
-                    shareDTO.setName("*栋*单元*号");
-                }
-                shareDTO.setJianzhumianji("建筑面积:" + (house.getBuildSquare() == null ? "0" : house.getBuildSquare()) + "m²");//建筑面积
-                shareDTO.setJvillageacreage("计算面积:" + (house.getSquare() == null ? "0" : house.getSquare()) + "m²");//计算面积
-                String biaoqian = house.getLiangDian();//标签
-                List<String> biaoqians = new ArrayList<>();
-                if (!TextUtils.isEmpty(biaoqian)) {
-                    for (String s1 : biaoqian.split(",")) {
-                        if (!TextUtils.isEmpty(s1)) {
-                            biaoqians.add(s1);
-                        }
-                    }
-                }
-                biaoqians.add((house.getBuildSquare() == null ? "0" : house.getBuildSquare()) + "m²");
-                shareDTO.setBiaoqian(biaoqians);//亮点标签
-                BigDecimal money = house.getMoney();
-                shareDTO.setPrice("***" + (accessToken != null && money != null && money.toString().length() > 2 ?
-                        money.toString().substring(money.toString().length() - 2) : "00"));//精算总价
-                shareDTO.setShowHouse(house.getShowHouse());
-                shareDTO.setHouseId(house.getId());
-                shareDTO.setVillageId(house.getVillageId());//小区id
-                shareDTO.setVillageName(house.getResidential());//小区名
-                shareDTO.setLayoutId(house.getModelingLayoutId());//户型id
-                shareDTO.setLayoutleft(ml == null ? "" : ml.getName());//户型名称
-                String jobLocationDetail = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                        String.format(DjConstants.YZPageAddress.JOBLOCATIONDETAIL, userToken, cityId, "施工现场") + "&houseId=" + house.getId();
-                shareDTO.setUrl(jobLocationDetail);
-                Example example = new Example(HouseDesignImage.class);
-                example.createCriteria().andEqualTo("houseId", house.getId());
-                List<HouseDesignImage> houseDesignImages = houseDesignImageMapper.selectByExample(example);
-                if ((houseDesignImages != null) && (houseDesignImages.size() > 0)) {
-                    shareDTO.setImageNum(houseDesignImages.size() + "张图片");
-                    shareDTO.setImage(address + houseDesignImages.get(0).getImageurl());//户型图片
-                } else {
-                    shareDTO.setImageNum(0 + "张图片");
-                    shareDTO.setImage("");//户型图片
-                }
-                srlist.add(shareDTO);
-            }
+            List<House> houseList = iHouseMapper.getSameLayout(cityId, villageId, minSquare, maxSquare, houseType);
             PageInfo pageResult = new PageInfo(houseList);
+            List<ShareDTO> srlist = new ArrayList<>();
+            for (House house : houseList) {
+                srlist.add(convertHouse(house, accessToken));
+            }
             pageResult.setList(srlist);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
@@ -837,10 +885,62 @@ public class HouseService {
         }
     }
 
+    public ShareDTO convertHouse(House house, AccessToken accessToken) {
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        ModelingLayout ml = modelingLayoutMapper.selectByPrimaryKey(house.getModelingLayoutId());
+        ShareDTO shareDTO = new ShareDTO();
+        shareDTO.setType("1");
+        if (house.getShowHouse() == 0) {
+            if (accessToken != null) {
+                shareDTO.setName(house.getHouseName());
+            } else {
+                shareDTO.setName(house.getNoNumberHouseName());
+            }
+        } else {
+            shareDTO.setName("*栋*单元*号");
+        }
+        shareDTO.setJianzhumianji("建筑面积:" + (house.getBuildSquare() == null ? "0" : house.getBuildSquare()) + "m²");//建筑面积
+        shareDTO.setJvillageacreage("计算面积:" + (house.getSquare() == null ? "0" : house.getSquare()) + "m²");//计算面积
+        String biaoqian = house.getLiangDian();//标签
+        List<String> biaoqians = new ArrayList<>();
+        if (!TextUtils.isEmpty(biaoqian)) {
+            for (String s1 : biaoqian.split(",")) {
+                if (!TextUtils.isEmpty(s1)) {
+                    biaoqians.add(s1);
+                }
+            }
+        }
+        biaoqians.add((house.getBuildSquare() == null ? "0" : house.getBuildSquare()) + "m²");
+        shareDTO.setBiaoqian(biaoqians);//亮点标签
+        BigDecimal money = house.getMoney();
+        shareDTO.setPrice("***" + (accessToken != null && money != null && money.toString().length() > 2 ?
+                money.toString().substring(money.toString().length() - 2) : "00"));//精算总价
+        shareDTO.setShowHouse(house.getShowHouse());
+        shareDTO.setHouseId(house.getId());
+        shareDTO.setVillageId(house.getVillageId());//小区id
+        shareDTO.setVillageName(house.getResidential());//小区名
+        shareDTO.setLayoutId(house.getModelingLayoutId());//户型id
+        shareDTO.setLayoutleft(ml == null ? "" : ml.getName());//户型名称
+        String jobLocationDetail = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                String.format(DjConstants.YZPageAddress.JOBLOCATIONDETAIL, accessToken != null ? accessToken.getUserToken() : "", house.getCityId(), "施工现场") + "&houseId=" + house.getId();
+        shareDTO.setUrl(jobLocationDetail);
+        Example example = new Example(HouseDesignImage.class);
+        example.createCriteria().andEqualTo("houseId", house.getId());
+        List<HouseDesignImage> houseDesignImages = houseDesignImageMapper.selectByExample(example);
+        if ((houseDesignImages != null) && (houseDesignImages.size() > 0)) {
+            shareDTO.setImageNum(houseDesignImages.size() + "张图片");
+            shareDTO.setImage(address + houseDesignImages.get(0).getImageurl());//户型图片
+        } else {
+            shareDTO.setImageNum(0 + "张图片");
+            shareDTO.setImage("");//户型图片
+        }
+        return shareDTO;
+    }
 
     //装修指南
     public ServerResponse getRenovationManual(String userToken, Integer type) {
         try {
+            String imgUrl=configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             Member member = null;
             if (!CommonUtil.isEmpty(userToken)) {
                 AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
@@ -853,9 +953,10 @@ public class HouseService {
                 List<RenovationManual> listR = renovationManualMapper.getRenovationManualByWorkertyId(wt.getId());
                 Map<String, Object> wMap = new HashMap<String, Object>();
                 wMap.put("workerTypeName", wt.getName());
+                wMap.put("image", imgUrl+wt.getImage());
                 List<Map<String, Object>> listMap = new ArrayList<Map<String, Object>>();
                 for (RenovationManual r : listR) {
-                    Map<String, Object> map = CommonUtil.beanToMap(r);
+                    Map<String, Object> map = BeanUtils.beanToMap(r);
                     if (member != null) {
                         Example example = new Example(RenovationManualMember.class);
                         example.createCriteria().andEqualTo("renovationManualId", r.getId()).andEqualTo("memberId", member.getId());
@@ -878,7 +979,21 @@ public class HouseService {
             return ServerResponse.createByErrorMessage("系统出错,获取装修指南失败");
         }
     }
-
+    /**
+     * 装修指南明细
+     *
+     * @param id
+     * @return
+     */
+    public ServerResponse getRenovationManualinfo(String id) {
+        try {
+            RenovationManual renovationManual= renovationManualMapper.selectByPrimaryKey(id);
+            return ServerResponse.createBySuccess("ok",renovationManual);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,获取装修指南失败");
+        }
+    }
     /**
      * 保存装修指南
      *
@@ -1110,10 +1225,23 @@ public class HouseService {
     public ServerResponse getReferenceBudget(String villageId, Double minSquare, Double maxSquare, Integer houseType) {
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            String userToken = request.getParameter(Constants.USER_TOKEY);
+            AccessToken accessToken = null;
+            if (!CommonUtil.isEmpty(userToken)) {
+                accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            }
             List<House> listHouse = iHouseMapper.getReferenceBudget(villageId, houseType, minSquare, maxSquare);
             if (listHouse.size() > 0) {//根据条件查询所选小区总价最少的房子
+                List<ShareDTO> srlist = new ArrayList<>();
+                for (House house : listHouse) {
+                    srlist.add(convertHouse(house, accessToken));
+                }
                 request.setAttribute(Constants.CITY_ID, listHouse.get(0).getCityId());
-                return budgetWorkerAPI.gatEstimateBudgetByHId(request, listHouse.get(0).getId());
+                ServerResponse serverResponse = budgetWorkerAPI.gatEstimateBudgetByHId(request, listHouse.get(0).getId());
+//                JSONObject goods= (JSONObject)serverResponse.getResultObj();
+//                goods.put("houses",srlist);
+//                serverResponse.setResultObj(goods);
+                return serverResponse;
             }
             return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "暂无所需报价");
         } catch (Exception e) {

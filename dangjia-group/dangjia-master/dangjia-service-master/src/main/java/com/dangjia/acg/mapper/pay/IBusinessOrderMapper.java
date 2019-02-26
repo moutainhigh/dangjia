@@ -1,6 +1,5 @@
 package com.dangjia.acg.mapper.pay;
 
-import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -16,10 +15,12 @@ import java.util.List;
 @Repository
 public interface IBusinessOrderMapper extends Mapper<BusinessOrder> {
 
-    List<BusinessOrder> byMemberId(@Param("memberId")String memberId);
+    List<BusinessOrder> byMemberId(@Param("memberId") String memberId);
 
-    BusinessOrder byNumber(@Param("number")String number);
+    BusinessOrder byNumber(@Param("number") String number);
 
-    /**查询所有订单*/
-    List<BusinessOrder> getAllBusinessOrder();
+    /**
+     * 查询所有订单
+     */
+    List<BusinessOrder> getAllBusinessOrder(@Param("likeMobile") String likeMobile, @Param("likeAddress") String likeAddress);
 }

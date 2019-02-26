@@ -187,9 +187,11 @@
 		 g.is_switch as isSwitch,
 		 g.create_date as createDate,
 		 g.modify_date as modifyDate,
-		 p.unit_name as unitName
-		FROM dj_basics_group_link as g, dj_basics_product as p
-		where group_id= #{groupId} and p.id = g.product_id
+		 p.unit_name as unitName,
+		 p.convert_unit as convertUnit,
+		 unit.name as convertUnitName
+		FROM dj_basics_group_link as g, dj_basics_product as p, dj_basics_unit as unit
+		where group_id= #{groupId} and p.id = g.product_id and unit.id = p.convert_unit
 		ORDER BY g.create_date desc
 	</select>
 	<!-- 根据关联组id和货品id查询关联关系 -->

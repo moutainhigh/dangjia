@@ -11,6 +11,7 @@ import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
 import com.dangjia.acg.modle.deliver.OrderSplit;
+import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -58,7 +59,7 @@ public class MendRecordService {
             MendOrderDetail mendOrderDetail = new MendOrderDetail();
 
             if(type == 5){
-                /*OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
+                OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
                 mendOrderDetail.setNumber(orderSplit.getNumber());
                 mendOrderDetail.setType(5);
                 mendOrderDetail.setState(orderSplit.getApplyStatus());
@@ -83,7 +84,7 @@ public class MendRecordService {
                     map.put("totalPrice", orderSplitItem.getTotalPrice());
                     mapList.add(map);
                 }
-                mendOrderDetail.setMapList(mapList);*/
+                mendOrderDetail.setMapList(mapList);
 
             }else {
                 MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
@@ -203,7 +204,7 @@ public class MendRecordService {
      * 要补退记录
      *  0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料
      */
-    public ServerResponse mendList(String userToken, String houseId){
+    public ServerResponse mendList(String houseId){
         try{
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<Map<String,Object>> returnMap = new ArrayList<>();
@@ -276,7 +277,7 @@ public class MendRecordService {
             }
 
             /*要货单记录*/
-            /*example = new Example(OrderSplit.class);
+            example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andGreaterThan(OrderSplit.APPLY_STATUS,0);
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             if(orderSplitList.size() > 0){
@@ -287,7 +288,7 @@ public class MendRecordService {
                 map.put("name", "要货记录");
                 map.put("size", "共"+orderSplitList.size()+"条");
                 returnMap.add(map);
-            }*/
+            }
 
             return ServerResponse.createBySuccess("查询成功",returnMap);
         }catch (Exception e){

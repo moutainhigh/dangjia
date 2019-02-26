@@ -26,10 +26,19 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 	int updateSelf(@Param("houseFlowId") String houseFlowId);
 	/**支付时工种服务总价*/
 	Double getBudgetSerPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+	/**支付时工种未选择服务总价*/
+	Double getNotSerPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	/**支付时工种材料总价*/
 	Double getBudgetCaiPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+	/**支付时工种未选择材料总价*/
+	Double getNotCaiPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+
 	/**未支付材料精算*/
 	List<BudgetMaterial> getBudgetCaiList(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+
+	/**未支付材料精算*/
+	BudgetMaterial getBudgetCaiListByGoodsId(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId,@Param("goodsId")String goodsId);
+
 	/**未支付服务精算*/
 	List<BudgetMaterial> getBudgetSerList(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	/**查询所有商品精算*/

@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 
 
-/**9
+/**
+ * 9
  * 用户
+ *
  * @author: QiYuXiang
  * @date: 2018/10/24
  */
@@ -23,88 +25,129 @@ import javax.servlet.http.HttpServletRequest;
 public interface MemberAPI {
     @RequestMapping(value = "member/mobile", method = RequestMethod.POST)
     @ApiOperation(value = "获取用户手机资料", notes = "获取用户手机资料")
-    ServerResponse getMemberMobile(@ApiParam(name = "request", value = "请求") @RequestParam("request")HttpServletRequest request,
-                                   @ApiParam(name = "id", value = "来源ID") @RequestParam("id")String id,
-                                   @ApiParam(name = "idType", value = "来源类型：1=房屋ID, 2=用户ID") @RequestParam("idType")String idType);
+    ServerResponse getMemberMobile(@ApiParam(name = "request", value = "请求") @RequestParam("request") HttpServletRequest request,
+                                   @ApiParam(name = "id", value = "来源ID") @RequestParam("id") String id,
+                                   @ApiParam(name = "idType", value = "来源类型：1=房屋ID, 2=用户ID") @RequestParam("idType") String idType);
 
     @RequestMapping(value = "member/sms", method = RequestMethod.GET)
     @ApiOperation(value = "查询验证码", notes = "查询验证码")
-    String getSmsCode(@RequestParam("phone")String phone);
+    String getSmsCode(@RequestParam("phone") String phone);
+
     /**
      * 获取用户详细资料
-     * @param userToken  token
+     *
+     * @param userToken token
      * @return
      */
     @RequestMapping(value = "member/info", method = RequestMethod.POST)
     @ApiOperation(value = "获取用户详细资料", notes = "获取用户详细资料")
-    ServerResponse getMemberInfo(@RequestParam("userToken")String userToken);
+    ServerResponse getMemberInfo(@RequestParam("userToken") String userToken);
+
     /**
      * 登录 接口
-     * @param phone 手机号
+     *
+     * @param phone    手机号
      * @param password 密码
      * @param userRole app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
      * @return
      */
-    
-    
+
+
     @RequestMapping(value = "member/login", method = RequestMethod.POST)
     @ApiOperation(value = "用户登录", notes = "用户登录")
     ServerResponse login(
             @ApiParam(name = "phone", value = "手机号") @RequestParam("phone") String phone,
             @ApiParam(name = "password", value = "密码") @RequestParam("password") String password,
-            @ApiParam(name = "userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色") @RequestParam("userRole") String userRole) ;
+            @ApiParam(name = "userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色") @RequestParam("userRole") String userRole);
 
     /**
      * 接口注册获取验证码
+     *
      * @param phone 手机号
      * @return
      */
 
     @RequestMapping(value = "member/registerCode", method = RequestMethod.POST)
     @ApiOperation(value = "接口注册获取验证码", notes = "接口注册获取验证码")
-    ServerResponse registerCode( @ApiParam(name = "phone", value = "手机号") @RequestParam("phone") String phone) ;
+    ServerResponse registerCode(@ApiParam(name = "phone", value = "手机号") @RequestParam("phone") String phone);
 
     /**
      * 校验验证码并保存密码
-     * @param phone 手机号
+     *
+     * @param phone    手机号
      * @param password 密码
-     * @param smscode 验证码Code
+     * @param smscode  验证码Code
      * @return
      */
 
     @RequestMapping(value = "member/checkRegister", method = RequestMethod.POST)
     @ApiOperation(value = "校验验证码并保存密码", notes = "校验验证码并保存密码")
     ServerResponse checkRegister(@RequestParam("request") HttpServletRequest request,
-            @ApiParam(name = "phone", value = "手机号") @RequestParam("phone") String phone,
-            @ApiParam(name = "password", value = "密码") @RequestParam("password")String password,
-            @ApiParam(name = "smscode", value = "验证码Code") @RequestParam("smscode") int smscode,
-            @ApiParam(name = "invitationCode", value = "邀请码") @RequestParam("invitationCode") String invitationCode,
-            @ApiParam(name = "userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色") @RequestParam("userRole")  Integer userRole);
+                                 @ApiParam(name = "phone", value = "手机号") @RequestParam("phone") String phone,
+                                 @ApiParam(name = "password", value = "密码") @RequestParam("password") String password,
+                                 @ApiParam(name = "smscode", value = "验证码Code") @RequestParam("smscode") int smscode,
+                                 @ApiParam(name = "invitationCode", value = "邀请码") @RequestParam("invitationCode") String invitationCode,
+                                 @ApiParam(name = "userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色") @RequestParam("userRole") Integer userRole);
 
     /**
      * 工匠提交详细资料
-     * @param user 用户详细信息
-     * @param userToken  token
+     *
+     * @param user      用户详细信息
+     * @param userToken token
      * @return
      */
 
     @RequestMapping(value = "member/updateWokerRegister", method = RequestMethod.POST)
     @ApiOperation(value = "工匠提交详细资料", notes = "工匠提交详细资料")
-    ServerResponse updateWokerRegister(@RequestParam("member") Member user, @RequestParam("userToken") String userToken,@RequestParam("userRole")  String userRole);
-    
+    ServerResponse updateWokerRegister(@RequestParam("member") Member user, @RequestParam("userToken") String userToken, @RequestParam("userRole") String userRole);
+
+    /**
+     * 实名认证提交资料
+     *
+     * @param userToken token
+     * @param name      真实姓名
+     * @param idcaoda   身份证正面
+     * @param idcaodb   身份证反面
+     * @param idcaodall 半身照
+     * @param idnumber  身份证号
+     * @return
+     */
+    @RequestMapping(value = "member/certification", method = RequestMethod.POST)
+    @ApiOperation(value = "实名认证提交资料", notes = "实名认证提交资料")
+    ServerResponse certification(@RequestParam("userToken") String userToken
+            , @RequestParam("name") String name
+            , @RequestParam("idcaoda") String idcaoda
+            , @RequestParam("idcaodb") String idcaodb
+            , @RequestParam("idcaodall") String idcaodall
+            , @RequestParam("idnumber") String idnumber);
+
+    /**
+     * 工种认证提交申请
+     *
+     * @param userToken    token
+     * @param workerTypeId 工种类型的id
+     * @return
+     */
+    @RequestMapping(value = "member/certificationWorkerType", method = RequestMethod.POST)
+    @ApiOperation(value = "实名认证提交资料", notes = "实名认证提交资料")
+    ServerResponse certificationWorkerType(@RequestParam("userToken") String userToken
+            , @RequestParam("workerTypeId") String workerTypeId);
+
     /**
      * 找回密码 获取code
+     *
      * @param phone 手机号
      * @return
      */
 
     @RequestMapping(value = "member/forgotPasswordCode", method = RequestMethod.POST)
     @ApiOperation(value = "找回密码", notes = "找回密码 获取code")
-    ServerResponse forgotPasswordCode( @ApiParam(name = "phone", value = "手机号") @RequestParam("phone") String phone);
+    ServerResponse forgotPasswordCode(@ApiParam(name = "phone", value = "手机号") @RequestParam("phone") String phone);
 
     /**
      * 找回密码校验验证码
-     * @param phone 手机号
+     *
+     * @param phone   手机号
      * @param smscode 验证码Code
      * @return
      * @throws Exception
@@ -119,7 +162,8 @@ public interface MemberAPI {
 
     /**
      * 找回密码更新密码
-     * @param phone 手机号
+     *
+     * @param phone    手机号
      * @param password 密码
      * @return
      * @throws Exception
@@ -128,7 +172,7 @@ public interface MemberAPI {
     @ApiOperation(value = "找回密码更新密码", notes = "找回密码更新密码")
     ServerResponse updateForgotPassword(
             @ApiParam(name = "phone", value = "手机号") @RequestParam("phone") String phone,
-            @ApiParam(name = "password", value = "密码") @RequestParam("password")String password,
+            @ApiParam(name = "password", value = "密码") @RequestParam("password") String password,
             @ApiParam(name = "token", value = "checkForgotPasswordCode返回的临时token") @RequestParam("token") String token
     );
 

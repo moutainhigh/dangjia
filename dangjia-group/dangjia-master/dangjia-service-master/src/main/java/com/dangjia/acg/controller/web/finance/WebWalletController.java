@@ -4,6 +4,7 @@ import com.dangjia.acg.api.web.finance.WebWalletAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.finance.WebWalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +25,13 @@ public class WebWalletController implements WebWalletAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getAllWallet(HttpServletRequest request, PageDTO pageDTO, String workerId, String houseId) {
-        return webWalletService.getAllWallet(pageDTO, workerId, houseId);
+    public ServerResponse getAllWallet(HttpServletRequest request, PageDTO pageDTO, String workerId, String houseId, String likeMobile, String likeAddress) {
+        return webWalletService.getAllWallet(pageDTO, workerId, houseId, likeMobile, likeAddress);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addWallet(HttpServletRequest request, WorkerDetail workerDetail) {
+        return webWalletService.addWallet(workerDetail);
     }
 }

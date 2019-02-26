@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * author: Ronalcheng
+ * author: RonalchenggetImagesList
  * Date: 2018/11/10 0010
  * Time: 16:21
  * 设计相关
@@ -111,58 +111,63 @@ public class DesignService {
      * 设计图列表
      */
     public ServerResponse getImagesList(HttpServletRequest request, String houseId){
-        List<String> designImageList = designImageTypeMapper.getDesignImageIdList(houseId);
-        String typeList = designImageList.get(0);
-        typeList = typeList.replaceAll("'","");
-        typeList = typeList.replaceAll(" ","");
-        String[] typeArray = StringUtils.split(typeList,",");
-        //查询所有免费风格
-        List<DesignImageType> designImageTypeList = designImageTypeMapper.getDesignImageTypeList(typeArray);
-        //查询额外付费图
-        Example example = new Example(HouseDesignImage.class);
-        example.createCriteria().andEqualTo("houseId", houseId).andEqualTo("sell", 1);
-        List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);
+        try{
+            List<String> designImageList = designImageTypeMapper.getDesignImageIdList(houseId);
+            String typeList = designImageList.get(0);
+            typeList = typeList.replaceAll("'","");
+            typeList = typeList.replaceAll(" ","");
+            String[] typeArray = StringUtils.split(typeList,",");
+            //查询所有免费风格
+            List<DesignImageType> designImageTypeList = designImageTypeMapper.getDesignImageTypeList(typeArray);
+            //查询额外付费图
+            Example example = new Example(HouseDesignImage.class);
+            example.createCriteria().andEqualTo("houseId", houseId).andEqualTo("sell", 1);
+            List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);
 
-        List<HouseDesignImageDTO> houseDesignImageDTOList = new ArrayList<HouseDesignImageDTO>();
-        HouseDesignImageDTO houseDesignImageDTO;
-        //先遍历免费图
-        for (DesignImageType designImageType : designImageTypeList){
-            HouseDesignImage hdi = designImageTypeMapper.getHouseDesignImage(houseId,designImageType.getId());
-            if(hdi == null){
-                houseDesignImageDTO = new HouseDesignImageDTO();
-                houseDesignImageDTO.setHouseId(houseId);
-                houseDesignImageDTO.setDesignImageTypeId(designImageType.getId());
-                houseDesignImageDTO.setImageurl(null);
-                houseDesignImageDTO.setName(designImageType.getName());
-                houseDesignImageDTO.setSell(0);
-                houseDesignImageDTO.setPrice(new BigDecimal(0));
-            }else {
-                houseDesignImageDTO = new HouseDesignImageDTO();
-                houseDesignImageDTO.setHouseId(houseId);
-                houseDesignImageDTO.setDesignImageTypeId(designImageType.getId());
-                if (StringUtil.isNotEmpty(hdi.getImageurl())){
-                    houseDesignImageDTO.setImageurl(hdi.getImageurl());
-                }else{
+            List<HouseDesignImageDTO> houseDesignImageDTOList = new ArrayList<HouseDesignImageDTO>();
+            HouseDesignImageDTO houseDesignImageDTO;
+            //先遍历免费图
+            for (DesignImageType designImageType : designImageTypeList){
+                HouseDesignImage hdi = designImageTypeMapper.getHouseDesignImage(houseId,designImageType.getId());
+                if(hdi == null){
+                    houseDesignImageDTO = new HouseDesignImageDTO();
+                    houseDesignImageDTO.setHouseId(houseId);
+                    houseDesignImageDTO.setDesignImageTypeId(designImageType.getId());
                     houseDesignImageDTO.setImageurl(null);
+                    houseDesignImageDTO.setName(designImageType.getName());
+                    houseDesignImageDTO.setSell(0);
+                    houseDesignImageDTO.setPrice(new BigDecimal(0));
+                }else {
+                    houseDesignImageDTO = new HouseDesignImageDTO();
+                    houseDesignImageDTO.setHouseId(houseId);
+                    houseDesignImageDTO.setDesignImageTypeId(designImageType.getId());
+                    if (StringUtil.isNotEmpty(hdi.getImageurl())){
+                        houseDesignImageDTO.setImageurl(hdi.getImageurl());
+                    }else{
+                        houseDesignImageDTO.setImageurl(null);
+                    }
+                    houseDesignImageDTO.setName(designImageType.getName());
+                    houseDesignImageDTO.setSell(0);
+                    houseDesignImageDTO.setPrice(new BigDecimal(0));
                 }
-                houseDesignImageDTO.setName(designImageType.getName());
-                houseDesignImageDTO.setSell(0);
-                houseDesignImageDTO.setPrice(new BigDecimal(0));
+                houseDesignImageDTOList.add(houseDesignImageDTO);
             }
-            houseDesignImageDTOList.add(houseDesignImageDTO);
+            //收费图
+            for (HouseDesignImage houseDesignImage : houseDesignImageList){
+                houseDesignImageDTO = new HouseDesignImageDTO();
+                houseDesignImageDTO.setHouseId(houseId);
+                houseDesignImageDTO.setDesignImageTypeId(houseDesignImage.getDesignImageTypeId());
+                houseDesignImageDTO.setImageurl(houseDesignImage.getImageurl());
+                houseDesignImageDTO.setName(designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId()).getName());
+                houseDesignImageDTO.setSell(1);
+                houseDesignImageDTO.setPrice(designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId()).getPrice());
+                houseDesignImageDTOList.add(houseDesignImageDTO);
+            }
+            return ServerResponse.createBySuccess("查询列表成功",houseDesignImageDTOList);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("异常");
         }
-        //收费图
-        for (HouseDesignImage houseDesignImage : houseDesignImageList){
-            houseDesignImageDTO = new HouseDesignImageDTO();
-            houseDesignImageDTO.setHouseId(houseId);
-            houseDesignImageDTO.setDesignImageTypeId(houseDesignImage.getDesignImageTypeId());
-            houseDesignImageDTO.setImageurl(houseDesignImage.getImageurl());
-            houseDesignImageDTO.setName(designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId()).getName());
-            houseDesignImageDTO.setSell(1);
-            houseDesignImageDTO.setPrice(designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId()).getPrice());
-            houseDesignImageDTOList.add(houseDesignImageDTO);
-        }
-        return ServerResponse.createBySuccess("查询列表成功",houseDesignImageDTOList);
     }
 
     /**

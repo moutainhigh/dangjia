@@ -2,6 +2,7 @@ package com.dangjia.acg.api.web.finance;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.worker.WorkerDetail;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -25,7 +26,13 @@ public interface WebWalletAPI {
     @PostMapping("web/finance/wallet/getAllWallet")
     @ApiOperation(value = "工人和业主支付订单流水", notes = "工人和业主支付订单流水")
     ServerResponse getAllWallet(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO,
-                                @RequestParam("workerId")String workerId, @RequestParam("houseId")String houseId);
+                                @RequestParam("workerId")String workerId, @RequestParam("houseId")String houseId,
+                                @RequestParam("likeMobile")String likeMobile, @RequestParam("likeAddress") String likeAddress);
 
-
+    /**
+     * 新增工人和业主支付订单流水
+     */
+    @PostMapping("web/finance/wallet/addWallet")
+    @ApiOperation(value = "新增工人和业主支付订单流水", notes = "新增工人和业主支付订单流水")
+    ServerResponse addWallet(@RequestParam("request") HttpServletRequest request, @RequestParam("workerDetail") WorkerDetail workerDetail);
 }

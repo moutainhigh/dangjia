@@ -33,37 +33,22 @@ public class RenovationManualController implements WebRenovationManualAPI {
 
      /**
      *新增装修指南
-     * @param name
-     * @param workerTypeId
-     * @param orderNumber
-     * @param types
-     * @param url
-     * @param urlName
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse addRenovationManual(String name, String workerTypeId, Integer orderNumber, String types,
-                                              String url, String urlName){
-        return renovationManualService.addRenovationManual(name,workerTypeId,orderNumber,types,url,urlName);
+    public ServerResponse addRenovationManual(RenovationManual renovationManual){
+        return renovationManualService.addRenovationManual(renovationManual);
     }
 
     /**
      * 修改装修指南
-     * @param id
-     * @param name
-     * @param orderNumber
-     * @param types
-     * @param state
-     * @param url
-     * @param urlName
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse updateRenovationManual(String id,String name,Integer orderNumber,String types,Integer state,
-                                                 String url,String urlName){
-        return renovationManualService.updateRenovationManual(id,name,orderNumber,types,state,url,urlName);
+    public ServerResponse updateRenovationManual(RenovationManual renovationManual){
+        return renovationManualService.updateRenovationManual(renovationManual);
     }
 
     /**
