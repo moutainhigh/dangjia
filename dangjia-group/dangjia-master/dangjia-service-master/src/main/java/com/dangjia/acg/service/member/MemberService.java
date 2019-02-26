@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.member;
 
 import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
@@ -24,6 +25,7 @@ import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.*;
+import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.activity.RedPackPayService;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -44,6 +46,7 @@ import tk.mybatis.mapper.entity.Example;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -79,6 +82,8 @@ public class MemberService {
     private CustomerRecordService customerRecordService;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private SupplierProductAPI supplierProductAPI;
 
     /****
      * 注入配置
@@ -91,7 +96,7 @@ public class MemberService {
      *
      * @param request
      * @param id      来源ID
-     * @param idType  1=房屋ID, 2=用户ID
+     * @param idType  1=房屋ID, 2=用户ID, 3=供应商ID
      * @return
      */
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
@@ -102,6 +107,11 @@ public class MemberService {
             if (house != null) {
                 Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
                 mobile = member == null ? "" : member.getMobile();
+            }
+        } else if (idType.equals("3")) {
+            Supplier supplier = supplierProductAPI.getSupplier(id);
+            if (supplier != null) {
+                mobile = supplier == null ? "" : supplier.getTelephone();
             }
         } else {
             Member member = memberMapper.selectByPrimaryKey(id);
@@ -122,8 +132,11 @@ public class MemberService {
         if (accessToken == null) {//无效的token
             return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
         } else {
-            Member member = memberMapper.selectByPrimaryKey(accessToken.getMemberId());
-            accessToken.setMember(member);
+            Member user = memberMapper.selectByPrimaryKey(accessToken.getMemberId());
+            if (user == null) {
+                return ServerResponse.createByErrorMessage("用户不存在");
+            }
+            updataMember(user, accessToken);
             return ServerResponse.createBySuccess("有效！", accessToken);
         }
     }
@@ -197,14 +210,15 @@ public class MemberService {
             return "手机号不正确";
         }
         Example example = new Example(Sms.class);
-        example.createCriteria().andEqualTo("mobile",phone);
+        example.createCriteria().andEqualTo("mobile", phone);
         example.orderBy(Sms.CREATE_DATE).desc();
-        List<Sms>  sms =smsMapper.selectByExample(example);
-        if(sms==null||sms.size()==0){
+        List<Sms> sms = smsMapper.selectByExample(example);
+        if (sms == null || sms.size() == 0) {
             return "无效验证码";
         }
         return sms.get(0).getCode();
     }
+
     /**
      * 校验验证码并保存密码
      */
@@ -247,6 +261,7 @@ public class MemberService {
             user.setNickName("当家-" + CommonUtil.randomString(6));
             user.setInviteNum(0);
             user.setIsCrowned(0);
+            user.setHead("qrcode/logo.png");
             memberMapper.insertSelective(user);
 //			memberMapper.updateByPrimaryKeySelective(user);
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
@@ -292,7 +307,7 @@ public class MemberService {
         if (user.getReferrals() != null && user.getReferrals().equals(user.getMobile())) {
             return ServerResponse.createByErrorMessage("自己不能作为推荐人");
         }
-        if (user != null && user.getId() != null) {//存在注册信息
+        if (user.getId() != null) {//存在注册信息
             WorkerType wt = workerTypeMapper.selectByPrimaryKey(user.getWorkerTypeId());
             if (wt != null) {
                 user.setWorkerTypeId(wt.getId());
@@ -330,6 +345,86 @@ public class MemberService {
     }
 
     /**
+     * 实名认证提交资料
+     *
+     * @param userToken token
+     * @param name      真实姓名
+     * @param idcaoda   身份证正面
+     * @param idcaodb   身份证反面
+     * @param idcaodall 半身照
+     * @param idnumber  身份证号
+     * @return
+     */
+    public ServerResponse certification(String userToken, String name, String idcaoda, String idcaodb, String idcaodall, String idnumber) {
+        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+        if (accessToken == null) {//无效的token
+            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+        }
+        Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+        if (user == null) {
+            return ServerResponse.createByErrorMessage("用户不存在");
+        }
+        if (user.getRealNameState() == 1) {
+            return ServerResponse.createByErrorMessage("您的资料正在审核中，请勿重复提交");
+        }
+        if (user.getRealNameState() == 3) {
+            return ServerResponse.createByErrorMessage("您的资料已审核通过，请勿重复提交");
+        }
+        if (user.getRealNameState() == 0 &&
+                (StringUtils.isEmpty(name) || StringUtils.isEmpty(idcaoda)
+                        || StringUtils.isEmpty(idcaodb) || StringUtils.isEmpty(idcaodall)
+                        || StringUtils.isEmpty(idnumber))) {
+            return ServerResponse.createByErrorMessage("请确认您的资料是否全部填写？");
+        }
+        if (!StringUtils.isEmpty(idnumber)) {
+            String idCard = RKIDCardUtil.getIDCardValidate(idnumber);
+            if (!"".equals(idCard)) {//验证身份证
+                return ServerResponse.createByErrorMessage(idCard);
+            }
+        }
+        if (!StringUtils.isEmpty(name))
+            user.setName(name);
+        if (!StringUtils.isEmpty(idcaoda))
+            user.setIdcaoda(idcaoda);
+        if (!StringUtils.isEmpty(idcaodb))
+            user.setIdcaodb(idcaodb);
+        if (!StringUtils.isEmpty(idcaodall))
+            user.setIdcaodall(idcaodall);
+        if (!StringUtils.isEmpty(idnumber))
+            user.setIdnumber(idnumber);
+        user.setRealNameState(1);
+        memberMapper.updateByPrimaryKeySelective(user);
+        updataMember(user, accessToken);
+        return ServerResponse.createBySuccessMessage("提交资料成功");
+    }
+
+    /**
+     * 工种认证提交申请
+     *
+     * @param userToken    token
+     * @param workerTypeId 工种类型的id
+     * @return
+     */
+    public ServerResponse certificationWorkerType(String userToken, String workerTypeId) {
+        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+        if (accessToken == null) {//无效的token
+            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+        }
+        Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+        if (user == null) {
+            return ServerResponse.createByErrorMessage("用户不存在");
+        }
+        if (user.getCheckType() != 5 && user.getCheckType() != 1) {
+            return ServerResponse.createByErrorMessage("您已提交过工种，不能再次提交");
+        }
+        user.setWorkerTypeId(workerTypeId);
+        user.setCheckType(0);
+        memberMapper.updateByPrimaryKeySelective(user);
+        updataMember(user, accessToken);
+        return ServerResponse.createBySuccessMessage("提交工种认证成功");
+    }
+
+    /**
      * 找回密码 获取code
      *
      * @return
@@ -361,7 +456,7 @@ public class MemberService {
      * @return
      * @throws Exception
      */
-    public ServerResponse checkForgotPasswordCode(String phone, int smscode) throws Exception {
+    public ServerResponse checkForgotPasswordCode(String phone, int smscode) {
         Member user = new Member();
         user.setMobile(phone);
         user.setSmscode(smscode);
@@ -433,30 +528,22 @@ public class MemberService {
     /**
      * 业主列表
      */
-    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String memberNickName, String parentId, String childId) {
+    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String searchKey, String parentId, String childId,String orderBy) {
         try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-//            Example example = new Example(Member.class);
-//            Example.Criteria criteria = example.createCriteria();
-//            criteria.andEqualTo(Member.DATA_STATUS, "0");
-//            example.orderBy(Member.CREATE_DATE).desc();
-//            List<Member> list = memberMapper.selectByExample(example);
-
             List<String> childsLabelIdList = new ArrayList<>();
             if (StringUtils.isNotBlank(parentId)) {
                 if (!StringUtils.isNotBlank(childId)) {//如果 子标签为null ，就是父标签的所有标签
                     List<MemberLabel> childsList = iMemberLabelMapper.getChildLabelByParentId(parentId);
-                    for (int i = 0; i < childsList.size(); i++)
-                        childsLabelIdList.add(childsList.get(i).getId());
+                    for (MemberLabel aChildsList : childsList) childsLabelIdList.add(aChildsList.getId());
                 } else {
                     childsLabelIdList.add(childId);
                 }
             }
             String[] childsLabelIdArr = new String[childsLabelIdList.size()];
             childsLabelIdList.toArray(childsLabelIdArr);
-
-            List<Member> list = memberMapper.getMemberListByName(memberNickName, stage, childsLabelIdArr);
-            List<MemberCustomerDTO> mcDTOListOrderBy = new ArrayList<>();
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<Member> list = memberMapper.getMemberListByName(searchKey, stage, childsLabelIdArr,orderBy);
+            PageInfo pageResult = new PageInfo(list);
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
             for (Member member : list) {
                 logger.info("getMemberListByName id:" + member.getId());
@@ -470,36 +557,46 @@ public class MemberService {
                     if (customer.getRemindRecordId() != null)//有提醒记录的 更新 为最新的更新沟通记录
                         customerRecordService.updateMaxNearRemind(customer);
                 }
-
                 List<MemberLabel> memberLabelList = new ArrayList<>();
                 if (customer.getLabelIdArr() != null) {
                     String[] labelIdArr = customer.getLabelIdArr().split(",");
-                    for (int i = 0; i < labelIdArr.length; i++) {
-                        MemberLabel memberlabel = iMemberLabelMapper.selectByPrimaryKey(labelIdArr[i]);
+                    for (String aLabelIdArr : labelIdArr) {
+                        MemberLabel memberlabel = iMemberLabelMapper.selectByPrimaryKey(aLabelIdArr);
                         if (memberlabel != null)
                             memberLabelList.add(memberlabel);
                     }
                 }
-
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
                 mcDTO.setMemberId(member.getId());
                 mcDTO.setMemberName(member.getName());
                 mcDTO.setMemberNickName(member.getNickName());
                 mcDTO.setMobile(member.getMobile());
                 mcDTO.setReferrals(member.getReferrals());
+                Member referralsMember = memberMapper.selectByPrimaryKey(member.getReferrals());
+                if (referralsMember != null) {
+                    mcDTO.setReferralsMobile(referralsMember.getMobile());
+                } else {
+                    mcDTO.setReferralsMobile("");
+                }
                 mcDTO.setSource("来源未知");
                 mcDTO.setStage(customer.getStage());
                 mcDTO.setUserId(customer.getUserId());
+                mcDTO.setCreateDate(member.getCreateDate());
                 if (customer.getUserId() != null) {
                     MainUser mainUser = userMapper.selectByPrimaryKey(customer.getUserId());
                     mcDTO.setUserName(mainUser.getUsername());
                 }
-
                 //找到提醒内容 ： 离当前时间最近的那一条
                 if (customer.getRemindRecordId() != null) {
                     CustomerRecord remindCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getRemindRecordId());
                     mcDTO.setRemindContent(remindCustomerRecord.getDescribes());
                     mcDTO.setRemindTime(remindCustomerRecord.getRemindTime());
+                    if (remindCustomerRecord.getRemindTime() != null) {
+                        mcDTO.setRemindTimeOvertime(
+                                Long.compare(remindCustomerRecord.getRemindTime().getTime(), new Date().getTime()));
+                    } else {
+                        mcDTO.setRemindTimeOvertime(-1);
+                    }
                 }
                 if (customer.getCurrRecordId() != null) {
                     CustomerRecord currCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getCurrRecordId());
@@ -511,11 +608,9 @@ public class MemberService {
                 }
                 mcDTO.setMemberLabelList(memberLabelList);
                 mcDTOList.add(mcDTO);
-                mcDTOListOrderBy.add(mcDTO);
             }
 //            logger.info(" mcDTOList getMemberNickName:" + mcDTOList.get(0).getMemberNickName());
 //            logger.info("mcDTOList size:" + mcDTOList.size() +" mcDTOListOrderBy:"+ mcDTOListOrderBy.size() + " list:"+ list.size());
-            PageInfo pageResult = new PageInfo(list);
             pageResult.setList(mcDTOList);
             return ServerResponse.createBySuccess("查询用户列表成功", pageResult);
         } catch (Exception e) {
@@ -524,6 +619,7 @@ public class MemberService {
         }
 
     }
+
 
     /**
      * 业主列表
@@ -563,5 +659,175 @@ public class MemberService {
         Map memberMap = BeanUtils.beanToMap(member);
         memberMap.put("invitationNum", memberMapper.selectCountByExample(example));
         return ServerResponse.createBySuccess("ok", memberMap);
+    }
+
+    /**
+     * 查询用户实名认证列表
+     *
+     * @param pageDTO
+     * @param searchKey     申请人或申请人手机好关键字
+     * @param realNameState -1:全部，1:认证中，2:认证被驳回，3:认证通过 （默认-1）
+     * @return
+     */
+    public ServerResponse certificationList(PageDTO pageDTO, String searchKey, Integer realNameState) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            Example example = new Example(Member.class);
+            Example.Criteria criteria = example.createCriteria();
+            if (!CommonUtil.isEmpty(searchKey)) {
+                criteria.andCondition("(name like '%" + searchKey
+                        + "%' or nick_name like '%" + searchKey
+                        + "%' or mobile like '%" + searchKey + "%')");
+            }
+            if (realNameState == null) realNameState = -1;
+            switch (realNameState) {
+                case -1:
+                    criteria.andCondition("real_name_state != 0");
+                    break;
+                case 1:
+                case 2:
+                case 3:
+                    criteria.andEqualTo(Member.REAL_NAME_STATE, realNameState);
+                    break;
+                default:
+                    return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+                            , "查无数据");
+            }
+            List<Member> members = memberMapper.selectByExample(example);
+            if (members.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+                        , "查无数据");
+            }
+            PageInfo pageResult = new PageInfo(members);
+            for (Member member : members) {
+                member.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                member.setPassword(null);
+            }
+            pageResult.setList(members);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 查询用户实名认证详情
+     *
+     * @param userId 用户id
+     * @return
+     */
+    public ServerResponse certificationDetails(String userId) {
+        if (CommonUtil.isEmpty(userId)) {
+            return ServerResponse.createByErrorMessage("传入参数错误");
+        }
+        Member member = memberMapper.selectByPrimaryKey(userId);
+        if (member == null || member.getRealNameState() == 0) {
+            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+                    , "查无数据");
+        }
+        member.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+        member.setPassword(null);
+        return ServerResponse.createBySuccess("查询成功", member);
+    }
+
+    /**
+     * 实名认证审核提交
+     *
+     * @param userId           用户id
+     * @param realNameState    2:认证驳回，3:认证通过
+     * @param realNameDescribe 实名认证描述
+     * @return
+     */
+    public ServerResponse certificationAuditing(String userId, Integer realNameState, String realNameDescribe) {
+        if (CommonUtil.isEmpty(userId)) {
+            return ServerResponse.createByErrorMessage("传入参数错误");
+        }
+        if (CommonUtil.isEmpty(realNameState)) {
+            return ServerResponse.createByErrorMessage("传入参数错误");
+        }
+        Member user = memberMapper.selectByPrimaryKey(userId);
+        if (user == null) {
+            return ServerResponse.createByErrorMessage("用户不存在");
+        }
+        if (user.getRealNameState() == 0) {
+            return ServerResponse.createByErrorMessage("请通知用户提交相关资料");
+        }
+        user.setRealNameState(realNameState);
+        if (realNameState == 3) {
+            user.setRealNameDescribe("审核通过");
+        } else {
+            user.setRealNameDescribe(CommonUtil.isEmpty(realNameDescribe) ? "审核不通过" : realNameDescribe);
+        }
+        memberMapper.updateByPrimaryKeySelective(user);
+        updataAccessTokenMember(user);
+        return ServerResponse.createBySuccessMessage("操作成功");
+    }
+
+    /**
+     * 工匠审核
+     *
+     * @param workerId      工匠id
+     * @param checkType     1审核未通过, 2审核已通过
+     * @param checkDescribe 工匠审核描述
+     * @return
+     */
+    public ServerResponse checkWorker(String workerId, Integer checkType, String checkDescribe) {
+        if (CommonUtil.isEmpty(workerId)) {
+            return ServerResponse.createByErrorMessage("传入参数错误");
+        }
+        if (CommonUtil.isEmpty(checkType)) {
+            return ServerResponse.createByErrorMessage("传入参数错误");
+        }
+        Member user = memberMapper.selectByPrimaryKey(workerId);
+        if (user == null) {
+            return ServerResponse.createByErrorMessage("用户不存在");
+        }
+        if (user.getRealNameState() != 3) {
+            return ServerResponse.createByErrorMessage("请先审核'实名认证'");
+        }
+        if (user.getCheckType() == 5) {
+            return ServerResponse.createByErrorMessage("请通知用户提交工种");
+        }
+        user.setCheckType(checkType);
+        if (checkType == 2) {
+            user.setCheckDescribe("审核通过");
+        } else {
+            user.setCheckDescribe(CommonUtil.isEmpty(checkDescribe) ? "审核不通过" : checkDescribe);
+        }
+        memberMapper.updateByPrimaryKeySelective(user);
+        updataAccessTokenMember(user);
+        return ServerResponse.createBySuccessMessage("操作成功");
+    }
+
+    private void updataAccessTokenMember(Member user) {
+        String userRole = "role" + 1 + ":" + user.getId();
+        String token = redisClient.getCache(userRole, String.class);
+        updataMember(user, token);
+        userRole = "role" + 2 + ":" + user.getId();
+        token = redisClient.getCache(userRole, String.class);
+        updataMember(user, token);
+    }
+
+    private void updataMember(Member user, String token) {
+        if (!CommonUtil.isEmpty(token)) {
+            AccessToken accessToken = redisClient.getCache(token + Constants.SESSIONUSERID, AccessToken.class);
+            updataMember(user, accessToken);
+        }
+    }
+
+    private void updataMember(Member user, AccessToken accessToken) {
+        if (accessToken != null) {//无效的token
+            user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+            user.setPassword(null);
+            accessToken.setMember(user);
+            if (!StringUtils.isEmpty(user.getWorkerTypeId())) {
+                WorkerType wt = workerTypeMapper.selectByPrimaryKey(user.getWorkerTypeId());
+                if (wt != null) {
+                    accessToken.setWorkerTypeName(wt.getName());
+                }
+            }
+            redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
+        }
     }
 }

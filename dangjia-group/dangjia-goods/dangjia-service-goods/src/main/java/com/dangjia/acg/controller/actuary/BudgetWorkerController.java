@@ -1,9 +1,7 @@
 package com.dangjia.acg.controller.actuary;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
-import com.dangjia.acg.api.data.GetForBudgetAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.actuary.BudgetWorkerService;
@@ -182,5 +180,12 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
     @ApiMethod
     public JSONArray getAllTechnologyByHouseId(String houseId) {
         return budgetWorkerService.getAllTechnologyByHouseId(houseId);
+    }
+
+    /**
+     * 工种施工节点
+     */
+    public JSONArray getTecByHouseFlowId(String houseId,String houseFlowId) {
+        return budgetWorkerService.getTecByHouseFlowId(houseId, houseFlowId);
     }
 }

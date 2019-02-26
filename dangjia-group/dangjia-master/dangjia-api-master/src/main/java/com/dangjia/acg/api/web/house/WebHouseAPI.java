@@ -23,11 +23,15 @@ public interface WebHouseAPI {
 
     @PostMapping("web/house/getList")
     @ApiOperation(value = "装修列表", notes = "装修列表")
-    ServerResponse getList(@RequestParam("request") HttpServletRequest request, @RequestParam("memberId") String memberId);
+    ServerResponse getList(@RequestParam("request") HttpServletRequest request,
+                           @RequestParam("pageDTO") PageDTO pageDTO,
+                           @RequestParam("searchKey") String searchKey,
+                           @RequestParam("memberId") String memberId);
 
     @PostMapping("web/house/startWorkPage")
     @ApiOperation(value = "确认开工页面", notes = "确认开工页面")
-    ServerResponse startWorkPage(@RequestParam("request") HttpServletRequest request, @RequestParam("houseId") String houseId);
+    ServerResponse startWorkPage(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("houseId") String houseId);
 
     @PostMapping("web/house/startWork")
     @ApiOperation(value = "确认开工", notes = "确认开工")

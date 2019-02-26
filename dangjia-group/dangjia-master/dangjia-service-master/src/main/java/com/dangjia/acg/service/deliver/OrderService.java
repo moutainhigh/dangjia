@@ -254,7 +254,7 @@ public class OrderService {
 
             Example example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
-                    .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());;
+                    .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             if (orderSplitList.size() == 0){
                 return ServerResponse.createByErrorMessage("没有生成要货单");

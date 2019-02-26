@@ -22,6 +22,17 @@
 		and
 		    p.id = #{productId}
 	</select>
+
+	<!--根据货品id查询品牌系列-->
+	<select id="brandSeriesByPid" resultType="com.dangjia.acg.modle.brand.BrandSeries">
+        select bs.*
+		From dj_basics_brand_series bs, dj_basics_product p
+		where
+		    p.brand_series_id = bs.id
+		and
+		    p.id = #{productId}
+	</select>
+
 	<!-- 查询所有 -->
 	<select id="queryBrandSeries" resultType="com.dangjia.acg.modle.brand.BrandSeries">
 		SELECT

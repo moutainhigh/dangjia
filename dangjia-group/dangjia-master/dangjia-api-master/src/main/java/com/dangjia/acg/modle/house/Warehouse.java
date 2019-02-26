@@ -52,6 +52,11 @@ public class Warehouse extends BaseEntity {
 	@ApiModelProperty("已要总数")
 	private Double askCount;
 
+	@Column(name = "receive")
+	@Desc(value = "收货总数")
+	@ApiModelProperty("收货总数")
+	private Double receive;//收货总数
+
 	@Column(name = "back_count")
 	@Desc(value = "退总数")
 	@ApiModelProperty("退总数")

@@ -160,9 +160,22 @@
 		<include refid="all_Base_columns"/>
 		FROM dj_basics_group_link
 		where group_id=#{groupId}
-		and product_id=#{productId}
+		<if test="productId!=null and productId!=''">
+			and p.product_id=#{productId}
+		</if>
 		ORDER BY create_date desc
 	</select>
+
+	<!-- 根据关联组id和goodsId查询关联关系 -->
+	<select id="queryGroupLinkByGidAndGoodsId" resultType="com.dangjia.acg.modle.basics.GroupLink">
+		SELECT
+		<include refid="all_Base_columns"/>
+		FROM dj_basics_group_link
+		where group_id=#{groupId}
+		and goods_id=#{goodsId}
+		ORDER BY create_date desc
+	</select>
+
 
 	<!-- 根据关联组id和货品id查询关联关系 -->
 	<select id="queryGroupLinkByGroupIdAndPid" resultType="com.dangjia.acg.modle.basics.GroupLink">

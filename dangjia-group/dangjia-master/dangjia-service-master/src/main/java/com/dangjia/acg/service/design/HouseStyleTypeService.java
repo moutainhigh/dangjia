@@ -2,7 +2,7 @@ package com.dangjia.acg.service.design;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.github.pagehelper.PageHelper;
@@ -54,7 +54,7 @@ public class HouseStyleTypeService {
         PageInfo pageResult = new PageInfo(houseStyleTypeList);
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (HouseStyleType houseStyleType : houseStyleTypeList) {
-            Map<String, Object> map = CommonUtil.beanToMap(houseStyleType);
+            Map<String, Object> map = BeanUtils.beanToMap(houseStyleType);
             mapList.add(map);
         }
         pageResult.setList(mapList);

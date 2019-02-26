@@ -26,16 +26,51 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<include refid="all_columns"/>
 		FROM dj_pay_business_order
 		where member_id = #{memberId}
-		and state = 3
 		ORDER BY create_date desc
 	</select>
 
 	<!-- 根据所有订单查询 -->
 	<select id="getAllBusinessOrder" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.pay.BusinessOrder">
 		SELECT
-		<include refid="all_columns"/>
-		FROM dj_pay_business_order
-		ORDER BY create_date desc
+		pbo.id,
+		pbo.member_id as memberId,
+		pbo.number,
+		pbo.pay_order_number as payOrderNumber,
+		pbo.house_id as houseId,
+		pbo.task_id as taskId,
+		pbo.state,
+		pbo.total_price as totalPrice,
+		pbo.discounts_price as discountsPrice,
+		pbo.pay_price as payPrice,
+		pbo.type,
+		pbo.data_status as dataStatus,
+		pbo.create_date as createDate,
+		pbo.modify_date as modifyDate,
+
+		house.id,
+		house.residential,
+		house.building,
+		house.unit,
+		house.number,
+		house.member_id,
+		member.mobile
+		FROM dj_pay_business_order as pbo,dj_house as house,dj_member as member
+		where
+		member.id = house.member_id
+		AND pbo.house_id = house.id
+		<if test="likeAddress!=null and likeAddress!=''">
+			AND (
+			house.residential LIKE CONCAT('%',#{likeAddress},'%')
+			OR house.building LIKE CONCAT('%',#{likeAddress},'%')
+			OR house.unit LIKE CONCAT('%',#{likeAddress},'%')
+			OR house.number LIKE CONCAT('%',#{likeAddress},'%')
+			)
+		</if>
+		<if test="likeMobile!=null and likeMobile!=''">
+			AND member.mobile LIKE CONCAT('%',#{likeMobile},'%')
+		</if>
+		ORDER BY pbo.create_date desc
+
 	</select>
 
     <!-- 根据orderId查询 -->

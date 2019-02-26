@@ -25,4 +25,9 @@ public class RenovationStage extends BaseEntity {
 	private String name;
 
 
+	@Column(name = "image")
+	@Desc(value = "图标")
+	@ApiModelProperty("图标")
+	private String image;
+
 }

@@ -11,9 +11,11 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IBankCardMapper;
 import com.dangjia.acg.mapper.worker.*;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,10 +43,10 @@ public class WebWalletService {
     /**
      * 所有用户（工人和业主）流水
      */
-    public ServerResponse getAllWallet(PageDTO pageDTO, String workerId, String houseId) {
+    public ServerResponse getAllWallet(PageDTO pageDTO, String workerId, String houseId, String likeMobile, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<WorkerDetail> list = iWorkerDetailMapper.getAllWallet(workerId, houseId);
+            List<WorkerDetail> list = iWorkerDetailMapper.getAllWallet(workerId, houseId, likeMobile, likeAddress);
             List<WebWorkerDetailDTO> workerDetailDTOList = new ArrayList<>();
             for (WorkerDetail workerDetail : list) {
                 WebWorkerDetailDTO workerDetailDTO = new WebWorkerDetailDTO();
@@ -54,6 +56,13 @@ public class WebWalletService {
                 House house = iHouseMapper.selectByPrimaryKey(workerDetail.getHouseId());
                 if (house != null)
                     workerDetailDTO.setHouseName(house.getHouseName());
+                if (StringUtils.isNoneBlank(workerDetail.getWorkerId())) {
+                    Member member = iMemberMapper.selectByPrimaryKey(workerDetail.getWorkerId());
+                    if (member != null) {
+                        workerDetailDTO.setMemberId(member.getId());
+                        workerDetailDTO.setMobile(member.getMobile());
+                    }
+                }
                 workerDetailDTO.setMoney(workerDetail.getMoney());
                 workerDetailDTO.setName(workerDetail.getName());
                 workerDetailDTO.setState(workerDetail.getState());
@@ -69,7 +78,45 @@ public class WebWalletService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
 
+    /**
+     * 添加用户（工人和业主）流水
+     */
+    public ServerResponse addWallet(WorkerDetail workerDetail) {
+        try {
+            if (!StringUtils.isNoneBlank(workerDetail.getName()))
+                return ServerResponse.createByErrorMessage("流水说明 不能为null");
+//            if (workerDetail.getMoney() != null)
+//                return ServerResponse.createByErrorMessage("费用金额 不能为null");
+//            if (workerDetail.getState() != null)
+//                return ServerResponse.createByErrorMessage("费用类型 不能为null");
+            if (!StringUtils.isNoneBlank(workerDetail.getDefinedName()))
+                return ServerResponse.createByErrorMessage("自定义流水说明 不能为null");
+
+            //记录到管家流水
+            WorkerDetail newWorkerDetail = new WorkerDetail();
+            newWorkerDetail.setName(workerDetail.getName());
+            newWorkerDetail.setWorkerId(workerDetail.getWorkerId());
+            Member worker = iMemberMapper.selectByPrimaryKey(workerDetail.getWorkerId());
+            if (worker != null)
+                newWorkerDetail.setWorkerName(worker.getName());
+
+            if (workerDetail.getHouseId() != null)
+                newWorkerDetail.setHouseId(workerDetail.getHouseId());
+            newWorkerDetail.setMoney(workerDetail.getMoney());
+            newWorkerDetail.setState(workerDetail.getState());//进钱  0工钱收入,1提现,2自定义增加金额,3自定义减少金额,4退材料退款,5剩余材料退款,6退人工退款
+            newWorkerDetail.setDefinedName(workerDetail.getDefinedName());
+//            newWorkerDetail.setHaveMoney(supervisorHWO.getHaveMoney());
+//            newWorkerDetail.setHouseWorkerOrderId(supervisorHWO.getId());
+//            newWorkerDetail.setApplyMoney(supervisorHF.getPatrolMoney());
+//            newWorkerDetail.setWalletMoney(supervisor.getHaveMoney());
+            iWorkerDetailMapper.insert(newWorkerDetail);
+            return ServerResponse.createBySuccessMessage("保存成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("保存失败");
+        }
     }
 
 

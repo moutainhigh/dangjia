@@ -1,8 +1,5 @@
 package com.dangjia.acg.dto.member;
 
-import com.dangjia.acg.modle.member.Customer;
-import com.dangjia.acg.modle.member.CustomerRecord;
-import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberLabel;
 import lombok.Data;
 
@@ -22,6 +19,7 @@ public class MemberCustomerDTO implements Comparable<MemberCustomerDTO> {
     private String memberNickName;//业主昵称
     private String mobile;//手机
     private String referrals;//邀请人
+    private String referralsMobile;//邀请人电话
     private String source;//来源
     private Integer stage;//阶段
     private String userId;//当前客服id
@@ -29,7 +27,9 @@ public class MemberCustomerDTO implements Comparable<MemberCustomerDTO> {
     private String remindContent;//提醒内容
     private String remarks;//业主备注
     private Date remindTime;//提醒时间
+    private int remindTimeOvertime;//提醒时间是否超时 -1:未超过，0：相等，1：超过了
     private Date lastRecord;//上次跟进时间
+    protected Date createDate;// 创建日期
     private List<MemberLabel> memberLabelList;//多个标签对象
 
     @Override

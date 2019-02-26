@@ -7,7 +7,7 @@ import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.basics.*;
@@ -252,7 +252,7 @@ public class GoodsGroupService {
                         }
                     }
                     p.setImage(imgStr);
-                    Map<String, Object> map = CommonUtil.beanToMap(p);
+                    Map<String, Object> map = BeanUtils.beanToMap(p);
                     map.put("imageUrl", imgUrlStr);
                     if (!StringUtils.isNotBlank(p.getLabelId())) {
                         map.put("labelId", "");
@@ -266,7 +266,7 @@ public class GoodsGroupService {
                     mapList.add(map);
                 }
                 LOG.info("mapList:::" + mapList.size());
-                Map<String, Object> gMap = CommonUtil.beanToMap(goods);
+                Map<String, Object> gMap = BeanUtils.beanToMap(goods);
                 gMap.put("productList", mapList);
                 gMapList.add(gMap);
             }

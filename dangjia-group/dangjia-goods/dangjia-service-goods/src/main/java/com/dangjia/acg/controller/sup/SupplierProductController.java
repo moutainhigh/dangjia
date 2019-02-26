@@ -4,6 +4,7 @@ import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.service.sup.SupplierProductService;
 import com.dangjia.acg.service.sup.SupplierService;
 import com.github.pagehelper.PageInfo;
@@ -11,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @ClassName: SupplierProductController
@@ -27,8 +26,12 @@ public class SupplierProductController implements SupplierProductAPI {
     private SupplierService supplierService;
     @Autowired
     private SupplierProductService supplierProductService;
-
-
+    /**
+     * 查询指定供应商
+     */
+    public Supplier getSupplier(String productId) {
+        return supplierService.getSupplier(productId);
+    }
     /**
      * 供应商登录
      */

@@ -5,11 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.mapper.basics.IGoodsMapper;
-import com.dangjia.acg.mapper.basics.ILabelMapper;
-import com.dangjia.acg.mapper.basics.IProductMapper;
+import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
@@ -40,6 +38,10 @@ public class GoodsService {
     private static Logger LOG = LoggerFactory.getLogger(GoodsService.class);
     @Autowired
     private IGoodsMapper iGoodsMapper;
+    @Autowired
+    private IGoodsSeriesMapper iGoodsSeriesMapper;
+    @Autowired
+    private IUnitMapper iUnitMapper;
     @Autowired
     private IProductMapper iProductMapper;
     @Autowired
@@ -80,17 +82,33 @@ public class GoodsService {
             iGoodsMapper.insert(goods);
             if (buy != 2) //非自购
             {
-                JSONArray arr = JSONArray.parseArray(arrString);
-                for (int i = 0; i < arr.size(); i++) {//新增goods关联品牌系列
-                    JSONObject obj = arr.getJSONObject(i);
+                if (!StringUtils.isNoneBlank(arrString)) {
                     GoodsSeries gs = new GoodsSeries();
                     gs.setGoodsId(goods.getId());
-                    gs.setBrandId(obj.getString("brandId"));
-                    gs.setSeriesId(obj.getString("seriesId"));
-                    gs.setCreateDate(new Date());
-                    gs.setModifyDate(new Date());
-                    iGoodsMapper.insertGoodsSeries(gs);
+                    gs.setBrandId(null);
+                    gs.setSeriesId(null);
+                    iGoodsSeriesMapper.insert(gs);
+                } else {
+                    JSONArray arr = JSONArray.parseArray(arrString);
+                    for (int i = 0; i < arr.size(); i++) {//新增goods关联品牌系列
+                        JSONObject obj = arr.getJSONObject(i);
+                        GoodsSeries gs = new GoodsSeries();
+                        gs.setGoodsId(goods.getId());
+                        if (!StringUtils.isNoneBlank(obj.getString("brandId"))) {
+                            gs.setBrandId(null);
+                        } else {
+                            gs.setBrandId(obj.getString("brandId"));
+                        }
+
+                        if (!StringUtils.isNoneBlank(obj.getString("seriesId"))) {
+                            gs.setSeriesId(null);
+                        } else {
+                            gs.setSeriesId(obj.getString("seriesId"));
+                        }
+                        iGoodsSeriesMapper.insert(gs);
+                    }
                 }
+
             }
 
             return ServerResponse.createBySuccess("新增成功", goods.getId());
@@ -192,18 +210,38 @@ public class GoodsService {
             iGoodsMapper.updateByPrimaryKeySelective(goods);
             if (buy != 2) //非自购goods ，有品牌
             {
-                JSONArray arr = JSONArray.parseArray(arrString);
-                iGoodsMapper.deleteGoodsSeries(id);//先删除goods所有跟品牌关联
-                for (int i = 0; i < arr.size(); i++) {//新增goods关联品牌系列
-                    JSONObject obj = arr.getJSONObject(i);
+                if (!StringUtils.isNoneBlank(arrString)) {
                     GoodsSeries gs = new GoodsSeries();
                     gs.setGoodsId(id);
-                    gs.setBrandId(obj.getString("brandId"));
-                    gs.setSeriesId(obj.getString("seriesId"));
+                    gs.setBrandId(null);
+                    gs.setSeriesId(null);
                     gs.setCreateDate(new Date());
                     gs.setModifyDate(new Date());
-                    iGoodsMapper.insertGoodsSeries(gs);
+                    iGoodsSeriesMapper.insert(gs);
+                }else{
+                    JSONArray arr = JSONArray.parseArray(arrString);
+                    iGoodsMapper.deleteGoodsSeries(id);//先删除goods所有跟品牌关联
+                    for (int i = 0; i < arr.size(); i++) {//新增goods关联品牌系列
+                        JSONObject obj = arr.getJSONObject(i);
+                        GoodsSeries gs = new GoodsSeries();
+                        gs.setGoodsId(id);
+
+                        if (!StringUtils.isNoneBlank(obj.getString("brandId"))) {
+                            gs.setBrandId(null);
+                        } else {
+                            gs.setBrandId(obj.getString("brandId"));
+                        }
+
+                        if (!StringUtils.isNoneBlank(obj.getString("seriesId"))) {
+                            gs.setSeriesId(null);
+                        } else {
+                            gs.setSeriesId(obj.getString("seriesId"));
+                        }
+                        iGoodsSeriesMapper.insert(gs);
+                    }
                 }
+
+
             }
 
             return ServerResponse.createBySuccessMessage("修改成功");
@@ -258,7 +296,7 @@ public class GoodsService {
             List<Goods> goodsList = iGoodsMapper.queryGoodsList(categoryId, name);
             List<Map<String, Object>> gMapList = new ArrayList<>();
             for (Goods goods : goodsList) {
-                Map<String, Object> gMap = CommonUtil.beanToMap(goods);
+                Map<String, Object> gMap = BeanUtils.beanToMap(goods);
                 List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
                 List<Map<String, Object>> mapList = new ArrayList<>();
                 for (Product p : productList) {
@@ -278,7 +316,7 @@ public class GoodsService {
                         }
                     }
                     p.setImage(imgStr);
-                    Map<String, Object> map = CommonUtil.beanToMap(p);
+                    Map<String, Object> map = BeanUtils.beanToMap(p);
                     map.put("imageUrl", imgUrlStr);
                     if (!StringUtils.isNotBlank(p.getLabelId())) {
                         map.put("labelId", "");
@@ -324,7 +362,7 @@ public class GoodsService {
             List<Goods> goodsList = iGoodsMapper.queryGoodsList(categoryId, name);
             List<Map<String, Object>> gMapList = new ArrayList<>();
             for (Goods goods : goodsList) {
-                Map<String, Object> gMap = CommonUtil.beanToMap(goods);
+                Map<String, Object> gMap = BeanUtils.beanToMap(goods);
                 List<Map<String, Object>> mapList = new ArrayList<>();
 
                 if (2 != goods.getBuy())//非自购
@@ -350,7 +388,7 @@ public class GoodsService {
                             }
                         }
                         p.setImage(imgStr);
-                        Map<String, Object> map = CommonUtil.beanToMap(p);
+                        Map<String, Object> map = BeanUtils.beanToMap(p);
                         map.put("imageUrl", imgUrlStr);
                         if (!StringUtils.isNotBlank(p.getLabelId())) {
                             map.put("labelId", "");
@@ -400,9 +438,9 @@ public class GoodsService {
             List<Goods> goodsList = iGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
             List<Map<String, Object>> gMapList = new ArrayList<>();
             for (Goods goods : goodsList) {
-                Map<String, Object> gMap = CommonUtil.beanToMap(goods);
+                Map<String, Object> gMap = BeanUtils.beanToMap(goods);
                 List<Map<String, Object>> mapList = new ArrayList<>();
-
+                gMap.put("goodsUnitName", iUnitMapper.selectByPrimaryKey(goods.getUnitId()).getName());
                 if (2 != goods.getBuy())//非自购
                 {
                     List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
@@ -426,8 +464,11 @@ public class GoodsService {
                                 imgUrlStr += imgArr[i] + ",";
                             }
                         }
+
+
                         p.setImage(imgStr);
-                        Map<String, Object> map = CommonUtil.beanToMap(p);
+                        Map<String, Object> map = BeanUtils.beanToMap(p);
+                        map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
                         map.put("imageUrl", imgUrlStr);
                         if (!StringUtils.isNotBlank(p.getLabelId())) {
                             map.put("labelId", "");
@@ -488,7 +529,7 @@ public class GoodsService {
                     if (product.getLabelId() != null) {
                         if (!product.getLabelId().equals(srcLabelId))
                             continue;
-//                        Map<String, Object> map = CommonUtil.beanToMap(p);
+//                        Map<String, Object> map = BeanUtils.beanToMap(p);
                         Map<String, Object> map = new HashMap<>();
                         Label label = iLabelMapper.selectByPrimaryKey(product.getLabelId());
                         if (label != null) {

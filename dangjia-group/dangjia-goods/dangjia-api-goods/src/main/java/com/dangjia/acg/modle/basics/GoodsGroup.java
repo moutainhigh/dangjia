@@ -26,6 +26,6 @@ public class GoodsGroup extends BaseEntity {
 	private Integer state;//是否启用 1启用2不启用
 
 	@Column(name = "switch_arr")
-	private String switchArr;//可切换的所有组id（逗号分隔）
+	private String switchArr;//可切换的所有组id（逗号分隔） 存储：所有 和当前关联组中的所有 goodsId 完全相同，商品数量完全相同
 	
 }

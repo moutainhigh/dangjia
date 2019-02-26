@@ -6,7 +6,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.IBrandMapper;
 import com.dangjia.acg.mapper.basics.IBrandSeriesMapper;
@@ -63,7 +63,7 @@ public class BrandService {
 				for(BrandSeries bs:mapList){
 					String imageUrl=bs.getImage();
 					bs.setImage(address+bs.getImage());
-					Map<String,Object> mapSeries = CommonUtil.beanToMap(bs);
+					Map<String,Object> mapSeries = BeanUtils.beanToMap(bs);
 					mapSeries.put("imageUrl",imageUrl);
 					mapList2.add(mapSeries);
 				}
@@ -91,7 +91,7 @@ public class BrandService {
 			for(BrandSeries bs:mapList){
 				String imageUrl=bs.getImage();
 				bs.setImage(address+bs.getImage());
-				Map<String,Object> mapSeries = CommonUtil.beanToMap(bs);
+				Map<String,Object> mapSeries = BeanUtils.beanToMap(bs);
 				mapSeries.put("imageUrl",imageUrl);
 				mapList2.add(mapSeries);
 			}
@@ -199,7 +199,7 @@ public class BrandService {
 				for(BrandSeries bs:mapList) {
 					String imageUrl=bs.getImage();
 					bs.setImage(address+bs.getImage());
-					Map<String,Object> mapSeries = CommonUtil.beanToMap(bs);
+					Map<String,Object> mapSeries = BeanUtils.beanToMap(bs);
 					mapSeries.put("imageUrl",imageUrl);
 					mapList2.add(mapSeries);
 				}

@@ -1,6 +1,9 @@
 package com.dangjia.acg.service.worker;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -70,6 +73,8 @@ public class StewardService {
     private ConfigUtil configUtil;
     @Autowired
     private IModelingVillageMapper modelingVillageMapper;
+    @Autowired
+    private BudgetWorkerAPI budgetWorkerAPI;
 
     @Autowired
     private ConfigMessageService configMessageService;
@@ -229,11 +234,25 @@ public class StewardService {
         try{
             List<WorkerDisclosure> wdList = workerDisclosureMapper.getWorkerDisclosureList(houseFlowId);
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+            JSONArray jsonArray = budgetWorkerAPI.getTecByHouseFlowId(hf.getHouseId(),hf.getId());
+            for(int i=0;i<jsonArray.size();i++){
+                JSONObject object = jsonArray.getJSONObject(i);
+                String technologyName = object.getString("technologyName");
+                String content = object.getString("content");
+                WorkerDisclosure workerDisclosure = new WorkerDisclosure();
+                workerDisclosure.setName(technologyName);
+                workerDisclosure.setDetails(content);
+                wdList.add(workerDisclosure);
+            }
+            if(hf.getWorkSteta()==4){
+                return ServerResponse.createBySuccess("查询成功", wdList);
+            }
             hf.setWorkSteta(4);//施工中
             houseFlowMapper.updateByPrimaryKeySelective(hf);
-
             House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
-            configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","大管家交底",String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_FINISHED,house.getHouseName()) ,"");
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
+            configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","大管家交底",
+                    String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_FINISHED,house.getHouseName(),workerType.getName()) ,"");
             return ServerResponse.createBySuccess("查询成功", wdList);
         }catch (Exception e){
             e.printStackTrace();
@@ -256,7 +275,8 @@ public class StewardService {
             if(!hf.getWorkerId().equals(worker.getId())){
                 return ServerResponse.createByErrorMessage("交底人不匹配");
             }
-            String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.READPROJECTINFO,userToken,hf.getCityId(),"交底详情")+"&houseFlowId=" +houseFlowId;
+            String url=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                    String.format(DjConstants.GJPageAddress.READPROJECTINFO,userToken,hf.getCityId(),"交底详情")+"&houseFlowId=" +houseFlowId;
             return ServerResponse.createBySuccess("交底成功", url);
         }catch (Exception e){
             return ServerResponse.createByErrorMessage("扫码失败");
@@ -305,7 +325,8 @@ public class StewardService {
             courseDTO.setHouseFlowId(houseFlowId);
             courseDTO.setHouseFlowApplyId("");
             String  userToken=redisClient.getCache("role2:"+houseFlow.getWorkerId(),String.class);
-            courseDTO.setRewardUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.JFREGULATIONS,userToken,houseFlow.getCityId(),"选择奖罚条例"));//奖罚页面
+            courseDTO.setRewardUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                    String.format(DjConstants.GJPageAddress.JFREGULATIONS,userToken,houseFlow.getCityId(),"选择奖罚条例"));//奖罚页面
             if(houseFlow.getWorkType() == 4 && houseFlow.getWorkSteta() == 3){//待交底
                 Example example = new Example(WorkerDisclosure.class);
                 example.createCriteria().andEqualTo("state", 1);

@@ -7,6 +7,7 @@ import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.sup.Supplier;
+import com.dangjia.acg.modle.sup.SupplierProduct;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -24,6 +25,12 @@ import java.util.List;
 @Api(description = "给master提供精算数据")
 @FeignClient("dangjia-service-goods")
 public interface ForMasterAPI {
+
+
+    @PostMapping("/data/forMaster/getSupplierProduct")
+    @ApiOperation(value = "查询供应价", notes = "查询供应价")
+    SupplierProduct getSupplierProduct(@RequestParam("cityId")String cityId, @RequestParam("supplierId")String supplierId,
+                                       @RequestParam("productId")String productId);
 
     @PostMapping("/data/forMaster/getSupplier")
     @ApiOperation(value = "查询供应商", notes = "查询供应商")
@@ -77,8 +84,18 @@ public interface ForMasterAPI {
     Double getBudgetCaiPrice(@RequestParam("houseId")String houseId, @RequestParam("workerTypeId")String workerTypeId,
                                           @RequestParam("cityId")String cityId);
 
+    @PostMapping("/data/forMaster/getNotCaiPrice")
+    @ApiOperation(value = "支付时工种未选择材料总价", notes = "支付时工种未选择材料总价")
+    Double getNotCaiPrice(@RequestParam("houseId")String houseId, @RequestParam("workerTypeId")String workerTypeId,
+                             @RequestParam("cityId")String cityId);
+
     @PostMapping("/data/forMaster/getBudgetSerPrice")
     @ApiOperation(value = "支付时工种服务总价", notes = "支付时工种服务总价")
     Double getBudgetSerPrice(@RequestParam("houseId")String houseId, @RequestParam("workerTypeId")String workerTypeId,
                                            @RequestParam("cityId")String cityId);
+
+    @PostMapping("/data/forMaster/getNotSerPrice")
+    @ApiOperation(value = "支付时工种未选择服务总价", notes = "支付时工种未选择服务总价")
+    Double getNotSerPrice(@RequestParam("houseId")String houseId, @RequestParam("workerTypeId")String workerTypeId,
+                             @RequestParam("cityId")String cityId);
 }

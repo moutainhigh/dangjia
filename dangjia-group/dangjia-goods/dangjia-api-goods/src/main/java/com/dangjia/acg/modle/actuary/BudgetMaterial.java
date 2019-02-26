@@ -64,7 +64,12 @@ public class BudgetMaterial extends BaseEntity{
 	private String description; //页面描述 备注
 
 	@Column(name = "shop_count")
-	private Double shopCount;//数量
+	private Double shopCount;//购买总数 (精算的时候，用户手动填写的购买数量， 该单位是 product 的convertUnit换算单位 )
+
+	//单位换算成 goods 表里的unit_name 后的购买总数
+	// （相当于 小单位 转成 大单位后的购买数量  公式：budgetMaterial.setConvertCount(Math.ceil(shopCount / pro.getConvertQuality()));）
+	@Column(name = "convert_count")
+	private Double convertCount;
 
 	/*@Column(name = "actuarial_quantity")
 	private Double actuarialQuantity;*///精算量

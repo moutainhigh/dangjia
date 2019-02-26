@@ -32,6 +32,11 @@ public class SplitDeliver extends BaseEntity {
     @ApiModelProperty("房子ID")
     private String houseId;
 
+    @Column(name = "order_split_id")
+    @Desc(value = "要货单id")
+    @ApiModelProperty("要货单id")
+    private String orderSplitId;
+
     @Column(name = "total_amount")
     @Desc(value = "发货单总额")
     @ApiModelProperty("发货单总额")

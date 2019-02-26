@@ -40,19 +40,71 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ORDER BY create_date DESC
     </select>
 
+    <!--&lt;!&ndash;所有订单流水 &ndash;&gt;-->
+    <!--<select id="getAllWallet" resultType="com.dangjia.acg.modle.worker.WorkerDetail">-->
+        <!--select-->
+        <!--<include refid="new_columns" />-->
+        <!--from dj_worker_worker_detail-->
+        <!--where 1=1-->
+        <!--<if test="workerId!=null and workerId!=''">-->
+            <!--and worker_id=#{workerId}-->
+        <!--</if>-->
+        <!--<if test="houseId!=null and houseId!=''">-->
+            <!--and house_id=#{houseId}-->
+        <!--</if>-->
+        <!--ORDER BY create_date DESC-->
+    <!--</select>-->
     <!--所有订单流水 -->
     <select id="getAllWallet" resultType="com.dangjia.acg.modle.worker.WorkerDetail">
         select
-        <include refid="new_columns" />
-        from dj_worker_worker_detail
+        wwd.id,
+        wwd.name,
+        wwd.worker_id as workerId,
+        wwd.worker_name as workerName,
+        wwd.house_id as houseId,
+        wwd.money,
+        wwd.state,
+        wwd.defined_worker_id as definedWorkerId,
+        wwd.defined_name as definedName,
+        wwd.have_money as haveMoney,
+        wwd.house_worker_order_id as houseWorkerOrderId,
+        wwd.apply_money as applyMoney,
+        wwd.wallet_money as walletMoney,
+        wwd.create_date as createDate,
+        wwd.modify_date as modifyDate,
+
+        house.id,
+        house.residential,
+        house.building,
+        house.unit,
+        house.number,
+        house.member_id,
+        member.mobile
+        FROM dj_worker_worker_detail as wwd
+        left  JOIN dj_house as house
+        on (wwd.house_id = house.id  )
+        left  JOIN dj_member as member
+        on (member.id = wwd.worker_id )
         where 1=1
         <if test="workerId!=null and workerId!=''">
-            and worker_id=#{workerId}
+            and wwd.worker_id=#{workerId}
         </if>
         <if test="houseId!=null and houseId!=''">
-            and house_id=#{houseId}
+            and wwd.house_id=#{houseId}
         </if>
-        ORDER BY create_date DESC
+        <if test="likeAddress!=null and likeAddress!=''">
+            AND wwd.house_id = house.id
+            AND (
+            house.residential LIKE CONCAT('%',#{likeAddress},'%')
+            OR house.building LIKE CONCAT('%',#{likeAddress},'%')
+            OR house.unit LIKE CONCAT('%',#{likeAddress},'%')
+            OR house.number LIKE CONCAT('%',#{likeAddress},'%')
+            )
+        </if>
+        <if test="likeMobile!=null and likeMobile!=''">
+            AND member.mobile LIKE CONCAT('%',#{likeMobile},'%')
+        </if>
+        ORDER BY wwd.create_date desc
     </select>
 
     <!--统计总支出钱 -->

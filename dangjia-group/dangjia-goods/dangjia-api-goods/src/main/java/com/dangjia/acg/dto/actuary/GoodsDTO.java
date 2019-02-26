@@ -16,7 +16,7 @@ public class GoodsDTO {
     private String budgetMaterialId;
     private String srcGroupId;//该product所在的原关联组id
     private int isSwitch;//可切换性0:可切换；1不可切换
-    private String targetGroupId;//可切换的目标关联组id
+//    private String targetGroupId;//可切换的目标关联组id
     private String productId;
     private String goodsId;
     private String image;//product图 1张

@@ -12,5 +12,9 @@ import java.util.List;
  */
 @Repository
 public interface ISupplierProductMapper extends Mapper<SupplierProduct> {
+
+    /**根据供应商id,货品id*/
+    SupplierProduct getSupplierProduct(@Param("supplierId")String supplierId,@Param("productId")String productId);
+
     List<SupplierProduct> querySupplierProduct(@Param("productId")String productId);
 }

@@ -30,6 +30,9 @@ public interface IGroupLinkMapper extends Mapper<GroupLink> {
     List<GroupLink> queryGroupLinkByGidAndPid(@Param("groupId") String groupId, @Param("productId") String productId);
 
     //根据关联组id和货品id查询关联关系
+    List<GroupLink> queryGroupLinkByGidAndGoodsId(@Param("groupId") String groupId, @Param("goodsId") String goodsId);
+
+    //根据关联组id和货品id查询关联关系
     GroupLink queryGroupLinkByGroupIdAndPid(@Param("groupId") String groupId, @Param("productId") String productId);
 
     //根据货品id查询关联关系

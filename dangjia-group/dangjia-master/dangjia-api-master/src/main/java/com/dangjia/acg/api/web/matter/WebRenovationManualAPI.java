@@ -24,14 +24,11 @@ public interface WebRenovationManualAPI {
 
     @PostMapping("web/renovationManual/addRenovationManual")
     @ApiOperation(value = "新增装修指南", notes = "新增装修指南")
-    ServerResponse addRenovationManual(@RequestParam("name")String name,@RequestParam("workerTypeId")String workerTypeId,@RequestParam("orderNumber")Integer orderNumber,
-                                       @RequestParam("types")String types,@RequestParam("url")String url,@RequestParam("urlName")String urlName);
+    ServerResponse addRenovationManual(@RequestParam("renovationManual")RenovationManual renovationManual);
 
     @PostMapping("web/renovationManual/updateRenovationManual")
     @ApiOperation(value = "修改装修指南", notes = "修改装修指南")
-    ServerResponse updateRenovationManual(@RequestParam("id")String id,@RequestParam("name")String name,@RequestParam("orderNumber")Integer orderNumber,
-                                          @RequestParam("types")String types,@RequestParam("state")Integer state,
-                                          @RequestParam("url")String url, @RequestParam("urlName")String urlName);
+    ServerResponse updateRenovationManual(@RequestParam("renovationManual")RenovationManual renovationManual);
 
     @PostMapping("web/renovationManual/deleteRenovationManual")
     @ApiOperation(value = "删除装修指南", notes = "删除装修指南")

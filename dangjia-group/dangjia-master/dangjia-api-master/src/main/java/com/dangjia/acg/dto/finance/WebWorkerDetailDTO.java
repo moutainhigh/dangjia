@@ -19,6 +19,8 @@ public class WebWorkerDetailDTO {
     private String id;//id
     private String name;//说明
     private String workerName;//用户姓名
+    private String memberId;//用户id
+    private String mobile;//电话
     private String houseName;//房子名字
     private BigDecimal money;// 本次金额
     private Integer state;// 0工钱收入,1提现,2自定义增加金额,3自定义减少金额,4退材料退款,5剩余材料退款,6退人工退款

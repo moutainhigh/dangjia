@@ -10,8 +10,10 @@ import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
+import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
+import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.sup.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,8 @@ public class SplitDeliverService {
     private ConfigUtil configUtil;
     @Autowired
     private ForMasterAPI forMasterAPI;
+    @Autowired
+    private IWarehouseMapper warehouseMapper;
 
 
     /**
@@ -56,6 +60,10 @@ public class SplitDeliverService {
                 OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
                 orderSplitItem.setReceive(receive);//本次收货数量
                 orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
+                /*统计收货数量*/
+                Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), splitDeliver.getHouseId());
+                warehouse.setReceive(warehouse.getReceive() + receive);
+                warehouseMapper.updateByPrimaryKeySelective(warehouse);
             }
 
             return ServerResponse.createBySuccessMessage("操作成功");
@@ -75,8 +83,16 @@ public class SplitDeliverService {
             splitDeliver.setImage(image);//收货图片
             splitDeliver.setModifyDate(new Date());//收货时间
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
-
             orderSplitItemMapper.affirmSplitDeliver(splitDeliverId);
+            /*统计收货数量*/
+            Example example = new Example(OrderSplitItem.class);
+            example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliverId);
+            List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+            for (OrderSplitItem orderSplitItem : orderSplitItemList){
+                Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), splitDeliver.getHouseId());
+                warehouse.setReceive(warehouse.getReceive() + orderSplitItem.getNum());
+                warehouseMapper.updateByPrimaryKeySelective(warehouse);
+            }
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
             e.printStackTrace();
@@ -115,6 +131,14 @@ public class SplitDeliverService {
             splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
             splitDeliverDTO.setSupState(splitDeliver.getSupState());//大管家收货状态
 
+            List<String> imageList = new ArrayList<>();
+            String[] imageArr = splitDeliver.getImage().split(",");
+            for (int i=0;i<imageArr.length;i++){
+                String image = address + imageArr[i];
+                imageList.add(image);
+            }
+            splitDeliverDTO.setImageList(imageList);
+
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
@@ -129,6 +153,8 @@ public class SplitDeliverService {
                 splitDeliverItemDTO.setUnitName(orderSplitItem.getUnitName());
                 splitDeliverItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(orderSplitItem.getProductId()));
                 splitDeliverItemDTO.setPrice(orderSplitItem.getPrice());
+                splitDeliverItemDTO.setId(orderSplitItem.getId());
+                splitDeliverItemDTO.setReceive(orderSplitItem.getReceive());//收货数量
                 splitDeliverItemDTOList.add(splitDeliverItemDTO);
             }
             splitDeliverDTO.setSplitDeliverItemDTOList(splitDeliverItemDTOList);//明细
@@ -148,7 +174,7 @@ public class SplitDeliverService {
         try{
             Example example = new Example(SplitDeliver.class);
             if (shipState == 5){
-                example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId);
+                example.createCriteria().andEqualTo(SplitDeliver.ORDER_SPLIT_ID, houseId);//中台用
             }else {
                 example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId).andEqualTo(SplitDeliver.SHIP_STATE,shipState);
             }
@@ -163,6 +189,7 @@ public class SplitDeliverService {
                 splitDeliverDTO.setSendTime(splitDeliver.getSendTime());//发货时间
                 splitDeliverDTO.setModifyDate(splitDeliver.getModifyDate());//收货时间
                 Supplier supplier = forMasterAPI.getSupplier(splitDeliver.getSupplierId());
+                splitDeliverDTO.setSupId(supplier.getId());//供应商id
                 splitDeliverDTO.setSupMobile(supplier.getTelephone());
                 splitDeliverDTO.setSupName(supplier.getName());
                 splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());

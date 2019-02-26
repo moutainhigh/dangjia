@@ -7,6 +7,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -68,6 +69,16 @@ public class HouseController implements HouseAPI {
     }
 
     /**
+     * 撤销房子装修
+     * @param userToken
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public  ServerResponse revokeHouse(@RequestParam("userToken")String userToken){
+        return houseService.revokeHouse(userToken);
+    }
+    /**
      * 修改房子精算状态
      *
      * @param houseId
@@ -96,8 +107,8 @@ public class HouseController implements HouseAPI {
     //根据城市，小区，最小最大面积查询房子
     @Override
     @ApiMethod
-    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId, Double minSquare, Double maxSquare, PageDTO pageDTO) {
-        return houseService.queryHouseByCity(userToken, cityId, villageId, minSquare, maxSquare, pageDTO);
+    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId, Double minSquare, Double maxSquare,Integer houseType , PageDTO pageDTO) {
+        return houseService.queryHouseByCity(userToken, cityId, villageId, minSquare, maxSquare, houseType,pageDTO);
     }
 
     //装修指南
@@ -107,6 +118,11 @@ public class HouseController implements HouseAPI {
         return houseService.getRenovationManual(userToken, type);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse getRenovationManualinfo(String id){
+        return houseService.getRenovationManualinfo(id);
+    }
     /**
      * 保存装修指南
      *

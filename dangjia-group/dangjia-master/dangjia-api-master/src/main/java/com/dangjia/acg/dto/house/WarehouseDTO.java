@@ -13,6 +13,7 @@ public class WarehouseDTO {
     private double shopCount;//买总数
     private double askCount;//要总数
     private double backCount;//退总数
+    private Double receive;//收货总数
     private double realCount;//实用 = shopCount - backCount
     private double surCount;//仓库剩余 = shopCount - askCount - backCount
     private String productName;

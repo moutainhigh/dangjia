@@ -10,6 +10,7 @@
 		worker_type_id as workerTypeId,
 		steta,
 		template_id as templateId,
+		convert_count as convertCount,
 		delete_state as deleteState,
 		product_id as productId,
 		product_sn as productSn,
@@ -40,6 +41,7 @@
 		FROM dj_actuary_budget_material
 		where
 		product_type = 0
+		and steta = 1
 		and
 		house_id = #{houseId}
 		<if test = "productName!=null and productName!=''">
@@ -69,10 +71,10 @@
 		and bm.steta = 1
 	</update>
 
-	<!--支付时工种材料总价-->
+	<!--支付时工种服务总价-->
 	<select id="getBudgetSerPrice" resultType="java.lang.Double">
 		select
-		    sum(p.price * bm.shop_count)
+		    sum(p.price * bm.convert_count)
 		from dj_basics_product p,dj_actuary_budget_material bm
 		where
 	        p.id = bm.product_id
@@ -82,17 +84,44 @@
 	    and bm.steta = 1
 	    and bm.product_type = 1
 	</select>
+	<!--支付时未选择服务总价-->
+	<select id="getNotSerPrice" resultType="java.lang.Double">
+		select
+		    sum(p.price * bm.convert_count)
+		from dj_basics_product p,dj_actuary_budget_material bm
+		where
+	        p.id = bm.product_id
+	    and bm.house_id = #{houseId}
+	    and bm.worker_type_id = #{workerTypeId}
+	    and bm.delete_state = 2
+	    and bm.steta = 1
+	    and bm.product_type = 1
+	</select>
 
 	<!--支付时工种材料总价-->
 	<select id="getBudgetCaiPrice" resultType="java.lang.Double">
 		select
-		    sum(p.price * bm.shop_count)
+		    sum(p.price * bm.convert_count)
 		from dj_basics_product p,dj_actuary_budget_material bm
 		where
 	        p.id = bm.product_id
 	    and bm.house_id = #{houseId}
 	    and bm.worker_type_id = #{workerTypeId}
 	    and bm.delete_state = 0
+	    and bm.steta = 1
+	    and bm.product_type = 0
+	</select>
+
+	<!--支付时未选择工种材料总价-->
+	<select id="getNotCaiPrice" resultType="java.lang.Double">
+		select
+		    sum(p.price * bm.convert_count)
+		from dj_basics_product p,dj_actuary_budget_material bm
+		where
+	        p.id = bm.product_id
+	    and bm.house_id = #{houseId}
+	    and bm.worker_type_id = #{workerTypeId}
+	    and bm.delete_state = 2
 	    and bm.steta = 1
 	    and bm.product_type = 0
 	</select>
@@ -107,6 +136,19 @@
 		   and product_type = 0
 		   and delete_state in (0,2);
 	</select>
+
+	<select id="getBudgetCaiListByGoodsId" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_actuary_budget_material
+		WHERE
+		house_id=#{houseId}
+		and worker_type_id =#{workerTypeId}
+		and goods_id =#{goodsId}
+		and product_type = 0
+		and delete_state in (0,2);
+	</select>
+
 
 	<select id="getBudgetSerList" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
 		SELECT
