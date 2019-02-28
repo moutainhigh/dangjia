@@ -36,6 +36,12 @@ public interface StewardAPI {
     @ApiOperation(value = "成功返回交底内容", notes = "成功返回交底内容")
     ServerResponse readProjectInfo(@RequestParam("houseFlowId")String houseFlowId);
 
+
+    @PostMapping("app/worker/steward/confirmProjectInfo")
+    @ApiOperation(value = "提交完成交底", notes = "提交完成交底")
+    ServerResponse confirmProjectInfo(@RequestParam("houseFlowId")String houseFlowId);
+
+
     @PostMapping("app/worker/steward/tellCode")
     @ApiOperation(value = "交底工匠扫二维码调用", notes = "交底工匠扫二维码调用")
     ServerResponse tellCode(@RequestParam("userToken")String userToken, @RequestParam("code")String code);

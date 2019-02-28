@@ -164,8 +164,7 @@ public class HouseService {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         Example example = new Example(House.class);
         example.createCriteria()
-                .andEqualTo(House.MEMBER_ID, accessToken.getMember().getId())
-                .andEqualTo(House.VISIT_STATE, 1)
+                .andEqualTo(House.MEMBER_ID, accessToken.getMember().getId()).andGreaterThan(House.VISIT_STATE, 0)
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
         List<Map<String, String>> mapList = new ArrayList<>();
@@ -773,6 +772,9 @@ public class HouseService {
                     return ServerResponse.createByErrorMessage("大管家没有精算人工费,请重新添加");
                 }
             }
+            if (house.getBudgetOk() == 2 && budgetOk == 2) {
+                return ServerResponse.createByErrorMessage("该精算任务已发送给业主审核！");
+            }
             if (house.getBudgetOk() == 3) {
                 return ServerResponse.createBySuccessMessage("精算已审核通过");
             }
@@ -940,7 +942,7 @@ public class HouseService {
     //装修指南
     public ServerResponse getRenovationManual(String userToken, Integer type) {
         try {
-            String imgUrl=configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            String imgUrl = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             Member member = null;
             if (!CommonUtil.isEmpty(userToken)) {
                 AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
@@ -953,7 +955,7 @@ public class HouseService {
                 List<RenovationManual> listR = renovationManualMapper.getRenovationManualByWorkertyId(wt.getId());
                 Map<String, Object> wMap = new HashMap<String, Object>();
                 wMap.put("workerTypeName", wt.getName());
-                wMap.put("image", imgUrl+wt.getImage());
+                wMap.put("image", imgUrl + wt.getImage());
                 List<Map<String, Object>> listMap = new ArrayList<Map<String, Object>>();
                 for (RenovationManual r : listR) {
                     Map<String, Object> map = BeanUtils.beanToMap(r);
@@ -979,6 +981,7 @@ public class HouseService {
             return ServerResponse.createByErrorMessage("系统出错,获取装修指南失败");
         }
     }
+
     /**
      * 装修指南明细
      *
@@ -987,13 +990,14 @@ public class HouseService {
      */
     public ServerResponse getRenovationManualinfo(String id) {
         try {
-            RenovationManual renovationManual= renovationManualMapper.selectByPrimaryKey(id);
-            return ServerResponse.createBySuccess("ok",renovationManual);
+            RenovationManual renovationManual = renovationManualMapper.selectByPrimaryKey(id);
+            return ServerResponse.createBySuccess("ok", renovationManual);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错,获取装修指南失败");
         }
     }
+
     /**
      * 保存装修指南
      *

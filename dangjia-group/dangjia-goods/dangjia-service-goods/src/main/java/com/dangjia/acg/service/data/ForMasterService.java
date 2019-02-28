@@ -110,7 +110,8 @@ public class ForMasterService {
             //重新记录支付时价格
             budgetMaterial.setPrice(product.getPrice());
             budgetMaterial.setCost(product.getCost());
-            budgetMaterial.setTotalPrice(budgetMaterial.getShopCount() * product.getPrice());//已支付 记录总价
+//            budgetMaterial.setTotalPrice(budgetMaterial.getShopCount() * product.getPrice());//已支付 记录总价
+            budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * product.getPrice());//已支付 记录总价
             budgetMaterial.setDeleteState(3);//已支付
             budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
         }

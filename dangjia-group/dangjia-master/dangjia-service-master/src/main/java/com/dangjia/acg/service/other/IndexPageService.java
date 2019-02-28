@@ -76,13 +76,13 @@ public class IndexPageService {
             Map<String,Object> mapReady = new HashMap<>();
             mapReady.put("name","准备阶段");
             if (house.getDecorationType() == 2){//自带设计
-                mapReady.put("typeA", "￥" + 0);
+                mapReady.put("typeA", "¥"  + 0);
             }else {
                 Order order = orderMapper.getWorkerOrder(houseId,"1");
-                mapReady.put("typeA", "￥" + order.getTotalAmount());
+                mapReady.put("typeA", "¥" + String.format("%.2f",order.getTotalAmount().doubleValue()));
             }
             Order order = orderMapper.getWorkerOrder(houseId,"2");
-            mapReady.put("typeB", "￥" + (order == null? 0 : order.getTotalAmount()));
+            mapReady.put("typeB","¥" + (order == null? 0 : String.format("%.2f", order.getTotalAmount().doubleValue())));
             mapList.add(mapReady);
 
             Example example = new Example(HouseFlow.class);

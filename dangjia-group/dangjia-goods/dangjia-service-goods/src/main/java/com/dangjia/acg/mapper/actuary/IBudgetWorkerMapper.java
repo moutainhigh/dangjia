@@ -19,6 +19,11 @@ import java.util.Map;
 @Repository
 public interface IBudgetWorkerMapper extends Mapper<BudgetWorker> {
 
+	List<BudgetWorker> getTypeAllList(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+	Double getTypeAllPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+	Double getHouseWorkerPrice(@Param("houseId")String houseId);
+	List<String> workerTypeList(@Param("houseId")String houseId);
+
 	BudgetWorker byWorkerGoodsId(@Param("houseId")String houseId, @Param("workerGoodsId")String workerGoodsId);
 
 	/**getByHouseFlowId*/

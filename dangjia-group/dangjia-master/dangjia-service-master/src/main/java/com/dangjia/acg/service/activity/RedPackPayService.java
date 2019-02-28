@@ -320,17 +320,29 @@ public class RedPackPayService {
                         ///判断人工，减免金额券,代金券金额计算
                         if (redPack.getFromObjectType() == 0 && workerTotal.doubleValue()>0 ) {
                             money = workerTotal.subtract(redPackRule.getMoney());
-                            if(money.doubleValue()<0){money=workerTotal;}
+                            if(money.doubleValue()<0){
+                                money=workerTotal;
+                            }else{
+                                money=redPackRule.getMoney();
+                            }
                         }
                         //判断材料，减免金额券,代金券金额计算
                         if (redPack.getFromObjectType() == 1 && goodsTotal.doubleValue()>0 ) {
                             money = goodsTotal.subtract(redPackRule.getMoney());
-                            if(money.doubleValue()<0){money=goodsTotal;}
+                            if(money.doubleValue()<0){
+                                money=goodsTotal;
+                            }else{
+                                money=redPackRule.getMoney();
+                            }
                         }
                         //判断货品，减免金额券,代金券金额计算
                         if (redPack.getFromObjectType() == 2 && productTotal.doubleValue()>0 ) {
                             money = productTotal.subtract(redPackRule.getMoney());
-                            if(money.doubleValue()<0){money=productTotal;}
+                            if(money.doubleValue()<0){
+                                money=productTotal;
+                            }else{
+                                money=redPackRule.getMoney();
+                            }
                         }
                     }
                     if (redPack.getType() == 1 ) {

@@ -194,7 +194,7 @@ public class HouseFlowService {
                     if (houseFlow.getWorkerType() == 1) {//设计师
                         HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
                         BigDecimal workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
-                        allgrabBean.setWorkertotal("￥" + workPrice);//工钱
+                        allgrabBean.setWorkertotal("¥" + String.format("%.2f", workPrice.doubleValue()));//工钱
                     }else {
                         ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(request, houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
                         if (serverResponse.isSuccess()) {
@@ -203,7 +203,7 @@ public class HouseFlowService {
                                 totalPrice = Double.parseDouble(obj.getString("totalPrice"));
                             }
                         }
-                        allgrabBean.setWorkertotal("￥" + totalPrice);//工钱
+                        allgrabBean.setWorkertotal("¥" + String.format("%.2f",totalPrice));//工钱
                     }
 
                     allgrabBean.setReleaseTime("时间 " + (houseFlow.getReleaseTime() == null ? "" :

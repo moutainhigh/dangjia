@@ -19,6 +19,11 @@ import java.util.Map;
 @Repository
 public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 
+	List<BudgetMaterial> getCategoryAllList(@Param("houseId")String houseId, @Param("categoryId")String categoryId);
+	Double getCategoryAllPrice(@Param("houseId")String houseId, @Param("categoryId")String categoryId);
+	Double getHouseCaiPrice(@Param("houseId")String houseId);
+	List<String> categoryIdList(@Param("houseId")String houseId);
+
 	/**查询精算内商品*/
 	List<BudgetMaterial> repairBudgetMaterial(@Param("workerTypeId")String workerTypeId,@Param("houseId")String houseId,
 											  @Param("categoryId")String categoryId,@Param("productName")String productName);

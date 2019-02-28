@@ -79,7 +79,7 @@ public class MendRecordService {
                         map.put("goodsType", "服务");
                     }
                     map.put("name", orderSplitItem.getProductName());
-                    map.put("price", "￥"+orderSplitItem.getPrice()+"/"+orderSplitItem.getUnitName());
+                    map.put("price", "¥" + String.format("%.2f",orderSplitItem.getPrice())+"/"+orderSplitItem.getUnitName());
                     map.put("shopCount", orderSplitItem.getShopCount());
                     map.put("totalPrice", orderSplitItem.getTotalPrice());
                     mapList.add(map);
@@ -108,7 +108,7 @@ public class MendRecordService {
                             map.put("goodsType", "服务");
                         }
                         map.put("name", mendMateriel.getProductName());
-                        map.put("price", "￥"+mendMateriel.getPrice()+"/"+mendMateriel.getUnitName());
+                        map.put("price", "¥" + String.format("%.2f",mendMateriel.getPrice())+"/"+mendMateriel.getUnitName());
                         map.put("shopCount", mendMateriel.getShopCount());
                         map.put("totalPrice", mendMateriel.getTotalPrice());
                         mapList.add(map);
@@ -120,9 +120,9 @@ public class MendRecordService {
                         map.put("image", address + mendWorker.getImage());
                         map.put("goodsType", "人工");
                         map.put("name", mendWorker.getWorkerGoodsName());
-                        map.put("price", "￥"+mendWorker.getPrice()+"/"+mendWorker.getUnitName());
+                        map.put("price", "¥" + String.format("%.2f",mendWorker.getPrice())+"/"+mendWorker.getUnitName());
                         map.put("shopCount", mendWorker.getShopCount());
-                        map.put("totalPrice", mendWorker.getTotalPrice());
+                        map.put("totalPrice", String.format("%.2f",mendWorker.getTotalPrice()));
                         mapList.add(map);
                     }
                 }
@@ -185,7 +185,7 @@ public class MendRecordService {
                     map.put("mendOrderId", mendOrder.getId());
                     map.put("number", mendOrder.getNumber());
                     map.put("state", mendOrder.getState());
-                    map.put("totalAmount", "￥" + mendOrder.getTotalAmount());
+                    map.put("totalAmount", "¥" + String.format("%.2f",+ mendOrder.getTotalAmount()));
                     map.put("createDate", mendOrder.getCreateDate());
                     map.put("type", type);
                     returnMap.add(map);
@@ -231,7 +231,7 @@ public class MendRecordService {
                 map.put("houseId", houseId);
                 map.put("type", 1);
                 map.put("image", address + "iconWork/one.png");
-                map.put("name", "剩余材料记录");
+                map.put("name", "补人工记录");
                 map.put("size", "共"+mendOrderList.size()+"条");
                 returnMap.add(map);
             }
@@ -244,7 +244,7 @@ public class MendRecordService {
                 map.put("houseId", houseId);
                 map.put("type", 2);
                 map.put("image", address + "iconWork/two.png");
-                map.put("name", "补人工记录");
+                map.put("name", "剩余材料记录");
                 map.put("size", "共"+mendOrderList.size()+"条");
                 returnMap.add(map);
             }
@@ -271,7 +271,7 @@ public class MendRecordService {
                 map.put("houseId", houseId);
                 map.put("type", 4);
                 map.put("image", address + "iconWork/four.png");
-                map.put("name", "业主退货");
+                map.put("name", "业主退货记录");
                 map.put("size", "共"+mendOrderList.size()+"条");
                 returnMap.add(map);
             }

@@ -8,6 +8,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
@@ -42,6 +43,8 @@ public class GoodsService {
     private IGoodsSeriesMapper iGoodsSeriesMapper;
     @Autowired
     private IUnitMapper iUnitMapper;
+    @Autowired
+    private IAttributeValueMapper iAttributeValueMapper;
     @Autowired
     private IProductMapper iProductMapper;
     @Autowired
@@ -218,7 +221,7 @@ public class GoodsService {
                     gs.setCreateDate(new Date());
                     gs.setModifyDate(new Date());
                     iGoodsSeriesMapper.insert(gs);
-                }else{
+                } else {
                     JSONArray arr = JSONArray.parseArray(arrString);
                     iGoodsMapper.deleteGoodsSeries(id);//先删除goods所有跟品牌关联
                     for (int i = 0; i < arr.size(); i++) {//新增goods关联品牌系列
@@ -464,12 +467,29 @@ public class GoodsService {
                                 imgUrlStr += imgArr[i] + ",";
                             }
                         }
-
-
                         p.setImage(imgStr);
                         Map<String, Object> map = BeanUtils.beanToMap(p);
                         map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
                         map.put("imageUrl", imgUrlStr);
+
+                        String strNewValueNameArr = "";
+                        if (StringUtils.isNotBlank(p.getValueIdArr())) {
+                            String[] newValueNameArr = p.getValueIdArr().split(",");
+
+                            for (int i = 0; i < newValueNameArr.length; i++) {
+                                String valueId = newValueNameArr[i];
+                                if (StringUtils.isNotBlank(valueId)) {
+                                    AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
+                                    if (i == 0) {
+                                        strNewValueNameArr = attributeValue.getName();
+                                    } else {
+                                        strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
+                                    }
+                                }
+                            }
+                        }
+                        map.put("newValueNameArr", strNewValueNameArr);
+
                         if (!StringUtils.isNotBlank(p.getLabelId())) {
                             map.put("labelId", "");
                             map.put("labelName", "");
