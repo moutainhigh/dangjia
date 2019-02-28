@@ -3,49 +3,5 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.core.IWorkerTypeMapper">
-    <sql id="all_columns">
-		id,
-		id AS workerTypeId,
-		create_date AS createDate,
-        modify_date AS modifyDate,
-		name,
-		type,
-		state,
-		methods,
-		sort,
-		safe_state AS safeState,
-		image,
-		inspect_number AS inspectNumber
-	</sql>
-
-	<!-- 注册用 -->
-	<select id="getWorkerTypeRegister" resultType="com.dangjia.acg.dto.core.WorkerTypeDTO">
-		SELECT
-		<include refid="all_columns" />
-		FROM dj_core_worker_type
-		WHERE
-		type not in (2,7)
-		AND state != 2
-		ORDER BY sort ASC
-	</select>
-
-	<select id="getWorkerTypeList" resultType="com.dangjia.acg.dto.core.WorkerTypeDTO">
-		SELECT
-		<include refid="all_columns" />
-		FROM dj_core_worker_type
-		WHERE
-		type not in (1,2,7)
-		AND state != 2
-		ORDER BY sort ASC
-	</select>
-
-	<select id="getWorkerTypeListAll" resultType="com.dangjia.acg.dto.core.WorkerTypeDTO">
-		SELECT
-		<include refid="all_columns" />
-		FROM dj_core_worker_type
-		WHERE
-		 state != 2
-		ORDER BY sort ASC
-	</select>
 </mapper>
 

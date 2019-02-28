@@ -37,7 +37,7 @@
         create_date as createDate,
         modify_date as modifyDate
         from dj_basics_worker_goods
-        where 1=1
+        where data_status = 0
         <if test="workerTypeId != null">
             AND worker_type_id=#{workerTypeId}
         </if>
@@ -60,7 +60,7 @@
     <select id="getWorkertoCheck" resultType="java.lang.Double">
         select sum(wg.price*abw.shop_count)
         from dj_basics_worker_goods wg,dj_actuary_budget_worker abw
-        where 1=1
+        where wg.data_status = 0
         and wg.id = abw.worker_goods_id
         and abw.house_id=#{houseId}
         and abw.delete_state!=1
@@ -71,7 +71,7 @@
     <select id="getPayedWorker" resultType="java.lang.Double">
         select sum(wg.price*abw.shop_count)
         from dj_basics_worker_goods wg,dj_actuary_budget_worker abw
-        where 1=1
+        where wg.data_status = 0
         and wg.id = abw.worker_goods_id
         and abw.house_id=#{houseId}
         and abw.delete_state =3
@@ -96,7 +96,7 @@
         create_date as createDate,
         modify_date as modifyDate
         from dj_basics_worker_goods
-        where 1=1
+        where data_status = 0
         <if test="name!=null and workerTypeId!=''">
             and
             name LIKE CONCAT('%',#{name},'%')
@@ -127,7 +127,7 @@
         create_date as createDate,
         modify_date as modifyDate
         from dj_basics_worker_goods as w
-        where 1=1
+        where w.data_status = 0
         <if test="workerGoodsSn!=null and workerGoodsSn!=''">
             and
             w.worker_goods_sn =#{workerGoodsSn}
@@ -158,7 +158,7 @@
         create_date as createDate,
         modify_date as modifyDate
         from dj_basics_worker_goods  as w
-        where 1=1
+        where w.data_status = 0
         <if test="name!=null and name!=''">
             and
             w.name =#{name}

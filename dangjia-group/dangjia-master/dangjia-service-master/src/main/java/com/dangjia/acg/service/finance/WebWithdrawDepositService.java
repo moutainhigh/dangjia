@@ -7,8 +7,10 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.finance.WebWithdrawDTO;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IWithdrawDepositMapper;
+import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.WithdrawDeposit;
+import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -18,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +31,8 @@ import java.util.List;
  */
 @Service
 public class WebWithdrawDepositService {
+    @Autowired
+    private IWorkerDetailMapper iWorkerDetailMapper;
     @Autowired
     private IMemberMapper iMemberMapper;
     @Autowired
@@ -125,6 +130,25 @@ public class WebWithdrawDepositService {
                     if (StringUtils.isNoneBlank(withdrawDeposit.getMemo()))
                         srcWithdrawDeposit.setMemo(withdrawDeposit.getMemo());
 
+                    Member worker = iMemberMapper.selectByPrimaryKey(srcWithdrawDeposit.getWorkerId());
+                    BigDecimal money = srcWithdrawDeposit.getMoney();
+
+                    //记录流水
+                    WorkerDetail workerDetail = new WorkerDetail();
+                    workerDetail.setName("提现驳回");
+                    workerDetail.setWorkerId(worker.getId());
+                    workerDetail.setWorkerName(worker.getName());
+                    workerDetail.setMoney(money);
+                    workerDetail.setDefinedName("提现驳回到余额");
+                    workerDetail.setState(7);//7提现驳回到余额
+                    workerDetail.setWalletMoney(worker.getHaveMoney());
+                    iWorkerDetailMapper.insert(workerDetail);
+
+                    //把钱 转到 余额上面
+                    worker.setHaveMoney(worker.getHaveMoney().add(money));//更新已有钱
+                    worker.setSurplusMoney(worker.getSurplusMoney().add(money));
+                    iMemberMapper.updateByPrimaryKeySelective(worker);
+
                     //提现失败推送
                     configMessageService.addConfigMessage(null, appType, withdrawDeposit.getWorkerId(), "0", "提现结果", DjConstants.PushMessage.WITHDRAW_CASH_ERROR, "");
                 }
@@ -146,6 +170,5 @@ public class WebWithdrawDepositService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-
 
 }

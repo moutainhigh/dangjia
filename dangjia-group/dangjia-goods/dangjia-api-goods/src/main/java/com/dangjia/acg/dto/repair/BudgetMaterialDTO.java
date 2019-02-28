@@ -25,6 +25,7 @@ public class BudgetMaterialDTO {
     private double cost;// 成本价
 
     private double shopCount;//购买总数
+    private double convertCount;//转换后的购买总数
 
     private String unitName;//单位
 

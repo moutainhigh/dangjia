@@ -64,9 +64,6 @@ public class EvaluateService {
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
-    private WorkerTypeService workerTypeService;
-
-    @Autowired
     private ConfigMessageService configMessageService;
     @Autowired
     private ConfigUtil configUtil;

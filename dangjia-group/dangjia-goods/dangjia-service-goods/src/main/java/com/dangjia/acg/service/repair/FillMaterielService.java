@@ -177,6 +177,7 @@ public class FillMaterielService {
                 budgetMaterialDTO.setPrice(budgetMaterial.getPrice());
                 budgetMaterialDTO.setCost(budgetMaterial.getCost());
                 budgetMaterialDTO.setShopCount(budgetMaterial.getShopCount());//购买数量
+                budgetMaterialDTO.setConvertCount(budgetMaterial.getConvertCount());//转换后的购买总数
                 budgetMaterialDTO.setUnitName(budgetMaterial.getUnitName());
                 budgetMaterialDTO.setProductType(budgetMaterial.getProductType());
                 budgetMaterialDTO.setCategoryId(budgetMaterial.getCategoryId());

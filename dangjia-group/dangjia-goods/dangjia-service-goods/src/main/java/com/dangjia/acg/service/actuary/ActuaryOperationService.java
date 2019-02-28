@@ -21,6 +21,7 @@ import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.*;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.BrandSeries;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -128,45 +129,51 @@ public class ActuaryOperationService {
             BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
             if (StringUtils.isNotBlank(targetGroupId) && StringUtils.isNoneBlank(srcGroupId))//不为空  可以切换
             {
-                Set<String> allNoPayProductIds = new HashSet<>();//所有未支付的product 是单品的
-//                List<String> productIds = new ArrayList<>();//所有未支付的product 是单品的
-                Set<String> productIds = new HashSet<>();//所有未支付的product 是单品的
-                //未支付的材料
-                List<BudgetMaterial> budgetMaterials = budgetMaterialMapper.getBudgetCaiList(houseId, workerTypeId);
-                for (BudgetMaterial budgetMaterial1 : budgetMaterials) {
-                    LOG.info("未支付 budgetMaterial1 :" + budgetMaterial1.getProductName() + " id" + budgetMaterial1.getId());
-                    allNoPayProductIds.add(budgetMaterial1.getProductId());
-                    if (!StringUtils.isNoneBlank(budgetMaterial1.getGoodsGroupId()))
-                        productIds.add(budgetMaterial1.getProductId());
-                }
-
-                LOG.info("单品 productIds:" + productIds);
-                for (String pId : productIds) {
-                    Product product = productMapper.selectByPrimaryKey(pId);
-                    LOG.info("单品 pId:" + product);
-                }
-
                 //找到 原关联组的goods成员， 把 goods 下的product 更换 成 目标关联组的 goods下的product
                 List<GroupLink> srcGroupLinkLists = iGroupLinkMapper.queryGroupLinkByGid(srcGroupId);
                 List<GroupLink> targetGroupLinkLists = iGroupLinkMapper.queryGroupLinkByGid(targetGroupId);
-
                 for (GroupLink groupLink : srcGroupLinkLists) {
                     LOG.info(" srcGroupLinkLists :" + groupLink.getProductName() + " id" + groupLink.getId() + groupLink);
                 }
                 for (GroupLink groupLink : targetGroupLinkLists) {
                     LOG.info(" targetGroupLinkLists :" + groupLink.getProductName() + " id" + groupLink.getId() + groupLink);
                 }
-                for (GroupLink srcGroupLink : srcGroupLinkLists) {
-//                    LOG.info(" srcGroupLinkLists :" + srcGroupLink.getProductName() + " id" + srcGroupLink.getId() + srcGroupLink);
-                    if (productIds.contains(srcGroupLink.getProductId())) //如果是单品，就不换
-                    {
-                        LOG.info(" 单品不执行更换 :" + srcGroupLink.getProductName() + " id" + srcGroupLink.getId() + srcGroupLink);
-                        continue;
+
+                Set<String> allNoPayProductIds = new HashSet<>();//所有未支付的product 是单品的
+                Set<String> danProductIds = new HashSet<>();//所有未支付的product 是单品的
+                //未支付的材料1
+                List<BudgetMaterial> budgetMaterials = budgetMaterialMapper.getBudgetCaiList(houseId, workerTypeId);
+                for (BudgetMaterial budgetMaterial1 : budgetMaterials) {
+                    LOG.info("未支付 budgetMaterial1 :" + budgetMaterial1.getProductName() + " budgetMaterial1Id:" + budgetMaterial1.getId());
+                    if (budgetMaterial.getGoodsGroupId().equals(srcGroupId)
+                            || budgetMaterial.getGoodsGroupId().equals(targetGroupId)) {
+                        allNoPayProductIds.add(budgetMaterial1.getProductId());
                     }
 
+                    if (!StringUtils.isNoneBlank(budgetMaterial1.getGoodsGroupId()))
+                        danProductIds.add(budgetMaterial1.getProductId());
+                }
+                for (String pId : allNoPayProductIds) {
+                    Product product = productMapper.selectByPrimaryKey(pId);
+                    LOG.info("allNoPayProductIds :" + " size:" + allNoPayProductIds.size() + "  " + allNoPayProductIds + product);
+                }
+                for (String pId : danProductIds) {
+                    Product product = productMapper.selectByPrimaryKey(pId);
+                    LOG.info("单品productIds :" + " size:" + danProductIds.size() + "  " + danProductIds + product);
+                }
+
+                for (GroupLink srcGroupLink : srcGroupLinkLists) {
+                    LOG.info(" srcGroupLinkLists id :" + srcGroupLink.getId() + srcGroupLink);
                     for (GroupLink targetGroupLink : targetGroupLinkLists) {
-                        LOG.info(" targetGroupLinkLists :" + targetGroupLink.getProductName() + " id" + targetGroupLink.getId() + targetGroupLink);
-                        if (srcGroupLink.getGoodsId().equals(targetGroupLink.getGoodsId())) {//原关联组的对应的goodsId 和 目标 关联组 goodsId 一样时，进行更换 product
+                        LOG.info(" targetGroupLink id:" + targetGroupLink.getId() + targetGroupLink);
+                        //原关联组的对应的goodsId 和 目标 关联组 goodsId 一样时，进行更换 product
+                        if (srcGroupLink.getGoodsId().equals(targetGroupLink.getGoodsId())
+                                && allNoPayProductIds.contains(srcGroupLink.getProductId())) {// 必须属于 未购买里的是 原关联组 和 目标关联组里包含的。
+                            if (danProductIds.contains(srcGroupLink.getProductId())) {//如果是单品，就不换
+                                LOG.info(" 单品不执行更换 :" + srcGroupLink.getProductName() + " id" + srcGroupLink.getId() + srcGroupLink);
+                                continue;
+                            }
+
                             //查到 老的关联组 的精算
                             BudgetMaterial srcBudgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, srcGroupLink.getGoodsId());
                             Product targetProduct = productMapper.selectByPrimaryKey(targetGroupLink.getProductId());//目标product 对象
@@ -272,7 +279,7 @@ public class ActuaryOperationService {
                 WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());//人工商品
                 WGoodsDTO wGoodsDTO = new WGoodsDTO();
                 wGoodsDTO.setImage(getImage(workerGoods.getImage()));
-                wGoodsDTO.setPrice("￥" + workerGoods.getPrice() + "/" + workerGoods.getUnitName());
+                wGoodsDTO.setPrice("¥" + String.format("%.2f",workerGoods.getPrice()) + "/" + workerGoods.getUnitName());
                 wGoodsDTO.setName(workerGoods.getName());
                 wGoodsDTO.setWorkerDec(getImage(workerGoods.getWorkerDec()));
                 List<Technology> technologyList = technologyMapper.queryTechnologyByWgId(workerGoods.getId());
@@ -311,7 +318,7 @@ public class ActuaryOperationService {
                 if (!CommonUtil.isEmpty(workerGoods.getImage())) {
                     wGoodsDTO.setImage(getImage(workerGoods.getImage()));
                 }
-                wGoodsDTO.setPrice("￥" + workerGoods.getPrice() + "/" + workerGoods.getUnitName());
+                wGoodsDTO.setPrice("¥" + String.format("%.2f", workerGoods.getPrice()) + "/" + workerGoods.getUnitName());
                 wGoodsDTO.setName(workerGoods.getName());
                 wGoodsDTO.setWorkerDec(getImage(workerGoods.getWorkerDec()));
                 List<Technology> technologyList = technologyMapper.queryTechnologyByWgId(workerGoods.getId());
@@ -356,7 +363,7 @@ public class ActuaryOperationService {
             goodsDTO.setProductId(product.getId());
             goodsDTO.setGoodsId(goods.getId());
             goodsDTO.setImage(getImage(product.getImage()));//图一张
-            goodsDTO.setPrice("￥" + product.getPrice() + "/" + product.getUnitName());
+            goodsDTO.setPrice("¥" + String.format("%.2f",product.getPrice()) + "/" + product.getUnitName());
             goodsDTO.setName(product.getName());
             goodsDTO.setUnitName(product.getUnitName());//单位
             goodsDTO.setProductType(goods.getType());//材料类型
@@ -532,7 +539,10 @@ public class ActuaryOperationService {
         try {
             if (StringUtil.isNotEmpty(images)) {
                 String[] imageArr = images.split(",");
-                return configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + imageArr[0];
+                for (int i = 0; i < imageArr.length; i++) {
+                    imageArr[i]=configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + imageArr[i];
+                }
+                return StringUtils.join(imageArr,",");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -548,10 +558,10 @@ public class ActuaryOperationService {
     public ServerResponse confirmActuaryDetail(String userToken, String houseId, String workerTypeId,
                                                int type, String cityId) {
         try {
-            ServerResponse serverResponse = workerTypeAPI.getNameByWorkerTypeId(workerTypeId);
             String workerTypeName = "";
-            if (serverResponse.isSuccess()) {
-                workerTypeName = serverResponse.getResultObj().toString();
+            ServerResponse response = workerTypeAPI.getWorkerType(workerTypeId);
+            if (response.isSuccess()) {
+                workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
             } else {
                 return ServerResponse.createByErrorMessage("查询工序精算失败");
             }
@@ -578,7 +588,7 @@ public class ActuaryOperationService {
                     flowActuaryDTO.setShopCount(bw.getShopCount());
                     String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO, userToken, cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bw.getId() + "&type=" + type;
                     flowActuaryDTO.setUrl(url);
-                    flowActuaryDTO.setPrice("￥" + workerGoods.getPrice() + "/" + workerGoods.getUnitName());
+                    flowActuaryDTO.setPrice("¥" + String.format("%.2f",workerGoods.getPrice()) + "/" + workerGoods.getUnitName());
                     flowActuaryDTO.setTotalPrice(workerGoods.getPrice() * bw.getShopCount());
                     flowActuaryDTOList.add(flowActuaryDTO);
                 }
@@ -613,7 +623,7 @@ public class ActuaryOperationService {
                                 cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + type;
                         flowActuaryDTO.setUrl(url);
                         flowActuaryDTO.setAttribute(getAttributes(product));//拼接属性品牌
-                        flowActuaryDTO.setPrice("￥" + product.getPrice() + "/" + product.getUnitName());
+                        flowActuaryDTO.setPrice("¥" + String.format("%.2f",product.getPrice()) + "/" + product.getUnitName());
                         flowActuaryDTO.setTotalPrice(product.getPrice() * bm.getConvertCount());
                     }
                     flowActuaryDTO.setShopCount(bm.getShopCount());

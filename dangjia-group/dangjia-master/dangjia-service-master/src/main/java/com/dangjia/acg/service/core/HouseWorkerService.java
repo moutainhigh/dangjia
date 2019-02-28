@@ -925,6 +925,7 @@ public class HouseWorkerService {
                     supervisorHWO.setHaveMoney(supervisorHWO.getHaveMoney().add(supervisorHF.getPatrolMoney()));
                     //累计大管家订单巡查得到的钱
                     supervisorHWO.setCheckMoney(supervisorHWO.getCheckMoney().add(supervisorHF.getPatrolMoney()));
+
                     houseWorkerOrderMapper.updateByPrimaryKeySelective(supervisorHWO);
 
                     //申请中记录大管家钱
@@ -1152,7 +1153,7 @@ public class HouseWorkerService {
                     map.put("releaseTime", houseFlow.getReleaseTime() == null ? "" : houseFlow.getReleaseTime().getTime());//发布时间
                     map.put("square", (house.getSquare() == null ? "0" : house.getSquare()) + "m²");//面积
                     map.put("memberName", memberMapper.selectByPrimaryKey(house.getMemberId()).getName());//业主姓名
-                    map.put("price", "￥" + (houseFlow.getWorkPrice() == null ? "0" : houseFlow.getWorkPrice()));//价格
+                    map.put("price", "¥" + (houseFlow.getWorkPrice() == null ? "0" : String.format("%.2f", houseFlow.getWorkPrice().doubleValue())));//价格
                     if (houseFlow.getPause() == 0) {//正常施工
                         map.put("isItNormal", "正常施工");
                     } else {

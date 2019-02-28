@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.member.LoanFlowMapper">
+    <select id="getLoanFlow" resultType="com.dangjia.acg.dto.member.LoanDTO">
+        SELECT
+        l.id AS id,
+        l.create_date AS createDate,
+        l.modify_date AS modifyDate,
+        l.data_status AS dataStatus,
+        l.loan_id AS loanId,
+        l.follow_up_id AS followUpId,
+        u.username AS followUpName,
+        l.state AS state,
+        l.state_describe AS stateDescribe
+        FROM
+        dj_member_loan_flow l
+        LEFT JOIN dj_user u ON l.follow_up_id = u.id
+        WHERE
+        l.data_status = 0
+        <if test="loanId!=null and loanId!=''">
+            and l.loan_id = #{loanId}
+        </if>
+        ORDER BY
+        l.create_date
+    </select>
+</mapper>

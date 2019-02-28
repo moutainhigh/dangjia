@@ -7,6 +7,7 @@ import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.data.GetForBudgetAPI;
 import com.dangjia.acg.api.data.TechnologyRecordAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
+import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -88,18 +89,23 @@ public class BudgetWorkerService {
     public ServerResponse getAllBudgetWorker() {
         try {
             List<Map<String, Object>> mapList = iBudgetWorkerMapper.getBudgetWorker();
-            for (Map<String, Object> obj : mapList) {
-                ServerResponse serverResponse = workerTypeAPI.getNameByWorkerTypeId(obj.get("workerTypeId").toString());
-                String workerTypeName = "";
-                if (serverResponse.isSuccess()) {
-                    workerTypeName = serverResponse.getResultObj().toString();
-                }
-                obj.put("workerTypeName", workerTypeName);
-            }
+            setWorkerTypeName(mapList);
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             e.printStackTrace();
             throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
+        }
+    }
+
+    private void setWorkerTypeName(List<Map<String, Object>> mapList) {
+        for (Map<String, Object> obj : mapList) {
+            String workerTypeName = "";
+            ServerResponse response = workerTypeAPI.getWorkerType(obj.get("workerTypeId").toString());
+            if (response.isSuccess()) {
+                //二级人工费
+                workerTypeName = ((JSONObject) response.getResultObj()).getString("name");
+            }
+            obj.put("workerTypeName", workerTypeName);
         }
     }
 
@@ -251,37 +257,34 @@ public class BudgetWorkerService {
         try {
             Map<String, Object> map = new HashMap<>();
             List<Map<String, Object>> wokerList = iBudgetWorkerMapper.getAllbudgetTemplates(templateId);
-            for (Map<String, Object> obj : wokerList) {
-                ServerResponse serverResponse = workerTypeAPI.getNameByWorkerTypeId(obj.get("workerTypeId").toString());
-                String workerTypeName = "";
-                if (serverResponse.isSuccess()) {
-                    workerTypeName = serverResponse.getResultObj().toString();
-                }
-                obj.put("workerTypeName", workerTypeName);
-            }
+            setWorkerTypeName(wokerList);
             map.put("wokerList", wokerList);//人工精算
             List<Map<String, Object>> materialList = iBudgetMaterialMapper.getAllbudgetTemplates(templateId);
-            for (Map<String, Object> obj : materialList) {
-                String goodsId = obj.get("goodsId").toString();
-                Goods goods = iGoodsMapper.queryById(goodsId);
-                obj.put("goodsBuy", goods.getBuy());
-                if (goods.getBuy() == 0 || goods.getBuy() == 1) {//0：必买；1可选；2自购
-//                    budgetMaterial.setSteta(1);//我们购
-                    String productId = obj.get("productId").toString();
-                    Product pro = iProductMapper.selectByPrimaryKey(productId);
-                    Unit unit = iUnitMapper.selectByPrimaryKey(pro.getConvertUnit());
-                    obj.put("convertUnitName", unit.getName());
-                } else {//自购
-                    Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
-                    if (unit != null)
-                        obj.put("goodsUnitName", unit.getName());
-                }
-            }
+            setGoods(materialList, iGoodsMapper, iProductMapper, iUnitMapper);
             map.put("materialList", materialList);//材料精算
             return ServerResponse.createBySuccess("查询精算成功", map);
         } catch (Exception e) {
             e.printStackTrace();
             throw new BaseException(ServerCode.WRONG_PARAM, "查询精算失败");
+        }
+    }
+
+    static void setGoods(List<Map<String, Object>> materialList, IGoodsMapper iGoodsMapper, IProductMapper iProductMapper, IUnitMapper iUnitMapper) {
+        for (Map<String, Object> obj : materialList) {
+            String goodsId = obj.get("goodsId").toString();
+            Goods goods = iGoodsMapper.queryById(goodsId);
+            obj.put("goodsBuy", goods.getBuy());
+            if (goods.getBuy() == 0 || goods.getBuy() == 1) {//0：必买；1可选；2自购
+//                    budgetMaterial.setSteta(1);//我们购
+                String productId = obj.get("productId").toString();
+                Product pro = iProductMapper.selectByPrimaryKey(productId);
+                Unit unit = iUnitMapper.selectByPrimaryKey(pro.getConvertUnit());
+                obj.put("convertUnitName", unit.getName());
+            } else {//自购
+                Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
+                if (unit != null)
+                    obj.put("goodsUnitName", unit.getName());
+            }
         }
     }
 
@@ -357,7 +360,7 @@ public class BudgetWorkerService {
                                     pro = pList.get(0);
                                 }
                             }
-                            budgetMaterial.setProductId(pro.getId().toString());
+                            budgetMaterial.setProductId(pro.getId());
                             budgetMaterial.setProductSn(pro.getProductSn());
                             budgetMaterial.setProductName(pro.getName());
                             budgetMaterial.setPrice(pro.getPrice());
@@ -437,8 +440,6 @@ public class BudgetWorkerService {
                         e.printStackTrace();
                         return ServerResponse.createByErrorMessage("生成失败");
                     }
-                } else {
-                    continue;
                 }
             }
 
@@ -556,15 +557,16 @@ public class BudgetWorkerService {
             List<BudgetListResult> cailist = new ArrayList<>();//材料list
 
             /*******************************人工费********************************/
-            for (int i = 0; i < hflist.size(); i++) {
+            for (HouseFlow aHflist1 : hflist) {
                 BudgetListResult blr = new BudgetListResult();
-                List<RlistResult> rlist = new ArrayList<RlistResult>();//算人力
-                WorkerType workType = workerTypeAPI.getWorkerType(hflist.get(i).getWorkerTypeId());
-                //二级人工费
-                blr.setListName(workType.getName() + "人工费用");
+                ServerResponse response = workerTypeAPI.getWorkerType(aHflist1.getWorkerTypeId());
+                if (response.isSuccess()) {
+                    //二级人工费
+                    blr.setListName((((JSONObject) response.getResultObj()).getString("name")) + "人工费用");
+                }
                 Double rgf = 0.00;//二级费用统计
                 Example example = new Example(BudgetWorker.class);
-                example.createCriteria().andEqualTo(BudgetWorker.HOUSE_FLOW_ID, hflist.get(i).getId()).andEqualTo(BudgetWorker.STETA, 1)
+                example.createCriteria().andEqualTo(BudgetWorker.HOUSE_FLOW_ID, aHflist1.getId()).andEqualTo(BudgetWorker.STETA, 1)
                         .andCondition("delete_state!=1");
                 List<BudgetWorker> bwList = iBudgetWorkerMapper.selectByExample(example);
                 for (BudgetWorker abw : bwList) {//增加一层循环遍历存储下级子项目
@@ -578,7 +580,6 @@ public class BudgetWorkerService {
                     rlistResult.setSumRcost(gjjg);//合计价格
                     Double number = abw.getShopCount();
                     rlistResult.setNumber(number);//数量
-                    rlist.add(rlistResult);
                     rgf += rlistResult.getSumRcost();
                     //总人工费
                     budgetResult.setWorkerBudget(budgetResult.getWorkerBudget() + rlistResult.getSumRcost());
@@ -588,45 +589,42 @@ public class BudgetWorkerService {
                 biglist.add(blr);
             }
             budgetResult.setBigList(biglist);
-
             /*************************材料费*************************************/
-            for (int i = 0; i < hflist.size(); i++) {
-                List<RlistResult> rlist = new ArrayList<RlistResult>();//算材料
+            for (HouseFlow aHflist : hflist) {
                 BudgetListResult blr = new BudgetListResult();
                 Double clf = 0.0;//二级费用统计
-                WorkerType workType = workerTypeAPI.getWorkerType(hflist.get(i).getWorkerTypeId());
-
-                blr.setListName(workType.getName() + "材料费");
+                ServerResponse response = workerTypeAPI.getWorkerType(aHflist.getWorkerTypeId());
+                if (response.isSuccess()) {
+                    //二级人工费
+                    blr.setListName((((JSONObject) response.getResultObj()).getString("name")) + "材料费");
+                }
                 Example example = new Example(BudgetMaterial.class);
-                example.createCriteria().andEqualTo(BudgetMaterial.HOUSE_FLOW_ID, hflist.get(i).getId()).andEqualTo(BudgetMaterial.STETA, 1)
+                example.createCriteria().andEqualTo(BudgetMaterial.HOUSE_FLOW_ID, aHflist.getId()).andEqualTo(BudgetMaterial.STETA, 1)
                         .andCondition("delete_state!=1");
                 List<BudgetMaterial> abmList = iBudgetMaterialMapper.selectByExample(example);//获取每个工序对应的材料表
                 for (BudgetMaterial abm : abmList) {//每个商品
                     Product product = iProductMapper.selectByPrimaryKey(abm.getProductId());
-                    Goods goods = iGoodsMapper.selectByPrimaryKey(product.getGoodsId());
+                    Goods goods = iGoodsMapper.selectByPrimaryKey(abm.getGoodsId());
                     rlistResult = new RlistResult();
                     rlistResult.setRId(abm.getId());//id
-                    if (hflist.get(i).getWorkType() == 4) {
-                        Double cailiao = hflist.get(i).getMaterialPrice().doubleValue();//支付后
-                        if (cailiao != null) {
-                            rlistResult.setRCost(cailiao);
-                        } else {
-                            rlistResult.setRCost(iBudgetMaterialMapper.getAbmPayOutByHfId(hflist.get(i).getId()));
-                        }
+                    if (aHflist.getWorkType() == 4) {
+                        Double cailiao = aHflist.getMaterialPrice().doubleValue();//支付后
+                        rlistResult.setRCost(cailiao);
                     } else {
                         //没支付查实时价格
-                        rlistResult.setRCost(iBudgetMaterialMapper.getAbmCasualByHfId(hflist.get(i).getId()));
+                        rlistResult.setRCost(iBudgetMaterialMapper.getAbmCasualByHfId(aHflist.getId()));
                     }
+                    double price = 0;
                     //单价
                     if (product != null) {
                         rlistResult.setRName(product.getName());
+                        price = product.getPrice() == null ? 0 : product.getPrice();
                     } else {
                         rlistResult.setRName(goods.getName());
                     }
-                    Double gjjg = (abm.getShopCount() * (abm.getPrice() == null ? product.getPrice() : abm.getPrice()));
+                    double gjjg = (abm.getShopCount() * (abm.getPrice() == null ? price : abm.getPrice()));
                     rlistResult.setSumRcost(gjjg);//合计价格
                     rlistResult.setNumber(abm.getShopCount());//数量
-                    rlist.add(rlistResult);
                     clf += rlistResult.getSumRcost();
                     //总材料费
                     budgetResult.setMaterialBudget(budgetResult.getMaterialBudget() + rlistResult.getSumRcost());
@@ -671,7 +669,7 @@ public class BudgetWorkerService {
     /**
      * 工种施工节点
      */
-    public JSONArray getTecByHouseFlowId(String houseId,String houseFlowId) {
+    public JSONArray getTecByHouseFlowId(String houseId, String houseFlowId) {
         try {
             JSONArray jsonArray = new JSONArray();
             List<BudgetWorker> budgetWorkerList = iBudgetWorkerMapper.getByHouseFlowId(houseId, houseFlowId);
@@ -688,11 +686,12 @@ public class BudgetWorkerService {
                 }
             }
             return jsonArray;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
+
     /**
      * 根据houseId查询所有
      * 已进场未完工工艺节点

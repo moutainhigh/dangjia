@@ -231,7 +231,8 @@ public class WalletService {
                 houseName = house.getHouseName();//流水描述
             }
             returnMap.put("name", houseName);//流水来源
-            if (workerDetail.getState() == 0 || workerDetail.getState() == 2) {
+            if (workerDetail.getState() == 0 || workerDetail.getState() == 2 || workerDetail.getState() == 4
+                    || workerDetail.getState() == 5 || workerDetail.getState() == 6) {
                 returnMap.put("money", "+" + workerDetail.getMoney());//流水金额(加)
             } else {
                 returnMap.put("money", "-" + workerDetail.getMoney());//流水金额(减)

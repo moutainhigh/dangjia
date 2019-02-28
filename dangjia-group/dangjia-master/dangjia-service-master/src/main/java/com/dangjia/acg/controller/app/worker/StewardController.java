@@ -42,6 +42,11 @@ public class StewardController implements StewardAPI {
     public ServerResponse readProjectInfo(String houseFlowId){
         return stewardService.readProjectInfo(houseFlowId);
     }
+    @Override
+    @ApiMethod
+    public ServerResponse confirmProjectInfo(String houseFlowId){
+        return stewardService.confirmProjectInfo(houseFlowId);
+    }
 
     @Override
     @ApiMethod

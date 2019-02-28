@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
@@ -131,14 +132,15 @@ public class SplitDeliverService {
             splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
             splitDeliverDTO.setSupState(splitDeliver.getSupState());//大管家收货状态
 
-            List<String> imageList = new ArrayList<>();
-            String[] imageArr = splitDeliver.getImage().split(",");
-            for (int i=0;i<imageArr.length;i++){
-                String image = address + imageArr[i];
-                imageList.add(image);
+            if(!CommonUtil.isEmpty(splitDeliver.getImage())) {
+                List<String> imageList = new ArrayList<>();
+                String[] imageArr = splitDeliver.getImage().split(",");
+                for (int i = 0; i < imageArr.length; i++) {
+                    String image = address + imageArr[i];
+                    imageList.add(image);
+                }
+                splitDeliverDTO.setImageList(imageList);
             }
-            splitDeliverDTO.setImageList(imageList);
-
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);

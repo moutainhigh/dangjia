@@ -1,22 +1,23 @@
 package com.dangjia.acg.service.core;
 
-import com.dangjia.acg.common.exception.BaseException;
-import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dto.core.WorkerTypeDTO;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.modle.core.WorkerType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
- * author: Ronalcheng
- * Date: 2018/10/31 0031
- * Time: 11:07
- * 工种
+ * @author Ruking.Cheng
+ * @descrilbe 工种查询
+ * @email 495095492@qq.com
+ * @tel 18075121944
+ * @date on 2019/2/26 20:13
  */
 @Service
 public class WorkerTypeService {
@@ -24,46 +25,81 @@ public class WorkerTypeService {
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
 
-    public WorkerType getWorkerTypeId(String workerTypeId){
+
+    public WorkerType queryWorkerType(String workerTypeId) {
+       return workerTypeMapper.selectByPrimaryKey(workerTypeId);
+    }
+
+    /**
+     * 获取工种列表
+     *
+     * @param type -1：全部，0：除精算防水工种列表，1：除设计精算防水工种列表
+     * @return
+     */
+    public ServerResponse getWorkerTypeList(Integer type) {
+        Example example = new Example(WorkerType.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (type != null && type == 0) {
+            criteria.andCondition("type not in (2,7) ");
+        } else if (type != null && type == 1) {
+            criteria.andCondition("type not in (1,2,7)");
+        }
+        criteria.andNotEqualTo(WorkerType.STATE, 2);
+        example.orderBy(WorkerType.SORT).asc();
+        List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
+        if (workerTypeList == null || workerTypeList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+                    , "查无数据");
+        }
+        List<Map> maps = (List<Map>) BeanUtils.listToMap(workerTypeList);
+        for (Map map : maps) {
+            map.put("workerTypeId", map.get(WorkerType.ID));
+        }
+        return ServerResponse.createBySuccess("查询成功", maps);
+    }
+
+    /**
+     * 根据workerTypeId返回工种对象
+     *
+     * @param workerTypeId workerTypeId
+     * @return
+     */
+    public ServerResponse getWorkerType(String workerTypeId) {
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);
-        return workerType;
+        if (workerType == null) {
+            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+                    , "查无工种");
+        }
+        Map map = BeanUtils.beanToMap(workerType);
+        map.put("workerTypeId", map.get(WorkerType.ID));
+        return ServerResponse.createBySuccess("查询成功", map);
     }
 
     /**
-     * 除精算防水工种列表
+     * 修改可抢单数，标准巡查次数，免费次数
+     *
+     * @param workerTypeId  workerTypeId
+     * @param methods       可抢单数
+     * @param inspectNumber 标准巡查次数
+     * @param safeState     免费要货次数
+     * @return
      */
-    public ServerResponse getWorkerTypeRegister(){
-        try{
-            List<WorkerTypeDTO> wtList = workerTypeMapper.getWorkerTypeRegister();
-            return ServerResponse.createBySuccess("查询成功", wtList);
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
+    public ServerResponse updataWorkerType(String workerTypeId, Integer methods, Integer inspectNumber, Integer safeState) {
+        if (workerTypeId == null) {
+            return ServerResponse.createByErrorMessage("操作失败，请传入workerTypeId");
         }
-    }
-
-    /**
-     * 除设计精算防水工种列表
-     */
-    public ServerResponse getWorkerTypeList(){
-        try{
-            List<WorkerTypeDTO> wtList = workerTypeMapper.getWorkerTypeList();
-            return ServerResponse.createBySuccess("查询成功", wtList);
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
+        WorkerType workerType = new WorkerType();
+        workerType.setId(workerTypeId);
+        if (methods != null) {
+            workerType.setMethods(methods);
         }
-    }
-    /**
-     * 所有工种列表
-     */
-    public ServerResponse getWorkerTypeListAll(){
-        try{
-            List<WorkerTypeDTO> wtList = workerTypeMapper.getWorkerTypeListAll();
-            return ServerResponse.createBySuccess("查询成功", wtList);
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
+        if (inspectNumber != null) {
+            workerType.setInspectNumber(inspectNumber);
         }
+        if (safeState != null) {
+            workerType.setSafeState(safeState);
+        }
+        workerTypeMapper.updateByPrimaryKeySelective(workerType);
+        return ServerResponse.createBySuccessMessage("操作成功");
     }
 }
