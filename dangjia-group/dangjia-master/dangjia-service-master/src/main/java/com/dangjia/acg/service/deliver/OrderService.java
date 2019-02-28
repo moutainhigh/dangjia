@@ -97,7 +97,7 @@ public class OrderService {
                 ItemDTO itemDTO = new ItemDTO();
                 itemDTO.setName(house.getStyle());
                 itemDTO.setImage(address + "icon/shejiF.png");
-                itemDTO.setPrice("￥"+order.getStylePrice()+"/㎡");
+                itemDTO.setPrice("¥" + String.format("%.2f",order.getStylePrice().doubleValue())+"/㎡");
                 itemDTO.setShopCount(house.getSquare().doubleValue());
                 itemDTO.setProductType(3);
                 itemDTOList.add(itemDTO);
@@ -108,7 +108,7 @@ public class OrderService {
                     itemDTO = new ItemDTO();
                     itemDTO.setName(designImageType.getName());  //设计图名字
                     itemDTO.setImage(address + houseDesignImage.getImageurl());
-                    itemDTO.setPrice("￥" + designImageType.getPrice());
+                    itemDTO.setPrice("¥" + String.format("%.2f",designImageType.getPrice().doubleValue()));
                     itemDTO.setShopCount(1.0);
                     itemDTO.setProductType(3);
                     itemDTOList.add(itemDTO);
@@ -117,7 +117,7 @@ public class OrderService {
                 ItemDTO itemDTO = new ItemDTO();
                 itemDTO.setName("当家精算");
                 itemDTO.setImage(address + "icon/jingsuanF.png");
-                itemDTO.setPrice("￥"+order.getBudgetCost()+"/㎡");
+                itemDTO.setPrice("¥" + String.format("%.2f",order.getBudgetCost().doubleValue())+"/㎡");
                 itemDTO.setShopCount(house.getSquare().doubleValue());
                 itemDTO.setProductType(3);
                 itemDTOList.add(itemDTO);
@@ -126,7 +126,7 @@ public class OrderService {
                 for(OrderItem orderItem : orderItemList){
                     ItemDTO itemDTO = new ItemDTO();
                     itemDTO.setImage(address + orderItem.getImage());
-                    itemDTO.setPrice("￥" + orderItem.getPrice());
+                    itemDTO.setPrice("¥" + String.format("%.2f",orderItem.getPrice()));
                     itemDTO.setShopCount(orderItem.getShopCount());
                     if (order.getType() == 1){//人工
                         itemDTO.setName(orderItem.getWorkerGoodsName());

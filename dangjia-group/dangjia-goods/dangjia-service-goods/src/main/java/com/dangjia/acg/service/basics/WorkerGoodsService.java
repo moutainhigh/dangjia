@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
-import com.dangjia.acg.common.enums.WorkTypeEnums;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.TechnologyDTO;
@@ -13,6 +12,7 @@ import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.util.DateUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -112,9 +112,9 @@ public class WorkerGoodsService {
             workerGoodsResult.setUnitName(workerGoods.getUnitName());
 
             String workerTypeName = "";
-            ServerResponse serverResponse = workerTypeAPI.getNameByWorkerTypeId(workerGoods.getWorkerTypeId());
-            if (serverResponse.isSuccess()) {
-                workerTypeName = (String) serverResponse.getResultObj();
+            ServerResponse response = workerTypeAPI.getWorkerType(workerGoods.getWorkerTypeId());
+            if (response.isSuccess()) {
+                workerTypeName=(((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
             }
             workerGoodsResult.setWorkerTypeName(workerTypeName);
             workerGoodsResult.setPrice(workerGoods.getPrice());

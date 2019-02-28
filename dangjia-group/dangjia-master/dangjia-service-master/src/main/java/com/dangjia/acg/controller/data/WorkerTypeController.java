@@ -9,10 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Created with IntelliJ IDEA.
- * author: Ronalcheng
- * Date: 2018/10/31 0031
- * Time: 13:50
+ * @author Ruking.Cheng
+ * @descrilbe 工种查询
+ * @email 495095492@qq.com
+ * @tel 18075121944
+ * @date on 2019/2/26 20:13
  */
 @RestController
 public class WorkerTypeController implements WorkerTypeAPI {
@@ -20,47 +21,27 @@ public class WorkerTypeController implements WorkerTypeAPI {
     @Autowired
     private WorkerTypeService workerTypeService;
 
-    /**
-     * 注册用
-     */
     @Override
     @ApiMethod
-    public ServerResponse getWorkerTypeRegister(){
-        return workerTypeService.getWorkerTypeRegister();
+    public ServerResponse getWorkerTypeList(Integer type) {
+        return workerTypeService.getWorkerTypeList(type);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getWorkerTypeList(){
-        return workerTypeService.getWorkerTypeList();
-    }
-    @Override
-    @ApiMethod
-    public ServerResponse getWorkerTypeListAll(){
-        return workerTypeService.getWorkerTypeListAll();
+    public WorkerType queryWorkerType(String workerTypeId) {
+        return workerTypeService.queryWorkerType(workerTypeId);
     }
 
-    /**
-     *  根据workerTypeId返回工种名字
-     * @return
-     */
     @Override
     @ApiMethod
-    public ServerResponse getNameByWorkerTypeId(String workerTypeId){
-        WorkerType workerType = workerTypeService.getWorkerTypeId(workerTypeId);
-        if(workerType==null){
-            return ServerResponse.createBySuccess("查询成功","");
-        }
-        return ServerResponse.createBySuccess("查询成功", workerType.getName());
+    public ServerResponse getWorkerType(String workerTypeId) {
+        return workerTypeService.getWorkerType(workerTypeId);
     }
 
-    /**
-     *  根据workerTypeId返回工种对象
-     * @return
-     */
     @Override
     @ApiMethod
-    public WorkerType getWorkerType(String workerTypeId){
-        return workerTypeService.getWorkerTypeId(workerTypeId);
+    public ServerResponse updataWorkerType(String workerTypeId, Integer methods, Integer inspectNumber, Integer safeState) {
+        return workerTypeService.updataWorkerType(workerTypeId, methods, inspectNumber, safeState);
     }
 }

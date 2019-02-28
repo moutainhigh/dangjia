@@ -244,22 +244,30 @@ public class StewardService {
                 workerDisclosure.setDetails(content);
                 wdList.add(workerDisclosure);
             }
-            if(hf.getWorkSteta()==4){
-                return ServerResponse.createBySuccess("查询成功", wdList);
-            }
-            hf.setWorkSteta(4);//施工中
-            houseFlowMapper.updateByPrimaryKeySelective(hf);
-            House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
-            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
-            configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","大管家交底",
-                    String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_FINISHED,house.getHouseName(),workerType.getName()) ,"");
             return ServerResponse.createBySuccess("查询成功", wdList);
         }catch (Exception e){
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-
+    /**
+     * 提交完成交底
+     */
+    public ServerResponse confirmProjectInfo(String houseFlowId){
+        try{
+            HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+            hf.setWorkSteta(4);//施工中
+            houseFlowMapper.updateByPrimaryKeySelective(hf);
+            House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
+            configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","大管家交底",
+                    String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_FINISHED,house.getHouseName(),workerType.getName()) ,"");
+            return ServerResponse.createBySuccessMessage("交底成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
     /**
      * 交底工匠扫二维码调用

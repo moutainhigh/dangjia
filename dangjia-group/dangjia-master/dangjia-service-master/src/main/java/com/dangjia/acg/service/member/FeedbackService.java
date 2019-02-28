@@ -8,8 +8,10 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.member.IFeedbackMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Feedback;
@@ -39,50 +41,52 @@ public class FeedbackService {
     @Autowired
     private IFeedbackMapper iFeedbackMapper;
     @Autowired
-    private WorkerTypeService workerTypeService;
-    @Autowired
     private RedisClient redisClient;
+    @Autowired
+    private IWorkerTypeMapper workerTypeMapper;
 
     /**
      * 获取反馈列表
+     *
      * @param feedback
      * @return
      */
     public ServerResponse getFeedbacks(HttpServletRequest request, PageDTO pageDTO, Feedback feedback) {
         Example example = new Example(Feedback.class);
-        String url=configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        String url = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         example.orderBy(Group.CREATE_DATE).desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Feedback> list = iFeedbackMapper.selectByExample(example);
-        List<Map> listMap=new ArrayList<>();
+        List<Map> listMap = new ArrayList<>();
         PageInfo pageResult = new PageInfo(list);
-        for (Feedback feedbacknew:list) {
-            if(!CommonUtil.isEmpty(feedbacknew.getImageurl())){
-                String[] imageurls= StringUtils.split(feedbacknew.getImageurl(),",");
+        for (Feedback feedbacknew : list) {
+            if (!CommonUtil.isEmpty(feedbacknew.getImageurl())) {
+                String[] imageurls = StringUtils.split(feedbacknew.getImageurl(), ",");
                 for (int i = 0; i < imageurls.length; i++) {
-                    if(!CommonUtil.isEmpty(imageurls[i])){
-                        imageurls[i]=url+imageurls[i];
+                    if (!CommonUtil.isEmpty(imageurls[i])) {
+                        imageurls[i] = url + imageurls[i];
                     }
                 }
-                feedbacknew.setImageurl(StringUtils.join(imageurls,","));
+                feedbacknew.setImageurl(StringUtils.join(imageurls, ","));
             }
             Map map = BeanUtils.beanToMap(feedbacknew);
-            map.put("memberName",memberMapper.selectByPrimaryKey(feedbacknew.getMemberId()).getNickName());
+            map.put("memberName", memberMapper.selectByPrimaryKey(feedbacknew.getMemberId()).getNickName());
             listMap.add(map);
         }
         pageResult.setList(listMap);
-        return ServerResponse.createBySuccess("ok",pageResult);
+        return ServerResponse.createBySuccess("ok", pageResult);
     }
 
     public ServerResponse addFeedback(HttpServletRequest request, Feedback customer) {
         String userToken = request.getParameter(Constants.USER_TOKEY);
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         customer.setMemberId(accessToken.getMemberId());
-		customer.setState(0);
+        customer.setState(0);
         customer.setMobile(accessToken.getMember().getMobile());
-		if(!CommonUtil.isEmpty(customer.getWorkerTypeId())) {
-			customer.setWorkerTypeName(workerTypeService.getWorkerTypeId(customer.getWorkerTypeId()).getName());
-		}
+        if (!CommonUtil.isEmpty(customer.getWorkerTypeId())) {
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(customer.getWorkerTypeId());
+            customer.setWorkerTypeName(workerType == null ? "" : workerType.getName());
+        }
         iFeedbackMapper.insertSelective(customer);
         return ServerResponse.createBySuccessMessage("反馈成功");
     }

@@ -202,7 +202,7 @@ public class HouseDataService {
             exportExcel.write(response, houseId + ".xlsx");
 //            File file= ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX+"excel/template.xlsx");
 //            exportExcel.writeFileDownload(response, file.getPath(),houseId + ".xlsx");//创建文件并输出
-            return ServerResponse.createBySuccess("导出Excel成功");
+            return ServerResponse.createBySuccessMessage("导出Excel成功");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

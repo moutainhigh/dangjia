@@ -33,8 +33,6 @@ public class BudgetMaterialService {
     @Autowired
     private IBudgetMaterialMapper iBudgetMaterialMapper;
     @Autowired
-    private IBudgetWorkerMapper iBudgetWorkerMapper;
-    @Autowired
     private IUnitMapper iUnitMapper;
     @Autowired
     private IGoodsMapper iGoodsMapper;
@@ -78,21 +76,7 @@ public class BudgetMaterialService {
         try {
             List<Map<String, Object>> mapList = iBudgetMaterialMapper.getBudgetMaterialById(houseId, workerTypeId);
             LOG.info("getAllBudgetMaterialById houseId:" + houseId + " workerTypeId:" + workerTypeId + " size:" + mapList.size());
-            for (Map<String, Object> obj : mapList) {
-                String goodsId = obj.get("goodsId").toString();
-                Goods goods = iGoodsMapper.queryById(goodsId);
-                obj.put("goodsBuy", goods.getBuy());
-                if (goods.getBuy() == 0 || goods.getBuy() == 1) {//我们购  //0：必买；1可选；2自购
-                    String productId = obj.get("productId").toString();
-                    Product pro = iProductMaper.selectByPrimaryKey(productId);
-                    Unit unit = iUnitMapper.selectByPrimaryKey(pro.getConvertUnit());
-                    obj.put("convertUnitName", unit.getName());
-                } else {//自购
-                    Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
-                    if (unit != null)
-                        obj.put("goodsUnitName", unit.getName());
-                }
-            }
+            BudgetWorkerService.setGoods(mapList, iGoodsMapper, iProductMaper, iUnitMapper);
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             e.printStackTrace();
