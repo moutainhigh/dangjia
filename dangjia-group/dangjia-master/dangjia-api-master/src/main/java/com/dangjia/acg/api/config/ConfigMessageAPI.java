@@ -21,28 +21,37 @@ import javax.servlet.http.HttpServletRequest;
 public interface ConfigMessageAPI {
     /**
      * 获取所有公告消息
+     *
      * @param configMessage
      * @return
      */
     @PostMapping("/config/message/list")
     @ApiOperation(value = "获取所有公告消息", notes = "获取所有公告消息")
-    ServerResponse getConfigMessages(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO")  PageDTO pageDTO, @RequestParam("configMessage") ConfigMessage configMessage);
+    ServerResponse getConfigMessages(@RequestParam("request") HttpServletRequest request,
+                                     @RequestParam("pageDTO") PageDTO pageDTO,
+                                     @RequestParam("configMessage") ConfigMessage configMessage);
+
     /**
      * 获取所有公告消息
+     *
      * @param configMessage
      * @return
      */
     @PostMapping("/config/message/all")
     @ApiOperation(value = "获取所有公告消息(web端列表)", notes = "获取所有公告消息(web端列表)")
-    ServerResponse queryConfigMessages(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO")  PageDTO pageDTO, @RequestParam("configMessage") ConfigMessage configMessage);
+    ServerResponse queryConfigMessages(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("pageDTO") PageDTO pageDTO,
+                                       @RequestParam("configMessage") ConfigMessage configMessage);
 
     /**
      * 新增公告消息
+     *
      * @param configMessage
      * @return
      */
     @PostMapping("/config/message/add")
     @ApiOperation(value = "新增公告消息", notes = "新增公告消息")
-    ServerResponse addConfigMessage(@RequestParam("request") HttpServletRequest request, @RequestParam("configMessage") ConfigMessage configMessage);
+    ServerResponse addConfigMessage(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("configMessage") ConfigMessage configMessage);
 
 }

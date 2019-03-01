@@ -25,6 +25,15 @@ public class WorkerTypeService {
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
 
+    public ServerResponse unfinishedFlow(String houseId) {
+        try{
+            List<WorkerType> workerTypeList = workerTypeMapper.unfinishedFlow(houseId);
+            return ServerResponse.createBySuccess("查询成功",workerTypeList);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
     public WorkerType queryWorkerType(String workerTypeId) {
        return workerTypeMapper.selectByPrimaryKey(workerTypeId);

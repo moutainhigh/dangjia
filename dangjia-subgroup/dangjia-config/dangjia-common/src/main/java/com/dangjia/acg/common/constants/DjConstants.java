@@ -140,6 +140,8 @@ public class DjConstants {
         public final static Integer RENGGONG = 1;// 人工
         public final static Integer CAILIAO = 2;// 材料
         public final static Integer FUWU = 3;// 服务
+        public final static Integer BU_RENGGONG = 4;// 补人工
+        public final static Integer BU_CAILIAO = 5;// 补材料
     }
     /**
      * Type 验房分销定金

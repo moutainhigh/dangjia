@@ -20,8 +20,12 @@ public interface MendWorkerAPI {
 
     @PostMapping("/repair/mendWorker/repairBudgetWorker")
     @ApiOperation(value = "补人工查询", notes = "补人工查询")
-    ServerResponse repairBudgetWorker(@RequestParam("request") HttpServletRequest request, @RequestParam("type")int type,@RequestParam("workerTypeId")String workerTypeId,
-                                        @RequestParam("houseId")String houseId, @RequestParam("name")String name,
-                                        @RequestParam("pageNum")Integer pageNum, @RequestParam("pageSize") Integer pageSize);
+    ServerResponse repairBudgetWorker(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("type") int type,
+                                      @RequestParam("workerTypeId") String workerTypeId,
+                                      @RequestParam("houseId") String houseId,
+                                      @RequestParam("name") String name,
+                                      @RequestParam("pageNum") Integer pageNum,
+                                      @RequestParam("pageSize") Integer pageSize);
 
 }

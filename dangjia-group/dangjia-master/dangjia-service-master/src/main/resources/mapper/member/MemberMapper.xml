@@ -166,6 +166,7 @@
         </if>
         <if test="stage == -1">
             and ifnull(mc.stage,0) !=3
+            and ifnull(mc.stage,0) !=2
         </if>
         <if test="childsLabelIdArr!=null and childsLabelIdArr!=''">
             <foreach collection="childsLabelIdArr" item="lableId" index="index">

@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -29,7 +30,9 @@ public interface GroupInfoAPI {
      */
     @RequestMapping(value = "/group/list", method = RequestMethod.POST)
     @ApiOperation(value = "获取群组列表", notes = "获取群组列表")
-    ServerResponse getGroups(HttpServletRequest request, PageDTO pageDTO, Group group);
+    ServerResponse getGroups(@RequestParam("request") HttpServletRequest request,
+                             @RequestParam("request") PageDTO pageDTO,
+                             @RequestParam("request") Group group);
 
     /**
      * 群组通知
@@ -39,7 +42,8 @@ public interface GroupInfoAPI {
      */
     @RequestMapping(value = "/group/notify", method = RequestMethod.POST)
     @ApiOperation(value = "群组通知", notes = "群组通知")
-    ServerResponse sendGroupsNotify(HttpServletRequest request, GroupNotifyInfo groupNotifyInfo);
+    ServerResponse sendGroupsNotify(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("groupNotifyInfo") GroupNotifyInfo groupNotifyInfo);
 
     /**
      * 批量更新群组成员
@@ -50,7 +54,9 @@ public interface GroupInfoAPI {
      */
     @RequestMapping(value = "/group/member/edit", method = RequestMethod.POST)
     @ApiOperation(value = "批量更新群组成员", notes = "批量更新群组成员,addList和removeList  多个以逗号分割,两者至少要有一个")
-    ServerResponse editManageGroup(int groupId, String addList, String removeList);
+    ServerResponse editManageGroup(@RequestParam("groupId") int groupId,
+                                   @RequestParam("addList") String addList,
+                                   @RequestParam("removeList") String removeList);
 
     /**
      * 新增群组客服成员配置表
@@ -60,7 +66,10 @@ public interface GroupInfoAPI {
      */
     @RequestMapping(value = "/group/add", method = RequestMethod.POST)
     @ApiOperation(value = "新增群组客服成员配置表", notes = "新增群组客服成员配置表")
-    ServerResponse addGroup(HttpServletRequest request, Group group,String members,String prefixs);
+    ServerResponse addGroup(@RequestParam("request") HttpServletRequest request,
+                            @RequestParam("group") Group group,
+                            @RequestParam("members") String members,
+                            @RequestParam("prefixs") String prefixs);
 
 
     /**
@@ -70,14 +79,17 @@ public interface GroupInfoAPI {
      */
     @RequestMapping(value = "/group/cfg/get", method = RequestMethod.POST)
     @ApiOperation(value = "获取群组客服成员配置表", notes = "获取群组客服成员配置表")
-    ServerResponse getGroupUserConfigs(HttpServletRequest request);
+    ServerResponse getGroupUserConfigs(@RequestParam("request") HttpServletRequest request);
+
     /**
      * 在线客服-一对一聊天
+     *
      * @return
      */
     @RequestMapping(value = "/group/cfg/online", method = RequestMethod.POST)
     @ApiOperation(value = "获取群组客服成员配置表", notes = "获取群组客服成员配置表")
-    public ServerResponse getOnlineService(HttpServletRequest request,String userToken);
+    ServerResponse getOnlineService(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("userToken") String userToken);
 
     /**
      * 群组客服成员配置表设置为管理员/取消管理员
@@ -87,6 +99,8 @@ public interface GroupInfoAPI {
      */
     @RequestMapping(value = "/group/cfg/edit", method = RequestMethod.POST)
     @ApiOperation(value = "群组客服成员配置表-更新", notes = "群组客服成员配置表-更新")
-    ServerResponse editGroupUserConfig(HttpServletRequest request, String id,String userId);
+    ServerResponse editGroupUserConfig(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("id") String id,
+                                       @RequestParam("userId") String userId);
 
 }

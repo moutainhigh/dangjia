@@ -35,15 +35,21 @@ public interface WebHouseAPI {
 
     @PostMapping("web/house/startWork")
     @ApiOperation(value = "确认开工", notes = "确认开工")
-    ServerResponse startWork(@RequestParam("request") HttpServletRequest request, @RequestParam("house") HouseDTO houseDTO, @RequestParam("members") String members, @RequestParam("prefixs") String prefixs);
+    ServerResponse startWork(@RequestParam("request") HttpServletRequest request,
+                             @RequestParam("house") HouseDTO houseDTO,
+                             @RequestParam("members") String members,
+                             @RequestParam("prefixs") String prefixs);
 
     @PostMapping("web/house/setHouseInfo")
     @ApiOperation(value = "设置房子为精选或者休眠", notes = "设置房子为精选或者休眠")
-    ServerResponse setHouseInfo(@RequestParam("request") HttpServletRequest request, @RequestParam("house") House house);
+    ServerResponse setHouseInfo(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("house") House house);
 
     @PostMapping("web/house/queryConstructionRecord")
     @ApiOperation(value = "施工记录", notes = "施工记录")
-    ServerResponse queryConstructionRecord(@RequestParam("houseId") String houseId, @RequestParam("pageDTO") PageDTO pageDTO, @RequestParam("workerTypeId") String workerTypeId);
+    ServerResponse queryConstructionRecord(@RequestParam("houseId") String houseId,
+                                           @RequestParam("pageDTO") PageDTO pageDTO,
+                                           @RequestParam("workerTypeId") String workerTypeId);
 
     /**
      * 根据房子装修状态查询所有的房子

@@ -24,16 +24,20 @@ public interface ActuaryOperationAPI {
      */
     @PostMapping("/actuary/actuaryOperation/choiceGoods")
     @ApiOperation(value = "选择取消精算", notes = "选择取消精算")
-    ServerResponse choiceGoods(@RequestParam("request") HttpServletRequest request, @RequestParam("budgetIdList") String budgetIdList);
+    ServerResponse choiceGoods(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("budgetIdList") String budgetIdList);
 
     /**
      * 更换货品
      */
     @PostMapping("/actuary/actuaryOperation/changeProduct")
     @ApiOperation(value = "更换货品", notes = "更换货品")
-    ServerResponse changeProduct(@RequestParam("request") HttpServletRequest request, @RequestParam("productId") String productId,
-                                 @RequestParam("budgetMaterialId") String budgetMaterialId, @RequestParam("srcGroupId") String srcGroupId,
-                                 @RequestParam("targetGroupId") String targetGroupId, @RequestParam("houseId") String houseId,
+    ServerResponse changeProduct(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("productId") String productId,
+                                 @RequestParam("budgetMaterialId") String budgetMaterialId,
+                                 @RequestParam("srcGroupId") String srcGroupId,
+                                 @RequestParam("targetGroupId") String targetGroupId,
+                                 @RequestParam("houseId") String houseId,
                                  @RequestParam("workerTypeId") String workerTypeId);
 
     /**
@@ -41,9 +45,12 @@ public interface ActuaryOperationAPI {
      */
     @PostMapping("/actuary/actuaryOperation/selectProduct")
     @ApiOperation(value = "选择货", notes = "选择货")
-    ServerResponse selectProduct(@RequestParam("request") HttpServletRequest request, @RequestParam("goodsId") String goodsId,
-                                 @RequestParam("brandId") String brandId, @RequestParam("brandSeriesId") String brandSeriesId,
-                                 @RequestParam("attributeIdArr") String attributeIdArr, @RequestParam("budgetMaterialId") String budgetMaterialId);
+    ServerResponse selectProduct(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("goodsId") String goodsId,
+                                 @RequestParam("brandId") String brandId,
+                                 @RequestParam("brandSeriesId") String brandSeriesId,
+                                 @RequestParam("attributeIdArr") String attributeIdArr,
+                                 @RequestParam("budgetMaterialId") String budgetMaterialId);
 
     /**
      * 精算商品详情
@@ -51,7 +58,10 @@ public interface ActuaryOperationAPI {
      */
     @PostMapping("/actuary/actuaryOperation/getCommo")
     @ApiOperation(value = "精算商品详情", notes = "精算商品详情")
-    ServerResponse getCommo(@RequestParam("request") HttpServletRequest request, @RequestParam("gId") String gId, @RequestParam("cityId") String cityId, @RequestParam("type") int type);
+    ServerResponse getCommo(@RequestParam("request") HttpServletRequest request,
+                            @RequestParam("gId") String gId,
+                            @RequestParam("cityId") String cityId,
+                            @RequestParam("type") int type);
 
     /**
      * 商品详情
@@ -59,7 +69,10 @@ public interface ActuaryOperationAPI {
      */
     @PostMapping("/actuary/actuaryOperation/goodsDetail")
     @ApiOperation(value = "普通-商品详情", notes = "普通-商品详情")
-    ServerResponse getGoodsDetail(@RequestParam("request") HttpServletRequest request, @RequestParam("gId") String gId, @RequestParam("cityId") String cityId, @RequestParam("type") int type);
+    ServerResponse getGoodsDetail(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("gId") String gId,
+                                  @RequestParam("cityId") String cityId,
+                                  @RequestParam("type") int type);
 
     /**
      * 工序明细
@@ -67,15 +80,21 @@ public interface ActuaryOperationAPI {
      */
     @PostMapping("/actuary/actuaryOperation/confirmActuaryDetail")
     @ApiOperation(value = "工序明细", notes = "工序明细")
-    ServerResponse confirmActuaryDetail(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken, @RequestParam("houseId") String houseId
-            , @RequestParam("workerTypeId") String workerTypeId, @RequestParam("type") int type, @RequestParam("cityId") String cityId);
+    ServerResponse confirmActuaryDetail(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("userToken") String userToken,
+                                        @RequestParam("houseId") String houseId,
+                                        @RequestParam("workerTypeId") String workerTypeId,
+                                        @RequestParam("type") int type,
+                                        @RequestParam("cityId") String cityId);
 
     /**
      * 精算详情
      */
     @PostMapping("/actuary/actuaryOperation/confirmActuary")
     @ApiOperation(value = "精算详情", notes = "精算详情")
-    ServerResponse confirmActuary(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken, @RequestParam("houseId") String houseId
-            , @RequestParam("cityId") String cityId);
+    ServerResponse confirmActuary(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("userToken") String userToken,
+                                  @RequestParam("houseId") String houseId,
+                                  @RequestParam("cityId") String cityId);
 
 }

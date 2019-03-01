@@ -31,7 +31,7 @@ public class HouseListDTO {
     private String building;//楼栋，后台客服填写
     private String unit;//单元号，后台客服填写
     private String number;//房间号，后台客服填写
-
+    private String workDepositId;
 
     public String getHouseName() {
         return (TextUtils.isEmpty(getResidential()) ? "*" : getResidential())

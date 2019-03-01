@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- *
- *
  * @类 名： LabelController.java
  * @功能描述：
  * @作者信息： ysl
@@ -24,54 +22,69 @@ import javax.servlet.http.HttpServletRequest;
 public interface LabelAPI {
     /**
      * 查询所有商品标签
+     *
      * @return
      */
     @PostMapping("/basics/label/getAllLabel")
     @ApiOperation(value = "查询所有商品标签", notes = "查询所有商品标签")
-    public ServerResponse<PageInfo> getAllLabel(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO);
+    ServerResponse<PageInfo> getAllLabel(@RequestParam("request") HttpServletRequest request,
+                                         @RequestParam("pageDTO") PageDTO pageDTO);
 
     /**
      * 修改商品标签
-     * @param labelId 标签ID
-     * @param labelName	标签名称
-     * @return	接口
+     *
+     * @param labelId   标签ID
+     * @param labelName 标签名称
+     * @return 接口
      */
     @PostMapping("/basics/label/updateLabel")
     @ApiOperation(value = "修改商品标签", notes = "修改商品标签")
-    public ServerResponse updateLabel(@RequestParam("request") HttpServletRequest request, @RequestParam("labelId") String labelId, @RequestParam("labelName") String labelName);
+    ServerResponse updateLabel(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("labelId") String labelId,
+                               @RequestParam("labelName") String labelName);
+
     /**
      * 新增商品标签
+     *
      * @param labelName 标签名称
      * @return
      */
     @PostMapping("/basics/label/insertLabel")
     @ApiOperation(value = "新增商品标签", notes = "新增商品标签")
-    public ServerResponse insertLabel(@RequestParam("request") HttpServletRequest request, @RequestParam("labelName") String labelName);
+    ServerResponse insertLabel(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("labelName") String labelName);
 
     /**
      * 根据id查询标签对象
+     *
      * @param labelId
      * @return
      */
     @PostMapping("/basics/label/selectLabelById")
     @ApiOperation(value = "根据id查询标签对象", notes = "根据id查询标签对象")
-    public ServerResponse selectLabelById(@RequestParam("request") HttpServletRequest request, @RequestParam("labelId") String labelId);
+    ServerResponse selectLabelById(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("labelId") String labelId);
+
     /**
      * 根据ID删除商品标签
+     *
      * @param labelId
      * @return
      */
     @PostMapping("/basics/label/deleteById")
     @ApiOperation(value = "根据ID删除商品标签", notes = "根据ID删除商品标签")
-    public ServerResponse deleteById(@RequestParam("request") HttpServletRequest request, @RequestParam("labelId") String labelId);
+    ServerResponse deleteById(@RequestParam("request") HttpServletRequest request,
+                              @RequestParam("labelId") String labelId);
 
     /**
      * 批量添加/修改货品标签
+     *
      * @param request
      * @param productLabeList
      * @return
      */
     @PostMapping("/basics/label/saveProductLabelList")
     @ApiOperation(value = "批量添加/修改货品标签", notes = "批量添加/修改货品标签")
-    public ServerResponse saveProductLabelList(@RequestParam("request") HttpServletRequest request,@RequestParam("productLabeList") String productLabeList);
+    ServerResponse saveProductLabelList(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("productLabeList") String productLabeList);
 }

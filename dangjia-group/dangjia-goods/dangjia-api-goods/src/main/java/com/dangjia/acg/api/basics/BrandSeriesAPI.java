@@ -12,47 +12,58 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * 
- * 
-   * @类 名： BrandExpalinController.java
-   * @功能描述：  
-   * @作者信息： hb
-   * @创建时间： 2018-9-13下午5:28:18
+ * @类 名： BrandExpalinController.java
+ * @功能描述：
+ * @作者信息： hb
+ * @创建时间： 2018-9-13下午5:28:18
  */
 @Api(description = "品牌系列管理接口")
 @FeignClient("dangjia-service-goods")
 public interface BrandSeriesAPI {
     /**
      * 查询所有
+     *
      * @return
      */
     @PostMapping("/basics/brandSeries/getAllBrandExplain")
     @ApiOperation(value = "查询所有", notes = "查询所有")
-    public ServerResponse<PageInfo> getAllBrandExplain(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO);
+    ServerResponse<PageInfo> getAllBrandExplain(@RequestParam("request") HttpServletRequest request,
+                                                @RequestParam("pageDTO") PageDTO pageDTO);
+
     /**
      * 修改
+     *
      * @param id
      * @return
      */
     @PostMapping("/basics/brandSeries/updateBrandExplain")
     @ApiOperation(value = "修改", notes = "修改")
-    public ServerResponse updateBrandExplain(@RequestParam("request") HttpServletRequest request,@RequestParam("id")String id,
-                                             @RequestParam("name")String name,@RequestParam("content")String content);
+    ServerResponse updateBrandExplain(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("id") String id,
+                                      @RequestParam("name") String name,
+                                      @RequestParam("content") String content);
+
     /**
      * 新增
+     *
      * @param brandId
      * @return
      */
     @PostMapping("/basics/brandSeries/insetBrandExplain")
     @ApiOperation(value = "新增", notes = "新增")
-    public ServerResponse insetBrandExplain(@RequestParam("request") HttpServletRequest request,@RequestParam("name")String name,
-                                            @RequestParam("content")String content,@RequestParam("brandId")String brandId);
+    ServerResponse insetBrandExplain(@RequestParam("request") HttpServletRequest request,
+                                     @RequestParam("name") String name,
+                                     @RequestParam("content") String content,
+                                     @RequestParam("brandId") String brandId);
+
     /**
      * 删除
+     *
      * @param id
      * @return
      */
     @PostMapping("/basics/brandSeries/deleteBrandExplain")
     @ApiOperation(value = "删除", notes = "删除")
-    public ServerResponse deleteBrandExplain(@RequestParam("request") HttpServletRequest request,@RequestParam("id")String id);
+    ServerResponse deleteBrandExplain(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("id") String id);
 }

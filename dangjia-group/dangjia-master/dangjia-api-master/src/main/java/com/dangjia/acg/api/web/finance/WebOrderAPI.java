@@ -21,8 +21,10 @@ public interface WebOrderAPI {
 
     @PostMapping("web/finance/order/getAllOrders")
     @ApiOperation(value = "所有订单流水", notes = "所有订单流水")
-    ServerResponse getAllOrders(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO,
-                                @RequestParam("likeMobile")String likeMobile, @RequestParam("likeAddress") String likeAddress);
+    ServerResponse getAllOrders(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("pageDTO") PageDTO pageDTO,
+                                @RequestParam("likeMobile") String likeMobile,
+                                @RequestParam("likeAddress") String likeAddress);
 
 //    @PostMapping("web/finance/order/orderList")
 //    @ApiOperation(value = "订单详情", notes = "订单详情")

@@ -21,39 +21,51 @@ public interface ConfigAppAPI {
 
     @PostMapping("/config/app/check")
     @ApiOperation(value = "版本检测", notes = "版本检测")
-    ServerResponse checkConfigApp(HttpServletRequest request, ConfigApp configApp);
+    ServerResponse checkConfigApp(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("configApp") ConfigApp configApp);
+
     /**
      * 获取所有版本应用
+     *
      * @param configApp
      * @return
      */
     @PostMapping("/config/app/list")
     @ApiOperation(value = "获取所有版本应用", notes = "获取所有版本应用")
-    ServerResponse getConfigApps(@RequestParam("request") HttpServletRequest request, @RequestParam("configApp") ConfigApp configApp);
+    ServerResponse getConfigApps(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("configApp") ConfigApp configApp);
+
     /**
      * 删除版本应用
+     *
      * @param id
      * @return
      */
     @PostMapping("/config/app/del")
     @ApiOperation(value = "删除版本应用", notes = "删除版本应用")
-    ServerResponse delConfigApp(@RequestParam("request") HttpServletRequest request, @RequestParam("id") String id) ;
+    ServerResponse delConfigApp(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("id") String id);
 
     /**
      * 修改版本应用
+     *
      * @param configApp
      * @return
      */
     @PostMapping("/config/app/edit")
     @ApiOperation(value = "修改版本应用", notes = "修改版本应用")
-    ServerResponse editConfigApp(@RequestParam("request") HttpServletRequest request, @RequestParam("configApp") ConfigApp configApp) ;
+    ServerResponse editConfigApp(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("configApp") ConfigApp configApp);
+
     /**
      * 新增版本应用
+     *
      * @param configApp
      * @return
      */
     @PostMapping("/config/app/add")
     @ApiOperation(value = "新增版本应用", notes = "新增版本应用")
-    ServerResponse addConfigApp(@RequestParam("request") HttpServletRequest request, @RequestParam("configApp") ConfigApp configApp);
+    ServerResponse addConfigApp(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("configApp") ConfigApp configApp);
 
 }

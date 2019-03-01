@@ -32,6 +32,7 @@ import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
+import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.*;
@@ -49,6 +50,7 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.City;
+import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -134,6 +136,9 @@ public class HouseService {
     private HouseFlowService houseFlowService;
     @Autowired
     private IMendOrderMapper mendOrderMapper;
+
+    @Autowired
+    private IWorkDepositMapper workDepositMapper;
     protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
 
     /**
@@ -704,6 +709,11 @@ public class HouseService {
         example.createCriteria()
                 .andEqualTo(House.MEMBER_ID, memberId)
                 .andEqualTo(House.DATA_STATUS, 0);
+
+        //获取结算比例对象
+        Example workDepositExample = new Example(WorkDeposit.class);
+        workDepositExample.orderBy(WorkDeposit.CREATE_DATE).desc();
+        List<WorkDeposit> workDeposits= workDepositMapper.selectByExample(workDepositExample);
         List<House> houseList = iHouseMapper.selectByExample(example);
         int again = 1;
         if (houseList.size() > 0) {
@@ -725,6 +735,7 @@ public class HouseService {
         house.setAgain(again);//第几套房产
         house.setHouseType(houseType);//装修的房子类型0：新房；1：老房
         house.setDrawings(drawings);//有无图纸0：无图纸；1：有图纸
+        house.setWorkDepositId(workDeposits.get(0).getId());
         iHouseMapper.insert(house);
         //房子花费
         HouseExpend houseExpend = new HouseExpend(true);

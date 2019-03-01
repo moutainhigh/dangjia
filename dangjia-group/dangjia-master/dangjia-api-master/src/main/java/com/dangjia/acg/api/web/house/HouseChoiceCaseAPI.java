@@ -21,36 +21,47 @@ import javax.servlet.http.HttpServletRequest;
 public interface HouseChoiceCaseAPI {
     /**
      * 获取所有房屋精选案例
+     *
      * @param houseChoiceCase
      * @return
      */
     @PostMapping("/config/choice/list")
     @ApiOperation(value = "获取所有房屋精选案例", notes = "获取所有房屋精选案例")
-    ServerResponse getHouseChoiceCases(@RequestParam("request") HttpServletRequest request, @RequestParam("houseChoiceCase") PageDTO pageDTO,  @RequestParam("houseChoiceCase") HouseChoiceCase houseChoiceCase);
+    ServerResponse getHouseChoiceCases(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("houseChoiceCase") PageDTO pageDTO,
+                                       @RequestParam("houseChoiceCase") HouseChoiceCase houseChoiceCase);
+
     /**
      * 删除房屋精选案例
+     *
      * @param id
      * @return
      */
     @PostMapping("/config/choice/del")
     @ApiOperation(value = "删除房屋精选案例", notes = "删除房屋精选案例")
-    ServerResponse delHouseChoiceCase(@RequestParam("request") HttpServletRequest request, @RequestParam("id") String id) ;
+    ServerResponse delHouseChoiceCase(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("id") String id);
 
     /**
      * 修改房屋精选案例
+     *
      * @param houseChoiceCase
      * @return
      */
     @PostMapping("/config/choice/edit")
     @ApiOperation(value = "修改房屋精选案例", notes = "修改房屋精选案例")
-    ServerResponse editHouseChoiceCase(@RequestParam("request") HttpServletRequest request, @RequestParam("houseChoiceCase") HouseChoiceCase houseChoiceCase) ;
+    ServerResponse editHouseChoiceCase(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("houseChoiceCase") HouseChoiceCase houseChoiceCase);
+
     /**
      * 新增房屋精选案例
+     *
      * @param houseChoiceCase
      * @return
      */
     @PostMapping("/config/choice/add")
     @ApiOperation(value = "新增房屋精选案例", notes = "新增房屋精选案例")
-    ServerResponse addHouseChoiceCase(@RequestParam("request") HttpServletRequest request, @RequestParam("houseChoiceCase") HouseChoiceCase houseChoiceCase);
+    ServerResponse addHouseChoiceCase(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("houseChoiceCase") HouseChoiceCase houseChoiceCase);
 
 }

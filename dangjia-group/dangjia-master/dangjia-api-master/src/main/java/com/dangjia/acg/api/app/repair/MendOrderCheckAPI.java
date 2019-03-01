@@ -18,10 +18,12 @@ public interface MendOrderCheckAPI {
 
     @PostMapping(value = "app/repair/mendOrderCheck/auditSituation")
     @ApiOperation(value = "查询审核情况", notes = "查询审核情况")
-    ServerResponse auditSituation(@RequestParam("mendOrderId")String mendOrderId);
+    ServerResponse auditSituation(@RequestParam("mendOrderId") String mendOrderId);
 
     @PostMapping(value = "app/repair/mendOrderCheck/checkMendOrder")
     @ApiOperation(value = "审核补退单", notes = "审核补退单")
-    ServerResponse checkMendOrder(@RequestParam("userToken")String userToken, @RequestParam("mendOrderId")String mendOrderId,
-                                  @RequestParam("roleType")String roleType,@RequestParam("state")Integer state);
+    ServerResponse checkMendOrder(@RequestParam("userToken") String userToken,
+                                  @RequestParam("mendOrderId") String mendOrderId,
+                                  @RequestParam("roleType") String roleType,
+                                  @RequestParam("state") Integer state);
 }

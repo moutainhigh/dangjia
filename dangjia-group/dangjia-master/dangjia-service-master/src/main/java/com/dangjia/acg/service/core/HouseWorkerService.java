@@ -812,7 +812,7 @@ public class HouseWorkerService {
 
             Member worker = memberMapper.selectByPrimaryKey(workerId);//查询对应的工人
             WorkerType workType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());//查询工种
-            WorkDeposit workDeposit = workDepositMapper.selectAll().get(0);//结算比例表
+            WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
 
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
 

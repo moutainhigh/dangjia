@@ -18,7 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -37,6 +39,123 @@ public class ActuaryOpeService {
     private ConfigUtil configUtil;
     @Autowired
     private IGoodsCategoryMapper goodsCategoryMapper;
+
+
+    /**
+     * 根据分类list查询商品
+     * 自定义查看
+     */
+    public ServerResponse getByCategoryId(String idArr, String houseId,Integer type) {
+        try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            BudgetDTO budgetDTO = new BudgetDTO();
+            List<BudgetItemDTO> budgetItemDTOList = new ArrayList<>();
+            if(type == 1){
+                budgetDTO.setWorkerPrice(0.0);
+                budgetDTO.setCaiPrice(budgetMaterialMapper.getHouseCaiPrice(houseId));
+                String[] workerTypeIdArr = idArr.split(",");
+                for (int i=0; i < workerTypeIdArr.length; i++){
+                    BudgetItemDTO budgetItemDTO = new BudgetItemDTO();
+                    WorkerType workerType = workerTypeAPI.queryWorkerType(workerTypeIdArr[i]);
+                    budgetItemDTO.setRowImage(address + workerType.getImage());
+                    budgetItemDTO.setRowName(workerType.getName());
+                    Double rowPrice = budgetWorkerMapper.getTypeAllPrice(houseId, workerTypeIdArr[i]);
+                    budgetItemDTO.setRowPrice(rowPrice);
+                    budgetDTO.setWorkerPrice(budgetDTO.getWorkerPrice() + rowPrice);
+
+                    List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getTypeAllList(houseId, workerTypeIdArr[i]);
+                    List<GoodsItemDTO> goodsItemDTOList = new ArrayList<>();
+                    for (BudgetWorker budgetWorker : budgetWorkerList){
+                        GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
+                        goodsItemDTO.setWorkerTypeName(workerType.getName());
+                        goodsItemDTO.setGoodsImage(address + budgetWorker.getImage());
+                        goodsItemDTO.setGoodsName(budgetWorker.getName());
+                        goodsItemDTO.setConvertCount(budgetWorker.getShopCount());
+                        goodsItemDTO.setPrice(budgetWorker.getPrice());
+                        goodsItemDTO.setUnitName(budgetWorker.getUnitName());
+                        goodsItemDTO.setId(budgetWorker.getWorkerGoodsId());//人工商品id
+                        goodsItemDTOList.add(goodsItemDTO);
+                    }
+                    budgetItemDTO.setGoodsItemDTOList(goodsItemDTOList);
+                    budgetItemDTOList.add(budgetItemDTO);
+                }
+                budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
+            }else {
+                budgetDTO.setWorkerPrice(budgetWorkerMapper.getHouseWorkerPrice(houseId));
+                budgetDTO.setCaiPrice(0.0);
+                String[] categoryIdArr = idArr.split(",");
+                for (int i=0; i<categoryIdArr.length; i++){
+                    BudgetItemDTO budgetItemDTO = new BudgetItemDTO();
+                    GoodsCategory goodsCategory = goodsCategoryMapper.selectByPrimaryKey(categoryIdArr[i]);
+                    budgetItemDTO.setRowImage(address + goodsCategory.getImage());
+                    budgetItemDTO.setRowName(goodsCategory.getName());
+                    Double rowPrice = budgetMaterialMapper.getCategoryAllPrice(houseId, categoryIdArr[i]);
+                    budgetItemDTO.setRowPrice(rowPrice);
+                    budgetDTO.setCaiPrice(budgetDTO.getCaiPrice() + rowPrice);
+
+                    List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.getCategoryAllList(houseId, categoryIdArr[i]);
+                    List<GoodsItemDTO> goodsItemDTOList = new ArrayList<>();
+                    for (BudgetMaterial budgetMaterial : budgetMaterialList){
+                        GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
+                        WorkerType workerType = workerTypeAPI.queryWorkerType(budgetMaterial.getWorkerTypeId());
+                        goodsItemDTO.setWorkerTypeName(workerType.getName());
+                        goodsItemDTO.setGoodsImage(address + budgetMaterial.getImage());
+                        if(budgetMaterial.getSteta() == 2){//自购
+                            goodsItemDTO.setGoodsName(budgetMaterial.getGoodsName());
+                        }else {
+                            goodsItemDTO.setGoodsName(budgetMaterial.getProductName());
+                            goodsItemDTO.setId(budgetMaterial.getProductId());//货号id
+                        }
+                        goodsItemDTO.setConvertCount(budgetMaterial.getConvertCount());
+                        goodsItemDTO.setPrice(budgetMaterial.getPrice());
+                        goodsItemDTO.setUnitName(budgetMaterial.getUnitName());
+                        goodsItemDTOList.add(goodsItemDTO);
+                    }
+                    budgetItemDTO.setGoodsItemDTOList(goodsItemDTOList);
+                    budgetItemDTOList.add(budgetItemDTO);
+                }
+                budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
+            }
+            //budgetDTO.setTotalPrice(budgetDTO.getWorkerPrice() + budgetDTO.getCaiPrice());
+
+            return ServerResponse.createBySuccess("查询成功",budgetDTO);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 所有分类
+     */
+    public ServerResponse categoryIdList(String houseId,Integer type) {
+        try{
+            List<Map<String,Object>> mapList = new ArrayList<>();
+            if(type == 1){
+                List<String> workerTypeIdList = budgetWorkerMapper.workerTypeList(houseId);
+                for (String workerTypeId : workerTypeIdList) {
+                    WorkerType workerType = workerTypeAPI.queryWorkerType(workerTypeId);
+                    Map map = new HashMap();
+                    map.put("id",workerType.getId());
+                    map.put("name", workerType.getName());
+                    mapList.add(map);
+                }
+            }else {
+                List<String> categoryIdList = budgetMaterialMapper.categoryIdList(houseId);
+                for (String categoryId : categoryIdList) {
+                    GoodsCategory goodsCategory = goodsCategoryMapper.selectByPrimaryKey(categoryId);
+                    Map map = new HashMap();
+                    map.put("id",goodsCategory.getId());
+                    map.put("name", goodsCategory.getName());
+                    mapList.add(map);
+                }
+            }
+            return ServerResponse.createBySuccess("查询成功", mapList);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
     /**
      * 精算详情
@@ -91,8 +210,14 @@ public class ActuaryOpeService {
                     List<GoodsItemDTO> goodsItemDTOList = new ArrayList<>();
                     for (BudgetMaterial budgetMaterial : budgetMaterialList){
                         GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
+                        WorkerType workerType = workerTypeAPI.queryWorkerType(budgetMaterial.getWorkerTypeId());
+                        goodsItemDTO.setWorkerTypeName(workerType.getName());
                         goodsItemDTO.setGoodsImage(address + budgetMaterial.getImage());
-                        goodsItemDTO.setGoodsName(budgetMaterial.getProductName());
+                        if(budgetMaterial.getSteta() == 2){//自购
+                            goodsItemDTO.setGoodsName(budgetMaterial.getGoodsName());
+                        }else {
+                            goodsItemDTO.setGoodsName(budgetMaterial.getProductName());
+                        }
                         goodsItemDTO.setConvertCount(budgetMaterial.getConvertCount());
                         goodsItemDTO.setPrice(budgetMaterial.getPrice());
                         goodsItemDTO.setUnitName(budgetMaterial.getUnitName());

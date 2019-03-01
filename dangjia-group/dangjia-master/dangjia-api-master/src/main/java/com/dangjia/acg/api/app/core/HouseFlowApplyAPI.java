@@ -18,18 +18,23 @@ public interface HouseFlowApplyAPI {
 
     @PostMapping("app/core/houseFlowApply/houseRecord")
     @ApiOperation(value = "工匠端工地记录", notes = "工匠端工地记录")
-    ServerResponse houseRecord(@RequestParam("userToken")String userToken, @RequestParam("houseId")String houseId,
-                               @RequestParam("pageNum")Integer pageNum, @RequestParam("pageSize")Integer pageSize);
+    ServerResponse houseRecord(@RequestParam("userToken") String userToken,
+                               @RequestParam("houseId") String houseId,
+                               @RequestParam("pageNum") Integer pageNum,
+                               @RequestParam("pageSize") Integer pageSize);
 
     @PostMapping("app/core/houseFlowApply/checkWorker")
     @ApiOperation(value = "每日申请直接审核", notes = "每日申请直接审核")
-    ServerResponse checkWorker(@RequestParam("userToken")String userToken,@RequestParam("houseFlowApplyId")String houseFlowApplyId);
+    ServerResponse checkWorker(@RequestParam("userToken") String userToken,
+                               @RequestParam("houseFlowApplyId") String houseFlowApplyId);
 
     @PostMapping("app/core/houseFlowApply/checkDetail")
     @ApiOperation(value = "验收详情", notes = "验收详情")
-    ServerResponse checkDetail(@RequestParam("userToken")String userToken,@RequestParam("houseFlowApplyId")String houseFlowApplyId);
+    ServerResponse checkDetail(@RequestParam("userToken") String userToken,
+                               @RequestParam("houseFlowApplyId") String houseFlowApplyId);
 
     @PostMapping("app/core/houseFlowApply/stewardCheckDetail")
     @ApiOperation(value = "管家端验收详情", notes = "管家端验收详情")
-    ServerResponse stewardCheckDetail(@RequestParam("userToken")String userToken,@RequestParam("houseFlowApplyId")String houseFlowApplyId);
+    ServerResponse stewardCheckDetail(@RequestParam("userToken") String userToken,
+                                      @RequestParam("houseFlowApplyId") String houseFlowApplyId);
 }

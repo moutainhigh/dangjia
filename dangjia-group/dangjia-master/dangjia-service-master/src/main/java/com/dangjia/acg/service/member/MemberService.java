@@ -96,7 +96,7 @@ public class MemberService {
      *
      * @param request
      * @param id      来源ID
-     * @param idType  1=房屋ID, 2=用户ID, 3=供应商ID
+     * @param idType  1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户
      * @return
      */
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
@@ -112,6 +112,11 @@ public class MemberService {
             Supplier supplier = supplierProductAPI.getSupplier(id);
             if (supplier != null) {
                 mobile = supplier == null ? "" : supplier.getTelephone();
+            }
+        } else if (idType.equals("4")) {
+            MainUser mainUser = userMapper.selectByPrimaryKey(id);
+            if (mainUser != null) {
+                mobile = mainUser == null ? "" : mainUser.getMobile();
             }
         } else {
             Member member = memberMapper.selectByPrimaryKey(id);
@@ -586,17 +591,28 @@ public class MemberService {
                     MainUser mainUser = userMapper.selectByPrimaryKey(customer.getUserId());
                     mcDTO.setUserName(mainUser.getUsername());
                 }
+//                //找到提醒内容 ： 离当前时间最近的那一条
+//                if (customer.getRemindRecordId() != null) {
+//                    CustomerRecord remindCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getRemindRecordId());
+//                    mcDTO.setRemindContent(remindCustomerRecord.getDescribes());
+//                    mcDTO.setRemindTime(remindCustomerRecord.getRemindTime());
+//                    if (remindCustomerRecord.getRemindTime() != null) {
+//                        mcDTO.setRemindTimeOvertime(
+//                                Long.compare(remindCustomerRecord.getRemindTime().getTime(), new Date().getTime()));
+//                    } else {
+//                        mcDTO.setRemindTimeOvertime(-1);
+//                    }
+//                }
+//                if (customer.getCurrRecordId() != null) {
+//                    CustomerRecord currCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getCurrRecordId());
+//                    if (currCustomerRecord != null)
+//                        mcDTO.setLastRecord(currCustomerRecord.getCreateDate());
+//                }
                 //找到提醒内容 ： 离当前时间最近的那一条
                 if (customer.getRemindRecordId() != null) {
                     CustomerRecord remindCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getRemindRecordId());
                     mcDTO.setRemindContent(remindCustomerRecord.getDescribes());
                     mcDTO.setRemindTime(remindCustomerRecord.getRemindTime());
-                    if (remindCustomerRecord.getRemindTime() != null) {
-                        mcDTO.setRemindTimeOvertime(
-                                Long.compare(remindCustomerRecord.getRemindTime().getTime(), new Date().getTime()));
-                    } else {
-                        mcDTO.setRemindTimeOvertime(-1);
-                    }
                 }
                 if (customer.getCurrRecordId() != null) {
                     CustomerRecord currCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getCurrRecordId());

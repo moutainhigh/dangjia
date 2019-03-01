@@ -200,7 +200,7 @@ public class OrderSplitService {
 
                 Example example = new Example(SplitDeliver.class);
                 example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId()).andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId)
-                        .andEqualTo(SplitDeliver.SHIP_STATE, 0);
+                        .andEqualTo(SplitDeliver.SHIP_STATE, 0).andEqualTo(SplitDeliver.ORDER_SPLIT_ID,orderSplitId);
                 List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
                 SplitDeliver splitDeliver;
                 if (splitDeliverList.size() > 0) {

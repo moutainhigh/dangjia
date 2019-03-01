@@ -29,53 +29,76 @@ public interface ActivityAPI {
 
     @PostMapping("web/activity/list")
     @ApiOperation(value = "获取活动列表", notes = "获取活动列表")
-     ServerResponse queryActivitys(@RequestParam("request") HttpServletRequest request,@RequestParam("pageDTO")  PageDTO pageDTO, @RequestParam("activity") Activity activity,@RequestParam("isEndTime") String isEndTime) ;
+    ServerResponse queryActivitys(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("pageDTO") PageDTO pageDTO,
+                                  @RequestParam("activity") Activity activity,
+                                  @RequestParam("isEndTime") String isEndTime);
 
     @PostMapping("web/activity/get")
     @ApiOperation(value = "获取活动明细", notes = "获取活动明细")
-     ServerResponse getActivity(@RequestParam("request") HttpServletRequest request, @RequestParam("activity") ActivityDTO activityDTO) ;
+    ServerResponse getActivity(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("activity") ActivityDTO activityDTO);
 
     /**
      * 修改
+     *
      * @param activity
      * @return
      */
     @PostMapping("web/activity/edit")
     @ApiOperation(value = "编辑活动", notes = "编辑活动")
-    ServerResponse editActivity(@RequestParam("request") HttpServletRequest request,@RequestParam("activity")  Activity activity,@RequestParam("discount") String discount) ;
+    ServerResponse editActivity(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("activity") Activity activity,
+                                @RequestParam("discount") String discount);
+
     /**
      * 新增
+     *
      * @param activity
      * @return
      */
     @PostMapping("web/activity/add")
     @ApiOperation(value = "新增活动", notes = "新增活动")
-    ServerResponse addActivity(@RequestParam("request") HttpServletRequest request,@RequestParam("activity") Activity activity,@RequestParam("discount") String discount);
+    ServerResponse addActivity(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("activity") Activity activity,
+                               @RequestParam("discount") String discount);
 
 
     /**
      * 获取所有优惠券
+     *
      * @param activityRedPack
      * @return
      */
     @PostMapping("web/activity/red/list")
     @ApiOperation(value = "获取所有优惠券列表", notes = "获取所有优惠券列表")
-   ServerResponse queryActivityRedPacks(@RequestParam("request") HttpServletRequest request,@RequestParam("pageDTO")  PageDTO pageDTO, @RequestParam("activityRedPack") ActivityRedPack activityRedPack,@RequestParam("isEndTime")  String isEndTime) ;
+    ServerResponse queryActivityRedPacks(@RequestParam("request") HttpServletRequest request,
+                                         @RequestParam("pageDTO") PageDTO pageDTO,
+                                         @RequestParam("activityRedPack") ActivityRedPack activityRedPack,
+                                         @RequestParam("isEndTime") String isEndTime);
+
     /**
      * 获取所有有效的优惠券
+     *
      * @param cityId
      * @param memberId 指定用户是否已经领取该优惠券
      * @return
      */
     @PostMapping("web/activity/red/myList")
     @ApiOperation(value = "获取所有有效的优惠券", notes = "获取所有有效的优惠券")
-    ServerResponse getActivityRedPacks(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("cityId") String cityId,@RequestParam("memberId") String memberId);
+    ServerResponse getActivityRedPacks(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("pageDTO") PageDTO pageDTO,
+                                       @RequestParam("cityId") String cityId,
+                                       @RequestParam("memberId") String memberId);
 
     @PostMapping("web/activity/red/get")
     @ApiOperation(value = "获取优惠券明细", notes = "获取优惠券明细")
-    ServerResponse getActivityRedPack(@RequestParam("request") HttpServletRequest request, @RequestParam("activityRedPackDTO") ActivityRedPackDTO activityRedPackDTO);
+    ServerResponse getActivityRedPack(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("activityRedPackDTO") ActivityRedPackDTO activityRedPackDTO);
+
     /**
      * 修改
+     *
      * @param activityRedPack
      * @return
      */
@@ -86,8 +109,10 @@ public interface ActivityAPI {
                                        @RequestParam("ruleNum") String ruleNum,
                                        @RequestParam("ruleMoney") String ruleMoney,
                                        @RequestParam("ruleSatisfyMoney") String ruleSatisfyMoney);
+
     /**
      * 新增
+     *
      * @param activityRedPack
      * @return
      */
