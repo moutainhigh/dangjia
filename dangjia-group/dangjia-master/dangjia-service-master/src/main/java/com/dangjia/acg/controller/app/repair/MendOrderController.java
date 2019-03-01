@@ -3,6 +3,7 @@ package com.dangjia.acg.controller.app.repair;
 import com.dangjia.acg.api.app.repair.MendOrderAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.service.repair.MendOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -82,6 +83,10 @@ public class MendOrderController implements MendOrderAPI {
     @ApiMethod
     public ServerResponse getMendWorkerList(String houseId,String workerTypeId){
         return mendOrderService.getMendWorkerList(houseId,workerTypeId);
+    }
+    @Override
+    public MendOrderInfoDTO getMendMendOrderInfo(String houseId, String workerTypeId, String type, String state){
+        return mendOrderService.getMendMendOrderInfo(houseId,workerTypeId,type,state);
     }
     /**
      * 提交补人工

@@ -32,6 +32,7 @@
         again,
         house_type as houseType,
         drawings,
+        work_deposit_id as workDepositId,
         custom_sort as customSort,
         is_select as isSelect,
         visit_state as visitState,
@@ -81,6 +82,7 @@
             unit,
             number,
             square,
+            work_deposit_id as workDepositId,
             refer_house_id as referHouseId,
             style,
             house_type as houseType,
@@ -172,7 +174,9 @@
         h.residential as residential,
         h.building as building,
         h.unit as unit,
+        h.work_deposit_id as workDepositId,
         h.number as number
+
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id

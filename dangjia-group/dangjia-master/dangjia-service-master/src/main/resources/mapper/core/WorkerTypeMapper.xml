@@ -3,5 +3,19 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.core.IWorkerTypeMapper">
+
+    <!--根据houseId查询已进场未完工工序-->
+    <select id="unfinishedFlow" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.WorkerType">
+        select
+            wt.id, wt.name
+        from dj_core_house_flow hf,dj_core_worker_type wt
+        where hf.state = 0
+        and hf.work_type = 4
+        and hf.work_steta != 2
+        and hf.worker_type > 2
+        and hf.house_id=#{houseId}
+        and wt.id = hf.worker_type_id
+        order by hf.sort asc
+    </select>
 </mapper>
 

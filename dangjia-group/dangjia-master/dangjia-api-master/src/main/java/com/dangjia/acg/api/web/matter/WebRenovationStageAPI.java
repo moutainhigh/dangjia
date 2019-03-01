@@ -22,11 +22,14 @@ public interface WebRenovationStageAPI {
 
     @PostMapping("web/renovationStage/addRenovationStage")
     @ApiOperation(value = "新增装修指南阶段配置", notes = "新增装修指南阶段配置")
-    ServerResponse addRenovationStage(@RequestParam("name") String name, @RequestParam("image") String image);
+    ServerResponse addRenovationStage(@RequestParam("name") String name,
+                                      @RequestParam("image") String image);
 
     @PostMapping("web/renovationStage/updateRenovationStage")
     @ApiOperation(value = "修改装修指南阶段配置", notes = "修改装修指南阶段配置")
-    ServerResponse updateRenovationStage(@RequestParam("id") String id, @RequestParam("name") String name, @RequestParam("image") String image);
+    ServerResponse updateRenovationStage(@RequestParam("id") String id,
+                                         @RequestParam("name") String name,
+                                         @RequestParam("image") String image);
 
     @PostMapping("web/renovationStage/deleteRenovationStage")
     @ApiOperation(value = "删除装修指南阶段配置", notes = "删除装修指南阶段配置")

@@ -38,5 +38,6 @@ public interface ActuaryAPI {
 
     @PostMapping("/data/actuary/getStatisticsByDate")
     @ApiOperation(value = "返回按日期统计列表", notes = "返回按日期统计列表")
-    ServerResponse getStatisticsByDate(@RequestParam("startDate")String startDate, @RequestParam("endDate")String endDate);
+    ServerResponse getStatisticsByDate(@RequestParam("startDate") String startDate,
+                                       @RequestParam("endDate") String endDate);
 }

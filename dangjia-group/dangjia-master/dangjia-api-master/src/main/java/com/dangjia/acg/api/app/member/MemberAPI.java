@@ -99,7 +99,9 @@ public interface MemberAPI {
 
     @RequestMapping(value = "member/updateWokerRegister", method = RequestMethod.POST)
     @ApiOperation(value = "工匠提交详细资料", notes = "工匠提交详细资料")
-    ServerResponse updateWokerRegister(@RequestParam("member") Member user, @RequestParam("userToken") String userToken, @RequestParam("userRole") String userRole);
+    ServerResponse updateWokerRegister(@RequestParam("member") Member user,
+                                       @RequestParam("userToken") String userToken,
+                                       @RequestParam("userRole") String userRole);
 
     /**
      * 实名认证提交资料
@@ -114,12 +116,12 @@ public interface MemberAPI {
      */
     @RequestMapping(value = "member/certification", method = RequestMethod.POST)
     @ApiOperation(value = "实名认证提交资料", notes = "实名认证提交资料")
-    ServerResponse certification(@RequestParam("userToken") String userToken
-            , @RequestParam("name") String name
-            , @RequestParam("idcaoda") String idcaoda
-            , @RequestParam("idcaodb") String idcaodb
-            , @RequestParam("idcaodall") String idcaodall
-            , @RequestParam("idnumber") String idnumber);
+    ServerResponse certification(@RequestParam("userToken") String userToken,
+                                 @RequestParam("name") String name,
+                                 @RequestParam("idcaoda") String idcaoda,
+                                 @RequestParam("idcaodb") String idcaodb,
+                                 @RequestParam("idcaodall") String idcaodall,
+                                 @RequestParam("idnumber") String idnumber);
 
     /**
      * 工种认证提交申请

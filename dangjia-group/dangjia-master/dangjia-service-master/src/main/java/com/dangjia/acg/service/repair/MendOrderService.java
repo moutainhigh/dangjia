@@ -8,7 +8,10 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
@@ -370,7 +373,47 @@ public class MendOrderService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-
+    /**
+     * 明细
+     */
+    public MendOrderInfoDTO getMendMendOrderInfo(String houseId, String workerTypeId, String type, String state) {
+        MendOrderInfoDTO mendOrderInfoDTO=new MendOrderInfoDTO();
+        try {
+            Example example = new Example(MendOrder.class);
+            Example.Criteria criteria=example.createCriteria();
+            criteria.andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, type)//补人工
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID, workerTypeId);
+            if(!CommonUtil.isEmpty(state)){
+                criteria.andEqualTo(MendOrder.STATE, state);
+            }
+            List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
+            if (mendOrderList.size() == 0) {
+                return mendOrderInfoDTO;
+            } else if (mendOrderList.size() > 1) {
+                return mendOrderInfoDTO;
+            } else {
+                MendOrder mendOrder = mendOrderList.get(0);
+                BeanUtils.beanToBean(mendOrder,mendOrderInfoDTO);
+                if("0".equals(type)||"2".equals(type)||"4".equals(type)){
+                    List<MendMateriel> mendMateriels = mendMaterialMapper.byMendOrderId(mendOrder.getId());
+                    for (MendMateriel v : mendMateriels) {
+                        v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                    }
+                    mendOrderInfoDTO.setMendMateriels(mendMateriels);
+                }else {
+                    List<MendWorker> mendWorkerList = mendWorkerMapper.byMendOrderId(mendOrder.getId());
+                    for (MendWorker v : mendWorkerList) {
+                        v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                    }
+                    mendOrderInfoDTO.setMendWorkers(mendWorkerList);
+                }
+                return mendOrderInfoDTO;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return mendOrderInfoDTO;
+        }
+    }
     /**
      * 管家
      * 提交补人工

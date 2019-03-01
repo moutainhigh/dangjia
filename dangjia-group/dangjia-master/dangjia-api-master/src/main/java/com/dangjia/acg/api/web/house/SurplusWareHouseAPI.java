@@ -28,9 +28,12 @@ public interface SurplusWareHouseAPI {
      */
     @PostMapping("web/surplus/wareHouse/getAllSurplusWareHouse")
     @ApiOperation(value = "所有剩余材料的临时仓库", notes = "所有所有剩余材料的临时仓库")
-    ServerResponse getAllSurplusWareHouse(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO,
-                                          @RequestParam("state") Integer state,@RequestParam("address") String address,
-                                          @RequestParam("productName") String productName,@RequestParam("beginDate") String beginDate,
+    ServerResponse getAllSurplusWareHouse(@RequestParam("request") HttpServletRequest request,
+                                          @RequestParam("pageDTO") PageDTO pageDTO,
+                                          @RequestParam("state") Integer state,
+                                          @RequestParam("address") String address,
+                                          @RequestParam("productName") String productName,
+                                          @RequestParam("beginDate") String beginDate,
                                           @RequestParam("endDate") String endDate);
 
     /**
@@ -38,7 +41,8 @@ public interface SurplusWareHouseAPI {
      */
     @PostMapping("web/surplus/wareHouse/setSurplusWareHouse")
     @ApiOperation(value = "修改临时仓库的信息", notes = "修改临时仓库的信息")
-    ServerResponse setSurplusWareHouse(@RequestParam("request") HttpServletRequest request, @RequestParam("withdrawDeposit") SurplusWareHouse surplusWareHouse);
+    ServerResponse setSurplusWareHouse(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("withdrawDeposit") SurplusWareHouse surplusWareHouse);
 
     /**
      * 添加临时仓库清点数据
@@ -49,7 +53,8 @@ public interface SurplusWareHouseAPI {
      */
     @PostMapping("web/surplus/wareHouse/addSurplusWareHouseItem")
     @ApiOperation(value = "修改临时仓库的信息", notes = "修改临时仓库的信息")
-    ServerResponse addSurplusWareHouseItem(@RequestParam("request") HttpServletRequest request, @RequestParam("jsonStr") String jsonStr);
+    ServerResponse addSurplusWareHouseItem(@RequestParam("request") HttpServletRequest request,
+                                           @RequestParam("jsonStr") String jsonStr);
 
     /**
      * 查看临时仓库清点的所有商品数据
@@ -60,7 +65,8 @@ public interface SurplusWareHouseAPI {
      */
     @PostMapping("web/surplus/wareHouse/getAllSurplusWareHouseItemBySId")
     @ApiOperation(value = "查看临时仓库清点数据", notes = "查看临时仓库清点数据")
-    ServerResponse getAllSurplusWareHouseItemBySId(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO,
+    ServerResponse getAllSurplusWareHouseItemBySId(@RequestParam("request") HttpServletRequest request,
+                                                   @RequestParam("pageDTO") PageDTO pageDTO,
                                                    @RequestParam("surplusWareHouseId") String surplusWareHouseId);
 
     /**
@@ -72,7 +78,8 @@ public interface SurplusWareHouseAPI {
      */
     @PostMapping("web/surplus/wareHouse/addSurplusWareDivertList")
     @ApiOperation(value = "修改临时仓库的信息", notes = "修改临时仓库的信息")
-    ServerResponse addSurplusWareDivertList(@RequestParam("request") HttpServletRequest request, @RequestParam("jsonStr") String jsonStr);
+    ServerResponse addSurplusWareDivertList(@RequestParam("request") HttpServletRequest request,
+                                            @RequestParam("jsonStr") String jsonStr);
 
     /**
      * 查询指定仓库id的挪货记录
@@ -84,7 +91,8 @@ public interface SurplusWareHouseAPI {
      */
     @PostMapping("web/surplus/wareHouse/getAllSurplusWareDivertListBySId")
     @ApiOperation(value = "查询指定仓库id的挪货记录", notes = "查询指定仓库id的挪货记录")
-    ServerResponse getAllSurplusWareDivertListBySId(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO,
+    ServerResponse getAllSurplusWareDivertListBySId(@RequestParam("request") HttpServletRequest request,
+                                                    @RequestParam("pageDTO") PageDTO pageDTO,
                                                     @RequestParam("surplusWareHouseId") String surplusWareHouseId);
 
     /**
@@ -98,8 +106,10 @@ public interface SurplusWareHouseAPI {
      */
     @PostMapping("web/surplus/wareHouse/getAllProductsLikeAddressOrPName")
     @ApiOperation(value = "查询所有商品的库存", notes = "查询所有商品的库存")
-    ServerResponse getAllProductsLikeAddressOrPName(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO,
-                                                     @RequestParam("address") String address, @RequestParam("productName") String productName);
+    ServerResponse getAllProductsLikeAddressOrPName(@RequestParam("request") HttpServletRequest request,
+                                                    @RequestParam("pageDTO") PageDTO pageDTO,
+                                                    @RequestParam("address") String address,
+                                                    @RequestParam("productName") String productName);
 
     /**
      * 查询指定productId的所有仓库
@@ -111,7 +121,8 @@ public interface SurplusWareHouseAPI {
      */
     @PostMapping("web/surplus/wareHouse/getAllSurplusWareHouseListByPId")
     @ApiOperation(value = "查询指定productId的所有仓库", notes = "查询指定productId的所有仓库")
-    ServerResponse getAllSurplusWareHouseListByPId(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO,
-                                                     @RequestParam("productId") String productId);
+    ServerResponse getAllSurplusWareHouseListByPId(@RequestParam("request") HttpServletRequest request,
+                                                   @RequestParam("pageDTO") PageDTO pageDTO,
+                                                   @RequestParam("productId") String productId);
 
 }

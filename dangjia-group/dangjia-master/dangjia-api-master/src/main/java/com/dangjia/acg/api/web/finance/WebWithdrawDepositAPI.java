@@ -26,15 +26,18 @@ public interface WebWithdrawDepositAPI {
      */
     @PostMapping("web/finance/withdraw/getAllWithdraw")
     @ApiOperation(value = "查询所有提现申请", notes = "查询所有有提现申请")
-    ServerResponse getAllWithdraw(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO,
-                                  @RequestParam("state") Integer state, @RequestParam("beginDate") String beginDate,
-                                  @RequestParam("endDate")  String endDate);
+    ServerResponse getAllWithdraw(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("pageDTO") PageDTO pageDTO,
+                                  @RequestParam("state") Integer state,
+                                  @RequestParam("beginDate") String beginDate,
+                                  @RequestParam("endDate") String endDate);
 
     /**
      * 修改提现信息
      */
     @PostMapping("web/finance/withdraw/setWithdraw")
     @ApiOperation(value = "提醒申请驳回，同意", notes = "提醒申请驳回，同意")
-    ServerResponse setWithdraw(@RequestParam("request") HttpServletRequest request, @RequestParam("withdrawDeposit") WithdrawDeposit withdrawDeposit);
+    ServerResponse setWithdraw(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("withdrawDeposit") WithdrawDeposit withdrawDeposit);
 
 }

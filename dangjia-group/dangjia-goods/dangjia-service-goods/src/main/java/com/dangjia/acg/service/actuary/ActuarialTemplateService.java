@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.actuary;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.basics.ActuarialTemplateDTO;
 import com.dangjia.acg.mapper.actuary.IActuarialTemplateMapper;
@@ -35,30 +36,22 @@ public class ActuarialTemplateService {
     private static Logger LOG = LoggerFactory.getLogger(ActuarialTemplateService.class);
 
     /**
-     * 查询精算模版
+     * 查询所有精算模板
      *
-     * @param pageNum
-     * @param pageSize
+     * @param pageDTO
      * @param workerTypeId
-     * @param stateType
+     * @param stateType    查询功能，state_type传1表示查询所有启用的，0为所有停用的，2或者不传为查询所有
+     * @param name
      * @return
      */
-    public ServerResponse<PageInfo> queryActuarialTemplate(Integer pageNum, Integer pageSize, String workerTypeId, String stateType, String name) {
+    public ServerResponse<PageInfo> queryActuarialTemplate(PageDTO pageDTO, String workerTypeId, String stateType, String name) {
         try {
-            if (pageNum == null) {
-                pageNum = 1;
-            }
-            if (pageSize == null) {
-                pageSize = 10;
-            }
-            PageHelper.startPage(pageNum, pageSize);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<ActuarialTemplate> tList = iActuarialTemplateMapper.query(StringUtils.isBlank(workerTypeId) ? null : workerTypeId,
                     StringUtils.isBlank(stateType) ? null : stateType, name);
             if (tList == null || tList.size() <= 0) {
                 return ServerResponse.createByErrorMessage("查无数据！");
             }
-
-            List<ActuarialTemplateDTO> actuarialTemplateResults = new ArrayList<ActuarialTemplateDTO>();
             PageInfo pageResult = new PageInfo(tList);
             pageResult.setList(tList);
             return ServerResponse.createBySuccess("查询精算模版成功", pageResult);
@@ -83,11 +76,9 @@ public class ActuarialTemplateService {
      */
     public ServerResponse<String> insertActuarialTemplate(String userId, String name, String styleId, String styleName, String applicableArea,
                                                           Integer stateType, String workerTypeName, Integer workerTypeId) {
-
         List<ActuarialTemplate> actuarialTemplateList = iActuarialTemplateMapper.queryByName(workerTypeId, name);
         if (actuarialTemplateList.size() > 0)
             return ServerResponse.createByErrorMessage("精算名字不能重复");
-
         ActuarialTemplate t = new ActuarialTemplate();
         t.setUserId(userId);
         t.setName(name);
@@ -103,28 +94,31 @@ public class ActuarialTemplateService {
             return ServerResponse.createBySuccess("新增精算模版成功", t.getId());
         }
         return ServerResponse.createByErrorMessage("新增精算模版失败");
-
     }
 
-    //修改精算模版
-    public ServerResponse<String> updateActuarialTemplate(String id, String name, String styleId, String styleName, String applicableArea, Integer stateType, String workingProcedure) {
+    /**
+     * 修改精算模版 根据精算模版ID修改
+     *
+     * @param id
+     * @param name
+     * @param styleId
+     * @param styleName
+     * @param applicableArea
+     * @param stateType
+     * @return
+     */
+    public ServerResponse<String> updateActuarialTemplate(String id, String name, String styleId, String styleName, String applicableArea, Integer stateType) {
         try {
             if (!StringUtils.isNotBlank(id)) {
                 return ServerResponse.createByErrorMessage("修改精算模版参数错误");
             }
             ActuarialTemplate oldActuarialTemplate = iActuarialTemplateMapper.selectByPrimaryKey(id);
-
-
             List<ActuarialTemplate> actuarialTemplateList = iActuarialTemplateMapper.queryByName(oldActuarialTemplate.getWorkerTypeId(), name);
             LOG.info("actuarialTemplateList:" + actuarialTemplateList.size());
-//            if (actuarialTemplateList.size() > 1)
-////                return ServerResponse.createByErrorMessage("精算名字不能重复");
-
             if (!oldActuarialTemplate.getName().equals(name)) {
                 if (actuarialTemplateList.size() > 0)
                     return ServerResponse.createByErrorMessage("精算名字已存在");
             }
-
             ActuarialTemplate t = new ActuarialTemplate();
             t.setId(id);
             t.setName(name);
@@ -143,7 +137,12 @@ public class ActuarialTemplateService {
         }
     }
 
-    //删除精算模版
+    /**
+     * 删除精算模板
+     *
+     * @param id
+     * @return
+     */
     public ServerResponse<String> deleteActuarialTemplate(String id) {
         try {
             if (!StringUtils.isNotBlank(id)) {

@@ -20,36 +20,46 @@ import javax.servlet.http.HttpServletRequest;
 public interface ConfigAdvertAPI {
     /**
      * 获取所有广告
+     *
      * @param configAdvert
      * @return
      */
     @PostMapping("/config/adverts/list")
     @ApiOperation(value = "获取所有广告", notes = "获取所有广告")
-    ServerResponse getConfigAdverts(@RequestParam("request") HttpServletRequest request, @RequestParam("configAdvert") ConfigAdvert configAdvert);
+    ServerResponse getConfigAdverts(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("configAdvert") ConfigAdvert configAdvert);
+
     /**
      * 删除广告
+     *
      * @param id
      * @return
      */
     @PostMapping("/config/adverts/del")
     @ApiOperation(value = "删除广告", notes = "删除广告")
-    ServerResponse delConfigAdvert(@RequestParam("request") HttpServletRequest request, @RequestParam("id") String id) ;
+    ServerResponse delConfigAdvert(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("id") String id);
 
     /**
      * 修改广告
+     *
      * @param configAdvert
      * @return
      */
     @PostMapping("/config/adverts/edit")
     @ApiOperation(value = "修改广告", notes = "修改广告")
-    ServerResponse editConfigAdvert(@RequestParam("request") HttpServletRequest request, @RequestParam("configAdvert") ConfigAdvert configAdvert) ;
+    ServerResponse editConfigAdvert(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("configAdvert") ConfigAdvert configAdvert);
+
     /**
      * 新增广告
+     *
      * @param configAdvert
      * @return
      */
     @PostMapping("/config/adverts/add")
     @ApiOperation(value = "新增广告", notes = "新增广告")
-    ServerResponse addConfigAdvert(@RequestParam("request") HttpServletRequest request,@RequestParam("configAdvert") ConfigAdvert configAdvert);
+    ServerResponse addConfigAdvert(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("configAdvert") ConfigAdvert configAdvert);
 
 }

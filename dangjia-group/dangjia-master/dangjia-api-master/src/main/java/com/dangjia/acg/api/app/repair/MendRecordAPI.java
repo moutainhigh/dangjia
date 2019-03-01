@@ -18,13 +18,15 @@ public interface MendRecordAPI {
 
     @PostMapping(value = "app/repair/mendRecord/mendOrderDetail")
     @ApiOperation(value = "补退明细", notes = "补退明细")
-    ServerResponse mendOrderDetail(@RequestParam("mendOrderId")String mendOrderId,@RequestParam("type")Integer type);
+    ServerResponse mendOrderDetail(@RequestParam("mendOrderId") String mendOrderId,
+                                   @RequestParam("type") Integer type);
 
     @PostMapping(value = "app/repair/mendRecord/recordList")
     @ApiOperation(value = "记录列表", notes = "记录列表")
-    ServerResponse recordList(@RequestParam("houseId")String houseId,@RequestParam("type")Integer type);
+    ServerResponse recordList(@RequestParam("houseId") String houseId,
+                              @RequestParam("type") Integer type);
 
     @PostMapping(value = "app/repair/mendRecord/mendList")
     @ApiOperation(value = "要补退记录", notes = "要补退记录")
-    ServerResponse mendList(@RequestParam("houseId")String houseId);
+    ServerResponse mendList(@RequestParam("houseId") String houseId);
 }

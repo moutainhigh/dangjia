@@ -22,6 +22,7 @@ public interface ActivityUserTemplateAPI {
 
     /**
      * 获取所有推送模板
+     *
      * @param activityUserTemplate
      * @return
      */
@@ -29,14 +30,13 @@ public interface ActivityUserTemplateAPI {
     @ApiOperation(value = "获取所有推送模板", notes = "获取所有推送模板")
     ServerResponse queryActivityUserTemplate(@RequestParam("request") HttpServletRequest request,
                                              @RequestParam("pageDTO") PageDTO pageDTO,
-                                             @RequestParam("activityUserTemplate") ActivityUserTemplate activityUserTemplate) ;
-
-
+                                             @RequestParam("activityUserTemplate") ActivityUserTemplate activityUserTemplate);
 
 
     /**
      * 新增
-     * @param templateId 修改时，模板ID
+     *
+     * @param templateId           修改时，模板ID
      * @param activityUserTemplate
      * @return
      */
@@ -45,16 +45,18 @@ public interface ActivityUserTemplateAPI {
     ServerResponse addActivityUserTemplate(@RequestParam("request") HttpServletRequest request,
                                            @RequestParam("templateId") String templateId,
                                            @RequestParam("activityUserTemplate") ActivityUserTemplate activityUserTemplate);
+
     /**
      * 推送用户推送活动优惠券
+     *
      * @param request
-     * @param members 成员组
+     * @param members    成员组
      * @param activityId
      * @return
      */
     @PostMapping("/data/Activity/template/send")
     @ApiOperation(value = "推送用户推送活动优惠券", notes = "推送用户推送活动优惠券")
-     ServerResponse sendActivityPadPack(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("members")String members,
-                                        @RequestParam("activityId")String activityId);
+    ServerResponse sendActivityPadPack(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("members") String members,
+                                       @RequestParam("activityId") String activityId);
 }

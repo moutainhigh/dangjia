@@ -18,20 +18,26 @@ public interface ChangeOrderAPI {
 
     @PostMapping(value = "app/repair/changeOrder/supCheckChangeOrder")
     @ApiOperation(value = "管家审核变更单", notes = "管家审核变更单")
-    ServerResponse supCheckChangeOrder(@RequestParam("userToken")String userToken,@RequestParam("changeOrderId")String changeOrderId,
-                                       @RequestParam("check")Integer check);
+    ServerResponse supCheckChangeOrder(@RequestParam("userToken") String userToken,
+                                       @RequestParam("changeOrderId") String changeOrderId,
+                                       @RequestParam("check") Integer check);
 
     @PostMapping(value = "app/repair/changeOrder/changeOrderDetail")
     @ApiOperation(value = "变更单详情", notes = "变更单详情")
-    ServerResponse changeOrderDetail(@RequestParam("changeOrderId")String changeOrderId);
+    ServerResponse changeOrderDetail(@RequestParam("changeOrderId") String changeOrderId);
 
     @PostMapping(value = "app/repair/changeOrder/queryChangeOrder")
     @ApiOperation(value = "查询变更单列表", notes = "查询变更单列表")
-    ServerResponse queryChangeOrder(@RequestParam("userToken")String userToken,@RequestParam("houseId")String houseId,
-                                    @RequestParam("type")Integer type);
+    ServerResponse queryChangeOrder(@RequestParam("userToken") String userToken,
+                                    @RequestParam("houseId") String houseId,
+                                    @RequestParam("type") Integer type);
 
     @PostMapping(value = "app/repair/changeOrder/workerSubmit")
     @ApiOperation(value = "提交变更单", notes = "提交变更单")
-    ServerResponse workerSubmit(@RequestParam("userToken")String userToken,@RequestParam("houseId")String houseId,@RequestParam("type")Integer type,
-                                @RequestParam("contentA")String contentA,@RequestParam("contentB")String contentB,@RequestParam("workerTypeId")String workerTypeId);
+    ServerResponse workerSubmit(@RequestParam("userToken") String userToken,
+                                @RequestParam("houseId") String houseId,
+                                @RequestParam("type") Integer type,
+                                @RequestParam("contentA") String contentA,
+                                @RequestParam("contentB") String contentB,
+                                @RequestParam("workerTypeId") String workerTypeId);
 }

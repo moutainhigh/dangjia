@@ -19,13 +19,14 @@ public interface WebEngineerAPI {
 
     @PostMapping(value = "web/engineer/checkWorker")
     @ApiOperation(value = "工匠审核", notes = "工匠审核")
-    ServerResponse checkWorker(@RequestParam("workerId") String workerId
-            , @RequestParam("checkType") Integer checkType
-            , @RequestParam("checkDescribe") String checkDescribe);
+    ServerResponse checkWorker(@RequestParam("workerId") String workerId,
+                               @RequestParam("checkType") Integer checkType,
+                               @RequestParam("checkDescribe") String checkDescribe);
 
     @PostMapping(value = "web/engineer/changePayed")
     @ApiOperation(value = "已支付换工匠", notes = "已支付换工匠")
-    ServerResponse changePayed(@RequestParam("houseWorkerId") String houseWorkerId, @RequestParam("workerId") String workerId);
+    ServerResponse changePayed(@RequestParam("houseWorkerId") String houseWorkerId,
+                               @RequestParam("workerId") String workerId);
 
     @PostMapping(value = "web/engineer/changeWorker")
     @ApiOperation(value = "换工匠重新抢", notes = "换工匠重新抢")
@@ -37,11 +38,13 @@ public interface WebEngineerAPI {
 
     @PostMapping(value = "web/engineer/setLockWorker")
     @ApiOperation(value = "指定修改工匠", notes = "指定修改工匠")
-    ServerResponse setLockWorker(@RequestParam("houseFlowId") String houseFlowId, @RequestParam("workerId") String workerId);
+    ServerResponse setLockWorker(@RequestParam("houseFlowId") String houseFlowId,
+                                 @RequestParam("workerId") String workerId);
 
     @PostMapping(value = "web/engineer/grabRecord")
     @ApiOperation(value = "抢单记录", notes = "抢单记录")
-    ServerResponse grabRecord(@RequestParam("houseId") String houseId, @RequestParam("workerTypeId") String workerTypeId);
+    ServerResponse grabRecord(@RequestParam("houseId") String houseId,
+                              @RequestParam("workerTypeId") String workerTypeId);
 
     @PostMapping(value = "web/engineer/workerOrder")
     @ApiOperation(value = "查看工匠订单", notes = "查看工匠订单")
@@ -73,6 +76,7 @@ public interface WebEngineerAPI {
 
     @PostMapping(value = "web/engineer/artisanList")
     @ApiOperation(value = "工匠列表", notes = "工匠列表")
-    ServerResponse artisanList(@RequestParam("name") String name, @RequestParam("workerTypeId") String workerTypeId,
+    ServerResponse artisanList(@RequestParam("name") String name,
+                               @RequestParam("workerTypeId") String workerTypeId,
                                @RequestParam("pageDTO") PageDTO pageDTO);
 }

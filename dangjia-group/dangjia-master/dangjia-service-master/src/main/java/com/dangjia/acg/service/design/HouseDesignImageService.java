@@ -145,7 +145,7 @@ public class HouseDesignImageService {
                     houseFlow.setWorkType(3);//自动抢单待支付精算费
                     houseFlow.setWorkerId("2c911c24606f21720160726f5e6a00df");
                     //这里算出精算费
-                    WorkDeposit workDeposit = workDepositMapper.selectAll().get(0);//结算比例表
+                    WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
                     houseFlow.setWorkPrice(house.getSquare().multiply(workDeposit.getBudgetCost()));
                     houseFlowMapper.insert(houseFlow);
                     HouseWorker houseWorker = new HouseWorker();

@@ -21,29 +21,31 @@ public interface SplitDeliverAPI {
      */
     @PostMapping("app/deliver/splitDeliver/partSplitDeliver")
     @ApiOperation(value = "部分收货", notes = "部分收货")
-    ServerResponse partSplitDeliver(@RequestParam("splitDeliverId")String splitDeliverId, @RequestParam("image")String image
-            , @RequestParam("splitItemList")String splitItemList);
+    ServerResponse partSplitDeliver(@RequestParam("splitDeliverId") String splitDeliverId,
+                                    @RequestParam("image") String image,
+                                    @RequestParam("splitItemList") String splitItemList);
 
     /**
      * 确认收货
      */
     @PostMapping("app/deliver/splitDeliver/affirmSplitDeliver")
     @ApiOperation(value = "确认收货", notes = "确认收货")
-    ServerResponse affirmSplitDeliver(@RequestParam("splitDeliverId")String splitDeliverId, @RequestParam("image")String image);
+    ServerResponse affirmSplitDeliver(@RequestParam("splitDeliverId") String splitDeliverId,
+                                      @RequestParam("image") String image);
 
     /**
      * 委托大管家收货
      */
     @PostMapping("app/deliver/splitDeliver/supState")
     @ApiOperation(value = "委托大管家收货", notes = "委托大管家收货")
-    ServerResponse supState(@RequestParam("splitDeliverId")String splitDeliverId);
+    ServerResponse supState(@RequestParam("splitDeliverId") String splitDeliverId);
 
     /**
      * 发货单明细
      */
     @PostMapping("app/deliver/splitDeliver/splitDeliverDetail")
     @ApiOperation(value = "发货单明细", notes = "发货单明细")
-    ServerResponse splitDeliverDetail(@RequestParam("splitDeliverId")String splitDeliverId);
+    ServerResponse splitDeliverDetail(@RequestParam("splitDeliverId") String splitDeliverId);
 
     /**
      * 收货列表
@@ -51,5 +53,6 @@ public interface SplitDeliverAPI {
      */
     @PostMapping("app/deliver/splitDeliver/splitDeliverList")
     @ApiOperation(value = "收货列表", notes = "收货列表")
-    ServerResponse splitDeliverList(@RequestParam("houseId")String houseId, @RequestParam("shipState")int shipState);
+    ServerResponse splitDeliverList(@RequestParam("houseId") String houseId,
+                                    @RequestParam("shipState") int shipState);
 }

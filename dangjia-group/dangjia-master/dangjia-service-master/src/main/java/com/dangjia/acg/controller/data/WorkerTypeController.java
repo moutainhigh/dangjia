@@ -23,6 +23,12 @@ public class WorkerTypeController implements WorkerTypeAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse unfinishedFlow(String houseId) {
+        return workerTypeService.unfinishedFlow(houseId);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse getWorkerTypeList(Integer type) {
         return workerTypeService.getWorkerTypeList(type);
     }

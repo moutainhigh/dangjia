@@ -18,14 +18,17 @@ public interface WebMendWorkerAPI {
 
     @PostMapping(value = "web/repair/webMendWorker/workerBackState")
     @ApiOperation(value = "查询退人工列表", notes = "查询退人工列表")
-    ServerResponse workerBackState(@RequestParam("houseId")String houseId,@RequestParam("pageNum")Integer pageNum, @RequestParam("pageSize")Integer pageSize);
+    ServerResponse workerBackState(@RequestParam("houseId") String houseId,
+                                   @RequestParam("pageNum") Integer pageNum,
+                                   @RequestParam("pageSize") Integer pageSize);
 
     @PostMapping(value = "web/repair/webMendWorker/mendWorkerList")
     @ApiOperation(value = "人工单明细", notes = "人工单明细")
-    ServerResponse mendWorkerList(@RequestParam("mendOrderId")String mendOrderId);
+    ServerResponse mendWorkerList(@RequestParam("mendOrderId") String mendOrderId);
 
     @PostMapping(value = "web/repair/webMendWorker/workerOrderState")
     @ApiOperation(value = "补人工单列表", notes = "补人工单列表")
-    ServerResponse workerOrderState(@RequestParam("houseId")String houseId,@RequestParam("pageNum")Integer pageNum,
-                                    @RequestParam("pageSize")Integer pageSize);
+    ServerResponse workerOrderState(@RequestParam("houseId") String houseId,
+                                    @RequestParam("pageNum") Integer pageNum,
+                                    @RequestParam("pageSize") Integer pageSize);
 }

@@ -35,7 +35,11 @@ public interface WorkerTypeAPI {
 //    @PostMapping("/data/workerType/getNameByWorkerTypeId")
 //    @ApiOperation(value = "根据workerTypeId返回工种名字", notes = "根据workerTypeId返回工种名字")
 //    ServerResponse getNameByWorkerTypeId(@RequestParam("workerTypeId")String workerTypeId);
-//
+
+    @PostMapping("/data/workerType/unfinishedFlow")
+    @ApiOperation(value = "已进场未完工工种", notes = "已进场未完工工种")
+    ServerResponse unfinishedFlow(@RequestParam("houseId")String houseId);
+
     @PostMapping("/data/workerType/queryWorkerType")
     @ApiOperation(value = "根据workerTypeId返回工种对象", notes = "根据workerTypeId返回工种对象")
     WorkerType queryWorkerType(@RequestParam("workerTypeId")String workerTypeId);
