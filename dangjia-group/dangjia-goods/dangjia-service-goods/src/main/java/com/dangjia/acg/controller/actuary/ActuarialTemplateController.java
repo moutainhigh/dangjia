@@ -15,104 +15,43 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- *
  * @类 名： ActuarialTemplateController
  * @功能描述：
  * @作者信息： lxl
  * @创建时间： 2018-9-20上午13:35:10
  */
 @RestController
-public class ActuarialTemplateController  implements ActuarialTemplateAPI {
+public class ActuarialTemplateController implements ActuarialTemplateAPI {
     /**
-     *service
+     * service
      */
     @Autowired
     private ActuarialTemplateService actuarialTemplateService;
-    @Autowired
-    private TechnologyService technologyService;
-    
-    /**
-     * 查询所有精算模板
-     * @Title: queryActuarialTemplate
-     * @Description: 查询功能，state_type传1表示查询所有启用的，0为所有停用的，2或者不传为查询所有
-     * @param: @param name
-     * @param: @param content
-     * @param: @return
-     * @return: JsonResult
-     * @throws
-     */
+
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> queryActuarialTemplate(HttpServletRequest request,PageDTO pageDTO ,String workerTypeId, String stateType,String name){
-        try {
-            return actuarialTemplateService.queryActuarialTemplate(pageDTO.getPageNum(),pageDTO.getPageSize(),workerTypeId,stateType,name);
-        } catch (Exception e) {
-            throw new BaseException(ServerCode.WRONG_PARAM, "查询精算模版列表失败");
-        }
+    public ServerResponse<PageInfo> queryActuarialTemplate(HttpServletRequest request, PageDTO pageDTO, String workerTypeId, String stateType, String name) {
+        return actuarialTemplateService.queryActuarialTemplate(pageDTO, workerTypeId, stateType, name);
     }
 
-    /**
-     * 新增精算模板
-     * @Title: insertActuarialTemplate
-     * @Description: TODO
-     * @param: @param name
-     * @param: @param content
-     * @param: @return
-     * @return: JsonResult
-     * @throws
-     */
     @Override
     @ApiMethod
-    public ServerResponse<String> insertActuarialTemplate(HttpServletRequest request,String userId, String name, String styleId,String styleName, String applicableArea,
-                                                          Integer stateType, String workerTypeName,Integer workerTypeId){
-        try {
-            return actuarialTemplateService.insertActuarialTemplate(userId,name,styleId,styleName,applicableArea,
-                    stateType,workerTypeName,workerTypeId);
-        }
-        catch (Exception e) {
-            return ServerResponse.createByErrorMessage("新增精算模版失败");
-        }
+    public ServerResponse<String> insertActuarialTemplate(HttpServletRequest request, String userId, String name, String styleId, String styleName, String applicableArea,
+                                                          Integer stateType, String workerTypeName, Integer workerTypeId) {
+        return actuarialTemplateService.insertActuarialTemplate(userId, name, styleId, styleName, applicableArea,
+                stateType, workerTypeName, workerTypeId);
+    }
 
-    }
-    /**
-     * 修改精算模板
-     * @Title: updateActuarialTemplate
-     * @Description: 根据精算模版ID修改
-     * @param: @param id
-     * @param: @param name
-     * @param: @param content
-     * @param: @return
-     * @return: JsonResult
-     * @throws
-     */
     @Override
     @ApiMethod
-    public ServerResponse<String> updateActuarialTemplate(HttpServletRequest request,String id,String name,String styleId,String styleName,String applicableArea,Integer stateType,String workingProcedure) {
-        try {
-            return actuarialTemplateService.updateActuarialTemplate(id, name, styleId,styleName, applicableArea, stateType, workingProcedure);
-        } catch (Exception e) {
-            return ServerResponse.createByErrorMessage("修改精算模版失败");
-        }
+    public ServerResponse<String> updateActuarialTemplate(HttpServletRequest request, String id, String name, String styleId, String styleName, String applicableArea, Integer stateType) {
+        return actuarialTemplateService.updateActuarialTemplate(id, name, styleId, styleName, applicableArea, stateType);
     }
-    /**
-     * 删除精算模板
-     * @Title: deleteActuarialTemplate
-     * @Description: 根据精算模版ID删除
-     * @param: @param id
-     * @param: @return
-     * @return: JsonResult
-     * @throws
-     */
+
     @Override
     @ApiMethod
-    public ServerResponse<String> deleteActuarialTemplate(HttpServletRequest request,String id)
-    {
-        try {
-            return actuarialTemplateService.deleteActuarialTemplate(id);
-        }
-        catch (Exception e) {
-            return ServerResponse.createByErrorMessage("删除精算模版失败");
-        }
+    public ServerResponse<String> deleteActuarialTemplate(HttpServletRequest request, String id) {
+        return actuarialTemplateService.deleteActuarialTemplate(id);
     }
 
 }

@@ -28,7 +28,9 @@ public interface HouseDistributionAPI {
      */
     @PostMapping("/data/house/distribution/list")
     @ApiOperation(value = "获取所有验房分销", notes = "获取所有验房分销")
-    ServerResponse getHouseDistribution(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO, @RequestParam("houseDistribution") HouseDistribution houseDistribution);
+    ServerResponse getHouseDistribution(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("pageDTO") PageDTO pageDTO,
+                                        @RequestParam("houseDistribution") HouseDistribution houseDistribution);
 
     /**
      * 新增
@@ -38,5 +40,6 @@ public interface HouseDistributionAPI {
      */
     @PostMapping("/data/house/distribution/add")
     @ApiOperation(value = "新增验房分销", notes = "新增验房分销")
-    ServerResponse addHouseDistribution(@RequestParam("request") HttpServletRequest request, @RequestParam("houseDistribution") HouseDistribution houseDistribution);
+    ServerResponse addHouseDistribution(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("houseDistribution") HouseDistribution houseDistribution);
 }

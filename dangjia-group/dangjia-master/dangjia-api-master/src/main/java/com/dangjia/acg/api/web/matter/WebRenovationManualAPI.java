@@ -20,21 +20,22 @@ public interface WebRenovationManualAPI {
 
     @PostMapping("web/renovationManual/queryRenovationManual")
     @ApiOperation(value = "查询所有装修指南", notes = "查询所有装修指南")
-    ServerResponse queryRenovationManual(@RequestParam("pageDTO") PageDTO pageDTO, @RequestParam("renovationManual") RenovationManual renovationManual);
+    ServerResponse queryRenovationManual(@RequestParam("pageDTO") PageDTO pageDTO,
+                                         @RequestParam("renovationManual") RenovationManual renovationManual);
 
     @PostMapping("web/renovationManual/addRenovationManual")
     @ApiOperation(value = "新增装修指南", notes = "新增装修指南")
-    ServerResponse addRenovationManual(@RequestParam("renovationManual")RenovationManual renovationManual);
+    ServerResponse addRenovationManual(@RequestParam("renovationManual") RenovationManual renovationManual);
 
     @PostMapping("web/renovationManual/updateRenovationManual")
     @ApiOperation(value = "修改装修指南", notes = "修改装修指南")
-    ServerResponse updateRenovationManual(@RequestParam("renovationManual")RenovationManual renovationManual);
+    ServerResponse updateRenovationManual(@RequestParam("renovationManual") RenovationManual renovationManual);
 
     @PostMapping("web/renovationManual/deleteRenovationManual")
     @ApiOperation(value = "删除装修指南", notes = "删除装修指南")
-    ServerResponse deleteRenovationManual(@RequestParam("id")String id);
+    ServerResponse deleteRenovationManual(@RequestParam("id") String id);
 
     @PostMapping("web/renovationManual/getRenovationManualById")
     @ApiOperation(value = "根据id查询装修指南对象", notes = "根据id查询装修指南对象")
-    ServerResponse getRenovationManualById(@RequestParam("id")String id);
+    ServerResponse getRenovationManualById(@RequestParam("id") String id);
 }

@@ -18,18 +18,19 @@ import java.util.Map;
  * Time: 16:55
  */
 @FeignClient("dangjia-service-master")
-@Api(value = "获取商品端精算的所需数据", description ="获取商品端精算的所需数据" )
+@Api(value = "获取商品端精算的所需数据", description = "获取商品端精算的所需数据")
 public interface GetForBudgetAPI {
 
     @PostMapping("/data/getForBudget/getStyleByName")
     @ApiOperation(value = "获取风格", notes = "获取风格")
-    HouseStyleType getStyleByName(@RequestParam("style")String style);
+    HouseStyleType getStyleByName(@RequestParam("style") String style);
 
     @PostMapping("/data/getForBudget/getFlowList")
     @ApiOperation(value = "根据houseId查出所有工序", notes = "根据houseId查出所有工序")
-    List<Map<String,String>> getFlowList(@RequestParam("houseId") String houseId);
+    List<Map<String, String>> getFlowList(@RequestParam("houseId") String houseId);
 
     @PostMapping("/data/workerType/actuarialForBudget")
     @ApiOperation(value = "根据参数生成houseFlow", notes = "根据参数生成houseFlow")
-    ServerResponse actuarialForBudget(@RequestParam("houseId") String houseId, @RequestParam("workerTypeId")  String workerTypeId);
+    ServerResponse actuarialForBudget(@RequestParam("houseId") String houseId,
+                                      @RequestParam("workerTypeId") String workerTypeId);
 }

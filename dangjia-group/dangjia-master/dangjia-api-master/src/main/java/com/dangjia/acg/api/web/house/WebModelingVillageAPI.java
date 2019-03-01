@@ -25,22 +25,29 @@ public interface WebModelingVillageAPI {
 
     @PostMapping("web/village/getVillageList")
     @ApiOperation(value = "根据城市获取小区列表", notes = "根据城市获取小区列表")
-    ServerResponse getVillageList(@RequestParam("request") HttpServletRequest request, @RequestParam("cityId") String cityId);
+    ServerResponse getVillageList(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("cityId") String cityId);
 
     @PostMapping("web/village/getVillageAllListByCityId")
     @ApiOperation(value = "指定城市id查询小区", notes = "指定城市id查询小区")
-    ServerResponse getVillageAllListByCityId(@RequestParam("request") HttpServletRequest request,@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("cityId") String cityId,@RequestParam("likeVillageName")String likeVillageName);
+    ServerResponse getVillageAllListByCityId(@RequestParam("request") HttpServletRequest request,
+                                             @RequestParam("pageDTO") PageDTO pageDTO,
+                                             @RequestParam("cityId") String cityId,
+                                             @RequestParam("likeVillageName") String likeVillageName);
 
     @PostMapping("web/village/setVillage")
     @ApiOperation(value = "新增或更新小区", notes = "新增或更新小区")
-    ServerResponse setVillage(@RequestParam("request") HttpServletRequest request,@RequestParam("jsonStr")String jsonStr);
+    ServerResponse setVillage(@RequestParam("request") HttpServletRequest request,
+                              @RequestParam("jsonStr") String jsonStr);
 
     @PostMapping("web/village/getLayoutList")
     @ApiOperation(value = "根据小区获取户型列表", notes = "根据小区获取户型列表")
-    ServerResponse getLayoutList(@RequestParam("request") HttpServletRequest request, @RequestParam("villageId") String villageId);
+    ServerResponse getLayoutList(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("villageId") String villageId);
 
     @PostMapping("web/village/getHouseList")
     @ApiOperation(value = "根据户型获取房子列表", notes = "根据户型获取房子列表")
-    ServerResponse getHouseList(@RequestParam("request") HttpServletRequest request, @RequestParam("modelingLayoutId") String modelingLayoutId);
+    ServerResponse getHouseList(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("modelingLayoutId") String modelingLayoutId);
 
 }

@@ -20,20 +20,27 @@ public interface WebDesignAPI {
 
     @PostMapping("web/design/sendPictures")
     @ApiOperation(value = "发送设计图给业主", notes = "发送设计图给业主")
-    ServerResponse sendPictures(@RequestParam("request") HttpServletRequest request, @RequestParam("houseId")String houseId
-            ,@RequestParam("designerOk")int designerOk);
+    ServerResponse sendPictures(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("houseId") String houseId,
+                                @RequestParam("designerOk") int designerOk);
 
     @PostMapping("web/design/uploadPictures")
     @ApiOperation(value = "上传图片", notes = "上传图片")
-    ServerResponse uploadPictures (@RequestParam("request") HttpServletRequest request, @RequestParam("houseId")String houseId,
-                                 @RequestParam("designImageTypeId")String designImageTypeId, @RequestParam("imageurl")String imageurl);
+    ServerResponse uploadPictures(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("houseId") String houseId,
+                                  @RequestParam("designImageTypeId") String designImageTypeId,
+                                  @RequestParam("imageurl") String imageurl);
 
     @PostMapping("web/design/getList")
     @ApiOperation(value = "设计师任务列表", notes = "设计师任务列表")
-    ServerResponse getDesignList(@RequestParam("request") HttpServletRequest request, @RequestParam("designerOk")int designerOk,
-                           String mobile, String residential, String number);
+    ServerResponse getDesignList(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("designerOk") int designerOk,
+                                 @RequestParam("mobile") String mobile,
+                                 @RequestParam("residential") String residential,
+                                 @RequestParam("number") String number);
 
     @PostMapping("web/design/getImagesList")
     @ApiOperation(value = "设计图列表", notes = "设计图列表")
-    ServerResponse getImagesList(@RequestParam("request") HttpServletRequest request, @RequestParam("houseId")String houseId);
+    ServerResponse getImagesList(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("houseId") String houseId);
 }

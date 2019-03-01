@@ -23,12 +23,13 @@ public interface FeedbackAPI {
 
     @PostMapping("/member/feedback/add")
     @ApiOperation(value = "添加客服反馈信息", notes = "添加客服反馈信息")
-    ServerResponse addFeedback(
-            @RequestParam("request") HttpServletRequest request,
-            @RequestParam("feedback") Feedback feedback);
+    ServerResponse addFeedback(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("feedback") Feedback feedback);
 
 
     @PostMapping("/member/feedback/list")
     @ApiOperation(value = "查询客服反馈列表", notes = "查询客服反馈列表")
-    ServerResponse getFeedbacks(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO, @RequestParam("feedback") Feedback feedback);
+    ServerResponse getFeedbacks(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("pageDTO") PageDTO pageDTO,
+                                @RequestParam("feedback") Feedback feedback);
 }

@@ -73,12 +73,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	</select>
 
-    <!-- 根据orderId查询 -->
-    <select id="byNumber" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.pay.BusinessOrder">
+    <!-- 根据taskId查询 -->
+    <select id="byTaskId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.pay.BusinessOrder">
         SELECT
             <include refid="all_columns"/>
         FROM dj_pay_business_order
-        where number = #{number}
+        where task_id = #{taskId}
     </select>
 
 </mapper>

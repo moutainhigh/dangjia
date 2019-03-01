@@ -9,6 +9,7 @@ import lombok.Data;
  */
 @Data
 public class GoodsItemDTO {
+    private String workerTypeName;//工种名字
     private String goodsImage;
     private String goodsName;
     private Double convertCount;//计算数量

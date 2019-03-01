@@ -23,29 +23,42 @@ public interface EvaluateAPI {
 
     @PostMapping("app/worker/integral/list")
     @ApiOperation(value = "积分记录", notes = "积分记录")
-    ServerResponse queryWorkIntegral(HttpServletRequest request, PageDTO pageDTO, String userToken);
+    ServerResponse queryWorkIntegral(@RequestParam("request") HttpServletRequest request,
+                                     @RequestParam("pageDTO") PageDTO pageDTO,
+                                     @RequestParam("userToken") String userToken);
 
     @PostMapping("app/worker/evaluate/list")
     @ApiOperation(value = "评分记录", notes = "评分记录")
-    ServerResponse queryEvaluates(HttpServletRequest request,  String userToken, Evaluate evaluate);
+    ServerResponse queryEvaluates(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("userToken") String userToken,
+                                  @RequestParam("evaluate") Evaluate evaluate);
 
     @PostMapping("app/worker/evaluate/checkNo")
     @ApiOperation(value = "管家不通过工匠完工申请", notes = "管家不通过工匠完工申请")
-    ServerResponse checkNo(@RequestParam("userToken") String userToken, @RequestParam("houseFlowApplyId")String houseFlowApplyId,
-                           @RequestParam("content")String content);
+    ServerResponse checkNo(@RequestParam("userToken") String userToken,
+                           @RequestParam("houseFlowApplyId") String houseFlowApplyId,
+                           @RequestParam("content") String content);
 
     @PostMapping("app/worker/evaluate/checkOk")
     @ApiOperation(value = "管家审核通过工匠完工申请", notes = "管家审核通过工匠完工申请")
-    ServerResponse checkOk(@RequestParam("userToken") String userToken, @RequestParam("houseFlowApplyId")String houseFlowApplyId,
-                                          @RequestParam("content")String content,@RequestParam("star")int star);
+    ServerResponse checkOk(@RequestParam("userToken") String userToken,
+                           @RequestParam("houseFlowApplyId") String houseFlowApplyId,
+                           @RequestParam("content") String content,
+                           @RequestParam("star") int star);
 
     @PostMapping("app/worker/evaluate/saveEvaluateSupervisor")
     @ApiOperation(value = "业主评价管家完工", notes = "业主评价管家完工")
-    ServerResponse saveEvaluateSupervisor(@RequestParam("userToken") String userToken, @RequestParam("houseFlowApplyId")String houseFlowApplyId,
-                                @RequestParam("content")String content,@RequestParam("star")int star);
+    ServerResponse saveEvaluateSupervisor(@RequestParam("userToken") String userToken,
+                                          @RequestParam("houseFlowApplyId") String houseFlowApplyId,
+                                          @RequestParam("content") String content,
+                                          @RequestParam("star") int star);
 
     @PostMapping("app/worker/evaluate/saveEvaluate")
     @ApiOperation(value = "业主端评价工匠", notes = "业主端评价工匠")
-    ServerResponse saveEvaluate(@RequestParam("userToken") String userToken, @RequestParam("houseFlowApplyId")String houseFlowApplyId,
-                                @RequestParam("wContent")String wContent,@RequestParam("wStar")int wStar,@RequestParam("sContent") String sContent,@RequestParam("sStar")int sStar);
+    ServerResponse saveEvaluate(@RequestParam("userToken") String userToken,
+                                @RequestParam("houseFlowApplyId") String houseFlowApplyId,
+                                @RequestParam("wContent") String wContent,
+                                @RequestParam("wStar") int wStar,
+                                @RequestParam("sContent") String sContent,
+                                @RequestParam("sStar") int sStar);
 }

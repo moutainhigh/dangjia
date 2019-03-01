@@ -44,20 +44,17 @@
 			house_id=#{houseId}
 		and category_id =#{categoryId}
 		and delete_state in (0,3,4)
-		and steta = 1
 	</select>
-
 	<!--精算分类材料总价(支付和未支付)-->
 	<select id="getCategoryAllPrice" resultType="java.lang.Double">
 	    select
-		    sum(p.price * bm.convert_count)
+		    IFNULL(sum(p.price * bm.convert_count),0)
 		from dj_basics_product p,dj_actuary_budget_material bm
 		where
 	        p.id = bm.product_id
 	    and bm.house_id = #{houseId}
 	    and bm.category_id =#{categoryId}
 	    and bm.delete_state in (0,3,4)
-	    and bm.steta = 1
 	</select>
 	<!--房子材料服务总价-->
 	<select id="getHouseCaiPrice" resultType="java.lang.Double">
@@ -68,9 +65,7 @@
 	        p.id = bm.product_id
 	    and bm.house_id = #{houseId}
 	    and bm.delete_state in (0,3,4)
-	    and bm.steta = 1
 	</select>
-
 	<!--查询精算分类-->
 	<select id="categoryIdList" resultType="java.lang.String">
 		select DISTINCT bm.category_id

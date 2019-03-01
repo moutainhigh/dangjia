@@ -20,6 +20,18 @@ public class ActuaryOpeController implements ActuaryOpeAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse getByCategoryId(String idArr, String houseId,String cityId,Integer type) {
+        return actuaryOpeService.getByCategoryId(idArr,houseId,type);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse categoryIdList(String houseId,String cityId,Integer type) {
+        return actuaryOpeService.categoryIdList(houseId,type);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse actuary(String houseId, String cityId,Integer type) {
         return actuaryOpeService.actuary(houseId, type);
     }

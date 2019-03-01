@@ -23,21 +23,24 @@ public interface TechnologyRecordAPI {
 
     @PostMapping("/data/technologyRecord/uploadingImageList")
     @ApiOperation(value = "获取上传图片列表", notes = "获取上传图片列表")
-    ServerResponse uploadingImageList(@RequestParam("userToken")String userToken,@RequestParam("nodeArr")String nodeArr);
+    ServerResponse uploadingImageList(@RequestParam("userToken") String userToken,
+                                      @RequestParam("nodeArr") String nodeArr);
 
     @PostMapping("/data/technologyRecord/technologyRecordList")
     @ApiOperation(value = "查询节点", notes = "查询节点")
-    ServerResponse technologyRecordList(@RequestParam("userToken")String userToken, @RequestParam("houseFlowId")String houseFlowId);
+    ServerResponse technologyRecordList(@RequestParam("userToken") String userToken,
+                                        @RequestParam("houseFlowId") String houseFlowId);
 
     @PostMapping("/data/technologyRecord/unfinishedFlow")
     @ApiOperation(value = "已进场未完工", notes = "已进场未完工")
-    List<HouseFlow> unfinishedFlow(@RequestParam("houseId")String houseId);
+    List<HouseFlow> unfinishedFlow(@RequestParam("houseId") String houseId);
 
     @PostMapping("/data/technologyRecord/warehouseList")
     @ApiOperation(value = "已购买材料", notes = "已购买材料")
-    List<Warehouse> warehouseList(@RequestParam("houseId")String houseId);
+    List<Warehouse> warehouseList(@RequestParam("houseId") String houseId);
 
     @PostMapping("/data/technologyRecord/getByProductId")
     @ApiOperation(value = "查仓库", notes = "查仓库")
-    Warehouse getByProductId(@RequestParam("productId")String productId,@RequestParam("houseId")String houseId);
+    Warehouse getByProductId(@RequestParam("productId") String productId,
+                             @RequestParam("houseId") String houseId);
 }

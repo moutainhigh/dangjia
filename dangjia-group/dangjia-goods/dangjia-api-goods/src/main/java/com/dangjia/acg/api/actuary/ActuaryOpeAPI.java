@@ -16,12 +16,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient("dangjia-service-goods")
 public interface ActuaryOpeAPI {
 
-    /**
-     * 精算详情
-     */
+    @PostMapping("/actuary/actuaryOpe/getByCategoryId")
+    @ApiOperation(value = "根据分类获取材料", notes = "根据分类获取材料")
+    ServerResponse getByCategoryId(@RequestParam("idArr")String idArr, @RequestParam("houseId")String houseId,@RequestParam("cityId")String cityId,
+                                   @RequestParam("type")Integer type);
+
+    @PostMapping("/actuary/actuaryOpe/categoryIdList")
+    @ApiOperation(value = "所有分类", notes = "所有分类")
+    ServerResponse categoryIdList(@RequestParam("houseId")String houseId,@RequestParam("cityId")String cityId,
+                                  @RequestParam("type")Integer type);
+
     @PostMapping("/actuary/actuaryOpe/actuary")
     @ApiOperation(value = "精算详情", notes = "精算详情")
-    ServerResponse actuary(@RequestParam("houseId") String houseId
-            , @RequestParam("cityId")String cityId, @RequestParam("type")Integer type);
+    ServerResponse actuary(@RequestParam("houseId") String houseId,
+                           @RequestParam("cityId")String cityId,
+                           @RequestParam("type")Integer type);
 
 }

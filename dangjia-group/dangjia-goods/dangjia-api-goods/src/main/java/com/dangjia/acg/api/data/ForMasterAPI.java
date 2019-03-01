@@ -29,26 +29,29 @@ public interface ForMasterAPI {
 
     @PostMapping("/data/forMaster/getSupplierProduct")
     @ApiOperation(value = "查询供应价", notes = "查询供应价")
-    SupplierProduct getSupplierProduct(@RequestParam("cityId")String cityId, @RequestParam("supplierId")String supplierId,
-                                       @RequestParam("productId")String productId);
+    SupplierProduct getSupplierProduct(@RequestParam("cityId") String cityId,
+                                       @RequestParam("supplierId") String supplierId,
+                                       @RequestParam("productId") String productId);
 
     @PostMapping("/data/forMaster/getSupplier")
     @ApiOperation(value = "查询供应商", notes = "查询供应商")
-    Supplier getSupplier(@RequestParam("supplierId")String supplierId);
+    Supplier getSupplier(@RequestParam("supplierId") String supplierId);
 
     @PostMapping("/data/forMaster/backCount")
     @ApiOperation(value = "增加退数量", notes = "增加退数量")
-    void backCount (@RequestParam("houseId")String houseId,@RequestParam("workerGoodsId")String workerGoodsId,
-                    @RequestParam("num")Double num);
+    void backCount(@RequestParam("houseId") String houseId,
+                   @RequestParam("workerGoodsId") String workerGoodsId,
+                   @RequestParam("num") Double num);
 
     @PostMapping("/data/forMaster/repairCount")
     @ApiOperation(value = "增加补数量", notes = "增加补数量")
-    void repairCount(@RequestParam("houseId")String houseId,@RequestParam("workerGoodsId")String workerGoodsId,
-                     @RequestParam("num")Double num);
+    void repairCount(@RequestParam("houseId") String houseId,
+                     @RequestParam("workerGoodsId") String workerGoodsId,
+                     @RequestParam("num") Double num);
 
     @PostMapping("/data/forMaster/byTechnologyId")
     @ApiOperation(value = "查工艺", notes = "查工艺")
-    Technology byTechnologyId(@RequestParam("technologyId")String technologyId);
+    Technology byTechnologyId(@RequestParam("technologyId") String technologyId);
 
     @PostMapping("/data/forMaster/brandSeriesName")
     @ApiOperation(value = "查询品牌系列名", notes = "查询品牌系列名")
@@ -56,46 +59,51 @@ public interface ForMasterAPI {
 
     @PostMapping("/data/forMaster/getWorkerGoods")
     @ApiOperation(value = "工价商品信息", notes = "工价商品信息")
-    WorkerGoods getWorkerGoods(@RequestParam("workerGoodsId")String workerGoodsId);
+    WorkerGoods getWorkerGoods(@RequestParam("workerGoodsId") String workerGoodsId);
 
     @PostMapping("/data/forMaster/getGoods")
     @ApiOperation(value = "商品信息", notes = "商品信息")
-    Goods getGoods(@RequestParam("goodsId")String goodsId);
+    Goods getGoods(@RequestParam("goodsId") String goodsId);
 
     @PostMapping("/data/forMaster/getProduct")
     @ApiOperation(value = "货品信息", notes = "货品信息")
-    Product getProduct(@RequestParam("productId")String productId);
+    Product getProduct(@RequestParam("productId") String productId);
 
     @PostMapping("/data/forMaster/caiLiao")
     @ApiOperation(value = "支付回调获取材料精算", notes = "支付回调获取材料精算")
-    List<BudgetMaterial> caiLiao(@RequestParam("houseFlowId")String houseFlowId);
+    List<BudgetMaterial> caiLiao(@RequestParam("houseFlowId") String houseFlowId);
 
     @PostMapping("/data/forMaster/renGong")
     @ApiOperation(value = "支付回调修改人工精算", notes = "支付回调修改人工精算")
-    List<BudgetWorker> renGong(@RequestParam("houseFlowId")String houseFlowId);
+    List<BudgetWorker> renGong(@RequestParam("houseFlowId") String houseFlowId);
 
     @PostMapping("/data/forMaster/getBudgetWorkerPrice")
     @ApiOperation(value = "支付时工种人工总价", notes = "支付时工种人工总价")
-    Double getBudgetWorkerPrice(@RequestParam("houseId")String houseId, @RequestParam("workerTypeId")String workerTypeId,
-                                    @RequestParam("cityId")String cityId);
+    Double getBudgetWorkerPrice(@RequestParam("houseId") String houseId,
+                                @RequestParam("workerTypeId") String workerTypeId,
+                                @RequestParam("cityId") String cityId);
 
     @PostMapping("/data/forMaster/getBudgetCaiPrice")
     @ApiOperation(value = "支付时工种材料总价", notes = "支付时工种材料总价")
-    Double getBudgetCaiPrice(@RequestParam("houseId")String houseId, @RequestParam("workerTypeId")String workerTypeId,
-                                          @RequestParam("cityId")String cityId);
+    Double getBudgetCaiPrice(@RequestParam("houseId") String houseId,
+                             @RequestParam("workerTypeId") String workerTypeId,
+                             @RequestParam("cityId") String cityId);
 
     @PostMapping("/data/forMaster/getNotCaiPrice")
     @ApiOperation(value = "支付时工种未选择材料总价", notes = "支付时工种未选择材料总价")
-    Double getNotCaiPrice(@RequestParam("houseId")String houseId, @RequestParam("workerTypeId")String workerTypeId,
-                             @RequestParam("cityId")String cityId);
+    Double getNotCaiPrice(@RequestParam("houseId") String houseId,
+                          @RequestParam("workerTypeId") String workerTypeId,
+                          @RequestParam("cityId") String cityId);
 
     @PostMapping("/data/forMaster/getBudgetSerPrice")
     @ApiOperation(value = "支付时工种服务总价", notes = "支付时工种服务总价")
-    Double getBudgetSerPrice(@RequestParam("houseId")String houseId, @RequestParam("workerTypeId")String workerTypeId,
-                                           @RequestParam("cityId")String cityId);
+    Double getBudgetSerPrice(@RequestParam("houseId") String houseId,
+                             @RequestParam("workerTypeId") String workerTypeId,
+                             @RequestParam("cityId") String cityId);
 
     @PostMapping("/data/forMaster/getNotSerPrice")
     @ApiOperation(value = "支付时工种未选择服务总价", notes = "支付时工种未选择服务总价")
-    Double getNotSerPrice(@RequestParam("houseId")String houseId, @RequestParam("workerTypeId")String workerTypeId,
-                             @RequestParam("cityId")String cityId);
+    Double getNotSerPrice(@RequestParam("houseId") String houseId,
+                          @RequestParam("workerTypeId") String workerTypeId,
+                          @RequestParam("cityId") String cityId);
 }

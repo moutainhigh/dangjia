@@ -445,7 +445,7 @@ public class PaymentService {
 
             } else if (hwo.getWorkerType() == 2) {//精算费用处理
                 Order order = new Order();
-                WorkDeposit workDeposit = workDepositMapper.selectAll().get(0);//结算比例表
+                WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
                 order.setBudgetCost(workDeposit.getBudgetCost());//精算价格
                 order.setHouseId(hwo.getHouseId());
                 order.setBusinessOrderNumber(businessOrderNumber);
@@ -830,19 +830,19 @@ public class PaymentService {
      */
     public ServerResponse getPaymentOrder(String userToken, String houseId, String taskId, int type) {
         try {
-
-
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             if (accessToken == null) {//无效的token
                 return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册!");
             }
+            BusinessOrder busOrder = businessOrderMapper.byTaskId(taskId);
+            if (busOrder != null){
+                if (busOrder.getState() == 3){
+                    return ServerResponse.createBySuccessMessage("该任务已支付");
+                }
+            }
+
             House house = houseMapper.selectByPrimaryKey(houseId);
-            PaymentDTO paymentDTO = new PaymentDTO();
-            List<ActuaryDTO> actuaryDTOList = new ArrayList<ActuaryDTO>();//商品
-
-            BigDecimal paymentPrice = new BigDecimal(0);//总共钱
-
             Example example = new Example(BusinessOrder.class);
             example.createCriteria().andEqualTo(BusinessOrder.HOUSE_ID, houseId).andEqualTo(BusinessOrder.STATE, 1);
             List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
@@ -863,6 +863,10 @@ public class PaymentService {
             }
             businessOrder.setType(type);//记录支付类型任务类型
             businessOrder.setTaskId(taskId);//保存任务ID
+
+            PaymentDTO paymentDTO = new PaymentDTO();
+            List<ActuaryDTO> actuaryDTOList = new ArrayList<>();//商品
+            BigDecimal paymentPrice = new BigDecimal(0);//总共钱
 
             if (type == 1) {//支付工序
                 HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(taskId);
@@ -1020,27 +1024,30 @@ public class PaymentService {
                 MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(taskId);
                 mendOrder.setBusinessOrderNumber(businessOrder.getNumber());
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-
-                //TODO 待补充html链接地址
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
                 ActuaryDTO actuaryDTO = new ActuaryDTO();
                 if (mendOrder.getType() == 1) {
                     actuaryDTO.setImage(imageAddress + "icon/burengong.png");
-                    actuaryDTO.setKind("补人工");
+                    actuaryDTO.setKind(workerType.getName());
                     actuaryDTO.setName("补人工花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
                     actuaryDTO.setButton("补人工明细");
-                    actuaryDTO.setUrl(" ");
+                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
+                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=4";
+                    actuaryDTO.setUrl(url);
                     actuaryDTO.setType(4);
 
                 } else if (mendOrder.getType() == 0) {
                     actuaryDTO.setImage(imageAddress + "icon/bucailiao.png");
-                    actuaryDTO.setKind("补材料");
+                    actuaryDTO.setKind(workerType.getName());
                     actuaryDTO.setName("补材料花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
-                    actuaryDTO.setButton("补材料明细");
-                    actuaryDTO.setUrl(" ");
+                    actuaryDTO.setButton("补材料明细"); String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
+                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=5";
+                    actuaryDTO.setUrl(url);
                     actuaryDTO.setType(5);
                 }
+
                 actuaryDTOList.add(actuaryDTO);
                 paymentDTO.setActuaryDTOList(actuaryDTOList);
                 paymentPrice = paymentPrice.add(new BigDecimal(mendOrder.getTotalAmount()));
@@ -1324,7 +1331,7 @@ public class PaymentService {
                         actuaryDTO.setPrice("¥" + String.format("%.2f", workerPrice));
                         actuaryDTO.setButton("人工明细");
                         String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
-                                + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=" + 1;
+                                + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=1";
                         actuaryDTO.setUrl(url);
                         actuaryDTO.setType(1);
                         actuaryDTOList.add(actuaryDTO);
@@ -1337,7 +1344,7 @@ public class PaymentService {
                         actuaryDTO.setPrice("¥" + String.format("%.2f", caiPrice));
                         actuaryDTO.setButton("材料明细");
                         String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
-                                + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=" + 2;
+                                + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=2" ;
                         actuaryDTO.setUrl(url);
                         actuaryDTO.setType(2);
                         actuaryDTOList.add(actuaryDTO);
@@ -1431,7 +1438,9 @@ public class PaymentService {
                     actuaryDTO.setName("补人工花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
                     actuaryDTO.setButton("补人工明细");
-                    actuaryDTO.setUrl("");
+                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
+                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=4" ;
+                    actuaryDTO.setUrl(url);
                     actuaryDTO.setType(4);
 
                 } else if (mendOrder.getType() == 0) {
@@ -1439,10 +1448,12 @@ public class PaymentService {
                     actuaryDTO.setKind(workerType.getName());
                     actuaryDTO.setName("补材料花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
-                    actuaryDTO.setButton("补材料明细");
-                    actuaryDTO.setUrl("");
+                    actuaryDTO.setButton("补材料明细"); String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
+                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=5" ;
+                    actuaryDTO.setUrl(url);
                     actuaryDTO.setType(5);
                 }
+
 
                 actuaryDTOList.add(actuaryDTO);
                 paymentDTO.setActuaryDTOList(actuaryDTOList);

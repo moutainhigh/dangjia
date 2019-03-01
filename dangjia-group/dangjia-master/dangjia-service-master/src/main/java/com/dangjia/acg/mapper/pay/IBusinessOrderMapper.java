@@ -17,7 +17,7 @@ public interface IBusinessOrderMapper extends Mapper<BusinessOrder> {
 
     List<BusinessOrder> byMemberId(@Param("memberId") String memberId);
 
-    BusinessOrder byNumber(@Param("number") String number);
+    BusinessOrder byTaskId(@Param("taskId")String taskId);
 
     /**
      * 查询所有订单
