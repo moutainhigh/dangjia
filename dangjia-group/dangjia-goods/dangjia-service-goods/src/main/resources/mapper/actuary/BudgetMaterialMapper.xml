@@ -71,7 +71,9 @@
 		select DISTINCT bm.category_id
 		from dj_actuary_budget_material bm
  		where bm.house_id = #{houseId}
- 		and bm.delete_state in (0,3,4);
+ 		and bm.delete_state in (0,3,4)
+ 		and bm.category_id !=''
+ 		and bm.category_id is not null;
 	</select>
 
 	<!-- 模糊查询 -->
@@ -114,7 +116,7 @@
 	<!--支付时工种服务总价-->
 	<select id="getBudgetSerPrice" resultType="java.lang.Double">
 		select
-		    sum(p.price * bm.convert_count)
+		    IFNULL(sum(p.price * bm.convert_count),0)
 		from dj_basics_product p,dj_actuary_budget_material bm
 		where
 	        p.id = bm.product_id
@@ -127,7 +129,7 @@
 	<!--支付时未选择服务总价-->
 	<select id="getNotSerPrice" resultType="java.lang.Double">
 		select
-		    sum(p.price * bm.convert_count)
+		    IFNULL(sum(p.price * bm.convert_count),0)
 		from dj_basics_product p,dj_actuary_budget_material bm
 		where
 	        p.id = bm.product_id
@@ -141,7 +143,7 @@
 	<!--支付时工种材料总价-->
 	<select id="getBudgetCaiPrice" resultType="java.lang.Double">
 		select
-		    sum(p.price * bm.convert_count)
+		    IFNULL(sum(p.price * bm.convert_count),0)
 		from dj_basics_product p,dj_actuary_budget_material bm
 		where
 	        p.id = bm.product_id
@@ -155,7 +157,7 @@
 	<!--支付时未选择工种材料总价-->
 	<select id="getNotCaiPrice" resultType="java.lang.Double">
 		select
-		    sum(p.price * bm.convert_count)
+		    IFNULL(sum(p.price * bm.convert_count),0)
 		from dj_basics_product p,dj_actuary_budget_material bm
 		where
 	        p.id = bm.product_id

@@ -488,7 +488,7 @@ public class ActuaryOperationService {
                         brandSeriesDTO.setName(brandSeries.getName());
 
                         LOG.info(" brandSeries id:" + brandSeries.getId() + " getBrandId:" + brandSeries.getBrandId() + " name:" + brandSeries.getName());
-                        List<AttributeDTO> attributeDTOList = getAllAttributes(budgetMaterial, product, brandSeries, pIdTargetGroupSet, apiType);
+                        List<AttributeDTO> attributeDTOList = getAllAttributes(budgetMaterial, product, brandSeries, pIdTargetGroupSet, apiType, imageList);
 //                        LOG.info(" brandSeries:" + brandSeries.getName());
 //                        LOG.info(" attributeDTOList :" + attributeDTOList);
                         brandSeriesDTO.setAttributeDTOList(attributeDTOList);
@@ -730,9 +730,8 @@ public class ActuaryOperationService {
 
     //根据品牌系列找属性品牌
     private List<AttributeDTO> getAllAttributes(BudgetMaterial budgetMaterial, Product product, BrandSeries
-            brandSeries, Set<String> pIdTargetGroupSet, Integer apiType) {
-
-        List<String> imageList = new ArrayList<String>();//长图片 多图组合
+            brandSeries, Set<String> pIdTargetGroupSet, Integer apiType, List<String> imageList) {
+//        List<String> imageList = new ArrayList<String>();//长图片 多图组合
         List<AttributeDTO> attributeDTOList = new ArrayList<>();
         //查询 一个 goods 的 某个 系列的 所有 product
 //        List<Product> productList = productMapper.queryByGoodsIdAndbrandSeriesId(product.getGoodsId(), brandSeries.getId());
@@ -791,7 +790,9 @@ public class ActuaryOperationService {
 
                             if (isContainsValue(attributeValue.getId(), product.getValueIdArr())) {//如果包含该属性
                                 avDTO.setState(1);//选中
-                                imageList.add(getImage(attributeValue.getImage()));//属性图
+                                if (StringUtils.isNoneBlank(attributeValue.getImage())) {
+                                    imageList.add(getImage(attributeValue.getImage()));//属性图
+                                }
                             } else {
                                 avDTO.setState(0);//未选中
                             }

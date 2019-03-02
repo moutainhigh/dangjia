@@ -82,7 +82,6 @@ import java.util.*;
  */
 @Service
 public class PaymentService {
-
     @Autowired
     private IActivityRedPackRecordMapper activityRedPackRecordMapper;
     @Autowired
@@ -141,13 +140,10 @@ public class PaymentService {
     private IWarehouseDetailMapper warehouseDetailMapper;//流水
     @Autowired
     private IWorkDepositMapper workDepositMapper;
-
     @Autowired
     private BudgetMaterialAPI budgetMaterialAPI;
-
     @Autowired
     private BudgetWorkerAPI budgetWorkerAPI;
-
     @Autowired
     private IHouseDistributionMapper iHouseDistributionMapper;
 
@@ -827,6 +823,7 @@ public class PaymentService {
 
     /**
      * 支付页面
+     * type   1工序支付任务,2补货补人工,3审核任务,4待付款进来只付材料
      */
     public ServerResponse getPaymentOrder(String userToken, String houseId, String taskId, int type) {
         try {
@@ -835,7 +832,7 @@ public class PaymentService {
             if (accessToken == null) {//无效的token
                 return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册!");
             }
-            BusinessOrder busOrder = businessOrderMapper.byTaskId(taskId);
+            BusinessOrder busOrder = businessOrderMapper.byTaskId(taskId,type);
             if (busOrder != null){
                 if (busOrder.getState() == 3){
                     return ServerResponse.createBySuccessMessage("该任务已支付");
@@ -947,15 +944,6 @@ public class PaymentService {
                     Double workerPrice = forMasterAPI.getBudgetWorkerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
                     Double caiPrice = forMasterAPI.getBudgetCaiPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算材料钱
                     Double serPrice = forMasterAPI.getBudgetSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算服务钱
-                    if (workerPrice == null) {
-                        workerPrice = 0.0;
-                    }
-                    if (caiPrice == null) {
-                        caiPrice = 0.0;
-                    }
-                    if (serPrice == null) {
-                        serPrice = 0.0;
-                    }
                     hwo.setWorkPrice(new BigDecimal(workerPrice));//工钱
                     hwo.setMaterialPrice(new BigDecimal(caiPrice + serPrice));//材料钱
                     hwo.setTotalPrice(hwo.getWorkPrice().add(hwo.getMaterialPrice()));//工钱+拆料
@@ -1032,9 +1020,9 @@ public class PaymentService {
                     actuaryDTO.setName("补人工花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
                     actuaryDTO.setButton("补人工明细");
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
-                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=4";
-                    actuaryDTO.setUrl(url);
+//                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
+//                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=4";
+//                    actuaryDTO.setUrl(url);
                     actuaryDTO.setType(4);
 
                 } else if (mendOrder.getType() == 0) {
@@ -1042,9 +1030,9 @@ public class PaymentService {
                     actuaryDTO.setKind(workerType.getName());
                     actuaryDTO.setName("补材料花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
-                    actuaryDTO.setButton("补材料明细"); String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
-                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=5";
-                    actuaryDTO.setUrl(url);
+//                    actuaryDTO.setButton("补材料明细"); String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
+//                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=5";
+//                    actuaryDTO.setUrl(url);
                     actuaryDTO.setType(5);
                 }
 
@@ -1057,12 +1045,6 @@ public class PaymentService {
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
                 Double caiPrice = forMasterAPI.getBudgetCaiPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算材料钱
                 Double serPrice = forMasterAPI.getBudgetSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算服务钱
-                if (caiPrice == null) {
-                    caiPrice = 0.0;
-                }
-                if (serPrice == null) {
-                    serPrice = 0.0;
-                }
                 paymentPrice = paymentPrice.add(new BigDecimal(caiPrice));
                 paymentPrice = paymentPrice.add(new BigDecimal(serPrice));
 
@@ -1305,21 +1287,6 @@ public class PaymentService {
 
                     Double notCaiPrice = forMasterAPI.getNotCaiPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//未选择材料钱
                     Double notSerPrice = forMasterAPI.getNotSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//未选择服务钱
-                    if (workerPrice == null) {
-                        workerPrice = 0.0;
-                    }
-                    if (caiPrice == null) {
-                        caiPrice = 0.0;
-                    }
-                    if (serPrice == null) {
-                        serPrice = 0.0;
-                    }
-                    if (notCaiPrice == null) {
-                        notCaiPrice = 0.0;
-                    }
-                    if (notSerPrice == null) {
-                        notSerPrice = 0.0;
-                    }
                     totalPrice = totalPrice.add(new BigDecimal(workerPrice));
                     totalPrice = totalPrice.add(new BigDecimal(caiPrice));
                     totalPrice = totalPrice.add(new BigDecimal(serPrice));
@@ -1465,12 +1432,6 @@ public class PaymentService {
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
                 Double caiPrice = forMasterAPI.getBudgetCaiPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算材料钱
                 Double serPrice = forMasterAPI.getBudgetSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算服务钱
-                if (caiPrice == null) {
-                    caiPrice = 0.0;
-                }
-                if (serPrice == null) {
-                    serPrice = 0.0;
-                }
                 totalPrice = totalPrice.add(new BigDecimal(caiPrice));
                 totalPrice = totalPrice.add(new BigDecimal(serPrice));
 

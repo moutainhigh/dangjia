@@ -31,6 +31,8 @@ public interface IHouseMapper extends Mapper<House> {
      */
     List<House> getAllHouseByVisitState(@Param("visitState") Integer visitState);
 
+    List<House> getByLikeAddress(@Param("likeAddress") String likeAddress);
+
     List<DesignDTO> getDesignList(@Param("designerOk") int designerOk, @Param("userName") String mobile,
                                   @Param("residential") String residential, @Param("number") String number);
 

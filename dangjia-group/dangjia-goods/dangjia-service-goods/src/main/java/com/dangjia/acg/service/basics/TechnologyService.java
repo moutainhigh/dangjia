@@ -81,7 +81,8 @@ public class TechnologyService {
                         return "工艺名称不能有重复的";
                 }
 
-                List<Technology> technologyList = iTechnologyMapper.query(workerTypeId, name, materialOrWorker);
+//                List<Technology> technologyList = iTechnologyMapper.query(workerTypeId, name, materialOrWorker);
+                List<Technology> technologyList = iTechnologyMapper.getByName(workerTypeId, name, materialOrWorker, goodsId);
                 if (!StringUtils.isNotBlank(id))//为空 ： 就是新增
                 {
                     if (technologyList.size() > 0)
@@ -287,7 +288,7 @@ public class TechnologyService {
                 String workerTypeName = "";
                 ServerResponse response = workerTypeAPI.getWorkerType(t.getWorkerTypeId());
                 if (response.isSuccess()) {
-                    workerTypeName=(((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
+                    workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
                 }
                 map.put("workerTypeName", workerTypeName);
                 map.put("content", t.getContent());
@@ -404,7 +405,7 @@ public class TechnologyService {
             if (type == 0 || type == 1) {
                 //根据内容模糊搜索商品
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<Product> pList = iProductMapper.queryByName(name);
+                List<Product> pList = iProductMapper.queryByLikeName(name);
                 pageResult = new PageInfo(pList);
                 for (Product t : pList) {
                     JSONObject object = new JSONObject();

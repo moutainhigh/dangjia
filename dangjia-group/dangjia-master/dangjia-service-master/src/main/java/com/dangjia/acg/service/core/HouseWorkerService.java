@@ -1031,6 +1031,7 @@ public class HouseWorkerService {
             House house = houseMapper.selectByPrimaryKey(supervisorHF.getHouseId());
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             List<HouseFlow> houseFlowList = houseFlowMapper.getForCheckMoney(supervisorHF.getHouseId());
+            WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
             int check = 0;//累计大管家总巡查次数
             int time = 0;//累计管家总阶段验收和完工验收次数
             for (HouseFlow houseflow : houseFlowList) {
@@ -1043,7 +1044,7 @@ public class HouseWorkerService {
                     workerTotal = obj.getDouble("totalPrice");
                 }
                 int inspectNumber = workerTypeMapper.selectByPrimaryKey(houseflow.getWorkerTypeId()).getInspectNumber();//该工种配置默认巡查次数
-                int thisCheck = workerTotal.intValue() / 600;//该工种钱算出来的巡查次数
+                int thisCheck = workerTotal.intValue() / workDeposit.getPatrolPrice().intValue();//该工种钱算出来的巡查次数
                 if (thisCheck > inspectNumber) {
                     thisCheck = inspectNumber;
                 }

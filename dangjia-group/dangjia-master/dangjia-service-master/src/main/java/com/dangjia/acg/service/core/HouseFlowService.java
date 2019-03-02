@@ -340,6 +340,11 @@ public class HouseFlowService {
             if (member.getCheckType() == 5) {
                 return ServerResponse.createByErrorMessage("您未提交资料审核,请点击【我的】→【我的资料】→完善资料并提交审核！");
             }
+            House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
+            if(house.getVisitState() == 2){
+                return ServerResponse.createByErrorMessage("该房已休眠");
+            }
+
             //通过查看奖罚限制抢单时间限制抢单
             for (RewardPunishRecord record : recordList) {
                 example = new Example(RewardPunishCondition.class);

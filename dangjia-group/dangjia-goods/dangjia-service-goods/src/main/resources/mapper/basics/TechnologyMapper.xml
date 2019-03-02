@@ -70,6 +70,31 @@
         ORDER BY create_date desc
     </select>
 
+    <!-- 按照条件查找 -->
+    <select id="getByName" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Technology">
+        SELECT
+        <include refid="all_columns" />
+        FROM dj_basics_technology
+        where 1=1
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            and
+            worker_type_id=#{workerTypeId}
+        </if>
+        <if test="name!=null and name!=''">
+            and
+            name =#{name}
+        </if>
+        <if test="goodsId!=null and goodsId!=''">
+            and
+            goods_id =#{goodsId}
+        </if>
+        <if test="materialOrWorker!=null and materialOrWorker!=''">
+            and
+            material_or_worker=#{materialOrWorker}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
     <select id="queryById" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Technology">
         SELECT
         <include refid="all_columns" />

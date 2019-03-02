@@ -26,7 +26,7 @@
         <include refid="all_columns" />
         from dj_member_label
         group by parent_id
-        ORDER by create_date
+        ORDER by modify_date desc ,create_date desc
     </select>
 
     <!-- 指定父标签id，查找所有的子标签 -->

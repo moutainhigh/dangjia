@@ -227,7 +227,7 @@ public class ProductService {
                 product.setUnitId(obj.getString("unitId"));//单位
 //                product.setLabelId(obj.getString("labelId"));//标签
                 product.setUnitName(obj.getString("unitName"));//单位
-                product.setWeight(obj.getString("weight"));//重量
+                product.setWeight(obj.getDouble("weight"));//重量
                 product.setConvertQuality(obj.getDouble("convertQuality"));//换算量
                 product.setConvertUnit(obj.getString("convertUnit"));//换算单位
                 product.setType(obj.getInteger("type"));//是否禁用0：禁用；1不禁用
@@ -377,7 +377,7 @@ public class ProductService {
                 product.setUnitName(obj.getString("unitName"));//单位
                 product.setUnitId(obj.getString("unitId"));//单位
 //                product.setLabelId(obj.getString("labelId"));//标签
-                product.setWeight(obj.getString("weight"));//重量
+                product.setWeight(obj.getDouble("weight"));//重量
                 product.setConvertQuality(obj.getDouble("convertQuality"));//换算量
                 product.setConvertUnit(obj.getString("convertUnit"));//换算单位
                 product.setType(obj.getInteger("type"));//是否禁用0：禁用；1不禁用

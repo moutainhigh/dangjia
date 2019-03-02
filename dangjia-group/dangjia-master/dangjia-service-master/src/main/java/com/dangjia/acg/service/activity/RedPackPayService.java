@@ -285,19 +285,19 @@ public class RedPackPayService {
                     String houseFlowId = businessOrder.getTaskId();
                     request.setAttribute(Constants.CITY_ID,house.getCityId());
                     ServerResponse retMaterial=budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(request,houseFlowId);
-//                    ServerResponse retWorker=budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(request,houseFlowId);
+                    ServerResponse retWorker=budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(request,houseFlowId);
                     BigDecimal workerTotal=new BigDecimal(0);
                     BigDecimal goodsTotal=new BigDecimal(0);
                     BigDecimal productTotal=new BigDecimal(0);
-                    if(retMaterial.getResultObj()!=null||retMaterial.getResultObj()!=null){
+                    if(retMaterial.getResultObj()!=null||retWorker.getResultObj()!=null){
                         List<BudgetMaterial> budgetMaterialList=JSONObject.parseArray(retMaterial.getResultObj().toString(),BudgetMaterial.class);
-                        List<BudgetWorker> budgetWorkerList=JSONObject.parseArray(retMaterial.getResultObj().toString(),BudgetWorker.class);
+                        List<BudgetWorker> budgetWorkerList=JSONObject.parseArray(retWorker.getResultObj().toString(),BudgetWorker.class);
 
                         if(budgetWorkerList.size()>0) {
-                            for (BudgetMaterial budgetMaterial : budgetMaterialList) {
+                            for (BudgetWorker budgetWorker:budgetWorkerList) {
                                 //判断工种的优惠券是否匹配
-                                if (budgetMaterial.getWorkerTypeId().equals(redPack.getFromObject()) && redPack.getFromObjectType() == 0) {
-                                    workerTotal = workerTotal.add(new BigDecimal(budgetMaterial.getTotalPrice()));
+                                if (budgetWorker.getWorkerTypeId().equals(redPack.getFromObject()) && redPack.getFromObjectType() == 0) {
+                                    workerTotal=workerTotal.add(new BigDecimal(budgetWorker.getTotalPrice()));
                                 }
                             }
                         }
