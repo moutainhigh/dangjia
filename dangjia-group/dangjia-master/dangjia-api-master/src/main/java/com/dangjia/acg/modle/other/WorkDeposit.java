@@ -50,4 +50,10 @@ public class WorkDeposit extends BaseEntity {
 	@Desc(value = "精算多少钱一平方")
 	@ApiModelProperty("精算多少钱一平方")
 	private BigDecimal budgetCost;//budgetcost       3.5
+
+	@Column(name = "patrol_price")
+	@Desc(value = "巡查次数基数金额；公式：该工序总金额/基数=巡查次数")
+	@ApiModelProperty("巡查次数基数金额；公式：该工序总金额/基数=巡查次数")
+	private BigDecimal patrolPrice;//       600
+
 }

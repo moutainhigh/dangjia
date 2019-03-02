@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 
-
 @RestController
 public class WebOrderSplitController implements WebOrderSplitAPI {
 
@@ -22,7 +21,7 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse sentSplitDeliver(String splitDeliverId){
+    public ServerResponse sentSplitDeliver(String splitDeliverId) {
         return orderSplitService.sentSplitDeliver(splitDeliverId);
     }
 
@@ -31,13 +30,13 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse splitDeliverDetail(String splitDeliverId){
+    public ServerResponse splitDeliverDetail(String splitDeliverId) {
         return orderSplitService.splitDeliverDetail(splitDeliverId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse splitDeliverList(String supplierId, int shipState){
+    public ServerResponse splitDeliverList(String supplierId, int shipState) {
         return orderSplitService.splitDeliverList(supplierId, shipState);
     }
 
@@ -47,13 +46,13 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse sentSupplier(String orderSplitId, String splitItemList){
+    public ServerResponse sentSupplier(String orderSplitId, String splitItemList) {
         return orderSplitService.sentSupplier(orderSplitId, splitItemList);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse cancelOrderSplit(String orderSplitId){
+    public ServerResponse cancelOrderSplit(String orderSplitId) {
         return orderSplitService.cancelOrderSplit(orderSplitId);
     }
 
@@ -62,19 +61,19 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse orderSplitItemList(String orderSplitId){
+    public ServerResponse orderSplitItemList(String orderSplitId) {
         return orderSplitService.orderSplitItemList(orderSplitId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getHouseList(Integer pageNum,Integer pageSize){
-        return orderSplitService.getHouseList(pageNum,pageSize);
+    public ServerResponse getHouseList(Integer pageNum, Integer pageSize, String likeAddress) {
+        return orderSplitService.getHouseList(pageNum, pageSize, likeAddress);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getOrderSplitList(String houseId){
+    public ServerResponse getOrderSplitList(String houseId) {
         return orderSplitService.getOrderSplitList(houseId);
     }
 

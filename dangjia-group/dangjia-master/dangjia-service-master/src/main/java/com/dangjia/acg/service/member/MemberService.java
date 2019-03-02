@@ -591,28 +591,17 @@ public class MemberService {
                     MainUser mainUser = userMapper.selectByPrimaryKey(customer.getUserId());
                     mcDTO.setUserName(mainUser.getUsername());
                 }
-//                //找到提醒内容 ： 离当前时间最近的那一条
-//                if (customer.getRemindRecordId() != null) {
-//                    CustomerRecord remindCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getRemindRecordId());
-//                    mcDTO.setRemindContent(remindCustomerRecord.getDescribes());
-//                    mcDTO.setRemindTime(remindCustomerRecord.getRemindTime());
-//                    if (remindCustomerRecord.getRemindTime() != null) {
-//                        mcDTO.setRemindTimeOvertime(
-//                                Long.compare(remindCustomerRecord.getRemindTime().getTime(), new Date().getTime()));
-//                    } else {
-//                        mcDTO.setRemindTimeOvertime(-1);
-//                    }
-//                }
-//                if (customer.getCurrRecordId() != null) {
-//                    CustomerRecord currCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getCurrRecordId());
-//                    if (currCustomerRecord != null)
-//                        mcDTO.setLastRecord(currCustomerRecord.getCreateDate());
-//                }
                 //找到提醒内容 ： 离当前时间最近的那一条
                 if (customer.getRemindRecordId() != null) {
                     CustomerRecord remindCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getRemindRecordId());
                     mcDTO.setRemindContent(remindCustomerRecord.getDescribes());
                     mcDTO.setRemindTime(remindCustomerRecord.getRemindTime());
+                    if (remindCustomerRecord.getRemindTime() != null) {
+                        mcDTO.setRemindTimeOvertime(
+                                Long.compare(remindCustomerRecord.getRemindTime().getTime(), new Date().getTime()));
+                    } else {
+                        mcDTO.setRemindTimeOvertime(-1);
+                    }
                 }
                 if (customer.getCurrRecordId() != null) {
                     CustomerRecord currCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getCurrRecordId());

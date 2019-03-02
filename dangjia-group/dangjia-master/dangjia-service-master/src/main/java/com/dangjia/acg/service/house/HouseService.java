@@ -774,6 +774,7 @@ public class HouseService {
     public ServerResponse setHouseBudgetOk(String houseId, Integer budgetOk) {
         try {
             House house = iHouseMapper.selectByPrimaryKey(houseId);
+            WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
             if (house == null) {
                 return ServerResponse.createByErrorMessage("修改房子精算状态失败");
             }
@@ -825,7 +826,7 @@ public class HouseService {
                     //查出该工种工钱
                     Double workerTotal = forMasterAPI.getBudgetWorkerPrice(houseId, hf.getWorkerTypeId(), house.getCityId());
                     int inspectNumber = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId()).getInspectNumber();//该工种配置默认巡查次数
-                    int thisCheck = (int) (workerTotal / 600);//该工种钱算出来的巡查次数
+                    int thisCheck = (int) (workerTotal / workDeposit.getPatrolPrice().intValue());//该工种钱算出来的巡查次数
                     if (thisCheck > inspectNumber) {
                         thisCheck = inspectNumber;
                     }

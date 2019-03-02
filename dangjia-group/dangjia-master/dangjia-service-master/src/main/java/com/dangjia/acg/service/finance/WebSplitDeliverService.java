@@ -64,7 +64,7 @@ public class WebSplitDeliverService {
 //            webSplitDeliverDTO.setAllNoHandleNum(allNoHandleList.size());//所有待处理的
 
             LOG.info("本周一 ：" + curWeekAddList.size() + " " + curWeekSuccessList.size() +
-                    " "+ curWeekNoHandleList.size()+ " "+ allNoHandleList.size());
+                    " " + curWeekNoHandleList.size() + " " + allNoHandleList.size());
 
             LOG.info("splitDeliverList size:" + splitDeliverList.size());
             WebSplitDeliverDTO webSplitDeliverDTO = new WebSplitDeliverDTO();
@@ -79,6 +79,7 @@ public class WebSplitDeliverService {
                 webSplitDeliverItemDTO.setSplitDeliverId(splitDeliver.getId());
                 Supplier supplier = forMasterAPI.getSupplier(splitDeliver.getSupplierId());
                 webSplitDeliverItemDTO.setSupMobile(supplier.getTelephone());
+                webSplitDeliverItemDTO.setSupplierId(splitDeliver.getSupplierId());
                 webSplitDeliverItemDTO.setSupName(supplier.getName());
                 webSplitDeliverItemDTO.setTotalAmount(splitDeliver.getTotalAmount());
                 webSplitDeliverItemDTO.setCreateDate(splitDeliver.getCreateDate());
