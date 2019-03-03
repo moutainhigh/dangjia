@@ -117,8 +117,8 @@
         house.data_status as dataStatus,
         house.create_date as createDate,
         house.modify_date as modifyDate,
-        (SELECT COUNT(*) from dj_deliver_order_split  where apply_status > 1 and house_id = house.id) as waitCount,
-        (SELECT COUNT(*) from dj_deliver_order_split  where apply_status > 2 and house_id = house.id) as sendCount
+        (SELECT COUNT(*) from dj_deliver_order_split  where apply_status = 1 and house_id = house.id) as waitCount,
+        (SELECT COUNT(*) from dj_deliver_order_split  where apply_status = 2 and house_id = house.id) as sendCount
         FROM dj_house as house
         WHERE 1=1
         <if test="likeAddress!=null and likeAddress!=''">

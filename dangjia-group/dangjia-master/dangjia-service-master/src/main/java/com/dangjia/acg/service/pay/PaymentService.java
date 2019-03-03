@@ -1115,7 +1115,7 @@ public class PaymentService {
             BusinessOrder businessOrder = businessOrderList.get(0);
             House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
             ActivityRedPackRecord activityRedPackRecord = new ActivityRedPackRecord();
-            activityRedPackRecord.setModifyDate(new Date());
+            activityRedPackRecord.setEndDate(new Date());
             activityRedPackRecord.setMemberId(businessOrder.getMemberId());
             activityRedPackRecord.setCityId(house.getCityId());
             activityRedPackRecord.setHaveReceive(0);

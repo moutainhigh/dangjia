@@ -84,8 +84,8 @@
                 AND rpr.have_receive!=1
             </if>
         </if>
-        <if test="modifyDate!=null">
-            AND rp.end_date >=#{modifyDate}
+        <if test="endDate!=null">
+            AND rp.end_date >=#{endDate}
         </if>
         order by rpr.have_receive DESC, rpr.create_date
     </select>

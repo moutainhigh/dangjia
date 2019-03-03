@@ -323,7 +323,10 @@ public class HouseFlowApplyService {
         }
     }
 
-    /**大管家拿钱*/
+    /**
+     *  普通工匠的阶段完工、整体完工审核通过后
+     *  大管家拿相应验收收入
+     **/
     public void stewardMoney(HouseFlowApply hfa){
         //这是工匠的houseFlowId
         String houseFlowId = hfa.getHouseFlowId();
@@ -339,15 +342,14 @@ public class HouseFlowApplyService {
         }else{
             star = evaluate.getStar();//几星？
         }
-        //管家钱
-        /*****兼容老工地管家拿钱*****/
+        /*****兼容老工地该字段没有初始值*****/
         if(hfa.getSupervisorMoney() == null){
             hfa.setSupervisorMoney(new BigDecimal(0));
         }
 
         BigDecimal supervisorMoney;
         if(star == 0 || star == 5){
-            supervisorMoney = hfa.getSupervisorMoney();
+            supervisorMoney = hfa.getSupervisorMoney();//大管家的验收收入
         }else if(star == 3 || star == 4){
             supervisorMoney = hfa.getSupervisorMoney().multiply(new BigDecimal(0.8));
         }else{
@@ -362,7 +364,7 @@ public class HouseFlowApplyService {
         //钱包处理大管家的工钱
         Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
 
-        //押金处理
+        //管家押金处理
         HouseFlowApply houseFlowApply = new HouseFlowApply();
         houseFlowApply.setWorkerType(3);
         houseFlowApply.setWorkerId(worker.getId());
@@ -380,11 +382,11 @@ public class HouseFlowApplyService {
         workerDetail.setWorkerId(worker.getId());
         workerDetail.setWorkerName(worker.getName());
         workerDetail.setHouseId(hwo.getHouseId());
-        workerDetail.setMoney(supervisorMoney);
+        workerDetail.setMoney(supervisorMoney);//实际收入
         workerDetail.setState(0);//进钱
         workerDetail.setHaveMoney(hwo.getHaveMoney());
         workerDetail.setHouseWorkerOrderId(hwo.getId());
-        workerDetail.setApplyMoney(hfa.getApplyMoney());
+        workerDetail.setApplyMoney(hfa.getSupervisorMoney());//管家应拿的验收收入
         workerDetail.setWalletMoney(worker.getHaveMoney());
         workerDetailMapper.insert(workerDetail);
         //处理工钱

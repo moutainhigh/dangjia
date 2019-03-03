@@ -8,6 +8,7 @@ import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
+import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
@@ -38,6 +39,8 @@ public class BudgetMaterialService {
     private IGoodsMapper iGoodsMapper;
     @Autowired
     private ILabelMapper iLabelMapper;
+    @Autowired
+    private IAttributeValueMapper iAttributeValueMapper;
     @Autowired
     private IProductMapper iProductMaper;
     @Autowired
@@ -154,6 +157,7 @@ public class BudgetMaterialService {
                     tTechnologymMapList.add(map);
                 }
 
+
                 String[] imgArr = p.getImage().split(",");
                 String imgStr = "";
                 String imgUrlStr = "";
@@ -179,6 +183,24 @@ public class BudgetMaterialService {
                     if (label.getName() != null)
                         map.put("labelName", label.getName());
                 }
+
+                String strNewValueNameArr = "";
+                if (StringUtils.isNotBlank(p.getValueIdArr())) {
+                    String[] newValueNameArr = p.getValueIdArr().split(",");
+                    for (int i = 0; i < newValueNameArr.length; i++) {
+                        String valueId = newValueNameArr[i];
+                        if (StringUtils.isNotBlank(valueId)) {
+                            AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
+                            if (i == 0) {
+                                strNewValueNameArr = attributeValue.getName();
+                            } else {
+                                strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
+                            }
+                        }
+                    }
+                }
+                map.put("newValueNameArr", strNewValueNameArr);
+
                 map.put("tTechnologymMapList", tTechnologymMapList);
                 mapList.add(map);
             }

@@ -64,6 +64,10 @@ public class MendRecordService {
                 mendOrderDetail.setType(5);
                 mendOrderDetail.setState(orderSplit.getApplyStatus());
                 mendOrderDetail.setCreateDate(orderSplit.getCreateDate());
+                /*
+                计算要货单钱
+                 */
+                mendOrderDetail.setTotalAmount(orderSplitItemMapper.getOrderSplitPrice(mendOrderId));
 
                 List<Map<String,Object>> mapList = new ArrayList<>();
                 Example example = new Example(OrderSplitItem.class);

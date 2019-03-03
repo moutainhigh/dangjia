@@ -162,41 +162,114 @@ public class ProductService {
                 if (convertQuality <= 0)
                     return ServerResponse.createByErrorMessage("换算量必须大于0");
 
-                List<Product> nameList = iProductMapper.queryByName(name);
-                List<Product> productSnList = iProductMapper.queryByProductSn(productSn);
-                if (!StringUtils.isNotBlank(id)) {//没有id则新增
-                    if (nameList.size() > 0)
-                        return ServerResponse.createByErrorMessage("商品名字已存在");
-                    if (productSnList.size() > 0)
-                        return ServerResponse.createByErrorMessage("商品编号已存在");
-                    int snCount = 0;
-                    int nameCount = 0;
-                    for (int j = 0; j < jsonArr.size(); j++) {
-                        JSONObject objJ = jsonArr.getJSONObject(j);
-                        if (productSn.equals(objJ.getString("productSn"))) {
-                            snCount++;
-                            if (snCount > 1)
-                                return ServerResponse.createByErrorMessage("商品编号不能重复");
-                        }
-                        if (name.equals(objJ.getString("name"))) {
-                            nameCount++;
-                            if (nameCount > 1)
-                                return ServerResponse.createByErrorMessage("商品名称不能重复");
-                        }
-                    }
-                } else {//修改
+                String brandId = obj.getString("brandId");
+                String brandSeriesId = obj.getString("brandSeriesId");
+                String valueNameArr = obj.getString("valueNameArr");
+                String valueIdArr = obj.getString("valueIdArr");
+                String attributeIdArr = obj.getString("attributeIdArr");
 
-                    Product oldProduct = iProductMapper.selectByPrimaryKey(id);
-                    if (!oldProduct.getName().equals(name)) {
-                        if (nameList.size() > 0)
-                            return ServerResponse.createByErrorMessage("商品名字已存在");
+                if (!StringUtils.isNotBlank(id)) {//没有id则新增
+                    int brandSeriesIdCount = 0;
+                    //同品牌同系列无属性值
+                    if (!StringUtils.isNoneBlank(valueIdArr)
+                            && !StringUtils.isNoneBlank(attributeIdArr)
+                            && StringUtils.isNoneBlank(brandId)
+                            && StringUtils.isNoneBlank(brandSeriesId)) {
+
+                        List<Product> pValueList = iProductMapper.getPListByBrandSeriesIdAndNullValueId(brandId, brandSeriesId);
+                        if (pValueList.size() > 0) {
+                            String ret = checkProduct(name, productSn, id, jsonArr);
+                            if (!ret.equals("ok")) {
+                                return ServerResponse.createByErrorMessage("同品牌同系列无属性值的商品已存在");
+                            }
+                        }
+
+                        //统计 没有品牌和系列时，同属性的
+                        for (int j = 0; j < jsonArr.size(); j++) {
+                            JSONObject objJ = jsonArr.getJSONObject(j);
+                            if (brandId.equals(objJ.getString("brandId"))
+                                    && brandSeriesId.equals(objJ.getString("brandSeriesId"))) {
+                                brandSeriesIdCount++;
+                                if (brandSeriesIdCount > 1) {
+                                    String ret = checkProduct(name, productSn, id, jsonArr);
+                                    if (!ret.equals("ok")) {
+                                        return ServerResponse.createByErrorMessage("同品牌同系列无属性值，属性值不能重复");
+                                    }
+                                }
+                            }
+                        }
                     }
-                    if (!oldProduct.getProductSn().equals(productSn)) {
-                        if (productSnList.size() > 0)
-                            return ServerResponse.createByErrorMessage("商品编号已存在");
+
+                    int valueIdArrCount = 0;
+                    //无品牌无系列同属性值
+                    if (StringUtils.isNoneBlank(valueIdArr)
+                            && StringUtils.isNoneBlank(attributeIdArr)
+                            && !StringUtils.isNoneBlank(brandId)
+                            && !StringUtils.isNoneBlank(brandSeriesId)) {
+
+                        List<Product> pValueList = iProductMapper.getPListByValueIdArr(valueIdArr);
+                        if (pValueList.size() > 0) {
+                            String ret = checkProduct(name, productSn, id, jsonArr);
+                            if (!ret.equals("ok")) {
+                                return ServerResponse.createByErrorMessage("无品牌无系列同属性值的商品已存在");
+                            }
+                        }
+
+                        //统计 没有品牌和系列时，同属性的
+                        for (int j = 0; j < jsonArr.size(); j++) {
+                            JSONObject objJ = jsonArr.getJSONObject(j);
+                            if (valueIdArr.equals(objJ.getString("valueIdArr"))) {
+                                valueIdArrCount++;
+                                if (valueIdArrCount > 1) {
+                                    String ret = checkProduct(name, productSn, id, jsonArr);
+                                    if (!ret.equals("ok")) {
+                                        return ServerResponse.createByErrorMessage("无品牌无系列时，属性值不能重复");
+                                    }
+                                }
+                            }
+                        }
                     }
+
+                    int valueCount = 0;
+                    //同品牌同系列同属性值
+                    if (StringUtils.isNoneBlank(attributeIdArr)
+                            && StringUtils.isNoneBlank(valueIdArr)
+                            && StringUtils.isNoneBlank(brandId)
+                            && StringUtils.isNoneBlank(brandSeriesId)) {
+                        List<Product> pValueList = iProductMapper.getPListByBrandSeriesId(brandId, brandSeriesId, valueIdArr);
+                        if (pValueList.size() > 0) {
+                            String ret = checkProduct(name, productSn, id, jsonArr);
+                            if (!ret.equals("ok")) {
+                                return ServerResponse.createByErrorMessage("同品牌同系列同属性值的商品已存在");
+                            }
+                        }
+
+                        //统计 同一个品牌，同系列，同属性的
+                        for (int j = 0; j < jsonArr.size(); j++) {
+                            JSONObject objJ = jsonArr.getJSONObject(j);
+                            if (brandId.equals(objJ.getString("brandId"))
+                                    && brandSeriesId.equals(objJ.getString("brandSeriesId"))
+                                    && attributeIdArr.equals(objJ.getString("attributeIdArr"))
+                                    && valueIdArr.equals(objJ.getString("valueIdArr"))) {
+                                valueCount++;
+                                if (valueCount > 1) {
+                                    String ret = checkProduct(name, productSn, id, jsonArr);
+                                    if (!ret.equals("ok")) {
+                                        return ServerResponse.createByErrorMessage("同品牌同系列的属性值不能重复");
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+                String ret = checkProduct(name, productSn, id, jsonArr);
+                if (!ret.equals("ok")) {
+                    return ServerResponse.createByErrorMessage(ret);
                 }
             }
+
 
             for (int i = 0; i < jsonArr.size(); i++) {
                 JSONObject obj = jsonArr.getJSONObject(i);
@@ -313,6 +386,49 @@ public class ProductService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("新增失败");
         }
+    }
+
+    public String checkProduct(String name, String productSn, String id, JSONArray jsonArr) {
+
+
+        List<Product> nameList = iProductMapper.queryByName(name);
+        List<Product> productSnList = iProductMapper.queryByProductSn(productSn);
+        if (!StringUtils.isNotBlank(id)) {//没有id则新增
+            if (nameList.size() > 0)
+                return "商品名字已存在";
+            if (productSnList.size() > 0)
+                return "商品编号已存在";
+            int snCount = 0;
+            int nameCount = 0;
+            for (int j = 0; j < jsonArr.size(); j++) {
+                JSONObject objJ = jsonArr.getJSONObject(j);
+                if (productSn.equals(objJ.getString("productSn"))) {
+                    snCount++;
+                    if (snCount > 1)
+                        return "商品编号不能重复";
+                }
+                if (name.equals(objJ.getString("name"))) {
+                    nameCount++;
+                    if (nameCount > 1)
+                        return "商品名称不能重复";
+                }
+
+
+            }
+        } else {//修改
+
+            Product oldProduct = iProductMapper.selectByPrimaryKey(id);
+            if (!oldProduct.getName().equals(name)) {
+                if (nameList.size() > 0)
+                    return "商品名字已存在";
+            }
+            if (!oldProduct.getProductSn().equals(productSn)) {
+                if (productSnList.size() > 0)
+                    return "商品编号已存在";
+            }
+        }
+
+        return "ok";
     }
 
     /**

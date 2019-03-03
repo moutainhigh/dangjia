@@ -864,6 +864,7 @@ public class HouseWorkerService {
                 }
                 hfa.setOtherMoney(workPrice.subtract(haveMoney).subtract(hfa.getApplyMoney()));
                 hfa.setApplyDec("我是" + workType.getName() + ",我已经阶段完工了");//描述
+                hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
                 houseFlowApplyMapper.insert(hfa);
 
                 configMessageService.addConfigMessage(null,"gj",supervisorHF.getWorkerId(),"0","阶段完工申请",
@@ -872,6 +873,7 @@ public class HouseWorkerService {
             } else if (applyType == 2) {
                 hfa.setApplyMoney(workPrice.subtract(haveMoney));
                 hfa.setApplyDec("我是" + workType.getName() + ",我已经整体完工了");//描述
+                hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
                 houseFlowApplyMapper.insert(hfa);
 
                 configMessageService.addConfigMessage(null,"gj",supervisorHF.getWorkerId(),"0","整体完工申请",

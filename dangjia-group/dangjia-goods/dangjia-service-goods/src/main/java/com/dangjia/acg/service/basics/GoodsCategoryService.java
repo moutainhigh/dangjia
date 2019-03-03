@@ -9,6 +9,7 @@ import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.modle.attribute.Attribute;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.Goods;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,6 +135,9 @@ public class GoodsCategoryService {
     //查询类别id查询所有父级以及父级属性
     public ServerResponse queryAttributeListById(String goodsCategoryId) {
         try {
+            if (!StringUtils.isNoneBlank(goodsCategoryId)) {
+                return ServerResponse.createByErrorMessage("goodsCategoryId不能为null");
+            }
             GoodsCategory goodsCategory = iGoodsCategoryMapper.selectByPrimaryKey(goodsCategoryId);
             if (goodsCategory == null) {
                 return ServerResponse.createByErrorMessage("查询失败");

@@ -44,7 +44,14 @@ public interface IProductMapper extends Mapper<Product> {
     /**
      * 查询product
      */
-    Product selectProduct(@Param("goodsId") String goodsId,  @Param("brandId") String brandId,@Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String[] valueIdArr);
+    Product selectProduct(@Param("goodsId") String goodsId, @Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String[] valueIdArr);
+
+    List<Product> getPListByBrandSeriesId(@Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String valueIdArr);
+
+    List<Product> getPListByValueIdArr(@Param("valueIdArr") String valueIdArr);
+    //按照商品id 找 没有品牌，有属性的所有货品
+    List<Product> getPListByGoodsIdAndNullBrandId(@Param("goodsId") String goodsId);
+    List<Product> getPListByBrandSeriesIdAndNullValueId(@Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId);
 
     List<Product> queryRepairBudgetMaterial(@Param("houseId") String houseId, @Param("name") String name, @Param("categoryId") String categoryId);
 
