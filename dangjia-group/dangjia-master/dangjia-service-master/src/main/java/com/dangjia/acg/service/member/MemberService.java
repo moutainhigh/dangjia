@@ -423,6 +423,10 @@ public class MemberService {
             return ServerResponse.createByErrorMessage("您已提交过工种，不能再次提交");
         }
         user.setWorkerTypeId(workerTypeId);
+        WorkerType wt = workerTypeMapper.selectByPrimaryKey(user.getWorkerTypeId());
+        if (wt != null) {
+            user.setWorkerType(wt.getType());
+        }
         user.setCheckType(0);
         memberMapper.updateByPrimaryKeySelective(user);
         updataMember(user, accessToken);

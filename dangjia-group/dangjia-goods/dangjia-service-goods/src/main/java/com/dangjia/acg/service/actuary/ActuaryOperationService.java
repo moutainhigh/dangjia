@@ -254,12 +254,12 @@ public class ActuaryOperationService {
         try {
             if (!StringUtils.isNoneBlank(goodsId))
                 return ServerResponse.createByErrorMessage("goodsId 不能为null");
-            if (!StringUtils.isNoneBlank(brandId))
-                return ServerResponse.createByErrorMessage("brandId 不能为null");
-            if (!StringUtils.isNoneBlank(brandSeriesId))
-                return ServerResponse.createByErrorMessage("brandSeriesId 不能为null");
-            if (!StringUtils.isNoneBlank(attributeIdArr))
-                return ServerResponse.createByErrorMessage("attributeIdArr 不能为null");
+//            if (!StringUtils.isNoneBlank(brandId))
+//                return ServerResponse.createByErrorMessage("brandId 不能为null");
+//            if (!StringUtils.isNoneBlank(brandSeriesId))
+//                return ServerResponse.createByErrorMessage("brandSeriesId 不能为null");
+//            if (!StringUtils.isNoneBlank(attributeIdArr))
+//                return ServerResponse.createByErrorMessage("attributeIdArr 不能为null");
             if (!StringUtils.isNoneBlank(budgetMaterialId))
                 return ServerResponse.createByErrorMessage("budgetMaterialId 不能为null");
 
@@ -389,6 +389,7 @@ public class ActuaryOperationService {
             goodsDTO.setProductType(goods.getType());//材料类型
 
             Product srcProduct = product;
+            List<String> imageList = new ArrayList<String>();//长图片 多图组合
             GoodsGroup srcGoodsGroup = null;
             //找到一个groupId 的可以切换的目标关联组
             List<GroupLink> groupLinkTargetList = new ArrayList<>();//可以切换的其他关联组的 GroupLink的productId
@@ -455,16 +456,6 @@ public class ActuaryOperationService {
                         brandSeriesSet.add(pt.getBrandSeriesId());//添加品牌系列
                     }
                 }
-
-//                if (brandSet.size() == 0) {//如果没有品牌，就只遍历属性
-//                    for (String pId : pIdTargetGroupSet) {
-//                        Product p = productMapper.selectByPrimaryKey(pId);
-//                        if (brandSeries.getId().equals(p.getBrandSeriesId()))//某个系列的
-//                            productList.add(p);
-//                    }
-//                }
-
-
             } else {
                 //该商品关联所有品牌系列
 //                if (apiType == 1) {
@@ -477,38 +468,34 @@ public class ActuaryOperationService {
                     brandSet.add(brandSeries.getBrandId());//添加品牌
                     brandSeriesSet.add(brandSeries.getId());//添加品牌系列
                 }
-
-                if (brandSeriesList.size() == 0) {//如果没有品牌，就只遍历属性
-
-
-                    List<Product> productList = new ArrayList<>();
-//                    if (budgetMaterial != null) { //是关联组
-//                        if (budgetMaterial.getGoodsGroupId() != null) { //是关联组
-//                            for (String pId : pIdTargetGroupSet) {
-//                                Product p = productMapper.selectByPrimaryKey(pId);
-//                                if (brandSeries.getId().equals(p.getBrandSeriesId()))//某个系列的
-//                                    productList.add(p);
-//                            }
-//                        }
-//                    } else {
-                        //            if (apiType == 1)
-                        //                productList.add(product);
-                        //            else if (apiType == 2 || apiType == 3)
-//                        productList = productMapper.queryByGoodsIdAndbrandSeriesId(product.getGoodsId(), brandSeries.getId());
-//                        productList = productMapper.getPListByValueIdArrAndNullBrandId(product.getGoodsId(), product.getValueIdArr());
-//                    }
-
-//                    List<AttributeDTO> attributeDTOList = getAllAttributes(product, productList, imageList);
-////                        LOG.info(" brandSeries:" + brandSeries.getName());
-////                        LOG.info(" attributeDTOList :" + attributeDTOList);
-//                    goodsDTO.setAttributeDTOList(attributeDTOList);
-
-
-                }
 //                }
             }
 
-            List<String> imageList = new ArrayList<String>();//长图片 多图组合
+            if (brandSeriesSet.size() == 0 || brandSet.size() == 0) {//如果没有品牌，就只遍历属性
+                List<Product> productList = new ArrayList<>();
+                if (srcGoodsGroup != null) {//是关联组
+                    for (String pId : pIdTargetGroupSet) {
+                        //如果没有品牌，就只遍历属性
+                        Product pt = productMapper.selectByPrimaryKey(pId);
+                        if (StringUtils.isNoneBlank(pt.getAttributeIdArr())
+                                && StringUtils.isNoneBlank(pt.getValueIdArr())) {
+                            productList.add(pt);
+                        }
+                    }
+                } else {
+//                    if (apiType == 1) {
+//                        productList.add(product);
+//                    } else if (apiType == 2 || apiType == 3) {
+                    productList = productMapper.getPListByGoodsIdAndNullBrandId(product.getGoodsId());
+//                    }
+//                    }
+                    List<AttributeDTO> attrList = getAllAttributes(null, null, product, productList, imageList);
+//                    LOG.info(" attrList :" + attrList);
+                    goodsDTO.setAttrList(attrList);
+                }
+
+            }
+
             for (String brandId : brandSet) {//循环品牌系列
                 Brand brand = iBrandMapper.selectByPrimaryKey(brandId);
                 BrandDTO brandDTO = new BrandDTO();
@@ -528,18 +515,23 @@ public class ActuaryOperationService {
                         brandSeriesDTO.setBrandSeriesId(brandSeries.getId());
                         brandSeriesDTO.setName(brandSeries.getName());
 
+                        if (brandSeries.getId().equals(product.getBrandSeriesId())) {
+                            brandSeriesDTO.setState(1);//选中
+                            imageList.add(getImage(brandSeries.getImage()));//加入品牌系列图
+                        } else {
+                            brandSeriesDTO.setState(0);//未选中
+                        }
+
                         LOG.info(" brandSeries id:" + brandSeries.getId() + " getBrandId:" + brandSeries.getBrandId() + " name:" + brandSeries.getName());
 
                         //查询 一个 goods 的 某个 系列的 所有 product
                         //        List<Product> productList = productMapper.queryByGoodsIdAndbrandSeriesId(product.getGoodsId(), brandSeries.getId());
                         List<Product> productList = new ArrayList<>();
-                        if (budgetMaterial != null) { //是关联组
-                            if (budgetMaterial.getGoodsGroupId() != null) { //是关联组
-                                for (String pId : pIdTargetGroupSet) {
-                                    Product p = productMapper.selectByPrimaryKey(pId);
-                                    if (brandSeries.getId().equals(p.getBrandSeriesId()))//某个系列的
-                                        productList.add(p);
-                                }
+                        if (srcGoodsGroup != null) { //是关联组
+                            for (String pId : pIdTargetGroupSet) {
+                                Product p = productMapper.selectByPrimaryKey(pId);
+                                if (brandSeries.getId().equals(p.getBrandSeriesId()))//某个系列的
+                                    productList.add(p);
                             }
                         } else {
                             //            if (apiType == 1)
@@ -548,17 +540,11 @@ public class ActuaryOperationService {
                             productList = productMapper.queryByGoodsIdAndbrandSeriesId(product.getGoodsId(), brandSeries.getId());
                         }
 
-                        List<AttributeDTO> attributeDTOList = getAllAttributes(product, productList, imageList);
+                        List<AttributeDTO> attributeDTOList = getAllAttributes(brandSeries.getBrandId(), brandSeries.getId(), product, productList, imageList);
 //                        LOG.info(" brandSeries:" + brandSeries.getName());
 //                        LOG.info(" attributeDTOList :" + attributeDTOList);
                         brandSeriesDTO.setAttributeDTOList(attributeDTOList);
 
-                        if (brandSeries.getId().equals(product.getBrandSeriesId())) {
-                            brandSeriesDTO.setState(1);//选中
-                            imageList.add(getImage(brandSeries.getImage()));//加入品牌系列图
-                        } else {
-                            brandSeriesDTO.setState(0);//未选中
-                        }
 
 //                        if (attributeDTOList.size() > 0)
                         brandSeriesDTOList.add(brandSeriesDTO);
@@ -790,7 +776,7 @@ public class ActuaryOperationService {
     }
 
     //根据品牌系列找属性品牌
-    private List<AttributeDTO> getAllAttributes(Product product, List<Product> productList, List<String> imageList) {
+    private List<AttributeDTO> getAllAttributes(String selectBrandId, String selectBrandSeriesId, Product product, List<Product> productList, List<String> imageList) {
 //        List<String> imageList = new ArrayList<String>();//长图片 多图组合
         List<AttributeDTO> attributeDTOList = new ArrayList<>();
 
@@ -835,12 +821,24 @@ public class ActuaryOperationService {
 
                             if (isContainsValue(attributeValue.getId(), product.getValueIdArr())) {//如果包含该属性
                                 avDTO.setState(1);//选中
-                                if (StringUtils.isNoneBlank(attributeValue.getImage())) {
-                                    imageList.add(getImage(attributeValue.getImage()));//属性图
+
+                                if (StringUtils.isNoneBlank(product.getBrandId())
+                                        && StringUtils.isNoneBlank(product.getBrandSeriesId())) {//有品牌和系列
+                                    if (product.getBrandId().equals(selectBrandId)
+                                            && product.getBrandSeriesId().equals(selectBrandSeriesId)) { //当前选中的品牌和系列对应的属性图
+                                        if (StringUtils.isNoneBlank(attributeValue.getImage())) {
+                                            imageList.add(getImage(attributeValue.getImage()));//属性图
+                                        }
+                                    }
+                                } else {//没有品牌和系列
+                                    if (StringUtils.isNoneBlank(attributeValue.getImage())) {
+                                        imageList.add(getImage(attributeValue.getImage()));//属性图
+                                    }
                                 }
                             } else {
                                 avDTO.setState(0);//未选中
                             }
+
                             attributeValueDTOList.add(avDTO);//添加属性值
                         }
                         j++;

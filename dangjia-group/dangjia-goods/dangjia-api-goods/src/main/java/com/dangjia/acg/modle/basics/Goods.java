@@ -3,6 +3,7 @@ package com.dangjia.acg.modle.basics;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,6 +18,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_basics_goods")
 @ApiModel(description = "货品")
+@FieldNameConstants(prefix = "")
 public class Goods extends BaseEntity{
 
 	@Column(name = "name")

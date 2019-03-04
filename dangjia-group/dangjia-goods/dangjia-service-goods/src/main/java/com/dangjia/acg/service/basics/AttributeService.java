@@ -48,7 +48,7 @@ public class AttributeService {
     private static Logger LOG = LoggerFactory.getLogger(AttributeService.class);
 
     //根据类别id查询关联属性
-    public ServerResponse<PageInfo> queryGoodsAttribute(Integer pageNum, Integer pageSize, String goodsCategoryId) {
+    public ServerResponse<PageInfo> queryGoodsAttribute(Integer pageNum, Integer pageSize, String goodsCategoryId, String likeAttrName) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         try {
             if (pageNum == null) {
@@ -60,12 +60,12 @@ public class AttributeService {
             PageHelper.startPage(pageNum, pageSize);
             List<Attribute> caList = new ArrayList<Attribute>();
             List<Map<String, Object>> rListMap = new ArrayList<Map<String, Object>>();
-            if (goodsCategoryId == null || "".equals(goodsCategoryId)) {
-                caList = iAttributeMapper.query();
-            } else {
-                LOG.info("queryGoodsAttribute **goodsCategoryId :" + goodsCategoryId);
-                caList = iAttributeMapper.queryAttributeByCategoryId(goodsCategoryId);
-            }
+//            if (goodsCategoryId == null || "".equals(goodsCategoryId)) {
+//                caList = iAttributeMapper.query();
+//            } else {
+            LOG.info("queryGoodsAttribute **goodsCategoryId :" + goodsCategoryId);
+            caList = iAttributeMapper.queryAttributeByCategoryId(goodsCategoryId, likeAttrName);
+//            }
             for (Attribute ca : caList) {
                 Map<String, Object> caMap = new HashMap<String, Object>();
                 caMap.put("id", ca.getId());
@@ -193,7 +193,7 @@ public class AttributeService {
     public ServerResponse insertGoodsAttribute(String goodsCategoryId, String attributeName, Integer type, String jsonStr) {
         try {
 //			List<Attribute> attributeList = iAttributeMapper.queryCategoryAttribute(goodsCategoryId);//弃用
-            List<Attribute> attributeList = iAttributeMapper.queryAttributeByCategoryId(goodsCategoryId);
+            List<Attribute> attributeList = iAttributeMapper.queryAttributeByCategoryId(goodsCategoryId, null);
             LOG.info("attributeList size:" + attributeList.size());
             for (Attribute attribute : attributeList) {
                 LOG.info("attributeList:" + attribute.getName() + " == " + attribute.getName());
@@ -252,7 +252,7 @@ public class AttributeService {
             Attribute srcAttribute = iAttributeMapper.queryById(attributeId);
             LOG.info("doModifyGoodsAttribute::::Id: " + attributeId + " name:" + attributeName);
             //只需查询 一个分类 对应的所有的属性名称 有没有被使用
-            List<Attribute> attributeList = iAttributeMapper.queryAttributeByCategoryId(srcAttribute.getCategoryId());
+            List<Attribute> attributeList = iAttributeMapper.queryAttributeByCategoryId(srcAttribute.getCategoryId(), null);
             for (Attribute ae : attributeList) {
                 LOG.info(" name:" + ae.getName());
                 if (ae.getName().equals(srcAttribute.getName())) {

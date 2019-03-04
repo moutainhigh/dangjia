@@ -19,7 +19,7 @@ import java.util.*;
 public class WeiXinPayUtil {
 
     //微信的应用ID(固定值)
-    public final  static String appid="wx3d76cd502417fb9a";
+    public final static String appid="wx3d76cd502417fb9a";
     //微信商号(固定值)
     public final static String mch_id="1500837831";
     //付费方法类型(固定值)
@@ -29,17 +29,16 @@ public class WeiXinPayUtil {
     //统一下单API接口链接  (固定值)
     public final static String url = "https://api.mch.weixin.qq.com/pay/unifiedorder";
     //支付成功回调接口
-    //public final static String notify_url = "https://api.fengjiangit.com:8080/dangjia/app/pay!weixinAsynchronous.action";
-    public final static String notify_url = "https://test.fengjiangit.com:8081/dangjia/app/pay!weixinAsynchronous.action";
+    public final static String notify_url = "master/app/pay/weixinAsynchronous";
 
     //微信公众号h5成功回调接口
-    public final static String notify_h5 = "https://test.fengjiangit.com:8081/dangjia/app/pay!publicAsynchronous.action";
+//    public final static String notify_h5 = "https://test.fengjiangit.com:8081/dangjia/app/pay!publicAsynchronous.action";
 
     /**
      * 微信支付调用接口
      * @return JSON形式的参数值
      */
-    public static ServerResponse getWeiXinSign(String price, String out_trade_no) {
+    public static ServerResponse getWeiXinSign(String price, String out_trade_no,String basePath) {
         Map<String,String> m = new HashMap<String,String>();
         try {
             String price1 = Integer.toString((int)((Double.parseDouble(price)*100)));
@@ -49,7 +48,7 @@ public class WeiXinPayUtil {
             m.put("body","当家App-微信支付");//商品描述（其实可有可无）
             m.put("mch_id", WeiXinPayUtil.mch_id);//微信支付商户信息号（固定值）
             m.put("nonce_str",out_trade_no);//支付订单号 不长于32位
-            m.put("notify_url",notify_url);//接收微信支付异步通知回调地址，通知url必须为直接可访问的url，不能携带参数。
+            m.put("notify_url", basePath + notify_url);//接收微信支付异步通知回调地址，通知url必须为直接可访问的url，不能携带参数。
             m.put("out_trade_no",out_trade_no);//商户系统内部的订单号,32个字符内、可包含字母
             m.put("total_fee",price1);//订单总金额，单位为分
             m.put("trade_type", WeiXinPayUtil.trade_type);//固定值

@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.pay;
 
 import com.dangjia.acg.modle.pay.PayOrder;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -11,4 +12,6 @@ import tk.mybatis.mapper.common.Mapper;
  */
 @Repository
 public interface IPayOrderMapper extends Mapper<PayOrder> {
+
+    PayOrder getByNumber(@Param("number")String number);
 }

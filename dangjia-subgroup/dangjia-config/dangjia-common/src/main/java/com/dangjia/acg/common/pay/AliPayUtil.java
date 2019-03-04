@@ -19,7 +19,11 @@ import java.util.Map;
  * @author Ronalcheng
  */
 public class AliPayUtil {
-    public static ServerResponse getAlipaySign(String price,String out_trade_no) {
+
+    //支付成功回调接口
+    public final static String notify_url = "master/app/pay/aliAsynchronous";
+
+    public static ServerResponse getAlipaySign(String price,String out_trade_no,String basePath) {
         try {
             AlipayClient alipayClient = AlipayConfig.getAlipayClient();
             AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();
@@ -30,7 +34,7 @@ public class AliPayUtil {
             model.setTotalAmount(price);
             model.setProductCode("QUICK_MSECURITY_PAY");
             request.setBizModel(model);
-            request.setNotifyUrl("https://test.fengjiangit.com:8081/dangjia/app/pay!aliAsynchronous.action");
+            request.setNotifyUrl(basePath + notify_url);
             model.setBody("蜂匠科技");
             model.setSubject("当家装修app");
             AlipayTradeAppPayResponse response = (AlipayTradeAppPayResponse) alipayClient.sdkExecute(request);

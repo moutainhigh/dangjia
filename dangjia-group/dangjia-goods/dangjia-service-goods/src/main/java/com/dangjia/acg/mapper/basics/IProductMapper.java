@@ -49,7 +49,7 @@ public interface IProductMapper extends Mapper<Product> {
     List<Product> getPListByBrandSeriesId(@Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String valueIdArr);
 
     List<Product> getPListByValueIdArr(@Param("valueIdArr") String valueIdArr);
-    //按照商品id 找 没有品牌，有属性的所有货品
+    //查询 无品牌无系列有属性值的商品
     List<Product> getPListByGoodsIdAndNullBrandId(@Param("goodsId") String goodsId);
     List<Product> getPListByBrandSeriesIdAndNullValueId(@Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId);
 

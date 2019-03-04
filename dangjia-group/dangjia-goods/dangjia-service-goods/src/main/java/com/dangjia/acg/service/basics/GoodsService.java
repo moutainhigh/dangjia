@@ -69,9 +69,21 @@ public class GoodsService {
     public ServerResponse saveGoods(String name, String categoryId, Integer buy,
                                     Integer sales, String unitId, Integer type, String arrString) {
         try {
+            if (!StringUtils.isNotBlank(name))
+                return ServerResponse.createByErrorMessage("名字不能为空");
+
             List<Goods> goodsList = iGoodsMapper.queryByName(name);
             if (goodsList.size() > 0)
-                return ServerResponse.createByErrorMessage("该货品名字不能重复");
+                return ServerResponse.createByErrorMessage("名字不能重复");
+
+            if (!StringUtils.isNotBlank(unitId))
+                return ServerResponse.createByErrorMessage("单位id不能为空");
+
+            if (!StringUtils.isNotBlank(categoryId))
+                return ServerResponse.createByErrorMessage("分类不能为空");
+
+            if (type < -1)
+                return ServerResponse.createByErrorMessage("性质不能为空");
 
             Goods goods = new Goods();
             goods.setName(name);

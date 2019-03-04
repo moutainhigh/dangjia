@@ -65,7 +65,8 @@ public interface GoodsCategoryAPI {
     @ApiOperation(value = "根据类别id查询关联属性", notes = "根据类别id查询关联属性")
     ServerResponse<PageInfo> queryGoodsAttribute(@RequestParam("request") HttpServletRequest request,
                                                  @RequestParam("pageDTO") PageDTO pageDTO,
-                                                 @RequestParam("goodsCategoryId") String goodsCategoryId);
+                                                 @RequestParam("goodsCategoryId") String goodsCategoryId,
+                                                 @RequestParam("likeAttrName") String likeAttrName);
 
     /**
      * 根据属性名称模糊查询属性

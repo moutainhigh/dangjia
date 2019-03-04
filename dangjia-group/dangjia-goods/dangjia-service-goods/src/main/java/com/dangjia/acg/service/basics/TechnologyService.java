@@ -9,10 +9,12 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.actuary.ISearchBoxMapper;
+import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
 import com.dangjia.acg.modle.actuary.SearchBox;
+import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
@@ -43,6 +45,9 @@ public class TechnologyService {
     private IWorkerGoodsMapper iWorkerGoodsMapper;
     @Autowired
     private IProductMapper iProductMapper;
+
+    @Autowired
+    private IGoodsMapper iGoodsMapper;
     @Autowired
     private WorkerTypeAPI workerTypeAPI;
     @Autowired
@@ -404,17 +409,28 @@ public class TechnologyService {
 
             if (type == 0 || type == 1) {
                 //根据内容模糊搜索商品
+                example = new Example(Goods.class);
+                example.createCriteria().andLike(Goods.NAME, "%"+name+"%").andEqualTo(Goods.DATA_STATUS,"0");
+                example.orderBy(Goods.CREATE_DATE).desc();
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<Product> pList = iProductMapper.queryByLikeName(name);
+                List<Goods> pList =iGoodsMapper.selectByExample(example);
                 pageResult = new PageInfo(pList);
-                for (Product t : pList) {
-                    JSONObject object = new JSONObject();
-                    object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + t.getImage());
-                    object.put("price", t.getPrice() + "/" + t.getUnitName());
-                    object.put("name", t.getName());
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") + "&gId=" + t.getId() + "&type=" + DjConstants.GXType.CAILIAO;
-                    object.put("url", url);//0:工艺；1：商品；2：人工
-                    arr.add(object);
+                for (Goods t : pList) {
+                    example = new Example(Product.class);
+                    example.createCriteria().andLike(Product.GOODS_ID, t.getId()).andEqualTo(Product.DATA_STATUS,"0").andEqualTo(Product.MAKET,"1");
+                    example.orderBy(Goods.CREATE_DATE).desc();
+                    PageHelper.startPage(1, 1);
+                    List<Product>  products=iProductMapper.selectByExample(example);
+                    if(products.size()>0) {
+                        Product product=products.get(0);
+                        JSONObject object = new JSONObject();
+                        object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
+                        object.put("price", product.getPrice() + "/" + product.getUnitName());
+                        object.put("name", product.getName());
+                        String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") + "&gId=" + product.getId() + "&type=" + DjConstants.GXType.CAILIAO;
+                        object.put("url", url);//0:工艺；1：商品；2：人工
+                        arr.add(object);
+                    }
                 }
             }
             if (type == 2) {

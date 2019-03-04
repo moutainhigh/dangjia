@@ -114,7 +114,7 @@ public class GoodsCategoryService {
             List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId(id);//根据id查询是否有下级类别
             List<Goods> goodsList = iGoodsMapper.queryByCategoryId(id);//根据id查询是否有关联商品
 //			List<Attribute> GoodsAList=attributeMapper.queryCategoryAttribute(id);//根据id查询是否有关联属性 （弃用）
-            List<Attribute> GoodsAList = attributeMapper.queryAttributeByCategoryId(id);//根据id查询是否有关联属性
+            List<Attribute> GoodsAList = attributeMapper.queryAttributeByCategoryId(id, null);//根据id查询是否有关联属性
             if (goodsCategoryList.size() > 0) {
                 return ServerResponse.createByErrorMessage("此类别有下级不能删除");
             }
@@ -143,12 +143,12 @@ public class GoodsCategoryService {
                 return ServerResponse.createByErrorMessage("查询失败");
             }
 //			List<Attribute> gaList=attributeMapper.queryCategoryAttribute(goodsCategory.getId());//弃用
-            List<Attribute> gaList = attributeMapper.queryAttributeByCategoryId(goodsCategory.getId());
+            List<Attribute> gaList = attributeMapper.queryAttributeByCategoryId(goodsCategory.getId(), null);
             while (goodsCategory != null) {
                 goodsCategory = iGoodsCategoryMapper.selectByPrimaryKey(goodsCategory.getParentId());
                 if (goodsCategory != null) {
 //					gaList.addAll(attributeMapper.queryCategoryAttribute(goodsCategory.getId()));//弃用
-                    gaList.addAll(attributeMapper.queryAttributeByCategoryId(goodsCategory.getId()));
+                    gaList.addAll(attributeMapper.queryAttributeByCategoryId(goodsCategory.getId(), null));
                 }
             }
             return ServerResponse.createBySuccess("查询成功", gaList);

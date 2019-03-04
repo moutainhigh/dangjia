@@ -24,43 +24,49 @@ public class ConfigAdvertController implements ConfigAdvertAPI {
 
     /**
      * 获取所有广告
+     *
      * @param configAdvert
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse getConfigAdverts(HttpServletRequest request, ConfigAdvert configAdvert) {
-        return configAdvertService.getConfigAdverts(request,configAdvert);
+    public ServerResponse getConfigAdverts(HttpServletRequest request, String userToken, ConfigAdvert configAdvert) {
+        return configAdvertService.getConfigAdverts(request, userToken, configAdvert);
     }
+
     /**
      * 删除广告
+     *
      * @param id
      * @return
      */
     @Override
     @ApiMethod
     public ServerResponse delConfigAdvert(HttpServletRequest request, String id) {
-        return configAdvertService.delConfigAdvert(request,id);
+        return configAdvertService.delConfigAdvert(request, id);
     }
 
     /**
      * 修改广告
+     *
      * @param configAdvert
      * @return
      */
     @Override
     @ApiMethod
     public ServerResponse editConfigAdvert(HttpServletRequest request, ConfigAdvert configAdvert) {
-        return configAdvertService.editConfigAdvert(request,configAdvert);
+        return configAdvertService.editConfigAdvert(request, configAdvert);
     }
+
     /**
      * 新增广告
+     *
      * @param configAdvert
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse addConfigAdvert(HttpServletRequest request,ConfigAdvert configAdvert) {
-        return configAdvertService.addConfigAdvert(request,configAdvert);
+    public ServerResponse addConfigAdvert(HttpServletRequest request, ConfigAdvert configAdvert) {
+        return configAdvertService.addConfigAdvert(request, configAdvert);
     }
 }

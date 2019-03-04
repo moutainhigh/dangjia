@@ -78,11 +78,6 @@ public interface ProductAPI {
                                @RequestParam("type") Integer type,
                                @RequestParam("arrString") String arrString);
 
-    @PostMapping("/basics/product/updateProduct")
-    @ApiOperation(value = "修改货品", notes = "修改货品")
-    ServerResponse updateProduct(@RequestParam("request") HttpServletRequest request,
-                                 @RequestParam("productArr") String productArr);
-
     @PostMapping("/basics/product/getProductById")
     @ApiOperation(value = "根据货品id查询货品对象", notes = "根据货品id查询货品对象")
     ServerResponse getProductById(@RequestParam("request") HttpServletRequest request,

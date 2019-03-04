@@ -24,7 +24,7 @@ public class SurplusWareHouseDTO {
     private Date createDate;// 创建日期
     private Date modifyDate;// 修改日期
 
-//    private String memberId;//大管家id
+    private String memberId;//大管家id
     private String memberName;//大管家名字
     private String memberPhone;//大管家电话
 

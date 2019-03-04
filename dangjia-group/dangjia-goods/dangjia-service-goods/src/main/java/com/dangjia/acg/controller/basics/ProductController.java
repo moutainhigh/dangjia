@@ -143,15 +143,6 @@ public class ProductController implements ProductAPI {
 		return goodsService.updateGoods(id,name, categoryId, buy, sales, unitId, type, arrString);
   		
   	}
-    /**
-  	 * 修改货品
-  	 */
-	@Override
-	@ApiMethod
-  	public ServerResponse updateProduct(HttpServletRequest request,String productArr){
-		return productService.updateProduct(productArr);
-  		
-  	}
 
 	/**
 	 * 根据货品id查询货品对象
