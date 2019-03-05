@@ -501,11 +501,11 @@ public class MemberService {
             }
             //认证通过，清除token认证
             redisClient.deleteCache(Constants.TEMP_TOKEN + phone);
-            user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-            AccessToken accessToken = TokenUtil.generateAccessToken(user);
             user.setPassword(DigestUtils.md5Hex(password));
             user.setSmscode(0);
             memberMapper.updateByPrimaryKeySelective(user);
+            user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+            AccessToken accessToken = TokenUtil.generateAccessToken(user);
             redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
             return ServerResponse.createBySuccessMessage("设置密码成功，正在跳转");
         }

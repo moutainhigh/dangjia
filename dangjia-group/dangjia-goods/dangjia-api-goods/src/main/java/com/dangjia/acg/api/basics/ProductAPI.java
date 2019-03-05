@@ -99,6 +99,7 @@ public interface ProductAPI {
                                                     @RequestParam("pageDTO") PageDTO pageDTO,
                                                     @RequestParam("categoryId") String categoryId,
                                                     @RequestParam("name") String name,
+                                                    @RequestParam("cityId") String cityId,
                                                     @RequestParam("type") Integer type);
 
     @PostMapping("/basics/product/updateProductLabelList")

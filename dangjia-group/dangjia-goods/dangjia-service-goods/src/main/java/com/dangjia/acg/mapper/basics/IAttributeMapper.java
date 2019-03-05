@@ -33,6 +33,8 @@ public interface IAttributeMapper extends Mapper<Attribute> {
 	//根据类别id查询关联属性
 	List<Attribute> queryAttributeByCategoryId(@Param("categoryId") String categoryId,@Param("likeAttrName") String likeAttrName);
 
+	List<Attribute> queryAttributeByCategoryIdAndAttrName(@Param("categoryId") String categoryId,@Param("attrName") String attrName);
+
 	//根据属性名称模糊查询属性
 	List<Attribute> queryGoodsAttributelikeName(String name);
 

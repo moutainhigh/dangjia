@@ -187,7 +187,7 @@ public class ProductController implements ProductAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse queryGoodsListByCategoryLikeName(HttpServletRequest request,PageDTO pageDTO,String categoryId,String name,Integer type){
+	public ServerResponse queryGoodsListByCategoryLikeName(HttpServletRequest request,PageDTO pageDTO,String categoryId,String name, String cityId,Integer type){
 		return goodsService.queryGoodsListByCategoryLikeName(pageDTO,categoryId,name,type);
 	}
 

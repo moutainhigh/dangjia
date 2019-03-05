@@ -21,14 +21,20 @@ public interface WebMendMaterielAPI {
     @ApiOperation(value = "业主退货单列表", notes = "业主退货单列表")
     ServerResponse landlordState(@RequestParam("houseId") String houseId,
                                  @RequestParam("pageNum") Integer pageNum,
-                                 @RequestParam("pageSize") Integer pageSize);
+                                 @RequestParam("pageSize") Integer pageSize,
+                                 @RequestParam("beginDate") String beginDate,
+                                 @RequestParam("endDate") String endDate,
+                                 @RequestParam("likeAddress") String likeAddress);
 
 
     @PostMapping(value = "web/repair/webMendMateriel/materialBackState")
     @ApiOperation(value = "房子id查询退货单列表", notes = "房子id查询退货单列表")
     ServerResponse materialBackState(@RequestParam("houseId") String houseId,
                                      @RequestParam("pageNum") Integer pageNum,
-                                     @RequestParam("pageSize") Integer pageSize);
+                                     @RequestParam("pageSize") Integer pageSize,
+                                     @RequestParam("beginDate") String beginDate,
+                                     @RequestParam("endDate") String endDate,
+                                     @RequestParam("likeAddress") String likeAddress);
 
     @PostMapping(value = "web/repair/webMendMateriel/mendMaterialList")
     @ApiOperation(value = "补退单查明细", notes = "补退单查明细")
@@ -38,5 +44,8 @@ public interface WebMendMaterielAPI {
     @ApiOperation(value = "房子id查询补货单列表", notes = "房子id查询补货单列表")
     ServerResponse materialOrderState(@RequestParam("houseId") String houseId,
                                       @RequestParam("pageNum") Integer pageNum,
-                                      @RequestParam("pageSize") Integer pageSize);
+                                      @RequestParam("pageSize") Integer pageSize,
+                                      @RequestParam("beginDate") String beginDate,
+                                      @RequestParam("endDate") String endDate,
+                                      @RequestParam("likeAddress") String likeAddress);
 }

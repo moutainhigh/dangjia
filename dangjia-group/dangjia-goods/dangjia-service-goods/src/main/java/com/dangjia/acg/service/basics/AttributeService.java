@@ -251,12 +251,16 @@ public class AttributeService {
         try {
             Attribute srcAttribute = iAttributeMapper.queryById(attributeId);
             LOG.info("doModifyGoodsAttribute::::Id: " + attributeId + " name:" + attributeName);
-            //只需查询 一个分类 对应的所有的属性名称 有没有被使用
-            List<Attribute> attributeList = iAttributeMapper.queryAttributeByCategoryId(srcAttribute.getCategoryId(), null);
-            for (Attribute ae : attributeList) {
-                LOG.info(" name:" + ae.getName());
-                if (ae.getName().equals(srcAttribute.getName())) {
-                    return ServerResponse.createByErrorMessage("该属性名称已被使用");
+
+            if (!attributeName.equals(srcAttribute.getName())) {//修改了属性名字
+                //只需查询 一个分类 对应的所有的属性名称 有没有被使用
+                List<Attribute> attributeList = iAttributeMapper.queryAttributeByCategoryIdAndAttrName(srcAttribute.getCategoryId(), attributeName);
+                for (Attribute ae : attributeList) {
+                    LOG.info(" name:" + ae.getName());
+//                List<AttributeValue> attributeValueList = iAttributeValueMapper.queryByAttributeId(ae.getId());
+                    if (ae.getName().equals(srcAttribute.getName())) {
+                        return ServerResponse.createByErrorMessage("该属性名称已被使用");
+                    }
                 }
             }
 
@@ -346,10 +350,10 @@ public class AttributeService {
                     iAttributeValueMapper.updateByPrimaryKeySelective(attributeValue);
                 }
             }
-            return ServerResponse.createBySuccessMessage("修改成功");
+            return ServerResponse.createBySuccessMessage("保存成功");
         } catch (Exception e) {
             e.printStackTrace();
-            throw new BaseException(ServerCode.WRONG_PARAM, "修改失败");
+            throw new BaseException(ServerCode.WRONG_PARAM, "保存失败");
         }
     }
 

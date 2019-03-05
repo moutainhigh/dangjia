@@ -426,7 +426,7 @@ public class TechnologyService {
                         JSONObject object = new JSONObject();
                         object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
                         object.put("price", product.getPrice() + "/" + product.getUnitName());
-                        object.put("name", product.getName());
+                        object.put("name", t.getName());
                         String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") + "&gId=" + product.getId() + "&type=" + DjConstants.GXType.CAILIAO;
                         object.put("url", url);//0:工艺；1：商品；2：人工
                         arr.add(object);

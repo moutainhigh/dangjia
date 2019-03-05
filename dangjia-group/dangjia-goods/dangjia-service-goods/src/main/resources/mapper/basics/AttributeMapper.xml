@@ -149,6 +149,24 @@
 		   ORDER BY create_date desc
 	</select>
 
+	<!-- 根据商品类别Id 查询关联的属性 -->
+	<select id="queryAttributeByCategoryIdAndAttrName" parameterType="java.lang.String"
+			resultType="com.dangjia.acg.modle.attribute.Attribute">
+		select*
+		from dj_basics_attribute
+		where 1=1
+		<if test="categoryId!=null and categoryId!=''">
+			and  category_id =#{categoryId}
+		</if>
+
+		<if test="attrName!=null and attrName!=''">
+			and  name =#{attrName}
+		</if>
+		ORDER BY create_date desc
+	</select>
+
+
+
     <!--&lt;!&ndash; 根据商品类别查询关联属性 &ndash;&gt;-->
     <!--<select id="queryCategoryAttribute" parameterType="java.lang.String"-->
             <!--resultType="com.dangjia.acg.modle.attribute.Attribute">-->

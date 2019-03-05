@@ -23,19 +23,19 @@ public class WebMendWorkerController implements WebMendWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse workerBackState(String houseId, Integer pageNum,Integer pageSize){
-        return mendWorkerService.workerBackState(houseId,pageNum,pageSize);
+    public ServerResponse workerBackState(String houseId, Integer pageNum, Integer pageSize, String beginDate, String endDate, String likeAddress) {
+        return mendWorkerService.workerBackState(houseId, pageNum, pageSize, beginDate, endDate, likeAddress);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse mendWorkerList(String mendOrderId){
+    public ServerResponse mendWorkerList(String mendOrderId) {
         return mendWorkerService.mendWorkerList(mendOrderId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse workerOrderState(String houseId,Integer pageNum, Integer pageSize){
-        return mendWorkerService.workerOrderState(houseId,pageNum,pageSize);
+    public ServerResponse workerOrderState(String houseId, Integer pageNum, Integer pageSize, String beginDate, String endDate, String likeAddress) {
+        return mendWorkerService.workerOrderState(houseId, pageNum, pageSize, beginDate, endDate, likeAddress);
     }
 }

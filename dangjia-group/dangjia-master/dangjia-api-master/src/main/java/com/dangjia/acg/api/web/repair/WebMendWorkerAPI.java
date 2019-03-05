@@ -20,7 +20,10 @@ public interface WebMendWorkerAPI {
     @ApiOperation(value = "查询退人工列表", notes = "查询退人工列表")
     ServerResponse workerBackState(@RequestParam("houseId") String houseId,
                                    @RequestParam("pageNum") Integer pageNum,
-                                   @RequestParam("pageSize") Integer pageSize);
+                                   @RequestParam("pageSize") Integer pageSize,
+                                   @RequestParam("beginDate") String beginDate,
+                                   @RequestParam("endDate") String endDate,
+                                   @RequestParam("likeAddress") String likeAddress);
 
     @PostMapping(value = "web/repair/webMendWorker/mendWorkerList")
     @ApiOperation(value = "人工单明细", notes = "人工单明细")
@@ -30,5 +33,8 @@ public interface WebMendWorkerAPI {
     @ApiOperation(value = "补人工单列表", notes = "补人工单列表")
     ServerResponse workerOrderState(@RequestParam("houseId") String houseId,
                                     @RequestParam("pageNum") Integer pageNum,
-                                    @RequestParam("pageSize") Integer pageSize);
+                                    @RequestParam("pageSize") Integer pageSize,
+                                    @RequestParam("beginDate") String beginDate,
+                                    @RequestParam("endDate") String endDate,
+                                    @RequestParam("likeAddress") String likeAddress);
 }

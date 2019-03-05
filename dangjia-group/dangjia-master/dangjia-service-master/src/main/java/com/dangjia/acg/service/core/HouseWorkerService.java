@@ -731,7 +731,13 @@ public class HouseWorkerService {
             return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "获取我的界面信息失败！");
         }
     }
-
+    /**
+     * 获取申请单明细
+     */
+    public ServerResponse getHouseFlowApply(String userToken, String houseFlowApplyId) {
+       HouseFlowApply houseFlowApply= houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+       return ServerResponse.createBySuccess( houseFlowApply);
+    }
     /**
      * 提交审核、停工
      */

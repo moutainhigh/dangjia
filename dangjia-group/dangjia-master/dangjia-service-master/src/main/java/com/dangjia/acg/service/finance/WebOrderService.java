@@ -55,7 +55,8 @@ public class WebOrderService {
                 webOrderDTO.setOrderId(businessOrder.getNumber());
                 webOrderDTO.setTotalAmount(businessOrder.getTotalPrice());
                 webOrderDTO.setState("待支付");
-                if (businessOrder.getState() == 3)
+                if (businessOrder.getState() == 3
+                        || businessOrder.getPayPrice().doubleValue() > 0)
                     webOrderDTO.setState("已支付");
                 webOrderDTO.setCreateDate(businessOrder.getCreateDate());
                 webOrderDTO.setModifyDate(businessOrder.getModifyDate());

@@ -6,6 +6,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.attribute.AttributeValue;
@@ -387,28 +388,29 @@ public class GoodsService {
                     List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
                     for (Product p : productList) {
                         //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
-                        if (type != p.getType() && -1 != type) //不等于 type 的不返回给前端
+                        if (type!=null&&type != p.getType() && -1 != type) //不等于 type 的不返回给前端
                             continue;
 
-                        if (p.getImage() == null)
-                            continue;
-
-                        String[] imgArr = p.getImage().split(",");
-                        String imgStr = "";
                         String imgUrlStr = "";
-                        for (int i = 0; i < imgArr.length; i++) {
-                            if (i == imgArr.length - 1) {
-                                imgStr += address + imgArr[i];
-                                imgUrlStr += imgArr[i];
-                            } else {
-                                imgStr += address + imgArr[i] + ",";
-                                imgUrlStr += imgArr[i] + ",";
+                        String imgStr = "";
+                        if (!CommonUtil.isEmpty(p.getImage())) {
+                            String[] imgArr = p.getImage().split(",");
+                            for (int i = 0; i < imgArr.length; i++) {
+                                if (i == imgArr.length - 1) {
+                                    imgStr += address + imgArr[i];
+                                    imgUrlStr += imgArr[i];
+                                } else {
+                                    imgStr += address + imgArr[i] + ",";
+                                    imgUrlStr += imgArr[i] + ",";
+                                }
                             }
                         }
                         p.setImage(imgStr);
+
                         Map<String, Object> map = BeanUtils.beanToMap(p);
-                        map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
                         map.put("imageUrl", imgUrlStr);
+
+                        map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
 
                         String strNewValueNameArr = "";
                         if (StringUtils.isNotBlank(p.getValueIdArr())) {

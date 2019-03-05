@@ -145,5 +145,59 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ORDER BY create_date desc
     </select>
 
+    <!-- 按state 和 收货地址 搜索 -->
+    <select id="materialByStateAndLikeAddress" resultType="com.dangjia.acg.modle.repair.MendOrder">
+        SELECT
+        rmo.id,
+        rmo.number,
+        rmo.change_order_id as changeOrderId,
+        rmo.image_arr as imageArr,
+        rmo.business_order_number as businessOrderNumber,
+        rmo.order_name as orderName,
+        rmo.house_id as houseId,
+        rmo.worker_type_id as workerTypeId,
+        rmo.apply_member_id as applyMemberId,
+        rmo.type,
+        rmo.state,
+        rmo.total_amount as totalAmount,
+        rmo.carriage,
+        rmo.data_status as dataStatus,
+        rmo.create_date as createDate,
+        rmo.modify_date as modifyDate,
+        house.id,
+        house.residential as residential,
+        house.building as building,
+        house.unit as unit,
+        house.number as number,
+        house.member_id as memberId
+        FROM dj_repair_mend_order as rmo
+        left  JOIN dj_house as house
+        on (rmo.house_id = house.id  )
+        where 1=1
+        and rmo.state > 0
+        <if test = "houseId!=null and houseId!=''">
+            and  rmo.house_id = #{houseId}
+        </if>
+        <if test = "type>-1">
+            and rmo.type = #{type}
+        </if>
+        <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+            and rmo.create_date between  #{beginDate}  and #{endDate}
+        </if>
+
+        <if test="likeAddress!=null and likeAddress!=''">
+            AND (
+            house.residential LIKE CONCAT('%',#{likeAddress},'%')
+            OR house.building LIKE CONCAT('%',#{likeAddress},'%')
+            OR house.unit LIKE CONCAT('%',#{likeAddress},'%')
+            OR house.number LIKE CONCAT('%',#{likeAddress},'%')
+            )
+        </if>
+
+        ORDER BY rmo.create_date desc
+    </select>
+
+
+
 </mapper>
 

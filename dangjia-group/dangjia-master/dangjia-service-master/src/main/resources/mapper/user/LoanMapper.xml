@@ -30,6 +30,6 @@
             or u.username like CONCAT('%',#{searchKey},'%'))
         </if>
         ORDER by
-        l.create_date
+        l.modify_date desc
     </select>
 </mapper>
