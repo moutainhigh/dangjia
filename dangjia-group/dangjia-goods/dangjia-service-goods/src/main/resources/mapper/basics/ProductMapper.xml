@@ -173,9 +173,9 @@
 		SELECT <include refid="new_columns"/>
 		FROM dj_basics_product
 		where data_status = 0
-		<if test="name!=null">
+		<if test="name!=null and name!=''">
 			and
-			name LIKE CONCAT('%',#{name},'%')
+			name=#{name}
 		</if>
 		ORDER BY create_date desc
 	</select>
@@ -197,7 +197,7 @@
 		SELECT <include refid="new_columns"/>
 		FROM dj_basics_product
 		where data_status = 0
-		<if test="name!=null">
+		<if test="name!=null and name!=''">
 			and
 			name LIKE CONCAT('%',#{name},'%')
 		</if>
@@ -228,17 +228,187 @@
 			<if test="goodsId!=null and goodsId!=''">
 				and p.goods_id=#{goodsId}
 			</if>
+
+			<if test="brandId==null or brandId==''">
+				and isnull(p.brand_id)
+			</if>
+			<if test="brandSeriesId==null or brandSeriesId==''">
+				and isnull(p.brand_series_id)
+			</if>
+			<if test="valueIdArr==null or valueIdArr==''">
+				and isnull(p.value_id_arr)
+			</if>
+
 			<if test="brandId!=null and brandId!=''">
 				and p.brand_id=#{brandId}
 			</if>
 			<if test="brandSeriesId!=null and brandSeriesId!=''">
 				and p.brand_series_id=#{brandSeriesId}
 			</if>
-		<foreach collection="valueIdArr" item="valueId" index="index" >
-			and FIND_IN_SET(#{valueId},p.value_id_arr)
-		</foreach>;
+			<if test="valueIdArr!=null or valueIdArr!=''">
+				<foreach collection="valueIdArr" item="valueId" index="index" >
+					and FIND_IN_SET(#{valueId},p.value_id_arr)
+				</foreach>
+			</if>
+
 	</select>
 
+	<!-- 查询 无品牌无系列同属性值的商品已存在 -->
+	<select id="getPListByValueIdArr" resultType="com.dangjia.acg.modle.basics.Product">
+		select
+		p.id as id,
+		p.name as name,
+		p.goods_id as goodsId,
+		p.category_id as categoryId,
+		p.product_sn as productSn,
+		p.image as image,
+		p.unit_id as unitId,
+		p.label_id as labelId,
+		p.unit_name as unitName,
+		p.type as type,
+		p.price as price,
+		p.brand_id as brandId,
+		p.brand_series_id as brandSeriesId,
+		p.attribute_id_arr AS attributeIdArr,
+		p.value_name_arr AS valueNameArr,
+		p.value_id_arr AS valueIdArr
+		from  dj_basics_product p
+		where
+		type=1 and maket=1
+		and isnull(p.brand_id)
+		and isnull(p.brand_series_id)
+		<if test="valueIdArr!=null and valueIdArr!=''">
+			and p.value_id_arr=#{valueIdArr}
+		</if>
+	</select>
+
+	<!-- 查询 无品牌无系列有属性值的商品 -->
+	<select id="getPListByGoodsIdAndNullBrandId" resultType="com.dangjia.acg.modle.basics.Product">
+		select
+		p.id as id,
+		p.name as name,
+		p.goods_id as goodsId,
+		p.category_id as categoryId,
+		p.product_sn as productSn,
+		p.image as image,
+		p.unit_id as unitId,
+		p.label_id as labelId,
+		p.unit_name as unitName,
+		p.type as type,
+		p.price as price,
+		p.brand_id as brandId,
+		p.brand_series_id as brandSeriesId,
+		p.attribute_id_arr AS attributeIdArr,
+		p.value_name_arr AS valueNameArr,
+		p.value_id_arr AS valueIdArr
+		from  dj_basics_product p
+		where
+		type=1 and maket=1
+		<if test="goodsId!=null and goodsId!=''">
+			and p.goods_id=#{goodsId}
+		</if>
+		and isnull(p.brand_id)
+		and isnull(p.brand_series_id)
+		and !isnull(p.value_id_arr)
+	</select>
+
+	<!-- 查询 无品牌无系列同属性值的商品已存在 -->
+	<select id="getPListByValueIdArrAndNullBrandId" resultType="com.dangjia.acg.modle.basics.Product">
+		select
+		p.id as id,
+		p.name as name,
+		p.goods_id as goodsId,
+		p.category_id as categoryId,
+		p.product_sn as productSn,
+		p.image as image,
+		p.unit_id as unitId,
+		p.label_id as labelId,
+		p.unit_name as unitName,
+		p.type as type,
+		p.price as price,
+		p.brand_id as brandId,
+		p.brand_series_id as brandSeriesId,
+		p.attribute_id_arr AS attributeIdArr,
+		p.value_name_arr AS valueNameArr,
+		p.value_id_arr AS valueIdArr
+		from  dj_basics_product p
+		where
+		type=1 and maket=1
+		<if test="goodsId!=null and goodsId!=''">
+			and p.goods_id=#{goodsId}
+		</if>
+		and isnull(p.brand_id)
+		and isnull(p.brand_series_id)
+		<if test="valueIdArr!=null and valueIdArr!=''">
+			and p.value_id_arr=#{valueIdArr}
+		</if>
+	</select>
+
+	<!-- 查询 同品牌同系列无属性值的商品已存在 -->
+	<select id="getPListByBrandSeriesIdAndNullValueId" resultType="com.dangjia.acg.modle.basics.Product">
+		select
+		p.id as id,
+		p.name as name,
+		p.goods_id as goodsId,
+		p.category_id as categoryId,
+		p.product_sn as productSn,
+		p.image as image,
+		p.unit_id as unitId,
+		p.label_id as labelId,
+		p.unit_name as unitName,
+		p.type as type,
+		p.price as price,
+		p.brand_id as brandId,
+		p.brand_series_id as brandSeriesId,
+		p.attribute_id_arr AS attributeIdArr,
+		p.value_name_arr AS valueNameArr,
+		p.value_id_arr AS valueIdArr
+		from  dj_basics_product p
+		where
+		type=1 and maket=1
+		and isnull(p.attribute_id_arr)
+		and isnull(p.value_id_arr)
+		<if test="brandId!=null and brandId!=''">
+			and p.brand_id=#{brandId}
+		</if>
+		<if test="brandSeriesId!=null and brandSeriesId!=''">
+			and p.brand_series_id=#{brandSeriesId}
+		</if>
+	</select>
+
+
+	<!-- 查询 同品牌同系列同属性值的商品已存在 -->
+	<select id="getPListByBrandSeriesId" resultType="com.dangjia.acg.modle.basics.Product">
+		select
+		p.id as id,
+		p.name as name,
+		p.goods_id as goodsId,
+		p.category_id as categoryId,
+		p.product_sn as productSn,
+		p.image as image,
+		p.unit_id as unitId,
+		p.label_id as labelId,
+		p.unit_name as unitName,
+		p.type as type,
+		p.price as price,
+		p.brand_id as brandId,
+		p.brand_series_id as brandSeriesId,
+		p.attribute_id_arr AS attributeIdArr,
+		p.value_name_arr AS valueNameArr,
+		p.value_id_arr AS valueIdArr
+		from  dj_basics_product p
+		where
+		type=1 and maket=1
+		<if test="brandId!=null and brandId!=''">
+			and p.brand_id=#{brandId}
+		</if>
+		<if test="brandSeriesId!=null and brandSeriesId!=''">
+			and p.brand_series_id=#{brandSeriesId}
+		</if>
+		<if test="valueIdArr!=null and valueIdArr!=''">
+			and p.value_id_arr=#{valueIdArr}
+		</if>
+	</select>
 
 	<!-- 查询product -->
 	<select id="queryByGoodsIdAndbrandSeriesId" resultType="com.dangjia.acg.modle.basics.Product">
@@ -268,7 +438,36 @@
 		</if>
 	</select>
 
-
+	<!-- 查询product -->
+	<select id="queryByGoodsIdAndbrandSeriesIdAndBrandId" resultType="com.dangjia.acg.modle.basics.Product">
+		select
+		p.id as id,
+		p.name as name,
+		p.goods_id as goodsId,
+		p.category_id as categoryId,
+		p.product_sn as productSn,
+		p.image as image,
+		p.unit_id as unitId,
+		p.label_id as labelId,
+		p.unit_name as unitName,
+		p.type as type,
+		p.price as price,
+		p.brand_id as brandId,
+		p.brand_series_id as brandSeriesId,
+		p.attribute_id_arr AS attributeIdArr,
+		p.value_name_arr AS valueNameArr,
+		p.value_id_arr AS valueIdArr
+		from  dj_basics_product p
+		where
+		type=1 and maket=1
+		and p.goods_id=#{goodsId}
+		<if test="brandId!=null and brandId!=''">
+			and p.brand_id=#{brandId}
+		</if>
+		<if test="brandSeriesId!=null and brandSeriesId!=''">
+			and p.brand_series_id=#{brandSeriesId}
+		</if>
+	</select>
 
 	<!--补货查询精算内商品-->
 	<select id="queryRepairBudgetMaterial" resultType="com.dangjia.acg.modle.basics.Product">

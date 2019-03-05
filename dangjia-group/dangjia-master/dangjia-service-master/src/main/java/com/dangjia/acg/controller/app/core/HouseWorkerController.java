@@ -61,7 +61,15 @@ public class HouseWorkerController implements HouseWorkerAPI {
     public ServerResponse getMyHomePage(String userToken, String cityId) {
         return houseWorkerService.getMyHomePage(userToken, cityId);
     }
+    /**
+     * 获取申请单明细
+     */
 
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseFlowApply(String userToken, String houseFlowApplyId){
+        return houseWorkerService.getHouseFlowApply(userToken, houseFlowApplyId);
+    }
     /**
      * 提交审核、停工
      *

@@ -104,6 +104,34 @@
         AND visit_state=#{visitState}
     </select>
 
+
+    <!--查询所有的房子 指定房子 装修状态-->
+    <select id="getByLikeAddress" resultType="com.dangjia.acg.modle.house.House">
+        SELECT
+        house.id,
+        house.member_id as memberId,
+        house.residential,
+        house.building,
+        house.unit,
+        house.number,
+        house.data_status as dataStatus,
+        house.create_date as createDate,
+        house.modify_date as modifyDate,
+        (SELECT COUNT(*) from dj_deliver_order_split  where apply_status = 1 and house_id = house.id) as waitCount,
+        (SELECT COUNT(*) from dj_deliver_order_split  where apply_status = 2 and house_id = house.id) as sendCount
+        FROM dj_house as house
+        WHERE 1=1
+        <if test="likeAddress!=null and likeAddress!=''">
+            AND (
+               house.residential LIKE CONCAT('%',#{likeAddress},'%')
+            OR house.building LIKE CONCAT('%',#{likeAddress},'%')
+            OR house.unit LIKE CONCAT('%',#{likeAddress},'%')
+            OR number LIKE CONCAT('%',#{likeAddress},'%')
+            )
+        </if>
+        ORDER BY waitCount DESC,sendCount DESC,house.create_date DESC
+    </select>
+
     <select id="getStatisticsByDate" resultType="com.dangjia.acg.modle.house.House">
         SELECT
             id,

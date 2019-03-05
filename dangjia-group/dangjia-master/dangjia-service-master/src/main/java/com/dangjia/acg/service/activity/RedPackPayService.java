@@ -150,7 +150,7 @@ public class RedPackPayService {
             BusinessOrder businessOrder = businessOrderList.get(0);
             House house=houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
             ActivityRedPackRecord activityRedPackRecord=new ActivityRedPackRecord();
-            activityRedPackRecord.setModifyDate(new Date());
+            activityRedPackRecord.setEndDate(new Date());
             activityRedPackRecord.setMemberId(businessOrder.getMemberId());
             activityRedPackRecord.setCityId(house.getCityId());
             List<ActivityRedPackRecordDTO> redPacketRecordList=activityRedPackRecordMapper.queryActivityRedPackRecords(activityRedPackRecord);
@@ -192,27 +192,32 @@ public class RedPackPayService {
                             }
                         }
                     }
-                    //判断优惠券类型是否为满减券
-                    if (redPacketRecord.getRedPack().getType() == 0 ) {
-                        ///判断人工金额是否满足优惠上限金额
-                        if (redPacketRecord.getRedPack().getFromObjectType() == 0 && workerTotal.compareTo(redPacketRecord.getRedPackRule().getSatisfyMoney()) >= 0) {
-                            redPacetResultList.add(redPacketRecord);
-                        }else
-                        //判断材料金额是否满足优惠上限金额
-                        if (redPacketRecord.getRedPack().getFromObjectType() == 1 && goodsTotal.compareTo(redPacketRecord.getRedPackRule().getSatisfyMoney()) >= 0) {
-                            redPacetResultList.add(redPacketRecord);
-                        }else
-                        //判断货品金额是否满足优惠上限金额
-                        if (redPacketRecord.getRedPack().getFromObjectType() == 2 && productTotal.compareTo(redPacketRecord.getRedPackRule().getSatisfyMoney()) >= 0) {
-                            redPacetResultList.add(redPacketRecord);
-                        }else{
-                            redPacetNotList.add(redPacketRecord);
+                    //判断是否有关联本单号
+                    if(CommonUtil.isEmpty(redPacketRecord.getBusinessOrderNumber())||redPacketRecord.getBusinessOrderNumber().equals(businessOrder.getNumber())) {
+                        //判断优惠券类型是否为满减券
+                        if (redPacketRecord.getRedPack().getType() == 0) {
+                            ///判断人工金额是否满足优惠上限金额
+                            if (redPacketRecord.getRedPack().getFromObjectType() == 0 && workerTotal.compareTo(redPacketRecord.getRedPackRule().getSatisfyMoney()) >= 0) {
+                                redPacetResultList.add(redPacketRecord);
+                            } else
+                                //判断材料金额是否满足优惠上限金额
+                                if (redPacketRecord.getRedPack().getFromObjectType() == 1 && goodsTotal.compareTo(redPacketRecord.getRedPackRule().getSatisfyMoney()) >= 0) {
+                                    redPacetResultList.add(redPacketRecord);
+                                } else
+                                    //判断货品金额是否满足优惠上限金额
+                                    if (redPacketRecord.getRedPack().getFromObjectType() == 2 && productTotal.compareTo(redPacketRecord.getRedPackRule().getSatisfyMoney()) >= 0) {
+                                        redPacetResultList.add(redPacketRecord);
+                                    } else {
+                                        redPacetNotList.add(redPacketRecord);
+                                    }
                         }
-                    }
-                    //判断优惠券类型是否为折扣券或代金券
-                    if ((redPacketRecord.getRedPack().getType() == 1 ||redPacketRecord.getRedPack().getType() == 2)&&
-                            (workerTotal.doubleValue()>0||goodsTotal.doubleValue()>0||productTotal.doubleValue()>0)) {
-                        redPacetResultList.add(redPacketRecord);
+                        //判断优惠券类型是否为折扣券或代金券
+                        if ((redPacketRecord.getRedPack().getType() == 1 || redPacketRecord.getRedPack().getType() == 2) &&
+                                (workerTotal.doubleValue() > 0 || goodsTotal.doubleValue() > 0 || productTotal.doubleValue() > 0)) {
+                            redPacetResultList.add(redPacketRecord);
+                        }
+                    }else{
+                        redPacetNotList.add(redPacketRecord);
                     }
                 }
 
@@ -285,19 +290,19 @@ public class RedPackPayService {
                     String houseFlowId = businessOrder.getTaskId();
                     request.setAttribute(Constants.CITY_ID,house.getCityId());
                     ServerResponse retMaterial=budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(request,houseFlowId);
-//                    ServerResponse retWorker=budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(request,houseFlowId);
+                    ServerResponse retWorker=budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(request,houseFlowId);
                     BigDecimal workerTotal=new BigDecimal(0);
                     BigDecimal goodsTotal=new BigDecimal(0);
                     BigDecimal productTotal=new BigDecimal(0);
-                    if(retMaterial.getResultObj()!=null||retMaterial.getResultObj()!=null){
+                    if(retMaterial.getResultObj()!=null||retWorker.getResultObj()!=null){
                         List<BudgetMaterial> budgetMaterialList=JSONObject.parseArray(retMaterial.getResultObj().toString(),BudgetMaterial.class);
-                        List<BudgetWorker> budgetWorkerList=JSONObject.parseArray(retMaterial.getResultObj().toString(),BudgetWorker.class);
+                        List<BudgetWorker> budgetWorkerList=JSONObject.parseArray(retWorker.getResultObj().toString(),BudgetWorker.class);
 
                         if(budgetWorkerList.size()>0) {
-                            for (BudgetMaterial budgetMaterial : budgetMaterialList) {
+                            for (BudgetWorker budgetWorker:budgetWorkerList) {
                                 //判断工种的优惠券是否匹配
-                                if (budgetMaterial.getWorkerTypeId().equals(redPack.getFromObject()) && redPack.getFromObjectType() == 0) {
-                                    workerTotal = workerTotal.add(new BigDecimal(budgetMaterial.getTotalPrice()));
+                                if (budgetWorker.getWorkerTypeId().equals(redPack.getFromObject()) && redPack.getFromObjectType() == 0) {
+                                    workerTotal=workerTotal.add(new BigDecimal(budgetWorker.getTotalPrice()));
                                 }
                             }
                         }

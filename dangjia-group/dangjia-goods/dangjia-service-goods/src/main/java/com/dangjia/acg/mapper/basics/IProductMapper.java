@@ -29,6 +29,9 @@ public interface IProductMapper extends Mapper<Product> {
     //根据商品Id 和 品牌系列id查货品
     List<Product> queryByGoodsIdAndbrandSeriesId(@Param("goodsId") String goodsId, @Param("brandSeriesId") String brandSeriesId);
 
+    //根据商品Id 和 品牌系列id查货品
+    List<Product> queryByGoodsIdAndbrandSeriesIdAndBrandId(@Param("goodsId") String goodsId,@Param("brandId") String brandId,  @Param("brandSeriesId") String brandSeriesId);
+
     List<Product> queryByName(@Param("name") String name);
 
     List<Product> queryByProductSn(@Param("productSn") String productSn);
@@ -44,7 +47,14 @@ public interface IProductMapper extends Mapper<Product> {
     /**
      * 查询product
      */
-    Product selectProduct(@Param("goodsId") String goodsId,  @Param("brandId") String brandId,@Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String[] valueIdArr);
+    Product selectProduct(@Param("goodsId") String goodsId, @Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String[] valueIdArr);
+
+    List<Product> getPListByBrandSeriesId(@Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String valueIdArr);
+
+    List<Product> getPListByValueIdArr(@Param("valueIdArr") String valueIdArr);
+    //查询 无品牌无系列有属性值的商品
+    List<Product> getPListByGoodsIdAndNullBrandId(@Param("goodsId") String goodsId);
+    List<Product> getPListByBrandSeriesIdAndNullValueId(@Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId);
 
     List<Product> queryRepairBudgetMaterial(@Param("houseId") String houseId, @Param("name") String name, @Param("categoryId") String categoryId);
 

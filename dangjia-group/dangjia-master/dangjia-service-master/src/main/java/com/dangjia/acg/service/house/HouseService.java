@@ -713,7 +713,7 @@ public class HouseService {
         //获取结算比例对象
         Example workDepositExample = new Example(WorkDeposit.class);
         workDepositExample.orderBy(WorkDeposit.CREATE_DATE).desc();
-        List<WorkDeposit> workDeposits= workDepositMapper.selectByExample(workDepositExample);
+        List<WorkDeposit> workDeposits = workDepositMapper.selectByExample(workDepositExample);
         List<House> houseList = iHouseMapper.selectByExample(example);
         int again = 1;
         if (houseList.size() > 0) {
@@ -777,6 +777,7 @@ public class HouseService {
             if (house == null) {
                 return ServerResponse.createByErrorMessage("修改房子精算状态失败");
             }
+            WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
             if (budgetOk == 2) {//打算发送给业主,验证精算完整性
                 Double price = forMasterAPI.getBudgetWorkerPrice(houseId, "3", house.getCityId());
                 if (price == 0) {
@@ -825,7 +826,7 @@ public class HouseService {
                     //查出该工种工钱
                     Double workerTotal = forMasterAPI.getBudgetWorkerPrice(houseId, hf.getWorkerTypeId(), house.getCityId());
                     int inspectNumber = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId()).getInspectNumber();//该工种配置默认巡查次数
-                    int thisCheck = (int) (workerTotal / 600);//该工种钱算出来的巡查次数
+                    int thisCheck = (int) (workerTotal / workDeposit.getPatrolPrice().intValue());//该工种钱算出来的巡查次数
                     if (thisCheck > inspectNumber) {
                         thisCheck = inspectNumber;
                     }
@@ -873,17 +874,8 @@ public class HouseService {
      */
     public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId, Double minSquare, Double maxSquare, Integer houseType, PageDTO pageDTO) {
         try {
-            if (pageDTO == null) {
-                pageDTO = new PageDTO();
-            }
-            if (pageDTO.getPageNum() == null) {
-                pageDTO.setPageNum(1);
-            }
-            if (pageDTO.getPageSize() == null) {
-                pageDTO.setPageSize(10);
-            }
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             List<House> houseList = iHouseMapper.getSameLayout(cityId, villageId, minSquare, maxSquare, houseType);
             PageInfo pageResult = new PageInfo(houseList);
             List<ShareDTO> srlist = new ArrayList<>();
@@ -898,17 +890,17 @@ public class HouseService {
         }
     }
 
-    public ShareDTO convertHouse(House house, AccessToken accessToken) {
+    private ShareDTO convertHouse(House house, AccessToken accessToken) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         ModelingLayout ml = modelingLayoutMapper.selectByPrimaryKey(house.getModelingLayoutId());
         ShareDTO shareDTO = new ShareDTO();
         shareDTO.setType("1");
         if (house.getShowHouse() == 0) {
-            if (accessToken != null) {
-                shareDTO.setName(house.getHouseName());
-            } else {
-                shareDTO.setName(house.getNoNumberHouseName());
-            }
+//            if (accessToken != null) {
+//                shareDTO.setName(house.getHouseName());
+//            } else {
+            shareDTO.setName(house.getNoNumberHouseName());
+//            }
         } else {
             shareDTO.setName("*栋*单元*号");
         }
@@ -959,15 +951,15 @@ public class HouseService {
                 AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
                 member = accessToken.getMember();
             }
-            Map<String, Object> returnMap = new HashMap<String, Object>();//返回对象
-            List<Map<String, Object>> workerTypeList = new ArrayList<Map<String, Object>>();
+            Map<String, Object> returnMap = new HashMap<>();//返回对象
+            List<Map<String, Object>> workerTypeList = new ArrayList<>();
             List<RenovationStage> wtList = renovationStageMapper.selectAll();
             for (RenovationStage wt : wtList) {
                 List<RenovationManual> listR = renovationManualMapper.getRenovationManualByWorkertyId(wt.getId());
-                Map<String, Object> wMap = new HashMap<String, Object>();
+                Map<String, Object> wMap = new HashMap<>();
                 wMap.put("workerTypeName", wt.getName());
                 wMap.put("image", imgUrl + wt.getImage());
-                List<Map<String, Object>> listMap = new ArrayList<Map<String, Object>>();
+                List<Map<String, Object>> listMap = new ArrayList<>();
                 for (RenovationManual r : listR) {
                     Map<String, Object> map = BeanUtils.beanToMap(r);
                     if (member != null) {
@@ -1165,57 +1157,80 @@ public class HouseService {
      */
     private List<Map<String, Object>> houseFlowApplyDetail(List<HouseFlowApply> hfaList) {
         try {
-            Map<Integer, String> applyTypeMap = new HashMap<>();
-            applyTypeMap.put(DjConstants.ApplyType.MEIRI_WANGGONG, "每日完工申请");
-            applyTypeMap.put(DjConstants.ApplyType.JIEDUAN_WANGONG, "阶段完工申请");
-            applyTypeMap.put(DjConstants.ApplyType.ZHENGTI_WANGONG, "整体完工申请");
-            applyTypeMap.put(DjConstants.ApplyType.TINGGONG, "停工申请");
-            applyTypeMap.put(DjConstants.ApplyType.MEIRI_KAIGONG, "每日开工");
-            applyTypeMap.put(DjConstants.ApplyType.YOUXIAO_XUNCHA, "巡查");
-            applyTypeMap.put(DjConstants.ApplyType.WUREN_XUNCHA, "巡查");
-            applyTypeMap.put(DjConstants.ApplyType.ZUIJIA_XUNCHA, "巡查");
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<Map<String, Object>> listMap = new ArrayList<>();
             for (HouseFlowApply hfa : hfaList) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("id", hfa.getId());
-                Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
-                map.put("workerHead", address + member.getHead());//工人头像
-                map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
-                map.put("workerName", member.getName());//工人名称
-                Example example = new Example(HouseWorker.class);
-                example.createCriteria().andEqualTo("houseId", hfa.getHouseId()).andEqualTo("workerId", hfa.getWorkerId());
-                List<HouseWorker> listHw = houseWorkerMapper.selectByExample(example);
-                if (listHw.size() > 0) {
-                    HouseWorker houseWorker = listHw.get(0);
-                    if (houseWorker.getWorkType() == 4) {
-                        map.put("isNormal", "已更换");//施工状态
-                    } else {
-                        map.put("isNormal", "正常施工");
-                    }
-                } else {
-                    map.put("isNormal", "正常施工");
-                }
-                map.put("content", hfa.getApplyDec());
-                example = new Example(HouseFlowApplyImage.class);
-                example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, hfa.getId());
-                List<HouseFlowApplyImage> hfaiList = houseFlowApplyImageMapper.selectByExample(example);
-                String[] imgArr = new String[hfaiList.size()];
-                for (int i = 0; i < hfaiList.size(); i++) {
-                    HouseFlowApplyImage hfai = hfaiList.get(i);
-                    String string = hfai.getImageUrl();
-                    imgArr[i] = address + string;
-                }
-                map.put("imgArr", imgArr);
-                map.put("applyType", applyTypeMap.get(hfa.getApplyType()));
-                map.put("createDate", hfa.getCreateDate().getTime());
-                listMap.add(map);
+                listMap.add(getHouseFlowApplyMap(hfa, address));
             }
             return listMap;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * 获取施工记录详情
+     *
+     * @param houseFlowApplyId 施工记录ID
+     * @return
+     */
+    public ServerResponse getHouseFlowApply(String houseFlowApplyId) {
+        if (CommonUtil.isEmpty(houseFlowApplyId)) {
+            return ServerResponse.createByErrorMessage("请传入施工记录ID");
+        }
+        try {
+            HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            return ServerResponse.createBySuccess("查询成功", getHouseFlowApplyMap(houseFlowApply, address));
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    private Map<String, Object> getHouseFlowApplyMap(HouseFlowApply hfa, String address) {
+        Map<Integer, String> applyTypeMap = new HashMap<>();
+        applyTypeMap.put(DjConstants.ApplyType.MEIRI_WANGGONG, "每日完工申请");
+        applyTypeMap.put(DjConstants.ApplyType.JIEDUAN_WANGONG, "阶段完工申请");
+        applyTypeMap.put(DjConstants.ApplyType.ZHENGTI_WANGONG, "整体完工申请");
+        applyTypeMap.put(DjConstants.ApplyType.TINGGONG, "停工申请");
+        applyTypeMap.put(DjConstants.ApplyType.MEIRI_KAIGONG, "每日开工");
+        applyTypeMap.put(DjConstants.ApplyType.YOUXIAO_XUNCHA, "巡查");
+        applyTypeMap.put(DjConstants.ApplyType.WUREN_XUNCHA, "巡查");
+        applyTypeMap.put(DjConstants.ApplyType.ZUIJIA_XUNCHA, "巡查");
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", hfa.getId());
+        Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
+        map.put("workerHead", address + member.getHead());//工人头像
+        map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+        map.put("workerName", member.getName());//工人名称
+        Example example = new Example(HouseWorker.class);
+        example.createCriteria().andEqualTo("houseId", hfa.getHouseId()).andEqualTo("workerId", hfa.getWorkerId());
+        List<HouseWorker> listHw = houseWorkerMapper.selectByExample(example);
+        if (listHw.size() > 0) {
+            HouseWorker houseWorker = listHw.get(0);
+            if (houseWorker.getWorkType() == 4) {
+                map.put("isNormal", "已更换");//施工状态
+            } else {
+                map.put("isNormal", "正常施工");
+            }
+        } else {
+            map.put("isNormal", "正常施工");
+        }
+        map.put("content", hfa.getApplyDec());
+        example = new Example(HouseFlowApplyImage.class);
+        example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, hfa.getId());
+        List<HouseFlowApplyImage> hfaiList = houseFlowApplyImageMapper.selectByExample(example);
+        String[] imgArr = new String[hfaiList.size()];
+        for (int i = 0; i < hfaiList.size(); i++) {
+            HouseFlowApplyImage hfai = hfaiList.get(i);
+            String string = hfai.getImageUrl();
+            imgArr[i] = address + string;
+        }
+        map.put("imgArr", imgArr);
+        map.put("applyType", applyTypeMap.get(hfa.getApplyType()));
+        map.put("createDate", hfa.getCreateDate().getTime());
+        return map;
     }
 
     /**

@@ -97,8 +97,7 @@ public class CustomerRecordService {
             iCustomerRecordMapper.insertSelective(newCustomerRecord);
 
             Customer customer = customerMapper.getCustomerByMemberId(newCustomerRecord.getMemberId());
-            if(customer == null)
-            {
+            if (customer == null) {
                 customer = new Customer();
                 customer.setMemberId(customerRecord.getMemberId());
                 customer.setUserId(customerRecord.getUserId());
@@ -140,7 +139,7 @@ public class CustomerRecordService {
         CustomerRecord tempMaxCr = null;//离当前时间最近的提醒记录
         CustomerRecord tempLastMaxCr = null;//离当前时间 前一天的最近的提醒记录
 
-        List<CustomerRecord> lastCustomerRecordList = new ArrayList<>();
+        List<CustomerRecord> lastCustomerRecordList = new ArrayList<>(); //存放 大于前一天的提醒时间
 
         //遍历找到 距离当时间最近时间的提醒内容的对象
         for (CustomerRecord cr : customerRecordList) {
@@ -157,6 +156,7 @@ public class CustomerRecordService {
                 }
             }
             Date date = checkOverdueTime(cr.getRemindTime());
+            LOG.info("检查是否超过一天 :" + date);
             if (date != null) { //添加 提醒 时间在 前一天内的记录
                 lastCustomerRecordList.add(cr);
             }
@@ -175,11 +175,12 @@ public class CustomerRecordService {
         }
         if (maxNearRemindCustomerRecord != null)//有最近的提醒
             customer.setRemindRecordId(maxNearRemindCustomerRecord.getId());
-        else {//没有最近的提醒，，就查找前一天的最近提醒
+        else {
+            //没有最近的提醒，，就查找前一天的最近提醒
             for (CustomerRecord cr : lastCustomerRecordList) {
-                if (tempLastMaxCr == null)
+                if (tempLastMaxCr == null) {
                     tempLastMaxCr = cr;
-                else {
+                } else {
                     //如果 距离当前时间 ，在前一天内，最近的提醒时间
                     if (cr.getRemindTime().getTime() > tempLastMaxCr.getRemindTime().getTime()) {
                         tempLastMaxCr = cr;
@@ -210,7 +211,7 @@ public class CustomerRecordService {
 
 
     /**
-     * 检查是否超过一天
+     * 如果大于 前一天 就返回data， 如果是前一天之前的就返回null
      *
      * @param date
      * @return
@@ -222,10 +223,32 @@ public class CustomerRecordService {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        Date lastDay = new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000);
         LOG.info(" 前一天:" + df.format(lastDate));
-        if (date.getTime() <= lastDate.getTime()) {//如果 传入时间 小于 前一天
+        if (date.getTime() <= lastDate.getTime()
+                || checkNextTime(date) == null) {//如果 传入时间 小于 前一天
             return null;
         }
         return date;
     }
+
+
+    /**
+     * 如果小于 后一天 就返回data， 如果是后一天之后的就返回null
+     *
+     * @param date
+     * @return
+     */
+    private Date checkNextTime(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, 1); //得到后一天
+        Date lastDate = calendar.getTime();
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        Date lastDay = new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000);
+        LOG.info(" 后一天:" + df.format(lastDate));
+        if (date.getTime() >= lastDate.getTime()) {//如果 传入时间 大于 后一天
+            return null;
+        }
+        return date;
+    }
+
 
 }

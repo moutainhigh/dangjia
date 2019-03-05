@@ -320,7 +320,7 @@ public class OrderSplitService {
     /**
      * 材料员看房子列表
      */
-    public ServerResponse getHouseList(Integer pageNum, Integer pageSize) {
+    public ServerResponse getHouseList(Integer pageNum, Integer pageSize,String likeAddress) {
         if (pageNum == null) {
             pageNum = 1;
         }
@@ -328,7 +328,8 @@ public class OrderSplitService {
             pageSize = 10;
         }
         PageHelper.startPage(pageNum, pageSize);
-        List<House> houseList = houseMapper.selectAll();
+//        List<House> houseList = houseMapper.selectAll();
+        List<House> houseList = houseMapper.getByLikeAddress(likeAddress);
         PageInfo pageResult = new PageInfo(houseList);
 
         List<DeliverHouseDTO> deliverHouseDTOList = new ArrayList<DeliverHouseDTO>();
@@ -342,10 +343,10 @@ public class OrderSplitService {
             deliverHouseDTO.setMobile(member.getMobile());
 
             Example example = new Example(OrderSplit.class);
-            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, house.getId()).andGreaterThan(OrderSplit.APPLY_STATUS, 2);//已发货
+            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, house.getId()).andEqualTo(OrderSplit.APPLY_STATUS, 2);//已发给供应商
             deliverHouseDTO.setSent(orderSplitMapper.selectCountByExample(example));
             example = new Example(OrderSplit.class);
-            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, house.getId()).andGreaterThan(OrderSplit.APPLY_STATUS, 1);//申请中
+            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, house.getId()).andEqualTo(OrderSplit.APPLY_STATUS, 1);//要货申请中
             deliverHouseDTO.setWait(orderSplitMapper.selectCountByExample(example));
             deliverHouseDTOList.add(deliverHouseDTO);
         }

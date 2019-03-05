@@ -9,6 +9,7 @@ import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.modle.attribute.Attribute;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.Goods;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,7 +114,7 @@ public class GoodsCategoryService {
             List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId(id);//根据id查询是否有下级类别
             List<Goods> goodsList = iGoodsMapper.queryByCategoryId(id);//根据id查询是否有关联商品
 //			List<Attribute> GoodsAList=attributeMapper.queryCategoryAttribute(id);//根据id查询是否有关联属性 （弃用）
-            List<Attribute> GoodsAList = attributeMapper.queryAttributeByCategoryId(id);//根据id查询是否有关联属性
+            List<Attribute> GoodsAList = attributeMapper.queryAttributeByCategoryId(id, null);//根据id查询是否有关联属性
             if (goodsCategoryList.size() > 0) {
                 return ServerResponse.createByErrorMessage("此类别有下级不能删除");
             }
@@ -134,17 +135,20 @@ public class GoodsCategoryService {
     //查询类别id查询所有父级以及父级属性
     public ServerResponse queryAttributeListById(String goodsCategoryId) {
         try {
+            if (!StringUtils.isNoneBlank(goodsCategoryId)) {
+                return ServerResponse.createByErrorMessage("goodsCategoryId不能为null");
+            }
             GoodsCategory goodsCategory = iGoodsCategoryMapper.selectByPrimaryKey(goodsCategoryId);
             if (goodsCategory == null) {
                 return ServerResponse.createByErrorMessage("查询失败");
             }
 //			List<Attribute> gaList=attributeMapper.queryCategoryAttribute(goodsCategory.getId());//弃用
-            List<Attribute> gaList = attributeMapper.queryAttributeByCategoryId(goodsCategory.getId());
+            List<Attribute> gaList = attributeMapper.queryAttributeByCategoryId(goodsCategory.getId(), null);
             while (goodsCategory != null) {
                 goodsCategory = iGoodsCategoryMapper.selectByPrimaryKey(goodsCategory.getParentId());
                 if (goodsCategory != null) {
 //					gaList.addAll(attributeMapper.queryCategoryAttribute(goodsCategory.getId()));//弃用
-                    gaList.addAll(attributeMapper.queryAttributeByCategoryId(goodsCategory.getId()));
+                    gaList.addAll(attributeMapper.queryAttributeByCategoryId(goodsCategory.getId(), null));
                 }
             }
             return ServerResponse.createBySuccess("查询成功", gaList);

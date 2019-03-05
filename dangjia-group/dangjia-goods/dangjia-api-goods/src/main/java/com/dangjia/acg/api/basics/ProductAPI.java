@@ -78,11 +78,6 @@ public interface ProductAPI {
                                @RequestParam("type") Integer type,
                                @RequestParam("arrString") String arrString);
 
-    @PostMapping("/basics/product/updateProduct")
-    @ApiOperation(value = "修改货品", notes = "修改货品")
-    ServerResponse updateProduct(@RequestParam("request") HttpServletRequest request,
-                                 @RequestParam("productArr") String productArr);
-
     @PostMapping("/basics/product/getProductById")
     @ApiOperation(value = "根据货品id查询货品对象", notes = "根据货品id查询货品对象")
     ServerResponse getProductById(@RequestParam("request") HttpServletRequest request,
@@ -104,6 +99,7 @@ public interface ProductAPI {
                                                     @RequestParam("pageDTO") PageDTO pageDTO,
                                                     @RequestParam("categoryId") String categoryId,
                                                     @RequestParam("name") String name,
+                                                    @RequestParam("cityId") String cityId,
                                                     @RequestParam("type") Integer type);
 
     @PostMapping("/basics/product/updateProductLabelList")

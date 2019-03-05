@@ -37,4 +37,19 @@ public interface IMendOrderMapper extends Mapper<MendOrder>{
     /**查询补货单*/
     List<MendOrder> materialOrderState(@Param("houseId") String houseId);
 
+    /**
+     * 按state 和 收货地址 搜索
+     * @param houseId
+     * @param type   0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料
+     * @param beginDate
+     * @param endDate
+     * @param likeAddress
+     * @return
+     */
+    List<MendOrder> materialByStateAndLikeAddress(@Param("houseId") String houseId,
+                                    @Param("type") Integer type,
+                                    @Param("beginDate") String beginDate,
+                                    @Param("endDate") String endDate,
+                                    @Param("likeAddress") String likeAddress);
+
 }

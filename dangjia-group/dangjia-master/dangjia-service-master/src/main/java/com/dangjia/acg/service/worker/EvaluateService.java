@@ -428,7 +428,7 @@ public class EvaluateService {
             workIntegral.setBriefed(desc+evaluate.getStar()+"星评价");
             workIntegralMapper.insert(workIntegral);
         }
-        memberMapper.updateByPrimaryKey(worker);
+        memberMapper.updateByPrimaryKeySelective(worker);
     }
 
     /**用于在工人被评价之后修改好评率*/
@@ -443,7 +443,7 @@ public class EvaluateService {
         }
         double astar1 = astar/(5*evaluateList.size());
         worker.setPraiseRate(new BigDecimal(astar1));
-        memberMapper.updateByPrimaryKey(worker);
+        memberMapper.updateByPrimaryKeySelective(worker);
     }
 
     /**皇冠规则*/
@@ -462,19 +462,19 @@ public class EvaluateService {
                     }
                     if(flag){
                         worker.setIsCrowned(1);
-                        memberMapper.updateByPrimaryKey(worker);
+                        memberMapper.updateByPrimaryKeySelective(worker);
                     }
                 }
                 if(evaluateList.size() > 0){
                     if(evaluateList.get(0).getStar() < 3){
                         worker.setIsCrowned(0);
-                        memberMapper.updateByPrimaryKey(worker);
+                        memberMapper.updateByPrimaryKeySelective(worker);
                     }
                 }
                 if(evaluateList.size() >= 2){
                     if((evaluateList.get(0).getStar()==3||evaluateList.get(0).getStar()==4)&&(evaluateList.get(1).getStar()==3||evaluateList.get(1).getStar()==4)){
                         worker.setIsCrowned(0);
-                        memberMapper.updateByPrimaryKey(worker);
+                        memberMapper.updateByPrimaryKeySelective(worker);
                     }
                 }
             }

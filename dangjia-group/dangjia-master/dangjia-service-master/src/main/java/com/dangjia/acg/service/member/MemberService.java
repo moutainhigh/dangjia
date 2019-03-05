@@ -423,6 +423,10 @@ public class MemberService {
             return ServerResponse.createByErrorMessage("您已提交过工种，不能再次提交");
         }
         user.setWorkerTypeId(workerTypeId);
+        WorkerType wt = workerTypeMapper.selectByPrimaryKey(user.getWorkerTypeId());
+        if (wt != null) {
+            user.setWorkerType(wt.getType());
+        }
         user.setCheckType(0);
         memberMapper.updateByPrimaryKeySelective(user);
         updataMember(user, accessToken);
@@ -497,11 +501,11 @@ public class MemberService {
             }
             //认证通过，清除token认证
             redisClient.deleteCache(Constants.TEMP_TOKEN + phone);
-            user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-            AccessToken accessToken = TokenUtil.generateAccessToken(user);
             user.setPassword(DigestUtils.md5Hex(password));
             user.setSmscode(0);
             memberMapper.updateByPrimaryKeySelective(user);
+            user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+            AccessToken accessToken = TokenUtil.generateAccessToken(user);
             redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
             return ServerResponse.createBySuccessMessage("设置密码成功，正在跳转");
         }
@@ -591,28 +595,17 @@ public class MemberService {
                     MainUser mainUser = userMapper.selectByPrimaryKey(customer.getUserId());
                     mcDTO.setUserName(mainUser.getUsername());
                 }
-//                //找到提醒内容 ： 离当前时间最近的那一条
-//                if (customer.getRemindRecordId() != null) {
-//                    CustomerRecord remindCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getRemindRecordId());
-//                    mcDTO.setRemindContent(remindCustomerRecord.getDescribes());
-//                    mcDTO.setRemindTime(remindCustomerRecord.getRemindTime());
-//                    if (remindCustomerRecord.getRemindTime() != null) {
-//                        mcDTO.setRemindTimeOvertime(
-//                                Long.compare(remindCustomerRecord.getRemindTime().getTime(), new Date().getTime()));
-//                    } else {
-//                        mcDTO.setRemindTimeOvertime(-1);
-//                    }
-//                }
-//                if (customer.getCurrRecordId() != null) {
-//                    CustomerRecord currCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getCurrRecordId());
-//                    if (currCustomerRecord != null)
-//                        mcDTO.setLastRecord(currCustomerRecord.getCreateDate());
-//                }
                 //找到提醒内容 ： 离当前时间最近的那一条
                 if (customer.getRemindRecordId() != null) {
                     CustomerRecord remindCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getRemindRecordId());
                     mcDTO.setRemindContent(remindCustomerRecord.getDescribes());
                     mcDTO.setRemindTime(remindCustomerRecord.getRemindTime());
+                    if (remindCustomerRecord.getRemindTime() != null) {
+                        mcDTO.setRemindTimeOvertime(
+                                Long.compare(remindCustomerRecord.getRemindTime().getTime(), new Date().getTime()));
+                    } else {
+                        mcDTO.setRemindTimeOvertime(-1);
+                    }
                 }
                 if (customer.getCurrRecordId() != null) {
                     CustomerRecord currCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getCurrRecordId());

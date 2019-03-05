@@ -26,6 +26,7 @@ import com.dangjia.acg.modle.other.BankCard;
 import com.dangjia.acg.modle.worker.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -229,6 +230,9 @@ public class WalletService {
             String houseName = "自定义流水";
             if (house != null) {
                 houseName = house.getHouseName();//流水描述
+            } else {
+                if (StringUtils.isNoneBlank(workerDetail.getDefinedName()))//自定义流水说明
+                    houseName = workerDetail.getDefinedName();
             }
             returnMap.put("name", houseName);//流水来源
             if (workerDetail.getState() == 0 || workerDetail.getState() == 2 || workerDetail.getState() == 4

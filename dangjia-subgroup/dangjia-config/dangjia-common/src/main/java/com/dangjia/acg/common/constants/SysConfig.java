@@ -27,6 +27,15 @@ abstract public  class SysConfig {
      * 应用类型: 工匠
      **/
     public static final Integer APP_TYPE_GJ = 2;
+
+
+    /**
+     * API路径
+     */
+    public static final ConfigBean<String> DANGJIA_API_LOCAL = new ConfigBean<String>("DANGJIA_API_LOCAL",
+            "http://172.16.30.95/", "API路径", APP_TYPE);
+
+
     /**
      * 图片路径
      */

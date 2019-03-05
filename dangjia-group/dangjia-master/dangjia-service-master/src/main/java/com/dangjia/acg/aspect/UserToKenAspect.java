@@ -18,7 +18,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- *  拦截器：检查用户是否登录……
+ * 拦截器：检查用户是否登录……
  *
  * @author 作者 qiyuxiang
  */
@@ -40,17 +40,17 @@ public class UserToKenAspect {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                 .getRequest();
         String userToken = request.getParameter(Constants.USER_TOKEY);
-        if(!CommonUtil.isEmpty(userToken)&&!request.getServletPath().equals("/member/login")){
+        if (!CommonUtil.isEmpty(userToken) && !request.getServletPath().equals("/member/login") && !request.getServletPath().equals("/config/adverts/list")) {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if(accessToken == null){//无效的token
-                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(),"无效的token,请重新登录或注册！");
+            if (accessToken == null) {//无效的token
+                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
             }
         }
         Object result;
         try {
             result = joinPoint.proceed();
         } catch (Throwable e) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.WRONG_PARAM.getCode(),ServerCode.WRONG_PARAM.getDesc());
+            return ServerResponse.createByErrorCodeMessage(ServerCode.WRONG_PARAM.getCode(), ServerCode.WRONG_PARAM.getDesc());
         }
         return result;
     }

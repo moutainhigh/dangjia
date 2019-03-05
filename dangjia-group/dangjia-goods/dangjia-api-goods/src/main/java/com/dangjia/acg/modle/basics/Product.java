@@ -51,7 +51,7 @@ public class Product extends BaseEntity {
     private String convertUnit;//换算单位
 
 	@Column(name = "weight")
-    private String weight;//重量  单价乘数量乘此系数(运费)
+    private Double weight;//重量  单价乘数量乘此系数(运费)
 
 	@Column(name = "type")
     private Integer type;//是否禁用0：禁用；1不禁用
