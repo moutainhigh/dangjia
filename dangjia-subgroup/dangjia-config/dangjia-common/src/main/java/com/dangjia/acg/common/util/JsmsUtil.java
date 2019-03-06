@@ -1,5 +1,9 @@
 package com.dangjia.acg.common.util;
 
+import cn.jsms.api.SendSMSResult;
+import cn.jsms.api.common.SMSClient;
+import cn.jsms.api.common.model.SMSPayload;
+
 import java.util.HashMap;
 import java.util.Map;
 
