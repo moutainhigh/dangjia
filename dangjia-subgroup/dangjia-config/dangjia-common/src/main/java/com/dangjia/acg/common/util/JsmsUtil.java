@@ -1,5 +1,9 @@
 package com.dangjia.acg.common.util;
 
+import cn.jsms.api.SendSMSResult;
+import cn.jsms.api.common.SMSClient;
+import cn.jsms.api.common.model.SMSPayload;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,19 +95,19 @@ public class JsmsUtil {
 	 * @return
 	 */
 	public static String sendSMS(String phone, String mid, Map params) {
-//		try {
-//			SMSClient client = new SMSClient(masterSecret, appkey);
-//			SMSPayload payload = SMSPayload.newBuilder()
-//				.setMobileNumber(phone)
-//				.setTempId(Integer.parseInt(mid))
-//				.setTempPara(params)
-//				.build();
-//			SendSMSResult res = client.sendTemplateSMS(payload);
-//			String result =res.toString();
-//			return result;
-//		} catch (Exception e) {
-//			e.printStackTrace(System.out);
-//		}
+		try {
+			SMSClient client = new SMSClient(masterSecret, appkey);
+			SMSPayload payload = SMSPayload.newBuilder()
+				.setMobileNumber(phone)
+				.setTempId(Integer.parseInt(mid))
+				.setTempPara(params)
+				.build();
+			SendSMSResult res = client.sendTemplateSMS(payload);
+			String result =res.toString();
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace(System.out);
+		}
 		return "";
 	}
 
