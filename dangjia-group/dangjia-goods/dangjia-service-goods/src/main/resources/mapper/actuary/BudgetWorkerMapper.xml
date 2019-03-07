@@ -67,7 +67,8 @@
 		select DISTINCT bw.worker_type_id
 		from dj_actuary_budget_worker bw
  		where bw.house_id = #{houseId}
- 		and bw.delete_state in (0,3);
+ 		and bw.delete_state in (0,3)
+ 		order by bw.worker_type_id
 	</select>
 
 	<select id="byWorkerGoodsId" resultType="com.dangjia.acg.modle.actuary.BudgetWorker" >

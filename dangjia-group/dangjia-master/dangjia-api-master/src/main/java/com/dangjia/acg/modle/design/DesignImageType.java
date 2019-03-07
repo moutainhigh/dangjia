@@ -19,7 +19,7 @@ import java.math.BigDecimal;
 @Data
 @Entity
 @Table(name = "dj_design_design_image_type")
-@ApiModel(description = "设计图与房子关联")
+@ApiModel(description = "图类型")
 public class DesignImageType extends BaseEntity {
 
 	@Column(name = "name")

@@ -19,6 +19,7 @@ public class MendOrderDTO {
     private Date createDate;
     private String houseId;
     private String address;//收货地址
+    private String memberId;//业主id
     private String memberName;//业主姓名
     private String memberMobile;//业主电话
 

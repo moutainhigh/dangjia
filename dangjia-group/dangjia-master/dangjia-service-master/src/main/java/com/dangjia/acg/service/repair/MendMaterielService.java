@@ -60,7 +60,7 @@ public class MendMaterielService {
             }
             PageHelper.startPage(pageNum, pageSize);
 //            List<MendOrder> mendOrderList = mendOrderMapper.landlordState(houseId);
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(houseId, 1, beginDate, endDate, likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(houseId, 4, beginDate, endDate, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
@@ -153,9 +153,11 @@ public class MendMaterielService {
                     mendOrderDTO.setAddress(house.getHouseName());
                     Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
                     mendOrderDTO.setMemberName(member.getNickName() == null ? member.getName() : member.getNickName());
+                    mendOrderDTO.setMemberId(member.getId());
                     mendOrderDTO.setMemberMobile(member.getMobile());
 
                     Member worker = memberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
+                    mendOrderDTO.setApplyMemberId(worker.getId());
                     mendOrderDTO.setApplyName(worker.getName());
                     mendOrderDTO.setApplyMobile(worker.getMobile());
                     mendOrderDTO.setType(mendOrder.getType());
