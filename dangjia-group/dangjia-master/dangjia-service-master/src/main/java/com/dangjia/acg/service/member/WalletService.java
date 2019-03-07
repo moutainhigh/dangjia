@@ -4,6 +4,7 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -77,7 +78,13 @@ public class WalletService {
     public ServerResponse checkFinish(String userToken, Integer paycode, Double money, String workerBankCardId, Integer roleType) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
+            if (accessToken == null) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            }
+            Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+            if (worker == null) {
+                return ServerResponse.createByErrorMessage("用户不存在");
+            }
             worker = memberMapper.selectByPrimaryKey(worker.getId());
             if (!paycode.equals(worker.getPaycode())) {
                 return ServerResponse.createByErrorMessage("验证码错误！");
@@ -136,7 +143,13 @@ public class WalletService {
     public ServerResponse getPaycode(String userToken) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member = accessToken.getMember();
+            if (accessToken == null) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            }
+            Member member = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+            if (member == null) {
+                return ServerResponse.createByErrorMessage("用户不存在");
+            }
             int paycode = (int) (Math.random() * 9000 + 1000);
             JsmsUtil.SMS(paycode, member.getMobile());
             //记录短信发送

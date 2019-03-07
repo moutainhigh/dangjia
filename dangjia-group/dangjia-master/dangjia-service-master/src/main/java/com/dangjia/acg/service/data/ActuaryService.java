@@ -133,6 +133,7 @@ public class ActuaryService {
         for (House house : houseList) {
             Map<String, Object> map = new HashMap<String, Object>();
             Member user = userMapper.selectByPrimaryKey(house.getMemberId());
+            if(user == null) continue;
             map.put("houseName", house.getHouseName());
             map.put("customSort", house.getCustomSort());
             map.put("name", user.getNickName());

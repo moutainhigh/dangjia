@@ -15,6 +15,7 @@ import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
@@ -22,11 +23,11 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
-import com.dangjia.acg.service.core.WorkerTypeService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +71,8 @@ public class EvaluateService {
     @Autowired
     private RedisClient redisClient;
 
+    @Autowired
+    private IChangeOrderMapper changeOrderMapper;
     /**
      * 获取积分记录
      * @param userToken
@@ -266,6 +269,12 @@ public class EvaluateService {
             if(houseFlowApply.getMemberCheck() == 1){
                 return ServerResponse.createByErrorMessage("重复审核");
             }
+            if(houseFlowApply.getApplyType()!= 0) {
+                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseFlowApply.getHouseId(), houseFlowApply.getWorkerTypeId());
+                if (changeOrderList.size() > 0) {
+                    return ServerResponse.createByErrorMessage("该工种有未处理人工变更单！");
+                }
+            }
             //在worker中根据评论星数修改工人的积分
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             Member supervisor = memberMapper.getSupervisor(houseFlowApply.getHouseId());//houseId获得大管家
@@ -324,6 +333,7 @@ public class EvaluateService {
             //业主审核
             ServerResponse serverResponse=houseFlowApplyService.checkWorker(houseFlowApplyId);
             if(serverResponse.getResultCode()!= EventStatus.SUCCESS.getCode()){
+
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return serverResponse;
             }

@@ -678,8 +678,9 @@ public class ActuaryOperationService {
                     flowActuaryDTO.setImage(bw.getImage());
                     flowActuaryDTO.setTypeName(typsValue);
                     flowActuaryDTO.setShopCount(bw.getShopCount());
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO, userToken, cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + budgetWorker.getId() + "&type=1";
-                    flowActuaryDTO.setUrl(url);
+//                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+//                            String.format(DjConstants.YZPageAddress.COMMO, userToken, cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + budgetWorker.getId() + "&type=1";
+//                    flowActuaryDTO.setUrl(url);
                     flowActuaryDTO.setPrice("¥" + String.format("%.2f", bw.getPrice()) + "/" + bw.getUnitName());
                     flowActuaryDTO.setTotalPrice(bw.getPrice() * bw.getShopCount());
                     flowActuaryDTOList.add(flowActuaryDTO);
@@ -694,9 +695,9 @@ public class ActuaryOperationService {
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
                     flowActuaryDTO.setTypeName(typsValue);
                     flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + bw.getImage());
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO, userToken,
-                            cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + budgetMaterial.getId() + "&type=2";
-                    flowActuaryDTO.setUrl(url);
+//                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO, userToken,
+//                            cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + budgetMaterial.getId() + "&type=2";
+//                    flowActuaryDTO.setUrl(url);
                     flowActuaryDTO.setAttribute(getAttributes(product));//拼接属性品牌
                     flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + product.getUnitName());
                     flowActuaryDTO.setTotalPrice(bw.getTotalPrice());

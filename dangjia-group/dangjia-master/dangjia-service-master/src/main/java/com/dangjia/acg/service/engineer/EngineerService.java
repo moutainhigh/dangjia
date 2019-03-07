@@ -360,20 +360,22 @@ public class EngineerService {
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (House house : houseList) {
             Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-            Map<String, Object> map = new HashMap<>();
-            map.put("houseId", house.getId());
-            map.put("address", house.getHouseName());
-            map.put("memberName", member.getNickName() == null ? member.getName() : member.getNickName());
-            map.put("mobile", member.getMobile());
-            Member supervisor  = memberMapper.getSupervisor(house.getId());
-            if(supervisor != null){
-                map.put("supName",supervisor.getName());
-                map.put("supMobile",supervisor.getMobile());
+            if(member!=null) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("houseId", house.getId());
+                map.put("address", house.getHouseName());
+                map.put("memberName", member.getNickName() == null ? member.getName() : member.getNickName());
+                map.put("mobile", member.getMobile());
+                Member supervisor = memberMapper.getSupervisor(house.getId());
+                if (supervisor != null) {
+                    map.put("supName", supervisor.getName());
+                    map.put("supMobile", supervisor.getMobile());
+                }
+                map.put("pause", house.getPause()); //0正常,1暂停
+                map.put("createDate", house.getCreateDate());
+                map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工
+                mapList.add(map);
             }
-            map.put("pause",house.getPause()); //0正常,1暂停
-            map.put("createDate",house.getCreateDate());
-            map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工
-            mapList.add(map);
         }
         pageResult.setList(mapList);
         return ServerResponse.createBySuccess("查询列表成功", pageResult);

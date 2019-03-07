@@ -18,4 +18,6 @@ public class DesignDTO {
     private String name;//业主姓名
     private String nickName;//昵称
     private String mobile;// 电话
+    private String image;// 平面图
+    private String imageUrl;// 平面图URL
 }

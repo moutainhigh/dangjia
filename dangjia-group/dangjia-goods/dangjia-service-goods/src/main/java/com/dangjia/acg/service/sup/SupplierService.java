@@ -53,10 +53,11 @@ public class SupplierService {
      */
     public ServerResponse byTelephone(String telephone) {
         try {
-            Supplier supplier = iSupplierMapper.byTelephone(telephone);
-            if (supplier == null) {
-                return ServerResponse.createByErrorMessage("查询失败");
+            List<Supplier> suppliers= iSupplierMapper.queryByTelephone(telephone);
+            if (suppliers == null||suppliers.size()==0) {
+                return ServerResponse.createByErrorMessage("查询失败，未查到供应记录");
             } else {
+                Supplier  supplier=suppliers.get(0);
                 return ServerResponse.createBySuccess("查询成功", supplier.getId());
             }
         } catch (Exception e) {

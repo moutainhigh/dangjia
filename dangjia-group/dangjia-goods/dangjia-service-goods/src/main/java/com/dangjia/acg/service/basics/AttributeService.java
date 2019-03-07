@@ -362,10 +362,16 @@ public class AttributeService {
      */
     public ServerResponse deleteGoodsAttribute(String goodsAttributeId) {
         try {
+
             Attribute srcAttribute = iAttributeMapper.queryById(goodsAttributeId);
             List<Goods> goodsList = iGoodsMapper.queryByCategoryId(srcAttribute.getCategoryId());//根据分类id查询是否有关联商品
             if (goodsList.size() > 0)
                 return ServerResponse.createByErrorMessage("该商品属性有关联商品不能删除");
+
+            List<Product> productLists = iProductMapper.getPListByValueIdArrOrAttrId(srcAttribute.getId(), null);
+            if (productLists.size() > 0)
+                return ServerResponse.createByErrorMessage("该商品属性有关联商品不能删除");
+
 
             //检查该分类中的所有商品，是否有商品使用 该属性名和属性选项名
             for (Goods gs : goodsList) {
@@ -407,9 +413,12 @@ public class AttributeService {
 //            Attribute srcAe = iAttributeMapper.queryById(srcAttributeValue.getAttributeId());
             AttributeValue srcAttributeValue = iAttributeValueMapper.selectByPrimaryKey(attributeValueId);
             Attribute srcAe = iAttributeMapper.selectByPrimaryKey(srcAttributeValue.getAttributeId());
-            LOG.info("deleteByAttributeId  :" + srcAe.getCategoryId());
+            LOG.info("deleteByAttributeId  :" + srcAe);
             List<Goods> goodsList = iGoodsMapper.queryByCategoryId(srcAe.getCategoryId());//根据分类id查询是否有关联商品
             if (goodsList.size() > 0)
+                return ServerResponse.createByErrorMessage("该商品属性有关联商品不能删除");
+            List<Product> productLists = iProductMapper.getPListByValueIdArrOrAttrId(null, attributeValueId);
+            if (productLists.size() > 0)
                 return ServerResponse.createByErrorMessage("该商品属性有关联商品不能删除");
 
             iAttributeValueMapper.deleteById(attributeValueId);//删除属性选项

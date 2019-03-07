@@ -230,7 +230,7 @@ public class ProductService {
                             && !StringUtils.isNoneBlank(brandId)
                             && !StringUtils.isNoneBlank(brandSeriesId)) {
 
-                        List<Product> pValueList = iProductMapper.getPListByValueIdArr(valueIdArr);
+                        List<Product> pValueList = iProductMapper.getPListByValueIdArrByNullBrandId(valueIdArr);
                         if (pValueList.size() > 0) {
                             String ret = checkProduct(name, productSn, id, jsonArr);
                             if (!ret.equals("ok")) {

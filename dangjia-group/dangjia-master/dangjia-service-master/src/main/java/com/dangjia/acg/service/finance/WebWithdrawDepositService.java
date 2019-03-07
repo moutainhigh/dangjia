@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -50,21 +51,34 @@ public class WebWithdrawDepositService {
         try {
 //            state = 0;
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-
             List<WithdrawDeposit> list = iWithdrawDepositMapper.getAllWithdraw(state, beginDate, endDate);
+            PageInfo pageResult = new PageInfo(list);
             LOG.info(" getAllWithdraw state:" + state + " " + beginDate + " " + endDate);
-
             String strBeginDate = DateUtil.dateToString(DateUtil.getMondayOfThisWeek(), "yyyy-MM-dd HH:mm:ss");
             String strEndDate = DateUtil.dateToString(DateUtil.getSundayOfThisWeek(), "yyyy-MM-dd HH:mm:ss");
 //            LOG.info("本周一 ：" + strBeginDate + "本周日 ：" + strEndDate);
             //state  0未处理,1同意（成功） 2不同意(驳回)
-            List<WithdrawDeposit> curWeekAddList = iWithdrawDepositMapper.getAllCurWeek(-1, strBeginDate, strEndDate);
-            List<WithdrawDeposit> curWeekSuccessList = iWithdrawDepositMapper.getAllCurWeek(1, strBeginDate, strEndDate);
-            List<WithdrawDeposit> curWeekNoHandleList = iWithdrawDepositMapper.getAllCurWeek(0, strBeginDate, strEndDate);
-            List<WithdrawDeposit> allNoHandleList = iWithdrawDepositMapper.getAllCurWeek(0, null, null);
-            LOG.info("getAllWithdraw size：" + curWeekAddList.size() + " " + curWeekSuccessList.size() +
-                    " " + curWeekNoHandleList.size() + " " + allNoHandleList.size());
+            Example example=new Example(WithdrawDeposit.class);
+            example.createCriteria().andBetween(WithdrawDeposit.CREATE_DATE, strBeginDate, strEndDate);
+            int curWeekAddSize = iWithdrawDepositMapper.selectCountByExample(example);
+            example=new Example(WithdrawDeposit.class);
+            example.createCriteria().andBetween(WithdrawDeposit.CREATE_DATE, strBeginDate, strEndDate)
+                    .andEqualTo(WithdrawDeposit.STATE, 1);
+            int curWeekSuccessSize = iWithdrawDepositMapper.selectCountByExample(example);
 
+            example=new Example(WithdrawDeposit.class);
+            example.createCriteria()
+                    .andBetween(WithdrawDeposit.CREATE_DATE, strBeginDate, strEndDate)
+                    .andEqualTo(WithdrawDeposit.STATE, 0);
+            int curWeekNoHandleSize = iWithdrawDepositMapper.selectCountByExample(example);
+
+
+            example=new Example(WithdrawDeposit.class);
+            example.createCriteria()
+                    .andEqualTo(WithdrawDeposit.STATE, 0);
+            int allNoHandleSize = iWithdrawDepositMapper.selectCountByExample(example);
+            LOG.info("getAllWithdraw size：" + curWeekAddSize + " " + curWeekSuccessSize +
+                    " " + curWeekNoHandleSize + " " + allNoHandleSize);
             List<WebWithdrawDTO> webWithdrawDTOlist = new ArrayList<>();
             for (WithdrawDeposit withdrawDeposit : list) {
                 WebWithdrawDTO webWithdrawDTO = new WebWithdrawDTO();
@@ -81,14 +95,12 @@ public class WebWithdrawDepositService {
                 webWithdrawDTO.setState(withdrawDeposit.getState());
                 webWithdrawDTO.setWorkerId(withdrawDeposit.getWorkerId());
                 /*****************************统计********************************/
-                webWithdrawDTO.setCurWeekAddNum(curWeekAddList.size());//本周新增
-                webWithdrawDTO.setCurWeekSuccessNum(curWeekSuccessList.size());//本周 成功的
-                webWithdrawDTO.setCurWeekNoHandleNum(curWeekNoHandleList.size());//本周 待处理的
-                webWithdrawDTO.setAllNoHandleNum(allNoHandleList.size());//所有待处理的
+                webWithdrawDTO.setCurWeekAddNum(curWeekAddSize);//本周新增
+                webWithdrawDTO.setCurWeekSuccessNum(curWeekSuccessSize);//本周 成功的
+                webWithdrawDTO.setCurWeekNoHandleNum(curWeekNoHandleSize);//本周 待处理的
+                webWithdrawDTO.setAllNoHandleNum(allNoHandleSize);//所有待处理的
                 webWithdrawDTOlist.add(webWithdrawDTO);
             }
-
-            PageInfo pageResult = new PageInfo(list);
             pageResult.setList(webWithdrawDTOlist);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
@@ -150,7 +162,10 @@ public class WebWithdrawDepositService {
                     iMemberMapper.updateByPrimaryKeySelective(worker);
 
                     //提现失败推送
-                    configMessageService.addConfigMessage(null, appType, withdrawDeposit.getWorkerId(), "0", "提现结果", DjConstants.PushMessage.WITHDRAW_CASH_ERROR, "");
+                    configMessageService.addConfigMessage(null, appType,
+                            withdrawDeposit.getWorkerId(),
+                            "0", "提现结果",
+                            DjConstants.PushMessage.WITHDRAW_CASH_ERROR, "");
                 }
                 if (withdrawDeposit.getState() == 1) {//1同意
                     srcWithdrawDeposit.setState(1);
@@ -158,7 +173,10 @@ public class WebWithdrawDepositService {
                     if (StringUtils.isNoneBlank(withdrawDeposit.getMemo()))
                         srcWithdrawDeposit.setMemo(withdrawDeposit.getMemo());
                     //提现成功推送
-                    configMessageService.addConfigMessage(null, appType, withdrawDeposit.getWorkerId(), "0", "提现结果", DjConstants.PushMessage.WITHDRAW_CASH_SUCCESS, "");
+                    configMessageService.addConfigMessage(null, appType,
+                            withdrawDeposit.getWorkerId(),
+                            "0", "提现结果",
+                            DjConstants.PushMessage.WITHDRAW_CASH_SUCCESS, "");
                 }
 
                 iWithdrawDepositMapper.updateByPrimaryKey(srcWithdrawDeposit);
