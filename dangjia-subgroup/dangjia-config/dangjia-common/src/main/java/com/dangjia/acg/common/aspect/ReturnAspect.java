@@ -78,7 +78,7 @@ public class ReturnAspect {
             if (log.isInfoEnabled()) {
                 log.error("around " + joinPoint + "\tUse time : "
                         + (end - start) + " ms with exception : "
-                        + e.getMessage());
+                        + e.getMessage(),e);
             }
             throw new BaseException(ServerCode.ERROR, "系统繁忙，请稍后再试! "+ServerCode.SERVER_UNKNOWN_ERROR.getCode());
         }

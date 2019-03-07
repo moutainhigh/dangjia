@@ -365,6 +365,12 @@ public class OrderService {
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
                 orderSplitItemMapper.deleteByExample(example);
+
+                orderSplit.setSupervisorId(worker.getId());
+                orderSplit.setSupervisorName(worker.getName());
+                orderSplit.setSupervisorTel(worker.getMobile());
+                orderSplit.setWorkerTypeId(worker.getWorkerTypeId());
+                orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
             }else {
                 example = new Example(OrderSplit.class);
                 orderSplit = new OrderSplit();

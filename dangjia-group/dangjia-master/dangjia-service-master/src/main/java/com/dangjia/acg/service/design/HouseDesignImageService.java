@@ -61,6 +61,8 @@ public class HouseDesignImageService {
     private ConfigMessageService configMessageService;
     @Autowired
     private IWorkDepositMapper workDepositMapper;
+    @Autowired
+    private DesignService designService;
 
 
     /**
@@ -112,7 +114,7 @@ public class HouseDesignImageService {
             houseMapper.updateByPrimaryKeySelective(house);
 
             //app推送和发送短信给工匠
-            if (house.getDesignerOk() == 6) {//通过
+            if (house.getDesignerOk() == 7) {//通过
                 if (hwo != null) {
                     configMessageService.addConfigMessage(null, "gj", hwo.getWorkerId(), "0", "平面图已通过", String.format(DjConstants.PushMessage.PLANE_OK, house.getHouseName()), "");
                 }
@@ -204,22 +206,24 @@ public class HouseDesignImageService {
             return ServerResponse.createBySuccess("查询成功", map);
         }
         if (house.getDesignerOk() == 2) {
-            example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId).andNotEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID, "1")
-                    .andIsNotNull(HouseDesignImage.IMAGEURL);
-            example.orderBy(HouseDesignImage.CREATE_DATE).desc();
-            houseDesignImageList = houseDesignImageMapper.selectByExample(example);
-            for (HouseDesignImage houseDesignImage : houseDesignImageList) {
-                if (StringUtil.isNotEmpty(houseDesignImage.getImageurl())) {
-                    DesignImageType designImageType = designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId());
-                    houseDesignImageDTO = new HouseDesignImageDTO();
-                    houseDesignImageDTO.setImageurl(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + houseDesignImage.getImageurl());
-                    houseDesignImageDTO.setName(designImageType.getName());
-                    houseDesignImageDTO.setSell(designImageType.getSell());
-                    houseDesignImageDTOList.add(houseDesignImageDTO);
-                }
-            }
+            ServerResponse serverResponse= designService.getImagesList(null,houseId);
+//            example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId).andNotEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID, "1")
+//                    .andIsNotNull(HouseDesignImage.IMAGEURL);
+//            example.orderBy(HouseDesignImage.CREATE_DATE).desc();
+//            houseDesignImageList = houseDesignImageMapper.selectByExample(example);
+//            for (HouseDesignImage houseDesignImage : houseDesignImageList) {
+//                if (StringUtil.isNotEmpty(houseDesignImage.getImageurl())) {
+//                    DesignImageType designImageType = designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId());
+//                    houseDesignImageDTO = new HouseDesignImageDTO();
+//                    houseDesignImageDTO.setImageurl(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + houseDesignImage.getImageurl());
+//                    houseDesignImageDTO.setName(designImageType.getName());
+//                    houseDesignImageDTO.setSell(designImageType.getSell());
+//                    houseDesignImageDTOList.add(houseDesignImageDTO);
+//                }
+//            };
+//            map.put("list", houseDesignImageDTOList);
+            map.put("list", serverResponse.getResultObj());
             map.put("button", "确认设计图");
-            map.put("list", houseDesignImageDTOList);
             return ServerResponse.createBySuccess("查询成功", map);
         }
         return ServerResponse.createByErrorMessage("查询失败");

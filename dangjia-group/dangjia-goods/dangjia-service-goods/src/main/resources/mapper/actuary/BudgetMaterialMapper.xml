@@ -59,7 +59,7 @@
 	<!--房子材料服务总价-->
 	<select id="getHouseCaiPrice" resultType="java.lang.Double">
 		select
-		    sum(p.price * bm.convert_count)
+		    IFNULL(sum(p.price * bm.convert_count),0)
 		from dj_basics_product p,dj_actuary_budget_material bm
 		where
 	        p.id = bm.product_id

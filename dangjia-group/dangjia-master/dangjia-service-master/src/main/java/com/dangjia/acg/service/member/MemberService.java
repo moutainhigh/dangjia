@@ -261,6 +261,7 @@ public class MemberService {
             user.setVisitState(0);
             user.setUserName(user.getMobile());
             user.setName("");
+            user.setSmscode(userRole);
             user.setOthersInvitationCode(invitationCode);
             user.setInvitationCode(CommonUtil.randomString(6));
             user.setNickName("当家-" + CommonUtil.randomString(6));
