@@ -226,13 +226,15 @@ public class HouseWorkerService {
             List<HouseWorker> houseWorkerList = houseWorkerMapper.getAllHouseWorker(worker.getId());//查询所有已抢待支付和已支付
             if (houseWorkerList.size() == 0) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "您暂无施工中的记录,快去接单吧！");
-            } else {
-                hw = houseWorkerMapper.getDetailHouseWorker(worker.getId());
             }
-            if (hw == null) {//没有选中的任务
+            List<HouseWorker> selectList = houseWorkerMapper.getDetailHouseWorker(worker.getId());//查询选中
+
+            if (selectList.size() == 0) {//没有选中的任务
                 hw = houseWorkerList.get(0);
                 hw.setIsSelect(1);//设置成默认
                 houseWorkerMapper.updateByPrimaryKeySelective(hw);
+            }else {
+                hw = selectList.get(0);
             }
 
             List<HouseFlow> hfList = houseFlowMapper.getAllFlowByHouseId(hw.getHouseId());
