@@ -304,7 +304,7 @@ public class HouseWorkerService {
                         wfr.setPatrolSecond("巡查次数" +
                                 houseFlowApplyMapper.getCountValidPatrolByHouseId(house.getId(), worker2 == null ? "0" : worker2.getId()));//巡查次数
                         wfr.setPatrolStandard("巡查标准" + hfl.getPatrol());//巡查标准
-                        HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker2 == null ? "" : worker2.getId());//查询今日开工记录
+                        HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker2 == null ? "" : worker2.getId(),new Date());//查询今日开工记录
                         if (todayStart == null) {//没有今日开工记录
                             wfr.setIsStart(0);//今日是否开工0:否；1：是；
                         } else {
@@ -371,7 +371,7 @@ public class HouseWorkerService {
                 //查询是否全部整体完工
                 List<HouseFlow> checkFinishList = houseFlowMapper.checkAllFinish(hf.getHouseId(), hf.getId());
                 //查询是否今天已经上传过巡查
-                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApplyBy56(hf.getHouseId());
+                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApplyBy56(hf.getHouseId(), new Date());
                 if (hf.getSupervisorStart() == 0) {//已开工之后都是巡查工地；1：巡查工地2：申请业主验收；3:确认开工
                     List<HouseFlow> listStart = houseFlowMapper.getHouseIsStart(hf.getHouseId());
                     if (listStart.size() > 0) {
@@ -395,7 +395,7 @@ public class HouseWorkerService {
                         }
                     }
                 } else if (houseFlowApplyList != null && houseFlowApplyList.size() != 0) {//今日已提交过巡查
-                    List<HouseFlowApply> hfalistApp7 = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 7, worker.getId());
+                    List<HouseFlowApply> hfalistApp7 = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 7, worker.getId(), new Date());
                     if (hfalistApp7 == null || hfalistApp7.size() == 0) {
                         buttonList.add(getButton("追加巡查", 4));
                     } else {
@@ -470,7 +470,7 @@ public class HouseWorkerService {
                     } else {//已交底
                         bean.setFootMessageTitle("");//每日开工事项
                         bean.setFootMessageDescribe("");//每日开工事项
-                        HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker.getId());//查询今日开工记录
+                        HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker.getId(), new Date());//查询今日开工记录
                         List<ConstructionByWorkerIdBean.BigListBean.ListMapBean> workerEverydayList = new ArrayList<>();
                         if (todayStart == null) {//没有今日开工记录
                             buttonList.add(getButton("今日开工", 2));
@@ -483,8 +483,8 @@ public class HouseWorkerService {
                             bean.setFootMessageTitle("今日开工任务");//每日开工事项
                             bean.setFootMessageDescribe("（每日十二点前今日开工）");//每日开工事项
                         } else {
-                            List<HouseFlowApply> stageAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 1, worker.getId());//查询今天是否已提交阶段完工
-                            List<HouseFlowApply> flowAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId());//查询是否已提交今日完工
+                            List<HouseFlowApply> stageAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 1, worker.getId(), new Date());//查询今天是否已提交阶段完工
+                            List<HouseFlowApply> flowAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId(), new Date());//查询是否已提交今日完工
                             if (stageAppList.size() > 0) {
                                 promptList.add("今日已申请阶段完工");
                             } else if (flowAppList != null && flowAppList.size() > 0) {//已提交今日完工
@@ -1184,7 +1184,7 @@ public class HouseWorkerService {
                     } else {
                         map.put("isItNormal", "暂停施工");//暂停施工
                     }
-                    List<HouseFlowApply> todayStartList = houseFlowApplyMapper.getTodayStartByHouseId(house.getId());//查询今日开工记录
+                    List<HouseFlowApply> todayStartList = houseFlowApplyMapper.getTodayStartByHouseId(house.getId(), new Date());//查询今日开工记录
                     if (todayStartList == null || todayStartList.size() == 0) {//没有今日开工记录
                         map.put("houseIsStart", "今日未开工");//是否正常施工
                     } else {
