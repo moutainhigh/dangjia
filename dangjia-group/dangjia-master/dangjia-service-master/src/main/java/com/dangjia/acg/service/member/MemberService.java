@@ -321,11 +321,6 @@ public class MemberService {
             }
             user.setVolume(new BigDecimal(0));
             user.setPraiseRate(new BigDecimal(1));
-            //如果工匠端工匠角色提交资料则需要从新审核
-            if (!CommonUtil.isEmpty(userRole) && 2 == Integer.parseInt(userRole)) {
-                user.setCheckType(0);//提交资料，审核中
-            }
-
             memberMapper.updateByPrimaryKeySelective(user);
             user = memberMapper.selectByPrimaryKey(user.getId());
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));

@@ -226,13 +226,15 @@ public class HouseWorkerService {
             List<HouseWorker> houseWorkerList = houseWorkerMapper.getAllHouseWorker(worker.getId());//查询所有已抢待支付和已支付
             if (houseWorkerList.size() == 0) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "您暂无施工中的记录,快去接单吧！");
-            } else {
-                hw = houseWorkerMapper.getDetailHouseWorker(worker.getId());
             }
-            if (hw == null) {//没有选中的任务
+            List<HouseWorker> selectList = houseWorkerMapper.getDetailHouseWorker(worker.getId());//查询选中
+
+            if (selectList.size() == 0) {//没有选中的任务
                 hw = houseWorkerList.get(0);
                 hw.setIsSelect(1);//设置成默认
                 houseWorkerMapper.updateByPrimaryKeySelective(hw);
+            }else {
+                hw = selectList.get(0);
             }
 
             List<HouseFlow> hfList = houseFlowMapper.getAllFlowByHouseId(hw.getHouseId());
@@ -1169,11 +1171,13 @@ public class HouseWorkerService {
                         continue;
                     House house = houseMapper.selectByPrimaryKey(houseWorker.getHouseId());//查询房产信息.
                     if (house == null) continue;
+                    Member member=memberMapper.selectByPrimaryKey(house.getMemberId());
+                    if (member == null) continue;
                     //房产信息
                     map.put("houseName", house.getHouseName());//地址
                     map.put("releaseTime", houseFlow.getReleaseTime() == null ? "" : houseFlow.getReleaseTime().getTime());//发布时间
                     map.put("square", (house.getSquare() == null ? "0" : house.getSquare()) + "m²");//面积
-                    map.put("memberName", memberMapper.selectByPrimaryKey(house.getMemberId()).getName());//业主姓名
+                    map.put("memberName", member.getName());//业主姓名
                     map.put("price", "¥" + (houseFlow.getWorkPrice() == null ? "0" : String.format("%.2f", houseFlow.getWorkPrice().doubleValue())));//价格
                     if (houseFlow.getPause() == 0) {//正常施工
                         map.put("isItNormal", "正常施工");
