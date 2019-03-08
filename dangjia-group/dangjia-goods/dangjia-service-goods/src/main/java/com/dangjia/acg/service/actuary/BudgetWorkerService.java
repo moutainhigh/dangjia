@@ -263,6 +263,15 @@ public class BudgetWorkerService {
             map.put("wokerList", wokerList);//人工精算
             List<Map<String, Object>> materialList = iBudgetMaterialMapper.getAllbudgetTemplates(templateId);
             setGoods(materialList, iGoodsMapper, iProductMapper, iUnitMapper);
+
+            for (Map<String, Object> obj : materialList) {
+                String goodsId = obj.get("goodsId").toString();
+                Goods goods = iGoodsMapper.queryById(goodsId);
+                Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
+                if (unit != null)
+                    obj.put("goodsUnitName", unit.getName());
+            }
+
             map.put("materialList", materialList);//材料精算
             return ServerResponse.createBySuccess("查询精算成功", map);
         } catch (Exception e) {
