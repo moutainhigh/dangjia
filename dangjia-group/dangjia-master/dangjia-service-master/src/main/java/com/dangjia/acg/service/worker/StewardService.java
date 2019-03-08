@@ -374,7 +374,7 @@ public class StewardService {
             Long countOrder = houseWorkerMapper.getCountOrderByWorkerId(worker.getId());
             workerDetailDTO.setCountOrder(countOrder == null ? 0 : countOrder);//总单数
 
-            HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(houseFlow.getHouseId(), worker.getId());//查询今日开工记录
+            HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(houseFlow.getHouseId(), worker.getId(),new Date());//查询今日开工记录
             if (todayStart == null) {//没有今日开工记录
                 workerDetailDTO.setIsStart("否");
             } else {
