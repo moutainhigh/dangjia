@@ -17,7 +17,6 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
-import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
@@ -138,8 +137,7 @@ public class OrderSplitService {
             detailDTO.setSupName(sup.getName());
             detailDTO.setMemo(splitDeliver.getMemo());
             detailDTO.setReason(splitDeliver.getReason());
-            detailDTO.setTotalAmount(splitDeliver.getTotalAmount());
-
+            detailDTO.setTotalAmount(0.0);
 
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliverId);
@@ -154,6 +152,7 @@ public class OrderSplitService {
                 orderSplitItemDTO.setTotalPrice(orderSplitItem.getCost() * orderSplitItem.getNum());//成本价 * 数量
                 orderSplitItemDTO.setBrandName("品牌名");
                 orderSplitItemDTOS.add(orderSplitItemDTO);
+                detailDTO.setTotalAmount(detailDTO.getTotalAmount() + orderSplitItemDTO.getTotalPrice());
             }
 
             detailDTO.setSize(orderSplitItemList.size());

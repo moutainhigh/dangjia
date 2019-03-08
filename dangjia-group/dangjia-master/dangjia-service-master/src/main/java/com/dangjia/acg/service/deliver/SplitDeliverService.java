@@ -155,8 +155,10 @@ public class SplitDeliverService {
                 splitDeliverItemDTO.setUnitName(orderSplitItem.getUnitName());
                 splitDeliverItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(orderSplitItem.getProductId()));
                 splitDeliverItemDTO.setPrice(orderSplitItem.getPrice());
+                splitDeliverItemDTO.setCost(orderSplitItem.getCost());
                 splitDeliverItemDTO.setId(orderSplitItem.getId());
                 splitDeliverItemDTO.setReceive(orderSplitItem.getReceive());//收货数量
+                splitDeliverItemDTO.setSupCost(orderSplitItem.getSupCost());
                 splitDeliverItemDTOList.add(splitDeliverItemDTO);
             }
             splitDeliverDTO.setSplitDeliverItemDTOList(splitDeliverItemDTOList);//明细
