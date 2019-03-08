@@ -538,7 +538,7 @@ public class MemberService {
     /**
      * 业主列表
      */
-    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String searchKey, String parentId, String childId,String orderBy) {
+    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String userRole,String searchKey, String parentId, String childId,String orderBy) {
         try {
             List<String> childsLabelIdList = new ArrayList<>();
             if (StringUtils.isNotBlank(parentId)) {
@@ -552,7 +552,7 @@ public class MemberService {
             String[] childsLabelIdArr = new String[childsLabelIdList.size()];
             childsLabelIdList.toArray(childsLabelIdArr);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Member> list = memberMapper.getMemberListByName(searchKey, stage, childsLabelIdArr,orderBy);
+            List<Member> list = memberMapper.getMemberListByName(searchKey, stage,userRole, childsLabelIdArr,orderBy);
             PageInfo pageResult = new PageInfo(list);
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
             for (Member member : list) {

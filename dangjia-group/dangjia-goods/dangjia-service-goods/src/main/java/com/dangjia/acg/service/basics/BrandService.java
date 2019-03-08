@@ -61,10 +61,24 @@ public class BrandService {
 				List<BrandSeries> mapList=iBrandSeriesMapper.queryBrandSeries(brand.getId());
 				List<Map<String,Object>> mapList2=new ArrayList<>();
 				for(BrandSeries bs:mapList){
-					String imageUrl=bs.getImage();
-					bs.setImage(address+bs.getImage());
+//					String imageUrl=bs.getImage();
+					String[] imgArr = bs.getImage().split(",");
+					String imgStr = "";
+					String imgUrlStr = "";
+					for (int i = 0; i < imgArr.length; i++) {
+						if (i == imgArr.length - 1) {
+							imgStr += address + imgArr[i];
+							imgUrlStr += imgArr[i];
+						} else {
+							imgStr += address + imgArr[i] + ",";
+							imgUrlStr += imgArr[i] + ",";
+						}
+					}
+//					bs.setImage(address+bs.getImage());
+					bs.setImage(imgStr);
 					Map<String,Object> mapSeries = BeanUtils.beanToMap(bs);
-					mapSeries.put("imageUrl",imageUrl);
+//					mapSeries.put("imageUrl",imageUrl);
+					mapSeries.put("imageUrl",imgUrlStr);
 					mapList2.add(mapSeries);
 				}
 				obj.put("mapList", mapList2);
@@ -197,10 +211,25 @@ public class BrandService {
 				String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
 				List<Map<String,Object>> mapList2=new ArrayList<>();
 				for(BrandSeries bs:mapList) {
-					String imageUrl=bs.getImage();
-					bs.setImage(address+bs.getImage());
+					String[] imgArr = bs.getImage().split(",");
+					String imgStr = "";
+					String imgUrlStr = "";
+					for (int i = 0; i < imgArr.length; i++) {
+						if (i == imgArr.length - 1) {
+							imgStr += address + imgArr[i];
+							imgUrlStr += imgArr[i];
+						} else {
+							imgStr += address + imgArr[i] + ",";
+							imgUrlStr += imgArr[i] + ",";
+						}
+					}
+
+//					String imageUrl=bs.getImage();
+//					bs.setImage(address+bs.getImage());
+					bs.setImage(imgStr);
 					Map<String,Object> mapSeries = BeanUtils.beanToMap(bs);
-					mapSeries.put("imageUrl",imageUrl);
+//					mapSeries.put("imageUrl",imageUrl);
+					mapSeries.put("imageUrl",imgUrlStr);
 					mapList2.add(mapSeries);
 				}
 				Map<String, Object> map=new HashMap<String, Object>();

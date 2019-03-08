@@ -28,6 +28,7 @@ public interface WebMemberAPI {
     ServerResponse getMemberList(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("pageDTO") PageDTO pageDTO,
                                  @RequestParam("stage") Integer stage,
+                                 @RequestParam("userRole") String userRole,
                                  @RequestParam("searchKey") String searchKey,
                                  @RequestParam("parentId") String parentId,
                                  @RequestParam("childId") String childId,
