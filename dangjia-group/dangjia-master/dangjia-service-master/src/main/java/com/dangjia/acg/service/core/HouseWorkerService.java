@@ -1171,11 +1171,13 @@ public class HouseWorkerService {
                         continue;
                     House house = houseMapper.selectByPrimaryKey(houseWorker.getHouseId());//查询房产信息.
                     if (house == null) continue;
+                    Member member=memberMapper.selectByPrimaryKey(house.getMemberId());
+                    if (member == null) continue;
                     //房产信息
                     map.put("houseName", house.getHouseName());//地址
                     map.put("releaseTime", houseFlow.getReleaseTime() == null ? "" : houseFlow.getReleaseTime().getTime());//发布时间
                     map.put("square", (house.getSquare() == null ? "0" : house.getSquare()) + "m²");//面积
-                    map.put("memberName", memberMapper.selectByPrimaryKey(house.getMemberId()).getName());//业主姓名
+                    map.put("memberName", member.getName());//业主姓名
                     map.put("price", "¥" + (houseFlow.getWorkPrice() == null ? "0" : String.format("%.2f", houseFlow.getWorkPrice().doubleValue())));//价格
                     if (houseFlow.getPause() == 0) {//正常施工
                         map.put("isItNormal", "正常施工");
