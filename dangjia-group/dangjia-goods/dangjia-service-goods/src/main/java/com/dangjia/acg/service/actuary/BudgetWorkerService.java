@@ -194,7 +194,9 @@ public class BudgetWorkerService {
                         double shopCount = Math.ceil(a);*/
                         budgetMaterial.setShopCount(jobT.getShopCount());
                         budgetMaterial.setConvertCount(jobT.getShopCount() / pro.getConvertQuality());
-                        budgetMaterial.setUnitName(pro.getUnitName());
+                        String convertUnitName = iUnitMapper.selectByPrimaryKey(pro.getConvertUnit()).getName();
+//                        budgetMaterial.setUnitName(pro.getUnitName());
+                        budgetMaterial.setUnitName(convertUnitName);
                         BigDecimal b1 = new BigDecimal(Double.toString(pro.getPrice()));
                         BigDecimal b2 = new BigDecimal(Double.toString(budgetMaterial.getConvertCount()));
                         Double totalPrice = b1.multiply(b2).doubleValue();
@@ -375,7 +377,9 @@ public class BudgetWorkerService {
                             BigDecimal b2 = new BigDecimal(Double.toString(budgetMaterial.getConvertCount()));
                             Double totalPrice = b1.multiply(b2).doubleValue();
                             budgetMaterial.setTotalPrice(totalPrice);
-                            budgetMaterial.setUnitName(pro.getUnitName());
+//                            budgetMaterial.setUnitName(pro.getUnitName());
+                            String convertUnitName = iUnitMapper.selectByPrimaryKey(pro.getConvertUnit()).getName();
+                            budgetMaterial.setUnitName(convertUnitName);
                         } else {
                             budgetMaterial.setSteta(2);//自购
                             budgetMaterial.setProductId("");

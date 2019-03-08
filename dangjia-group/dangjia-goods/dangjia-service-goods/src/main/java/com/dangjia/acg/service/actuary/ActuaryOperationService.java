@@ -60,6 +60,8 @@ public class ActuaryOperationService {
     @Autowired
     private IProductMapper productMapper;
     @Autowired
+    private IUnitMapper iUnitMapper;
+    @Autowired
     private IGroupLinkMapper iGroupLinkMapper;
     @Autowired
     private IGoodsGroupMapper iGoodsGroupMapper;
@@ -383,9 +385,12 @@ public class ActuaryOperationService {
             goodsDTO.setProductId(product.getId());
             goodsDTO.setGoodsId(goods.getId());
             goodsDTO.setImage(getImage(product.getImage()));//图一张
-            goodsDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + product.getUnitName());
+            String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
+//            goodsDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + product.getUnitName());
+            goodsDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
             goodsDTO.setName(product.getName());
-            goodsDTO.setUnitName(product.getUnitName());//单位
+//            goodsDTO.setUnitName(product.getUnitName());//单位
+            goodsDTO.setUnitName(convertUnitName);//单位
             goodsDTO.setProductType(goods.getType());//材料类型
 
             Product srcProduct = product;
@@ -699,14 +704,18 @@ public class ActuaryOperationService {
 //                            cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + budgetMaterial.getId() + "&type=2";
 //                    flowActuaryDTO.setUrl(url);
                     flowActuaryDTO.setAttribute(getAttributes(product));//拼接属性品牌
-                    flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + product.getUnitName());
+//                    flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + product.getUnitName());
+
+                    String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
+                    flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
                     flowActuaryDTO.setTotalPrice(bw.getTotalPrice());
                     flowActuaryDTO.setShopCount(bw.getShopCount());
                     flowActuaryDTO.setConvertCount(Math.ceil(bw.getShopCount() / product.getConvertQuality()));
                     flowActuaryDTO.setBuy(0);
                     flowActuaryDTO.setBudgetMaterialId(bw.getId());
                     flowActuaryDTO.setName(bw.getProductName());
-                    flowActuaryDTO.setUnitName(bw.getUnitName());
+//                    flowActuaryDTO.setUnitName(bw.getUnitName());
+                    flowActuaryDTO.setUnitName(convertUnitName);
                     flowActuaryDTOList.add(flowActuaryDTO);
                 }
                 flowDTO.setSumTotal(new BigDecimal(mendOrderInfoDTO.getTotalAmount()));//合计
@@ -733,20 +742,28 @@ public class ActuaryOperationService {
                     Product product = productMapper.selectByPrimaryKey(bm.getProductId());
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
                     flowActuaryDTO.setTypeName(typsValue);
+
+                    String convertUnitName = bm.getUnitName();
                     if (product != null) {
                         flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
                         String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO, userToken,
                                 cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + type;
                         flowActuaryDTO.setUrl(url);
                         flowActuaryDTO.setAttribute(getAttributes(product));//拼接属性品牌
-                        flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + product.getUnitName());
+//                        flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + product.getUnitName());
+
+                        convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
+
+//                        flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName());
+                        flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
                         flowActuaryDTO.setTotalPrice(product.getPrice() * bm.getConvertCount());
                     }
                     flowActuaryDTO.setShopCount(bm.getShopCount());
                     flowActuaryDTO.setConvertCount(bm.getConvertCount());
                     flowActuaryDTO.setBudgetMaterialId(bm.getId());
                     flowActuaryDTO.setName(bm.getGoodsName());
-                    flowActuaryDTO.setUnitName(bm.getUnitName());
+//                    flowActuaryDTO.setUnitName(bm.getUnitName());
+                    flowActuaryDTO.setUnitName(convertUnitName);
 
                     if (bm.getDeleteState() == 2) {
                         flowActuaryDTO.setBuy(3);//可选没选中(业主已取消)
