@@ -554,7 +554,7 @@ public class HouseWorkerService {
             mapBean.setName(name);
             mapBean.setUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + getH5Url(edUrls[i], userToken, cityId, name)
                     + "&houseId=" + house.getId() + "&houseFlowId=" + houseFlowId);
-            mapBean.setImage(address + "/gongjiang/" + edImages[i]);
+            mapBean.setImage(address + "gongjiang/" + edImages[i]);
             mapBean.setType(edTypes[i]);
             listMap.add(mapBean);
         }
@@ -593,7 +593,7 @@ public class HouseWorkerService {
                         "&houseId=" + house.getId() + "&houseFlowId=" + houseFlowId + "&roleType=3");//工匠
             }
             mapBean.setName(name);
-            mapBean.setImage(address + "/gongjiang/" + qtImages[i]);
+            mapBean.setImage(address + "gongjiang/" + qtImages[i]);
             mapBean.setType(qtTypes[i]);
             listMap.add(mapBean);
         }
@@ -732,7 +732,7 @@ public class HouseWorkerService {
                 HomePageBean.ListBean listBean = new HomePageBean.ListBean();
                 listBean.setName(name);
                 listBean.setUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + getH5Url(urls[i], userToken, cityId, name));
-                listBean.setImageUrl(address + "/gongjiang/" + imageUrls[i]);
+                listBean.setImageUrl(address + "gongjiang/" + imageUrls[i]);
                 listBean.setType(urls[i].equals("") ? 1 : 0);
                 list.add(listBean);
             }
