@@ -84,7 +84,7 @@ public class MendRecordService {
                     }
                     map.put("name", orderSplitItem.getProductName());
                     map.put("price", "¥" + String.format("%.2f",orderSplitItem.getPrice())+"/"+orderSplitItem.getUnitName());
-                    map.put("shopCount", orderSplitItem.getShopCount());
+                    map.put("shopCount", orderSplitItem.getNum());//本次数量
                     map.put("totalPrice", orderSplitItem.getTotalPrice());
                     mapList.add(map);
                 }

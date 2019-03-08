@@ -8,11 +8,13 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
+import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.ChangeOrder;
+import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,10 +40,12 @@ public class ChangeOrderService {
     private IHouseMapper houseMapper;
     @Autowired
     private ConfigMessageService configMessageService;
+    @Autowired
+    private IMendOrderMapper mendOrderMapper;
 
     /**
      * 管家审核变更单
-     *  check 1通过 2不通过
+     *  check 1不通过 2通过
      */
     public ServerResponse supCheckChangeOrder(String userToken,String changeOrderId,Integer check){
         try {
@@ -97,7 +101,13 @@ public class ChangeOrderService {
         }
         List<Map<String,Object>> returnMap = new ArrayList<>();
         for (ChangeOrder changeOrder : changeOrderList){
-
+            if (changeOrder.getState() == 2){
+                List<MendOrder> mendOrderList = mendOrderMapper.getByChangeOrderId(changeOrder.getId());
+                if (mendOrderList.size() == 0){
+                    changeOrder.setState(3);
+                    changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+                }
+            }
             Map<String,Object> map = BeanUtils.beanToMap(changeOrder);
             map.put("changeOrderId", changeOrder.getId());
             map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(changeOrder.getWorkerTypeId()).getName());

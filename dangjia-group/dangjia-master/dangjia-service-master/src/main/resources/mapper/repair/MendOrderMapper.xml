@@ -23,6 +23,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		modify_date as modifyDate
 	</sql>
 
+
+    <!-- 查询补退人工单 -->
+    <select id="getByChangeOrderId" resultType="com.dangjia.acg.modle.repair.MendOrder">
+        SELECT
+            <include refid="all_columns"/>
+        FROM dj_repair_mend_order
+        where
+            type in (1,3)
+        and change_order_id = #{changeOrderId}
+    </select>
+
     <!-- 查询工种未处理补人工 -->
     <select id="unCheckRepWorker" resultType="com.dangjia.acg.modle.repair.MendOrder">
         SELECT

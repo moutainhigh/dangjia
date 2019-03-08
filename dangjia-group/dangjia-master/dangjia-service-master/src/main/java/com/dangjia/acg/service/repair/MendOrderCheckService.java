@@ -151,7 +151,17 @@ public class MendOrderCheckService {
      */
     private ServerResponse settleMendOrder(MendOrder mendOrder){
         try{
+            if(mendOrder.getType() == 1){
+                ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
+                changeOrder.setState(5);//待业主支付
+                changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+            }
+
             if (mendOrder.getType() == 3){//退人工
+                ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
+                changeOrder.setState(6);//退人工完成
+                changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+
                 HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(mendOrder.getHouseId(), mendOrder.getWorkerTypeId());
                 BigDecimal refund = new BigDecimal(mendOrder.getTotalAmount());
                 houseWorkerOrder.setWorkPrice(houseWorkerOrder.getWorkPrice().subtract(refund));//减掉工钱

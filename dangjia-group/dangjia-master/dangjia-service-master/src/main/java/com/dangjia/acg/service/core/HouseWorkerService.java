@@ -242,7 +242,7 @@ public class HouseWorkerService {
             bean.setWorkerType(worker.getWorkerType() == 3 ? 0 : 1);
             bean.setHouseFlowId(hf.getId());
             bean.setIfBackOut(1);
-            if(hf.getPause() == 1){//已暂停
+            if (hf.getPause() == 1) {//已暂停
                 bean.setIfBackOut(2);
             }
             String houseName = house.getHouseName();
@@ -257,7 +257,7 @@ public class HouseWorkerService {
                 bean.setAlreadyMoney(hwo.getHaveMoney());//已得钱
                 bean.setAlsoMoney(alsoMoney);//还可得钱
             }
-            bean.setBigList(getBigList(userToken, cityId, house, worker));//添加菜单到返回体中
+            bean.setBigList(getBigList(userToken, cityId, house, worker, hf));//添加菜单到返回体中
             List<String> promptList = new ArrayList<>();//消息提示list
             List<ConstructionByWorkerIdBean.ButtonListBean> buttonList = new ArrayList<>();
             if (worker.getWorkerType() == 3) {//大管家
@@ -452,14 +452,13 @@ public class HouseWorkerService {
                     bean.setIfBackOut(2);
                 } else if (hf.getWorkSteta() == 1) {
                     promptList.add("您已阶段完工");
-                    //bean.setIfBackOut(2);
+                    bean.setIfBackOut(2);
                 } else if (hf.getWorkSteta() == 2) {
                     promptList.add("您已整体完工");
-                    //bean.setIfBackOut(2);
+                    bean.setIfBackOut(2);
+                } else {
+                    bean.setIfBackOut(1);
                 }
-//                else {
-//                    bean.setIfBackOut(1);
-//                }
                 if (hf.getWorkType() >= 4) {
                     if (hf.getWorkSteta() == 3) {//待交底
                         buttonList.add(getButton("找大管家交底", 1));
@@ -484,9 +483,9 @@ public class HouseWorkerService {
                         } else {
                             List<HouseFlowApply> stageAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 1, worker.getId());//查询今天是否已提交阶段完工
                             List<HouseFlowApply> flowAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId());//查询是否已提交今日完工
-                            if(stageAppList.size() > 0){
+                            if (stageAppList.size() > 0) {
                                 promptList.add("今日已申请阶段完工");
-                            }else if (flowAppList != null && flowAppList.size() > 0) {//已提交今日完工
+                            } else if (flowAppList != null && flowAppList.size() > 0) {//已提交今日完工
                                 promptList.add("今日已完工");
                             } else {
                                 buttonList.add(getButton("今日完工", 3));
@@ -528,7 +527,7 @@ public class HouseWorkerService {
      * @param worker    当前用户
      * @return 菜单列表
      */
-    private List<ConstructionByWorkerIdBean.BigListBean> getBigList(String userToken, String cityId, House house, Member worker) {
+    private List<ConstructionByWorkerIdBean.BigListBean> getBigList(String userToken, String cityId, House house, Member worker, HouseFlow hf) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         List<ConstructionByWorkerIdBean.BigListBean> bigList = new ArrayList<>();
         //添加工程资料菜单
@@ -571,6 +570,12 @@ public class HouseWorkerService {
         bigListBean.setName("材料人工");
         listMap = new ArrayList<>();
         for (int i = 0; i < qtNames.length; i++) {
+            //整体完工后"材料人工"只留下"要补退记录"
+            if (hf.getWorkSteta() == 2) {
+                if (!qtNames[i].equals("要补退记录")) {
+                    continue;
+                }
+            }
             ConstructionByWorkerIdBean.BigListBean.ListMapBean mapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
             if (worker.getWorkerType() == 3) {
                 if (qtShowTypes[i] == 2) continue;
@@ -606,23 +611,23 @@ public class HouseWorkerService {
      */
     private void setDisplayState(HouseFlow hf, List<String> promptList, List<ConstructionByWorkerIdBean.ButtonListBean> buttonList, HouseFlowApply checkFlowApp, boolean isShow) {
         if (isShow) {//整体完工
-            if(checkFlowApp == null){
-                if (hf.getWorkSteta() != 2){
+            if (checkFlowApp == null) {
+                if (hf.getWorkSteta() != 2) {
                     buttonList.add(getButton("申请整体完工", 5));
                 }
-            }else if (checkFlowApp.getSupervisorCheck() == 0){
+            } else if (checkFlowApp.getSupervisorCheck() == 0) {
                 promptList.add("已申请整体完工,等待大管家审核");
-            }else if (checkFlowApp.getSupervisorCheck() == 1) {
+            } else if (checkFlowApp.getSupervisorCheck() == 1) {
                 promptList.add("大管家已审核您的整体完工,待业主审核");
             }
         } else {//阶段完工申请
-            if(checkFlowApp == null){
-                if (hf.getWorkSteta() != 1 && hf.getWorkSteta() != 2){
+            if (checkFlowApp == null) {
+                if (hf.getWorkSteta() != 1 && hf.getWorkSteta() != 2) {
                     buttonList.add(getButton("申请阶段完工", 4));
                 }
-            }else if (checkFlowApp.getSupervisorCheck() == 0){
+            } else if (checkFlowApp.getSupervisorCheck() == 0) {
                 promptList.add("已申请阶段完工,等待大管家审核");
-            }else if (checkFlowApp.getSupervisorCheck() == 1) {
+            } else if (checkFlowApp.getSupervisorCheck() == 1) {
                 promptList.add("大管家已审核您的阶段完工,待业主审核");
             }
         }
@@ -736,13 +741,15 @@ public class HouseWorkerService {
             return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "获取我的界面信息失败！");
         }
     }
+
     /**
      * 获取申请单明细
      */
     public ServerResponse getHouseFlowApply(String userToken, String houseFlowApplyId) {
-       HouseFlowApply houseFlowApply= houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
-       return ServerResponse.createBySuccess( houseFlowApply);
+        HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+        return ServerResponse.createBySuccess(houseFlowApply);
     }
+
     /**
      * 提交审核、停工
      */
@@ -1158,7 +1165,8 @@ public class HouseWorkerService {
                     HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
                     Map<String, Object> map = new HashMap<>();
                     map.put("houseFlowId", houseFlow.getId());//任务id
-                    if (houseFlow == null || (worker.getWorkerType()!=null&&worker.getWorkerType()!=3&&houseFlow.getWorkType()==2)) continue;
+                    if (houseFlow == null || (worker.getWorkerType() != null && worker.getWorkerType() != 3 && houseFlow.getWorkType() == 2))
+                        continue;
                     House house = houseMapper.selectByPrimaryKey(houseWorker.getHouseId());//查询房产信息.
                     if (house == null) continue;
                     //房产信息

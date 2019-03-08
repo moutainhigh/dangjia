@@ -161,6 +161,10 @@
             AND (w.nick_name LIKE CONCAT('%',#{searchKey},'%')
             or w.mobile LIKE CONCAT('%',#{searchKey},'%'))
         </if>
+        <if test="userRole!=null and userRole!=''">
+            AND w.smscode = #{userRole}
+        </if>
+
         <if test="stage >= 0">
             and ifnull(mc.stage,0)=#{stage}
         </if>

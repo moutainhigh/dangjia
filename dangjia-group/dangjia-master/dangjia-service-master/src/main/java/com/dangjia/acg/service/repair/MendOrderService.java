@@ -77,6 +77,8 @@ public class MendOrderService {
 
     @Autowired
     private ISurplusWareHouseMapper iSurplusWareHouseMapper;
+    @Autowired
+    private IChangeOrderMapper changeOrderMapper;
 
     /**
      * 业主确认退货
@@ -196,6 +198,10 @@ public class MendOrderService {
                 MendOrder mendOrder = mendOrderList.get(0);
                 mendOrder.setState(1);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+
+                ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
+                changeOrder.setState(2);//通过->工匠业主审核
+                changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 configMessageService.addConfigMessage(null, "gj", house.getMemberId(), "0", "退人工变更", String.format
@@ -334,6 +340,10 @@ public class MendOrderService {
                 MendOrder mendOrder = mendOrderList.get(0);
                 mendOrder.setState(1);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+
+                ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
+                changeOrder.setState(2);//通过->工匠业主审核
+                changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "补人工", String.format
