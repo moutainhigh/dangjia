@@ -16,7 +16,7 @@ public interface IBrandMapper extends Mapper<Brand> {
 	List<Brand> getBrands();
 	/**根据拿到的name拿到品牌*/
 	List<Brand> getBrandByNames(String name);
-	Brand getBrandByName(String name);
+	List<Brand>  getBrandByName(String name);
 	/**根据拿到的Id删除品牌*/
 	void deleteById(String id);
 }

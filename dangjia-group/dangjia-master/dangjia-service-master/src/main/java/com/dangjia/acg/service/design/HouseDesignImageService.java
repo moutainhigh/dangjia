@@ -3,7 +3,6 @@ package com.dangjia.acg.service.design;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.design.HouseDesignImageDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -73,20 +72,21 @@ public class HouseDesignImageService {
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
-            Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId);
-            List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);
-            List<HouseDesignImageDTO> imageDTOList = new ArrayList<HouseDesignImageDTO>();
-            for (HouseDesignImage houseDesignImage : houseDesignImageList) {
-                DesignImageType designImageType = designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId());
-                if (designImageType != null && !CommonUtil.isEmpty(houseDesignImage.getImageurl())) {
-                    HouseDesignImageDTO houseDesignImageDTO = new HouseDesignImageDTO();
-                    houseDesignImageDTO.setImageurl(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + houseDesignImage.getImageurl());
-                    houseDesignImageDTO.setName(designImageType.getName());
-                    imageDTOList.add(houseDesignImageDTO);
-                }
-            }
-            return ServerResponse.createBySuccess("查询成功", imageDTOList);
+            ServerResponse serverResponse= designService.getImagesList(null,houseId);
+//            Example example = new Example(HouseFlow.class);
+//            example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId);
+//            List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);
+//            List<HouseDesignImageDTO> imageDTOList = new ArrayList<HouseDesignImageDTO>();
+//            for (HouseDesignImage houseDesignImage : houseDesignImageList) {
+//                DesignImageType designImageType = designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId());
+//                if (designImageType != null && !CommonUtil.isEmpty(houseDesignImage.getImageurl())) {
+//                    HouseDesignImageDTO houseDesignImageDTO = new HouseDesignImageDTO();
+//                    houseDesignImageDTO.setImageurl(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + houseDesignImage.getImageurl());
+//                    houseDesignImageDTO.setName(designImageType.getName());
+//                    imageDTOList.add(houseDesignImageDTO);
+//                }
+//            }
+            return ServerResponse.createBySuccess("查询成功", serverResponse.getResultObj());
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
