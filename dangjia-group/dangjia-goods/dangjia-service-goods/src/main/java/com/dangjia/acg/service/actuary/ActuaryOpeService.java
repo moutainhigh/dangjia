@@ -222,10 +222,11 @@ public class ActuaryOpeService {
                     }
                     //获取价格
                     Double rowPrice = budgetMaterialMapper.getCategoryAllPrice(houseId, categoryId);
-                    if (rowPrice != null) {
-                        //将价格每次都相加
-                        budgetItemDTO.setRowPrice(budgetItemDTO.getRowPrice() + rowPrice);
-                    }
+                    Double rowPriceOld = budgetItemDTO.getRowPrice();
+                    if (rowPriceOld == null) rowPriceOld = 0.0;
+                    if (rowPrice == null) rowPrice = 0.0;
+                    //将价格每次都相加
+                    budgetItemDTO.setRowPrice(rowPriceOld + rowPrice);
                     List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.getCategoryAllList(houseId, categoryId);
                     for (BudgetMaterial budgetMaterial : budgetMaterialList) {
                         GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
