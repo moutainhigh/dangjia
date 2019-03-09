@@ -45,16 +45,16 @@ public class ActuaryOpeService {
      * 根据分类list查询商品
      * 自定义查看
      */
-    public ServerResponse getByCategoryId(String idArr, String houseId,Integer type) {
+    public ServerResponse getByCategoryId(String idArr, String houseId, Integer type) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             BudgetDTO budgetDTO = new BudgetDTO();
             List<BudgetItemDTO> budgetItemDTOList = new ArrayList<>();
-            if(type == 1){
+            if (type == 1) {
                 budgetDTO.setWorkerPrice(0.0);
                 budgetDTO.setCaiPrice(budgetMaterialMapper.getHouseCaiPrice(houseId));
                 String[] workerTypeIdArr = idArr.split(",");
-                for (int i=0; i < workerTypeIdArr.length; i++){
+                for (int i = 0; i < workerTypeIdArr.length; i++) {
                     BudgetItemDTO budgetItemDTO = new BudgetItemDTO();
                     WorkerType workerType = workerTypeAPI.queryWorkerType(workerTypeIdArr[i]);
                     budgetItemDTO.setRowImage(address + workerType.getImage());
@@ -65,12 +65,12 @@ public class ActuaryOpeService {
 
                     List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getTypeAllList(houseId, workerTypeIdArr[i]);
                     List<GoodsItemDTO> goodsItemDTOList = new ArrayList<>();
-                    for (BudgetWorker budgetWorker : budgetWorkerList){
+                    for (BudgetWorker budgetWorker : budgetWorkerList) {
                         GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
                         goodsItemDTO.setWorkerTypeName(workerType.getName());
                         goodsItemDTO.setGoodsImage(address + budgetWorker.getImage());
                         goodsItemDTO.setGoodsName(budgetWorker.getName());
-                        goodsItemDTO.setConvertCount(budgetWorker.getShopCount());
+                        goodsItemDTO.setConvertCount(budgetWorker.getShopCount().intValue());
                         goodsItemDTO.setPrice(budgetWorker.getPrice());
                         goodsItemDTO.setUnitName(budgetWorker.getUnitName());
                         goodsItemDTO.setId(budgetWorker.getWorkerGoodsId());//人工商品id
@@ -80,11 +80,11 @@ public class ActuaryOpeService {
                     budgetItemDTOList.add(budgetItemDTO);
                 }
                 budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
-            }else {
+            } else {
                 budgetDTO.setWorkerPrice(budgetWorkerMapper.getHouseWorkerPrice(houseId));
                 budgetDTO.setCaiPrice(0.0);
                 String[] categoryIdArr = idArr.split(",");
-                for (int i=0; i<categoryIdArr.length; i++){
+                for (int i = 0; i < categoryIdArr.length; i++) {
                     BudgetItemDTO budgetItemDTO = new BudgetItemDTO();
                     GoodsCategory goodsCategory = goodsCategoryMapper.selectByPrimaryKey(categoryIdArr[i]);
                     budgetItemDTO.setRowImage(address + goodsCategory.getImage());
@@ -95,14 +95,14 @@ public class ActuaryOpeService {
 
                     List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.getCategoryAllList(houseId, categoryIdArr[i]);
                     List<GoodsItemDTO> goodsItemDTOList = new ArrayList<>();
-                    for (BudgetMaterial budgetMaterial : budgetMaterialList){
+                    for (BudgetMaterial budgetMaterial : budgetMaterialList) {
                         GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
                         WorkerType workerType = workerTypeAPI.queryWorkerType(budgetMaterial.getWorkerTypeId());
                         goodsItemDTO.setWorkerTypeName(workerType.getName());
                         goodsItemDTO.setGoodsImage(address + budgetMaterial.getImage());
-                        if(budgetMaterial.getSteta() == 2){//自购
+                        if (budgetMaterial.getSteta() == 2) {//自购
                             goodsItemDTO.setGoodsName(budgetMaterial.getGoodsName());
-                        }else {
+                        } else {
                             goodsItemDTO.setGoodsName(budgetMaterial.getProductName());
                             goodsItemDTO.setId(budgetMaterial.getProductId());//货号id
                         }
@@ -118,8 +118,8 @@ public class ActuaryOpeService {
             }
             //budgetDTO.setTotalPrice(budgetDTO.getWorkerPrice() + budgetDTO.getCaiPrice());
 
-            return ServerResponse.createBySuccess("查询成功",budgetDTO);
-        }catch (Exception e){
+            return ServerResponse.createBySuccess("查询成功", budgetDTO);
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -128,30 +128,30 @@ public class ActuaryOpeService {
     /**
      * 所有分类
      */
-    public ServerResponse categoryIdList(String houseId,Integer type) {
-        try{
-            List<Map<String,Object>> mapList = new ArrayList<>();
-            if(type == 1){
+    public ServerResponse categoryIdList(String houseId, Integer type) {
+        try {
+            List<Map<String, Object>> mapList = new ArrayList<>();
+            if (type == 1) {
                 List<String> workerTypeIdList = budgetWorkerMapper.workerTypeList(houseId);
                 for (String workerTypeId : workerTypeIdList) {
                     WorkerType workerType = workerTypeAPI.queryWorkerType(workerTypeId);
                     Map map = new HashMap();
-                    map.put("id",workerType.getId());
+                    map.put("id", workerType.getId());
                     map.put("name", workerType.getName());
                     mapList.add(map);
                 }
-            }else {
+            } else {
                 List<String> categoryIdList = budgetMaterialMapper.categoryIdList(houseId);
                 for (String categoryId : categoryIdList) {
                     GoodsCategory goodsCategory = goodsCategoryMapper.selectByPrimaryKey(categoryId);
                     Map map = new HashMap();
-                    map.put("id",goodsCategory.getId());
+                    map.put("id", goodsCategory.getId());
                     map.put("name", goodsCategory.getName());
                     mapList.add(map);
                 }
             }
             return ServerResponse.createBySuccess("查询成功", mapList);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -168,10 +168,10 @@ public class ActuaryOpeService {
             budgetDTO.setWorkerPrice(budgetWorkerMapper.getHouseWorkerPrice(houseId));
             budgetDTO.setCaiPrice(budgetMaterialMapper.getHouseCaiPrice(houseId));
             budgetDTO.setTotalPrice(budgetDTO.getWorkerPrice() + budgetDTO.getCaiPrice());
-            if(type == 1){//人工
+            if (type == 1) {//人工
                 List<String> workerTypeIdList = budgetWorkerMapper.workerTypeList(houseId);
                 List<BudgetItemDTO> budgetItemDTOList = new ArrayList<>();
-                for (String workerTypeId : workerTypeIdList){
+                for (String workerTypeId : workerTypeIdList) {
                     BudgetItemDTO budgetItemDTO = new BudgetItemDTO();
                     WorkerType workerType = workerTypeAPI.queryWorkerType(workerTypeId);
                     budgetItemDTO.setRowImage(address + workerType.getImage());
@@ -181,11 +181,11 @@ public class ActuaryOpeService {
 
                     List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getTypeAllList(houseId, workerTypeId);
                     List<GoodsItemDTO> goodsItemDTOList = new ArrayList<>();
-                    for (BudgetWorker budgetWorker : budgetWorkerList){
+                    for (BudgetWorker budgetWorker : budgetWorkerList) {
                         GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
                         goodsItemDTO.setGoodsImage(address + budgetWorker.getImage());
                         goodsItemDTO.setGoodsName(budgetWorker.getName());
-                        goodsItemDTO.setConvertCount(budgetWorker.getShopCount());
+                        goodsItemDTO.setConvertCount(budgetWorker.getShopCount().intValue());
                         goodsItemDTO.setPrice(budgetWorker.getPrice());
                         goodsItemDTO.setUnitName(budgetWorker.getUnitName());
                         goodsItemDTO.setId(budgetWorker.getWorkerGoodsId());//人工商品id
@@ -195,43 +195,65 @@ public class ActuaryOpeService {
                     budgetItemDTOList.add(budgetItemDTO);
                 }
                 budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
-            }else if (type == 2){
+            } else if (type == 2) {//材料
                 List<String> categoryIdList = budgetMaterialMapper.categoryIdList(houseId);
-                List<BudgetItemDTO> budgetItemDTOList = new ArrayList<>();
-                for (String categoryId : categoryIdList){
-                    BudgetItemDTO budgetItemDTO = new BudgetItemDTO();
-                    GoodsCategory goodsCategory = goodsCategoryMapper.selectByPrimaryKey(categoryId);
-                    budgetItemDTO.setRowImage(address + goodsCategory.getImage());
-                    budgetItemDTO.setRowName(goodsCategory.getName());
+                Map<String, BudgetItemDTO> maps = new HashMap<>();
+                for (String categoryId : categoryIdList) {
+                    //获取低级类别
+                    GoodsCategory goodsCategoryNext = goodsCategoryMapper.selectByPrimaryKey(categoryId);
+                    if (goodsCategoryNext == null) {
+                        continue;
+                    }
+                    //获取顶级类别
+                    GoodsCategory goodsCategoryParentTop = goodsCategoryMapper.selectByPrimaryKey(goodsCategoryNext.getParentTop());
+                    GoodsCategory goodsCategory;
+                    if (goodsCategoryParentTop == null) {
+                        goodsCategory = goodsCategoryNext;
+                    } else {
+                        goodsCategory = goodsCategoryParentTop;
+                    }
+                    //重临时缓存maps中取出BudgetItemDTO
+                    BudgetItemDTO budgetItemDTO = maps.get(goodsCategory.getId());
+                    if (budgetItemDTO == null) {
+                        //如果没有将BudgetItemDTO初始化
+                        budgetItemDTO = new BudgetItemDTO();
+                        budgetItemDTO.setRowImage(address + goodsCategory.getImage());
+                        budgetItemDTO.setRowName(goodsCategory.getName());
+                    }
+                    //获取价格
                     Double rowPrice = budgetMaterialMapper.getCategoryAllPrice(houseId, categoryId);
-                    budgetItemDTO.setRowPrice(rowPrice);
-
+                    Double rowPriceOld = budgetItemDTO.getRowPrice();
+                    if (rowPriceOld == null) rowPriceOld = 0.0;
+                    if (rowPrice == null) rowPrice = 0.0;
+                    //将价格每次都相加
+                    budgetItemDTO.setRowPrice(rowPriceOld + rowPrice);
                     List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.getCategoryAllList(houseId, categoryId);
-                    List<GoodsItemDTO> goodsItemDTOList = new ArrayList<>();
-                    for (BudgetMaterial budgetMaterial : budgetMaterialList){
+                    for (BudgetMaterial budgetMaterial : budgetMaterialList) {
                         GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
                         WorkerType workerType = workerTypeAPI.queryWorkerType(budgetMaterial.getWorkerTypeId());
                         goodsItemDTO.setWorkerTypeName(workerType.getName());
                         goodsItemDTO.setGoodsImage(address + budgetMaterial.getImage());
-                        if(budgetMaterial.getSteta() == 2){//自购
+                        if (budgetMaterial.getSteta() == 2) {//自购
                             goodsItemDTO.setGoodsName(budgetMaterial.getGoodsName());
-                        }else {
+                        } else {
                             goodsItemDTO.setGoodsName(budgetMaterial.getProductName());
                         }
                         goodsItemDTO.setConvertCount(budgetMaterial.getConvertCount());
                         goodsItemDTO.setPrice(budgetMaterial.getPrice());
                         goodsItemDTO.setUnitName(budgetMaterial.getUnitName());
                         goodsItemDTO.setId(budgetMaterial.getProductId());//货号id
-                        goodsItemDTOList.add(goodsItemDTO);
+                        budgetItemDTO.addGoodsItemDTO(goodsItemDTO);
                     }
-                    budgetItemDTO.setGoodsItemDTOList(goodsItemDTOList);
-                    budgetItemDTOList.add(budgetItemDTO);
+                    maps.put(goodsCategory.getId(), budgetItemDTO);
+                }
+                List<BudgetItemDTO> budgetItemDTOList = new ArrayList<>();
+                for (Map.Entry<String, BudgetItemDTO> entry : maps.entrySet()) {
+                    budgetItemDTOList.add(entry.getValue());
                 }
                 budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
             }
-
-            return ServerResponse.createBySuccess("查询成功",budgetDTO);
-        }catch (Exception e){
+            return ServerResponse.createBySuccess("查询成功", budgetDTO);
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }

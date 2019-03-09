@@ -160,7 +160,7 @@ public class BudgetWorkerService {
             if (jobT.getProductType() != 2) {//材料或者服务
                 try {
                     BudgetMaterial budgetMaterial = new BudgetMaterial();
-                    budgetMaterial.setConvertCount(1.00);
+                    budgetMaterial.setConvertCount(1);
                     Goods goods = iGoodsMapper.queryById(jobT.getGoodsId());
                     if (goods == null) {
                         continue;
@@ -193,11 +193,14 @@ public class BudgetWorkerService {
                        /* double a = jobT.getActuarialQuantity() / pro.getConvertQuality();
                         double shopCount = Math.ceil(a);*/
                         budgetMaterial.setShopCount(jobT.getShopCount());
-                        budgetMaterial.setConvertCount(jobT.getShopCount() / pro.getConvertQuality());
+                        Double converCount = Math.ceil(jobT.getShopCount() / pro.getConvertQuality());
+                        budgetMaterial.setConvertCount(converCount.intValue());
                         String convertUnitName = iUnitMapper.selectByPrimaryKey(pro.getConvertUnit()).getName();
 //                        budgetMaterial.setUnitName(pro.getUnitName());
                         budgetMaterial.setUnitName(convertUnitName);
                         BigDecimal b1 = new BigDecimal(Double.toString(pro.getPrice()));
+//                        BigDecimal b2 = new BigDecimal(Double.toString(budgetMaterial.getConvertCount()));
+//                        BigDecimal b2 = new BigDecimal(Double.toString(Math.ceil(budgetMaterial.getConvertCount())));
                         BigDecimal b2 = new BigDecimal(Double.toString(budgetMaterial.getConvertCount()));
                         Double totalPrice = b1.multiply(b2).doubleValue();
                         budgetMaterial.setTotalPrice(totalPrice);
@@ -363,7 +366,7 @@ public class BudgetWorkerService {
                         budgetMaterial.setWorkerTypeId(workerTypeId);
                         budgetMaterial.setHouseFlowId(houseFlowId);
                         budgetMaterial.setHouseId(houseId);
-                        budgetMaterial.setConvertCount(1.00);
+                        budgetMaterial.setConvertCount(1);
                         if (goods.getBuy() == 0 || goods.getBuy() == 1) {//0：必买；1可选；2自购
                             budgetMaterial.setSteta(1);//我们购
 
@@ -383,10 +386,12 @@ public class BudgetWorkerService {
                            /* double a = actuarialQuantity / pro.getConvertQuality();
                             double shopCount = Math.ceil(a);*/
                             budgetMaterial.setShopCount(shopCount);
-                            budgetMaterial.setConvertCount(Math.ceil(shopCount / pro.getConvertQuality()));
+                            Double converCount = Math.ceil(shopCount / pro.getConvertQuality());
+                            budgetMaterial.setConvertCount(converCount.intValue());
                             BigDecimal b1 = new BigDecimal(Double.toString(budgetMaterial.getPrice()));
 //                            BigDecimal b2 = new BigDecimal(Double.toString(shopCount));
-                            BigDecimal b2 = new BigDecimal(Double.toString(budgetMaterial.getConvertCount()));
+//                            BigDecimal b2 = new BigDecimal(Double.toString(budgetMaterial.getConvertCount()));
+                            BigDecimal b2 = new BigDecimal(Double.toString(Math.ceil(budgetMaterial.getConvertCount())));
                             Double totalPrice = b1.multiply(b2).doubleValue();
                             budgetMaterial.setTotalPrice(totalPrice);
 //                            budgetMaterial.setUnitName(pro.getUnitName());

@@ -14,9 +14,12 @@ import com.dangjia.acg.export.actuary.TActuaryGoodsTotal;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
+import com.dangjia.acg.mapper.basics.IProductMapper;
+import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Goods;
+import com.dangjia.acg.modle.basics.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +46,11 @@ public class HouseDataService {
     private IBudgetMaterialMapper iBudgetMaterialMapper;
     @Autowired
     private IBudgetWorkerMapper iBudgetWorkerMapper;
+
+    @Autowired
+    private IProductMapper iProductMapper;
+    @Autowired
+    private IUnitMapper iUnitMapper;
     @Autowired
     private IGoodsMapper iGoodsMapper;
     @Autowired
@@ -150,6 +158,15 @@ public class HouseDataService {
                     TActuaryGoods tActuaryGoods = new TActuaryGoods();
                     String name = WorkTypeEnums.getInstance(Integer.parseInt(material.getWorkerTypeId())).getDesc();
                     tActuaryGoods.setName(name);
+                    tActuaryGoods.setShopNum(material.getShopCount());
+//                    购买性质0：必买；1可选；2自购
+                    if (goods.getBuy() != 2) {
+                        Product product = iProductMapper.selectByPrimaryKey(material.getProductId());
+                        tActuaryGoods.setProductSn(product.getProductSn());
+                        tActuaryGoods.setGoodsUnitName(product.getUnitName());
+                        tActuaryGoods.setConvertQuality(product.getConvertQuality());
+                        tActuaryGoods.setUnit(iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName());
+                    }
 
                     //用户删除状态·,0表示未支付，1表示已删除,2表示业主取消,3表示已经支付,4再次购买
                     switch (material.getDeleteState()) {
@@ -158,7 +175,7 @@ public class HouseDataService {
                             break;
                         case 1:
                             tActuaryGoods.setDeleteState("已删除");
-                            break;
+                            continue;//不显示 已删除的
                         case 2:
                             tActuaryGoods.setDeleteState("业主取消");
                             break;
@@ -181,7 +198,7 @@ public class HouseDataService {
                     if (goods.getBuy() == 2) //自购
                     {
                         tActuaryGoods.setProductName("自购商品:" + material.getProductName());
-                        tActuaryGoods.setProductNum(0.0);
+                        tActuaryGoods.setProductNum(0);
                         tActuaryGoods.setPrice(0.0);
                         tActuaryGoods.setPriceTotal(0.0);
                         tActuaryGoods.setUnit("自购商品单位:" + material.getUnitName());
@@ -213,7 +230,7 @@ public class HouseDataService {
                             break;
                         case 1:
                             tActuaryGoods.setDeleteState("已删除");
-                            break;
+                            continue;//不显示 已删除的
                         case 2:
                             tActuaryGoods.setDeleteState("业主取消");
                             break;
@@ -226,7 +243,7 @@ public class HouseDataService {
                     if (CommonUtil.isEmpty(worker.getName()))
                         continue;
                     tActuaryGoods.setProductName(worker.getName());
-                    tActuaryGoods.setProductNum(worker.getShopCount());
+                    tActuaryGoods.setProductNum(worker.getShopCount().intValue());
                     tActuaryGoods.setPrice(worker.getPrice());
                     tActuaryGoods.setPriceTotal(worker.getTotalPrice());
                     tActuaryGoods.setUnit(worker.getUnitName());

@@ -211,7 +211,9 @@ public class ActuaryOperationService {
                             srcBudgetMaterial.setGroupType(goodsGroup.getName());
                             srcBudgetMaterial.setCost(targetProduct.getCost());
                             //这里会更新 为 新product的 换算后的购买数量
-                            srcBudgetMaterial.setConvertCount(Math.ceil(srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality()));
+//                            srcBudgetMaterial.setConvertCount(Math.ceil(srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality()));
+                            Double converCount = Math.ceil(srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality());
+                            srcBudgetMaterial.setConvertCount(converCount.intValue());
                             srcBudgetMaterial.setTotalPrice(targetProduct.getPrice() * srcBudgetMaterial.getConvertCount());
                             LOG.info("srcBudgetMaterial 换后:" + srcBudgetMaterial);
                             budgetMaterialMapper.updateByPrimaryKey(srcBudgetMaterial);
@@ -230,7 +232,8 @@ public class ActuaryOperationService {
                 budgetMaterial.setPrice(product.getPrice());
                 budgetMaterial.setCost(product.getCost());
                 //这里会更新 为 新product的 换算后的购买数量
-                budgetMaterial.setConvertCount(Math.ceil(budgetMaterial.getShopCount() / product.getConvertQuality()));
+                Double converCount = Math.ceil(budgetMaterial.getShopCount() / product.getConvertQuality());
+                budgetMaterial.setConvertCount(converCount.intValue());
                 budgetMaterial.setTotalPrice(product.getPrice() * budgetMaterial.getConvertCount());
                 budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
                 return ServerResponse.createBySuccessMessage("操作成功" + ret);
@@ -294,7 +297,7 @@ public class ActuaryOperationService {
             }
 
             if (valueIdArr == null || valueIdArr.length == 0 || CommonUtil.isEmpty(attributeIdArr)) {
-                criteria.andCondition(" (isnull(value_id_arr) or value_id_arr = '') " );
+                criteria.andCondition(" (isnull(value_id_arr) or value_id_arr = '') ");
             } else {
                 for (String val : valueIdArr) {
                     criteria.andCondition("  FIND_IN_SET('" + val + "',value_id_arr) ");
@@ -738,7 +741,9 @@ public class ActuaryOperationService {
                     flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
                     flowActuaryDTO.setTotalPrice(bw.getTotalPrice());
                     flowActuaryDTO.setShopCount(bw.getShopCount());
-                    flowActuaryDTO.setConvertCount(Math.ceil(bw.getShopCount() / product.getConvertQuality()));
+//                    flowActuaryDTO.setConvertCount(Math.ceil(bw.getShopCount() / product.getConvertQuality()));
+                    Double converCount = Math.ceil(bw.getShopCount() / product.getConvertQuality());
+                    flowActuaryDTO.setConvertCount(converCount.intValue());
                     flowActuaryDTO.setBuy(0);
                     flowActuaryDTO.setBudgetMaterialId(bw.getId());
                     flowActuaryDTO.setName(bw.getProductName());
