@@ -115,11 +115,7 @@ public class ActuaryOpeService {
                 Map<String, Map<String, Object>> maps = new HashMap<>();
                 for (String categoryId : categoryIdList) {
                     //获取低级类别
-                    Example example = new Example(GoodsCategory.class);
-                    Example.Criteria criteria = example.createCriteria();
-                    criteria.andEqualTo(GoodsCategory.ID, categoryId);
-                    example.orderBy(GoodsCategory.PARENT_TOP).asc();
-                    GoodsCategory goodsCategoryNext = goodsCategoryMapper.selectByPrimaryKey(example);
+                    GoodsCategory goodsCategoryNext = goodsCategoryMapper.selectByPrimaryKey(categoryId);
                     if (goodsCategoryNext == null) {
                         continue;
                     }
@@ -212,11 +208,7 @@ public class ActuaryOpeService {
         Map<String, BudgetItemDTO> maps = new HashMap<>();
         for (String categoryId : categoryIdList) {
             //获取低级类别
-            Example example = new Example(GoodsCategory.class);
-            Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo(GoodsCategory.ID, categoryId);
-            example.orderBy(GoodsCategory.PARENT_TOP).asc();
-            GoodsCategory goodsCategoryNext = goodsCategoryMapper.selectByPrimaryKey(example);
+            GoodsCategory goodsCategoryNext = goodsCategoryMapper.selectByPrimaryKey(categoryId);
             if (goodsCategoryNext == null) {
                 continue;
             }
