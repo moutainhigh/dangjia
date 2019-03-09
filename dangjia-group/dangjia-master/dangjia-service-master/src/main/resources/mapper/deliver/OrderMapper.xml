@@ -46,9 +46,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!-- 根据所有的订单 -->
     <select id="getAllOrders" resultType="com.dangjia.acg.modle.deliver.Order">
         SELECT
-        <include refid="all_columns"/>
-        from dj_deliver_order
-        ORDER BY create_date desc
+            house_id houseId,SUM(total_amount) totalAmount,worker_type_id workerTypeId,type
+        FROM
+            dj_deliver_order
+        WHERE
+         house_id = #{houseId}
+        and
+            worker_type_id = #{workerTypeId}
+        GROUP BY house_id,worker_type_id,type
+        ORDER BY
+            create_date DESC
     </select>
 
 </mapper>

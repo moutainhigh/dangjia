@@ -93,9 +93,7 @@ public class IndexPageService {
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
                 Map<String,Object> map = new HashMap<>();
                 map.put("name",workerType.getName());
-                example = new Example(Order.class);
-                example.createCriteria().andEqualTo(Order.HOUSE_ID, houseId).andEqualTo(Order.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
-                List<Order> workerOrders = orderMapper.selectByExample(example);
+                List<Order> workerOrders = orderMapper.getAllOrders(houseId,houseFlow.getWorkerTypeId());
                 map.put("workers",  workerOrders);
                 mapList.add(map);
             }
