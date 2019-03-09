@@ -813,13 +813,11 @@ public class HouseWorkerService {
                 return ServerResponse.createByErrorMessage("该工种有未处理变更单,通知管家处理");
             }
 
-
-            //测试注释掉
             //包括所有申请 和 巡查
-            /*List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(houseFlowId, applyType, workerId);
+            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(houseFlowId, applyType, workerId, new Date());
             if (houseFlowApplyList.size() > 0) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "您今日已提交过此申请,请勿重复提交！");
-            }*/
+            }
 
             /*待审核申请*/
             if (applyType < 4) {
@@ -914,9 +912,9 @@ public class HouseWorkerService {
                 Date lateDate = DateUtil.toDate(s2);
                 Date newDate2 = new Date();//当前时间
                 Long downTime = newDate2.getTime() - lateDate.getTime();//对比12点
-               /* if(downTime>0){
+                if(downTime>0){
                     return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
-                }*/
+                }
                 hfa.setApplyDec("我是" + workType.getName() + ",我今天已经开工了");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过

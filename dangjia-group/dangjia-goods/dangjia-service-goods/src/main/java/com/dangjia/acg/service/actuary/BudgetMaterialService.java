@@ -48,6 +48,10 @@ public class BudgetMaterialService {
     @Autowired
     private ConfigUtil configUtil;
 
+    @Autowired
+    private BudgetWorkerService budgetWorkerService;
+
+
     private static Logger LOG = LoggerFactory.getLogger(BudgetMaterialService.class);
 
     //查询所有精算
@@ -79,7 +83,15 @@ public class BudgetMaterialService {
         try {
             List<Map<String, Object>> mapList = iBudgetMaterialMapper.getBudgetMaterialById(houseId, workerTypeId);
             LOG.info("getAllBudgetMaterialById houseId:" + houseId + " workerTypeId:" + workerTypeId + " size:" + mapList.size());
-            BudgetWorkerService.setGoods(mapList, iGoodsMapper, iProductMaper, iUnitMapper);
+//            BudgetWorkerService.setGoods(mapList, iGoodsMapper, iProductMaper, iUnitMapper);
+            budgetWorkerService.setGoods(mapList);
+            for (Map<String, Object> obj : mapList) {
+                String goodsId = obj.get("goodsId").toString();
+                Goods goods = iGoodsMapper.queryById(goodsId);
+                Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
+                if (unit != null)
+                    obj.put("goodsUnitName", unit.getName());
+            }
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             e.printStackTrace();

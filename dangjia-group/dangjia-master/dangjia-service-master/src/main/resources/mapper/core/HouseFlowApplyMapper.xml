@@ -41,7 +41,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             house_id = #{houseId}
         and (supervisor_check = 0 or (supervisor_check = 1 and member_check = 0))
         and worker_type_id = #{workerTypeId}
-        and apply_type in (0,1,2)
+        and apply_type in (1,2)
     </select>
 
     <!--管家已审核业主未审核申请 -->

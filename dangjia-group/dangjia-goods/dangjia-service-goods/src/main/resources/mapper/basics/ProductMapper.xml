@@ -206,22 +206,30 @@
 	<!-- 查询product -->
 	<select id="selectProduct" resultType="com.dangjia.acg.modle.basics.Product">
 		select
-		p.id as id,
-		p.name as name,
+		p.id,
+		p.name,
 		p.goods_id as goodsId,
 		p.category_id as categoryId,
 		p.product_sn as productSn,
-		p.image as image,
+		p.image,
 		p.unit_id as unitId,
 		p.label_id as labelId,
 		p.unit_name as unitName,
-		p.type as type,
-		p.price as price,
+		p.weight,
+		p.type,
+		p.maket,
+		p.cost,
+		p.price,
+		p.profit,
 		p.brand_id as brandId,
 		p.brand_series_id as brandSeriesId,
-		p.attribute_id_arr AS attributeIdArr,
-		p.value_name_arr AS valueNameArr,
-		p.value_id_arr AS valueIdArr
+		p.attribute_id_arr as attributeIdArr,
+		p.value_name_arr as valueNameArr,
+		p.value_id_arr as valueIdArr,
+		p.convert_unit as convertUnit,
+		p.convert_quality as convertQuality,
+		p.create_date as createDate,
+		p.modify_date as modifyDate
 		from  dj_basics_product p
 		where
 		    type=1 and maket=1
@@ -235,9 +243,6 @@
 			<if test="brandSeriesId==null or brandSeriesId==''">
 				and isnull(p.brand_series_id)
 			</if>
-			<if test="valueIdArr==null or valueIdArr==''">
-				and isnull(p.value_id_arr)
-			</if>
 
 			<if test="brandId!=null and brandId!=''">
 				and p.brand_id=#{brandId}
@@ -245,11 +250,15 @@
 			<if test="brandSeriesId!=null and brandSeriesId!=''">
 				and p.brand_series_id=#{brandSeriesId}
 			</if>
-			<if test="valueIdArr!=null or valueIdArr!=''">
-				<foreach collection="valueIdArr" item="valueId" index="index" >
+		<if test="valueIdArr==null or valueIdArr==''">
+			and (isnull(p.value_id_arr) or p.value_id_arr = '')
+		</if>
+
+		<if test="valueIdArr!=null or valueIdArr!=''">
+			<foreach collection="valueIdArr" item="valueId" index="index" >
 					and FIND_IN_SET(#{valueId},p.value_id_arr)
-				</foreach>
-			</if>
+			</foreach>
+		</if>
 
 	</select>
 
@@ -399,7 +408,7 @@
 		where
 		type=1 and maket=1
 		and isnull(p.attribute_id_arr)
-		and isnull(p.value_id_arr)
+		and (isnull(p.value_id_arr) or p.value_id_arr = '')
 		<if test="brandId!=null and brandId!=''">
 			and p.brand_id=#{brandId}
 		</if>

@@ -9,10 +9,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.actuary.ISearchBoxMapper;
-import com.dangjia.acg.mapper.basics.IGoodsMapper;
-import com.dangjia.acg.mapper.basics.IProductMapper;
-import com.dangjia.acg.mapper.basics.ITechnologyMapper;
-import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
+import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.actuary.SearchBox;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
@@ -45,6 +42,8 @@ public class TechnologyService {
     private IWorkerGoodsMapper iWorkerGoodsMapper;
     @Autowired
     private IProductMapper iProductMapper;
+    @Autowired
+    private IUnitMapper iUnitMapper;
 
     @Autowired
     private IGoodsMapper iGoodsMapper;
@@ -425,7 +424,9 @@ public class TechnologyService {
                         Product product=products.get(0);
                         JSONObject object = new JSONObject();
                         object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
-                        object.put("price", product.getPrice() + "/" + product.getUnitName());
+//                        object.put("price", product.getPrice() + "/" + product.getUnitName());
+                        String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
+                        object.put("price", product.getPrice() + "/" + convertUnitName);
                         object.put("name", t.getName());
                         String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") + "&gId=" + product.getId() + "&type=" + DjConstants.GXType.CAILIAO;
                         object.put("url", url);//0:工艺；1：商品；2：人工

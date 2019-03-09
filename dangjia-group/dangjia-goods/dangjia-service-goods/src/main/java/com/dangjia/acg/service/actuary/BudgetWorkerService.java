@@ -262,7 +262,17 @@ public class BudgetWorkerService {
             setWorkerTypeName(wokerList);
             map.put("wokerList", wokerList);//人工精算
             List<Map<String, Object>> materialList = iBudgetMaterialMapper.getAllbudgetTemplates(templateId);
-            setGoods(materialList, iGoodsMapper, iProductMapper, iUnitMapper);
+//            setGoods(materialList, iGoodsMapper, iProductMapper, iUnitMapper);
+            setGoods(materialList);
+
+            for (Map<String, Object> obj : materialList) {
+                String goodsId = obj.get("goodsId").toString();
+                Goods goods = iGoodsMapper.queryById(goodsId);
+                Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
+                if (unit != null)
+                    obj.put("goodsUnitName", unit.getName());
+            }
+
             map.put("materialList", materialList);//材料精算
             return ServerResponse.createBySuccess("查询精算成功", map);
         } catch (Exception e) {
@@ -271,10 +281,12 @@ public class BudgetWorkerService {
         }
     }
 
-    static void setGoods(List<Map<String, Object>> materialList, IGoodsMapper iGoodsMapper, IProductMapper iProductMapper, IUnitMapper iUnitMapper) {
+    public void setGoods(List<Map<String, Object>> materialList) {
+//        , IGoodsMapper iGoodsMapper, IProductMapper iProductMapper, IUnitMapper iUnitMapper
         for (Map<String, Object> obj : materialList) {
             String goodsId = obj.get("goodsId").toString();
-            Goods goods = iGoodsMapper.queryById(goodsId);
+//            Goods goods = iGoodsMapper.queryById(goodsId);
+            Goods goods = iGoodsMapper.selectByPrimaryKey(goodsId);
             obj.put("goodsBuy", goods.getBuy());
             if (goods.getBuy() == 0 || goods.getBuy() == 1) {//0：必买；1可选；2自购
 //                    budgetMaterial.setSteta(1);//我们购

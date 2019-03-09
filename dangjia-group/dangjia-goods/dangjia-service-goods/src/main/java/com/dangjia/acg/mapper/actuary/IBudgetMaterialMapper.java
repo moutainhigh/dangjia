@@ -52,6 +52,10 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 	List<Map<String,Object>> getAllbudgetTemplates(String template_id);
 	/**根据house_id查询所有商品精算*/
 	List<Map<String,Object>> getBudgetMaterialById(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+
+	/**根据house_id查询所有商品精算*/
+	List<BudgetMaterial> getBudgetMaterialByHouseIdAndWorkerTypeId(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+
 	/**根据拿到的Id删除精算*/
 	void deleteById(String id);
 	/**根据拿到的Id删除精算*/
