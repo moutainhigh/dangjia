@@ -48,6 +48,7 @@ public interface IProductMapper extends Mapper<Product> {
      * 查询product
      */
     Product selectProduct(@Param("goodsId") String goodsId, @Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String[] valueIdArr);
+//    Product selectProduct(@Param("goodsId") String goodsId, @Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String valueIdArr);
 
     List<Product> getPListByBrandSeriesId(@Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String valueIdArr);
 

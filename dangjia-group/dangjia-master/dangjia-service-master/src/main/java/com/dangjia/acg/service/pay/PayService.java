@@ -7,9 +7,11 @@ import com.dangjia.acg.common.pay.AliPayUtil;
 import com.dangjia.acg.common.pay.WeiXinPayUtil;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.pay.IPayOrderMapper;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
@@ -47,6 +49,8 @@ public class PayService {
     private IHouseDistributionMapper iHouseDistributionMapper;
     @Autowired
     private PaymentService paymentService;
+    @Autowired
+    private IWorkerTypeMapper workerTypeMapper;
 
     protected static final Logger LOG = LoggerFactory.getLogger(PayService.class);
 
@@ -234,8 +238,11 @@ public class PayService {
         payOrder.setState(0);// 0未支付,1已支付
         payOrderMapper.insert(payOrder);
 
-        /****临时支付金额****/
-        payOrder.setPrice(new BigDecimal("0.01"));
+        /****临时支付金额 写活暂且用设计师一个字段****/
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey("1");
+        if (workerType.getMethods() != 0){
+            payOrder.setPrice(new BigDecimal("0.01"));
+        }
         return payOrder;
     }
 

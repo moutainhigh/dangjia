@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
 import java.math.BigDecimal;
@@ -274,10 +275,37 @@ public class ActuaryOperationService {
             for (String str : valueIdArr) {
                 LOG.info("valueIdArr str:" + str);
             }
-            Product product = productMapper.selectProduct(goodsId, brandId, brandSeriesId, valueIdArr);
-            if (product == null) {
+            Example example = new Example(Product.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo(Product.TYPE, 1);
+            criteria.andEqualTo(Product.MAKET, 1);
+            if (!CommonUtil.isEmpty(goodsId)) {
+                criteria.andEqualTo(Product.GOODS_ID, goodsId);
+            }
+            if (!CommonUtil.isEmpty(brandId)) {
+                criteria.andEqualTo(Product.BRAND_ID, brandId);
+            } else {
+                criteria.andCondition("  (isnull(brand_id) or brand_id = '')");
+            }
+            if (!CommonUtil.isEmpty(brandSeriesId)) {
+                criteria.andEqualTo(Product.BRAND_SERIES_ID, brandSeriesId);
+            } else {
+                criteria.andCondition("  (isnull(brand_series_id) or brand_series_id = '') ");
+            }
+
+            if (valueIdArr == null || valueIdArr.length == 0 || CommonUtil.isEmpty(attributeIdArr)) {
+                criteria.andCondition(" (isnull(value_id_arr) or value_id_arr = '') " );
+            } else {
+                for (String val : valueIdArr) {
+                    criteria.andCondition("  FIND_IN_SET('" + val + "',value_id_arr) ");
+                }
+            }
+            List<Product> products = productMapper.selectByExample(example);
+//            Product product = productMapper.selectProduct(goodsId, brandId, brandSeriesId, valueIdArr);
+            if (products == null || products.size() == 0) {
                 return ServerResponse.createBySuccess("暂无该货号", "");
             }
+            Product product = products.get(0);
             GoodsDTO goodsDTO = goodsDetail(product, budgetMaterialId, 3);
             if (goodsDTO != null) {
                 return ServerResponse.createBySuccess("查询成功", goodsDTO);

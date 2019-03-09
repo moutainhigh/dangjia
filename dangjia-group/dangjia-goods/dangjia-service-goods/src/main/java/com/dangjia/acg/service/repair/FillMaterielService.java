@@ -68,25 +68,22 @@ public class FillMaterielService {
      */
     public ServerResponse repairLibraryMaterial(String categoryId, String name, Integer pageNum, Integer pageSize) {
         try {
-            if (name == "") {
-                name = null;
-            }
             if (pageNum == null) {
                 pageNum = 1;
             }
             if (pageSize == null) {
                 pageSize = 5;
             }
-            List<GoodsDTO> goodsDTOList = new ArrayList<GoodsDTO>();
+            List<GoodsDTO> goodsDTOList = new ArrayList<>();
             PageHelper.startPage(pageNum, pageSize);
             List<Product> productList;
             if (StringUtil.isEmpty(categoryId)) {
                 Example example = new Example(Product.class);
-                example.createCriteria().andLike(Product.NAME, name);
+                example.createCriteria().andLike(Product.NAME, "%" + name + "%");
                 productList = iProductMapper.selectByExample(example);
             } else {
                 Example example = new Example(Product.class);
-                example.createCriteria().andEqualTo(Product.CATEGORY_ID, categoryId).andLike(Product.NAME, name);
+                example.createCriteria().andEqualTo(Product.CATEGORY_ID, categoryId).andLike(Product.NAME, "%" + name + "%");
                 productList = iProductMapper.selectByExample(example);
             }
             PageInfo pageResult = new PageInfo(productList);
@@ -99,16 +96,6 @@ public class FillMaterielService {
                 }
             }
             pageResult.setList(goodsDTOList);
-
-            /*List<Goods> goodsList = goodsMapper.queryRepairGoods(name,categoryId);
-            for(Goods goods : goodsList){
-                List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
-                if(productList.size() > 0){
-                    Product product = productList.get(0);
-                    GoodsDTO goodsDTO = actuaryOperationService.goodsDetail(product, "");
-                    goodsDTOList.add(goodsDTO);
-                }
-            }*/
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
