@@ -525,9 +525,10 @@ public class PaymentService {
 
 
                 /*处理人工和取消的材料改到自购精算*/
-                this.renGong(businessOrderNumber, hwo, payState, houseFlowId);
-                /*处理材料*/
-                this.caiLiao(businessOrderNumber, hwo, payState, houseFlowId);
+                if(this.renGong(businessOrderNumber, hwo, payState, houseFlowId)){
+                    /*处理材料*/
+                    this.caiLiao(businessOrderNumber, hwo, payState, houseFlowId);
+                }
                 /*处理保险订单*/
                 this.insurance(hwo, payState);
             }
@@ -602,7 +603,7 @@ public class PaymentService {
     /**
      * 处理精算人工生成人工订单
      */
-    private void renGong(String businessOrderNumber, HouseWorkerOrder hwo, String payState, String houseFlowId) {
+    private boolean renGong(String businessOrderNumber, HouseWorkerOrder hwo, String payState, String houseFlowId) {
         try {
             //处理人工
             List<BudgetWorker> budgetWorkerList = forMasterAPI.renGong(houseFlowId);
@@ -634,9 +635,11 @@ public class PaymentService {
                     orderItemMapper.insert(orderItem);
                 }
             }
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return false;
         }
     }
 
@@ -1444,6 +1447,21 @@ public class PaymentService {
                     example = new Example(WorkerTypeSafe.class);
                     example.createCriteria().andEqualTo(WorkerTypeSafe.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
                     List<WorkerTypeSafe> wtsList = workerTypeSafeMapper.selectByExample(example);
+
+                    WorkerTypeSafeOrder workerTypeSafeOrder = workerTypeSafeOrderMapper.getByWorkerTypeId(houseFlow.getWorkerTypeId(), houseFlow.getHouseId());
+                    if(workerTypeSafeOrder == null){//默认去勾上
+                        if (wtsList.size() > 0) {
+                            workerTypeSafeOrder = new WorkerTypeSafeOrder();
+                            workerTypeSafeOrder.setWorkerTypeSafeId(wtsList.get(0).getId()); // 向保险订单中存入保险服务类型的id
+                            workerTypeSafeOrder.setHouseId(houseFlow.getHouseId()); // 存入房子id
+                            workerTypeSafeOrder.setWorkerTypeId(houseFlow.getWorkerTypeId()); // 工种id
+                            workerTypeSafeOrder.setWorkerType(houseFlow.getWorkerType());
+                            workerTypeSafeOrder.setPrice(wtsList.get(0).getPrice().multiply(house.getSquare()));
+                            workerTypeSafeOrder.setState(0);  //未支付
+                            workerTypeSafeOrderMapper.insert(workerTypeSafeOrder);
+                        }
+                    }
+
                     //有保险服务
                     if (wtsList.size() > 0) {
                         //查出有没有生成保险订单
