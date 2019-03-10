@@ -71,10 +71,18 @@ public class IndexPageService {
                 mapReady.put("typeA", "¥"  + 0);
             }else {
                 Order order = orderMapper.getWorkerOrder(houseId,"1");
-                mapReady.put("typeA", "¥" + String.format("%.2f",order.getTotalAmount().doubleValue()));
+                if(order!=null) {
+                    mapReady.put("typeA", "¥" + String.format("%.2f", order.getTotalAmount().doubleValue()));
+                }else{
+                    mapReady.put("typeA", "¥"  + 0);
+                }
             }
             Order order = orderMapper.getWorkerOrder(houseId,"2");
-            mapReady.put("typeB","¥" + (order == null? 0 : String.format("%.2f", order.getTotalAmount().doubleValue())));
+            if(order!=null) {
+                mapReady.put("typeB","¥" + (order == null? 0 : String.format("%.2f", order.getTotalAmount().doubleValue())));
+            }else{
+                mapReady.put("typeB", "¥"  + 0);
+            }
             mapList.add(mapReady);
 
             Example example = new Example(HouseFlow.class);
