@@ -650,7 +650,7 @@ public class BudgetWorkerService {
                     } else {
                         rlistResult.setRName(goods.getName());
                     }
-                    double gjjg = (abm.getShopCount() * (abm.getPrice() == null ? price : abm.getPrice()));
+                    double gjjg = (abm.getConvertCount() * (abm.getPrice() == null ? price : abm.getPrice()));
                     rlistResult.setSumRcost(gjjg);//合计价格
                     rlistResult.setNumber(abm.getShopCount());//数量
                     clf += rlistResult.getSumRcost();
