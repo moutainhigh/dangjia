@@ -70,7 +70,7 @@ public class ActuaryOpeService {
                         goodsItemDTO.setWorkerTypeName(workerType.getName());
                         goodsItemDTO.setGoodsImage(address + budgetWorker.getImage());
                         goodsItemDTO.setGoodsName(budgetWorker.getName());
-                        goodsItemDTO.setConvertCount(budgetWorker.getShopCount().intValue());
+                        goodsItemDTO.setConvertCount(budgetWorker.getShopCount());
                         goodsItemDTO.setPrice(budgetWorker.getPrice());
                         goodsItemDTO.setUnitName(budgetWorker.getUnitName());
                         goodsItemDTO.setId(budgetWorker.getWorkerGoodsId());//人工商品id
@@ -185,7 +185,7 @@ public class ActuaryOpeService {
                         GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
                         goodsItemDTO.setGoodsImage(address + budgetWorker.getImage());
                         goodsItemDTO.setGoodsName(budgetWorker.getName());
-                        goodsItemDTO.setConvertCount(budgetWorker.getShopCount().intValue());
+                        goodsItemDTO.setConvertCount(budgetWorker.getShopCount());
                         goodsItemDTO.setPrice(budgetWorker.getPrice());
                         goodsItemDTO.setUnitName(budgetWorker.getUnitName());
                         goodsItemDTO.setId(budgetWorker.getWorkerGoodsId());//人工商品id

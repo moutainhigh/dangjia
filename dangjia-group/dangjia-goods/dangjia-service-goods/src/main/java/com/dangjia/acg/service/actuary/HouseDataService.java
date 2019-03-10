@@ -198,7 +198,7 @@ public class HouseDataService {
                     if (goods.getBuy() == 2) //自购
                     {
                         tActuaryGoods.setProductName("自购商品:" + material.getProductName());
-                        tActuaryGoods.setProductNum(0);
+                        tActuaryGoods.setProductNum(0d);
                         tActuaryGoods.setPrice(0.0);
                         tActuaryGoods.setPriceTotal(0.0);
                         tActuaryGoods.setUnit("自购商品单位:" + material.getUnitName());
@@ -243,7 +243,7 @@ public class HouseDataService {
                     if (CommonUtil.isEmpty(worker.getName()))
                         continue;
                     tActuaryGoods.setProductName(worker.getName());
-                    tActuaryGoods.setProductNum(worker.getShopCount().intValue());
+                    tActuaryGoods.setProductNum(worker.getShopCount());
                     tActuaryGoods.setPrice(worker.getPrice());
                     tActuaryGoods.setPriceTotal(worker.getTotalPrice());
                     tActuaryGoods.setUnit(worker.getUnitName());

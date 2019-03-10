@@ -14,7 +14,7 @@ public class FlowActuaryDTO {
     private String name;//商品名
     private String image;//图片
     private Double shopCount;//购买总数
-    private Integer convertCount;//小单位转成大单位转换后的购买总数
+    private Double convertCount;//小单位转成大单位转换后的购买总数
     private String url;//商品详情
 
     private int buy;//购买性质0：必买；1可取消；2自购
