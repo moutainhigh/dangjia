@@ -140,7 +140,7 @@ public class HouseFlowService {
             if (accessToken == null) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
             }
-            Member member = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+            Member member = accessToken.getMember();
             if (member == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
             }
