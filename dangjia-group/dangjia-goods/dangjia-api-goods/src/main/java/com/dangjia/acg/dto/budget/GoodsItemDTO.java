@@ -12,7 +12,7 @@ public class GoodsItemDTO {
     private String workerTypeName;//工种名字
     private String goodsImage;
     private String goodsName;
-    private Integer convertCount;//计算数量
+    private Double convertCount;//计算数量
     private String unitName;//单位
     private Double price;// 销售价
     private String id;  //人工商品workerGoodsId 服务材料 productId

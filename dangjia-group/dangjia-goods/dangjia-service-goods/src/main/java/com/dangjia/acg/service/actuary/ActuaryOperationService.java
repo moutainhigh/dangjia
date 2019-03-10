@@ -213,7 +213,7 @@ public class ActuaryOperationService {
                             //这里会更新 为 新product的 换算后的购买数量
 //                            srcBudgetMaterial.setConvertCount(Math.ceil(srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality()));
                             Double converCount = Math.ceil(srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality());
-                            srcBudgetMaterial.setConvertCount(converCount.intValue());
+                            srcBudgetMaterial.setConvertCount(converCount);
                             srcBudgetMaterial.setTotalPrice(targetProduct.getPrice() * srcBudgetMaterial.getConvertCount());
                             LOG.info("srcBudgetMaterial 换后:" + srcBudgetMaterial);
                             budgetMaterialMapper.updateByPrimaryKey(srcBudgetMaterial);
@@ -233,7 +233,7 @@ public class ActuaryOperationService {
                 budgetMaterial.setCost(product.getCost());
                 //这里会更新 为 新product的 换算后的购买数量
                 Double converCount = Math.ceil(budgetMaterial.getShopCount() / product.getConvertQuality());
-                budgetMaterial.setConvertCount(converCount.intValue());
+                budgetMaterial.setConvertCount(converCount);
                 budgetMaterial.setTotalPrice(product.getPrice() * budgetMaterial.getConvertCount());
                 budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
                 return ServerResponse.createBySuccessMessage("操作成功" + ret);
@@ -743,7 +743,7 @@ public class ActuaryOperationService {
                     flowActuaryDTO.setShopCount(bw.getShopCount());
 //                    flowActuaryDTO.setConvertCount(Math.ceil(bw.getShopCount() / product.getConvertQuality()));
                     Double converCount = Math.ceil(bw.getShopCount() / product.getConvertQuality());
-                    flowActuaryDTO.setConvertCount(converCount.intValue());
+                    flowActuaryDTO.setConvertCount(converCount);
                     flowActuaryDTO.setBuy(0);
                     flowActuaryDTO.setBudgetMaterialId(bw.getId());
                     flowActuaryDTO.setName(bw.getProductName());

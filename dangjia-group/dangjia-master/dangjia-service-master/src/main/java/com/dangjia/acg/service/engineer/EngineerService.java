@@ -254,6 +254,14 @@ public class EngineerService {
             map.put("refuseNumber",houseFlow.getRefuseNumber());//被拒人数
             map.put("grabNumber",houseFlow.getGrabNumber());//抢过单人数
             map.put("workType",houseFlow.getWorkType());//抢单状态，1还没有发布，只是默认房产,2等待被抢，3有工匠抢单,4已采纳已支付
+            if (houseFlow.getWorkType() == 3){//待支付
+                HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(),houseFlow.getWorkerTypeId(),1);
+                map.put("houseWorkerId",houseWorker.getId());
+            }else if (houseFlow.getWorkType() == 4){//已支付
+                HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(),houseFlow.getWorkerTypeId(),6);
+                map.put("houseWorkerId",houseWorker.getId());
+            }
+
             map.put("releaseTime",houseFlow.getReleaseTime());//发布时间
             map.put("workSteta",houseFlow.getWorkSteta());//0未开始 ，1阶段完工通过，2整体完工通过，3待交底，4施工中
             map.put("pause",houseFlow.getPause());//施工状态0正常,1暂停

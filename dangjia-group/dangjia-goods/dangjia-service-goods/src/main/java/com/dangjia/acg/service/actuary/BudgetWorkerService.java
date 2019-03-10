@@ -7,7 +7,6 @@ import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.data.GetForBudgetAPI;
 import com.dangjia.acg.api.data.TechnologyRecordAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
-import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -27,7 +26,6 @@ import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.HouseFlow;
-import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
@@ -160,7 +158,7 @@ public class BudgetWorkerService {
             if (jobT.getProductType() != 2) {//材料或者服务
                 try {
                     BudgetMaterial budgetMaterial = new BudgetMaterial();
-                    budgetMaterial.setConvertCount(1);
+                    budgetMaterial.setConvertCount(1d);
                     Goods goods = iGoodsMapper.queryById(jobT.getGoodsId());
                     if (goods == null) {
                         continue;
@@ -194,7 +192,7 @@ public class BudgetWorkerService {
                         double shopCount = Math.ceil(a);*/
                         budgetMaterial.setShopCount(jobT.getShopCount());
                         Double converCount = Math.ceil(jobT.getShopCount() / pro.getConvertQuality());
-                        budgetMaterial.setConvertCount(converCount.intValue());
+                        budgetMaterial.setConvertCount(converCount);
                         String convertUnitName = iUnitMapper.selectByPrimaryKey(pro.getConvertUnit()).getName();
 //                        budgetMaterial.setUnitName(pro.getUnitName());
                         budgetMaterial.setUnitName(convertUnitName);
@@ -366,7 +364,7 @@ public class BudgetWorkerService {
                         budgetMaterial.setWorkerTypeId(workerTypeId);
                         budgetMaterial.setHouseFlowId(houseFlowId);
                         budgetMaterial.setHouseId(houseId);
-                        budgetMaterial.setConvertCount(1);
+                        budgetMaterial.setConvertCount(1d);
                         if (goods.getBuy() == 0 || goods.getBuy() == 1) {//0：必买；1可选；2自购
                             budgetMaterial.setSteta(1);//我们购
 
@@ -387,7 +385,7 @@ public class BudgetWorkerService {
                             double shopCount = Math.ceil(a);*/
                             budgetMaterial.setShopCount(shopCount);
                             Double converCount = Math.ceil(shopCount / pro.getConvertQuality());
-                            budgetMaterial.setConvertCount(converCount.intValue());
+                            budgetMaterial.setConvertCount(converCount);
                             BigDecimal b1 = new BigDecimal(Double.toString(budgetMaterial.getPrice()));
 //                            BigDecimal b2 = new BigDecimal(Double.toString(shopCount));
 //                            BigDecimal b2 = new BigDecimal(Double.toString(budgetMaterial.getConvertCount()));

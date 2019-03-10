@@ -69,7 +69,7 @@ public class BudgetMaterial extends BaseEntity{
 	//单位换算成 goods 表里的unit_name 后的购买总数
 	// （相当于 小单位 转成 大单位后的购买数量  公式：budgetMaterial.setConvertCount(Math.ceil(shopCount / pro.getConvertQuality()));）
 	@Column(name = "convert_count")
-	private Integer convertCount;
+	private Double convertCount;
 
 	/*@Column(name = "actuarial_quantity")
 	private Double actuarialQuantity;*///精算量

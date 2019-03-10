@@ -37,7 +37,7 @@ public class TActuaryGoods {
     private Double convertQuality;//换算量
 
     @ExcelField(titile = "换算后的数量", offset = 9)
-    private Integer productNum;
+    private Double productNum;
 
     @ExcelField(titile = "换算后的单位", offset = 10)
     private String unit;
