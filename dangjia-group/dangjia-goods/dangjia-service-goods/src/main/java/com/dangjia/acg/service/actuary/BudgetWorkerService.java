@@ -344,7 +344,7 @@ public class BudgetWorkerService {
 
             iBudgetMaterialMapper.deleteByhouseId(houseId, workerTypeId);
             iBudgetWorkerMapper.deleteByhouseId(houseId, workerTypeId);
-
+            Example example=null;
             JSONArray goodsList = JSONArray.parseArray(listOfGoods);
             for (int i = 0; i < goodsList.size(); i++) {
                 JSONObject job = goodsList.getJSONObject(i);
@@ -355,6 +355,16 @@ public class BudgetWorkerService {
                 String goodsGroupId = job.getString("goodsGroupId");//所属关联组
                 Double shopCount = Double.parseDouble(job.getString("shopCount"));//数量
                 if (0 == productType || 1 == productType) {//材料或者服务
+                    example=new Example(BudgetMaterial.class);
+                    example.createCriteria()
+                            .andEqualTo(BudgetMaterial.HOUSE_ID)
+                            .andEqualTo(BudgetMaterial.WORKER_TYPE_ID,workerTypeId)
+                            .andEqualTo(BudgetMaterial.GOODS_ID,goodsId)
+                            .andEqualTo(BudgetMaterial.PRODUCT_ID,productId);
+                    int num=iBudgetMaterialMapper.selectCountByExample(example);
+                    if (num>0) {
+                        continue;
+                    }
                     try {
                         BudgetMaterial budgetMaterial = new BudgetMaterial();
                         Goods goods = iGoodsMapper.queryById(goodsId);
@@ -429,6 +439,15 @@ public class BudgetWorkerService {
                     }
                 } else if (2 == productType) {//人工商品
                     try {
+                        example=new Example(BudgetWorker.class);
+                        example.createCriteria()
+                                .andEqualTo(BudgetWorker.HOUSE_ID)
+                                .andEqualTo(BudgetWorker.WORKER_TYPE_ID,workerTypeId)
+                                .andEqualTo(BudgetWorker.WORKER_GOODS_ID,productId);
+                        int num=iBudgetWorkerMapper.selectCountByExample(example);
+                        if (num>0) {
+                            continue;
+                        }
                         BudgetWorker budgetWorker = new BudgetWorker();
                         WorkerGoods workerGoods = iWorkerGoodsMapper.selectByPrimaryKey(productId);
                         if (workerGoods == null) {
