@@ -12,7 +12,6 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.Order;
-import com.dangjia.acg.modle.design.HouseDesignImage;
 import com.dangjia.acg.modle.house.House;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,16 +49,9 @@ public class IndexPageService {
         try {
             House house = houseMapper.selectByPrimaryKey(houseId);
             HouseDetailsDTO houseDetailsDTO = new HouseDetailsDTO();
-            HouseDesignImage houseDesignImage = houseDesignImageMapper.planeGraph(houseId);
-            if (houseDesignImage == null){
-                Example example = new Example(HouseDesignImage.class);
-                example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId);
-                List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);
-                houseDesignImage = houseDesignImageList.get(0);
-            }
             houseDetailsDTO.setCityId(house.getCityId());
             houseDetailsDTO.setHouseId(house.getId());
-            houseDetailsDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + houseDesignImage.getImageurl());
+            houseDetailsDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + house.getImage());
             houseDetailsDTO.setHouseName(house.getResidential()+"***"+house.getNumber()+"房");
             String[] liangArr = {};
             if (house.getLiangDian() != null){
