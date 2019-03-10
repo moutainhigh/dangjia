@@ -356,7 +356,7 @@ public class BudgetWorkerService {
                 String goodsGroupId = job.getString("goodsGroupId");//所属关联组
                 Double shopCount = Double.parseDouble(job.getString("shopCount"));//数量
                 if (0 == productType || 1 == productType) {//材料或者服务
-                    if (Boolean.parseBoolean(map.get(houseId+workerTypeId+goodsId+productId).toString())) {
+                    if (map.get(houseId+workerTypeId+goodsId+productId)!=null&&Boolean.parseBoolean(map.get(houseId+workerTypeId+goodsId+productId).toString())) {
                         continue;
                     }
                     try {
@@ -434,7 +434,7 @@ public class BudgetWorkerService {
                     }
                 } else if (2 == productType) {//人工商品
                     try {
-                        if (Boolean.parseBoolean(map.get(houseId+workerTypeId+"R"+goodsId+productId).toString())) {
+                        if (map.get(houseId+workerTypeId+"R"+goodsId+productId)!=null&&Boolean.parseBoolean(map.get(houseId+workerTypeId+"R"+goodsId+productId).toString())) {
                             continue;
                         }
                         BudgetWorker budgetWorker = new BudgetWorker();
