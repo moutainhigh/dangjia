@@ -11,6 +11,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		from  dj_design_house_design_image
 		where
 		    house_id=#{houseId} and design_image_type_id=#{designImageTypeId}
+
+		    ORDER BY create_date DESC LIMIT 1;
 	</select>
 
     <!-- 查询风格关联的设计类型图id -->
