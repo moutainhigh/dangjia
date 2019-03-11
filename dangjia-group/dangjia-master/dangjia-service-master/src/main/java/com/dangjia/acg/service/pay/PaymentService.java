@@ -1448,8 +1448,8 @@ public class PaymentService {
                     example.createCriteria().andEqualTo(WorkerTypeSafe.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
                     List<WorkerTypeSafe> wtsList = workerTypeSafeMapper.selectByExample(example);
 
-                    WorkerTypeSafeOrder workerTypeSafeOrder = workerTypeSafeOrderMapper.getByWorkerTypeId(houseFlow.getWorkerTypeId(), houseFlow.getHouseId());
-                    if(workerTypeSafeOrder == null){//默认去勾上
+                    WorkerTypeSafeOrder workerTypeSafeOrder = workerTypeSafeOrderMapper.getByNotPay(houseFlow.getWorkerTypeId(), houseFlow.getHouseId());
+                    if(workerTypeSafeOrder == null){//默认生成一条
                         if (wtsList.size() > 0) {
                             workerTypeSafeOrder = new WorkerTypeSafeOrder();
                             workerTypeSafeOrder.setWorkerTypeSafeId(wtsList.get(0).getId()); // 向保险订单中存入保险服务类型的id

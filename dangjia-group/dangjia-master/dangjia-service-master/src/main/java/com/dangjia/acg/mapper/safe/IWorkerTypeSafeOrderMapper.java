@@ -14,4 +14,6 @@ import tk.mybatis.mapper.common.Mapper;
 public interface IWorkerTypeSafeOrderMapper extends Mapper<WorkerTypeSafeOrder> {
 
     WorkerTypeSafeOrder getByWorkerTypeId(@Param("workerTypeId")String workerTypeId,@Param("houseId")String houseId);
+
+    WorkerTypeSafeOrder getByNotPay(@Param("workerTypeId")String workerTypeId,@Param("houseId")String houseId);
 }
