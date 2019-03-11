@@ -527,7 +527,11 @@ public class PaymentService {
                 /*处理人工和取消的材料改到自购精算*/
                 if(this.renGong(businessOrderNumber, hwo, payState, houseFlowId)){
                     /*处理材料*/
-                    this.caiLiao(businessOrderNumber, hwo, payState, houseFlowId);
+                    Double caiPrice = forMasterAPI.getBudgetCaiPrice(hwo.getHouseId(), houseFlow.getWorkerTypeId(), house.getCityId());//精算材料钱
+                    Double serPrice = forMasterAPI.getBudgetSerPrice(hwo.getHouseId(), houseFlow.getWorkerTypeId(), house.getCityId());//精算服务钱
+                    if(caiPrice > 0 || serPrice > 0){
+                        this.caiLiao(businessOrderNumber, hwo, payState, houseFlowId);
+                    }
                 }
                 /*处理保险订单*/
                 this.insurance(hwo, payState);

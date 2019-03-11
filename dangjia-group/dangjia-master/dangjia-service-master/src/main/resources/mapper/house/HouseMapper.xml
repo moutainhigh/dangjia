@@ -222,5 +222,67 @@
         ORDER by
         h.create_date
     </select>
+
+    <select id="getHouseListLikeSearchKey" resultType="com.dangjia.acg.modle.house.House">
+        SELECT
+        m.id as memberId,
+        m.nick_name as memberNickName,
+        m.name as memberName,
+        m.mobile as mobile,
+        h.id as id,
+        h.building,
+        h.city_name as cityName,
+        h.residential,
+        h.type,
+        h.unit,
+        h.member_id as memberId,
+        h.task_number as taskNumber,
+        h.square,
+        h.number,
+        h.style,
+        h.designer_ok as designerOk,
+        h.budget_ok as budgetOk,
+        h.image,
+        h.decoration_type as decorationType,
+        h.city_id as cityId,
+        h.modeling_layout_id as modelingLayoutId,
+        h.money,
+        h.pause,
+        h.show_house as showHouse,
+        h.village_id as villageId,
+        h.refer_house_id as referHouseId,
+        h.have_complete as haveComplete,
+        h.record_type as recordType,
+        h.build_square as buildSquare,
+        h.again,
+        h.house_type as houseType,
+        h.drawings,
+        h.work_deposit_id as workDepositId,
+        h.custom_sort as customSort,
+        h.is_select as isSelect,
+        h.visit_state as visitState,
+        h.data_status as dataStatus,
+        h.create_date as createDate,
+        h.modify_date as modifyDate
+        FROM
+        dj_house h
+        INNER JOIN dj_member m ON h.member_id = m.id
+        WHERE
+        h.data_status =0
+        <if test="visitState!=-1">
+            and h.visit_state = #{visitState}
+        </if>
+
+        <if test="searchKey!=null and searchKey!=''">
+            and ( m.mobile like CONCAT('%',#{searchKey},'%')
+            or h.residential like CONCAT('%',#{searchKey},'%')
+            or h.unit like CONCAT('%',#{searchKey},'%')
+            or h.number like CONCAT('%',#{searchKey},'%')
+            or m.nick_name like CONCAT('%',#{searchKey},'%')
+            or m.name like CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        ORDER by h.create_date
+    </select>
 </mapper>
 

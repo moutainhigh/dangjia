@@ -72,7 +72,9 @@ public interface WebEngineerAPI {
 
     @PostMapping(value = "web/engineer/getHouseList")
     @ApiOperation(value = "工地列表", notes = "工地列表")
-    ServerResponse getHouseList(@RequestParam("pageDTO") PageDTO pageDTO);
+    ServerResponse getHouseList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                @RequestParam("visitState") Integer visitState,
+                                @RequestParam("searchKey") String searchKey);
 
     @PostMapping(value = "web/engineer/artisanList")
     @ApiOperation(value = "工匠列表", notes = "工匠列表")

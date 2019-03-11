@@ -44,4 +44,6 @@ public interface IHouseMapper extends Mapper<House> {
 
 
     List<HouseListDTO> getHouseList(@Param("memberId") String memberId, @Param("searchKey") String searchKey);
+
+    List<House> getHouseListLikeSearchKey(@Param("visitState") Integer visitState,@Param("searchKey") String searchKey);
 }
