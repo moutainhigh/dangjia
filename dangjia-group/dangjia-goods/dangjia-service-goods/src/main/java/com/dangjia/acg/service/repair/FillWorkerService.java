@@ -5,19 +5,15 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.BudgetWorkerDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
-import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.WorkerGoods;
-import com.dangjia.acg.service.actuary.ActuaryOperationService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.rmi.runtime.Log;
-import sun.util.locale.provider.LocaleServiceProviderPool;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
@@ -34,8 +30,6 @@ public class FillWorkerService {
 
     @Autowired
     private IBudgetWorkerMapper budgetWorkerMapper;
-    @Autowired
-    private ITechnologyMapper iTechnologyMapper;
     @Autowired
     private IWorkerGoodsMapper workerGoodsMapper;
 
