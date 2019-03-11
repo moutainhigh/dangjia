@@ -10,7 +10,6 @@ import com.dangjia.acg.dto.actuary.GoodsDTO;
 import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.dto.repair.BudgetMaterialDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
-import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Product;
@@ -36,9 +35,6 @@ import java.util.List;
  */
 @Service
 public class FillMaterielService {
-
-    @Autowired
-    private IGoodsMapper goodsMapper;
     @Autowired
     private IProductMapper iProductMapper;
     @Autowired
@@ -53,6 +49,12 @@ public class FillMaterielService {
     private TechnologyRecordAPI technologyRecordAPI;
     @Autowired
     private ForMasterService forMasterService;
+
+
+    /**
+     * 要退查询仓库
+     * 结合 精算记录+补记录
+     */
 
 
     /**
@@ -104,7 +106,7 @@ public class FillMaterielService {
     }
 
     /**
-     * 工匠补退要货查询精算内货品
+     * 工匠补查询精算内货品
      */
     public ServerResponse workerTypeBudget(String userToken, String houseId, String categoryId, String name, Integer pageNum, Integer pageSize) {
         try {
@@ -117,6 +119,7 @@ public class FillMaterielService {
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
             for (BudgetMaterial budgetMaterial : budgetMaterialList) {
                 Warehouse warehouse = technologyRecordAPI.getByProductId(budgetMaterial.getProductId(), houseId);
+                if(warehouse == null) continue;
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());

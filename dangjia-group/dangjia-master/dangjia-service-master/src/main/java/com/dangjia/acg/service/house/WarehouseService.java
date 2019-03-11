@@ -54,7 +54,7 @@ public class WarehouseService {
             }
             LOG.info(" warehouseList size:" + warehouseList.size());
             PageInfo pageResult = new PageInfo(warehouseList);
-            List<WarehouseDTO> warehouseDTOS = new ArrayList<WarehouseDTO>();
+            List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
             for (Warehouse warehouse : warehouseList) {
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
                 warehouseDTO.setImage(address + warehouse.getImage());
