@@ -416,7 +416,11 @@ public class TechnologyService {
                 pageResult = new PageInfo(pList);
                 for (Goods t : pList) {
                     example = new Example(Product.class);
-                    example.createCriteria().andLike(Product.GOODS_ID, t.getId()).andEqualTo(Product.DATA_STATUS,"0").andEqualTo(Product.MAKET,"1");
+                    example.createCriteria()
+                            .andLike(Product.GOODS_ID, t.getId())
+                            .andEqualTo(Product.DATA_STATUS,"0")
+                            .andEqualTo(Product.MAKET,"1")
+                            .andEqualTo(Product.TYPE,"1");
                     example.orderBy(Goods.CREATE_DATE).desc();
                     PageHelper.startPage(1, 1);
                     List<Product>  products=iProductMapper.selectByExample(example);

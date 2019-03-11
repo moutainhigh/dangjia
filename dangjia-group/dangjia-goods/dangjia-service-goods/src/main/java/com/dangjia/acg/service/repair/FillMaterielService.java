@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.repair;
 
+import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.TechnologyRecordAPI;
 import com.dangjia.acg.common.constants.Constants;
@@ -81,11 +82,13 @@ public class FillMaterielService {
             List<Product> productList;
             if (StringUtil.isEmpty(categoryId)) {
                 Example example = new Example(Product.class);
-                example.createCriteria().andLike(Product.NAME, "%" + name + "%");
+                example.createCriteria().andLike(Product.NAME, "%" + name + "%")
+                        .andEqualTo(Product.TYPE,"1");
                 productList = iProductMapper.selectByExample(example);
             } else {
                 Example example = new Example(Product.class);
-                example.createCriteria().andEqualTo(Product.CATEGORY_ID, categoryId).andLike(Product.NAME, "%" + name + "%");
+                example.createCriteria().andEqualTo(Product.CATEGORY_ID, categoryId).andLike(Product.NAME, "%" + name + "%")
+                        .andEqualTo(Product.TYPE,"1");
                 productList = iProductMapper.selectByExample(example);
             }
             PageInfo pageResult = new PageInfo(productList);
@@ -118,8 +121,12 @@ public class FillMaterielService {
             PageInfo pageResult = new PageInfo(budgetMaterialList);
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
             for (BudgetMaterial budgetMaterial : budgetMaterialList) {
-                Warehouse warehouse = technologyRecordAPI.getByProductId(budgetMaterial.getProductId(), houseId);
-                if(warehouse == null) continue;
+                ServerResponse response = technologyRecordAPI.getByProductId(budgetMaterial.getProductId(), houseId);
+                if(!response.isSuccess()) continue;
+
+                Object warehousestr = response.getResultObj();
+                Warehouse warehouse = JSON.parseObject(JSON.toJSONString(warehousestr),Warehouse.class);
+
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
