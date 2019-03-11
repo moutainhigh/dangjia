@@ -798,6 +798,11 @@ public class HouseWorkerService {
                     return ServerResponse.createByErrorMessage("该工序已暂停施工,请勿重复申请");
                 }
             }
+            if(applyType == 3){
+                if (houseFlow.getWorkSteta() == 3){
+                    return ServerResponse.createByErrorMessage("待交底请勿发起停工申请");
+                }
+            }
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());//查询房子
             HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);//大管家的hf
             //****针对老工地管家兼容巡查拿钱和验收拿钱***//
