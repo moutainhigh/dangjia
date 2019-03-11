@@ -527,7 +527,11 @@ public class PaymentService {
                 /*处理人工和取消的材料改到自购精算*/
                 if(this.renGong(businessOrderNumber, hwo, payState, houseFlowId)){
                     /*处理材料*/
-                    this.caiLiao(businessOrderNumber, hwo, payState, houseFlowId);
+                    Double caiPrice = forMasterAPI.getBudgetCaiPrice(hwo.getHouseId(), houseFlow.getWorkerTypeId(), house.getCityId());//精算材料钱
+                    Double serPrice = forMasterAPI.getBudgetSerPrice(hwo.getHouseId(), houseFlow.getWorkerTypeId(), house.getCityId());//精算服务钱
+                    if(caiPrice > 0 || serPrice > 0){
+                        this.caiLiao(businessOrderNumber, hwo, payState, houseFlowId);
+                    }
                 }
                 /*处理保险订单*/
                 this.insurance(hwo, payState);
@@ -1448,8 +1452,8 @@ public class PaymentService {
                     example.createCriteria().andEqualTo(WorkerTypeSafe.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
                     List<WorkerTypeSafe> wtsList = workerTypeSafeMapper.selectByExample(example);
 
-                    WorkerTypeSafeOrder workerTypeSafeOrder = workerTypeSafeOrderMapper.getByWorkerTypeId(houseFlow.getWorkerTypeId(), houseFlow.getHouseId());
-                    if(workerTypeSafeOrder == null){//默认去勾上
+                    WorkerTypeSafeOrder workerTypeSafeOrder = workerTypeSafeOrderMapper.getByNotPay(houseFlow.getWorkerTypeId(), houseFlow.getHouseId());
+                    if(workerTypeSafeOrder == null){//默认生成一条
                         if (wtsList.size() > 0) {
                             workerTypeSafeOrder = new WorkerTypeSafeOrder();
                             workerTypeSafeOrder.setWorkerTypeSafeId(wtsList.get(0).getId()); // 向保险订单中存入保险服务类型的id

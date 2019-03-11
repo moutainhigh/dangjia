@@ -121,13 +121,13 @@ public class ChangeOrderService {
      * type 1工匠补  2业主退
      */
     public ServerResponse workerSubmit(String userToken,String houseId,Integer type,String contentA,String contentB,String workerTypeId){
-        List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseId,workerTypeId);
+        AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+        Member member = accessToken.getMember();
+        List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseId, member.getWorkerTypeId());
         if (changeOrderList.size() > 0){
             return ServerResponse.createByErrorMessage("该工种有未处理变更单,通知管家处理");
         }
 
-        AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-        Member member = accessToken.getMember();
         if (type == 1){
             ChangeOrder changeOrder = new ChangeOrder();
             changeOrder.setHouseId(houseId);

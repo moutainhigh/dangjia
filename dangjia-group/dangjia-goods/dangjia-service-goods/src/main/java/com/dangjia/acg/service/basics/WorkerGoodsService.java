@@ -5,6 +5,7 @@ import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.TechnologyDTO;
 import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
@@ -80,28 +81,33 @@ public class WorkerGoodsService {
             workerGoodsResult.setId(workerGoods.getId());
             workerGoodsResult.setName(workerGoods.getName());
             workerGoodsResult.setWorkerGoodsSn(workerGoods.getWorkerGoodsSn());
-            String[] imgArr = workerGoods.getImage().split(",");
             String imgStr = "";
             String imgUrlStr = "";
-            for (int i = 0; i < imgArr.length; i++) {
-                if (i == imgArr.length - 1) {
-                    imgStr += address + imgArr[i];
-                    imgUrlStr += imgArr[i];
-                } else {
-                    imgStr += address + imgArr[i] + ",";
-                    imgUrlStr += imgArr[i] + ",";
+            if (!CommonUtil.isEmpty(workerGoods.getImage())) {
+                String[] imgArr = workerGoods.getImage().split(",");
+                for (int i = 0; i < imgArr.length; i++) {
+                    if (i == imgArr.length - 1) {
+                        imgStr += address + imgArr[i];
+                        imgUrlStr += imgArr[i];
+                    } else {
+                        imgStr += address + imgArr[i] + ",";
+                        imgUrlStr += imgArr[i] + ",";
+                    }
                 }
             }
-            String[] imgArr2 = workerGoods.getWorkerDec().split(",");
+
             String imgStr2 = "";
             String imgUrlStr2 = "";
-            for (int i = 0; i < imgArr2.length; i++) {
-                if (i == imgArr2.length - 1) {
-                    imgStr2 += address + imgArr2[i];
-                    imgUrlStr2 += imgArr2[i];
-                } else {
-                    imgStr2 += address + imgArr2[i] + ",";
-                    imgUrlStr2 += imgArr2[i] + ",";
+            if (!CommonUtil.isEmpty(workerGoods.getWorkerDec())) {
+                String[] imgArr2 = workerGoods.getWorkerDec().split(",");
+                for (int i = 0; i < imgArr2.length; i++) {
+                    if (i == imgArr2.length - 1) {
+                        imgStr2 += address + imgArr2[i];
+                        imgUrlStr2 += imgArr2[i];
+                    } else {
+                        imgStr2 += address + imgArr2[i] + ",";
+                        imgUrlStr2 += imgArr2[i] + ",";
+                    }
                 }
             }
             workerGoodsResult.setImage(imgStr);
@@ -114,7 +120,7 @@ public class WorkerGoodsService {
             String workerTypeName = "";
             ServerResponse response = workerTypeAPI.getWorkerType(workerGoods.getWorkerTypeId());
             if (response.isSuccess()) {
-                workerTypeName=(((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
+                workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
             }
             workerGoodsResult.setWorkerTypeName(workerTypeName);
             workerGoodsResult.setPrice(workerGoods.getPrice());
@@ -330,8 +336,7 @@ public class WorkerGoodsService {
 
             String[] deleteTechnologyIdArr = deleteTechnologyIds.split(",");
             for (int i = 0; i < deleteTechnologyIdArr.length; i++) {
-                if(iTechnologyMapper.selectByPrimaryKey(deleteTechnologyIdArr[i])!= null)
-                {
+                if (iTechnologyMapper.selectByPrimaryKey(deleteTechnologyIdArr[i]) != null) {
                     if (iTechnologyMapper.deleteByPrimaryKey(deleteTechnologyIdArr[i]) < 0)
                         return ServerResponse.createByErrorMessage("删除id：" + deleteTechnologyIdArr[i] + "失败");
                 }

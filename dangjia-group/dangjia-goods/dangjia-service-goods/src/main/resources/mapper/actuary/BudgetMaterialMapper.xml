@@ -84,8 +84,8 @@
 		where
 		product_type = 0
 		and steta = 1
-		and
-		house_id = #{houseId}
+		and delete_state != 1
+		and house_id = #{houseId}
 		<if test = "productName!=null and productName!=''">
 			and
 			product_name LIKE CONCAT('%',#{productName},'%')

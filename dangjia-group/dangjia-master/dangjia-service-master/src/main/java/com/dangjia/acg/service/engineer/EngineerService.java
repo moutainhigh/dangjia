@@ -358,12 +358,13 @@ public class EngineerService {
     /**
      * 工地列表
      */
-    public ServerResponse getHouseList(Integer pageNum, Integer pageSize) {
+    public ServerResponse getHouseList(Integer pageNum, Integer pageSize,Integer visitState, String searchKey) {
         if (pageNum == null) pageNum = 1;
         if (pageSize == null) pageSize = 10;
 
         PageHelper.startPage(pageNum, pageSize);
-        List<House> houseList = houseMapper.selectAll();
+//        List<House> houseList = houseMapper.selectAll();
+        List<House> houseList = houseMapper.getHouseListLikeSearchKey(visitState,searchKey);
         PageInfo pageResult = new PageInfo(houseList);
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (House house : houseList) {

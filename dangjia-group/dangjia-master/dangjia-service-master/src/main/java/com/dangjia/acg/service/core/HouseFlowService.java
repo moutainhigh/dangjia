@@ -151,7 +151,7 @@ public class HouseFlowService {
             /*待抢单*/
             Example example = new Example(HouseFlow.class);
             example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 2).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
-                    .andEqualTo(HouseFlow.CITY_ID, cityId);
+                    .andEqualTo(HouseFlow.CITY_ID, cityId).andNotEqualTo(HouseFlow.STATE,2);
             List<HouseFlow> hfList = houseFlowMapper.selectByExample(example);
 
             example = new Example(HouseWorker.class);
@@ -370,14 +370,17 @@ public class HouseFlowService {
                     }
                 }
             }
-            /*//抢单时间限制
-            if (houseFlowDownTimeList != null && houseFlowDownTimeList.size() > 0) {
+           //抢单时间限制
+            example = new Example(HouseFlowCountDownTime.class);
+            example.createCriteria().andEqualTo(HouseFlowCountDownTime.WORKER_ID, member.getId()).andEqualTo(HouseFlowCountDownTime.HOUSE_FLOW_ID, hf.getId());
+            List<HouseFlowCountDownTime> houseFlowDownTimeList = houseFlowCountDownTimeMapper.selectByExample(example);
+            if (houseFlowDownTimeList.size() > 0) {
                 HouseFlowCountDownTime houseFlowCountDownTime = houseFlowDownTimeList.get(0);
                 long countDownTime = houseFlowCountDownTime.getCountDownTime().getTime() - new Date().getTime();//获取倒计时
                 if (countDownTime > 0) {//未到时间不能抢单
                     return ServerResponse.createByErrorMessage("您还在排队时间内，请稍后抢单！");
                 }
-            }*/
+            }
             if (member.getWorkerType() > 3) {//其他工人
                 if (hf.getPause() == 1) {
                     return ServerResponse.createByErrorMessage("该房子已暂停施工！");
@@ -389,10 +392,10 @@ public class HouseFlowService {
                 }
 
                 //暂时注释
-                /*List<HouseWorker> hwlist = houseWorkerMapper.grabOneDayOneTime(member.getId());
+                List<HouseWorker> hwlist = houseWorkerMapper.grabOneDayOneTime(member.getId());
                 if (hwlist.size() > 0) {
                     return ServerResponse.createByErrorMessage("每天只能抢一单哦！");
-                }*/
+                }
             }
             String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.AFFIRMGRAB, userToken, cityId, "确认") + "&houseFlowId=" + houseFlowId + "&workerTypeId=" + member.getWorkerTypeId()
                     + "&houseId=" + hf.getHouseId();

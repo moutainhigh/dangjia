@@ -21,6 +21,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		modify_date as modifyDate
 	</sql>
 
+	<!--查未支付保险-->
+	<select id="getByNotPay" resultType="com.dangjia.acg.modle.safe.WorkerTypeSafeOrder">
+		select
+		<include refid="all_columns"/>
+		from dj_safe_worker_type_safe_order
+		where
+		worker_type_id = #{workerTypeId}
+		and house_id = #{houseId}
+		and state = 0
+	</select>
+
     <!--查保险-->
     <select id="getByWorkerTypeId" resultType="com.dangjia.acg.modle.safe.WorkerTypeSafeOrder">
         select

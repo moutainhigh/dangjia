@@ -55,7 +55,8 @@ public class WorkerGoods extends BaseEntity {
     private String workerTypeId;//关联工种id
 
     @Column(name = "show_goods")
-    private Integer showGoods;//是否展示0展示；1不展示
+    private Integer showGoods;//是否展示 1展示；0不展示
+//    private Integer showGoods;//是否展示 0展示；1不展示
 
 
 }

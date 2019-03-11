@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -104,7 +105,6 @@ public class ForMasterService {
         example.createCriteria().andEqualTo(BudgetMaterial.HOUSE_FLOW_ID, houseFlowId).andEqualTo(BudgetMaterial.DELETE_STATE, 0)
             .andEqualTo(BudgetMaterial.STETA,1);
         List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.selectByExample(example);
-
         for (BudgetMaterial budgetMaterial : budgetMaterialList){
             Product product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());
             //重新记录支付时价格
@@ -113,8 +113,11 @@ public class ForMasterService {
 //            budgetMaterial.setTotalPrice(budgetMaterial.getShopCount() * product.getPrice());//已支付 记录总价
             budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * product.getPrice());//已支付 记录总价
             budgetMaterial.setDeleteState(3);//已支付
+            budgetMaterial.setModifyDate(new Date());
             budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
         }
+        //业主取消的材料又改为待付款
+        budgetMaterialMapper.updateSelf(houseFlowId);
         return budgetMaterialList;
     }
 
@@ -131,11 +134,9 @@ public class ForMasterService {
             budgetWorker.setPrice(wg.getPrice());
             budgetWorker.setTotalPrice(budgetWorker.getShopCount() * wg.getPrice());
             budgetWorker.setDeleteState(3);//已支付
+            budgetWorker.setModifyDate(new Date());
             budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
         }
-
-        //业主取消的材料又改为待付款
-        budgetMaterialMapper.updateSelf(houseFlowId);
         return budgetWorkerList;
     }
 
