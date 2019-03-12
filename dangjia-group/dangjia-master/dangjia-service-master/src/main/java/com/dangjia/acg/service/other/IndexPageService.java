@@ -16,6 +16,7 @@ import com.dangjia.acg.mapper.design.IHouseDesignImageMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.house.House;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -83,28 +84,28 @@ public class IndexPageService {
             }
             houseDetailsDTO.setDianList(dianList);
             List<Map<String,Object>> mapList = new ArrayList<>();
-//            Map<String,Object> mapReady = new HashMap<>();
-//            mapReady.put("name","准备阶段");
-//            if (house.getDecorationType() == 2){//自带设计
-//                mapReady.put("typeA", "¥"  + 0);
-//            }else {
-//                Order order = orderMapper.getWorkerOrder(houseId,"1");
-//                if(order!=null) {
-//                    mapReady.put("typeA", "¥" + String.format("%.2f", order.getTotalAmount().doubleValue()));
-//                }else{
-//                    mapReady.put("typeA", "¥"  + 0);
-//                }
-//            }
-//            Order order = orderMapper.getWorkerOrder(houseId,"2");
-//            if(order!=null) {
-//                mapReady.put("typeB","¥" + (order == null? 0 : String.format("%.2f", order.getTotalAmount().doubleValue())));
-//            }else{
-//                mapReady.put("typeB", "¥"  + 0);
-//            }
-//            mapList.add(mapReady);
+            Map<String,Object> mapReady = new HashMap<>();
+            mapReady.put("name","准备阶段");
+            if (house.getDecorationType() == 2){//自带设计
+                mapReady.put("typeA", "¥"  + 0);
+            }else {
+                Order order = orderMapper.getWorkerOrder(houseId,"1");
+                if(order!=null) {
+                    mapReady.put("typeA", "¥" + String.format("%.2f", order.getTotalAmount().doubleValue()));
+                }else{
+                    mapReady.put("typeA", "¥"  + 0);
+                }
+            }
+            Order order = orderMapper.getWorkerOrder(houseId,"2");
+            if(order!=null) {
+                mapReady.put("typeB","¥" + (order == null? 0 : String.format("%.2f", order.getTotalAmount().doubleValue())));
+            }else{
+                mapReady.put("typeB", "¥"  + 0);
+            }
+            mapList.add(mapReady);
 
             Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andEqualTo(HouseFlow.WORK_TYPE,4);
+            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andEqualTo(HouseFlow.WORK_TYPE,4).andGreaterThan(HouseFlow.WORKER_TYPE,2);;
             example.orderBy(HouseFlow.WORKER_TYPE);
             List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
             for (HouseFlow houseFlow : houseFlowList){
