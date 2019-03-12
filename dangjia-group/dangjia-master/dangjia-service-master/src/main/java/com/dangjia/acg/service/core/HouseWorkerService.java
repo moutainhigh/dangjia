@@ -455,13 +455,12 @@ public class HouseWorkerService {
                 } else if (hf.getWorkSteta() == 1) {
                     promptList.add("您已阶段完工");
                     bean.setIfBackOut(2);
-                } else if (hf.getWorkSteta() == 2) {
+                }
+
+                if (hf.getWorkSteta() == 2) {
                     promptList.add("您已整体完工");
                     bean.setIfBackOut(2);
-                } else {
-                    bean.setIfBackOut(1);
-                }
-                if (hf.getWorkType() >= 4) {
+                }else if (hf.getWorkType() == 4) {
                     if (hf.getWorkSteta() == 3) {//待交底
                         buttonList.add(getButton("找大管家交底", 1));
                         bean.setIfBackOut(1);
