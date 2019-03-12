@@ -4,8 +4,8 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
-import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.attribute.AttributeValue;
@@ -53,6 +53,17 @@ public class BudgetMaterialService {
 
 
     private static Logger LOG = LoggerFactory.getLogger(BudgetMaterialService.class);
+
+    //精算阶段花费统计
+    public ServerResponse getHouseBudgetStageCost(String houseId, String workerTypeId){
+        try {
+            List<BudgetStageCostDTO> mapList = iBudgetMaterialMapper.getHouseBudgetStageCost(houseId,workerTypeId);
+            return ServerResponse.createBySuccess("查询成功", mapList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
     //查询所有精算
     public ServerResponse getAllBudgetMaterial() {

@@ -39,11 +39,11 @@ public interface IHouseMapper extends Mapper<House> {
     List<House> getSameLayout(@Param("cityId") String cityId, @Param("villageId") String villageId,
                               @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare, @Param("houseType") Integer houseType);
 
-    List<House> getReferenceBudget(@Param("villageId") String villageId, @Param("houseType") Integer houseType,
+    List<House> getReferenceBudget(@Param("cityId") String cityId, @Param("villageId") String villageId, @Param("houseType") Integer houseType,
                                    @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare);
 
 
     List<HouseListDTO> getHouseList(@Param("memberId") String memberId, @Param("searchKey") String searchKey);
 
-    List<House> getHouseListLikeSearchKey(@Param("visitState") Integer visitState,@Param("searchKey") String searchKey);
+    List<House> getHouseListLikeSearchKey(@Param("visitState") Integer visitState, @Param("searchKey") String searchKey);
 }

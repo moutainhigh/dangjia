@@ -237,6 +237,7 @@ public class EngineerService {
      * 查看工序
      */
     public ServerResponse houseFlowList(String houseId) {
+        House house = houseMapper.selectByPrimaryKey(houseId);
         Example example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId);
         example.orderBy(HouseFlow.SORT).desc();
@@ -270,10 +271,19 @@ public class EngineerService {
             map.put("workPrice",houseFlow.getWorkPrice());//工钱
             map.put("patrol",houseFlow.getPatrol());//巡查次数
 
+            if(houseFlow.getWorkerType() == 1){//设计
+                map.put("designerOk", house.getDesignerOk());
+            }
+            if(houseFlow.getWorkerType() == 2){//精算
+                map.put("budgetOk", house.getBudgetOk());
+            }
+
             if(houseFlow.getWorkType() > 2){
                 Member worker = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
-                map.put("workerName", worker.getName());//工人姓名
-                map.put("mobile", worker.getMobile());//电话
+                if(worker != null){
+                    map.put("workerName", worker.getName());//工人姓名
+                    map.put("mobile", worker.getMobile());//电话
+                }
             }
             mapList.add(map);
         }

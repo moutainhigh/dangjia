@@ -56,6 +56,11 @@ public interface MendOrderAPI {
                                      @RequestParam("workerTypeId") String workerTypeId);
 
 
+    @PostMapping(value = "app/repair/mendOrder/getMendDetail")
+    @ApiOperation(value = "补明细(新)", notes = "补明细(新)")
+    MendOrderInfoDTO getMendDetail(@RequestParam("workerTypeId") String workerTypeId,
+                                          @RequestParam("type") String type);
+
     @PostMapping(value = "app/repair/mendOrder/getMendMendOrderInfo")
     @ApiOperation(value = "补退订单明细", notes = "补退订单明细")
     MendOrderInfoDTO getMendMendOrderInfo(@RequestParam("houseId") String houseId,

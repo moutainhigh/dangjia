@@ -666,12 +666,15 @@ public class ActuaryOperationService {
                                                int type, String cityId) {
         try {
             String workerTypeName = "";
-            ServerResponse response = workerTypeAPI.getWorkerType(workerTypeId);
-            if (response.isSuccess()) {
-                workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
-            } else {
-                return ServerResponse.createByErrorMessage("查询工序精算失败");
+            if(type != 5 && type !=4){
+                ServerResponse response = workerTypeAPI.getWorkerType(workerTypeId);
+                if (response.isSuccess()) {
+                    workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
+                } else {
+                    return ServerResponse.createByErrorMessage("查询工序精算失败");
+                }
             }
+
             Map<Integer, String> mapgx = new HashMap<>();
             mapgx.put(DjConstants.GXType.RENGGONG, "人工");
             mapgx.put(DjConstants.GXType.CAILIAO, "材料");
@@ -704,11 +707,9 @@ public class ActuaryOperationService {
                 Double workerPrice = budgetWorkerMapper.getBudgetWorkerPrice(houseId, workerTypeId);//精算工钱
                 flowDTO.setSumTotal(new BigDecimal(workerPrice));//合计
             } else if (type == DjConstants.GXType.BU_RENGGONG) {
-                MendOrderInfoDTO mendOrderInfoDTO = mendOrderAPI.getMendMendOrderInfo(houseId, workerTypeId, "1", "");
+                MendOrderInfoDTO mendOrderInfoDTO = mendOrderAPI.getMendDetail(workerTypeId, "1");
                 List<MendWorker> budgetWorkerList = mendOrderInfoDTO.getMendWorkers();
                 for (MendWorker bw : budgetWorkerList) {
-
-                    BudgetWorker budgetWorker = budgetWorkerMapper.byWorkerGoodsId(houseId, bw.getWorkerGoodsId());
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
                     flowActuaryDTO.setName(bw.getWorkerGoodsName());
                     flowActuaryDTO.setImage(bw.getImage());
@@ -723,31 +724,27 @@ public class ActuaryOperationService {
                 }
                 flowDTO.setSumTotal(new BigDecimal(mendOrderInfoDTO.getTotalAmount()));//合计
             } else if (type == DjConstants.GXType.BU_CAILIAO) {
-                MendOrderInfoDTO mendOrderInfoDTO = mendOrderAPI.getMendMendOrderInfo(houseId, workerTypeId, "0", "");
+                MendOrderInfoDTO mendOrderInfoDTO = mendOrderAPI.getMendDetail(workerTypeId, "0");
                 List<MendMateriel> budgetMaterielList = mendOrderInfoDTO.getMendMateriels();
-                for (MendMateriel bw : budgetMaterielList) {
-                    Product product = productMapper.selectByPrimaryKey(bw.getProductId());
-                    BudgetMaterial budgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, product.getGoodsId());
+                for (MendMateriel mendMateriel : budgetMaterielList) {
+                    Product product = productMapper.selectByPrimaryKey(mendMateriel.getProductId());
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
                     flowActuaryDTO.setTypeName(typsValue);
-                    flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + bw.getImage());
+                    flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + mendMateriel.getImage());
 //                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO, userToken,
-//                            cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + budgetMaterial.getId() + "&type=2";
-//                    flowActuaryDTO.setUrl(url);
+////                            cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + budgetMaterial.getId() + "&type=2";
+////                    flowActuaryDTO.setUrl(url);
                     flowActuaryDTO.setAttribute(getAttributes(product));//拼接属性品牌
-//                    flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + product.getUnitName());
 
                     String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
                     flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
-                    flowActuaryDTO.setTotalPrice(bw.getTotalPrice());
-                    flowActuaryDTO.setShopCount(bw.getShopCount());
-//                    flowActuaryDTO.setConvertCount(Math.ceil(bw.getShopCount() / product.getConvertQuality()));
-                    Double converCount = Math.ceil(bw.getShopCount() / product.getConvertQuality());
+                    flowActuaryDTO.setTotalPrice(mendMateriel.getTotalPrice());
+                    flowActuaryDTO.setShopCount(mendMateriel.getShopCount());
+                    Double converCount = Math.ceil(mendMateriel.getShopCount() / product.getConvertQuality());
                     flowActuaryDTO.setConvertCount(converCount);
                     flowActuaryDTO.setBuy(0);
-                    flowActuaryDTO.setBudgetMaterialId(bw.getId());
-                    flowActuaryDTO.setName(bw.getProductName());
-//                    flowActuaryDTO.setUnitName(bw.getUnitName());
+                    flowActuaryDTO.setBudgetMaterialId(mendMateriel.getId());
+                    flowActuaryDTO.setName(mendMateriel.getProductName());
                     flowActuaryDTO.setUnitName(convertUnitName);
                     flowActuaryDTOList.add(flowActuaryDTO);
                 }

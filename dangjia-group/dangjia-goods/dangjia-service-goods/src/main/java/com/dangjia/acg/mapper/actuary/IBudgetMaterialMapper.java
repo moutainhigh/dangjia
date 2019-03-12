@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.actuary;
 
+import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -18,6 +19,9 @@ import java.util.Map;
  */
 @Repository
 public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
+
+	/**精算阶段花费统计*/
+	List<BudgetStageCostDTO> getHouseBudgetStageCost(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 
 	List<BudgetMaterial> getCategoryAllList(@Param("houseId")String houseId, @Param("categoryId")String categoryId);
 	Double getCategoryAllPrice(@Param("houseId")String houseId, @Param("categoryId")String categoryId);
