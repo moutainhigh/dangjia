@@ -83,7 +83,7 @@
 		FROM dj_actuary_budget_material
 		where
 		product_type = 0
-		and steta = 1
+		and steta in (1,2)
 		and delete_state != 1
 		and house_id = #{houseId}
 		<if test = "productName!=null and productName!=''">

@@ -80,6 +80,37 @@ public class MendOrderService {
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
 
+
+    /**
+     * 补材料明细
+     * workerTypeId 即 mendOrderId
+     */
+    public MendOrderInfoDTO getMendDetail(String workerTypeId, String type) {
+        MendOrderInfoDTO mendOrderInfoDTO = new MendOrderInfoDTO();
+        mendOrderInfoDTO.setTotalAmount(0.0);
+        try {
+            if("0".equals(type)){
+                List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(workerTypeId);
+                for (MendMateriel v : mendMaterielList) {
+                    v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                    mendOrderInfoDTO.setTotalAmount(mendOrderInfoDTO.getTotalAmount() + v.getTotalPrice());
+                }
+                mendOrderInfoDTO.setMendMateriels(mendMaterielList);
+            }else if("1".equals(type)){
+                List<MendWorker> mendWorkerList = mendWorkerMapper.byMendOrderId(workerTypeId);
+                for (MendWorker v : mendWorkerList) {
+                    v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                    mendOrderInfoDTO.setTotalAmount(mendOrderInfoDTO.getTotalAmount() + v.getTotalPrice());
+                }
+                mendOrderInfoDTO.setMendWorkers(mendWorkerList);
+            }
+            return mendOrderInfoDTO;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return mendOrderInfoDTO;
+        }
+    }
+
     /**
      * 业主确认退货
      */
@@ -387,7 +418,8 @@ public class MendOrderService {
      * 明细
      */
     public MendOrderInfoDTO getMendMendOrderInfo(String houseId, String workerTypeId, String type, String state) {
-        MendOrderInfoDTO mendOrderInfoDTO=new MendOrderInfoDTO();
+        MendOrderInfoDTO mendOrderInfoDTO = new MendOrderInfoDTO();
+        mendOrderInfoDTO.setTotalAmount(0.0);
         try {
             Example example = new Example(MendOrder.class);
             Example.Criteria criteria=example.createCriteria();
@@ -408,12 +440,14 @@ public class MendOrderService {
                     List<MendMateriel> mendMateriels = mendMaterialMapper.byMendOrderId(mendOrder.getId());
                     for (MendMateriel v : mendMateriels) {
                         v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                        mendOrderInfoDTO.setTotalAmount(mendOrderInfoDTO.getTotalAmount() + v.getTotalPrice());
                     }
                     mendOrderInfoDTO.setMendMateriels(mendMateriels);
                 }else {
                     List<MendWorker> mendWorkerList = mendWorkerMapper.byMendOrderId(mendOrder.getId());
                     for (MendWorker v : mendWorkerList) {
                         v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                        mendOrderInfoDTO.setTotalAmount(mendOrderInfoDTO.getTotalAmount() + v.getTotalPrice());
                     }
                     mendOrderInfoDTO.setMendWorkers(mendWorkerList);
                 }
@@ -520,6 +554,7 @@ public class MendOrderService {
                 mendOrder.setTotalAmount(mendOrder.getTotalAmount() + mendWorker.getTotalPrice());
                 mendWorkerMapper.insertSelective(mendWorker);
             }
+            mendOrder.setModifyDate(new Date());
             mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
             return true;
         } catch (Exception e) {
@@ -822,6 +857,7 @@ public class MendOrderService {
                 mendMateriel.setImage(product.getImage());
                 mendMaterialMapper.insertSelective(mendMateriel);
             }
+            mendOrder.setModifyDate(new Date());
             mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
             return true;
         } catch (Exception e) {

@@ -1501,7 +1501,6 @@ public class PaymentService {
             } else if (type == 2) {//补人工补材料
                 MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(taskId);
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
-                //待补充html链接地址
                 ActuaryDTO actuaryDTO = new ActuaryDTO();
                 if (mendOrder.getType() == 1) {
                     actuaryDTO.setImage(imageAddress + "icon/burengong.png");
@@ -1511,7 +1510,7 @@ public class PaymentService {
                     actuaryDTO.setButton("补人工明细");
                     String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                             String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
-                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=4" ;
+                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getId() + "&type=4" ;
                     actuaryDTO.setUrl(url);
                     actuaryDTO.setType(4);
 
@@ -1523,7 +1522,7 @@ public class PaymentService {
                     actuaryDTO.setButton("补材料明细");
                     String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                             String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
-                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=5" ;
+                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getId() + "&type=5" ;
                     actuaryDTO.setUrl(url);
                     actuaryDTO.setType(5);
                 }

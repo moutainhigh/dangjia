@@ -117,13 +117,13 @@
         house.data_status as dataStatus,
         house.create_date as createDate,
         house.modify_date as modifyDate,
-        (SELECT COUNT(*) from dj_deliver_order_split  where apply_status = 1 and house_id = house.id) as waitCount,
-        (SELECT COUNT(*) from dj_deliver_order_split  where apply_status = 2 and house_id = house.id) as sendCount
+        (SELECT COUNT(*) from dj_deliver_order_split where apply_status = 1 and house_id = house.id) as waitCount,
+        (SELECT COUNT(*) from dj_deliver_order_split where apply_status = 2 and house_id = house.id) as sendCount
         FROM dj_house as house
         WHERE 1=1
         <if test="likeAddress!=null and likeAddress!=''">
             AND (
-               house.residential LIKE CONCAT('%',#{likeAddress},'%')
+            house.residential LIKE CONCAT('%',#{likeAddress},'%')
             OR house.building LIKE CONCAT('%',#{likeAddress},'%')
             OR house.unit LIKE CONCAT('%',#{likeAddress},'%')
             OR number LIKE CONCAT('%',#{likeAddress},'%')
@@ -203,8 +203,9 @@
         h.building as building,
         h.unit as unit,
         h.work_deposit_id as workDepositId,
+        h.create_date AS createDate,
+        h.modify_date AS modifyDate,
         h.number as number
-
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
@@ -220,7 +221,7 @@
             or h.number like CONCAT('%',#{searchKey},'%'))
         </if>
         ORDER by
-        h.create_date
+        h.create_date desc
     </select>
 
     <select id="getHouseListLikeSearchKey" resultType="com.dangjia.acg.modle.house.House">
@@ -282,7 +283,7 @@
             or m.name like CONCAT('%',#{searchKey},'%')
             )
         </if>
-        ORDER by h.create_date
+        ORDER by h.create_date desc
     </select>
 </mapper>
 

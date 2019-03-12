@@ -2,6 +2,7 @@ package com.dangjia.acg.service.other;
 
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.other.HouseDetailsDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -58,11 +59,18 @@ public class IndexPageService {
                 liangArr = house.getLiangDian().split(",");
             }
             List<String> dianList = new ArrayList<>();
-            dianList.add(house.getStyle());
-            for (int i=0; i<liangArr.length;  i++){
-                dianList.add(liangArr[i]);
+            if(!CommonUtil.isEmpty(house.getStyle())) {
+                dianList.add(house.getStyle());
+
             }
-            dianList.add(house.getSquare() + "㎡");
+            if(!CommonUtil.isEmpty(house.getLiangDian())) {
+                for (int i = 0; i < liangArr.length; i++) {
+                    dianList.add(liangArr[i]);
+                }
+            }
+            if(!CommonUtil.isEmpty(house.getSquare())) {
+                dianList.add(house.getSquare() + "㎡");
+            }
             houseDetailsDTO.setDianList(dianList);
             List<Map<String,Object>> mapList = new ArrayList<>();
             Map<String,Object> mapReady = new HashMap<>();

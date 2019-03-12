@@ -4,6 +4,7 @@ import lombok.Data;
 import org.apache.http.util.TextUtils;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * @author Ruking.Cheng
@@ -32,6 +33,8 @@ public class HouseListDTO {
     private String unit;//单元号，后台客服填写
     private String number;//房间号，后台客服填写
     private String workDepositId;
+    private Date createDate;// 创建日期
+    private Date modifyDate;// 修改日期
 
     public String getHouseName() {
         return (TextUtils.isEmpty(getResidential()) ? "*" : getResidential())

@@ -201,7 +201,7 @@ public class HouseDesignImageService {
             houseDesignImageDTO.setImageurl(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + houseDesignImage.getImageurl());
             houseDesignImageDTO.setName("平面图");
             houseDesignImageDTOList.add(houseDesignImageDTO);
-            map.put("button", "确认平面图");
+            map.put("button", "确认施工图");
             map.put("list", houseDesignImageDTOList);
             return ServerResponse.createBySuccess("查询成功", map);
         }
@@ -223,7 +223,7 @@ public class HouseDesignImageService {
 //            };
 //            map.put("list", houseDesignImageDTOList);
             map.put("list", serverResponse.getResultObj());
-            map.put("button", "确认设计图");
+            map.put("button", "确认施工图");
             return ServerResponse.createBySuccess("查询成功", map);
         }
         return ServerResponse.createByErrorMessage("查询失败");

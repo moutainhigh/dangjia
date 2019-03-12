@@ -85,6 +85,10 @@ public class MendOrderController implements MendOrderAPI {
         return mendOrderService.getMendWorkerList(houseId,workerTypeId);
     }
     @Override
+    public MendOrderInfoDTO getMendDetail(String workerTypeId, String type){
+        return mendOrderService.getMendDetail(workerTypeId,type);
+    }
+    @Override
     public MendOrderInfoDTO getMendMendOrderInfo(String houseId, String workerTypeId, String type, String state){
         return mendOrderService.getMendMendOrderInfo(houseId,workerTypeId,type,state);
     }
