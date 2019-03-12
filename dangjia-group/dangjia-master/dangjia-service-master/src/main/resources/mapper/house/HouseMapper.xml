@@ -148,7 +148,9 @@
     <select id="getSameLayout" resultType="com.dangjia.acg.modle.house.House">
         SELECT
         <include refid="basic_columns"/>
-        from dj_house
+        from dj_house h
+        INNER JOIN (SELECT a.house_id,COUNT(a.id) num FROM dj_core_house_flow_apply a GROUP BY a.house_id ) b ON
+        b.house_id=h.id
         where
         data_status=0
         <if test="cityId!=null and cityId!=''">
@@ -168,7 +170,7 @@
         </if>
         and ((decoration_type in (1,2) and budget_ok=3) or (decoration_type=3 and visit_state=1))
         and show_house!=1
-        order by create_date desc
+        order by num desc
     </select>
 
     <!--参考报价-->
@@ -178,7 +180,12 @@
         from dj_house
         where
         data_status=0
-        AND village_id = #{villageId}
+        <if test="cityId!=null and cityId!=''">
+            and city_id = #{cityId}
+        </if>
+        <if test="villageId!=null and villageId!=''">
+            and village_id = #{villageId}
+        </if>
         and build_square &gt;= #{minSquare}
         and build_square &lt;= #{maxSquare}
         and house_type = #{houseType}

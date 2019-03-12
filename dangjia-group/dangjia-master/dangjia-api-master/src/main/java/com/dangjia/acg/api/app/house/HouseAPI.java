@@ -136,7 +136,8 @@ public interface HouseAPI {
 
     @PostMapping("app/house/house/getReferenceBudget")
     @ApiOperation(value = "参考报价", notes = "参考报价")
-    ServerResponse getReferenceBudget(@RequestParam("villageId") String villageId,
+    ServerResponse getReferenceBudget(@RequestParam("cityId") String cityId,
+                                      @RequestParam("villageId") String villageId,
                                       @RequestParam("square") Double square,
                                       @RequestParam("houseType") Integer houseType);
 }

@@ -25,6 +25,15 @@ public class BudgetMaterialController implements BudgetMaterialAPI {
 	@Autowired
 	private GetForBudgetAPI getForBudgetAPI;
 	/**
+	 * 精算阶段花费统计
+	 * @return
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse getHouseBudgetStageCost(HttpServletRequest request,String houseId, String workerTypeId){
+		return budgetMaterialService.getHouseBudgetStageCost(houseId,workerTypeId);
+	}
+	/**
 	 * 查询所有精算
 	 * @return
 	 */

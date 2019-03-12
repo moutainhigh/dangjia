@@ -876,11 +876,33 @@ public class HouseService {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            boolean isReferenceBudget = false;
+            if (villageId != null && villageId.contains("#")) {
+                isReferenceBudget = true;
+                villageId = villageId.replaceAll("#", "");
+            }
+
             List<House> houseList = iHouseMapper.getSameLayout(cityId, villageId, minSquare, maxSquare, houseType);
             PageInfo pageResult = new PageInfo(houseList);
             List<ShareDTO> srlist = new ArrayList<>();
-            for (House house : houseList) {
-                srlist.add(convertHouse(house, accessToken));
+            if (houseList.size() > 0) {//根据条件查询所选小区总价最少的房子
+                for (House house : houseList) {
+                    srlist.add(convertHouse(house, accessToken));
+                }
+            } else {
+                if (isReferenceBudget) {
+                    houseList = iHouseMapper.getSameLayout(cityId, null, minSquare, maxSquare, houseType);
+                    pageResult = new PageInfo(houseList);
+                    if (houseList.size() > 0) {//根据条件查询所选小区总价最少的房子
+                        for (House house : houseList) {
+                            srlist.add(convertHouse(house, accessToken));
+                        }
+                    } else {
+                        return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "查无数据");
+                    }
+                } else {
+                    return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "查无数据");
+                }
             }
             pageResult.setList(srlist);
             return ServerResponse.createBySuccess("查询成功", pageResult);
@@ -1252,26 +1274,22 @@ public class HouseService {
      *
      * @return
      */
-    public ServerResponse getReferenceBudget(String villageId, Double minSquare, Double maxSquare, Integer houseType) {
+    public ServerResponse getReferenceBudget(String cityId, String villageId, Double minSquare, Double maxSquare, Integer houseType) {
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-            String userToken = request.getParameter(Constants.USER_TOKEY);
-            AccessToken accessToken = null;
-            if (!CommonUtil.isEmpty(userToken)) {
-                accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            }
-            List<House> listHouse = iHouseMapper.getReferenceBudget(villageId, houseType, minSquare, maxSquare);
+            House house = null;
+            List<House> listHouse = iHouseMapper.getReferenceBudget(cityId, villageId, houseType, minSquare, maxSquare);
             if (listHouse.size() > 0) {//根据条件查询所选小区总价最少的房子
-                List<ShareDTO> srlist = new ArrayList<>();
-                for (House house : listHouse) {
-                    srlist.add(convertHouse(house, accessToken));
+                house = listHouse.get(0);
+            } else {
+                listHouse = iHouseMapper.getReferenceBudget(cityId, null, houseType, minSquare, maxSquare);
+                if (listHouse.size() > 0) {//根据条件查询所选小区总价最少的房子
+                    house = listHouse.get(0);
                 }
-                request.setAttribute(Constants.CITY_ID, listHouse.get(0).getCityId());
-                ServerResponse serverResponse = budgetWorkerAPI.gatEstimateBudgetByHId(request, listHouse.get(0).getId());
-//                JSONObject goods= (JSONObject)serverResponse.getResultObj();
-//                goods.put("houses",srlist);
-//                serverResponse.setResultObj(goods);
-                return serverResponse;
+            }
+            if (house != null) {
+                request.setAttribute(Constants.CITY_ID, house.getCityId());
+                return budgetWorkerAPI.gatEstimateBudgetByHId(request, house.getId());
             }
             return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "暂无所需报价");
         } catch (Exception e) {

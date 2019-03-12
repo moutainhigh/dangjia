@@ -34,7 +34,43 @@
 		modify_date as modifyDate
 	</sql>
 
-
+	<!--精算阶段花费统计-->
+	<select id="getHouseBudgetStageCost" resultType="com.dangjia.acg.dto.actuary.BudgetStageCostDTO">
+		(
+			SELECT
+				house_id houseId,
+				worker_type_id workerTypeId,
+				product_type type,
+				SUM(total_price) totalAmount
+			FROM
+				`dj_actuary_budget_material`
+			WHERE
+				delete_state != 1
+			AND `worker_type_id` = #{workerTypeId}
+			AND `house_id` = #{houseId}
+			GROUP BY
+				houseId,
+				workerTypeId,
+				product_type
+		)
+		UNION ALL
+			(
+				SELECT
+					house_id houseId,
+					worker_type_id workerTypeId,
+					'2' type,
+					SUM(total_price) totalAmount
+				FROM
+					`dj_actuary_budget_worker`
+				WHERE
+					delete_state != 1
+				AND `worker_type_id` = #{workerTypeId}
+				AND `house_id` = #{houseId}
+				GROUP BY
+					houseId,
+					workerTypeId
+			);
+	</select>
 	<!--精算分类(支付和未支付)-->
 	<select id="getCategoryAllList" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
 		SELECT
