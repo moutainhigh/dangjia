@@ -166,7 +166,7 @@ public class MemberService {
             }
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             AccessToken accessToken = TokenUtil.generateAccessToken(user);
-            if (!StringUtils.isEmpty(user.getWorkerTypeId())) {
+            if (!CommonUtil.isEmpty(user.getWorkerTypeId())) {
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(user.getWorkerTypeId());
                 if (wt != null) {
                     accessToken.setWorkerTypeName(wt.getName());
@@ -272,7 +272,7 @@ public class MemberService {
 //			memberMapper.updateByPrimaryKeySelective(user);
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             AccessToken accessToken = TokenUtil.generateAccessToken(user);
-            if (!StringUtils.isEmpty(user.getWorkerTypeId())) {
+            if (!CommonUtil.isEmpty(user.getWorkerTypeId())) {
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(user.getWorkerTypeId());
                 if (wt != null) {
                     accessToken.setWorkerTypeName(wt.getName());
@@ -304,7 +304,7 @@ public class MemberService {
         }
         user.setId(accessToken.getMember().getId());
         user.setCheckType(accessToken.getMember().getCheckType());//提交资料，审核中
-        if (!StringUtils.isEmpty(user.getIdnumber())) {
+        if (!CommonUtil.isEmpty(user.getIdnumber())) {
             String idCard = RKIDCardUtil.getIDCardValidate(user.getIdnumber());
             if (!"".equals(idCard)) {//验证身份证
                 return ServerResponse.createByErrorMessage(idCard);
@@ -372,26 +372,28 @@ public class MemberService {
             return ServerResponse.createByErrorMessage("您的资料已审核通过，请勿重复提交");
         }
         if (user.getRealNameState() == 0 &&
-                (StringUtils.isEmpty(name) || StringUtils.isEmpty(idcaoda)
-                        || StringUtils.isEmpty(idcaodb) || StringUtils.isEmpty(idcaodall)
-                        || StringUtils.isEmpty(idnumber))) {
+                (CommonUtil.isEmpty(name)
+                        || (CommonUtil.isEmpty(user.getIdcaoda()) && CommonUtil.isEmpty(idcaoda))
+                        || (CommonUtil.isEmpty(user.getIdcaodb()) && CommonUtil.isEmpty(idcaodb))
+                        || (CommonUtil.isEmpty(user.getIdcaodall()) && CommonUtil.isEmpty(idcaodall))
+                        || CommonUtil.isEmpty(idnumber))) {
             return ServerResponse.createByErrorMessage("请确认您的资料是否全部填写？");
         }
-        if (!StringUtils.isEmpty(idnumber)) {
+        if (!CommonUtil.isEmpty(idnumber)) {
             String idCard = RKIDCardUtil.getIDCardValidate(idnumber);
             if (!"".equals(idCard)) {//验证身份证
                 return ServerResponse.createByErrorMessage(idCard);
             }
         }
-        if (!StringUtils.isEmpty(name))
+        if (!CommonUtil.isEmpty(name))
             user.setName(name);
-        if (!StringUtils.isEmpty(idcaoda))
+        if (!CommonUtil.isEmpty(idcaoda))
             user.setIdcaoda(idcaoda);
-        if (!StringUtils.isEmpty(idcaodb))
+        if (!CommonUtil.isEmpty(idcaodb))
             user.setIdcaodb(idcaodb);
-        if (!StringUtils.isEmpty(idcaodall))
+        if (!CommonUtil.isEmpty(idcaodall))
             user.setIdcaodall(idcaodall);
-        if (!StringUtils.isEmpty(idnumber))
+        if (!CommonUtil.isEmpty(idnumber))
             user.setIdnumber(idnumber);
         user.setRealNameState(1);
         memberMapper.updateByPrimaryKeySelective(user);
@@ -485,7 +487,7 @@ public class MemberService {
         Member user = new Member();
         user.setMobile(phone);
         user = memberMapper.getUser(user);
-        if (StringUtils.isEmpty(token)) {
+        if (CommonUtil.isEmpty(token)) {
             return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "身份认证错误,无认证参数！");
         }
         if (user == null) {
@@ -533,7 +535,7 @@ public class MemberService {
     /**
      * 业主列表
      */
-    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String userRole,String searchKey, String parentId, String childId,String orderBy) {
+    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy) {
         try {
             List<String> childsLabelIdList = new ArrayList<>();
             if (StringUtils.isNotBlank(parentId)) {
@@ -547,7 +549,7 @@ public class MemberService {
             String[] childsLabelIdArr = new String[childsLabelIdList.size()];
             childsLabelIdList.toArray(childsLabelIdArr);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Member> list = memberMapper.getMemberListByName(searchKey, stage,userRole, childsLabelIdArr,orderBy);
+            List<Member> list = memberMapper.getMemberListByName(searchKey, stage, userRole, childsLabelIdArr, orderBy);
             PageInfo pageResult = new PageInfo(list);
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
             for (Member member : list) {
@@ -826,7 +828,7 @@ public class MemberService {
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             user.setPassword(null);
             accessToken.setMember(user);
-            if (!StringUtils.isEmpty(user.getWorkerTypeId())) {
+            if (!CommonUtil.isEmpty(user.getWorkerTypeId())) {
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(user.getWorkerTypeId());
                 if (wt != null) {
                     accessToken.setWorkerTypeName(wt.getName());
