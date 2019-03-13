@@ -34,7 +34,6 @@ public class ForMasterController implements ForMasterAPI {
     }
 
     @Override
-    @ApiMethod
     public Supplier getSupplier(String supplierId){
         return forMasterService.getSupplier(supplierId);
     }
@@ -67,6 +66,11 @@ public class ForMasterController implements ForMasterAPI {
     @ApiMethod
     public String brandSeriesName(String productId){
         return forMasterService.brandSeriesName(productId);
+    }
+    @Override
+    @ApiMethod
+    public String brandName(String productId){
+        return forMasterService.brandName(productId);
     }
     @Override
     @ApiMethod

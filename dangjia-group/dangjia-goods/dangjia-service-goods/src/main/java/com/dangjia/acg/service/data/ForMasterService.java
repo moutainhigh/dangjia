@@ -86,6 +86,9 @@ public class ForMasterService {
     public String brandSeriesName(String productId){
         return brandSeriesMapper.brandSeriesName(productId);
     }
+    public String brandName(String productId){
+        return brandSeriesMapper.brandName(productId);
+    }
 
     public WorkerGoods getWorkerGoods(String workerGoodsId){
         return workerGoodsMapper.selectByPrimaryKey(workerGoodsId);

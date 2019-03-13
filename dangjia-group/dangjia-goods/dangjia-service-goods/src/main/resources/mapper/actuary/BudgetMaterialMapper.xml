@@ -19,7 +19,6 @@
 		goods_id as goodsId,
 		goods_name as goodsName,
 		price,
-		total_price as totalPrice,
 		cost,
 		description,
 		shop_count as shopCount,

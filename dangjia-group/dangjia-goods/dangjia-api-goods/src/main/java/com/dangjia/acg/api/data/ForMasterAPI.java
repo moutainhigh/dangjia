@@ -57,6 +57,10 @@ public interface ForMasterAPI {
     @ApiOperation(value = "查询品牌系列名", notes = "查询品牌系列名")
     String brandSeriesName(@RequestParam("productId") String productId);
 
+    @PostMapping("/data/forMaster/brandName")
+    @ApiOperation(value = "查询品牌名", notes = "查询品牌名")
+    String brandName(@RequestParam("productId") String productId);
+
     @PostMapping("/data/forMaster/getWorkerGoods")
     @ApiOperation(value = "工价商品信息", notes = "工价商品信息")
     WorkerGoods getWorkerGoods(@RequestParam("workerGoodsId") String workerGoodsId);

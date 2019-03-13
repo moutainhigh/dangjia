@@ -47,9 +47,6 @@ public class FillWorkerService {
         if (StringUtil.isEmpty(workerTypeId)) {
             return ServerResponse.createByErrorMessage("workerTypeId不能为空");
         }
-        if (name == "") {
-            name = null;
-        }
         if (pageNum == null) {
             pageNum = 1;
         }
@@ -57,7 +54,7 @@ public class FillWorkerService {
             pageSize = 10;
         }
         List<BudgetWorkerDTO> budgetWorkerDTOList = new ArrayList<BudgetWorkerDTO>();
-        PageInfo pageResult = new PageInfo();
+        PageInfo pageResult;
         try {
             if (type == 0) {//精算内
                 Example example = new Example(BudgetWorker.class);
@@ -66,7 +63,7 @@ public class FillWorkerService {
                         .andEqualTo(BudgetWorker.HOUSE_ID, houseId)
                         .andNotEqualTo(BudgetWorker.DELETE_STATE, "1")
                         .andCondition(" ( `name` IS NOT NULL OR `name` <> '' ) ")
-                        .andLike(BudgetWorker.NAME, name);
+                        .andLike(BudgetWorker.NAME, "%"+name+"%");
                 PageHelper.startPage(pageNum, pageSize);
                 List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
                 pageResult = new PageInfo(budgetWorkerList);
@@ -86,7 +83,7 @@ public class FillWorkerService {
             } else {
                 Example example = new Example(WorkerGoods.class);
                 example.createCriteria().andEqualTo(WorkerGoods.WORKER_TYPE_ID, workerTypeId).andEqualTo(WorkerGoods.SHOW_GOODS, 1).
-                        andLike(WorkerGoods.NAME, name);
+                        andLike(WorkerGoods.NAME, "%"+name+"%");
                 PageHelper.startPage(pageNum, pageSize);
                 List<WorkerGoods> workerGoodsList = workerGoodsMapper.selectByExample(example);
                 pageResult = new PageInfo(workerGoodsList);
