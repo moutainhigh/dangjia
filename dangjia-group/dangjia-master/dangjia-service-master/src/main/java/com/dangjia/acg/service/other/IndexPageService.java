@@ -105,7 +105,7 @@ public class IndexPageService {
             mapList.add(mapReady);
 
             Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andEqualTo(HouseFlow.WORK_TYPE,4).andGreaterThan(HouseFlow.WORKER_TYPE,2);;
+            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andEqualTo(HouseFlow.WORK_TYPE,4).andGreaterThan(HouseFlow.WORKER_TYPE,2);
             example.orderBy(HouseFlow.WORKER_TYPE);
             List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
             for (HouseFlow houseFlow : houseFlowList){
