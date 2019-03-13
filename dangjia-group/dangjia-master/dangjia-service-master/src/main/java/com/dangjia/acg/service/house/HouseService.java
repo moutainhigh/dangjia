@@ -905,7 +905,7 @@ public class HouseService {
                 }
             }
             pageResult.setList(srlist);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
+            return ServerResponse.createBySuccess(null, pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错,获取数据失败");

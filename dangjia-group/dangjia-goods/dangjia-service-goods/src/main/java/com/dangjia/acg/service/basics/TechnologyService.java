@@ -435,7 +435,7 @@ public class TechnologyService {
                         String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") + "&gId=" + product.getId() + "&type=" + DjConstants.GXType.CAILIAO;
                         object.put("url", url);//0:工艺；1：商品；2：人工
                         arr.add(object);
-                    }
+                    }else{pageResult.setTotal(pageResult.getTotal()-1);}
                 }
             }
             if (type == 2) {

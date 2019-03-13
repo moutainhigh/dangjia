@@ -169,6 +169,8 @@ public class PayService {
     public ServerResponse getWeiXinSign(String businessOrderNumber){
         //API路径
         String basePath = configUtil.getValue(SysConfig.DANGJIA_API_LOCAL, String.class);
+        LOG.info(basePath + "getWeiXinSign**********************************************");
+
         //检测订单有效性
         checkOrder(businessOrderNumber);
         //生成支付流水
@@ -184,6 +186,8 @@ public class PayService {
     public ServerResponse getAliSign(String businessOrderNumber){
         //API路径
         String basePath = configUtil.getValue(SysConfig.DANGJIA_API_LOCAL, String.class);
+        LOG.info(basePath + "getAliSign**********************************************");
+
         //检测订单有效性
         checkOrder(businessOrderNumber);
         //生成支付流水

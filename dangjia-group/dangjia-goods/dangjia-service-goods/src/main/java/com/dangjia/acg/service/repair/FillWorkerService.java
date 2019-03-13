@@ -61,7 +61,11 @@ public class FillWorkerService {
         try {
             if (type == 0) {//精算内
                 Example example = new Example(BudgetWorker.class);
-                example.createCriteria().andEqualTo(BudgetWorker.WORKER_TYPE_ID, workerTypeId).andEqualTo(BudgetWorker.HOUSE_ID, houseId)
+                example.createCriteria()
+                        .andEqualTo(BudgetWorker.WORKER_TYPE_ID, workerTypeId)
+                        .andEqualTo(BudgetWorker.HOUSE_ID, houseId)
+                        .andNotEqualTo(BudgetWorker.DELETE_STATE, "1")
+                        .andCondition(" ( `name` IS NOT NULL OR `name` <> '' ) ")
                         .andLike(BudgetWorker.NAME, name);
                 PageHelper.startPage(pageNum, pageSize);
                 List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
