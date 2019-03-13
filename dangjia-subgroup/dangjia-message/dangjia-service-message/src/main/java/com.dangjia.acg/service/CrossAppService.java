@@ -34,6 +34,8 @@ public class CrossAppService  extends BaseService{
     public  void addOrRemoveMembersFromCrossGroup(String appType,String myAppType,long gid, String[] addUsers,String[] delUsers) {
 
         JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
+        addUsers=getUserTags(addUsers);
+        delUsers=getUserTags(delUsers);
         try {
             List<CrossGroup> crossGroups = new ArrayList<CrossGroup>();
             CrossGroup crossGroup = new CrossGroup.Builder()
@@ -91,7 +93,7 @@ public class CrossAppService  extends BaseService{
      */
     public  void addCrossBlacklist(String appType,String[] users,String username) {
         try {
-
+            users=getUserTags(users);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             List<CrossBlacklist> crossBlacklists = new ArrayList<CrossBlacklist>();
             CrossBlacklist blacklist = new CrossBlacklist.Builder()
@@ -120,6 +122,7 @@ public class CrossAppService  extends BaseService{
     public  void deleteCrossBlacklist(String appType,String[] users,String username) {
         try {
 
+            users=getUserTags(users);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             List<CrossBlacklist> crossBlacklists = new ArrayList<CrossBlacklist>();
             CrossBlacklist blacklist = new CrossBlacklist.Builder()
@@ -179,6 +182,7 @@ public class CrossAppService  extends BaseService{
     public  void addCrossUsers(String appType,String[] usernames,String username) {
         try {
 
+            usernames=getUserTags(usernames);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             CrossFriendPayload payload = new CrossFriendPayload.Builder()
                     .setAppKey(getAppkey(appType))

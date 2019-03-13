@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.DeliverHouseDTO;
 import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
@@ -24,13 +25,12 @@ import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -71,9 +71,6 @@ public class OrderSplitService {
     @Autowired
     private IWorkerDetailMapper workerDetailMapper;
 
-    private static Logger LOG = LoggerFactory.getLogger(OrderSplitService.class);
-
-
     /**
      * 修改 供应商结算状态
      * id 供应商结算id
@@ -90,7 +87,7 @@ public class OrderSplitService {
                 return ServerResponse.createByErrorMessage("无供应商结算单");
 
             //配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收）
-            if (srcSplitDeliver.getShipState() != 2)
+            if (!(srcSplitDeliver.getShipState() == 2 || srcSplitDeliver.getShipState() == 4))
                 return ServerResponse.createByErrorMessage("当前为未收货状态，不能申请结算");
 
             srcSplitDeliver.setDeliveryFee(splitDeliver.getDeliveryFee());
@@ -187,6 +184,7 @@ public class OrderSplitService {
      */
     public ServerResponse sentSupplier(String orderSplitId, String splitItemList) {
         try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(orderSplitId);
             House house = houseMapper.selectByPrimaryKey(orderSplit.getHouseId());
             Member supervisor = memberMapper.getSupervisor(house.getId());//管家
@@ -197,8 +195,11 @@ public class OrderSplitService {
                 JSONObject obj = arr.getJSONObject(i);
                 String id = obj.getString("id");
                 String supplierId = obj.getString("supplierId");
-                OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
+                Supplier supplier = forMasterAPI.getSupplier(supplierId);
+                JsmsUtil.sendSupplier(supplier.getTelephone(), address+"submitNumber");
 
+
+                OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
                 Example example = new Example(SplitDeliver.class);
                 example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId()).andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId)
                         .andEqualTo(SplitDeliver.SHIP_STATE, 0).andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplitId);

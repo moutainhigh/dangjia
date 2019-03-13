@@ -31,7 +31,24 @@ public class BaseService {
 
 
     public Map<String, String>  map = new HashMap<String, String>();
+    @Value("${spring.profiles.active}")
+    private String active;
 
+    public String getUserTag(String userid){
+        if(!(active!=null&&"pre".equals(active))){
+            return "test_"+userid;
+        }else{
+            return userid;
+        }
+    }
+    public String[] getUserTags(String[] userids){
+        if(userids!=null&&userids.length>0){
+            for (int i = 0; i < userids.length; i++) {
+                userids[i]=getUserTag(userids[i]);
+            }
+        }
+        return userids;
+    }
     @PostConstruct //加上该注解表明该方法会在bean初始化后调用
     public void init(){
         map.put("zx_appkey", zx_appkey);

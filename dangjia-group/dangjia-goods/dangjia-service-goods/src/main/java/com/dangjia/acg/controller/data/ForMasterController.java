@@ -34,7 +34,6 @@ public class ForMasterController implements ForMasterAPI {
     }
 
     @Override
-    @ApiMethod
     public Supplier getSupplier(String supplierId){
         return forMasterService.getSupplier(supplierId);
     }

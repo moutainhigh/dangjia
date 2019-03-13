@@ -46,6 +46,8 @@ public class MessageService  extends BaseService {
 
         try {
 
+            targetId=getUserTag(targetId);
+            fromId=getUserTag(fromId);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             MessageBody body = MessageBody.text(text);
             SendMessageResult result = client.sendSingleTextByAdmin(targetId, fromId, body);
@@ -69,7 +71,8 @@ public class MessageService  extends BaseService {
     public  void sendGroupTextByAdmin(String appType,String targetId, String fromId,String text) {
 
     	try {
-
+            targetId=getUserTag(targetId);
+            fromId=getUserTag(fromId);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
     		MessageBody body = MessageBody.text(text);
     		SendMessageResult result = client.sendGroupTextByAdmin(targetId, fromId, body);
@@ -199,6 +202,7 @@ public class MessageService  extends BaseService {
     public  MessageListResult getUserMessageList(String appType,String username, int count, String begin_time, String end_time) {
         try {
 
+            username=getUserTag(username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             MessageListResult result = client.getUserMessages(username, count, begin_time, end_time);
             String cursor = result.getCursor();
@@ -225,6 +229,7 @@ public class MessageService  extends BaseService {
     public  MessageListResult getUserMessagesByCursor(String appType,String username,String cursor) {
         try {
 
+            username=getUserTag(username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             MessageListResult secondResult = client.getUserMessagesByCursor(username, cursor);
             return secondResult;
@@ -248,6 +253,7 @@ public class MessageService  extends BaseService {
     public  void retractMessage(String appType,String username,int msgid) {
         try {
 
+            username=getUserTag(username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             ResponseWrapper result = client.retractMessage(username, msgid);
             LOG.info(result.toString());
@@ -316,6 +322,8 @@ public class MessageService  extends BaseService {
      * @param alert 通知内容
      */
     public  void sendMemberIdPush(String appType,String[] memberId,String title,String alert,String speak) {
+
+        memberId=getUserTags(memberId);
         Collection<String> list =new LinkedList<String>();
         if (memberId!=null&&memberId.length>0){
             for (String r:memberId) {
