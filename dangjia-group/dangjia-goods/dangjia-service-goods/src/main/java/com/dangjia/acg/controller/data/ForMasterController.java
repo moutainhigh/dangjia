@@ -70,6 +70,11 @@ public class ForMasterController implements ForMasterAPI {
     }
     @Override
     @ApiMethod
+    public String brandName(String productId){
+        return forMasterService.brandName(productId);
+    }
+    @Override
+    @ApiMethod
     public WorkerGoods getWorkerGoods(String workerGoodsId){
         return forMasterService.getWorkerGoods(workerGoodsId);
     }

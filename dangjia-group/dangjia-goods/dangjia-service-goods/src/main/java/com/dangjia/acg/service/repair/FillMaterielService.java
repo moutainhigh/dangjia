@@ -137,6 +137,7 @@ public class FillMaterielService {
                 warehouseDTO.setProductName(warehouse.getProductName());
                 warehouseDTO.setPrice(warehouse.getPrice());
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
+                warehouseDTO.setReceive(warehouse.getReceive());
                 warehouseDTO.setUnitName(warehouse.getUnitName());
                 warehouseDTO.setProductType(warehouse.getProductType());
                 warehouseDTO.setAskTime(warehouse.getAskTime());

@@ -16,6 +16,9 @@ public class OrderSplitItemDTO {
     private Double totalPrice; //总价
     private String brandName;//品牌名
 
-
+    private String brandSeriesName;//品牌系列
+    private String image;
+    private String shopCount;//购买总数
+    private String receive;//收货数量
 
 }

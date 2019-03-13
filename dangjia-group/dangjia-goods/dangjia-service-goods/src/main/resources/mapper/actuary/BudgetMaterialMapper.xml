@@ -134,7 +134,8 @@
 			and
 			category_id = #{categoryId}
 		</if>
-		ORDER BY create_date desc
+		GROUP BY product_sn
+		ORDER BY create_date,house_id,product_sn desc
 	</select>
 
 	<!--业主取消的又改为待付款-->

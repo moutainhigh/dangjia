@@ -126,6 +126,7 @@ public class OrderSplitService {
      */
     public ServerResponse splitDeliverDetail(String splitDeliverId) {
         try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
             SplitDeliverDetailDTO detailDTO = new SplitDeliverDetailDTO();
             detailDTO.setNumber(splitDeliver.getNumber());
@@ -149,12 +150,15 @@ public class OrderSplitService {
                 orderSplitItemDTO.setNum(orderSplitItem.getNum());
                 orderSplitItemDTO.setCost(orderSplitItem.getCost());
                 orderSplitItemDTO.setUnitName(orderSplitItem.getUnitName());
-                orderSplitItemDTO.setTotalPrice(orderSplitItem.getCost() * orderSplitItem.getNum());//成本价 * 数量
-                orderSplitItemDTO.setBrandName("品牌名");
+                orderSplitItemDTO.setShopCount(String.valueOf(orderSplitItem.getShopCount()));
+                orderSplitItemDTO.setImage(address + orderSplitItem.getImage());
+                orderSplitItemDTO.setReceive(String.valueOf(orderSplitItem.getReceive()));
+                orderSplitItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(orderSplitItem.getProductId()));
+                orderSplitItemDTO.setBrandName(forMasterAPI.brandName(orderSplitItem.getProductId()));
+                orderSplitItemDTO.setTotalPrice(orderSplitItem.getCost() * orderSplitItem.getReceive());//成本价 * 数量
                 orderSplitItemDTOS.add(orderSplitItemDTO);
                 detailDTO.setTotalAmount(detailDTO.getTotalAmount() + orderSplitItemDTO.getTotalPrice());
             }
-
             detailDTO.setSize(orderSplitItemList.size());
             detailDTO.setOrderSplitItemDTOS(orderSplitItemDTOS);
 
