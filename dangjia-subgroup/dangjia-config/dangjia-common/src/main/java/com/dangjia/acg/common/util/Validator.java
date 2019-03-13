@@ -211,7 +211,7 @@ public class Validator extends Assert {
    * @return true/false
    */
   public static boolean isMobileNo(String mobile) {
-    String regex = "^((13[0-9])|(14[0-9])|(15[0-9])|(18[0-9])|(17[0-9])|(19[0-9]))\\d{8}$";
+    String regex = "(1[0-9]{2}){1}\\d{8}";
     return mobile.matches(regex);
   }
   private static final Pattern SIMPLE_PASSWORD = Pattern
