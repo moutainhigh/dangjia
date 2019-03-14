@@ -498,20 +498,20 @@ public class BudgetWorkerService {
     public ServerResponse importExcelBudgets(String workerTypeId, MultipartFile file) {
         try {
             Map map=new HashMap();
-            ImportExcel caiLiao=new ImportExcel(file,1,1);//材料
-            ImportExcel renGong=new ImportExcel(file,1,2);//服务
-            List<WorkerGoodsDTO> workerGoodsDTOList=renGong.getDataList(WorkerGoodsDTO.class,0);
-            for (int i = 0; i < workerGoodsDTOList.size(); i++) {
-                WorkerGoodsDTO workerGoodsDTO=workerGoodsDTOList.get(i);
-                if(CommonUtil.isEmpty(workerGoodsDTO.getWorkerGoodsSn())){
-                    break;
-                }
-                workerGoodsDTO=workerGoodsService.getWorkerGoodsDTO(workerGoodsDTO.getWorkerGoodsSn(),workerTypeId,workerGoodsDTO.getShopCount());
-                workerGoodsDTOList.remove(i);
-                workerGoodsDTOList.add(i,workerGoodsDTO);
-            }
-            ImportExcel fuWu=new ImportExcel(file,1,0);//人工
-            map.put("workerGoods",workerGoodsDTOList);
+//            ImportExcel caiLiao=new ImportExcel(file,1,1);//材料
+//            ImportExcel renGong=new ImportExcel(file,1,2);//服务
+//            List<WorkerGoodsDTO> workerGoodsDTOList=renGong.getDataList(WorkerGoodsDTO.class,0);
+//            for (int i = 0; i < workerGoodsDTOList.size(); i++) {
+//                WorkerGoodsDTO workerGoodsDTO=workerGoodsDTOList.get(i);
+//                if(CommonUtil.isEmpty(workerGoodsDTO.getWorkerGoodsSn())){
+//                    break;
+//                }
+//                workerGoodsDTO=workerGoodsService.getWorkerGoodsDTO(workerGoodsDTO.getWorkerGoodsSn(),workerTypeId,workerGoodsDTO.getShopCount());
+//                workerGoodsDTOList.remove(i);
+//                workerGoodsDTOList.add(i,workerGoodsDTO);
+//            }
+//            ImportExcel fuWu=new ImportExcel(file,1,0);//人工
+//            map.put("workerGoods",workerGoodsDTOList);
             return ServerResponse.createBySuccessMessage("生成精算成功");
         } catch (Exception e) {
             e.printStackTrace();
