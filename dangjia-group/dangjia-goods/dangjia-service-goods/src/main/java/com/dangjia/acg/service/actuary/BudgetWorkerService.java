@@ -12,10 +12,7 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.excel.ImportExcel;
-import com.dangjia.acg.dto.basics.BudgetListResult;
-import com.dangjia.acg.dto.basics.BudgetResult;
-import com.dangjia.acg.dto.basics.RlistResult;
-import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
+import com.dangjia.acg.dto.basics.*;
 import com.dangjia.acg.mapper.actuary.IActuarialTemplateMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
@@ -32,6 +29,7 @@ import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.service.basics.ProductService;
 import com.dangjia.acg.service.basics.WorkerGoodsService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -74,6 +72,8 @@ public class BudgetWorkerService {
     private GetForBudgetAPI getForBudgetAPI;
     @Autowired
     private WorkerGoodsService workerGoodsService;
+    @Autowired
+    private ProductService productService;
 
 
     private static Logger LOG = LoggerFactory.getLogger(BudgetWorkerService.class);
@@ -492,27 +492,68 @@ public class BudgetWorkerService {
     }
 
 
+
     /**
      * 生成精算（xls导入）
      */
     public ServerResponse importExcelBudgets(String workerTypeId, MultipartFile file) {
         try {
             Map map=new HashMap();
-//            ImportExcel caiLiao=new ImportExcel(file,1,1);//材料
-//            ImportExcel renGong=new ImportExcel(file,1,2);//服务
-//            List<WorkerGoodsDTO> workerGoodsDTOList=renGong.getDataList(WorkerGoodsDTO.class,0);
-//            for (int i = 0; i < workerGoodsDTOList.size(); i++) {
-//                WorkerGoodsDTO workerGoodsDTO=workerGoodsDTOList.get(i);
-//                if(CommonUtil.isEmpty(workerGoodsDTO.getWorkerGoodsSn())){
-//                    break;
-//                }
-//                workerGoodsDTO=workerGoodsService.getWorkerGoodsDTO(workerGoodsDTO.getWorkerGoodsSn(),workerTypeId,workerGoodsDTO.getShopCount());
-//                workerGoodsDTOList.remove(i);
-//                workerGoodsDTOList.add(i,workerGoodsDTO);
-//            }
-//            ImportExcel fuWu=new ImportExcel(file,1,0);//人工
-//            map.put("workerGoods",workerGoodsDTOList);
-            return ServerResponse.createBySuccessMessage("生成精算成功");
+            ImportExcel caiLiao=new ImportExcel(file,0,1);//材料
+            List<ProductDTO> caiLiaoList=caiLiao.getDataList(ProductDTO.class,0);
+            List<ProductDTO> caiLiaos=new ArrayList<>();
+            for (int i = 0; i < caiLiaoList.size(); i++) {
+                ProductDTO productDTO=caiLiaoList.get(i);
+                if(CommonUtil.isEmpty(productDTO.getProductSn())){
+                    break;
+                }
+                productDTO=productService.getProductDTO(productDTO.getProductSn(),productDTO.getShopCount());
+                if(CommonUtil.isEmpty(productDTO.getShopCount())){
+                    continue;
+                }
+                caiLiaos.add(productDTO);
+            }
+            map.put("caiLiaos",caiLiaos);
+
+
+
+
+            ImportExcel fuWu=new ImportExcel(file,0,2);//服务
+            List<ProductDTO> fuWuList=fuWu.getDataList(ProductDTO.class,0);
+            List<ProductDTO> fuWus=new ArrayList<>();
+            for (int i = 0; i < fuWuList.size(); i++) {
+                ProductDTO productDTO=fuWuList.get(i);
+                if(CommonUtil.isEmpty(productDTO.getProductSn())){
+                    break;
+                }
+                productDTO=productService.getProductDTO(productDTO.getProductSn(),productDTO.getShopCount());
+                if(CommonUtil.isEmpty(productDTO.getShopCount())){
+                    continue;
+                }
+                fuWus.add(productDTO);
+            }
+            map.put("fuWus",fuWus);
+
+
+
+
+
+            ImportExcel renGong=new ImportExcel(file,0,0);//人工
+            List<WorkerGoodsDTO> workerGoodsDTOList=renGong.getDataList(WorkerGoodsDTO.class,0);
+            List<WorkerGoodsDTO> workerGoodsDTOS=new ArrayList<>();
+            for (int i = 0; i < workerGoodsDTOList.size(); i++) {
+                WorkerGoodsDTO workerGoodsDTO=workerGoodsDTOList.get(i);
+                if(CommonUtil.isEmpty(workerGoodsDTO.getWorkerGoodsSn())){
+                    break;
+                }
+                workerGoodsDTO=workerGoodsService.getWorkerGoodsDTO(workerGoodsDTO.getWorkerGoodsSn(),workerTypeId,workerGoodsDTO.getShopCount());
+                if(CommonUtil.isEmpty(workerGoodsDTO.getShopCount())){
+                    continue;
+                }
+                workerGoodsDTOS.add(workerGoodsDTO);
+            }
+            map.put("workerGoods",workerGoodsDTOS);
+            return ServerResponse.createBySuccess("生成精算成功",map);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("生成失败");

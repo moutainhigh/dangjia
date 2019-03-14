@@ -6,7 +6,9 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Brand;
@@ -19,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -564,4 +567,35 @@ public class ProductService {
         }
     }
 
+    public ProductDTO getProductDTO(String productSn,String shopCount){
+        Example example=new Example(Product.class);
+        example.createCriteria()
+                .andEqualTo(Product.DATA_STATUS,'0')
+                .andEqualTo(Product.PRODUCT_SN,productSn)
+                .andEqualTo(Product.TYPE,"1")
+                .andEqualTo(Product.MAKET,"1")
+//                .andEqualTo(Product.WORKER_TYPE_ID,workerTypeId)
+        ;
+        List<Product> products=iProductMapper.selectByExample(example);
+        ProductDTO productsDTO=new ProductDTO();
+        if(products!=null&&products.size()>0){
+            Product product=products.get(0);
+            productsDTO.setGoodsId(product.getGoodsId());
+            productsDTO.setProductId(product.getId());
+            productsDTO.setProductName(product.getName());
+            productsDTO.setUnitName(product.getUnitName());
+            productsDTO.setLabelId(product.getLabelId());
+            productsDTO.setShopCount(shopCount);
+            Goods goods= goodsMapper.selectByPrimaryKey(product.getGoodsId());
+            if(goods!=null){
+                productsDTO.setGoodsName(goods.getName());
+                productsDTO.setProductType(String.valueOf(goods.getType()));
+                productsDTO.setBuy(String.valueOf(goods.getBuy()));
+            }
+        }else{
+            productsDTO.setProductSn(productSn);
+            productsDTO.setMsg("找不到该商品（"+productSn+"）,请检查是否创建或者停用！");
+        }
+        return productsDTO;
+    }
 }

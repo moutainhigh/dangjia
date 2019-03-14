@@ -451,8 +451,8 @@ public class EvaluateService {
         for(Evaluate el : evaluateList){
             astar += el.getStar();
         }
-        double astar1 = astar/(5*evaluateList.size());
-        worker.setPraiseRate(new BigDecimal(astar1));
+        BigDecimal praiseRate = new BigDecimal(astar).divide(new BigDecimal(5*evaluateList.size()),2,BigDecimal.ROUND_HALF_UP);
+        worker.setPraiseRate(praiseRate);
         memberMapper.updateByPrimaryKeySelective(worker);
     }
 

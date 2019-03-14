@@ -72,7 +72,6 @@ public class HouseDesignImageService {
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
-            ServerResponse serverResponse= designService.getImagesList(null,houseId);
 //            Example example = new Example(HouseFlow.class);
 //            example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId);
 //            List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);
@@ -86,7 +85,7 @@ public class HouseDesignImageService {
 //                    imageDTOList.add(houseDesignImageDTO);
 //                }
 //            }
-            return ServerResponse.createBySuccess("查询成功", serverResponse.getResultObj());
+            return designService.getImagesList(null, houseId);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -206,7 +205,7 @@ public class HouseDesignImageService {
             return ServerResponse.createBySuccess("查询成功", map);
         }
         if (house.getDesignerOk() == 2) {
-            ServerResponse serverResponse= designService.getImagesList(null,houseId);
+            ServerResponse serverResponse = designService.getImagesList(null, houseId);
 //            example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId).andNotEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID, "1")
 //                    .andIsNotNull(HouseDesignImage.IMAGEURL);
 //            example.orderBy(HouseDesignImage.CREATE_DATE).desc();
@@ -245,8 +244,6 @@ public class HouseDesignImageService {
             example.createCriteria().andEqualTo("houseId", houseId).andEqualTo("sell", 1);
             example.orderBy(HouseDesignImage.CREATE_DATE).desc();
             List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);
-
-
 
 
             return designImageTypeList;

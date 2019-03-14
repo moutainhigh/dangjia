@@ -56,7 +56,7 @@ public class WorkerGoodsDTO {
 
 
     @ExcelField(titile = "精算数", offset = 6)
-    private Double shopCount;//精算数
+    private String shopCount;//精算数
     private String msg;//异常说明
 
     @ApiModelProperty("technologies")

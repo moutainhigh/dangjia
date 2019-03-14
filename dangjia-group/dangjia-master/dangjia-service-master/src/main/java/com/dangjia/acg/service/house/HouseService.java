@@ -956,7 +956,7 @@ public class HouseService {
         List<HouseDesignImage> houseDesignImages = houseDesignImageMapper.selectByExample(example);
         if ((houseDesignImages != null) && (houseDesignImages.size() > 0)) {
             shareDTO.setImageNum(houseDesignImages.size() + "张图片");
-            shareDTO.setImage(address + houseDesignImages.get(0).getImageurl()+"?image/resize,w_100,h_100/quality,q_10");//户型图片
+            shareDTO.setImage(address + houseDesignImages.get(0).getImageurl()+"?x-image-process=image/resize,w_500,h_500/quality,q_80");//户型图片
         } else {
             shareDTO.setImageNum(0 + "张图片");
             shareDTO.setImage("");//户型图片
