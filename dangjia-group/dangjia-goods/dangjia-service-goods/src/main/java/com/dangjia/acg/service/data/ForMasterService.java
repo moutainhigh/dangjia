@@ -15,6 +15,7 @@ import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
@@ -104,24 +105,30 @@ public class ForMasterService {
      * 支付回调获取材料精算
      */
     public List<BudgetMaterial> caiLiao(String houseFlowId){
-        Example example = new Example(BudgetMaterial.class);
-        example.createCriteria().andEqualTo(BudgetMaterial.HOUSE_FLOW_ID, houseFlowId).andEqualTo(BudgetMaterial.DELETE_STATE, 0)
-            .andEqualTo(BudgetMaterial.STETA,1);
-        List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.selectByExample(example);
-        for (BudgetMaterial budgetMaterial : budgetMaterialList){
-            Product product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());
-            //重新记录支付时价格
-            budgetMaterial.setPrice(product.getPrice());
-            budgetMaterial.setCost(product.getCost());
+        try{
+            Example example = new Example(BudgetMaterial.class);
+            example.createCriteria().andEqualTo(BudgetMaterial.HOUSE_FLOW_ID, houseFlowId).andEqualTo(BudgetMaterial.DELETE_STATE, 0)
+                    .andEqualTo(BudgetMaterial.STETA,1);
+            List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.selectByExample(example);
+            for (BudgetMaterial budgetMaterial : budgetMaterialList){
+                Product product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());
+                //重新记录支付时价格
+                budgetMaterial.setPrice(product.getPrice());
+                budgetMaterial.setCost(product.getCost());
 //            budgetMaterial.setTotalPrice(budgetMaterial.getShopCount() * product.getPrice());//已支付 记录总价
-            budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * product.getPrice());//已支付 记录总价
-            budgetMaterial.setDeleteState(3);//已支付
-            budgetMaterial.setModifyDate(new Date());
-            budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
+                budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * product.getPrice());//已支付 记录总价
+                budgetMaterial.setDeleteState(3);//已支付
+                budgetMaterial.setModifyDate(new Date());
+                budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
+            }
+            //业主取消的材料又改为待付款
+            budgetMaterialMapper.updateSelf(houseFlowId);
+            return budgetMaterialList;
+        }catch (Exception e){
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return null;
         }
-        //业主取消的材料又改为待付款
-        budgetMaterialMapper.updateSelf(houseFlowId);
-        return budgetMaterialList;
     }
 
     /**
@@ -129,18 +136,26 @@ public class ForMasterService {
      * 业主取消的又改为待付款
      */
     public List<BudgetWorker> renGong(String houseFlowId){
-        Example example = new Example(BudgetWorker.class);
-        example.createCriteria().andEqualTo(BudgetWorker.HOUSE_FLOW_ID, houseFlowId).andEqualTo(BudgetWorker.DELETE_STATE, 0);
-        List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
-        for(BudgetWorker budgetWorker : budgetWorkerList){
-            WorkerGoods wg = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
-            budgetWorker.setPrice(wg.getPrice());
-            budgetWorker.setTotalPrice(budgetWorker.getShopCount() * wg.getPrice());
-            budgetWorker.setDeleteState(3);//已支付
-            budgetWorker.setModifyDate(new Date());
-            budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
+        try{
+            Example example = new Example(BudgetWorker.class);
+            example.createCriteria().andEqualTo(BudgetWorker.HOUSE_FLOW_ID, houseFlowId).andEqualTo(BudgetWorker.DELETE_STATE, 0);
+            List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
+            for(BudgetWorker budgetWorker : budgetWorkerList){
+                WorkerGoods wg = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
+                if (wg != null){
+                    budgetWorker.setPrice(wg.getPrice());
+                    budgetWorker.setTotalPrice(budgetWorker.getShopCount() * wg.getPrice());
+                    budgetWorker.setDeleteState(3);//已支付
+                    budgetWorker.setModifyDate(new Date());
+                    budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
+                }
+            }
+            return budgetWorkerList;
+        }catch (Exception e){
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return null;
         }
-        return budgetWorkerList;
     }
 
     /**

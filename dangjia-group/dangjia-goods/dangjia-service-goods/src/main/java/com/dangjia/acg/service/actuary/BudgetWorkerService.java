@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
@@ -485,7 +486,18 @@ public class BudgetWorkerService {
     }
 
 
-
+    /**
+     * 生成精算（xls导入）
+     */
+    public ServerResponse makeBudgets(String actuarialTemplateId, String houseId, String workerTypeId, MultipartFile file) {
+        try {
+//            ImportExcel importExcel=new ImportExcel(file,1,0);
+            return ServerResponse.createBySuccessMessage("生成精算成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("生成失败");
+        }
+    }
     /**
      * 根据houseId和workerTypeId查询房子人工精算总价
      */

@@ -23,6 +23,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -58,22 +59,22 @@ public class WebWithdrawDepositService {
             String strEndDate = DateUtil.dateToString(DateUtil.getSundayOfThisWeek(), "yyyy-MM-dd HH:mm:ss");
 //            LOG.info("本周一 ：" + strBeginDate + "本周日 ：" + strEndDate);
             //state  0未处理,1同意（成功） 2不同意(驳回)
-            Example example=new Example(WithdrawDeposit.class);
+            Example example = new Example(WithdrawDeposit.class);
             example.createCriteria().andBetween(WithdrawDeposit.CREATE_DATE, strBeginDate, strEndDate);
             int curWeekAddSize = iWithdrawDepositMapper.selectCountByExample(example);
-            example=new Example(WithdrawDeposit.class);
+            example = new Example(WithdrawDeposit.class);
             example.createCriteria().andBetween(WithdrawDeposit.CREATE_DATE, strBeginDate, strEndDate)
                     .andEqualTo(WithdrawDeposit.STATE, 1);
             int curWeekSuccessSize = iWithdrawDepositMapper.selectCountByExample(example);
 
-            example=new Example(WithdrawDeposit.class);
+            example = new Example(WithdrawDeposit.class);
             example.createCriteria()
                     .andBetween(WithdrawDeposit.CREATE_DATE, strBeginDate, strEndDate)
                     .andEqualTo(WithdrawDeposit.STATE, 0);
             int curWeekNoHandleSize = iWithdrawDepositMapper.selectCountByExample(example);
 
 
-            example=new Example(WithdrawDeposit.class);
+            example = new Example(WithdrawDeposit.class);
             example.createCriteria()
                     .andEqualTo(WithdrawDeposit.STATE, 0);
             int allNoHandleSize = iWithdrawDepositMapper.selectCountByExample(example);
@@ -159,6 +160,7 @@ public class WebWithdrawDepositService {
                     //把钱 转到 余额上面
                     worker.setHaveMoney(worker.getHaveMoney().add(money));//更新已有钱
                     worker.setSurplusMoney(worker.getSurplusMoney().add(money));
+                    worker.setModifyDate(new Date());
                     iMemberMapper.updateByPrimaryKeySelective(worker);
 
                     //提现失败推送
@@ -178,7 +180,7 @@ public class WebWithdrawDepositService {
                             "0", "提现结果",
                             DjConstants.PushMessage.WITHDRAW_CASH_SUCCESS, "");
                 }
-
+                srcWithdrawDeposit.setModifyDate(new Date());
                 iWithdrawDepositMapper.updateByPrimaryKey(srcWithdrawDeposit);
             }
 
