@@ -214,6 +214,7 @@ public class House extends BaseEntity {
     }
 
     public String getNoNumberHouseName() {
-        return (TextUtils.isEmpty(getResidential()) ? "*" : getResidential()) + "**栋**单元**号";
+        return (TextUtils.isEmpty(getResidential()) ? "*" : getResidential()) + "**栋**单元"
+                + (TextUtils.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
     }
 }
