@@ -10,9 +10,12 @@ import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.excel.ImportExcel;
 import com.dangjia.acg.dto.basics.BudgetListResult;
 import com.dangjia.acg.dto.basics.BudgetResult;
 import com.dangjia.acg.dto.basics.RlistResult;
+import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
 import com.dangjia.acg.mapper.actuary.IActuarialTemplateMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
@@ -29,6 +32,7 @@ import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.service.basics.WorkerGoodsService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +72,9 @@ public class BudgetWorkerService {
     private TechnologyRecordAPI technologyRecordAPI;
     @Autowired
     private GetForBudgetAPI getForBudgetAPI;
+    @Autowired
+    private WorkerGoodsService workerGoodsService;
+
 
     private static Logger LOG = LoggerFactory.getLogger(BudgetWorkerService.class);
 
@@ -345,8 +352,8 @@ public class BudgetWorkerService {
 
             iBudgetMaterialMapper.deleteByhouseId(houseId, workerTypeId);
             iBudgetWorkerMapper.deleteByhouseId(houseId, workerTypeId);
-            Map map=new HashMap();//记录重复数据，防止重复添加
-            Example example=null;
+            Map map = new HashMap();//记录重复数据，防止重复添加
+            Example example = null;
             JSONArray goodsList = JSONArray.parseArray(listOfGoods);
             for (int i = 0; i < goodsList.size(); i++) {
                 JSONObject job = goodsList.getJSONObject(i);
@@ -357,7 +364,7 @@ public class BudgetWorkerService {
                 String goodsGroupId = job.getString("goodsGroupId");//所属关联组
                 Double shopCount = Double.parseDouble(job.getString("shopCount"));//数量
                 if (0 == productType || 1 == productType) {//材料或者服务
-                    if (map.get(houseId+workerTypeId+goodsId+productId)!=null&&Boolean.parseBoolean(map.get(houseId+workerTypeId+goodsId+productId).toString())) {
+                    if (map.get(houseId + workerTypeId + goodsId + productId) != null && Boolean.parseBoolean(map.get(houseId + workerTypeId + goodsId + productId).toString())) {
                         continue;
                     }
                     try {
@@ -426,16 +433,15 @@ public class BudgetWorkerService {
                         budgetMaterial.setGroupType(groupType);
                         budgetMaterial.setGoodsGroupId(goodsGroupId);
 //                        budgetMaterial.setTemplateId(actuarialTemplateId);
-
                         iBudgetMaterialMapper.insert(budgetMaterial);
-                        map.put(houseId+workerTypeId+goodsId+productId,true);
+                        map.put(houseId + workerTypeId + goodsId + productId, true);
                     } catch (Exception e) {
                         e.printStackTrace();
                         return ServerResponse.createByErrorMessage("生成失败");
                     }
                 } else if (2 == productType) {//人工商品
                     try {
-                        if (map.get(houseId+workerTypeId+"R"+goodsId+productId)!=null&&Boolean.parseBoolean(map.get(houseId+workerTypeId+"R"+goodsId+productId).toString())) {
+                        if (map.get(houseId + workerTypeId + "R" + goodsId + productId) != null && Boolean.parseBoolean(map.get(houseId + workerTypeId + "R" + goodsId + productId).toString())) {
                             continue;
                         }
                         BudgetWorker budgetWorker = new BudgetWorker();
@@ -464,7 +470,7 @@ public class BudgetWorkerService {
                         budgetWorker.setCreateDate(new Date());
                         budgetWorker.setModifyDate(new Date());
                         iBudgetWorkerMapper.insert(budgetWorker);
-                        map.put(houseId+workerTypeId+"R"+goodsId+productId,true);
+                        map.put(houseId + workerTypeId + "R" + goodsId + productId, true);
                     } catch (Exception e) {
                         e.printStackTrace();
                         return ServerResponse.createByErrorMessage("生成失败");
@@ -489,9 +495,23 @@ public class BudgetWorkerService {
     /**
      * 生成精算（xls导入）
      */
-    public ServerResponse makeBudgets(String actuarialTemplateId, String houseId, String workerTypeId, MultipartFile file) {
+    public ServerResponse importExcelBudgets(String workerTypeId, MultipartFile file) {
         try {
-//            ImportExcel importExcel=new ImportExcel(file,1,0);
+            Map map=new HashMap();
+            ImportExcel caiLiao=new ImportExcel(file,1,1);//材料
+            ImportExcel renGong=new ImportExcel(file,1,2);//服务
+            List<WorkerGoodsDTO> workerGoodsDTOList=renGong.getDataList(WorkerGoodsDTO.class,0);
+            for (int i = 0; i < workerGoodsDTOList.size(); i++) {
+                WorkerGoodsDTO workerGoodsDTO=workerGoodsDTOList.get(i);
+                if(CommonUtil.isEmpty(workerGoodsDTO.getWorkerGoodsSn())){
+                    break;
+                }
+                workerGoodsDTO=workerGoodsService.getWorkerGoodsDTO(workerGoodsDTO.getWorkerGoodsSn(),workerTypeId,workerGoodsDTO.getShopCount());
+                workerGoodsDTOList.remove(i);
+                workerGoodsDTOList.add(i,workerGoodsDTO);
+            }
+            ImportExcel fuWu=new ImportExcel(file,1,0);//人工
+            map.put("workerGoods",workerGoodsDTOList);
             return ServerResponse.createBySuccessMessage("生成精算成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -682,15 +702,27 @@ public class BudgetWorkerService {
             BudgetListResult blr3 = new BudgetListResult();
 
             HouseStyleType houseStyleType = getForBudgetAPI.getStyleByName(house.getStyle());
-            blr1.setListCost(house.getSquare().multiply(houseStyleType.getPrice()));
+            if (houseStyleType != null && houseStyleType.getPrice() != null) {
+                blr1.setListCost(house.getSquare().multiply(houseStyleType.getPrice()));
+            } else {
+                blr1.setListCost(new BigDecimal(0));
+            }
             blr1.setListName("设计费");
 
             HouseFlow houseFlow = houseFlowAPI.getHouseFlowByHidAndWty(houseId, 2);
-            blr2.setListCost(houseFlow.getWorkPrice());
+            if (houseFlow != null && houseFlow.getWorkPrice() != null) {
+                blr2.setListCost(houseFlow.getWorkPrice());
+            } else {
+                blr2.setListCost(new BigDecimal(0));
+            }
             blr2.setListName("精算费");
 
             houseFlow = houseFlowAPI.getHouseFlowByHidAndWty(houseId, 3);
-            blr3.setListCost(houseFlow.getTotalPrice());
+            if (houseFlow != null && houseFlow.getTotalPrice() != null) {
+                blr3.setListCost(houseFlow.getTotalPrice());
+            } else {
+                blr3.setListCost(new BigDecimal(0));
+            }
             blr3.setListName("管家费");
             expectList.add(blr1);
             expectList.add(blr2);

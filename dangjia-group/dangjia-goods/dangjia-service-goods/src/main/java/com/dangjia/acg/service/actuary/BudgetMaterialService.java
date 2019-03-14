@@ -3,6 +3,7 @@ package com.dangjia.acg.service.actuary;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
@@ -55,9 +56,9 @@ public class BudgetMaterialService {
     private static Logger LOG = LoggerFactory.getLogger(BudgetMaterialService.class);
 
     //精算阶段花费统计
-    public ServerResponse getHouseBudgetStageCost(String houseId, String workerTypeId){
+    public ServerResponse getHouseBudgetStageCost(String houseId, String workerTypeId) {
         try {
-            List<BudgetStageCostDTO> mapList = iBudgetMaterialMapper.getHouseBudgetStageCost(houseId,workerTypeId);
+            List<BudgetStageCostDTO> mapList = iBudgetMaterialMapper.getHouseBudgetStageCost(houseId, workerTypeId);
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             e.printStackTrace();
@@ -102,6 +103,11 @@ public class BudgetMaterialService {
                 Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
                 if (unit != null)
                     obj.put("goodsUnitName", unit.getName());
+                if (goods != null) {
+                    if (!CommonUtil.isEmpty(goods.getName()))
+                        obj.put("goodsName", goods.getName());
+                }
+
             }
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {

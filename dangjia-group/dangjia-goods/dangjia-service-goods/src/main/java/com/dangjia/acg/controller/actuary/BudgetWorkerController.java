@@ -7,8 +7,12 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.actuary.BudgetWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 public class BudgetWorkerController implements BudgetWorkerAPI {
@@ -131,7 +135,31 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
     public ServerResponse makeBudgets(HttpServletRequest request, String actuarialTemplateId, String houseId, String workerTypeId, String listOfGoods) {
         return budgetWorkerService.makeBudgets(actuarialTemplateId, houseId, workerTypeId, listOfGoods);
     }
-
+    /**
+     * 生成精算（xls导入）
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse importExcelBudgets(StandardMultipartHttpServletRequest request, MultipartFile[] multipartFiles, String workerTypeId){
+        MultipartFile file=null;
+        if(multipartFiles.length==0){
+            List<MultipartFile> allimg=new ArrayList<>();
+            List<MultipartFile> images=request.getFiles("image");
+            List<MultipartFile> files=request.getFiles("file");
+            List<MultipartFile> imgFile=request.getFiles("imgFile");
+            allimg.addAll(images);
+            allimg.addAll(files);
+            allimg.addAll(imgFile);
+            multipartFiles=new MultipartFile[allimg.size()];
+            multipartFiles=allimg.toArray(multipartFiles);
+            if(multipartFiles.length>0){
+                file=multipartFiles[0];
+            }
+        }else{
+            file=multipartFiles[0];
+        }
+        return budgetWorkerService.importExcelBudgets( workerTypeId, file);
+    }
     /**
      * 根据houseId和wokerTypeId查询房子人工精算总价
      *

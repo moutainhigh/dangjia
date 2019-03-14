@@ -7,6 +7,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -133,6 +135,12 @@ public interface BudgetWorkerAPI {
                                @RequestParam("workerTypeId") String workerTypeId,
                                @RequestParam("listOfGoods") String listOfGoods);
 
+    @PostMapping("/actuary/budgetWorker/importExcelBudgets")
+    @ApiOperation(value = "Excel导入精算", notes = "Excel导入精算")
+    ServerResponse importExcelBudgets(
+            @RequestParam("request") StandardMultipartHttpServletRequest request,
+            @RequestParam("file")  MultipartFile[] multipartFiles,
+            @RequestParam("workerTypeId") String workerTypeId);
     /**
      * 根据houseId和wokerTypeId查询房子人工精算总价
      *

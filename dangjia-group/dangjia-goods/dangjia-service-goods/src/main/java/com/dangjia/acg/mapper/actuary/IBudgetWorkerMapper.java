@@ -49,4 +49,6 @@ public interface IBudgetWorkerMapper extends Mapper<BudgetWorker> {
 	void deleteByhouseId(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	/**根据houseId和workerTypeId查询房子人工精算总价*/
 	Map<String,Object> getWorkerTotalPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+
+	void insertByBatch(@Param("list")List<BudgetWorker> list);
 }
