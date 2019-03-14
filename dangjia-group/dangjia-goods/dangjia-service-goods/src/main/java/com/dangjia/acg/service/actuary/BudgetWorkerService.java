@@ -10,7 +10,6 @@ import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.excel.ImportExcel;
 import com.dangjia.acg.dto.basics.BudgetListResult;
 import com.dangjia.acg.dto.basics.BudgetResult;
 import com.dangjia.acg.dto.basics.RlistResult;
@@ -35,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
@@ -487,28 +485,7 @@ public class BudgetWorkerService {
     }
 
 
-    /**
-     * 生成精算（xls导入）
-     */
-    public ServerResponse makeBudgets(String actuarialTemplateId, String houseId, String workerTypeId, MultipartFile file) {
-        try {
-            LOG.info("makeBudgets ***** :" + actuarialTemplateId);
-            ServerResponse serverResponse = getForBudgetAPI.actuarialForBudget(houseId, workerTypeId);
 
-            if (!serverResponse.isSuccess())
-                return ServerResponse.createByErrorMessage("新增人工精算失败。原因:查询houseFlow失败！");
-            JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
-            String houseFlowId = obj.getString("houseFlowId");
-            iBudgetMaterialMapper.deleteByhouseId(houseId, workerTypeId);
-            iBudgetWorkerMapper.deleteByhouseId(houseId, workerTypeId);
-            ImportExcel importExcel=new ImportExcel(file,1,0);
-
-            return ServerResponse.createBySuccessMessage("生成精算成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("生成失败");
-        }
-    }
     /**
      * 根据houseId和workerTypeId查询房子人工精算总价
      */
