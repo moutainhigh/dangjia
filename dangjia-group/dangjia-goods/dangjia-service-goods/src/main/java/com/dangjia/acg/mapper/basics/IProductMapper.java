@@ -66,6 +66,7 @@ public interface IProductMapper extends Mapper<Product> {
     List<Product> getPListByBrandSeriesIdAndNullValueId(@Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId);
 
     List<Product> queryRepairBudgetMaterial(@Param("houseId") String houseId, @Param("name") String name, @Param("categoryId") String categoryId);
+    List<Product> serviceMaterials(@Param("name") String name, @Param("categoryId") String categoryId);
 
     Product getSwitchProduct(@Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String[] valueIdArr);
 }

@@ -552,6 +552,48 @@
 		</if>
 	</select>
 
+	<!--补货查询商品库服务-->
+	<select id="serviceMaterials" resultType="com.dangjia.acg.modle.basics.Product">
+		select
+		p.id,
+		p.NAME,
+		p.goods_id AS goodsId,
+		p.category_id AS categoryId,
+		p.product_sn AS productSn,
+		p.image,
+		p.unit_id as unitId,
+		p.label_id as labelId,
+		p.unit_name as unitName,
+		p.weight,
+		p.type,
+		p.maket,
+		p.cost,
+		p.price,
+		p.profit,
+		p.brand_id AS brandId,
+		p.brand_series_id AS brandSeriesId,
+		p.attribute_id_arr AS attributeIdArr,
+		p.value_name_arr AS valueNameArr,
+		p.value_id_arr AS valueIdArr,
+		p.convert_unit AS convertUnit,
+		p.convert_quality AS convertQuality,
+		p.create_date AS createDate,
+		p.modify_date AS modifyDate
+		from dj_basics_goods g,dj_basics_product p
+		where
+			p.goods_id = g.id
+		and g.type = 1
+		and p.type = 1
+		<if test="name!=null and name!=''">
+			AND
+			p.name LIKE CONCAT('%',#{name},'%')
+		</if>
+		<if test="categoryId!=null and categoryId!=''">
+			AND
+			p.category_id =#{categoryId}
+		</if>
+	</select>
+
 	<!-- 根据系列和属性查询切换货品-->
 	<select id="getSwitchProduct" resultType="com.dangjia.acg.modle.basics.Product">
 		select

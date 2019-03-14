@@ -29,8 +29,8 @@ public class MendMaterielController implements MendMaterielAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse repairLibraryMaterial(HttpServletRequest request, String categoryId,String name,PageDTO pageDTO){
-        return fillMaterielService.repairLibraryMaterial(categoryId,name,pageDTO.getPageNum(),pageDTO.getPageSize());
+    public ServerResponse repairLibraryMaterial(String userToken,HttpServletRequest request, String categoryId,String name,PageDTO pageDTO){
+        return fillMaterielService.repairLibraryMaterial(userToken,categoryId,name,pageDTO.getPageNum(),pageDTO.getPageSize());
     }
 
     /**

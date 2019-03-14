@@ -2,6 +2,7 @@ package com.dangjia.acg.service.repair;
 
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.BudgetWorkerDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
@@ -58,12 +59,14 @@ public class FillWorkerService {
         try {
             if (type == 0) {//精算内
                 Example example = new Example(BudgetWorker.class);
-                example.createCriteria()
-                        .andEqualTo(BudgetWorker.WORKER_TYPE_ID, workerTypeId)
-                        .andEqualTo(BudgetWorker.HOUSE_ID, houseId)
-                        .andNotEqualTo(BudgetWorker.DELETE_STATE, "1")
-                        .andCondition(" ( `name` IS NOT NULL OR `name` <> '' ) ")
-                        .andLike(BudgetWorker.NAME, "%"+name+"%");
+                Example.Criteria criteria=example.createCriteria();
+                criteria.andEqualTo(BudgetWorker.WORKER_TYPE_ID, workerTypeId);
+                criteria.andEqualTo(BudgetWorker.HOUSE_ID, houseId);
+                criteria.andNotEqualTo(BudgetWorker.DELETE_STATE, "1");
+                criteria.andCondition(" ( `name` IS NOT NULL OR `name` <> '' ) ");
+                if(!CommonUtil.isEmpty(name)) {
+                    criteria.andLike(BudgetWorker.NAME, "%"+name+"%");
+                }
                 PageHelper.startPage(pageNum, pageSize);
                 List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
                 pageResult = new PageInfo(budgetWorkerList);
@@ -82,8 +85,12 @@ public class FillWorkerService {
                 }
             } else {
                 Example example = new Example(WorkerGoods.class);
-                example.createCriteria().andEqualTo(WorkerGoods.WORKER_TYPE_ID, workerTypeId).andEqualTo(WorkerGoods.SHOW_GOODS, 1).
-                        andLike(WorkerGoods.NAME, "%"+name+"%");
+                Example.Criteria criteria=example.createCriteria();
+                criteria.andEqualTo(WorkerGoods.WORKER_TYPE_ID, workerTypeId);
+                criteria.andEqualTo(WorkerGoods.SHOW_GOODS, 1);
+                if(!CommonUtil.isEmpty(name)) {
+                    criteria.andLike(WorkerGoods.NAME, "%" + name + "%");
+                }
                 PageHelper.startPage(pageNum, pageSize);
                 List<WorkerGoods> workerGoodsList = workerGoodsMapper.selectByExample(example);
                 pageResult = new PageInfo(workerGoodsList);

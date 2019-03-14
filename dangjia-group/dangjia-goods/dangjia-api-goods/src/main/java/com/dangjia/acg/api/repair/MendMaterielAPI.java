@@ -30,7 +30,8 @@ public interface MendMaterielAPI {
 
     @PostMapping("/repair/mendMateriel/repairLibraryMaterial")
     @ApiOperation(value = "补货查询商品库商品", notes = "补货查询商品库商品")
-    ServerResponse repairLibraryMaterial(@RequestParam("request") HttpServletRequest request,
+    ServerResponse repairLibraryMaterial(@RequestParam("userToken") String userToken,
+                                         @RequestParam("request") HttpServletRequest request,
                                          @RequestParam("categoryId") String categoryId,
                                          @RequestParam("name") String name,
                                          @RequestParam("pageDTO") PageDTO pageDTO);

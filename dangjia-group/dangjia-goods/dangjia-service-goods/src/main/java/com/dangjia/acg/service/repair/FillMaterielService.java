@@ -68,9 +68,12 @@ public class FillMaterielService {
 
     /**
      * 补货查询商品库
+     * 是大管家就查询商品库服务材料
      */
-    public ServerResponse repairLibraryMaterial(String categoryId, String name, Integer pageNum, Integer pageSize) {
+    public ServerResponse repairLibraryMaterial(String userToken,String categoryId, String name, Integer pageNum, Integer pageSize) {
         try {
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            Member worker = accessToken.getMember();
             if (pageNum == null) {
                 pageNum = 1;
             }
@@ -80,7 +83,9 @@ public class FillMaterielService {
             List<GoodsDTO> goodsDTOList = new ArrayList<>();
             PageHelper.startPage(pageNum, pageSize);
             List<Product> productList;
-            if (StringUtil.isEmpty(categoryId)) {
+            if (worker.getWorkerType() == 3){//大管家
+                productList = iProductMapper.serviceMaterials(name,categoryId);
+            }else if (StringUtil.isEmpty(categoryId)) {
                 Example example = new Example(Product.class);
                 example.createCriteria().andLike(Product.NAME, "%" + name + "%")
                         .andEqualTo(Product.TYPE,"1");
@@ -91,6 +96,7 @@ public class FillMaterielService {
                         .andEqualTo(Product.TYPE,"1");
                 productList = iProductMapper.selectByExample(example);
             }
+
             PageInfo pageResult = new PageInfo(productList);
             if (productList.size() > 0) {
                 for (Product product : productList) {
@@ -156,7 +162,9 @@ public class FillMaterielService {
         }
     }
 
-
+    /**
+     * 查询工序材料
+     */
     public ServerResponse repairBudgetMaterial(String workerTypeId, String categoryId, String houseId, String productName,
                                                Integer pageNum, Integer pageSize) {
         try {
