@@ -64,6 +64,7 @@
         w.worker_type_id is not null
         ORDER by
         w.create_date
+        desc
     </select>
 
     <select id="getSupervisor" resultType="com.dangjia.acg.modle.member.Member">

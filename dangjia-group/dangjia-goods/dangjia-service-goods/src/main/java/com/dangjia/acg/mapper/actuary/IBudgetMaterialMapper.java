@@ -70,4 +70,6 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 	Double getAbmPayOutByHfId(@Param("houseFlowId")String houseFlowId);
 	/**根据houseFlow查询未支付实时精算价格*/
 	Double getAbmCasualByHfId(@Param("houseFlowId")String houseFlowId);
+
+	void insertByBatch(@Param("list")List<BudgetMaterial> list);
 }

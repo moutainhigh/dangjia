@@ -112,14 +112,20 @@ public class ForMasterService {
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.selectByExample(example);
             for (BudgetMaterial budgetMaterial : budgetMaterialList){
                 Product product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());
-                //重新记录支付时价格
-                budgetMaterial.setPrice(product.getPrice());
-                budgetMaterial.setCost(product.getCost());
-//            budgetMaterial.setTotalPrice(budgetMaterial.getShopCount() * product.getPrice());//已支付 记录总价
-                budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * product.getPrice());//已支付 记录总价
-                budgetMaterial.setDeleteState(3);//已支付
-                budgetMaterial.setModifyDate(new Date());
-                budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
+                if(product == null){
+                    budgetMaterialList.remove(budgetMaterial);//移除
+                    budgetMaterial.setDeleteState(1);//找不到商品标记删除
+                    budgetMaterial.setModifyDate(new Date());
+                    budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
+                }else {
+                    //重新记录支付时精算价格
+                    budgetMaterial.setPrice(product.getPrice());
+                    budgetMaterial.setCost(product.getCost());
+                    budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * product.getPrice());//已支付 记录总价
+                    budgetMaterial.setDeleteState(3);//已支付
+                    budgetMaterial.setModifyDate(new Date());
+                    budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
+                }
             }
             //业主取消的材料又改为待付款
             budgetMaterialMapper.updateSelf(houseFlowId);
@@ -142,7 +148,12 @@ public class ForMasterService {
             List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
             for(BudgetWorker budgetWorker : budgetWorkerList){
                 WorkerGoods wg = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
-                if (wg != null){
+                if (wg == null){
+                    budgetWorkerList.remove(budgetWorker);//移除
+                    budgetWorker.setDeleteState(1);//找不到商品标记删除
+                    budgetWorker.setModifyDate(new Date());
+                    budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
+                }else {
                     budgetWorker.setPrice(wg.getPrice());
                     budgetWorker.setTotalPrice(budgetWorker.getShopCount() * wg.getPrice());
                     budgetWorker.setDeleteState(3);//已支付

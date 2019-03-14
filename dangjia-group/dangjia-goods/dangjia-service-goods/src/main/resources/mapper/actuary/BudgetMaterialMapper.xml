@@ -311,4 +311,75 @@
         and abm.house_flow_id=#{houseFlowId}
 	</select>
 
+
+	<insert id="insertByBatch" parameterType="java.util.List">
+		INSERT INTO dj_actuary_budget_material (
+		id,
+		house_flow_id,
+		house_id,
+		worker_type_id,
+		steta,
+		template_id,
+		delete_state,
+		product_id,
+		product_sn,
+		goods_id,
+		goods_name,
+		product_name,
+		price,
+		cost,
+		description,
+		shop_count,
+		convert_count,
+		unit_name,
+		total_price,
+		create_date,
+		modify_date,
+		group_type,
+		product_type,
+		actuarial_quantity,
+		data_status,
+		product_nick_name,
+		goods_group_id,
+		category_id,
+		image
+		)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(
+			#{item.id},
+			#{item.houseFlowId},
+			#{item.houseId},
+			#{item.workerTypeId},
+			#{item.steta},
+			#{item.templateId},
+			#{item.deleteState},
+			#{item.productId},
+			#{item.productSn},
+			#{item.goodsId},
+			#{item.goodsName},
+			#{item.productName},
+			#{item.price},
+			#{item.cost},
+			#{item.description},
+			#{item.shopCount},
+			#{item.convertCount},
+			#{item.unitName},
+			#{item.totalPrice},
+			#{item.createDate},
+			#{item.modifyDate},
+			#{item.groupType},
+			#{item.productType},
+			#{item.actuarialQuantity},
+			#{item.dataStatus},
+			#{item.productNickName},
+			#{item.goodsGroupId},
+			#{item.categoryId},
+			#{item.image}
+			)
+		</foreach>
+	</insert>
+
+
+
 </mapper>
