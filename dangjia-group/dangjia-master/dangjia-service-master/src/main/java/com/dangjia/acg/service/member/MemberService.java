@@ -319,8 +319,6 @@ public class MemberService {
                 user.setWorkerTypeId(wt.getId());
                 user.setWorkerType(wt.getType());
             }
-            user.setVolume(new BigDecimal(0));
-            user.setPraiseRate(new BigDecimal(1));
             memberMapper.updateByPrimaryKeySelective(user);
             user = memberMapper.selectByPrimaryKey(user.getId());
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));

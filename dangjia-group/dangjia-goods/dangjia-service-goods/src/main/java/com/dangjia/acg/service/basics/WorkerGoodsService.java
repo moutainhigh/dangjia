@@ -76,7 +76,7 @@ public class WorkerGoodsService {
     }
 
 
-    public WorkerGoodsDTO getWorkerGoodsDTO(String workerGoodsSn,String workerTypeId,Double shopCount){
+    public WorkerGoodsDTO getWorkerGoodsDTO(String workerGoodsSn,String workerTypeId,String shopCount){
         Example example=new Example(WorkerGoods.class);
         example.createCriteria()
                 .andEqualTo(WorkerGoods.DATA_STATUS,'0')

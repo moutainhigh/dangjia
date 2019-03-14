@@ -498,21 +498,24 @@ public class BudgetWorkerService {
     public ServerResponse importExcelBudgets(String workerTypeId, MultipartFile file) {
         try {
             Map map=new HashMap();
-//            ImportExcel caiLiao=new ImportExcel(file,1,1);//材料
-//            ImportExcel renGong=new ImportExcel(file,1,2);//服务
-//            List<WorkerGoodsDTO> workerGoodsDTOList=renGong.getDataList(WorkerGoodsDTO.class,0);
-//            for (int i = 0; i < workerGoodsDTOList.size(); i++) {
-//                WorkerGoodsDTO workerGoodsDTO=workerGoodsDTOList.get(i);
-//                if(CommonUtil.isEmpty(workerGoodsDTO.getWorkerGoodsSn())){
-//                    break;
-//                }
-//                workerGoodsDTO=workerGoodsService.getWorkerGoodsDTO(workerGoodsDTO.getWorkerGoodsSn(),workerTypeId,workerGoodsDTO.getShopCount());
-//                workerGoodsDTOList.remove(i);
-//                workerGoodsDTOList.add(i,workerGoodsDTO);
-//            }
-//            ImportExcel fuWu=new ImportExcel(file,1,0);//人工
-//            map.put("workerGoods",workerGoodsDTOList);
-            return ServerResponse.createBySuccessMessage("生成精算成功");
+            ImportExcel caiLiao=new ImportExcel(file,0,1);//材料
+            ImportExcel fuWu=new ImportExcel(file,0,2);//服务
+            ImportExcel renGong=new ImportExcel(file,0,0);//人工
+            List<WorkerGoodsDTO> workerGoodsDTOList=renGong.getDataList(WorkerGoodsDTO.class,0);
+            List<WorkerGoodsDTO> workerGoodsDTOS=new ArrayList<>();
+            for (int i = 0; i < workerGoodsDTOList.size(); i++) {
+                WorkerGoodsDTO workerGoodsDTO=workerGoodsDTOList.get(i);
+                if(CommonUtil.isEmpty(workerGoodsDTO.getWorkerGoodsSn())){
+                    break;
+                }
+                workerGoodsDTO=workerGoodsService.getWorkerGoodsDTO(workerGoodsDTO.getWorkerGoodsSn(),workerTypeId,workerGoodsDTO.getShopCount());
+                if(CommonUtil.isEmpty(workerGoodsDTO.getShopCount())){
+                    continue;
+                }
+                workerGoodsDTOS.add(workerGoodsDTO);
+            }
+            map.put("workerGoods",workerGoodsDTOS);
+            return ServerResponse.createBySuccess("生成精算成功",map);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("生成失败");
