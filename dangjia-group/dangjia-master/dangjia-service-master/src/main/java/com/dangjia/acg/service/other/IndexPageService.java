@@ -92,6 +92,7 @@ public class IndexPageService {
                 Order order = orderMapper.getWorkerOrder(houseId,"1");
                 if(order!=null) {
                     mapReady.put("typeA", "¥" + String.format("%.2f", order.getTotalAmount().doubleValue()));
+                    totalPrice=totalPrice.add(order.getTotalAmount());
                 }else{
                     mapReady.put("typeA", "¥"  + 0);
                 }
@@ -99,13 +100,14 @@ public class IndexPageService {
             Order order = orderMapper.getWorkerOrder(houseId,"2");
             if(order!=null) {
                 mapReady.put("typeB","¥" + (order == null? 0 : String.format("%.2f", order.getTotalAmount().doubleValue())));
+                totalPrice=totalPrice.add(order.getTotalAmount());
             }else{
                 mapReady.put("typeB", "¥"  + 0);
             }
             mapList.add(mapReady);
 
             Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andEqualTo(HouseFlow.WORK_TYPE,4).andGreaterThan(HouseFlow.WORKER_TYPE,2);
+            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andGreaterThan(HouseFlow.WORKER_TYPE,2);
             example.orderBy(HouseFlow.WORKER_TYPE);
             List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
             for (HouseFlow houseFlow : houseFlowList){

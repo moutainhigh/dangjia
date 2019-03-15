@@ -6,13 +6,36 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<!-- 查询HouseDesignImage -->
 	<select id="getHouseDesignImage" resultType="com.dangjia.acg.modle.design.HouseDesignImage">
-		select
-		    *
-		from  dj_design_house_design_image
-		where
-		    house_id=#{houseId} and design_image_type_id=#{designImageTypeId}
+		SELECT
+			*
+		FROM
+			dj_design_house_design_image
+		WHERE
+			house_id = #{houseId}
+		AND (
+			design_image_type_id = #{designImageTypeId}
+			OR design_image_type_id = (
+				SELECT
+					id
+				FROM
+					dj_design_design_image_type
+				WHERE
+					NAME = (
+						SELECT
+							NAME
+						FROM
+							dj_design_design_image_type
+						WHERE
+							id = #{designImageTypeId}
+					)
+				AND id != #{designImageTypeId}
+				LIMIT 1
+			)
+		)
+		ORDER BY
+			design_image_type_id DESC
+		LIMIT 1;
 
-		    ORDER BY create_date DESC LIMIT 1;
 	</select>
 
     <!-- 查询风格关联的设计类型图id -->
