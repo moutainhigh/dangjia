@@ -45,4 +45,9 @@ public class HouseDesignImage extends BaseEntity {
 	@Desc(value = "额外付费图 1是, 0不是")
 	@ApiModelProperty("额外付费图 1是, 0不是")
 	private Integer sell;//
+
+	@Column(name = "sort")
+	@Desc(value = "排序")
+	@ApiModelProperty("排序")
+	private Integer sort;//
 }

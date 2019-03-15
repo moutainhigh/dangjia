@@ -12,26 +12,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			dj_design_house_design_image
 		WHERE
 			house_id = #{houseId}
-		AND (
+		AND
 			design_image_type_id = #{designImageTypeId}
-			OR design_image_type_id = (
-				SELECT
-					id
-				FROM
-					dj_design_design_image_type
-				WHERE
-					NAME = (
-						SELECT
-							NAME
-						FROM
-							dj_design_design_image_type
-						WHERE
-							id = #{designImageTypeId}
-					)
-				AND id != #{designImageTypeId}
-				LIMIT 1
-			)
-		)
 		ORDER BY
 			design_image_type_id DESC
 		LIMIT 1;
