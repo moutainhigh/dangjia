@@ -79,8 +79,7 @@ public class HouseDesignImageService {
                 return ServerResponse.createByErrorMessage("找不到房子对应图类型");
             }
             for (HouseDesignImageDTO houseDesignImage : houseDesignImageList) {
-                DesignImageType designImageType = designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId());
-                if (designImageType != null && !CommonUtil.isEmpty(houseDesignImage.getImageurl())) {
+                if (!CommonUtil.isEmpty(houseDesignImage.getImageurl())) {
                     if (StringUtil.isNotEmpty(houseDesignImage.getImageurl())) {
                         houseDesignImage.setImageurl(address + houseDesignImage.getImageurl());
                     }
