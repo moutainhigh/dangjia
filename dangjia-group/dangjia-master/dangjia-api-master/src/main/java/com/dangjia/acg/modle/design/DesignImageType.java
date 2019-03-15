@@ -51,4 +51,9 @@ public class DesignImageType extends BaseEntity {
 	@Desc(value = "价格")
 	@ApiModelProperty("价格")
 	private BigDecimal price;
+
+	@Column(name = "sort")
+	@Desc(value = "排序")
+	@ApiModelProperty("排序")
+	private Integer sort;//
 }

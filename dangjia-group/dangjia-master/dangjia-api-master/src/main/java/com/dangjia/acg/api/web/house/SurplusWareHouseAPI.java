@@ -52,7 +52,7 @@ public interface SurplusWareHouseAPI {
      * @return
      */
     @PostMapping("web/surplus/wareHouse/addSurplusWareHouseItem")
-    @ApiOperation(value = "修改临时仓库的信息", notes = "修改临时仓库的信息")
+    @ApiOperation(value = "添加临时仓库清点数据", notes = "添加临时仓库清点数据")
     ServerResponse addSurplusWareHouseItem(@RequestParam("request") HttpServletRequest request,
                                            @RequestParam("jsonStr") String jsonStr);
 
@@ -77,7 +77,7 @@ public interface SurplusWareHouseAPI {
      * @return
      */
     @PostMapping("web/surplus/wareHouse/addSurplusWareDivertList")
-    @ApiOperation(value = "修改临时仓库的信息", notes = "修改临时仓库的信息")
+    @ApiOperation(value = "添加挪货记录", notes = "添加挪货记录")
     ServerResponse addSurplusWareDivertList(@RequestParam("request") HttpServletRequest request,
                                             @RequestParam("jsonStr") String jsonStr);
 

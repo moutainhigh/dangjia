@@ -9,6 +9,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.config.ConstantProperties;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.mapper.IResourceFileMapper;
 import com.dangjia.acg.model.ResourceFile;
 import com.obs.services.ObsClient;
 import com.obs.services.model.AccessControlList;
@@ -40,8 +41,8 @@ import static java.lang.System.currentTimeMillis;
 public class FileCommonService {
 
   private Logger logger = LoggerFactory.getLogger(FileCommonService.class);
-  //@Autowired
-  //private IResourceFileMapper resourceFileMapper;
+  @Autowired
+  private IResourceFileMapper resourceFileMapper;
   @Autowired
   private ConfigUtil configUtil;
 
@@ -86,12 +87,14 @@ public class FileCommonService {
         paramMap.put("url", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+webAddress+"/"+fileName);
         paramMap.put("fileName", fileName);
 
-        //新增上传记录，记录上传文件
-        //ResourceFile resourceFile=new ResourceFile();
-        //resourceFile.setAddress(String.valueOf(paramMap.get("url")));
-        //resourceFile.setPath(String.valueOf(paramMap.get("address")));
-        //resourceFile.setFileName(fileName);
-        //resourceFileMapper.insert(resourceFile);
+        if(active!=null&&(active.equals("pre"))) {
+          //新增上传记录，记录上传文件
+          ResourceFile resourceFile = new ResourceFile();
+          resourceFile.setAddress(String.valueOf(paramMap.get("url")));
+          resourceFile.setPath(String.valueOf(paramMap.get("address")));
+          resourceFile.setFileName(fileName);
+          resourceFileMapper.insert(resourceFile);
+        }
         logger.info("上传成功：：："+JSONObject.toJSONString(paramMap));
         list.add(paramMap);
       }

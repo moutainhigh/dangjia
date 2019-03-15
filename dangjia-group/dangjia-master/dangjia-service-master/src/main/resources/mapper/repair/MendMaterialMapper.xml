@@ -23,6 +23,45 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		modify_date as modifyDate
 	</sql>
 
+
+    <!-- 查询房子工种所有补材料 -->
+    <select id="askAndQuit"  resultType="com.dangjia.acg.modle.repair.MendMateriel">
+        SELECT
+            mm.id,
+            mm.mend_order_id as mendOrderId,
+            mm.product_id as productId,
+            mm.product_sn as productSn,
+            mm.product_name as productName,
+            mm.product_nick_name as productNickName,
+            mm.price,
+            mm.cost,
+            mm.unit_name as unitName,
+            mm.shop_count as shopCount,
+            mm.total_price as totalPrice,
+            mm.product_type as productType,
+            mm.category_id as categoryId,
+            mm.image,
+            mm.create_date as createDate,
+            mm.modify_date as modifyDate
+        FROM dj_repair_mend_order mo, dj_repair_mend_materiel mm
+        where
+            mo.house_id = #{houseId}
+        and mo.worker_type_id = #{workerTypeId}
+        and mo.type = 0
+        and mo.state = 4
+        and mm.mend_order_id = mo.id
+        <if test = "name!=null and name!=''">
+            and
+            mm.product_name LIKE CONCAT('%',#{name},'%')
+        </if>
+        <if test = "categoryId!=null and categoryId!=''">
+            and
+            mm.category_id = #{categoryId}
+        </if>
+
+        ORDER BY mo.create_date desc
+    </select>
+
     <!-- 根据mendOrderId查询所有 -->
     <select id="byMendOrderId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.repair.MendMateriel">
         SELECT

@@ -21,6 +21,16 @@ public class MendMaterielController implements MendMaterielAPI {
     @Autowired
     private FillMaterielService fillMaterielService;
 
+    /**
+     * 要退查询仓库
+     * 结合 精算记录+补记录
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse askAndQuit(String userToken, String houseId, String categoryId, String name) {
+        return fillMaterielService.askAndQuit(userToken,houseId,categoryId,name);
+    }
+
     @Override
     @ApiMethod
     public ServerResponse selectProduct(HttpServletRequest request,String goodsId,String brandId,String brandSeriesId,String attributeIdArr){

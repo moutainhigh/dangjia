@@ -126,7 +126,7 @@ public class DesignService {
             typeList = typeList.replaceAll("'", "");
             typeList = typeList.replaceAll(" ", "");
             String[] typeArray = StringUtils.split(typeList, ",");
-            //查询所有免费风格
+            //查询所有风格
             List<DesignImageType> designImageTypeList = designImageTypeMapper.getDesignImageTypeList(typeArray);
 
 

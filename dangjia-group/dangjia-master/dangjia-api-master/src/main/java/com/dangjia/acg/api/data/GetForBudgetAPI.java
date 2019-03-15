@@ -2,6 +2,7 @@ package com.dangjia.acg.api.data;
 
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.design.HouseStyleType;
+import com.dangjia.acg.modle.repair.MendMateriel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -20,6 +21,11 @@ import java.util.Map;
 @FeignClient("dangjia-service-master")
 @Api(value = "获取商品端精算的所需数据", description = "获取商品端精算的所需数据")
 public interface GetForBudgetAPI {
+
+    @PostMapping("/data/getForBudget/askAndQuit")
+    @ApiOperation(value = "要退查询补记录", notes = "要退查询补记录")
+    List<MendMateriel>  askAndQuit(@RequestParam("workerTypeId") String workerTypeId, @RequestParam("houseId") String houseId,
+                                   @RequestParam("categoryId") String categoryId, @RequestParam("name")  String name);
 
     @PostMapping("/data/getForBudget/getStyleByName")
     @ApiOperation(value = "获取风格", notes = "获取风格")

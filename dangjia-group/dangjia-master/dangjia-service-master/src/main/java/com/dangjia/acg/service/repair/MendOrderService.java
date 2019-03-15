@@ -738,7 +738,7 @@ public class MendOrderService {
                     configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家补服务", String.format
                             (DjConstants.PushMessage.STEWARD_B_SERVER, house.getHouseName()), "");
                 } else {
-                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠要材料", String.format
+                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠补材料", String.format
                             (DjConstants.PushMessage.CRAFTSMAN_B_MATERIAL, house.getHouseName()), "");
                 }
                 return ServerResponse.createBySuccessMessage("操作成功");

@@ -4,8 +4,10 @@ import com.dangjia.acg.api.data.GetForBudgetAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.design.HouseStyleType;
+import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.design.HouseStyleTypeService;
+import com.dangjia.acg.service.repair.MendMaterielService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,7 +27,13 @@ public class GetForBudgetController implements GetForBudgetAPI {
     private HouseFlowService houseFlowService;
     @Autowired
     private HouseStyleTypeService houseStyleTypeService;
+    @Autowired
+    private MendMaterielService mendMaterielService;
 
+    @Override
+    public List<MendMateriel> askAndQuit(String workerTypeId, String houseId, String categoryId, String name) {
+        return mendMaterielService.askAndQuit(workerTypeId,houseId,categoryId,name);
+    }
 
     @Override
     @ApiMethod

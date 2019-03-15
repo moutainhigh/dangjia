@@ -10,5 +10,8 @@ import java.util.List;
 @Repository
 public interface IMendMaterialMapper extends Mapper<MendMateriel>{
 
+    List<MendMateriel> askAndQuit(@Param("workerTypeId")String workerTypeId, @Param("houseId")String houseId,
+                                              @Param("categoryId")String categoryId, @Param("name")String name);
+
     List<MendMateriel> byMendOrderId(@Param("mendOrderId") String mendOrderId);
 }
