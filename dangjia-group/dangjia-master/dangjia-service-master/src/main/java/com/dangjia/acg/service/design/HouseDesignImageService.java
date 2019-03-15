@@ -73,9 +73,11 @@ public class HouseDesignImageService {
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
+
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             Example example = new Example(HouseFlow.class);
             example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId);
-            example.orderBy(HouseDesignImage.SORT).orderBy(HouseDesignImage.CREATE_DATE);
+            example.setOrderByClause("sort ,create_date");
             List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);
             if(houseDesignImageList==null||houseDesignImageList.size()==0){
                 return ServerResponse.createByErrorMessage("找不到房子对应图类型");
@@ -85,8 +87,19 @@ public class HouseDesignImageService {
                 DesignImageType designImageType = designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId());
                 if (designImageType != null && !CommonUtil.isEmpty(houseDesignImage.getImageurl())) {
                     HouseDesignImageDTO houseDesignImageDTO = new HouseDesignImageDTO();
-                    houseDesignImageDTO.setImageurl(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + houseDesignImage.getImageurl());
+                    houseDesignImageDTO = new HouseDesignImageDTO();
+                    houseDesignImageDTO.setHouseId(houseId);
+                    houseDesignImageDTO.setDesignImageTypeId(designImageType.getId());
+                    if (StringUtil.isNotEmpty(houseDesignImage.getImageurl())) {
+                        houseDesignImageDTO.setImageurl(address + houseDesignImage.getImageurl());
+                        houseDesignImageDTO.setImage(houseDesignImage.getImageurl());
+                    } else {
+                        houseDesignImageDTO.setImageurl(null);
+                        houseDesignImageDTO.setImage(null);
+                    }
                     houseDesignImageDTO.setName(designImageType.getName());
+                    houseDesignImageDTO.setSell(designImageType.getSell());
+                    houseDesignImageDTO.setPrice(designImageType.getPrice());
                     imageDTOList.add(houseDesignImageDTO);
                 }
             }
