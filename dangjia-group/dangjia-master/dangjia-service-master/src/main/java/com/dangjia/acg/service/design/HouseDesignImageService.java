@@ -87,7 +87,6 @@ public class HouseDesignImageService {
                 DesignImageType designImageType = designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId());
                 if (designImageType != null && !CommonUtil.isEmpty(houseDesignImage.getImageurl())) {
                     HouseDesignImageDTO houseDesignImageDTO = new HouseDesignImageDTO();
-                    houseDesignImageDTO = new HouseDesignImageDTO();
                     houseDesignImageDTO.setHouseId(houseId);
                     houseDesignImageDTO.setDesignImageTypeId(designImageType.getId());
                     if (StringUtil.isNotEmpty(houseDesignImage.getImageurl())) {
