@@ -73,37 +73,21 @@ public class HouseDesignImageService {
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
-
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId);
-            example.setOrderByClause("sort ,create_date");
-            List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);
+            List<HouseDesignImageDTO> houseDesignImageList = houseDesignImageMapper.queryHouseDesignImage(houseId);
             if(houseDesignImageList==null||houseDesignImageList.size()==0){
                 return ServerResponse.createByErrorMessage("找不到房子对应图类型");
             }
-            List<HouseDesignImageDTO> imageDTOList = new ArrayList<>();
-            for (HouseDesignImage houseDesignImage : houseDesignImageList) {
+            for (HouseDesignImageDTO houseDesignImage : houseDesignImageList) {
                 DesignImageType designImageType = designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId());
                 if (designImageType != null && !CommonUtil.isEmpty(houseDesignImage.getImageurl())) {
-                    HouseDesignImageDTO houseDesignImageDTO = new HouseDesignImageDTO();
-                    houseDesignImageDTO.setHouseId(houseId);
-                    houseDesignImageDTO.setDesignImageTypeId(designImageType.getId());
                     if (StringUtil.isNotEmpty(houseDesignImage.getImageurl())) {
-                        houseDesignImageDTO.setImageurl(address + houseDesignImage.getImageurl());
-                        houseDesignImageDTO.setImage(houseDesignImage.getImageurl());
-                    } else {
-                        houseDesignImageDTO.setImageurl(null);
-                        houseDesignImageDTO.setImage(null);
+                        houseDesignImage.setImageurl(address + houseDesignImage.getImageurl());
                     }
-                    houseDesignImageDTO.setName(designImageType.getName());
-                    houseDesignImageDTO.setSell(designImageType.getSell());
-                    houseDesignImageDTO.setPrice(designImageType.getPrice());
-                    imageDTOList.add(houseDesignImageDTO);
                 }
             }
 //            return designService.getImagesList(null, houseId);
-            return ServerResponse.createBySuccess("",imageDTOList);
+            return ServerResponse.createBySuccess("",houseDesignImageList);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

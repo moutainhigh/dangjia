@@ -37,5 +37,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and house_id = #{houseId}
     </select>
 
+
+    <select id="queryHouseDesignImage" resultType="com.dangjia.acg.dto.design.HouseDesignImageDTO">
+        SELECT
+            h.house_id as houseId,
+            h.design_image_type_id as designImageTypeId,
+            h.imageurl,
+            h.sell,
+            t.name,
+            h.imageurl image ,
+            t.price
+        FROM
+           dj_design_house_design_image h
+           INNER JOIN	 dj_design_design_image_type t on h.design_image_type_id=t.id
+        WHERE
+        h.house_id= #{houseId}
+        ORDER BY
+        t.sort,
+        t.create_date;
+    </select>
 </mapper>
 

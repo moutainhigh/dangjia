@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.design;
 
+import com.dangjia.acg.dto.design.HouseDesignImageDTO;
 import com.dangjia.acg.modle.design.HouseDesignImage;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -19,4 +20,8 @@ public interface IHouseDesignImageMapper extends Mapper<HouseDesignImage> {
     HouseDesignImage planeGraph(@Param("houseId")String houseId);
 
     List<HouseDesignImage> byNumber(@Param("houseId")String houseId, @Param("businessOrderNumber")String businessOrderNumber);
+
+
+    List<HouseDesignImageDTO> queryHouseDesignImage(@Param("houseId")String houseId);
+
 }
