@@ -12,10 +12,8 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
-import com.dangjia.acg.service.finance.WebWalletService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +42,15 @@ public class MendMaterielService {
 
     @Autowired
     private static Logger LOG = LoggerFactory.getLogger(MendMaterielService.class);
+
+
+    /**
+     * 要货退货 查询补材料
+     */
+    public List<MendMateriel>  askAndQuit(String workerTypeId, String houseId, String categoryId, String name) {
+        List<MendMateriel> mendMaterielList = mendMaterialMapper.askAndQuit(workerTypeId, houseId, categoryId, name);
+        return mendMaterielList;
+    }
 
     /**
      * 房子id查询业主退货单列表

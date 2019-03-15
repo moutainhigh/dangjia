@@ -46,7 +46,7 @@ public class JsonResponseAdvice implements ResponseBodyAdvice<Object> {
             }
             if (StringUtils.isEmpty(header)) {
                 Gson gson = new Gson();
-                if (o != null&& CommonUtil.isEmpty(request.getAttribute("isShow"))) {
+                if (o != null&& CommonUtil.isEmpty(request.getAttribute("isShow"))&&CommonUtil.isEmpty(request.getParameter("isShow"))) {
                     o = BeanUtils.beanToMap(o);
                 }
                 JsonResponse jsonResponse = new JsonResponse(ServerCode.SUCCESS.getCode(), o);
