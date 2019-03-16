@@ -848,7 +848,8 @@ public class MendOrderService {
                 mendMateriel.setProductName(product.getName());
                 mendMateriel.setPrice(product.getPrice());
                 mendMateriel.setCost(product.getCost());
-                mendMateriel.setUnitName(product.getUnitName());
+                String unitName = forMasterAPI.getUnitName(product.getConvertUnit());
+                mendMateriel.setUnitName(unitName);
                 mendMateriel.setShopCount(num);
                 mendMateriel.setTotalPrice(num * product.getPrice());
                 mendOrder.setTotalAmount(mendOrder.getTotalAmount() + mendMateriel.getTotalPrice());//修改总价

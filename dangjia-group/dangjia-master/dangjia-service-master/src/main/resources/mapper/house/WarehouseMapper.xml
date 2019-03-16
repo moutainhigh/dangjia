@@ -88,6 +88,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		FROM dj_house_warehouse
 		where 1=1
 		and house_id = #{houseId}
+		<if test = "name!=null and name!=''">
+			and
+			product_name LIKE CONCAT('%',#{name},'%')
+		</if>
+		<if test = "categoryId!=null and categoryId!=''">
+			and
+			category_id = #{categoryId}
+		</if>
 		ORDER BY create_date desc
 	</select>
 

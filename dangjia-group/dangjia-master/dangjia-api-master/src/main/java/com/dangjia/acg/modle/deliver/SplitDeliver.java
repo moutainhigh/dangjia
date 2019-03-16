@@ -53,7 +53,7 @@ public class SplitDeliver extends BaseEntity {
     private Double applyMoney;
 
     @Column(name = "apply_state")
-    @Desc(value = "供应商申请结算的状态：0申请中(待处理)；1不通过(驳回)；2通过(同意)")
+    @Desc(value = "供应商申请结算的状态：0申请中(待处理)；1不通过(驳回)；2通过(同意),3其它(迁移)")
     @ApiModelProperty("供应商申请结算的状态0申请中(待处理)；1不通过(驳回)；2通过(同意)")
     private Integer applyState;
 
@@ -110,7 +110,7 @@ public class SplitDeliver extends BaseEntity {
     @Column(name = "shipping_state")
     @Desc(value = "配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收）")
     @ApiModelProperty("配送状态")
-    private Integer shipState;
+    private Integer shippingState;
 
     @Column(name = "image")
     @Desc(value = "收货照片")

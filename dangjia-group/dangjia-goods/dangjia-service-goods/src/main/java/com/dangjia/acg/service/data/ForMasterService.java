@@ -11,6 +11,7 @@ import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,12 +49,16 @@ public class ForMasterService {
     private ISupplierMapper supplierMapper;
     @Autowired
     private ISupplierProductMapper supplierProductMapper;
+    @Autowired
+    private IUnitMapper unitMapper;
 
-    /**
-     * @param supplierId
-     * @param productId
-     * @return
-     */
+
+    public String getUnitName(String unitId){
+        Unit unit = unitMapper.selectByPrimaryKey(unitId);
+        return unit.getName();
+    }
+
+
     public SupplierProduct getSupplierProduct(String supplierId,String productId){
         return supplierProductMapper.getSupplierProduct(supplierId,productId);
     }

@@ -87,7 +87,7 @@ public class OrderSplitService {
                 return ServerResponse.createByErrorMessage("无供应商结算单");
 
             //配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收）
-            if (!(srcSplitDeliver.getShipState() == 2 || srcSplitDeliver.getShipState() == 4))
+            if (!(srcSplitDeliver.getShippingState() == 2 || srcSplitDeliver.getShippingState() == 4))
                 return ServerResponse.createByErrorMessage("当前为未收货状态，不能申请结算");
 
             srcSplitDeliver.setDeliveryFee(splitDeliver.getDeliveryFee());
@@ -109,7 +109,7 @@ public class OrderSplitService {
         try {
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
             splitDeliver.setSendTime(new Date());
-            splitDeliver.setShipState(1);//已发待收
+            splitDeliver.setShippingState(1);//已发待收
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
@@ -172,7 +172,7 @@ public class OrderSplitService {
      */
     public ServerResponse splitDeliverList(String supplierId, int shipState) {
         Example example = new Example(SplitDeliver.class);
-        example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId).andEqualTo(SplitDeliver.SHIP_STATE, shipState);
+        example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId).andEqualTo(SplitDeliver.SHIPPING_STATE, shipState);
         List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
         return ServerResponse.createBySuccess("查询成功", splitDeliverList);
     }
@@ -202,7 +202,7 @@ public class OrderSplitService {
                 OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
                 Example example = new Example(SplitDeliver.class);
                 example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId()).andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId)
-                        .andEqualTo(SplitDeliver.SHIP_STATE, 0).andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplitId);
+                        .andEqualTo(SplitDeliver.SHIPPING_STATE, 0).andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplitId);
                 List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
                 SplitDeliver splitDeliver;
                 if (splitDeliverList.size() > 0) {
@@ -223,7 +223,7 @@ public class OrderSplitService {
                     splitDeliver.setSupervisorId(supervisor.getId());//管家id
                     splitDeliver.setSubmitTime(new Date());
                     splitDeliver.setSupState(0);
-                    splitDeliver.setShipState(0);//待发货状态
+                    splitDeliver.setShippingState(0);//待发货状态
                     splitDeliverMapper.insert(splitDeliver);
                 }
 
