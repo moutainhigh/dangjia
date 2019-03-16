@@ -27,6 +27,12 @@ public class ForMasterController implements ForMasterAPI {
     @Autowired
     private ForMasterService forMasterService;
 
+
+    @Override
+    public String getUnitName(String unitId){
+        return forMasterService.getUnitName(unitId);
+    }
+
     @Override
     @ApiMethod
     public SupplierProduct getSupplierProduct(String cityId,String supplierId, String productId){

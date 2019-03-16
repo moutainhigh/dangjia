@@ -50,7 +50,7 @@ public class SplitDeliverService {
     public ServerResponse partSplitDeliver(String splitDeliverId, String image ,String splitItemList){
         try{
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
-            splitDeliver.setShipState(4);//部分收货
+            splitDeliver.setShippingState(4);//部分收货
             splitDeliver.setImage(image);//收货图片
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             JSONArray arr = JSONArray.parseArray(splitItemList);
@@ -80,7 +80,7 @@ public class SplitDeliverService {
     public ServerResponse affirmSplitDeliver(String splitDeliverId, String image){
         try{
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
-            splitDeliver.setShipState(2);//收货
+            splitDeliver.setShippingState(2);//收货
             splitDeliver.setImage(image);//收货图片
             splitDeliver.setModifyDate(new Date());//收货时间
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
@@ -123,7 +123,7 @@ public class SplitDeliverService {
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             SplitDeliverDTO splitDeliverDTO = new SplitDeliverDTO();
-            splitDeliverDTO.setShipState(splitDeliver.getShipState());//发货状态
+            splitDeliverDTO.setShipState(splitDeliver.getShippingState());//发货状态
             splitDeliverDTO.setNumber(splitDeliver.getNumber());
             splitDeliverDTO.setCreateDate(splitDeliver.getCreateDate());
             splitDeliverDTO.setSendTime(splitDeliver.getSendTime());
@@ -180,7 +180,7 @@ public class SplitDeliverService {
             if (shipState == 5){
                 example.createCriteria().andEqualTo(SplitDeliver.ORDER_SPLIT_ID, houseId);//中台用
             }else {
-                example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId).andEqualTo(SplitDeliver.SHIP_STATE,shipState);
+                example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId).andEqualTo(SplitDeliver.SHIPPING_STATE,shipState);
             }
             List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
             List<SplitDeliverDTO> splitDeliverDTOList = new ArrayList<>();
@@ -188,20 +188,20 @@ public class SplitDeliverService {
                 SplitDeliverDTO splitDeliverDTO = new SplitDeliverDTO();
                 splitDeliverDTO.setSplitDeliverId(splitDeliver.getId());
                 splitDeliverDTO.setCreateDate(splitDeliver.getCreateDate());
-                splitDeliverDTO.setShipState(splitDeliver.getShipState());
+                splitDeliverDTO.setShipState(splitDeliver.getShippingState());
                 splitDeliverDTO.setNumber(splitDeliver.getNumber());
                 splitDeliverDTO.setSendTime(splitDeliver.getSendTime());//发货时间
                 splitDeliverDTO.setModifyDate(splitDeliver.getModifyDate());//收货时间
                 Supplier supplier = forMasterAPI.getSupplier(splitDeliver.getSupplierId());
-                splitDeliverDTO.setSupId(supplier.getId());//供应商id
-                splitDeliverDTO.setSupMobile(supplier.getTelephone());
-                splitDeliverDTO.setSupName(supplier.getName());
+                if(supplier != null){
+                    splitDeliverDTO.setSupId(supplier.getId());//供应商id
+                    splitDeliverDTO.setSupMobile(supplier.getTelephone());
+                    splitDeliverDTO.setSupName(supplier.getName());
+                }
                 splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
-
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
-
                 splitDeliverDTO.setTol(orderSplitItemList.size());//几种
                 splitDeliverDTO.setName(orderSplitItemList.get(0).getProductName());
                 splitDeliverDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + orderSplitItemList.get(0).getImage());

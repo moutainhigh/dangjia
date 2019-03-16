@@ -26,6 +26,9 @@ import java.util.List;
 @FeignClient("dangjia-service-goods")
 public interface ForMasterAPI {
 
+    @PostMapping("/data/forMaster/getUnitName")
+    @ApiOperation(value = "获取单位名", notes = "获取单位名")
+    String getUnitName(@RequestParam("unitId")String unitId);
 
     @PostMapping("/data/forMaster/getSupplierProduct")
     @ApiOperation(value = "查询供应价", notes = "查询供应价")
