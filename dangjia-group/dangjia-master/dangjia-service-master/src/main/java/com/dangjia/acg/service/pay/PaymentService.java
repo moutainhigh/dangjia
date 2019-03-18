@@ -320,6 +320,7 @@ public class PaymentService {
                 example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, businessOrder.getHouseId()).andEqualTo(MendOrder.TYPE, 0)
                         .andEqualTo(MendOrder.STATE, 4);
                 order.setWorkerTypeName("大管家补货" + "00" + (mendOrderMapper.selectCountByExample(example) + 1));
+                order.setWorkerTypeId(mendOrder.getWorkerTypeId());
                 order.setPayment(payState);// 支付方式
                 order.setType(2);//材料
                 orderMapper.insert(order);
