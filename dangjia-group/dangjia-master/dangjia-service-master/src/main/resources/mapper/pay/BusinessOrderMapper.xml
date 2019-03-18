@@ -44,9 +44,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		pbo.pay_price as payPrice,
 		pbo.type,
 		pbo.data_status as dataStatus,
-		pbo.create_date as createDate,
-		pbo.modify_date as modifyDate,
-
+		pay.create_date AS createDate,
+		pay.modify_date AS modifyDate,
 		house.id,
 		house.residential,
 		house.building,
@@ -54,10 +53,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		house.number,
 		house.member_id,
 		member.mobile
-		FROM dj_pay_business_order as pbo,dj_house as house,dj_member as member
-		where
-		member.id = house.member_id
-		AND pbo.house_id = house.id
+		FROM dj_pay_business_order as pbo
+		LEFT JOIN dj_pay_pay_order AS pay ON pay.number = pbo.pay_order_number
+		INNER JOIN dj_house AS house ON pbo.house_id = house.id
+		INNER JOIN dj_member AS member ON member.id = house.member_id
+		where pbo.data_status=0
 		<if test="likeAddress!=null and likeAddress!=''">
 			AND (
 			house.residential LIKE CONCAT('%',#{likeAddress},'%')

@@ -25,8 +25,6 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tk.mybatis.mapper.entity.Example;
-import tk.mybatis.mapper.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -132,7 +130,7 @@ public class FillMaterielService {
 
 
     /**
-     * 补货查询商品库
+     * 工匠补货查询商品库普通材料
      * 是大管家就查询商品库服务材料
      */
     public ServerResponse repairLibraryMaterial(String userToken,String categoryId, String name, Integer pageNum, Integer pageSize) {
@@ -150,16 +148,8 @@ public class FillMaterielService {
             List<Product> productList;
             if (worker.getWorkerType() == 3){//大管家
                 productList = iProductMapper.serviceMaterials(name,categoryId);
-            }else if (StringUtil.isEmpty(categoryId)) {
-                Example example = new Example(Product.class);
-                example.createCriteria().andLike(Product.NAME, "%" + name + "%")
-                        .andEqualTo(Product.TYPE,"1");
-                productList = iProductMapper.selectByExample(example);
-            } else {
-                Example example = new Example(Product.class);
-                example.createCriteria().andEqualTo(Product.CATEGORY_ID, categoryId).andLike(Product.NAME, "%" + name + "%")
-                        .andEqualTo(Product.TYPE,"1");
-                productList = iProductMapper.selectByExample(example);
+            } else {//其它工匠
+                productList = iProductMapper.commonMaterials(name,categoryId);
             }
 
             PageInfo pageResult = new PageInfo(productList);
