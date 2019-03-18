@@ -54,7 +54,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		house.member_id,
 		member.mobile
 		FROM dj_pay_business_order as pbo
-		INNER JOIN dj_pay_pay_order AS pay ON pay.number = pbo.pay_order_number
+		LEFT JOIN dj_pay_pay_order AS pay ON pay.number = pbo.pay_order_number
 		INNER JOIN dj_house AS house ON pbo.house_id = house.id
 		INNER JOIN dj_member AS member ON member.id = house.member_id
 		where pbo.data_status=0
