@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -89,7 +88,7 @@ public class ImportExcel {
             Cell cell = row.getCell(column);
             if (cell != null){
                 if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC){
-                    val = String.valueOf(new DecimalFormat("#").format(cell.getNumericCellValue()));
+                    val = String.valueOf(cell.getNumericCellValue());
                 }else if (cell.getCellType() == Cell.CELL_TYPE_STRING){
                     val = cell.getStringCellValue();
                 }else if (cell.getCellType() == Cell.CELL_TYPE_FORMULA){
