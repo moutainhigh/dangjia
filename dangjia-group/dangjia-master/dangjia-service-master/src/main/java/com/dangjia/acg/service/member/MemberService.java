@@ -111,12 +111,12 @@ public class MemberService {
         } else if (idType.equals("3")) {
             Supplier supplier = supplierProductAPI.getSupplier(id);
             if (supplier != null) {
-                mobile = supplier == null ? "" : supplier.getTelephone();
+                mobile = supplier.getTelephone();
             }
         } else if (idType.equals("4")) {
             MainUser mainUser = userMapper.selectByPrimaryKey(id);
             if (mainUser != null) {
-                mobile = mainUser == null ? "" : mainUser.getMobile();
+                mobile = mainUser.getMobile();
             }
         } else {
             Member member = memberMapper.selectByPrimaryKey(id);
@@ -148,7 +148,6 @@ public class MemberService {
 
     // 登录 接口
     public ServerResponse login(String phone, String password, String userRole) {
-
         //指定角色查询用户
         Member user = new Member();
         user.setMobile(phone);
@@ -158,25 +157,29 @@ public class MemberService {
         if (user == null) {
             return ServerResponse.createByErrorMessage("电话号码或者密码错误");
         } else {
-            userRole = "role" + userRole + ":" + user.getId();
-            String token = redisClient.getCache(userRole, String.class);
-            //如果用户存在usertoken则清除原来的token数据
-            if (!CommonUtil.isEmpty(token)) {
-                redisClient.deleteCache(token + Constants.SESSIONUSERID);
-            }
-            user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-            AccessToken accessToken = TokenUtil.generateAccessToken(user);
-            if (!CommonUtil.isEmpty(user.getWorkerTypeId())) {
-                WorkerType wt = workerTypeMapper.selectByPrimaryKey(user.getWorkerTypeId());
-                if (wt != null) {
-                    accessToken.setWorkerTypeName(wt.getName());
-                }
-            }
-            redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
-            redisClient.put(userRole, accessToken.getUserToken());
-            groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
-            return ServerResponse.createBySuccess("登录成功，正在跳转", accessToken);
+            return getUser(user, userRole);
         }
+    }
+
+    ServerResponse getUser(Member user, String userRole) {
+        userRole = "role" + userRole + ":" + user.getId();
+        String token = redisClient.getCache(userRole, String.class);
+        //如果用户存在usertoken则清除原来的token数据
+        if (!CommonUtil.isEmpty(token)) {
+            redisClient.deleteCache(token + Constants.SESSIONUSERID);
+        }
+        user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+        AccessToken accessToken = TokenUtil.generateAccessToken(user);
+        if (!CommonUtil.isEmpty(user.getWorkerTypeId())) {
+            WorkerType wt = workerTypeMapper.selectByPrimaryKey(user.getWorkerTypeId());
+            if (wt != null) {
+                accessToken.setWorkerTypeName(wt.getName());
+            }
+        }
+        redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
+        redisClient.put(userRole, accessToken.getUserToken());
+        groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
+        return ServerResponse.createBySuccess("登录成功，正在跳转", accessToken);
     }
 
     /*
