@@ -58,7 +58,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             and
             mm.category_id = #{categoryId}
         </if>
-
+        Group By mm.product_id
         ORDER BY mo.create_date desc
     </select>
 

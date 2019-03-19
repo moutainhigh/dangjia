@@ -115,7 +115,7 @@ public class MendOrderCheckService {
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                 if (mendOrder.getType()==1 || mendOrder.getType()==3){//补退人工
                     ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
-                    changeOrder.setState(3);//管家提交的数量单取消 需重新提交
+                    changeOrder.setState(1);//管家提交的数量单取消 需重新提交
                     changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
                 }
             }else {
