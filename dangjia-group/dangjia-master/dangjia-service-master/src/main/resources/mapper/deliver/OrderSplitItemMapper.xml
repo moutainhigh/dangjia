@@ -4,6 +4,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper">
 
+
+    <!--查询要货单总价-->
+    <select id="getOrderSplitPrice" resultType="java.lang.Double">
+	    select
+		    IFNULL(sum(price*num),0)
+		from dj_deliver_order_split_item
+		where
+	        order_split_id = #{orderSplitId}
+	</select>
+
     <update id="setSupplierId" >
         update dj_deliver_order_split_item
         set split_deliver_id = #{splitDeliverId}

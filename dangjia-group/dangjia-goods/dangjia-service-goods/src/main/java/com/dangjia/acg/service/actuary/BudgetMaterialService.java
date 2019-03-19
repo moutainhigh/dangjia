@@ -3,11 +3,13 @@ package com.dangjia.acg.service.actuary;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
-import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
+import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
@@ -39,13 +41,30 @@ public class BudgetMaterialService {
     @Autowired
     private ILabelMapper iLabelMapper;
     @Autowired
+    private IAttributeValueMapper iAttributeValueMapper;
+    @Autowired
     private IProductMapper iProductMaper;
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
     @Autowired
     private ConfigUtil configUtil;
 
+    @Autowired
+    private BudgetWorkerService budgetWorkerService;
+
+
     private static Logger LOG = LoggerFactory.getLogger(BudgetMaterialService.class);
+
+    //精算阶段花费统计
+    public ServerResponse getHouseBudgetStageCost(String houseId, String workerTypeId) {
+        try {
+            List<BudgetStageCostDTO> mapList = iBudgetMaterialMapper.getHouseBudgetStageCost(houseId, workerTypeId);
+            return ServerResponse.createBySuccess("查询成功", mapList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
     //查询所有精算
     public ServerResponse getAllBudgetMaterial() {
@@ -76,7 +95,20 @@ public class BudgetMaterialService {
         try {
             List<Map<String, Object>> mapList = iBudgetMaterialMapper.getBudgetMaterialById(houseId, workerTypeId);
             LOG.info("getAllBudgetMaterialById houseId:" + houseId + " workerTypeId:" + workerTypeId + " size:" + mapList.size());
-            BudgetWorkerService.setGoods(mapList, iGoodsMapper, iProductMaper, iUnitMapper);
+//            BudgetWorkerService.setGoods(mapList, iGoodsMapper, iProductMaper, iUnitMapper);
+            budgetWorkerService.setGoods(mapList);
+            for (Map<String, Object> obj : mapList) {
+                String goodsId = obj.get("goodsId").toString();
+                Goods goods = iGoodsMapper.queryById(goodsId);
+                Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
+                if (unit != null)
+                    obj.put("goodsUnitName", unit.getName());
+                if (goods != null) {
+                    if (!CommonUtil.isEmpty(goods.getName()))
+                        obj.put("goodsName", goods.getName());
+                }
+
+            }
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             e.printStackTrace();
@@ -154,6 +186,7 @@ public class BudgetMaterialService {
                     tTechnologymMapList.add(map);
                 }
 
+
                 String[] imgArr = p.getImage().split(",");
                 String imgStr = "";
                 String imgUrlStr = "";
@@ -179,6 +212,24 @@ public class BudgetMaterialService {
                     if (label.getName() != null)
                         map.put("labelName", label.getName());
                 }
+
+                String strNewValueNameArr = "";
+                if (StringUtils.isNotBlank(p.getValueIdArr())) {
+                    String[] newValueNameArr = p.getValueIdArr().split(",");
+                    for (int i = 0; i < newValueNameArr.length; i++) {
+                        String valueId = newValueNameArr[i];
+                        if (StringUtils.isNotBlank(valueId)) {
+                            AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
+                            if (i == 0) {
+                                strNewValueNameArr = attributeValue.getName();
+                            } else {
+                                strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
+                            }
+                        }
+                    }
+                }
+                map.put("newValueNameArr", strNewValueNameArr);
+
                 map.put("tTechnologymMapList", tTechnologymMapList);
                 mapList.add(map);
             }

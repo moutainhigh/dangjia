@@ -10,6 +10,9 @@ import java.util.List;
 @Repository
 public interface IMendOrderMapper extends Mapper<MendOrder>{
 
+
+    List<MendOrder> getByChangeOrderId(@Param("changeOrderId") String changeOrderId);
+
     /**查询工种未处理补人工*/
     List<MendOrder> unCheckRepWorker(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId);
 
@@ -36,5 +39,20 @@ public interface IMendOrderMapper extends Mapper<MendOrder>{
 
     /**查询补货单*/
     List<MendOrder> materialOrderState(@Param("houseId") String houseId);
+
+    /**
+     * 按state 和 收货地址 搜索
+     * @param houseId
+     * @param type   0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料
+     * @param beginDate
+     * @param endDate
+     * @param likeAddress
+     * @return
+     */
+    List<MendOrder> materialByStateAndLikeAddress(@Param("houseId") String houseId,
+                                    @Param("type") Integer type,
+                                    @Param("beginDate") String beginDate,
+                                    @Param("endDate") String endDate,
+                                    @Param("likeAddress") String likeAddress);
 
 }

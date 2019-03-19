@@ -5,6 +5,7 @@ import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.TechnologyDTO;
 import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
@@ -21,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,6 +75,41 @@ public class WorkerGoodsService {
         return ServerResponse.createBySuccess("获取工价商品列表成功", pageResult);
     }
 
+
+    public WorkerGoodsDTO getWorkerGoodsDTO(String workerGoodsSn,String workerTypeId,String shopCount){
+        Example example=new Example(WorkerGoods.class);
+        example.createCriteria()
+                .andEqualTo(WorkerGoods.DATA_STATUS,'0')
+                .andEqualTo(WorkerGoods.SHOW_GOODS,1)
+                .andEqualTo(WorkerGoods.WORKER_GOODS_SN,workerGoodsSn)
+                .andEqualTo(WorkerGoods.WORKER_TYPE_ID,workerTypeId)
+        ;
+        List<WorkerGoods> workerGoods=iWorkerGoodsMapper.selectByExample(example);
+        WorkerGoodsDTO workerGoodsDTO=new WorkerGoodsDTO();
+        if(workerGoods!=null&&workerGoods.size()>0){
+            workerGoodsDTO=assembleWorkerGoodsResult(workerGoods.get(0));
+            workerGoodsDTO.setShopCount(shopCount);
+        }else{
+            workerGoodsDTO.setWorkerGoodsSn(workerGoodsSn);
+            workerGoodsDTO.setWorkerTypeId(workerTypeId);
+            workerGoodsDTO.setMsg("找不到该人工商品（"+workerGoodsSn+"）,请检查是否创建或者停用！");
+        }
+        return workerGoodsDTO;
+    }
+    public String getImageAddress(String address,String image){
+        String imgStr = "";
+        if (!CommonUtil.isEmpty(image)) {
+            String[] imgArr = image.split(",");
+            for (int i = 0; i < imgArr.length; i++) {
+                if (i == imgArr.length - 1) {
+                    imgStr += address + imgArr[i];
+                } else {
+                    imgStr += address + imgArr[i] + ",";
+                }
+            }
+        }
+        return imgStr;
+    }
     private WorkerGoodsDTO assembleWorkerGoodsResult(WorkerGoods workerGoods) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
@@ -80,41 +117,17 @@ public class WorkerGoodsService {
             workerGoodsResult.setId(workerGoods.getId());
             workerGoodsResult.setName(workerGoods.getName());
             workerGoodsResult.setWorkerGoodsSn(workerGoods.getWorkerGoodsSn());
-            String[] imgArr = workerGoods.getImage().split(",");
-            String imgStr = "";
-            String imgUrlStr = "";
-            for (int i = 0; i < imgArr.length; i++) {
-                if (i == imgArr.length - 1) {
-                    imgStr += address + imgArr[i];
-                    imgUrlStr += imgArr[i];
-                } else {
-                    imgStr += address + imgArr[i] + ",";
-                    imgUrlStr += imgArr[i] + ",";
-                }
-            }
-            String[] imgArr2 = workerGoods.getWorkerDec().split(",");
-            String imgStr2 = "";
-            String imgUrlStr2 = "";
-            for (int i = 0; i < imgArr2.length; i++) {
-                if (i == imgArr2.length - 1) {
-                    imgStr2 += address + imgArr2[i];
-                    imgUrlStr2 += imgArr2[i];
-                } else {
-                    imgStr2 += address + imgArr2[i] + ",";
-                    imgUrlStr2 += imgArr2[i] + ",";
-                }
-            }
-            workerGoodsResult.setImage(imgStr);
-            workerGoodsResult.setImageUrl(imgUrlStr);
-            workerGoodsResult.setWorkerDec(imgStr2);
-            workerGoodsResult.setWorkerDecUrl(imgUrlStr2);
+            workerGoodsResult.setImage(getImageAddress(address,workerGoods.getImage()));
+            workerGoodsResult.setImageUrl(workerGoods.getImage());
+            workerGoodsResult.setWorkerDec(getImageAddress(address,workerGoods.getWorkerDec()));
+            workerGoodsResult.setWorkerDecUrl(workerGoods.getWorkerDec());
             workerGoodsResult.setUnitId(workerGoods.getUnitId());
             workerGoodsResult.setUnitName(workerGoods.getUnitName());
 
             String workerTypeName = "";
             ServerResponse response = workerTypeAPI.getWorkerType(workerGoods.getWorkerTypeId());
             if (response.isSuccess()) {
-                workerTypeName=(((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
+                workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
             }
             workerGoodsResult.setWorkerTypeName(workerTypeName);
             workerGoodsResult.setPrice(workerGoods.getPrice());
@@ -137,22 +150,8 @@ public class WorkerGoodsService {
                 technologyResult.setName(technology.getName());
                 technologyResult.setWorkerTypeId(technology.getWorkerTypeId());
                 technologyResult.setContent(technology.getContent());
-                String imgStr3 = "";
-                String imgUrlStr3 = "";
-                if (technology.getImage() != null) {
-                    String[] imgArr3 = technology.getImage().split(",");
-                    for (int i = 0; i < imgArr3.length; i++) {
-                        if (i == imgArr3.length - 1) {
-                            imgStr3 += address + imgArr3[i];
-                            imgUrlStr3 += imgArr3[i];
-                        } else {
-                            imgStr3 += address + imgArr3[i] + ",";
-                            imgUrlStr3 += imgArr3[i] + ",";
-                        }
-                    }
-                }
-                technologyResult.setImage(imgUrlStr3);
-                technologyResult.setImageUrl(imgStr3);
+                technologyResult.setImage(getImageAddress(address,technology.getImage()));
+                technologyResult.setImageUrl(technology.getImage());
                 technologyResult.setSampleImage(technology.getSampleImage());
                 technologyResult.setSampleImageUrl(address + technology.getSampleImage());
                 technologyResult.setType(technology.getType());
@@ -265,32 +264,6 @@ public class WorkerGoodsService {
         List<WorkerGoods> workerGoodsSnList = iWorkerGoodsMapper.selectByWorkerGoodsSn(workerGoods.getWorkerGoodsSn(), workerGoods.getWorkerTypeId());
 
         if (workerGoods != null) {
-            if (workerGoods.getImage() != null && !"".equals(workerGoods.getImage())) {
-                String[] imgArr = workerGoods.getImage().split(",");
-                String imgStr = "";
-                for (int i = 0; i < imgArr.length; i++) {
-                    String img = imgArr[i];
-                    if (i == imgArr.length - 1) {
-                        imgStr += img;
-                    } else {
-                        imgStr += img + ",";
-                    }
-                }
-                workerGoods.setImage(imgStr);
-            }
-            if (workerGoods.getWorkerDec() != null && !"".equals(workerGoods.getWorkerDec())) {
-                String[] imgArr2 = workerGoods.getWorkerDec().split(",");
-                String imgStr2 = "";
-                for (int i = 0; i < imgArr2.length; i++) {
-                    String img = imgArr2[i];
-                    if (i == imgArr2.length - 1) {
-                        imgStr2 += img;
-                    } else {
-                        imgStr2 += img + ",";
-                    }
-                }
-                workerGoods.setWorkerDec(imgStr2);//商品介绍图片
-            }
 
             WorkerGoods workerG = iWorkerGoodsMapper.selectByPrimaryKey(workerGoods.getId());
             if (StringUtils.isNotBlank(workerGoods.getId()) && workerG != null) {
@@ -330,8 +303,7 @@ public class WorkerGoodsService {
 
             String[] deleteTechnologyIdArr = deleteTechnologyIds.split(",");
             for (int i = 0; i < deleteTechnologyIdArr.length; i++) {
-                if(iTechnologyMapper.selectByPrimaryKey(deleteTechnologyIdArr[i])!= null)
-                {
+                if (iTechnologyMapper.selectByPrimaryKey(deleteTechnologyIdArr[i]) != null) {
                     if (iTechnologyMapper.deleteByPrimaryKey(deleteTechnologyIdArr[i]) < 0)
                         return ServerResponse.createByErrorMessage("删除id：" + deleteTechnologyIdArr[i] + "失败");
                 }

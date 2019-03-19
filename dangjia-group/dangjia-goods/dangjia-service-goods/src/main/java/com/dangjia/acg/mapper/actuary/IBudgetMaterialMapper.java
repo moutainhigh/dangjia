@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.actuary;
 
+import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -18,6 +19,9 @@ import java.util.Map;
  */
 @Repository
 public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
+
+	/**精算阶段花费统计*/
+	List<BudgetStageCostDTO> getHouseBudgetStageCost(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 
 	List<BudgetMaterial> getCategoryAllList(@Param("houseId")String houseId, @Param("categoryId")String categoryId);
 	Double getCategoryAllPrice(@Param("houseId")String houseId, @Param("categoryId")String categoryId);
@@ -52,6 +56,10 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 	List<Map<String,Object>> getAllbudgetTemplates(String template_id);
 	/**根据house_id查询所有商品精算*/
 	List<Map<String,Object>> getBudgetMaterialById(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+
+	/**根据house_id查询所有商品精算*/
+	List<BudgetMaterial> getBudgetMaterialByHouseIdAndWorkerTypeId(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+
 	/**根据拿到的Id删除精算*/
 	void deleteById(String id);
 	/**根据拿到的Id删除精算*/
@@ -62,4 +70,6 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 	Double getAbmPayOutByHfId(@Param("houseFlowId")String houseFlowId);
 	/**根据houseFlow查询未支付实时精算价格*/
 	Double getAbmCasualByHfId(@Param("houseFlowId")String houseFlowId);
+
+	void insertByBatch(@Param("list")List<BudgetMaterial> list);
 }

@@ -67,7 +67,8 @@
 		select DISTINCT bw.worker_type_id
 		from dj_actuary_budget_worker bw
  		where bw.house_id = #{houseId}
- 		and bw.delete_state in (0,3);
+ 		and bw.delete_state in (0,3)
+ 		order by bw.worker_type_id
 	</select>
 
 	<select id="byWorkerGoodsId" resultType="com.dangjia.acg.modle.actuary.BudgetWorker" >
@@ -130,6 +131,16 @@
 		ORDER BY create_date desc
 	</select>
 
+	<!-- 根据houseId和wokerTypeId查询房子人工精算 -->
+	<select id="getBudgetWorkerByHouseIdAndWorkerTypeId" resultType="com.dangjia.acg.modle.actuary.BudgetWorker">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_actuary_budget_worker
+		WHERE house_id=#{houseId}
+		and worker_type_id =#{workerTypeId}
+		ORDER BY create_date desc
+	</select>
+
 	<!-- 根据template_id查询所有 -->
 	<select id="getAllbudgetTemplates" resultType="java.util.Map">
 		SELECT
@@ -170,4 +181,57 @@
 		AND abw.delete_state != 1
 		AND abw.worker_type_id = #{workerTypeId}
     </select>
+
+	<insert id="insertByBatch" parameterType="java.util.List">
+		INSERT INTO dj_actuary_budget_worker (
+		id,
+		house_flow_id,
+		house_id,
+		worker_type_id,
+		steta,
+		template_id,
+		delete_state,
+		worker_goods_id,
+		worker_goods_sn,
+		image,
+		name,
+		price,
+		description,
+		shop_count,
+		repair_count,
+		back_count,
+		unit_name,
+		total_price,
+		create_date,
+		modify_date,
+		data_status
+		)
+		VALUES
+
+		<foreach collection="list" item="item" index="index" separator=",">
+			(
+			#{item.id},
+			#{item.houseFlowId},
+			#{item.houseId},
+			#{item.workerTypeId},
+			#{item.steta},
+			#{item.templateId},
+			#{item.deleteState},
+			#{item.workerGoodsId},
+			#{item.workerGoodsSn},
+			#{item.image},
+			#{item.name},
+			#{item.price},
+			#{item.description},
+			#{item.shopCount},
+			#{item.repairCount},
+			#{item.backCount},
+			#{item.unitName},
+			#{item.totalPrice},
+			#{item.createDate},
+			#{item.modifyDate},
+			#{item.dataStatus}
+			)
+		</foreach>
+	</insert>
 </mapper>

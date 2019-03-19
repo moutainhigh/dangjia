@@ -23,8 +23,8 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse landlordState(String houseId,Integer pageNum, Integer pageSize){
-        return mendMaterielService.landlordState(houseId,pageNum,pageSize);
+    public ServerResponse landlordState(String houseId,Integer pageNum, Integer pageSize,String beginDate, String endDate,String likeAddress){
+        return mendMaterielService.landlordState(houseId,pageNum,pageSize,beginDate,endDate,likeAddress);
     }
 
     /**
@@ -32,8 +32,8 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse materialBackState(String houseId,Integer pageNum, Integer pageSize){
-        return mendMaterielService.materialBackState(houseId,pageNum,pageSize);
+    public ServerResponse materialBackState(String houseId,Integer pageNum, Integer pageSize,String beginDate, String endDate,String likeAddress){
+        return mendMaterielService.materialBackState(houseId,pageNum,pageSize,beginDate,endDate,likeAddress);
     }
 
     /**
@@ -50,7 +50,7 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse materialOrderState(String houseId,Integer pageNum, Integer pageSize){
-        return mendMaterielService.materialOrderState(houseId,pageNum,pageSize);
+    public ServerResponse materialOrderState(String houseId,Integer pageNum, Integer pageSize,String beginDate, String endDate,String likeAddress){
+        return mendMaterielService.materialOrderState(houseId,pageNum,pageSize,beginDate,endDate,likeAddress);
     }
 }

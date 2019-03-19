@@ -19,7 +19,7 @@ import java.math.BigDecimal;
 @Data
 @Entity
 @Table(name = "dj_design_design_image_type")
-@ApiModel(description = "设计图与房子关联")
+@ApiModel(description = "图类型")
 public class DesignImageType extends BaseEntity {
 
 	@Column(name = "name")
@@ -51,4 +51,9 @@ public class DesignImageType extends BaseEntity {
 	@Desc(value = "价格")
 	@ApiModelProperty("价格")
 	private BigDecimal price;
+
+	@Column(name = "sort")
+	@Desc(value = "排序")
+	@ApiModelProperty("排序")
+	private Integer sort;//
 }

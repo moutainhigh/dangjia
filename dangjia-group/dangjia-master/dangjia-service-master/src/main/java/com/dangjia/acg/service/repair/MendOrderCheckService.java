@@ -115,7 +115,7 @@ public class MendOrderCheckService {
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                 if (mendOrder.getType()==1 || mendOrder.getType()==3){//补退人工
                     ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
-                    changeOrder.setState(3);//管家提交的数量单取消 需重新提交
+                    changeOrder.setState(1);//管家提交的数量单取消 需重新提交
                     changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
                 }
             }else {
@@ -151,7 +151,17 @@ public class MendOrderCheckService {
      */
     private ServerResponse settleMendOrder(MendOrder mendOrder){
         try{
+            if(mendOrder.getType() == 1){
+                ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
+                changeOrder.setState(5);//待业主支付
+                changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+            }
+
             if (mendOrder.getType() == 3){//退人工
+                ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
+                changeOrder.setState(6);//退人工完成
+                changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+
                 HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(mendOrder.getHouseId(), mendOrder.getWorkerTypeId());
                 BigDecimal refund = new BigDecimal(mendOrder.getTotalAmount());
                 houseWorkerOrder.setWorkPrice(houseWorkerOrder.getWorkPrice().subtract(refund));//减掉工钱

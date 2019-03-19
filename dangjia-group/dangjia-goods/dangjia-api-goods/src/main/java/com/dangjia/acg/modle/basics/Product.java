@@ -48,7 +48,7 @@ public class Product extends BaseEntity {
     private Double convertQuality;//换算量
 
     @Column(name = "convert_unit")
-    private String convertUnit;//换算单位
+    private String convertUnit;//换算单位ID
 
 	@Column(name = "weight")
     private Double weight;//重量  单价乘数量乘此系数(运费)

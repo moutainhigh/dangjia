@@ -49,8 +49,8 @@ public class HouseDistribution extends BaseEntity {
 	private String sex;//
 
 	@Column(name = "number")
-	@Desc(value = "支付订单号")
-	@ApiModelProperty("支付订单号")
+	@Desc(value = "业务订单号")
+	@ApiModelProperty("业务订单号")
 	private String number;
 
 	@Column(name = "city")

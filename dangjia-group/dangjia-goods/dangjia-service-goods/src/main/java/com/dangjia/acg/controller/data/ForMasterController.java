@@ -27,6 +27,12 @@ public class ForMasterController implements ForMasterAPI {
     @Autowired
     private ForMasterService forMasterService;
 
+
+    @Override
+    public String getUnitName(String unitId){
+        return forMasterService.getUnitName(unitId);
+    }
+
     @Override
     @ApiMethod
     public SupplierProduct getSupplierProduct(String cityId,String supplierId, String productId){
@@ -34,7 +40,6 @@ public class ForMasterController implements ForMasterAPI {
     }
 
     @Override
-    @ApiMethod
     public Supplier getSupplier(String supplierId){
         return forMasterService.getSupplier(supplierId);
     }
@@ -67,6 +72,11 @@ public class ForMasterController implements ForMasterAPI {
     @ApiMethod
     public String brandSeriesName(String productId){
         return forMasterService.brandSeriesName(productId);
+    }
+    @Override
+    @ApiMethod
+    public String brandName(String productId){
+        return forMasterService.brandName(productId);
     }
     @Override
     @ApiMethod

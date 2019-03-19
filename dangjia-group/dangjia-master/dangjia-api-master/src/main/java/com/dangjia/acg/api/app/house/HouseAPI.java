@@ -109,6 +109,10 @@ public interface HouseAPI {
     ServerResponse queryConstructionRecord(@RequestParam("houseId") String houseId,
                                            @RequestParam("pageDTO") PageDTO pageDTO);
 
+    @PostMapping("app/house/house/getHouseFlowApply")
+    @ApiOperation(value = "获取施工记录详情", notes = "获取施工记录详情")
+    ServerResponse getHouseFlowApply(@RequestParam("houseFlowApplyId") String houseFlowApplyId);
+
     /**
      * 施工记录（首页滚动）
      */
@@ -132,7 +136,8 @@ public interface HouseAPI {
 
     @PostMapping("app/house/house/getReferenceBudget")
     @ApiOperation(value = "参考报价", notes = "参考报价")
-    ServerResponse getReferenceBudget(@RequestParam("villageId") String villageId,
+    ServerResponse getReferenceBudget(@RequestParam("cityId") String cityId,
+                                      @RequestParam("villageId") String villageId,
                                       @RequestParam("square") Double square,
                                       @RequestParam("houseType") Integer houseType);
 }

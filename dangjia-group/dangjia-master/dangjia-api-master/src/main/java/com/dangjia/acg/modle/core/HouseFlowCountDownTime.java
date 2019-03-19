@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,6 +20,7 @@ import java.util.Date;
 @Entity
 @Table(name = "dj_core_house_flow_count_down_time")
 @ApiModel(description = "工序")
+@FieldNameConstants(prefix = "")
 public class HouseFlowCountDownTime extends BaseEntity {
 
 	@Column(name = "worker_id")

@@ -26,6 +26,9 @@ import java.util.List;
 @FeignClient("dangjia-service-goods")
 public interface ForMasterAPI {
 
+    @PostMapping("/data/forMaster/getUnitName")
+    @ApiOperation(value = "获取单位名", notes = "获取单位名")
+    String getUnitName(@RequestParam("unitId")String unitId);
 
     @PostMapping("/data/forMaster/getSupplierProduct")
     @ApiOperation(value = "查询供应价", notes = "查询供应价")
@@ -56,6 +59,10 @@ public interface ForMasterAPI {
     @PostMapping("/data/forMaster/brandSeriesName")
     @ApiOperation(value = "查询品牌系列名", notes = "查询品牌系列名")
     String brandSeriesName(@RequestParam("productId") String productId);
+
+    @PostMapping("/data/forMaster/brandName")
+    @ApiOperation(value = "查询品牌名", notes = "查询品牌名")
+    String brandName(@RequestParam("productId") String productId);
 
     @PostMapping("/data/forMaster/getWorkerGoods")
     @ApiOperation(value = "工价商品信息", notes = "工价商品信息")

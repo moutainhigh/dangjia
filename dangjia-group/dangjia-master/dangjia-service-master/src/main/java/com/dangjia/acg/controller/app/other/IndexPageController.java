@@ -5,7 +5,10 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.other.IndexPageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * author: Ronalcheng
@@ -22,7 +25,7 @@ public class IndexPageController implements IndexPageAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse houseDetails(String houseId){
-        return indexPageService.houseDetails(houseId);
+    public ServerResponse houseDetails(HttpServletRequest request, String houseId){
+        return indexPageService.houseDetails(request,houseId);
     }
 }

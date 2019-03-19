@@ -19,6 +19,14 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-goods")
 public interface MendMaterielAPI {
 
+
+    @PostMapping("/repair/mendMateriel/askAndQuit")
+    @ApiOperation(value = "要退查询仓库", notes = "要退查询仓库")
+    ServerResponse askAndQuit(@RequestParam("userToken") String userToken,
+                                    @RequestParam("houseId") String houseId,
+                                    @RequestParam("categoryId") String categoryId,
+                                    @RequestParam("name") String name);
+
     @PostMapping("/repair/mendMateriel/selectProduct")
     @ApiOperation(value = "选择货", notes = "选择货")
     ServerResponse selectProduct(@RequestParam("request") HttpServletRequest request,
@@ -30,7 +38,8 @@ public interface MendMaterielAPI {
 
     @PostMapping("/repair/mendMateriel/repairLibraryMaterial")
     @ApiOperation(value = "补货查询商品库商品", notes = "补货查询商品库商品")
-    ServerResponse repairLibraryMaterial(@RequestParam("request") HttpServletRequest request,
+    ServerResponse repairLibraryMaterial(@RequestParam("userToken") String userToken,
+                                         @RequestParam("request") HttpServletRequest request,
                                          @RequestParam("categoryId") String categoryId,
                                          @RequestParam("name") String name,
                                          @RequestParam("pageDTO") PageDTO pageDTO);

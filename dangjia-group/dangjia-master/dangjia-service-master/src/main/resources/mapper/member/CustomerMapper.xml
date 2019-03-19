@@ -24,7 +24,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="memberId!=null and memberId!=''">
             and member_id=#{memberId}
         </if>
-        ORDER by create_date
+        ORDER by create_date desc
     </select>
 
     <!-- 根据业主id 和 stage 查询 -->
@@ -39,7 +39,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="stage >= 0">
             and stage=#{stage}
         </if>
-        ORDER by create_date
+        ORDER by create_date desc
     </select>
 </mapper>
 

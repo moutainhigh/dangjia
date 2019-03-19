@@ -143,15 +143,6 @@ public class ProductController implements ProductAPI {
 		return goodsService.updateGoods(id,name, categoryId, buy, sales, unitId, type, arrString);
   		
   	}
-    /**
-  	 * 修改货品
-  	 */
-	@Override
-	@ApiMethod
-  	public ServerResponse updateProduct(HttpServletRequest request,String productArr){
-		return productService.updateProduct(productArr);
-  		
-  	}
 
 	/**
 	 * 根据货品id查询货品对象
@@ -196,7 +187,7 @@ public class ProductController implements ProductAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse queryGoodsListByCategoryLikeName(HttpServletRequest request,PageDTO pageDTO,String categoryId,String name,Integer type){
+	public ServerResponse queryGoodsListByCategoryLikeName(HttpServletRequest request,PageDTO pageDTO,String categoryId,String name, String cityId,Integer type){
 		return goodsService.queryGoodsListByCategoryLikeName(pageDTO,categoryId,name,type);
 	}
 

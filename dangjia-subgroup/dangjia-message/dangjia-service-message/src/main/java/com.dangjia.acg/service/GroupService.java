@@ -37,7 +37,7 @@ public class GroupService  extends BaseService{
     public  CreateGroupResultDTO createGroup(String appType,String owner_username,String name,String[] members_username,String avatar,String desc ,int flag) {
       
         try {
-
+            members_username=getUserTags(members_username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             CreateGroupResult res = client.createGroup(owner_username, name, desc, avatar, flag, members_username);
             CreateGroupResultDTO result=new CreateGroupResultDTO();
@@ -142,7 +142,8 @@ public class GroupService  extends BaseService{
     public  void manageGroup(String appType,int groupId, String[] addList,String[] removeList) {
 
         try {
-
+            addList=getUserTags(addList);
+            removeList=getUserTags(removeList);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             client.addOrRemoveMembers(groupId, addList, removeList );
         } catch (APIConnectionException e) {

@@ -7,6 +7,8 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * author: Ronalcheng
  * Date: 2019/1/4 0004
@@ -18,5 +20,5 @@ public interface IndexPageAPI {
 
     @PostMapping("/app/other/indexPage/houseDetails")
     @ApiOperation(value = "施工现场详情", notes = "施工现场详情")
-    ServerResponse houseDetails(@RequestParam("houseId") String houseId);
+    ServerResponse houseDetails(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId") String houseId);
 }

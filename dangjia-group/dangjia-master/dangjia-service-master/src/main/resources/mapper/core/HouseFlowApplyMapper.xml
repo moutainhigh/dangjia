@@ -41,7 +41,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             house_id = #{houseId}
         and (supervisor_check = 0 or (supervisor_check = 1 and member_check = 0))
         and worker_type_id = #{workerTypeId}
-        and apply_type in (0,1,2)
+        and apply_type in (1,2)
     </select>
 
     <!--管家已审核业主未审核申请 -->
@@ -82,7 +82,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <!--根据工人id和houseId查询今日是否开工 -->
-    <select id="getTodayStart" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+    <select id="getTodayStart" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select
         <include refid="all_columns" />
         from dj_core_house_flow_apply
@@ -90,7 +90,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and house_id = #{houseId}
         and worker_id = #{workerId}
         and apply_type = 4
-        and to_days(create_date) = to_days(now())
+        and to_days(create_date) = to_days(#{time})
     </select>
 
     <!--查询待审核的申请(不算每日完工) -->
@@ -114,11 +114,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <!--大管家查询自己今天是否已上传过巡查 -->
-    <select id="getTodayHouseFlowApplyBy56" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+    <select id="getTodayHouseFlowApplyBy56"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select <include refid="all_columns" />
         from dj_core_house_flow_apply
         where
-            to_days(create_date) = to_days(now())
+            to_days(create_date) = to_days(#{time})
         and house_id = #{houseId}
         and apply_type in(5,6)
         order by create_date desc
@@ -170,7 +170,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select <include refid="all_columns" />
         from dj_core_house_flow_apply
         where
-            to_days(create_date) = to_days(now())
+            to_days(create_date) = to_days(#{time})
         and house_flow_id = #{houseFlowId}
         and apply_type =#{applyType}
         and worker_id = #{workerId}
@@ -185,7 +185,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where 1=1
         and house_id = #{houseId}
         and apply_type = 4
-        and to_days(create_date) = to_days(now())
+        and to_days(create_date) = to_days(#{time})
     </select>
 
     <!--根据houseflowid和工匠id查询待管家审核-->

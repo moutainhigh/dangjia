@@ -204,37 +204,6 @@ public class Member extends BaseEntity {
     @ApiModelProperty("工匠审核描述")
     private String checkDescribe;
 
-    /*@Column(name = "user_role")
-    @Desc(value = "用户角色")
-    @ApiModelProperty("用户角色 1为业主角色，2为工匠角色，0为业主和工匠双重身份角色")
-    private Integer userRole;//用户角色*/
-
-
-    /*@Column(name = "workyears")
-    @Desc(value = "工作年限")
-    @ApiModelProperty("工作年限")
-    private String workyears;//工作年限
-
-    @Column(name = "nativeplace")
-    @Desc(value = "籍贯")
-    @ApiModelProperty("籍贯")
-    private String nativeplace;//籍贯
-
-    @Column(name = "address")
-    @Desc(value = "现居地址")
-    @ApiModelProperty("现居地址")
-    private String address;//现居地址
-
-    @Column(name = "self_assessment")//selfassessment
-    @Desc(value = "自我评价")
-    @ApiModelProperty("自我评价")
-    private String selfAssessment;//自我评价
-
-    @Column(name = "specialty")//goodwork
-    @Desc(value = "擅长工作")
-    @ApiModelProperty("擅长工作")
-    private String specialty;//擅长工作*/
-
 
     //所有图片字段加入域名和端口，形成全路径
     public void initPath(String address) {

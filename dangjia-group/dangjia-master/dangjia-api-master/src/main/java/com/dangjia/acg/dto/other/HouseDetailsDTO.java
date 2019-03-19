@@ -1,10 +1,8 @@
 package com.dangjia.acg.dto.other;
 
-import com.dangjia.acg.common.annotation.Desc;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Column;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +17,7 @@ public class HouseDetailsDTO {
     private String houseName;
     private String houseId;
     private String cityId;
+    private BigDecimal totalPrice;//总计
     private List<String> dianList;
     private List<Map<String,Object>> mapList;
 }

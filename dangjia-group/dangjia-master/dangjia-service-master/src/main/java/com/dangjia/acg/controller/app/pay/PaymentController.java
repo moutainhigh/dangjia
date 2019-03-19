@@ -30,21 +30,18 @@ public class PaymentController implements PaymentAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setPaySuccess(String userToken,String businessOrderNumber,Integer type){
-        if(type==null){ type=0;}
-        return paymentService.setPaySuccess(userToken,businessOrderNumber, type);
+    public ServerResponse setPaySuccess(String userToken,String businessOrderNumber){
+        return paymentService.setPaySuccess(userToken,businessOrderNumber);
     }
     @Override
     @ApiMethod
-    public ServerResponse getWeiXinSign(String userToken, String businessOrderNumber,Integer type){
-        if(type==null){ type=0;}
-        return payService.getWeiXinSign(userToken,businessOrderNumber, type);
+    public ServerResponse getWeiXinSign(String userToken, String businessOrderNumber){
+        return payService.getWeiXinSign(businessOrderNumber);
     }
     @Override
     @ApiMethod
-    public ServerResponse getAliSign(String userToken, String businessOrderNumber,Integer type){
-        if(type==null){ type=0;}
-        return payService.getAliSign(userToken,businessOrderNumber, type);
+    public ServerResponse getAliSign(String userToken, String businessOrderNumber){
+        return payService.getAliSign(businessOrderNumber);
     }
     @Override
     @ApiMethod

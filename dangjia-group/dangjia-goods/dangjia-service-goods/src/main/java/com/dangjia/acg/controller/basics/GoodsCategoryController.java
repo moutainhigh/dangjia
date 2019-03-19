@@ -58,8 +58,8 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo>  queryGoodsAttribute(HttpServletRequest request,PageDTO pageDTO,String goodsCategoryId){
-        return goodsAttributeService.queryGoodsAttribute(pageDTO.getPageNum(),pageDTO.getPageSize(),goodsCategoryId);
+    public ServerResponse<PageInfo>  queryGoodsAttribute(HttpServletRequest request,PageDTO pageDTO,String goodsCategoryId,String likeAttrName){
+        return goodsAttributeService.queryGoodsAttribute(pageDTO.getPageNum(),pageDTO.getPageSize(),goodsCategoryId,likeAttrName);
     }
     
     /**根据属性名称模糊查询属性

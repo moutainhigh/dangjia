@@ -237,6 +237,7 @@ public class EngineerService {
      * 查看工序
      */
     public ServerResponse houseFlowList(String houseId) {
+        House house = houseMapper.selectByPrimaryKey(houseId);
         Example example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId);
         example.orderBy(HouseFlow.SORT).desc();
@@ -254,6 +255,14 @@ public class EngineerService {
             map.put("refuseNumber",houseFlow.getRefuseNumber());//被拒人数
             map.put("grabNumber",houseFlow.getGrabNumber());//抢过单人数
             map.put("workType",houseFlow.getWorkType());//抢单状态，1还没有发布，只是默认房产,2等待被抢，3有工匠抢单,4已采纳已支付
+            if (houseFlow.getWorkType() == 3){//待支付
+                HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(),houseFlow.getWorkerTypeId(),1);
+                map.put("houseWorkerId",houseWorker.getId());
+            }else if (houseFlow.getWorkType() == 4){//已支付
+                HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(),houseFlow.getWorkerTypeId(),6);
+                map.put("houseWorkerId",houseWorker.getId());
+            }
+
             map.put("releaseTime",houseFlow.getReleaseTime());//发布时间
             map.put("workSteta",houseFlow.getWorkSteta());//0未开始 ，1阶段完工通过，2整体完工通过，3待交底，4施工中
             map.put("pause",houseFlow.getPause());//施工状态0正常,1暂停
@@ -262,10 +271,19 @@ public class EngineerService {
             map.put("workPrice",houseFlow.getWorkPrice());//工钱
             map.put("patrol",houseFlow.getPatrol());//巡查次数
 
+            if(houseFlow.getWorkerType() == 1){//设计
+                map.put("designerOk", house.getDesignerOk());
+            }
+            if(houseFlow.getWorkerType() == 2){//精算
+                map.put("budgetOk", house.getBudgetOk());
+            }
+
             if(houseFlow.getWorkType() > 2){
                 Member worker = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
-                map.put("workerName", worker.getName());//工人姓名
-                map.put("mobile", worker.getMobile());//电话
+                if(worker != null){
+                    map.put("workerName", worker.getName());//工人姓名
+                    map.put("mobile", worker.getMobile());//电话
+                }
             }
             mapList.add(map);
         }
@@ -350,30 +368,33 @@ public class EngineerService {
     /**
      * 工地列表
      */
-    public ServerResponse getHouseList(Integer pageNum, Integer pageSize) {
+    public ServerResponse getHouseList(Integer pageNum, Integer pageSize,Integer visitState, String searchKey) {
         if (pageNum == null) pageNum = 1;
         if (pageSize == null) pageSize = 10;
 
         PageHelper.startPage(pageNum, pageSize);
-        List<House> houseList = houseMapper.selectAll();
+//        List<House> houseList = houseMapper.selectAll();
+        List<House> houseList = houseMapper.getHouseListLikeSearchKey(visitState,searchKey);
         PageInfo pageResult = new PageInfo(houseList);
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (House house : houseList) {
             Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-            Map<String, Object> map = new HashMap<>();
-            map.put("houseId", house.getId());
-            map.put("address", house.getHouseName());
-            map.put("memberName", member.getNickName() == null ? member.getName() : member.getNickName());
-            map.put("mobile", member.getMobile());
-            Member supervisor  = memberMapper.getSupervisor(house.getId());
-            if(supervisor != null){
-                map.put("supName",supervisor.getName());
-                map.put("supMobile",supervisor.getMobile());
+            if(member!=null) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("houseId", house.getId());
+                map.put("address", house.getHouseName());
+                map.put("memberName", member.getNickName() == null ? member.getName() : member.getNickName());
+                map.put("mobile", member.getMobile());
+                Member supervisor = memberMapper.getSupervisor(house.getId());
+                if (supervisor != null) {
+                    map.put("supName", supervisor.getName());
+                    map.put("supMobile", supervisor.getMobile());
+                }
+                map.put("pause", house.getPause()); //0正常,1暂停
+                map.put("createDate", house.getCreateDate());
+                map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工
+                mapList.add(map);
             }
-            map.put("pause",house.getPause()); //0正常,1暂停
-            map.put("createDate",house.getCreateDate());
-            map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工
-            mapList.add(map);
         }
         pageResult.setList(mapList);
         return ServerResponse.createBySuccess("查询列表成功", pageResult);

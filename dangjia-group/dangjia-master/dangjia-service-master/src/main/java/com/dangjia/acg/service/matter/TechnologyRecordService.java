@@ -6,6 +6,7 @@ import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dto.matter.TechnologyRecordDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -13,6 +14,7 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
@@ -144,8 +146,9 @@ public class TechnologyRecordService {
         return warehouseMapper.warehouseList(houseId,null,null);
     }
 
-    public Warehouse getByProductId(String productId,String houseId){
-        return warehouseMapper.getByProductId(productId,houseId);
+    public ServerResponse getByProductId(String productId,String houseId){
+        Warehouse warehouse = warehouseMapper.getByProductId(productId,houseId);
+        return ServerResponse.createBySuccess("查询成功", warehouse);
     }
 
 }

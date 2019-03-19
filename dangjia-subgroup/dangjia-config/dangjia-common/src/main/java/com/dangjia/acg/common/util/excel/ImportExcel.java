@@ -52,6 +52,9 @@ public class ImportExcel {
     public ImportExcel(MultipartFile file, int headerNum) throws IOException {
         this(file.getOriginalFilename(), file.getInputStream(), headerNum, 0);
     }
+    public ImportExcel(MultipartFile file, int headerNum, int sheetIndex) throws IOException {
+        this(file.getOriginalFilename(), file.getInputStream(), headerNum, sheetIndex);
+    }
 
     public ImportExcel(String fileName, InputStream is, int headerNum, int sheetIndex)
             throws InvalidFormatException, IOException {
@@ -135,7 +138,6 @@ public class ImportExcel {
         List<T> dataList = Lists.newArrayList();
         for (int i = this.getDataRowNum(); i <= this.getLastDataRowNum(); i++) {
             T e = (T)targetClass.newInstance();
-            int column = columnNum;
             Row row = this.getRow(i);
             if (isRowEmpty(row)) {
                 continue;
@@ -143,10 +145,9 @@ public class ImportExcel {
             StringBuilder sb = new StringBuilder();
             int countError = 0 ;
             for (Object[] os : annotationList){
-                Object val = this.getCellValue(row, column++);
-
+                ExcelField ef = (ExcelField)os[0];
+                Object val = this.getCellValue(row, ef.offset()-1);
                 if (val != null){
-                    ExcelField ef = (ExcelField)os[0];
 
                     Class<?> valType = Class.class;
                     if (os[1] instanceof Field){
@@ -192,7 +193,7 @@ public class ImportExcel {
                             }
                         }
                     } catch (Exception ex) {
-                        logger.info("Get cell value ["+i+","+column+"] error: " + ex.toString());
+                        logger.info("Get cell value ["+i+","+ef.offset()+"] error: " + ex.toString());
                         val = null;
                     }
                     // set entity value

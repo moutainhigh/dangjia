@@ -77,6 +77,39 @@ public class MendOrderService {
 
     @Autowired
     private ISurplusWareHouseMapper iSurplusWareHouseMapper;
+    @Autowired
+    private IChangeOrderMapper changeOrderMapper;
+
+
+    /**
+     * 补材料明细
+     * workerTypeId 即 mendOrderId
+     */
+    public MendOrderInfoDTO getMendDetail(String workerTypeId, String type) {
+        MendOrderInfoDTO mendOrderInfoDTO = new MendOrderInfoDTO();
+        mendOrderInfoDTO.setTotalAmount(0.0);
+        try {
+            if("0".equals(type)){
+                List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(workerTypeId);
+                for (MendMateriel v : mendMaterielList) {
+                    v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                    mendOrderInfoDTO.setTotalAmount(mendOrderInfoDTO.getTotalAmount() + v.getTotalPrice());
+                }
+                mendOrderInfoDTO.setMendMateriels(mendMaterielList);
+            }else if("1".equals(type)){
+                List<MendWorker> mendWorkerList = mendWorkerMapper.byMendOrderId(workerTypeId);
+                for (MendWorker v : mendWorkerList) {
+                    v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                    mendOrderInfoDTO.setTotalAmount(mendOrderInfoDTO.getTotalAmount() + v.getTotalPrice());
+                }
+                mendOrderInfoDTO.setMendWorkers(mendWorkerList);
+            }
+            return mendOrderInfoDTO;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return mendOrderInfoDTO;
+        }
+    }
 
     /**
      * 业主确认退货
@@ -196,6 +229,10 @@ public class MendOrderService {
                 MendOrder mendOrder = mendOrderList.get(0);
                 mendOrder.setState(1);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+
+                ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
+                changeOrder.setState(2);//通过->工匠业主审核
+                changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 configMessageService.addConfigMessage(null, "gj", house.getMemberId(), "0", "退人工变更", String.format
@@ -335,6 +372,10 @@ public class MendOrderService {
                 mendOrder.setState(1);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
 
+                ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
+                changeOrder.setState(2);//通过->工匠业主审核
+                changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "补人工", String.format
                         (DjConstants.PushMessage.CRAFTSMAN_B_WORK, house.getHouseName()), "");
@@ -377,7 +418,8 @@ public class MendOrderService {
      * 明细
      */
     public MendOrderInfoDTO getMendMendOrderInfo(String houseId, String workerTypeId, String type, String state) {
-        MendOrderInfoDTO mendOrderInfoDTO=new MendOrderInfoDTO();
+        MendOrderInfoDTO mendOrderInfoDTO = new MendOrderInfoDTO();
+        mendOrderInfoDTO.setTotalAmount(0.0);
         try {
             Example example = new Example(MendOrder.class);
             Example.Criteria criteria=example.createCriteria();
@@ -398,12 +440,14 @@ public class MendOrderService {
                     List<MendMateriel> mendMateriels = mendMaterialMapper.byMendOrderId(mendOrder.getId());
                     for (MendMateriel v : mendMateriels) {
                         v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                        mendOrderInfoDTO.setTotalAmount(mendOrderInfoDTO.getTotalAmount() + v.getTotalPrice());
                     }
                     mendOrderInfoDTO.setMendMateriels(mendMateriels);
                 }else {
                     List<MendWorker> mendWorkerList = mendWorkerMapper.byMendOrderId(mendOrder.getId());
                     for (MendWorker v : mendWorkerList) {
                         v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                        mendOrderInfoDTO.setTotalAmount(mendOrderInfoDTO.getTotalAmount() + v.getTotalPrice());
                     }
                     mendOrderInfoDTO.setMendWorkers(mendWorkerList);
                 }
@@ -510,6 +554,7 @@ public class MendOrderService {
                 mendOrder.setTotalAmount(mendOrder.getTotalAmount() + mendWorker.getTotalPrice());
                 mendWorkerMapper.insertSelective(mendWorker);
             }
+            mendOrder.setModifyDate(new Date());
             mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
             return true;
         } catch (Exception e) {
@@ -693,7 +738,7 @@ public class MendOrderService {
                     configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家补服务", String.format
                             (DjConstants.PushMessage.STEWARD_B_SERVER, house.getHouseName()), "");
                 } else {
-                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠要材料", String.format
+                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠补材料", String.format
                             (DjConstants.PushMessage.CRAFTSMAN_B_MATERIAL, house.getHouseName()), "");
                 }
                 return ServerResponse.createBySuccessMessage("操作成功");
@@ -803,7 +848,8 @@ public class MendOrderService {
                 mendMateriel.setProductName(product.getName());
                 mendMateriel.setPrice(product.getPrice());
                 mendMateriel.setCost(product.getCost());
-                mendMateriel.setUnitName(product.getUnitName());
+                String unitName = forMasterAPI.getUnitName(product.getConvertUnit());
+                mendMateriel.setUnitName(unitName);
                 mendMateriel.setShopCount(num);
                 mendMateriel.setTotalPrice(num * product.getPrice());
                 mendOrder.setTotalAmount(mendOrder.getTotalAmount() + mendMateriel.getTotalPrice());//修改总价
@@ -812,6 +858,7 @@ public class MendOrderService {
                 mendMateriel.setImage(product.getImage());
                 mendMaterialMapper.insertSelective(mendMateriel);
             }
+            mendOrder.setModifyDate(new Date());
             mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
             return true;
         } catch (Exception e) {

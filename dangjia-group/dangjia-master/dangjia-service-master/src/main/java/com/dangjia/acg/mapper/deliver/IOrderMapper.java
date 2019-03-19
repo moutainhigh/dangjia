@@ -21,5 +21,5 @@ public interface IOrderMapper extends Mapper<Order> {
     Order getWorkerOrder(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
 
     /**查询所有订单*/
-    List<Order> getAllOrders();
+    List<Order> getAllOrders(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
 }

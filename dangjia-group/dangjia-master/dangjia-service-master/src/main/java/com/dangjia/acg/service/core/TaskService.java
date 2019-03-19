@@ -55,6 +55,8 @@ public class TaskService {
     private IMendOrderMapper mendOrderMapper;
     @Autowired
     private IHouseExpendMapper houseExpendMapper;
+    @Autowired
+    private HouseFlowApplyService houseFlowApplyService;
 
 
     /**
@@ -223,6 +225,10 @@ public class TaskService {
         //验收任务
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getMemberCheckList(houseId);
         for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
+            if (houseFlowApply.getApplyType() == 0){
+                houseFlowApplyService.checkWorker(houseFlowApply.getId());
+                continue;
+            }
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));

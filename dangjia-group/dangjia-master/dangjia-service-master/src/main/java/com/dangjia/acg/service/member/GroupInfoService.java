@@ -238,8 +238,10 @@ public class GroupInfoService {
 						Member member = memberMapper.selectByPrimaryKey(username[i]);
 						if(!CommonUtil.isEmpty(member.getWorkerTypeId())&&CommonUtil.isEmpty(prefix)) {
 							WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-							prefix=workerType.getName();
-							signature=String.valueOf(workerType.getType());
+							if(workerType != null){
+								prefix=workerType.getName();
+								signature=String.valueOf(workerType.getType());
+							}
 						}
 						phone = member.getMobile();
 						nickname = member.getName();

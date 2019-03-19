@@ -86,6 +86,7 @@ public class SurplusWareHouseService {
 
                 Member member = iMemberMapper.selectByPrimaryKey(surplusWareHouse.getMemberId());
                 if (member != null) {
+                    surplusWareHouseDTO.setMemberId(member.getId());
                     surplusWareHouseDTO.setMemberName(member.getName());
                     surplusWareHouseDTO.setMemberPhone(member.getMobile());
                 }

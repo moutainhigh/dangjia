@@ -7,6 +7,7 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
@@ -95,7 +96,7 @@ public class HouseFlowService {
     private boolean isHouseWorker(List<HouseWorker> hwList, HouseFlow hf) {
         for (HouseWorker houseWorker : hwList) {
             HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
-            if(houseFlow == null) continue;
+            if (houseFlow == null) continue;
             if (hf.getId().equals(houseFlow.getId())) {
                 return true;
             }
@@ -136,7 +137,13 @@ public class HouseFlowService {
             request.setAttribute(Constants.CITY_ID, cityId);
             List<AllgrabBean> grabList = new ArrayList<>();//返回的任务list
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            if (accessToken == null) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            }
             Member member = accessToken.getMember();
+            if (member == null) {
+                return ServerResponse.createByErrorMessage("用户不存在");
+            }
             String workerTypeId = "4";
             if (StringUtil.isNotEmpty(member.getWorkerTypeId())) {
                 workerTypeId = member.getWorkerTypeId();
@@ -144,7 +151,7 @@ public class HouseFlowService {
             /*待抢单*/
             Example example = new Example(HouseFlow.class);
             example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 2).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
-                    .andEqualTo(HouseFlow.CITY_ID, cityId);
+                    .andEqualTo(HouseFlow.CITY_ID, cityId).andNotEqualTo(HouseFlow.STATE,2);
             List<HouseFlow> hfList = houseFlowMapper.selectByExample(example);
 
             example = new Example(HouseWorker.class);
@@ -155,7 +162,7 @@ public class HouseFlowService {
                     if (isHouseWorker(hwList, houseFlow)) {
                         continue;
                     }
-                    if(houseFlow.getGrabLock() == 1 && !houseFlow.getNominator().equals(member.getId())){
+                    if (houseFlow.getGrabLock() == 1 && !houseFlow.getNominator().equals(member.getId())) {
                         continue;
                     }
                     House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
@@ -185,17 +192,19 @@ public class HouseFlowService {
                         }
                     }
                     Member mem = memberMapper.selectByPrimaryKey(house.getMemberId());
+                    if(mem==null){continue;}
                     allgrabBean.setWorkerTypeId(workerTypeId);
                     allgrabBean.setHouseFlowId(houseFlow.getId());
                     allgrabBean.setHouseName(house.getHouseName());
                     allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
-                    allgrabBean.setHouseMember("业主 " + mem.getNickName()==null?mem.getName():mem.getNickName());//业主名称
+                    allgrabBean.setHouseMember("业主 " + mem.getNickName() == null ? mem.getName() : mem.getNickName());//业主名称
+                    allgrabBean.setWorkertotal("¥0" );//工钱
                     double totalPrice = 0;
-                    if (houseFlow.getWorkerType() == 1) {//设计师
+                    if (houseFlow.getWorkerType() == 1&&!CommonUtil.isEmpty(house.getStyle())) {//设计师
                         HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
                         BigDecimal workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", workPrice.doubleValue()));//工钱
-                    }else {
+                    } else {
                         ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(request, houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
                         if (serverResponse.isSuccess()) {
                             if (serverResponse.getResultObj() != null) {
@@ -203,7 +212,7 @@ public class HouseFlowService {
                                 totalPrice = Double.parseDouble(obj.getString("totalPrice"));
                             }
                         }
-                        allgrabBean.setWorkertotal("¥" + String.format("%.2f",totalPrice));//工钱
+                        allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
                     }
 
                     allgrabBean.setReleaseTime("时间 " + (houseFlow.getReleaseTime() == null ? "" :
@@ -341,7 +350,7 @@ public class HouseFlowService {
                 return ServerResponse.createByErrorMessage("您未提交资料审核,请点击【我的】→【我的资料】→完善资料并提交审核！");
             }
             House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
-            if(house.getVisitState() == 2){
+            if (house.getVisitState() == 2) {
                 return ServerResponse.createByErrorMessage("该房已休眠");
             }
 
@@ -361,14 +370,17 @@ public class HouseFlowService {
                     }
                 }
             }
-            /*//抢单时间限制
-            if (houseFlowDownTimeList != null && houseFlowDownTimeList.size() > 0) {
+           //抢单时间限制
+            example = new Example(HouseFlowCountDownTime.class);
+            example.createCriteria().andEqualTo(HouseFlowCountDownTime.WORKER_ID, member.getId()).andEqualTo(HouseFlowCountDownTime.HOUSE_FLOW_ID, hf.getId());
+            List<HouseFlowCountDownTime> houseFlowDownTimeList = houseFlowCountDownTimeMapper.selectByExample(example);
+            if (houseFlowDownTimeList.size() > 0) {
                 HouseFlowCountDownTime houseFlowCountDownTime = houseFlowDownTimeList.get(0);
                 long countDownTime = houseFlowCountDownTime.getCountDownTime().getTime() - new Date().getTime();//获取倒计时
                 if (countDownTime > 0) {//未到时间不能抢单
                     return ServerResponse.createByErrorMessage("您还在排队时间内，请稍后抢单！");
                 }
-            }*/
+            }
             if (member.getWorkerType() > 3) {//其他工人
                 if (hf.getPause() == 1) {
                     return ServerResponse.createByErrorMessage("该房子已暂停施工！");
@@ -380,10 +392,10 @@ public class HouseFlowService {
                 }
 
                 //暂时注释
-                /*List<HouseWorker> hwlist = houseWorkerMapper.grabOneDayOneTime(member.getId());
+                List<HouseWorker> hwlist = houseWorkerMapper.grabOneDayOneTime(member.getId());
                 if (hwlist.size() > 0) {
                     return ServerResponse.createByErrorMessage("每天只能抢一单哦！");
-                }*/
+                }
             }
             String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.AFFIRMGRAB, userToken, cityId, "确认") + "&houseFlowId=" + houseFlowId + "&workerTypeId=" + member.getWorkerTypeId()
                     + "&houseId=" + hf.getHouseId();
@@ -406,7 +418,13 @@ public class HouseFlowService {
     public ServerResponse setGiveUpOrder(String userToken, String houseFlowId) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member = accessToken.getMember();
+            if (accessToken == null) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            }
+            Member member = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+            if (member == null) {
+                return ServerResponse.createByErrorMessage("用户不存在");
+            }
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(HouseWorker.class);
             example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId()).andEqualTo(HouseWorker.HOUSE_ID, hf.getHouseId());
@@ -498,7 +516,13 @@ public class HouseFlowService {
             if (!serverResponse.isSuccess())
                 return serverResponse;
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member = accessToken.getMember();
+            if (accessToken == null) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            }
+            Member member = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+            if (member == null) {
+                return ServerResponse.createByErrorMessage("用户不存在");
+            }
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             //查询排队时间,并修改重排
             Example example = new Example(HouseFlowCountDownTime.class);

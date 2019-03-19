@@ -87,12 +87,14 @@ public class FileCommonService {
         paramMap.put("url", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+webAddress+"/"+fileName);
         paramMap.put("fileName", fileName);
 
-        //新增上传记录，记录上传文件
-        ResourceFile resourceFile=new ResourceFile();
-        resourceFile.setAddress(String.valueOf(paramMap.get("url")));
-        resourceFile.setPath(String.valueOf(paramMap.get("address")));
-        resourceFile.setFileName(fileName);
-        resourceFileMapper.insert(resourceFile);
+        if(active!=null&&(active.equals("pre"))) {
+          //新增上传记录，记录上传文件
+          ResourceFile resourceFile = new ResourceFile();
+          resourceFile.setAddress(String.valueOf(paramMap.get("url")));
+          resourceFile.setPath(String.valueOf(paramMap.get("address")));
+          resourceFile.setFileName(fileName);
+          resourceFileMapper.insert(resourceFile);
+        }
         logger.info("上传成功：：："+JSONObject.toJSONString(paramMap));
         list.add(paramMap);
       }

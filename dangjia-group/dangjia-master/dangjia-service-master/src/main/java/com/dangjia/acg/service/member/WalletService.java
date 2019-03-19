@@ -4,6 +4,7 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -26,6 +27,7 @@ import com.dangjia.acg.modle.other.BankCard;
 import com.dangjia.acg.modle.worker.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,7 +78,13 @@ public class WalletService {
     public ServerResponse checkFinish(String userToken, Integer paycode, Double money, String workerBankCardId, Integer roleType) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
+            if (accessToken == null) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            }
+            Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+            if (worker == null) {
+                return ServerResponse.createByErrorMessage("用户不存在");
+            }
             worker = memberMapper.selectByPrimaryKey(worker.getId());
             if (!paycode.equals(worker.getPaycode())) {
                 return ServerResponse.createByErrorMessage("验证码错误！");
@@ -135,7 +143,13 @@ public class WalletService {
     public ServerResponse getPaycode(String userToken) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member = accessToken.getMember();
+            if (accessToken == null) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            }
+            Member member = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+            if (member == null) {
+                return ServerResponse.createByErrorMessage("用户不存在");
+            }
             int paycode = (int) (Math.random() * 9000 + 1000);
             JsmsUtil.SMS(paycode, member.getMobile());
             //记录短信发送
@@ -229,6 +243,9 @@ public class WalletService {
             String houseName = "自定义流水";
             if (house != null) {
                 houseName = house.getHouseName();//流水描述
+            } else {
+                if (StringUtils.isNoneBlank(workerDetail.getDefinedName()))//自定义流水说明
+                    houseName = workerDetail.getDefinedName();
             }
             returnMap.put("name", houseName);//流水来源
             if (workerDetail.getState() == 0 || workerDetail.getState() == 2 || workerDetail.getState() == 4

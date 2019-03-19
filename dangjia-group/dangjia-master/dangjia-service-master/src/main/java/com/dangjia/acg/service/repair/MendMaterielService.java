@@ -14,6 +14,8 @@ import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,45 +40,39 @@ public class MendMaterielService {
     @Autowired
     private IMemberMapper memberMapper;
 
+    @Autowired
+    private static Logger LOG = LoggerFactory.getLogger(MendMaterielService.class);
+
+
+    /**
+     * 要货退货 查询补材料
+     */
+    public List<MendMateriel>  askAndQuit(String workerTypeId, String houseId, String categoryId, String name) {
+        List<MendMateriel> mendMaterielList = mendMaterialMapper.askAndQuit(workerTypeId, houseId, categoryId, name);
+        return mendMaterielList;
+    }
+
     /**
      * 房子id查询业主退货单列表
      * landlordState
      * 0生成中,1平台审核中,2不通过,3通过
      */
-    public ServerResponse landlordState(String houseId,Integer pageNum, Integer pageSize){
-        try{
-            if(pageNum == null){
+    public ServerResponse landlordState(String houseId, Integer pageNum, Integer pageSize, String beginDate, String endDate, String likeAddress) {
+        try {
+            if (pageNum == null) {
                 pageNum = 1;
             }
-            if(pageSize == null){
+            if (pageSize == null) {
                 pageSize = 10;
             }
             PageHelper.startPage(pageNum, pageSize);
-            List<MendOrder> mendOrderList = mendOrderMapper.landlordState(houseId);
+//            List<MendOrder> mendOrderList = mendOrderMapper.landlordState(houseId);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(houseId, 4, beginDate, endDate, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
-            List<MendOrderDTO> mendOrderDTOS = new ArrayList<MendOrderDTO>();
-            for (MendOrder mendOrder : mendOrderList){
-                MendOrderDTO mendOrderDTO = new MendOrderDTO();
-                mendOrderDTO.setMendOrderId(mendOrder.getId());
-                mendOrderDTO.setNumber(mendOrder.getNumber());
-                mendOrderDTO.setCreateDate(mendOrder.getCreateDate());
-                House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
-                mendOrderDTO.setAddress(house.getResidential()+house.getBuilding()+"栋"+house.getUnit()+"单元"+house.getNumber());
-                Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                mendOrderDTO.setMemberName(member.getNickName() == null ? member.getName() : member.getNickName());
-                mendOrderDTO.setMemberMobile(member.getMobile());
-
-                Member worker = memberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
-                mendOrderDTO.setApplyName(worker.getName());
-                mendOrderDTO.setApplyMobile(worker.getMobile());
-                mendOrderDTO.setType(mendOrder.getType());
-                mendOrderDTO.setState(mendOrder.getState());
-                mendOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
-                mendOrderDTOS.add(mendOrderDTO);
-            }
+            List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -87,40 +83,22 @@ public class MendMaterielService {
      * material_back_state
      * 0生成中,1平台审核中，2平台审核不通过，3审核通过，4管家取消
      */
-    public ServerResponse materialBackState(String houseId,Integer pageNum, Integer pageSize){
-        try{
-            if(pageNum == null){
+    public ServerResponse materialBackState(String houseId, Integer pageNum, Integer pageSize, String beginDate, String endDate, String likeAddress) {
+        try {
+            if (pageNum == null) {
                 pageNum = 1;
             }
-            if(pageSize == null){
+            if (pageSize == null) {
                 pageSize = 10;
             }
             PageHelper.startPage(pageNum, pageSize);
-            List<MendOrder> mendOrderList = mendOrderMapper.materialBackState(houseId);
+//            List<MendOrder> mendOrderList = mendOrderMapper.materialBackState(houseId); 2
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(houseId, 2, beginDate, endDate, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
-            List<MendOrderDTO> mendOrderDTOS = new ArrayList<MendOrderDTO>();
-            for (MendOrder mendOrder : mendOrderList){
-                MendOrderDTO mendOrderDTO = new MendOrderDTO();
-                mendOrderDTO.setMendOrderId(mendOrder.getId());
-                mendOrderDTO.setNumber(mendOrder.getNumber());
-                mendOrderDTO.setCreateDate(mendOrder.getCreateDate());
-                House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
-                mendOrderDTO.setAddress(house.getResidential()+house.getBuilding()+"栋"+house.getUnit()+"单元"+house.getNumber());
-                Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                mendOrderDTO.setMemberName(member.getNickName() == null ? member.getName() : member.getNickName());
-                mendOrderDTO.setMemberMobile(member.getMobile());
-
-                Member worker = memberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
-                mendOrderDTO.setApplyName(worker.getName());
-                mendOrderDTO.setApplyMobile(worker.getMobile());
-                mendOrderDTO.setType(mendOrder.getType());
-                mendOrderDTO.setState(mendOrder.getState());
-                mendOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
-                mendOrderDTOS.add(mendOrderDTO);
-            }
+            List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -130,9 +108,9 @@ public class MendMaterielService {
     /**
      * 根据mendOrderId查明细
      */
-    public ServerResponse mendMaterialList(String mendOrderId){
+    public ServerResponse mendMaterialList(String mendOrderId) {
         List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderId);
-        for (MendMateriel mendMateriel : mendMaterielList){
+        for (MendMateriel mendMateriel : mendMaterielList) {
             mendMateriel.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
         }
         return ServerResponse.createBySuccess("查询成功", mendMaterielList);
@@ -143,44 +121,63 @@ public class MendMaterielService {
      * materialOrderState
      * 0生成中,1平台审核中，2平台审核不通过，3平台审核通过待业主支付,4业主已支付，5业主不同意，6管家取消
      */
-    public ServerResponse materialOrderState(String houseId,Integer pageNum, Integer pageSize){
-        try{
-            if(pageNum == null){
+    public ServerResponse materialOrderState(String houseId, Integer pageNum, Integer pageSize, String beginDate, String endDate, String likeAddress) {
+        try {
+            if (pageNum == null) {
                 pageNum = 1;
             }
-            if(pageSize == null){
+            if (pageSize == null) {
                 pageSize = 10;
             }
             PageHelper.startPage(pageNum, pageSize);
-            List<MendOrder> mendOrderList = mendOrderMapper.materialOrderState(houseId);
+//            List<MendOrder> mendOrderList = mendOrderMapper.materialOrderState(houseId);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(houseId, 0, beginDate, endDate, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
-            List<MendOrderDTO> mendOrderDTOS = new ArrayList<MendOrderDTO>();
-            for (MendOrder mendOrder : mendOrderList){
-                MendOrderDTO mendOrderDTO = new MendOrderDTO();
-                mendOrderDTO.setMendOrderId(mendOrder.getId());
-                mendOrderDTO.setNumber(mendOrder.getNumber());
-                mendOrderDTO.setCreateDate(mendOrder.getCreateDate());
-                House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
-                mendOrderDTO.setAddress(house.getResidential()+house.getBuilding()+"栋"+house.getUnit()+"单元"+house.getNumber());
-                Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                mendOrderDTO.setMemberName(member.getNickName() == null ? member.getName() : member.getNickName());
-                mendOrderDTO.setMemberMobile(member.getMobile());
-
-                Member worker = memberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
-                mendOrderDTO.setApplyName(worker.getName());
-                mendOrderDTO.setApplyMobile(worker.getMobile());
-                mendOrderDTO.setType(mendOrder.getType());
-                mendOrderDTO.setState(mendOrder.getState());
-                mendOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
-                mendOrderDTOS.add(mendOrderDTO);
-            }
+            List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
 
             return ServerResponse.createBySuccess("查询成功", pageResult);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+    public List<MendOrderDTO> getMendOrderDTOList(List<MendOrder> mendOrderList) {
+
+        LOG.info("mendOrderList:" + mendOrderList.size() + "  " + mendOrderList);
+        List<MendOrderDTO> mendOrderDTOS = new ArrayList<MendOrderDTO>();
+        for (MendOrder mendOrder : mendOrderList) {
+            LOG.info("mendOrder :" + mendOrder);
+            MendOrderDTO mendOrderDTO = new MendOrderDTO();
+            mendOrderDTO.setMendOrderId(mendOrder.getId());
+            mendOrderDTO.setNumber(mendOrder.getNumber());
+            mendOrderDTO.setCreateDate(mendOrder.getCreateDate());
+            House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
+            if (house != null) {
+                if (house.getVisitState() != 0) {
+//                    mendOrderDTO.setAddress(house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber());
+                    mendOrderDTO.setAddress(house.getHouseName());
+                    Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                    mendOrderDTO.setMemberName(member.getNickName() == null ? member.getName() : member.getNickName());
+                    mendOrderDTO.setMemberId(member.getId());
+                    mendOrderDTO.setMemberMobile(member.getMobile());
+
+                    Member worker = memberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
+                    mendOrderDTO.setApplyMemberId(worker.getId());
+                    mendOrderDTO.setApplyName(worker.getName());
+                    mendOrderDTO.setApplyMobile(worker.getMobile());
+                    mendOrderDTO.setType(mendOrder.getType());
+                    mendOrderDTO.setState(mendOrder.getState());
+                    mendOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
+                    mendOrderDTOS.add(mendOrderDTO);
+
+                }
+            }
+        }
+
+        return mendOrderDTOS;
+    }
+
 
 }

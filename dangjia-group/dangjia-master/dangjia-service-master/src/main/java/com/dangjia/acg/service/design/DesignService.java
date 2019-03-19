@@ -1,7 +1,9 @@
 package com.dangjia.acg.service.design;
 
 import com.dangjia.acg.common.constants.DjConstants;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.design.HouseDesignImageDTO;
 import com.dangjia.acg.dto.house.DesignDTO;
 import com.dangjia.acg.mapper.design.IDesignImageTypeMapper;
@@ -39,42 +41,44 @@ public class DesignService {
     private IDesignImageTypeMapper designImageTypeMapper;
     @Autowired
     private IHouseDesignImageMapper houseDesignImageMapper;//房子关联设计图
+    @Autowired
+    private ConfigUtil configUtil;
 
     /**
      * 发送设计图业主
      * 设计状态:默认0未确定设计师,4有设计抢单待支付,1已支付设计师待发平面图,5平面图发给业主,6平面图审核不通过,7通过平面图待发施工图,
-     *         2已发给业主施工图,8施工图片审核不通过,3施工图(全部图)审核通过
+     * 2已发给业主施工图,8施工图片审核不通过,3施工图(全部图)审核通过
      */
-    public ServerResponse sendPictures(HttpServletRequest request,String houseId,int designerOk){
+    public ServerResponse sendPictures(HttpServletRequest request, String houseId, int designerOk) {
         House house = houseMapper.selectByPrimaryKey(houseId);
         Example example = new Example(HouseDesignImage.class);
         List<HouseDesignImage> houseDesignImageList;
-        if (designerOk == 1 || designerOk == 6){
+        if (designerOk == 1 || designerOk == 6) {
             example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId).andEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID, "1");
             houseDesignImageList = houseDesignImageMapper.selectByExample(example);
-            if(houseDesignImageList.size() == 0){
+            if (houseDesignImageList.size() == 0) {
                 return ServerResponse.createByErrorMessage("请上传平面图");
             }
 
             house.setDesignerOk(5);//平面图发给业主
             houseMapper.updateByPrimaryKeySelective(house);
             //app推送给业主
-            configMessageService.addConfigMessage(null,"gj",house.getMemberId(),"0","设计图上传提醒",
-                    String.format(DjConstants.PushMessage.PLANE_UPLOADING,house.getHouseName()) ,"");
+            configMessageService.addConfigMessage(null, "gj", house.getMemberId(), "0", "设计图上传提醒",
+                    String.format(DjConstants.PushMessage.PLANE_UPLOADING, house.getHouseName()), "");
             return ServerResponse.createBySuccessMessage("发送成功");
-        }else if (designerOk == 7 || designerOk==8){
-            example.createCriteria().andEqualTo("houseId", houseId).andNotEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID,"1")
+        } else if (designerOk == 7 || designerOk == 8) {
+            example.createCriteria().andEqualTo("houseId", houseId).andNotEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID, "1")
                     .andIsNotNull(HouseDesignImage.IMAGEURL);
             houseDesignImageList = houseDesignImageMapper.selectByExample(example);
-            if(houseDesignImageList.size() == 0){
+            if (houseDesignImageList.size() == 0) {
                 return ServerResponse.createByErrorMessage("请上传施工图");
             }
 
             house.setDesignerOk(2);//施工图(其它图)发给业主
             houseMapper.updateByPrimaryKeySelective(house);
             //app推送给业主
-            configMessageService.addConfigMessage(null,"gj",house.getMemberId(),"0","设计图上传提醒",
-                    String.format(DjConstants.PushMessage.CONSTRUCTION_UPLOADING,house.getHouseName()) ,"");
+            configMessageService.addConfigMessage(null, "gj", house.getMemberId(), "0", "设计图上传提醒",
+                    String.format(DjConstants.PushMessage.CONSTRUCTION_UPLOADING, house.getHouseName()), "");
 
             return ServerResponse.createBySuccessMessage("发送成功");
         }
@@ -84,23 +88,23 @@ public class DesignService {
     /**
      * 上传图片
      */
-    public ServerResponse uploadPictures(HttpServletRequest request,String houseId,String designImageTypeId,String imageurl){
-        try{
-            HouseDesignImage hdi = designImageTypeMapper.getHouseDesignImage(houseId,designImageTypeId);
-            if(hdi == null){
+    public ServerResponse uploadPictures(HttpServletRequest request, String houseId, String designImageTypeId, String imageurl) {
+        try {
+            HouseDesignImage hdi = designImageTypeMapper.getHouseDesignImage(houseId, designImageTypeId);
+            if (hdi == null) {
                 hdi = new HouseDesignImage();
                 hdi.setHouseId(houseId);
                 hdi.setDesignImageTypeId(designImageTypeId);
                 hdi.setImageurl(imageurl);
                 hdi.setSell(0);
                 houseDesignImageMapper.insert(hdi);
-            }else {
+            } else {
                 hdi.setHouseId(houseId);
                 hdi.setDesignImageTypeId(designImageTypeId);
                 hdi.setImageurl(imageurl);
                 houseDesignImageMapper.updateByPrimaryKeySelective(hdi);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("上传失败");
         }
@@ -110,61 +114,55 @@ public class DesignService {
     /**
      * 设计图列表
      */
-    public ServerResponse getImagesList(HttpServletRequest request, String houseId){
-        try{
-            List<String> designImageList = designImageTypeMapper.getDesignImageIdList(houseId);
-            String typeList = designImageList.get(0);
-            typeList = typeList.replaceAll("'","");
-            typeList = typeList.replaceAll(" ","");
-            String[] typeArray = StringUtils.split(typeList,",");
-            //查询所有免费风格
-            List<DesignImageType> designImageTypeList = designImageTypeMapper.getDesignImageTypeList(typeArray);
-            //查询额外付费图
-            Example example = new Example(HouseDesignImage.class);
-            example.createCriteria().andEqualTo("houseId", houseId).andEqualTo("sell", 1);
-            List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);
+    public ServerResponse getImagesList(HttpServletRequest request, String houseId) {
+        try {
 
-            List<HouseDesignImageDTO> houseDesignImageDTOList = new ArrayList<HouseDesignImageDTO>();
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            List<String> designImageList = designImageTypeMapper.getDesignImageIdList(houseId);
+            if(designImageList==null||designImageList.size()==0){
+                return ServerResponse.createByErrorMessage("找不到房子对应图类型");
+            }
+            String typeList = designImageList.get(0);
+            typeList = typeList.replaceAll("'", "");
+            typeList = typeList.replaceAll(" ", "");
+            String[] typeArray = StringUtils.split(typeList, ",");
+            //查询所有风格
+            List<DesignImageType> designImageTypeList = designImageTypeMapper.getDesignImageTypeList(typeArray);
+
+
+            List<HouseDesignImageDTO> houseDesignImageDTOList = new ArrayList<>();
             HouseDesignImageDTO houseDesignImageDTO;
-            //先遍历免费图
-            for (DesignImageType designImageType : designImageTypeList){
-                HouseDesignImage hdi = designImageTypeMapper.getHouseDesignImage(houseId,designImageType.getId());
-                if(hdi == null){
+            for (DesignImageType designImageType : designImageTypeList) {
+
+                HouseDesignImage hdi = designImageTypeMapper.getHouseDesignImage(houseId, designImageType.getId());
+                if (hdi == null) {
                     houseDesignImageDTO = new HouseDesignImageDTO();
                     houseDesignImageDTO.setHouseId(houseId);
                     houseDesignImageDTO.setDesignImageTypeId(designImageType.getId());
                     houseDesignImageDTO.setImageurl(null);
+                    houseDesignImageDTO.setImage(null);
                     houseDesignImageDTO.setName(designImageType.getName());
-                    houseDesignImageDTO.setSell(0);
+                    houseDesignImageDTO.setSell(designImageType.getSell());
                     houseDesignImageDTO.setPrice(new BigDecimal(0));
-                }else {
+                } else {
                     houseDesignImageDTO = new HouseDesignImageDTO();
                     houseDesignImageDTO.setHouseId(houseId);
                     houseDesignImageDTO.setDesignImageTypeId(designImageType.getId());
-                    if (StringUtil.isNotEmpty(hdi.getImageurl())){
-                        houseDesignImageDTO.setImageurl(hdi.getImageurl());
-                    }else{
+                    if (StringUtil.isNotEmpty(hdi.getImageurl())) {
+                        houseDesignImageDTO.setImageurl(address + hdi.getImageurl());
+                        houseDesignImageDTO.setImage(hdi.getImageurl());
+                    } else {
                         houseDesignImageDTO.setImageurl(null);
+                        houseDesignImageDTO.setImage(null);
                     }
                     houseDesignImageDTO.setName(designImageType.getName());
-                    houseDesignImageDTO.setSell(0);
+                    houseDesignImageDTO.setSell(designImageType.getSell());
                     houseDesignImageDTO.setPrice(new BigDecimal(0));
                 }
                 houseDesignImageDTOList.add(houseDesignImageDTO);
             }
-            //收费图
-            for (HouseDesignImage houseDesignImage : houseDesignImageList){
-                houseDesignImageDTO = new HouseDesignImageDTO();
-                houseDesignImageDTO.setHouseId(houseId);
-                houseDesignImageDTO.setDesignImageTypeId(houseDesignImage.getDesignImageTypeId());
-                houseDesignImageDTO.setImageurl(houseDesignImage.getImageurl());
-                houseDesignImageDTO.setName(designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId()).getName());
-                houseDesignImageDTO.setSell(1);
-                houseDesignImageDTO.setPrice(designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId()).getPrice());
-                houseDesignImageDTOList.add(houseDesignImageDTO);
-            }
-            return ServerResponse.createBySuccess("查询列表成功",houseDesignImageDTOList);
-        }catch (Exception e){
+            return ServerResponse.createBySuccess("查询列表成功", houseDesignImageDTOList);
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("异常");
         }
@@ -172,13 +170,22 @@ public class DesignService {
 
     /**
      * 设计任务列表
-     * @param designerOk
-     * 设计状态:
-     * 默认0未确定设计师,4有设计抢单待支付,1已支付设计师待发平面图,5平面图发给业主,6平面图审核不通过,
-     * 7通过平面图待发施工图,2已发给业主施工图,8施工图片审核不通过,3施工图(全部图)审核通过
+     *
+     * @param designerOk 设计状态:
+     *                   默认0未确定设计师,4有设计抢单待支付,1已支付设计师待发平面图,5平面图发给业主,6平面图审核不通过,
+     *                   7通过平面图待发施工图,2已发给业主施工图,8施工图片审核不通过,3施工图(全部图)审核通过
      */
-    public ServerResponse getDesignList(HttpServletRequest request, int designerOk,String mobile,String residential,String number){
-        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerOk,mobile,residential,number);
-        return ServerResponse.createBySuccess("查询用户列表成功",designDTOList);
+    public ServerResponse getDesignList(HttpServletRequest request, int designerOk, String mobile, String residential, String number) {
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerOk, mobile, residential, number);
+        for (DesignDTO designDTO : designDTOList) {
+            HouseDesignImage hdi = designImageTypeMapper.getHouseDesignImage(designDTO.getHouseId(), "1");//1某个房子的平面图
+            if (hdi != null) {
+                designDTO.setImage(hdi.getImageurl());
+                designDTO.setImageUrl(address + hdi.getImageurl());
+            }
+
+        }
+        return ServerResponse.createBySuccess("查询用户列表成功", designDTOList);
     }
 }

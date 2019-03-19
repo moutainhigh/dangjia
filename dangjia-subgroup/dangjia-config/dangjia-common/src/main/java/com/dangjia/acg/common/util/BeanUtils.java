@@ -53,6 +53,8 @@ public class BeanUtils {
           if (result instanceof BigDecimal) {
             BigDecimal  value =((BigDecimal) result).setScale(2,BigDecimal.ROUND_HALF_UP);
             resultValue = String.valueOf(value.doubleValue());
+          }else  if (result instanceof Double) {
+            resultValue = String.format("%.2f", result);
           }else  if (result instanceof String && Validator.isMobileNo((String)result)) {
             resultValue = ((String)result).replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2");
           }else {

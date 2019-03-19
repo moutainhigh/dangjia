@@ -15,6 +15,7 @@ import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
@@ -22,11 +23,11 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
-import com.dangjia.acg.service.core.WorkerTypeService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +71,8 @@ public class EvaluateService {
     @Autowired
     private RedisClient redisClient;
 
+    @Autowired
+    private IChangeOrderMapper changeOrderMapper;
     /**
      * 获取积分记录
      * @param userToken
@@ -266,6 +269,12 @@ public class EvaluateService {
             if(houseFlowApply.getMemberCheck() == 1){
                 return ServerResponse.createByErrorMessage("重复审核");
             }
+            if(houseFlowApply.getApplyType()!= 0) {
+                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseFlowApply.getHouseId(), houseFlowApply.getWorkerTypeId());
+                if (changeOrderList.size() > 0) {
+                    return ServerResponse.createByErrorMessage("该工种有未处理人工变更单！");
+                }
+            }
             //在worker中根据评论星数修改工人的积分
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             Member supervisor = memberMapper.getSupervisor(houseFlowApply.getHouseId());//houseId获得大管家
@@ -324,6 +333,7 @@ public class EvaluateService {
             //业主审核
             ServerResponse serverResponse=houseFlowApplyService.checkWorker(houseFlowApplyId);
             if(serverResponse.getResultCode()!= EventStatus.SUCCESS.getCode()){
+
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return serverResponse;
             }
@@ -428,7 +438,7 @@ public class EvaluateService {
             workIntegral.setBriefed(desc+evaluate.getStar()+"星评价");
             workIntegralMapper.insert(workIntegral);
         }
-        memberMapper.updateByPrimaryKey(worker);
+        memberMapper.updateByPrimaryKeySelective(worker);
     }
 
     /**用于在工人被评价之后修改好评率*/
@@ -441,9 +451,9 @@ public class EvaluateService {
         for(Evaluate el : evaluateList){
             astar += el.getStar();
         }
-        double astar1 = astar/(5*evaluateList.size());
-        worker.setPraiseRate(new BigDecimal(astar1));
-        memberMapper.updateByPrimaryKey(worker);
+        BigDecimal praiseRate = new BigDecimal(astar).divide(new BigDecimal(5*evaluateList.size()),2,BigDecimal.ROUND_HALF_UP);
+        worker.setPraiseRate(praiseRate);
+        memberMapper.updateByPrimaryKeySelective(worker);
     }
 
     /**皇冠规则*/
@@ -462,19 +472,19 @@ public class EvaluateService {
                     }
                     if(flag){
                         worker.setIsCrowned(1);
-                        memberMapper.updateByPrimaryKey(worker);
+                        memberMapper.updateByPrimaryKeySelective(worker);
                     }
                 }
                 if(evaluateList.size() > 0){
                     if(evaluateList.get(0).getStar() < 3){
                         worker.setIsCrowned(0);
-                        memberMapper.updateByPrimaryKey(worker);
+                        memberMapper.updateByPrimaryKeySelective(worker);
                     }
                 }
                 if(evaluateList.size() >= 2){
                     if((evaluateList.get(0).getStar()==3||evaluateList.get(0).getStar()==4)&&(evaluateList.get(1).getStar()==3||evaluateList.get(1).getStar()==4)){
                         worker.setIsCrowned(0);
-                        memberMapper.updateByPrimaryKey(worker);
+                        memberMapper.updateByPrimaryKeySelective(worker);
                     }
                 }
             }

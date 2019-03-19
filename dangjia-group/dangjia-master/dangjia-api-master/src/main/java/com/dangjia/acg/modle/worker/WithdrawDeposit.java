@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,6 +21,7 @@ import java.util.Date;
 @Entity
 @Table(name = "dj_worker_withdraw_deposit")
 @ApiModel(description = "提现申请")
+@FieldNameConstants(prefix = "")
 public class WithdrawDeposit extends BaseEntity {
 
 	@Column(name = "name")

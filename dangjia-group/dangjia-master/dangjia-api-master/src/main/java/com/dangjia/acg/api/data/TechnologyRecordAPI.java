@@ -41,6 +41,6 @@ public interface TechnologyRecordAPI {
 
     @PostMapping("/data/technologyRecord/getByProductId")
     @ApiOperation(value = "查仓库", notes = "查仓库")
-    Warehouse getByProductId(@RequestParam("productId") String productId,
+    ServerResponse getByProductId(@RequestParam("productId") String productId,
                              @RequestParam("houseId") String houseId);
 }

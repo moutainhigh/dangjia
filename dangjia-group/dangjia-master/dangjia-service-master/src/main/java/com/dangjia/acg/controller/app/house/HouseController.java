@@ -70,14 +70,16 @@ public class HouseController implements HouseAPI {
 
     /**
      * 撤销房子装修
+     *
      * @param userToken
      * @return
      */
     @Override
     @ApiMethod
-    public  ServerResponse revokeHouse(@RequestParam("userToken")String userToken){
+    public ServerResponse revokeHouse(@RequestParam("userToken") String userToken) {
         return houseService.revokeHouse(userToken);
     }
+
     /**
      * 修改房子精算状态
      *
@@ -107,8 +109,8 @@ public class HouseController implements HouseAPI {
     //根据城市，小区，最小最大面积查询房子
     @Override
     @ApiMethod
-    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId, Double minSquare, Double maxSquare,Integer houseType , PageDTO pageDTO) {
-        return houseService.queryHouseByCity(userToken, cityId, villageId, minSquare, maxSquare, houseType,pageDTO);
+    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId, Double minSquare, Double maxSquare, Integer houseType, PageDTO pageDTO) {
+        return houseService.queryHouseByCity(userToken, cityId, villageId, minSquare, maxSquare, houseType, pageDTO);
     }
 
     //装修指南
@@ -120,9 +122,10 @@ public class HouseController implements HouseAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getRenovationManualinfo(String id){
+    public ServerResponse getRenovationManualinfo(String id) {
         return houseService.getRenovationManualinfo(id);
     }
+
     /**
      * 保存装修指南
      *
@@ -147,6 +150,12 @@ public class HouseController implements HouseAPI {
     @ApiMethod
     public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO) {
         return houseService.queryConstructionRecord(houseId, pageDTO.getPageNum(), pageDTO.getPageSize(), null);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseFlowApply(String houseFlowApplyId) {
+        return houseService.getHouseFlowApply(houseFlowApplyId);
     }
 
     /**
@@ -183,11 +192,11 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getReferenceBudget(String villageId, Double square, Integer houseType) {
+    public ServerResponse getReferenceBudget(String cityId, String villageId, Double square, Integer houseType) {
         if (square != null && !"".equals(square)) {
             Double minSquare = square - 50;
             Double maxSquare = square + 50;
-            return houseService.getReferenceBudget(villageId, minSquare, maxSquare, houseType);
+            return houseService.getReferenceBudget(cityId, villageId, minSquare, maxSquare, houseType);
         } else {
             return ServerResponse.createByErrorMessage("请输入正确的面积");
         }

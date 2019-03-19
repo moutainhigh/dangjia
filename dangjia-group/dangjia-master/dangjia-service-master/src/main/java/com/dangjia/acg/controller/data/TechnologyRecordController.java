@@ -61,7 +61,7 @@ public class TechnologyRecordController implements TechnologyRecordAPI {
 
     @Override
     @ApiMethod
-    public Warehouse getByProductId(String productId,String houseId){
+    public ServerResponse getByProductId(String productId,String houseId){
         return technologyRecordService.getByProductId(productId,houseId);
     }
 

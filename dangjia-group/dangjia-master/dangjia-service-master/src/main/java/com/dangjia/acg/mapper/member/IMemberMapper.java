@@ -32,7 +32,7 @@ public interface IMemberMapper extends Mapper<Member> {
      * @return
      */
     List<Member> getMemberListByName(@Param("searchKey") String searchKey,
-                                      @Param("stage") Integer stage,
+                                      @Param("stage") Integer stage, @Param("userRole") String userRole,
                                       @Param("childsLabelIdArr")String[] childsLabelIdArr,@Param("orderBy") String orderBy);
 
     List<Map<String,Object>> getMemberList();

@@ -12,6 +12,7 @@ import com.dangjia.acg.dto.deliver.BusinessOrderDTO;
 import com.dangjia.acg.dto.deliver.ItemDTO;
 import com.dangjia.acg.dto.deliver.OrderDTO;
 import com.dangjia.acg.dto.deliver.OrderItemDTO;
+import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
@@ -23,6 +24,7 @@ import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplit;
@@ -42,7 +44,9 @@ import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 要货
@@ -79,6 +83,8 @@ public class OrderService {
     private IDesignImageTypeMapper designImageTypeMapper;
     @Autowired
     private ConfigMessageService configMessageService;
+    @Autowired
+    private IWorkerTypeMapper workerTypeMapper;
 
     /**
      * 订单详情
@@ -306,11 +312,18 @@ public class OrderService {
         try{
             AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
             Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
-
+            Map<String,Object> map = new HashMap<>();
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
+            map.put("times", workerType.getSafeState());//要货次数
             Example example = new Example(OrderSplit.class);
+            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
+            List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
+            map.put("surplus", workerType.getSafeState() - orderSplitList.size());
+
+            example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
             .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
-            List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
+            orderSplitList = orderSplitMapper.selectByExample(example);
             if (orderSplitList.size() == 0){
                 return ServerResponse.createBySuccessMessage("没有生成中要货单");
             }else if (orderSplitList.size() > 1){
@@ -323,7 +336,8 @@ public class OrderService {
                 for (OrderSplitItem v : orderSplitItemList){
                     v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
                 }
-                return ServerResponse.createBySuccess("查询成功", orderSplitItemList);
+                map.put("orderSplitItemList",orderSplitItemList);
+                return ServerResponse.createBySuccess("查询成功", map);
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -351,6 +365,12 @@ public class OrderService {
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
                 orderSplitItemMapper.deleteByExample(example);
+
+                orderSplit.setSupervisorId(worker.getId());
+                orderSplit.setSupervisorName(worker.getName());
+                orderSplit.setSupervisorTel(worker.getMobile());
+                orderSplit.setWorkerTypeId(worker.getWorkerTypeId());
+                orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
             }else {
                 example = new Example(OrderSplit.class);
                 orderSplit = new OrderSplit();

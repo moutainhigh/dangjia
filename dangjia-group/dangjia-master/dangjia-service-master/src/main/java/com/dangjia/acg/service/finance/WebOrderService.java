@@ -54,9 +54,14 @@ public class WebOrderService {
                 WebOrderDTO webOrderDTO = new WebOrderDTO();
                 webOrderDTO.setOrderId(businessOrder.getNumber());
                 webOrderDTO.setTotalAmount(businessOrder.getTotalPrice());
+//                1刚生成(可编辑),2去支付(不修改),3已支付
                 webOrderDTO.setState("待支付");
-                if (businessOrder.getState() == 3)
+                if (businessOrder.getState() == 2) {
+                    webOrderDTO.setState("支付中");
+                }
+                if (businessOrder.getState() == 3) {
                     webOrderDTO.setState("已支付");
+                }
                 webOrderDTO.setCreateDate(businessOrder.getCreateDate());
                 webOrderDTO.setModifyDate(businessOrder.getModifyDate());
                 House house = iHouseMapper.selectByPrimaryKey(businessOrder.getHouseId());

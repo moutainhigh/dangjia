@@ -117,13 +117,13 @@
         house.data_status as dataStatus,
         house.create_date as createDate,
         house.modify_date as modifyDate,
-        (SELECT COUNT(*) from dj_deliver_order_split  where apply_status > 1 and house_id = house.id) as waitCount,
-        (SELECT COUNT(*) from dj_deliver_order_split  where apply_status > 2 and house_id = house.id) as sendCount
+        (SELECT COUNT(*) from dj_deliver_order_split where apply_status = 1 and house_id = house.id) as waitCount,
+        (SELECT COUNT(*) from dj_deliver_order_split where apply_status = 2 and house_id = house.id) as sendCount
         FROM dj_house as house
         WHERE 1=1
         <if test="likeAddress!=null and likeAddress!=''">
             AND (
-               house.residential LIKE CONCAT('%',#{likeAddress},'%')
+            house.residential LIKE CONCAT('%',#{likeAddress},'%')
             OR house.building LIKE CONCAT('%',#{likeAddress},'%')
             OR house.unit LIKE CONCAT('%',#{likeAddress},'%')
             OR number LIKE CONCAT('%',#{likeAddress},'%')
@@ -148,7 +148,9 @@
     <select id="getSameLayout" resultType="com.dangjia.acg.modle.house.House">
         SELECT
         <include refid="basic_columns"/>
-        from dj_house
+        from dj_house h
+        INNER JOIN (SELECT a.house_id,COUNT(a.id) num FROM dj_core_house_flow_apply a GROUP BY a.house_id ) b ON
+        b.house_id=h.id
         where
         data_status=0
         <if test="cityId!=null and cityId!=''">
@@ -168,7 +170,7 @@
         </if>
         and ((decoration_type in (1,2) and budget_ok=3) or (decoration_type=3 and visit_state=1))
         and show_house!=1
-        order by create_date desc
+        order by num desc
     </select>
 
     <!--参考报价-->
@@ -178,7 +180,12 @@
         from dj_house
         where
         data_status=0
-        AND village_id = #{villageId}
+        <if test="cityId!=null and cityId!=''">
+            and city_id = #{cityId}
+        </if>
+        <if test="villageId!=null and villageId!=''">
+            and village_id = #{villageId}
+        </if>
         and build_square &gt;= #{minSquare}
         and build_square &lt;= #{maxSquare}
         and house_type = #{houseType}
@@ -203,8 +210,9 @@
         h.building as building,
         h.unit as unit,
         h.work_deposit_id as workDepositId,
+        h.create_date AS createDate,
+        h.modify_date AS modifyDate,
         h.number as number
-
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
@@ -220,7 +228,69 @@
             or h.number like CONCAT('%',#{searchKey},'%'))
         </if>
         ORDER by
-        h.create_date
+        h.create_date desc
+    </select>
+
+    <select id="getHouseListLikeSearchKey" resultType="com.dangjia.acg.modle.house.House">
+        SELECT
+        m.id as memberId,
+        m.nick_name as memberNickName,
+        m.name as memberName,
+        m.mobile as mobile,
+        h.id as id,
+        h.building,
+        h.city_name as cityName,
+        h.residential,
+        h.type,
+        h.unit,
+        h.member_id as memberId,
+        h.task_number as taskNumber,
+        h.square,
+        h.number,
+        h.style,
+        h.designer_ok as designerOk,
+        h.budget_ok as budgetOk,
+        h.image,
+        h.decoration_type as decorationType,
+        h.city_id as cityId,
+        h.modeling_layout_id as modelingLayoutId,
+        h.money,
+        h.pause,
+        h.show_house as showHouse,
+        h.village_id as villageId,
+        h.refer_house_id as referHouseId,
+        h.have_complete as haveComplete,
+        h.record_type as recordType,
+        h.build_square as buildSquare,
+        h.again,
+        h.house_type as houseType,
+        h.drawings,
+        h.work_deposit_id as workDepositId,
+        h.custom_sort as customSort,
+        h.is_select as isSelect,
+        h.visit_state as visitState,
+        h.data_status as dataStatus,
+        h.create_date as createDate,
+        h.modify_date as modifyDate
+        FROM
+        dj_house h
+        INNER JOIN dj_member m ON h.member_id = m.id
+        WHERE
+        h.data_status =0
+        <if test="visitState!=-1">
+            and h.visit_state = #{visitState}
+        </if>
+
+        <if test="searchKey!=null and searchKey!=''">
+            and ( m.mobile like CONCAT('%',#{searchKey},'%')
+            or h.residential like CONCAT('%',#{searchKey},'%')
+            or h.unit like CONCAT('%',#{searchKey},'%')
+            or h.number like CONCAT('%',#{searchKey},'%')
+            or m.nick_name like CONCAT('%',#{searchKey},'%')
+            or m.name like CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        ORDER by h.create_date desc
     </select>
 </mapper>
 

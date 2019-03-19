@@ -39,6 +39,8 @@ public interface IBudgetWorkerMapper extends Mapper<BudgetWorker> {
 	List<Map<String,Object>> getAllbudgetTemplates(String template_id);
 	/**根据houseId和workerTypeId查询房子人工精算*/
 	List<Map<String,Object>> getBudgetWorkerById(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+	/**根据houseId和workerTypeId查询房子人工精算*/
+	List<BudgetWorker> getBudgetWorkerByHouseIdAndWorkerTypeId(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	/**根据拿到的Id删除精算*/
 	void deleteById(String budgetWorkerId);
 	/**根据拿到的Id删除精算*/
@@ -47,4 +49,6 @@ public interface IBudgetWorkerMapper extends Mapper<BudgetWorker> {
 	void deleteByhouseId(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	/**根据houseId和workerTypeId查询房子人工精算总价*/
 	Map<String,Object> getWorkerTotalPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+
+	void insertByBatch(@Param("list")List<BudgetWorker> list);
 }

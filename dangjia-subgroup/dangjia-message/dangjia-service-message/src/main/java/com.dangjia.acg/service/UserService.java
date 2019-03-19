@@ -41,7 +41,8 @@ public class UserService extends BaseService {
      */
     public  void registerUsers(String appType,String[] usernames,String[] passwords) {
         try {
-
+            usernames=getUserTags(usernames);
+            passwords=getUserTags(passwords);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             List<RegisterInfo> users = new ArrayList<RegisterInfo>();
             for (int i = 0; i < usernames.length; i++) {
@@ -73,6 +74,7 @@ public class UserService extends BaseService {
     public  UserInfoResultDTO getUserInfo(String appType,String username) {
         try {
 
+            username=getUserTag(username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             UserInfoResult res = client.getUserInfo(username);
             UserInfoResultDTO resultDTO=new UserInfoResultDTO();
@@ -99,6 +101,7 @@ public class UserService extends BaseService {
     public  UserStateResult getUserState(String appType,String username) {
         try {
 
+            username=getUserTag(username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             UserStateResult result = client.getUserState(username);
             return result;
@@ -121,6 +124,7 @@ public class UserService extends BaseService {
     public  UserStateListResult[]  getUsersState(String appType,String[] usernames) {
         try {
 
+            usernames=getUserTags(usernames);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             UserStateListResult[] results = client.getUsersState(usernames);
             return  results;
@@ -144,6 +148,7 @@ public class UserService extends BaseService {
     public  void updatePassword(String appType,String username, String password) {
         try {
 
+            username=getUserTag(username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             client.updateUserPassword(username, password);
         } catch (APIConnectionException e) {
@@ -177,6 +182,7 @@ public class UserService extends BaseService {
                                 String phone, String address, String avatar) {
         try {
 
+            username=getUserTag(username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             UserPayload payload = UserPayload.newBuilder()
                     .setNickname(nickname)
@@ -228,6 +234,7 @@ public class UserService extends BaseService {
     public  void deleteUser(String appType,String username) {
         try {
 
+            username=getUserTag(username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             client.deleteUser(username);
         } catch (APIConnectionException e) {
@@ -274,6 +281,7 @@ public class UserService extends BaseService {
     public  UserInfoResult[] getBlackList(String appType,String username) {
         try {
 
+            username=getUserTag(username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             UserInfoResult[] result = client.getBlackList(username);
             return result;
@@ -297,6 +305,7 @@ public class UserService extends BaseService {
     public  void removeBlacklist(String appType,String username,String[] usernames) {
         try {
 
+            usernames=getUserTags(usernames);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             ResponseWrapper response = client.removeBlacklist(username, usernames);
         } catch (APIConnectionException e) {
@@ -317,6 +326,7 @@ public class UserService extends BaseService {
     public  void addBlackList(String appType,String username,String[] usernames) {
         try {
 
+            usernames=getUserTags(usernames);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             ResponseWrapper response = client.addBlackList(username, usernames);
         } catch (APIConnectionException e) {
@@ -338,6 +348,7 @@ public class UserService extends BaseService {
     public  void setNoDisturb(String appType,String username,Long[] groupId,String[] singleUsername ) {
         try {
 
+            username=getUserTag(username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             NoDisturbPayload payload = new NoDisturbPayload.Builder()
                     .setAddSingleUsers(singleUsername)
@@ -362,6 +373,7 @@ public class UserService extends BaseService {
     public  void addFriends(String appType,String username, String[] users) {
         try {
 
+            username=getUserTag(username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             ResponseWrapper response = client.addFriends(username, users);
         } catch (APIConnectionException e) {
@@ -382,6 +394,7 @@ public class UserService extends BaseService {
     public  void deleteFriends(String appType,String username, String[] users) {
         try {
 
+            username=getUserTag(username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             ResponseWrapper response = client.deleteFriends(username, users);
         } catch (APIConnectionException e) {
@@ -404,6 +417,7 @@ public class UserService extends BaseService {
     public  void updateFriendsNote(String appType,String username,String[] noteNames,String[] others,String[] usernames) {
         try {
 
+            username=getUserTag(username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             List<FriendNote> friendNotes = new ArrayList<FriendNote>();
             for (int i = 0; i <usernames.length ; i++) {
@@ -433,6 +447,7 @@ public class UserService extends BaseService {
     public  UserInfoResult[] getFriends(String appType,String username) {
         try {
 
+            username=getUserTag(username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             UserInfoResult[] userInfoArray = client.getFriendsInfo(username);
             return userInfoArray;
@@ -455,6 +470,7 @@ public class UserService extends BaseService {
     public  void forbidUser(String appType,String username) {
         try {
 
+            username=getUserTag(username);
             JMessageClient client = new JMessageClient(getAppkey(appType), getMasterSecret(appType));
             ResponseWrapper result = client.forbidUser(username, true);
             LOG.info("response code: " + result.responseCode);

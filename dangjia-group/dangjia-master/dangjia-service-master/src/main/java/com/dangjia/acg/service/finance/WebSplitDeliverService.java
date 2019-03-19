@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -129,7 +130,7 @@ public class WebSplitDeliverService {
                 if (splitDeliver.getApplyState() == 2) {//通过
                     srcSplitDeliver.setApplyState(2);
                 }
-
+                srcSplitDeliver.setModifyDate(new Date());
                 iSplitDeliverMapper.updateByPrimaryKey(srcSplitDeliver);
             }
 

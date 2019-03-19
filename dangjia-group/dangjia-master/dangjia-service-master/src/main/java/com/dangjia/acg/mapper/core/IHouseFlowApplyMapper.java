@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -21,17 +22,17 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
     List<HouseFlowApply> getMemberCheckList(@Param("houseId") String houseId);
 
     Long getCountValidPatrolByHouseId(@Param("houseId") String houseId,@Param("workerId") String workerId);
-    HouseFlowApply getTodayStart(@Param("houseId") String houseId,@Param("workerId") String workerId);
+    HouseFlowApply getTodayStart(@Param("houseId") String houseId, @Param("workerId") String workerId, @Param("time")Date time);
     HouseFlowApply checkHouseFlowApply(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
     List<HouseFlowApply> getSupervisorCheckList(@Param("houseId") String houseId);
-    List<HouseFlowApply> getTodayHouseFlowApplyBy56(@Param("houseId") String houseId);
+    List<HouseFlowApply> getTodayHouseFlowApplyBy56(@Param("houseId") String houseId,@Param("time")Date time);
     HouseFlowApply checkSupervisorApply(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
     List<HouseFlowApply> getTodayHouseFlowApply(@Param("houseFlowId") String houseFlowId,@Param("applyType") Integer applyType,
-                                                @Param("workerId") String workerId);
+                                                @Param("workerId") String workerId,@Param("time")Date time);
     List<HouseFlowApply> getEarliestTimeHouseApply(@Param("houseId") String houseId,@Param("workerId") String workerId);
     Long getSuspendApply(@Param("houseId") String houseId,@Param("workerId") String workerId);
     Long getEveryDayApply(@Param("houseId") String houseId,@Param("workerId") String workerId);
-    List<HouseFlowApply> getTodayStartByHouseId(@Param("houseId") String houseId);
+    List<HouseFlowApply> getTodayStartByHouseId(@Param("houseId") String houseId, @Param("time")Date time);
     HouseFlowApply getSupervisorCheck(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
     /**根据houseId查询所有施工记录*/
     List<HouseFlowApply> queryAllHfaByHouseId(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId);

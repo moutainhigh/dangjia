@@ -1,6 +1,7 @@
 package com.dangjia.acg.dto.basics;
 
 
+import com.dangjia.acg.common.annotation.ExcelField;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -21,6 +22,8 @@ public class WorkerGoodsDTO {
     private String id;
     @ApiModelProperty("name")
     private String name;
+
+    @ExcelField(titile = "商品编号", offset = 2)
     private String workerGoodsSn;
     @ApiModelProperty("image")
     private String image;
@@ -50,6 +53,12 @@ public class WorkerGoodsDTO {
     private String createDate;
     @ApiModelProperty("modifyDate")
     private String modifyDate;
+
+
+    @ExcelField(titile = "精算数", offset = 6)
+    private String shopCount;//精算数
+    private String msg;//异常说明
+
     @ApiModelProperty("technologies")
     private List<TechnologyDTO> technologies;
 

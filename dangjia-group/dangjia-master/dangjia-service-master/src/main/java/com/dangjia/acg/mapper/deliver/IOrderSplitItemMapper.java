@@ -13,6 +13,8 @@ import tk.mybatis.mapper.common.Mapper;
 @Repository
 public interface IOrderSplitItemMapper extends Mapper<OrderSplitItem> {
 
+    Double getOrderSplitPrice(@Param("orderSplitId")String orderSplitId);
+
     void setSupplierId(@Param("id") String id, @Param("splitDeliverId") String splitDeliverId);
 
     /**确认收货更新收货数量*/

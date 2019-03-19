@@ -1,6 +1,8 @@
 package com.dangjia.acg.service.repair;
 
+import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.api.data.GetForBudgetAPI;
 import com.dangjia.acg.api.data.TechnologyRecordAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -10,21 +12,19 @@ import com.dangjia.acg.dto.actuary.GoodsDTO;
 import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.dto.repair.BudgetMaterialDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
-import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.service.actuary.ActuaryOperationService;
 import com.dangjia.acg.service.data.ForMasterService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tk.mybatis.mapper.entity.Example;
-import tk.mybatis.mapper.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +36,6 @@ import java.util.List;
  */
 @Service
 public class FillMaterielService {
-
-    @Autowired
-    private IGoodsMapper goodsMapper;
     @Autowired
     private IProductMapper iProductMapper;
     @Autowired
@@ -53,6 +50,75 @@ public class FillMaterielService {
     private TechnologyRecordAPI technologyRecordAPI;
     @Autowired
     private ForMasterService forMasterService;
+    @Autowired
+    private GetForBudgetAPI getForBudgetAPI;
+
+
+    /**
+     * 要退查询仓库
+     * 结合 精算记录+补记录
+     */
+    public ServerResponse askAndQuit(String userToken, String houseId, String categoryId, String name) {
+        try {
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            Member worker = accessToken.getMember();
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+
+            //精算的
+            List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name);
+            //补材料的
+            List<MendMateriel> mendMaterielList = getForBudgetAPI.askAndQuit(worker.getWorkerTypeId(), houseId,categoryId,name);
+            List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
+
+            List<String> productIdList = new ArrayList<>();
+            String productId;
+            for(MendMateriel mendMateriel : mendMaterielList){
+                productId = mendMateriel.getProductId();
+                productIdList.add(productId);
+                for (BudgetMaterial budgetMaterial : budgetMaterialList){
+                    if (productId.equals(budgetMaterial.getProductId())){
+                        budgetMaterialList.remove(budgetMaterial);
+                        continue;
+                    }
+                }
+            }
+            for (BudgetMaterial budgetMaterial : budgetMaterialList){
+                productIdList.add(budgetMaterial.getProductId());
+            }
+
+            for (String id : productIdList) {
+                ServerResponse response = technologyRecordAPI.getByProductId(id, houseId);
+                //if(!response.isSuccess()) continue;
+                Object warehouseStr = response.getResultObj();
+                Warehouse warehouse = JSON.parseObject(JSON.toJSONString(warehouseStr),Warehouse.class);
+                if(warehouse == null) continue;
+                WarehouseDTO warehouseDTO = new WarehouseDTO();
+                warehouseDTO.setImage(address + warehouse.getImage());
+                warehouseDTO.setShopCount(warehouse.getShopCount());
+                warehouseDTO.setAskCount(warehouse.getAskCount());
+                warehouseDTO.setBackCount(warehouse.getBackCount());
+                warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
+                warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getAskCount() - warehouse.getBackCount());
+                warehouseDTO.setProductName(warehouse.getProductName());
+                warehouseDTO.setPrice(warehouse.getPrice());
+                warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
+                warehouseDTO.setReceive(warehouse.getReceive());
+                warehouseDTO.setUnitName(warehouse.getUnitName());
+                warehouseDTO.setProductType(warehouse.getProductType());
+                warehouseDTO.setAskTime(warehouse.getAskTime());
+                warehouseDTO.setRepTime(warehouse.getRepTime());
+                warehouseDTO.setBackTime(warehouse.getBackTime());
+                warehouseDTO.setBrandSeriesName(forMasterService.brandSeriesName(warehouse.getProductId()));
+                warehouseDTO.setProductId(warehouse.getProductId());
+                warehouseDTOS.add(warehouseDTO);
+            }
+
+            return ServerResponse.createBySuccess("查询成功", warehouseDTOS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
 
     /**
@@ -64,31 +130,28 @@ public class FillMaterielService {
 
 
     /**
-     * 补货查询商品库
+     * 工匠补货查询商品库普通材料
+     * 是大管家就查询商品库服务材料
      */
-    public ServerResponse repairLibraryMaterial(String categoryId, String name, Integer pageNum, Integer pageSize) {
+    public ServerResponse repairLibraryMaterial(String userToken,String categoryId, String name, Integer pageNum, Integer pageSize) {
         try {
-            if (name == "") {
-                name = null;
-            }
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            Member worker = accessToken.getMember();
             if (pageNum == null) {
                 pageNum = 1;
             }
             if (pageSize == null) {
                 pageSize = 5;
             }
-            List<GoodsDTO> goodsDTOList = new ArrayList<GoodsDTO>();
+            List<GoodsDTO> goodsDTOList = new ArrayList<>();
             PageHelper.startPage(pageNum, pageSize);
             List<Product> productList;
-            if (StringUtil.isEmpty(categoryId)) {
-                Example example = new Example(Product.class);
-                example.createCriteria().andLike(Product.NAME, name);
-                productList = iProductMapper.selectByExample(example);
-            } else {
-                Example example = new Example(Product.class);
-                example.createCriteria().andEqualTo(Product.CATEGORY_ID, categoryId).andLike(Product.NAME, name);
-                productList = iProductMapper.selectByExample(example);
+            if (worker.getWorkerType() == 3){//大管家
+                productList = iProductMapper.serviceMaterials(name,categoryId);
+            } else {//其它工匠
+                productList = iProductMapper.commonMaterials(name,categoryId);
             }
+
             PageInfo pageResult = new PageInfo(productList);
             if (productList.size() > 0) {
                 for (Product product : productList) {
@@ -99,16 +162,6 @@ public class FillMaterielService {
                 }
             }
             pageResult.setList(goodsDTOList);
-
-            /*List<Goods> goodsList = goodsMapper.queryRepairGoods(name,categoryId);
-            for(Goods goods : goodsList){
-                List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
-                if(productList.size() > 0){
-                    Product product = productList.get(0);
-                    GoodsDTO goodsDTO = actuaryOperationService.goodsDetail(product, "");
-                    goodsDTOList.add(goodsDTO);
-                }
-            }*/
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
@@ -117,7 +170,7 @@ public class FillMaterielService {
     }
 
     /**
-     * 工匠补退要货查询精算内货品
+     * 工匠补查询精算内货品
      */
     public ServerResponse workerTypeBudget(String userToken, String houseId, String categoryId, String name, Integer pageNum, Integer pageSize) {
         try {
@@ -129,7 +182,11 @@ public class FillMaterielService {
             PageInfo pageResult = new PageInfo(budgetMaterialList);
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
             for (BudgetMaterial budgetMaterial : budgetMaterialList) {
-                Warehouse warehouse = technologyRecordAPI.getByProductId(budgetMaterial.getProductId(), houseId);
+                ServerResponse response = technologyRecordAPI.getByProductId(budgetMaterial.getProductId(), houseId);
+                if(!response.isSuccess()) continue;
+                Object warehouseStr = response.getResultObj();
+                Warehouse warehouse = JSON.parseObject(JSON.toJSONString(warehouseStr),Warehouse.class);
+                if(warehouse == null) continue;
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
@@ -140,6 +197,7 @@ public class FillMaterielService {
                 warehouseDTO.setProductName(warehouse.getProductName());
                 warehouseDTO.setPrice(warehouse.getPrice());
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
+                warehouseDTO.setReceive(warehouse.getReceive());
                 warehouseDTO.setUnitName(warehouse.getUnitName());
                 warehouseDTO.setProductType(warehouse.getProductType());
                 warehouseDTO.setAskTime(warehouse.getAskTime());
@@ -150,7 +208,6 @@ public class FillMaterielService {
                 warehouseDTOS.add(warehouseDTO);
             }
             pageResult.setList(warehouseDTOS);
-
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
@@ -158,7 +215,9 @@ public class FillMaterielService {
         }
     }
 
-
+    /**
+     * 查询工序材料
+     */
     public ServerResponse repairBudgetMaterial(String workerTypeId, String categoryId, String houseId, String productName,
                                                Integer pageNum, Integer pageSize) {
         try {

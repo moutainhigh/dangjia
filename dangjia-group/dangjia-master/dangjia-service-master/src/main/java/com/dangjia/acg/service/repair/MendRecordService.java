@@ -64,6 +64,10 @@ public class MendRecordService {
                 mendOrderDetail.setType(5);
                 mendOrderDetail.setState(orderSplit.getApplyStatus());
                 mendOrderDetail.setCreateDate(orderSplit.getCreateDate());
+                /*
+                计算要货单钱
+                 */
+                mendOrderDetail.setTotalAmount(orderSplitItemMapper.getOrderSplitPrice(mendOrderId));
 
                 List<Map<String,Object>> mapList = new ArrayList<>();
                 Example example = new Example(OrderSplitItem.class);
@@ -80,7 +84,7 @@ public class MendRecordService {
                     }
                     map.put("name", orderSplitItem.getProductName());
                     map.put("price", "¥" + String.format("%.2f",orderSplitItem.getPrice())+"/"+orderSplitItem.getUnitName());
-                    map.put("shopCount", orderSplitItem.getShopCount());
+                    map.put("shopCount", orderSplitItem.getNum());//本次数量
                     map.put("totalPrice", orderSplitItem.getTotalPrice());
                     mapList.add(map);
                 }
@@ -218,7 +222,7 @@ public class MendRecordService {
                 map.put("houseId", houseId);
                 map.put("type", 0);
                 map.put("image", address + "iconWork/zero.png");
-                map.put("name", "补材料记录");
+                map.put("name", "补材料/服务记录");
                 map.put("size", "共"+mendOrderList.size()+"条");
                 returnMap.add(map);
             }
@@ -244,7 +248,7 @@ public class MendRecordService {
                 map.put("houseId", houseId);
                 map.put("type", 2);
                 map.put("image", address + "iconWork/two.png");
-                map.put("name", "剩余材料记录");
+                map.put("name", "退材料/服务记录");
                 map.put("size", "共"+mendOrderList.size()+"条");
                 returnMap.add(map);
             }
@@ -271,7 +275,7 @@ public class MendRecordService {
                 map.put("houseId", houseId);
                 map.put("type", 4);
                 map.put("image", address + "iconWork/four.png");
-                map.put("name", "业主退货记录");
+                map.put("name", "业主退材料记录");
                 map.put("size", "共"+mendOrderList.size()+"条");
                 returnMap.add(map);
             }
