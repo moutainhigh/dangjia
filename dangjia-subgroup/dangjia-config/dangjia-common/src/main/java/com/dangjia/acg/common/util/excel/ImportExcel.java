@@ -139,7 +139,7 @@ public class ImportExcel {
         for (int i = this.getDataRowNum(); i <= this.getLastDataRowNum(); i++) {
             T e = (T)targetClass.newInstance();
             Row row = this.getRow(i);
-            if (isRowEmpty(row)) {
+            if (row!=null&&isRowEmpty(row)) {
                 continue;
             }
             StringBuilder sb = new StringBuilder();
