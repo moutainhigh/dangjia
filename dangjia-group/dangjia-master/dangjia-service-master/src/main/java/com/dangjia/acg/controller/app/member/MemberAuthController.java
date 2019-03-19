@@ -21,8 +21,8 @@ public class MemberAuthController implements MemberAuthAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse authLogin(HttpServletRequest request, Integer openType, String openid, Integer userRole) {
-        return memberAuthService.authLogin(openType, openid, userRole);
+    public ServerResponse authLogin(HttpServletRequest request, Integer openType, String unionid, Integer userRole) {
+        return memberAuthService.authLogin(openType, unionid, userRole);
     }
 
     @Override

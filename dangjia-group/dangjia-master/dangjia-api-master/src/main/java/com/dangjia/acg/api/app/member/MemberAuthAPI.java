@@ -20,7 +20,7 @@ public interface MemberAuthAPI {
     @ApiOperation(value = "当家用户第三方认证登录", notes = "当家用户第三方认证登录")
     ServerResponse authLogin(@RequestParam("request") HttpServletRequest request,
                              @RequestParam("openType") Integer openType,
-                             @RequestParam("openid") String openid,
+                             @RequestParam("unionid") String unionid,
                              @RequestParam("userRole") Integer userRole);
 
     @RequestMapping(value = "memberAuth/oldUserBinding", method = RequestMethod.POST)

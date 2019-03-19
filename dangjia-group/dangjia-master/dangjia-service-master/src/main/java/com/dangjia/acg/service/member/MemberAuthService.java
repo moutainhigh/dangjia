@@ -37,21 +37,20 @@ public class MemberAuthService {
      * 当家用户第三方认证登录
      *
      * @param openType 认证类型 1:微信，2：QQ，3:新浪，4:支付宝
-     * @param openid   第三方认证ID
+     * @param unionid   第三方认证ID
      * @param userRole app应用角色  1为业主角色，2为工匠角色
      * @return
      */
-    public ServerResponse authLogin(Integer openType, String openid, Integer userRole) {
+    public ServerResponse authLogin(Integer openType, String unionid, Integer userRole) {
         if (userRole == null || userRole == 0
                 || openType == null || openType == 0
-                || openid == null) {
+                || unionid == null) {
             return ServerResponse.createByErrorMessage("传入参数有误");
         }
         Example example = new Example(MemberAuth.class);
         example.createCriteria()
                 .andEqualTo(MemberAuth.OPEN_TYPE, openType)
-                .andEqualTo(MemberAuth.OPENID, openid)
-                .andEqualTo(MemberAuth.USER_ROLE, userRole)
+                .andEqualTo(MemberAuth.UNIONID, unionid)
                 .andEqualTo(MemberAuth.DATA_STATUS, 0);
         List<MemberAuth> memberAuthList = memberAuthMapper.selectByExample(example);
         if (memberAuthList == null || memberAuthList.size() <= 0) {
@@ -79,7 +78,7 @@ public class MemberAuthService {
     public ServerResponse oldUserBinding(String phone, String password, MemberAuth memberAuth) {
         if (memberAuth.getUserRole() == null || memberAuth.getUserRole() == 0
                 || memberAuth.getOpenType() == null || memberAuth.getOpenType() == 0
-                || memberAuth.getOpenid() == null) {
+                || memberAuth.getUnionid() == null) {
             return ServerResponse.createByErrorMessage("传入参数有误");
         }
         //指定角色查询用户
@@ -94,7 +93,6 @@ public class MemberAuthService {
             example.createCriteria()
                     .andEqualTo(MemberAuth.OPEN_TYPE, memberAuth.getOpenType())
                     .andEqualTo(MemberAuth.MEMBER_ID, user.getId())
-                    .andEqualTo(MemberAuth.USER_ROLE, memberAuth.getUserRole())
                     .andEqualTo(MemberAuth.DATA_STATUS, 0);
             List<MemberAuth> memberAuthList = memberAuthMapper.selectByExample(example);
             if (memberAuthList != null && memberAuthList.size() > 0) {
@@ -121,7 +119,7 @@ public class MemberAuthService {
                                          MemberAuth memberAuth) {
         if (memberAuth.getUserRole() == null || memberAuth.getUserRole() == 0
                 || memberAuth.getOpenType() == null || memberAuth.getOpenType() == 0
-                || memberAuth.getOpenid() == null) {
+                || memberAuth.getUnionid() == null) {
             return ServerResponse.createByErrorMessage("传入参数有误");
         }
         ServerResponse response = memberService.checkRegister(request, phone, smscode, password, invitationCode, memberAuth.getUserRole());
@@ -141,7 +139,7 @@ public class MemberAuthService {
     public ServerResponse bindingThirdParties(String userToken, MemberAuth memberAuth) {
         if (memberAuth.getUserRole() == null || memberAuth.getUserRole() == 0
                 || memberAuth.getOpenType() == null || memberAuth.getOpenType() == 0
-                || memberAuth.getOpenid() == null) {
+                || memberAuth.getUnionid() == null) {
             return ServerResponse.createByErrorMessage("传入参数有误");
         }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
@@ -155,8 +153,7 @@ public class MemberAuthService {
         Example example = new Example(MemberAuth.class);
         example.createCriteria()
                 .andEqualTo(MemberAuth.OPEN_TYPE, memberAuth.getOpenType())
-                .andEqualTo(MemberAuth.OPENID, memberAuth.getOpenid())
-                .andEqualTo(MemberAuth.USER_ROLE, memberAuth.getUserRole())
+                .andEqualTo(MemberAuth.UNIONID, memberAuth.getUnionid())
                 .andEqualTo(MemberAuth.DATA_STATUS, 0);
         List<MemberAuth> memberAuthList = memberAuthMapper.selectByExample(example);
         if (memberAuthList != null && memberAuthList.size() > 0) {
@@ -198,7 +195,6 @@ public class MemberAuthService {
         example.createCriteria()
                 .andEqualTo(MemberAuth.OPEN_TYPE, openType)
                 .andEqualTo(MemberAuth.MEMBER_ID, user.getId())
-                .andEqualTo(MemberAuth.USER_ROLE, userRole)
                 .andEqualTo(MemberAuth.DATA_STATUS, 0);
         List<MemberAuth> memberAuthList = memberAuthMapper.selectByExample(example);
         if (memberAuthList == null || memberAuthList.size() <= 0) {
@@ -236,7 +232,6 @@ public class MemberAuthService {
         example.createCriteria()
                 .andEqualTo(MemberAuth.OPEN_TYPE, openType)
                 .andEqualTo(MemberAuth.MEMBER_ID, user.getId())
-                .andEqualTo(MemberAuth.USER_ROLE, userRole)
                 .andEqualTo(MemberAuth.DATA_STATUS, 0);
         List<MemberAuth> memberAuthList = memberAuthMapper.selectByExample(example);
         if (memberAuthList == null || memberAuthList.size() <= 0) {
