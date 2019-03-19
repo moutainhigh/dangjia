@@ -12,6 +12,7 @@ import javax.servlet.annotation.WebListener;
 public class IndexListener implements ServletContextListener{
   @Override
   public void contextDestroyed(ServletContextEvent arg0) {
+
     System.out.println("IndexListener2 contextDestroyed method");
   }
   @Override
