@@ -10,6 +10,9 @@ import java.util.List;
 @Repository
 public interface IMendOrderMapper extends Mapper<MendOrder>{
 
+    List<MendOrder> workerMendOrder(@Param("houseId") String houseId,@Param("type") Integer type,
+                                    @Param("workerTypeId") String workerTypeId);
+
 
     List<MendOrder> getByChangeOrderId(@Param("changeOrderId") String changeOrderId);
 
