@@ -24,6 +24,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</sql>
 
 
+    <!-- 查询人工单 -->
+    <select id="workerMendOrder" resultType="com.dangjia.acg.modle.repair.MendOrder">
+        SELECT
+              <include refid="all_columns"/>
+        FROM dj_repair_mend_order
+        where
+        type = #{type}
+        and state > 0
+        and house_id = #{houseId}
+        <if test = "workerTypeId!=null and workerTypeId!=''">
+            and
+            worker_type_id = #{workerTypeId}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
+
     <!-- 查询补退人工单 -->
     <select id="getByChangeOrderId" resultType="com.dangjia.acg.modle.repair.MendOrder">
         SELECT

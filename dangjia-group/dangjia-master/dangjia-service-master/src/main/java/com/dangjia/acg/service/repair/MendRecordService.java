@@ -236,13 +236,12 @@ public class MendRecordService {
                 returnMap.add(map);
             }
 
-            example = new Example(MendOrder.class);
-            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,1)
-                    .andNotEqualTo(MendOrder.STATE,0);
+
             if(roleType == 3){//工匠
-                example.createCriteria().andEqualTo(MendOrder.WORKER_TYPE_ID,worker.getWorkerTypeId());
+                mendOrderList = mendOrderMapper.workerMendOrder(houseId,1,worker.getWorkerTypeId());
+            }else {
+                mendOrderList = mendOrderMapper.workerMendOrder(houseId,1,"");
             }
-            mendOrderList = mendOrderMapper.selectByExample(example);
             if(mendOrderList.size() > 0){
                 Map<String,Object> map = new HashMap<>();
                 map.put("houseId", houseId);
@@ -265,13 +264,12 @@ public class MendRecordService {
                 map.put("size", "共"+mendOrderList.size()+"条");
                 returnMap.add(map);
             }
-            example = new Example(MendOrder.class);
-            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,3)
-                    .andNotEqualTo(MendOrder.STATE,0);
+
             if(roleType == 3){//工匠
-                example.createCriteria().andEqualTo(MendOrder.WORKER_TYPE_ID,worker.getWorkerTypeId());
+                mendOrderList = mendOrderMapper.workerMendOrder(houseId,3,worker.getWorkerTypeId());
+            }else {
+                mendOrderList = mendOrderMapper.workerMendOrder(houseId,3,"");
             }
-            mendOrderList = mendOrderMapper.selectByExample(example);
             if(mendOrderList.size() > 0){
                 Map<String,Object> map = new HashMap<>();
                 map.put("houseId", houseId);
