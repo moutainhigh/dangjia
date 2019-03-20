@@ -10,7 +10,6 @@ import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.cors.CorsConfiguration;
 
 import javax.servlet.MultipartConfigElement;
 
@@ -33,13 +32,6 @@ public class SesameServiceGoodsApplication implements CommandLineRunner {
 
   public static void main(String[] args) {
     SpringApplication.run(SesameServiceGoodsApplication.class, args);
-  }
-  private CorsConfiguration buildConfig(){
-    CorsConfiguration corsConfiguration=new CorsConfiguration();
-    corsConfiguration.addAllowedOrigin("*");
-    corsConfiguration.addAllowedHeader("*");
-    corsConfiguration.addAllowedMethod("*");
-    return corsConfiguration;
   }
   @Bean
   MultipartConfigElement multipartConfigElement() {
