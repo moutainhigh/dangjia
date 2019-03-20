@@ -246,37 +246,34 @@ public class ModelingVillageService {
                 for (int m = 0; m < mvlist.size(); m++) {
                     char c = mvlist.get(m).getInitials().charAt(0);
                     int i = c;
-                    if ((i >= 65 && i <= 90) || (i >= 97 && i <= 122)) {
-                        VillageDTO villageDTO = new VillageDTO();//小区对象
-                        villageDTO.setVillageId(mvlist.get(m).getId());
-                        villageDTO.setInitials(mvlist.get(m).getInitials().toUpperCase());
-                        villageDTO.setName(mvlist.get(m).getName());
+                    VillageDTO villageDTO = new VillageDTO();//小区对象
+                    villageDTO.setVillageId(mvlist.get(m).getId());
+                    villageDTO.setInitials(mvlist.get(m).getInitials().toUpperCase());
+                    villageDTO.setName(mvlist.get(m).getName());
 
-                        if (mvlist.get(m).getLayoutSum() != null && mvlist.get(m).getLayoutSum() > 0) {
-                            hotList.add(villageDTO);//热门搜索小区
-                        }
-
-                        if (m > 0) {//第一个直接存储，后面需要比较与前一个字母是否相同
-                            if (mvlist.get(m).getInitials().toUpperCase().equals(mvlist.get(m - 1).getInitials().toUpperCase())) {
-                                //如果与前一个字母相同则不用new新的字母对象，直接存储
-                                letterList.add(villageDTO);//存放小区集合
-                                villageClassifyDTO.setInitials(mvlist.get(m).getInitials().toUpperCase());
-                                villageClassifyDTO.setVillageDTOList(letterList);
-                            } else {
-                                //如果与前一个字母不相同则new新的字母对象，再存储
-                                villageClassifyDTOList.add(villageClassifyDTO);//存放字母集合
-                                villageClassifyDTO = new VillageClassifyDTO(); //字母对象
-                                letterList = new ArrayList<VillageDTO>();//小区数组
-                                letterList.add(villageDTO);//存放小区集合
-                                villageClassifyDTO.setInitials(mvlist.get(m).getInitials().toUpperCase());
-                                villageClassifyDTO.setVillageDTOList(letterList);//小区分类集合放入对应字母分类
-                            }
-                        } else {
+                    if (mvlist.get(m).getLayoutSum() != null && mvlist.get(m).getLayoutSum() > 0) {
+                        hotList.add(villageDTO);//热门搜索小区
+                    }
+                    if (m > 0) {//第一个直接存储，后面需要比较与前一个字母是否相同
+                        if (mvlist.get(m).getInitials().toUpperCase().equals(mvlist.get(m - 1).getInitials().toUpperCase())) {
                             //如果与前一个字母相同则不用new新的字母对象，直接存储
                             letterList.add(villageDTO);//存放小区集合
                             villageClassifyDTO.setInitials(mvlist.get(m).getInitials().toUpperCase());
-                            villageClassifyDTO.setVillageDTOList(letterList);//小区集合放入对应字母对象
+                            villageClassifyDTO.setVillageDTOList(letterList);
+                        } else {
+                            //如果与前一个字母不相同则new新的字母对象，再存储
+                            villageClassifyDTOList.add(villageClassifyDTO);//存放字母集合
+                            villageClassifyDTO = new VillageClassifyDTO(); //字母对象
+                            letterList = new ArrayList<VillageDTO>();//小区数组
+                            letterList.add(villageDTO);//存放小区集合
+                            villageClassifyDTO.setInitials(mvlist.get(m).getInitials().toUpperCase());
+                            villageClassifyDTO.setVillageDTOList(letterList);//小区分类集合放入对应字母分类
                         }
+                    } else {
+                        //如果与前一个字母相同则不用new新的字母对象，直接存储
+                        letterList.add(villageDTO);//存放小区集合
+                        villageClassifyDTO.setInitials(mvlist.get(m).getInitials().toUpperCase());
+                        villageClassifyDTO.setVillageDTOList(letterList);//小区集合放入对应字母对象
                     }
                 }
             }
@@ -286,7 +283,9 @@ public class ModelingVillageService {
             villageClassifyDTO.setVillageDTOList(hotList);//热门集合
             villageClassifyDTOList.add(0, villageClassifyDTO);
 
-            redisClient.putListCaches("vresult:" + cityId, mvlist);
+            if(mvlist!=null&&mvlist.size()>0) {
+                redisClient.putListCaches("vresult:" + cityId, mvlist);
+            }
             return ServerResponse.createBySuccess("根据城市查询小区成功", villageClassifyDTOList);
         } catch (Exception e) {
             redisClient.deleteCache("vresult:" + cityId);
