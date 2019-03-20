@@ -72,18 +72,22 @@ public class FillMaterielService {
 
             List<String> productIdList = new ArrayList<>();
             String productId;
+
             for(MendMateriel mendMateriel : mendMaterielList){
+                boolean flag = true;
                 productId = mendMateriel.getProductId();
-                productIdList.add(productId);
-                for (BudgetMaterial budgetMaterial : budgetMaterialList){
-                    if (productId.equals(budgetMaterial.getProductId())){
-                        budgetMaterialList.remove(budgetMaterial);
+                for(BudgetMaterial bm : budgetMaterialList){
+                    if(productId.equals(bm.getProductId())){
+                        flag = false;
                         continue;
                     }
                 }
+                if(flag){
+                    productIdList.add(productId);
+                }
             }
-            for (BudgetMaterial budgetMaterial : budgetMaterialList){
-                productIdList.add(budgetMaterial.getProductId());
+            for(BudgetMaterial bm : budgetMaterialList){
+                productIdList.add(bm.getProductId());
             }
 
             for (String id : productIdList) {
