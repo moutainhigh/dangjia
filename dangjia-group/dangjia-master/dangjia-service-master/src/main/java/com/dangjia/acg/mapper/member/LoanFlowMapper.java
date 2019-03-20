@@ -1,7 +1,6 @@
 package com.dangjia.acg.mapper.member;
 
 import com.dangjia.acg.dto.member.LoanDTO;
-import com.dangjia.acg.modle.member.Loan;
 import com.dangjia.acg.modle.member.LoanFlow;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;

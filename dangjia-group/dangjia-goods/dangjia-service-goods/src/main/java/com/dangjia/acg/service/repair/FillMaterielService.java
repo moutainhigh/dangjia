@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -66,6 +67,8 @@ public class FillMaterielService {
 
             //精算的
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name);
+            Iterator<BudgetMaterial> iterator = budgetMaterialList.iterator();
+
             //补材料的
             List<MendMateriel> mendMaterielList = getForBudgetAPI.askAndQuit(worker.getWorkerTypeId(), houseId,categoryId,name);
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
@@ -75,17 +78,23 @@ public class FillMaterielService {
             for(MendMateriel mendMateriel : mendMaterielList){
                 productId = mendMateriel.getProductId();
                 productIdList.add(productId);
-                for (BudgetMaterial budgetMaterial : budgetMaterialList){
-                    if (productId.equals(budgetMaterial.getProductId())){
-                        budgetMaterialList.remove(budgetMaterial);
-                        continue;
+
+                while(iterator.hasNext()){
+                    BudgetMaterial budgetMaterial = iterator.next();
+                    if(productId.equals(budgetMaterial.getProductId())){
+                        iterator.remove();   //注意这个地方
+                    }else {
+                        productIdList.add(budgetMaterial.getProductId());
                     }
                 }
             }
-            for (BudgetMaterial budgetMaterial : budgetMaterialList){
+            for(BudgetMaterial budgetMaterial : budgetMaterialList){
                 productIdList.add(budgetMaterial.getProductId());
             }
-
+//            while(iterator.hasNext()){
+//                BudgetMaterial budgetMaterial = iterator.next();
+//                productIdList.add(budgetMaterial.getProductId());
+//            }
             for (String id : productIdList) {
                 ServerResponse response = technologyRecordAPI.getByProductId(id, houseId);
                 //if(!response.isSuccess()) continue;

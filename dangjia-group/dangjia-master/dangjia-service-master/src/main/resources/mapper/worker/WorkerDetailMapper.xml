@@ -102,7 +102,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             )
         </if>
         <if test="likeMobile!=null and likeMobile!=''">
-            AND member.mobile LIKE CONCAT('%',#{likeMobile},'%')
+            AND (
+            member.mobile LIKE CONCAT('%',#{likeMobile},'%')
+            OR
+            member.name LIKE CONCAT('%',#{likeMobile},'%')
+            OR
+            wwd.worker_name LIKE CONCAT('%',#{likeMobile},'%')
+            )
         </if>
         ORDER BY wwd.create_date desc
     </select>

@@ -38,6 +38,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -438,6 +439,7 @@ public class EvaluateService {
             workIntegral.setBriefed(desc+evaluate.getStar()+"星评价");
             workIntegralMapper.insert(workIntegral);
         }
+        worker.setModifyDate(new Date());
         memberMapper.updateByPrimaryKeySelective(worker);
     }
 
