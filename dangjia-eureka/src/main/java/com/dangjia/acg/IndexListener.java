@@ -15,6 +15,7 @@ public class IndexListener implements ServletContextListener{
 
     System.out.println("IndexListener2 contextDestroyed method");
   }
+
   @Override
   public void contextInitialized(ServletContextEvent arg0) {
     System.out.println("IndexListener2 contextInitialized method");
