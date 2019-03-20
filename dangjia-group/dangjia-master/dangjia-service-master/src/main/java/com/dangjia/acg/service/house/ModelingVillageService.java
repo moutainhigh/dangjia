@@ -232,47 +232,13 @@ public class ModelingVillageService {
      * @return
      */
     public ServerResponse getAllVillageByCity(String cityId) {
-        List<VillageDTO> letterList = new ArrayList<>();//字母集合
         List<VillageDTO> hotList = new ArrayList<>();//热门小区集合
         List<VillageClassifyDTO> villageClassifyDTOList = new ArrayList<>();//返回集
         try {
-            List<ModelingVillage> mvlist = redisClient.getListCache("vresult:" + cityId, ModelingVillage.class);
+            List<VillageClassifyDTO> mvlist = redisClient.getListCache("vresult:" + cityId, VillageClassifyDTO.class);
             Integer number = modelingVillageMapper.getAllVillageCount(cityId);//统计根据城市id查询小区按字母排序
             if (mvlist == null || mvlist.size() != number) {
-                mvlist = modelingVillageMapper.getAllVillage(cityId, "");
-            }
-            if (mvlist != null) {
-                VillageClassifyDTO villageClassifyDTO = new VillageClassifyDTO();//字母小区对象
-                int m=0;
-                for (ModelingVillage modelingVillage : mvlist) {
-                    char c = modelingVillage.getInitials().charAt(0);
-                    VillageDTO villageDTO = new VillageDTO();//小区对象
-                    villageDTO.setVillageId(modelingVillage.getId());
-                    villageDTO.setInitials(modelingVillage.getInitials().toUpperCase());
-                    villageDTO.setName(modelingVillage.getName());
-                    if (m > 0) {//第一个直接存储，后面需要比较与前一个字母是否相同
-                        if (modelingVillage.getInitials().toUpperCase().equals(mvlist.get(m - 1).getInitials().toUpperCase())) {
-                            //如果与前一个字母相同则不用new新的字母对象，直接存储
-                            letterList.add(villageDTO);//存放小区集合
-                            villageClassifyDTO.setInitials(modelingVillage.getInitials().toUpperCase());
-                            villageClassifyDTO.setVillageDTOList(letterList);
-                        } else {
-                            //如果与前一个字母不相同则new新的字母对象，再存储
-                            villageClassifyDTOList.add(villageClassifyDTO);//存放字母集合
-                            villageClassifyDTO = new VillageClassifyDTO(); //字母对象
-                            letterList = new ArrayList<VillageDTO>();//小区数组
-                            letterList.add(villageDTO);//存放小区集合
-                            villageClassifyDTO.setInitials(modelingVillage.getInitials().toUpperCase());
-                            villageClassifyDTO.setVillageDTOList(letterList);//小区分类集合放入对应字母分类
-                        }
-                    } else {
-                        //如果与前一个字母相同则不用new新的字母对象，直接存储
-                        letterList.add(villageDTO);//存放小区集合
-                        villageClassifyDTO.setInitials(modelingVillage.getInitials().toUpperCase());
-                        villageClassifyDTO.setVillageDTOList(letterList);//小区集合放入对应字母对象
-                    }
-                    m++;
-                }
+                mvlist = modelingVillageMapper.getAllVillageDTO(cityId, "");
             }
 
             Example example=new Example(ModelingVillage.class);
@@ -290,8 +256,8 @@ public class ModelingVillageService {
             VillageClassifyDTO villageClassifyDTO = new VillageClassifyDTO(); //按热门分类对象
             villageClassifyDTO.setInitials("热");
             villageClassifyDTO.setVillageDTOList(hotList);//热门集合
-            villageClassifyDTOList.add(0, villageClassifyDTO);
-
+            villageClassifyDTOList.add(villageClassifyDTO);
+            villageClassifyDTOList.addAll(mvlist);
             if(mvlist!=null&&mvlist.size()>0) {
                 redisClient.putListCaches("vresult:" + cityId, mvlist);
             }

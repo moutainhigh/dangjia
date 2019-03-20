@@ -21,6 +21,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         create_date as createDate,
         modify_date as modifyDate
     </sql>
+    <resultMap id="findVillageClassifys" type="com.dangjia.acg.dto.house.VillageClassifyDTO" >
+        <result column="initials" property="initials"/>
+        <collection property="villageDTOList" ofType="com.dangjia.acg.dto.house.VillageDTO">
+            <result  column="id" property="villageId"/>
+            <result column="initials" property="initials"/>
+            <result  column="name" property="name"/>
+        </collection>
+    </resultMap>
     <select id="getVillageList" resultType="map" >
         SELECT
             id,
@@ -30,6 +38,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             city_id=#{cityId}
         ORDER by
             create_date
+    </select>
+
+    <!--根据城市id查询小区按字母排序-->
+    <select id="getAllVillageDTO" resultMap="findVillageClassifys" >
+        SELECT
+        <include refid="basic_columns"/>
+        FROM dj_house_modeling_village
+        WHERE 1=1
+        <if test="cityId!=null and cityId!=''">
+            and city_id=#{cityId}
+        </if>
+        <if test="likeVillageName!=null and likeVillageName!=''">
+            and name LIKE CONCAT('%',#{likeVillageName},'%')
+        </if>
+        ORDER by
+        initials asc
     </select>
     <!--根据城市id查询小区按字母排序-->
     <select id="getAllVillage" resultType="com.dangjia.acg.modle.house.ModelingVillage" >
