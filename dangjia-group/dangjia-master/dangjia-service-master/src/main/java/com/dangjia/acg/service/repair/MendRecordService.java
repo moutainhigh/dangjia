@@ -213,6 +213,7 @@ public class MendRecordService {
     /**
      * 要补退记录
      *  0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料
+     *  roleType 1业主 2管家 3工匠
      */
     public ServerResponse mendList(String userToken,String houseId, int roleType){
         try{
@@ -234,9 +235,13 @@ public class MendRecordService {
                 map.put("size", "共"+mendOrderList.size()+"条");
                 returnMap.add(map);
             }
+
             example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,1)
                     .andNotEqualTo(MendOrder.STATE,0);
+            if(roleType == 3){//工匠
+                example.createCriteria().andEqualTo(MendOrder.WORKER_TYPE_ID,worker.getWorkerTypeId());
+            }
             mendOrderList = mendOrderMapper.selectByExample(example);
             if(mendOrderList.size() > 0){
                 Map<String,Object> map = new HashMap<>();
@@ -263,6 +268,9 @@ public class MendRecordService {
             example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,3)
                     .andNotEqualTo(MendOrder.STATE,0);
+            if(roleType == 3){//工匠
+                example.createCriteria().andEqualTo(MendOrder.WORKER_TYPE_ID,worker.getWorkerTypeId());
+            }
             mendOrderList = mendOrderMapper.selectByExample(example);
             if(mendOrderList.size() > 0){
                 Map<String,Object> map = new HashMap<>();
