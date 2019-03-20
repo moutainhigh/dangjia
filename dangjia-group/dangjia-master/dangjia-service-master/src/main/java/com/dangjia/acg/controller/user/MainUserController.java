@@ -312,7 +312,7 @@ public class MainUserController implements MainUserAPI {
 	public ServerResponse checkAuth(HttpServletRequest request,String rcode) {
 		try {
 			// 判断用户是否登录
-			String userID = "634562756456434564545";
+			String userID = request.getParameter(Constants.USERID);
 			MainUser existUser= redisClient.getCache(Constants.USER_KEY+userID,MainUser.class);
 			if (null == existUser) {
 				throw new BaseException(ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN, ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN.getDesc());
