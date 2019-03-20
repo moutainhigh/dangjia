@@ -146,13 +146,14 @@ public class OrderSplitService {
                 orderSplitItemDTO.setProductName(orderSplitItem.getProductName());
                 orderSplitItemDTO.setNum(orderSplitItem.getNum());
                 orderSplitItemDTO.setCost(orderSplitItem.getCost());
+                orderSplitItemDTO.setSupCost(orderSplitItem.getSupCost());
                 orderSplitItemDTO.setUnitName(orderSplitItem.getUnitName());
                 orderSplitItemDTO.setShopCount(String.valueOf(orderSplitItem.getShopCount()));
                 orderSplitItemDTO.setImage(address + orderSplitItem.getImage());
                 orderSplitItemDTO.setReceive(String.valueOf(orderSplitItem.getNum()));
                 orderSplitItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(orderSplitItem.getProductId()));
                 orderSplitItemDTO.setBrandName(forMasterAPI.brandName(orderSplitItem.getProductId()));
-                orderSplitItemDTO.setTotalPrice(orderSplitItem.getCost() * orderSplitItem.getNum());//成本价 * 数量
+                orderSplitItemDTO.setTotalPrice(orderSplitItem.getSupCost() * orderSplitItem.getNum());//成本价 * 数量
                 orderSplitItemDTOS.add(orderSplitItemDTO);
                 detailDTO.setTotalAmount(detailDTO.getTotalAmount() + orderSplitItemDTO.getTotalPrice());
             }

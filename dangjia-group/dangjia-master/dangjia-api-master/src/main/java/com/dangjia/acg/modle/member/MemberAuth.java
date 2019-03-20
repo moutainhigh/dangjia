@@ -15,10 +15,10 @@ import java.math.BigDecimal;
 
 @Data
 @Entity
-@Table(name = "dj_member_auths")
+@Table(name = "dj_member_auth")
 @FieldNameConstants(prefix = "")
 @ApiModel(description = "当家用户第三方认证表")
-public class MemberAuths extends BaseEntity {
+public class MemberAuth extends BaseEntity {
 
     @Column(name = "member_id")
     @Desc(value = "当家用户ID")
@@ -59,5 +59,10 @@ public class MemberAuths extends BaseEntity {
     @Desc(value = "第三方所使用的头像")
     @ApiModelProperty("第三方所使用的头像")
     private String iconurl;
+
+    @Column(name = "user_role")
+    @Desc(value = "app应用角色  1为业主角色，2为工匠角色")
+    @ApiModelProperty("app应用角色  1为业主角色，2为工匠角色")
+    private Integer userRole;
 
 }

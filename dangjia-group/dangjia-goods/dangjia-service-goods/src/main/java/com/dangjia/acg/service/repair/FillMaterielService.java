@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -67,28 +66,30 @@ public class FillMaterielService {
 
             //精算的
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name);
-            Iterator<BudgetMaterial> iterator = budgetMaterialList.iterator();
-
             //补材料的
             List<MendMateriel> mendMaterielList = getForBudgetAPI.askAndQuit(worker.getWorkerTypeId(), houseId,categoryId,name);
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
 
             List<String> productIdList = new ArrayList<>();
             String productId;
+
             for(MendMateriel mendMateriel : mendMaterielList){
+                boolean flag = true;
                 productId = mendMateriel.getProductId();
-                productIdList.add(productId);
-                while(iterator.hasNext()){
-                    BudgetMaterial budgetMaterial = iterator.next();
-                    if(productId.equals(budgetMaterial.getProductId())){
-                        iterator.remove();   //注意这个地方
+                for(BudgetMaterial bm : budgetMaterialList){
+                    if(productId.equals(bm.getProductId())){
+                        flag = false;
+                        continue;
                     }
                 }
+                if(flag){
+                    productIdList.add(productId);
+                }
             }
-            while(iterator.hasNext()){
-                BudgetMaterial budgetMaterial = iterator.next();
-                productIdList.add(budgetMaterial.getProductId());
+            for(BudgetMaterial bm : budgetMaterialList){
+                productIdList.add(bm.getProductId());
             }
+
             for (String id : productIdList) {
                 ServerResponse response = technologyRecordAPI.getByProductId(id, houseId);
                 //if(!response.isSuccess()) continue;

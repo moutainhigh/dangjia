@@ -12,6 +12,7 @@ public class OrderSplitItemDTO {
     private String productName;//名字
     private Double num;//本次发货数量
     private Double cost;// 成本价
+    private Double supCost;//选择的供应商提供的单价
     private String unitName;//单位
     private Double totalPrice; //总价
     private String brandName;//品牌名
