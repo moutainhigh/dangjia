@@ -171,6 +171,11 @@ public class MendOrderService {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member member = accessToken.getMember();//业主
 
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            if (house.getVisitState() == 3 || house.getHaveComplete() == 1){
+                return ServerResponse.createByErrorMessage("该房子已完工");
+            }
+
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 4)//业主退材料
                     .andLessThan(MendOrder.STATE, 2);//小于2 包括审核中状态
