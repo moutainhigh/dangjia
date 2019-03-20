@@ -28,5 +28,6 @@ public interface MendRecordAPI {
 
     @PostMapping(value = "app/repair/mendRecord/mendList")
     @ApiOperation(value = "要补退记录", notes = "要补退记录")
-    ServerResponse mendList(@RequestParam("houseId") String houseId);
+    ServerResponse mendList(@RequestParam("userToken") String userToken,@RequestParam("houseId") String houseId
+            ,@RequestParam("roleType") int roleType);
 }

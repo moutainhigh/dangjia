@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.repair;
 
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -12,6 +14,8 @@ import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
+import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -48,6 +52,8 @@ public class MendRecordService {
     private IOrderSplitItemMapper orderSplitItemMapper;
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
+    @Autowired
+    private RedisClient redisClient;
 
     /**
      * 要补退明细
@@ -207,11 +213,14 @@ public class MendRecordService {
     /**
      * 要补退记录
      *  0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料
+     *  roleType 1业主 2管家 3工匠
      */
-    public ServerResponse mendList(String houseId){
+    public ServerResponse mendList(String userToken,String houseId, int roleType){
         try{
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<Map<String,Object>> returnMap = new ArrayList<>();
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            Member worker = accessToken.getMember();
 
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,0)
@@ -226,10 +235,13 @@ public class MendRecordService {
                 map.put("size", "共"+mendOrderList.size()+"条");
                 returnMap.add(map);
             }
-            example = new Example(MendOrder.class);
-            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,1)
-                    .andNotEqualTo(MendOrder.STATE,0);
-            mendOrderList = mendOrderMapper.selectByExample(example);
+
+
+            if(roleType == 3){//工匠
+                mendOrderList = mendOrderMapper.workerMendOrder(houseId,1,worker.getWorkerTypeId());
+            }else {
+                mendOrderList = mendOrderMapper.workerMendOrder(houseId,1,"");
+            }
             if(mendOrderList.size() > 0){
                 Map<String,Object> map = new HashMap<>();
                 map.put("houseId", houseId);
@@ -252,10 +264,12 @@ public class MendRecordService {
                 map.put("size", "共"+mendOrderList.size()+"条");
                 returnMap.add(map);
             }
-            example = new Example(MendOrder.class);
-            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,3)
-                    .andNotEqualTo(MendOrder.STATE,0);
-            mendOrderList = mendOrderMapper.selectByExample(example);
+
+            if(roleType == 3){//工匠
+                mendOrderList = mendOrderMapper.workerMendOrder(houseId,3,worker.getWorkerTypeId());
+            }else {
+                mendOrderList = mendOrderMapper.workerMendOrder(houseId,3,"");
+            }
             if(mendOrderList.size() > 0){
                 Map<String,Object> map = new HashMap<>();
                 map.put("houseId", houseId);
