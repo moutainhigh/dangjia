@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -89,7 +88,7 @@ public class ImportExcel {
             Cell cell = row.getCell(column);
             if (cell != null){
                 if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC){
-                    val = String.valueOf(new DecimalFormat("#").format(cell.getNumericCellValue()));
+                    val = String.valueOf(cell.getNumericCellValue());
                 }else if (cell.getCellType() == Cell.CELL_TYPE_STRING){
                     val = cell.getStringCellValue();
                 }else if (cell.getCellType() == Cell.CELL_TYPE_FORMULA){
@@ -139,7 +138,7 @@ public class ImportExcel {
         for (int i = this.getDataRowNum(); i <= this.getLastDataRowNum(); i++) {
             T e = (T)targetClass.newInstance();
             Row row = this.getRow(i);
-            if (isRowEmpty(row)) {
+            if (row!=null&&isRowEmpty(row)) {
                 continue;
             }
             StringBuilder sb = new StringBuilder();
@@ -163,17 +162,7 @@ public class ImportExcel {
                     //log.debug("Import value type: ["+i+","+column+"] " + valType);
                     try {
                         if (valType == String.class){
-                            String s = String.valueOf(val.toString());
-                            if(StringUtils.endsWith(s, ".0")){
-                                val = StringUtils.substringBefore(s, ".0");
-                            }else{
-                                val = String.valueOf(val.toString());
-                            }
-                            if(StringUtils.isEmpty(s)){
-                                countError++;
-                                continue;
-                                //gval = null;
-                            }
+                            val = val.toString();
                         }else if (valType == Integer.class){
                             val = Double.valueOf(val.toString().replaceAll("\"", "")).intValue();
                         }else if (valType == Long.class){
