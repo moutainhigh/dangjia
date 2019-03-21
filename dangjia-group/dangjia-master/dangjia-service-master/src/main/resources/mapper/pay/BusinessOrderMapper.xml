@@ -59,12 +59,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		INNER JOIN dj_member AS member ON member.id = house.member_id
 		where pbo.data_status=0
 		<if test="likeAddress!=null and likeAddress!=''">
-			AND (
-			house.residential LIKE CONCAT('%',#{likeAddress},'%')
-			OR house.building LIKE CONCAT('%',#{likeAddress},'%')
-			OR house.unit LIKE CONCAT('%',#{likeAddress},'%')
-			OR house.number LIKE CONCAT('%',#{likeAddress},'%')
-			)
+			AND  CONCAT(house.residential,house.building,'栋',house.unit,'单元',house.number,'号') LIKE CONCAT('%',#{likeAddress},'%')
 		</if>
 		<if test="likeMobile!=null and likeMobile!=''">
 			AND member.mobile LIKE CONCAT('%',#{likeMobile},'%')

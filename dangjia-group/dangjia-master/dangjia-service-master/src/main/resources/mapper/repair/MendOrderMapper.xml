@@ -214,12 +214,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </if>
 
         <if test="likeAddress!=null and likeAddress!=''">
-            AND (
-            house.residential LIKE CONCAT('%',#{likeAddress},'%')
-            OR house.building LIKE CONCAT('%',#{likeAddress},'%')
-            OR house.unit LIKE CONCAT('%',#{likeAddress},'%')
-            OR house.number LIKE CONCAT('%',#{likeAddress},'%')
-            )
+            AND CONCAT(house.residential,house.building,'栋',house.unit,'单元',house.number,'号') LIKE CONCAT('%',#{likeAddress},'%')
+
         </if>
 
         ORDER BY rmo.create_date desc
