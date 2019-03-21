@@ -128,6 +128,10 @@ public interface MainUserAPI {
                          @RequestParam("member") UserDTO user,
                          @RequestParam(value = "rememberMe", required = false) boolean rememberMe);
 
+
+    @RequestMapping(value = "/user/checkAuth", method = RequestMethod.POST)
+    @ApiOperation(value = "檢查指定权限code，当前登录用户是否有权限", notes = "檢查指定权限code，当前登录用户是否有权限\"")
+    ServerResponse checkAuth(@RequestParam("request") HttpServletRequest request,@RequestParam("rcode") String rcode);
     /**
      * 修改密码之确认手机号
      *

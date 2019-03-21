@@ -34,11 +34,6 @@ public class BusinessOrder extends BaseEntity {
 	@ApiModelProperty("订单号")
 	private String number;//
 
-	/*@Column(name = "red_packet_pay_money_id")
-	@Desc(value = "优惠顶级单号")
-	@ApiModelProperty("优惠顶级单号")
-	private String redPacketPayMoneyId;//*/
-
 	@Column(name = "pay_order_number")
 	@Desc(value = "支付订单号")
 	@ApiModelProperty("支付订单号")

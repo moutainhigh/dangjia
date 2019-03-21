@@ -25,6 +25,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         INNER JOIN dj_house h ON hi.house_id = h.id
         WHERE
         hi.worker_id = #{workerId}
+        ORDER BY hi.create_date DESC
     </select>
 </mapper>
 
