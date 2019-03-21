@@ -8,6 +8,7 @@ import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.Validator;
+import com.dangjia.acg.dto.user.PermissionVO;
 import com.dangjia.acg.dto.user.UserDTO;
 import com.dangjia.acg.dto.user.UserSearchDTO;
 import com.dangjia.acg.modle.user.MainUser;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @RestController
 public class MainUserController implements MainUserAPI {
@@ -300,7 +302,39 @@ public class MainUserController implements MainUserAPI {
 		}
 		return msg;
 	}
-
+	/**
+	 * 检测指定用户是否拥有指定权限Code
+	 * @param rcode 权限code
+	 * @return
+	 */
+	@Override
+	@ApiMethod
+	public ServerResponse checkAuth(HttpServletRequest request,String rcode) {
+		try {
+			// 判断用户是否登录
+			String userID = request.getParameter(Constants.USERID);
+			MainUser existUser= redisClient.getCache(Constants.USER_KEY+userID,MainUser.class);
+			if (null == existUser) {
+				throw new BaseException(ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN, ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN.getDesc());
+			}
+			List<PermissionVO> source= redisClient.getListCache("userPerms:"+existUser.getId(), PermissionVO.class);
+			if(source==null||source.size()==0){
+				ServerResponse pvo  = mainAuthService.getUserPerms(existUser.getId());
+				source=(List) pvo.getResultObj();
+				redisClient.putListCache("userPerms"+existUser.getId(),source);
+			}
+			if(source!=null&&source.size()>0){
+				for (PermissionVO permissionVO : source) {
+					if(rcode.equals(permissionVO.getCode())){
+						return ServerResponse.createBySuccess("ok",true);
+					}
+				}
+			}
+		} catch (Exception e) {
+			return ServerResponse.createBySuccess("ok",false);
+		}
+		return ServerResponse.createBySuccess("ok",false);
+	}
 
 	/**
 	 * 修改密码之确认手机号
@@ -308,7 +342,9 @@ public class MainUserController implements MainUserAPI {
 	 * @param picCode
 	 * @return
 	 */
-	@Override @ApiMethod public ServerResponse updatePwd(HttpServletRequest request,String mobile, String picCode, String mobileCode) {
+	@Override
+	@ApiMethod
+	public ServerResponse updatePwd(HttpServletRequest request,String mobile, String picCode, String mobileCode) {
 		logger.debug("修改密码之确认手机号！mobile:" + mobile + ",picCode=" + picCode
 				+ ",mobileCode=" + mobileCode);
 		try {

@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.house;
 
+import com.dangjia.acg.dto.house.VillageClassifyDTO;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -18,5 +19,6 @@ public interface IModelingVillageMapper extends Mapper<ModelingVillage> {
 
     List<Map<String,Object>> getVillageList(@Param("cityId")String cityId);
     List<ModelingVillage> getAllVillage(@Param("cityId")String cityId,@Param("likeVillageName")String likeVillageName);
+    List<VillageClassifyDTO> getAllVillageDTO(@Param("cityId")String cityId, @Param("likeVillageName")String likeVillageName);
     Integer getAllVillageCount(@Param("cityId")String cityId);
 }
