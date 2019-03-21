@@ -330,9 +330,7 @@ public class PaymentService {
                 warehouseDetail.setRecordType(2);//补材料
                 warehouseDetail.setRelationId(order.getId());
                 warehouseDetailMapper.insert(warehouseDetail);
-                example = new Example(Warehouse.class);
-                example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, businessOrder.getHouseId());
-                List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
+
                 //处理补材料
                 for (MendMateriel mendMateriel : mendMaterielList) {
                     OrderItem orderItem = new OrderItem();
@@ -352,17 +350,11 @@ public class PaymentService {
                     orderItem.setImage(mendMateriel.getImage());
                     orderItemMapper.insert(orderItem);
 
-                    boolean flag = false;
-                    String warehouseId = null;
-                    for (Warehouse warehouse : warehouseList) {
-                        if (mendMateriel.getProductId().equals(warehouse.getProductId())) {//有相同货
-                            flag = true;
-                            warehouseId = warehouse.getId();
-                            continue;
-                        }
-                    }
-                    if (flag) {//累计数量
-                        Warehouse warehouse = warehouseMapper.selectByPrimaryKey(warehouseId);
+                    example = new Example(Warehouse.class);
+                    example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, businessOrder.getHouseId()).andEqualTo(Warehouse.PRODUCT_ID, mendMateriel.getProductId());
+                    int sum = warehouseMapper.selectCountByExample(example);
+                    if (sum > 0){//仓库购买过
+                        Warehouse warehouse = warehouseMapper.getByProductId(businessOrder.getHouseId(),mendMateriel.getProductId());
                         warehouse.setShopCount(warehouse.getShopCount() + mendMateriel.getShopCount());//数量
                         warehouse.setRepairCount(warehouse.getRepairCount() + mendMateriel.getShopCount());
                         warehouse.setPrice(mendMateriel.getPrice());
@@ -370,7 +362,7 @@ public class PaymentService {
                         warehouse.setImage(mendMateriel.getImage());
                         warehouse.setRepTime(warehouse.getRepTime() + 1);//补次数
                         warehouseMapper.updateByPrimaryKeySelective(warehouse);
-                    } else {//增加一条
+                    }else {
                         Warehouse warehouse = new Warehouse();
                         warehouse.setHouseId(businessOrder.getHouseId());
                         warehouse.setShopCount(mendMateriel.getShopCount());
@@ -687,9 +679,6 @@ public class PaymentService {
             warehouseDetail.setRecordType(0);//支付精算
             warehouseDetail.setRelationId(orderId);
             warehouseDetailMapper.insert(warehouseDetail);
-            Example example = new Example(Warehouse.class);
-            example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId);
-            List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
 
             for (BudgetMaterial budgetMaterial : budgetMaterialList) {
                 OrderItem orderItem = new OrderItem();
@@ -701,7 +690,6 @@ public class PaymentService {
                 orderItem.setProductNickName(budgetMaterial.getProductNickName());//货品昵称
                 orderItem.setPrice(budgetMaterial.getPrice());//销售价
                 orderItem.setCost(budgetMaterial.getCost());//成本价
-//                orderItem.setShopCount(budgetMaterial.getShopCount());//购买总数
                 orderItem.setShopCount(budgetMaterial.getConvertCount().doubleValue());//购买总数
                 orderItem.setUnitName(budgetMaterial.getUnitName());//单位
                 orderItem.setTotalPrice(budgetMaterial.getTotalPrice());//总价
@@ -710,24 +698,15 @@ public class PaymentService {
                 orderItem.setImage(budgetMaterial.getImage());
                 orderItemMapper.insert(orderItem);
 
-                boolean flag = false;
-                String warehouseId = null;
-                for (Warehouse warehouse : warehouseList) {
-                    if (budgetMaterial.getProductId().equals(warehouse.getProductId())) {//有相同货
-                        flag = true;
-                        warehouseId = warehouse.getId();
-                        continue;
-                    }
-                }
-                if (flag) {//累计数量
-                    Warehouse warehouse = warehouseMapper.selectByPrimaryKey(warehouseId);
-//                    warehouse.setShopCount(warehouse.getShopCount() + budgetMaterial.getShopCount());//数量
+                Example example = new Example(Warehouse.class);
+                example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId).andEqualTo(Warehouse.PRODUCT_ID, budgetMaterial.getProductId());
+                int sum = warehouseMapper.selectCountByExample(example);
+                if (sum > 0) {//累计数量
+                    Warehouse warehouse = warehouseMapper.getByProductId(houseId, budgetMaterial.getProductId());
                     warehouse.setShopCount(warehouse.getShopCount() + budgetMaterial.getConvertCount());//数量
                     if (type == 1) {//抢
-//                        warehouse.setRobCount(warehouse.getRobCount() + budgetMaterial.getShopCount());
                         warehouse.setRobCount(warehouse.getRobCount() + budgetMaterial.getConvertCount());
                     } else if (type == 2) {//未 待
-//                        warehouse.setStayCount(warehouse.getStayCount() + budgetMaterial.getShopCount());
                         warehouse.setStayCount(warehouse.getStayCount() + budgetMaterial.getConvertCount());
                     }
                     warehouse.setPrice(budgetMaterial.getPrice());
@@ -738,15 +717,12 @@ public class PaymentService {
                 } else {//增加一条
                     Warehouse warehouse = new Warehouse();
                     warehouse.setHouseId(houseId);
-//                    warehouse.setShopCount(budgetMaterial.getShopCount());
                     warehouse.setShopCount(budgetMaterial.getConvertCount().doubleValue());
                     if (type == 1) {
-//                        warehouse.setRobCount(budgetMaterial.getShopCount());//抢单任务进来总数
                         warehouse.setRobCount(budgetMaterial.getConvertCount().doubleValue());//抢单任务进来总数
                         warehouse.setStayCount(0.0);
                     } else {
                         warehouse.setRobCount(0.0);
-//                        warehouse.setStayCount(budgetMaterial.getShopCount());
                         warehouse.setStayCount(budgetMaterial.getConvertCount().doubleValue());
                     }
                     warehouse.setRepairCount(0.0);
