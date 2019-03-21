@@ -39,6 +39,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		    product_id=#{productId}
 		and
 		    house_id=#{houseId}
+		LIMIT 1;
     </select>
 
 	<!-- 模糊查询材料类商品 -->

@@ -122,12 +122,8 @@
         FROM dj_house as house
         WHERE 1=1
         <if test="likeAddress!=null and likeAddress!=''">
-            AND (
-            house.residential LIKE CONCAT('%',#{likeAddress},'%')
-            OR house.building LIKE CONCAT('%',#{likeAddress},'%')
-            OR house.unit LIKE CONCAT('%',#{likeAddress},'%')
-            OR number LIKE CONCAT('%',#{likeAddress},'%')
-            )
+            AND CONCAT(house.residential,house.building,'栋',house.unit,'单元',house.number,'号') LIKE CONCAT('%',#{likeAddress},'%')
+
         </if>
         ORDER BY waitCount DESC,sendCount DESC,house.create_date DESC
     </select>
@@ -222,10 +218,11 @@
             and m.id = #{memberId}
         </if>
         <if test="searchKey!=null and searchKey!=''">
-            and ( m.mobile like CONCAT('%',#{searchKey},'%')
-            or h.residential like CONCAT('%',#{searchKey},'%')
-            or h.unit like CONCAT('%',#{searchKey},'%')
-            or h.number like CONCAT('%',#{searchKey},'%'))
+            AND (
+                m.mobile like CONCAT('%',#{searchKey},'%')
+                or
+                CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') LIKE CONCAT('%',#{searchKey},'%')
+            )
         </if>
         ORDER by
         h.create_date desc
@@ -283,9 +280,7 @@
 
         <if test="searchKey!=null and searchKey!=''">
             and ( m.mobile like CONCAT('%',#{searchKey},'%')
-            or h.residential like CONCAT('%',#{searchKey},'%')
-            or h.unit like CONCAT('%',#{searchKey},'%')
-            or h.number like CONCAT('%',#{searchKey},'%')
+            or CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') LIKE CONCAT('%',#{searchKey},'%')
             or m.nick_name like CONCAT('%',#{searchKey},'%')
             or m.name like CONCAT('%',#{searchKey},'%')
             )

@@ -352,8 +352,6 @@ public class BudgetWorkerService {
 
             iBudgetMaterialMapper.deleteByhouseId(houseId, workerTypeId);
             iBudgetWorkerMapper.deleteByhouseId(houseId, workerTypeId);
-            Map map = new HashMap();//记录重复数据，防止重复添加
-            Example example = null;
             JSONArray goodsList = JSONArray.parseArray(listOfGoods);
             for (int i = 0; i < goodsList.size(); i++) {
                 JSONObject job = goodsList.getJSONObject(i);
@@ -364,7 +362,10 @@ public class BudgetWorkerService {
                 String goodsGroupId = job.getString("goodsGroupId");//所属关联组
                 Double shopCount = Double.parseDouble(job.getString("shopCount"));//数量
                 if (0 == productType || 1 == productType) {//材料或者服务
-                    if (map.get(houseId + workerTypeId + goodsId + productId) != null && Boolean.parseBoolean(map.get(houseId + workerTypeId + goodsId + productId).toString())) {
+                    Example example1=new Example(BudgetMaterial.class);
+                    example1.createCriteria().andEqualTo(BudgetMaterial.HOUSE_ID,houseId).andEqualTo(BudgetMaterial.PRODUCT_ID,productId).andEqualTo(BudgetMaterial.WORKER_TYPE_ID,workerTypeId);
+                    int num= iBudgetMaterialMapper.selectCountByExample(example1);
+                    if(num>0){
                         continue;
                     }
                     try {
@@ -434,14 +435,16 @@ public class BudgetWorkerService {
                         budgetMaterial.setGoodsGroupId(goodsGroupId);
 //                        budgetMaterial.setTemplateId(actuarialTemplateId);
                         iBudgetMaterialMapper.insert(budgetMaterial);
-                        map.put(houseId + workerTypeId + goodsId + productId, true);
                     } catch (Exception e) {
                         e.printStackTrace();
                         return ServerResponse.createByErrorMessage("生成失败");
                     }
                 } else if (2 == productType) {//人工商品
                     try {
-                        if (map.get(houseId + workerTypeId + "R" + goodsId + productId) != null && Boolean.parseBoolean(map.get(houseId + workerTypeId + "R" + goodsId + productId).toString())) {
+                        Example example1=new Example(BudgetWorker.class);
+                        example1.createCriteria().andEqualTo(BudgetWorker.HOUSE_ID,houseId).andEqualTo(BudgetWorker.WORKER_GOODS_ID,productId).andEqualTo(BudgetWorker.WORKER_TYPE_ID,workerTypeId);
+                        int num= iBudgetWorkerMapper.selectCountByExample(example1);
+                        if(num>0){
                             continue;
                         }
                         BudgetWorker budgetWorker = new BudgetWorker();
@@ -470,7 +473,6 @@ public class BudgetWorkerService {
                         budgetWorker.setCreateDate(new Date());
                         budgetWorker.setModifyDate(new Date());
                         iBudgetWorkerMapper.insert(budgetWorker);
-                        map.put(houseId + workerTypeId + "R" + goodsId + productId, true);
                     } catch (Exception e) {
                         e.printStackTrace();
                         return ServerResponse.createByErrorMessage("生成失败");
