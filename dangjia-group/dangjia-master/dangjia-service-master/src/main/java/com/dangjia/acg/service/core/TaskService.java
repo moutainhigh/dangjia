@@ -141,7 +141,8 @@ public class TaskService {
         List<Task> taskList = new ArrayList<Task>();
         //查询待支付工序
         Example example = new Example(HouseFlow.class);
-        example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 3).andEqualTo(HouseFlow.HOUSE_ID, houseId);
+        example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 3).andEqualTo(HouseFlow.HOUSE_ID, houseId)
+                .andNotEqualTo(HouseFlow.STATE,2);
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         for (HouseFlow houseFlow : houseFlowList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
