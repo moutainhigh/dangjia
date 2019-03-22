@@ -1563,7 +1563,7 @@ public class PaymentService {
 
 
     /**
-     * 待付款 管家后
+     * 未付款 管家后
      */
     public ServerResponse setPaying(String houseId) {
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
