@@ -354,7 +354,7 @@ public class PaymentService {
                     example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, businessOrder.getHouseId()).andEqualTo(Warehouse.PRODUCT_ID, mendMateriel.getProductId());
                     int sum = warehouseMapper.selectCountByExample(example);
                     if (sum > 0){//仓库购买过
-                        Warehouse warehouse = warehouseMapper.getByProductId(businessOrder.getHouseId(),mendMateriel.getProductId());
+                        Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(),businessOrder.getHouseId());
                         warehouse.setShopCount(warehouse.getShopCount() + mendMateriel.getShopCount());//数量
                         warehouse.setRepairCount(warehouse.getRepairCount() + mendMateriel.getShopCount());
                         warehouse.setPrice(mendMateriel.getPrice());
@@ -702,7 +702,7 @@ public class PaymentService {
                 example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId).andEqualTo(Warehouse.PRODUCT_ID, budgetMaterial.getProductId());
                 int sum = warehouseMapper.selectCountByExample(example);
                 if (sum > 0) {//累计数量
-                    Warehouse warehouse = warehouseMapper.getByProductId(houseId, budgetMaterial.getProductId());
+                    Warehouse warehouse = warehouseMapper.getByProductId(budgetMaterial.getProductId(),houseId);
                     warehouse.setShopCount(warehouse.getShopCount() + budgetMaterial.getConvertCount());//数量
                     if (type == 1) {//抢
                         warehouse.setRobCount(warehouse.getRobCount() + budgetMaterial.getConvertCount());
