@@ -51,7 +51,8 @@
         SELECT
         <include refid="all_columns"/>
         FROM dj_member w
-        WHERE 1=1
+        INNER JOIN dj_member_info mi on mi.member_id = w.id and mi.policy_id='2'
+        WHERE w.data_status = 0
         <if test="name!=null and name!=''">
             and
             w.name LIKE CONCAT('%',#{name},'%')
@@ -83,7 +84,7 @@
         SELECT
         <include refid="all_columns"/>
         FROM dj_member w
-        where 1=1
+        where w.data_status = 0
         <if test="password!=null">
             AND password=#{password}
         </if>
@@ -107,7 +108,7 @@
             create_date AS createDate
         FROM dj_member
         WHERE
-            1=1
+          data_status = 0
         ORDER by
             create_date
     </select>
