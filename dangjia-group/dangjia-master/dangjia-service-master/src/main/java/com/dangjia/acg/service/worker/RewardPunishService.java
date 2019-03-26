@@ -79,21 +79,22 @@ public class RewardPunishService {
                 rewardPunishCondition.setRewardPunishCorrelationId(rewardPunishCorrelation.getId());
                 String conditionName="";
                 if(type==0){//奖励
-                        conditionName="奖励"+object.getInteger("quantity")+object.getString("units");
+                        conditionName="奖励"+object.getString("quantity")+object.getString("units");
                 }else{//处罚
                     if(object.getInteger("type")==3){
-                        conditionName="处罚"+object.getInteger("quantity")+object.getString("units")+"不能接单";
+                        conditionName="处罚"+object.getString("quantity")+object.getString("units")+"不能接单";
                     }else if(object.getInteger("type")==4){
-                        conditionName="处罚"+object.getInteger("quantity")+object.getString("units")+"不能提现";
+                        conditionName="处罚"+object.getString("quantity")+object.getString("units")+"不能提现";
                     }else{
-                        conditionName="扣除"+object.getInteger("quantity")+object.getString("units");
+                        conditionName="扣除"+object.getString("quantity")+object.getString("units");
                     }
                 }
+                int types=Integer.parseInt(object.getString("type"));
                 rewardPunishCondition.setName(conditionName);
-                rewardPunishCondition.setType(object.getInteger("type"));
+                rewardPunishCondition.setType(types);
                 rewardPunishCondition.setQuantity(object.getBigDecimal("quantity"));
                 rewardPunishCondition.setUnits(object.getString("units"));
-                if(object.getInteger("type")==3||object.getInteger("type")==4){
+                if(types==3||types==4){
                     String startTime = object.getString("startTime");
                     String endTime = object.getString("endTime");
                     rewardPunishCondition.setStartTime(DateUtil.toDate(startTime));

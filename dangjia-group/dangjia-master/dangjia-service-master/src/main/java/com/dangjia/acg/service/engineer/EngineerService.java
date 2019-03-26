@@ -58,7 +58,7 @@ public class EngineerService {
     public ServerResponse changePayed(String houseWorkerId,String workerId){
         try {
             HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(houseWorkerId);
-            if (houseWorker.getWorkerType() != 3) {//不操作管家
+//            if (houseWorker.getWorkerType() != 3) {//不操作管家
                 //记录被换的人
                 HouseWorker hw = new HouseWorker();
                 hw.setHouseId(houseWorker.getHouseId());
@@ -82,7 +82,7 @@ public class EngineerService {
 
                 houseWorker.setWorkerId(workerId);
                 houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-            }
+//            }
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
             e.printStackTrace();
