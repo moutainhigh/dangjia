@@ -101,25 +101,30 @@ public class MemberService {
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
         String mobile = "";
         request.setAttribute("isShow", "true");
-        if (idType.equals("1")) {
-            House house = houseMapper.selectByPrimaryKey(id);
-            if (house != null) {
-                Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+        switch (idType) {
+            case "1":
+                House house = houseMapper.selectByPrimaryKey(id);
+                if (house != null) {
+                    Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                    mobile = member == null ? "" : member.getMobile();
+                }
+                break;
+            case "3":
+                Supplier supplier = supplierProductAPI.getSupplier(id);
+                if (supplier != null) {
+                    mobile = supplier.getTelephone();
+                }
+                break;
+            case "4":
+                MainUser mainUser = userMapper.selectByPrimaryKey(id);
+                if (mainUser != null) {
+                    mobile = mainUser.getMobile();
+                }
+                break;
+            default:
+                Member member = memberMapper.selectByPrimaryKey(id);
                 mobile = member == null ? "" : member.getMobile();
-            }
-        } else if (idType.equals("3")) {
-            Supplier supplier = supplierProductAPI.getSupplier(id);
-            if (supplier != null) {
-                mobile = supplier.getTelephone();
-            }
-        } else if (idType.equals("4")) {
-            MainUser mainUser = userMapper.selectByPrimaryKey(id);
-            if (mainUser != null) {
-                mobile = mainUser.getMobile();
-            }
-        } else {
-            Member member = memberMapper.selectByPrimaryKey(id);
-            mobile = member == null ? "" : member.getMobile();
+                break;
         }
         if (CommonUtil.isEmpty(mobile)) {
             mobile = "4001681231";
