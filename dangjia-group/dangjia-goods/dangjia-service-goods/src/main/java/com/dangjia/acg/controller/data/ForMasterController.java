@@ -118,8 +118,18 @@ public class ForMasterController implements ForMasterAPI {
     }
     @Override
     @ApiMethod
+    public Double nonPaymentCai(String houseId, String workerTypeId,String cityId){
+        return forMasterService.nonPaymentCai(houseId,workerTypeId);
+    }
+    @Override
+    @ApiMethod
     public Double getBudgetSerPrice(String houseId,String workerTypeId,String cityId){
         return forMasterService.getBudgetSerPrice(houseId,workerTypeId);
+    }
+    @Override
+    @ApiMethod
+    public Double nonPaymentSer(String houseId,String workerTypeId,String cityId){
+        return forMasterService.nonPaymentSer(houseId,workerTypeId);
     }
     @Override
     @ApiMethod
