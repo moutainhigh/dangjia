@@ -616,4 +616,36 @@
 			and FIND_IN_SET(#{valueId},p.value_id_arr)
 		</foreach>;
 	</select>
+
+	<!-- app搜索落地页 -->
+	<select id="serchBoxName"  resultType="com.dangjia.acg.modle.basics.Product">
+		SELECT pg.id,pg.goods_id goodsId, g.`name`, pg.image, pg.price , pg.convert_unit convertUnit FROM
+			dj_basics_goods g
+		INNER JOIN (
+			SELECT
+			p.id,
+			p.goods_id,
+			p.convert_unit,
+			p.image,
+			p.price
+			FROM
+			dj_basics_product p
+			WHERE
+			p.maket = 1
+			AND p.type = 1
+			ORDER BY
+			p.create_date DESC
+		) pg ON g.id = pg.goods_id
+		WHERE
+			g.data_status = 0
+		<if test="name!=null and name!=''">
+			AND
+			g.name LIKE CONCAT('%',#{name},'%')
+		</if>
+		GROUP BY
+			g.id
+		ORDER BY
+			g.create_date DESC
+	</select>
+
 </mapper>

@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletResponse;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -244,9 +243,12 @@ public class HouseDataService {
                         continue;
                     tActuaryGoods.setProductName(worker.getName());
                     tActuaryGoods.setProductNum(worker.getShopCount());
+                    tActuaryGoods.setShopNum(worker.getShopCount());
+                    tActuaryGoods.setGoodsUnitName(worker.getUnitName());
                     tActuaryGoods.setPrice(worker.getPrice());
                     tActuaryGoods.setPriceTotal(worker.getTotalPrice());
                     tActuaryGoods.setUnit(worker.getUnitName());
+                    tActuaryGoods.setProductSn(worker.getWorkerGoodsSn());
                     tActuaryGoodsList.add(tActuaryGoods);
 
                     TActuaryGoodsTotal total = mapsTotal.get(keyArrs[i - 3][2]);
