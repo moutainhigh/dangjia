@@ -70,4 +70,6 @@ public interface IProductMapper extends Mapper<Product> {
     List<Product> commonMaterials(@Param("name") String name, @Param("categoryId") String categoryId);
 
     Product getSwitchProduct(@Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String[] valueIdArr);
+
+    List<Product> serchBoxName(@Param("name") String name);
 }

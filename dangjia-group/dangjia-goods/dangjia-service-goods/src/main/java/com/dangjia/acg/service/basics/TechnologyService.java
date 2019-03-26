@@ -412,30 +412,17 @@ public class TechnologyService {
                 example.createCriteria().andLike(Goods.NAME, "%"+name+"%").andEqualTo(Goods.DATA_STATUS,"0");
                 example.orderBy(Goods.CREATE_DATE).desc();
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<Goods> pList =iGoodsMapper.selectByExample(example);
+                List<Product> pList =iProductMapper.serchBoxName(name);
                 pageResult = new PageInfo(pList);
-                for (Goods t : pList) {
-                    example = new Example(Product.class);
-                    example.createCriteria()
-                            .andLike(Product.GOODS_ID, t.getId())
-                            .andEqualTo(Product.DATA_STATUS,"0")
-                            .andEqualTo(Product.MAKET,"1")
-                            .andEqualTo(Product.TYPE,"1");
-                    example.orderBy(Goods.CREATE_DATE).desc();
-                    PageHelper.startPage(1, 1);
-                    List<Product>  products=iProductMapper.selectByExample(example);
-                    if(products.size()>0) {
-                        Product product=products.get(0);
-                        JSONObject object = new JSONObject();
-                        object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
-//                        object.put("price", product.getPrice() + "/" + product.getUnitName());
-                        String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
-                        object.put("price", product.getPrice() + "/" + convertUnitName);
-                        object.put("name", t.getName());
-                        String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") + "&gId=" + product.getId() + "&type=" + DjConstants.GXType.CAILIAO;
-                        object.put("url", url);//0:工艺；1：商品；2：人工
-                        arr.add(object);
-                    }else{pageResult.setTotal(pageResult.getTotal()-1);}
+                for (Product product : pList) {
+                    String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
+                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") + "&gId=" + product.getId() + "&type=" + DjConstants.GXType.CAILIAO;
+                    JSONObject object = new JSONObject();
+                    object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
+                    object.put("price", product.getPrice() + "/" + convertUnitName);
+                    object.put("name", product.getName());
+                    object.put("url", url);//0:工艺；1：商品；2：人工
+                    arr.add(object);
                 }
             }
             if (type == 2) {
