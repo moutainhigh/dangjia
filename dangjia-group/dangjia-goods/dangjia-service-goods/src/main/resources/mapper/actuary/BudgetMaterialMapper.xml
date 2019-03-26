@@ -149,6 +149,20 @@
 		and bm.steta = 1
 	</update>
 
+	<!--未付款工种服务总价-->
+	<select id="nonPaymentSer" resultType="java.lang.Double">
+		select
+		    IFNULL(sum(p.price * bm.convert_count),0)
+		from dj_basics_product p,dj_actuary_budget_material bm
+		where
+	        p.id = bm.product_id
+	    and bm.house_id = #{houseId}
+	    and bm.worker_type_id = #{workerTypeId}
+	    and bm.delete_state in (0,2)
+	    and bm.steta = 1
+	    and bm.product_type = 1
+	</select>
+
 	<!--支付时工种服务总价-->
 	<select id="getBudgetSerPrice" resultType="java.lang.Double">
 		select
@@ -174,6 +188,21 @@
 	    and bm.delete_state = 2
 	    and bm.steta = 1
 	    and bm.product_type = 1
+	</select>
+
+
+	<!--未付款材料总价-->
+	<select id="nonPaymentCai" resultType="java.lang.Double">
+		select
+		    IFNULL(sum(p.price * bm.convert_count),0)
+		from dj_basics_product p,dj_actuary_budget_material bm
+		where
+	        p.id = bm.product_id
+	    and bm.house_id = #{houseId}
+	    and bm.worker_type_id = #{workerTypeId}
+	    and bm.delete_state in (0, 2)
+	    and bm.steta = 1
+	    and bm.product_type = 0
 	</select>
 
 	<!--支付时工种材料总价-->
