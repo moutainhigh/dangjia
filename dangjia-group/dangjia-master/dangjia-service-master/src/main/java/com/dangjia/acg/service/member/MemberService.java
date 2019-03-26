@@ -16,10 +16,7 @@ import com.dangjia.acg.dto.member.MemberCustomerDTO;
 import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.member.ICustomerMapper;
-import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
-import com.dangjia.acg.mapper.member.IMemberLabelMapper;
-import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.member.*;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -62,6 +59,8 @@ public class MemberService {
     private RedPackPayService redPackPayService;
     @Autowired
     private IMemberMapper memberMapper;
+    @Autowired
+    private IMemberInfoMapper memberInfoMapper;
     @Autowired
     private ICustomerRecordMapper iCustomerRecordMapper;
     @Autowired
@@ -178,6 +177,7 @@ public class MemberService {
         }
         redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
         redisClient.put(userRole, accessToken.getUserToken());
+        updateOrInsertInfo(user.getId(),String.valueOf(userRole),user.getPassword());
         groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
         return ServerResponse.createBySuccess("登录成功，正在跳转", accessToken);
     }
@@ -233,6 +233,7 @@ public class MemberService {
     public ServerResponse checkRegister(HttpServletRequest request, String phone, int smscode, String password, String invitationCode, Integer userRole) {
         Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
         if (registerCode == null || smscode != registerCode) {
+
             return ServerResponse.createByErrorMessage("验证码错误");
         } else {
             Member user = new Member();
@@ -264,7 +265,7 @@ public class MemberService {
             user.setVisitState(0);
             user.setUserName(user.getMobile());
             user.setName("");
-            user.setSmscode(userRole);
+            user.setSmscode(0);
             user.setOthersInvitationCode(invitationCode);
             user.setInvitationCode(CommonUtil.randomString(6));
             user.setNickName("当家-" + CommonUtil.randomString(6));
@@ -273,6 +274,7 @@ public class MemberService {
             user.setHead("qrcode/logo.png");
             memberMapper.insertSelective(user);
 //			memberMapper.updateByPrimaryKeySelective(user);
+            updateOrInsertInfo(user.getId(),String.valueOf(userRole),user.getPassword());
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             AccessToken accessToken = TokenUtil.generateAccessToken(user);
             if (!CommonUtil.isEmpty(user.getWorkerTypeId())) {
@@ -295,6 +297,24 @@ public class MemberService {
         }
     }
 
+    public void updateOrInsertInfo(String memberid,String policyId,String pwd){
+        try {
+            //检测是否已有指定身份，无则初始化
+            Example example =new Example(MemberInfo.class);
+            example.createCriteria().andEqualTo(MemberInfo.MEMBER_ID,memberid).andEqualTo(MemberInfo.POLICY_ID,policyId);
+            List<MemberInfo> infos= memberInfoMapper.selectByExample(example);
+            if(!CommonUtil.isEmpty(memberid)&&(infos==null||infos.size()==0)){
+               MemberInfo memberInfo=new MemberInfo();
+               memberInfo.setMemberId(memberid);
+               memberInfo.setPolicyId(policyId);
+               memberInfo.setPassword(pwd);
+               memberInfo.setCheckStatus("0");
+               memberInfoMapper.insertSelective(memberInfo);
+            }
+        }catch (Exception e){
+            logger.error("用户身份异常！", e);
+        }
+    }
     /**
      * 工匠提交详细资料
      */

@@ -1563,7 +1563,7 @@ public class PaymentService {
 
 
     /**
-     * 待付款 管家后
+     * 未付款 管家后
      */
     public ServerResponse setPaying(String houseId) {
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
@@ -1575,8 +1575,8 @@ public class PaymentService {
         List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
         House house = houseMapper.selectByPrimaryKey(houseId);
         for (HouseFlow hf : houseFlowList) {
-            Double caiPrice = forMasterAPI.getBudgetCaiPrice(houseId, hf.getWorkerTypeId(), house.getCityId());//精算材料钱
-            Double serPrice = forMasterAPI.getBudgetSerPrice(houseId, hf.getWorkerTypeId(), house.getCityId());//精算服务钱
+            Double caiPrice = forMasterAPI.nonPaymentCai(houseId, hf.getWorkerTypeId(), house.getCityId());//精算未付款材料钱
+            Double serPrice = forMasterAPI.nonPaymentSer(houseId, hf.getWorkerTypeId(), house.getCityId());//精算未付款服务钱
             if (caiPrice == null) {
                 caiPrice = 0.0;
             }

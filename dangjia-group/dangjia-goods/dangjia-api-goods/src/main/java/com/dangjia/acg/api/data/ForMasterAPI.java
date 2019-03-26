@@ -95,6 +95,11 @@ public interface ForMasterAPI {
     Double getBudgetCaiPrice(@RequestParam("houseId") String houseId,
                              @RequestParam("workerTypeId") String workerTypeId,
                              @RequestParam("cityId") String cityId);
+    @PostMapping("/data/forMaster/nonPaymentCai")
+    @ApiOperation(value = "未付款材料", notes = "未付款材料")
+    Double nonPaymentCai(@RequestParam("houseId") String houseId,
+                             @RequestParam("workerTypeId") String workerTypeId,
+                             @RequestParam("cityId") String cityId);
 
     @PostMapping("/data/forMaster/getNotCaiPrice")
     @ApiOperation(value = "支付时工种未选择材料总价", notes = "支付时工种未选择材料总价")
@@ -105,6 +110,11 @@ public interface ForMasterAPI {
     @PostMapping("/data/forMaster/getBudgetSerPrice")
     @ApiOperation(value = "支付时工种服务总价", notes = "支付时工种服务总价")
     Double getBudgetSerPrice(@RequestParam("houseId") String houseId,
+                             @RequestParam("workerTypeId") String workerTypeId,
+                             @RequestParam("cityId") String cityId);
+    @PostMapping("/data/forMaster/nonPaymentSer")
+    @ApiOperation(value = "未付款工种服务总价", notes = "未付款工种服务总价")
+    Double nonPaymentSer(@RequestParam("houseId") String houseId,
                              @RequestParam("workerTypeId") String workerTypeId,
                              @RequestParam("cityId") String cityId);
 
