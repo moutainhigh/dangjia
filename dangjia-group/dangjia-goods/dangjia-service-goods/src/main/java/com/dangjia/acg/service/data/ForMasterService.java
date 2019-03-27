@@ -187,6 +187,7 @@ public class ForMasterService {
         return budgetMaterialMapper.getBudgetCaiPrice(houseId,workerTypeId);
     }
     public Double nonPaymentCai(String houseId,String workerTypeId){
+        budgetMaterialMapper.updateCai(houseId,workerTypeId);
         return budgetMaterialMapper.nonPaymentCai(houseId,workerTypeId);
     }
     /**

@@ -40,6 +40,8 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 	Double getNotSerPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	/**未付款材料总价*/
 	Double nonPaymentCai(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+
+	int updateCai(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	/**支付时工种材料总价*/
 	Double getBudgetCaiPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	/**支付时工种未选择材料总价*/

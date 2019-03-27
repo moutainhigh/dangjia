@@ -15,12 +15,14 @@ public class HouseWorkerSupService {
 
     /**
      * 工匠申请停工
-     * @param userToken
-     * @param applyDec   内容
-     * @param startDate 开始时间
-     * @param endDate 结束时间
      */
-    public ServerResponse applyShutdown(String userToken,String houseId,String applyDec,String startDate,String endDate){
-        return null;
+    public ServerResponse applyShutdown(String userToken, String houseFlowId, String applyDec, String startDate, String endDate){
+        try{
+
+            return ServerResponse.createBySuccessMessage("操作成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("申请失败");
+        }
     }
 }
