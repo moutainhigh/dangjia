@@ -17,6 +17,12 @@ public class HouseWorkerSupService {
      * 工匠申请停工
      */
     public ServerResponse applyShutdown(String userToken, String houseFlowId, String applyDec, String startDate, String endDate){
-        return ServerResponse.createBySuccessMessage("操作成功");
+        try{
+
+            return ServerResponse.createBySuccessMessage("操作成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("申请失败");
+        }
     }
 }
