@@ -20,7 +20,7 @@ public class HouseWorkerSupController implements HouseWorkerSupAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse applyShutdown(String userToken, String houseId, String applyDec, String startDate, String endDate){
-        return houseWorkerSupService.applyShutdown(userToken,houseId,applyDec,startDate,endDate);
+    public ServerResponse applyShutdown(String userToken, String houseFlowId, String applyDec, String startDate, String endDate){
+        return houseWorkerSupService.applyShutdown(userToken,houseFlowId,applyDec,startDate,endDate);
     }
 }

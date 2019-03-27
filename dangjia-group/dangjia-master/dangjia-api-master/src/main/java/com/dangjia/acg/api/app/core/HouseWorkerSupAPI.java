@@ -18,6 +18,6 @@ public interface HouseWorkerSupAPI {
 
     @PostMapping("app/core/houseWorkerSup/applyShutdown")
     @ApiOperation(value = "工匠申请停工", notes = "工匠申请停工")
-    ServerResponse applyShutdown(@RequestParam("userToken")String userToken, @RequestParam("houseId")String houseId, @RequestParam("applyDec")String applyDec,
+    ServerResponse applyShutdown(@RequestParam("userToken")String userToken, @RequestParam("houseFlowId")String houseFlowId, @RequestParam("applyDec")String applyDec,
                                  @RequestParam("startDate")String startDate, @RequestParam("endDate")String endDate);
 }
