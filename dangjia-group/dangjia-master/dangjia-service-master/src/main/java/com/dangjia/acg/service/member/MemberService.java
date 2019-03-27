@@ -166,6 +166,7 @@ public class MemberService {
     }
 
     ServerResponse getUser(Member user, String userRole) {
+        updateOrInsertInfo(user.getId(),String.valueOf(userRole),user.getPassword());
         userRole = "role" + userRole + ":" + user.getId();
         String token = redisClient.getCache(userRole, String.class);
         //如果用户存在usertoken则清除原来的token数据
@@ -182,7 +183,6 @@ public class MemberService {
         }
         redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
         redisClient.put(userRole, accessToken.getUserToken());
-        updateOrInsertInfo(user.getId(),String.valueOf(userRole),user.getPassword());
         groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
         return ServerResponse.createBySuccess("登录成功，正在跳转", accessToken);
     }
