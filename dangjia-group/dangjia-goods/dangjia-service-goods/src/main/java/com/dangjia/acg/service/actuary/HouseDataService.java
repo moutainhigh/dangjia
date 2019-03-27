@@ -1,8 +1,10 @@
 package com.dangjia.acg.service.actuary;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.GetForBudgetAPI;
+import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.WorkTypeEnums;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.excel.ExportExcel;
@@ -20,6 +22,7 @@ import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.core.WorkerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +48,8 @@ public class HouseDataService {
     private IBudgetMaterialMapper iBudgetMaterialMapper;
     @Autowired
     private IBudgetWorkerMapper iBudgetWorkerMapper;
+    @Autowired
+    private WorkerTypeAPI workerTypeAPI;
 
     @Autowired
     private IProductMapper iProductMapper;
@@ -111,8 +116,13 @@ public class HouseDataService {
             LOG.info("exportActuaryTotal :" + houseId);
             List<TActuaryGoods> tActuaryGoodsList = new ArrayList<>();//商品基础数据结果集
             List<TActuaryGoodsTotal> tActuaryGoodsTotalList = new ArrayList<>();//商品汇总数据结果集
+            Map<String, TActuaryGoodsTotal> mapsTotal = new HashMap<>();//存放 统计结果数据
+            ServerResponse serverResponse=workerTypeAPI.getWorkerTypeList(-1);
+            JSONArray jsonArray =null;
+            if (serverResponse.isSuccess()) {
+                jsonArray = (JSONArray) serverResponse.getResultObj();
+            }
 
-            Map<Integer, TActuaryGoodsTotal> mapsTotal = new HashMap<>();//存放 统计结果数据
             /**
              *  // 工匠数据库对应id： 3: 大管家 ，4：拆除 ，5：防水（弃用）  ，6：水电 ，7：泥工 ，8：木工 ，9：油漆
              *  // 一维： 0: 大管家 ，1：拆除 ，2：  ，3：水电 ，4：泥工 ，5：木工 ，6：油漆
@@ -120,15 +130,14 @@ public class HouseDataService {
              *   例如： [0][0]: 表示 大管家->材料
              *   例如： [0][1]: 表示 大管家->服务
              */
-            int[][] keyArrs = new int[7][3];
-            int indexCount = 0;
-            for (int i = 0; i < keyArrs.length; ++i) {
+            for (int i = 0; i < jsonArray.size(); ++i) {
                 for (int j = 0; j < 3; ++j) {
-                    keyArrs[i][j] = indexCount++;
-//                    if(i == 5) //5：防水（弃用）
-//                        continue;
+                    JSONObject workerType = (JSONObject)jsonArray.get(i);
+                    if(workerType.getInteger(WorkerType.TYPE)<3){
+                        continue;
+                    }
                     TActuaryGoodsTotal tActuaryGoodsTotal = new TActuaryGoodsTotal();
-                    tActuaryGoodsTotal.setName(WorkTypeEnums.getInstance(i + 3).getDesc() + "");
+                    tActuaryGoodsTotal.setName(workerType.getString(WorkerType.NAME));
                     tActuaryGoodsTotal.setPriceTotal(0.0);
                     if (j == 0)
                         tActuaryGoodsTotal.setGoodsType("材料");
@@ -136,127 +145,125 @@ public class HouseDataService {
                         tActuaryGoodsTotal.setGoodsType("服务");
                     if (j == 2)
                         tActuaryGoodsTotal.setGoodsType("人工");
-                    mapsTotal.put(keyArrs[i][j], tActuaryGoodsTotal);
+                    mapsTotal.put(workerType.getString(WorkerType.ID)+"-"+j, tActuaryGoodsTotal);
                 }
             }
-//            for (int i = 0; i < keyArrs.length; i++) { //遍历二维数组，遍历出来的每一个元素是一个一维数组
-//                for (int j = 0; j < keyArrs[i].length; j++) { //遍历对应位置上的一维数组
-//                    LOG.info("keyArrs:" + keyArrs[i][j] + " i:" + i + "J:" + j);
-//                }
-//            }
-            for (int i = 3; i < 10; i++) { //遍历每个工序
-                String workerTypeId = i + "";  // 3: 大管家 ，4：拆除 ，5：  ，6：水电 ，7：泥工 ，8：木工 ，9：油漆
-                //根据houseId和workerTypeId查询房子材料精算
-//                List<Map<String, Object>> materialMapList = iBudgetMaterialMapper.getBudgetMaterialById(houseId, workerTypeId);
-                List<BudgetMaterial> materialMapList = iBudgetMaterialMapper.getBudgetMaterialByHouseIdAndWorkerTypeId(houseId, workerTypeId);
-                for (BudgetMaterial material : materialMapList) {
-                    if (CommonUtil.isEmpty(material.getProductName()))
+
+            if (jsonArray != null&&jsonArray.size()>0) {
+                for (int i = 0; i < jsonArray.size(); i++) { //遍历每个工序
+                    JSONObject workerType = (JSONObject)jsonArray.get(i);  // 3: 大管家 ，4：拆除 ，5：  ，6：水电 ，7：泥工 ，8：木工 ，9：油漆
+                    if(workerType.getInteger(WorkerType.TYPE)<3){
                         continue;
-                    Goods goods = iGoodsMapper.selectByPrimaryKey(material.getGoodsId());
-                    if (goods == null) continue;
-                    TActuaryGoods tActuaryGoods = new TActuaryGoods();
-                    String name = WorkTypeEnums.getInstance(Integer.parseInt(material.getWorkerTypeId())).getDesc();
-                    tActuaryGoods.setName(name);
-                    tActuaryGoods.setShopNum(material.getShopCount());
-//                    购买性质0：必买；1可选；2自购
-                    if (goods.getBuy() != 2) {
-                        Product product = iProductMapper.selectByPrimaryKey(material.getProductId());
-                        tActuaryGoods.setProductSn(product.getProductSn());
-                        tActuaryGoods.setGoodsUnitName(product.getUnitName());
-                        tActuaryGoods.setConvertQuality(product.getConvertQuality());
-                        tActuaryGoods.setUnit(iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName());
+                    }
+                    //根据houseId和workerTypeId查询房子材料精算
+                    List<BudgetMaterial> materialMapList = iBudgetMaterialMapper.getBudgetMaterialByHouseIdAndWorkerTypeId(houseId, workerType.getString(WorkerType.ID));
+                    for (BudgetMaterial material : materialMapList) {
+                        if (CommonUtil.isEmpty(material.getProductName()))
+                            continue;
+                        Goods goods = iGoodsMapper.selectByPrimaryKey(material.getGoodsId());
+                        if (goods == null) continue;
+                        TActuaryGoods tActuaryGoods = new TActuaryGoods();
+                        tActuaryGoods.setName(workerType.getString(WorkerType.NAME));
+                        tActuaryGoods.setShopNum(material.getShopCount());
+    //                    购买性质0：必买；1可选；2自购
+                        if (goods.getBuy() != 2) {
+                            Product product = iProductMapper.selectByPrimaryKey(material.getProductId());
+                            tActuaryGoods.setProductSn(product.getProductSn());
+                            tActuaryGoods.setGoodsUnitName(product.getUnitName());
+                            tActuaryGoods.setConvertQuality(product.getConvertQuality());
+                            tActuaryGoods.setUnit(iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName());
+                        }
+
+                        //用户删除状态·,0表示未支付，1表示已删除,2表示业主取消,3表示已经支付,4再次购买
+                        switch (material.getDeleteState()) {
+                            case 0:
+                                tActuaryGoods.setDeleteState("未支付");
+                                break;
+                            case 1:
+                                tActuaryGoods.setDeleteState("已删除");
+                                continue;//不显示 已删除的
+                            case 2:
+                                tActuaryGoods.setDeleteState("业主取消");
+                                break;
+                            case 3:
+                                tActuaryGoods.setDeleteState("已支付");
+                                break;
+                            case 4:
+                                tActuaryGoods.setDeleteState("再次购买");
+                                break;
+                        }
+
+                        if (goods != null) {
+                            if (0 == goods.getType())//0:材料；1：服务
+                                tActuaryGoods.setGoodsType("材料");//商品类型 : 材料，服务，人工，
+                            else if (1 == goods.getType())
+                                tActuaryGoods.setGoodsType("服务");//商品类型 : 材料，服务，人工，
+                        }
+
+                        TActuaryGoodsTotal total = mapsTotal.get(workerType.getString(WorkerType.ID)+"-"+goods.getType());
+                        if (goods.getBuy() == 2) //自购
+                        {
+                            tActuaryGoods.setProductName("自购商品:" + material.getProductName());
+                            tActuaryGoods.setProductNum(0d);
+                            tActuaryGoods.setPrice(0.0);
+                            tActuaryGoods.setPriceTotal(0.0);
+                            tActuaryGoods.setUnit("自购商品单位:" + material.getUnitName());
+                        } else {
+                            tActuaryGoods.setProductName(material.getProductName());
+    //                        tActuaryGoods.setProductNum(materialMap.get("shopCount").toString());
+                            tActuaryGoods.setProductNum(material.getConvertCount());
+                            tActuaryGoods.setPrice(material.getPrice());
+                            tActuaryGoods.setPriceTotal(material.getTotalPrice());
+                            tActuaryGoods.setUnit(material.getUnitName());
+
+                            total.setPriceTotal(total.getPriceTotal() + tActuaryGoods.getPriceTotal());
+                        }
+                        tActuaryGoodsList.add(tActuaryGoods);
                     }
 
-                    //用户删除状态·,0表示未支付，1表示已删除,2表示业主取消,3表示已经支付,4再次购买
-                    switch (material.getDeleteState()) {
-                        case 0:
-                            tActuaryGoods.setDeleteState("未支付");
-                            break;
-                        case 1:
-                            tActuaryGoods.setDeleteState("已删除");
-                            continue;//不显示 已删除的
-                        case 2:
-                            tActuaryGoods.setDeleteState("业主取消");
-                            break;
-                        case 3:
-                            tActuaryGoods.setDeleteState("已支付");
-                            break;
-                        case 4:
-                            tActuaryGoods.setDeleteState("再次购买");
-                            break;
-                    }
+                    //根据houseId和wokerTypeId查询房子人工精算
+    //                List<Map<String, Object>> workerMapList = iBudgetWorkerMapper.getBudgetWorkerById(houseId, workerTypeId);
+                    List<BudgetWorker> workerMapList = iBudgetWorkerMapper.getBudgetWorkerByHouseIdAndWorkerTypeId(houseId, workerType.getString(WorkerType.ID));
+                    for (BudgetWorker worker : workerMapList) {
+                        TActuaryGoods tActuaryGoods = new TActuaryGoods();
+                        tActuaryGoods.setName(workerType.getString(WorkerType.NAME));
 
-                    if (goods != null) {
-                        if (0 == goods.getType())//0:材料；1：服务
-                            tActuaryGoods.setGoodsType("材料");//商品类型 : 材料，服务，人工，
-                        else if (1 == goods.getType())
-                            tActuaryGoods.setGoodsType("服务");//商品类型 : 材料，服务，人工，
-                    }
+                        //用户删除状态·,0表示未支付，1表示已删除,2表示业主取消,3表示已经支付,4再次购买
+                        switch (worker.getDeleteState()) {
+                            case 0:
+                                tActuaryGoods.setDeleteState("未支付");
+                                break;
+                            case 1:
+                                tActuaryGoods.setDeleteState("已删除");
+                                continue;//不显示 已删除的
+                            case 2:
+                                tActuaryGoods.setDeleteState("业主取消");
+                                break;
+                            case 3:
+                                tActuaryGoods.setDeleteState("已支付");
+                                break;
+                        }
 
-                    TActuaryGoodsTotal total = mapsTotal.get(keyArrs[i - 3][goods.getType()]);
-                    if (goods.getBuy() == 2) //自购
-                    {
-                        tActuaryGoods.setProductName("自购商品:" + material.getProductName());
-                        tActuaryGoods.setProductNum(0d);
-                        tActuaryGoods.setPrice(0.0);
-                        tActuaryGoods.setPriceTotal(0.0);
-                        tActuaryGoods.setUnit("自购商品单位:" + material.getUnitName());
-                    } else {
-                        tActuaryGoods.setProductName(material.getProductName());
-//                        tActuaryGoods.setProductNum(materialMap.get("shopCount").toString());
-                        tActuaryGoods.setProductNum(material.getConvertCount());
-                        tActuaryGoods.setPrice(material.getPrice());
-                        tActuaryGoods.setPriceTotal(material.getTotalPrice());
-                        tActuaryGoods.setUnit(material.getUnitName());
+                        tActuaryGoods.setGoodsType("人工");//商品类型 : 人工，材料，服务
+                        if (CommonUtil.isEmpty(worker.getName()))
+                            continue;
+                        tActuaryGoods.setProductName(worker.getName());
+                        tActuaryGoods.setProductNum(worker.getShopCount());
+                        tActuaryGoods.setShopNum(worker.getShopCount());
+                        tActuaryGoods.setGoodsUnitName(worker.getUnitName());
+                        tActuaryGoods.setPrice(worker.getPrice());
+                        tActuaryGoods.setPriceTotal(worker.getTotalPrice());
+                        tActuaryGoods.setUnit(worker.getUnitName());
+                        tActuaryGoods.setProductSn(worker.getWorkerGoodsSn());
+                        tActuaryGoodsList.add(tActuaryGoods);
 
+                        TActuaryGoodsTotal total = mapsTotal.get(workerType.getString(WorkerType.ID)+"-2");
                         total.setPriceTotal(total.getPriceTotal() + tActuaryGoods.getPriceTotal());
                     }
-                    tActuaryGoodsList.add(tActuaryGoods);
                 }
 
-                //根据houseId和wokerTypeId查询房子人工精算
-//                List<Map<String, Object>> workerMapList = iBudgetWorkerMapper.getBudgetWorkerById(houseId, workerTypeId);
-                List<BudgetWorker> workerMapList = iBudgetWorkerMapper.getBudgetWorkerByHouseIdAndWorkerTypeId(houseId, workerTypeId);
-                for (BudgetWorker worker : workerMapList) {
-                    TActuaryGoods tActuaryGoods = new TActuaryGoods();
-                    String name = WorkTypeEnums.getInstance(Integer.parseInt(worker.getWorkerTypeId())).getDesc();
-                    tActuaryGoods.setName(name);
-
-                    //用户删除状态·,0表示未支付，1表示已删除,2表示业主取消,3表示已经支付,4再次购买
-                    switch (worker.getDeleteState()) {
-                        case 0:
-                            tActuaryGoods.setDeleteState("未支付");
-                            break;
-                        case 1:
-                            tActuaryGoods.setDeleteState("已删除");
-                            continue;//不显示 已删除的
-                        case 2:
-                            tActuaryGoods.setDeleteState("业主取消");
-                            break;
-                        case 3:
-                            tActuaryGoods.setDeleteState("已支付");
-                            break;
-                    }
-
-                    tActuaryGoods.setGoodsType("人工");//商品类型 : 人工，材料，服务
-                    if (CommonUtil.isEmpty(worker.getName()))
-                        continue;
-                    tActuaryGoods.setProductName(worker.getName());
-                    tActuaryGoods.setProductNum(worker.getShopCount());
-                    tActuaryGoods.setShopNum(worker.getShopCount());
-                    tActuaryGoods.setGoodsUnitName(worker.getUnitName());
-                    tActuaryGoods.setPrice(worker.getPrice());
-                    tActuaryGoods.setPriceTotal(worker.getTotalPrice());
-                    tActuaryGoods.setUnit(worker.getUnitName());
-                    tActuaryGoods.setProductSn(worker.getWorkerGoodsSn());
-                    tActuaryGoodsList.add(tActuaryGoods);
-
-                    TActuaryGoodsTotal total = mapsTotal.get(keyArrs[i - 3][2]);
-                    total.setPriceTotal(total.getPriceTotal() + tActuaryGoods.getPriceTotal());
-                }
             }
-
-            for (Map.Entry<Integer, TActuaryGoodsTotal> entry : mapsTotal.entrySet())
+            for (Map.Entry<String, TActuaryGoodsTotal> entry : mapsTotal.entrySet())
                 tActuaryGoodsTotalList.add(entry.getValue());
 
             ExportExcel exportExcel = new ExportExcel();//创建表格实例
