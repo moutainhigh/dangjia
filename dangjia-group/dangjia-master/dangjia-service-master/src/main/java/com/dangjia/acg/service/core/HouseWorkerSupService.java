@@ -16,7 +16,7 @@ public class HouseWorkerSupService {
     /**
      * 工匠申请停工
      */
-    public ServerResponse applyShutdown(String userToken,String applyDec){
+    public ServerResponse applyShutdown(String userToken, String houseId, String applyDec, String startDate, String endDate){
         return null;
     }
 }
