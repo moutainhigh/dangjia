@@ -39,6 +39,6 @@ public interface IMemberMapper extends Mapper<Member> {
 //    //查询所有业主关联客服的所有数据
 //    List<Map<String,Object>> getMemberAndCustomerList();
 
-
+    Member getByPhone(@Param("mobile") String mobile);
 }
 

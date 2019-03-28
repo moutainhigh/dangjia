@@ -25,6 +25,7 @@ import com.dangjia.acg.modle.member.*;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.activity.RedPackPayService;
+import com.dangjia.acg.service.clue.ClueService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.util.RKIDCardUtil;
 import com.dangjia.acg.util.TokenUtil;
@@ -83,7 +84,8 @@ public class MemberService {
     private UserMapper userMapper;
     @Autowired
     private SupplierProductAPI supplierProductAPI;
-
+    @Autowired
+    private ClueService clueService;
     /****
      * 注入配置
      */
@@ -279,6 +281,7 @@ public class MemberService {
             user.setHead("qrcode/logo.png");
             memberMapper.insertSelective(user);
 //			memberMapper.updateByPrimaryKeySelective(user);
+            clueService.sendUser(user,user.getMobile());
             updateOrInsertInfo(user.getId(),String.valueOf(userRole),user.getPassword());
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             AccessToken accessToken = TokenUtil.generateAccessToken(user);

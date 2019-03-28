@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.clue.ClueTalkMapper">
+    <sql id="ClueTalk_List">
+      id,
+      clue_id as clueId,
+      talk_content as talkContent,
+      create_date as createDate,
+      modify_date as modifyDate,
+      data_status as dataStatus
+
+    </sql>
+
+    <select id="getTalkByClueId" parameterType="String" resultType="com.dangjia.acg.modle.clue.ClueTalk">
+      select
+      <include refid="ClueTalk_List"/>
+        from dj_clue_talk where data_status='0' and clue_id=#{clue_id}
+    </select>
+</mapper>
+
