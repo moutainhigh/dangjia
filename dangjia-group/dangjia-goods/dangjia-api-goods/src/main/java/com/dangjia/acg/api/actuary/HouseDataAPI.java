@@ -52,6 +52,7 @@ public interface HouseDataAPI {
     ServerResponse getBudgetMaterial(@RequestParam("cityId") String cityId,
                                      @RequestParam("houseId") String houseId,
                                      @RequestParam("workerTypeId") String workerTypeId,
+                                     @RequestParam("productType") String productType,
                                      @RequestParam("pageDTO") PageDTO pageDTO);
 
     @GetMapping("/actuary/houseData/export/actuary/exportActuaryTotal")

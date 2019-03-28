@@ -15,19 +15,19 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.member.MemberCustomerDTO;
 import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.member.ICustomerMapper;
-import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
-import com.dangjia.acg.mapper.member.IMemberLabelMapper;
-import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.member.*;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.member.*;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.activity.RedPackPayService;
+import com.dangjia.acg.service.clue.ClueService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.util.RKIDCardUtil;
 import com.dangjia.acg.util.TokenUtil;
@@ -63,6 +63,8 @@ public class MemberService {
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
+    private IMemberInfoMapper memberInfoMapper;
+    @Autowired
     private ICustomerRecordMapper iCustomerRecordMapper;
     @Autowired
     private ICustomerMapper iCustomerMapper;
@@ -84,7 +86,10 @@ public class MemberService {
     private UserMapper userMapper;
     @Autowired
     private SupplierProductAPI supplierProductAPI;
-
+    @Autowired
+    private ClueService clueService;
+    @Autowired
+    private IHouseDistributionMapper iHouseDistributionMapper;
     /****
      * 注入配置
      */
@@ -96,31 +101,42 @@ public class MemberService {
      *
      * @param request
      * @param id      来源ID
-     * @param idType  1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户
+     * @param idType  1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户, 5=验房分销
      * @return
      */
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
         String mobile = "";
         request.setAttribute("isShow", "true");
-        if (idType.equals("1")) {
-            House house = houseMapper.selectByPrimaryKey(id);
-            if (house != null) {
-                Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+        switch (idType) {
+            case "1":
+                House house = houseMapper.selectByPrimaryKey(id);
+                if (house != null) {
+                    Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                    mobile = member == null ? "" : member.getMobile();
+                }
+                break;
+            case "3":
+                Supplier supplier = supplierProductAPI.getSupplier(id);
+                if (supplier != null) {
+                    mobile = supplier.getTelephone();
+                }
+                break;
+            case "4":
+                MainUser mainUser = userMapper.selectByPrimaryKey(id);
+                if (mainUser != null) {
+                    mobile = mainUser.getMobile();
+                }
+                break;
+            case "5":
+                HouseDistribution distribution = iHouseDistributionMapper.selectByPrimaryKey(id);
+                if (distribution != null) {
+                    mobile = distribution.getPhone();
+                }
+                break;
+            default:
+                Member member = memberMapper.selectByPrimaryKey(id);
                 mobile = member == null ? "" : member.getMobile();
-            }
-        } else if (idType.equals("3")) {
-            Supplier supplier = supplierProductAPI.getSupplier(id);
-            if (supplier != null) {
-                mobile = supplier.getTelephone();
-            }
-        } else if (idType.equals("4")) {
-            MainUser mainUser = userMapper.selectByPrimaryKey(id);
-            if (mainUser != null) {
-                mobile = mainUser.getMobile();
-            }
-        } else {
-            Member member = memberMapper.selectByPrimaryKey(id);
-            mobile = member == null ? "" : member.getMobile();
+                break;
         }
         if (CommonUtil.isEmpty(mobile)) {
             mobile = "4001681231";
@@ -162,6 +178,7 @@ public class MemberService {
     }
 
     ServerResponse getUser(Member user, String userRole) {
+        updateOrInsertInfo(user.getId(),String.valueOf(userRole),user.getPassword());
         userRole = "role" + userRole + ":" + user.getId();
         String token = redisClient.getCache(userRole, String.class);
         //如果用户存在usertoken则清除原来的token数据
@@ -233,6 +250,7 @@ public class MemberService {
     public ServerResponse checkRegister(HttpServletRequest request, String phone, int smscode, String password, String invitationCode, Integer userRole) {
         Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
         if (registerCode == null || smscode != registerCode) {
+
             return ServerResponse.createByErrorMessage("验证码错误");
         } else {
             Member user = new Member();
@@ -264,7 +282,7 @@ public class MemberService {
             user.setVisitState(0);
             user.setUserName(user.getMobile());
             user.setName("");
-            user.setSmscode(userRole);
+            user.setSmscode(0);
             user.setOthersInvitationCode(invitationCode);
             user.setInvitationCode(CommonUtil.randomString(6));
             user.setNickName("当家-" + CommonUtil.randomString(6));
@@ -273,6 +291,8 @@ public class MemberService {
             user.setHead("qrcode/logo.png");
             memberMapper.insertSelective(user);
 //			memberMapper.updateByPrimaryKeySelective(user);
+            clueService.sendUser(user,user.getMobile());
+            updateOrInsertInfo(user.getId(),String.valueOf(userRole),user.getPassword());
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             AccessToken accessToken = TokenUtil.generateAccessToken(user);
             if (!CommonUtil.isEmpty(user.getWorkerTypeId())) {
@@ -295,6 +315,24 @@ public class MemberService {
         }
     }
 
+    public void updateOrInsertInfo(String memberid,String policyId,String pwd){
+        try {
+            //检测是否已有指定身份，无则初始化
+            Example example =new Example(MemberInfo.class);
+            example.createCriteria().andEqualTo(MemberInfo.MEMBER_ID,memberid).andEqualTo(MemberInfo.POLICY_ID,policyId);
+            List<MemberInfo> infos= memberInfoMapper.selectByExample(example);
+            if(!CommonUtil.isEmpty(memberid)&&(infos==null||infos.size()==0)){
+               MemberInfo memberInfo=new MemberInfo();
+               memberInfo.setMemberId(memberid);
+               memberInfo.setPolicyId(policyId);
+               memberInfo.setPassword(pwd);
+               memberInfo.setCheckStatus("0");
+               memberInfoMapper.insertSelective(memberInfo);
+            }
+        }catch (Exception e){
+            logger.error("用户身份异常！", e);
+        }
+    }
     /**
      * 工匠提交详细资料
      */

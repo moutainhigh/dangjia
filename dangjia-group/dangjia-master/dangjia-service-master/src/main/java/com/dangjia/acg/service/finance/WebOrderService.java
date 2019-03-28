@@ -54,6 +54,7 @@ public class WebOrderService {
                 WebOrderDTO webOrderDTO = new WebOrderDTO();
                 webOrderDTO.setOrderId(businessOrder.getNumber());
                 webOrderDTO.setTotalAmount(businessOrder.getTotalPrice());
+                webOrderDTO.setType(businessOrder.getType());
 //                1刚生成(可编辑),2去支付(不修改),3已支付
                 webOrderDTO.setState("待支付");
                 if (businessOrder.getState() == 2) {

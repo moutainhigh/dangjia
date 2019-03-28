@@ -28,7 +28,7 @@ public interface ForMasterAPI {
 
     @PostMapping("/data/forMaster/getUnitName")
     @ApiOperation(value = "获取单位名", notes = "获取单位名")
-    String getUnitName(@RequestParam("unitId")String unitId);
+    String getUnitName(@RequestParam("unitId") String unitId);
 
     @PostMapping("/data/forMaster/getSupplierProduct")
     @ApiOperation(value = "查询供应价", notes = "查询供应价")
@@ -96,6 +96,12 @@ public interface ForMasterAPI {
                              @RequestParam("workerTypeId") String workerTypeId,
                              @RequestParam("cityId") String cityId);
 
+    @PostMapping("/data/forMaster/nonPaymentCai")
+    @ApiOperation(value = "未付款材料", notes = "未付款材料")
+    Double nonPaymentCai(@RequestParam("houseId") String houseId,
+                         @RequestParam("workerTypeId") String workerTypeId,
+                         @RequestParam("cityId") String cityId);
+
     @PostMapping("/data/forMaster/getNotCaiPrice")
     @ApiOperation(value = "支付时工种未选择材料总价", notes = "支付时工种未选择材料总价")
     Double getNotCaiPrice(@RequestParam("houseId") String houseId,
@@ -107,6 +113,12 @@ public interface ForMasterAPI {
     Double getBudgetSerPrice(@RequestParam("houseId") String houseId,
                              @RequestParam("workerTypeId") String workerTypeId,
                              @RequestParam("cityId") String cityId);
+
+    @PostMapping("/data/forMaster/nonPaymentSer")
+    @ApiOperation(value = "未付款工种服务总价", notes = "未付款工种服务总价")
+    Double nonPaymentSer(@RequestParam("houseId") String houseId,
+                         @RequestParam("workerTypeId") String workerTypeId,
+                         @RequestParam("cityId") String cityId);
 
     @PostMapping("/data/forMaster/getNotSerPrice")
     @ApiOperation(value = "支付时工种未选择服务总价", notes = "支付时工种未选择服务总价")

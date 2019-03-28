@@ -41,9 +41,8 @@ public class WarehouseService {
             }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<Warehouse> warehouseList;
-
-            PageHelper.startPage(pageNum, pageSize);
             if (type == 0) {//材料
+                PageHelper.startPage(pageNum, pageSize);
                 warehouseList = warehouseMapper.materialsList(houseId, categoryId, name);
             } else if (type == 1) {//服务
                 PageHelper.startPage(pageNum, pageSize);

@@ -21,6 +21,7 @@ public class SplitDeliverDetailDTO {
     private String reason;//备注
     private Double totalAmount;//总价
     private int size;//件
-
+    private Integer shippingState;
+    private Integer applyState;
     private List<OrderSplitItemDTO> orderSplitItemDTOS;
 }

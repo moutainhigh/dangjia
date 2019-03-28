@@ -51,7 +51,8 @@
         SELECT
         <include refid="all_columns"/>
         FROM dj_member w
-        WHERE 1=1
+        INNER JOIN dj_member_info mi on mi.member_id = w.id and mi.policy_id='2'
+        WHERE w.data_status = 0
         <if test="name!=null and name!=''">
             and
             w.name LIKE CONCAT('%',#{name},'%')
@@ -83,7 +84,7 @@
         SELECT
         <include refid="all_columns"/>
         FROM dj_member w
-        where 1=1
+        where w.data_status = 0
         <if test="password!=null">
             AND password=#{password}
         </if>
@@ -107,7 +108,7 @@
             create_date AS createDate
         FROM dj_member
         WHERE
-            1=1
+          data_status = 0
         ORDER by
             create_date
     </select>
@@ -155,10 +156,10 @@
         mc.remind_record_id,
         mcr.remind_time
         FROM dj_member w
+        INNER JOIN dj_member_info mi on mi.member_id = w.id and mi.policy_id=#{userRole}
         LEFT JOIN dj_member_customer mc on mc.member_id = w.id
         LEFT JOIN dj_member_customer_record mcr on mc.remind_record_id = mcr.id
         WHERE w.data_status = 0
-        and (w.worker_type_id is  null or w.worker_type_id ='0' )
         <if test="searchKey!=null and searchKey!=''">
             AND (w.nick_name LIKE CONCAT('%',#{searchKey},'%')
             or w.mobile LIKE CONCAT('%',#{searchKey},'%'))
@@ -183,6 +184,11 @@
         </if>
 
 
+    </select>
+
+    <select id="getByPhone" parameterType="String" resultType="com.dangjia.acg.modle.member.Member">
+        select  *
+        from dj_member where mobile=#{mobile}
     </select>
 
 </mapper>

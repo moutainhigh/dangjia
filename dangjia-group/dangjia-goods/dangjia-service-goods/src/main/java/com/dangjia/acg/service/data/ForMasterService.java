@@ -186,11 +186,18 @@ public class ForMasterService {
     public Double getBudgetCaiPrice(String houseId,String workerTypeId){
         return budgetMaterialMapper.getBudgetCaiPrice(houseId,workerTypeId);
     }
+    public Double nonPaymentCai(String houseId,String workerTypeId){
+        budgetMaterialMapper.updateCai(houseId,workerTypeId);
+        return budgetMaterialMapper.nonPaymentCai(houseId,workerTypeId);
+    }
     /**
      * 支付时工种服务总价
      */
     public Double getBudgetSerPrice(String houseId,String workerTypeId){
         return budgetMaterialMapper.getBudgetSerPrice(houseId,workerTypeId);
+    }
+    public Double nonPaymentSer(String houseId,String workerTypeId){
+        return budgetMaterialMapper.nonPaymentSer(houseId,workerTypeId);
     }
     public Double getNotSerPrice(String houseId,String workerTypeId){
         return budgetMaterialMapper.getNotSerPrice(houseId,workerTypeId);

@@ -15,6 +15,7 @@ import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
+import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseMapper;
 import com.dangjia.acg.mapper.repair.*;
@@ -23,6 +24,7 @@ import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -72,6 +74,8 @@ public class MendOrderService {
     private IMendOrderCheckMapper mendOrderCheckMapper;
     @Autowired
     private IHouseMapper houseMapper;
+    @Autowired
+    private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private ConfigMessageService configMessageService;
 
@@ -233,11 +237,11 @@ public class MendOrderService {
             } else {
                 MendOrder mendOrder = mendOrderList.get(0);
                 mendOrder.setState(1);
-                mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+                mendOrderMapper.updateByPrimaryKey(mendOrder);
 
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
                 changeOrder.setState(2);//通过->工匠业主审核
-                changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+                changeOrderMapper.updateByPrimaryKey(changeOrder);
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 configMessageService.addConfigMessage(null, "gj", house.getMemberId(), "0", "退人工变更", String.format
@@ -384,6 +388,11 @@ public class MendOrderService {
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "补人工", String.format
                         (DjConstants.PushMessage.CRAFTSMAN_B_WORK, house.getHouseName()), "");
+
+
+//                String url= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"changeArtificial?userToken="+userToken+"&cityId="+house.getCityId()+"&title=人工变更&houseId="+houseId+"&houseFlowId="+houseFlow.getId()+"&roleType=2";
+                configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "补人工", String.format
+                        (DjConstants.PushMessage.GJ_B_002, house.getHouseName()), "");
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
         } catch (Exception e) {
@@ -518,6 +527,12 @@ public class MendOrderService {
             }
 
             if (this.addMendWorker(workerGoodsArr, mendOrder, workerTypeId)) {
+                HouseFlow houseFlow =houseFlowMapper.getHouseFlowByHidAndWty(houseId,3);
+                House house = houseMapper.selectByPrimaryKey(houseId);
+                WorkerType workType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
+                String url= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"changeArtificial?userToken="+userToken+"&cityId="+house.getCityId()+"&title=人工变更&houseId="+houseId+"&houseFlowId="+houseFlow.getId()+"&roleType=2";
+                configMessageService.addConfigMessage(null, "gj",houseFlow.getWorkerId(), "0", "补人工", String.format
+                        (DjConstants.PushMessage.DGJ_B_001, house.getHouseName(),workType.getName()), url);
                 return ServerResponse.createBySuccessMessage("保存成功");
             } else {
                 return ServerResponse.createByErrorMessage("添加明细失败");

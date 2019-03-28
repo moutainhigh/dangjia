@@ -65,7 +65,7 @@ public class FillMaterielService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
 
             //精算的
-            List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name);
+            List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name,"0");
             //补材料的
             List<MendMateriel> mendMaterielList = getForBudgetAPI.askAndQuit(worker.getWorkerTypeId(), houseId,categoryId,name);
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
@@ -182,7 +182,7 @@ public class FillMaterielService {
             Member worker = accessToken.getMember();
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageNum, pageSize);
-            List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name);
+            List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name,"0");
             PageInfo pageResult = new PageInfo(budgetMaterialList);
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
             for (BudgetMaterial budgetMaterial : budgetMaterialList) {
@@ -222,20 +222,21 @@ public class FillMaterielService {
     /**
      * 查询工序材料
      */
-    public ServerResponse repairBudgetMaterial(String workerTypeId, String categoryId, String houseId, String productName,
+    public ServerResponse repairBudgetMaterial(String workerTypeId, String categoryId, String houseId, String productName,String productType,
                                                Integer pageNum, Integer pageSize) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageNum, pageSize);
-            List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(workerTypeId, houseId, categoryId, productName);
+            List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(workerTypeId, houseId, categoryId, productName,productType);
             PageInfo pageResult = new PageInfo(budgetMaterialList);
             List<BudgetMaterialDTO> budgetMaterialDTOS = new ArrayList<>();
             for (BudgetMaterial budgetMaterial : budgetMaterialList) {
+                Product product=iProductMapper.selectByPrimaryKey(budgetMaterial.getProductId());
                 BudgetMaterialDTO budgetMaterialDTO = new BudgetMaterialDTO();
                 budgetMaterialDTO.setId(budgetMaterial.getId());
                 budgetMaterialDTO.setProductId(budgetMaterial.getProductId());
                 budgetMaterialDTO.setProductSn(budgetMaterial.getProductSn());
-                budgetMaterialDTO.setProductName(budgetMaterial.getProductName());
+                budgetMaterialDTO.setProductName(product.getName());
                 budgetMaterialDTO.setProductNickName(budgetMaterial.getProductNickName());
                 budgetMaterialDTO.setPrice(budgetMaterial.getPrice());
                 budgetMaterialDTO.setCost(budgetMaterial.getCost());
@@ -244,7 +245,7 @@ public class FillMaterielService {
                 budgetMaterialDTO.setUnitName(budgetMaterial.getUnitName());
                 budgetMaterialDTO.setProductType(budgetMaterial.getProductType());
                 budgetMaterialDTO.setCategoryId(budgetMaterial.getCategoryId());
-                budgetMaterialDTO.setImage(budgetMaterial.getImage() == null ? "" : address + budgetMaterial.getImage());
+                budgetMaterialDTO.setImage(product.getImage() == null ? "" : address + product.getImage());
                 budgetMaterialDTOS.add(budgetMaterialDTO);
             }
             pageResult.setList(budgetMaterialDTOS);
