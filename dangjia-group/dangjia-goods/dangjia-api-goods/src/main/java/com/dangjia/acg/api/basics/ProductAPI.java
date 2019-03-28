@@ -56,6 +56,11 @@ public interface ProductAPI {
                                          @RequestParam("goodsId") String goodsId,
                                          @RequestParam("brandId") String brandId);
 
+    @PostMapping("/basics/product/updateProduct")
+    @ApiOperation(value = "更新货品名称", notes = "更新货品名称")
+    ServerResponse updateProductById(@RequestParam("request") HttpServletRequest request,
+                                     @RequestParam("id")  String id,
+                                     @RequestParam("name")  String name);
     @PostMapping("/basics/product/insertProduct")
     @ApiOperation(value = "新增货品", notes = "新增货品")
     ServerResponse insertProduct(@RequestParam("request") HttpServletRequest request,

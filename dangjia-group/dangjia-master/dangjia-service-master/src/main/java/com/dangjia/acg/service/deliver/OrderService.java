@@ -398,6 +398,7 @@ public class OrderService {
                 orderSplitItem.setProductSn(warehouse.getProductSn());
                 orderSplitItem.setProductName(warehouse.getProductName());
                 orderSplitItem.setPrice(warehouse.getPrice());
+                orderSplitItem.setAskCount(warehouse.getAskCount());
                 orderSplitItem.setCost(warehouse.getCost());
                 orderSplitItem.setShopCount(warehouse.getShopCount());
                 orderSplitItem.setNum(num);

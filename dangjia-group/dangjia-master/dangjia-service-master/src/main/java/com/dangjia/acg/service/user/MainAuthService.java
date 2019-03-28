@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 @Service
@@ -99,6 +100,12 @@ public class MainAuthService {
 	
 	@Transactional(propagation = Propagation.REQUIRED,isolation = Isolation.DEFAULT,timeout=30000,rollbackFor={RuntimeException.class, Exception.class})
 	public ServerResponse addRole(Role role, String permIds) {
+		Example example =new Example(Role.class);
+		example.createCriteria().andEqualTo("roleName",role.getRoleName());
+		List list=roleMapper.selectByExample(example);
+		if(list.size()>0){
+			return ServerResponse.createByErrorMessage("角色名称不能重复");
+		}
 		this.roleMapper.insert(role);
 		String roleId=role.getId();
 		String[] arrays=permIds.split(",");
@@ -129,6 +136,12 @@ public class MainAuthService {
 	@Transactional(propagation = Propagation.REQUIRED,isolation = Isolation.DEFAULT,timeout=30000,rollbackFor={RuntimeException.class, Exception.class})
 	public ServerResponse updateRole(Role role, String permIds) {
 		String roleId=role.getId();
+		Example example =new Example(Role.class);
+		example.createCriteria().andEqualTo("roleName",role.getRoleName()).andNotEqualTo(Role.ID,roleId);
+		List list=roleMapper.selectByExample(example);
+		if(list.size()>0){
+			return ServerResponse.createByErrorMessage("角色名称不能重复");
+		}
 		String[] arrays=permIds.split(",");
 		logger.debug("权限id =arrays="+arrays.toString());
 		//1，更新角色表数据；

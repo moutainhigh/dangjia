@@ -487,7 +487,24 @@ public class ProductService {
             return ServerResponse.createByErrorMessage("删除失败");
         }
     }
-
+    /**
+     * 根据productid更新名称
+     *
+     * @param id
+     * @return
+     */
+    public ServerResponse updateProductById(String id,String name) {
+        try {
+            Product product = new Product();
+            product.setId(id);
+            product.setName(name);
+            iProductMapper.updateByPrimaryKeySelective(product);
+            return ServerResponse.createBySuccessMessage("删除成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("删除失败");
+        }
+    }
     /**
      * 修改单个product标签
      * <p>Title: updateProductLabel</p>

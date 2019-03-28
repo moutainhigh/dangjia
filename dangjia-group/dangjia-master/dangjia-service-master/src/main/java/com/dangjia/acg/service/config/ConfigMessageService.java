@@ -15,6 +15,7 @@ import com.dangjia.acg.modle.config.ConfigMessage;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -122,6 +123,9 @@ public class ConfigMessageService {
                     "","","奖罚记录");
             configMessage.setType(0);
             configMessage.setData(pingJia);
+        }else if(!StringUtils.isNumeric(type)){
+            configMessage.setType(0);
+            configMessage.setData(type);
         }else{
             configMessage.setType(Integer.parseInt(type));
         }

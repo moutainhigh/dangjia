@@ -15,16 +15,19 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.member.MemberCustomerDTO;
 import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.*;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.member.*;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.activity.RedPackPayService;
+import com.dangjia.acg.service.clue.ClueService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.util.RKIDCardUtil;
 import com.dangjia.acg.util.TokenUtil;
@@ -83,7 +86,10 @@ public class MemberService {
     private UserMapper userMapper;
     @Autowired
     private SupplierProductAPI supplierProductAPI;
-
+    @Autowired
+    private ClueService clueService;
+    @Autowired
+    private IHouseDistributionMapper iHouseDistributionMapper;
     /****
      * 注入配置
      */
@@ -95,7 +101,7 @@ public class MemberService {
      *
      * @param request
      * @param id      来源ID
-     * @param idType  1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户
+     * @param idType  1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户, 5=验房分销
      * @return
      */
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
@@ -119,6 +125,12 @@ public class MemberService {
                 MainUser mainUser = userMapper.selectByPrimaryKey(id);
                 if (mainUser != null) {
                     mobile = mainUser.getMobile();
+                }
+                break;
+            case "5":
+                HouseDistribution distribution = iHouseDistributionMapper.selectByPrimaryKey(id);
+                if (distribution != null) {
+                    mobile = distribution.getPhone();
                 }
                 break;
             default:
@@ -166,6 +178,7 @@ public class MemberService {
     }
 
     ServerResponse getUser(Member user, String userRole) {
+        updateOrInsertInfo(user.getId(),String.valueOf(userRole),user.getPassword());
         userRole = "role" + userRole + ":" + user.getId();
         String token = redisClient.getCache(userRole, String.class);
         //如果用户存在usertoken则清除原来的token数据
@@ -182,7 +195,6 @@ public class MemberService {
         }
         redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
         redisClient.put(userRole, accessToken.getUserToken());
-        updateOrInsertInfo(user.getId(),String.valueOf(userRole),user.getPassword());
         groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
         return ServerResponse.createBySuccess("登录成功，正在跳转", accessToken);
     }
@@ -279,6 +291,7 @@ public class MemberService {
             user.setHead("qrcode/logo.png");
             memberMapper.insertSelective(user);
 //			memberMapper.updateByPrimaryKeySelective(user);
+            clueService.sendUser(user,user.getMobile());
             updateOrInsertInfo(user.getId(),String.valueOf(userRole),user.getPassword());
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             AccessToken accessToken = TokenUtil.generateAccessToken(user);

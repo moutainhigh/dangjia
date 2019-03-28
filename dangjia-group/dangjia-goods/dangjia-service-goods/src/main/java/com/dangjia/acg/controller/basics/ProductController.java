@@ -177,6 +177,11 @@ public class ProductController implements ProductAPI {
 		return goodsService.deleteGoods(id);
 	}
 
+	@Override
+	@ApiMethod
+	public ServerResponse updateProductById(HttpServletRequest request,String id,String name){
+		return productService.updateProductById(id,name);
+	}
 	/**
 	 * 查询商品及下属货品
 	 * @param request
