@@ -226,5 +226,34 @@ public class DjConstants {
         public final static String STEWARD_T_CHECK_WORK ="大管家您好！【%s】业主提出退人工变更，请审核并填写变更数量";
 
 
+        public final static String DGJ_B_001 ="大管家您好！【%s】【%s】申请补人工，请审核并填写数量！";
+        public final static String GJ_B_001 ="工匠您好！【%s】补人工申请未通过";
+        public final static String GJ_B_002 ="工匠您好！【%s】补人工申请大管家已同意，请查看数量";
+        public final static String GJ_B_003 ="工匠您好！【%s】补人工申请未通过";
+        public final static String YZ_B_001 ="业主您好！【%s】补人工申请未通过";
+        public final static String GJ_B_004 ="工匠您好！【%s】补人工成功";
+        public final static String DGJ_T_002 ="大管家您好！【%s】业主申请退人工，请审核并填写数量！";
+        public final static String YZ_B_002 ="业主您好！【%s】退人工申请未通过";
+        public final static String YZ_T_003 ="业主您好！【%s】退人工申请大管家已同意，请查看数量";
+        public final static String YZ_T_004 ="业主您好！【%s】退人工申请未通过";
+        public final static String GJ_T_005 ="工匠您好！【%s】退人工申请未通过";
+        public final static String YZ_T_005 ="业主您好！【%s】退【%s】人工成功";
+        public final static String YZ_F_001 ="业主您好！【%s】装修材料已发货，请注意查收";
+        public final static String YZ_S_001 ="业主您好！【%s】装修材料已收货";
+        public final static String YZ_DS_001 ="业主您好！【%s】装修材料已由他人代收货，请在48小时内验货";
+
+        public final static String YZ_B_010 ="业主您好！【%s】补【%s】人工申请大管家已同意，请查看数量";
+        public final static String DGJ_B_010 ="大管家您好！【%s】补【%s】人工申请未通过";
+        public final static String DGJ_B_011 ="大管家您好！【%s】补【%s】人工申请未通过";
+        public final static String DGJ_B_012 ="大管家您好！【%s】补【%s】人工成功";
+        public final static String GJ_T_010 ="工匠您好！【%s】退人工申请大管家已同意，请查看数量";
+        public final static String DGJ_T_011 ="大管家您好！【%s】退【%s】人工申请未通过";
+        public final static String DGJ_T_012 ="大管家您好！【%s】退【%s】人工申请未通过";
+        public final static String DGJ_T_013 ="大管家您好！【%s】退【%s】人工成功";
+
+        public final static String YZ_B_100 ="业主您好！【%s】补【%s】人工成功";
+        public final static String GJ_T_100 ="工匠您好！【%s】退人工成功";
+
+
     }
 }
