@@ -186,5 +186,10 @@
 
     </select>
 
+    <select id="getByPhone" parameterType="String" resultType="com.dangjia.acg.modle.member.Member">
+        select  *
+        from dj_member where mobile=#{mobile}
+    </select>
+
 </mapper>
 
