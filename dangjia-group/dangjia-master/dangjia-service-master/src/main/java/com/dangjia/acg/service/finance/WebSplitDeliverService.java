@@ -7,8 +7,6 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.finance.WebSplitDeliverDTO;
 import com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
-import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.github.pagehelper.PageHelper;
@@ -79,9 +77,11 @@ public class WebSplitDeliverService {
                 webSplitDeliverItemDTO.setShipAddress(splitDeliver.getShipAddress());
                 webSplitDeliverItemDTO.setSplitDeliverId(splitDeliver.getId());
                 Supplier supplier = forMasterAPI.getSupplier(splitDeliver.getSupplierId());
-                webSplitDeliverItemDTO.setSupMobile(supplier.getTelephone());
+                if(supplier!=null) {
+                    webSplitDeliverItemDTO.setSupMobile(supplier.getTelephone());
+                    webSplitDeliverItemDTO.setSupName(supplier.getName());
+                }
                 webSplitDeliverItemDTO.setSupplierId(splitDeliver.getSupplierId());
-                webSplitDeliverItemDTO.setSupName(supplier.getName());
                 webSplitDeliverItemDTO.setTotalAmount(splitDeliver.getTotalAmount());
                 webSplitDeliverItemDTO.setCreateDate(splitDeliver.getCreateDate());
                 webSplitDeliverItemDTO.setCurWeekAddNum(curWeekAddList.size());//本周新增

@@ -88,6 +88,8 @@ public class MemberService {
     private SupplierProductAPI supplierProductAPI;
     @Autowired
     private ClueService clueService;
+    @Autowired
+    private IHouseDistributionMapper iHouseDistributionMapper;
     /****
      * 注入配置
      */
