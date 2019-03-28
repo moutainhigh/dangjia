@@ -231,11 +231,12 @@ public class FillMaterielService {
             PageInfo pageResult = new PageInfo(budgetMaterialList);
             List<BudgetMaterialDTO> budgetMaterialDTOS = new ArrayList<>();
             for (BudgetMaterial budgetMaterial : budgetMaterialList) {
+                Product product=iProductMapper.selectByPrimaryKey(budgetMaterial.getProductId());
                 BudgetMaterialDTO budgetMaterialDTO = new BudgetMaterialDTO();
                 budgetMaterialDTO.setId(budgetMaterial.getId());
                 budgetMaterialDTO.setProductId(budgetMaterial.getProductId());
                 budgetMaterialDTO.setProductSn(budgetMaterial.getProductSn());
-                budgetMaterialDTO.setProductName(budgetMaterial.getProductName());
+                budgetMaterialDTO.setProductName(product.getName());
                 budgetMaterialDTO.setProductNickName(budgetMaterial.getProductNickName());
                 budgetMaterialDTO.setPrice(budgetMaterial.getPrice());
                 budgetMaterialDTO.setCost(budgetMaterial.getCost());
@@ -244,7 +245,7 @@ public class FillMaterielService {
                 budgetMaterialDTO.setUnitName(budgetMaterial.getUnitName());
                 budgetMaterialDTO.setProductType(budgetMaterial.getProductType());
                 budgetMaterialDTO.setCategoryId(budgetMaterial.getCategoryId());
-                budgetMaterialDTO.setImage(budgetMaterial.getImage() == null ? "" : address + budgetMaterial.getImage());
+                budgetMaterialDTO.setImage(product.getImage() == null ? "" : address + product.getImage());
                 budgetMaterialDTOS.add(budgetMaterialDTO);
             }
             pageResult.setList(budgetMaterialDTOS);
