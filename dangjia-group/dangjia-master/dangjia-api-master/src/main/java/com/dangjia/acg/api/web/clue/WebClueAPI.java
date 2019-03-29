@@ -26,16 +26,16 @@ public interface WebClueAPI {
     /**
      * 添加线索
      */
-    @PostMapping("web/clue/clueMessage/addClue")
+    @PostMapping("web/clue/addClue")
     @ApiOperation(value = "添加线索", notes = "添加线索")
     int addClue(@RequestParam("clue") Clue clue);
 
     /**
-     * 模糊查询
+     * 查询线索
      */
-    @PostMapping("web/clue/clueMessage/view")
-    @ApiOperation(value = "模糊查询", notes = "模糊查询")
-     ServerResponse getByExample (@RequestParam("stage") Integer stage, @RequestParam("values") String values,@RequestParam("pageDTO") PageDTO pageDTO);
+    @PostMapping("web/clue/getClueList")
+    @ApiOperation(value = "查询线索", notes = "查询线索")
+     ServerResponse getClueList (@RequestParam("stage") Integer stage, @RequestParam("values") String values,@RequestParam("pageDTO") PageDTO pageDTO);
 
     /**
      *通过状态查找线索
@@ -47,7 +47,7 @@ public interface WebClueAPI {
     /**
      * 修改客服
      */
-    @PostMapping("web/clue/clueMessage/updateCus")
+    @PostMapping("web/clue/updateCus")
     @ApiOperation(value = "根据id修改客服", notes = "根据id修改客服")
     ServerResponse updateCus(@RequestParam("cusService") String cusService,@RequestParam("id")  String id);
 
@@ -57,21 +57,21 @@ public interface WebClueAPI {
      * @param file
      * @return
      */
-    @PostMapping("web/clue/clueMessage/importExce")
+    @PostMapping("web/clue/importExce")
     @ApiOperation(value = "xls导入线索", notes = "xls导入线索")
     ServerResponse importExcelClue(@RequestParam("userId") String userId,@RequestParam("file") MultipartFile file);
 
     /**
      * 放弃跟进/加入黑名单
      */
-    @PostMapping("web/clue/clueMessage/giveUp")
+    @PostMapping("web/clue/giveUp")
     @ApiOperation(value = "放弃跟进/加入黑名单", notes = "放弃跟进/加入黑名单")
     ServerResponse giveUp(@RequestParam("id") String id,@RequestParam("type") int type);
 
     /**
      * 转客户
      */
-    @PostMapping("web/clue/clueMessage/sendUser")
+    @PostMapping("web/clue/sendUser")
     @ApiOperation(value = "转客户", notes = "转客户")
     ServerResponse sendUser(@RequestParam("member")Member member,@RequestParam("phone") String phone);
 }
