@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.web.clue;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -15,11 +16,11 @@ public interface WebClueTalkAPI {
      */
     @PostMapping("web/clue/clueTalk/getAllTalk")
     @ApiOperation(value = "通过线索ID获取沟通记录", notes = "通过线索ID获取沟通记录")
-    ServerResponse getTalkByClueId(@RequestParam("clueID") String clueID, @RequestParam("pageNum") Integer pageNum, @RequestParam("pageSize") Integer pageSize);
+    ServerResponse getTalkByClueId(@RequestParam("clueId") String clueId, @RequestParam("pageDTO") PageDTO pageDTO);
     /**
      * 添加沟通内容
      */
     @PostMapping("web/clue/clueTalk/addTalk")
     @ApiOperation(value = "添加沟通内容", notes = "添加沟通内容")
-    ServerResponse addTalk(@RequestParam("clueId") String clueId,@RequestParam("talkContent") String talkContent);
+    ServerResponse addTalk(@RequestParam("clueId") String clueId,@RequestParam("talkContent") String talkContent,@RequestParam("userId") String userId);
 }
