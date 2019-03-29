@@ -212,7 +212,7 @@ public class ActuaryOperationService {
                             srcBudgetMaterial.setCost(targetProduct.getCost());
                             //这里会更新 为 新product的 换算后的购买数量
 //                            srcBudgetMaterial.setConvertCount(Math.ceil(srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality()));
-                            Double converCount = Math.ceil(srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality());
+                            Double converCount = (srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality());
                             srcBudgetMaterial.setConvertCount(converCount);
                             srcBudgetMaterial.setTotalPrice(targetProduct.getPrice() * srcBudgetMaterial.getConvertCount());
                             LOG.info("srcBudgetMaterial 换后:" + srcBudgetMaterial);
@@ -232,7 +232,7 @@ public class ActuaryOperationService {
                 budgetMaterial.setPrice(product.getPrice());
                 budgetMaterial.setCost(product.getCost());
                 //这里会更新 为 新product的 换算后的购买数量
-                Double converCount = Math.ceil(budgetMaterial.getShopCount() / product.getConvertQuality());
+                Double converCount = (budgetMaterial.getShopCount() / product.getConvertQuality());
                 budgetMaterial.setConvertCount(converCount);
                 budgetMaterial.setTotalPrice(product.getPrice() * budgetMaterial.getConvertCount());
                 budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
@@ -740,7 +740,7 @@ public class ActuaryOperationService {
                     flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
                     flowActuaryDTO.setTotalPrice(mendMateriel.getTotalPrice());
                     flowActuaryDTO.setShopCount(mendMateriel.getShopCount());
-                    Double converCount = Math.ceil(mendMateriel.getShopCount() / product.getConvertQuality());
+                    Double converCount = (mendMateriel.getShopCount() / product.getConvertQuality());
                     flowActuaryDTO.setConvertCount(converCount);
                     flowActuaryDTO.setBuy(0);
                     flowActuaryDTO.setBudgetMaterialId(mendMateriel.getId());
