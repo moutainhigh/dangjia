@@ -33,14 +33,14 @@ public class WebClueController implements WebClueAPI {
     }
 
     /**
-     * 模糊查询
+     * 查询线索
      * @param values
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse getByExample (Integer stage,String values, PageDTO pageDTO){
-        return clueService.getByExample(stage,values,pageDTO.getPageNum(),pageDTO.getPageSize());
+    public ServerResponse getClueList (Integer stage,String values, PageDTO pageDTO){
+        return clueService.getClueList(stage,values,pageDTO.getPageNum(),pageDTO.getPageSize());
     }
 
     @Override
