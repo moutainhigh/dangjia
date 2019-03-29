@@ -4,7 +4,10 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
@@ -12,6 +15,7 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.*;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
@@ -56,6 +60,11 @@ public class MendOrderCheckService {
     private IHouseMapper houseMapper;
     @Autowired
     private IMemberMapper memberMapper;
+
+    @Autowired
+    private ConfigUtil configUtil;
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IMendMaterialMapper mendMaterialMapper;
     @Autowired
@@ -119,13 +128,40 @@ public class MendOrderCheckService {
                     changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
 
                     House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
-                    if(mendOrder.getType()==1) {
-                        configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "补人工未通过", String.format
-                                (DjConstants.PushMessage.GJ_B_001, house.getHouseName()), "");
+
+                    //补人工未通过
+                    if(mendOrder.getType() == 1) {
+                        //业主审核人工变更（补）未通过
+                        if ("1".equals(roleType)) {
+                            String urlyz= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+house.getId()+"&roleType=3";
+                            //工匠
+                            configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "补人工未通过", String.format
+                                    (DjConstants.PushMessage.GJ_B_003, house.getHouseName()), urlyz);
+
+                            urlyz= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+house.getId()+"&roleType=2";
+                            //大管家
+                            configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "补人工未通过", String.format
+                                    (DjConstants.PushMessage.DGJ_B_010, house.getHouseName()), urlyz);
+                        }
+                        //大管家审核人工变更（补）未通过
+                        if ("2".equals(roleType)) {
+                            configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "补人工未通过", String.format
+                                    (DjConstants.PushMessage.GJ_B_001, house.getHouseName()), "");
+                        }
+                        //工匠审核人工变更（补）未通过
+                        if ("3".equals(roleType)) {
+                            configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "补人工未通过", String.format
+                                    (DjConstants.PushMessage.GJ_B_001, house.getHouseName()), "");
+                        }
+
                     }
-                    if(mendOrder.getType()==1) {
-                        configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "退人工未通过", String.format
-                                (DjConstants.PushMessage.YZ_B_002, house.getHouseName()), "");
+                    //退人工未通过
+                    if(mendOrder.getType() == 3) {
+                        //大管家审核人工变更（退）未通过
+                        if ("2".equals(roleType)) {
+                            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "退人工未通过", String.format
+                                    (DjConstants.PushMessage.YZ_B_002, house.getHouseName()), "");
+                        }
                     }
                 }
             }else {
