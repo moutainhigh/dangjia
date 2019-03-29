@@ -3,6 +3,7 @@ package com.dangjia.acg.service.deliver;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -11,11 +12,14 @@ import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.sup.Supplier;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -43,6 +47,10 @@ public class SplitDeliverService {
     @Autowired
     private IWarehouseMapper warehouseMapper;
 
+    @Autowired
+    private IHouseMapper houseMapper;
+    @Autowired
+    private ConfigMessageService configMessageService;
 
     /**
      * 部分收货
@@ -66,7 +74,10 @@ public class SplitDeliverService {
                 warehouse.setReceive(warehouse.getReceive() + receive);
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
             }
-
+            House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+            //业主
+            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "装修材料部分收货", String.format
+                    (DjConstants.PushMessage.YZ_S_001, house.getHouseName()), "");
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
             e.printStackTrace();
@@ -94,6 +105,10 @@ public class SplitDeliverService {
                 warehouse.setReceive(warehouse.getReceive() + orderSplitItem.getNum());
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
             }
+            House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+            //业主
+            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "装修材料已收货", String.format
+                    (DjConstants.PushMessage.YZ_S_001, house.getHouseName()), "");
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
             e.printStackTrace();
