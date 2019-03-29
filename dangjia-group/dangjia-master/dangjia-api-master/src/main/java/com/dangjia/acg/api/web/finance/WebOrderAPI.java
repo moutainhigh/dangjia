@@ -16,18 +16,14 @@ import javax.servlet.http.HttpServletRequest;
  * Time: 10:55
  */
 @FeignClient("dangjia-service-master")
-@Api(value = "所有订单流水", description = "所有订单流水")
+@Api(value = "支付订单流水", description = "支付订单流水")
 public interface WebOrderAPI {
 
     @PostMapping("web/finance/order/getAllOrders")
-    @ApiOperation(value = "所有订单流水", notes = "所有订单流水")
+    @ApiOperation(value = "支付订单流水", notes = "支付订单流水")
     ServerResponse getAllOrders(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                 @RequestParam("likeMobile") String likeMobile,
                                 @RequestParam("likeAddress") String likeAddress);
-
-//    @PostMapping("web/finance/order/orderList")
-//    @ApiOperation(value = "订单详情", notes = "订单详情")
-//    ServerResponse orderList(@RequestParam("businessOrderId") String businessOrderId);
 
 }
