@@ -99,7 +99,7 @@ public class WebWalletService {
                 worker.setHaveMoney(worker.getHaveMoney().subtract(workerDetail.getMoney()));
                 worker.setSurplusMoney(worker.getSurplusMoney().subtract(workerDetail.getMoney()));
             }
-            if(workerDetail.getState() == 4){//加钱
+            if(workerDetail.getState() == 2){//加钱
                 worker.setHaveMoney(worker.getHaveMoney().add(workerDetail.getMoney()));
                 worker.setSurplusMoney(worker.getSurplusMoney().add(workerDetail.getMoney()));
             }
