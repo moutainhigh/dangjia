@@ -117,6 +117,16 @@ public class MendOrderCheckService {
                     ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
                     changeOrder.setState(1);//管家提交的数量单取消 需重新提交
                     changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+
+                    House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
+                    if(mendOrder.getType()==1) {
+                        configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "补人工未通过", String.format
+                                (DjConstants.PushMessage.GJ_B_001, house.getHouseName()), "");
+                    }
+                    if(mendOrder.getType()==1) {
+                        configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "退人工未通过", String.format
+                                (DjConstants.PushMessage.YZ_B_002, house.getHouseName()), "");
+                    }
                 }
             }else {
                 boolean flag = true;

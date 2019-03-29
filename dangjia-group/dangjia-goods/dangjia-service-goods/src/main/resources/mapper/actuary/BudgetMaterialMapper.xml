@@ -117,13 +117,16 @@
 		    <include refid="all_columns"/>
 		FROM dj_actuary_budget_material
 		where
-		product_type = 0
-		and steta in (1,2)
+		 steta in (1,2)
 		and delete_state != 1
 		and house_id = #{houseId}
 		<if test = "productName!=null and productName!=''">
 			and
 			product_name LIKE CONCAT('%',#{productName},'%')
+		</if>
+		<if test = "productType!=null and productType!=''">
+			and
+			product_type = #{productType}
 		</if>
 		<if test = "workerTypeId!=null and workerTypeId!=''">
 			and

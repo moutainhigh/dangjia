@@ -30,7 +30,7 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 
 	/**查询精算内商品*/
 	List<BudgetMaterial> repairBudgetMaterial(@Param("workerTypeId")String workerTypeId,@Param("houseId")String houseId,
-											  @Param("categoryId")String categoryId,@Param("productName")String productName);
+											  @Param("categoryId")String categoryId,@Param("productName")String productName,String productType);
 	/**修改业主取消的精算去自购*/
 	int updateSelf(@Param("houseFlowId") String houseFlowId);
 	/**支付时工种服务总价*/

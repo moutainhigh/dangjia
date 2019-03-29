@@ -129,6 +129,9 @@ public class OrderSplitService {
             detailDTO.setNumber(splitDeliver.getNumber());
             detailDTO.setShipName(splitDeliver.getShipName());
             detailDTO.setShipAddress(splitDeliver.getShipAddress());
+            detailDTO.setShippingState(splitDeliver.getShippingState());
+            detailDTO.setApplyState(splitDeliver.getApplyState());
+
             detailDTO.setShipMobile(splitDeliver.getShipMobile());
             Member sup = memberMapper.selectByPrimaryKey(splitDeliver.getSupervisorId());//管家
             detailDTO.setSupMobile(sup.getMobile());
@@ -169,7 +172,7 @@ public class OrderSplitService {
 
     /**
      * 供应商端发货列表
-     * shipState  0待发货,1已发待收货,2已收货,3取消,4部分收
+     * shipState  0待发货,1已发待收货,2已收货,3取消,4部分收,5已结算
      */
     public ServerResponse splitDeliverList(String supplierId, int shipState) {
         Example example = new Example(SplitDeliver.class);

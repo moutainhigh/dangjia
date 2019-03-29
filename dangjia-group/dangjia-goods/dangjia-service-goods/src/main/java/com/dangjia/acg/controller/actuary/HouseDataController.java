@@ -78,8 +78,8 @@ public class HouseDataController implements HouseDataAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getBudgetMaterial(String cityId,String houseId, String workerTypeId, PageDTO pageDTO){
-        return fillMaterielService.repairBudgetMaterial(workerTypeId,"",houseId,"",pageDTO.getPageNum(),pageDTO.getPageSize());
+    public ServerResponse getBudgetMaterial(String cityId,String houseId, String workerTypeId,String productType, PageDTO pageDTO){
+        return fillMaterielService.repairBudgetMaterial(workerTypeId,"",houseId,"",productType,pageDTO.getPageNum(),pageDTO.getPageSize());
     }
 
 

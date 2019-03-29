@@ -15,12 +15,14 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.member.MemberCustomerDTO;
 import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.*;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.member.*;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
@@ -86,6 +88,8 @@ public class MemberService {
     private SupplierProductAPI supplierProductAPI;
     @Autowired
     private ClueService clueService;
+    @Autowired
+    private IHouseDistributionMapper iHouseDistributionMapper;
     /****
      * 注入配置
      */
@@ -97,7 +101,7 @@ public class MemberService {
      *
      * @param request
      * @param id      来源ID
-     * @param idType  1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户
+     * @param idType  1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户, 5=验房分销
      * @return
      */
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
@@ -121,6 +125,12 @@ public class MemberService {
                 MainUser mainUser = userMapper.selectByPrimaryKey(id);
                 if (mainUser != null) {
                     mobile = mainUser.getMobile();
+                }
+                break;
+            case "5":
+                HouseDistribution distribution = iHouseDistributionMapper.selectByPrimaryKey(id);
+                if (distribution != null) {
+                    mobile = distribution.getPhone();
                 }
                 break;
             default:

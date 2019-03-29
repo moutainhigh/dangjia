@@ -31,6 +31,12 @@ public class DateUtils {
                 Locale.CHINA);
         Date date;
         String times = null;
+        times = getTimeString(time, sdr, times);
+        return times;
+    }
+
+    private static String getTimeString(String time, SimpleDateFormat sdr, String times) {
+        Date date;
         try {
             date = sdr.parse(time);
             long l = date.getTime();
@@ -69,14 +75,7 @@ public class DateUtils {
                 Locale.CHINA);
         Date date;
         String times = null;
-        try {
-            date = sdr.parse(time);
-            long l = date.getTime();
-            String stf = String.valueOf(l);
-            times = stf.substring(0, 10);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        times = getTimeString(time, sdr, times);
         return times;
     }
 
@@ -84,14 +83,7 @@ public class DateUtils {
         SimpleDateFormat sdr = new SimpleDateFormat(type, Locale.CHINA);
         Date date;
         String times = null;
-        try {
-            date = sdr.parse(time);
-            long l = date.getTime();
-            String stf = String.valueOf(l);
-            times = stf.substring(0, 10);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        times = getTimeString(time, sdr, times);
         return times;
     }
 

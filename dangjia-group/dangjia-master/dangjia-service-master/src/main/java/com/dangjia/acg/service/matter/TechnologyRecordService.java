@@ -55,11 +55,9 @@ public class TechnologyRecordService {
         try{
             List<Map<String,Object>> listMap = new ArrayList<>();
             Map<String,Object> map;
-
             if (StringUtil.isNotEmpty(nodeArr)){
                 String[] idArr = nodeArr.split(",");
-                for(int i=0; i<idArr.length; i++){
-                    String id = idArr[i];
+                for (String id : idArr) {
                     Technology technology = forMasterAPI.byTechnologyId(id);
                     map = new HashMap<>();
                     map.put("imageTypeId", id);
@@ -74,19 +72,16 @@ public class TechnologyRecordService {
                 map.put("imageType",2);
                 listMap.add(0,map);
             }
-
             map = new HashMap<>();
             map.put("imageTypeId","");
             map.put("imageTypeName","材料照片");
             map.put("imageType",0);
             listMap.add(listMap.size(), map);
-
          /*   map = new HashMap<>();
             map.put("imageTypeId","");
             map.put("imageTypeName","进度照片");
             map.put("imageType",1);
             listMap.add(listMap.size(), map);*/
-
             return ServerResponse.createBySuccess("查询成功",listMap);
         }catch (Exception e){
             e.printStackTrace();
