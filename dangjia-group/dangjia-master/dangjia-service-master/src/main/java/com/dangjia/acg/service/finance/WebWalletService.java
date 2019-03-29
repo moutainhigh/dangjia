@@ -82,35 +82,43 @@ public class WebWalletService {
 
     /**
      * 添加用户（工人和业主）流水
+     * 修改用户钱包
      */
     public ServerResponse addWallet(WorkerDetail workerDetail) {
         try {
             if (!StringUtils.isNoneBlank(workerDetail.getName()))
                 return ServerResponse.createByErrorMessage("流水说明 不能为null");
-//            if (workerDetail.getMoney() != null)
-//                return ServerResponse.createByErrorMessage("费用金额 不能为null");
-//            if (workerDetail.getState() != null)
-//                return ServerResponse.createByErrorMessage("费用类型 不能为null");
             if (!StringUtils.isNoneBlank(workerDetail.getDefinedName()))
                 return ServerResponse.createByErrorMessage("自定义流水说明 不能为null");
+
+            Member worker = iMemberMapper.selectByPrimaryKey(workerDetail.getWorkerId());
+            if(workerDetail.getState() == 3 && worker.getSurplusMoney().compareTo(workerDetail.getMoney()) < 0){
+                return ServerResponse.createByErrorMessage("工匠余额不足");
+            }
+            if(workerDetail.getState() == 3){//减钱
+                worker.setHaveMoney(worker.getHaveMoney().subtract(workerDetail.getMoney()));
+                worker.setSurplusMoney(worker.getSurplusMoney().subtract(workerDetail.getMoney()));
+            }
+            if(workerDetail.getState() == 4){//加钱
+                worker.setHaveMoney(worker.getHaveMoney().add(workerDetail.getMoney()));
+                worker.setSurplusMoney(worker.getSurplusMoney().add(workerDetail.getMoney()));
+            }
+            iMemberMapper.updateByPrimaryKeySelective(worker);
 
             //记录到管家流水
             WorkerDetail newWorkerDetail = new WorkerDetail();
             newWorkerDetail.setName(workerDetail.getName());
             newWorkerDetail.setWorkerId(workerDetail.getWorkerId());
-            Member worker = iMemberMapper.selectByPrimaryKey(workerDetail.getWorkerId());
             if (worker != null)
                 newWorkerDetail.setWorkerName(worker.getName());
 
             if (workerDetail.getHouseId() != null)
                 newWorkerDetail.setHouseId(workerDetail.getHouseId());
+
+
             newWorkerDetail.setMoney(workerDetail.getMoney());
             newWorkerDetail.setState(workerDetail.getState());//进钱  0工钱收入,1提现,2自定义增加金额,3自定义减少金额,4退材料退款,5剩余材料退款,6退人工退款
             newWorkerDetail.setDefinedName(workerDetail.getDefinedName());
-//            newWorkerDetail.setHaveMoney(supervisorHWO.getHaveMoney());
-//            newWorkerDetail.setHouseWorkerOrderId(supervisorHWO.getId());
-//            newWorkerDetail.setApplyMoney(supervisorHF.getPatrolMoney());
-//            newWorkerDetail.setWalletMoney(supervisor.getHaveMoney());
             iWorkerDetailMapper.insert(newWorkerDetail);
             return ServerResponse.createBySuccessMessage("保存成功");
         } catch (Exception e) {
