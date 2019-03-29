@@ -87,5 +87,44 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             AND r.reward_punish_correlation_id=#{rewardPunishCorrelationId}
         </if>
 	</select>
+    <select id="getRewardPunishRecord" resultType="com.dangjia.acg.dto.worker.RewardPunishRecordDTO">
+        SELECT
+        r.id,
+        r.reward_punish_correlation_id,
+        r.member_id,
+        r.operator_id,
+        r.house_id,
+        r.type,
+        r.state,
+        r.remarks,
+        r.create_date,
+        r.modify_date,
+        r.data_status,
+        CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') house_name,
+        u.nick_name memberName,
+        t.id tid,
+        t.`name` tname,
+        t.content tcontent,
+        t.type ttype,
+        t.state tstate,
+        m.`id` mid,
+        m.`reward_punish_correlation_id` mreward_punish_correlation_id,
+        m.`name` mname,
+        m.type mtype,
+        m.quantity mquantity,
+        m.units munits,
+        m.start_time mstart_time,
+        m.end_time mend_time
+        FROM
+        `dj_worker_reward_punish_record` r
+        LEFT JOIN dj_house h ON r.house_id = h.id
+        INNER JOIN dj_member u ON r.member_id = u.id
+        INNER JOIN dj_worker_reward_punish_correlation t ON r.reward_punish_correlation_id = t.id
+        INNER JOIN dj_worker_reward_punish_condition m ON r.reward_punish_correlation_id = m.reward_punish_correlation_id
+        where r.data_status=0
+        <if test="rewardPunishRecordId!=null and rewardPunishRecordId!=''">
+            and r.id = #{rewardPunishRecordId}
+        </if>
+    </select>
 </mapper>
 

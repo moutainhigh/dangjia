@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.complain.IComplainMapper">
+
+    <select id="getComplainList" resultType="com.dangjia.acg.dto.complain.ComplainDTO">
+        SELECT c.id as id,
+        c.member_id as memberId,
+        m.name as memberName,
+        m.nick_name as memberNickName,
+        m.mobile as memberMobile,
+        c.complain_type as complainType,
+        c.user_id as userId,
+        u.username as userName,
+        c.status as status,
+        c.description as description,
+        c.business_id as businessId,
+        c.house_id as houseId,
+        CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') as houseName,
+        c.files as files,
+        c.create_date as createDate,
+        c.modify_date as modifyDate
+        FROM dj_complain c
+        INNER JOIN dj_member m ON c.member_id = m.id
+        LEFT JOIN dj_user u ON c.user_id = u.id
+        LEFT JOIN dj_house h ON c.house_id = h.id
+        WHERE c.data_status = 0
+        <if test="complainType!=null">
+            and c.complain_type = #{complainType}
+        </if>
+        <if test="state!=null">
+            and c.status = #{state}
+        </if>
+        <if test="searchKey!=null and searchKey!=''">
+            and ( m.mobile like CONCAT('%',#{searchKey},'%')
+            or m.name like CONCAT('%',#{searchKey},'%')
+            or m.nick_name like CONCAT('%',#{searchKey},'%')
+            or u.username like CONCAT('%',#{searchKey},'%'))
+        </if>
+        ORDER by c.modify_date desc
+    </select>
+    <select id="getComplain" resultType="com.dangjia.acg.dto.complain.ComplainDTO">
+        SELECT c.id as id,
+        c.member_id as memberId,
+        m.name as memberName,
+        m.nick_name as memberNickName,
+        m.mobile as memberMobile,
+        c.complain_type as complainType,
+        c.user_id as userId,
+        u.username as userName,
+        c.status as status,
+        c.description as description,
+        c.business_id as businessId,
+        c.house_id as houseId,
+        CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') as houseName,
+        c.files as files,
+        c.create_date as createDate,
+        c.modify_date as modifyDate
+        FROM dj_complain c
+        INNER JOIN dj_member m ON c.member_id = m.id
+        LEFT JOIN dj_user u ON c.user_id = u.id
+        LEFT JOIN dj_house h ON c.house_id = h.id
+        WHERE c.data_status = 0
+        <if test="complainId!=null and complainId!=''">
+            and c.id = #{complainId}
+        </if>
+    </select>
+</mapper>
+
+
+
+
+
+
+
+
