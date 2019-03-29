@@ -389,10 +389,12 @@ public class MendOrderService {
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "补人工", String.format
                         (DjConstants.PushMessage.CRAFTSMAN_B_WORK, house.getHouseName()), "");
 
-
-//                String url= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"changeArtificial?userToken="+userToken+"&cityId="+house.getCityId()+"&title=人工变更&houseId="+houseId+"&houseFlowId="+houseFlow.getId()+"&roleType=2";
+                HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseId, workerTypeId);
+                String token = "role2:" + houseFlow.getWorkerId();
+                String userToken = redisClient.getCache(token, String.class);
+                String url= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?userToken="+userToken+"&cityId="+house.getCityId()+"&title=要补退记录&houseId="+houseId+"&houseFlowId="+houseFlow.getId()+"&roleType=3";
                 configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "补人工", String.format
-                        (DjConstants.PushMessage.GJ_B_002, house.getHouseName()), "");
+                        (DjConstants.PushMessage.GJ_B_002, house.getHouseName()), url);
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
         } catch (Exception e) {
