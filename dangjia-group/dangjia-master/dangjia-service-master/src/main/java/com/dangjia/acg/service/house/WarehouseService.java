@@ -3,6 +3,8 @@ package com.dangjia.acg.service.house;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
@@ -13,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
 import java.util.ArrayList;
@@ -40,39 +43,31 @@ public class WarehouseService {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<Warehouse> warehouseList;
-            if (type == 0) {//材料
-                PageHelper.startPage(pageNum, pageSize);
-                warehouseList = warehouseMapper.materialsList(houseId, categoryId, name);
-            } else if (type == 1) {//服务
-                PageHelper.startPage(pageNum, pageSize);
-                warehouseList = warehouseMapper.serverList(houseId, categoryId, name);
-            } else {
-                PageHelper.startPage(pageNum, pageSize);
-                warehouseList = warehouseMapper.warehouseList(houseId, categoryId, name);
+            Example example=new Example(Warehouse.class);
+            Example.Criteria criteria=example.createCriteria();
+            criteria.andEqualTo(Warehouse.HOUSE_ID,houseId);
+            if(type!=null&&type<2){
+                criteria.andEqualTo(Warehouse.PRODUCT_TYPE,type);
             }
+            if(!CommonUtil.isEmpty(categoryId)){
+                criteria.andEqualTo(Warehouse.CATEGORY_ID,categoryId);
+            }
+            if(!CommonUtil.isEmpty(name)){
+                criteria.andLike(Warehouse.PRODUCT_NAME,"%"+name+"%");
+            }
+            PageHelper.startPage(pageNum, pageSize);
+            List<Warehouse> warehouseList=warehouseMapper.selectByExample(example);
             LOG.info(" warehouseList size:" + warehouseList.size());
             PageInfo pageResult = new PageInfo(warehouseList);
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
             for (Warehouse warehouse : warehouseList) {
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
+                BeanUtils.beanToBean(warehouse,warehouseDTO);
                 warehouseDTO.setImage(address + warehouse.getImage());
-                warehouseDTO.setShopCount(warehouse.getShopCount());
-                warehouseDTO.setAskCount(warehouse.getAskCount());
-                warehouseDTO.setBackCount(warehouse.getBackCount());
-                warehouseDTO.setReceive(warehouse.getReceive());//收货数
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                 warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getAskCount() - warehouse.getBackCount());
-                warehouseDTO.setProductName(warehouse.getProductName());
-                warehouseDTO.setPrice(warehouse.getPrice());
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
-                warehouseDTO.setUnitName(warehouse.getUnitName());
-                warehouseDTO.setProductType(warehouse.getProductType());
-                warehouseDTO.setAskTime(warehouse.getAskTime());
-                warehouseDTO.setRepTime(warehouse.getRepTime());
-                warehouseDTO.setBackTime(warehouse.getBackTime());
                 warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(warehouse.getProductId()));
-                warehouseDTO.setProductId(warehouse.getProductId());
                 warehouseDTOS.add(warehouseDTO);
             }
             pageResult.setList(warehouseDTOS);
