@@ -23,6 +23,11 @@ public class ClueTalk extends BaseEntity {
     @ApiModelProperty("线索ID")
     private String clueId;
 
+    @Column(name = "user_id")
+    @Desc(value = "操作人ID（客服）")
+    @ApiModelProperty("操作人ID（客服）")
+    private String userId;
+
     @Column(name = "talk_content")
     @Desc(value = "谈话内容")
     @ApiModelProperty("谈话内容")

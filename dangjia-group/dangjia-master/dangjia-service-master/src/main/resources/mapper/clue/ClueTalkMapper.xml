@@ -6,6 +6,7 @@
     <sql id="ClueTalk_List">
       id,
       clue_id as clueId,
+      user_id as userId,
       talk_content as talkContent,
       create_date as createDate,
       modify_date as modifyDate,
