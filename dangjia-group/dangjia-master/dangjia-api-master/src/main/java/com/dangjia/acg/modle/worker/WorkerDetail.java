@@ -48,8 +48,8 @@ public class WorkerDetail extends BaseEntity {
 	private BigDecimal money;//实拿
 
 	@Column(name = "state")
-	@Desc(value = "0工钱收入,1提现,2自定义增加金额,3自定义减少金额,4退材料退款,5剩余材料退款,6退人工退款,7提现驳回到余额")
-	@ApiModelProperty("0工钱收入,1提现,2自定义增加金额,3自定义减少金额,4退材料退款,5剩余材料退款,6退人工退款,7提现驳回到余额")
+	@Desc(value = "0工钱收入,1提现,2自定义增加金额,3自定义减少金额,4退材料退款,5剩余材料退款,6退人工退款,7运费,8提现驳回到余额")
+	@ApiModelProperty("0工钱收入,1提现,2自定义增加金额,3自定义减少金额,4退材料退款,5剩余材料退款,6退人工退款,7运费,8提现驳回到余额")
 	private Integer state;
 
 	@Column(name = "defined_worker_id")

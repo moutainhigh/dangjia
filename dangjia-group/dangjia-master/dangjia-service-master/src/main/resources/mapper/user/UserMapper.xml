@@ -136,6 +136,13 @@
         from dj_user
         WHERE username=#{username} and is_del=0
     </select>
+
+    <select id="getNameById" parameterType="String" resultType="com.dangjia.acg.modle.user.MainUser">
+        select
+        <include refid="Base_Column_List"/>
+        from dj_user
+        WHERE is_del=0 and id=#{id}
+    </select>
     <!--=End findUserByName 根据用户名查找用户 -->
     <!--=Start updatePwd 修改用户密码 -->
     <update id="updatePwd">
