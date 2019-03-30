@@ -16,6 +16,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(value = "施工业务补充", description = "施工业务补充")
 public interface HouseWorkerSupAPI {
 
+
+    @PostMapping("app/core/houseWorkerSup/auditApply")
+    @ApiOperation(value = "审核停工", notes = "审核停工")
+    ServerResponse auditApply(@RequestParam("houseFlowApplyId")String houseFlowApplyId,
+                              @RequestParam("memberCheck")Integer memberCheck);
+
+    @PostMapping("app/core/houseWorkerSup/tingGongPage")
+    @ApiOperation(value = "停工申请内容", notes = "停工申请内容")
+    ServerResponse tingGongPage(@RequestParam("userToken")String userToken,
+                                @RequestParam("houseFlowApplyId")String houseFlowApplyId);
+
     @PostMapping("app/core/houseWorkerSup/applyShutdown")
     @ApiOperation(value = "工匠申请停工", notes = "工匠申请停工")
     ServerResponse applyShutdown(@RequestParam("userToken")String userToken, @RequestParam("houseFlowId")String houseFlowId, @RequestParam("applyDec")String applyDec,
