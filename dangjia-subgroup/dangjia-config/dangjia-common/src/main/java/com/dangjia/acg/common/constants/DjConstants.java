@@ -86,6 +86,8 @@ public class DjConstants {
         public final static String HOUSEINSPECTION ="houseInspection?userToken=%s&cityId=%s&title=%s";//我要验房
         public final static String ZHINAN ="zhinan?userToken=%s&cityId=%s&title=%s";//装修指南
         public final static String CONFIRMAPPLY ="confirmApply?userToken=%s&cityId=%s&title=%s";//审核申请
+        public final static String TingGong ="examineShutdown?userToken=%s&cityId=%s&title=%s";//业主审核停工
+
         public final static String JOBLOCATIONDETAIL ="jobLocationDetails?userToken=%s&cityId=%s&title=%s";//施工现场详情
         public final static String SHIGONG ="shigong?userToken=%s&cityId=%s&title=%s";//施工流程
         public final static String BANKCARDALREADYADD ="bankCardAlreadyAdd?userToken=%s&cityId=%s&title=%s";//我的-银行卡

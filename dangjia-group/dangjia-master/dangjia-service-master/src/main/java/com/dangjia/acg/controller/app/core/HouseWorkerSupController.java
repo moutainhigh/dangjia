@@ -20,6 +20,18 @@ public class HouseWorkerSupController implements HouseWorkerSupAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse auditApply(String houseFlowApplyId,Integer memberCheck){
+        return houseWorkerSupService.auditApply(houseFlowApplyId,memberCheck);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse tingGongPage(String userToken,String houseFlowApplyId){
+        return houseWorkerSupService.tingGongPage(houseFlowApplyId);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse applyShutdown(String userToken, String houseFlowId, String applyDec, String startDate, String endDate){
         return houseWorkerSupService.applyShutdown(userToken,houseFlowId,applyDec,startDate,endDate);
     }
