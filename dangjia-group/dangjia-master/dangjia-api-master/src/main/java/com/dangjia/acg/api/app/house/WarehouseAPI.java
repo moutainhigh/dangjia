@@ -17,7 +17,15 @@ public interface WarehouseAPI {
 
     @PostMapping("app/house/warehouse/warehouseList")
     @ApiOperation(value = "我购买的材料", notes = "我购买的材料")
-    ServerResponse warehouseList(@RequestParam("request") HttpServletRequest request,
+    ServerResponse warehouseList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                 @RequestParam("houseId") String houseId,
+                                 @RequestParam("categoryId") String categoryId,
+                                 @RequestParam("name") String name,
+                                 @RequestParam("type") Integer type);
+
+    @PostMapping("app/house/warehouse/warehouseGmList")
+    @ApiOperation(value = "我购买的材料", notes = "我购买的材料")
+    ServerResponse warehouseGmList(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("houseId") String houseId,
                                  @RequestParam("name") String name,
                                  @RequestParam("type") Integer type);

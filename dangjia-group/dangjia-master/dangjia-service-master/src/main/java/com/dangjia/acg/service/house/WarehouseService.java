@@ -11,6 +11,8 @@ import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +45,52 @@ public class WarehouseService {
      * 查询仓库材料
      * type 0材料 1服务 2所有
      */
-    public ServerResponse warehouseList (HttpServletRequest request, String houseId, String name, Integer type) {
+    public ServerResponse warehouseList(Integer pageNum, Integer pageSize, String houseId, String categoryId, String name, Integer type) {
+        try {
+            if (StringUtil.isEmpty(houseId)) {
+                return ServerResponse.createByErrorMessage("houseId不能为空");
+            }
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            Example example=new Example(Warehouse.class);
+            Example.Criteria criteria=example.createCriteria();
+            criteria.andEqualTo(Warehouse.HOUSE_ID,houseId);
+            if(type!=null&&type<2){
+                criteria.andEqualTo(Warehouse.PRODUCT_TYPE,type);
+            }
+            if(!CommonUtil.isEmpty(categoryId)){
+                criteria.andEqualTo(Warehouse.CATEGORY_ID,categoryId);
+            }
+            if(!CommonUtil.isEmpty(name)){
+                criteria.andLike(Warehouse.PRODUCT_NAME,"%"+name+"%");
+            }
+            PageHelper.startPage(pageNum, pageSize);
+            List<Warehouse> warehouseList=warehouseMapper.selectByExample(example);
+            LOG.info(" warehouseList size:" + warehouseList.size());
+            PageInfo pageResult = new PageInfo(warehouseList);
+            List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
+            for (Warehouse warehouse : warehouseList) {
+                WarehouseDTO warehouseDTO = new WarehouseDTO();
+                BeanUtils.beanToBean(warehouse,warehouseDTO);
+                warehouseDTO.setImage(address + warehouse.getImage());
+                warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
+                warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getAskCount() - warehouse.getBackCount());
+                warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
+                warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(warehouse.getProductId()));
+                warehouseDTOS.add(warehouseDTO);
+            }
+            pageResult.setList(warehouseDTOS);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 查询仓库材料（已购买）
+     * type 0材料 1服务 2所有
+     */
+    public ServerResponse warehouseGmList(HttpServletRequest request, String houseId, String name, Integer type) {
         try {
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
@@ -105,10 +152,13 @@ public class WarehouseService {
                 budgetItemDTO.put("goodsItems",warehouseDTOS);
                 maps.put(goodsCategory.getId(), budgetItemDTO);
             }
-
+            List<Map> budgetItemDTOList = new ArrayList<>();
+            for (Map.Entry<String, Map> entry : maps.entrySet()) {
+                budgetItemDTOList.add(entry.getValue());
+            }
             Map map=new HashMap();
             map.put("totalPrice",allPrice);
-            map.put("goodsItemDTOList",maps);
+            map.put("goodsItemDTOList",budgetItemDTOList);
             return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             e.printStackTrace();
