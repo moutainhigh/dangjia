@@ -149,6 +149,7 @@ public class WarehouseService {
                     rowPrice=rowPrice.add(new BigDecimal(warehouseDTO.getTolPrice()));
                 }
                 allPrice=allPrice.add(rowPrice);
+                budgetItemDTO.put("rowPrice",rowPrice);
                 budgetItemDTO.put("goodsItems",warehouseDTOS);
                 maps.put(goodsCategory.getId(), budgetItemDTO);
             }
