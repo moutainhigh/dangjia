@@ -242,10 +242,19 @@ public class MendOrderService {
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
                 changeOrder.setState(2);//通过->工匠业主审核
                 changeOrderMapper.updateByPrimaryKey(changeOrder);
+//                House house = houseMapper.selectByPrimaryKey(houseId);
+//                configMessageService.addConfigMessage(null, "gj", house.getMemberId(), "0", "退人工变更", String.format
+//                        (DjConstants.PushMessage.CRAFTSMAN_T_WORK, house.getHouseName()), "");
+
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
-                configMessageService.addConfigMessage(null, "gj", house.getMemberId(), "0", "退人工变更", String.format
-                        (DjConstants.PushMessage.CRAFTSMAN_T_WORK, house.getHouseName()), "");
+                String urlyz= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+houseId+"&roleType=1";
+                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "退人工变更", String.format
+                        (DjConstants.PushMessage.YZ_T_003, house.getHouseName()), urlyz);
+
+                String url= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+houseId+"&roleType=3";
+                configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "退人工变更", String.format
+                        (DjConstants.PushMessage.GJ_T_010, house.getHouseName()), url);
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
         } catch (Exception e) {
@@ -351,6 +360,13 @@ public class MendOrderService {
             }
 
             if (this.addMendWorker(workerGoodsArr, mendOrder, workerTypeId)) {
+
+                House house = houseMapper.selectByPrimaryKey(houseId);
+                WorkerType workType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
+                String url= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"changeArtificial?userToken="+userToken+"&cityId="+house.getCityId()+"&title=人工变更&houseId="+houseId+"&houseFlowId="+houseFlow.getId()+"&roleType=2";
+                configMessageService.addConfigMessage(null, "gj",houseFlow.getWorkerId(), "0", "退人工", String.format
+                        (DjConstants.PushMessage.DGJ_T_002, house.getHouseName(),workType.getName()), url);
+
                 return ServerResponse.createBySuccessMessage("保存成功");
             } else {
                 return ServerResponse.createByErrorMessage("添加明细失败");
@@ -386,13 +402,13 @@ public class MendOrderService {
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "补人工", String.format
-                        (DjConstants.PushMessage.CRAFTSMAN_B_WORK, house.getHouseName()), "");
+                String urlyz= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+houseId+"&roleType=1";
+                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "补人工变更", String.format
+                        (DjConstants.PushMessage.YZ_B_010, house.getHouseName()), urlyz);
 
-
-//                String url= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"changeArtificial?userToken="+userToken+"&cityId="+house.getCityId()+"&title=人工变更&houseId="+houseId+"&houseFlowId="+houseFlow.getId()+"&roleType=2";
-                configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "补人工", String.format
-                        (DjConstants.PushMessage.GJ_B_002, house.getHouseName()), "");
+                String url= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+houseId+"&roleType=3";
+                configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "补人工变更", String.format
+                        (DjConstants.PushMessage.GJ_B_002, house.getHouseName()), url);
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
         } catch (Exception e) {
