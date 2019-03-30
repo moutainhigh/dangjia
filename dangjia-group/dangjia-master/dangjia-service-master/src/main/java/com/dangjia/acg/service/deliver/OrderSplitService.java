@@ -3,6 +3,7 @@ package com.dangjia.acg.service.deliver;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.JsmsUtil;
@@ -28,6 +29,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -71,6 +73,8 @@ public class OrderSplitService {
     @Autowired
     private IWorkerDetailMapper workerDetailMapper;
 
+    @Autowired
+    private ConfigMessageService configMessageService;
     /**
      * 修改 供应商结算状态
      * id 供应商结算id
@@ -111,6 +115,10 @@ public class OrderSplitService {
             splitDeliver.setSendTime(new Date());
             splitDeliver.setShippingState(1);//已发待收
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
+            House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+            //业主
+            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "供应商发货", String.format
+                    (DjConstants.PushMessage.YZ_F_001, house.getHouseName()), "");
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();

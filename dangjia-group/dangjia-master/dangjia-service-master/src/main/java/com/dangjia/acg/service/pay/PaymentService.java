@@ -1513,6 +1513,10 @@ public class PaymentService {
                 //待付款只付材料费
                 HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(taskId);
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+                /*
+                 * 在这里取消的材料都改成未付款
+                 */
+                forMasterAPI.updateCai(houseId,houseFlow.getWorkerTypeId(), house.getCityId());
                 Double caiPrice = forMasterAPI.getBudgetCaiPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算材料钱
                 Double serPrice = forMasterAPI.getBudgetSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算服务钱
                 totalPrice = totalPrice.add(new BigDecimal(caiPrice));

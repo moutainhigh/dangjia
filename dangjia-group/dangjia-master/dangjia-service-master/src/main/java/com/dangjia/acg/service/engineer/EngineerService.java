@@ -327,7 +327,9 @@ public class EngineerService {
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (HouseFlow houseFlow : houseFlowList) {
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+            if (house == null) continue;
             Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+            if (member == null) continue;
             Map<String, Object> map = new HashMap<>();
             map.put("houseId", house.getId());
             map.put("address", house.getHouseName());

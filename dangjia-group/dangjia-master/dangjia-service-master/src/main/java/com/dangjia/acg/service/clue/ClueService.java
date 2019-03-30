@@ -39,8 +39,10 @@ public class ClueService {
     private ICustomerMapper iCustomerMapper;
 
     /**
-     * 获取所有线索
      *
+     * 获取所有线索
+     * @param pageNum
+     * @param pageSize
      * @return
      */
     public ServerResponse getAll(Integer pageNum, Integer pageSize) {
@@ -57,9 +59,9 @@ public class ClueService {
     }
 
     /**
-     * 模糊查询
+     * 查询线索list
      */
-    public ServerResponse getByExample(Integer stage,String values, Integer pageNum, Integer pageSize) {
+    public ServerResponse getClueList(Integer stage,String values, Integer pageNum, Integer pageSize) {
         try {
             Example example = new Example(Clue.class);
             Example.Criteria criteria = example.createCriteria();
@@ -71,7 +73,7 @@ public class ClueService {
             }
             //criteria.andCondition(" stage IN (0,1) ");
             if (!CommonUtil.isEmpty(values)) {
-                criteria.andCondition(" CONCAT(owername,phone,wechat,address) like CONCAT('%'," + values + ",'%')");
+                criteria.andCondition(" CONCAT(owername,phone,wechat,address) like CONCAT('%','" + values + "','%')");
             }
             PageHelper.startPage(pageNum, pageSize);
             List<Clue> clues = clueMapper.selectByExample(example);
@@ -158,9 +160,13 @@ public class ClueService {
             clue.setId(id);
             if (type == 2) {
                 clue.setStage(2);
-            } else {
+                clue.setCusService("");
+            } else if (type==3){
                 clue.setStage(3);
+            }else {
+                clue.setStage(1);
             }
+
             clueMapper.updateByPrimaryKeySelective(clue);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
@@ -175,7 +181,7 @@ public class ClueService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse sendUser(Member member,String phone) {
         try {
-            Clue clue = clueMapper.getByPhone(phone); //这个可以单独独立出来，用来判断
+            Clue clue = clueMapper.getByPhone(phone);
             //表示线索表存在线索
             if (clue != null) {
                 //有沟通记录

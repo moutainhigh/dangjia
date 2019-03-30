@@ -153,7 +153,7 @@ public class WebWithdrawDepositService {
                     workerDetail.setWorkerName(worker.getName());
                     workerDetail.setMoney(money);
                     workerDetail.setDefinedName("提现驳回到余额");
-                    workerDetail.setState(7);//7提现驳回到余额
+                    workerDetail.setState(8);//8提现驳回到余额
                     workerDetail.setWalletMoney(worker.getHaveMoney());
                     iWorkerDetailMapper.insert(workerDetail);
 

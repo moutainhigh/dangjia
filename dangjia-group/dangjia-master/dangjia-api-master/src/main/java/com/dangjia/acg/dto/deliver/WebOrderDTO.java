@@ -25,5 +25,5 @@ public class WebOrderDTO {
     private String state;//状态
     private Date createDate;//创建日期
     private Date modifyDate;//修改日期
-    private Integer type; // 1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销
+    private String type; // 1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销
 }
