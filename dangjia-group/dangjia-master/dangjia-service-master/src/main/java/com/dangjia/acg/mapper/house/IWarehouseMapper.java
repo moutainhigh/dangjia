@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface IWarehouseMapper extends Mapper<Warehouse> {
 
+    List<String> categoryIdList(@Param("houseId")String houseId);
     Warehouse getByProductId(@Param("productId")String productId, @Param("houseId")String houseId);
 
     List<Warehouse> warehouseList(@Param("houseId")String houseId, @Param("categoryId")String categoryId,

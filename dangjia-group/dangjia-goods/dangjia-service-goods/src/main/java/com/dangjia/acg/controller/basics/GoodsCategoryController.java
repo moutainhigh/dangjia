@@ -4,6 +4,7 @@ import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.service.basics.AttributeService;
 import com.dangjia.acg.service.basics.GoodsCategoryService;
 import com.github.pagehelper.PageInfo;
@@ -28,6 +29,11 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
     @Autowired
     private AttributeService goodsAttributeService;
 
+    @Override
+    public GoodsCategory getGoodsCategory( HttpServletRequest request,String categoryId){
+        GoodsCategory goodsCategory = goodsCategoryService.getGoodsCategory(categoryId);
+        return goodsCategory;
+    }
     /**新增商品类别
      * @Title: getProduct 
      */
