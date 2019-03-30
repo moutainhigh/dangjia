@@ -17,11 +17,13 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -84,6 +86,17 @@ public class HouseWorkerSupService {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+
+            Example example = new Example(HouseFlowApply.class);
+            example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE,3)
+                    .andEqualTo(HouseFlowApply.MEMBER_CHECK,1).andEqualTo(HouseFlowApply.PAY_STATE,1);
+            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
+            if(houseFlowApplyList.size() > 0){
+//                HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
+//                if(houseFlowApply.getStartDate().before(new Date()) && houseFlowApply.getEndDate().after(new Date())){
+                    return ServerResponse.createByErrorMessage("工序处于停工期间!");
+//                }
+            }
 
             HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
             hfa.setHouseFlowId(houseFlowId);//工序id
