@@ -5,6 +5,7 @@ import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.clue.ClueTalkMapper;
 
 import com.dangjia.acg.mapper.user.UserMapper;
+import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.clue.ClueTalk;
 import com.dangjia.acg.modle.user.MainUser;
 import com.github.pagehelper.PageHelper;
@@ -12,6 +13,7 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +67,12 @@ public class ClueTalkService {
             clueTalk.setTalkContent(talkContent);
             clueTalk.setUserId(userId);
             clueTalkMapper.insert(clueTalk);
+            Date createDate=clueMapper.selectByPrimaryKey(clueId).getCreateDate();
+            Clue clue=new Clue();
+            clue.setId(clueId);
+            clue.setCreateDate(createDate);
+            clue.setModifyDate(clueTalk.getModifyDate());
+            clueMapper.updateByPrimaryKeySelective(clue);
             int stage=clueMapper.selectByPrimaryKey(clueId).getStage();
             if(stage==0){
                 clueService.giveUp(clueId,1);

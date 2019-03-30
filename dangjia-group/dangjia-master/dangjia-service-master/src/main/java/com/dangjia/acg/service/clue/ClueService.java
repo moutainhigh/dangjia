@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
+
+import java.util.Date;
 import java.util.List;
 
 
@@ -75,6 +77,7 @@ public class ClueService {
             if (!CommonUtil.isEmpty(values)) {
                 criteria.andCondition(" CONCAT(owername,phone,wechat,address) like CONCAT('%','" + values + "','%')");
             }
+            example.orderBy("modifyDate").desc();
             PageHelper.startPage(pageNum, pageSize);
             List<Clue> clues = clueMapper.selectByExample(example);
             PageInfo pageResult = new PageInfo(clues);
@@ -187,6 +190,7 @@ public class ClueService {
                 //有沟通记录
                 List<ClueTalk> clueTalkList = clueTalkMapper.getTalkByClueId(clue.getId());
                 if (clueTalkList.size() != 0) {
+                    Date date=clueTalkMapper.getMaxDate(clue.getId());
                     for (ClueTalk clueTalk : clueTalkList) {
                         //操作dj_member_customer_record表
                         CustomerRecord customerRecord = new CustomerRecord();
@@ -197,15 +201,16 @@ public class ClueService {
                         customerRecord.setCreateDate(clueTalk.getCreateDate());
                         iCustomerRecordMapper.insert(customerRecord);
                         //操作dj_member_customer表
-                        Customer customer = new Customer();
-                        customer.setUserId(clue.getCusService());
-                        customer.setMemberId(member.getId());
-                        customer.setCurrRecordId(customerRecord.getId());
-                        //customer.setModifyDate(clueTalk.getModifyDate());
-                        customer.setCreateDate(clueTalk.getCreateDate());
-                        customer.setStage(1);
-                        iCustomerMapper.insert(customer);
-
+                        if(date.compareTo(clueTalk.getModifyDate())==0){
+                            Customer customer = new Customer();
+                            customer.setUserId(clue.getCusService());
+                            customer.setMemberId(member.getId());
+                            customer.setCurrRecordId(customerRecord.getId());
+                            //customer.setModifyDate(clueTalk.getModifyDate());
+                            customer.setCreateDate(clueTalk.getCreateDate());
+                            customer.setStage(1);
+                            iCustomerMapper.insert(customer);
+                        }
                         //改变线索沟通表的数据状态
                         clueTalk.setDataStatus(1);
                         clueTalkMapper.updateByPrimaryKeySelective(clueTalk);
@@ -213,11 +218,11 @@ public class ClueService {
                 }
                 //改变线索表的数据状态
                 clue.setDataStatus(1);
+                clue.setStage(4);
                 clueMapper.updateByPrimaryKeySelective(clue);
                 //操作dj_member表
                 member.setCreateDate(clue.getCreateDate());
                 iMemberMapper.updateByPrimaryKeySelective(member);
-                System.out.println("***********");
             }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
