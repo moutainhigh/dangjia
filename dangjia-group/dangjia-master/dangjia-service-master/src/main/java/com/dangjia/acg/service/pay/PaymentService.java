@@ -1516,7 +1516,7 @@ public class PaymentService {
                 /*
                  * 在这里取消的材料都改成未付款
                  */
-                forMasterAPI.updateCai(houseId,houseFlow.getWorkerTypeId(), house.getCityId());
+//                forMasterAPI.updateCai(houseId,houseFlow.getWorkerTypeId(), house.getCityId());
                 Double caiPrice = forMasterAPI.getBudgetCaiPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算材料钱
                 Double serPrice = forMasterAPI.getBudgetSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算服务钱
                 totalPrice = totalPrice.add(new BigDecimal(caiPrice));

@@ -34,6 +34,10 @@ public class GoodsCategoryService {
     private IAttributeMapper attributeMapper;
     private static Logger LOG = LoggerFactory.getLogger(GoodsCategoryService.class);
 
+    public  GoodsCategory getGoodsCategory(String categoryId){
+        GoodsCategory goodsCategory = iGoodsCategoryMapper.selectByPrimaryKey(categoryId);
+        return goodsCategory;
+    }
     //新增商品类别
     public ServerResponse insertGoodsCategory(String name, String parentId, String parentTop) {
         try {

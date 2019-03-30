@@ -2,6 +2,7 @@ package com.dangjia.acg.api.basics;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,6 +22,9 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-goods")
 public interface GoodsCategoryAPI {
 
+    @PostMapping("/basics/goodsCategory/getGoodsCategory")
+    @ApiOperation(value = "商品类别明细", notes = "商品类别明细")
+    GoodsCategory getGoodsCategory(@RequestParam("request") HttpServletRequest request,@RequestParam("categoryId") String categoryId);
     /**
      * 新增商品类别
      *

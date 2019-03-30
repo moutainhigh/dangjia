@@ -30,7 +30,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		create_date as createDate,
 		modify_date as modifyDate
 	</sql>
-
+	<!--查询精算分类-->
+	<select id="categoryIdList" resultType="java.lang.String">
+		select DISTINCT bm.category_id
+		from dj_house_warehouse bm
+ 		where bm.house_id = #{houseId}
+ 		and bm.category_id !=''
+ 		and bm.category_id is not null;
+	</select>
 	<select id="getByProductId" resultType="com.dangjia.acg.modle.house.Warehouse" >
         SELECT
 		<include refid="all_columns"/>
