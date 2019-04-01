@@ -23,6 +23,7 @@ import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.*;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.BrandSeries;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.repair.MendMateriel;
@@ -213,6 +214,10 @@ public class ActuaryOperationService {
                             //这里会更新 为 新product的 换算后的购买数量
 //                            srcBudgetMaterial.setConvertCount(Math.ceil(srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality()));
                             Double converCount = (srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality());
+                            Unit convertUnit = iUnitMapper.selectByPrimaryKey(targetProduct.getConvertUnit());
+                            if(convertUnit.getType()==1){
+                                converCount=Math.ceil(converCount);
+                            }
                             srcBudgetMaterial.setConvertCount(converCount);
                             srcBudgetMaterial.setTotalPrice(targetProduct.getPrice() * srcBudgetMaterial.getConvertCount());
                             LOG.info("srcBudgetMaterial 换后:" + srcBudgetMaterial);
@@ -233,6 +238,10 @@ public class ActuaryOperationService {
                 budgetMaterial.setCost(product.getCost());
                 //这里会更新 为 新product的 换算后的购买数量
                 Double converCount = (budgetMaterial.getShopCount() / product.getConvertQuality());
+                Unit convertUnit = iUnitMapper.selectByPrimaryKey(product.getConvertUnit());
+                if(convertUnit.getType()==1){
+                    converCount=Math.ceil(converCount);
+                }
                 budgetMaterial.setConvertCount(converCount);
                 budgetMaterial.setTotalPrice(product.getPrice() * budgetMaterial.getConvertCount());
                 budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
@@ -736,16 +745,19 @@ public class ActuaryOperationService {
 ////                    flowActuaryDTO.setUrl(url);
                     flowActuaryDTO.setAttribute(getAttributes(product));//拼接属性品牌
 
-                    String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
-                    flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
+                    Unit convertUnit = iUnitMapper.selectByPrimaryKey(product.getConvertUnit());
+                    flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnit.getName());
                     flowActuaryDTO.setTotalPrice(mendMateriel.getTotalPrice());
                     flowActuaryDTO.setShopCount(mendMateriel.getShopCount());
                     Double converCount = (mendMateriel.getShopCount() / product.getConvertQuality());
+                    if(convertUnit.getType()==1){
+                        converCount=Math.ceil(converCount);
+                    }
                     flowActuaryDTO.setConvertCount(converCount);
                     flowActuaryDTO.setBuy(0);
                     flowActuaryDTO.setBudgetMaterialId(mendMateriel.getId());
                     flowActuaryDTO.setName(mendMateriel.getProductName());
-                    flowActuaryDTO.setUnitName(convertUnitName);
+                    flowActuaryDTO.setUnitName(convertUnit.getName());
                     flowActuaryDTOList.add(flowActuaryDTO);
                 }
                 flowDTO.setSumTotal(new BigDecimal(mendOrderInfoDTO.getTotalAmount()));//合计

@@ -289,7 +289,7 @@ public class MendRecordService {
                 map.put("houseId", houseId);
                 map.put("type", 4);
                 map.put("image", address + "iconWork/four.png");
-                map.put("name", "业主退材料记录");
+                map.put("name", "业主退材料/服务记录");
                 map.put("size", "共"+mendOrderList.size()+"条");
                 returnMap.add(map);
             }

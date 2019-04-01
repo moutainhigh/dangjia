@@ -898,10 +898,13 @@ public class PaymentService {
             if (accessToken == null) {//无效的token
                 return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册!");
             }
-            BusinessOrder busOrder = businessOrderMapper.byTaskId(taskId,type);
-            if (busOrder != null){
-                if (busOrder.getState() == 3){
-                    return ServerResponse.createBySuccessMessage("该任务已支付");
+
+            if(type != 4){
+                BusinessOrder busOrder = businessOrderMapper.byTaskId(taskId,type);
+                if (busOrder != null){
+                    if (busOrder.getState() == 3){
+                        return ServerResponse.createBySuccessMessage("该任务已支付");
+                    }
                 }
             }
 
@@ -1516,13 +1519,18 @@ public class PaymentService {
                 /*
                  * 在这里取消的材料都改成未付款
                  */
-                forMasterAPI.updateCai(houseId,houseFlow.getWorkerTypeId(), house.getCityId());
+//                forMasterAPI.updateCai(houseId,houseFlow.getWorkerTypeId(), house.getCityId());
                 Double caiPrice = forMasterAPI.getBudgetCaiPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算材料钱
                 Double serPrice = forMasterAPI.getBudgetSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算服务钱
+
+
+                Double notCaiPrice = forMasterAPI.getNotCaiPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//未选择材料钱
+                Double notSerPrice = forMasterAPI.getNotSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//未选择服务钱
+
                 totalPrice = totalPrice.add(new BigDecimal(caiPrice));
                 totalPrice = totalPrice.add(new BigDecimal(serPrice));
 
-                if (caiPrice > 0) {
+                if (caiPrice > 0||notCaiPrice>0) {
                     ActuaryDTO actuaryDTO = new ActuaryDTO();
                     actuaryDTO.setImage(imageAddress + "icon/Acailiao.png");
                     actuaryDTO.setKind("支付材料");
@@ -1535,7 +1543,7 @@ public class PaymentService {
                     actuaryDTO.setType(2);
                     actuaryDTOList.add(actuaryDTO);
                 }
-                if (serPrice > 0) {
+                if (serPrice > 0||notSerPrice>0) {
                     ActuaryDTO actuaryDTO = new ActuaryDTO();
                     actuaryDTO.setImage(imageAddress + "icon/Afuwu.png");
                     actuaryDTO.setKind("支付服务");
