@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -16,4 +17,5 @@ public interface ClueTalkMapper extends Mapper<ClueTalk> {
      * @return
      */
     List<ClueTalk> getTalkByClueId(String clueId);
+    Date getMaxDate(String clueID);
 }

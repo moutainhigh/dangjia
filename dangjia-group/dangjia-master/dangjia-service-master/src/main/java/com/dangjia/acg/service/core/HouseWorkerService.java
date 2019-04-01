@@ -33,6 +33,7 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
+import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,9 @@ import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.swing.*;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -760,6 +763,17 @@ public class HouseWorkerService {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         Member worker = accessToken.getMember();
 
+        Example example = new Example(HouseFlowApply.class);
+        example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE,3)
+        .andEqualTo(HouseFlowApply.MEMBER_CHECK,1).andEqualTo(HouseFlowApply.PAY_STATE,1);
+        List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
+        if(houseFlowApplyList.size() > 0){
+            HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
+            if(houseFlowApply.getStartDate().before(new Date()) && houseFlowApply.getEndDate().after(new Date())){
+                return ServerResponse.createByErrorMessage("工序处于停工期间!");
+            }
+        }
+
         //暂停施工
         if (applyType != 4) {//每日开工不需要验证
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
@@ -845,7 +859,6 @@ public class HouseWorkerService {
             hfa.setWorkerType(worker.getWorkerType());//工种类型
             hfa.setHouseId(houseFlow.getHouseId());//房子id
             hfa.setApplyType(applyType);//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
-            hfa.setSuspendDay(suspendDay);//申请停工天数
             hfa.setApplyDec(applyDec);//描述
             hfa.setApplyMoney(new BigDecimal(0));//申请得钱
             hfa.setSupervisorMoney(new BigDecimal(0));
@@ -857,11 +870,9 @@ public class HouseWorkerService {
             //********************发申请，计算可得钱和积分等*****************//
             BigDecimal workPrice = new BigDecimal(0);
             BigDecimal haveMoney = new BigDecimal(0);
-            BigDecimal everyMoney = new BigDecimal(0);
             if (hwo != null) {
                 workPrice = hwo.getWorkPrice();//工钱
                 haveMoney = hwo.getHaveMoney();
-                everyMoney = hwo.getEveryMoney();//每日完工累计钱
             }
             BigDecimal limitpay = workPrice.multiply(workDeposit.getLimitPay());//每日完工得到钱的上限
 
@@ -902,16 +913,22 @@ public class HouseWorkerService {
                         String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED, house.getHouseName(), workType.getName()), "5");
                 //***停工申请***//*
             } else if (applyType == 3) {
+                hfa.setSuspendDay(suspendDay);//申请停工天数
+                Date today = new Date();
+                Date end = new Date(today.getTime() + 24*60*60*1000*suspendDay);
+                hfa.setStartDate(today);
+                hfa.setEndDate(end);
+                hfa.setMemberCheck(0);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
+                hfa.setPayState(1);//标记为新停工申请
+                houseFlowApplyMapper.insert(hfa);
+
                 houseFlow.setPause(1);//0:正常；1暂停；
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
-                hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
-                houseFlowApplyMapper.insert(hfa);
 
                 configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "工匠申请停工",
                         String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "5");
                 return ServerResponse.createBySuccessMessage("操作成功");
 
-                //***每日开工申请(不用审核，默认审核通过)***//
             } else if (applyType == 4) {
                 String s2 = DateUtil.getDateString2(new Date().getTime()) + " 12:00:00";//当天12点
                 Date lateDate = DateUtil.toDate(s2);

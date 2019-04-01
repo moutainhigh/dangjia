@@ -11,6 +11,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.math.BigDecimal;
+import java.util.Date;
+
 /**
  * 实体类 - 任务进程 申请表
  */
@@ -55,6 +57,16 @@ public class HouseFlowApply extends BaseEntity {
 	@Desc(value = "申请停工多少天")
 	@ApiModelProperty("申请停工多少天")
 	private Integer suspendDay;//suspendDay
+
+	@Column(name = "start_date")
+	@Desc(value = "开始时间")
+	@ApiModelProperty("开始时间")
+	private Date startDate;
+
+	@Column(name = "end_date")
+	@Desc(value = "结束时间")
+	@ApiModelProperty("结束时间")
+	private Date endDate;
 
 	@Column(name = "apply_dec")
 	@Desc(value = "每日描述 审核停工的原因")
