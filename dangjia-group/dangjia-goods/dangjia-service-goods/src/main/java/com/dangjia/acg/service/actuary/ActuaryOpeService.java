@@ -198,6 +198,7 @@ public class ActuaryOpeService {
             } else if (type == 2) {//材料
                 List<String> categoryIdList = budgetMaterialMapper.categoryIdList(houseId);
                 Map<String, BudgetItemDTO> maps = new HashMap<>();
+                List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.getCategoryAllList(houseId, null);
                 for (String categoryId : categoryIdList) {
                     //获取低级类别
                     GoodsCategory goodsCategoryNext = goodsCategoryMapper.selectByPrimaryKey(categoryId);
@@ -227,8 +228,8 @@ public class ActuaryOpeService {
                     if (rowPrice == null) rowPrice = 0.0;
                     //将价格每次都相加
                     budgetItemDTO.setRowPrice(rowPriceOld + rowPrice);
-                    List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.getCategoryAllList(houseId, categoryId);
                     for (BudgetMaterial budgetMaterial : budgetMaterialList) {
+                        if(!categoryId.equals(budgetMaterial.getCategoryId())) continue;
                         GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
                         WorkerType workerType = workerTypeAPI.queryWorkerType(budgetMaterial.getWorkerTypeId());
                         goodsItemDTO.setWorkerTypeName(workerType.getName());
