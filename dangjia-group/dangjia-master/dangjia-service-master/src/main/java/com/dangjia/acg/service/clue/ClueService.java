@@ -24,6 +24,8 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @Service
@@ -138,12 +140,17 @@ public class ClueService {
             ImportExcel clue = new ImportExcel(file, 0, 0);
             List<Clue> clueList = clue.getDataList(Clue.class, 0);
             for (Clue c : clueList) {
-                c.setCusService(userId);
-                Clue clue1= clueMapper.getByPhone(c.getPhone());
-                Member member=iMemberMapper.getByPhone(c.getPhone());
-                //表示从来没有过线索和注册过
-                if(clue1==null&&member==null){
-                    clueMapper.insert(c);
+                String regex="^(13[0-9]|14[5|7]|15[0|1|2|3|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\\d{8}$";
+                Pattern pattern=Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
+                Matcher m= pattern.matcher(c.getPhone());
+                if(m.matches()) {
+                    c.setCusService(userId);
+                    Clue clue1 = clueMapper.getByPhone(c.getPhone());
+                    Member member = iMemberMapper.getByPhone(c.getPhone());
+                    //表示从来没有过线索和注册过
+                    if (clue1 == null && member == null) {
+                        clueMapper.insert(c);
+                    }
                 }
             }
             return ServerResponse.createBySuccessMessage("更新成功");
