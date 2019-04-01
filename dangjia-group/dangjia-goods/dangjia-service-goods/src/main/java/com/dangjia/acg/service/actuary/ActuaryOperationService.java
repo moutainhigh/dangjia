@@ -825,20 +825,18 @@ public class ActuaryOperationService {
 
     //拼接属性品牌
     private String getAttributes(Product product) {
-        String attributes = "";
-        try {
-            String[] valueIdArr = product.getValueIdArr().split(",");
-            for (int i = 0; i < valueIdArr.length; i++) {
-                AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueIdArr[i]);
-                attributes = attributes + " " + attributeValue.getName();
-            }
-            BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(product.getBrandSeriesId());
-            attributes = attributes + " " + brandSeries.getName();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "查询属性失败";
+        String attributes = product.getValueNameArr();
+        if(attributes==null){
+            attributes="";
         }
-        return attributes;
+        BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(product.getBrandSeriesId());
+        if(brandSeries!=null) {
+            attributes = attributes + " " + brandSeries.getName();
+        }
+        if(CommonUtil.isEmpty(attributes)){
+            return "无";
+        }
+        return attributes.replaceAll(","," ");
     }
 
     //根据品牌系列找属性品牌
