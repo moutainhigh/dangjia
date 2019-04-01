@@ -335,8 +335,9 @@ public class WalletService {
             walletDTO.setIncome(income == null ? 0 : income);//总收入
             Example example = new Example(HouseWorker.class);
             example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId());
-            List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
-            walletDTO.setHouseOrder(houseWorkerList.size());//接单量
+//            List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
+//            walletDTO.setHouseOrder(houseWorkerList.size());//接单量
+            walletDTO.setHouseOrder(member.getVolume().intValue());//接单量
 
             return ServerResponse.createBySuccess("获取成功", walletDTO);
         } catch (Exception e) {
