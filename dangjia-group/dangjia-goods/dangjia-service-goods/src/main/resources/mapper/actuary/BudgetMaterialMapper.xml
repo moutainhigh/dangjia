@@ -39,7 +39,7 @@
 			SELECT
 				house_id houseId,
 				worker_type_id workerTypeId,
-				product_type type,
+				'0' type,
 				SUM(total_price) totalAmount
 			FROM
 				`dj_actuary_budget_material`
@@ -49,7 +49,6 @@
 			AND `house_id` = #{houseId}
 			GROUP BY
 				houseId,
-				workerTypeId,
 				product_type
 		)
 		UNION ALL
