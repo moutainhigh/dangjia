@@ -2,6 +2,7 @@ package com.dangjia.acg.service.clue;
 
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.common.util.excel.ImportExcel;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.clue.ClueTalkMapper;
@@ -24,6 +25,8 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @Service
@@ -138,12 +141,14 @@ public class ClueService {
             ImportExcel clue = new ImportExcel(file, 0, 0);
             List<Clue> clueList = clue.getDataList(Clue.class, 0);
             for (Clue c : clueList) {
-                c.setCusService(userId);
-                Clue clue1= clueMapper.getByPhone(c.getPhone());
-                Member member=iMemberMapper.getByPhone(c.getPhone());
-                //表示从来没有过线索和注册过
-                if(clue1==null&&member==null){
-                    clueMapper.insert(c);
+                if(Validator.isMobileNo(c.getPhone())) {
+                    c.setCusService(userId);
+                    Clue clue1 = clueMapper.getByPhone(c.getPhone());
+                    Member member = iMemberMapper.getByPhone(c.getPhone());
+                    //表示从来没有过线索和注册过
+                    if (clue1 == null && member == null) {
+                        clueMapper.insert(c);
+                    }
                 }
             }
             return ServerResponse.createBySuccessMessage("更新成功");
