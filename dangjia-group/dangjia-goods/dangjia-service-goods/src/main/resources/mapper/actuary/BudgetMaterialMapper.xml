@@ -76,7 +76,9 @@
 		FROM dj_actuary_budget_material
 		WHERE
 			house_id=#{houseId}
-		and category_id =#{categoryId}
+		<if test = "categoryId!=null and categoryId!=''">
+			and category_id = #{categoryId}
+		</if>
 		and delete_state in (0,3,4)
 	</select>
 	<!--精算分类材料总价(支付和未支付)-->
