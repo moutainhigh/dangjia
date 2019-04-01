@@ -75,6 +75,7 @@ public class HouseWorkerSupService {
         map.put("applyDec",houseFlowApply.getApplyDec());
         map.put("startDate",sdf.format(houseFlowApply.getStartDate()));
         map.put("endDate",sdf.format(houseFlowApply.getEndDate()));
+        map.put("createDate", houseFlowApply.getCreateDate());
         return ServerResponse.createBySuccess("获取成功", map);
     }
 
