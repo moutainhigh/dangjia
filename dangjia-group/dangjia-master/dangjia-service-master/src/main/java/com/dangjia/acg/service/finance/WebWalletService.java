@@ -92,9 +92,9 @@ public class WebWalletService {
                 return ServerResponse.createByErrorMessage("自定义流水说明 不能为null");
 
             Member worker = iMemberMapper.selectByPrimaryKey(workerDetail.getWorkerId());
-            if(workerDetail.getState() == 3 && worker.getSurplusMoney().compareTo(workerDetail.getMoney()) < 0){
-                return ServerResponse.createByErrorMessage("工匠余额不足");
-            }
+//            if(workerDetail.getState() == 3 && worker.getSurplusMoney().compareTo(workerDetail.getMoney()) < 0){
+//                return ServerResponse.createByErrorMessage("工匠余额不足");
+//            }
             if(workerDetail.getState() == 3){//减钱
                 worker.setHaveMoney(worker.getHaveMoney().subtract(workerDetail.getMoney()));
                 worker.setSurplusMoney(worker.getSurplusMoney().subtract(workerDetail.getMoney()));
