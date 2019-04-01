@@ -898,10 +898,13 @@ public class PaymentService {
             if (accessToken == null) {//无效的token
                 return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册!");
             }
-            BusinessOrder busOrder = businessOrderMapper.byTaskId(taskId,type);
-            if (busOrder != null){
-                if (busOrder.getState() == 3){
-                    return ServerResponse.createBySuccessMessage("该任务已支付");
+
+            if(type != 4){
+                BusinessOrder busOrder = businessOrderMapper.byTaskId(taskId,type);
+                if (busOrder != null){
+                    if (busOrder.getState() == 3){
+                        return ServerResponse.createBySuccessMessage("该任务已支付");
+                    }
                 }
             }
 
