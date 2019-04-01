@@ -2,6 +2,7 @@ package com.dangjia.acg.service.clue;
 
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.common.util.excel.ImportExcel;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.clue.ClueTalkMapper;
@@ -140,10 +141,7 @@ public class ClueService {
             ImportExcel clue = new ImportExcel(file, 0, 0);
             List<Clue> clueList = clue.getDataList(Clue.class, 0);
             for (Clue c : clueList) {
-                String regex="^(13[0-9]|14[5|7]|15[0|1|2|3|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\\d{8}$";
-                Pattern pattern=Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
-                Matcher m= pattern.matcher(c.getPhone());
-                if(m.matches()) {
+                if(Validator.isMobileNo(c.getPhone())) {
                     c.setCusService(userId);
                     Clue clue1 = clueMapper.getByPhone(c.getPhone());
                     Member member = iMemberMapper.getByPhone(c.getPhone());
