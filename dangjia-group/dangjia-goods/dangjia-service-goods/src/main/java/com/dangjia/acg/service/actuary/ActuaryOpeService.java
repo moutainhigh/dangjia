@@ -157,6 +157,41 @@ public class ActuaryOpeService {
         }
     }
 
+
+    /**
+     * 查看房子已购买的人工详细列表
+     * @param houseId
+     * @param address
+     * @return
+     */
+    public List<BudgetItemDTO> getHouseWorkerInfo(String houseId,String address){
+        List<String> workerTypeIdList = budgetWorkerMapper.workerTypeList(houseId);
+        List<BudgetItemDTO> budgetItemDTOList = new ArrayList<>();
+        for (String workerTypeId : workerTypeIdList) {
+            BudgetItemDTO budgetItemDTO = new BudgetItemDTO();
+            WorkerType workerType = workerTypeAPI.queryWorkerType(workerTypeId);
+            budgetItemDTO.setRowImage(address + workerType.getImage());
+            budgetItemDTO.setRowName(workerType.getName());
+            Double rowPrice = budgetWorkerMapper.getTypeAllPrice(houseId, workerTypeId);
+            budgetItemDTO.setRowPrice(rowPrice);
+
+            List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getTypeAllList(houseId, workerTypeId);
+            List<GoodsItemDTO> goodsItemDTOList = new ArrayList<>();
+            for (BudgetWorker budgetWorker : budgetWorkerList) {
+                GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
+                goodsItemDTO.setGoodsImage(address + budgetWorker.getImage());
+                goodsItemDTO.setGoodsName(budgetWorker.getName());
+                goodsItemDTO.setConvertCount(budgetWorker.getShopCount());
+                goodsItemDTO.setPrice(budgetWorker.getPrice());
+                goodsItemDTO.setUnitName(budgetWorker.getUnitName());
+                goodsItemDTO.setId(budgetWorker.getWorkerGoodsId());//人工商品id
+                goodsItemDTOList.add(goodsItemDTO);
+            }
+            budgetItemDTO.setGoodsItemDTOList(goodsItemDTOList);
+            budgetItemDTOList.add(budgetItemDTO);
+        }
+        return budgetItemDTOList;
+    }
     /**
      * 精算详情
      * type: 1人工 2材料服务
@@ -169,31 +204,7 @@ public class ActuaryOpeService {
             budgetDTO.setCaiPrice(budgetMaterialMapper.getHouseCaiPrice(houseId));
             budgetDTO.setTotalPrice(budgetDTO.getWorkerPrice() + budgetDTO.getCaiPrice());
             if (type == 1) {//人工
-                List<String> workerTypeIdList = budgetWorkerMapper.workerTypeList(houseId);
-                List<BudgetItemDTO> budgetItemDTOList = new ArrayList<>();
-                for (String workerTypeId : workerTypeIdList) {
-                    BudgetItemDTO budgetItemDTO = new BudgetItemDTO();
-                    WorkerType workerType = workerTypeAPI.queryWorkerType(workerTypeId);
-                    budgetItemDTO.setRowImage(address + workerType.getImage());
-                    budgetItemDTO.setRowName(workerType.getName());
-                    Double rowPrice = budgetWorkerMapper.getTypeAllPrice(houseId, workerTypeId);
-                    budgetItemDTO.setRowPrice(rowPrice);
-
-                    List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getTypeAllList(houseId, workerTypeId);
-                    List<GoodsItemDTO> goodsItemDTOList = new ArrayList<>();
-                    for (BudgetWorker budgetWorker : budgetWorkerList) {
-                        GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
-                        goodsItemDTO.setGoodsImage(address + budgetWorker.getImage());
-                        goodsItemDTO.setGoodsName(budgetWorker.getName());
-                        goodsItemDTO.setConvertCount(budgetWorker.getShopCount());
-                        goodsItemDTO.setPrice(budgetWorker.getPrice());
-                        goodsItemDTO.setUnitName(budgetWorker.getUnitName());
-                        goodsItemDTO.setId(budgetWorker.getWorkerGoodsId());//人工商品id
-                        goodsItemDTOList.add(goodsItemDTO);
-                    }
-                    budgetItemDTO.setGoodsItemDTOList(goodsItemDTOList);
-                    budgetItemDTOList.add(budgetItemDTO);
-                }
+                List<BudgetItemDTO> budgetItemDTOList=getHouseWorkerInfo(houseId,address);
                 budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
             } else if (type == 2) {//材料
                 List<String> categoryIdList = budgetMaterialMapper.categoryIdList(houseId);

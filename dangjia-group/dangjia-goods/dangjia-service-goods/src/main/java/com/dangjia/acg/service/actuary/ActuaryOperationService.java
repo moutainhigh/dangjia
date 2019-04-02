@@ -804,6 +804,9 @@ public class ActuaryOperationService {
                     flowActuaryDTO.setConvertCount(bm.getConvertCount());
                     flowActuaryDTO.setBudgetMaterialId(bm.getId());
                     flowActuaryDTO.setName(bm.getGoodsName());
+                    if(CommonUtil.isEmpty(flowActuaryDTO.getName())){
+                        flowActuaryDTO.setName(bm.getProductName());
+                    }
 //                    flowActuaryDTO.setUnitName(bm.getUnitName());
                     flowActuaryDTO.setUnitName(convertUnitName);
 
