@@ -22,6 +22,7 @@ public class WarehouseDTO {
     private String unitName;
     private int productType;// 0：材料；1：服务
     private String image;
+    private Double repairCount;
     private String productId;
 
     private int askTime; //要货次数
