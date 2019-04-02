@@ -117,10 +117,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			and
 			product_name LIKE CONCAT('%',#{name},'%')
 		</if>
-		<if test = "type!=null and type!=''">
-			and
-			product_type = #{type}
-		</if>
 	</select>
 
 </mapper>
