@@ -104,7 +104,7 @@ public class WarehouseService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             BigDecimal allPrice =new BigDecimal(0);
             if(type!=null&&type==2){
-                List<BudgetItemDTO> budgetItemDTOS= actuaryOpeAPI.getHouseWorkerInfo(houseId,address);
+                List<BudgetItemDTO> budgetItemDTOS= actuaryOpeAPI.getHouseWorkerInfo(request,houseId,address);
                 for (BudgetItemDTO budgetItemDTO : budgetItemDTOS) {
                     allPrice = allPrice.add(new BigDecimal(budgetItemDTO.getRowPrice()));
                 }
