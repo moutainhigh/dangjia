@@ -46,6 +46,7 @@ public class ActuaryOpeController implements ActuaryOpeAPI {
      * @return
      */
     @Override
+    @ApiMethod
     public List<BudgetItemDTO> getHouseWorkerInfo(String houseId, String address){
         return actuaryOpeService.getHouseWorkerInfo(houseId, address);
     }
