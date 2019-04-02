@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.house;
 
+import com.dangjia.acg.api.actuary.ActuaryOpeAPI;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -7,6 +8,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.budget.BudgetItemDTO;
 import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
@@ -38,8 +40,8 @@ public class WarehouseService {
     private ConfigUtil configUtil;
     @Autowired
     private ForMasterAPI forMasterAPI;
-//    @Autowired
-//    private ActuaryOpeAPI actuaryOpeAPI;
+    @Autowired
+    private ActuaryOpeAPI actuaryOpeAPI;
     private static Logger LOG = LoggerFactory.getLogger(WarehouseService.class);
 
 
@@ -75,7 +77,7 @@ public class WarehouseService {
                 BeanUtils.beanToBean(warehouse,warehouseDTO);
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
-                warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getAskCount() - warehouse.getBackCount());
+                warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getAskCount());
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                 warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(warehouse.getProductId()));
                 warehouseDTOS.add(warehouseDTO);
@@ -102,12 +104,12 @@ public class WarehouseService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             BigDecimal allPrice =new BigDecimal(0);
             if(type!=null&&type==2){
-//                List<BudgetItemDTO> budgetItemDTOS= actuaryOpeAPI.getHouseWorkerInfo(houseId,address);
-//                for (BudgetItemDTO budgetItemDTO : budgetItemDTOS) {
-//                    allPrice = allPrice.add(new BigDecimal(budgetItemDTO.getRowPrice()));
-//                }
-//                map.put("totalPrice",allPrice);
-//                map.put("goodsItemDTOList",budgetItemDTOS);
+                List<BudgetItemDTO> budgetItemDTOS= actuaryOpeAPI.getHouseWorkerInfo(request,houseId,address);
+                for (BudgetItemDTO budgetItemDTO : budgetItemDTOS) {
+                    allPrice = allPrice.add(new BigDecimal(budgetItemDTO.getRowPrice()));
+                }
+                map.put("totalPrice",allPrice);
+                map.put("goodsItemDTOList",budgetItemDTOS);
             }else {
                 Example example = new Example(Warehouse.class);
                 Example.Criteria criteria = example.createCriteria();
