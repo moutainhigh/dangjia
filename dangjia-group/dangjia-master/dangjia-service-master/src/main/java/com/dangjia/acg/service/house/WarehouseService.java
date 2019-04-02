@@ -109,7 +109,7 @@ public class WarehouseService {
                 for (BudgetItemDTO budgetItemDTO : budgetItemDTOS) {
                     allPrice = allPrice.add(new BigDecimal(budgetItemDTO.getRowPrice()));
                 }
-                allPrice=allPrice.add(new BigDecimal(warehouseMapper.getHouseGoodsPrice(houseId,String.valueOf(type),name)));
+                allPrice=allPrice.add(new BigDecimal(warehouseMapper.getHouseGoodsPrice(houseId,name)));
                 map.put("goodsItemDTOList",budgetItemDTOS);
             }else {
                 Example example = new Example(Warehouse.class);

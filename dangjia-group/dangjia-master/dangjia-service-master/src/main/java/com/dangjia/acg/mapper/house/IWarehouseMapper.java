@@ -23,7 +23,6 @@ public interface IWarehouseMapper extends Mapper<Warehouse> {
     /**材料类商品*/
     List<Warehouse> materialsList(@Param("houseId")String houseId, @Param("categoryId")String categoryId,
                                @Param("name")String name);
-    Double getHouseGoodsPrice(@Param("houseId")String houseId, @Param("type")String type,
-                                  @Param("name")String name);
+    Double getHouseGoodsPrice(@Param("houseId")String houseId, @Param("name")String name);
 
 }
