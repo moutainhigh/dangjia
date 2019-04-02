@@ -1,13 +1,8 @@
 package com.dangjia.acg.service.member;
 
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
-import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.modle.member.Customer;
-import com.dangjia.acg.service.core.WorkerTypeService;
-import com.dangjia.acg.service.house.WarehouseService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +43,7 @@ public class CustomerService {
 
             if (StringUtils.isNotBlank(customer.getUserId()))
                 srcCustomer.setUserId(customer.getUserId());
-            if (customer.getLabelIdArr() != "noUpdate")
+            if (!customer.getLabelIdArr().equals("noUpdate"))
                 srcCustomer.setLabelIdArr(customer.getLabelIdArr());
             if (!StringUtils.isNotBlank(customer.getLabelIdArr())) //如果为null 或者 “”，就删除
                 srcCustomer.setLabelIdArr(null);

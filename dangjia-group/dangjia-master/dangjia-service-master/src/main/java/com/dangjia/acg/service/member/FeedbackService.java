@@ -15,6 +15,7 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Feedback;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.core.WorkerTypeService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -70,7 +71,12 @@ public class FeedbackService {
                 feedbacknew.setImageurl(StringUtils.join(imageurls, ","));
             }
             Map map = BeanUtils.beanToMap(feedbacknew);
-            map.put("memberName", memberMapper.selectByPrimaryKey(feedbacknew.getMemberId()).getNickName());
+            if (!CommonUtil.isEmpty(feedbacknew.getMemberId())) {
+                Member member = memberMapper.selectByPrimaryKey(feedbacknew.getMemberId());
+                if (member != null) {
+                    map.put("memberName", member.getNickName());
+                }
+            }
             listMap.add(map);
         }
         pageResult.setList(listMap);

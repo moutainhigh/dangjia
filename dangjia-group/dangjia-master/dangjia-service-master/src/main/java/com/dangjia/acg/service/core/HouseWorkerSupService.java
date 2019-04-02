@@ -72,6 +72,7 @@ public class HouseWorkerSupService {
         map.put("name", worker.getName());
         map.put("praiseRate", worker.getPraiseRate() == null ? "100%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
         map.put("mobile",worker.getMobile());
+        map.put("memberId",worker.getId());
         map.put("applyDec",houseFlowApply.getApplyDec());
         map.put("startDate",sdf.format(houseFlowApply.getStartDate()));
         map.put("endDate",sdf.format(houseFlowApply.getEndDate()));
