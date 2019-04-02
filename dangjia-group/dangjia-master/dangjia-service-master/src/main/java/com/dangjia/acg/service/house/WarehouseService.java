@@ -103,13 +103,8 @@ public class WarehouseService {
             Map<String, Map> maps = new HashMap<>();
             Map map=new HashMap();
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            BigDecimal allPrice =new BigDecimal(0);
             if(type!=null&&type==2){
                 List<BudgetItemDTO> budgetItemDTOS= actuaryOpeAPI.getHouseWorkerInfo(request,houseId,address);
-                for (BudgetItemDTO budgetItemDTO : budgetItemDTOS) {
-                    allPrice = allPrice.add(new BigDecimal(budgetItemDTO.getRowPrice()));
-                }
-                allPrice=allPrice.add(new BigDecimal(warehouseMapper.getHouseGoodsPrice(houseId,name)));
                 map.put("goodsItemDTOList",budgetItemDTOS);
             }else {
                 Example example = new Example(Warehouse.class);
@@ -162,7 +157,6 @@ public class WarehouseService {
                         warehouseDTOS.add(warehouseDTO);
                         rowPrice = rowPrice.add(new BigDecimal(warehouseDTO.getTolPrice()));
                     }
-                    allPrice = allPrice.add(rowPrice);
                     budgetItemDTO.put("rowPrice", rowPrice);
                     budgetItemDTO.put("goodsItems", warehouseDTOS);
                     maps.put(goodsCategory.getId(), budgetItemDTO);
@@ -171,10 +165,14 @@ public class WarehouseService {
                 for (Map.Entry<String, Map> entry : maps.entrySet()) {
                     budgetItemDTOList.add(entry.getValue());
                 }
-                allPrice=allPrice.add(new BigDecimal(actuaryOpeAPI.getHouseWorkerPrice(request,houseId)));
                 map.put("goodsItemDTOList", budgetItemDTOList);
             }
-            map.put("totalPrice", allPrice);
+            Double workerPrice=actuaryOpeAPI.getHouseWorkerPrice(request,houseId);
+            Double caiPrice=warehouseMapper.getHouseGoodsPrice(houseId,name);
+            Double totalPrice=workerPrice+caiPrice;
+            map.put("workerPrice", workerPrice);
+            map.put("caiPrice", caiPrice);
+            map.put("totalPrice", totalPrice);
             return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             e.printStackTrace();
