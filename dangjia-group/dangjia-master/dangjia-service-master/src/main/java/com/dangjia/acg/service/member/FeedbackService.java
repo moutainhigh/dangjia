@@ -79,10 +79,14 @@ public class FeedbackService {
 
     public ServerResponse addFeedback(HttpServletRequest request, Feedback customer) {
         String userToken = request.getParameter(Constants.USER_TOKEY);
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        customer.setMemberId(accessToken.getMemberId());
+        if (userToken != null) {
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            if (accessToken != null && accessToken.getMember() != null) {
+                customer.setMemberId(accessToken.getMemberId());
+                customer.setMobile(accessToken.getMember().getMobile());
+            }
+        }
         customer.setState(0);
-        customer.setMobile(accessToken.getMember().getMobile());
         if (!CommonUtil.isEmpty(customer.getWorkerTypeId())) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(customer.getWorkerTypeId());
             customer.setWorkerTypeName(workerType == null ? "" : workerType.getName());
