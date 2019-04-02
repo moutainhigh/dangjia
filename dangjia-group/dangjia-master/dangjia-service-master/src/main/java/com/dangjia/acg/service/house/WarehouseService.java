@@ -109,7 +109,7 @@ public class WarehouseService {
                 for (BudgetItemDTO budgetItemDTO : budgetItemDTOS) {
                     allPrice = allPrice.add(new BigDecimal(budgetItemDTO.getRowPrice()));
                 }
-                map.put("totalPrice",allPrice);
+                allPrice=allPrice.add(new BigDecimal(warehouseMapper.getHouseGoodsPrice(houseId,String.valueOf(type),name)));
                 map.put("goodsItemDTOList",budgetItemDTOS);
             }else {
                 Example example = new Example(Warehouse.class);
@@ -171,9 +171,10 @@ public class WarehouseService {
                 for (Map.Entry<String, Map> entry : maps.entrySet()) {
                     budgetItemDTOList.add(entry.getValue());
                 }
-                map.put("totalPrice", allPrice);
+                allPrice=allPrice.add(new BigDecimal(actuaryOpeAPI.getHouseWorkerPrice(request,houseId)));
                 map.put("goodsItemDTOList", budgetItemDTOList);
             }
+            map.put("totalPrice", allPrice);
             return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             e.printStackTrace();

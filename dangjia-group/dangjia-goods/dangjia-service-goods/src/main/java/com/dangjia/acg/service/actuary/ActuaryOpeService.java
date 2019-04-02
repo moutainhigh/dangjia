@@ -192,6 +192,9 @@ public class ActuaryOpeService {
         }
         return budgetItemDTOList;
     }
+    public Double getHouseWorkerPrice(String houseId){
+        return budgetWorkerMapper.getHouseWorkerPrice(houseId);
+    }
     /**
      * 精算详情
      * type: 1人工 2材料服务
