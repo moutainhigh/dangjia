@@ -102,7 +102,7 @@ public class FillMaterielService {
                 warehouseDTO.setAskCount(warehouse.getAskCount());
                 warehouseDTO.setBackCount(warehouse.getBackCount());
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
-                warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getAskCount() - warehouse.getBackCount());
+                warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getBackCount() - warehouse.getReceive());//所有买的数量 - 退货 - 收的
                 warehouseDTO.setProductName(warehouse.getProductName());
                 warehouseDTO.setPrice(warehouse.getPrice());
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());

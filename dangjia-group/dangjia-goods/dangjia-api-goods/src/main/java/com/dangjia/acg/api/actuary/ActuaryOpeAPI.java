@@ -1,11 +1,15 @@
 package com.dangjia.acg.api.actuary;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.budget.BudgetItemDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * author: Ronalcheng
@@ -31,5 +35,9 @@ public interface ActuaryOpeAPI {
     ServerResponse actuary(@RequestParam("houseId") String houseId,
                            @RequestParam("cityId")String cityId,
                            @RequestParam("type")Integer type);
+
+    @PostMapping("/actuary/actuaryOpe/getHouseWorkerInfo")
+    @ApiOperation(value = " 查看房子已购买的人工详细列表(内部使用)", notes = " 内部使用")
+    List<BudgetItemDTO> getHouseWorkerInfo(@RequestParam("request") HttpServletRequest request, @RequestParam("houseId")String houseId, @RequestParam("address")String address);
 
 }
