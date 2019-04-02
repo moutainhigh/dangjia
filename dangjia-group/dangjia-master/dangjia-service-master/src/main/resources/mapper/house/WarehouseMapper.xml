@@ -94,8 +94,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		SELECT
 		<include refid="all_columns"/>
 		FROM dj_house_warehouse
-		where 1=1
-		and house_id = #{houseId}
+		where house_id = #{houseId}
 		<if test = "name!=null and name!=''">
 			and
 			product_name LIKE CONCAT('%',#{name},'%')
@@ -107,7 +106,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		ORDER BY create_date desc
 	</select>
 
-
+	<!--房子商品总价-->
+	<select id="getHouseGoodsPrice" resultType="java.lang.Double">
+		SELECT
+		IFNULL(sum(price * (shop_count-back_count)),0) tolPrice
+		FROM
+			dj_house_warehouse
+		WHERE  house_id = #{houseId}
+		<if test = "name!=null and name!=''">
+			and
+			product_name LIKE CONCAT('%',#{name},'%')
+		</if>
+		<if test = "type!=null and type!=''">
+			and
+			product_type = #{type}
+		</if>
+	</select>
 
 </mapper>
 

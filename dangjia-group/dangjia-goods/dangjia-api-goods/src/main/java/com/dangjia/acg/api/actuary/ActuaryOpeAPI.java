@@ -40,4 +40,7 @@ public interface ActuaryOpeAPI {
     @ApiOperation(value = " 查看房子已购买的人工详细列表(内部使用)", notes = " 内部使用")
     List<BudgetItemDTO> getHouseWorkerInfo(@RequestParam("request") HttpServletRequest request, @RequestParam("houseId")String houseId, @RequestParam("address")String address);
 
+    @PostMapping("/actuary/actuaryOpe/getHouseWorkerPrice")
+    @ApiOperation(value = " 房子人工总价(内部使用)", notes = " 内部使用")
+    Double getHouseWorkerPrice(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId") String houseId);
 }

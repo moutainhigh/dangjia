@@ -47,8 +47,11 @@ public class ActuaryOpeController implements ActuaryOpeAPI {
      * @return
      */
     @Override
-    @ApiMethod
     public List<BudgetItemDTO> getHouseWorkerInfo( HttpServletRequest request, String houseId, String address){
         return actuaryOpeService.getHouseWorkerInfo(houseId, address);
+    }
+    @Override
+    public Double getHouseWorkerPrice(HttpServletRequest request,String houseId){
+        return actuaryOpeService.getHouseWorkerPrice(houseId);
     }
 }
