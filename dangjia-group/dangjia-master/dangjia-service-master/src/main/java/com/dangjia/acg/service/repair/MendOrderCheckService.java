@@ -10,6 +10,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
@@ -19,6 +20,7 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.house.WarehouseDetail;
@@ -80,6 +82,8 @@ public class MendOrderCheckService {
     @Autowired
     private ConfigMessageService configMessageService;
 
+    @Autowired
+    private IOrderSplitMapper orderSplitMapper;
 
     /**
      * 根据mendOrderId查询审核情况
@@ -132,6 +136,16 @@ public class MendOrderCheckService {
                     changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
                     pushMessage(mendOrder,roleType);
 
+                }
+                Example example = new Example(OrderSplit.class);
+                example.createCriteria().andEqualTo(OrderSplit.MEND_NUMBER,mendOrderId);
+                List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
+                //判断是否存在要货
+                if (orderSplitList.size() >0) {
+                    for (OrderSplit orderSplit : orderSplitList) {
+                        orderSplit.setApplyStatus(3);//不通过
+                        orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
+                    }
                 }
             }else {
                 boolean flag = true;
