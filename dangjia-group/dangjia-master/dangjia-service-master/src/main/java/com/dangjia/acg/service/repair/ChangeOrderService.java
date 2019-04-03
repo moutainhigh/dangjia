@@ -5,10 +5,12 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -42,6 +44,8 @@ public class ChangeOrderService {
     private ConfigMessageService configMessageService;
     @Autowired
     private IMendOrderMapper mendOrderMapper;
+    @Autowired
+    private IHouseFlowApplyMapper houseFlowApplyMapper;
 
     /**
      * 管家审核变更单
@@ -126,6 +130,11 @@ public class ChangeOrderService {
         List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseId, member.getWorkerTypeId());
         if (changeOrderList.size() > 0){
             return ServerResponse.createByErrorMessage("该工种有未处理变更单,通知管家处理");
+        }
+
+        List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
+        if (houseFlowApplyList.size() > 0) {
+            return ServerResponse.createByErrorMessage("该工种有未处理完工申请");
         }
 
         if (type == 1){

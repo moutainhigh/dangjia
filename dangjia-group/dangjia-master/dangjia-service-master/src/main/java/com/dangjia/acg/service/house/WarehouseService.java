@@ -3,6 +3,7 @@ package com.dangjia.acg.service.house;
 import com.dangjia.acg.api.actuary.ActuaryOpeAPI;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -77,7 +78,7 @@ public class WarehouseService {
                 BeanUtils.beanToBean(warehouse,warehouseDTO);
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
-                warehouseDTO.setSurCount(warehouse.getShopCount()  - warehouse.getBackCount() - warehouse.getReceive());//剩余数量
+                warehouseDTO.setSurCount(warehouse.getShopCount()  - warehouse.getBackCount() - warehouse.getReceive());//剩余数量 所有买的数量 - 退货 - 收的
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                 warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(warehouse.getProductId()));
                 warehouseDTO.setRepairCount(warehouse.getRepairCount());
@@ -97,19 +98,15 @@ public class WarehouseService {
      */
     public ServerResponse warehouseGmList(HttpServletRequest request, String houseId, String name, Integer type) {
         try {
+            String cityId = request.getParameter(Constants.CITY_ID);
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
             Map<String, Map> maps = new HashMap<>();
             Map map=new HashMap();
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            BigDecimal allPrice =new BigDecimal(0);
             if(type!=null&&type==2){
-                List<BudgetItemDTO> budgetItemDTOS= actuaryOpeAPI.getHouseWorkerInfo(request,houseId,address);
-                for (BudgetItemDTO budgetItemDTO : budgetItemDTOS) {
-                    allPrice = allPrice.add(new BigDecimal(budgetItemDTO.getRowPrice()));
-                }
-                map.put("totalPrice",allPrice);
+                List<BudgetItemDTO> budgetItemDTOS= actuaryOpeAPI.getHouseWorkerInfo(cityId,"3",houseId,address);
                 map.put("goodsItemDTOList",budgetItemDTOS);
             }else {
                 Example example = new Example(Warehouse.class);
@@ -162,7 +159,6 @@ public class WarehouseService {
                         warehouseDTOS.add(warehouseDTO);
                         rowPrice = rowPrice.add(new BigDecimal(warehouseDTO.getTolPrice()));
                     }
-                    allPrice = allPrice.add(rowPrice);
                     budgetItemDTO.put("rowPrice", rowPrice);
                     budgetItemDTO.put("goodsItems", warehouseDTOS);
                     maps.put(goodsCategory.getId(), budgetItemDTO);
@@ -171,9 +167,14 @@ public class WarehouseService {
                 for (Map.Entry<String, Map> entry : maps.entrySet()) {
                     budgetItemDTOList.add(entry.getValue());
                 }
-                map.put("totalPrice", allPrice);
                 map.put("goodsItemDTOList", budgetItemDTOList);
             }
+            Double workerPrice=actuaryOpeAPI.getHouseWorkerPrice(cityId,"3",houseId);
+            Double caiPrice=warehouseMapper.getHouseGoodsPrice(houseId,name);
+            Double totalPrice=workerPrice+caiPrice;
+            map.put("workerPrice", workerPrice);
+            map.put("caiPrice", caiPrice);
+            map.put("totalPrice", totalPrice);
             return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             e.printStackTrace();

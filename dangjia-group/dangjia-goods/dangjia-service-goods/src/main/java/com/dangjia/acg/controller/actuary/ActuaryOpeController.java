@@ -8,7 +8,6 @@ import com.dangjia.acg.service.actuary.ActuaryOpeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 
@@ -47,8 +46,11 @@ public class ActuaryOpeController implements ActuaryOpeAPI {
      * @return
      */
     @Override
-    @ApiMethod
-    public List<BudgetItemDTO> getHouseWorkerInfo( HttpServletRequest request, String houseId, String address){
-        return actuaryOpeService.getHouseWorkerInfo(houseId, address);
+    public List<BudgetItemDTO> getHouseWorkerInfo( String cityId,String deleteState, String houseId, String address){
+        return actuaryOpeService.getHouseWorkerInfo(houseId,deleteState, address);
+    }
+    @Override
+    public Double getHouseWorkerPrice(String cityId,String deleteState,String houseId){
+        return actuaryOpeService.getHouseWorkerPrice(houseId,deleteState);
     }
 }

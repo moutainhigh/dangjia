@@ -8,7 +8,6 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -38,6 +37,16 @@ public interface ActuaryOpeAPI {
 
     @PostMapping("/actuary/actuaryOpe/getHouseWorkerInfo")
     @ApiOperation(value = " 查看房子已购买的人工详细列表(内部使用)", notes = " 内部使用")
-    List<BudgetItemDTO> getHouseWorkerInfo(@RequestParam("request") HttpServletRequest request, @RequestParam("houseId")String houseId, @RequestParam("address")String address);
+    List<BudgetItemDTO> getHouseWorkerInfo(
+            @RequestParam("cityId")String cityId,
+            @RequestParam("deleteState")String deleteState,
+            @RequestParam("houseId")String houseId,
+            @RequestParam("address")String address);
 
+    @PostMapping("/actuary/actuaryOpe/getHouseWorkerPrice")
+    @ApiOperation(value = " 房子人工总价(内部使用)", notes = " 内部使用")
+    Double getHouseWorkerPrice(
+            @RequestParam("cityId")String cityId,
+            @RequestParam("deleteState")String deleteState,
+            @RequestParam("houseId") String houseId);
 }
