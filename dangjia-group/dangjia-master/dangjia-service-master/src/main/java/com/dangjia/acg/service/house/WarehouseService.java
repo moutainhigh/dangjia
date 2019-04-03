@@ -11,6 +11,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.budget.BudgetItemDTO;
 import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.github.pagehelper.PageHelper;
@@ -97,19 +98,15 @@ public class WarehouseService {
      */
     public ServerResponse warehouseGmList(HttpServletRequest request, String houseId, String name, Integer type) {
         try {
+            request.setAttribute(BudgetWorker.DATA_STATUS,3);
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
             Map<String, Map> maps = new HashMap<>();
             Map map=new HashMap();
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            BigDecimal allPrice =new BigDecimal(0);
             if(type!=null&&type==2){
                 List<BudgetItemDTO> budgetItemDTOS= actuaryOpeAPI.getHouseWorkerInfo(request,houseId,address);
-                for (BudgetItemDTO budgetItemDTO : budgetItemDTOS) {
-                    allPrice = allPrice.add(new BigDecimal(budgetItemDTO.getRowPrice()));
-                }
-                map.put("totalPrice",allPrice);
                 map.put("goodsItemDTOList",budgetItemDTOS);
             }else {
                 Example example = new Example(Warehouse.class);
@@ -162,7 +159,6 @@ public class WarehouseService {
                         warehouseDTOS.add(warehouseDTO);
                         rowPrice = rowPrice.add(new BigDecimal(warehouseDTO.getTolPrice()));
                     }
-                    allPrice = allPrice.add(rowPrice);
                     budgetItemDTO.put("rowPrice", rowPrice);
                     budgetItemDTO.put("goodsItems", warehouseDTOS);
                     maps.put(goodsCategory.getId(), budgetItemDTO);
@@ -171,9 +167,14 @@ public class WarehouseService {
                 for (Map.Entry<String, Map> entry : maps.entrySet()) {
                     budgetItemDTOList.add(entry.getValue());
                 }
-                map.put("totalPrice", allPrice);
                 map.put("goodsItemDTOList", budgetItemDTOList);
             }
+            Double workerPrice=actuaryOpeAPI.getHouseWorkerPrice(request,houseId);
+            Double caiPrice=warehouseMapper.getHouseGoodsPrice(houseId,name);
+            Double totalPrice=workerPrice+caiPrice;
+            map.put("workerPrice", workerPrice);
+            map.put("caiPrice", caiPrice);
+            map.put("totalPrice", totalPrice);
             return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             e.printStackTrace();
