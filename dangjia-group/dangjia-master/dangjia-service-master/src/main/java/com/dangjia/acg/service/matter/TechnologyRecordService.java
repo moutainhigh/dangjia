@@ -8,6 +8,7 @@ import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dto.matter.TechnologyRecordDTO;
+import com.dangjia.acg.dto.matter.WorkNodeDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
@@ -47,6 +48,54 @@ public class TechnologyRecordService {
     @Autowired
     private ForMasterAPI forMasterAPI;
 
+
+    /**
+     * 工匠今日完工节点列表
+     */
+    public ServerResponse workNodeList(String houseFlowId){
+        List<WorkNodeDTO> workNodeDTOList = new ArrayList<>();
+
+        WorkNodeDTO workNodeDTOA = new WorkNodeDTO();
+        List<TechnologyRecordDTO> trList = new ArrayList<>();
+        TechnologyRecordDTO A1 = new TechnologyRecordDTO();
+        A1.setId("123131");
+        A1.setName("空鼓率");
+        A1.setState(0);
+        trList.add(A1);
+
+        TechnologyRecordDTO A2 = new TechnologyRecordDTO();
+        A2.setId("123131");
+        A2.setName("平整度");
+        A2.setState(0);
+        trList.add(A2);
+
+        workNodeDTOA.setTecName("地砖正普贴");
+        workNodeDTOA.setTrList(trList);
+
+        workNodeDTOList.add(workNodeDTOA);
+
+        WorkNodeDTO workNodeDTOB = new WorkNodeDTO();
+        trList = new ArrayList<>();
+        TechnologyRecordDTO B1 = new TechnologyRecordDTO();
+        B1.setId("123131");
+        B1.setName("空鼓率");
+        B1.setState(0);
+        trList.add(B1);
+
+        TechnologyRecordDTO B2 = new TechnologyRecordDTO();
+        B2.setId("123131");
+        B2.setName("留缝标准");
+        B2.setState(0);
+        trList.add(B2);
+
+        workNodeDTOB.setTecName("墙贴铺贴");
+        workNodeDTOB.setTrList(trList);
+
+        workNodeDTOList.add(workNodeDTOB);
+
+        return ServerResponse.createBySuccess("查询成功", workNodeDTOList);
+    }
+
     /**
      * 获取上传图片列表
      * applyType 0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
@@ -77,11 +126,6 @@ public class TechnologyRecordService {
             map.put("imageTypeName","材料照片");
             map.put("imageType",0);
             listMap.add(listMap.size(), map);
-         /*   map = new HashMap<>();
-            map.put("imageTypeId","");
-            map.put("imageTypeName","进度照片");
-            map.put("imageType",1);
-            listMap.add(listMap.size(), map);*/
             return ServerResponse.createBySuccess("查询成功",listMap);
         }catch (Exception e){
             e.printStackTrace();
