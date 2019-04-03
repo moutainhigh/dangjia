@@ -30,6 +30,7 @@ public class MemberCustomerDTO implements Comparable<MemberCustomerDTO> {
     private int remindTimeOvertime;//提醒时间是否超时 -1:未超过，0：相等，1：超过了
     private Date lastRecord;//上次跟进时间
     protected Date createDate;// 创建日期
+    protected Date orderDate;//下单时间
     private List<MemberLabel> memberLabelList;//多个标签对象
 
     @Override

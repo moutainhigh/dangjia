@@ -25,8 +25,6 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 @Service
@@ -106,7 +104,6 @@ public class ClueService {
      */
     public ServerResponse getByStage(int stage, Integer pageNum, Integer pageSize) {
         try {
-
             PageHelper.startPage(pageNum, pageSize);
             List<Clue> clues = clueMapper.getByStage(stage);
             PageInfo pageResult = new PageInfo(clues);

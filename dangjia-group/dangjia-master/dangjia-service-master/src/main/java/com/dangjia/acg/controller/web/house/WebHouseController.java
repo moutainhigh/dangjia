@@ -25,8 +25,8 @@ public class WebHouseController implements WebHouseAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getList(HttpServletRequest request, PageDTO pageDTO, String searchKey, String memberId) {
-        return houseService.getList(pageDTO, searchKey, memberId);
+    public ServerResponse getList(HttpServletRequest request, PageDTO pageDTO,Integer visitState,String startDate,String endDate, String searchKey,String orderBy, String memberId) {
+        return houseService.getList(pageDTO,visitState,startDate,endDate, searchKey,orderBy, memberId);
     }
 
     @Override
