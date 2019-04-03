@@ -855,7 +855,7 @@ public class MendOrderService {
             }
 
             if (this.addMendMateriel(productArr, mendOrder)) {
-                return ServerResponse.createBySuccessMessage("保存成功");
+                return ServerResponse.createBySuccess("保存成功",mendOrder.getId());
             } else {
                 return ServerResponse.createByErrorMessage("添加明细失败");
             }

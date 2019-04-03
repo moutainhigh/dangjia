@@ -387,7 +387,10 @@ public class OrderSplitService {
     public ServerResponse getOrderSplitList(String houseId) {
         try {
             Example example = new Example(OrderSplit.class);
-            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andGreaterThan(OrderSplit.APPLY_STATUS, 0);//大于0
+            example.createCriteria()
+                    .andEqualTo(OrderSplit.HOUSE_ID, houseId)
+                    .andGreaterThan(OrderSplit.APPLY_STATUS, 0)//大于0
+            .andNotEqualTo(OrderSplit.APPLY_STATUS,4);//过滤业主未支付
             example.orderBy(OrderSplit.CREATE_DATE).desc();
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             return ServerResponse.createBySuccess("查询成功", orderSplitList);
