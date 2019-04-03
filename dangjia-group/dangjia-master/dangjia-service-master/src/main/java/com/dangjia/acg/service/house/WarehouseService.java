@@ -78,7 +78,7 @@ public class WarehouseService {
                 BeanUtils.beanToBean(warehouse,warehouseDTO);
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
-                warehouseDTO.setSurCount(warehouse.getShopCount()  - warehouse.getBackCount() - warehouse.getReceive());//剩余数量
+                warehouseDTO.setSurCount(warehouse.getShopCount()  - warehouse.getBackCount() - warehouse.getReceive());//剩余数量 所有买的数量 - 退货 - 收的
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                 warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(warehouse.getProductId()));
                 warehouseDTO.setRepairCount(warehouse.getRepairCount());

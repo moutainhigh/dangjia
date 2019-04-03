@@ -24,6 +24,14 @@ public class TechnologyRecordController implements TechnologyRecordAPI {
 
 
     /**
+     * 工匠今日完工节点列表
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse workNodeList(String userToken, String houseFlowId){
+        return technologyRecordService.workNodeList(houseFlowId);
+    }
+    /**
      * 获取上传图片列表
      */
     @Override
