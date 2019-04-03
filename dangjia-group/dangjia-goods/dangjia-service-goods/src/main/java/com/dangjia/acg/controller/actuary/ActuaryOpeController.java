@@ -4,12 +4,10 @@ import com.dangjia.acg.api.actuary.ActuaryOpeAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.budget.BudgetItemDTO;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.service.actuary.ActuaryOpeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 
@@ -48,19 +46,11 @@ public class ActuaryOpeController implements ActuaryOpeAPI {
      * @return
      */
     @Override
-    public List<BudgetItemDTO> getHouseWorkerInfo( HttpServletRequest request, String houseId, String address){
-        String deleteState="";
-        if(request.getAttribute(BudgetWorker.DATA_STATUS)!=null){
-            deleteState=(String) request.getAttribute(BudgetWorker.DATA_STATUS);
-        }
+    public List<BudgetItemDTO> getHouseWorkerInfo( String cityId,String deleteState, String houseId, String address){
         return actuaryOpeService.getHouseWorkerInfo(houseId,deleteState, address);
     }
     @Override
-    public Double getHouseWorkerPrice(HttpServletRequest request,String houseId){
-        String deleteState="";
-        if(request.getAttribute(BudgetWorker.DATA_STATUS)!=null){
-            deleteState=(String) request.getAttribute(BudgetWorker.DATA_STATUS);
-        }
+    public Double getHouseWorkerPrice(String cityId,String deleteState,String houseId){
         return actuaryOpeService.getHouseWorkerPrice(houseId,deleteState);
     }
 }

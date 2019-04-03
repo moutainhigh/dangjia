@@ -3,6 +3,7 @@ package com.dangjia.acg.service.house;
 import com.dangjia.acg.api.actuary.ActuaryOpeAPI;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -11,7 +12,6 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.budget.BudgetItemDTO;
 import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.github.pagehelper.PageHelper;
@@ -78,7 +78,7 @@ public class WarehouseService {
                 BeanUtils.beanToBean(warehouse,warehouseDTO);
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
-                warehouseDTO.setSurCount(warehouse.getShopCount()  - warehouse.getBackCount() - warehouse.getReceive());//剩余数量
+                warehouseDTO.setSurCount(warehouse.getShopCount()  - warehouse.getBackCount() - warehouse.getReceive());//剩余数量 所有买的数量 - 退货 - 收的
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                 warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(warehouse.getProductId()));
                 warehouseDTO.setRepairCount(warehouse.getRepairCount());
@@ -98,7 +98,7 @@ public class WarehouseService {
      */
     public ServerResponse warehouseGmList(HttpServletRequest request, String houseId, String name, Integer type) {
         try {
-            request.setAttribute(BudgetWorker.DATA_STATUS,3);
+            String cityId = request.getParameter(Constants.CITY_ID);
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
@@ -106,7 +106,7 @@ public class WarehouseService {
             Map map=new HashMap();
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             if(type!=null&&type==2){
-                List<BudgetItemDTO> budgetItemDTOS= actuaryOpeAPI.getHouseWorkerInfo(request,houseId,address);
+                List<BudgetItemDTO> budgetItemDTOS= actuaryOpeAPI.getHouseWorkerInfo(cityId,"3",houseId,address);
                 map.put("goodsItemDTOList",budgetItemDTOS);
             }else {
                 Example example = new Example(Warehouse.class);
@@ -169,7 +169,7 @@ public class WarehouseService {
                 }
                 map.put("goodsItemDTOList", budgetItemDTOList);
             }
-            Double workerPrice=actuaryOpeAPI.getHouseWorkerPrice(request,houseId);
+            Double workerPrice=actuaryOpeAPI.getHouseWorkerPrice(cityId,"3",houseId);
             Double caiPrice=warehouseMapper.getHouseGoodsPrice(houseId,name);
             Double totalPrice=workerPrice+caiPrice;
             map.put("workerPrice", workerPrice);

@@ -117,7 +117,7 @@ public class HouseWorkerSupService {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Date start = sdf.parse(startDate);
             Date end = sdf.parse(endDate);
-            long day =(end.getTime() - start.getTime())/(24*60*60*1000);
+            long day =(end.getTime() - start.getTime())/(24*60*60*1000) + 1;
             hfa.setSuspendDay((int)day);//申请停工天数 计算
             hfa.setStartDate(start);
             hfa.setEndDate(end);

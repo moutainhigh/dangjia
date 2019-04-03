@@ -59,7 +59,7 @@
 			and bw.delete_state = #{deleteState}
 		</if>
 		<if test = "deleteState==null or deleteState==''">
-			and bw.delete_state in (0,3);
+			and bw.delete_state in (0,3)
 		</if>
 	    and bw.worker_type_id = #{workerTypeId}
 	</select>
