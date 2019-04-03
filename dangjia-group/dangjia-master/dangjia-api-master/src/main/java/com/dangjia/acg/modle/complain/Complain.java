@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -14,7 +15,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_complain")
 @FieldNameConstants(prefix = "")
-@ApiModel(description = "当家申述处理")
+@ApiModel(description = "当家申诉处理")
 public class Complain extends BaseEntity {
 
     @Column(name = "member_id")
@@ -23,8 +24,8 @@ public class Complain extends BaseEntity {
     private String memberId;
 
     @Column(name = "complain_type")
-    @Desc(value = "申述类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申述.")
-    @ApiModelProperty("申述类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申述.")
+    @Desc(value = "申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.")
+    @ApiModelProperty("申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.")
     private Integer complainType;
 
     @Column(name = "user_id")
@@ -55,6 +56,7 @@ public class Complain extends BaseEntity {
     @Desc(value = "对应房子ID")
     @ApiModelProperty("对应房子ID")
     private String houseId;
+
 
     @Column(name = "files")
     @Desc(value = "附件")
