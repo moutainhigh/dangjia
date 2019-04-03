@@ -4,6 +4,7 @@ import com.dangjia.acg.api.actuary.ActuaryOpeAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.budget.BudgetItemDTO;
+import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.service.actuary.ActuaryOpeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,10 +49,18 @@ public class ActuaryOpeController implements ActuaryOpeAPI {
      */
     @Override
     public List<BudgetItemDTO> getHouseWorkerInfo( HttpServletRequest request, String houseId, String address){
-        return actuaryOpeService.getHouseWorkerInfo(houseId, address);
+        String deleteState="";
+        if(request.getAttribute(BudgetWorker.DATA_STATUS)!=null){
+            deleteState=(String) request.getAttribute(BudgetWorker.DATA_STATUS);
+        }
+        return actuaryOpeService.getHouseWorkerInfo(houseId,deleteState, address);
     }
     @Override
     public Double getHouseWorkerPrice(HttpServletRequest request,String houseId){
-        return actuaryOpeService.getHouseWorkerPrice(houseId);
+        String deleteState="";
+        if(request.getAttribute(BudgetWorker.DATA_STATUS)!=null){
+            deleteState=(String) request.getAttribute(BudgetWorker.DATA_STATUS);
+        }
+        return actuaryOpeService.getHouseWorkerPrice(houseId,deleteState);
     }
 }

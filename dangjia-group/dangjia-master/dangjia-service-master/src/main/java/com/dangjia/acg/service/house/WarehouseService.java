@@ -11,6 +11,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.budget.BudgetItemDTO;
 import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.github.pagehelper.PageHelper;
@@ -97,6 +98,7 @@ public class WarehouseService {
      */
     public ServerResponse warehouseGmList(HttpServletRequest request, String houseId, String name, Integer type) {
         try {
+            request.setAttribute(BudgetWorker.DATA_STATUS,3);
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
