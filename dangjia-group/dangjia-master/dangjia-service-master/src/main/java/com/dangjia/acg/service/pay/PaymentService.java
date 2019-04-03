@@ -23,6 +23,8 @@ import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderMapper;
+import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
+import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.design.IDesignImageTypeMapper;
 import com.dangjia.acg.mapper.design.IHouseDesignImageMapper;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
@@ -46,6 +48,8 @@ import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
+import com.dangjia.acg.modle.deliver.OrderSplit;
+import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.design.DesignImageType;
 import com.dangjia.acg.modle.design.HouseDesignImage;
 import com.dangjia.acg.modle.design.HouseStyleType;
@@ -151,7 +155,11 @@ public class PaymentService {
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
 
+    @Autowired
+    private IOrderSplitMapper orderSplitMapper;
 
+    @Autowired
+    private IOrderSplitItemMapper orderSplitItemMapper;
     /**
      * 服务器回调
      */
@@ -301,6 +309,7 @@ public class PaymentService {
         try {
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(businessOrder.getTaskId());
             HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
+            WorkerType workerType=workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
             if (mendOrder.getType() == 0) {//补货
                 houseExpend.setMaterialMoney(houseExpend.getMaterialMoney() + businessOrder.getTotalPrice().doubleValue());//材料
                 houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
@@ -319,7 +328,7 @@ public class PaymentService {
                 example = new Example(MendOrder.class);
                 example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, businessOrder.getHouseId()).andEqualTo(MendOrder.TYPE, 0)
                         .andEqualTo(MendOrder.STATE, 4);
-                order.setWorkerTypeName("大管家补货" + "00" + (mendOrderMapper.selectCountByExample(example) + 1));
+                order.setWorkerTypeName(workerType.getName()+"补货" + "00" + (mendOrderMapper.selectCountByExample(example) + 1));
                 order.setWorkerTypeId(mendOrder.getWorkerTypeId());
                 order.setPayment(payState);// 支付方式
                 order.setType(2);//材料
@@ -388,6 +397,7 @@ public class PaymentService {
                         warehouseMapper.insert(warehouse);
                     }
                 }
+                orderSplit( mendOrder.getHouseId(), mendOrder.getId(), workerType.getType());
             } else if (mendOrder.getType() == 1) {//补人工
                 houseExpend.setWorkerMoney(houseExpend.getWorkerMoney() + businessOrder.getTotalPrice().doubleValue());//人工
                 houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
@@ -417,7 +427,7 @@ public class PaymentService {
                 example = new Example(MendOrder.class);
                 example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, businessOrder.getHouseId()).andEqualTo(MendOrder.TYPE, 1)
                         .andEqualTo(MendOrder.STATE, 4);
-                order.setWorkerTypeName("大管家补人工" + "00" + (mendOrderMapper.selectCountByExample(example) + 1));
+                order.setWorkerTypeName(workerType.getName()+"补人工" + "00" + (mendOrderMapper.selectCountByExample(example) + 1));
                 order.setWorkerTypeId(mendOrder.getWorkerTypeId());//补人工记录工种
                 order.setPayment(payState);// 支付方式
                 order.setType(1);//人工
@@ -444,7 +454,47 @@ public class PaymentService {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
     }
+    /**
+     * 业主支付完补货单后处理要货单
+     */
+    private void orderSplit(String houseId,String mendOrderId,Integer workerType) {
+        Example example = new Example(OrderSplit.class);
+        example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 4)
+                .andEqualTo(OrderSplit.MEND_NUMBER,mendOrderId);
+        List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
+        //判断是否存在要货
+        if (orderSplitList.size() >0){
+            for (OrderSplit orderSplit : orderSplitList) {
+                example = new Example(OrderSplitItem.class);
+                example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
+                List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+                for (OrderSplitItem orderSplitItem : orderSplitItemList){
+                    Warehouse warehouse = warehouseMapper.selectByPrimaryKey(orderSplitItem.getWarehouseId());
+                    warehouse.setAskCount(warehouse.getAskCount() + orderSplitItem.getNum());//更新仓库已要总数
+                    warehouse.setAskTime(warehouse.getAskTime() + 1);//更新该货品被要次数
+                    warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                }
+                orderSplit.setApplyStatus(1);//提交到后台
+                orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
 
+                //记录仓库流水
+                WarehouseDetail warehouseDetail = new WarehouseDetail();
+                warehouseDetail.setHouseId(houseId);
+                warehouseDetail.setRelationId(orderSplit.getId());//要货单
+                warehouseDetail.setRecordType(1);//要
+                warehouseDetailMapper.insert(warehouseDetail);
+
+                House house = houseMapper.selectByPrimaryKey(houseId);
+                if(workerType == 3){
+                    configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","大管家要服务",
+                            String.format(DjConstants.PushMessage.STEWARD_Y_SERVER,house.getHouseName()) ,"");
+                }else {
+                    configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","工匠要材料",String.format
+                            (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL,house.getHouseName()) ,"");
+                }
+            }
+        }
+    }
     /**
      * 支付工序
      */

@@ -26,14 +26,19 @@ public class OrderSplit extends BaseEntity {
 	@ApiModelProperty("订单号")
 	private String number;
 
+	@Column(name = "mend_number")
+	@Desc(value = "补货单号")
+	@ApiModelProperty("补货订单号")
+	private String mendNumber;
+
 	@Column(name = "house_id")
 	@Desc(value = "房子ID")
 	@ApiModelProperty("房子ID")
 	private String houseId;//houseid
 
 	@Column(name = "apply_status")
-	@Desc(value = "后台审核状态：0生成中, 1申请中, 2通过(发给供应商), 3不通过")
-	@ApiModelProperty("后台审核状态：0生成中, 1申请中, 2通过(发给供应商), 3不通过")
+	@Desc(value = "后台审核状态：0生成中, 1申请中, 2通过(发给供应商), 3不通过, 4待业主支付")
+	@ApiModelProperty("后台审核状态：0生成中, 1申请中, 2通过(发给供应商), 3不通过, 4待业主支付")
 	private Integer applyStatus;
 
 	@Column(name = "supervisor_id")
