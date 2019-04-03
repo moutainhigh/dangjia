@@ -59,11 +59,11 @@ public class ActuaryOpeService {
                     WorkerType workerType = workerTypeAPI.queryWorkerType(workerTypeIdArr[i]);
                     budgetItemDTO.setRowImage(address + workerType.getImage());
                     budgetItemDTO.setRowName(workerType.getName());
-                    Double rowPrice = budgetWorkerMapper.getTypeAllPrice(houseId, workerTypeIdArr[i]);
+                    Double rowPrice = budgetWorkerMapper.getTypeAllPrice(houseId,null, workerTypeIdArr[i]);
                     budgetItemDTO.setRowPrice(rowPrice);
                     budgetDTO.setWorkerPrice(budgetDTO.getWorkerPrice() + rowPrice);
 
-                    List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getTypeAllList(houseId, workerTypeIdArr[i]);
+                    List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getTypeAllList(houseId,null, workerTypeIdArr[i]);
                     List<GoodsItemDTO> goodsItemDTOList = new ArrayList<>();
                     for (BudgetWorker budgetWorker : budgetWorkerList) {
                         GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
@@ -81,7 +81,7 @@ public class ActuaryOpeService {
                 }
                 budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
             } else {
-                budgetDTO.setWorkerPrice(budgetWorkerMapper.getHouseWorkerPrice(houseId));
+                budgetDTO.setWorkerPrice(budgetWorkerMapper.getHouseWorkerPrice(houseId,null));
                 budgetDTO.setCaiPrice(0.0);
                 String[] categoryIdArr = idArr.split(",");
                 for (int i = 0; i < categoryIdArr.length; i++) {
@@ -164,20 +164,21 @@ public class ActuaryOpeService {
      * @param address
      * @return
      */
-    public List<BudgetItemDTO> getHouseWorkerInfo(String houseId,String address){
+    public List<BudgetItemDTO> getHouseWorkerInfo(String houseId,String deleteState,String address){
         List<String> workerTypeIdList = budgetWorkerMapper.workerTypeList(houseId);
         List<BudgetItemDTO> budgetItemDTOList = new ArrayList<>();
+        List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getTypeAllList(houseId,deleteState, null);
         for (String workerTypeId : workerTypeIdList) {
             BudgetItemDTO budgetItemDTO = new BudgetItemDTO();
             WorkerType workerType = workerTypeAPI.queryWorkerType(workerTypeId);
             budgetItemDTO.setRowImage(address + workerType.getImage());
             budgetItemDTO.setRowName(workerType.getName());
-            Double rowPrice = budgetWorkerMapper.getTypeAllPrice(houseId, workerTypeId);
+            Double rowPrice = budgetWorkerMapper.getTypeAllPrice(houseId, deleteState,workerTypeId);
             budgetItemDTO.setRowPrice(rowPrice);
 
-            List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getTypeAllList(houseId, workerTypeId);
             List<GoodsItemDTO> goodsItemDTOList = new ArrayList<>();
             for (BudgetWorker budgetWorker : budgetWorkerList) {
+                if(!workerTypeId.equals(budgetWorker.getWorkerTypeId())) continue;
                 GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
                 goodsItemDTO.setGoodsImage(address + budgetWorker.getImage());
                 goodsItemDTO.setGoodsName(budgetWorker.getName());
@@ -192,8 +193,8 @@ public class ActuaryOpeService {
         }
         return budgetItemDTOList;
     }
-    public Double getHouseWorkerPrice(String houseId){
-        return budgetWorkerMapper.getHouseWorkerPrice(houseId);
+    public Double getHouseWorkerPrice(String houseId,String deleteState){
+        return budgetWorkerMapper.getHouseWorkerPrice(houseId,deleteState);
     }
     /**
      * 精算详情
@@ -203,11 +204,11 @@ public class ActuaryOpeService {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             BudgetDTO budgetDTO = new BudgetDTO();
-            budgetDTO.setWorkerPrice(budgetWorkerMapper.getHouseWorkerPrice(houseId));
+            budgetDTO.setWorkerPrice(budgetWorkerMapper.getHouseWorkerPrice(houseId,null));
             budgetDTO.setCaiPrice(budgetMaterialMapper.getHouseCaiPrice(houseId));
             budgetDTO.setTotalPrice(budgetDTO.getWorkerPrice() + budgetDTO.getCaiPrice());
             if (type == 1) {//人工
-                List<BudgetItemDTO> budgetItemDTOList=getHouseWorkerInfo(houseId,address);
+                List<BudgetItemDTO> budgetItemDTOList=getHouseWorkerInfo(houseId,null,address);
                 budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
             } else if (type == 2) {//材料
                 List<String> categoryIdList = budgetMaterialMapper.categoryIdList(houseId);
