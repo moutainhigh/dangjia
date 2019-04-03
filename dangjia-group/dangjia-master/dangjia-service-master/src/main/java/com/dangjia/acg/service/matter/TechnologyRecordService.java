@@ -50,9 +50,62 @@ public class TechnologyRecordService {
 
 
     /**
+     * 1.31
+     * 获取上传图片列表
+     * applyType 0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
+     */
+    public ServerResponse nodeImageList(String nodeArr,Integer applyType ){
+        try{
+
+            Map<String,Object> returnMap = new HashMap<>();
+
+            if(applyType == 1 || applyType == 2){
+                returnMap.put("hint", "温馨提示:您在提交验收后被驳回次数<font color=red>超过2次后将产生罚款</font>,金额为100元/1次的费用.");
+                returnMap.put("pop", "您的整改次数已经超过2次，从第3次起，每次整改将按照100元/次自动罚款，请知晓");
+            }else {
+                returnMap.put("hint", "");
+                returnMap.put("pop", "");
+            }
+
+            List<Map<String,Object>> listMap = new ArrayList<>();
+            Map<String,Object> map;
+            if (StringUtil.isNotEmpty(nodeArr)){
+                String[] idArr = nodeArr.split(",");
+                for (String id : idArr) {
+                    //Technology technology = forMasterAPI.byTechnologyId(id);
+                    map = new HashMap<>();
+                    map.put("imageTypeId", id);
+                   // map.put("imageTypeName", technology.getName());
+                    map.put("imageTypeName", "节点工艺名");
+                    map.put("imageType", 3);  //节点照片
+                    listMap.add(map);
+                }
+            }else {
+                map = new HashMap<>();
+                map.put("imageTypeId","");
+                map.put("imageTypeName","现场照片");
+                map.put("imageType",2);
+                listMap.add(0,map);
+            }
+            map = new HashMap<>();
+            map.put("imageTypeId","");
+            map.put("imageTypeName","材料照片");
+            map.put("imageType",0);
+            listMap.add(listMap.size(), map);
+
+            returnMap.put("listMap", listMap);
+            return ServerResponse.createBySuccess("查询成功",returnMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 1.31
      * 工匠今日完工节点列表
      */
-    public ServerResponse workNodeList(String houseFlowId){
+    public ServerResponse workNodeList(String houseFlowId, Integer applyType){
         List<WorkNodeDTO> workNodeDTOList = new ArrayList<>();
 
         WorkNodeDTO workNodeDTOA = new WorkNodeDTO();

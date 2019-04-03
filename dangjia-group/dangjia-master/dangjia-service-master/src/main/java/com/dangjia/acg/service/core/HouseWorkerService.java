@@ -757,6 +757,7 @@ public class HouseWorkerService {
 
     /**
      * 提交审核、停工
+     *  @Deprecated
      */
     public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId, Integer suspendDay,
                                             String applyDec, String imageList, String houseFlowId2) {

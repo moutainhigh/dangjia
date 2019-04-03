@@ -23,13 +23,19 @@ public class TechnologyRecordController implements TechnologyRecordAPI {
     private TechnologyRecordService technologyRecordService;
 
 
+    @Override
+    @ApiMethod
+    public ServerResponse nodeImageList(String userToken, String nodeArr,Integer applyType ){
+        return technologyRecordService.nodeImageList(nodeArr, applyType);
+    }
+
     /**
      * 工匠今日完工节点列表
      */
     @Override
     @ApiMethod
-    public ServerResponse workNodeList(String userToken, String houseFlowId){
-        return technologyRecordService.workNodeList(houseFlowId);
+    public ServerResponse workNodeList(String userToken, String houseFlowId,Integer applyType){
+        return technologyRecordService.workNodeList(houseFlowId, applyType);
     }
     /**
      * 获取上传图片列表

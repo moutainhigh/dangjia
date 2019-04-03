@@ -20,9 +20,15 @@ import java.util.List;
 @Api(value = "验收工艺节点相关", description = "验收工艺节点相关")
 public interface TechnologyRecordAPI {
 
+    @PostMapping("/data/technologyRecord/nodeImageList")
+    @ApiOperation(value = "节点图片列表", notes = "节点图片列表")
+    ServerResponse nodeImageList(@RequestParam("userToken") String userToken,@RequestParam("nodeArr")String nodeArr,
+                                 @RequestParam("applyType")Integer applyType);
+
     @PostMapping("/data/technologyRecord/workNodeList")
     @ApiOperation(value = "工匠今日完工节点列表", notes = "工匠今日完工节点列表")
-    ServerResponse workNodeList(@RequestParam("userToken") String userToken, @RequestParam("houseFlowId") String houseFlowId);
+    ServerResponse workNodeList(@RequestParam("userToken") String userToken, @RequestParam("houseFlowId") String houseFlowId
+                                    ,@RequestParam("applyType")Integer applyType);
 
     @PostMapping("/data/technologyRecord/uploadingImageList")
     @ApiOperation(value = "获取上传图片列表", notes = "获取上传图片列表")
