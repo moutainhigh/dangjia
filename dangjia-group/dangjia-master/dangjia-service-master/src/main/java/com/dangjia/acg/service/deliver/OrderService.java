@@ -317,13 +317,13 @@ public class OrderService {
             map.put("times", workerType.getSafeState());//要货次数
             Example example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
-            List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
-            map.put("surplus", workerType.getSafeState() - orderSplitList.size());
+            int surplus = orderSplitMapper.selectCountByExample(example);
+            map.put("surplus", workerType.getSafeState() - surplus);
 
             example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
             .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
-            orderSplitList = orderSplitMapper.selectByExample(example);
+            List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             if (orderSplitList.size() == 0){
                 return ServerResponse.createBySuccessMessage("没有生成中要货单");
             }else if (orderSplitList.size() > 1){
