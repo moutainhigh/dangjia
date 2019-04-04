@@ -228,6 +228,7 @@ public class OrderSplitService {
                     splitDeliver.setTotalAmount(0.0);
                     splitDeliver.setDeliveryFee(0.0);
                     splitDeliver.setApplyMoney(0.0);
+                    splitDeliver.setApplyState(0);
                     splitDeliver.setShipName(member.getNickName() == null ? member.getName() : member.getNickName());
                     splitDeliver.setShipMobile(member.getMobile());
                     splitDeliver.setShipAddress(house.getHouseName());

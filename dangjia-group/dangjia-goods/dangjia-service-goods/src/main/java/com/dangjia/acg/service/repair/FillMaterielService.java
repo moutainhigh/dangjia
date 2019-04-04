@@ -141,25 +141,19 @@ public class FillMaterielService {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
-            if (pageNum == null) {
-                pageNum = 1;
-            }
-            if (pageSize == null) {
-                pageSize = 5;
-            }
             List<GoodsDTO> goodsDTOList = new ArrayList<>();
             PageHelper.startPage(pageNum, pageSize);
             List<Product> productList;
             if (worker.getWorkerType() == 3){//大管家
-                productList = iProductMapper.serviceMaterials(name,categoryId);
+                productList = iProductMapper.queryProductData(name,categoryId,"1");
             } else {//其它工匠
-                productList = iProductMapper.commonMaterials(name,categoryId);
+                productList = iProductMapper.queryProductData(name,categoryId,"0");
             }
 
             PageInfo pageResult = new PageInfo(productList);
             if (productList.size() > 0) {
                 for (Product product : productList) {
-                    GoodsDTO goodsDTO = actuaryOperationService.goodsDetail(product, null, 1);
+                    GoodsDTO goodsDTO = actuaryOperationService.goodsDetail(product, null);
                     if (goodsDTO != null) {
                         goodsDTOList.add(goodsDTO);
                     }
