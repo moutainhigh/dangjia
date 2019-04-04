@@ -613,6 +613,11 @@ public class MemberService {
                     }
                 }
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
+                //判断是否有装修记录
+                Date date=houseMapper.getHouseDateByMemberId(member.getId());
+                if(date!=null){
+                    mcDTO.setOrderDate(date);
+                }
                 mcDTO.setMemberId(member.getId());
                 mcDTO.setMemberName(member.getName());
                 mcDTO.setMemberNickName(member.getNickName());

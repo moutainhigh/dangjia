@@ -12,7 +12,7 @@ import javax.persistence.Table;
 
 /**
  * 工人奖罚记录
- *  原表 WorkerRewardAndPunishRecord
+ * 原表 WorkerRewardAndPunishRecord
  */
 @Data
 @Entity
@@ -20,39 +20,46 @@ import javax.persistence.Table;
 @FieldNameConstants(prefix = "")
 public class RewardPunishRecord extends BaseEntity {
 
-	@Column(name = "member_id")
-	@Desc(value = "账户id")
-	@ApiModelProperty("账户id")
-	private String memberId;
 
-	@Column(name = "reward_punish_correlation_id")
-	@Desc(value = "奖罚条件id")
-	@ApiModelProperty("奖罚条件id")
-	private String rewardPunishCorrelationId;
+    @Column(name = "member_id")
+    @Desc(value = "账户id")
+    @ApiModelProperty("账户id")
+    private String memberId;
 
-	@Column(name = "operator_id")
-	@Desc(value = "操作人id")
-	@ApiModelProperty("操作人id")
-	private String operatorId;
+    @Column(name = "reward_punish_correlation_id")
+    @Desc(value = "奖罚条件id")
+    @ApiModelProperty("奖罚条件id")
+    private String rewardPunishCorrelationId;
 
-	@Column(name = "house_id")
-	@Desc(value = "房子Id")
-	@ApiModelProperty("房子Id")
-    private String houseId;	//houseid
+    @Column(name = "operator_id")
+    @Desc(value = "操作人id")
+    @ApiModelProperty("操作人id")
+    private String operatorId;
 
-	@Column(name = "type")
-	@Desc(value = "奖罚类型")
-	@ApiModelProperty("奖罚类型")
-	private Integer type;//0:奖励;1:处罚
+    @Column(name = "house_id")
+    @Desc(value = "房子Id")
+    @ApiModelProperty("房子Id")
+    private String houseId;    //houseid
 
-	@Column(name = "remarks")
-	@Desc(value = "奖罚备注")
-	@ApiModelProperty("奖罚备注")
-	private String remarks;
+    @Column(name = "type")
+    @Desc(value = "奖罚类型")
+    @ApiModelProperty("奖罚类型")
+    private Integer type;//0:奖励;1:处罚
 
-	@Column(name = "state")
-	@Desc(value = "启用状态")
-	@ApiModelProperty("启用状态")
-	private Integer state;//0:启用;1:不启用
+    @Column(name = "remarks")
+    @Desc(value = "奖罚备注")
+    @ApiModelProperty("奖罚备注")
+    private String remarks;
+
+    @Column(name = "state")
+    @Desc(value = "启用状态")
+    @ApiModelProperty("启用状态")
+    private Integer state;//0:启用;1:不启用
+
+    @Column(name = "complain_id")
+    @Desc(value = "申诉ID")
+    @ApiModelProperty("申诉ID")
+    private String complainId;
+
 
 }

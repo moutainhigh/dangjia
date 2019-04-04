@@ -217,6 +217,12 @@
         <if test="memberId!=null and memberId!=''">
             and m.id = #{memberId}
         </if>
+        <if test="visitState!=null">
+            and h.visit_state=#{visitState}
+        </if>
+        <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
+            and h.create_date BETWEEN #{startDate} and #{endDate}
+        </if>
         <if test="searchKey!=null and searchKey!=''">
             AND (
                 m.mobile like CONCAT('%',#{searchKey},'%')
@@ -224,8 +230,12 @@
                 CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
-        ORDER by
-        h.create_date desc
+            ORDER by
+            h.create_date
+        <if test="orderBy!=null and orderBy!=''and orderBy=='desc'">
+            desc
+        </if>
+
     </select>
 
     <select id="getHouseListLikeSearchKey" resultType="com.dangjia.acg.modle.house.House">
@@ -286,6 +296,14 @@
             )
         </if>
         ORDER by h.create_date desc
+    </select>
+
+    <select id="getHouseDateByMemberId" parameterType="String" resultType="date">
+        SELECT
+         h.create_date
+         from dj_member m
+         INNER join dj_house h on m.id=h.member_id where m.id=#{memberId} and h.data_status =0 and h.visit_state =1
+         ORDER BY create_date DESC limit 1
     </select>
 </mapper>
 

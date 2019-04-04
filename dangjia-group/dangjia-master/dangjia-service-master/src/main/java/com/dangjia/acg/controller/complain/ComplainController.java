@@ -18,21 +18,21 @@ public class ComplainController implements ComplainAPI {
     ComplainService complainService;
 
 
-    //添加申述
+    //添加申诉
     @Override
     @ApiMethod
-    public ServerResponse addComplain(HttpServletRequest request, String userToken, Integer complainType, String businessId, String houseId) {
-        return complainService.addComplain(userToken, complainType, businessId, houseId);
+    public ServerResponse addComplain(HttpServletRequest request, String userToken, Integer complainType, String businessId, String houseId,String files) {
+        return complainService.addComplain(userToken, complainType, businessId, houseId, files);
     }
 
-    //查询申述
+    //查询申诉
     @Override
     @ApiMethod
     public ServerResponse getComplainList(HttpServletRequest request, PageDTO pageDTO, Integer complainType, Integer state, String searchKey) {
         return complainService.getComplainList(pageDTO, complainType, state, searchKey);
     }
 
-    //修改申述
+    //修改申诉
     @Override
     @ApiMethod
     public ServerResponse updataComplain(HttpServletRequest request, String userId, String complainId, Integer state, String description, String files) {

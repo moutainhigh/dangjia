@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 申述返回体
+ * 申诉返回体
  */
 @Data
 public class ComplainDTO {
