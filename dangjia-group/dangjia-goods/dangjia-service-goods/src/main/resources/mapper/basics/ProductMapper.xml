@@ -559,7 +559,7 @@
 		</if>
 		WHERE  p.type = 1
 		<if test="productType!=null and productType!=''">
-			g.type =#{productType}
+			AND g.type =#{productType}
 		</if>
 		<if test="name!=null and name!=''">
 			AND (
