@@ -19,11 +19,13 @@ import java.util.List;
 @Repository
 public interface ISplitDeliverMapper extends Mapper<SplitDeliver> {
 
-    /**授权大管家收货*/
+    /**
+     * 授权大管家收货
+     */
     void supState(@Param("splitDeliverId") String splitDeliverId);
 
-    List<WebSplitDeliverItemDTO> getWebSplitDeliverList(@Param("applyState")Integer applyState,
-                                               @Param("searchKey")String searchKey,
-                                               @Param("beginDate")String beginDate,
-                                               @Param("endDate")String endDate);
+    List<WebSplitDeliverItemDTO> getWebSplitDeliverList(@Param("applyState") Integer applyState,
+                                                        @Param("searchKey") String searchKey,
+                                                        @Param("beginDate") String beginDate,
+                                                        @Param("endDate") String endDate);
 }
