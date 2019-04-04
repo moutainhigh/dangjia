@@ -75,6 +75,7 @@ public class OrderSplitService {
 
     @Autowired
     private ConfigMessageService configMessageService;
+
     /**
      * 修改 供应商结算状态
      * id 供应商结算id
@@ -208,7 +209,7 @@ public class OrderSplitService {
                 String id = obj.getString("id");
                 String supplierId = obj.getString("supplierId");
                 Supplier supplier = forMasterAPI.getSupplier(supplierId);
-                JsmsUtil.sendSupplier(supplier.getTelephone(), address+"submitNumber");
+                JsmsUtil.sendSupplier(supplier.getTelephone(), address + "submitNumber");
 
 
                 OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
@@ -233,6 +234,8 @@ public class OrderSplitService {
                     splitDeliver.setShipMobile(member.getMobile());
                     splitDeliver.setShipAddress(house.getHouseName());
                     splitDeliver.setSupplierId(supplierId);//供应商id
+                    splitDeliver.setSupplierTelephone(supplier.getTelephone());//供应商联系电话
+                    splitDeliver.setSupplierName(supplier.getName());//供应商供应商名称
                     splitDeliver.setSupervisorId(supervisor.getId());//管家id
                     splitDeliver.setSubmitTime(new Date());
                     splitDeliver.setSupState(0);

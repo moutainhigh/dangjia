@@ -82,6 +82,16 @@ public class SplitDeliver extends BaseEntity {
     @ApiModelProperty("供应商id")
     private String supplierId;//
 
+    @Column(name = "supplier_telephone")
+    @Desc(value = "供应商联系电话")
+    @ApiModelProperty("供应商联系电话")
+    private String supplierTelephone;//
+
+    @Column(name = "supplier_name")
+    @Desc(value = "供应商供应商名称")
+    @ApiModelProperty("供应商供应商名称")
+    private String supplierName;//
+
     @Column(name = "memo")
     @Desc(value = "附言 可编辑")
     @ApiModelProperty("附言 可编辑")

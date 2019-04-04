@@ -146,12 +146,11 @@ public class SplitDeliverService {
             splitDeliverDTO.setModifyDate(splitDeliver.getModifyDate());//收货时间
             splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
             splitDeliverDTO.setSupState(splitDeliver.getSupState());//大管家收货状态
-
             if(!CommonUtil.isEmpty(splitDeliver.getImage())) {
                 List<String> imageList = new ArrayList<>();
                 String[] imageArr = splitDeliver.getImage().split(",");
-                for (int i = 0; i < imageArr.length; i++) {
-                    String image = address + imageArr[i];
+                for (String anImageArr : imageArr) {
+                    String image = address + anImageArr;
                     imageList.add(image);
                 }
                 splitDeliverDTO.setImageList(imageList);
