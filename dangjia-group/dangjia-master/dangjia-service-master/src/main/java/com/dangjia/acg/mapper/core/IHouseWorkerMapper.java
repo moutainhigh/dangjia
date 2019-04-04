@@ -27,6 +27,6 @@ public interface IHouseWorkerMapper extends Mapper<HouseWorker> {
     HouseWorker getHwByHidAndWtype(@Param("houseId")String houseId,@Param("workerType")Integer workerType);
     Long getCountOrderByWorkerId(@Param("workerId")String workerId);
     List<HouseWorker> paidListByHouseId(@Param("houseId")String houseId);
-
     List<HouseWorkerDTO> queryWorkerHouse(@Param("workerId")String workerId);
+    int changeWorkerByHouseIdWorkerId(@Param("houseId") String houseId, @Param("workerId") String workerId);
 }

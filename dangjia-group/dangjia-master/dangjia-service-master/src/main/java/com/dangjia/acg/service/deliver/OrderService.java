@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -26,6 +27,8 @@ import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
+import com.dangjia.acg.modle.basics.Goods;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
@@ -89,6 +92,8 @@ public class OrderService {
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
 
+    @Autowired
+    private ForMasterAPI forMasterAPI;
     @Autowired
     private MendOrderService mendOrderService;
 
@@ -420,6 +425,26 @@ public class OrderService {
                     orderSplitItem.setProductType(warehouse.getProductType());
                     orderSplitItem.setCategoryId(warehouse.getCategoryId());
                     orderSplitItem.setImage(warehouse.getImage());//货品图片
+                    orderSplitItem.setHouseId(houseId);
+                    orderSplitItemMapper.insert(orderSplitItem);
+                }else{
+                    Product product=forMasterAPI.getProduct(productId);
+                    Goods goods=forMasterAPI.getGoods(product.getGoodsId());
+                    OrderSplitItem orderSplitItem = new OrderSplitItem();
+                    orderSplitItem.setOrderSplitId(orderSplit.getId());
+                    orderSplitItem.setProductId(product.getId());
+                    orderSplitItem.setProductSn(product.getProductSn());
+                    orderSplitItem.setProductName(product.getName());
+                    orderSplitItem.setPrice(product.getPrice());
+                    orderSplitItem.setAskCount(0d);
+                    orderSplitItem.setCost(product.getCost());
+                    orderSplitItem.setShopCount(0d);
+                    orderSplitItem.setNum(num);
+                    orderSplitItem.setUnitName(product.getUnitName());
+                    orderSplitItem.setTotalPrice(product.getPrice() * num);//单项总价 销售价
+                    orderSplitItem.setProductType(goods.getType());
+                    orderSplitItem.setCategoryId(product.getCategoryId());
+                    orderSplitItem.setImage(product.getImage());//货品图片
                     orderSplitItem.setHouseId(houseId);
                     orderSplitItemMapper.insert(orderSplitItem);
                 }
