@@ -140,7 +140,7 @@ public class TechnologyRecordService {
                     JSONObject object = jsonArray.getJSONObject(i);
                     String technologyId = object.getString("technologyId");
                     String technologyName = object.getString("technologyName");
-                    List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(house.getId(),technologyId);
+                    List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(house.getId(),technologyId,worker.getWorkerTypeId());
                     TechnologyRecordDTO trd = new TechnologyRecordDTO();
                     trd.setId(technologyId);
                     trd.setName(technologyName);
@@ -174,7 +174,7 @@ public class TechnologyRecordService {
                         TechnologyRecordDTO trd = new TechnologyRecordDTO();
                         trd.setId(technologyId);
                         trd.setName(technologyName);
-                        List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(houseFlow.getHouseId(),technologyId);
+                        List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(houseFlow.getHouseId(),technologyId,worker.getWorkerTypeId());
                         if (technologyRecordList.size() == 0){ //没有验收
                             trd.setState(0);
                         }else {
@@ -252,7 +252,7 @@ public class TechnologyRecordService {
                 JSONObject object = jsonArray.getJSONObject(i);
                 String technologyId = object.getString("technologyId");
                 String technologyName = object.getString("technologyName");
-                List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(house.getId(),technologyId);
+                List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(house.getId(),technologyId,"3");
                 if (technologyRecordList.size() == 0){
                     TechnologyRecordDTO dto = new TechnologyRecordDTO();
                     dto.setId(technologyId);
