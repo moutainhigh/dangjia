@@ -32,7 +32,7 @@
             and apply_state = #{applyState}
         </if>
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
-            and create_date between #{beginDate} and #{endDate}
+            and modify_date between #{beginDate} and #{endDate}
         </if>
         <if test="searchKey!=null and searchKey!=''">
             and ( ship_address like CONCAT('%',#{searchKey},'%')
