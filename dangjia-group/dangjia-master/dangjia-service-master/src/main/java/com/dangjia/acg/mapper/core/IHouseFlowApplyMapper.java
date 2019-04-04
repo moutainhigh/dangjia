@@ -11,6 +11,7 @@ import java.util.List;
 @Repository
 public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
 
+    List<HouseFlowApply> noPassList(@Param("houseFlowId") String houseFlowId);
     /**删除未审核申请*/
     void deleteNotMemberCheck(@Param("houseId")String houseId,@Param("workerId")String workerId);
 

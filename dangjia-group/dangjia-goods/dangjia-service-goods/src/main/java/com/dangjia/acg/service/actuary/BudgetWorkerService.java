@@ -860,4 +860,50 @@ public class BudgetWorkerService {
         }
     }
 
+
+    /**
+     * 精算查询包含工艺的人工商品
+     */
+    public JSONArray getWorkerGoodsList(String houseId, String houseFlowId) {
+        try {
+            JSONArray jsonArray = new JSONArray();
+            List<BudgetWorker> budgetWorkerList = iBudgetWorkerMapper.getByHouseFlowId(houseId, houseFlowId);
+            for (BudgetWorker abw : budgetWorkerList) {
+                if (abw.getShopCount() + abw.getRepairCount() - abw.getBackCount() > 0) {
+                    List<Technology> tList = iTechnologyMapper.workerPatrolList(abw.getWorkerGoodsId());
+                    if (tList.size() > 0){
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("workerGoodsId", abw.getWorkerGoodsId());
+                        jsonObject.put("workerGoodsName", abw.getName());
+                        jsonArray.add(jsonObject);
+                    }
+                }
+            }
+            return jsonArray;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * 根据人工商品查询工艺
+     */
+    public JSONArray getTecList(String workerGoodsId) {
+        try {
+            JSONArray jsonArray = new JSONArray();
+            List<Technology> tList = iTechnologyMapper.workerPatrolList(workerGoodsId);
+            for (Technology t : tList) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("technologyId", t.getId());
+                jsonObject.put("technologyName", t.getName());
+                jsonArray.add(jsonObject);
+            }
+            return jsonArray;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 }

@@ -23,7 +23,7 @@ public interface TechnologyRecordAPI {
     @PostMapping("/data/technologyRecord/nodeImageList")
     @ApiOperation(value = "节点图片列表", notes = "节点图片列表")
     ServerResponse nodeImageList(@RequestParam("userToken") String userToken,@RequestParam("nodeArr")String nodeArr,
-                                 @RequestParam("applyType")Integer applyType);
+                                 @RequestParam("applyType")Integer applyType,@RequestParam("houseFlowId")String houseFlowId);
 
     @PostMapping("/data/technologyRecord/workNodeList")
     @ApiOperation(value = "工匠今日完工节点列表", notes = "工匠今日完工节点列表")
