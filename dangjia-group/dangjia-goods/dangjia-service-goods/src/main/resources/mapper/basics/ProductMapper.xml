@@ -577,6 +577,7 @@
 		<if test="categoryId!=null and categoryId!=''">
 			AND (ca.parent_top=#{categoryId} OR p.category_id=#{categoryId})
 		</if>
+		ORDER BY p.`name` DESC
 	</select>
 
 	<!-- 根据系列和属性查询切换货品-->
