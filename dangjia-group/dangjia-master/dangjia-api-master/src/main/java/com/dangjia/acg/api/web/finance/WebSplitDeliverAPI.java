@@ -29,6 +29,7 @@ public interface WebSplitDeliverAPI {
     ServerResponse getAllSplitDeliver(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("pageDTO") PageDTO pageDTO,
                                       @RequestParam("applyState") Integer applyState,
+                                      @RequestParam("searchKey") String searchKey,
                                       @RequestParam("beginDate") String beginDate,
                                       @RequestParam("endDate") String endDate);
 
