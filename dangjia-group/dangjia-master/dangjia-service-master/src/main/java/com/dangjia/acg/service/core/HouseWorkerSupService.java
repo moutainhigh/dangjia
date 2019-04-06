@@ -55,7 +55,7 @@ public class HouseWorkerSupService {
      * 材料审查
      * 剩余材料列表
      */
-    public ServerResponse surplusList(String userToken,String houseFlowApplyId){
+    public ServerResponse surplusList(String houseFlowApplyId){
         HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
         return mendMaterielAPI.surplusList(houseFlowApply.getWorkerTypeId(),houseFlowApply.getHouseId());
     }

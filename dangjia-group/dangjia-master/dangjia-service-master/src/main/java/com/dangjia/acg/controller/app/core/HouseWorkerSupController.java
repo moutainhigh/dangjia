@@ -21,7 +21,7 @@ public class HouseWorkerSupController implements HouseWorkerSupAPI {
     @Override
     @ApiMethod
     public ServerResponse surplusList(String userToken,String houseFlowApplyId){
-        return houseWorkerSupService.surplusList(userToken,houseFlowApplyId);
+        return houseWorkerSupService.surplusList(houseFlowApplyId);
     }
 
     @Override
