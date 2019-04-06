@@ -154,6 +154,16 @@ public class EvaluateService {
 
     /**
      * 管家审核通过工匠完工申请
+     * 1.31 增加 剩余材料登记
+     */
+    public ServerResponse checkOk(String houseFlowApplyId,String content,int star, String productArr){
+
+        return null;
+    }
+
+    /**
+     * 管家审核通过工匠完工申请
+     * 1.30
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse checkOk(String houseFlowApplyId,String content,int star){
