@@ -365,17 +365,13 @@ public class EvaluateService {
         if (worker.getWorkerType() == 3) {//管家加分
             if(worker.getEvaluationScore().compareTo(new BigDecimal("70"))==-1){
                 score = evaluationXA.multiply(new BigDecimal("0.6"));
-
             }else if( worker.getEvaluationScore().compareTo(new BigDecimal("70")) >= 0 &&
                     worker.getEvaluationScore().compareTo(new BigDecimal("80")) == -1){
-
                 score = evaluationXA.multiply(new BigDecimal("0.6"));
             }else if( worker.getEvaluationScore().compareTo(new BigDecimal("80")) >= 0 &&
                     worker.getEvaluationScore().compareTo(new BigDecimal("90"))==-1){
-
                 score = evaluationXA.multiply(new BigDecimal("0.15"));
             }else if(worker.getEvaluationScore().compareTo(new BigDecimal("90")) >= 0){
-
                 score = evaluationXA.multiply(new BigDecimal("0.07"));
             }
         }else{
@@ -401,43 +397,29 @@ public class EvaluateService {
         if(worker.getEvaluationScore() == null){
             worker.setEvaluationScore(new BigDecimal("60.0"));
         }
-        if(evaluate.getStar()==5){
-            worker.setEvaluationScore(worker.getEvaluationScore().add(score));
-            WorkIntegral workIntegral=new WorkIntegral();
-            workIntegral.setWorkerId(worker.getId());
-            workIntegral.setMemberId(evaluate.getMemberId());
-            workIntegral.setButlerId(evaluate.getButlerId());
-            workIntegral.setStar(evaluate.getStar());
-            workIntegral.setStatus(1);
-            workIntegral.setHouseId(evaluate.getHouseId());
-            workIntegral.setIntegral(score);
-            workIntegral.setBriefed(desc+evaluate.getStar()+"星评价");
+        WorkIntegral workIntegral=new WorkIntegral();
 
-            workIntegralMapper.insert(workIntegral);
-        }else if (evaluate.getStar() == 1 || evaluate.getStar() == 2) {
-            worker.setEvaluationScore(worker.getEvaluationScore().subtract((score.multiply(new BigDecimal(2)))));//减双倍
-            WorkIntegral workIntegral=new WorkIntegral();
-            workIntegral.setWorkerId(worker.getId());
-            workIntegral.setMemberId(evaluate.getMemberId());
-            workIntegral.setButlerId(evaluate.getButlerId());
-            workIntegral.setStar(evaluate.getStar());
-            workIntegral.setStatus(1);
-            workIntegral.setHouseId(evaluate.getHouseId());
+        if(evaluate.getStar()==5){
+            BigDecimal evaluationScore = worker.getEvaluationScore().add(score);
+            worker.setEvaluationScore(evaluationScore);
+            workIntegral.setIntegral(score);
+        }else if (evaluate.getStar() == 1 || evaluate.getStar() == 2){
+            BigDecimal evaluationScore = worker.getEvaluationScore().subtract((score.multiply(new BigDecimal(2))));
+            worker.setEvaluationScore(evaluationScore);//减双倍
             workIntegral.setIntegral(score.multiply(new BigDecimal(-2)));
-            workIntegral.setBriefed(desc+evaluate.getStar()+"星评价");
-            workIntegralMapper.insert(workIntegral);
         }else {
-            WorkIntegral workIntegral=new WorkIntegral();
-            workIntegral.setWorkerId(worker.getId());
-            workIntegral.setMemberId(evaluate.getMemberId());
-            workIntegral.setButlerId(evaluate.getButlerId());
-            workIntegral.setStar(evaluate.getStar());
-            workIntegral.setStatus(1);//得分类型
-            workIntegral.setHouseId(evaluate.getHouseId());
             workIntegral.setIntegral(new BigDecimal(0));  //不增不减
-            workIntegral.setBriefed(desc+evaluate.getStar()+"星评价");
-            workIntegralMapper.insert(workIntegral);
         }
+        workIntegral.setWorkerId(worker.getId());
+        workIntegral.setMemberId(evaluate.getMemberId());
+        workIntegral.setButlerId(evaluate.getButlerId());
+        workIntegral.setStar(evaluate.getStar());
+        workIntegral.setStatus(1);
+        workIntegral.setHouseId(evaluate.getHouseId());
+
+        workIntegral.setBriefed(desc+evaluate.getStar()+"星评价");
+        workIntegralMapper.insert(workIntegral);
+
         memberMapper.updateByPrimaryKeySelective(worker);
     }
 
