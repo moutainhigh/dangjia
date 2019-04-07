@@ -169,8 +169,9 @@ public class TechnologyRecordService {
                     JSONArray tecArray = budgetWorkerAPI.getTecList(workerGoodsId);
                     List<TechnologyRecordDTO> trList = new ArrayList<>();
                     for(int j=0; j<tecArray.size(); j++){
-                        String technologyId = object.getString("technologyId");
-                        String technologyName = object.getString("technologyName");
+                        JSONObject tecObject = tecArray.getJSONObject(j);
+                        String technologyId = tecObject.getString("technologyId");
+                        String technologyName = tecObject.getString("technologyName");
                         TechnologyRecordDTO trd = new TechnologyRecordDTO();
                         trd.setId(technologyId);
                         trd.setName(technologyName);
