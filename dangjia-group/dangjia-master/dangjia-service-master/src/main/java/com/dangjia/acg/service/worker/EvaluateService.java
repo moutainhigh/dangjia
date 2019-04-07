@@ -3,6 +3,7 @@ package com.dangjia.acg.service.worker;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -16,13 +17,16 @@ import com.dangjia.acg.dto.worker.WorkIntegralDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.house.ISurplusWareHouseItemMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.SurplusWareHouseItem;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.ChangeOrder;
@@ -73,9 +77,13 @@ public class EvaluateService {
     private ConfigUtil configUtil;
     @Autowired
     private RedisClient redisClient;
-
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
+    @Autowired
+    private ForMasterAPI forMasterAPI;
+    @Autowired
+    private ISurplusWareHouseItemMapper surplusWareHouseItemMapper;
+
     /**
      * 获取积分记录
      * @param userToken
@@ -162,12 +170,19 @@ public class EvaluateService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse materialRecord(String houseFlowApplyId,String content,int star, String productArr){
         try{
+            HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             //登记剩余材料
             JSONArray jsonArray = JSONArray.parseArray(productArr);
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
                 String productId = obj.getString("productId");
                 double num = Double.parseDouble(obj.getString("num"));
+                Product product = forMasterAPI.getProduct(productId);
+//                SurplusWareHouseItem surplusWareHouseItem = new SurplusWareHouseItem();
+//                surplusWareHouseItem.setProductId(productId);
+//                surplusWareHouseItem.setProductName(product.getName());
+//                surplusWareHouseItem.setProductCount((int)num);
+//                surplusWareHouseItemMapper.insert(surplusWareHouseItem);
             }
 
         }catch (Exception e){
