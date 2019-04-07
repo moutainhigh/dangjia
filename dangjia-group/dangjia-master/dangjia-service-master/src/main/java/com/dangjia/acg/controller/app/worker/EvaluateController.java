@@ -45,6 +45,12 @@ public class EvaluateController implements EvaluateAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse materialRecord(String userToken,String houseFlowApplyId,String content,int star, String productArr){
+        return evaluateService.materialRecord(houseFlowApplyId,content,star,productArr);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse checkOk(String userToken,String houseFlowApplyId,String content,int star){
         return evaluateService.checkOk(houseFlowApplyId,content,star);
     }

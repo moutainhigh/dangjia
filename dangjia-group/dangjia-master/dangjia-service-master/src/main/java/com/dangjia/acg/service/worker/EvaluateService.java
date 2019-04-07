@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.worker;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
@@ -24,6 +26,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.ChangeOrder;
+import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -156,9 +159,23 @@ public class EvaluateService {
      * 管家审核通过工匠完工申请
      * 1.31 增加 剩余材料登记
      */
-    public ServerResponse checkOk(String houseFlowApplyId,String content,int star, String productArr){
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse materialRecord(String houseFlowApplyId,String content,int star, String productArr){
+        try{
+            //登记剩余材料
+            JSONArray jsonArray = JSONArray.parseArray(productArr);
+            for (int i = 0; i < jsonArray.size(); i++) {
+                JSONObject obj = jsonArray.getJSONObject(i);
+                String productId = obj.getString("productId");
+                double num = Double.parseDouble(obj.getString("num"));
+            }
 
-        return null;
+        }catch (Exception e){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+        return checkOk(houseFlowApplyId,content,star);
     }
 
     /**

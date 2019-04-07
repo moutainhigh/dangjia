@@ -117,7 +117,7 @@ public class TechnologyRecordService {
      * 管家工匠合并 节点列表
      * applyType 0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
      */
-    public ServerResponse workNodeList(String userToken, String houseFlowId, Integer applyType){
+    public ServerResponse workNodeList(String userToken, String houseFlowId){
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         Member worker = accessToken.getMember();
 
@@ -131,61 +131,57 @@ public class TechnologyRecordService {
 
         List<WorkNodeDTO> workNodeDTOList = new ArrayList<>();
         if(worker.getWorkerType() == 3){ //管家查询管家应验收节点
-            if(applyType == 5 || applyType == 6 || applyType == 7){
+            WorkNodeDTO workNodeDTOA = new WorkNodeDTO();
+            //所有已进场未完工工序的节点
+            List<TechnologyRecordDTO> trList = new ArrayList<>();
+            JSONArray jsonArray = budgetWorkerAPI.getAllTechnologyByHouseId(house.getId());
+            for(int i=0;i<jsonArray.size();i++){
+                JSONObject object = jsonArray.getJSONObject(i);
+                String technologyId = object.getString("technologyId");
+                String technologyName = object.getString("technologyName");
+                List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(house.getId(),technologyId,worker.getWorkerTypeId());
+                TechnologyRecordDTO trd = new TechnologyRecordDTO();
+                trd.setId(technologyId);
+                trd.setName(technologyName);
+                if (technologyRecordList.size() == 0){
+                    trd.setState(0);//未验收
+                }else {
+                    trd.setState(1);//已验收
+                }
+                trList.add(trd);
+            }
+            workNodeDTOA.setTecName("管家验收所有节点");
+            workNodeDTOA.setTrList(trList);
+            workNodeDTOList.add(workNodeDTOA);
+        }else {//工匠提交的验收节点
+            //含工艺人工商品
+            JSONArray jsonArray = budgetWorkerAPI.getWorkerGoodsList(houseFlow.getHouseId(),houseFlowId);
+            for(int i=0;i<jsonArray.size();i++){
+                JSONObject object = jsonArray.getJSONObject(i);
+                String workerGoodsId = object.getString("workerGoodsId");
+                String workerGoodsName = object.getString("workerGoodsName");
+
                 WorkNodeDTO workNodeDTOA = new WorkNodeDTO();
-                //所有已进场未完工工序的节点
+                workNodeDTOA.setTecName(workerGoodsName);//商品名
+                JSONArray tecArray = budgetWorkerAPI.getTecList(workerGoodsId);
                 List<TechnologyRecordDTO> trList = new ArrayList<>();
-                JSONArray jsonArray = budgetWorkerAPI.getAllTechnologyByHouseId(house.getId());
-                for(int i=0;i<jsonArray.size();i++){
-                    JSONObject object = jsonArray.getJSONObject(i);
-                    String technologyId = object.getString("technologyId");
-                    String technologyName = object.getString("technologyName");
-                    List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(house.getId(),technologyId,worker.getWorkerTypeId());
+                for(int j=0; j<tecArray.size(); j++){
+                    JSONObject tecObject = tecArray.getJSONObject(j);
+                    String technologyId = tecObject.getString("technologyId");
+                    String technologyName = tecObject.getString("technologyName");
                     TechnologyRecordDTO trd = new TechnologyRecordDTO();
                     trd.setId(technologyId);
                     trd.setName(technologyName);
-                    if (technologyRecordList.size() == 0){
-                        trd.setState(0);//未验收
+                    List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(houseFlow.getHouseId(),technologyId,worker.getWorkerTypeId());
+                    if (technologyRecordList.size() == 0){ //没有验收
+                        trd.setState(0);
                     }else {
                         trd.setState(1);//已验收
                     }
                     trList.add(trd);
                 }
-                workNodeDTOA.setTecName("管家验收所有节点");
                 workNodeDTOA.setTrList(trList);
                 workNodeDTOList.add(workNodeDTOA);
-            }
-        }else {//工匠提交的验收节点
-            if(applyType == 0 || applyType == 1 || applyType == 2){
-                //含工艺人工商品
-                JSONArray jsonArray = budgetWorkerAPI.getWorkerGoodsList(houseFlow.getHouseId(),houseFlowId);
-                for(int i=0;i<jsonArray.size();i++){
-                    JSONObject object = jsonArray.getJSONObject(i);
-                    String workerGoodsId = object.getString("workerGoodsId");
-                    String workerGoodsName = object.getString("workerGoodsName");
-
-                    WorkNodeDTO workNodeDTOA = new WorkNodeDTO();
-                    workNodeDTOA.setTecName(workerGoodsName);//商品名
-                    JSONArray tecArray = budgetWorkerAPI.getTecList(workerGoodsId);
-                    List<TechnologyRecordDTO> trList = new ArrayList<>();
-                    for(int j=0; j<tecArray.size(); j++){
-                        JSONObject tecObject = tecArray.getJSONObject(j);
-                        String technologyId = tecObject.getString("technologyId");
-                        String technologyName = tecObject.getString("technologyName");
-                        TechnologyRecordDTO trd = new TechnologyRecordDTO();
-                        trd.setId(technologyId);
-                        trd.setName(technologyName);
-                        List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(houseFlow.getHouseId(),technologyId,worker.getWorkerTypeId());
-                        if (technologyRecordList.size() == 0){ //没有验收
-                            trd.setState(0);
-                        }else {
-                            trd.setState(1);//已验收
-                        }
-                        trList.add(trd);
-                    }
-                    workNodeDTOA.setTrList(trList);
-                    workNodeDTOList.add(workNodeDTOA);
-                }
             }
         }
         return ServerResponse.createBySuccess("查询成功", workNodeDTOList);

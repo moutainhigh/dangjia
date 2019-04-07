@@ -34,8 +34,8 @@ public class TechnologyRecordController implements TechnologyRecordAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse workNodeList(String userToken, String houseFlowId,Integer applyType){
-        return technologyRecordService.workNodeList(userToken, houseFlowId, applyType);
+    public ServerResponse workNodeList(String userToken, String houseFlowId){
+        return technologyRecordService.workNodeList(userToken, houseFlowId);
     }
 
 
