@@ -844,6 +844,7 @@ public class BudgetWorkerService {
             for (Warehouse warehouse : warehouseList) {//每个商品
                 if (warehouse.getShopCount() - warehouse.getBackCount() > 0) {
                     Product product = iProductMapper.selectByPrimaryKey(warehouse.getProductId());
+                    if(product == null) continue;
                     List<Technology> tList = iTechnologyMapper.patrolList(product.getId());
                     for (Technology t : tList) {
                         Map<String, Object> map = new HashMap<>();
