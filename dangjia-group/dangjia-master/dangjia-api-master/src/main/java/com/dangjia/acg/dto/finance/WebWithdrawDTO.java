@@ -24,9 +24,9 @@ public class WebWithdrawDTO {
     private Date processingDate;//处理时间
     private Date createDate;// 创建日期
     private Date modifyDate;// 修改日期
-
-    private Integer curWeekAddNum;//本周新增
-    private Integer curWeekSuccessNum;//本周 成功的
-    private Integer curWeekNoHandleNum;//本周 待处理的
-    private Integer allNoHandleNum;//所有待处理的
+    private int dataStatus;//数据状态 0=正常，1=删除
+    private Integer roleType;//roleType   1：业主端  2 大管家 3：工匠端
+    private String image;//回执单图片
+    private String reason;//不同意理由
+    private String memo;//附言 可编辑
 }
