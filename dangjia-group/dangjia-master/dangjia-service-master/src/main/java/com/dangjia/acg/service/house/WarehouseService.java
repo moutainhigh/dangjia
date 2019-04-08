@@ -139,14 +139,17 @@ public class WarehouseService {
                     //重临时缓存maps中取出BudgetItemDTO
                     Map budgetItemDTO = maps.get(goodsCategory.getId());
                     BigDecimal rowPrice = new BigDecimal(0);
+                    List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
                     if (budgetItemDTO == null) {
                         //如果没有将BudgetItemDTO初始化
                         budgetItemDTO = new HashMap();
                         budgetItemDTO.put("rowImage", address + goodsCategory.getImage());
                         budgetItemDTO.put("rowName", goodsCategory.getName());
                         budgetItemDTO.put("rowPrice", rowPrice);
+                    }else{
+                        rowPrice=(BigDecimal)budgetItemDTO.get("rowPrice");
+                        warehouseDTOS=(List<WarehouseDTO>)budgetItemDTO.get("goodsItems");
                     }
-                    List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
                     for (Warehouse warehouse : warehouseList) {
                         if (!categoryId.equals(warehouse.getCategoryId())) continue;
                         WarehouseDTO warehouseDTO = new WarehouseDTO();
