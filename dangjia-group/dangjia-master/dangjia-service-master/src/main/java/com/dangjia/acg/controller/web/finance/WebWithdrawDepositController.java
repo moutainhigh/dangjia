@@ -27,8 +27,8 @@ public class WebWithdrawDepositController implements WebWithdrawDepositAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getAllWithdraw(HttpServletRequest request, PageDTO pageDTO, Integer state, String beginDate, String endDate) {
-        return webWithdrawDepositService.getAllWithdraw(pageDTO,state,beginDate,endDate);
+    public ServerResponse getAllWithdraw(HttpServletRequest request, PageDTO pageDTO, String searchKey, Integer state, String beginDate, String endDate) {
+        return webWithdrawDepositService.getAllWithdraw(pageDTO, searchKey, state, beginDate, endDate);
     }
 
     @Override
