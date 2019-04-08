@@ -1,15 +1,20 @@
 package com.dangjia.acg.service.data;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -24,59 +29,31 @@ public class ActuaryService {
     private IHouseMapper houseMapper;
     @Autowired
     private IMemberMapper userMapper;
-
     /**
-     * 待业主支付精算数据
+     * 查询房子精算数据
      *
      * @return
      */
-    public ServerResponse getActuaryWaitPay() {
+    public ServerResponse getActuaryAll(HttpServletRequest request, PageDTO pageDTO, String name, String budgetOk) {
         Example example = new Example(House.class);
-        example.createCriteria()
-                .andEqualTo(House.BUDGET_OK, 0)
-                .andEqualTo(House.DESIGNER_OK, 3)
-                .andEqualTo(House.DATA_STATUS, 0);
+        Example.Criteria criteria=example.createCriteria();
+        criteria.andEqualTo(House.DESIGNER_OK, 3);
+        criteria.andEqualTo(House.DATA_STATUS, 0);
+        if(CommonUtil.isEmpty(budgetOk)){
+            if("2".equals(budgetOk)||"4".equals(budgetOk)){
+                criteria.andCondition("(budget_ok =2 || budget_ok = 4)");
+            }else{
+                criteria.andEqualTo(House.BUDGET_OK, budgetOk);
+            }
+        }
+        if(CommonUtil.isEmpty(name)){
+            criteria.andCondition("CONCAT(residential,building,'栋',unit,'单元',number,'号') LIKE CONCAT('%','"+name+"','%')");
+        }
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<House> houseList = houseMapper.selectByExample(example);
-        return ServerResponse.createBySuccess("查询成功", listResult(houseList));
-    }
-
-    /**
-     * 待提交精算
-     */
-    public ServerResponse getActuaryCommit() {
-        Example example = new Example(House.class);
-        example.createCriteria()
-                .andEqualTo(House.BUDGET_OK, 1)
-                .andEqualTo(House.DESIGNER_OK, 3)
-                .andEqualTo(House.DATA_STATUS, 0);
-        List<House> houseList = houseMapper.selectByExample(example);
-        return ServerResponse.createBySuccess("查询成功", listResult(houseList));
-    }
-
-    /**
-     * 待业主确认精算
-     */
-    public ServerResponse getActuaryConfirm() {
-        Example example = new Example(House.class);
-        example.createCriteria()
-                .andCondition("(budget_ok =2 || budget_ok = 4)")
-                .andEqualTo(House.DESIGNER_OK, 3)
-                .andEqualTo(House.DATA_STATUS, 0);
-        List<House> houseList = houseMapper.selectByExample(example);
-        return ServerResponse.createBySuccess("查询成功", listResult(houseList));
-    }
-
-    /**
-     * 已完成精算
-     */
-    public ServerResponse getActuaryComplete() {
-        Example example = new Example(House.class);
-        example.createCriteria()
-                .andEqualTo(House.BUDGET_OK, 3)
-                .andEqualTo(House.DESIGNER_OK, 3)
-                .andEqualTo(House.DATA_STATUS, 0);
-        List<House> houseList = houseMapper.selectByExample(example);
-        return ServerResponse.createBySuccess("查询成功", listResult(houseList));
+        PageInfo pageResult = new PageInfo(houseList);
+        pageResult.setList(listResult(houseList));
+        return ServerResponse.createBySuccess("查询成功",pageResult);
     }
 
     /**

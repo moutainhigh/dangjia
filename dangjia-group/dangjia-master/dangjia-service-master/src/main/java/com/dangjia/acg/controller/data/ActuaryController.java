@@ -2,10 +2,13 @@ package com.dangjia.acg.controller.data;
 
 import com.dangjia.acg.api.data.ActuaryAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.data.ActuaryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * author: Ronalcheng
@@ -24,8 +27,9 @@ public class ActuaryController implements ActuaryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getActuaryWaitPay(){
-        return actuaryService.getActuaryWaitPay();
+    public ServerResponse getActuaryWaitPay(HttpServletRequest request,PageDTO pageDTO,String name){
+        return actuaryService.getActuaryAll(request,pageDTO,name,"0");
+
     }
 
     /**
@@ -34,8 +38,9 @@ public class ActuaryController implements ActuaryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getActuaryCommit(){
-        return actuaryService.getActuaryCommit();
+    public ServerResponse getActuaryCommit(HttpServletRequest request,PageDTO pageDTO,String name){
+
+        return actuaryService.getActuaryAll(request,pageDTO,name,"1");
     }
 
     /**
@@ -44,8 +49,8 @@ public class ActuaryController implements ActuaryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getActuaryConfirm(){
-        return actuaryService.getActuaryConfirm();
+    public ServerResponse getActuaryConfirm(HttpServletRequest request,PageDTO pageDTO,String name){
+        return actuaryService.getActuaryAll(request,pageDTO,name,"2");
     }
 
     /**
@@ -54,8 +59,8 @@ public class ActuaryController implements ActuaryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getActuaryComplete(){
-        return actuaryService.getActuaryComplete();
+    public ServerResponse getActuaryComplete(HttpServletRequest request,PageDTO pageDTO,String name){
+        return actuaryService.getActuaryAll(request,pageDTO,name,"3");
     }
 
     /**
@@ -64,7 +69,7 @@ public class ActuaryController implements ActuaryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getStatistics(){
+    public ServerResponse getStatistics(HttpServletRequest request,PageDTO pageDTO,String name){
         return actuaryService.getStatistics();
     }
 
