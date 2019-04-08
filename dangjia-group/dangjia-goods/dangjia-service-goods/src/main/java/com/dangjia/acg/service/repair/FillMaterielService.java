@@ -82,6 +82,7 @@ public class FillMaterielService {
             for(MendMateriel mendMateriel : mendMaterielList){
                 if(map.get(mendMateriel.getProductId())==null){
                     productIdList.add(mendMateriel.getProductId());
+                    map.put(mendMateriel.getProductId(),"0");
                 }
             }
             for (String id : productIdList) {
