@@ -150,8 +150,7 @@ public class MendOrderCheckService {
                 if (orderSplitList.size() >0) {
                     for (OrderSplit orderSplit : orderSplitList) {
                         //要货单打回
-                        orderSplitService.cancelOrderSplit(orderSplit.getId());
-
+//                        orderSplitService.cancelOrderSplit(orderSplit.getId());
                         orderSplit.setApplyStatus(3);//不通过
                         orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
                     }
