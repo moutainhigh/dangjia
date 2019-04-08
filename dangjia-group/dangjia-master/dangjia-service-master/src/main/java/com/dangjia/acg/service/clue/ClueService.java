@@ -219,7 +219,7 @@ public class ClueService {
                     }
                 }
                 //改变线索表的数据状态
-                clue.setDataStatus(1);
+//                clue.setDataStatus(1);
                 clue.setStage(4);
                 clueMapper.updateByPrimaryKeySelective(clue);
                 //操作dj_member表
