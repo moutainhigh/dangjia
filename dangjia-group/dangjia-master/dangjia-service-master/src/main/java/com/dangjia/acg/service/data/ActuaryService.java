@@ -39,7 +39,7 @@ public class ActuaryService {
         Example.Criteria criteria=example.createCriteria();
         criteria.andEqualTo(House.DESIGNER_OK, 3);
         criteria.andEqualTo(House.DATA_STATUS, 0);
-        if(CommonUtil.isEmpty(budgetOk)){
+        if(!CommonUtil.isEmpty(budgetOk)){
             if("2".equals(budgetOk)||"4".equals(budgetOk)){
                 criteria.andCondition(" (budget_ok =2 || budget_ok = 4) ");
             }else{

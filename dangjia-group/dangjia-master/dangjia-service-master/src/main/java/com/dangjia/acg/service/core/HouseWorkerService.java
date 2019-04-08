@@ -33,7 +33,6 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
-import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +45,7 @@ import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.swing.*;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -721,14 +718,14 @@ public class HouseWorkerService {
             stringBuffer.append(worker.getWorkerType() != null && worker.getWorkerType() == 3 ? "大管家" : "工匠");
             homePageBean.setGradeName(stringBuffer.toString());
             String[] names = {"我的任务", "我的银行卡", "提现记录",
-                    "接单记录", "奖罚记录", "我的邀请码", "帮助中心"};
+                    "接单记录", "奖罚记录","工价工艺", "我的邀请码", "帮助中心"};
 //            "工艺要求", "工匠报价",
             String[] urls = {DjConstants.GJPageAddress.MYTASK, DjConstants.YZPageAddress.BANKCARDALREADYADD, DjConstants.GJPageAddress.CASHRECORD,
-                    DjConstants.GJPageAddress.ORDERRECORD, DjConstants.GJPageAddress.JIANGFALIST, DjConstants.GJPageAddress.MYINVITECODE, DjConstants.GJPageAddress.HELPCENTER};
+                    DjConstants.GJPageAddress.ORDERRECORD, DjConstants.GJPageAddress.JIANGFALIST,DjConstants.GJPageAddress.GJPRICE, DjConstants.GJPageAddress.MYINVITECODE, DjConstants.GJPageAddress.HELPCENTER};
 //            , DjConstants.GJPageAddress.PROCESSREQUIRE,DjConstants.GJPageAddress.GJPRICE
 //            "artisan_35.png","artisan_36.png",
             String[] imageUrls = {"artisan_40.png", "artisan_41.png", "artisan_39.png",
-                    "artisan_61.png", "artisan_69.png", "artisan_42.png", "artisan_60.png"};
+                    "artisan_61.png", "artisan_69.png","artisan_36.png", "artisan_42.png", "artisan_60.png"};
             List<HomePageBean.ListBean> list = new ArrayList<>();
             for (int i = 0; i < names.length; i++) {
                 String name = names[i];
