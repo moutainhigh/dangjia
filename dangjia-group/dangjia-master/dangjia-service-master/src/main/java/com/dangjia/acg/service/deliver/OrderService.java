@@ -373,7 +373,8 @@ public class OrderService {
             Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
 
             Example example = new Example(OrderSplit.class);
-            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0);
+            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
+                    .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             OrderSplit orderSplit;
             if (orderSplitList.size() > 0){
