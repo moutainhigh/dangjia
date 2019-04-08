@@ -482,9 +482,12 @@ public class HouseWorkerService {
                             bean.setFootMessageTitle("今日开工任务");//每日开工事项
                             bean.setFootMessageDescribe("（每日十二点前今日开工）");//每日开工事项
                         } else {
+                            List<HouseFlowApply> allAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 2, worker.getId(), new Date());//查询今天是否已提交整体完工
                             List<HouseFlowApply> stageAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 1, worker.getId(), new Date());//查询今天是否已提交阶段完工
                             List<HouseFlowApply> flowAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId(), new Date());//查询是否已提交今日完工
-                            if (stageAppList.size() > 0) {
+                            if (allAppList.size() > 0) {
+                                promptList.add("今日已申请整体完工");
+                            } else if (stageAppList.size() > 0) {
                                 promptList.add("今日已申请阶段完工");
                             } else if (flowAppList != null && flowAppList.size() > 0) {//已提交今日完工
                                 promptList.add("今日已完工");
