@@ -824,20 +824,36 @@ public class MendOrderService {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();//工匠
 
-            Example  example = new Example(MendOrder.class);
-            MendOrder  mendOrder = new MendOrder();
-            mendOrder.setNumber("DJZX" + 00000 + mendOrderMapper.selectCountByExample(example));//订单号
-            mendOrder.setHouseId(houseId);
-            mendOrder.setWorkerTypeId(worker.getWorkerTypeId());
-            mendOrder.setApplyMemberId(worker.getId());
-            mendOrder.setType(0);//补材料
-            mendOrder.setOrderName("补材料");
-            mendOrder.setState(0);//生成中
-            mendOrder.setTotalAmount(0.0);
-            if (!this.createMendCheck(mendOrder)) {
-                return ServerResponse.createByErrorMessage("添加审核流程失败");
+            Example example = new Example(MendOrder.class);
+            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID, worker.getWorkerTypeId())
+                    .andLessThan(MendOrder.STATE, 2);//处理中
+            List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
+            MendOrder mendOrder;
+            if (mendOrderList.size() > 0) {
+                mendOrder = mendOrderList.get(0);
+                mendOrder.setState(0);//生成中
+                /*删除之前子项*/
+                example = new Example(MendMateriel.class);
+                example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, mendOrder.getId());
+                mendMaterialMapper.deleteByExample(example);
+                mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+            } else {
+                example = new Example(MendOrder.class);
+                mendOrder = new MendOrder();
+                mendOrder.setNumber("DJZX" + 00000 + mendOrderMapper.selectCountByExample(example));//订单号
+                mendOrder.setHouseId(houseId);
+                mendOrder.setWorkerTypeId(worker.getWorkerTypeId());
+                mendOrder.setApplyMemberId(worker.getId());
+                mendOrder.setType(0);//补材料
+                mendOrder.setOrderName("补材料");
+                mendOrder.setState(0);//生成中
+                mendOrder.setTotalAmount(0.0);
+                if (!this.createMendCheck(mendOrder)) {
+                    return ServerResponse.createByErrorMessage("添加审核流程失败");
+                }
+                mendOrderMapper.insert(mendOrder);
             }
-            mendOrderMapper.insert(mendOrder);
 
             if (this.addMendMateriel(productArr, mendOrder)) {
                 return ServerResponse.createBySuccess("保存成功",mendOrder.getId());
