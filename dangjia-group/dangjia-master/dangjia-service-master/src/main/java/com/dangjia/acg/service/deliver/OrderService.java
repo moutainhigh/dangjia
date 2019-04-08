@@ -461,6 +461,12 @@ public class OrderService {
                         map.put("productId", productId);
                         productList.add(map);
                     }
+                    if(overflowCount<0){
+                        Map map = new HashMap();
+                        map.put("num", num);
+                        map.put("productId", productId);
+                        productList.add(map);
+                    }
                 }else{
                     Map map = new HashMap();
                     map.put("num", num);
@@ -471,7 +477,7 @@ public class OrderService {
 
             //补货材料列表
             String mendMaterialArr=JSON.toJSONString(productList);
-            if(!CommonUtil.isEmpty(mendMaterialArr)){
+            if(!CommonUtil.isEmpty(mendMaterialArr)&&productList.size()>0){
                 ServerResponse serverResponse= mendOrderService.saveMendMaterial( userToken, houseId, mendMaterialArr);
                 if (serverResponse.isSuccess()) {
                     if (serverResponse.getResultObj() != null) {
