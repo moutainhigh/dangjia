@@ -309,8 +309,10 @@ public class OrderSplitService {
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             for (OrderSplitItem orderSplitItem : orderSplitItemList) {
                 Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
-                warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());
-                warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                if(warehouse!=null) {
+                    warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());
+                    warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                }
             }
 
             orderSplit.setApplyStatus(3);
