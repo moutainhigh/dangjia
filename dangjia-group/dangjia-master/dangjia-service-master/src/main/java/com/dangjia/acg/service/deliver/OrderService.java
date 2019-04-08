@@ -289,7 +289,7 @@ public class OrderService {
                 example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
                 for (OrderSplitItem orderSplitItem : orderSplitItemList){
-                    Warehouse warehouse = warehouseMapper.selectByPrimaryKey(orderSplitItem.getWarehouseId());
+                    Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
                     warehouse.setAskCount(warehouse.getAskCount() + orderSplitItem.getNum());//更新仓库已要总数
                     warehouse.setAskTime(warehouse.getAskTime() + 1);//更新该货品被要次数
                     warehouseMapper.updateByPrimaryKeySelective(warehouse);

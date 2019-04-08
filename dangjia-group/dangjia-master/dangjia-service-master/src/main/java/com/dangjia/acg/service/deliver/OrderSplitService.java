@@ -305,7 +305,7 @@ public class OrderSplitService {
         try {
             OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(orderSplitId);
             Example example = new Example(OrderSplitItem.class);
-            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplitId);
+            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             for (OrderSplitItem orderSplitItem : orderSplitItemList) {
                 Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
