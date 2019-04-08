@@ -837,6 +837,7 @@ public class MendOrderService {
                 example = new Example(MendMateriel.class);
                 example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, mendOrder.getId());
                 mendMaterialMapper.deleteByExample(example);
+                mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
             } else {
                 example = new Example(MendOrder.class);
                 mendOrder = new MendOrder();

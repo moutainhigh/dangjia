@@ -27,7 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -71,25 +73,18 @@ public class FillMaterielService {
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
 
             List<String> productIdList = new ArrayList<>();
-            String productId;
 
-            for(MendMateriel mendMateriel : mendMaterielList){
-                boolean flag = true;
-                productId = mendMateriel.getProductId();
-                for(BudgetMaterial bm : budgetMaterialList){
-                    if(productId.equals(bm.getProductId())){
-                        flag = false;
-                        continue;
-                    }
-                }
-                if(flag){
-                    productIdList.add(productId);
-                }
-            }
+            Map map =new HashMap();
             for(BudgetMaterial bm : budgetMaterialList){
                 productIdList.add(bm.getProductId());
+                map.put(bm.getProductId(),"0");
             }
-
+            for(MendMateriel mendMateriel : mendMaterielList){
+                if(map.get(mendMateriel.getProductId())==null){
+                    productIdList.add(mendMateriel.getProductId());
+                    map.put(mendMateriel.getProductId(),"0");
+                }
+            }
             for (String id : productIdList) {
                 ServerResponse response = technologyRecordAPI.getByProductId(id, houseId);
                 //if(!response.isSuccess()) continue;
