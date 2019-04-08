@@ -313,7 +313,8 @@ public class OrderSplitService {
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
             }
 
-            orderSplitMapper.cancelOrderSplit(orderSplitId);
+            orderSplit.setApplyStatus(3);
+            orderSplitMapper.updateByPrimaryKey(orderSplit);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
