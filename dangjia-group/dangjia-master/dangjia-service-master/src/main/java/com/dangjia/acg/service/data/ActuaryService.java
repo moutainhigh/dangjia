@@ -41,13 +41,13 @@ public class ActuaryService {
         criteria.andEqualTo(House.DATA_STATUS, 0);
         if(CommonUtil.isEmpty(budgetOk)){
             if("2".equals(budgetOk)||"4".equals(budgetOk)){
-                criteria.andCondition("(budget_ok =2 || budget_ok = 4)");
+                criteria.andCondition(" (budget_ok =2 || budget_ok = 4) ");
             }else{
                 criteria.andEqualTo(House.BUDGET_OK, budgetOk);
             }
         }
-        if(CommonUtil.isEmpty(name)){
-            criteria.andCondition("CONCAT(residential,building,'栋',unit,'单元',number,'号') LIKE CONCAT('%','"+name+"','%')");
+        if(!CommonUtil.isEmpty(name)){
+            criteria.andCondition(" CONCAT(residential,building,'栋',unit,'单元',number,'号') LIKE CONCAT('%','"+name+"','%') ");
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<House> houseList = houseMapper.selectByExample(example);
