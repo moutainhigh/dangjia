@@ -154,7 +154,7 @@ public class FillMaterielService {
                     Product product=productList.get(i);
                     GoodsDTO goodsDTO = actuaryOperationService.goodsDetail(product, null);
                     if (goodsDTO != null) {
-                        goodsDTOList.add(i,goodsDTO);
+                        goodsDTOList.add(goodsDTO);
                     }
                 }
             }
