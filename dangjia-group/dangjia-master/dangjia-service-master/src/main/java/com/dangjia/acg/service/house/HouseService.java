@@ -252,7 +252,7 @@ public class HouseService {
                 .andEqualTo(House.MEMBER_ID, member.getId())
                 .andNotEqualTo(House.VISIT_STATE, 0).andNotEqualTo(House.VISIT_STATE, 2)
                 .andEqualTo(House.DATA_STATUS, 0);
-        List<House> houseList = iHouseMapper.selectByExample(example);
+            List<House> houseList = iHouseMapper.selectByExample(example);
         String houseId = null;
         if (houseList.size() > 1) {
             for (House house : houseList) {
@@ -635,6 +635,7 @@ public class HouseService {
         }
 
         house.setVisitState(1);//开工成单
+        //house.setModifyDate(new Date());
         iHouseMapper.updateByPrimaryKeySelective(house);
 
         try {
@@ -747,10 +748,10 @@ public class HouseService {
     /**
      * 房子装修列表
      */
-    public ServerResponse getList(PageDTO pageDTO, String searchKey, String memberId) {
+    public ServerResponse getList(PageDTO pageDTO,Integer visitState,String startDate,String endDate, String searchKey,String orderBy, String memberId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<HouseListDTO> houseList = iHouseMapper.getHouseList(memberId, searchKey);
+            List<HouseListDTO> houseList = iHouseMapper.getHouseList(memberId,visitState,startDate,endDate,orderBy,searchKey);
             if (houseList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
                         , "查无数据");

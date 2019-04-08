@@ -28,8 +28,10 @@ public class WebSplitDeliverController implements WebSplitDeliverAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getAllSplitDeliver(HttpServletRequest request, PageDTO pageDTO, Integer applyState, String beginDate, String endDate) {
-        return webSplitDeliverService.getAllSplitDeliver(pageDTO,applyState,beginDate,endDate);
+    public ServerResponse getAllSplitDeliver(HttpServletRequest request, PageDTO pageDTO,
+                                             Integer applyState, String searchKey,
+                                             String beginDate, String endDate) {
+        return webSplitDeliverService.getAllSplitDeliver(pageDTO, applyState, searchKey, beginDate, endDate);
     }
 
     @Override

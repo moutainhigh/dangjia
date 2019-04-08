@@ -140,5 +140,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and worker_type not in(1,2,3)
         and work_type= 6
     </select>
+    <update id="changeWorkerByHouseIdWorkerId" parameterType="java.lang.String">
+        UPDATE dj_core_house_worker
+        set data_status=1
+        WHERE house_id = #{houseId}
+          AND worker_id = #{workerId}
+    </update>
+
 </mapper>
 

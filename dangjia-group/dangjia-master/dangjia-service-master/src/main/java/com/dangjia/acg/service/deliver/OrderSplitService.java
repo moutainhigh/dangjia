@@ -75,6 +75,7 @@ public class OrderSplitService {
 
     @Autowired
     private ConfigMessageService configMessageService;
+
     /**
      * 修改 供应商结算状态
      * id 供应商结算id
@@ -208,7 +209,7 @@ public class OrderSplitService {
                 String id = obj.getString("id");
                 String supplierId = obj.getString("supplierId");
                 Supplier supplier = forMasterAPI.getSupplier(supplierId);
-                JsmsUtil.sendSupplier(supplier.getTelephone(), address+"submitNumber");
+                JsmsUtil.sendSupplier(supplier.getTelephone(), address + "submitNumber");
 
 
                 OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
@@ -228,10 +229,13 @@ public class OrderSplitService {
                     splitDeliver.setTotalAmount(0.0);
                     splitDeliver.setDeliveryFee(0.0);
                     splitDeliver.setApplyMoney(0.0);
+                    splitDeliver.setApplyState(0);
                     splitDeliver.setShipName(member.getNickName() == null ? member.getName() : member.getNickName());
                     splitDeliver.setShipMobile(member.getMobile());
                     splitDeliver.setShipAddress(house.getHouseName());
                     splitDeliver.setSupplierId(supplierId);//供应商id
+                    splitDeliver.setSupplierTelephone(supplier.getTelephone());//供应商联系电话
+                    splitDeliver.setSupplierName(supplier.getName());//供应商供应商名称
                     splitDeliver.setSupervisorId(supervisor.getId());//管家id
                     splitDeliver.setSubmitTime(new Date());
                     splitDeliver.setSupState(0);
@@ -301,15 +305,18 @@ public class OrderSplitService {
         try {
             OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(orderSplitId);
             Example example = new Example(OrderSplitItem.class);
-            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplitId);
+            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             for (OrderSplitItem orderSplitItem : orderSplitItemList) {
                 Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
-                warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());
-                warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                if(warehouse!=null) {
+                    warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());
+                    warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                }
             }
 
-            orderSplitMapper.cancelOrderSplit(orderSplitId);
+            orderSplit.setApplyStatus(3);
+            orderSplitMapper.updateByPrimaryKey(orderSplit);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();

@@ -469,10 +469,12 @@ public class PaymentService {
                 example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
                 for (OrderSplitItem orderSplitItem : orderSplitItemList){
-                    Warehouse warehouse = warehouseMapper.selectByPrimaryKey(orderSplitItem.getWarehouseId());
+                    Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(),houseId);
                     warehouse.setAskCount(warehouse.getAskCount() + orderSplitItem.getNum());//更新仓库已要总数
                     warehouse.setAskTime(warehouse.getAskTime() + 1);//更新该货品被要次数
                     warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                    orderSplitItem.setShopCount(warehouse.getShopCount());
+                    orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
                 }
                 orderSplit.setApplyStatus(1);//提交到后台
                 orderSplitMapper.updateByPrimaryKeySelective(orderSplit);

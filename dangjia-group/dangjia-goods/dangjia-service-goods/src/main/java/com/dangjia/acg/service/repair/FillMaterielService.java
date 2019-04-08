@@ -27,7 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -71,25 +73,18 @@ public class FillMaterielService {
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
 
             List<String> productIdList = new ArrayList<>();
-            String productId;
 
-            for(MendMateriel mendMateriel : mendMaterielList){
-                boolean flag = true;
-                productId = mendMateriel.getProductId();
-                for(BudgetMaterial bm : budgetMaterialList){
-                    if(productId.equals(bm.getProductId())){
-                        flag = false;
-                        continue;
-                    }
-                }
-                if(flag){
-                    productIdList.add(productId);
-                }
-            }
+            Map map =new HashMap();
             for(BudgetMaterial bm : budgetMaterialList){
                 productIdList.add(bm.getProductId());
+                map.put(bm.getProductId(),"0");
             }
-
+            for(MendMateriel mendMateriel : mendMaterielList){
+                if(map.get(mendMateriel.getProductId())==null){
+                    productIdList.add(mendMateriel.getProductId());
+                    map.put(mendMateriel.getProductId(),"0");
+                }
+            }
             for (String id : productIdList) {
                 ServerResponse response = technologyRecordAPI.getByProductId(id, houseId);
                 //if(!response.isSuccess()) continue;
@@ -102,7 +97,7 @@ public class FillMaterielService {
                 warehouseDTO.setAskCount(warehouse.getAskCount());
                 warehouseDTO.setBackCount(warehouse.getBackCount());
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
-                warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getBackCount() - warehouse.getReceive());//所有买的数量 - 退货 - 收的
+                warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getBackCount() - warehouse.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
                 warehouseDTO.setProductName(warehouse.getProductName());
                 warehouseDTO.setPrice(warehouse.getPrice());
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
@@ -141,25 +136,18 @@ public class FillMaterielService {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
-            if (pageNum == null) {
-                pageNum = 1;
-            }
-            if (pageSize == null) {
-                pageSize = 5;
-            }
             List<GoodsDTO> goodsDTOList = new ArrayList<>();
-            PageHelper.startPage(pageNum, pageSize);
-            List<Product> productList;
+            String productType="0";
             if (worker.getWorkerType() == 3){//大管家
-                productList = iProductMapper.serviceMaterials(name,categoryId);
-            } else {//其它工匠
-                productList = iProductMapper.commonMaterials(name,categoryId);
+                productType="1";
             }
-
+            PageHelper.startPage(pageNum, pageSize);
+            List<Product>  productList = iProductMapper.queryProductData(name,categoryId,productType);
             PageInfo pageResult = new PageInfo(productList);
             if (productList.size() > 0) {
-                for (Product product : productList) {
-                    GoodsDTO goodsDTO = actuaryOperationService.goodsDetail(product, null, 1);
+                for (int i = 0; i < productList.size(); i++) {
+                    Product product=productList.get(i);
+                    GoodsDTO goodsDTO = actuaryOperationService.goodsDetail(product, null);
                     if (goodsDTO != null) {
                         goodsDTOList.add(goodsDTO);
                     }
