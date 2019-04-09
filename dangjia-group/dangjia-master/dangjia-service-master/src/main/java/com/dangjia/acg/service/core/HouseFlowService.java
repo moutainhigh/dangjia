@@ -377,9 +377,9 @@ public class HouseFlowService {
             if (houseFlowDownTimeList.size() > 0) {
                 HouseFlowCountDownTime houseFlowCountDownTime = houseFlowDownTimeList.get(0);
                 long countDownTime = houseFlowCountDownTime.getCountDownTime().getTime() - new Date().getTime();//获取倒计时
-//                if (countDownTime > 0) {//未到时间不能抢单
-//                    return ServerResponse.createByErrorMessage("您还在排队时间内，请稍后抢单！");
-//                }
+                if (countDownTime > 0) {//未到时间不能抢单
+                    return ServerResponse.createByErrorMessage("您还在排队时间内，请稍后抢单！");
+                }
             }
             if (member.getWorkerType() > 3) {//其他工人
                 if (hf.getPause() == 1) {
