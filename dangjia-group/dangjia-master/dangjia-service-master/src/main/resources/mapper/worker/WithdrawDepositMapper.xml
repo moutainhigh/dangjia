@@ -3,47 +3,41 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.worker.IWithdrawDepositMapper">
-    <sql id="Base_columns">
-    id,
-    name,
-    worker_id as workerId,
-    state,
-    money,
-    bank_name as bankName,
-    card_number as cardNumber,
-    processing_date as processingDate,
-    create_date as createDate,
-    modify_date as modifyDate
-    </sql>
-
-    <!--查询所有提现申请 -->
-    <select id="getAllWithdraw" resultType="com.dangjia.acg.modle.worker.WithdrawDeposit">
-        select
-        <include refid="Base_columns"/>
-        from dj_worker_withdraw_deposit
-        where 1=1
+    <select id="getWebWithdrawList" resultType="com.dangjia.acg.dto.finance.WebWithdrawDTO">
+        SELECT
+        w.id AS id,
+        w.name AS name,
+        m.mobile AS mobile,
+        w.worker_id AS workerId,
+        w.state AS state,
+        w.money AS money,
+        w.bank_name AS bankName,
+        w.card_number AS cardNumber,
+        w.processing_date AS processingDate,
+        w.create_date AS createDate,
+        w.modify_date AS modifyDate,
+        w.data_status AS dataStatus,
+        w.role_type AS roleType,
+        w.image AS image,
+        w.reason AS reason,
+        w.memo AS memo
+        FROM
+        dj_worker_withdraw_deposit w
+        INNER JOIN dj_member m ON w.worker_id = m.id
+        WHERE
+        w.data_status = 0
         <if test="state!=-1">
-            and state = #{state}
+            and w.state = #{state}
         </if>
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
-            and create_date between  #{beginDate}  and #{endDate}
+            and w.create_date between #{beginDate} and #{endDate}
         </if>
-        ORDER BY create_date DESC
-    </select>
-
-    <!--查询当前周所有提现申请 -->
-    <select id="getAllCurWeek" resultType="com.dangjia.acg.modle.worker.WithdrawDeposit">
-        select
-        <include refid="Base_columns"/>
-        from dj_worker_withdraw_deposit
-        where 1=1
-        <if test="state!=-1">
-            and state = #{state}
+        <if test="searchKey!=null and searchKey!=''">
+            and ( w.name like CONCAT('%',#{searchKey},'%')
+            or m.mobile like CONCAT('%',#{searchKey},'%'))
         </if>
-        <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
-            and create_date between  #{beginDate}  and #{endDate}
-        </if>
-        ORDER BY create_date DESC
+        ORDER BY
+        w.create_date DESC
     </select>
 
 

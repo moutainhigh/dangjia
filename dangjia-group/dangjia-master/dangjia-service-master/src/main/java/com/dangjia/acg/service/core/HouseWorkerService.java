@@ -33,7 +33,6 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
-import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +45,7 @@ import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.swing.*;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -485,9 +482,12 @@ public class HouseWorkerService {
                             bean.setFootMessageTitle("今日开工任务");//每日开工事项
                             bean.setFootMessageDescribe("（每日十二点前今日开工）");//每日开工事项
                         } else {
+                            List<HouseFlowApply> allAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 2, worker.getId(), new Date());//查询今天是否已提交整体完工
                             List<HouseFlowApply> stageAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 1, worker.getId(), new Date());//查询今天是否已提交阶段完工
                             List<HouseFlowApply> flowAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId(), new Date());//查询是否已提交今日完工
-                            if (stageAppList.size() > 0) {
+                            if (allAppList.size() > 0) {
+                                promptList.add("今日已申请整体完工");
+                            } else if (stageAppList.size() > 0) {
                                 promptList.add("今日已申请阶段完工");
                             } else if (flowAppList != null && flowAppList.size() > 0) {//已提交今日完工
                                 promptList.add("今日已完工");
@@ -721,14 +721,14 @@ public class HouseWorkerService {
             stringBuffer.append(worker.getWorkerType() != null && worker.getWorkerType() == 3 ? "大管家" : "工匠");
             homePageBean.setGradeName(stringBuffer.toString());
             String[] names = {"我的任务", "我的银行卡", "提现记录",
-                    "接单记录", "奖罚记录", "我的邀请码", "帮助中心"};
+                    "接单记录", "奖罚记录","工价工艺", "我的邀请码", "帮助中心"};
 //            "工艺要求", "工匠报价",
             String[] urls = {DjConstants.GJPageAddress.MYTASK, DjConstants.YZPageAddress.BANKCARDALREADYADD, DjConstants.GJPageAddress.CASHRECORD,
-                    DjConstants.GJPageAddress.ORDERRECORD, DjConstants.GJPageAddress.JIANGFALIST, DjConstants.GJPageAddress.MYINVITECODE, DjConstants.GJPageAddress.HELPCENTER};
+                    DjConstants.GJPageAddress.ORDERRECORD, DjConstants.GJPageAddress.JIANGFALIST,DjConstants.GJPageAddress.GJPRICE, DjConstants.GJPageAddress.MYINVITECODE, DjConstants.GJPageAddress.HELPCENTER};
 //            , DjConstants.GJPageAddress.PROCESSREQUIRE,DjConstants.GJPageAddress.GJPRICE
 //            "artisan_35.png","artisan_36.png",
             String[] imageUrls = {"artisan_40.png", "artisan_41.png", "artisan_39.png",
-                    "artisan_61.png", "artisan_69.png", "artisan_42.png", "artisan_60.png"};
+                    "artisan_61.png", "artisan_69.png","artisan_36.png", "artisan_42.png", "artisan_60.png"};
             List<HomePageBean.ListBean> list = new ArrayList<>();
             for (int i = 0; i < names.length; i++) {
                 String name = names[i];
@@ -757,6 +757,7 @@ public class HouseWorkerService {
 
     /**
      * 提交审核、停工
+     *  @Deprecated
      */
     public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId, Integer suspendDay,
                                             String applyDec, String imageList, String houseFlowId2) {
@@ -899,6 +900,10 @@ public class HouseWorkerService {
                 hfa.setOtherMoney(workPrice.subtract(haveMoney).subtract(hfa.getApplyMoney()));
                 hfa.setApplyDec("我是" + workType.getName() + ",我已经阶段完工了");//描述
                 hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
+                //增加倒计时系统自动审核时间
+                Calendar calendar = Calendar.getInstance();
+                calendar.add(Calendar.DAY_OF_YEAR,3);
+                hfa.setEndDate(calendar.getTime());
                 houseFlowApplyMapper.insert(hfa);
 
                 configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "阶段完工申请",
@@ -908,6 +913,10 @@ public class HouseWorkerService {
                 hfa.setApplyMoney(workPrice.subtract(haveMoney));
                 hfa.setApplyDec("我是" + workType.getName() + ",我已经整体完工了");//描述
                 hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
+                //增加倒计时系统自动审核时间
+                Calendar calendar = Calendar.getInstance();
+                calendar.add(Calendar.DAY_OF_YEAR,3);
+                hfa.setEndDate(calendar.getTime());
                 houseFlowApplyMapper.insert(hfa);
 
                 configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "整体完工申请",
@@ -1025,8 +1034,7 @@ public class HouseWorkerService {
                     if (imageType == 3) {//节点图
                         String imageTypeId = imageObj.getString("imageTypeId");
                         String imageTypeName = imageObj.getString("imageTypeName");
-
-                        Technology technology = forMasterAPI.byTechnologyId(imageTypeId);
+                        Technology technology = forMasterAPI.byTechnologyId(house.getCityId(), imageTypeId);
                         TechnologyRecord technologyRecord = new TechnologyRecord();
                         technologyRecord.setHouseId(house.getId());
                         technologyRecord.setTechnologyId(technology.getId());

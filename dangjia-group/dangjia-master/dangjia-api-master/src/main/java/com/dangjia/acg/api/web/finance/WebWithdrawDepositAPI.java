@@ -28,6 +28,7 @@ public interface WebWithdrawDepositAPI {
     @ApiOperation(value = "查询所有提现申请", notes = "查询所有有提现申请")
     ServerResponse getAllWithdraw(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("pageDTO") PageDTO pageDTO,
+                                  @RequestParam("searchKey") String searchKey,
                                   @RequestParam("state") Integer state,
                                   @RequestParam("beginDate") String beginDate,
                                   @RequestParam("endDate") String endDate);

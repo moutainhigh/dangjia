@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.core;
 
 import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.api.repair.MendMaterielAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -46,7 +47,18 @@ public class HouseWorkerSupService {
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private MendMaterielAPI mendMaterielAPI;
 
+    /**
+     * 管家审核验收申请h
+     * 材料审查
+     * 剩余材料列表
+     */
+    public ServerResponse surplusList(String houseFlowApplyId){
+        HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+        return mendMaterielAPI.surplusList(houseFlowApply.getWorkerTypeId(),houseFlowApply.getHouseId());
+    }
 
     /**
      * 审核停工

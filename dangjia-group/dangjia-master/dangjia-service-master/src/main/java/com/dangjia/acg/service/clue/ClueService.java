@@ -217,9 +217,17 @@ public class ClueService {
                         clueTalk.setDataStatus(1);
                         clueTalkMapper.updateByPrimaryKeySelective(clueTalk);
                     }
+                }else{
+                    Customer customer = new Customer();
+                    customer.setUserId(clue.getCusService());
+                    customer.setMemberId(member.getId());
+                    //customer.setModifyDate(clueTalk.getModifyDate());
+                    customer.setCreateDate(clue.getCreateDate());
+                    customer.setStage(1);
+                    iCustomerMapper.insert(customer);
                 }
                 //改变线索表的数据状态
-                clue.setDataStatus(1);
+//                clue.setDataStatus(1);
                 clue.setStage(4);
                 clueMapper.updateByPrimaryKeySelective(clue);
                 //操作dj_member表

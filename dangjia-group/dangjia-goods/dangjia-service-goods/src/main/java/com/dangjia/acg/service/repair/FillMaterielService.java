@@ -15,6 +15,7 @@ import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
@@ -27,7 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -53,6 +56,69 @@ public class FillMaterielService {
     @Autowired
     private GetForBudgetAPI getForBudgetAPI;
 
+    /**
+     * 管家审核验收申请
+     * 材料审查
+     * 剩余材料列表
+     */
+    public ServerResponse surplusList(String workerTypeId,String houseId){
+        try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            //精算的
+            List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(workerTypeId, houseId, "", "","0");
+            //补材料的
+            List<MendMateriel> mendMaterielList = getForBudgetAPI.askAndQuit(workerTypeId, houseId,"","");
+            List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
+            List<String> productIdList = new ArrayList<>();
+            String productId;
+            for(MendMateriel mendMateriel : mendMaterielList){
+                boolean flag = true;
+                productId = mendMateriel.getProductId();
+                for(BudgetMaterial bm : budgetMaterialList){
+                    if(productId.equals(bm.getProductId())){
+                        flag = false;
+                        continue;
+                    }
+                }
+                if(flag){
+                    productIdList.add(productId);
+                }
+            }
+            for(BudgetMaterial bm : budgetMaterialList){
+                productIdList.add(bm.getProductId());
+            }
+            for (String id : productIdList) {
+                ServerResponse response = technologyRecordAPI.getByProductId(id, houseId);
+                //if(!response.isSuccess()) continue;
+                Object warehouseStr = response.getResultObj();
+                Warehouse warehouse = JSON.parseObject(JSON.toJSONString(warehouseStr),Warehouse.class);
+                if(warehouse == null) continue;
+                WarehouseDTO warehouseDTO = new WarehouseDTO();
+                warehouseDTO.setImage(address + warehouse.getImage());
+                warehouseDTO.setShopCount(warehouse.getShopCount());
+                warehouseDTO.setAskCount(warehouse.getAskCount());
+                warehouseDTO.setBackCount(warehouse.getBackCount());
+                warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
+                warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getBackCount() - warehouse.getReceive());//所有买的数量 - 退货 - 收的
+                warehouseDTO.setProductName(warehouse.getProductName());
+                warehouseDTO.setPrice(warehouse.getPrice());
+                warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
+                warehouseDTO.setReceive(warehouse.getReceive());
+                warehouseDTO.setUnitName(warehouse.getUnitName());
+                warehouseDTO.setProductType(warehouse.getProductType());
+                warehouseDTO.setAskTime(warehouse.getAskTime());
+                warehouseDTO.setRepTime(warehouse.getRepTime());
+                warehouseDTO.setBackTime(warehouse.getBackTime());
+                warehouseDTO.setBrandSeriesName(forMasterService.brandSeriesName(warehouse.getProductId()));
+                warehouseDTO.setProductId(warehouse.getProductId());
+                warehouseDTOS.add(warehouseDTO);
+            }
+            return ServerResponse.createBySuccess("查询成功", warehouseDTOS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
     /**
      * 要退查询仓库
@@ -71,25 +137,18 @@ public class FillMaterielService {
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
 
             List<String> productIdList = new ArrayList<>();
-            String productId;
 
-            for(MendMateriel mendMateriel : mendMaterielList){
-                boolean flag = true;
-                productId = mendMateriel.getProductId();
-                for(BudgetMaterial bm : budgetMaterialList){
-                    if(productId.equals(bm.getProductId())){
-                        flag = false;
-                        continue;
-                    }
-                }
-                if(flag){
-                    productIdList.add(productId);
-                }
-            }
+            Map map =new HashMap();
             for(BudgetMaterial bm : budgetMaterialList){
                 productIdList.add(bm.getProductId());
+                map.put(bm.getProductId(),"0");
             }
-
+            for(MendMateriel mendMateriel : mendMaterielList){
+                if(map.get(mendMateriel.getProductId())==null){
+                    productIdList.add(mendMateriel.getProductId());
+                    map.put(mendMateriel.getProductId(),"0");
+                }
+            }
             for (String id : productIdList) {
                 ServerResponse response = technologyRecordAPI.getByProductId(id, houseId);
                 //if(!response.isSuccess()) continue;
@@ -102,7 +161,7 @@ public class FillMaterielService {
                 warehouseDTO.setAskCount(warehouse.getAskCount());
                 warehouseDTO.setBackCount(warehouse.getBackCount());
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
-                warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getBackCount() - warehouse.getReceive());//所有买的数量 - 退货 - 收的
+                warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getBackCount() - warehouse.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
                 warehouseDTO.setProductName(warehouse.getProductName());
                 warehouseDTO.setPrice(warehouse.getPrice());
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
@@ -154,7 +213,7 @@ public class FillMaterielService {
                     Product product=productList.get(i);
                     GoodsDTO goodsDTO = actuaryOperationService.goodsDetail(product, null);
                     if (goodsDTO != null) {
-                        goodsDTOList.add(i,goodsDTO);
+                        goodsDTOList.add(goodsDTO);
                     }
                 }
             }

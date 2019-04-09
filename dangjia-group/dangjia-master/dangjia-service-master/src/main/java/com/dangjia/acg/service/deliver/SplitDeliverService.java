@@ -159,6 +159,7 @@ public class SplitDeliverService {
             example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             List<SplitDeliverItemDTO> splitDeliverItemDTOList = new ArrayList<>();
+            House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
             for (OrderSplitItem orderSplitItem : orderSplitItemList){
                 SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
                 splitDeliverItemDTO.setImage(address + orderSplitItem.getImage());
@@ -167,7 +168,7 @@ public class SplitDeliverService {
                 splitDeliverItemDTO.setShopCount(orderSplitItem.getShopCount());
                 splitDeliverItemDTO.setNum(orderSplitItem.getNum());
                 splitDeliverItemDTO.setUnitName(orderSplitItem.getUnitName());
-                splitDeliverItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(orderSplitItem.getProductId()));
+                splitDeliverItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(),orderSplitItem.getProductId()));
                 splitDeliverItemDTO.setPrice(orderSplitItem.getPrice());
                 splitDeliverItemDTO.setCost(orderSplitItem.getCost());
                 splitDeliverItemDTO.setId(orderSplitItem.getId());
@@ -198,6 +199,7 @@ public class SplitDeliverService {
             }
             List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
             List<SplitDeliverDTO> splitDeliverDTOList = new ArrayList<>();
+            House house = houseMapper.selectByPrimaryKey(houseId);
             for (SplitDeliver splitDeliver : splitDeliverList){
                 SplitDeliverDTO splitDeliverDTO = new SplitDeliverDTO();
                 splitDeliverDTO.setSplitDeliverId(splitDeliver.getId());
@@ -206,7 +208,7 @@ public class SplitDeliverService {
                 splitDeliverDTO.setNumber(splitDeliver.getNumber());
                 splitDeliverDTO.setSendTime(splitDeliver.getSendTime());//发货时间
                 splitDeliverDTO.setModifyDate(splitDeliver.getModifyDate());//收货时间
-                Supplier supplier = forMasterAPI.getSupplier(splitDeliver.getSupplierId());
+                Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), splitDeliver.getSupplierId());
                 if(supplier != null){
                     splitDeliverDTO.setSupId(supplier.getId());//供应商id
                     splitDeliverDTO.setSupMobile(supplier.getTelephone());

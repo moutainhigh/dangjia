@@ -33,6 +33,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		and worker_id = #{workerId}
     </delete>
 
+
+    <!--查询审核不通过的申请-->
+    <select id="noPassList" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        select <include refid="all_columns" />
+        from dj_core_house_flow_apply
+        where
+            house_flow_id = #{houseFlowId}
+        and (supervisor_check = 2 or member_check = 2)
+        and apply_type in (1,2)
+    </select>
+
     <!--查询待处理完工申请-->
     <select id="unCheckByWorkerTypeId" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select <include refid="all_columns" />

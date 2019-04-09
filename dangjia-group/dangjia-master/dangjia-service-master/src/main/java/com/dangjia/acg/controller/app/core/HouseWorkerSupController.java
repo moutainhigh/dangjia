@@ -20,6 +20,12 @@ public class HouseWorkerSupController implements HouseWorkerSupAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse surplusList(String userToken,String houseFlowApplyId){
+        return houseWorkerSupService.surplusList(houseFlowApplyId);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse auditApply(String houseFlowApplyId,Integer memberCheck){
         return houseWorkerSupService.auditApply(houseFlowApplyId,memberCheck);
     }
