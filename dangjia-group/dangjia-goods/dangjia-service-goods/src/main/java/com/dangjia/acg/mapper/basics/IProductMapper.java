@@ -71,5 +71,10 @@ public interface IProductMapper extends Mapper<Product> {
 
     Product getSwitchProduct(@Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String[] valueIdArr);
 
+    /**
+     * 模糊搜索商品
+     * @param name  用户给定的商品名称，可以是product / basics_brand / basics_brand_series 中的name的一种
+     * @return 到的goods中的商品名称
+     */
     List<Product> serchBoxName(@Param("name") String name);
 }

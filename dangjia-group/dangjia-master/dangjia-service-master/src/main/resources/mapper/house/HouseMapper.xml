@@ -24,6 +24,7 @@
         money,
         pause,
         show_house as showHouse,
+        site_display as siteDisplay,
         village_id as villageId,
         refer_house_id as referHouseId,
         have_complete as haveComplete,
@@ -71,27 +72,25 @@
     </select>
 
     <select id="startWorkPage" resultType="com.dangjia.acg.dto.house.HouseDTO">
-        SELECT
-            id as houseId,
-            city_id as cityId,
-            city_name as cityName,
-            village_id as villageId,
-            residential,
-            modeling_layout_id as modelingLayoutId,
-            building,
-            unit,
-            number,
-            square,
-            work_deposit_id as workDepositId,
-            refer_house_id as referHouseId,
-            style,
-            house_type as houseType,
-            drawings,
-            decoration_type as decorationType
+        SELECT id                 as houseId,
+               city_id            as cityId,
+               city_name          as cityName,
+               village_id         as villageId,
+               residential,
+               modeling_layout_id as modelingLayoutId,
+               building,
+               unit,
+               number,
+               square,
+               work_deposit_id    as workDepositId,
+               refer_house_id     as referHouseId,
+               style,
+               house_type         as houseType,
+               drawings,
+               decoration_type    as decorationType
         FROM dj_house
-        WHERE
-            data_status=0
-            AND id=#{houseId}
+        WHERE data_status = 0
+          AND id = #{houseId}
     </select>
 
     <!--查询所有的房子 指定房子 装修状态-->
@@ -122,22 +121,19 @@
         FROM dj_house as house
         WHERE 1=1
         <if test="likeAddress!=null and likeAddress!=''">
-            AND CONCAT(house.residential,house.building,'栋',house.unit,'单元',house.number,'号') LIKE CONCAT('%',#{likeAddress},'%')
+            AND CONCAT(house.residential,house.building,'栋',house.unit,'单元',house.number,'号') LIKE
+            CONCAT('%',#{likeAddress},'%')
 
         </if>
         ORDER BY waitCount DESC,sendCount DESC,house.create_date DESC
     </select>
 
     <select id="getStatisticsByDate" resultType="com.dangjia.acg.modle.house.House">
-        SELECT
-            id,
-            budget_ok as budgetOk
+        SELECT id, budget_ok as budgetOk
         FROM dj_house
-        WHERE
-        designer_ok = 3
-        AND
-        data_status=0
-        AND  modify_date BETWEEN #{start} AND #{end}
+        WHERE designer_ok = 3
+          AND data_status = 0
+          AND modify_date BETWEEN #{start} AND #{end}
         ORDER BY create_date ASC
     </select>
     <!--根据城市、小区，最大最小面积搜索-->
@@ -165,7 +161,7 @@
             and house_type = #{houseType}
         </if>
         and ((decoration_type in (1,2) and budget_ok=3) or (decoration_type=3 and visit_state=1))
-        and show_house!=1
+        and show_house!=1 and site_display!=1
         order by num desc
     </select>
 
@@ -208,7 +204,8 @@
         h.work_deposit_id as workDepositId,
         h.create_date AS createDate,
         h.modify_date AS modifyDate,
-        h.number as number
+        h.number as number,
+        h.site_display as siteDisplay
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
@@ -225,16 +222,65 @@
         </if>
         <if test="searchKey!=null and searchKey!=''">
             AND (
-                m.mobile like CONCAT('%',#{searchKey},'%')
-                or
-                CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') LIKE CONCAT('%',#{searchKey},'%')
+            m.mobile like CONCAT('%',#{searchKey},'%')
+            or
+            CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
-            ORDER by
-            h.create_date
+        ORDER by
+        h.create_date
         <if test="orderBy!=null and orderBy!=''and orderBy=='desc'">
             desc
         </if>
+
+    </select>
+    <select id="getActuaryAll" resultType="com.dangjia.acg.dto.house.HouseListDTO">
+        SELECT
+        h.id as houseId,
+        CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') houseName,
+        h.city_name as cityName,
+        h.budget_ok as budgetOk,
+        h.custom_sort as customSort,
+        m.nick_name as name,
+        m.id as memberId,
+        m.name as memberName,
+        m.mobile as mobile,
+        h.visit_state as visitState,
+        h.show_house as showHouse,
+        h.style as style,
+        h.square as square,
+        h.square as buildSquare,
+        h.decoration_type as decorationType,
+        h.house_type as houseType,
+        h.residential as residential,
+        h.building as building,
+        h.unit as unit,
+        h.work_deposit_id as workDepositId,
+        h.create_date AS createDate,
+        h.modify_date AS modifyDate,
+        h.number as number
+        FROM
+        dj_house h
+        INNER JOIN dj_member m ON h.member_id = m.id
+        WHERE
+        h.data_status =0 and h.designer_ok=3
+        <if test="budgetOk!=null and budgetOk!=''">
+            <if test="budgetOk=='2' or budgetOk=='4'">
+                and  (budget_ok =2 || budget_ok = 4)
+            </if>
+            <if test="!(budgetOk=='2' or budgetOk=='4')">
+                and  budget_ok =#{budgetOk}
+            </if>
+        </if>
+
+        <if test="searchKey!=null and searchKey!=''">
+            AND (
+            m.mobile like CONCAT('%',#{searchKey},'%')
+            or
+            CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        ORDER by  h.create_date  desc
 
     </select>
 
@@ -299,11 +345,14 @@
     </select>
 
     <select id="getHouseDateByMemberId" parameterType="String" resultType="date">
-        SELECT
-         h.create_date
-         from dj_member m
-         INNER join dj_house h on m.id=h.member_id where m.id=#{memberId} and h.data_status =0 and h.visit_state =1
-         ORDER BY create_date DESC limit 1
+        SELECT h.create_date
+        from dj_member m
+                 INNER join dj_house h on m.id = h.member_id
+        where m.id = #{memberId}
+          and h.data_status = 0
+          and h.visit_state = 1
+        ORDER BY create_date DESC
+        limit 1
     </select>
 </mapper>
 

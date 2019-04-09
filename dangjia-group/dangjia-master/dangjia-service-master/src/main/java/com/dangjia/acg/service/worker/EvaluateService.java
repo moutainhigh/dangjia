@@ -171,13 +171,14 @@ public class EvaluateService {
     public ServerResponse materialRecord(String houseFlowApplyId,String content,int star, String productArr){
         try{
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+            House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             //登记剩余材料
             JSONArray jsonArray = JSONArray.parseArray(productArr);
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
                 String productId = obj.getString("productId");
                 double num = Double.parseDouble(obj.getString("num"));
-                Product product = forMasterAPI.getProduct(productId);
+                Product product = forMasterAPI.getProduct(house.getCityId(), productId);
 //                SurplusWareHouseItem surplusWareHouseItem = new SurplusWareHouseItem();
 //                surplusWareHouseItem.setProductId(productId);
 //                surplusWareHouseItem.setProductName(product.getName());

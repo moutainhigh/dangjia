@@ -191,7 +191,13 @@ public class SurplusWareHouseService {
                     newSurplusWareHouseItem.setProductId(productId);
                     newSurplusWareHouseItem.setProductCount(productCount);
 
-                    Product product = forMasterAPI.getProduct(productId);
+                    House house = iHouseMapper.selectByPrimaryKey(srcSurplusWareHouse.getHouseId());
+                    Product product;
+                    if(house != null){
+                        product = forMasterAPI.getProduct(house.getCityId(), productId);
+                    }else {
+                        product = forMasterAPI.getProduct("", productId);
+                    }
                     if (product != null)
                         newSurplusWareHouseItem.setProductName(product.getName());
 

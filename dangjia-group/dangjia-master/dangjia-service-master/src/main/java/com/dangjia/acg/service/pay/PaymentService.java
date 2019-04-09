@@ -432,6 +432,7 @@ public class PaymentService {
                 order.setPayment(payState);// 支付方式
                 order.setType(1);//人工
                 orderMapper.insert(order);
+                House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
                 for (MendWorker mendWorker : mendWorkerList) {
                     OrderItem orderItem = new OrderItem();
                     orderItem.setOrderId(order.getId());
@@ -446,7 +447,7 @@ public class PaymentService {
                     orderItem.setImage(mendWorker.getImage());
                     orderItemMapper.insert(orderItem);
                     /*记录补数量*/
-                    forMasterAPI.repairCount(mendOrder.getHouseId(), mendWorker.getWorkerGoodsId(), mendWorker.getShopCount());
+                    forMasterAPI.repairCount(house.getCityId(),mendOrder.getHouseId(), mendWorker.getWorkerGoodsId(), mendWorker.getShopCount());
                 }
             }
         } catch (Exception e) {
@@ -622,13 +623,13 @@ public class PaymentService {
      */
     private void awaitPay(BusinessOrder businessOrder, String payState) {
         try {
-            List<BudgetMaterial> budgetMaterialList = forMasterAPI.caiLiao(businessOrder.getTaskId());
+            House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+            List<BudgetMaterial> budgetMaterialList = forMasterAPI.caiLiao(house.getCityId(), businessOrder.getTaskId());
             if (budgetMaterialList.size() > 0) {
                 HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
                 houseExpend.setMaterialMoney(houseExpend.getMaterialMoney() + businessOrder.getTotalPrice().doubleValue());//材料钱
                 houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
 
-                House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
                 HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(businessOrder.getTaskId());
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
                 Order order = new Order();
@@ -655,9 +656,9 @@ public class PaymentService {
     private boolean renGong(String businessOrderNumber, HouseWorkerOrder hwo, String payState, String houseFlowId) {
         try {
             //处理人工
-            List<BudgetWorker> budgetWorkerList = forMasterAPI.renGong(houseFlowId);
+            House house = houseMapper.selectByPrimaryKey(hwo.getHouseId());
+            List<BudgetWorker> budgetWorkerList = forMasterAPI.renGong(house.getCityId(),houseFlowId);
             if (budgetWorkerList.size() > 0) {
-                House house = houseMapper.selectByPrimaryKey(hwo.getHouseId());
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(hwo.getWorkerTypeId());
                 Order order = new Order();
                 order.setHouseId(house.getId());
@@ -698,7 +699,8 @@ public class PaymentService {
     private void caiLiao(String businessOrderNumber, HouseWorkerOrder hwo, String payState, String houseFlowId) {
         try {
             //处理材料
-            List<BudgetMaterial> budgetMaterialList = forMasterAPI.caiLiao(houseFlowId);
+            House house = houseMapper.selectByPrimaryKey(hwo.getHouseId());
+            List<BudgetMaterial> budgetMaterialList = forMasterAPI.caiLiao(house.getCityId(),houseFlowId);
             if (budgetMaterialList.size() > 0) {
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(hwo.getWorkerTypeId());
                 Order order = new Order();

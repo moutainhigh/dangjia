@@ -89,12 +89,17 @@ public class SurplusWareDivertService {
                     itemList.add(item);
                 }
             }
-
+            House house = iHouseMapper.selectByPrimaryKey(srcSurplusWareHouse.getHouseId());
             for (SurplusWareDivert item : itemList) {
                 SurplusWareHouseItem surplusWareHouseItem = iSurplusWareHouseItemMapper.getAllSurplusWareHouseItemByProductId(srcSurplusWareHouseId, item.getProductId());
                 //挪出的商品 数量 大于 库存数量 就提示  库存不足
                 if (item.getDivertCount() > surplusWareHouseItem.getProductCount()) {
-                    String name = forMasterAPI.getProduct(item.getProductId()).getName();
+                    String name;
+                    if (house != null){
+                        name = forMasterAPI.getProduct(house.getCityId(), item.getProductId()).getName();
+                    }else {
+                        name = forMasterAPI.getProduct("", item.getProductId()).getName();
+                    }
                     return ServerResponse.createByErrorMessage(name + " 库存不足,剩余:" + surplusWareHouseItem.getProductCount());
                 }
             }
@@ -124,12 +129,12 @@ public class SurplusWareDivertService {
                         return ServerResponse.createByErrorMessage(retStr);
                     address = toSurplusWareHouse.getAddress();
                 } else if (divertType == 2) {//供应商  toSurplusWareHouseId : 是供应商id
-                    Supplier toSupplier = forMasterAPI.getSupplier(toSurplusWareHouseId);
+                    Supplier toSupplier = forMasterAPI.getSupplier(house.getCityId(), toSurplusWareHouseId);
                     if (toSupplier != null)
                         address = toSupplier.getName();
 
                 } else if (divertType == 3) {// 业主   toSurplusWareHouseId : 这里是 房子的id
-                    House house = iHouseMapper.selectByPrimaryKey(toSurplusWareHouseId);
+                    house = iHouseMapper.selectByPrimaryKey(toSurplusWareHouseId);
                     toSurplusWareHouse = iSurplusWareHouseMapper.getSurplusWareHouseByHouseId(house.getId());
                     if (toSurplusWareHouse == null) { //创建 房子 临时仓库
                         toSurplusWareHouse = new SurplusWareHouse();
@@ -179,12 +184,18 @@ public class SurplusWareDivertService {
     private String divertProductToWareHouse(String productId, Integer divertCount, SurplusWareHouse toSurplusWareHouse) {
         try {
             SurplusWareHouseItem toSurplusWareHouseItem = iSurplusWareHouseItemMapper.getAllSurplusWareHouseItemByProductId(toSurplusWareHouse.getId(), productId);
+            House house = iHouseMapper.selectByPrimaryKey(toSurplusWareHouse.getHouseId());
             if (toSurplusWareHouseItem == null) {//如果仓库里没有 该清点商品 就新增
                 SurplusWareHouseItem newSurplusWareHouseItem = new SurplusWareHouseItem();
                 newSurplusWareHouseItem.setSurplusWareHouseId(toSurplusWareHouse.getId());
                 newSurplusWareHouseItem.setProductId(productId);
                 newSurplusWareHouseItem.setProductCount(divertCount);
-                Product product = forMasterAPI.getProduct(productId);
+                Product product;
+                if (house != null){
+                    product = forMasterAPI.getProduct(house.getCityId(), productId);
+                }else {
+                    product = forMasterAPI.getProduct("", productId);
+                }
                 if (product != null)
                     newSurplusWareHouseItem.setProductName(product.getName());
 
@@ -221,7 +232,7 @@ public class SurplusWareDivertService {
                 detailsDTO.setProductName(surplusWareHouseItem.getProductName());
                 detailsDTO.setProductCount(surplusWareHouseItem.getProductCount());
                 detailsDTO.setCreateDate(surplusWareHouseItem.getCreateDate());
-                Product product = forMasterAPI.getProduct(surplusWareHouseItem.getProductId());
+                Product product = forMasterAPI.getProduct("", surplusWareHouseItem.getProductId());
                 if (product != null)
                     detailsDTO.setProductUnit(product.getUnitName());
                 detailsDTO.setSurplusWareHouseId(surplusWareHouseItem.getSurplusWareHouseId());
