@@ -178,7 +178,7 @@ public class MemberService {
     }
 
     ServerResponse getUser(Member user, String userRole) {
-        updateOrInsertInfo(user.getId(),String.valueOf(userRole),user.getPassword());
+        updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
         userRole = "role" + userRole + ":" + user.getId();
         String token = redisClient.getCache(userRole, String.class);
         //如果用户存在usertoken则清除原来的token数据
@@ -291,8 +291,8 @@ public class MemberService {
             user.setHead("qrcode/logo.png");
             memberMapper.insertSelective(user);
 //			memberMapper.updateByPrimaryKeySelective(user);
-            clueService.sendUser(user,user.getMobile());
-            updateOrInsertInfo(user.getId(),String.valueOf(userRole),user.getPassword());
+            clueService.sendUser(user, user.getMobile());
+            updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             AccessToken accessToken = TokenUtil.generateAccessToken(user);
             if (!CommonUtil.isEmpty(user.getWorkerTypeId())) {
@@ -315,24 +315,25 @@ public class MemberService {
         }
     }
 
-    public void updateOrInsertInfo(String memberid,String policyId,String pwd){
+    public void updateOrInsertInfo(String memberid, String policyId, String pwd) {
         try {
             //检测是否已有指定身份，无则初始化
-            Example example =new Example(MemberInfo.class);
-            example.createCriteria().andEqualTo(MemberInfo.MEMBER_ID,memberid).andEqualTo(MemberInfo.POLICY_ID,policyId);
-            List<MemberInfo> infos= memberInfoMapper.selectByExample(example);
-            if(!CommonUtil.isEmpty(memberid)&&(infos==null||infos.size()==0)){
-               MemberInfo memberInfo=new MemberInfo();
-               memberInfo.setMemberId(memberid);
-               memberInfo.setPolicyId(policyId);
-               memberInfo.setPassword(pwd);
-               memberInfo.setCheckStatus("0");
-               memberInfoMapper.insertSelective(memberInfo);
+            Example example = new Example(MemberInfo.class);
+            example.createCriteria().andEqualTo(MemberInfo.MEMBER_ID, memberid).andEqualTo(MemberInfo.POLICY_ID, policyId);
+            List<MemberInfo> infos = memberInfoMapper.selectByExample(example);
+            if (!CommonUtil.isEmpty(memberid) && (infos == null || infos.size() == 0)) {
+                MemberInfo memberInfo = new MemberInfo();
+                memberInfo.setMemberId(memberid);
+                memberInfo.setPolicyId(policyId);
+                memberInfo.setPassword(pwd);
+                memberInfo.setCheckStatus("0");
+                memberInfoMapper.insertSelective(memberInfo);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("用户身份异常！", e);
         }
     }
+
     /**
      * 工匠提交详细资料
      */
@@ -612,17 +613,20 @@ public class MemberService {
                             memberLabelList.add(memberlabel);
                     }
                 }
+
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
                 //判断是否有装修记录
-                Date date=houseMapper.getHouseDateByMemberId(member.getId());
-                if(date!=null){
+                Date date = houseMapper.getHouseDateByMemberId(member.getId());
+                if (date != null) {
                     mcDTO.setOrderDate(date);
                 }
+
                 mcDTO.setMemberId(member.getId());
                 mcDTO.setMemberName(member.getName());
                 mcDTO.setMemberNickName(member.getNickName());
                 mcDTO.setMobile(member.getMobile());
                 mcDTO.setReferrals(member.getReferrals());
+
                 Member referralsMember = memberMapper.selectByPrimaryKey(member.getReferrals());
                 if (referralsMember != null) {
                     mcDTO.setReferralsMobile(referralsMember.getMobile());

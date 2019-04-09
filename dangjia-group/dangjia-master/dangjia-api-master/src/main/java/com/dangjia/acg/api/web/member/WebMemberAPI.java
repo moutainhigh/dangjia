@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
  * web端用户接口
  */
 @FeignClient("dangjia-service-master")
-@Api(value = "用户接口", description = "用户接口")
+@Api(value = "web端用户接口", description = "web端用户接口")
 public interface WebMemberAPI {
 
     @PostMapping("web/member/getMemberList")

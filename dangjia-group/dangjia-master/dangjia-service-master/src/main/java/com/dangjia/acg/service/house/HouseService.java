@@ -252,7 +252,7 @@ public class HouseService {
                 .andEqualTo(House.MEMBER_ID, member.getId())
                 .andNotEqualTo(House.VISIT_STATE, 0).andNotEqualTo(House.VISIT_STATE, 2)
                 .andEqualTo(House.DATA_STATUS, 0);
-            List<House> houseList = iHouseMapper.selectByExample(example);
+        List<House> houseList = iHouseMapper.selectByExample(example);
         String houseId = null;
         if (houseList.size() > 1) {
             for (House house : houseList) {
@@ -481,6 +481,9 @@ public class HouseService {
             House srcHouse = iHouseMapper.selectByPrimaryKey(house.getId());
             if (srcHouse == null)
                 return ServerResponse.createByErrorMessage("没有该房子");
+            if (!CommonUtil.isEmpty(house.getSiteDisplay())) {
+                srcHouse.setSiteDisplay(house.getSiteDisplay());
+            }
             if (house.getShowHouse() != -1) {
                 srcHouse.setShowHouse(house.getShowHouse());
                 if (house.getShowHouse() == 1) {
@@ -748,10 +751,10 @@ public class HouseService {
     /**
      * 房子装修列表
      */
-    public ServerResponse getList(PageDTO pageDTO,Integer visitState,String startDate,String endDate, String searchKey,String orderBy, String memberId) {
+    public ServerResponse getList(PageDTO pageDTO, Integer visitState, String startDate, String endDate, String searchKey, String orderBy, String memberId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<HouseListDTO> houseList = iHouseMapper.getHouseList(memberId,visitState,startDate,endDate,orderBy,searchKey);
+            List<HouseListDTO> houseList = iHouseMapper.getHouseList(memberId, visitState, startDate, endDate, orderBy, searchKey);
             if (houseList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
                         , "查无数据");
@@ -957,7 +960,7 @@ public class HouseService {
         List<HouseDesignImage> houseDesignImages = houseDesignImageMapper.selectByExample(example);
         if ((houseDesignImages != null) && (houseDesignImages.size() > 0)) {
             shareDTO.setImageNum(houseDesignImages.size() + "张图片");
-            shareDTO.setImage(address + houseDesignImages.get(0).getImageurl()+"?x-image-process=image/resize,w_500,h_500/quality,q_80");//户型图片
+            shareDTO.setImage(address + houseDesignImages.get(0).getImageurl() + "?x-image-process=image/resize,w_500,h_500/quality,q_80");//户型图片
         } else {
             shareDTO.setImageNum(0 + "张图片");
             shareDTO.setImage("");//户型图片

@@ -55,80 +55,80 @@ public class IndexPageService {
     /**
      * 施工现场
      */
-    public ServerResponse houseDetails(HttpServletRequest request, String houseId){
+    public ServerResponse houseDetails(HttpServletRequest request, String houseId) {
         try {
-            BigDecimal totalPrice=new BigDecimal(0);//总计
+            BigDecimal totalPrice = new BigDecimal(0);//总计
             House house = houseMapper.selectByPrimaryKey(houseId);
-            request.setAttribute(Constants.CITY_ID,house.getCityId());
+            request.setAttribute(Constants.CITY_ID, house.getCityId());
             HouseDetailsDTO houseDetailsDTO = new HouseDetailsDTO();
             houseDetailsDTO.setCityId(house.getCityId());
             houseDetailsDTO.setHouseId(house.getId());
             houseDetailsDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + house.getImage());
-            houseDetailsDTO.setHouseName(house.getResidential()+"***"+house.getNumber()+"房");
+            houseDetailsDTO.setHouseName(house.getResidential() + "***" + house.getNumber() + "房");
             String[] liangArr = {};
-            if (house.getLiangDian() != null){
+            if (house.getLiangDian() != null) {
                 liangArr = house.getLiangDian().split(",");
             }
             List<String> dianList = new ArrayList<>();
-            if(!CommonUtil.isEmpty(house.getStyle())) {
+            if (!CommonUtil.isEmpty(house.getStyle())) {
                 dianList.add(house.getStyle());
 
             }
-            if(!CommonUtil.isEmpty(house.getLiangDian())) {
+            if (!CommonUtil.isEmpty(house.getLiangDian())) {
                 for (int i = 0; i < liangArr.length; i++) {
                     dianList.add(liangArr[i]);
                 }
             }
-            if(!CommonUtil.isEmpty(house.getBuildSquare())) {
+            if (!CommonUtil.isEmpty(house.getBuildSquare())) {
                 dianList.add(house.getBuildSquare() + "㎡");
             }
             houseDetailsDTO.setDianList(dianList);
-            List<Map<String,Object>> mapList = new ArrayList<>();
-            Map<String,Object> mapReady = new HashMap<>();
-            mapReady.put("name","准备阶段");
-            if (house.getDecorationType() == 2){//自带设计
-                mapReady.put("typeA", "¥"  + 0);
-            }else {
-                Order order = orderMapper.getWorkerOrder(houseId,"1");
-                if(order!=null) {
+            List<Map<String, Object>> mapList = new ArrayList<>();
+            Map<String, Object> mapReady = new HashMap<>();
+            mapReady.put("name", "准备阶段");
+            if (house.getDecorationType() == 2) {//自带设计
+                mapReady.put("typeA", "¥" + 0);
+            } else {
+                Order order = orderMapper.getWorkerOrder(houseId, "1");
+                if (order != null) {
                     mapReady.put("typeA", "¥" + String.format("%.2f", order.getTotalAmount().doubleValue()));
-                    totalPrice=totalPrice.add(order.getTotalAmount());
-                }else{
-                    mapReady.put("typeA", "¥"  + 0);
+                    totalPrice = totalPrice.add(order.getTotalAmount());
+                } else {
+                    mapReady.put("typeA", "¥" + 0);
                 }
             }
-            Order order = orderMapper.getWorkerOrder(houseId,"2");
-            if(order!=null) {
-                mapReady.put("typeB","¥" + (order == null? 0 : String.format("%.2f", order.getTotalAmount().doubleValue())));
-                totalPrice=totalPrice.add(order.getTotalAmount());
-            }else{
-                mapReady.put("typeB", "¥"  + 0);
+            Order order = orderMapper.getWorkerOrder(houseId, "2");
+            if (order != null) {
+                mapReady.put("typeB", "¥" + (order == null ? 0 : String.format("%.2f", order.getTotalAmount().doubleValue())));
+                totalPrice = totalPrice.add(order.getTotalAmount());
+            } else {
+                mapReady.put("typeB", "¥" + 0);
             }
             mapList.add(mapReady);
 
             Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andGreaterThan(HouseFlow.WORKER_TYPE,2);
+            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andGreaterThan(HouseFlow.WORKER_TYPE, 2);
             example.orderBy(HouseFlow.WORKER_TYPE);
             List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
-            for (HouseFlow houseFlow : houseFlowList){
+            for (HouseFlow houseFlow : houseFlowList) {
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
-                Map<String,Object> map = new HashMap<>();
-                map.put("name",workerType.getName());
-                ServerResponse serverResponse=budgetMaterialAPI.getHouseBudgetStageCost(request,houseId,houseFlow.getWorkerTypeId());
-                JSONArray pageInfo=(JSONArray)serverResponse.getResultObj();
-                List<BudgetStageCostDTO>  budgetStageCostDTOS= pageInfo.toJavaList(BudgetStageCostDTO.class);
+                Map<String, Object> map = new HashMap<>();
+                map.put("name", workerType.getName());
+                ServerResponse serverResponse = budgetMaterialAPI.getHouseBudgetStageCost(request, houseId, houseFlow.getWorkerTypeId());
+                JSONArray pageInfo = (JSONArray) serverResponse.getResultObj();
+                List<BudgetStageCostDTO> budgetStageCostDTOS = pageInfo.toJavaList(BudgetStageCostDTO.class);
                 for (BudgetStageCostDTO budgetStageCostDTO : budgetStageCostDTOS) {
-                    totalPrice=totalPrice.add(budgetStageCostDTO.getTotalAmount());
+                    totalPrice = totalPrice.add(budgetStageCostDTO.getTotalAmount());
                 }
-                if(budgetStageCostDTOS.size()>0) {
+                if (budgetStageCostDTOS.size() > 0) {
                     map.put("workers", serverResponse.getResultObj());
                     mapList.add(map);
                 }
             }
             houseDetailsDTO.setMapList(mapList);
             houseDetailsDTO.setTotalPrice(totalPrice);
-            return ServerResponse.createBySuccess("查询成功",houseDetailsDTO);
-        }catch (Exception e){
+            return ServerResponse.createBySuccess("查询成功", houseDetailsDTO);
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
         }

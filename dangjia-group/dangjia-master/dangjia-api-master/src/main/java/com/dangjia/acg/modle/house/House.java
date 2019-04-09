@@ -4,6 +4,7 @@ import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 import org.apache.http.util.TextUtils;
@@ -97,6 +98,11 @@ public class House extends BaseEntity {
     @Desc(value = "是否展示 0不展示，1展示,默认0")
     @ApiModelProperty("是否展示 0不展示，1展示,默认0")
     private Integer showHouse;//showhouse
+
+    @Column(name = "site_display")
+    @Desc(value = "是否在施工现场展示（默认展示）：0：展示，1：不展示")
+    @ApiModelProperty("是否在施工现场展示（默认展示）：0：展示，1：不展示")
+    private Integer siteDisplay;//site_display
 
     @Column(name = "task_number")
     @Desc(value = "未处理任务数,默认生成为0")
