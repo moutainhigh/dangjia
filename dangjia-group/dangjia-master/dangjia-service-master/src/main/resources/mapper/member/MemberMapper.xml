@@ -5,10 +5,10 @@
 <mapper namespace="com.dangjia.acg.mapper.member.IMemberMapper">
 
     <sql id="all_columns">
-		w.id,
-        w.user_name AS userName ,
+        w.id,
+        w.user_name AS userName,
         w.password,
-        w.nick_name AS nickName ,
+        w.nick_name AS nickName,
         w.name,
         w.mobile,
         w.qrcode,
@@ -44,7 +44,7 @@
         w.create_date AS createDate,
         w.data_status AS dataStatus,
         w.modify_date AS modifyDate
-	</sql>
+    </sql>
 
     <!-- 工匠列表 -->
     <select id="artisanList" resultType="com.dangjia.acg.modle.member.Member">
@@ -99,18 +99,10 @@
     </select>
 
     <select id="getMemberList" resultType="map">
-        SELECT
-            id,
-            user_name AS userName,
-            name,
-            mobile,
-            visit_state AS visitState,
-            create_date AS createDate
+        SELECT id, user_name AS userName, name, mobile, visit_state AS visitState, create_date AS createDate
         FROM dj_member
-        WHERE
-          data_status = 0
-        ORDER by
-            create_date
+        WHERE data_status = 0
+        ORDER by create_date
     </select>
 
     <select id="getMemberListByName" resultType="com.dangjia.acg.modle.member.Member">
@@ -165,9 +157,20 @@
             or w.mobile LIKE CONCAT('%',#{searchKey},'%'))
         </if>
 
-
-        <if test="stage >= 0">
+        <if test="stage &gt;= 0 and stage &lt;= 4">
             and ifnull(mc.stage,0)=#{stage}
+        </if>
+
+        <if test="stage == -1">
+            and ifnull(mc.stage,0) !=3
+            and ifnull(mc.stage,0) !=2
+        </if>
+        <if test="stage == 5">
+            and h.type = 2
+        </if>
+        <if test="stage == 6">
+            and h.type = 1
+            and h.data_status=0
         </if>
         <!--<if test="stage == -1">-->
             <!--and ifnull(mc.stage,0) !=3-->
@@ -178,7 +181,7 @@
                 and FIND_IN_SET(#{lableId},mc.label_id_arr)
             </foreach>
         </if>
-        ORDER by  mcr.remind_time desc,w.create_date
+        ORDER by mcr.remind_time desc,w.create_date
         <if test="orderBy!=null and orderBy!=''and orderBy=='desc'">
             desc
         </if>
@@ -187,8 +190,9 @@
     </select>
 
     <select id="getByPhone" parameterType="String" resultType="com.dangjia.acg.modle.member.Member">
-        select  *
-        from dj_member where mobile=#{mobile}
+        select *
+        from dj_member
+        where mobile = #{mobile}
     </select>
 
 </mapper>

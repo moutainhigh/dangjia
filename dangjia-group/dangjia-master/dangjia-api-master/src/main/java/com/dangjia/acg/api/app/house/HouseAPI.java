@@ -140,4 +140,5 @@ public interface HouseAPI {
                                       @RequestParam("villageId") String villageId,
                                       @RequestParam("square") Double square,
                                       @RequestParam("houseType") Integer houseType);
+
 }

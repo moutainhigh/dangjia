@@ -88,7 +88,7 @@ public class HouseFlowApplyService {
     public ServerResponse houseRecord(String userToken, String houseId, Integer pageNum, Integer pageSize){
 //        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         try{
-    //        Member worker = accessToken.getMember();
+            //        Member worker = accessToken.getMember();
             if(pageNum==null){
                 pageNum=1;
             }
@@ -760,6 +760,7 @@ public class HouseFlowApplyService {
             HouseFlow houseFlow = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);
             Member steward = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());//管家
 
+            houseFlowApplyDTO.setHouseId(houseFlowApply.getHouseId());
             houseFlowApplyDTO.setWorkerId(worker.getId());
             houseFlowApplyDTO.setManagerId(steward.getId());
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
@@ -771,11 +772,13 @@ public class HouseFlowApplyService {
             houseFlowApplyDTO.setHeadB(local+steward.getHead());
             houseFlowApplyDTO.setNameB(steward.getName());
             houseFlowApplyDTO.setMobileB(steward.getMobile());
-            houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate()); //自动审核时间
+            if(houseFlowApply.getEndDate() != null){
+                houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate().getTime() - new Date().getTime()); //自动审核时间
+            }
             Example example = new Example(HouseFlowApplyImage.class);
             example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
             List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
-            List<String> imageList = new ArrayList<String>();
+            List<String> imageList = new ArrayList<>();
             for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList){
                 imageList.add(local+houseFlowApplyImage.getImageUrl());
             }
@@ -804,12 +807,15 @@ public class HouseFlowApplyService {
             Example example = new Example(HouseFlowApplyImage.class);
             example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
             List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
-            List<String> imageList = new ArrayList<String>();
+            List<String> imageList = new ArrayList<>();
             for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList){
                 imageList.add(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class)+houseFlowApplyImage.getImageUrl());
             }
             houseFlowApplyDTO.setImageList(imageList);
             houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(),"yyyy-MM-dd HH:mm"));
+            if(houseFlowApply.getEndDate() != null){
+                houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate().getTime() - new Date().getTime()); //自动审核时间
+            }
 
             return ServerResponse.createBySuccess("查询成功", houseFlowApplyDTO);
         }catch (Exception e){

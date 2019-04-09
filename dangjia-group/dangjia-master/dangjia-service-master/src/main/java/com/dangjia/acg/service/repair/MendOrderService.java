@@ -314,9 +314,9 @@ public class MendOrderService {
             Member steward = accessToken.getMember();//管家
 
             HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseId, workerTypeId);
-            if (houseFlow.getWorkSteta() == 1 || houseFlow.getWorkSteta() == 2) {
-                return ServerResponse.createByErrorMessage("该工种已阶段完工,不能退人工!");
-            }
+//            if (houseFlow.getWorkSteta() == 1 || houseFlow.getWorkSteta() == 2) {
+//                return ServerResponse.createByErrorMessage("该工种已阶段完工,不能退人工!");
+//            }
 
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
             if (houseFlowApplyList.size() > 0) {

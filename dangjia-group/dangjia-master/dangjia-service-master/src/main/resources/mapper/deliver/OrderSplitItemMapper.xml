@@ -27,5 +27,74 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where split_deliver_id = #{splitDeliverId}
     </update>
 
+
+    <!--********************查看统计 开始**********************-->
+
+    <!--指定房子所有发货的供应商-->
+    <select id="getSplitReportSuppliers" resultType="com.dangjia.acg.dto.deliver.SplitReportSupplierDTO">
+	   SELECT
+           	sd.supplierId,
+            sd.supplierName,
+            sd.supplierTelephone,
+            si.houseId,
+            sum(si.sup_cost * si.num) totalPrice,
+            sum(
+                (si.price * si.num) - (si.sup_cost * si.num)
+            ) totalProfit
+        FROM
+            `dj_deliver_order_split_item` si
+        INNER JOIN dj_deliver_split_deliver sd ON si.split_deliver_id = sd.id
+        AND sd.supplier_id IS NOT NULL
+        WHERE si.house_id= #{houseId}
+        GROUP BY
+            sd.supplier_id,
+            si.house_id
+	</select>
+
+
+    <!--指定供应商所有的要货订单-->
+    <select id="getSplitReportDeliverOrders" resultType="com.dangjia.acg.dto.deliver.SplitReportDeliverOrderDTO">
+	   SELECT
+            s.number,
+            s.createDate,
+            sum(si.price * si.num) totalPrice,
+            sum(
+                (si.price * si.num) - (si.sup_cost * si.num)
+            ) totalProfit
+        FROM
+            `dj_deliver_order_split` s
+        INNER JOIN dj_deliver_order_split_item si ON si.order_split_id = s.id
+        INNER JOIN dj_deliver_split_deliver sd ON si.split_deliver_id = sd.id
+        AND sd.supplier_id IS NOT NULL
+        WHERE sd.supplier_id =#{supplierId}
+        GROUP BY
+            sd.number
+        ORDER BY
+            create_date DESC
+	</select>
+
+
+    <!--要货订单明细-->
+    <select id="getSplitReportDeliverOrderItems" resultType="com.dangjia.acg.dto.deliver.SplitReportDeliverOrderItemDTO">
+        SELECT
+            si.image,
+            si.productName,
+            si.productSn,
+            si.supCost,
+            si.num,
+            si.price,
+            (si.price * si.num) totalPrice,
+            (
+                (si.price * si.num) - (si.sup_cost * si.num)
+            ) totalProfit
+        FROM
+            `dj_deliver_order_split` s
+        INNER JOIN dj_deliver_order_split_item si ON si.order_split_id = s.id
+        WHERE
+            s.number = #{number}
+        ORDER BY
+            si.create_date DESC;
+	</select>
+    <!--********************查看统计 结束**********************-->
 </mapper>
 

@@ -179,11 +179,6 @@ public class EvaluateService {
                 String productId = obj.getString("productId");
                 double num = Double.parseDouble(obj.getString("num"));
                 Product product = forMasterAPI.getProduct(house.getCityId(), productId);
-//                SurplusWareHouseItem surplusWareHouseItem = new SurplusWareHouseItem();
-//                surplusWareHouseItem.setProductId(productId);
-//                surplusWareHouseItem.setProductName(product.getName());
-//                surplusWareHouseItem.setProductCount((int)num);
-//                surplusWareHouseItemMapper.insert(surplusWareHouseItem);
             }
 
         }catch (Exception e){

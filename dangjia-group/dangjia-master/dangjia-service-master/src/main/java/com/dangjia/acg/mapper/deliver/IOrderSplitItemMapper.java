@@ -1,9 +1,14 @@
 package com.dangjia.acg.mapper.deliver;
 
+import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderDTO;
+import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderItemDTO;
+import com.dangjia.acg.dto.deliver.SplitReportSupplierDTO;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
+
+import java.util.List;
 
 /**
  * author: zmj
@@ -19,5 +24,17 @@ public interface IOrderSplitItemMapper extends Mapper<OrderSplitItem> {
 
     /**确认收货更新收货数量*/
     void affirmSplitDeliver(@Param("splitDeliverId") String splitDeliverId);
+
+
+
+    /********************查看统计 开始**********************/
+
+    List<SplitReportSupplierDTO> getSplitReportSuppliers(@Param("houseId")String houseId);
+
+    List<SplitReportDeliverOrderDTO> getSplitReportDeliverOrders(@Param("supplierId")String supplierId);
+
+    List<SplitReportDeliverOrderItemDTO> getSplitReportDeliverOrderItems(@Param("number")String number);
+
+    /********************查看统计 结束**********************/
 
 }
