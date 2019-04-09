@@ -17,6 +17,7 @@ import java.util.Map;
 @Data
 public class HouseFlowApplyDTO {
 
+    private String houseId;
     private String workerId;
     private String managerId;
     private String houseFlowApplyId;
@@ -34,6 +35,6 @@ public class HouseFlowApplyDTO {
 
 
     private Date startDate;
-    private Date endDate; //自动审核时间
+    private Long endDate; //自动审核时间
 
 }
