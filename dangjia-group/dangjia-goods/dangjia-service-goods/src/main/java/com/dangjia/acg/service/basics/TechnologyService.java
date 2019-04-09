@@ -405,7 +405,6 @@ public class TechnologyService {
                 searchBoxMapper.insertSelective(serchBox);
             }
 
-
             if (type == 0 || type == 1) {
                 //根据内容模糊搜索商品
                 example = new Example(Goods.class);
@@ -413,7 +412,7 @@ public class TechnologyService {
                 example.orderBy(Goods.CREATE_DATE).desc();
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 List<Product> pList =iProductMapper.serchBoxName(name);
-                pageResult = new PageInfo(pList);
+                pageResult = new PageInfo<>(pList);
                 for (Product product : pList) {
                     String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
                     String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") + "&gId=" + product.getId() + "&type=" + DjConstants.GXType.CAILIAO;
@@ -429,7 +428,7 @@ public class TechnologyService {
                 //根据内容模糊搜索人工
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 List<WorkerGoods> wList = iWorkerGoodsMapper.queryByName(name, null);
-                pageResult = new PageInfo(wList);
+                pageResult = new PageInfo<>(wList);
                 for (WorkerGoods wg : wList) {
                     JSONObject object = new JSONObject();
                     object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + wg.getImage());

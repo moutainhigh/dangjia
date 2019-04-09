@@ -760,7 +760,6 @@ public class HouseFlowApplyService {
             HouseFlow houseFlow = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);
             Member steward = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());//管家
 
-            houseFlowApplyDTO.setHouseId(houseFlowApply.getHouseId());
             houseFlowApplyDTO.setWorkerId(worker.getId());
             houseFlowApplyDTO.setManagerId(steward.getId());
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
@@ -772,9 +771,7 @@ public class HouseFlowApplyService {
             houseFlowApplyDTO.setHeadB(local+steward.getHead());
             houseFlowApplyDTO.setNameB(steward.getName());
             houseFlowApplyDTO.setMobileB(steward.getMobile());
-            if(houseFlowApply.getEndDate() != null){
-                houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate().getTime() - new Date().getTime()); //自动审核时间
-            }
+            houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate()); //自动审核时间
             Example example = new Example(HouseFlowApplyImage.class);
             example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
             List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
@@ -813,9 +810,6 @@ public class HouseFlowApplyService {
             }
             houseFlowApplyDTO.setImageList(imageList);
             houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(),"yyyy-MM-dd HH:mm"));
-            if(houseFlowApply.getEndDate() != null){
-                houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate().getTime() - new Date().getTime()); //自动审核时间
-            }
 
             return ServerResponse.createBySuccess("查询成功", houseFlowApplyDTO);
         }catch (Exception e){
