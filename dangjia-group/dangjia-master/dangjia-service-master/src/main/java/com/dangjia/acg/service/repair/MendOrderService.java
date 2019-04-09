@@ -871,6 +871,7 @@ public class MendOrderService {
      */
     private boolean addMendMateriel(String productArr, MendOrder mendOrder) {
         try {
+            House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
             mendOrder.setTotalAmount(0.0);
             JSONArray jsonArray = JSONArray.parseArray(productArr);
             for (int i = 0; i < jsonArray.size(); i++) {
@@ -878,7 +879,7 @@ public class MendOrderService {
                 MendMateriel mendMateriel = new MendMateriel();//补退材料明细
                 String productId = obj.getString("productId");
                 double num = Double.parseDouble(obj.getString("num"));
-                Product product = forMasterAPI.getProduct(productId);
+                Product product = forMasterAPI.getProduct(house.getCityId(), productId);
                 mendMateriel.setMendOrderId(mendOrder.getId());
                 mendMateriel.setProductId(productId);
                 mendMateriel.setProductSn(product.getProductSn());

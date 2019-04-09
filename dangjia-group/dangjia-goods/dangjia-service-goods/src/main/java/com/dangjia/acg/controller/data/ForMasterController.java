@@ -12,6 +12,7 @@ import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.service.data.ForMasterService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -90,7 +91,7 @@ public class ForMasterController implements ForMasterAPI {
     }
     @Override
     @ApiMethod
-    public Product getProduct(String productId){
+    public Product getProduct(String cityId, String productId){
         return forMasterService.getProduct(productId);
     }
 

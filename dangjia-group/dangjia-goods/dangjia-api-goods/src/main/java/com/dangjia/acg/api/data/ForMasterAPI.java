@@ -74,7 +74,7 @@ public interface ForMasterAPI {
 
     @PostMapping("/data/forMaster/getProduct")
     @ApiOperation(value = "货品信息", notes = "货品信息")
-    Product getProduct(@RequestParam("productId") String productId);
+    Product getProduct(@RequestParam("cityId") String cityId,@RequestParam("productId") String productId);
 
     @PostMapping("/data/forMaster/caiLiao")
     @ApiOperation(value = "支付回调获取材料精算", notes = "支付回调获取材料精算")

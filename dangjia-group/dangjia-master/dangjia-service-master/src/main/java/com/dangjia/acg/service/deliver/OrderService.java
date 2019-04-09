@@ -377,6 +377,7 @@ public class OrderService {
                     .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             OrderSplit orderSplit;
+            House house = houseMapper.selectByPrimaryKey(houseId);
             if (orderSplitList.size() > 0){
                 orderSplit = orderSplitList.get(0);
                 /*删除之前子项*/
@@ -429,7 +430,7 @@ public class OrderService {
                     orderSplitItem.setHouseId(houseId);
                     orderSplitItemMapper.insert(orderSplitItem);
                 }else{
-                    Product product=forMasterAPI.getProduct(productId);
+                    Product product=forMasterAPI.getProduct(house.getCityId(), productId);
                     Goods goods=forMasterAPI.getGoods(product.getGoodsId());
                     OrderSplitItem orderSplitItem = new OrderSplitItem();
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
