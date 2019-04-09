@@ -260,7 +260,9 @@ public class EngineerService {
                 map.put("houseWorkerId", houseWorker.getId());
             } else if (houseFlow.getWorkType() == 4) {//已支付
                 HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 6);
-                map.put("houseWorkerId", houseWorker.getId());
+               if(houseWorker!=null) {
+                   map.put("houseWorkerId", houseWorker.getId());
+               }
             }
 
             map.put("releaseTime", houseFlow.getReleaseTime());//发布时间
