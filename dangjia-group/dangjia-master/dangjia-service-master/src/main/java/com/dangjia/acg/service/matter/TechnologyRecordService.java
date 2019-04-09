@@ -81,10 +81,11 @@ public class TechnologyRecordService {
 
             List<Map<String,Object>> listMap = new ArrayList<>();
             Map<String,Object> map;
+            House house = houseMapper.selectByPrimaryKey(houseFlowMapper.selectByPrimaryKey(houseFlowId).getHouseId());
             if (StringUtil.isNotEmpty(nodeArr)){
                 String[] idArr = nodeArr.split(",");
                 for (String id : idArr) {
-                    Technology technology = forMasterAPI.byTechnologyId(id);
+                    Technology technology = forMasterAPI.byTechnologyId(house.getCityId(), id);
                     map = new HashMap<>();
                     map.put("imageTypeId", id);
                     map.put("imageTypeName", technology.getName());
@@ -199,7 +200,7 @@ public class TechnologyRecordService {
             if (StringUtil.isNotEmpty(nodeArr)){
                 String[] idArr = nodeArr.split(",");
                 for (String id : idArr) {
-                    Technology technology = forMasterAPI.byTechnologyId(id);
+                    Technology technology = forMasterAPI.byTechnologyId("", id);
                     map = new HashMap<>();
                     map.put("imageTypeId", id);
                     map.put("imageTypeName", technology.getName());

@@ -30,7 +30,7 @@ public class ForMasterController implements ForMasterAPI {
 
 
     @Override
-    public String getUnitName(String unitId){
+    public String getUnitName(String cityId,String unitId){
         return forMasterService.getUnitName(unitId);
     }
 
@@ -41,7 +41,7 @@ public class ForMasterController implements ForMasterAPI {
     }
 
     @Override
-    public Supplier getSupplier(String supplierId){
+    public Supplier getSupplier(String cityId,String supplierId){
         return forMasterService.getSupplier(supplierId);
     }
 
@@ -50,7 +50,7 @@ public class ForMasterController implements ForMasterAPI {
      */
     @Override
     @ApiMethod
-    public void backCount (String houseId,String workerGoodsId,Double num){
+    public void backCount (String cityId,String houseId,String workerGoodsId,Double num){
         forMasterService.backCount(houseId,workerGoodsId,num);
     }
 
@@ -59,34 +59,34 @@ public class ForMasterController implements ForMasterAPI {
      */
     @Override
     @ApiMethod
-    public void repairCount(String houseId,String workerGoodsId,Double num){
+    public void repairCount(String cityId,String houseId,String workerGoodsId,Double num){
         forMasterService.repairCount(houseId,workerGoodsId,num);
     }
 
     @Override
     @ApiMethod
-    public Technology byTechnologyId(String technologyId){
+    public Technology byTechnologyId(String cityId,String technologyId){
         return forMasterService.byTechnologyId(technologyId);
     }
 
     @Override
     @ApiMethod
-    public String brandSeriesName(String productId){
+    public String brandSeriesName(String cityId,String productId){
         return forMasterService.brandSeriesName(productId);
     }
     @Override
     @ApiMethod
-    public String brandName(String productId){
+    public String brandName(String cityId,String productId){
         return forMasterService.brandName(productId);
     }
     @Override
     @ApiMethod
-    public WorkerGoods getWorkerGoods(String workerGoodsId){
+    public WorkerGoods getWorkerGoods(String cityId,String workerGoodsId){
         return forMasterService.getWorkerGoods(workerGoodsId);
     }
     @Override
     @ApiMethod
-    public Goods getGoods(String goodsId){
+    public Goods getGoods(String cityId,String goodsId){
         return forMasterService.getGoods(goodsId);
     }
     @Override
@@ -97,13 +97,13 @@ public class ForMasterController implements ForMasterAPI {
 
     @Override
     @ApiMethod
-    public List<BudgetMaterial> caiLiao(String houseFlowId){
+    public List<BudgetMaterial> caiLiao(String cityId,String houseFlowId){
         return forMasterService.caiLiao(houseFlowId);
     }
 
     @Override
     @ApiMethod
-    public List<BudgetWorker> renGong(String houseFlowId){
+    public List<BudgetWorker> renGong(String cityId,String houseFlowId){
        return forMasterService.renGong(houseFlowId);
     }
 

@@ -129,7 +129,7 @@ public class SurplusWareDivertService {
                         return ServerResponse.createByErrorMessage(retStr);
                     address = toSurplusWareHouse.getAddress();
                 } else if (divertType == 2) {//供应商  toSurplusWareHouseId : 是供应商id
-                    Supplier toSupplier = forMasterAPI.getSupplier(toSurplusWareHouseId);
+                    Supplier toSupplier = forMasterAPI.getSupplier(house.getCityId(), toSurplusWareHouseId);
                     if (toSupplier != null)
                         address = toSupplier.getName();
 

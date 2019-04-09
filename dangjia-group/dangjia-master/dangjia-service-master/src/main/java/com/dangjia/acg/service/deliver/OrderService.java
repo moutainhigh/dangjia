@@ -431,7 +431,7 @@ public class OrderService {
                     orderSplitItemMapper.insert(orderSplitItem);
                 }else{
                     Product product=forMasterAPI.getProduct(house.getCityId(), productId);
-                    Goods goods=forMasterAPI.getGoods(product.getGoodsId());
+                    Goods goods=forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
                     OrderSplitItem orderSplitItem = new OrderSplitItem();
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
                     orderSplitItem.setProductId(product.getId());

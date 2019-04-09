@@ -153,6 +153,7 @@ public class OrderSplitService {
             example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliverId);
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             List<OrderSplitItemDTO> orderSplitItemDTOS = new ArrayList<>();
+            House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
             for (OrderSplitItem orderSplitItem : orderSplitItemList) {
                 OrderSplitItemDTO orderSplitItemDTO = new OrderSplitItemDTO();
                 orderSplitItemDTO.setProductName(orderSplitItem.getProductName());
@@ -163,8 +164,8 @@ public class OrderSplitService {
                 orderSplitItemDTO.setShopCount(String.valueOf(orderSplitItem.getShopCount()));
                 orderSplitItemDTO.setImage(address + orderSplitItem.getImage());
                 orderSplitItemDTO.setReceive(String.valueOf(orderSplitItem.getNum()));
-                orderSplitItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(orderSplitItem.getProductId()));
-                orderSplitItemDTO.setBrandName(forMasterAPI.brandName(orderSplitItem.getProductId()));
+                orderSplitItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(),orderSplitItem.getProductId()));
+                orderSplitItemDTO.setBrandName(forMasterAPI.brandName(house.getCityId(),orderSplitItem.getProductId()));
                 orderSplitItemDTO.setTotalPrice(new BigDecimal(orderSplitItem.getSupCost() * orderSplitItem.getNum()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());//成本价 * 数量
                 orderSplitItemDTOS.add(orderSplitItemDTO);
                 detailDTO.setTotalAmount(new BigDecimal(detailDTO.getTotalAmount() + orderSplitItemDTO.getTotalPrice()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
@@ -208,7 +209,7 @@ public class OrderSplitService {
                 JSONObject obj = arr.getJSONObject(i);
                 String id = obj.getString("id");
                 String supplierId = obj.getString("supplierId");
-                Supplier supplier = forMasterAPI.getSupplier(supplierId);
+                Supplier supplier = forMasterAPI.getSupplier(house.getCityId(),supplierId);
                 JsmsUtil.sendSupplier(supplier.getTelephone(), address + "submitNumber");
 
 

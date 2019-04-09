@@ -567,12 +567,13 @@ public class MendOrderService {
         try {
             mendOrder.setTotalAmount(0.0);
             JSONArray jsonArray = JSONArray.parseArray(workerGoodsArr);
+            House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
                 MendWorker mendWorker = new MendWorker();//补退人工
                 String workerGoodsId = obj.getString("workerGoodsId");
                 double num = Double.parseDouble(obj.getString("num"));
-                WorkerGoods workerGoods = forMasterAPI.getWorkerGoods(workerGoodsId);
+                WorkerGoods workerGoods = forMasterAPI.getWorkerGoods(house.getCityId(), workerGoodsId);
                 if (!workerGoods.getWorkerTypeId().equals(workerTypeId)) {
                     System.out.println("所选人工商品与所选工种不符");
                     TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -886,12 +887,12 @@ public class MendOrderService {
                 mendMateriel.setProductName(product.getName());
                 mendMateriel.setPrice(product.getPrice());
                 mendMateriel.setCost(product.getCost());
-                String unitName = forMasterAPI.getUnitName(product.getConvertUnit());
+                String unitName = forMasterAPI.getUnitName(house.getCityId(), product.getConvertUnit());
                 mendMateriel.setUnitName(unitName);
                 mendMateriel.setShopCount(num);
                 mendMateriel.setTotalPrice(num * product.getPrice());
                 mendOrder.setTotalAmount(mendOrder.getTotalAmount() + mendMateriel.getTotalPrice());//修改总价
-                mendMateriel.setProductType(forMasterAPI.getGoods(product.getGoodsId()).getType());//0：材料；1：服务
+                mendMateriel.setProductType(forMasterAPI.getGoods(house.getCityId(), product.getGoodsId()).getType());//0：材料；1：服务
                 mendMateriel.setCategoryId(product.getCategoryId());
                 mendMateriel.setImage(product.getImage());
                 mendMaterialMapper.insertSelective(mendMateriel);
