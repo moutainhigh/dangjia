@@ -1034,8 +1034,7 @@ public class HouseWorkerService {
                     if (imageType == 3) {//节点图
                         String imageTypeId = imageObj.getString("imageTypeId");
                         String imageTypeName = imageObj.getString("imageTypeName");
-
-                        Technology technology = forMasterAPI.byTechnologyId(imageTypeId);
+                        Technology technology = forMasterAPI.byTechnologyId(house.getCityId(), imageTypeId);
                         TechnologyRecord technologyRecord = new TechnologyRecord();
                         technologyRecord.setHouseId(house.getId());
                         technologyRecord.setTechnologyId(technology.getId());
