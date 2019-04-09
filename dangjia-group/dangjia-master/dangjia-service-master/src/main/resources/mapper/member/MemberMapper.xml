@@ -169,10 +169,10 @@
         <if test="stage >= 0">
             and ifnull(mc.stage,0)=#{stage}
         </if>
-        <if test="stage == -1">
-            and ifnull(mc.stage,0) !=3
-            and ifnull(mc.stage,0) !=2
-        </if>
+        <!--<if test="stage == -1">-->
+            <!--and ifnull(mc.stage,0) !=3-->
+            <!--and ifnull(mc.stage,0) !=2-->
+        <!--</if>-->
         <if test="childsLabelIdArr!=null and childsLabelIdArr!=''">
             <foreach collection="childsLabelIdArr" item="lableId" index="index">
                 and FIND_IN_SET(#{lableId},mc.label_id_arr)

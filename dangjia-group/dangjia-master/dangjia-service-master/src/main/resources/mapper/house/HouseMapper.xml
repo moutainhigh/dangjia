@@ -237,6 +237,55 @@
         </if>
 
     </select>
+    <select id="getActuaryAll" resultType="com.dangjia.acg.dto.house.HouseListDTO">
+        SELECT
+        h.id as houseId,
+        CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') houseName,
+        h.city_name as cityName,
+        h.budget_ok as budgetOk,
+        h.custom_sort as customSort,
+        m.nick_name as name,
+        m.id as memberId,
+        m.name as memberName,
+        m.mobile as mobile,
+        h.visit_state as visitState,
+        h.show_house as showHouse,
+        h.style as style,
+        h.square as square,
+        h.square as buildSquare,
+        h.decoration_type as decorationType,
+        h.house_type as houseType,
+        h.residential as residential,
+        h.building as building,
+        h.unit as unit,
+        h.work_deposit_id as workDepositId,
+        h.create_date AS createDate,
+        h.modify_date AS modifyDate,
+        h.number as number
+        FROM
+        dj_house h
+        INNER JOIN dj_member m ON h.member_id = m.id
+        WHERE
+        h.data_status =0 and h.designer_ok=3
+        <if test="budgetOk!=null and budgetOk!=''">
+            <if test="budgetOk=='2' or budgetOk=='4'">
+                and  (budget_ok =2 || budget_ok = 4)
+            </if>
+            <if test="!(budgetOk=='2' or budgetOk=='4')">
+                and  budget_ok =#{budgetOk}
+            </if>
+        </if>
+
+        <if test="searchKey!=null and searchKey!=''">
+            AND (
+            m.mobile like CONCAT('%',#{searchKey},'%')
+            or
+            CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        ORDER by  h.create_date  desc
+
+    </select>
 
     <select id="getHouseListLikeSearchKey" resultType="com.dangjia.acg.modle.house.House">
         SELECT
