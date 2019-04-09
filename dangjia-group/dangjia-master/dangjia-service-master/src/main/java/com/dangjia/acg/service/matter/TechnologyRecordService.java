@@ -65,6 +65,8 @@ public class TechnologyRecordService {
      */
     public ServerResponse nodeImageList(String nodeArr,Integer applyType,String houseFlowId){
         try{
+            if(StringUtil.isEmpty(houseFlowId))
+                return ServerResponse.createByErrorMessage("houseFlowId不能为空");
             Map<String,Object> returnMap = new HashMap<>();
             if(applyType == 1 || applyType == 2){
                 returnMap.put("hint", "温馨提示:您在提交验收后被驳回次数<font color=red>超过2次后将产生罚款</font>,金额为100元/1次的费用.");
@@ -81,7 +83,8 @@ public class TechnologyRecordService {
 
             List<Map<String,Object>> listMap = new ArrayList<>();
             Map<String,Object> map;
-            House house = houseMapper.selectByPrimaryKey(houseFlowMapper.selectByPrimaryKey(houseFlowId).getHouseId());
+            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+            House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             if (StringUtil.isNotEmpty(nodeArr)){
                 String[] idArr = nodeArr.split(",");
                 for (String id : idArr) {
