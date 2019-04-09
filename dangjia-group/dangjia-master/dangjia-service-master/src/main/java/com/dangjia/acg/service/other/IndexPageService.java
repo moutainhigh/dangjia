@@ -79,8 +79,8 @@ public class IndexPageService {
                     dianList.add(liangArr[i]);
                 }
             }
-            if(!CommonUtil.isEmpty(house.getSquare())) {
-                dianList.add(house.getSquare() + "㎡");
+            if(!CommonUtil.isEmpty(house.getBuildSquare())) {
+                dianList.add(house.getBuildSquare() + "㎡");
             }
             houseDetailsDTO.setDianList(dianList);
             List<Map<String,Object>> mapList = new ArrayList<>();

@@ -436,7 +436,7 @@ public class BudgetWorkerService {
                         // budgetMaterial.setActuarialQuantity(actuarialQuantity);
                         budgetMaterial.setCreateDate(new Date());
                         budgetMaterial.setModifyDate(new Date());
-                        budgetMaterial.setProductType(productType);
+                        budgetMaterial.setProductType(goods.getType());
                         budgetMaterial.setGroupType(groupType);
                         budgetMaterial.setGoodsGroupId(goodsGroupId);
 //                        budgetMaterial.setTemplateId(actuarialTemplateId);

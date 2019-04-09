@@ -37,8 +37,6 @@ public class WebWalletService {
     private IWorkerDetailMapper iWorkerDetailMapper;
     @Autowired
     private IHouseMapper iHouseMapper;
-    @Autowired
-    private static Logger LOG = LoggerFactory.getLogger(WebWalletService.class);
 
     /**
      * 所有用户（工人和业主）流水
@@ -69,6 +67,7 @@ public class WebWalletService {
                 workerDetailDTO.setWorkerName(workerDetail.getWorkerName());
                 workerDetailDTO.setCreateDate(workerDetail.getCreateDate());
                 workerDetailDTO.setModifyDate(workerDetail.getModifyDate());
+                workerDetailDTO.setWalletMoney(workerDetail.getWalletMoney());
                 workerDetailDTOList.add(workerDetailDTO);
             }
             PageInfo pageResult = new PageInfo(list);
@@ -95,11 +94,11 @@ public class WebWalletService {
 //            if(workerDetail.getState() == 3 && worker.getSurplusMoney().compareTo(workerDetail.getMoney()) < 0){
 //                return ServerResponse.createByErrorMessage("工匠余额不足");
 //            }
-            if(workerDetail.getState() == 3){//减钱
+            if (workerDetail.getState() == 3) {//减钱
                 worker.setHaveMoney(worker.getHaveMoney().subtract(workerDetail.getMoney()));
                 worker.setSurplusMoney(worker.getSurplusMoney().subtract(workerDetail.getMoney()));
             }
-            if(workerDetail.getState() == 2){//加钱
+            if (workerDetail.getState() == 2) {//加钱
                 worker.setHaveMoney(worker.getHaveMoney().add(workerDetail.getMoney()));
                 worker.setSurplusMoney(worker.getSurplusMoney().add(workerDetail.getMoney()));
             }

@@ -1,12 +1,15 @@
 package com.dangjia.acg.service.deliver;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.BusinessOrderDTO;
 import com.dangjia.acg.dto.deliver.ItemDTO;
@@ -24,6 +27,8 @@ import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
+import com.dangjia.acg.modle.basics.Goods;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
@@ -38,6 +43,7 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.repair.MendOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -85,6 +91,11 @@ public class OrderService {
     private ConfigMessageService configMessageService;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
+
+    @Autowired
+    private ForMasterAPI forMasterAPI;
+    @Autowired
+    private MendOrderService mendOrderService;
 
     /**
      * 订单详情
@@ -268,11 +279,17 @@ public class OrderService {
                 return ServerResponse.createByErrorMessage("生成多个未提交要货单,异常联系平台部");
             }else {
                 OrderSplit orderSplit = orderSplitList.get(0);
+                //如果存在补货单，则告知业主补货支付
+                if(!CommonUtil.isEmpty(orderSplit.getMendNumber())){
+                    orderSplit.setApplyStatus(4);
+                    orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
+                    return mendOrderService.confirmMendMaterial(userToken,houseId);
+                }
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
                 for (OrderSplitItem orderSplitItem : orderSplitItemList){
-                    Warehouse warehouse = warehouseMapper.selectByPrimaryKey(orderSplitItem.getWarehouseId());
+                    Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
                     warehouse.setAskCount(warehouse.getAskCount() + orderSplitItem.getNum());//更新仓库已要总数
                     warehouse.setAskTime(warehouse.getAskTime() + 1);//更新该货品被要次数
                     warehouseMapper.updateByPrimaryKeySelective(warehouse);
@@ -356,7 +373,8 @@ public class OrderService {
             Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
 
             Example example = new Example(OrderSplit.class);
-            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0);
+            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
+                    .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             OrderSplit orderSplit;
             if (orderSplitList.size() > 0){
@@ -374,9 +392,9 @@ public class OrderService {
             }else {
                 example = new Example(OrderSplit.class);
                 orderSplit = new OrderSplit();
-                orderSplit.setNumber("dj" + 200000 + orderSplitMapper.selectCountByExample(example));//要货单号
+                orderSplit.setNumber("DJ" + 200000 + orderSplitMapper.selectCountByExample(example));//要货单号
                 orderSplit.setHouseId(houseId);
-                orderSplit.setApplyStatus(0);//后台审核状态：0生成中, 1申请中, 2通过, 3不通过 后台(材料员)
+                orderSplit.setApplyStatus(0);//后台审核状态：0生成中, 1申请中, 2通过, 3不通过, 4业主待支付补货材料 后台(材料员)
                 orderSplit.setSupervisorId(worker.getId());
                 orderSplit.setSupervisorName(worker.getName());
                 orderSplit.setSupervisorTel(worker.getMobile());
@@ -385,32 +403,91 @@ public class OrderService {
             }
 
             JSONArray arr = JSONArray.parseArray(productArr);
+            List productList=new ArrayList();
             for(int i=0; i<arr.size(); i++) {
                 JSONObject obj = arr.getJSONObject(i);
                 Double num = Double.parseDouble(obj.getString("num"));
                 String productId = obj.getString("productId");
-
                 Warehouse warehouse = warehouseMapper.getByProductId(productId, houseId);//定位到仓库id
-                OrderSplitItem orderSplitItem = new OrderSplitItem();
-                orderSplitItem.setOrderSplitId(orderSplit.getId());
-                orderSplitItem.setWarehouseId(warehouse.getId());//仓库子项id
-                orderSplitItem.setProductId(warehouse.getProductId());
-                orderSplitItem.setProductSn(warehouse.getProductSn());
-                orderSplitItem.setProductName(warehouse.getProductName());
-                orderSplitItem.setPrice(warehouse.getPrice());
-                orderSplitItem.setAskCount(warehouse.getAskCount());
-                orderSplitItem.setCost(warehouse.getCost());
-                orderSplitItem.setShopCount(warehouse.getShopCount());
-                orderSplitItem.setNum(num);
-                orderSplitItem.setUnitName(warehouse.getUnitName());
-                orderSplitItem.setTotalPrice(warehouse.getPrice() * num);//单项总价 销售价
-                orderSplitItem.setProductType(warehouse.getProductType());
-                orderSplitItem.setCategoryId(warehouse.getCategoryId());
-                orderSplitItem.setImage(warehouse.getImage());//货品图片
-                orderSplitItem.setHouseId(houseId);
-                orderSplitItemMapper.insert(orderSplitItem);
+                if(warehouse!=null) {
+                    OrderSplitItem orderSplitItem = new OrderSplitItem();
+                    orderSplitItem.setOrderSplitId(orderSplit.getId());
+                    orderSplitItem.setWarehouseId(warehouse.getId());//仓库子项id
+                    orderSplitItem.setProductId(warehouse.getProductId());
+                    orderSplitItem.setProductSn(warehouse.getProductSn());
+                    orderSplitItem.setProductName(warehouse.getProductName());
+                    orderSplitItem.setPrice(warehouse.getPrice());
+                    orderSplitItem.setAskCount(warehouse.getAskCount());
+                    orderSplitItem.setCost(warehouse.getCost());
+                    orderSplitItem.setShopCount(warehouse.getShopCount());
+                    orderSplitItem.setNum(num);
+                    orderSplitItem.setUnitName(warehouse.getUnitName());
+                    orderSplitItem.setTotalPrice(warehouse.getPrice() * num);//单项总价 销售价
+                    orderSplitItem.setProductType(warehouse.getProductType());
+                    orderSplitItem.setCategoryId(warehouse.getCategoryId());
+                    orderSplitItem.setImage(warehouse.getImage());//货品图片
+                    orderSplitItem.setHouseId(houseId);
+                    orderSplitItemMapper.insert(orderSplitItem);
+                }else{
+                    Product product=forMasterAPI.getProduct(productId);
+                    Goods goods=forMasterAPI.getGoods(product.getGoodsId());
+                    OrderSplitItem orderSplitItem = new OrderSplitItem();
+                    orderSplitItem.setOrderSplitId(orderSplit.getId());
+                    orderSplitItem.setProductId(product.getId());
+                    orderSplitItem.setProductSn(product.getProductSn());
+                    orderSplitItem.setProductName(product.getName());
+                    orderSplitItem.setPrice(product.getPrice());
+                    orderSplitItem.setAskCount(0d);
+                    orderSplitItem.setCost(product.getCost());
+                    orderSplitItem.setShopCount(0d);
+                    orderSplitItem.setNum(num);
+                    orderSplitItem.setUnitName(product.getUnitName());
+                    orderSplitItem.setTotalPrice(product.getPrice() * num);//单项总价 销售价
+                    orderSplitItem.setProductType(goods.getType());
+                    orderSplitItem.setCategoryId(product.getCategoryId());
+                    orderSplitItem.setImage(product.getImage());//货品图片
+                    orderSplitItem.setHouseId(houseId);
+                    orderSplitItemMapper.insert(orderSplitItem);
+                }
+
+                //计算补货数量
+                if(warehouse!=null) {
+                    //仓库剩余数
+                    Double surCount = warehouse.getShopCount() - warehouse.getAskCount() - warehouse.getBackCount();
+                    //多出的数
+                    Double overflowCount = (num - surCount);
+                    if (overflowCount > 0) {
+                        Map map = new HashMap();
+                        map.put("num", overflowCount);
+                        map.put("productId", productId);
+                        productList.add(map);
+                    }
+                    if(overflowCount<0){
+                        Map map = new HashMap();
+                        map.put("num", num);
+                        map.put("productId", productId);
+                        productList.add(map);
+                    }
+                }else{
+                    Map map = new HashMap();
+                    map.put("num", num);
+                    map.put("productId", productId);
+                    productList.add(map);
+                }
             }
 
+            //补货材料列表
+            String mendMaterialArr=JSON.toJSONString(productList);
+            if(!CommonUtil.isEmpty(mendMaterialArr)&&productList.size()>0){
+                ServerResponse serverResponse= mendOrderService.saveMendMaterial( userToken, houseId, mendMaterialArr);
+                if (serverResponse.isSuccess()) {
+                    if (serverResponse.getResultObj() != null) {
+                        //保存补货ID
+                        orderSplit.setMendNumber(String.valueOf(serverResponse.getResultObj()));
+                        orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
+                    }
+                }
+            }
             return ServerResponse.createBySuccessMessage("提交成功");
         }catch (Exception e){
             e.printStackTrace();

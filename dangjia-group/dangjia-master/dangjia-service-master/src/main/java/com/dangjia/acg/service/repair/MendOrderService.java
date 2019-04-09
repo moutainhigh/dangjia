@@ -837,6 +837,7 @@ public class MendOrderService {
                 example = new Example(MendMateriel.class);
                 example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, mendOrder.getId());
                 mendMaterialMapper.deleteByExample(example);
+                mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
             } else {
                 example = new Example(MendOrder.class);
                 mendOrder = new MendOrder();
@@ -855,7 +856,7 @@ public class MendOrderService {
             }
 
             if (this.addMendMateriel(productArr, mendOrder)) {
-                return ServerResponse.createBySuccessMessage("保存成功");
+                return ServerResponse.createBySuccess("保存成功",mendOrder.getId());
             } else {
                 return ServerResponse.createByErrorMessage("添加明细失败");
             }

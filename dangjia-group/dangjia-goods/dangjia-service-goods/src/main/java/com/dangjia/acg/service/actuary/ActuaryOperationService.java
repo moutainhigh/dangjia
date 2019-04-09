@@ -318,7 +318,7 @@ public class ActuaryOperationService {
                 return ServerResponse.createBySuccess("暂无该货号", "");
             }
             Product product = products.get(0);
-            GoodsDTO goodsDTO = goodsDetail(product, budgetMaterialId, 3);
+            GoodsDTO goodsDTO = goodsDetail(product, budgetMaterialId);
             if (goodsDTO != null) {
                 return ServerResponse.createBySuccess("查询成功", goodsDTO);
             } else {
@@ -353,7 +353,7 @@ public class ActuaryOperationService {
             } else if (type == 2 || type == 3) {//材料商品  服务商品
                 BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(gId);
                 Product product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());//当前 货品
-                GoodsDTO goodsDTO = goodsDetail(product, budgetMaterial.getId(), 2);
+                GoodsDTO goodsDTO = goodsDetail(product, budgetMaterial.getId());
                 if (goodsDTO != null) {
                     return ServerResponse.createBySuccess("查询成功", goodsDTO);
                 } else {
@@ -391,7 +391,7 @@ public class ActuaryOperationService {
                 return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
             } else if (type == 2 || type == 3) {//材料商品  服务商品
                 Product product = productMapper.selectByPrimaryKey(gId);//当前 货品
-                GoodsDTO goodsDTO = goodsDetail(product, null, 1);
+                GoodsDTO goodsDTO = goodsDetail(product, null);
                 if (goodsDTO != null) {
                     return ServerResponse.createBySuccess("查询成功", goodsDTO);
                 } else {
@@ -411,84 +411,68 @@ public class ActuaryOperationService {
     /**
      * @param product
      * @param budgetMaterialId 传null ：表示不是精算里的商品。 如果是精算里的商品 ，可能有 关联组，关联组id 在 精算表里存的，所以，需要传精算id  ，
-     * @param apiType          哪个接口调用的 1: getGoodsDetail 接口    2：getCommo 接口    3: selectProduct 接口
      * @return GoodsDTO
      */
-    public GoodsDTO goodsDetail(Product product, String budgetMaterialId, Integer apiType) {
+    public GoodsDTO goodsDetail(Product product, String budgetMaterialId) {
         try {
             LOG.info("goodsDetail product:" + product);
             LOG.info("goodsDetail productId:" + product.getId());
             LOG.info("goodsDetail budgetMaterialId:" + budgetMaterialId);
-            LOG.info("goodsDetail apiType:" + apiType);
             GoodsDTO goodsDTO = new GoodsDTO();//长图  品牌系列图+属性图(多个)
             Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());//当前 商品
             goodsDTO.setProductId(product.getId());
             goodsDTO.setGoodsId(goods.getId());
             goodsDTO.setImage(getImage(product.getImage()));//图一张
             String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
-//            goodsDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + product.getUnitName());
             goodsDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
             goodsDTO.setName(product.getName());
-//            goodsDTO.setUnitName(product.getUnitName());//单位
             goodsDTO.setUnitName(convertUnitName);//单位
             goodsDTO.setProductType(goods.getType());//材料类型
 
-            Product srcProduct = product;
             List<String> imageList = new ArrayList<String>();//长图片 多图组合
             GoodsGroup srcGoodsGroup = null;
             //找到一个groupId 的可以切换的目标关联组
             List<GroupLink> groupLinkTargetList = new ArrayList<>();//可以切换的其他关联组的 GroupLink的productId
             Set<String> pIdTargetGroupSet = new HashSet();//目标关联组下的所有productId
             pIdTargetGroupSet.add(product.getId());
-//            goodsDTO.setIsSwitch(1);//默认不可切换
-
             BudgetMaterial budgetMaterial = null;
-            if (srcProduct != null) {
-                if (budgetMaterialId != null)
-                    budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
-                if (budgetMaterial == null)
-                    LOG.info("暂无该精算 ");
-                else {//有精算的时候，才有可能 有关联组的处理
-                    if (StringUtils.isNoneBlank(budgetMaterial.getGoodsGroupId())) {
-                        LOG.info("valueList budgetMaterial:" + budgetMaterial + " srcProduct:" + srcProduct);
-                        LOG.info("valueList srcProduct.getId():" + srcProduct.getId());
-                        srcGoodsGroup = iGoodsGroupMapper.selectByPrimaryKey(budgetMaterial.getGoodsGroupId());
-                        LOG.info("srcGoodsGroup:" + srcGoodsGroup);
-                        goodsDTO.setIsSwitch(1);
-                        String[] gGroupIds = srcGoodsGroup.getSwitchArr().split(",");
-                        if (StringUtils.isNoneBlank(gGroupIds)) {
-                            for (String gGroupId : gGroupIds) {
-                                //拼接 所有目标关联组 的所有 productId
-                                //找到所有可以切换的组 商品
-                                List<GroupLink> groupLinkList = iGroupLinkMapper.queryGroupLinkByGidAndGoodsId(gGroupId, product.getGoodsId());
-                                for (GroupLink groupLink : groupLinkList) {
-                                    if (groupLink.getGoodsId().equals(product.getGoodsId())
-                                            && groupLinkList.size() == groupLinkList.size()) { //可切换性0:可切换；1不可切换
-                                        if (groupLink.getProductId().equals(product.getId())) {// 找出当前product 所在关联组id 和 是否能切换
-                                            goodsDTO.setSrcGroupId(groupLink.getGroupId());
-                                            goodsDTO.setIsSwitch(groupLink.getIsSwitch());
-                                            LOG.info("原关联组为:" + groupLink + " gropuId:" + groupLink.getGroupId());
-                                        }
-                                        if (groupLink.getIsSwitch() == 0) {//保存可以切换的 product
-                                            if (!pIdTargetGroupSet.contains(groupLink.getProductId()))
-                                                groupLinkTargetList.add(groupLink);//保存 所有可切换的 关联组 下的不同 productId
-                                            pIdTargetGroupSet.add(groupLink.getProductId());
-                                        }
+            if (budgetMaterialId != null) {
+                budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
+            }
+            if (budgetMaterial != null) {
+               //有精算的时候，才有可能 有关联组的处理
+                if (StringUtils.isNoneBlank(budgetMaterial.getGoodsGroupId())) {
+                    srcGoodsGroup = iGoodsGroupMapper.selectByPrimaryKey(budgetMaterial.getGoodsGroupId());
+                    LOG.info("srcGoodsGroup:" + srcGoodsGroup);
+                    goodsDTO.setIsSwitch(1);
+                    String[] gGroupIds = srcGoodsGroup.getSwitchArr().split(",");
+                    if (StringUtils.isNoneBlank(gGroupIds)) {
+                        for (String gGroupId : gGroupIds) {
+                            //拼接 所有目标关联组 的所有 productId
+                            //找到所有可以切换的组 商品
+                            List<GroupLink> groupLinkList = iGroupLinkMapper.queryGroupLinkByGidAndGoodsId(gGroupId, product.getGoodsId());
+                            for (GroupLink groupLink : groupLinkList) {
+                                if (groupLink.getGoodsId().equals(product.getGoodsId())
+                                        && groupLinkList.size() == groupLinkList.size()) { //可切换性0:可切换；1不可切换
+                                    if (groupLink.getProductId().equals(product.getId())) {// 找出当前product 所在关联组id 和 是否能切换
+                                        goodsDTO.setSrcGroupId(groupLink.getGroupId());
+                                        goodsDTO.setIsSwitch(groupLink.getIsSwitch());
+                                        LOG.info("原关联组为:" + groupLink + " gropuId:" + groupLink.getGroupId());
+                                    }
+                                    if (groupLink.getIsSwitch() == 0) {//保存可以切换的 product
+                                        if (!pIdTargetGroupSet.contains(groupLink.getProductId()))
+                                            groupLinkTargetList.add(groupLink);//保存 所有可切换的 关联组 下的不同 productId
+                                        pIdTargetGroupSet.add(groupLink.getProductId());
                                     }
                                 }
                             }
                         }
                     }
-                    if (goodsDTO.getSrcGroupId() != null)
-                        LOG.info("goodsDetail SrcGroupId:" + iGoodsGroupMapper.selectByPrimaryKey(goodsDTO.getSrcGroupId()));
-                    LOG.info("pIdTargetGroupSet size:" + pIdTargetGroupSet.size() + "  " + pIdTargetGroupSet + "  " + groupLinkTargetList);
                 }
+                LOG.info("pIdTargetGroupSet size:" + pIdTargetGroupSet.size() + "  " + pIdTargetGroupSet + "  " + groupLinkTargetList);
             }
 
-
             List<BrandDTO> brandDTOList = new ArrayList<BrandDTO>();//品牌
-//            //根据商品分类id关联所有价格属性
-//            List<Attribute> goodsAttributeList = attributeMapper.queryPriceAttribute(goods.getCategoryId());
             Set<String> brandSet = new HashSet();
             Set<String> brandSeriesSet = new HashSet();
 
@@ -503,11 +487,6 @@ public class ActuaryOperationService {
                 }
             } else {
                 //该商品关联所有品牌系列
-//                if (apiType == 1) {
-////                    BrandSeries brandSeries = iBrandSeriesMapper.brandSeriesByPid(product.getId());
-//                    brandSet.add(product.getBrandId());//添加品牌
-//                    brandSeriesSet.add(product.getBrandSeriesId());//添加品牌系列
-//                } else if (apiType == 2 || apiType == 3) {
                 List<BrandSeries> brandSeriesList = iBrandSeriesMapper.queryBrandByGid(goods.getId());
                 for (BrandSeries brandSeries : brandSeriesList) {//循环品牌系列
                     List<Product> productList = productMapper.queryByGoodsIdAndbrandSeriesIdAndBrandId(goods.getId(), brandSeries.getBrandId(), brandSeries.getId());
@@ -516,7 +495,6 @@ public class ActuaryOperationService {
                         brandSeriesSet.add(brandSeries.getId());//添加品牌系列
                     }
                 }
-//                }
             }
 
             if (brandSeriesSet.size() == 0 || brandSet.size() == 0) {//如果没有品牌，就只遍历属性
@@ -531,19 +509,11 @@ public class ActuaryOperationService {
                         }
                     }
                 } else {
-//                    if (apiType == 1) {
-//                        productList.add(product);
-//                    } else if (apiType == 2 || apiType == 3) {
                     productList = productMapper.getPListByGoodsIdAndNullBrandId(product.getGoodsId());
-//                    }
-//                    }
                     List<AttributeDTO> attrList = getAllAttributes(null, null, product, productList, imageList);
-//                    LOG.info(" attrList :" + attrList);
                     goodsDTO.setAttrList(attrList);
                 }
-
             }
-
             for (String brandId : brandSet) {//循环品牌系列
                 Brand brand = iBrandMapper.selectByPrimaryKey(brandId);
                 BrandDTO brandDTO = new BrandDTO();
@@ -554,7 +524,6 @@ public class ActuaryOperationService {
                 } else {
                     brandDTO.setState(0);//未选中
                 }
-//                LOG.info(" brandDTO:" + brandDTO.getBrandId() + " name:" + brandDTO.getName());
                 List<BrandSeriesDTO> brandSeriesDTOList = new ArrayList<BrandSeriesDTO>();//品牌系列
                 for (String brandSeriesId : brandSeriesSet) {//循环品牌系列
                     BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(brandSeriesId);
@@ -572,8 +541,6 @@ public class ActuaryOperationService {
 
                         LOG.info(" brandSeries id:" + brandSeries.getId() + " getBrandId:" + brandSeries.getBrandId() + " name:" + brandSeries.getName());
 
-                        //查询 一个 goods 的 某个 系列的 所有 product
-                        //        List<Product> productList = productMapper.queryByGoodsIdAndbrandSeriesId(product.getGoodsId(), brandSeries.getId());
                         List<Product> productList = new ArrayList<>();
                         if (srcGoodsGroup != null) { //是关联组
                             for (String pId : pIdTargetGroupSet) {
@@ -582,28 +549,17 @@ public class ActuaryOperationService {
                                     productList.add(p);
                             }
                         } else {
-                            //            if (apiType == 1)
-                            //                productList.add(product);
-                            //            else if (apiType == 2 || apiType == 3)
                             productList = productMapper.queryByGoodsIdAndbrandSeriesId(product.getGoodsId(), brandSeries.getId());
                         }
 
                         List<AttributeDTO> attributeDTOList = getAllAttributes(brandSeries.getBrandId(), brandSeries.getId(), product, productList, imageList);
-//                        LOG.info(" brandSeries:" + brandSeries.getName());
-//                        LOG.info(" attributeDTOList :" + attributeDTOList);
                         brandSeriesDTO.setAttributeDTOList(attributeDTOList);
-
-
-//                        if (attributeDTOList.size() > 0)
                         brandSeriesDTOList.add(brandSeriesDTO);
                     }
                 }
-
                 brandDTO.setBrandSeriesDTOList(brandSeriesDTOList);
                 brandDTOList.add(brandDTO);
             }
-
-
             goodsDTO.setBrandDTOList(brandDTOList);
             goodsDTO.setImageList(imageList);
             LOG.info("goodsDetail goodsDTO:" + goodsDTO);
