@@ -2,7 +2,6 @@ package com.dangjia.acg.service.data;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.house.HouseListDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -36,20 +35,6 @@ public class ActuaryService {
      * @return
      */
     public ServerResponse getActuaryAll(HttpServletRequest request, PageDTO pageDTO, String name, String budgetOk) {
-        Example example = new Example(House.class);
-        Example.Criteria criteria=example.createCriteria();
-        criteria.andEqualTo(House.DESIGNER_OK, 3);
-        criteria.andEqualTo(House.DATA_STATUS, 0);
-        if(!CommonUtil.isEmpty(budgetOk)){
-            if("2".equals(budgetOk)||"4".equals(budgetOk)){
-                criteria.andCondition(" (budget_ok =2 || budget_ok = 4) ");
-            }else{
-                criteria.andEqualTo(House.BUDGET_OK, budgetOk);
-            }
-        }
-        if(!CommonUtil.isEmpty(name)){
-            criteria.andCondition(" CONCAT(residential,building,'栋',unit,'单元',number,'号') LIKE CONCAT('%','"+name+"','%') ");
-        }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<HouseListDTO> houseList = houseMapper.getActuaryAll(budgetOk,name);
         PageInfo pageResult = new PageInfo(houseList);
