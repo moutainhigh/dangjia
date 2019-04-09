@@ -10,6 +10,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
@@ -29,6 +30,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.deliver.OrderSplitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,6 +86,10 @@ public class MendOrderCheckService {
 
     @Autowired
     private IOrderSplitMapper orderSplitMapper;
+    @Autowired
+    private OrderSplitService orderSplitService;
+    @Autowired
+    private IOrderSplitItemMapper orderSplitItemMapper;
 
     /**
      * 根据mendOrderId查询审核情况
@@ -143,6 +149,8 @@ public class MendOrderCheckService {
                 //判断是否存在要货
                 if (orderSplitList.size() >0) {
                     for (OrderSplit orderSplit : orderSplitList) {
+                        //要货单打回
+//                        orderSplitService.cancelOrderSplit(orderSplit.getId());
                         orderSplit.setApplyStatus(3);//不通过
                         orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
                     }
@@ -347,6 +355,9 @@ public class MendOrderCheckService {
                     Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(), mendOrder.getHouseId());
                     warehouse.setBackCount(warehouse.getBackCount() + mendMateriel.getShopCount());//更新退数量
                     warehouse.setBackTime(warehouse.getBackTime() + 1);//更新退次数
+                    if (mendOrder.getType() == 2){
+                        warehouse.setReceive(warehouse.getReceive() - mendMateriel.getShopCount()); //收货数量减掉工匠退数量
+                    }
                     warehouseMapper.updateByPrimaryKeySelective(warehouse);
                 }
 

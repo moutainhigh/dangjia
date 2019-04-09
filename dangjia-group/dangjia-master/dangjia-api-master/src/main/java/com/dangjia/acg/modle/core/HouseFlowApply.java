@@ -65,7 +65,7 @@ public class HouseFlowApply extends BaseEntity {
 
 	@Column(name = "end_date")
 	@Desc(value = "结束时间")
-	@ApiModelProperty("结束时间")
+	@ApiModelProperty("结束时间,自动审核倒计时时间")
 	private Date endDate;
 
 	@Column(name = "apply_dec")

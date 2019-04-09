@@ -22,7 +22,7 @@ public class TechnologyRecord extends BaseEntity {
     @Column(name = "house_id")
     private String houseId;
 
-    @Column(name = "technology_Id")
+    @Column(name = "technology_id")
     private String technologyId;//工艺id
 
     @Column(name = "name")

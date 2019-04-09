@@ -729,6 +729,7 @@ public class HouseFlowApplyService {
 
     /**
      * 验收详情
+     * 1.30 1.31 共用
      */
     public ServerResponse checkDetail(String houseFlowApplyId){
         try{
@@ -770,6 +771,7 @@ public class HouseFlowApplyService {
             houseFlowApplyDTO.setHeadB(local+steward.getHead());
             houseFlowApplyDTO.setNameB(steward.getName());
             houseFlowApplyDTO.setMobileB(steward.getMobile());
+            houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate()); //自动审核时间
             Example example = new Example(HouseFlowApplyImage.class);
             example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
             List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);

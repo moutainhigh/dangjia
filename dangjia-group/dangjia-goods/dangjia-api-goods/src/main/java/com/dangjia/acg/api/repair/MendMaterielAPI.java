@@ -19,6 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-goods")
 public interface MendMaterielAPI {
 
+    @PostMapping("/repair/mendMateriel/surplusList")
+    @ApiOperation(value = "材料列表", notes = "材料列表")
+    ServerResponse surplusList(@RequestParam("workerTypeId")String workerTypeId,@RequestParam("houseId")String houseId);
 
     @PostMapping("/repair/mendMateriel/askAndQuit")
     @ApiOperation(value = "要退查询仓库", notes = "要退查询仓库")

@@ -31,6 +31,19 @@
         ORDER BY create_date desc
     </select>
 
+    <!--查询巡查工艺 人工,材料共用 -->
+    <select id="workerPatrolList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Technology">
+        select
+        <include refid="all_columns" />
+        from
+        dj_basics_technology
+        where
+        goods_id = #{goodsId}
+        and
+        type in (2,3)
+        ORDER BY create_date desc
+    </select>
+
     <!-- 根据商品id查询商品关联节点工艺 人工 材料共用 -->
     <select id="queryTechnologyList" parameterType="java.lang.String"
             resultType="com.dangjia.acg.modle.basics.Technology">

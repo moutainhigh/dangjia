@@ -305,15 +305,18 @@ public class OrderSplitService {
         try {
             OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(orderSplitId);
             Example example = new Example(OrderSplitItem.class);
-            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplitId);
+            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             for (OrderSplitItem orderSplitItem : orderSplitItemList) {
                 Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
-                warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());
-                warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                if(warehouse!=null) {
+                    warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());
+                    warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                }
             }
 
-            orderSplitMapper.cancelOrderSplit(orderSplitId);
+            orderSplit.setApplyStatus(3);
+            orderSplitMapper.updateByPrimaryKey(orderSplit);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();

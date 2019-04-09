@@ -21,6 +21,12 @@ public class MendMaterielController implements MendMaterielAPI {
     @Autowired
     private FillMaterielService fillMaterielService;
 
+
+    @Override
+    @ApiMethod
+    public ServerResponse surplusList(String workerTypeId,String houseId){
+        return fillMaterielService.surplusList(workerTypeId,houseId);
+    }
     /**
      * 要退查询仓库
      * 结合 精算记录+补记录

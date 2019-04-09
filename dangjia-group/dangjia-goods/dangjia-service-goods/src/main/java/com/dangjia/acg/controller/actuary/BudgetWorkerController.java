@@ -216,4 +216,15 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
     public JSONArray getTecByHouseFlowId(String houseId,String houseFlowId) {
         return budgetWorkerService.getTecByHouseFlowId(houseId, houseFlowId);
     }
+
+    /**
+     * 查询精算工序所有工艺
+     */
+    public JSONArray getTecList(String workerGoodsId) {
+        return budgetWorkerService.getTecList(workerGoodsId);
+    }
+
+    public JSONArray getWorkerGoodsList(String houseId, String houseFlowId){
+        return budgetWorkerService.getWorkerGoodsList(houseId, houseFlowId);
+    }
 }
