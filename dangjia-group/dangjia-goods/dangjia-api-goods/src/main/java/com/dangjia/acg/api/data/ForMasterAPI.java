@@ -28,7 +28,7 @@ public interface ForMasterAPI {
 
     @PostMapping("/data/forMaster/getUnitName")
     @ApiOperation(value = "获取单位名", notes = "获取单位名")
-    String getUnitName(@RequestParam("unitId") String unitId);
+    String getUnitName(@RequestParam("cityId") String cityId,@RequestParam("unitId") String unitId);
 
     @PostMapping("/data/forMaster/getSupplierProduct")
     @ApiOperation(value = "查询供应价", notes = "查询供应价")
@@ -38,51 +38,51 @@ public interface ForMasterAPI {
 
     @PostMapping("/data/forMaster/getSupplier")
     @ApiOperation(value = "查询供应商", notes = "查询供应商")
-    Supplier getSupplier(@RequestParam("supplierId") String supplierId);
+    Supplier getSupplier(@RequestParam("cityId") String cityId,@RequestParam("supplierId") String supplierId);
 
     @PostMapping("/data/forMaster/backCount")
     @ApiOperation(value = "增加退数量", notes = "增加退数量")
-    void backCount(@RequestParam("houseId") String houseId,
+    void backCount(@RequestParam("cityId") String cityId,@RequestParam("houseId") String houseId,
                    @RequestParam("workerGoodsId") String workerGoodsId,
                    @RequestParam("num") Double num);
 
     @PostMapping("/data/forMaster/repairCount")
     @ApiOperation(value = "增加补数量", notes = "增加补数量")
-    void repairCount(@RequestParam("houseId") String houseId,
+    void repairCount(@RequestParam("cityId") String cityId,@RequestParam("houseId") String houseId,
                      @RequestParam("workerGoodsId") String workerGoodsId,
                      @RequestParam("num") Double num);
 
     @PostMapping("/data/forMaster/byTechnologyId")
     @ApiOperation(value = "查工艺", notes = "查工艺")
-    Technology byTechnologyId(@RequestParam("technologyId") String technologyId);
+    Technology byTechnologyId(@RequestParam("cityId") String cityId,@RequestParam("technologyId") String technologyId);
 
     @PostMapping("/data/forMaster/brandSeriesName")
     @ApiOperation(value = "查询品牌系列名", notes = "查询品牌系列名")
-    String brandSeriesName(@RequestParam("productId") String productId);
+    String brandSeriesName(@RequestParam("cityId") String cityId,@RequestParam("productId") String productId);
 
     @PostMapping("/data/forMaster/brandName")
     @ApiOperation(value = "查询品牌名", notes = "查询品牌名")
-    String brandName(@RequestParam("productId") String productId);
+    String brandName(@RequestParam("cityId") String cityId,@RequestParam("productId") String productId);
 
     @PostMapping("/data/forMaster/getWorkerGoods")
     @ApiOperation(value = "工价商品信息", notes = "工价商品信息")
-    WorkerGoods getWorkerGoods(@RequestParam("workerGoodsId") String workerGoodsId);
+    WorkerGoods getWorkerGoods(@RequestParam("cityId") String cityId,@RequestParam("workerGoodsId") String workerGoodsId);
 
     @PostMapping("/data/forMaster/getGoods")
     @ApiOperation(value = "商品信息", notes = "商品信息")
-    Goods getGoods(@RequestParam("goodsId") String goodsId);
+    Goods getGoods(@RequestParam("cityId") String cityId,@RequestParam("goodsId") String goodsId);
 
     @PostMapping("/data/forMaster/getProduct")
     @ApiOperation(value = "货品信息", notes = "货品信息")
-    Product getProduct(@RequestParam("productId") String productId);
+    Product getProduct(@RequestParam("cityId") String cityId,@RequestParam("productId") String productId);
 
     @PostMapping("/data/forMaster/caiLiao")
     @ApiOperation(value = "支付回调获取材料精算", notes = "支付回调获取材料精算")
-    List<BudgetMaterial> caiLiao(@RequestParam("houseFlowId") String houseFlowId);
+    List<BudgetMaterial> caiLiao(@RequestParam("cityId") String cityId,@RequestParam("houseFlowId") String houseFlowId);
 
     @PostMapping("/data/forMaster/renGong")
     @ApiOperation(value = "支付回调修改人工精算", notes = "支付回调修改人工精算")
-    List<BudgetWorker> renGong(@RequestParam("houseFlowId") String houseFlowId);
+    List<BudgetWorker> renGong(@RequestParam("cityId") String cityId,@RequestParam("houseFlowId") String houseFlowId);
 
     @PostMapping("/data/forMaster/getBudgetWorkerPrice")
     @ApiOperation(value = "支付时工种人工总价", notes = "支付时工种人工总价")

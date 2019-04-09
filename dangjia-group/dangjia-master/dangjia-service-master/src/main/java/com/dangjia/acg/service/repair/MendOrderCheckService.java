@@ -323,10 +323,10 @@ public class MendOrderCheckService {
 
                 List<MendWorker> mendWorkerList = mendWorkerMapper.byMendOrderId(mendOrder.getId());
                 /*记录退数量*/
-                for (MendWorker mendWorker : mendWorkerList){
-                    forMasterAPI.backCount(mendOrder.getHouseId(), mendWorker.getWorkerGoodsId(), mendWorker.getShopCount());
-                }
                 House house = houseMapper.selectByPrimaryKey(houseWorkerOrder.getHouseId());
+                for (MendWorker mendWorker : mendWorkerList){
+                    forMasterAPI.backCount(house.getCityId(), mendOrder.getHouseId(), mendWorker.getWorkerGoodsId(), mendWorker.getShopCount());
+                }
                 Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
                 member.setSurplusMoney(member.getSurplusMoney().add(refund));
                 member.setHaveMoney(member.getHaveMoney().add(refund));
