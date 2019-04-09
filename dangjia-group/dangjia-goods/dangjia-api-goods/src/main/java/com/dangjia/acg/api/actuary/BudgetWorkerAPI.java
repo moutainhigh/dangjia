@@ -190,4 +190,13 @@ public interface BudgetWorkerAPI {
     @ApiOperation(value = "交底节点", notes = "交底节点")
     JSONArray getTecByHouseFlowId(@RequestParam("houseId") String houseId,
                                   @RequestParam("houseFlowId") String houseFlowId);
+
+
+    @PostMapping("/actuary/budgetWorker/getTecList")
+    @ApiOperation(value = "根据人工商品查询工艺", notes = "根据人工商品查询工艺")
+   JSONArray getTecList(@RequestParam("workerGoodsId")String workerGoodsId);
+
+    @PostMapping("/actuary/budgetWorker/getWorkerGoodsList")
+    @ApiOperation(value = "精算查询包含工艺的人工商品", notes = "精算查询包含工艺的人工商品")
+    JSONArray getWorkerGoodsList(@RequestParam("houseId")String houseId, @RequestParam("houseFlowId")String houseFlowId);
 }

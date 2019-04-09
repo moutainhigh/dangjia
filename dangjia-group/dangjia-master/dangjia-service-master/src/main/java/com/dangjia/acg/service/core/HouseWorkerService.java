@@ -757,6 +757,7 @@ public class HouseWorkerService {
 
     /**
      * 提交审核、停工
+     *  @Deprecated
      */
     public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId, Integer suspendDay,
                                             String applyDec, String imageList, String houseFlowId2) {
@@ -899,6 +900,10 @@ public class HouseWorkerService {
                 hfa.setOtherMoney(workPrice.subtract(haveMoney).subtract(hfa.getApplyMoney()));
                 hfa.setApplyDec("我是" + workType.getName() + ",我已经阶段完工了");//描述
                 hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
+                //增加倒计时系统自动审核时间
+                Calendar calendar = Calendar.getInstance();
+                calendar.add(Calendar.DAY_OF_YEAR,3);
+                hfa.setEndDate(calendar.getTime());
                 houseFlowApplyMapper.insert(hfa);
 
                 configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "阶段完工申请",
@@ -908,6 +913,10 @@ public class HouseWorkerService {
                 hfa.setApplyMoney(workPrice.subtract(haveMoney));
                 hfa.setApplyDec("我是" + workType.getName() + ",我已经整体完工了");//描述
                 hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
+                //增加倒计时系统自动审核时间
+                Calendar calendar = Calendar.getInstance();
+                calendar.add(Calendar.DAY_OF_YEAR,3);
+                hfa.setEndDate(calendar.getTime());
                 houseFlowApplyMapper.insert(hfa);
 
                 configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "整体完工申请",
@@ -934,9 +943,9 @@ public class HouseWorkerService {
                 Date lateDate = DateUtil.toDate(s2);
                 Date newDate2 = new Date();//当前时间
                 Long downTime = newDate2.getTime() - lateDate.getTime();//对比12点
-//                if(downTime>0){
-//                    return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
-//                }
+                if(downTime>0){
+                    return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
+                }
                 hfa.setApplyDec("我是" + workType.getName() + ",我今天已经开工了");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过

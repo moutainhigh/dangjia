@@ -4,6 +4,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.dto.house.HouseListDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.house.House;
@@ -50,9 +51,8 @@ public class ActuaryService {
             criteria.andCondition(" CONCAT(residential,building,'栋',unit,'单元',number,'号') LIKE CONCAT('%','"+name+"','%') ");
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<House> houseList = houseMapper.selectByExample(example);
+        List<HouseListDTO> houseList = houseMapper.getActuaryAll(budgetOk,name);
         PageInfo pageResult = new PageInfo(houseList);
-        pageResult.setList(listResult(houseList));
         return ServerResponse.createBySuccess("查询成功",pageResult);
     }
 

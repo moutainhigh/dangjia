@@ -355,6 +355,9 @@ public class MendOrderCheckService {
                     Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(), mendOrder.getHouseId());
                     warehouse.setBackCount(warehouse.getBackCount() + mendMateriel.getShopCount());//更新退数量
                     warehouse.setBackTime(warehouse.getBackTime() + 1);//更新退次数
+                    if (mendOrder.getType() == 2){
+                        warehouse.setReceive(warehouse.getReceive() - mendMateriel.getShopCount()); //收货数量减掉工匠退数量
+                    }
                     warehouseMapper.updateByPrimaryKeySelective(warehouse);
                 }
 
