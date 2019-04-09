@@ -39,6 +39,14 @@ public interface EvaluateAPI {
                            @RequestParam("houseFlowApplyId") String houseFlowApplyId,
                            @RequestParam("content") String content);
 
+
+    @PostMapping("app/worker/evaluate/materialRecord")
+    @ApiOperation(value = "剩余材料登记", notes = "剩余材料登记")
+    ServerResponse materialRecord(@RequestParam("userToken") String userToken,
+                           @RequestParam("houseFlowApplyId") String houseFlowApplyId,
+                           @RequestParam("content") String content, @RequestParam("star") int star
+                            ,@RequestParam("productArr") String productArr);
+
     @PostMapping("app/worker/evaluate/checkOk")
     @ApiOperation(value = "管家审核通过工匠完工申请", notes = "管家审核通过工匠完工申请")
     ServerResponse checkOk(@RequestParam("userToken") String userToken,

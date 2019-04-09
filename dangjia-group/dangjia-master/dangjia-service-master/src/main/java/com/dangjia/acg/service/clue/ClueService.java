@@ -42,8 +42,8 @@ public class ClueService {
     private ICustomerMapper iCustomerMapper;
 
     /**
-     *
      * 获取所有线索
+     *
      * @param pageNum
      * @param pageSize
      * @return
@@ -64,14 +64,14 @@ public class ClueService {
     /**
      * 查询线索list
      */
-    public ServerResponse getClueList(Integer stage,String values, Integer pageNum, Integer pageSize) {
+    public ServerResponse getClueList(Integer stage, String values, Integer pageNum, Integer pageSize) {
         try {
             Example example = new Example(Clue.class);
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo(Clue.DATA_STATUS, 0);
-            if(stage!=null){
-                criteria.andEqualTo(Clue.STAGE,stage);
-            }else {
+            if (stage != null) {
+                criteria.andEqualTo(Clue.STAGE, stage);
+            } else {
                 criteria.andCondition(" stage IN (0,1) ");
             }
             //criteria.andCondition(" stage IN (0,1) ");
@@ -138,7 +138,7 @@ public class ClueService {
             ImportExcel clue = new ImportExcel(file, 0, 0);
             List<Clue> clueList = clue.getDataList(Clue.class, 0);
             for (Clue c : clueList) {
-                if(Validator.isMobileNo(c.getPhone())) {
+                if (Validator.isMobileNo(c.getPhone())) {
                     c.setCusService(userId);
                     Clue clue1 = clueMapper.getByPhone(c.getPhone());
                     Member member = iMemberMapper.getByPhone(c.getPhone());
@@ -166,12 +166,11 @@ public class ClueService {
             if (type == 2) {
                 clue.setStage(2);
                 clue.setCusService("");
-            } else if (type==3){
+            } else if (type == 3) {
                 clue.setStage(3);
-            }else {
+            } else {
                 clue.setStage(1);
             }
-
             clueMapper.updateByPrimaryKeySelective(clue);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
@@ -184,7 +183,7 @@ public class ClueService {
      * 转客户
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse sendUser(Member member,String phone) {
+    public ServerResponse sendUser(Member member, String phone) {
         try {
             Clue clue = clueMapper.getByPhone(phone);
             //表示线索表存在线索
@@ -192,7 +191,7 @@ public class ClueService {
                 //有沟通记录
                 List<ClueTalk> clueTalkList = clueTalkMapper.getTalkByClueId(clue.getId());
                 if (clueTalkList.size() != 0) {
-                    Date date=clueTalkMapper.getMaxDate(clue.getId());
+                    Date date = clueTalkMapper.getMaxDate(clue.getId());
                     for (ClueTalk clueTalk : clueTalkList) {
                         //操作dj_member_customer_record表
                         CustomerRecord customerRecord = new CustomerRecord();
@@ -203,7 +202,7 @@ public class ClueService {
                         customerRecord.setCreateDate(clueTalk.getCreateDate());
                         iCustomerRecordMapper.insert(customerRecord);
                         //操作dj_member_customer表
-                        if(date.compareTo(clueTalk.getModifyDate())==0){
+                        if (date.compareTo(clueTalk.getModifyDate()) == 0) {
                             Customer customer = new Customer();
                             customer.setUserId(clue.getCusService());
                             customer.setMemberId(member.getId());
@@ -217,6 +216,14 @@ public class ClueService {
                         clueTalk.setDataStatus(1);
                         clueTalkMapper.updateByPrimaryKeySelective(clueTalk);
                     }
+                } else {
+                    Customer customer = new Customer();
+                    customer.setUserId(clue.getCusService());
+                    customer.setMemberId(member.getId());
+                    //customer.setModifyDate(clueTalk.getModifyDate());
+                    customer.setCreateDate(clue.getCreateDate());
+                    customer.setStage(1);
+                    iCustomerMapper.insert(customer);
                 }
                 //改变线索表的数据状态
 //                clue.setDataStatus(1);

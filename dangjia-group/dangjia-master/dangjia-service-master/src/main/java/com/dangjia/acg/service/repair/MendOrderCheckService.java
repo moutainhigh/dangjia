@@ -323,10 +323,10 @@ public class MendOrderCheckService {
 
                 List<MendWorker> mendWorkerList = mendWorkerMapper.byMendOrderId(mendOrder.getId());
                 /*记录退数量*/
-                for (MendWorker mendWorker : mendWorkerList){
-                    forMasterAPI.backCount(mendOrder.getHouseId(), mendWorker.getWorkerGoodsId(), mendWorker.getShopCount());
-                }
                 House house = houseMapper.selectByPrimaryKey(houseWorkerOrder.getHouseId());
+                for (MendWorker mendWorker : mendWorkerList){
+                    forMasterAPI.backCount(house.getCityId(), mendOrder.getHouseId(), mendWorker.getWorkerGoodsId(), mendWorker.getShopCount());
+                }
                 Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
                 member.setSurplusMoney(member.getSurplusMoney().add(refund));
                 member.setHaveMoney(member.getHaveMoney().add(refund));
@@ -355,6 +355,9 @@ public class MendOrderCheckService {
                     Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(), mendOrder.getHouseId());
                     warehouse.setBackCount(warehouse.getBackCount() + mendMateriel.getShopCount());//更新退数量
                     warehouse.setBackTime(warehouse.getBackTime() + 1);//更新退次数
+                    if (mendOrder.getType() == 2){
+                        warehouse.setReceive(warehouse.getReceive() - mendMateriel.getShopCount()); //收货数量减掉工匠退数量
+                    }
                     warehouseMapper.updateByPrimaryKeySelective(warehouse);
                 }
 

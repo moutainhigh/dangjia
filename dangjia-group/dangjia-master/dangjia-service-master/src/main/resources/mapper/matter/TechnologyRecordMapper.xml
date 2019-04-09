@@ -6,7 +6,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <sql id="all_columns">
 		id,
 		house_id as houseId,
-		technology_Id as technologyId,
+		technology_id as technologyId,
 		name,
 		material_or_worker as materialOrWorker,
 		worker_type_id as workerTypeId,
@@ -38,7 +38,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		where
 		    house_id = #{houseId}
 		and
-		technology_Id = #{technologyId}
+			technology_id = #{technologyId}
+		and
+			worker_type_id = #{workerTypeId}
 	</select>
 
 </mapper>

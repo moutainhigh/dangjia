@@ -11,8 +11,10 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.budget.BudgetItemDTO;
 import com.dangjia.acg.dto.house.WarehouseDTO;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -43,6 +45,8 @@ public class WarehouseService {
     private ForMasterAPI forMasterAPI;
     @Autowired
     private ActuaryOpeAPI actuaryOpeAPI;
+    @Autowired
+    private IHouseMapper houseMapper;
     private static Logger LOG = LoggerFactory.getLogger(WarehouseService.class);
 
 
@@ -73,6 +77,7 @@ public class WarehouseService {
             LOG.info(" warehouseList size:" + warehouseList.size());
             PageInfo pageResult = new PageInfo(warehouseList);
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
+            House house = houseMapper.selectByPrimaryKey(houseId);
             for (Warehouse warehouse : warehouseList) {
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
                 BeanUtils.beanToBean(warehouse,warehouseDTO);
@@ -80,7 +85,7 @@ public class WarehouseService {
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                 warehouseDTO.setSurCount(warehouse.getShopCount()  - warehouse.getBackCount() - warehouse.getAskCount());//剩余数量 所有买的数量 - 退货 - 收的
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
-                warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(warehouse.getProductId()));
+                warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
                 warehouseDTO.setRepairCount(warehouse.getRepairCount());
                 warehouseDTOS.add(warehouseDTO);
             }
@@ -158,7 +163,7 @@ public class WarehouseService {
                         warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                         warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getAskCount() - warehouse.getBackCount());
                         warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
-                        warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(warehouse.getProductId()));
+                        warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(cityId,warehouse.getProductId()));
                         warehouseDTOS.add(warehouseDTO);
                         rowPrice = rowPrice.add(new BigDecimal(warehouseDTO.getTolPrice()));
                     }

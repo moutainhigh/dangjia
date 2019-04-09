@@ -844,6 +844,7 @@ public class BudgetWorkerService {
             for (Warehouse warehouse : warehouseList) {//每个商品
                 if (warehouse.getShopCount() - warehouse.getBackCount() > 0) {
                     Product product = iProductMapper.selectByPrimaryKey(warehouse.getProductId());
+                    if(product == null) continue;
                     List<Technology> tList = iTechnologyMapper.patrolList(product.getId());
                     for (Technology t : tList) {
                         Map<String, Object> map = new HashMap<>();
@@ -852,6 +853,52 @@ public class BudgetWorkerService {
                         jsonArray.add(map);
                     }
                 }
+            }
+            return jsonArray;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    /**
+     * 精算查询包含工艺的人工商品
+     */
+    public JSONArray getWorkerGoodsList(String houseId, String houseFlowId) {
+        try {
+            JSONArray jsonArray = new JSONArray();
+            List<BudgetWorker> budgetWorkerList = iBudgetWorkerMapper.getByHouseFlowId(houseId, houseFlowId);
+            for (BudgetWorker abw : budgetWorkerList) {
+                if (abw.getShopCount() + abw.getRepairCount() - abw.getBackCount() > 0) {
+                    List<Technology> tList = iTechnologyMapper.workerPatrolList(abw.getWorkerGoodsId());
+                    if (tList.size() > 0){
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("workerGoodsId", abw.getWorkerGoodsId());
+                        jsonObject.put("workerGoodsName", abw.getName());
+                        jsonArray.add(jsonObject);
+                    }
+                }
+            }
+            return jsonArray;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * 根据人工商品查询工艺
+     */
+    public JSONArray getTecList(String workerGoodsId) {
+        try {
+            JSONArray jsonArray = new JSONArray();
+            List<Technology> tList = iTechnologyMapper.workerPatrolList(workerGoodsId);
+            for (Technology t : tList) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("technologyId", t.getId());
+                jsonObject.put("technologyName", t.getName());
+                jsonArray.add(jsonObject);
             }
             return jsonArray;
         } catch (Exception e) {

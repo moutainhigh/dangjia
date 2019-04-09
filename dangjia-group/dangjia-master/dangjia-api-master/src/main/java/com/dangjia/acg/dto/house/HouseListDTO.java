@@ -15,6 +15,11 @@ import java.util.Date;
  */
 @Data
 public class HouseListDTO {
+
+    private String houseName;
+    private String customSort;
+    private String name;
+    private String budgetOk;
     private String houseId;
     private String cityName;
     private String address;
@@ -23,6 +28,7 @@ public class HouseListDTO {
     private String mobile;
     private Integer visitState;//0待确认开工,1装修中,2休眠中,3已完工
     private Integer showHouse;//0不是，1是 是否精选
+    private Integer siteDisplay;//0 展示 1 不展示
     private String style;//设计风格
     private BigDecimal square;//外框面积
     private BigDecimal buildSquare;//建筑面积
