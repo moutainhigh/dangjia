@@ -151,7 +151,6 @@
         INNER JOIN dj_member_info mi on mi.member_id = w.id and mi.policy_id=#{userRole}
         LEFT JOIN dj_member_customer mc on mc.member_id = w.id
         LEFT JOIN dj_member_customer_record mcr on mc.remind_record_id = mcr.id
-        LEFT JOIN dj_house h on h.member_id = w.id
         WHERE w.data_status = 0
         <if test="searchKey!=null and searchKey!=''">
             AND (w.nick_name LIKE CONCAT('%',#{searchKey},'%')
@@ -173,6 +172,10 @@
             and h.type = 1
             and h.data_status=0
         </if>
+        <!--<if test="stage == -1">-->
+            <!--and ifnull(mc.stage,0) !=3-->
+            <!--and ifnull(mc.stage,0) !=2-->
+        <!--</if>-->
         <if test="childsLabelIdArr!=null and childsLabelIdArr!=''">
             <foreach collection="childsLabelIdArr" item="lableId" index="index">
                 and FIND_IN_SET(#{lableId},mc.label_id_arr)

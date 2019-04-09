@@ -15,7 +15,6 @@ import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Product;
-import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
@@ -151,7 +150,6 @@ public class FillMaterielService {
             }
             for (String id : productIdList) {
                 ServerResponse response = technologyRecordAPI.getByProductId(id, houseId);
-                //if(!response.isSuccess()) continue;
                 Object warehouseStr = response.getResultObj();
                 Warehouse warehouse = JSON.parseObject(JSON.toJSONString(warehouseStr),Warehouse.class);
                 if(warehouse == null) continue;
