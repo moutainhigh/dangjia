@@ -56,7 +56,6 @@ public class ClueTalkService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-
     /**
      * 新增沟通记录
      */
