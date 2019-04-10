@@ -954,7 +954,7 @@ public class HouseWorkerService {
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发每日开工将暂停状态改为正常
                 houseFlowApplyMapper.insert(hfa);
                 return ServerResponse.createBySuccessMessage("操作成功");
-            } else if (applyType == 5) {//有人巡查
+            } else if (applyType == 5) {//有人巡
                 hfa.setApplyDec("业主您好,我是" + workType.getName() + ",大管家已经巡查了");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过

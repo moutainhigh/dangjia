@@ -322,12 +322,19 @@ public class MendOrderService {
             if (houseFlowApplyList.size() > 0) {
                 return ServerResponse.createByErrorMessage("该工种有未处理完工申请");
             }
-
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 3)
                     .andEqualTo(MendOrder.WORKER_TYPE_ID, workerTypeId)
-                    .andEqualTo(MendOrder.STATE, 0);
+                    .andEqualTo(MendOrder.STATE, 1);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
+            if(mendOrderList.size()>0){
+                return ServerResponse.createByErrorMessage("该工种有未处理完的退人工申请");
+            }
+            example = new Example(MendOrder.class);
+            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 3)
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID, workerTypeId)
+                    .andEqualTo(MendOrder.STATE, 0);
+            mendOrderList = mendOrderMapper.selectByExample(example);
 
             MendOrder mendOrder;
             if (mendOrderList.size() > 0) {
@@ -360,13 +367,13 @@ public class MendOrderService {
             }
 
             if (this.addMendWorker(workerGoodsArr, mendOrder, workerTypeId)) {
-
-//                House house = houseMapper.selectByPrimaryKey(houseId);
-//                WorkerType workType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
-//                String url= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"changeArtificial?userToken="+userToken+"&cityId="+house.getCityId()+"&title=人工变更&houseId="+houseId+"&houseFlowId="+houseFlow.getId()+"&roleType=2";
-//                configMessageService.addConfigMessage(null, "gj",houseFlow.getWorkerId(), "0", "退人工", String.format
-//                        (DjConstants.PushMessage.DGJ_T_002, house.getHouseName(),workType.getName()), url);
-
+                WorkerType workType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
+                if(workType.getType()!=3) {
+                    House house = houseMapper.selectByPrimaryKey(houseId);
+                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "changeArtificial?userToken=" + userToken + "&cityId=" + house.getCityId() + "&title=人工变更&houseId=" + houseId + "&houseFlowId=" + houseFlow.getId() + "&roleType=2";
+                    configMessageService.addConfigMessage(null, "gj", houseFlow.getWorkerId(), "0", "退人工", String.format
+                            (DjConstants.PushMessage.DGJ_T_002, house.getHouseName(), workType.getName()), url);
+                }
                 return ServerResponse.createBySuccessMessage("保存成功");
             } else {
                 return ServerResponse.createByErrorMessage("添加明细失败");
