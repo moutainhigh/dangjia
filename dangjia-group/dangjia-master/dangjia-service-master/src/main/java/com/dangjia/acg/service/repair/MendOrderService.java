@@ -322,12 +322,19 @@ public class MendOrderService {
             if (houseFlowApplyList.size() > 0) {
                 return ServerResponse.createByErrorMessage("该工种有未处理完工申请");
             }
-
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 3)
                     .andEqualTo(MendOrder.WORKER_TYPE_ID, workerTypeId)
-                    .andEqualTo(MendOrder.STATE, 0);
+                    .andEqualTo(MendOrder.STATE, 1);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
+            if(mendOrderList.size()>0){
+                return ServerResponse.createByErrorMessage("该工种有未处理完的退人工申请");
+            }
+            example = new Example(MendOrder.class);
+            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 3)
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID, workerTypeId)
+                    .andEqualTo(MendOrder.STATE, 0);
+            mendOrderList = mendOrderMapper.selectByExample(example);
 
             MendOrder mendOrder;
             if (mendOrderList.size() > 0) {

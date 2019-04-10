@@ -371,11 +371,18 @@ public class OrderService {
         try{
             AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
             Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
-
             Example example = new Example(OrderSplit.class);
-            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
+            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 4)
                     .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
+            if(orderSplitList.size()>0){
+                return ServerResponse.createByErrorMessage("存在待业主确认支付的补货单，无法提交要货！");
+            }
+
+            example = new Example(OrderSplit.class);
+            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
+                    .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
+            orderSplitList = orderSplitMapper.selectByExample(example);
             OrderSplit orderSplit;
             House house = houseMapper.selectByPrimaryKey(houseId);
             if (orderSplitList.size() > 0){
