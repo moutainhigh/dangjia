@@ -160,7 +160,7 @@
             and house_type = #{houseType}
         </if>
         and ((decoration_type in (1,2) and budget_ok=3) or (decoration_type=3 and visit_state=1))
-        and show_house!=1 and site_display!=1
+        and site_display=0
         order by num desc
     </select>
 
