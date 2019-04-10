@@ -462,12 +462,14 @@ public class OrderService {
                         map.put("num", overflowCount);
                         map.put("productId", productId);
                         productList.add(map);
-                    }
-                    if(overflowCount<0){
-                        Map map = new HashMap();
-                        map.put("num", num);
-                        map.put("productId", productId);
-                        productList.add(map);
+                    }else {
+                        //如果剩余数为负数
+                        if (surCount < 0) {
+                            Map map = new HashMap();
+                            map.put("num", num);
+                            map.put("productId", productId);
+                            productList.add(map);
+                        }
                     }
                 }else{
                     Map map = new HashMap();
