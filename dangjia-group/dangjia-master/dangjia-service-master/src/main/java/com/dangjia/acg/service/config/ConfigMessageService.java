@@ -137,25 +137,23 @@ public class ConfigMessageService {
      * @return
      */
     public ServerResponse addConfigMessage(HttpServletRequest request,ConfigMessage configMessage) {
-        try {
-
-            if(CommonUtil.isEmpty(configMessage.getIcon())){
+        new Thread(() -> {
+            if (CommonUtil.isEmpty(configMessage.getIcon())) {
                 //设置默认图标
                 configMessage.setIcon("qrcode/push.png");
             }
-            if(this.configMessageMapper.insertSelective(configMessage)>0){
-                //发送推送消息
-                String appType=(!CommonUtil.isEmpty(configMessage.getAppType())&&configMessage.getAppType().equals("1"))?"zx":"gj";
-                if(!CommonUtil.isEmpty(configMessage.getTargetUid())&&configMessage.getTargetType().equals("0")){
-                    messageAPI.sendMemberIdPush(appType,new String[]{configMessage.getTargetUid()},configMessage.getName(),configMessage.getText(),configMessage.getSpeak());
-                }
-                if(configMessage.getTargetType().equals("1")){
-                    messageAPI.sendSysPush(appType,configMessage.getName(),configMessage.getText(),configMessage.getSpeak());
-                }
-                return ServerResponse.createBySuccessMessage("ok");
-            }else{
-                return ServerResponse.createByErrorMessage("推送失败，请您稍后再试");
+            //发送推送消息
+            String appType = (!CommonUtil.isEmpty(configMessage.getAppType()) && configMessage.getAppType().equals("1")) ? "zx" : "gj";
+            if (!CommonUtil.isEmpty(configMessage.getTargetUid()) && configMessage.getTargetType().equals("0")) {
+                messageAPI.sendMemberIdPush(appType, new String[]{configMessage.getTargetUid()}, configMessage.getName(), configMessage.getText(), configMessage.getSpeak());
             }
+            if (configMessage.getTargetType().equals("1")) {
+                messageAPI.sendSysPush(appType, configMessage.getName(), configMessage.getText(), configMessage.getSpeak());
+            }
+        }).start();
+        try {
+            this.configMessageMapper.insertSelective(configMessage);
+            return ServerResponse.createBySuccessMessage("ok");
         }catch (Exception e){
             return ServerResponse.createByErrorMessage("推送失败；原因："+e.getMessage());
         }
