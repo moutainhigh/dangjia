@@ -35,6 +35,7 @@ import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -699,7 +700,7 @@ public class HouseWorkerService {
             }
             HomePageBean homePageBean = new HomePageBean();
             homePageBean.setWorkerId(worker.getId());
-            homePageBean.setIoflow(worker.getHead());
+            homePageBean.setIoflow(CommonUtil.isEmpty(worker.getHead()) ? null : address + worker.getHead());
             homePageBean.setWorkerName(worker.getName());
             homePageBean.setEvaluation(worker.getEvaluationScore());
             homePageBean.setFavorable(worker.getPraiseRate() == null ? "0.00%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
@@ -940,13 +941,13 @@ public class HouseWorkerService {
                 return ServerResponse.createBySuccessMessage("操作成功");
 
             } else if (applyType == 4) {
-//                String s2 = DateUtil.getDateString2(new Date().getTime()) + " 12:00:00";//当天12点
-//                Date lateDate = DateUtil.toDate(s2);
-//                Date newDate2 = new Date();//当前时间
-//                Long downTime = newDate2.getTime() - lateDate.getTime();//对比12点
-//                if (downTime > 0) {
-//                    return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
-//                }
+                String s2 = DateUtil.getDateString2(new Date().getTime()) + " 12:00:00";//当天12点
+                Date lateDate = DateUtil.toDate(s2);
+                Date newDate2 = new Date();//当前时间
+                Long downTime = newDate2.getTime() - lateDate.getTime();//对比12点
+                if (downTime > 0) {
+                    return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
+                }
                 hfa.setApplyDec("我是" + workType.getName() + ",我今天已经开工了");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过

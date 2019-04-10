@@ -220,6 +220,10 @@ public class RewardPunishService {
             if(!CommonUtil.isEmpty(userId)) {
                 rewardPunishRecord.setOperatorId(userId);
             }
+            if(!CommonUtil.isEmpty(rewardPunishRecord.getRewardPunishCorrelationId())){
+                RewardPunishCorrelation rewardPunishCorrelation=rewardPunishCorrelationMapper.selectByPrimaryKey(rewardPunishRecord.getRewardPunishCorrelationId());
+                rewardPunishRecord.setType(rewardPunishCorrelation.getType());
+            }
             rewardPunishRecord.setState(0);//0:启用;1:不启用
             rewardPunishRecordMapper.insertSelective(rewardPunishRecord);
 
