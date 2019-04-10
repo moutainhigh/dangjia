@@ -67,6 +67,7 @@
                 AND member.mobile like #{mobile}
             </if>
         </where>
+
         ORDER BY house.create_date DESC
     </select>
 
@@ -92,7 +93,7 @@
           AND id = #{houseId}
     </select>
 
-    <!--查询所有的房子 指定房子 装修状态-->
+    <!--查询所有的房子 指定房子 iiii装修状态-->
     <select id="getAllHouseByVisitState" resultType="com.dangjia.acg.modle.house.House">
         SELECT
         <include refid="basic_columns"/>
