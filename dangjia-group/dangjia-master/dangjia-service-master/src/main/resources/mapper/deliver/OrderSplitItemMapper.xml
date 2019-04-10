@@ -55,6 +55,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!--指定供应商所有的要货订单-->
     <select id="getSplitReportDeliverOrders" resultType="com.dangjia.acg.dto.deliver.SplitReportDeliverOrderDTO">
 	   SELECT
+	        s.supervisor_id supervisorId,
+            s.supervisor_name supervisorName,
+            s.supervisor_tel supervisorTel,
             s.number,
             s.create_date createDate,
             sum(si.price * si.num)  totalPrice,
