@@ -25,6 +25,7 @@ import com.dangjia.acg.mapper.design.IHouseDesignImageMapper;
 import com.dangjia.acg.mapper.house.IHouseExpendMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingLayoutMapper;
+import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMemberMapper;
 import com.dangjia.acg.mapper.matter.IRenovationStageMapper;
@@ -38,10 +39,7 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.design.HouseDesignImage;
 import com.dangjia.acg.modle.group.Group;
-import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.house.HouseChoiceCase;
-import com.dangjia.acg.modle.house.HouseExpend;
-import com.dangjia.acg.modle.house.ModelingLayout;
+import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.matter.RenovationManualMember;
 import com.dangjia.acg.modle.matter.RenovationStage;
@@ -96,6 +94,8 @@ public class HouseService {
     private RedisClient redisClient;
     @Autowired
     private IModelingLayoutMapper modelingLayoutMapper;
+    @Autowired
+    private IModelingVillageMapper modelingVillageMapper;
     @Autowired
     private IHouseDesignImageMapper houseDesignImageMapper;
     @Autowired
@@ -1321,4 +1321,28 @@ public class HouseService {
         return ServerResponse.createBySuccess("查询成功", mapList);
     }
 
+    /**
+     * 业主装修的房子可修改
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse updateByHouseId(String building, String unit, String number, String houseId, String villageId, String cityId, String modelingLayoutId) {
+        try {
+            House house = iHouseMapper.selectByPrimaryKey(houseId);
+            house.setBuilding(building);                 //楼栋
+            house.setUnit(unit);                         //单元号
+            house.setNumber(number);                     //房间号
+            house.setVillageId(villageId);                //小区Id
+            house.setCityId(cityId);                      //城市Id
+            house.setModelingLayoutId(modelingLayoutId);  //户型Id
+            ModelingVillage modelingVillage = modelingVillageMapper.selectByPrimaryKey(villageId);
+            house.setResidential(modelingVillage.getName());
+            iHouseMapper.updateByPrimaryKeySelective(house);
+            return ServerResponse.createBySuccessMessage("更新成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("更新失败");
+        }
+
+    }
 }
+

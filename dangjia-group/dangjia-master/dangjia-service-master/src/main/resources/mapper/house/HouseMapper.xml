@@ -24,7 +24,6 @@
         money,
         pause,
         show_house as showHouse,
-        site_display as siteDisplay,
         village_id as villageId,
         refer_house_id as referHouseId,
         have_complete as haveComplete,
@@ -205,6 +204,10 @@
         h.create_date AS createDate,
         h.modify_date AS modifyDate,
         h.number as number,
+        h.city_id as cityId,
+        h.modeling_layout_id as modelingLayoutId,
+        h.village_id as villageId,
+        h.number as number,
         h.site_display as siteDisplay
         FROM
         dj_house h
@@ -345,14 +348,11 @@
     </select>
 
     <select id="getHouseDateByMemberId" parameterType="String" resultType="date">
-        SELECT h.create_date
-        from dj_member m
-                 INNER join dj_house h on m.id = h.member_id
-        where m.id = #{memberId}
-          and h.data_status = 0
-          and h.visit_state = 1
-        ORDER BY create_date DESC
-        limit 1
+        SELECT
+         h.create_date
+         from dj_member m
+         INNER join dj_house h on m.id=h.member_id where m.id=#{memberId} and h.data_status =0 and h.visit_state =1
+         ORDER BY create_date DESC limit 1
     </select>
 </mapper>
 

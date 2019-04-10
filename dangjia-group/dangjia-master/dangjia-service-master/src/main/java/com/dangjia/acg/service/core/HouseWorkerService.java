@@ -540,7 +540,7 @@ public class HouseWorkerService {
         int[] edShowTypes = {0, 0, 0, 0, 2, 0};//1：大管家有的，2：工匠有的，0：都有
         String[] edImages = {"artisan_25.png", "artisan_26.png", "artisan_27.png", "artisan_29.png", "erweima.png", "artisan_30.png"};
         String[] edUrls = {DjConstants.GJPageAddress.PROJECTDRAWINGLIST, DjConstants.GJPageAddress.GJJINGSUANLIST, DjConstants.GJPageAddress.GJPRICE,
-                DjConstants.YZPageAddress.CONSTUCTIONRECORD, DjConstants.GJPageAddress.QRCODE, DjConstants.GJPageAddress.PROJECTADRESSLIST};//H5路由
+                DjConstants.GJPageAddress.PROJECTRECORD, DjConstants.GJPageAddress.QRCODE, DjConstants.GJPageAddress.PROJECTADRESSLIST};//H5路由
         ConstructionByWorkerIdBean.BigListBean bigListBean = new ConstructionByWorkerIdBean.BigListBean();
         bigListBean.setName("工程资料");
         List<ConstructionByWorkerIdBean.BigListBean.ListMapBean> listMap = new ArrayList<>();

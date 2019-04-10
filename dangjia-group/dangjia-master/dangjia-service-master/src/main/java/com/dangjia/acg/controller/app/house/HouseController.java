@@ -4,7 +4,6 @@ import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -201,6 +200,11 @@ public class HouseController implements HouseAPI {
         } else {
             return ServerResponse.createByErrorMessage("请输入正确的面积");
         }
+    }
+    @Override
+    @ApiMethod
+    public ServerResponse updateByHouseId(String building,String unit,String number,String houseId,String villageId,String cityId,String modelingLayoutId) {
+       return  houseService.updateByHouseId(building,unit,number,houseId,villageId,cityId,modelingLayoutId);
     }
 
 }

@@ -83,6 +83,7 @@ public class ComplainService {
      * @return
      */
 
+
     public ServerResponse addComplain(String userToken, Integer complainType, String businessId, String houseId, String files) {
         if (CommonUtil.isEmpty(complainType) || CommonUtil.isEmpty(businessId) || CommonUtil.isEmpty(houseId)) {
             return ServerResponse.createByErrorMessage("参数不正确");
@@ -173,10 +174,10 @@ public class ComplainService {
             if (complain.getComplainType() != null)
                 switch (complain.getComplainType()) {
                     case 1://TODO 1:工匠被处罚后不服.
-                       /* RewardPunishRecord rewardPunishRecord = rewardPunishRecordMapper.selectByPrimaryKey(businessId);
-                        rewardPunishRecord.setComplainId(complain.getId());
-                        rewardPunishRecordMapper.updateByPrimaryKeySelective(rewardPunishRecord);*/
-                        break;
+//                        RewardPunishRecord rewardPunishRecord = rewardPunishRecordMapper.selectByPrimaryKey(businessId);
+//                        rewardPunishRecord.setComplainId(complain.getId());
+//                        rewardPunishRecordMapper.updateByPrimaryKeySelective(rewardPunishRecord);
+//                        break;
                     case 2://2：业主要求整改.
                         Member member = memberMapper.selectByPrimaryKey(complain.getBusinessId());
                         houseWorkerMapper.changeWorkerByHouseIdWorkerId(complain.getHouseId(), member.getId());
@@ -198,7 +199,7 @@ public class ComplainService {
                         houseFlow.setWorkType(2);
                         houseFlowMapper.updateByPrimaryKey(houseFlow);
                         break;
-                    case 4://TODO 4:部分收货申诉
+                    case 4:// 4:部分收货申诉
                         ServerResponse response = splitDeliverService.splitDeliverDetail(complain.getBusinessId());
                         if (response.isSuccess()) {
                             String json_str = JSON.toJSON(response.getResultObj()).toString();
