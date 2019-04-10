@@ -17,6 +17,7 @@ import com.dangjia.acg.dto.worker.WorkIntegralDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseItemMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
@@ -26,6 +27,7 @@ import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.house.SurplusWareHouseItem;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
@@ -82,7 +84,7 @@ public class EvaluateService {
     @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired
-    private ISurplusWareHouseItemMapper surplusWareHouseItemMapper;
+    private IMaterialRecordMapper materialRecordMapper;
 
     /**
      * 获取积分记录
@@ -179,6 +181,15 @@ public class EvaluateService {
                 String productId = obj.getString("productId");
                 double num = Double.parseDouble(obj.getString("num"));
                 Product product = forMasterAPI.getProduct(house.getCityId(), productId);
+                MaterialRecord materialRecord = new MaterialRecord();
+                materialRecord.setHouseId(houseFlowApply.getHouseId());
+                materialRecord.setWorkerTypeId(houseFlowApply.getWorkerTypeId());
+                materialRecord.setApplyType(houseFlowApply.getApplyType());
+                materialRecord.setNum(num);
+                materialRecord.setProductId(productId);
+                materialRecord.setProductSn(product.getProductSn());
+                materialRecord.setProductName(product.getName());
+                materialRecordMapper.insert(materialRecord);
             }
 
         }catch (Exception e){
