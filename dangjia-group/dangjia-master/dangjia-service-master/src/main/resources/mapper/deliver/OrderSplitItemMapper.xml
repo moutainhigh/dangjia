@@ -33,14 +33,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!--指定房子所有发货的供应商-->
     <select id="getSplitReportSuppliers" resultType="com.dangjia.acg.dto.deliver.SplitReportSupplierDTO">
 	   SELECT
-           	sd.supplierId,
-            sd.supplierName,
-            sd.supplierTelephone,
-            si.houseId,
-            sum(si.sup_cost * si.num) totalPrice,
+           	sd.supplier_id supplierId,
+            sd.supplier_name supplierName,
+            sd.supplier_telephone supplierTelephone,
+            si.house_id houseId,
+            sum(si.sup_cost * si.num)  totalPrice,
             sum(
                 (si.price * si.num) - (si.sup_cost * si.num)
-            ) totalProfit
+            )  totalProfit
         FROM
             `dj_deliver_order_split_item` si
         INNER JOIN dj_deliver_split_deliver sd ON si.split_deliver_id = sd.id
@@ -56,8 +56,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="getSplitReportDeliverOrders" resultType="com.dangjia.acg.dto.deliver.SplitReportDeliverOrderDTO">
 	   SELECT
             s.number,
-            s.createDate,
-            sum(si.price * si.num) totalPrice,
+            s.create_date createDate,
+            sum(si.price * si.num)  totalPrice,
             sum(
                 (si.price * si.num) - (si.sup_cost * si.num)
             ) totalProfit
@@ -66,11 +66,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         INNER JOIN dj_deliver_order_split_item si ON si.order_split_id = s.id
         INNER JOIN dj_deliver_split_deliver sd ON si.split_deliver_id = sd.id
         AND sd.supplier_id IS NOT NULL
-        WHERE sd.supplier_id =#{supplierId}
+        WHERE sd.supplier_id =#{supplierId} and s.house_id =#{houseId}
         GROUP BY
             sd.number
         ORDER BY
-            create_date DESC
+            s.create_date DESC
 	</select>
 
 
@@ -78,9 +78,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="getSplitReportDeliverOrderItems" resultType="com.dangjia.acg.dto.deliver.SplitReportDeliverOrderItemDTO">
         SELECT
             si.image,
-            si.productName,
-            si.productSn,
-            si.supCost,
+            si.product_name productName,
+            si.product_sn productSn,
+            si.sup_cost supCost,
             si.num,
             si.price,
             (si.price * si.num) totalPrice,

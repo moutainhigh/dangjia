@@ -35,8 +35,7 @@ public class DjConstants {
         public final static String GJREGISTERPROTOCOL = "gjRegisterProtocol?userToken=%s&cityId=%s&title=%s";//注册协议
         public final static String PROJECTDRAWINGLIST = "projectDrawingList?userToken=%s&cityId=%s&title=%s";//施工图
         public final static String QRCODE = "qrCode?userToken=%s&cityId=%s&title=%s";//二维码
-        //        public final static String PROJECTRECORD ="projectRecord?userToken=%s&cityId=%s&title=%s";//工地记录
-        public final static String PROJECTRECORD = "constuctionRecord?userToken=%s&cityId=%s&title=%s";//工地记录
+        public final static String PROJECTRECORD ="projectRecord?userToken=%s&cityId=%s&title=%s";//工地记录
         public final static String PROJECTADRESSLIST = "projectAdressList?userToken=%s&cityId=%s&title=%s";//工地通讯录
         public final static String GJJINGSUANLIST = "jsCraftsman?userToken=%s&cityId=%s&title=%s";//精算
         public final static String CONFIRMQIANGDAN = "confirmQiangdan?userToken=%s&cityId=%s&title=%s";//抢单确认

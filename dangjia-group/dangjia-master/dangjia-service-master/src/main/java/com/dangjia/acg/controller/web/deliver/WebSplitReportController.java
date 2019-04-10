@@ -32,8 +32,8 @@ public class WebSplitReportController implements WebSplitReportAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getSplitReportDeliverOrders(String supplierId){
-        return splitDeliverReportService.getSplitReportDeliverOrders(supplierId);
+    public ServerResponse getSplitReportDeliverOrders(String houseId,String supplierId){
+        return splitDeliverReportService.getSplitReportDeliverOrders(houseId,supplierId);
     }
 
     /**

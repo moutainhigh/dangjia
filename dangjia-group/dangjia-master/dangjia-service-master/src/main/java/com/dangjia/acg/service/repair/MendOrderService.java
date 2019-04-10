@@ -314,9 +314,9 @@ public class MendOrderService {
             Member steward = accessToken.getMember();//管家
 
             HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseId, workerTypeId);
-            if (houseFlow.getWorkSteta() == 1 || houseFlow.getWorkSteta() == 2) {
-                return ServerResponse.createByErrorMessage("该工种已阶段完工,不能退人工!");
-            }
+//            if (houseFlow.getWorkSteta() == 1 || houseFlow.getWorkSteta() == 2) {
+//                return ServerResponse.createByErrorMessage("该工种已阶段完工,不能退人工!");
+//            }
 
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
             if (houseFlowApplyList.size() > 0) {
@@ -361,11 +361,11 @@ public class MendOrderService {
 
             if (this.addMendWorker(workerGoodsArr, mendOrder, workerTypeId)) {
 
-                House house = houseMapper.selectByPrimaryKey(houseId);
-                WorkerType workType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
-                String url= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"changeArtificial?userToken="+userToken+"&cityId="+house.getCityId()+"&title=人工变更&houseId="+houseId+"&houseFlowId="+houseFlow.getId()+"&roleType=2";
-                configMessageService.addConfigMessage(null, "gj",houseFlow.getWorkerId(), "0", "退人工", String.format
-                        (DjConstants.PushMessage.DGJ_T_002, house.getHouseName(),workType.getName()), url);
+//                House house = houseMapper.selectByPrimaryKey(houseId);
+//                WorkerType workType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
+//                String url= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"changeArtificial?userToken="+userToken+"&cityId="+house.getCityId()+"&title=人工变更&houseId="+houseId+"&houseFlowId="+houseFlow.getId()+"&roleType=2";
+//                configMessageService.addConfigMessage(null, "gj",houseFlow.getWorkerId(), "0", "退人工", String.format
+//                        (DjConstants.PushMessage.DGJ_T_002, house.getHouseName(),workType.getName()), url);
 
                 return ServerResponse.createBySuccessMessage("保存成功");
             } else {

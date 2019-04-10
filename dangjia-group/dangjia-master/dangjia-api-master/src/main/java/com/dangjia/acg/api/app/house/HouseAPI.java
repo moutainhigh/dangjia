@@ -141,4 +141,15 @@ public interface HouseAPI {
                                       @RequestParam("square") Double square,
                                       @RequestParam("houseType") Integer houseType);
 
+
+    @PostMapping("app/house/house/updateByHouseId")
+    @ApiOperation(value = "业主装修的房子可修改", notes = "业主装修的房子可修改")
+    ServerResponse updateByHouseId(@RequestParam("building") String building,                       //楼栋
+                                   @RequestParam("houseId") String houseId,                         //小区ID
+                                   @RequestParam("unit") String unit,                               //单元号
+                                   @RequestParam("number") String number,                           //房间号
+                                   @RequestParam("cityId") String cityId,                           //城市Id
+                                   @RequestParam("modelingLayoutId") String modelingLayoutId,       //户型Id
+                                   @RequestParam("villageId") String villageId);                    //小区Id
+
 }

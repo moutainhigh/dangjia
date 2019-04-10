@@ -37,6 +37,7 @@ public class ActivityTask {
    * 检测活动是否过期
    * 每天凌晨(24点)执行一次
    */
+
   @Scheduled(cron = "0 0 0 * * ?") //每天凌晨(24点执行一次)
 //  @Scheduled(cron = "0 0/5 * * * ?")//5分钟执行一次
 //  @Scheduled(cron = "0/30 * * * * ?")//30秒执行一次
