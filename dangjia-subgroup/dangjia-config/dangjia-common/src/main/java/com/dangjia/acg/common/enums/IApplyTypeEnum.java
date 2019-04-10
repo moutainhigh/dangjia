@@ -40,7 +40,4 @@ public enum IApplyTypeEnum implements IBaseEnum {
         return desc;
     }
 
-    public static void main(String[] args) {
-        System.out.println(IApplyTypeEnum.getValue(1));
-    }
 }
