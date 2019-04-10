@@ -35,6 +35,7 @@ import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -699,7 +700,7 @@ public class HouseWorkerService {
             }
             HomePageBean homePageBean = new HomePageBean();
             homePageBean.setWorkerId(worker.getId());
-            homePageBean.setIoflow(worker.getHead());
+            homePageBean.setIoflow(CommonUtil.isEmpty(worker.getHead()) ? null : address + worker.getHead());
             homePageBean.setWorkerName(worker.getName());
             homePageBean.setEvaluation(worker.getEvaluationScore());
             homePageBean.setFavorable(worker.getPraiseRate() == null ? "0.00%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
