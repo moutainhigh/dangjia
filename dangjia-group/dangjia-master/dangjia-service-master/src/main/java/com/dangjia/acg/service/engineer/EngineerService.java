@@ -272,6 +272,7 @@ public class EngineerService {
             map.put("materialPrice", houseFlow.getMaterialPrice());//材料钱
             map.put("workPrice", houseFlow.getWorkPrice());//工钱
             map.put("patrol", houseFlow.getPatrol());//巡查次数
+            map.put("workerId", houseFlow.getWorkerId());//工人ID
 
             if (houseFlow.getWorkerType() == 1) {//设计
                 map.put("designerOk", house.getDesignerOk());
