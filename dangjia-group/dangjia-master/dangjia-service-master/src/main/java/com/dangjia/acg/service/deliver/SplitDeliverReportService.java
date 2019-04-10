@@ -31,8 +31,8 @@ public class SplitDeliverReportService {
         return ServerResponse.createBySuccess("查询成功", splitDeliverDTOList);
     }
 
-    public ServerResponse getSplitReportDeliverOrders(String supplierId){
-        List<SplitReportDeliverOrderDTO>  splitReportDeliverOrderDTOS=orderSplitItemMapper.getSplitReportDeliverOrders(supplierId);
+    public ServerResponse getSplitReportDeliverOrders(String houseId,String supplierId){
+        List<SplitReportDeliverOrderDTO>  splitReportDeliverOrderDTOS=orderSplitItemMapper.getSplitReportDeliverOrders(houseId,supplierId);
         return ServerResponse.createBySuccess("查询成功", splitReportDeliverOrderDTOS);
     }
 

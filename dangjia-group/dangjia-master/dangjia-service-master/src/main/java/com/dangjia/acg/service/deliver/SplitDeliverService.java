@@ -199,8 +199,8 @@ public class SplitDeliverService {
             }
             List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
             List<SplitDeliverDTO> splitDeliverDTOList = new ArrayList<>();
-            House house = houseMapper.selectByPrimaryKey(houseId);
             for (SplitDeliver splitDeliver : splitDeliverList){
+                House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
                 SplitDeliverDTO splitDeliverDTO = new SplitDeliverDTO();
                 splitDeliverDTO.setSplitDeliverId(splitDeliver.getId());
                 splitDeliverDTO.setCreateDate(splitDeliver.getCreateDate());

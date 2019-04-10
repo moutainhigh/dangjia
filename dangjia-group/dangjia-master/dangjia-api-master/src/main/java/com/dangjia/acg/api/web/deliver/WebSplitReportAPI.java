@@ -19,7 +19,7 @@ public interface WebSplitReportAPI {
 
     @PostMapping("web/deliver/split/report/deliverOrder")
     @ApiOperation(value = "指定供应商所有的要货订单", notes = "指定供应商所有的要货订单")
-    ServerResponse getSplitReportDeliverOrders(@RequestParam("supplierId") String supplierId);
+    ServerResponse getSplitReportDeliverOrders(@RequestParam("houseId") String houseId,@RequestParam("supplierId") String supplierId);
 
     @PostMapping("web/deliver/split/report/deliverOrderItems")
     @ApiOperation(value = "要货订单明细", notes = "要货订单明细")

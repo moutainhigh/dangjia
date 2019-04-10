@@ -55,6 +55,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!--指定供应商所有的要货订单-->
     <select id="getSplitReportDeliverOrders" resultType="com.dangjia.acg.dto.deliver.SplitReportDeliverOrderDTO">
 	   SELECT
+	        s.supervisor_id supervisorId,
+            s.supervisor_name supervisorName,
+            s.supervisor_tel supervisorTel,
             s.number,
             s.create_date createDate,
             sum(si.price * si.num)  totalPrice,
@@ -66,11 +69,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         INNER JOIN dj_deliver_order_split_item si ON si.order_split_id = s.id
         INNER JOIN dj_deliver_split_deliver sd ON si.split_deliver_id = sd.id
         AND sd.supplier_id IS NOT NULL
-        WHERE sd.supplier_id =#{supplierId}
+        WHERE sd.supplier_id =#{supplierId} and s.house_id =#{houseId}
         GROUP BY
             sd.number
         ORDER BY
-            create_date DESC
+            s.create_date DESC
 	</select>
 
 

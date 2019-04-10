@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.house.IMaterialRecordMapper">
+
+    <sql id="all_columns">
+		id,
+		product_id as productId,
+		data_status as dataStatus,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+
+
+</mapper>
+

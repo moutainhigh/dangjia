@@ -24,7 +24,6 @@
         money,
         pause,
         show_house as showHouse,
-        site_display as siteDisplay,
         village_id as villageId,
         refer_house_id as referHouseId,
         have_complete as haveComplete,
@@ -161,7 +160,7 @@
             and house_type = #{houseType}
         </if>
         and ((decoration_type in (1,2) and budget_ok=3) or (decoration_type=3 and visit_state=1))
-        and show_house!=1 and site_display!=1
+        and site_display=0
         order by num desc
     </select>
 
@@ -195,7 +194,7 @@
         h.show_house as showHouse,
         h.style as style,
         h.square as square,
-        h.square as buildSquare,
+        h.build_square as buildSquare,
         h.decoration_type as decorationType,
         h.house_type as houseType,
         h.residential as residential,
@@ -204,6 +203,10 @@
         h.work_deposit_id as workDepositId,
         h.create_date AS createDate,
         h.modify_date AS modifyDate,
+        h.number as number,
+        h.city_id as cityId,
+        h.modeling_layout_id as modelingLayoutId,
+        h.village_id as villageId,
         h.number as number,
         h.site_display as siteDisplay
         FROM
@@ -249,7 +252,7 @@
         h.show_house as showHouse,
         h.style as style,
         h.square as square,
-        h.square as buildSquare,
+        h.build_square as buildSquare,
         h.decoration_type as decorationType,
         h.house_type as houseType,
         h.residential as residential,
@@ -345,14 +348,11 @@
     </select>
 
     <select id="getHouseDateByMemberId" parameterType="String" resultType="date">
-        SELECT h.create_date
-        from dj_member m
-                 INNER join dj_house h on m.id = h.member_id
-        where m.id = #{memberId}
-          and h.data_status = 0
-          and h.visit_state = 1
-        ORDER BY create_date DESC
-        limit 1
+        SELECT
+         h.create_date
+         from dj_member m
+         INNER join dj_house h on m.id=h.member_id where m.id=#{memberId} and h.data_status =0 and h.visit_state =1
+         ORDER BY create_date DESC limit 1
     </select>
 </mapper>
 
