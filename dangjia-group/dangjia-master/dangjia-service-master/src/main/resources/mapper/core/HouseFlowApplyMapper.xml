@@ -54,7 +54,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where
             house_flow_id = #{houseFlowId}
         and (supervisor_check = 2 or member_check = 2)
-        and apply_type in (1,2)
+        and apply_type =666
     </select>
 
     <!--查询待处理完工申请-->

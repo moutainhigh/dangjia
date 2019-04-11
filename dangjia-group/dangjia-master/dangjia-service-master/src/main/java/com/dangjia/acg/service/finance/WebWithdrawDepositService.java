@@ -5,7 +5,6 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.finance.WebWithdrawDTO;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -108,6 +107,8 @@ public class WebWithdrawDepositService {
 
                     Member worker = iMemberMapper.selectByPrimaryKey(srcWithdrawDeposit.getWorkerId());
                     BigDecimal money = srcWithdrawDeposit.getMoney();
+                    BigDecimal haveMoney = worker.getHaveMoney().add(money);
+                    BigDecimal surplusMoney = worker.getSurplusMoney().add(money);
 
                     //记录流水
                     WorkerDetail workerDetail = new WorkerDetail();
@@ -117,12 +118,12 @@ public class WebWithdrawDepositService {
                     workerDetail.setMoney(money);
                     workerDetail.setDefinedName("提现驳回到余额");
                     workerDetail.setState(8);//8提现驳回到余额
-                    workerDetail.setWalletMoney(worker.getHaveMoney());
+                    workerDetail.setWalletMoney(haveMoney);
                     iWorkerDetailMapper.insert(workerDetail);
 
                     //把钱 转到 余额上面
-                    worker.setHaveMoney(worker.getHaveMoney().add(money));//更新已有钱
-                    worker.setSurplusMoney(worker.getSurplusMoney().add(money));
+                    worker.setHaveMoney(haveMoney);//更新已有钱
+                    worker.setSurplusMoney(surplusMoney);
                     worker.setModifyDate(new Date());
                     iMemberMapper.updateByPrimaryKeySelective(worker);
 

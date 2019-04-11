@@ -376,7 +376,7 @@ public class OrderService {
                     .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             if(orderSplitList.size()>0){
-                return ServerResponse.createByErrorMessage("存在待业主确认支付的补货单，无法提交要货！");
+                return ServerResponse.createByErrorMessage("存在业主未处理的补货单，无法提交要货！");
             }
 
             example = new Example(OrderSplit.class);

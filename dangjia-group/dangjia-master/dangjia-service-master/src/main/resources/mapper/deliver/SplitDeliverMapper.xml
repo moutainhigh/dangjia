@@ -28,8 +28,13 @@
         dj_deliver_split_deliver
         WHERE
         data_status = 0
-        <if test="applyState!= -1">
+        and apply_state IS not NULL
+        and apply_state != 3
+        <if test="applyState!= -2 and applyState!= -1 ">
             and apply_state = #{applyState}
+        </if>
+        <if test="applyState == -2">
+            and apply_state != 0
         </if>
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
             and modify_date between #{beginDate} and #{endDate}
@@ -40,7 +45,6 @@
             or ship_name like CONCAT('%',#{searchKey},'%')
             or supplier_name like CONCAT('%',#{searchKey},'%'))
         </if>
-
         ORDER BY
         create_date DESC
     </select>
