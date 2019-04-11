@@ -96,7 +96,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE
             s.number = #{number}
         ORDER BY
-            si.create_date DESC;
+            si.create_date DESC
 	</select>
 
 
@@ -117,7 +117,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         GROUP BY
             si.product_sn
         ORDER BY
-            si.create_date DESC;
+            si.create_date DESC
 	</select>
 
 
@@ -145,7 +145,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             sd.supplier_id,
             si.house_id
         ORDER BY
-            si.house_id;
+            si.house_id
 	</select>
    <!--********************查看统计 结束**********************-->
 </mapper>
