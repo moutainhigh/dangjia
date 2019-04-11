@@ -4,6 +4,7 @@ import com.dangjia.acg.api.app.core.HouseFlowApplyAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
+import com.dangjia.acg.service.core.TimingApplyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,7 +18,15 @@ public class HouseFlowApplyController implements HouseFlowApplyAPI {
 
     @Autowired
     private HouseFlowApplyService houseFlowApplyService;
+    @Autowired
+    private TimingApplyService timingApplyService;
 
+
+    @Override
+    @ApiMethod
+    public void couponApply(){
+        timingApplyService.couponApply();
+    }
 
     /**
      * 工匠端工地记录
