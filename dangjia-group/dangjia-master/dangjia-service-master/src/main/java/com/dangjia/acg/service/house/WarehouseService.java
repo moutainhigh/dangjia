@@ -62,8 +62,17 @@ public class WarehouseService {
      */
     public ServerResponse warehouseList(String  userToken,Integer pageNum, Integer pageSize, String houseId, String categoryId, String name, Integer type) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member=accessToken.getMember();
+            if(!CommonUtil.isEmpty(userToken)){
+                AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+                Member member=accessToken.getMember();
+                if(type==null){
+                    if(member.getWorkerType()==3){
+                        type=1;
+                    }else{
+                        type=0;
+                    }
+                }
+            }
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
@@ -71,13 +80,7 @@ public class WarehouseService {
             Example example=new Example(Warehouse.class);
             Example.Criteria criteria=example.createCriteria();
             criteria.andEqualTo(Warehouse.HOUSE_ID,houseId);
-            if(type==null){
-                if(member.getWorkerType()==3){
-                    type=1;
-                }else{
-                    type=0;
-                }
-            }
+
             if(type!=null&&type<2){
                 criteria.andEqualTo(Warehouse.PRODUCT_TYPE,type);
             }
@@ -118,18 +121,20 @@ public class WarehouseService {
      */
     public ServerResponse warehouseGmList(HttpServletRequest request,String  userToken, String houseId, String name, Integer type) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member=accessToken.getMember();
+            if(!CommonUtil.isEmpty(userToken)){
+                AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+                Member member=accessToken.getMember();
+                if(type==null){
+                    if(member.getWorkerType()==3){
+                        type=1;
+                    }else{
+                        type=0;
+                    }
+                }
+            }
             String cityId = request.getParameter(Constants.CITY_ID);
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
-            }
-            if(type==null){
-                if(member.getWorkerType()==3){
-                    type=1;
-                }else{
-                    type=0;
-                }
             }
             Map<String, Map> maps = new HashMap<>();
             Map map=new HashMap();
