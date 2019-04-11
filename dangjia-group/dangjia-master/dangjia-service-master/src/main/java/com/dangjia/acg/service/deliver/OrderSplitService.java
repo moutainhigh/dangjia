@@ -7,6 +7,7 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.DeliverHouseDTO;
@@ -343,12 +344,9 @@ public class OrderSplitService {
 
                 v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
                 Map map= BeanUtils.beanToMap(v);
-                Example exampleDeliver = new Example(SplitDeliver.class);
-                exampleDeliver.createCriteria().andEqualTo(OrderSplitItem.HOUSE_ID,v.getHouseId()).andEqualTo(OrderSplitItem.PRODUCT_SN,v.getProductSn());
-                exampleDeliver.orderBy(OrderSplitItem.CREATE_DATE).desc();
-                List<SplitDeliver> splitDelivers=splitDeliverMapper.selectByExample(exampleDeliver);
-                if(splitDelivers.size()>0){
-                    map.put(SplitDeliver.SUPPLIER_ID,splitDelivers.get(0).getSupplierId());
+               String  supplierId=splitDeliverMapper.getSupplierGoodsId(v.getHouseId(),v.getProductSn());
+                if(!CommonUtil.isEmpty(supplierId)){
+                    map.put(SplitDeliver.SUPPLIER_ID,supplierId);
                 }
                 mapList.add(map);
             }
