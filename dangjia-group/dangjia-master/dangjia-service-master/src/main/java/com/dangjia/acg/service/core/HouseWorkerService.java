@@ -944,7 +944,6 @@ public class HouseWorkerService {
                 String s2 = DateUtil.getDateString2(new Date().getTime()) + " 12:00:00";//当天12点
                 Date lateDate = DateUtil.toDate(s2);
                 Date newDate2 = new Date();//当前时间
-//                Long downTime = newDate2.getTime() - lateDate.getTime();//对比12点
 //                if (downTime > 0) {
 //                    return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
 //                }
