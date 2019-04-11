@@ -143,6 +143,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and house_flow_id = #{houseFlowId}
         and member_check = 0
         and worker_id = #{workerId}
+        LIMIT 1
     </select>
 
     <!--查询最早的每日开工申请-->
