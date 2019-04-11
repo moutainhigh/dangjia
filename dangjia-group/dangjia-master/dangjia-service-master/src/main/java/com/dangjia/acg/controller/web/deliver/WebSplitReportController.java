@@ -46,7 +46,26 @@ public class WebSplitReportController implements WebSplitReportAPI {
     public ServerResponse getSplitReportDeliverOrderItems(String number){
         return splitDeliverReportService.getSplitReportDeliverOrderItems(number);
     }
-
-
+    /**
+     * 要货订单供应商（商品维度）
+     * @param houseId
+     * @param productSn
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getSplitReportGoodsSuppliers(String houseId,String productSn){
+        return splitDeliverReportService.getSplitReportGoodsSuppliers(houseId,productSn);
+    }
+    /**
+     * 要货单商品列表统计（商品维度）
+     * @param houseId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getSplitReportGoodsOrderItems(String houseId){
+        return splitDeliverReportService.getSplitReportGoodsOrderItems(houseId);
+    }
 
 }

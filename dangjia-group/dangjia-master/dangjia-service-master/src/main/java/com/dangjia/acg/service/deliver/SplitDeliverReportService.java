@@ -46,4 +46,20 @@ public class SplitDeliverReportService {
     }
 
 
+    public ServerResponse getSplitReportGoodsSuppliers(String houseId,String productSn){
+        List<SplitReportSupplierDTO> splitDeliverDTOList=orderSplitItemMapper.getSplitReportGoodsSuppliers(houseId,productSn);
+        return ServerResponse.createBySuccess("查询成功", splitDeliverDTOList);
+    }
+
+
+    public ServerResponse getSplitReportGoodsOrderItems(String houseId){
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        List<SplitReportDeliverOrderItemDTO>  splitReportDeliverOrderItemDTOS=orderSplitItemMapper.getSplitReportGoodsOrderItems(houseId);
+        for (SplitReportDeliverOrderItemDTO splitReportDeliverOrderItemDTO : splitReportDeliverOrderItemDTOS) {
+            splitReportDeliverOrderItemDTO.setImage(address+splitReportDeliverOrderItemDTO.getImage());
+        }
+        return ServerResponse.createBySuccess("查询成功", splitReportDeliverOrderItemDTOS);
+    }
+
+
 }

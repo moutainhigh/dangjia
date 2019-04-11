@@ -249,7 +249,7 @@ public class EvaluateService {
                     + "申请的" + IApplyTypeEnum.getValue(houseFlowApply.getApplyType());
             houseFlowApply.setApplyDec(appDesc);
             houseFlowApply.setWorkerType(3);
-            houseFlowApply.setWorkerId(flowByHidAndWty.getWorkerTypeId());
+            houseFlowApply.setWorkerTypeId(flowByHidAndWty.getWorkerTypeId());
             houseFlowApply.setWorkerId(flowByHidAndWty.getWorkerId());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
             /*

@@ -26,5 +26,12 @@ public interface WebSplitReportAPI {
     ServerResponse getSplitReportDeliverOrderItems(@RequestParam("number") String number);
 
 
+    @PostMapping("web/deliver/split/report/goodsSuppliers")
+    @ApiOperation(value = "要货订单供应商（商品维度）", notes = "要货订单供应商（商品维度）")
+    ServerResponse getSplitReportGoodsSuppliers(String houseId,String productSn);
+
+    @PostMapping("web/deliver/split/report/goods")
+    @ApiOperation(value = "要货单商品列表统计（商品维度）", notes = "要货单商品列表统计（商品维度）")
+    ServerResponse getSplitReportGoodsOrderItems(String houseId);
 
 }
