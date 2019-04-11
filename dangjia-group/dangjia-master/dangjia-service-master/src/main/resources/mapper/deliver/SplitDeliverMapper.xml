@@ -28,6 +28,8 @@
         dj_deliver_split_deliver
         WHERE
         data_status = 0
+        and apply_state IS not NULL
+        and apply_state != 3
         <if test="applyState!= -2 and applyState!= -1 ">
             and apply_state = #{applyState}
         </if>
