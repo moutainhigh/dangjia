@@ -59,66 +59,66 @@
     </resultMap>
 
     <sql id="all_columns">
-        id,
-        name,
-        goods_id,
-        category_id,
-        product_sn,
-        image,
-        unitId,
-        labelId,
-        unitName,
-        weight,
-        type,
-        maket,
-        cost,
-        price,
-        profit,
-        brand_id,
-        brand_series_id,
-        attribute_id_arr,
-        value_name_arr,
-        value_id_arr,
-        convert_unit,
-        convert_quality,
-        create_date,
-        modify_date
+               id,
+               name,
+               goods_id,
+               category_id,
+               product_sn,
+               image,
+               unitId,
+               labelId,
+               unitName,
+               weight,
+               type,
+               maket,
+               cost,
+               price,
+               profit,
+               brand_id,
+               brand_series_id,
+               attribute_id_arr,
+               value_name_arr,
+               value_id_arr,
+               convert_unit,
+               convert_quality,
+               create_date,
+               modify_date
     </sql>
     <sql id="new_columns">
-        id,
-        name,
-        goods_id as goodsId,
-        category_id as categoryId,
-        product_sn as productSn,
-        image,
-        unit_id as unitId,
-        label_id as labelId,
-        unit_name as unitName,
-        weight,
-        type,
-        maket,
-        cost,
-        price,
-        profit,
-        brand_id as brandId,
-        brand_series_id as brandSeriesId,
-        attribute_id_arr as attributeIdArr,
-        value_name_arr as valueNameArr,
-        value_id_arr as valueIdArr,
-        convert_unit as convertUnit,
-        convert_quality as convertQuality,
-        create_date as createDate,
-        modify_date as modifyDate
+               id,
+               name,
+               goods_id         as goodsId,
+               category_id      as categoryId,
+               product_sn       as productSn,
+               image,
+               unit_id          as unitId,
+               label_id         as labelId,
+               unit_name        as unitName,
+               weight,
+               type,
+               maket,
+               cost,
+               price,
+               profit,
+               brand_id         as brandId,
+               brand_series_id  as brandSeriesId,
+               attribute_id_arr as attributeIdArr,
+               value_name_arr   as valueNameArr,
+               value_id_arr     as valueIdArr,
+               convert_unit     as convertUnit,
+               convert_quality  as convertQuality,
+               create_date      as createDate,
+               modify_date      as modifyDate
     </sql>
 
     <sql id="all_PaColumns">
-        id,
-        name,
-        product_id,
-        attribute_id,
-        value_id,
-        create_date,
-        modify_date
+               id,
+               name,
+               product_id,
+               attribute_id,
+               value_id,
+               create_date,
+               modify_date
     </sql>
     <!-- 删除对象 -->
     <delete id="deleteById" parameterType="java.lang.String">
@@ -659,6 +659,16 @@
         <!--g.id-->
         <!--ORDER BY-->
         <!--g.create_date DESC-->
+    </select>
+    <select id="selectProductByGoodsIdAndBrandIdAndBrandSeriesId"
+            resultType="com.dangjia.acg.modle.basics.Product">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_basics_product
+        WHERE 1 = 1
+        AND goods_id = 'HP0261'
+        AND brand_id = 'PP027'
+        AND brand_series_id = 'XL0093'
     </select>
 
 </mapper>

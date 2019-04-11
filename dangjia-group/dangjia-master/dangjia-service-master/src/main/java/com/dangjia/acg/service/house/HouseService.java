@@ -229,6 +229,7 @@ public class HouseService {
         Example example = new Example(House.class);
         example.createCriteria()
                 .andEqualTo(House.MEMBER_ID, accessToken.getMember().getId())
+                .andNotEqualTo(House.VISIT_STATE, 0).andNotEqualTo(House.VISIT_STATE, 2)
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
         List<Map> mapList = new ArrayList<>();
@@ -1313,7 +1314,7 @@ public class HouseService {
      * @return
      */
     public ServerResponse getAllHouseByVisitState(Integer visitState) {
-        List<House> houseList = iHouseMapper.getAllHouseByVisitState(1);//0待确认开工,1装修中,2休眠中,3已完工
+        List<House> houseList = iHouseMapper.getAllHouseByVisitState(visitState);//0待确认开工,1装修中,2休眠中,3已完工
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (House house : houseList) {
             Map<String, Object> map = new HashMap<>();
