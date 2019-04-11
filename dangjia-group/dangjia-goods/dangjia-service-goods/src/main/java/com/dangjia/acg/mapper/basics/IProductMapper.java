@@ -30,7 +30,7 @@ public interface IProductMapper extends Mapper<Product> {
     List<Product> queryByGoodsIdAndbrandSeriesId(@Param("goodsId") String goodsId, @Param("brandSeriesId") String brandSeriesId);
 
     //根据商品Id 和 品牌系列id查货品
-    List<Product> queryByGoodsIdAndbrandSeriesIdAndBrandId(@Param("goodsId") String goodsId,@Param("brandId") String brandId,  @Param("brandSeriesId") String brandSeriesId);
+    List<Product> queryByGoodsIdAndbrandSeriesIdAndBrandId(@Param("goodsId") String goodsId, @Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId);
 
     List<Product> queryByName(@Param("name") String name);
 
@@ -56,25 +56,31 @@ public interface IProductMapper extends Mapper<Product> {
 
     /**
      * 按照 属性id 和属性值查找商品
+     *
      * @param attributeIdArr
      * @param valueIdArr
      * @return
      */
-    List<Product> getPListByValueIdArrOrAttrId(@Param("attributeIdArr") String attributeIdArr,@Param("valueIdArr") String valueIdArr);
+    List<Product> getPListByValueIdArrOrAttrId(@Param("attributeIdArr") String attributeIdArr, @Param("valueIdArr") String valueIdArr);
+
     //查询 无品牌无系列有属性值的商品
     List<Product> getPListByGoodsIdAndNullBrandId(@Param("goodsId") String goodsId);
+
     List<Product> getPListByBrandSeriesIdAndNullValueId(@Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId);
 
     List<Product> queryRepairBudgetMaterial(@Param("houseId") String houseId, @Param("name") String name, @Param("categoryId") String categoryId);
 
-    List<Product> queryProductData(@Param("name") String name, @Param("categoryId") String categoryId,@Param("productType")  String productType);
+    List<Product> queryProductData(@Param("name") String name, @Param("categoryId") String categoryId, @Param("productType") String productType);
 
     Product getSwitchProduct(@Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String[] valueIdArr);
 
     /**
      * 模糊搜索商品
-     * @param name  用户给定的商品名称，可以是product / basics_brand / basics_brand_series 中的name的一种
+     *
+     * @param name 用户给定的商品名称，可以是product / basics_brand / basics_brand_series 中的name的一种
      * @return 到的goods中的商品名称
      */
     List<Product> serchBoxName(@Param("name") String name);
+
+    Product selectProductByGoodsIdAndBrandIdAndBrandSeriesId(String goodsId, String brandId, String brandSeriesId);
 }

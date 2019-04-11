@@ -773,7 +773,7 @@ public class HouseWorkerService {
             HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
             if (houseFlowApply.getStartDate().before(new Date()) && houseFlowApply.getEndDate().after(new Date())) {
-                return ServerResponse.createByErrorMessage("工序("+workerType.getName()+")处于停工期间!");
+                return ServerResponse.createByErrorMessage("工序(" + workerType.getName() + ")处于停工期间!");
             }
         }
 
@@ -785,7 +785,7 @@ public class HouseWorkerService {
                 if (hf.getPause() == 1) {
 
                     WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
-                    return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "该工序（"+workerType.getName()+"）已暂停施工,请勿提交申请！");
+                    return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "该工序（" + workerType.getName() + "）已暂停施工,请勿提交申请！");
                 }
                 if (house.getPause() != null) {
                     if (house.getPause() == 1) {
@@ -815,10 +815,10 @@ public class HouseWorkerService {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             if (applyType == 3) {
                 if (houseFlow.getPause() == 1) {
-                    return ServerResponse.createByErrorMessage("该工序（"+workerType.getName()+"）已暂停施工,请勿重复申请");
+                    return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已暂停施工,请勿重复申请");
                 }
                 if (houseFlow.getWorkSteta() == 3) {
-                    return ServerResponse.createByErrorMessage("该工序（"+workerType.getName()+"）待交底请勿发起停工申请");
+                    return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）待交底请勿发起停工申请");
                 }
             }
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());//查询房子
@@ -833,7 +833,7 @@ public class HouseWorkerService {
             /*提交申请进行控制*/
             List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
             if (changeOrderList.size() > 0) {
-                return ServerResponse.createByErrorMessage("该工种（"+workerType.getName()+"）有未处理变更单,通知管家处理");
+                return ServerResponse.createByErrorMessage("该工种（" + workerType.getName() + "）有未处理变更单,通知管家处理");
             }
 
             //包括所有申请 和 巡查
@@ -938,7 +938,7 @@ public class HouseWorkerService {
 
                 configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "工匠申请停工",
                         String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "5");
-                return ServerResponse.createBySuccessMessage("工匠申请停工（"+workerType.getName()+"）操作成功");
+                return ServerResponse.createBySuccessMessage("工匠申请停工（" + workerType.getName() + "）操作成功");
 
             } else if (applyType == 4) {
                 String s2 = DateUtil.getDateString2(new Date().getTime()) + " 12:00:00";//当天12点
@@ -957,6 +957,7 @@ public class HouseWorkerService {
                 return ServerResponse.createBySuccessMessage("操作成功");
             } else if (applyType == 5) {//有人巡
                 hfa.setApplyDec("业主您好,我是" + workerType.getName() + ",大管家已经巡查了");//描述
+                hfa.setWorkerId(supervisorHF.getWorkerId());
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 Example example2 = new Example(HouseFlowApply.class);
@@ -1010,16 +1011,18 @@ public class HouseWorkerService {
                     workerDetailMapper.insert(workerDetail);
                 } else {
                     houseFlowApplyMapper.insert(hfa);
-                    return ServerResponse.createBySuccessMessage("工序（"+workerType.getName()+"）巡查成功");
+                    return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）巡查成功");
                 }
 
             } else if (applyType == 6) {//无人巡查
                 hfa.setApplyDec("业主您好，我已经巡查了工地，工地情况如图");//描述
+                hfa.setWorkerId(supervisorHF.getWorkerId());
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 houseFlowApplyMapper.insert(hfa);
             } else if (applyType == 7) {//追加巡查
                 hfa.setApplyDec("业主您好，我已经巡查了工地，工地情况如图");//描述
+                hfa.setWorkerId(supervisorHF.getWorkerId());
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 houseFlowApplyMapper.insert(hfa);
@@ -1269,7 +1272,7 @@ public class HouseWorkerService {
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);//查询houseFlow
             HouseWorker hw = houseWorkerMapper.getHwByHidAndWtype(houseFlow.getHouseId(), worker.getWorkerType());//这是查的大管家houseworker
             HouseFlowApply houseFlowApp = houseFlowApplyMapper.checkSupervisorApply(houseFlow.getId(), hw.getWorkerId());//查询大管家是否有验收申请
-            if(houseFlowApp!=null){
+            if (houseFlowApp != null) {
                 return ServerResponse.createByErrorMessage("您已申请验收，重复申请！");
             }
             //新生成大管家hfa

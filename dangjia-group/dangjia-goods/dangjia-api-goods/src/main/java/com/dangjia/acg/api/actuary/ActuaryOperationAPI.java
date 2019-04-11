@@ -44,7 +44,7 @@ public interface ActuaryOperationAPI {
      * 选择货品
      */
     @PostMapping("/actuary/actuaryOperation/selectProduct")
-    @ApiOperation(value = "选择货", notes = "选择货")
+    @ApiOperation(value = "选择货品", notes = "选择货品")
     ServerResponse selectProduct(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("goodsId") String goodsId,
                                  @RequestParam("brandId") String brandId,
