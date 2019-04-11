@@ -15,6 +15,7 @@ public class SplitReportDeliverOrderItemDTO {
     private String image;
     private String productName;
     private String productSn;
+    private String productId;
     private BigDecimal supCost;
     private BigDecimal num;
     private BigDecimal price;

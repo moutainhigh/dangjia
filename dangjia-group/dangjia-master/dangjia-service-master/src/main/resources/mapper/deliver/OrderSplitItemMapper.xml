@@ -98,6 +98,55 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ORDER BY
             si.create_date DESC;
 	</select>
-    <!--********************查看统计 结束**********************-->
+
+
+    <!--要货订单商品列表-->
+    <select id="getSplitReportGoodsOrderItems" resultType="com.dangjia.acg.dto.deliver.SplitReportDeliverOrderItemDTO">
+       SELECT
+            si.image,
+            si.product_name productName,
+            si.product_sn productSn,
+            si.product_id productId,
+            sum(si.num) num,
+            (si.price * si.num) totalPrice
+        FROM
+            `dj_deliver_order_split` s
+        INNER JOIN dj_deliver_order_split_item si ON si.order_split_id = s.id
+        WHERE
+            s.house_id = #{houseId}
+        GROUP BY
+            si.product_sn
+        ORDER BY
+            si.create_date DESC;
+	</select>
+
+
+    <!--指定房子所有发货的供应商-->
+    <select id="getSplitReportGoodsSuppliers" resultType="com.dangjia.acg.dto.deliver.SplitReportSupplierDTO">
+        SELECT
+            sd.supplier_id supplierId,
+            sd.supplier_name supplierName,
+            sd.supplier_telephone supplierTelephone,
+            si.house_id houseId,
+            sum(si.num) num,
+            sd.send_time sendTime,
+            si.create_date createDate,
+            sd.number,
+            si.price,
+            sum(si.price * si.num) totalPrice
+        FROM
+            `dj_deliver_order_split_item` si
+        INNER JOIN dj_deliver_split_deliver sd ON si.split_deliver_id = sd.id
+        AND sd.supplier_id IS NOT NULL
+        WHERE
+            si.house_id =  #{houseId}
+        AND si.product_sn =  #{productSn}
+        GROUP BY
+            sd.supplier_id,
+            si.house_id
+        ORDER BY
+            si.house_id;
+	</select>
+   <!--********************查看统计 结束**********************-->
 </mapper>
 
