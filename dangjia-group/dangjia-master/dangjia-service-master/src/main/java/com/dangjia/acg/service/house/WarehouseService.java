@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.house;
 
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.ActuaryOpeAPI;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
@@ -16,6 +17,8 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.member.Member;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -47,6 +50,9 @@ public class WarehouseService {
     private ActuaryOpeAPI actuaryOpeAPI;
     @Autowired
     private IHouseMapper houseMapper;
+
+    @Autowired
+    private RedisClient redisClient;
     private static Logger LOG = LoggerFactory.getLogger(WarehouseService.class);
 
 
@@ -54,8 +60,10 @@ public class WarehouseService {
      * 查询仓库材料
      * type 0材料 1服务 2所有
      */
-    public ServerResponse warehouseList(Integer pageNum, Integer pageSize, String houseId, String categoryId, String name, Integer type) {
+    public ServerResponse warehouseList(String  userToken,Integer pageNum, Integer pageSize, String houseId, String categoryId, String name, Integer type) {
         try {
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            Member member=accessToken.getMember();
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
@@ -63,6 +71,13 @@ public class WarehouseService {
             Example example=new Example(Warehouse.class);
             Example.Criteria criteria=example.createCriteria();
             criteria.andEqualTo(Warehouse.HOUSE_ID,houseId);
+            if(type==null){
+                if(member.getWorkerType()==3){
+                    type=1;
+                }else{
+                    type=0;
+                }
+            }
             if(type!=null&&type<2){
                 criteria.andEqualTo(Warehouse.PRODUCT_TYPE,type);
             }
@@ -101,11 +116,20 @@ public class WarehouseService {
      * 查询仓库材料（已购买）
      * type 0材料 1服务 2人工
      */
-    public ServerResponse warehouseGmList(HttpServletRequest request, String houseId, String name, Integer type) {
+    public ServerResponse warehouseGmList(HttpServletRequest request,String  userToken, String houseId, String name, Integer type) {
         try {
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            Member member=accessToken.getMember();
             String cityId = request.getParameter(Constants.CITY_ID);
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
+            }
+            if(type==null){
+                if(member.getWorkerType()==3){
+                    type=1;
+                }else{
+                    type=0;
+                }
             }
             Map<String, Map> maps = new HashMap<>();
             Map map=new HashMap();
