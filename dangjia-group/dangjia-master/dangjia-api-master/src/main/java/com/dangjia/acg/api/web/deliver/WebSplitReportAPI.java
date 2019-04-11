@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.web.deliver;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,6 +33,6 @@ public interface WebSplitReportAPI {
 
     @PostMapping("web/deliver/split/report/goods")
     @ApiOperation(value = "要货单商品列表统计（商品维度）", notes = "要货单商品列表统计（商品维度）")
-    ServerResponse getSplitReportGoodsOrderItems(String houseId);
+    ServerResponse getSplitReportGoodsOrderItems(@RequestParam("pageDTO") PageDTO pageDTO, String houseId);
 
 }
