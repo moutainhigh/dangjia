@@ -115,6 +115,9 @@ public class WalletService {
             wd.setState(0);//未处理
             withdrawDepositMapper.insert(wd);
 
+
+            BigDecimal haveMoney = worker.getHaveMoney().subtract(new BigDecimal(money));
+            BigDecimal surplusMoneys = worker.getSurplusMoney().subtract(new BigDecimal(money));
             //记录流水
             WorkerDetail workerDetail = new WorkerDetail();
             workerDetail.setName("提取现金");
@@ -122,11 +125,11 @@ public class WalletService {
             workerDetail.setWorkerName(worker.getName());
             workerDetail.setMoney(new BigDecimal(money));
             workerDetail.setState(1);//出
-            workerDetail.setWalletMoney(worker.getHaveMoney());
+            workerDetail.setWalletMoney(haveMoney);
             workerDetailMapper.insert(workerDetail);
 
-            worker.setHaveMoney(worker.getHaveMoney().subtract(new BigDecimal(money)));//更新已有钱
-            worker.setSurplusMoney(worker.getSurplusMoney().subtract(new BigDecimal(money)));
+            worker.setHaveMoney(haveMoney);//更新已有钱
+            worker.setSurplusMoney(surplusMoneys);
             worker.setPaycode(0);//验证码置0
             memberMapper.updateByPrimaryKeySelective(worker);
             return ServerResponse.createBySuccessMessage("提现成功！");
