@@ -70,10 +70,11 @@ public class TaskService {
         }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         Member member = accessToken.getMember();
-
         //该城市该用户所有房产
         Example example = new Example(House.class);
-        example.createCriteria().andEqualTo(House.MEMBER_ID, member.getId())
+        example.createCriteria()
+                .andEqualTo(House.MEMBER_ID, member.getId())
+                .andNotEqualTo(House.VISIT_STATE, 0).andNotEqualTo(House.VISIT_STATE, 2)
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = houseMapper.selectByExample(example);
         for (House house : houseList) {
