@@ -196,6 +196,7 @@
 			OR bbs.`name` LIKE CONCAT( '%', #{name}, '%' )
 			)
 		</if>
+		GROUP BY bg.id
 		ORDER BY bg.create_date desc
 	</select>
 
@@ -235,6 +236,7 @@
 			OR bbs.`name` LIKE CONCAT( '%', #{name}, '%' )
 			)
 		</if>
+		GROUP BY bg.id
 		ORDER BY bg.create_date desc
 	</select>
 	<!-- 补货查询商品库- -->
