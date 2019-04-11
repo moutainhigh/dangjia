@@ -35,7 +35,7 @@ public class DjConstants {
         public final static String GJREGISTERPROTOCOL = "gjRegisterProtocol?userToken=%s&cityId=%s&title=%s";//注册协议
         public final static String PROJECTDRAWINGLIST = "projectDrawingList?userToken=%s&cityId=%s&title=%s";//施工图
         public final static String QRCODE = "qrCode?userToken=%s&cityId=%s&title=%s";//二维码
-        public final static String PROJECTRECORD ="projectRecord?userToken=%s&cityId=%s&title=%s";//工地记录
+        public final static String PROJECTRECORD = "projectRecord?userToken=%s&cityId=%s&title=%s";//工地记录
         public final static String PROJECTADRESSLIST = "projectAdressList?userToken=%s&cityId=%s&title=%s";//工地通讯录
         public final static String GJJINGSUANLIST = "jsCraftsman?userToken=%s&cityId=%s&title=%s";//精算
         public final static String CONFIRMQIANGDAN = "confirmQiangdan?userToken=%s&cityId=%s&title=%s";//抢单确认
@@ -132,6 +132,9 @@ public class DjConstants {
         public final static Integer YOUXIAO_XUNCHA = 5;// 5有效巡查
         public final static Integer WUREN_XUNCHA = 6;// 6无人巡查
         public final static Integer ZUIJIA_XUNCHA = 7;// 7追加巡查
+        public final static Integer JIEDUAN_WANGONG_SUCCESS = 101;// 阶段完工审核
+        public final static Integer ZHENGTI_WANGONG_SUCCESS = 102;// 整体完工审核
+        public final static Integer NO_PASS = 666;// 整体完工
     }
 
 
