@@ -2,25 +2,20 @@ package com.dangjia.acg.service.finance;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.finance.WebWorkerDetailDTO;
-import com.dangjia.acg.mapper.config.ISmsMapper;
-import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.other.IBankCardMapper;
-import com.dangjia.acg.mapper.worker.*;
+import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,17 +86,21 @@ public class WebWalletService {
                 return ServerResponse.createByErrorMessage("自定义流水说明 不能为null");
 
             Member worker = iMemberMapper.selectByPrimaryKey(workerDetail.getWorkerId());
+            BigDecimal haveMoney = new BigDecimal(0);
+            BigDecimal surplusMoney = new BigDecimal(0);
 //            if(workerDetail.getState() == 3 && worker.getSurplusMoney().compareTo(workerDetail.getMoney()) < 0){
 //                return ServerResponse.createByErrorMessage("工匠余额不足");
 //            }
             if (workerDetail.getState() == 3) {//减钱
-                worker.setHaveMoney(worker.getHaveMoney().subtract(workerDetail.getMoney()));
-                worker.setSurplusMoney(worker.getSurplusMoney().subtract(workerDetail.getMoney()));
+                haveMoney =worker.getHaveMoney().subtract(workerDetail.getMoney());
+                surplusMoney = worker.getSurplusMoney().subtract(workerDetail.getMoney());
             }
             if (workerDetail.getState() == 2) {//加钱
-                worker.setHaveMoney(worker.getHaveMoney().add(workerDetail.getMoney()));
-                worker.setSurplusMoney(worker.getSurplusMoney().add(workerDetail.getMoney()));
+                haveMoney =worker.getHaveMoney().add(workerDetail.getMoney());
+                surplusMoney = worker.getSurplusMoney().add(workerDetail.getMoney());
             }
+            worker.setHaveMoney(haveMoney);
+            worker.setSurplusMoney(surplusMoney);
             iMemberMapper.updateByPrimaryKeySelective(worker);
 
             //记录到管家流水

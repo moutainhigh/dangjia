@@ -944,10 +944,10 @@ public class HouseWorkerService {
                 String s2 = DateUtil.getDateString2(new Date().getTime()) + " 12:00:00";//当天12点
                 Date lateDate = DateUtil.toDate(s2);
                 Date newDate2 = new Date();//当前时间
-                Long downTime = newDate2.getTime() - lateDate.getTime();//对比12点
-                if (downTime > 0) {
-                    return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
-                }
+//                Long downTime = newDate2.getTime() - lateDate.getTime();//对比12点
+//                if (downTime > 0) {
+//                    return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
+//                }
                 hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经开工了");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
@@ -992,12 +992,16 @@ public class HouseWorkerService {
                     if (supervisor.getSurplusMoney() == null) {
                         supervisor.setSurplusMoney(new BigDecimal(0));
                     }
-                    supervisor.setHaveMoney(supervisor.getHaveMoney().add(supervisorHF.getPatrolMoney()));
-                    supervisor.setSurplusMoney(supervisor.getSurplusMoney().add(supervisorHF.getPatrolMoney()));
+                    BigDecimal haveMoneys = supervisor.getHaveMoney().add(supervisorHF.getPatrolMoney());
+                    BigDecimal surplusMoneys =supervisor.getSurplusMoney().add(supervisorHF.getPatrolMoney());
+                    supervisor.setHaveMoney(haveMoneys);
+                    supervisor.setSurplusMoney(surplusMoneys);
                     memberMapper.updateByPrimaryKeySelective(supervisor);
+
+
                     //记录到管家流水
                     WorkerDetail workerDetail = new WorkerDetail();
-                    workerDetail.setName("巡查收入");
+                    workerDetail.setName(workerType.getName()+"巡查收入");
                     workerDetail.setWorkerId(supervisor.getId());
                     workerDetail.setWorkerName(supervisor.getName());
                     workerDetail.setHouseId(hfa.getHouseId());
@@ -1005,7 +1009,7 @@ public class HouseWorkerService {
                     workerDetail.setState(0);//进钱
                     workerDetail.setHaveMoney(supervisorHWO.getHaveMoney());
                     workerDetail.setHouseWorkerOrderId(supervisorHWO.getId());
-                    workerDetail.setApplyMoney(supervisorHF.getPatrolMoney());
+                    workerDetail.setApplyMoney(haveMoneys);
                     workerDetail.setWalletMoney(supervisor.getHaveMoney());
                     workerDetailMapper.insert(workerDetail);
                 } else {

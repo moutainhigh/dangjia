@@ -172,16 +172,31 @@
 	<!-- 查询某个分类的商品 模糊name -->
 	<select id="queryGoodsListByCategoryLikeName" resultType="com.dangjia.acg.modle.basics.Goods">
 		SELECT
-		<include refid="new_columns"/>
-		FROM dj_basics_goods
+			bg.id as id,
+			bg.`NAME` as name,
+			bg.category_id AS categoryId,
+			bg.type as type,
+			bg.buy as buy,
+			bg.sales as sales,
+			bg.unit_id AS unitId,
+			bg.create_date AS createDate,
+			bg.modify_date AS modifyDate
+		FROM dj_basics_goods bg
+		INNER JOIN dj_basics_product bp ON bp.goods_id = bg.id
+		INNER JOIN dj_basics_brand bb ON bb.id = bp.brand_id
+		INNER JOIN dj_basics_brand_series bbs ON bbs.id = bp.brand_series_id
 		where 1=1
 		<if test="categoryId!=null and categoryId!=''">
-			and category_id=#{categoryId}
+			and bg.category_id=#{categoryId}
 		</if>
 		<if test="name!=null and name!=''">
-			and name LIKE CONCAT('%',#{name},'%')
+			AND (
+			bp.`name` LIKE CONCAT('%',#{name}, '%' )
+			OR bb.`name` LIKE CONCAT('%',#{name}, '%' )
+			OR bbs.`name` LIKE CONCAT( '%', #{name}, '%' )
+			)
 		</if>
-		ORDER BY create_date desc
+		ORDER BY bg.create_date desc
 	</select>
 
 	<!-- 查询某个分类的商品 模糊name -->
