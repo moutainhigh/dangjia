@@ -1,22 +1,17 @@
 package com.dangjia.acg.service.finance;
 
-import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
-import com.dangjia.acg.modle.sup.Supplier;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -34,7 +29,7 @@ public class WebSplitDeliverService {
      * 所有供应商发货订单
      *
      * @param pageDTO    分页参数
-     * @param applyState 状态
+     * @param applyState 供应商申请结算的状态：0申请中(待处理)；1不通过(驳回)；2通过(同意),3其它(迁移)
      * @param searchKey  收货地址，供应商名称
      * @param beginDate  开始时间
      * @param endDate    结束时间
@@ -43,6 +38,9 @@ public class WebSplitDeliverService {
     public ServerResponse getAllSplitDeliver(PageDTO pageDTO, Integer applyState, String searchKey, String beginDate, String endDate) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
+                applyState = -1;
+            }
             List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(applyState, searchKey, beginDate, endDate);
             PageInfo pageResult = new PageInfo(webSplitDeliverItemDTOLists);
             return ServerResponse.createBySuccess("查询成功", pageResult);

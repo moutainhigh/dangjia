@@ -33,6 +33,7 @@
         </if>
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
             and modify_date between #{beginDate} and #{endDate}
+            and apply_state != 0
         </if>
         <if test="searchKey!=null and searchKey!=''">
             and ( ship_address like CONCAT('%',#{searchKey},'%')
@@ -40,7 +41,6 @@
             or ship_name like CONCAT('%',#{searchKey},'%')
             or supplier_name like CONCAT('%',#{searchKey},'%'))
         </if>
-
         ORDER BY
         create_date DESC
     </select>
