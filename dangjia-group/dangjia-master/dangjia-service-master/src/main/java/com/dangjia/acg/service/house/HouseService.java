@@ -1309,7 +1309,7 @@ public class HouseService {
      * @return
      */
     public ServerResponse getAllHouseByVisitState(Integer visitState) {
-        List<House> houseList = iHouseMapper.getAllHouseByVisitState(1);//0待确认开工,1装修中,2休眠中,3已完工
+        List<House> houseList = iHouseMapper.getAllHouseByVisitState(visitState);//0待确认开工,1装修中,2休眠中,3已完工
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (House house : houseList) {
             Map<String, Object> map = new HashMap<>();
