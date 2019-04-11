@@ -992,12 +992,16 @@ public class HouseWorkerService {
                     if (supervisor.getSurplusMoney() == null) {
                         supervisor.setSurplusMoney(new BigDecimal(0));
                     }
-                    supervisor.setHaveMoney(supervisor.getHaveMoney().add(supervisorHF.getPatrolMoney()));
-                    supervisor.setSurplusMoney(supervisor.getSurplusMoney().add(supervisorHF.getPatrolMoney()));
+                    BigDecimal haveMoneys = supervisor.getHaveMoney().add(supervisorHF.getPatrolMoney());
+                    BigDecimal surplusMoneys =supervisor.getSurplusMoney().add(supervisorHF.getPatrolMoney());
+                    supervisor.setHaveMoney(haveMoneys);
+                    supervisor.setSurplusMoney(surplusMoneys);
                     memberMapper.updateByPrimaryKeySelective(supervisor);
+
+
                     //记录到管家流水
                     WorkerDetail workerDetail = new WorkerDetail();
-                    workerDetail.setName("巡查收入");
+                    workerDetail.setName(workerType.getName()+"巡查收入");
                     workerDetail.setWorkerId(supervisor.getId());
                     workerDetail.setWorkerName(supervisor.getName());
                     workerDetail.setHouseId(hfa.getHouseId());
@@ -1005,7 +1009,7 @@ public class HouseWorkerService {
                     workerDetail.setState(0);//进钱
                     workerDetail.setHaveMoney(supervisorHWO.getHaveMoney());
                     workerDetail.setHouseWorkerOrderId(supervisorHWO.getId());
-                    workerDetail.setApplyMoney(supervisorHF.getPatrolMoney());
+                    workerDetail.setApplyMoney(haveMoneys);
                     workerDetail.setWalletMoney(supervisor.getHaveMoney());
                     workerDetailMapper.insert(workerDetail);
                 } else {

@@ -264,7 +264,7 @@ public class OrderSplitService {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(orderSplit.getWorkerTypeId());
             if (orderSplitList.size() > workerType.getSafeState()) {//超过免费次数收工匠运费
                 //TODO 计算运费 暂无准确计算公式
-                Double yunFei = 0.1;
+                BigDecimal yunFei = new BigDecimal(0.1);
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
                 List<OrderSplitItem> osiList = orderSplitItemMapper.selectByExample(example);
@@ -274,19 +274,21 @@ public class OrderSplitService {
                 }
 
                 Member worker = memberMapper.selectByPrimaryKey(orderSplit.getSupervisorId());//要货人
+                BigDecimal haveMoney = worker.getHaveMoney().subtract(yunFei);
+                BigDecimal surplusMoneys = worker.getSurplusMoney().subtract(yunFei);
                 WorkerDetail workerDetail = new WorkerDetail();
-                workerDetail.setName("要货运费");
+                workerDetail.setName(workerType.getName()+"要货运费");
                 workerDetail.setWorkerId(worker.getId());
                 workerDetail.setWorkerName(worker.getName());
                 workerDetail.setHouseId(orderSplit.getHouseId());
-                workerDetail.setMoney(new BigDecimal(yunFei));
+                workerDetail.setMoney(yunFei);
                 workerDetail.setState(7);//收取运费
-                workerDetail.setWalletMoney(worker.getHaveMoney());
-                workerDetail.setApplyMoney(new BigDecimal(yunFei));
+                workerDetail.setWalletMoney(haveMoney);
+                workerDetail.setApplyMoney(yunFei);
                 workerDetailMapper.insert(workerDetail);
 
-                worker.setHaveMoney(worker.getHaveMoney().subtract(new BigDecimal(yunFei)));
-                worker.setSurplusMoney(worker.getSurplusMoney().subtract(new BigDecimal(yunFei)));
+                worker.setHaveMoney(haveMoney);
+                worker.setSurplusMoney(surplusMoneys);
                 memberMapper.updateByPrimaryKeySelective(worker);
             }
 

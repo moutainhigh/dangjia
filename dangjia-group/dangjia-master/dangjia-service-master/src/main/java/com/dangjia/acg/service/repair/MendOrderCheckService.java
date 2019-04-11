@@ -328,8 +328,11 @@ public class MendOrderCheckService {
                     forMasterAPI.backCount(house.getCityId(), mendOrder.getHouseId(), mendWorker.getWorkerGoodsId(), mendWorker.getShopCount());
                 }
                 Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                member.setSurplusMoney(member.getSurplusMoney().add(refund));
-                member.setHaveMoney(member.getHaveMoney().add(refund));
+                BigDecimal haveMoney = member.getHaveMoney().add(refund);
+                BigDecimal surplusMoney = member.getSurplusMoney().add(refund);
+
+                member.setSurplusMoney(surplusMoney);
+                member.setHaveMoney(haveMoney);
                 memberMapper.updateByPrimaryKeySelective(member);
 
                 //记录流水
@@ -338,9 +341,9 @@ public class MendOrderCheckService {
                 workerDetail.setWorkerId(member.getId());
                 workerDetail.setWorkerName(member.getName() == null?member.getNickName() : member.getName());
                 workerDetail.setHouseId(mendOrder.getHouseId());
-                workerDetail.setMoney(new BigDecimal(mendOrder.getTotalAmount()));
-                workerDetail.setApplyMoney(new BigDecimal(mendOrder.getTotalAmount()));
-                workerDetail.setWalletMoney(member.getHaveMoney());
+                workerDetail.setMoney(refund);
+                workerDetail.setApplyMoney(refund);
+                workerDetail.setWalletMoney(haveMoney);
                 workerDetail.setState(6);//退人工退款
                 workerDetailMapper.insert(workerDetail);
 
@@ -373,6 +376,8 @@ public class MendOrderCheckService {
 
                 /*退钱给业主*/
                 Member member = memberMapper.selectByPrimaryKey(houseMapper.selectByPrimaryKey(mendOrder.getHouseId()).getMemberId());
+                BigDecimal haveMoney = member.getHaveMoney().add(new BigDecimal(mendOrder.getTotalAmount()));
+                BigDecimal surplusMoney = member.getSurplusMoney().add(new BigDecimal(mendOrder.getTotalAmount()));
                 //记录流水
                 WorkerDetail workerDetail = new WorkerDetail();
                 workerDetail.setName("退材料退款");
@@ -381,7 +386,7 @@ public class MendOrderCheckService {
                 workerDetail.setHouseId(mendOrder.getHouseId());
                 workerDetail.setMoney(new BigDecimal(mendOrder.getTotalAmount()));
                 workerDetail.setApplyMoney(new BigDecimal(mendOrder.getTotalAmount()));
-                workerDetail.setWalletMoney(member.getHaveMoney());
+                workerDetail.setWalletMoney(haveMoney);
                 if (mendOrder.getType() == 2){
                     workerDetail.setState(5);//进钱//工匠退 登记剩余
                 }else {
@@ -389,8 +394,8 @@ public class MendOrderCheckService {
                 }
                 workerDetailMapper.insert(workerDetail);
 
-                member.setHaveMoney(member.getHaveMoney().add(new BigDecimal(mendOrder.getTotalAmount())));
-                member.setSurplusMoney(member.getSurplusMoney().add(new BigDecimal(mendOrder.getTotalAmount())));
+                member.setHaveMoney(haveMoney);
+                member.setSurplusMoney(surplusMoney);
                 memberMapper.updateByPrimaryKeySelective(member);
 
                 mendOrder.setState(4);
