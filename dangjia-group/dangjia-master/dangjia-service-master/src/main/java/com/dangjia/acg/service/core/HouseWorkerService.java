@@ -900,6 +900,7 @@ public class HouseWorkerService {
                     hfa.setApplyMoney(new BigDecimal(0));
                 }
                 hfa.setOtherMoney(workPrice.subtract(haveMoney).subtract(hfa.getApplyMoney()));
+
                 hfa.setApplyDec("我是" + workType.getName() + ",我已申请了阶段完工");//描述
                 hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
                 //增加倒计时系统自动审核时间

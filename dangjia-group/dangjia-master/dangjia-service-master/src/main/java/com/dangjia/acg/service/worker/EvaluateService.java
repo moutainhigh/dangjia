@@ -158,8 +158,8 @@ public class EvaluateService {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             houseFlowApply.setApplyDec(content);
             houseFlowApply.setSupervisorCheck(2);
+            houseFlowApply.setApplyType(IApplyTypeEnum.NO_PASS.getCode());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-
 
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             configMessageService.addConfigMessage(null, "gj", houseFlowApply.getWorkerId(), "0", "完工申请结果", String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS, house.getHouseName()), "5");
@@ -243,14 +243,26 @@ public class EvaluateService {
 
             // 修改HouseFlowApply内容
             // 通过houseId获得大管家的HouseFlow
+            // 添加大管家通过申请的内容
             HouseFlow flowByHidAndWty = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);
-            houseFlowApply.setWorkerId(flowByHidAndWty.getWorkerId());
-            String appDesc = "业主您好,我是大管家,我已验收" + IWorkTypeEnum.getValue(houseFlowApply.getWorkerType())
-                    + "申请的" + IApplyTypeEnum.getValue(houseFlowApply.getApplyType());
-            houseFlowApply.setApplyDec(appDesc);
-            houseFlowApply.setWorkerType(3);
-            houseFlowApply.setWorkerTypeId(flowByHidAndWty.getWorkerTypeId());
-            houseFlowApply.setWorkerId(flowByHidAndWty.getWorkerId());
+//            houseFlowApply.setWorkerId(flowByHidAndWty.getWorkerId());
+            int n = houseFlowApply.getApplyType();
+            switch (houseFlowApply.getApplyType()) {
+                case 1:
+                    n = 101;
+                    break;
+                case 2:
+                    n = 102;
+                    break;
+            }
+            String appDesc = "业主您好,我是大管家,我已验收了" + IWorkTypeEnum.getValue(houseFlowApply.getWorkerType()) + ": " + worker.getName()
+                    + "申请的" + IApplyTypeEnum.getValue(n);
+//            houseFlowApply.setApplyDec(appDesc);
+//            houseFlowApply.setWorkerType(3);
+//            houseFlowApply.setWorkerTypeId(flowByHidAndWty.getWorkerTypeId());
+//            houseFlowApply.setWorkerId(flowByHidAndWty.getWorkerId());
+            HouseFlowApply bigHouseFlowApply = setBigHouseFlowApply(houseFlowApply, flowByHidAndWty, appDesc, n);
+            houseFlowApplyMapper.insert(bigHouseFlowApply);
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
             /*
              * 大管家每次审核拿钱 新算法 2018.08.03
@@ -278,6 +290,27 @@ public class EvaluateService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
+    }
+
+    private HouseFlowApply setBigHouseFlowApply(HouseFlowApply houseFlowApply, HouseFlow flowByHidAndWty, String appDesc, int applyType) {
+        HouseFlowApply bigHouseFlowApply = new HouseFlowApply();
+        bigHouseFlowApply.setHouseFlowId(houseFlowApply.getHouseFlowId());
+        bigHouseFlowApply.setWorkerId(flowByHidAndWty.getWorkerId());
+        bigHouseFlowApply.setWorkerTypeId(flowByHidAndWty.getWorkerTypeId());
+        bigHouseFlowApply.setWorkerType(3);
+        bigHouseFlowApply.setHouseId(houseFlowApply.getHouseId());
+        bigHouseFlowApply.setApplyType(applyType);
+        bigHouseFlowApply.setSuspendDay(houseFlowApply.getSuspendDay());
+        bigHouseFlowApply.setStartDate(houseFlowApply.getStartDate());
+        bigHouseFlowApply.setEndDate(houseFlowApply.getEndDate());
+        bigHouseFlowApply.setApplyDec(appDesc);
+        bigHouseFlowApply.setMemberCheck(1);
+        bigHouseFlowApply.setSupervisorCheck(1);
+        bigHouseFlowApply.setApplyMoney(houseFlowApply.getApplyMoney());
+        bigHouseFlowApply.setPayState(houseFlowApply.getPayState());
+        bigHouseFlowApply.setOtherMoney(houseFlowApply.getOtherMoney());
+        bigHouseFlowApply.setSupervisorMoney(houseFlowApply.getSupervisorMoney());
+        return bigHouseFlowApply;
     }
 
     /**
@@ -440,7 +473,8 @@ public class EvaluateService {
         BigDecimal evaluationXA = new BigDecimal("1.0");
         BigDecimal score = new BigDecimal(0);
 
-        if (worker.getWorkerType() == 3) {//管家加分
+        //管家加分
+        if (worker.getWorkerType() == 3) {
             if (worker.getEvaluationScore().compareTo(new BigDecimal("70")) == -1) {
                 score = evaluationXA.multiply(new BigDecimal("0.6"));
             } else if (worker.getEvaluationScore().compareTo(new BigDecimal("70")) >= 0 &&
