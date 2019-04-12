@@ -1227,9 +1227,9 @@ public class HouseService {
         applyTypeMap.put(DjConstants.ApplyType.YOUXIAO_XUNCHA, "巡查");
         applyTypeMap.put(DjConstants.ApplyType.WUREN_XUNCHA, "巡查");
         applyTypeMap.put(DjConstants.ApplyType.ZUIJIA_XUNCHA, "巡查");
-        applyTypeMap.put(DjConstants.ApplyType.JIEDUAN_WANGONG_SUCCESS, "阶段完工审核");
-        applyTypeMap.put(DjConstants.ApplyType.ZHENGTI_WANGONG_SUCCESS, "整体完工审核");
-        applyTypeMap.put(DjConstants.ApplyType.NO_PASS, "审核未通过");
+//        applyTypeMap.put(DjConstants.ApplyType.JIEDUAN_WANGONG_SUCCESS, "阶段完工审核");
+//        applyTypeMap.put(DjConstants.ApplyType.ZHENGTI_WANGONG_SUCCESS, "整体完工审核");
+//        applyTypeMap.put(DjConstants.ApplyType.NO_PASS, "审核未通过");
         Map<String, Object> map = new HashMap<>();
         map.put("id", hfa.getId());
         Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
