@@ -238,7 +238,7 @@ public class EvaluateService {
 
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DAY_OF_YEAR, 7);//业主倒计时
-            houseFlowApply.setStartDate(calendar.getTime());
+            houseFlowApply.setEndDate(calendar.getTime());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
             /*
              * 大管家每次审核拿钱 新算法 2018.08.03

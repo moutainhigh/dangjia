@@ -891,7 +891,7 @@ public class HouseWorkerService {
                 //增加倒计时系统自动审核时间
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.DAY_OF_YEAR, 3);//管家倒计时
-                hfa.setEndDate(calendar.getTime());
+                hfa.setStartDate(calendar.getTime());
                 // 阶段完工,管家审核通过工匠完工申请 @link checkOk()
                 houseFlowApplyMapper.insert(hfa);
                 configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "阶段完工申请",
@@ -905,7 +905,7 @@ public class HouseWorkerService {
                 //增加倒计时系统自动审核时间
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.DAY_OF_YEAR, 3);//管家倒计时
-                hfa.setEndDate(calendar.getTime());
+                hfa.setStartDate(calendar.getTime());
                 houseFlowApplyMapper.insert(hfa);
 
                 configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "整体完工申请",
@@ -932,9 +932,9 @@ public class HouseWorkerService {
                 Date lateDate = DateUtil.toDate(s2);
                 Date newDate2 = new Date();//当前时间
                 Long downTime = newDate2.getTime() - lateDate.getTime();//对比12点
-                if (downTime > 0) {
+               /* if (downTime > 0) {
                     return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
-                }
+                }*/
                 hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经开工了");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
