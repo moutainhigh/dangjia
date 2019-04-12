@@ -243,6 +243,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where house_flow_id = #{houseFlowId}
         order by create_date DESC
     </select>
+    <select id="queryHfaByHouseId" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        SELECT <include refid="all_columns" />
+        FROM
+             dj_core_house_flow_apply
+        WHERE 1 = 1
+          AND house_id = #{houseId}
+          AND supervisor_check = 1
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            and worker_type_id=#{workerTypeId}
+        </if>
+        ORDER BY create_date DESC
+    </select>
 
 </mapper>
 
