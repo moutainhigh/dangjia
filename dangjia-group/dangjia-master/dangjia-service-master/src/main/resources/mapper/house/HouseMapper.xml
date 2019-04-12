@@ -63,7 +63,7 @@
             <if test="number!=null and number!=''">
                 AND house.number like #{number}
             </if>
-            <if test="userName!=null and userName!=''">
+            <if test="mobile!=null and mobile!=''">
                 AND member.mobile like #{mobile}
             </if>
         </where>
