@@ -172,9 +172,9 @@ public class SplitDeliverService {
                 Member operator = memberMapper.selectByPrimaryKey(splitDeliver.getOperatorId());
                 if(StringUtil.isNotEmpty(operator.getWorkerTypeId())){
                     WorkerType workerType = workerTypeMapper.selectByPrimaryKey(operator.getWorkerTypeId());
-                    splitDeliverDTO.setOperatorName(workerType.getName() + operator.getName() == null ? operator.getNickName() : operator.getName());
+                    splitDeliverDTO.setOperatorName(workerType.getName()+"-" + (operator.getName() == null ? operator.getNickName() : operator.getName()));
                 }else {
-                    splitDeliverDTO.setOperatorName("业主" + operator.getName() == null ? operator.getNickName() : operator.getName());
+                    splitDeliverDTO.setOperatorName("业主-" + operator.getName() == null ? operator.getNickName() : operator.getName());
                 }
             }
 
