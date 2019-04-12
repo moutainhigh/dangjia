@@ -148,5 +148,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and worker_type not in (1,2,3)
         order by sort asc
     </select>
+    <select id="getMemberByHouseIdAndWorkerType" resultType="com.dangjia.acg.modle.member.Member">
+        SELECT m.*
+        FROM dj_core_house_flow chf
+        INNER JOIN dj_member m on m.id = chf.worker_id
+        WHERE chf.house_id = #{houseId}
+        AND chf.worker_type =#{workerType}
+    </select>
 </mapper>
 
