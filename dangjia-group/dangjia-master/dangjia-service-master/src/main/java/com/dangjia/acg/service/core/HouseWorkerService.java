@@ -890,7 +890,9 @@ public class HouseWorkerService {
                 hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
                 //增加倒计时系统自动审核时间
                 Calendar calendar = Calendar.getInstance();
-                calendar.add(Calendar.DAY_OF_YEAR, 3);
+                calendar.add(Calendar.DAY_OF_YEAR, 3);//管家倒计时
+                hfa.setStartDate(calendar.getTime());
+                calendar.add(Calendar.DAY_OF_YEAR, 7);//业主倒计时
                 hfa.setEndDate(calendar.getTime());
                 // 阶段完工,管家审核通过工匠完工申请 @link checkOk()
                 houseFlowApplyMapper.insert(hfa);
@@ -904,7 +906,9 @@ public class HouseWorkerService {
                 hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
                 //增加倒计时系统自动审核时间
                 Calendar calendar = Calendar.getInstance();
-                calendar.add(Calendar.DAY_OF_YEAR, 3);
+                calendar.add(Calendar.DAY_OF_YEAR, 3);//管家倒计时
+                hfa.setStartDate(calendar.getTime());
+                calendar.add(Calendar.DAY_OF_YEAR, 7);//业主倒计时
                 hfa.setEndDate(calendar.getTime());
                 houseFlowApplyMapper.insert(hfa);
 

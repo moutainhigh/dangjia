@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.pay;
 
+import com.dangjia.acg.dto.deliver.WebOrderDTO;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -17,10 +18,7 @@ public interface IBusinessOrderMapper extends Mapper<BusinessOrder> {
 
     List<BusinessOrder> byMemberId(@Param("memberId") String memberId);
 
-    BusinessOrder byTaskId(@Param("taskId")String taskId,@Param("type")int type);
+    BusinessOrder byTaskId(@Param("taskId") String taskId, @Param("type") int type);
 
-    /**
-     * 查询所有订单
-     */
-    List<BusinessOrder> getAllBusinessOrder(@Param("likeMobile") String likeMobile, @Param("likeAddress") String likeAddress);
+    List<WebOrderDTO> getWebOrderList(@Param("state") Integer state, @Param("searchKey") String searchKey);
 }
