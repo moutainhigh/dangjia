@@ -999,7 +999,7 @@ public class HouseWorkerService {
                     workerDetail.setHaveMoney(supervisorHWO.getHaveMoney());
                     workerDetail.setHouseWorkerOrderId(supervisorHWO.getId());
                     workerDetail.setApplyMoney(haveMoneys);
-                    workerDetail.setWalletMoney(supervisor.getHaveMoney());
+                    workerDetail.setWalletMoney(supervisor.getSurplusMoney());
                     workerDetailMapper.insert(workerDetail);
                 } else {
                     houseFlowApplyMapper.insert(hfa);

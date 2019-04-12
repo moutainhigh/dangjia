@@ -235,7 +235,7 @@ public class HouseFlowApplyService {
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
                 //记录流水
                 Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
-                BigDecimal haveMoney = worker.getHaveMoney().add(hfa.getApplyMoney());
+                BigDecimal surplusMoney = worker.getSurplusMoney().add(hfa.getApplyMoney());
                 WorkerDetail workerDetail = new WorkerDetail();
                 workerDetail.setName("每日完工");
                 workerDetail.setWorkerId(hwo.getWorkerId());
@@ -245,7 +245,7 @@ public class HouseFlowApplyService {
                 workerDetail.setHaveMoney(hwo.getHaveMoney());
                 workerDetail.setHouseWorkerOrderId(hwo.getId());
                 workerDetail.setApplyMoney(hfa.getApplyMoney());
-                workerDetail.setWalletMoney(haveMoney);
+                workerDetail.setWalletMoney(surplusMoney);
                 workerDetail.setState(0);//进钱
                 workerDetailMapper.insert(workerDetail);
 
@@ -372,7 +372,7 @@ public class HouseFlowApplyService {
         houseFlowApply.setHouseId(hwo.getHouseId());
         deposit(houseFlowApply);
 
-        BigDecimal haveMoney = worker.getHaveMoney().add(supervisorMoney);
+        BigDecimal surplusMoney = worker.getSurplusMoney().add(supervisorMoney);
         //记录流水
         WorkerDetail workerDetail = new WorkerDetail();
         if(hfa.getApplyType() == 2){//整体完工申请
@@ -388,7 +388,7 @@ public class HouseFlowApplyService {
         workerDetail.setHaveMoney(hwo.getHaveMoney());
         workerDetail.setHouseWorkerOrderId(hwo.getId());
         workerDetail.setApplyMoney(hfa.getSupervisorMoney());//管家应拿的验收收入
-        workerDetail.setWalletMoney(haveMoney);
+        workerDetail.setWalletMoney(surplusMoney);
         workerDetailMapper.insert(workerDetail);
         //处理工钱
         if(worker.getHaveMoney() == null){//工人已获取
@@ -537,6 +537,7 @@ public class HouseFlowApplyService {
             hwo.setHaveMoney(hwo.getHaveMoney().add(applymoney));
             houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
             BigDecimal haveMoney = worker.getHaveMoney().add(applymoney);
+            BigDecimal surplusMoney = worker.getSurplusMoney().add(applymoney);
             //记录流水
             WorkerDetail workerDetail = new WorkerDetail();
             if(hfa.getApplyType() == 2){//整体完工申请
@@ -557,7 +558,7 @@ public class HouseFlowApplyService {
             workerDetail.setHaveMoney(hwo.getHaveMoney());
             workerDetail.setHouseWorkerOrderId(hwo.getId());
             workerDetail.setApplyMoney(hfa.getApplyMoney());
-            workerDetail.setWalletMoney(haveMoney);
+            workerDetail.setWalletMoney(surplusMoney);
             workerDetailMapper.insert(workerDetail);
 
 
@@ -591,7 +592,7 @@ public class HouseFlowApplyService {
     /**补人工算钱*/
     private void workerDetailRepair(HouseWorkerOrder hwo){
         Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
-        BigDecimal haveMoney = worker.getHaveMoney().add(hwo.getRepairPrice());
+        BigDecimal surplusMoney = worker.getSurplusMoney().add(hwo.getRepairPrice());
         WorkerDetail workerDetail = new WorkerDetail();
         workerDetail.setName("补人工钱");
         workerDetail.setWorkerId(hwo.getWorkerId());
@@ -601,7 +602,7 @@ public class HouseFlowApplyService {
         workerDetail.setState(0);//进钱
         workerDetail.setHaveMoney(hwo.getHaveMoney());
         workerDetail.setHouseWorkerOrderId(hwo.getId());
-        workerDetail.setWalletMoney(haveMoney);
+        workerDetail.setWalletMoney(surplusMoney);
         workerDetail.setApplyMoney(hwo.getRepairPrice());
         workerDetailMapper.insert(workerDetail);
 
@@ -666,7 +667,7 @@ public class HouseFlowApplyService {
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());
             //处理worker表中大管家
             Member worker = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
-            BigDecimal haveMoney = worker.getHaveMoney().add(applyMoney);
+            BigDecimal surplusMoney = worker.getSurplusMoney().add(applyMoney);
             //记录流水
             WorkerDetail workerDetail = new WorkerDetail();
             workerDetail.setName("项目完工收入");
@@ -678,7 +679,7 @@ public class HouseFlowApplyService {
             workerDetail.setHaveMoney(hwo.getHaveMoney());
             workerDetail.setHouseWorkerOrderId(hwo.getId());
             workerDetail.setApplyMoney(hfa.getApplyMoney());
-            workerDetail.setWalletMoney(haveMoney);
+            workerDetail.setWalletMoney(surplusMoney);
             workerDetailMapper.insert(workerDetail);
 
             //记录项目流水
