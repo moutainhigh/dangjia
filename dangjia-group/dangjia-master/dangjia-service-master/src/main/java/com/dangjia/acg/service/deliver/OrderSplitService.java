@@ -244,6 +244,7 @@ public class OrderSplitService {
                     splitDeliver.setSubmitTime(new Date());
                     splitDeliver.setSupState(0);
                     splitDeliver.setShippingState(0);//待发货状态
+                    splitDeliver.setApplyState(null);
                     splitDeliverMapper.insert(splitDeliver);
                 }
 
