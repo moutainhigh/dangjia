@@ -3,6 +3,7 @@ package com.dangjia.acg.service.complain;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.model.PageDTO;
@@ -33,6 +34,7 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
@@ -109,16 +111,23 @@ public class ComplainService {
      * @return
      */
 
-
-    public ServerResponse addComplain(String userToken, String memberId, Integer complainType, String businessId, String houseId, String files) {
+    public ServerResponse addComplain(String userToken, Integer complainType, String businessId, String houseId, String files) {
         if (CommonUtil.isEmpty(complainType) || CommonUtil.isEmpty(businessId)) {
             return ServerResponse.createByErrorMessage("参数错误");
         }
         if((complainType==2||complainType==3)&&CommonUtil.isEmpty(houseId)){
             return ServerResponse.createByErrorMessage("参数错误");
         }
+        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+        if (accessToken == null) {//无效的token
+            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+        }
+        Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+        if (user == null) {
+            return ServerResponse.createByErrorMessage("用户不存在");
+        }
         Complain complain = new Complain();
-        complain.setMemberId(memberId);
+        complain.setMemberId(user.getId());
         complain.setComplainType(complainType);
         complain.setBusinessId(businessId);
         complain.setUserId(getUserID(complainType,businessId,houseId));
@@ -272,10 +281,10 @@ public class ComplainService {
         complain.setFiles(files);
 
 
-        if (state == 2) {   //TODO 申诉成功后要对对应的业务逻辑进行处理
+        if (state == 2) {   // 申诉成功后要对对应的业务逻辑进行处理
             if (complain.getComplainType() != null)
                 switch (complain.getComplainType()) {
-                    case 1://TODO 1:工匠被处罚后不服.
+                    case 1:// 1:工匠被处罚后不服.
                         RewardPunishRecord rewardPunishRecord = rewardPunishRecordMapper.selectByPrimaryKey(complain.getBusinessId());
                         //1.获取被罚的工人id
                         //2.获取奖罚条例的类型来判断是奖励还是处罚
