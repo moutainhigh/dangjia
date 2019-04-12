@@ -3,7 +3,6 @@ package com.dangjia.acg.service.complain;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.model.PageDTO;
@@ -34,7 +33,6 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
@@ -112,23 +110,15 @@ public class ComplainService {
      */
 
 
-    public ServerResponse addComplain(String userToken, Integer complainType, String businessId, String houseId, String files) {
+    public ServerResponse addComplain(String userToken, String memberId, Integer complainType, String businessId, String houseId, String files) {
         if (CommonUtil.isEmpty(complainType) || CommonUtil.isEmpty(businessId)) {
             return ServerResponse.createByErrorMessage("参数错误");
         }
         if((complainType==2||complainType==3)&&CommonUtil.isEmpty(houseId)){
             return ServerResponse.createByErrorMessage("参数错误");
         }
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
-        }
-        Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
-        if (user == null) {
-            return ServerResponse.createByErrorMessage("用户不存在");
-        }
         Complain complain = new Complain();
-        complain.setMemberId(user.getId());
+        complain.setMemberId(memberId);
         complain.setComplainType(complainType);
         complain.setBusinessId(businessId);
         complain.setUserId(getUserID(complainType,businessId,houseId));
@@ -151,7 +141,7 @@ public class ComplainService {
             switch (complainType) {
                 case 1://奖罚
                     RewardPunishRecord rewardPunishRecord = rewardPunishRecordMapper.selectByPrimaryKey(businessId);
-                    userid=rewardPunishRecord.getOperatorId();
+                    userid=rewardPunishRecord.getMemberId();
                     break;
                 case 2://2：业主要求整改.
                     Member stewardHouse = memberMapper.getSupervisor(houseId);
@@ -236,6 +226,7 @@ public class ComplainService {
             PageInfo pageResult = new PageInfo(complainDTOList);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             for (ComplainDTO complainDTO : complainDTOList) {
+
                 String files = complainDTO.getFiles();
                 if (CommonUtil.isEmpty(files)) {
                     complainDTO.setFileList(null);

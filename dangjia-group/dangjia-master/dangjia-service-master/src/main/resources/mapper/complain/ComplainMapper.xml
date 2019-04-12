@@ -22,7 +22,7 @@
         c.create_date as createDate,
         c.modify_date as modifyDate
         FROM dj_complain c
-        INNER JOIN dj_member m ON c.member_id = m.id
+        LEFT JOIN dj_member m ON c.member_id = m.id
         LEFT JOIN dj_user u ON c.user_id = u.id
         LEFT JOIN dj_house h ON c.house_id = h.id
         WHERE c.data_status = 0
@@ -59,7 +59,7 @@
         c.modify_date as modifyDate,
         c.content as content
         FROM dj_complain c
-        INNER JOIN dj_member m ON c.member_id = m.id
+        LEFT JOIN dj_member m ON c.member_id = m.id
         LEFT JOIN dj_user u ON c.user_id = u.id
         LEFT JOIN dj_house h ON c.house_id = h.id
         WHERE c.data_status = 0
