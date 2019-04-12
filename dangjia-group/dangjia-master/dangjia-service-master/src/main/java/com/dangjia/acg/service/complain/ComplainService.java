@@ -177,18 +177,18 @@ public class ComplainService {
                     MainUser user=userMapper.selectByPrimaryKey(userId);
                     if(user==null){
                         Member member=memberMapper.selectByPrimaryKey(userId);
-                        userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId())+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
+                        userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName()+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
                     }else {
                         userName="客服-"+user.getUsername();
                     }
                     break;
                 case 2://2：业主要求整改.
                     Member member=memberMapper.selectByPrimaryKey(userId);
-                    userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId())+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
+                    userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName()+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
                     break;
                 case 3:// 3：大管家（开工后）要求换人.
                     member=memberMapper.selectByPrimaryKey(userId);
-                    userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId())+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
+                    userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName()+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
                     break;
                 case 4:// 4:部分收货申诉
                     Supplier supplier=supplierProductAPI.getSupplier(userId);
