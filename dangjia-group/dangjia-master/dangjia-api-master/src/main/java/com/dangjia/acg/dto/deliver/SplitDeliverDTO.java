@@ -15,7 +15,7 @@ public class SplitDeliverDTO {
 
     private String splitDeliverId;
     private int shipState;//配送状态
-    private String number;
+    private String number; //发货单
     private Date createDate;// 创建日期
     private Date sendTime; //发货时间
     private Date submitTime;//下单时间

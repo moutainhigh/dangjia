@@ -17,5 +17,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and wt.id = hf.worker_type_id
         order by hf.sort asc
     </select>
+    <select id="getName" resultType="String">
+        SELECT name from dj_core_worker_type where type=#{type}
+    </select>
 </mapper>
 

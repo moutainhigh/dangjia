@@ -146,6 +146,9 @@ public class SplitDeliverService {
             splitDeliverDTO.setModifyDate(splitDeliver.getModifyDate());//收货时间
             splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
             splitDeliverDTO.setSupState(splitDeliver.getSupState());//大管家收货状态
+            splitDeliverDTO.setSupName(splitDeliver.getSupplierName());
+            splitDeliverDTO.setSupId(splitDeliver.getSupervisorId());
+            splitDeliverDTO.setSupMobile(splitDeliver.getShipMobile());
             if(!CommonUtil.isEmpty(splitDeliver.getImage())) {
                 List<String> imageList = new ArrayList<>();
                 String[] imageArr = splitDeliver.getImage().split(",");
@@ -174,6 +177,7 @@ public class SplitDeliverService {
                 splitDeliverItemDTO.setId(orderSplitItem.getId());
                 splitDeliverItemDTO.setReceive(orderSplitItem.getReceive());//收货数量
                 splitDeliverItemDTO.setSupCost(orderSplitItem.getSupCost());
+                splitDeliverItemDTO.setAskCount(orderSplitItem.getAskCount());
                 splitDeliverItemDTOList.add(splitDeliverItemDTO);
             }
             splitDeliverDTO.setSplitDeliverItemDTOList(splitDeliverItemDTOList);//明细

@@ -58,12 +58,10 @@
             AND house.visit_state=1
             AND member.id = house.member_id
             <if test="residential!=null and residential!=''">
-                AND house.residential like #{residential}
+                AND CONCAT(house.residential,house.building,'栋',house.unit,'单元',house.number,'号') LIKE
+                CONCAT('%',#{residential},'%')
             </if>
-            <if test="number!=null and number!=''">
-                AND house.number like #{number}
-            </if>
-            <if test="userName!=null and userName!=''">
+            <if test="mobile!=null and mobile!=''">
                 AND member.mobile like #{mobile}
             </if>
         </where>
