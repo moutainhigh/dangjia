@@ -21,6 +21,7 @@ import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
@@ -32,6 +33,7 @@ import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sup.Supplier;
@@ -83,6 +85,8 @@ public class ComplainService {
 
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
+    @Autowired
+    private IHouseMapper houseMapper;
 
     @Autowired
     private IRewardPunishConditionMapper iRewardPunishConditionMapper;
@@ -165,7 +169,7 @@ public class ComplainService {
     }
 
     /**
-     * 根据用户ID返回用户名称
+     * 根据用户ID获取发起人名称
      * @param userId
      * @return
      */
@@ -177,18 +181,18 @@ public class ComplainService {
                     MainUser user=userMapper.selectByPrimaryKey(userId);
                     if(user==null){
                         Member member=memberMapper.selectByPrimaryKey(userId);
-                        userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId())+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
+                        userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName()+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
                     }else {
                         userName="客服-"+user.getUsername();
                     }
                     break;
                 case 2://2：业主要求整改.
                     Member member=memberMapper.selectByPrimaryKey(userId);
-                    userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId())+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
+                    userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName()+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
                     break;
                 case 3:// 3：大管家（开工后）要求换人.
                     member=memberMapper.selectByPrimaryKey(userId);
-                    userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId())+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
+                    userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName()+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
                     break;
                 case 4:// 4:部分收货申诉
                     Supplier supplier=supplierProductAPI.getSupplier(userId);
@@ -196,6 +200,21 @@ public class ComplainService {
                     break;
             }
         return userName;
+    }
+    /**
+     * 根据用户ID获取对象名称
+     * @param memberId
+     * @return
+     */
+    public String getUserName(Integer complainType,String memberId,String houseid){
+        if(complainType==4) {
+            House house = houseMapper.selectByPrimaryKey(houseid);
+            return house.getHouseName();
+        }else{
+            Member member = memberMapper.selectByPrimaryKey(memberId);
+            String userName = iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName() + "-" + (CommonUtil.isEmpty(member.getName()) ? member.getUserName() : member.getName());
+            return userName;
+        }
     }
     /**
      * 查询申诉
@@ -421,8 +440,8 @@ public class ComplainService {
             List<String> list = new ArrayList<>();
             complain.setFileList(list);
         }
-        complain.setContent(getUserName(complain.getComplainType(),complain.getUserId()));
-
+        complain.setContent(getUserName(complain.getComplainType(),complain.getMemberId(),complain.getHouseId()));
+        complain.setMemberNickName(getUserName(complain.getComplainType(),complain.getUserId()));
         //添加返回体
         if (complain.getComplainType() != null){
             if(complain.getComplainType()==1){//奖罚
