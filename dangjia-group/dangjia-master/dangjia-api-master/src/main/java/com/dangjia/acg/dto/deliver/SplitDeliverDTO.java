@@ -31,6 +31,7 @@ public class SplitDeliverDTO {
     private String supId;//供货商id
     private String supMobile;//供货商电话
     private String supName;//供应商名字
+    private String operatorName;//收货人姓名
 
     private List<String> imageList;
 }

@@ -21,6 +21,7 @@ public interface ComplainAPI {
     @ApiOperation(value = "添加申诉", notes = "添加申诉")
     ServerResponse addComplain(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("userToken") String userToken,
+                               @RequestParam("memberId") String memberId,
                                @RequestParam("complainType") Integer complainType,
                                @RequestParam("businessId") String businessId,
                                @RequestParam("houseId") String houseId,

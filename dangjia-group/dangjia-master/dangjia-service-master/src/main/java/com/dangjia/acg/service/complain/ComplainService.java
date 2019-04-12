@@ -21,6 +21,7 @@ import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
@@ -30,8 +31,10 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sup.Supplier;
@@ -83,6 +86,8 @@ public class ComplainService {
 
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
+    @Autowired
+    private IHouseMapper houseMapper;
 
     @Autowired
     private IRewardPunishConditionMapper iRewardPunishConditionMapper;
@@ -93,6 +98,7 @@ public class ComplainService {
     private SplitDeliverService splitDeliverService;
     @Autowired
     private IWorkerDetailMapper iWorkerDetailMapper;
+
     /**
      * 添加申诉
      *
@@ -107,29 +113,40 @@ public class ComplainService {
      * @return
      */
 
-
-    public ServerResponse addComplain(String userToken, Integer complainType, String businessId, String houseId, String files) {
+    public ServerResponse addComplain(String userToken,String memberId, Integer complainType, String businessId, String houseId, String files) {
         if (CommonUtil.isEmpty(complainType) || CommonUtil.isEmpty(businessId)) {
             return ServerResponse.createByErrorMessage("参数错误");
         }
         if((complainType==2||complainType==3)&&CommonUtil.isEmpty(houseId)){
             return ServerResponse.createByErrorMessage("参数错误");
         }
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
-        }
-        Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
-        if (user == null) {
-            return ServerResponse.createByErrorMessage("用户不存在");
-        }
         Complain complain = new Complain();
-        complain.setMemberId(user.getId());
+        complain.setMemberId(memberId);
         complain.setComplainType(complainType);
         complain.setBusinessId(businessId);
         complain.setUserId(getUserID(complainType,businessId,houseId));
         complain.setHouseId(houseId);
         complain.setFiles(files);
+//        1:工匠被处罚后不服.2：业主要求整改.3：要求换人.4:部分收货申诉.
+        if(complainType==4){
+           Supplier supplier=supplierProductAPI.getSupplier(complain.getUserId());
+            complain.setUserMobile(supplier.getTelephone());
+            complain.setUserName(supplier.getName());
+            complain.setUserNickName("供应商-"+supplier.getCheckPeople());
+        }else{
+            String field="业主-";
+            Member member=memberMapper.selectByPrimaryKey(complain.getUserId());
+            if(!CommonUtil.isEmpty(member.getWorkerTypeId())) {
+                WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                field= workerType.getName()+"-";
+            }
+            if(member!=null) {
+                complain.setUserMobile(member.getMobile());
+                complain.setUserName(CommonUtil.isEmpty(member.getName())?member.getNickName():member.getName());
+                complain.setUserNickName(field+member.getNickName());
+            }
+        }
+        complain.setContent(getUserName(complain.getComplainType(),complain.getMemberId(),complain.getHouseId()));
         complainMapper.insertSelective(complain);
         return ServerResponse.createBySuccessMessage("提交成功");
     }
@@ -147,10 +164,11 @@ public class ComplainService {
             switch (complainType) {
                 case 1://奖罚
                     RewardPunishRecord rewardPunishRecord = rewardPunishRecordMapper.selectByPrimaryKey(businessId);
-                    userid=rewardPunishRecord.getOperatorId();
+                    userid=rewardPunishRecord.getMemberId();
                     break;
                 case 2://2：业主要求整改.
-                    Member stewardHouse = memberMapper.getSupervisor(houseId);
+                    House house= houseMapper.selectByPrimaryKey(houseId);
+                    Member stewardHouse = memberMapper.selectByPrimaryKey(house.getMemberId());
                     userid=stewardHouse.getId();
                     break;
                 case 3:// 3：大管家（开工后）要求换人.
@@ -165,47 +183,34 @@ public class ComplainService {
     }
 
     /**
-     * 根据用户ID获取发起人名称
-     * @param userId
-     * @return
-     */
-    public String getUserName(Integer complainType, String userId){
-        String userName="";
-        if (complainType != null&&!CommonUtil.isEmpty(userId))
-            switch (complainType) {
-                case 1://奖罚
-                    MainUser user=userMapper.selectByPrimaryKey(userId);
-                    if(user==null){
-                        Member member=memberMapper.selectByPrimaryKey(userId);
-                        userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName()+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
-                    }else {
-                        userName="客服-"+user.getUsername();
-                    }
-                    break;
-                case 2://2：业主要求整改.
-                    Member member=memberMapper.selectByPrimaryKey(userId);
-                    userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName()+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
-                    break;
-                case 3:// 3：大管家（开工后）要求换人.
-                    member=memberMapper.selectByPrimaryKey(userId);
-                    userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName()+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
-                    break;
-                case 4:// 4:部分收货申诉
-                    Supplier supplier=supplierProductAPI.getSupplier(userId);
-                    userName="供应商-"+supplier.getName();
-                    break;
-            }
-        return userName;
-    }
-    /**
      * 根据用户ID获取对象名称
      * @param memberId
      * @return
      */
-    public String getUserName(String memberId){
-        Member member=memberMapper.selectByPrimaryKey(memberId);
-        String userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName()+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
-        return userName;
+    public String getUserName(Integer complainType,String memberId,String houseid){
+        if(complainType==4) {
+            House house = houseMapper.selectByPrimaryKey(houseid);
+            return house.getHouseName();
+        }else{
+            String field="业主-";
+            String userName="";
+            Member member=memberMapper.selectByPrimaryKey(memberId);
+            if(member!=null) {
+                if (!CommonUtil.isEmpty(member.getWorkerTypeId())) {
+                    WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                    field = workerType.getName() + "-";
+                }
+                userName = field + (CommonUtil.isEmpty(member.getName()) ? member.getUserName() : member.getName());
+                return userName;
+            }
+            MainUser user =userMapper.selectByPrimaryKey(memberId);
+            if(user!=null) {
+                field="客服-";
+                userName=field+user.getUsername();
+                return userName;
+            }
+            return userName;
+        }
     }
     /**
      * 查询申诉
@@ -227,6 +232,8 @@ public class ComplainService {
             PageInfo pageResult = new PageInfo(complainDTOList);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             for (ComplainDTO complainDTO : complainDTOList) {
+
+//                u.username as userName,
                 String files = complainDTO.getFiles();
                 if (CommonUtil.isEmpty(files)) {
                     complainDTO.setFileList(null);
@@ -273,10 +280,10 @@ public class ComplainService {
         complain.setFiles(files);
 
 
-        if (state == 2) {   //TODO 申诉成功后要对对应的业务逻辑进行处理
+        if (state == 2) {   // 申诉成功后要对对应的业务逻辑进行处理
             if (complain.getComplainType() != null)
                 switch (complain.getComplainType()) {
-                    case 1://TODO 1:工匠被处罚后不服.
+                    case 1:// 1:工匠被处罚后不服.
                         RewardPunishRecord rewardPunishRecord = rewardPunishRecordMapper.selectByPrimaryKey(complain.getBusinessId());
                         //1.获取被罚的工人id
                         //2.获取奖罚条例的类型来判断是奖励还是处罚
@@ -431,8 +438,7 @@ public class ComplainService {
             List<String> list = new ArrayList<>();
             complain.setFileList(list);
         }
-        complain.setContent(getUserName(complain.getMemberId()));
-        complain.setMemberNickName(getUserName(complain.getComplainType(),complain.getUserId()));
+
         //添加返回体
         if (complain.getComplainType() != null){
             if(complain.getComplainType()==1){//奖罚
@@ -461,6 +467,7 @@ public class ComplainService {
                 for (OrderSplitItem orderSplitItem : orderSplitItemList){
                     SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
                     splitDeliverItemDTO.setImage(address + orderSplitItem.getImage());
+                    splitDeliverItemDTO.setProductSn(orderSplitItem.getProductSn());
                     splitDeliverItemDTO.setProductName(orderSplitItem.getProductName());
                     splitDeliverItemDTO.setTotalPrice(orderSplitItem.getTotalPrice());
                     splitDeliverItemDTO.setShopCount(orderSplitItem.getShopCount());

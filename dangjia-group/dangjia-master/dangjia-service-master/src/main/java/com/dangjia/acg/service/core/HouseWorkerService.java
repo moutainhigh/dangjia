@@ -795,9 +795,10 @@ public class HouseWorkerService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setHouseFlowApply(Integer applyType, String houseFlowId, String workerId, Integer suspendDay, String applyDec,
                                             String imageList) {
+
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);//工序
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
         try {
-            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);//工序
-            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             if (applyType == 3) {
                 if (houseFlow.getPause() == 1) {
                     return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已暂停施工,请勿重复申请");
@@ -892,8 +893,6 @@ public class HouseWorkerService {
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.DAY_OF_YEAR, 3);//管家倒计时
                 hfa.setStartDate(calendar.getTime());
-                calendar.add(Calendar.DAY_OF_YEAR, 7);//业主倒计时
-                hfa.setEndDate(calendar.getTime());
                 // 阶段完工,管家审核通过工匠完工申请 @link checkOk()
                 houseFlowApplyMapper.insert(hfa);
                 configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "阶段完工申请",
@@ -908,8 +907,6 @@ public class HouseWorkerService {
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.DAY_OF_YEAR, 3);//管家倒计时
                 hfa.setStartDate(calendar.getTime());
-                calendar.add(Calendar.DAY_OF_YEAR, 7);//业主倒计时
-                hfa.setEndDate(calendar.getTime());
                 houseFlowApplyMapper.insert(hfa);
 
                 configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "整体完工申请",
@@ -936,9 +933,9 @@ public class HouseWorkerService {
                 Date lateDate = DateUtil.toDate(s2);
                 Date newDate2 = new Date();//当前时间
                 Long downTime = newDate2.getTime() - lateDate.getTime();//对比12点
-                if (downTime > 0) {
-//                    return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
-                }
+               /* if (downTime > 0) {
+                    return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
+                }*/
                 hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经开工了");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
@@ -1063,11 +1060,11 @@ public class HouseWorkerService {
             if (applyType == 0) {//每日完工
                 houseFlowApplyService.checkWorker(hfa.getId());
             }
-            return ServerResponse.createBySuccessMessage("操作成功");
+            return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）巡查成功");
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("操作失败");
+            return ServerResponse.createByErrorMessage("工序（" + workerType.getName() + "）巡查失败");
         }
     }
 

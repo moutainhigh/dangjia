@@ -23,5 +23,6 @@ public class SplitDeliverDetailDTO {
     private int size;//件
     private Integer shippingState;
     private Integer applyState;
+    private String houseId;
     private List<OrderSplitItemDTO> orderSplitItemDTOS;
 }

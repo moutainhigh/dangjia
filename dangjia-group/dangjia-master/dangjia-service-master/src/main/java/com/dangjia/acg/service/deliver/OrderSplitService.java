@@ -138,12 +138,12 @@ public class OrderSplitService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
             SplitDeliverDetailDTO detailDTO = new SplitDeliverDetailDTO();
+            detailDTO.setHouseId(splitDeliver.getHouseId());
             detailDTO.setNumber(splitDeliver.getNumber());
             detailDTO.setShipName(splitDeliver.getShipName());
             detailDTO.setShipAddress(splitDeliver.getShipAddress());
             detailDTO.setShippingState(splitDeliver.getShippingState());
             detailDTO.setApplyState(splitDeliver.getApplyState());
-
             detailDTO.setShipMobile(splitDeliver.getShipMobile());
             Member sup = memberMapper.selectByPrimaryKey(splitDeliver.getSupervisorId());//管家
             detailDTO.setSupMobile(sup.getMobile());
