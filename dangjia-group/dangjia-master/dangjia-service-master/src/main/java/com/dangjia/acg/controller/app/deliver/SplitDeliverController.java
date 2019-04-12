@@ -5,6 +5,7 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.deliver.SplitDeliverService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -24,8 +25,8 @@ public class SplitDeliverController implements SplitDeliverAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse partSplitDeliver(String splitDeliverId, String image , String splitItemList){
-        return splitDeliverService.partSplitDeliver(splitDeliverId,image,splitItemList);
+    public ServerResponse partSplitDeliver(String userToken,String splitDeliverId, String image , String splitItemList){
+        return splitDeliverService.partSplitDeliver(userToken,splitDeliverId,image,splitItemList);
     }
 
     /**
@@ -33,8 +34,8 @@ public class SplitDeliverController implements SplitDeliverAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse affirmSplitDeliver(String splitDeliverId, String image){
-        return splitDeliverService.affirmSplitDeliver(splitDeliverId,image);
+    public ServerResponse affirmSplitDeliver(String userToken,String splitDeliverId, String image){
+        return splitDeliverService.affirmSplitDeliver(userToken,splitDeliverId,image);
     }
 
     /**
