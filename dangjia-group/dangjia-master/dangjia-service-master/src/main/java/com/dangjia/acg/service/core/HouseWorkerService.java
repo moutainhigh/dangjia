@@ -418,7 +418,7 @@ public class HouseWorkerService {
                 if (earliestTime != null) {
                     Date EarliestDay = earliestTime.getCreateDate();//最早开工时间
                     Date newDate = new Date();
-                    totalDay = daysOfTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
+                    totalDay = DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
                     if (suspendDay != null) {
                         totalDay = totalDay - suspendDay;
                         if (totalDay <= 0) totalDay = 0;
@@ -665,21 +665,6 @@ public class HouseWorkerService {
         return address;
     }
 
-    /**
-     * 根据开始时间和结束时间对比相差多少天
-     *
-     * @param fDate 开始时间
-     * @param oDate 结束时间
-     * @return 相差多少天
-     */
-    public static int daysOfTwo(Date fDate, Date oDate) {
-        Calendar aCalendar = Calendar.getInstance();
-        aCalendar.setTime(fDate);
-        int day1 = aCalendar.get(Calendar.DAY_OF_YEAR);
-        aCalendar.setTime(oDate);
-        int day2 = aCalendar.get(Calendar.DAY_OF_YEAR);
-        return day2 - day1;
-    }
 
     /**
      * 获取我的界面

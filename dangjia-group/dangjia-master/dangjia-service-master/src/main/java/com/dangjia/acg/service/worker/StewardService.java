@@ -8,6 +8,7 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.CourseDTO;
 import com.dangjia.acg.dto.worker.WorkerDetailDTO;
@@ -30,7 +31,6 @@ import com.dangjia.acg.modle.matter.WorkerDisclosureHouseFlow;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.config.ConfigMessageService;
-import com.dangjia.acg.service.core.HouseWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -391,7 +391,7 @@ public class StewardService {
             if (earliestTime != null && earliestTime.size() > 0) {
                 Date EarliestDay = earliestTime.get(0).getCreateDate();//最早开工时间
                 Date newDate = new Date();
-                int num = HouseWorkerService.daysOfTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
+                int num = DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
                 if (suspendDay == null) {
                     workerDetailDTO.setTotalDay(num);//总开工天数
                 } else {
