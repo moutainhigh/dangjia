@@ -34,7 +34,7 @@ public class HouseFlowApplyDTO {
     private List<Map> list;
 
 
-    private Date startDate;
+    private Long startDate;
     private Long endDate; //自动审核时间
 
 }
