@@ -278,44 +278,44 @@ public class ActuaryOperationService {
             if (!StringUtils.isNoneBlank(budgetMaterialId))
                 return ServerResponse.createByErrorMessage("budgetMaterialId 不能为null");
 
-            String[] valueIdArr = attributeIdArr.split(",");
-            LOG.info("selectProduct goodsId :" + goodsId);
-            LOG.info("selectProduct brandId :" + brandId);
-            LOG.info("selectProduct brandSeriesId :" + brandSeriesId);
-            LOG.info("selectProduct attributeIdArr :" + attributeIdArr);
-            LOG.info("selectProduct budgetMaterialId :" + budgetMaterialId);
-            for (String str : valueIdArr) {
-                LOG.info("valueIdArr str:" + str);
-            }
-            Example example = new Example(Product.class);
-            Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo(Product.TYPE, 1);
-            criteria.andEqualTo(Product.MAKET, 1);
-            if (!CommonUtil.isEmpty(goodsId)) {
-                criteria.andEqualTo(Product.GOODS_ID, goodsId);
-            }
-            if (!CommonUtil.isEmpty(brandId)) {
-                criteria.andEqualTo(Product.BRAND_ID, brandId);
-            } else {
-                criteria.andCondition("  (isnull(brand_id) or brand_id = '')");
-            }
-            if (!CommonUtil.isEmpty(brandSeriesId)) {
-                criteria.andEqualTo(Product.BRAND_SERIES_ID, brandSeriesId);
-            } else {
-                criteria.andCondition("  (isnull(brand_series_id) or brand_series_id = '') ");
-            }
-
-            if (valueIdArr == null || valueIdArr.length == 0 || CommonUtil.isEmpty(attributeIdArr)) {
-                criteria.andCondition(" (isnull(value_id_arr) or value_id_arr = '') ");
-            } else {
-                for (String val : valueIdArr) {
-                    criteria.andCondition("  FIND_IN_SET('" + val + "',value_id_arr) ");
-                }
-            }
-            Product product1 = new Product();
-            product1.setBrandId(brandId);
-            product1.setBrandSeriesId(brandSeriesId);
-            product1.setGoodsId(goodsId);
+//            String[] valueIdArr = attributeIdArr.split(",");
+//            LOG.info("selectProduct goodsId :" + goodsId);
+//            LOG.info("selectProduct brandId :" + brandId);
+//            LOG.info("selectProduct brandSeriesId :" + brandSeriesId);
+//            LOG.info("selectProduct attributeIdArr :" + attributeIdArr);
+//            LOG.info("selectProduct budgetMaterialId :" + budgetMaterialId);
+//            for (String str : valueIdArr) {
+//                LOG.info("valueIdArr str:" + str);
+//            }
+//            Example example = new Example(Product.class);
+//            Example.Criteria criteria = example.createCriteria();
+//            criteria.andEqualTo(Product.TYPE, 1);
+//            criteria.andEqualTo(Product.MAKET, 1);
+//            if (!CommonUtil.isEmpty(goodsId)) {
+//                criteria.andEqualTo(Product.GOODS_ID, goodsId);
+//            }
+//            if (!CommonUtil.isEmpty(brandId)) {
+//                criteria.andEqualTo(Product.BRAND_ID, brandId);
+//            } else {
+//                criteria.andCondition("  (isnull(brand_id) or brand_id = '')");
+//            }
+//            if (!CommonUtil.isEmpty(brandSeriesId)) {
+//                criteria.andEqualTo(Product.BRAND_SERIES_ID, brandSeriesId);
+//            } else {
+//                criteria.andCondition("  (isnull(brand_series_id) or brand_series_id = '') ");
+//            }
+//
+//            if (valueIdArr == null || valueIdArr.length == 0 || CommonUtil.isEmpty(attributeIdArr)) {
+//                criteria.andCondition(" (isnull(value_id_arr) or value_id_arr = '') ");
+//            } else {
+//                for (String val : valueIdArr) {
+//                    criteria.andCondition("  FIND_IN_SET('" + val + "',value_id_arr) ");
+//                }
+//            }
+//            Product product1 = new Product();
+//            product1.setBrandId(brandId);
+//            product1.setBrandSeriesId(brandSeriesId);
+//            product1.setGoodsId(goodsId);
             Product product = productMapper.selectProductByGoodsIdAndBrandIdAndBrandSeriesId(goodsId, brandId, brandSeriesId);
 //            List<Product> products = productMapper.selectByExample(example);
 ////            Product product = productMapper.selectProduct(goodsId, brandId, brandSeriesId, valueIdArr);
