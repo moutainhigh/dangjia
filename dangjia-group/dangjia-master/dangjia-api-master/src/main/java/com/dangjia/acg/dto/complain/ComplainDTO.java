@@ -19,13 +19,14 @@ public class ComplainDTO {
     private String userId;
     private String userName;
     private Integer status;
-    private String description;
-    private String businessId;
-    private String houseId;
-    private String houseName;	//houseid
-    private String files;
+    private String description;//处理描述
+    private String businessId;//对应业务ID
+    private String houseId;//房子ID
+    private String houseName;	//房子名称
+    private String files;//文件集
     private List<String> fileList;
     protected Date createDate;// 创建日期
     protected Date modifyDate;// 修改日期
     private Object data;//公用产生体
+    private String content;//描述
 }

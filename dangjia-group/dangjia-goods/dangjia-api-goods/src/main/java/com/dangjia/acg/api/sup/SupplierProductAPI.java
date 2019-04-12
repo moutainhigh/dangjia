@@ -117,7 +117,6 @@ public interface SupplierProductAPI {
      *
      * @throws
      * @Title: saveSupplierProduct
-     * @Description: TODO
      * @param: @param product_id
      * @return: JsonResult   7
      */
