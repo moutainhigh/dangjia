@@ -7,12 +7,11 @@
     <select id="getComplainList" resultType="com.dangjia.acg.dto.complain.ComplainDTO">
         SELECT c.id as id,
         c.member_id as memberId,
-        m.name as memberName,
-        m.nick_name as memberNickName,
-        m.mobile as memberMobile,
+        c.user_name as memberName,
+        c.user_nick_name as memberNickName,
+        c.user_mobile as memberMobile,
         c.complain_type as complainType,
         c.user_id as userId,
-        u.username as userName,
         c.status as status,
         c.description as description,
         c.business_id as businessId,
@@ -22,8 +21,6 @@
         c.create_date as createDate,
         c.modify_date as modifyDate
         FROM dj_complain c
-        LEFT JOIN dj_member m ON c.member_id = m.id
-        LEFT JOIN dj_user u ON c.user_id = u.id
         LEFT JOIN dj_house h ON c.house_id = h.id
         WHERE c.data_status = 0
         <if test="complainType!=null">
@@ -33,22 +30,18 @@
             and c.status = #{state}
         </if>
         <if test="searchKey!=null and searchKey!=''">
-            and ( m.mobile like CONCAT('%',#{searchKey},'%')
-            or m.name like CONCAT('%',#{searchKey},'%')
-            or m.nick_name like CONCAT('%',#{searchKey},'%')
-            or u.username like CONCAT('%',#{searchKey},'%'))
+           and CONCAT(c.user_mobile,c.user_name,c.user_nick_name)  like CONCAT('%',#{searchKey},'%')
         </if>
         ORDER by c.modify_date desc
     </select>
     <select id="getComplain" resultType="com.dangjia.acg.dto.complain.ComplainDTO">
         SELECT c.id as id,
         c.member_id as memberId,
-        m.name as memberName,
-        m.nick_name as memberNickName,
-        m.mobile as memberMobile,
+        c.user_name as memberName,
+        c.user_nick_name as memberNickName,
+        c.user_mobile as memberMobile,
         c.complain_type as complainType,
         c.user_id as userId,
-        u.username as userName,
         c.status as status,
         c.description as description,
         c.business_id as businessId,
@@ -59,8 +52,6 @@
         c.modify_date as modifyDate,
         c.content as content
         FROM dj_complain c
-        LEFT JOIN dj_member m ON c.member_id = m.id
-        LEFT JOIN dj_user u ON c.user_id = u.id
         LEFT JOIN dj_house h ON c.house_id = h.id
         WHERE c.data_status = 0
         <if test="complainId!=null and complainId!=''">
