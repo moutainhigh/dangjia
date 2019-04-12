@@ -73,7 +73,8 @@ public class TaskService {
         //该城市该用户所有房产
         Example example = new Example(House.class);
         example.createCriteria()
-                .andEqualTo(House.MEMBER_ID, member.getId()).andNotEqualTo(House.VISIT_STATE, 2)
+                .andEqualTo(House.MEMBER_ID, member.getId())
+                .andNotEqualTo(House.VISIT_STATE, 2)
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = houseMapper.selectByExample(example);
         for (House house : houseList) {

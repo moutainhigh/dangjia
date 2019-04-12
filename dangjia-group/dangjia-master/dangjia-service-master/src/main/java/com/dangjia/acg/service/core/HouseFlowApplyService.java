@@ -223,7 +223,7 @@ public class HouseFlowApplyService {
                         houseFlowMapper.updateByPrimaryKeySelective(houseFlowList.get(0));
                     }
                 }
-            }else{ //每日完工,处理钱
+            }else if(hfa.getApplyType() == 0){ //每日完工,处理钱
                 //算每日积分
                 updateDayIntegral(hfa);
 

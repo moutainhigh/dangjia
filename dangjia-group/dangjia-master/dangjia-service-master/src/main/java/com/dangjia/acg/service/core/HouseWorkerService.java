@@ -418,7 +418,7 @@ public class HouseWorkerService {
                 if (earliestTime != null) {
                     Date EarliestDay = earliestTime.getCreateDate();//最早开工时间
                     Date newDate = new Date();
-                    totalDay = daysOfTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
+                    totalDay = DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
                     if (suspendDay != null) {
                         totalDay = totalDay - suspendDay;
                         if (totalDay <= 0) totalDay = 0;
@@ -665,21 +665,6 @@ public class HouseWorkerService {
         return address;
     }
 
-    /**
-     * 根据开始时间和结束时间对比相差多少天
-     *
-     * @param fDate 开始时间
-     * @param oDate 结束时间
-     * @return 相差多少天
-     */
-    public static int daysOfTwo(Date fDate, Date oDate) {
-        Calendar aCalendar = Calendar.getInstance();
-        aCalendar.setTime(fDate);
-        int day1 = aCalendar.get(Calendar.DAY_OF_YEAR);
-        aCalendar.setTime(oDate);
-        int day2 = aCalendar.get(Calendar.DAY_OF_YEAR);
-        return day2 - day1;
-    }
 
     /**
      * 获取我的界面
@@ -957,7 +942,6 @@ public class HouseWorkerService {
                 return ServerResponse.createBySuccessMessage("操作成功");
             } else if (applyType == 5) {//有人巡
                 hfa.setApplyDec("业主您好,我是" + workerType.getName() + ",大管家已经巡查了");//描述
-                hfa.setWorkerId(supervisorHF.getWorkerId());
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 Example example2 = new Example(HouseFlowApply.class);
@@ -1020,18 +1004,15 @@ public class HouseWorkerService {
 
             } else if (applyType == 6) {//无人巡查
                 hfa.setApplyDec("业主您好，我已经巡查了工地，工地情况如图");//描述
-                hfa.setWorkerId(supervisorHF.getWorkerId());
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 houseFlowApplyMapper.insert(hfa);
             } else if (applyType == 7) {//追加巡查
                 hfa.setApplyDec("业主您好，我已经巡查了工地，工地情况如图");//描述
-                hfa.setWorkerId(supervisorHF.getWorkerId());
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 houseFlowApplyMapper.insert(hfa);
             }
-
             /**********保存巡查图片,验收节点图片等信息************/
             if (StringUtil.isNotEmpty(imageList)) {
                 JSONArray imageObjArr = JSON.parseArray(imageList);
