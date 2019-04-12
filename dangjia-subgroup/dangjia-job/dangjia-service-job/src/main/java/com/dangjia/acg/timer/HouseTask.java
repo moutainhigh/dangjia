@@ -48,12 +48,12 @@ public class HouseTask {
   /**
    * 定时审核完工申请
    */
-  @Scheduled(cron = "0 0/1 * * * ?")//1分钟执行一次
-  public void couponApply() {
-    log.info(format.format(new Date()) + "开始执行完工申请检测任务...");
-    houseFlowApplyAPI.couponApply();
-    log.info(format.format(new Date()) + "结束执行完工申请检测任务...");
-  }
+//  @Scheduled(cron = "0 0/1 * * * ?")//1分钟执行一次
+//  public void couponApply() {
+//    log.info(format.format(new Date()) + "开始执行完工申请检测任务...");
+//    houseFlowApplyAPI.couponApply();
+//    log.info(format.format(new Date()) + "结束执行完工申请检测任务...");
+//  }
 
 
   /**
