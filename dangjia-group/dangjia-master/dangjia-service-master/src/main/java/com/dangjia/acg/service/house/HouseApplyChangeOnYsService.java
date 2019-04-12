@@ -51,13 +51,17 @@ public class HouseApplyChangeOnYsService {
         this.houseFlowApplyImageMapper = houseFlowApplyImageMapper;
     }
 
+
     /**
      * 施工记录
+     * 原实现方法
      *
-     * @update 杨帅：添加补丁施工记录中展示的交底巡查验收三种属性的显示人为大管家
+     * @version 1.31 冲刺
+     * @see com.dangjia.acg.service.house.HouseService
+     * 在原实现方法上添加了施工记录中展示的交底巡查验收三种属性的显示人为大管家
+     * 且三种属性未被管家通过的情况下不会再施工记录显示.
      */
     public ServerResponse queryConstructionRecord(String houseId, Integer pageNum, Integer pageSize, String workerTypeId) {
-        // 施工记录的内容需要更改
         if (pageNum == null) {
             pageNum = 1;
         }
@@ -69,7 +73,7 @@ public class HouseApplyChangeOnYsService {
         }
         PageHelper.startPage(pageNum, pageSize);
         List<HouseFlowApply> hfaList = houseFlowApplyMapper.queryHfaByHouseId(houseId, workerTypeId);
-        PageInfo pageResult = new PageInfo<>(hfaList);
+        PageInfo pageResult = new PageInfo(hfaList);
         List<Map<String, Object>> listMap = this.houseFlowApplyDetail(hfaList);
         if (listMap == null) {
             return ServerResponse.createByErrorMessage("系统出错,查询施工记录失败");
@@ -80,9 +84,10 @@ public class HouseApplyChangeOnYsService {
 
 
     /**
-     * 记录
+     * 施工记录
+     * 添加补丁施工记录中展示的交底巡查验收三种属性的显示人为大管家
      *
-     * @update 添加补丁施工记录中展示的交底巡查验收三种属性的显示人为大管家
+     * @version 1.31 冲刺
      */
     private List<Map<String, Object>> houseFlowApplyDetail(List<HouseFlowApply> hfaList) {
         try {
@@ -109,9 +114,10 @@ public class HouseApplyChangeOnYsService {
     /**
      * 将巡查，交底，验收的操作人改为大管家
      *
-     * @param hfa
-     * @param address
-     * @return
+     * @param hfa     数据库查询出来的施工记录
+     * @param address 图片源地址
+     * @return 以map形式返回一条数据
+     * @link getHouseFlowApplyMap
      */
     private Map<String, Object> getHouseFlowApplyMapOnPatrol(HouseFlowApply hfa, String address) {
         Map<Integer, String> applyTypeMap = new HashMap<>();
@@ -153,19 +159,14 @@ public class HouseApplyChangeOnYsService {
         return map;
     }
 
-    static void changeConstruction(Map<String, Object> map, List<HouseWorker> listHw) {
-        if (listHw.size() > 0) {
-            HouseWorker houseWorker = listHw.get(0);
-            if (houseWorker.getWorkType() == 4) {
-                map.put("isNormal", "已更换");//施工状态
-            } else {
-                map.put("isNormal", "正常施工");
-            }
-        } else {
-            map.put("isNormal", "正常施工");
-        }
-    }
-
+    /**
+     * 这个方法不会讲操作人改为大管家，还是原来的样式
+     *
+     * @param hfa     数据库查询出来的施工记录
+     * @param address 图片源地址
+     * @return 以map形式返回一条数据
+     * @link getHouseFlowApplyMapOnPatrol
+     */
     private Map<String, Object> getHouseFlowApplyMap(HouseFlowApply hfa, String address) {
         Map<Integer, String> applyTypeMap = new HashMap<>();
         applyTypeMap.put(DjConstants.ApplyType.MEIRI_WANGGONG, "每日完工");
@@ -204,4 +205,19 @@ public class HouseApplyChangeOnYsService {
         map.put("createDate", hfa.getCreateDate().getTime());
         return map;
     }
+
+    private static void changeConstruction(Map<String, Object> map, List<HouseWorker> listHw) {
+        if (listHw.size() > 0) {
+            HouseWorker houseWorker = listHw.get(0);
+            if (houseWorker.getWorkType() == 4) {
+                map.put("isNormal", "已更换");
+            } else {
+                map.put("isNormal", "正常施工");
+            }
+        } else {
+            map.put("isNormal", "正常施工");
+        }
+    }
+
+
 }
