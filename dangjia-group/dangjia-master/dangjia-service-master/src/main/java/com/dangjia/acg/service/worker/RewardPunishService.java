@@ -14,15 +14,12 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.worker.RewardPunishCorrelationDTO;
 import com.dangjia.acg.dto.worker.RewardPunishRecordDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
-import com.dangjia.acg.mapper.worker.IRewardPunishCorrelationMapper;
-import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.worker.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.worker.RewardPunishCondition;
-import com.dangjia.acg.modle.worker.RewardPunishCorrelation;
-import com.dangjia.acg.modle.worker.RewardPunishRecord;
+import com.dangjia.acg.modle.worker.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -30,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +50,14 @@ public class RewardPunishService {
     private ConfigMessageService configMessageService;
     @Autowired
     private IHouseMapper houseMapper;
+
+    @Autowired
+    private IWorkIntegralMapper iWorkIntegralMapper;
+    @Autowired
+    private IWorkerDetailMapper iWorkerDetailMapper;
+
+    @Autowired
+    private IMemberMapper memberMapper;
     /**
      * 保存奖罚条件及条件明细
      * @return
@@ -227,6 +233,10 @@ public class RewardPunishService {
             rewardPunishRecord.setState(0);//0:启用;1:不启用
             rewardPunishRecordMapper.insertSelective(rewardPunishRecord);
 
+            //工人ID账户奖罚积分和金额变更
+            updateWorkerInfo(rewardPunishRecord.getId());
+
+
             if(!CommonUtil.isEmpty(rewardPunishRecord.getHouseId())&&rewardPunishRecord.getHouseId()!=null&&rewardPunishRecord.getMemberId()!=null) {
                 House house = houseMapper.selectByPrimaryKey(rewardPunishRecord.getHouseId());
                 configMessageService.addConfigMessage(null, "gj", rewardPunishRecord.getMemberId(), "0", "奖罚提醒", String.format(DjConstants.PushMessage.RECORD_OF_REWARDS_AND_PENALTIES, house.getHouseName()), "7");
@@ -235,6 +245,81 @@ public class RewardPunishService {
         }catch (Exception e){
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("新增奖罚记录失败");
+        }
+    }
+
+    public void updateWorkerInfo(String rewardPunishRecordId){
+        RewardPunishRecord rewardPunishRecord = rewardPunishRecordMapper.selectByPrimaryKey(rewardPunishRecordId);
+        //1.获取被罚的工人id
+        //2.获取奖罚条例的类型来判断是奖励还是处罚
+        //3.获取条例的明细列表
+        if(rewardPunishRecord.getType()==null){
+            return;
+        }
+        Member member= memberMapper.selectByPrimaryKey(rewardPunishRecord.getMemberId());
+        Example example =new Example(RewardPunishCondition.class);
+        example.createCriteria().andEqualTo(RewardPunishCondition.REWARD_PUNISH_CORRELATION_ID,rewardPunishRecord.getRewardPunishCorrelationId());
+        List<RewardPunishCondition> rewardPunishConditionList =  rewardPunishConditionMapper.selectByExample(example);
+        for(RewardPunishCondition rewardPunishCondition:rewardPunishConditionList) {
+            BigDecimal bigDecimal = rewardPunishCondition.getQuantity();
+            BigDecimal bigDecimal2;
+            WorkIntegral workIntegral = new WorkIntegral();
+            WorkerDetail workerDetail = new WorkerDetail();
+
+            workIntegral.setHouseId(rewardPunishRecord.getHouseId());
+            workIntegral.setStatus(0);
+            workIntegral.setWorkerId(member.getId());
+            workerDetail.setWorkerId(member.getId());
+            workerDetail.setWorkerName(member.getName());
+            workerDetail.setHouseId(rewardPunishRecord.getHouseId());
+            if (rewardPunishRecord.getType() == 0) {
+                workIntegral.setBriefed("奖励，积分增加");
+                workerDetail.setName("奖罚，资金增加");
+                //奖励
+                //4.根据每个条例的明细类型（奖或罚）来判断，该工人是否扣除或者增加（只对账户余额和积分进行增减）
+                //1积分;2钱;3限制接单;4冻结账号
+                //5.对工人原有的基础之上重新set账户余额或者积分并进行更新（update）
+                if (rewardPunishCondition.getType() == 1) {
+                    bigDecimal2 = member.getEvaluationScore().add(bigDecimal);
+                    member.setEvaluationScore(bigDecimal2);
+                    //加积分流水
+                    workIntegral.setIntegral(bigDecimal);
+                    iWorkIntegralMapper.insert(workIntegral);
+                }
+                if (rewardPunishCondition.getType() == 2) {
+                    bigDecimal2 = member.getSurplusMoney().add(bigDecimal);
+                    BigDecimal haveMoney = member.getHaveMoney().add(bigDecimal);
+                    member.setSurplusMoney(bigDecimal2);
+                    member.setHaveMoney(haveMoney);
+                    //加流水记录
+                    workerDetail.setMoney(bigDecimal);
+                    workerDetail.setState(1);
+                    iWorkerDetailMapper.insert(workerDetail);
+                }
+
+                //罚
+            }  if (rewardPunishRecord.getType() == 1) {
+                workIntegral.setBriefed("处罚，积分扣除");
+                workerDetail.setName("处罚，资金扣除");
+                if (rewardPunishCondition.getType() == 1) {
+                    bigDecimal2 = member.getEvaluationScore().subtract(bigDecimal);
+                    member.setEvaluationScore(bigDecimal2);
+                    //加积分流水
+                    workIntegral.setIntegral(bigDecimal);
+                    iWorkIntegralMapper.insert(workIntegral);
+                }
+                if (rewardPunishCondition.getType() == 2) {
+                    bigDecimal2 = member.getSurplusMoney().subtract(bigDecimal);
+                    BigDecimal haveMoney = member.getHaveMoney().subtract(bigDecimal);
+                    member.setSurplusMoney(bigDecimal2);
+                    member.setHaveMoney(haveMoney);
+                    //加流水记录
+                    workerDetail.setMoney(bigDecimal);
+                    workerDetail.setState(0);
+                    iWorkerDetailMapper.insert(workerDetail);
+                }
+            }
+            memberMapper.updateByPrimaryKeySelective(member);
         }
     }
 

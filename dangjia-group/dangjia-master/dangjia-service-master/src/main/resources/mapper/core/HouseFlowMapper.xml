@@ -138,6 +138,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and state= 0 order by sort asc
     </select>
 
+    <select id="getNextHouseFlow1" resultType="com.dangjia.acg.modle.core.HouseFlow">
+        select
+        <include refid="new_columns" />
+        from dj_core_house_flow
+        where house_id=#{houseId}
+        and state= 0 ORDER BY modify_date desc LIMIT 1
+    </select>
+
     <!--设计精算管家外可用工序-->
     <select id="getWorkerFlow" resultType="com.dangjia.acg.modle.core.HouseFlow">
         select

@@ -8,9 +8,12 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.CourseDTO;
 import com.dangjia.acg.dto.worker.WorkerDetailDTO;
+import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
@@ -20,6 +23,7 @@ import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.matter.IWorkerDisclosureHouseFlowMapper;
 import com.dangjia.acg.mapper.matter.IWorkerDisclosureMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -30,7 +34,6 @@ import com.dangjia.acg.modle.matter.WorkerDisclosureHouseFlow;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.config.ConfigMessageService;
-import com.dangjia.acg.service.core.HouseWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -40,6 +43,7 @@ import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -76,6 +80,8 @@ public class StewardService {
     @Autowired
     private BudgetWorkerAPI budgetWorkerAPI;
 
+    @Autowired
+    private IComplainMapper complainMapper;
     @Autowired
     private ConfigMessageService configMessageService;
 
@@ -354,7 +360,19 @@ public class StewardService {
                 }
             }
 
-            return ServerResponse.createBySuccess("获取进程详情成功", courseDTO);
+            //查询是否存在申诉。防止重复申诉
+            Member stewardHouse = memberMapper.getSupervisor(houseFlow.getHouseId());
+            Example example=new Example(Complain.class);
+            example.createCriteria().andEqualTo(Complain.USER_ID,stewardHouse.getId()).andEqualTo(Complain.HOUSE_ID,houseFlow.getHouseId()).andEqualTo(Complain.STATUS,0);
+            List<Complain> complains=complainMapper.selectByExample(example);
+            if(complains.size()>0){
+                Map map= BeanUtils.beanToMap(courseDTO);
+                map.put(Complain.STATUS,0);
+                return ServerResponse.createBySuccess("获取进程详情成功", map);
+            }else{
+                return ServerResponse.createBySuccess("获取进程详情成功", courseDTO);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -378,7 +396,6 @@ public class StewardService {
             workerDetailDTO.setEvaluationScore(worker.getEvaluationScore());//积分
             Long countOrder = houseWorkerMapper.getCountOrderByWorkerId(worker.getId());
             workerDetailDTO.setCountOrder(countOrder == null ? 0 : countOrder);//总单数
-
             HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(houseFlow.getHouseId(), worker.getId(), new Date());//查询今日开工记录
             if (todayStart == null) {//没有今日开工记录
                 workerDetailDTO.setIsStart("否");
@@ -391,7 +408,7 @@ public class StewardService {
             if (earliestTime != null && earliestTime.size() > 0) {
                 Date EarliestDay = earliestTime.get(0).getCreateDate();//最早开工时间
                 Date newDate = new Date();
-                int num = HouseWorkerService.daysOfTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
+                int num = DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
                 if (suspendDay == null) {
                     workerDetailDTO.setTotalDay(num);//总开工天数
                 } else {

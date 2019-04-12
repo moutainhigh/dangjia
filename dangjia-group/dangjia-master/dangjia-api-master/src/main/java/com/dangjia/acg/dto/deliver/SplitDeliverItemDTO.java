@@ -21,4 +21,5 @@ public class SplitDeliverItemDTO {
     private String id;
     private Double receive;//收货数量
     private Double supCost;//选择的供应商提供的单价
+    private Double askCount;//要货数量
 }

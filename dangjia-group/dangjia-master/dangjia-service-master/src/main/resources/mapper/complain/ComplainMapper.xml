@@ -56,7 +56,8 @@
         CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') as houseName,
         c.files as files,
         c.create_date as createDate,
-        c.modify_date as modifyDate
+        c.modify_date as modifyDate,
+        c.content as content
         FROM dj_complain c
         INNER JOIN dj_member m ON c.member_id = m.id
         LEFT JOIN dj_user u ON c.user_id = u.id
