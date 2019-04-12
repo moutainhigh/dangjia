@@ -165,7 +165,7 @@ public class ComplainService {
     }
 
     /**
-     * 根据用户ID返回用户名称
+     * 根据用户ID获取发起人名称
      * @param userId
      * @return
      */
@@ -195,6 +195,16 @@ public class ComplainService {
                     userName="供应商-"+supplier.getName();
                     break;
             }
+        return userName;
+    }
+    /**
+     * 根据用户ID获取对象名称
+     * @param memberId
+     * @return
+     */
+    public String getUserName(String memberId){
+        Member member=memberMapper.selectByPrimaryKey(memberId);
+        String userName=iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName()+"-"+(CommonUtil.isEmpty(member.getName())?member.getUserName():member.getName());
         return userName;
     }
     /**
@@ -421,8 +431,8 @@ public class ComplainService {
             List<String> list = new ArrayList<>();
             complain.setFileList(list);
         }
-        complain.setContent(getUserName(complain.getComplainType(),complain.getUserId()));
-
+        complain.setContent(getUserName(complain.getMemberId()));
+        complain.setMemberNickName(getUserName(complain.getComplainType(),complain.getUserId()));
         //添加返回体
         if (complain.getComplainType() != null){
             if(complain.getComplainType()==1){//奖罚
