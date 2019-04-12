@@ -49,6 +49,17 @@
         create_date DESC
     </select>
 
+    <select id="getSupplierGoodsId" resultType="java.lang.String">
+        SELECT
+            d.supplier_id
+        FROM
+            `dj_deliver_order_split_item` si
+        INNER JOIN dj_deliver_split_deliver d ON si.split_deliver_id = d.id
+        WHERE
+            si.house_id = #{houseId}
+        AND si.product_sn =  #{productSn}
+        ORDER BY si.create_date DESC LIMIT 1
+    </select>
 
 </mapper>
 

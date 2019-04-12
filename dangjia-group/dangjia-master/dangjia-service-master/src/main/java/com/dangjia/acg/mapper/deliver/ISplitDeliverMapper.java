@@ -1,14 +1,11 @@
 package com.dangjia.acg.mapper.deliver;
 
 import com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO;
-import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
-import com.dangjia.acg.modle.pay.BusinessOrder;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,4 +25,5 @@ public interface ISplitDeliverMapper extends Mapper<SplitDeliver> {
                                                         @Param("searchKey") String searchKey,
                                                         @Param("beginDate") String beginDate,
                                                         @Param("endDate") String endDate);
+    String getSupplierGoodsId( @Param("houseId") String houseId, @Param("productSn") String productSn);
 }
