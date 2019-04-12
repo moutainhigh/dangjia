@@ -115,17 +115,7 @@ public class TechnologyService {
                 t.setName(name);
                 t.setContent(content);
                 t.setGoodsId(goodsId);//根据 materialOrWorker字段决定：  0:服务productId;  1:人工商品
-                String[] imgArr = image.split(",");
-                String imgStr = "";
-                for (int i = 0; i < imgArr.length; i++) {
-                    String img = imgArr[i];
-                    if (i == imgArr.length - 1) {
-                        imgStr += img;
-                    } else {
-                        imgStr += img + ",";
-                    }
-                }
-                t.setImage(imgStr);
+                t.setImage(image);
                 t.setSampleImage(sampleImage);
 
                 t.setType(type);
@@ -182,17 +172,7 @@ public class TechnologyService {
             t.setCreateDate(new Date());
             t.setModifyDate(new Date());
             t.setContent(content);
-            String[] imgArr = image.split(",");
-            String imgStr = "";
-            for (int i = 0; i < imgArr.length; i++) {
-                String img = imgArr[i];
-                if (i == imgArr.length - 1) {
-                    imgStr += img;
-                } else {
-                    imgStr += img + ",";
-                }
-            }
-            t.setImage(imgStr);
+            t.setImage(image);
             if (materialOrWorker == 1) {
                 t.setWorkerTypeId(workerTypeId);
                 t.setType(type);
@@ -233,17 +213,7 @@ public class TechnologyService {
             t.setContent(content);
             t.setType(type);
             if (null != image && !"".equals(image)) {
-                String[] imgArr = image.split(",");
-                String imgStr = "";
-                for (int i = 0; i < imgArr.length; i++) {
-                    String img = imgArr[i];
-                    if (i == imgArr.length - 1) {
-                        imgStr += img;
-                    } else {
-                        imgStr += img + ",";
-                    }
-                }
-                t.setImage(imgStr);
+                t.setImage(image);
             }
             if (t.getMaterialOrWorker() == 1) {
                 t.setType(type);

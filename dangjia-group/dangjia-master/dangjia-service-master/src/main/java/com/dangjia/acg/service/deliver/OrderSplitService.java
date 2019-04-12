@@ -6,6 +6,8 @@ import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.DeliverHouseDTO;
@@ -41,6 +43,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -336,10 +339,18 @@ public class OrderSplitService {
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplitId);
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+            List<Map> mapList=new ArrayList<>();
             for (OrderSplitItem v : orderSplitItemList) {
+
                 v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                Map map= BeanUtils.beanToMap(v);
+               String  supplierId=splitDeliverMapper.getSupplierGoodsId(v.getHouseId(),v.getProductSn());
+                if(!CommonUtil.isEmpty(supplierId)){
+                    map.put(SplitDeliver.SUPPLIER_ID,supplierId);
+                }
+                mapList.add(map);
             }
-            return ServerResponse.createBySuccess("查询成功", orderSplitItemList);
+            return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

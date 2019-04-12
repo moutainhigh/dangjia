@@ -957,7 +957,6 @@ public class HouseWorkerService {
                 return ServerResponse.createBySuccessMessage("操作成功");
             } else if (applyType == 5) {//有人巡
                 hfa.setApplyDec("业主您好,我是" + workerType.getName() + ",大管家已经巡查了");//描述
-                hfa.setWorkerId(supervisorHF.getWorkerId());
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 Example example2 = new Example(HouseFlowApply.class);
@@ -1020,18 +1019,15 @@ public class HouseWorkerService {
 
             } else if (applyType == 6) {//无人巡查
                 hfa.setApplyDec("业主您好，我已经巡查了工地，工地情况如图");//描述
-                hfa.setWorkerId(supervisorHF.getWorkerId());
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 houseFlowApplyMapper.insert(hfa);
             } else if (applyType == 7) {//追加巡查
                 hfa.setApplyDec("业主您好，我已经巡查了工地，工地情况如图");//描述
-                hfa.setWorkerId(supervisorHF.getWorkerId());
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 houseFlowApplyMapper.insert(hfa);
             }
-
             /**********保存巡查图片,验收节点图片等信息************/
             if (StringUtil.isNotEmpty(imageList)) {
                 JSONArray imageObjArr = JSON.parseArray(imageList);
