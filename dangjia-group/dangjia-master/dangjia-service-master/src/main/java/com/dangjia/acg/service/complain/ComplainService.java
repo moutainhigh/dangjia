@@ -141,7 +141,7 @@ public class ComplainService {
             switch (complainType) {
                 case 1://奖罚
                     RewardPunishRecord rewardPunishRecord = rewardPunishRecordMapper.selectByPrimaryKey(businessId);
-                    userid=rewardPunishRecord.getOperatorId();
+                    userid=rewardPunishRecord.getMemberId();
                     break;
                 case 2://2：业主要求整改.
                     Member stewardHouse = memberMapper.getSupervisor(houseId);
@@ -226,6 +226,7 @@ public class ComplainService {
             PageInfo pageResult = new PageInfo(complainDTOList);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             for (ComplainDTO complainDTO : complainDTOList) {
+
                 String files = complainDTO.getFiles();
                 if (CommonUtil.isEmpty(files)) {
                     complainDTO.setFileList(null);
