@@ -795,9 +795,10 @@ public class HouseWorkerService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setHouseFlowApply(Integer applyType, String houseFlowId, String workerId, Integer suspendDay, String applyDec,
                                             String imageList) {
+
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);//工序
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
         try {
-            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);//工序
-            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             if (applyType == 3) {
                 if (houseFlow.getPause() == 1) {
                     return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已暂停施工,请勿重复申请");
@@ -998,7 +999,7 @@ public class HouseWorkerService {
                     workerDetail.setHaveMoney(supervisorHWO.getHaveMoney());
                     workerDetail.setHouseWorkerOrderId(supervisorHWO.getId());
                     workerDetail.setApplyMoney(haveMoneys);
-                    workerDetail.setWalletMoney(supervisor.getHaveMoney());
+                    workerDetail.setWalletMoney(supervisor.getSurplusMoney());
                     workerDetailMapper.insert(workerDetail);
                 } else {
                     houseFlowApplyMapper.insert(hfa);
@@ -1059,11 +1060,11 @@ public class HouseWorkerService {
             if (applyType == 0) {//每日完工
                 houseFlowApplyService.checkWorker(hfa.getId());
             }
-            return ServerResponse.createBySuccessMessage("操作成功");
+            return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）巡查成功");
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("操作失败");
+            return ServerResponse.createByErrorMessage("工序（" + workerType.getName() + "）巡查失败");
         }
     }
 

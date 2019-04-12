@@ -287,7 +287,7 @@ public class OrderSplitService {
                 workerDetail.setHouseId(orderSplit.getHouseId());
                 workerDetail.setMoney(yunFei);
                 workerDetail.setState(7);//收取运费
-                workerDetail.setWalletMoney(haveMoney);
+                workerDetail.setWalletMoney(surplusMoneys);
                 workerDetail.setApplyMoney(yunFei);
                 workerDetailMapper.insert(workerDetail);
 

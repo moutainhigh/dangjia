@@ -343,7 +343,7 @@ public class MendOrderCheckService {
                 workerDetail.setHouseId(mendOrder.getHouseId());
                 workerDetail.setMoney(refund);
                 workerDetail.setApplyMoney(refund);
-                workerDetail.setWalletMoney(haveMoney);
+                workerDetail.setWalletMoney(surplusMoney);
                 workerDetail.setState(6);//退人工退款
                 workerDetailMapper.insert(workerDetail);
 
@@ -386,7 +386,7 @@ public class MendOrderCheckService {
                 workerDetail.setHouseId(mendOrder.getHouseId());
                 workerDetail.setMoney(new BigDecimal(mendOrder.getTotalAmount()));
                 workerDetail.setApplyMoney(new BigDecimal(mendOrder.getTotalAmount()));
-                workerDetail.setWalletMoney(haveMoney);
+                workerDetail.setWalletMoney(surplusMoney);
                 if (mendOrder.getType() == 2){
                     workerDetail.setState(5);//进钱//工匠退 登记剩余
                 }else {
