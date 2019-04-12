@@ -134,10 +134,9 @@ public class HouseApplyChangeOnYsService {
 //        applyTypeMap.put(DjConstants.ApplyType.NO_PASS, "审核未通过");
         Map<String, Object> map = new HashMap<>();
         map.put("id", hfa.getId());
-        Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
         Member supervisor = houseFlowMapper.getMemberByHouseIdAndWorkerType(hfa.getHouseId(), 3);
         map.put("workerHead", address + supervisor.getHead());//工人头像
-        map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+        map.put("workerTypeName", "大管家");//工匠类型
         map.put("workerName", supervisor.getName());//工人名称
         Example example = new Example(HouseWorker.class);
         example.createCriteria().andEqualTo("houseId", hfa.getHouseId()).andEqualTo("workerId", hfa.getWorkerId());
