@@ -13,6 +13,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         house_id as houseId,
         apply_type as applyType,
         suspend_day as suspendDay,
+        end_date as endDate,
+        start_date as startDate,
         apply_dec as applyDec,
         member_check as memberCheck,
         supervisor_check as supervisorCheck,
@@ -23,6 +25,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         create_date as createDate,
         modify_date as modifyDate
     </sql>
+
+
+    <!--管家已审核业主未审核超过时间申请 -->
+    <select id="couponApply" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        select <include refid="all_columns" />
+        from dj_core_house_flow_apply
+        where
+            member_check = 0
+        and ( ((apply_type=1 or apply_type=2) and (supervisor_check = 1)) or apply_type=0 )
+        and NOW() > end_date
+    </select>
 
     <!--删除未审核申请-->
     <delete id="deleteNotMemberCheck" parameterType="java.lang.String">
@@ -143,6 +156,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and house_flow_id = #{houseFlowId}
         and member_check = 0
         and worker_id = #{workerId}
+        LIMIT 1
     </select>
 
     <!--查询最早的每日开工申请-->

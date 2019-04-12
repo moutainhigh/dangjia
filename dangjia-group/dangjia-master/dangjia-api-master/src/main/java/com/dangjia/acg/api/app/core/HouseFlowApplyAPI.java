@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(value = "业主验收审核", description = "业主验收审核")
 public interface HouseFlowApplyAPI {
 
+    @PostMapping("app/core/houseFlowApply/couponApply")
+    @ApiOperation(value = "审核到时业主未审核申请", notes = "审核到时业主未审核申请")
+    void couponApply();
+
     @PostMapping("app/core/houseFlowApply/houseRecord")
     @ApiOperation(value = "工匠端工地记录", notes = "工匠端工地记录")
     ServerResponse houseRecord(@RequestParam("userToken") String userToken,

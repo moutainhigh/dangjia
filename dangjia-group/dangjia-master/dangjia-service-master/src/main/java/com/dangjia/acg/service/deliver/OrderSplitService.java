@@ -6,6 +6,8 @@ import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.DeliverHouseDTO;
@@ -41,6 +43,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -264,7 +267,7 @@ public class OrderSplitService {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(orderSplit.getWorkerTypeId());
             if (orderSplitList.size() > workerType.getSafeState()) {//超过免费次数收工匠运费
                 //TODO 计算运费 暂无准确计算公式
-                Double yunFei = 0.1;
+                BigDecimal yunFei = new BigDecimal(0.1);
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
                 List<OrderSplitItem> osiList = orderSplitItemMapper.selectByExample(example);
@@ -274,19 +277,21 @@ public class OrderSplitService {
                 }
 
                 Member worker = memberMapper.selectByPrimaryKey(orderSplit.getSupervisorId());//要货人
+                BigDecimal haveMoney = worker.getHaveMoney().subtract(yunFei);
+                BigDecimal surplusMoneys = worker.getSurplusMoney().subtract(yunFei);
                 WorkerDetail workerDetail = new WorkerDetail();
-                workerDetail.setName("要货运费");
+                workerDetail.setName(workerType.getName()+"要货运费");
                 workerDetail.setWorkerId(worker.getId());
                 workerDetail.setWorkerName(worker.getName());
                 workerDetail.setHouseId(orderSplit.getHouseId());
-                workerDetail.setMoney(new BigDecimal(yunFei));
+                workerDetail.setMoney(yunFei);
                 workerDetail.setState(7);//收取运费
-                workerDetail.setWalletMoney(worker.getHaveMoney());
-                workerDetail.setApplyMoney(new BigDecimal(yunFei));
+                workerDetail.setWalletMoney(haveMoney);
+                workerDetail.setApplyMoney(yunFei);
                 workerDetailMapper.insert(workerDetail);
 
-                worker.setHaveMoney(worker.getHaveMoney().subtract(new BigDecimal(yunFei)));
-                worker.setSurplusMoney(worker.getSurplusMoney().subtract(new BigDecimal(yunFei)));
+                worker.setHaveMoney(haveMoney);
+                worker.setSurplusMoney(surplusMoneys);
                 memberMapper.updateByPrimaryKeySelective(worker);
             }
 
@@ -334,10 +339,18 @@ public class OrderSplitService {
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplitId);
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+            List<Map> mapList=new ArrayList<>();
             for (OrderSplitItem v : orderSplitItemList) {
+
                 v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                Map map= BeanUtils.beanToMap(v);
+               String  supplierId=splitDeliverMapper.getSupplierGoodsId(v.getHouseId(),v.getProductSn());
+                if(!CommonUtil.isEmpty(supplierId)){
+                    map.put(SplitDeliver.SUPPLIER_ID,supplierId);
+                }
+                mapList.add(map);
             }
-            return ServerResponse.createBySuccess("查询成功", orderSplitItemList);
+            return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

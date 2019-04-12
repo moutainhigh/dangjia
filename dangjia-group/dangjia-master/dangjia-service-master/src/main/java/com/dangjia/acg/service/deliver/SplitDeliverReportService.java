@@ -1,12 +1,15 @@
 package com.dangjia.acg.service.deliver;
 
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderDTO;
 import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderItemDTO;
 import com.dangjia.acg.dto.deliver.SplitReportSupplierDTO;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +46,25 @@ public class SplitDeliverReportService {
             splitReportDeliverOrderItemDTO.setImage(address+splitReportDeliverOrderItemDTO.getImage());
         }
         return ServerResponse.createBySuccess("查询成功", splitReportDeliverOrderItemDTOS);
+    }
+
+
+    public ServerResponse getSplitReportGoodsSuppliers(String houseId,String productSn){
+        List<SplitReportSupplierDTO> splitDeliverDTOList=orderSplitItemMapper.getSplitReportGoodsSuppliers(houseId,productSn);
+        return ServerResponse.createBySuccess("查询成功", splitDeliverDTOList);
+    }
+
+
+    public ServerResponse getSplitReportGoodsOrderItems(PageDTO pageDTO,String houseId){
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<SplitReportDeliverOrderItemDTO>  splitReportDeliverOrderItemDTOS=orderSplitItemMapper.getSplitReportGoodsOrderItems(houseId);
+        PageInfo pageResult = new PageInfo(splitReportDeliverOrderItemDTOS);
+        for (SplitReportDeliverOrderItemDTO splitReportDeliverOrderItemDTO : splitReportDeliverOrderItemDTOS) {
+            splitReportDeliverOrderItemDTO.setImage(address+splitReportDeliverOrderItemDTO.getImage());
+        }
+        pageResult.setList(splitReportDeliverOrderItemDTOS);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
 
