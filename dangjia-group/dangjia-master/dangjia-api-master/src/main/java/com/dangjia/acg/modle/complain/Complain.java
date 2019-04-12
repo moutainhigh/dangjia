@@ -62,4 +62,10 @@ public class Complain extends BaseEntity {
     @Desc(value = "附件")
     @ApiModelProperty("附件")
     private String files;
+
+    @Column(name = "content")
+    @Desc(value = "对象ID")
+    @ApiModelProperty("对象ID")
+    private String content;
+
 }
