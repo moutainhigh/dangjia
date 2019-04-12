@@ -89,9 +89,8 @@ public class HouseApplyChangeOnYsService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<Map<String, Object>> listMap = new ArrayList<>();
             for (HouseFlowApply hfa : hfaList) {
-
                 // 如果为交底巡查验收三种属性就调用getHouseFlowApplyMapOnPatrol将显示人为大管家
-                if (hfa.getApplyType() == 0 || hfa.getApplyType() == 1 || hfa.getApplyType() == 2
+                if (hfa.getApplyType() == 1 || hfa.getApplyType() == 2
                         || hfa.getApplyType() == 5 || hfa.getApplyType() == 6 || hfa.getApplyType() == 7) {
                     listMap.add(getHouseFlowApplyMapOnPatrol(hfa, address));
                 } else {
@@ -165,9 +164,9 @@ public class HouseApplyChangeOnYsService {
 
     private Map<String, Object> getHouseFlowApplyMap(HouseFlowApply hfa, String address) {
         Map<Integer, String> applyTypeMap = new HashMap<>();
-        applyTypeMap.put(DjConstants.ApplyType.MEIRI_WANGGONG, "每日完工申请");
-        applyTypeMap.put(DjConstants.ApplyType.JIEDUAN_WANGONG, "阶段完工申请");
-        applyTypeMap.put(DjConstants.ApplyType.ZHENGTI_WANGONG, "整体完工申请");
+        applyTypeMap.put(DjConstants.ApplyType.MEIRI_WANGGONG, "每日完工");
+        applyTypeMap.put(DjConstants.ApplyType.JIEDUAN_WANGONG, "阶段完工");
+        applyTypeMap.put(DjConstants.ApplyType.ZHENGTI_WANGONG, "整体完工");
         applyTypeMap.put(DjConstants.ApplyType.TINGGONG, "停工申请");
         applyTypeMap.put(DjConstants.ApplyType.MEIRI_KAIGONG, "每日开工");
         applyTypeMap.put(DjConstants.ApplyType.YOUXIAO_XUNCHA, "巡查");

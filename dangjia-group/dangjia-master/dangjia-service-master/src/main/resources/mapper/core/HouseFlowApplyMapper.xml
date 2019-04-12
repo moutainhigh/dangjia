@@ -249,7 +249,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
              dj_core_house_flow_apply
         WHERE 1 = 1
           AND house_id = #{houseId}
-          AND supervisor_check = 1
+          AND (apply_type=0 OR supervisor_check=1)
         <if test="workerTypeId!=null and workerTypeId!=''">
             and worker_type_id=#{workerTypeId}
         </if>
