@@ -21,7 +21,7 @@ public interface SplitDeliverAPI {
      */
     @PostMapping("app/deliver/splitDeliver/partSplitDeliver")
     @ApiOperation(value = "部分收货", notes = "部分收货")
-    ServerResponse partSplitDeliver(@RequestParam("splitDeliverId") String splitDeliverId,
+    ServerResponse partSplitDeliver(@RequestParam("userToken") String userToken,@RequestParam("splitDeliverId") String splitDeliverId,
                                     @RequestParam("image") String image,
                                     @RequestParam("splitItemList") String splitItemList);
 
@@ -30,7 +30,7 @@ public interface SplitDeliverAPI {
      */
     @PostMapping("app/deliver/splitDeliver/affirmSplitDeliver")
     @ApiOperation(value = "确认收货", notes = "确认收货")
-    ServerResponse affirmSplitDeliver(@RequestParam("splitDeliverId") String splitDeliverId,
+    ServerResponse affirmSplitDeliver(@RequestParam("userToken") String userToken,@RequestParam("splitDeliverId") String splitDeliverId,
                                       @RequestParam("image") String image);
 
     /**

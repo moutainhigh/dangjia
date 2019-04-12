@@ -166,7 +166,7 @@ public class OrderSplitService {
                 orderSplitItemDTO.setUnitName(orderSplitItem.getUnitName());
                 orderSplitItemDTO.setShopCount(String.valueOf(orderSplitItem.getShopCount()));
                 orderSplitItemDTO.setImage(address + orderSplitItem.getImage());
-                orderSplitItemDTO.setReceive(String.valueOf(orderSplitItem.getNum()));
+                orderSplitItemDTO.setReceive(String.valueOf(orderSplitItem.getReceive()));
                 orderSplitItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(),orderSplitItem.getProductId()));
                 orderSplitItemDTO.setBrandName(forMasterAPI.brandName(house.getCityId(),orderSplitItem.getProductId()));
                 orderSplitItemDTO.setTotalPrice(new BigDecimal(orderSplitItem.getSupCost() * orderSplitItem.getNum()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());//成本价 * 数量
@@ -244,6 +244,7 @@ public class OrderSplitService {
                     splitDeliver.setSubmitTime(new Date());
                     splitDeliver.setSupState(0);
                     splitDeliver.setShippingState(0);//待发货状态
+                    splitDeliver.setApplyState(null);
                     splitDeliverMapper.insert(splitDeliver);
                 }
 
