@@ -30,7 +30,6 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
-import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -50,7 +49,6 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -357,18 +355,18 @@ public class ComplainService {
                         break;
 
                     case 3:// 3：大管家（开工后）要求换人.
-                        HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(complain.getBusinessId());
-                        if (houseWorker.getWorkType() == 6) {
-                            return ServerResponse.createByErrorMessage("已支付,更换换人方式");
-                        }
-                        houseWorker.setWorkType(3);//被平台换
-                        houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-                        houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
-                        houseFlow.setWorkerId("");
-                        houseFlow.setWorkType(2);
-                        houseFlow.setReleaseTime(new Date());//重新发布
-                        houseFlow.setRefuseNumber(houseFlow.getRefuseNumber() + 1);
-                        houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+//                        HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(complain.getBusinessId());
+//                        if (houseWorker.getWorkType() == 6) {
+//                            return ServerResponse.createByErrorMessage("已支付,更换换人方式");
+//                        }
+//                        houseWorker.setWorkType(3);//被平台换
+//                        houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+//                        houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
+//                        houseFlow.setWorkerId("");
+//                        houseFlow.setWorkType(2);
+//                        houseFlow.setReleaseTime(new Date());//重新发布
+//                        houseFlow.setRefuseNumber(houseFlow.getRefuseNumber() + 1);
+//                        houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                         break;
                     case 4:// 4:部分收货申诉
                         ServerResponse response = splitDeliverService.splitDeliverDetail(complain.getBusinessId());
