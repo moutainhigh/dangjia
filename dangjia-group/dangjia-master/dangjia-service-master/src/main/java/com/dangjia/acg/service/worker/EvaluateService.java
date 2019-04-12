@@ -47,6 +47,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -234,6 +235,10 @@ public class EvaluateService {
             updateIntegral(evaluate);//工人积分
 
             houseFlowApply.setSupervisorCheck(1);
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DAY_OF_YEAR, 7);//业主倒计时
+            houseFlowApply.setStartDate(calendar.getTime());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
             /*
              * 大管家每次审核拿钱 新算法 2018.08.03
