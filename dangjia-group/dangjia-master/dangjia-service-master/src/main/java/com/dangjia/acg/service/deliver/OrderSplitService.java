@@ -262,39 +262,39 @@ public class OrderSplitService {
             /*
              * 计算是否超过免费要货次数,收取工匠运费
              */
-            Example example = new Example(OrderSplit.class);
-            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, orderSplit.getHouseId()).andEqualTo(OrderSplit.WORKER_TYPE_ID, orderSplit.getWorkerTypeId());
-            List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
-            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(orderSplit.getWorkerTypeId());
-            if (orderSplitList.size() > workerType.getSafeState()) {//超过免费次数收工匠运费
-                //TODO 计算运费 暂无准确计算公式
-                BigDecimal yunFei = new BigDecimal(0.1);
-                example = new Example(OrderSplitItem.class);
-                example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
-                List<OrderSplitItem> osiList = orderSplitItemMapper.selectByExample(example);
-                for (OrderSplitItem osi : osiList) {
-                    //Product product = forMasterAPI.getProduct(osi.getProductId());
-                    //yunFei += osi.getTotalPrice() * 0.1;
-                }
-
-                Member worker = memberMapper.selectByPrimaryKey(orderSplit.getSupervisorId());//要货人
-                BigDecimal haveMoney = worker.getHaveMoney().subtract(yunFei);
-                BigDecimal surplusMoneys = worker.getSurplusMoney().subtract(yunFei);
-                WorkerDetail workerDetail = new WorkerDetail();
-                workerDetail.setName(workerType.getName()+"要货运费");
-                workerDetail.setWorkerId(worker.getId());
-                workerDetail.setWorkerName(worker.getName());
-                workerDetail.setHouseId(orderSplit.getHouseId());
-                workerDetail.setMoney(yunFei);
-                workerDetail.setState(7);//收取运费
-                workerDetail.setWalletMoney(haveMoney);
-                workerDetail.setApplyMoney(yunFei);
-                workerDetailMapper.insert(workerDetail);
-
-                worker.setHaveMoney(haveMoney);
-                worker.setSurplusMoney(surplusMoneys);
-                memberMapper.updateByPrimaryKeySelective(worker);
-            }
+//            Example example = new Example(OrderSplit.class);
+//            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, orderSplit.getHouseId()).andEqualTo(OrderSplit.WORKER_TYPE_ID, orderSplit.getWorkerTypeId());
+//            List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
+//            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(orderSplit.getWorkerTypeId());
+//            if (orderSplitList.size() > workerType.getSafeState()) {//超过免费次数收工匠运费
+//                //TODO 计算运费 暂无准确计算公式
+//                BigDecimal yunFei = new BigDecimal(0.1);
+//                example = new Example(OrderSplitItem.class);
+//                example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
+//                List<OrderSplitItem> osiList = orderSplitItemMapper.selectByExample(example);
+//                for (OrderSplitItem osi : osiList) {
+//                    //Product product = forMasterAPI.getProduct(osi.getProductId());
+//                    //yunFei += osi.getTotalPrice() * 0.1;
+//                }
+//
+//                Member worker = memberMapper.selectByPrimaryKey(orderSplit.getSupervisorId());//要货人
+//                BigDecimal haveMoney = worker.getHaveMoney().subtract(yunFei);
+//                BigDecimal surplusMoneys = worker.getSurplusMoney().subtract(yunFei);
+//                WorkerDetail workerDetail = new WorkerDetail();
+//                workerDetail.setName(workerType.getName()+"要货运费");
+//                workerDetail.setWorkerId(worker.getId());
+//                workerDetail.setWorkerName(worker.getName());
+//                workerDetail.setHouseId(orderSplit.getHouseId());
+//                workerDetail.setMoney(yunFei);
+//                workerDetail.setState(7);//收取运费
+//                workerDetail.setWalletMoney(haveMoney);
+//                workerDetail.setApplyMoney(yunFei);
+//                workerDetailMapper.insert(workerDetail);
+//
+//                worker.setHaveMoney(haveMoney);
+//                worker.setSurplusMoney(surplusMoneys);
+//                memberMapper.updateByPrimaryKeySelective(worker);
+//            }
 
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
