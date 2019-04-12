@@ -38,10 +38,6 @@ import java.util.List;
 @Service
 public class WebOrderService {
     @Autowired
-    private IMemberMapper memberMapper;
-    @Autowired
-    private IHouseMapper iHouseMapper;
-    @Autowired
     private IBusinessOrderMapper iBusinessOrderMapper;
     @Autowired
     private IActivityRedPackRecordMapper iActivityRedPackRecordMapper;
@@ -53,85 +49,58 @@ public class WebOrderService {
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private IMendOrderMapper mendOrderMapper;
-    @Autowired
-    private IPayOrderMapper payOrderMapper;
 
-    /*所有订单流水*/
-    public ServerResponse getAllOrders(PageDTO pageDTO, String likeMobile, String likeAddress) {
+    /**
+     * 所有订单流水
+     *
+     * @param pageDTO   分页
+     * @param state     处理状态 -1全部， 1刚生成(可编辑),2去支付(不修改),3已支付
+     * @param searchKey 模糊搜索：订单号,房屋信息,电话,支付单号(业务订单号)
+     * @return
+     */
+    public ServerResponse getAllOrders(PageDTO pageDTO, Integer state, String searchKey) {
         try {
+            if (state == null) {
+                state = -1;
+            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-
-            List<WebOrderDTO> webOrderDTOList = new ArrayList<>();
-            List<BusinessOrder> orderList = iBusinessOrderMapper.getAllBusinessOrder(likeMobile, likeAddress);
-
-            for (BusinessOrder businessOrder : orderList) {
-                WebOrderDTO webOrderDTO = new WebOrderDTO();
-                webOrderDTO.setOrderId(businessOrder.getNumber());
-                webOrderDTO.setTotalAmount(businessOrder.getTotalPrice());
-                webOrderDTO.setState("待支付");
-                if (businessOrder.getState() == 2) {
-                    webOrderDTO.setState("支付中");
-                }
-                if (businessOrder.getState() == 3) {
-                    PayOrder payOrder = payOrderMapper.getByNumber(businessOrder.getPayOrderNumber());
-                    if(payOrder.getPayState().equals("1")){
-                        webOrderDTO.setState("微信已支付");
-                    }else {
-                        webOrderDTO.setState("支付宝已支付");
-                    }
-
-                    if(businessOrder.getType() == 1){//工序支付
-                        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(businessOrder.getTaskId());
-                        if(houseFlow != null){
-                            webOrderDTO.setType(workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId()).getName()+"抢单");
+            List<WebOrderDTO> orderList = iBusinessOrderMapper.getWebOrderList(state, searchKey);
+            PageInfo pageResult = new PageInfo(orderList);
+            for (WebOrderDTO webOrderDTO : orderList) {
+                if (webOrderDTO.getState() == 3) {
+                    if (webOrderDTO.getType() == 1) {//工序支付
+                        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(webOrderDTO.getTaskId());
+                        if (houseFlow != null) {
+                            webOrderDTO.setTypeText(workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId()).getName() + "抢单");
                         }
                     }
-                    if(businessOrder.getType() == 2){//补货补人工
-                        MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(businessOrder.getTaskId());
-                        if(mendOrder != null){
-                            if (mendOrder.getType() == 0){
-                                webOrderDTO.setType(workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId()).getName()+"补材料");
-                            }else {
-                                webOrderDTO.setType(workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId()).getName()+"补人工");
+                    if (webOrderDTO.getType() == 2) {//补货补人工
+                        MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(webOrderDTO.getTaskId());
+                        if (mendOrder != null) {
+                            if (mendOrder.getType() == 0) {
+                                webOrderDTO.setTypeText(workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId()).getName() + "补材料");
+                            } else {
+                                webOrderDTO.setTypeText(workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId()).getName() + "补人工");
                             }
                         }
                     }
-
-                    if(businessOrder.getType() == 4) {//只付材料
-                        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(businessOrder.getTaskId());
-                        if(houseFlow != null){
-                            webOrderDTO.setType(workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId()).getName()+"付材料");
+                    if (webOrderDTO.getType() == 4) {//只付材料
+                        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(webOrderDTO.getTaskId());
+                        if (houseFlow != null) {
+                            webOrderDTO.setTypeText(workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId()).getName() + "付材料");
                         }
                     }
-                    if(businessOrder.getType() == 5) {
-                        webOrderDTO.setType("验房分销");
+                    if (webOrderDTO.getType() == 5) {
+                        webOrderDTO.setTypeText("验房分销");
                     }
                 }
-                webOrderDTO.setCreateDate(businessOrder.getCreateDate());
-                webOrderDTO.setModifyDate(businessOrder.getModifyDate());
-                House house = iHouseMapper.selectByPrimaryKey(businessOrder.getHouseId());
-                if (house != null) {
-//                    return ServerResponse.createByErrorMessage("找不到房子信息 houseId:" + businessOrder.getHouseId());
-                    webOrderDTO.setHouseName(house.getHouseName());
-                    Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                    if (member != null) {
-                        webOrderDTO.setMemberId(member.getId());
-                        webOrderDTO.setMobile(member.getMobile());
-                    }
-                }
-                webOrderDTO.setPayOrderNumber(businessOrder.getPayOrderNumber());
-                webOrderDTO.setActualPayment(businessOrder.getPayPrice());
-                ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(businessOrder.getNumber());
+                ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(webOrderDTO.getOrderId());
                 if (activityRedPackRecord != null) {
                     ActivityRedPack activityRedPack = iActivityRedPackMapper.selectByPrimaryKey(activityRedPackRecord.getRedPackId());
                     webOrderDTO.setRedPackName(activityRedPack.getName());
-                    webOrderDTO.setRedPackAmount(businessOrder.getDiscountsPrice());
                 }
-                webOrderDTOList.add(webOrderDTO);
             }
-
-            PageInfo pageResult = new PageInfo(orderList);
-            pageResult.setList(webOrderDTOList);
+            pageResult.setList(orderList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();

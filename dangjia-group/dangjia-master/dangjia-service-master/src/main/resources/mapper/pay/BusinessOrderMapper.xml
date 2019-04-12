@@ -29,45 +29,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		ORDER BY create_date desc
 	</select>
 
-	<!-- 根据所有订单查询 -->
-	<select id="getAllBusinessOrder" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.pay.BusinessOrder">
-		SELECT
-		pbo.id,
-		pbo.member_id as memberId,
-		pbo.number,
-		pbo.pay_order_number as payOrderNumber,
-		pbo.house_id as houseId,
-		pbo.task_id as taskId,
-		pbo.state,
-		pbo.total_price as totalPrice,
-		pbo.discounts_price as discountsPrice,
-		pbo.pay_price as payPrice,
-		pbo.type,
-		pbo.data_status as dataStatus,
-		pay.create_date AS createDate,
-		pay.modify_date AS modifyDate,
-		house.id,
-		house.residential,
-		house.building,
-		house.unit,
-		house.number,
-		house.member_id,
-		member.mobile
-		FROM dj_pay_business_order as pbo
-		LEFT JOIN dj_pay_pay_order AS pay ON pay.number = pbo.pay_order_number
-		INNER JOIN dj_house AS house ON pbo.house_id = house.id
-		INNER JOIN dj_member AS member ON member.id = house.member_id
-		where pbo.data_status=0
-		<if test="likeAddress!=null and likeAddress!=''">
-			AND  CONCAT(house.residential,house.building,'栋',house.unit,'单元',house.number,'号') LIKE CONCAT('%',#{likeAddress},'%')
-		</if>
-		<if test="likeMobile!=null and likeMobile!=''">
-			AND member.mobile LIKE CONCAT('%',#{likeMobile},'%')
-		</if>
-		ORDER BY pbo.create_date desc
-
-	</select>
-
     <!-- 根据taskId查询 -->
     <select id="byTaskId" resultType="com.dangjia.acg.modle.pay.BusinessOrder">
         SELECT
@@ -76,6 +37,42 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where task_id = #{taskId}
 		and type = #{type}
     </select>
+
+	<select id="getWebOrderList" resultType="com.dangjia.acg.dto.deliver.WebOrderDTO">
+		SELECT
+			a.id AS id,
+			a.number AS orderId,
+			CONCAT( c.residential, c.building, '栋', c.unit, '单元', c.number, '号' ) AS houseName,
+			a.member_id AS memberId,
+			d.mobile AS mobile,
+			a.pay_order_number AS payOrderNumber,
+			a.total_price AS totalAmount,
+			a.discounts_price AS redPackAmount,
+			a.pay_price AS actualPayment,
+			b.create_date AS createDate,
+			a.type AS type,
+			a.state AS state,
+			a.task_id AS taskId,
+			b.pay_state AS payType
+		FROM
+			dj_pay_business_order AS a
+			LEFT JOIN dj_pay_pay_order AS b ON b.number = a.pay_order_number
+			INNER JOIN dj_house AS c ON a.house_id = c.id
+			INNER JOIN dj_member AS d ON d.id = a.member_id
+		WHERE
+			a.data_status = 0
+			<if test="state != -1">
+				and a.state = #{state}
+			</if>
+			<if test="searchKey!=null and searchKey!=''">
+				and ( d.mobile like CONCAT('%',#{searchKey},'%')
+				or CONCAT( c.residential, c.building, '栋', c.unit, '单元', c.number, '号' ) LIKE CONCAT('%',#{searchKey},'%')
+				or a.pay_order_number like CONCAT('%',#{searchKey},'%')
+				or a.number like CONCAT('%',#{searchKey},'%'))
+			</if>
+		ORDER BY
+			b.create_date DESC
+	</select>
 
 </mapper>
 

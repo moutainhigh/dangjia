@@ -23,7 +23,7 @@ public interface WebOrderAPI {
     @ApiOperation(value = "支付订单流水", notes = "支付订单流水")
     ServerResponse getAllOrders(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("pageDTO") PageDTO pageDTO,
-                                @RequestParam("likeMobile") String likeMobile,
-                                @RequestParam("likeAddress") String likeAddress);
+                                @RequestParam("state") Integer state,
+                                @RequestParam("searchKey") String searchKey);
 
 }
