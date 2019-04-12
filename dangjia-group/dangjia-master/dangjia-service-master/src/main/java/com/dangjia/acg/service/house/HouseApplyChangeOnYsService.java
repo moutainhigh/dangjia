@@ -136,16 +136,7 @@ public class HouseApplyChangeOnYsService {
         Example example = new Example(HouseWorker.class);
         example.createCriteria().andEqualTo("houseId", hfa.getHouseId()).andEqualTo("workerId", hfa.getWorkerId());
         List<HouseWorker> listHw = houseWorkerMapper.selectByExample(example);
-        if (listHw.size() > 0) {
-            HouseWorker houseWorker = listHw.get(0);
-            if (houseWorker.getWorkType() == 4) {
-                map.put("isNormal", "已更换");//施工状态
-            } else {
-                map.put("isNormal", "正常施工");
-            }
-        } else {
-            map.put("isNormal", "正常施工");
-        }
+        changeConstruction(map, listHw);
         map.put("content", hfa.getApplyDec());
         example = new Example(HouseFlowApplyImage.class);
         example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, hfa.getId());
@@ -160,6 +151,19 @@ public class HouseApplyChangeOnYsService {
         map.put("applyType", applyTypeMap.get(hfa.getApplyType()));
         map.put("createDate", hfa.getCreateDate().getTime());
         return map;
+    }
+
+    static void changeConstruction(Map<String, Object> map, List<HouseWorker> listHw) {
+        if (listHw.size() > 0) {
+            HouseWorker houseWorker = listHw.get(0);
+            if (houseWorker.getWorkType() == 4) {
+                map.put("isNormal", "已更换");//施工状态
+            } else {
+                map.put("isNormal", "正常施工");
+            }
+        } else {
+            map.put("isNormal", "正常施工");
+        }
     }
 
     private Map<String, Object> getHouseFlowApplyMap(HouseFlowApply hfa, String address) {
@@ -184,16 +188,7 @@ public class HouseApplyChangeOnYsService {
         Example example = new Example(HouseWorker.class);
         example.createCriteria().andEqualTo("houseId", hfa.getHouseId()).andEqualTo("workerId", hfa.getWorkerId());
         List<HouseWorker> listHw = houseWorkerMapper.selectByExample(example);
-        if (listHw.size() > 0) {
-            HouseWorker houseWorker = listHw.get(0);
-            if (houseWorker.getWorkType() == 4) {
-                map.put("isNormal", "已更换");//施工状态
-            } else {
-                map.put("isNormal", "正常施工");
-            }
-        } else {
-            map.put("isNormal", "正常施工");
-        }
+        changeConstruction(map, listHw);
         map.put("content", hfa.getApplyDec());
         example = new Example(HouseFlowApplyImage.class);
         example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, hfa.getId());
