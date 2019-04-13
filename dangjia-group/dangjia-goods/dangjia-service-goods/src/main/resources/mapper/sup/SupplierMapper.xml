@@ -195,49 +195,43 @@
 	<!-- 根据供应商查询自己所供应的商品-->
 	<select id="querySupplierProduct" resultType="com.dangjia.acg.modle.basics.Product" >
 		select
-			id,
-			name,
-			goods_id as goodsId,
-			category_id as categoryId,
-			product_sn as productSn,
-			image,
-			unit_name,
-			unit_id,
-			weight,
-			type,
-			maket,
-			cost,
-			price,
-			profit,
-			brand_id as brandId,
-			brand_series_id as brandSeriesId,
-			attribute_id_arr as attributeIdArr,
-			value_name_arr as valueNameArr,
-			value_id_arr as valueIdArr,
-			convert_unit as convertUnit,
-            convert_quality as convertQuality,
-			create_date as createDate,
-			modify_date as modifyDate
+			p.id,
+			p.NAME,
+			p.goods_id AS goodsId,
+			p.category_id AS categoryId,
+			p.product_sn AS productSn,
+			p.image,
+			p.unit_name as unitName,
+			p.unit_id as unitId,
+			p.weight,
+			p.type,
+			p.maket,
+			p.cost,
+			p.price,
+			p.profit,
+			p.brand_id AS brandId,
+			p.brand_series_id AS brandSeriesId,
+			p.attribute_id_arr AS attributeIdArr,
+			p.value_name_arr AS valueNameArr,
+			p.value_id_arr AS valueIdArr,
+			p.convert_unit AS convertUnit,
+			p.convert_quality AS convertQuality,
+			p.create_date AS createDate,
+			p.modify_date AS modifyDate
 		from
-		    dj_basics_product
-		where 1=1
-			and
-		    id in
-				(select 
-				    product_id
-				 from dj_sup_supplier_product as product
-				 WHERE  1=1
-					<if test="supplierId!=null and supplierId!=''">
-						and supplier_id=#{supplierId}
-					</if>
-					<if test="isSupply!= -1">
-						and is_supply=#{isSupply}
-					</if>
-				)
-			<if test="likeProductName!=null and likeProductName!=''">
-				and name like CONCAT('%',#{likeProductName},'%')
+		    dj_basics_product p
+		INNER JOIN dj_sup_supplier_product sp ON p.id = sp.product_id
+		where  p.data_status=0
+			<if test="supplierId!=null and supplierId!=''">
+				and sp.supplier_id=#{supplierId}
 			</if>
-		ORDER BY create_date desc
+			<if test="isSupply!= -1">
+				and sp.is_supply=#{isSupply}
+			</if>
+			<if test="likeProductName!=null and likeProductName!=''">
+				and p.name like CONCAT('%',#{likeProductName},'%')
+			</if>
+		ORDER BY p.create_date desc
     </select>
 	<!-- 根据供应商查询在供应的货品种类-->
 	<select id="getSupplierProductByProductId" parameterType="java.lang.String" resultType="java.lang.Integer">
