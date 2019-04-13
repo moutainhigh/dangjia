@@ -19,8 +19,8 @@ import javax.persistence.Table;
 public class Complain extends BaseEntity {
 
     @Column(name = "member_id")
-    @Desc(value = "当家用户ID")
-    @ApiModelProperty("当家用户ID")
+    @Desc(value = "对象ID")
+    @ApiModelProperty("对象ID")
     private String memberId;
 
     @Column(name = "complain_type")
@@ -29,8 +29,8 @@ public class Complain extends BaseEntity {
     private Integer complainType;
 
     @Column(name = "user_id")
-    @Desc(value = "处理人ID")
-    @ApiModelProperty("处理人ID")
+    @Desc(value = "发起人ID")
+    @ApiModelProperty("发起人ID")
     private String userId;
 
     @Column(name = "status")
@@ -64,8 +64,25 @@ public class Complain extends BaseEntity {
     private String files;
 
     @Column(name = "content")
-    @Desc(value = "对象ID")
-    @ApiModelProperty("对象ID")
+    @Desc(value = "对象名称")
+    @ApiModelProperty("对象名称")
     private String content;
+
+    @Column(name = "user_name")
+    @Desc(value = "发起人名称")
+    @ApiModelProperty("发起人名称")
+    private String userName;
+
+
+    @Column(name = "user_nick_name")
+    @Desc(value = "发起人昵称")
+    @ApiModelProperty("发起人昵称")
+    private String userNickName;
+
+
+    @Column(name = "user_mobile")
+    @Desc(value = "发起人电话")
+    @ApiModelProperty("发起人电话")
+    private String userMobile;
 
 }

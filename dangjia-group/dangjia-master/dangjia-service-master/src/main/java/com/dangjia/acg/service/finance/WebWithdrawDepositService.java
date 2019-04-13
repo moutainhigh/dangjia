@@ -118,7 +118,7 @@ public class WebWithdrawDepositService {
                     workerDetail.setMoney(money);
                     workerDetail.setDefinedName("提现驳回到余额");
                     workerDetail.setState(8);//8提现驳回到余额
-                    workerDetail.setWalletMoney(haveMoney);
+                    workerDetail.setWalletMoney(surplusMoney);
                     iWorkerDetailMapper.insert(workerDetail);
 
                     //把钱 转到 余额上面

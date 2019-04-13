@@ -11,6 +11,7 @@ import lombok.Data;
 public class SplitDeliverItemDTO {
     private String image;//图片
     private String productName;//名字
+    private String productSn;//编号
     private Double shopCount;//购买总数
     private Double num;//本次发货数量
     private String unitName;//单位
