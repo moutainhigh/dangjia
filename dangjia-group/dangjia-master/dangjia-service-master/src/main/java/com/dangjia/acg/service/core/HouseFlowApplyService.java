@@ -592,7 +592,31 @@ public class HouseFlowApplyService {
     /**补人工算钱*/
     private void workerDetailRepair(HouseWorkerOrder hwo){
         Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
+        //处理工钱
+        if(worker.getWorkerPrice()==null){//总钱
+            worker.setWorkerPrice(new BigDecimal(0.0));
+        }
+        if(worker.getHaveMoney() == null){//工人已获取
+            worker.setHaveMoney(new BigDecimal(0.0));
+        }
+        if(worker.getSurplusMoney() == null){//可取余额 赋初始值为0
+            worker.setSurplusMoney(new BigDecimal(0.0));
+        }
+        BigDecimal mid = worker.getHaveMoney().subtract(worker.getRetentionMoney());//可取等于 获得减押金
+        if(mid.compareTo(BigDecimal.ZERO) == 1){//大于0
+            worker.setSurplusMoney(mid);
+        }else{
+            worker.setSurplusMoney(BigDecimal.ZERO);
+        }
+
         BigDecimal surplusMoney = worker.getSurplusMoney().add(hwo.getRepairPrice());
+        BigDecimal workerPrice = worker.getWorkerPrice().add(hwo.getRepairPrice());
+        BigDecimal haveMoney = worker.getHaveMoney().add(hwo.getRepairPrice());
+        worker.setWorkerPrice(workerPrice);
+        worker.setHaveMoney(haveMoney);
+        worker.setSurplusMoney(surplusMoney);
+        memberMapper.updateByPrimaryKeySelective(worker);
+
         WorkerDetail workerDetail = new WorkerDetail();
         workerDetail.setName("补人工钱");
         workerDetail.setWorkerId(hwo.getWorkerId());
@@ -605,28 +629,6 @@ public class HouseFlowApplyService {
         workerDetail.setWalletMoney(surplusMoney);
         workerDetail.setApplyMoney(hwo.getRepairPrice());
         workerDetailMapper.insert(workerDetail);
-
-        //处理工钱
-        if(worker.getWorkerPrice()==null){//总钱
-            worker.setWorkerPrice(new BigDecimal(0.0));
-        }
-        worker.setWorkerPrice(worker.getWorkerPrice().add(hwo.getRepairPrice()));
-
-        if(worker.getHaveMoney() == null){//工人已获取
-            worker.setHaveMoney(new BigDecimal(0.0));
-        }
-        worker.setHaveMoney(worker.getHaveMoney().add(hwo.getRepairPrice()));
-
-        if(worker.getSurplusMoney() == null){//可取余额 赋初始值为0
-            worker.setSurplusMoney(new BigDecimal(0.0));
-        }
-        BigDecimal mid = worker.getHaveMoney().subtract(worker.getRetentionMoney());//可取等于 获得减押金
-        if(mid.compareTo(BigDecimal.ZERO) == 1){//大于0
-            worker.setSurplusMoney(mid);
-        }else{
-            worker.setSurplusMoney(BigDecimal.ZERO);
-        }
-        memberMapper.updateByPrimaryKeySelective(worker);
     }
 
 
