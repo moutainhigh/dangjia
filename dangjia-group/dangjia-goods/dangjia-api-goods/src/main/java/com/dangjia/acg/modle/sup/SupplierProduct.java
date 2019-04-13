@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,6 +24,7 @@ import java.io.Serializable;
 @Entity
 @Table(name = "dj_sup_supplier_product")
 @ApiModel(description = "供应商关联货品表")
+@FieldNameConstants(prefix = "")
 public class SupplierProduct extends BaseEntity implements Serializable{
 
 	@Column(name = "product_id")

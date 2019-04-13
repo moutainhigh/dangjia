@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.sup.ISupplierMapper;
@@ -19,8 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -224,49 +225,31 @@ public class SupplierService {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();//返回list
-
             List<Supplier> supplierList = iSupplierMapper.querySupplierListLikeByName(name);
+            PageInfo pageResult = new PageInfo(supplierList);
             for (Supplier supplier : supplierList) {
-                Map<String, Object> map = new HashMap<String, Object>();
-                map.put("id", supplier.getId());
-                map.put("name", supplier.getName());//供应商名称
-                map.put("address", supplier.getAddress());//地址
-                map.put("telephone", supplier.getTelephone());//联系电话
-                map.put("checkPeople", supplier.getCheckPeople());//联系人
-                map.put("email", supplier.getEmail());//电子邮件
-                map.put("notice", supplier.getNotice());//发货须知
-                map.put("supplierLevel", supplier.getSupplierLevel());//供应商级别
-                map.put("gender", supplier.getGender());//联系人性别 1男 2女
-
+                Map<String, Object> map = BeanUtils.beanToMap(supplier);
                 //查找所有的货品 供应商
-                List<Product> pList = iSupplierMapper.querySupplierProduct(supplier.getId(), "", -1);
+                Example example =new Example(SupplierProduct.class);
+                example.createCriteria().andEqualTo(SupplierProduct.SUPPLIER_ID,supplier.getId()).andEqualTo(SupplierProduct.IS_SUPPLY,1);
+                List<SupplierProduct> pList = iSupplierProductMapper.selectByExample(example);
 
                 Set<String> goodsSet = new HashSet();
                 Set<String> productSet = new HashSet();
                 Integer countStock = 0;
-                for (Product product : pList) {
+                for (SupplierProduct product : pList) {
                     //根据供应商、商品、属性查询对应关系
-                    SupplierProduct supplierProduct = iSupplierMapper.querySupplierProductRelation(product.getId(), supplier.getId());
-                    if (supplierProduct.getIsSupply() == 1) {
-                        goodsSet.add(product.getGoodsId());
-                        productSet.add(product.getId());
-                        if (supplierProduct.getStock() < 50)
-                            countStock++;
-//                        LOG.info("product name:" + product.getName() + " getGoodsId:" + product.getGoodsId() + " productID:" + product.getId() + " siez:" + goodsSet.size());
+                    goodsSet.add(product.getGoodsId());
+                    productSet.add(product.getId());
+                    if (product.getStock() < 50) {
+                        countStock++;
                     }
                 }
                 map.put("countGoods", goodsSet.size());//供应的货品种类
-//                Integer countAttribute = iSupplierMapper.getSupplierProductByProductId(supplier.getId());
                 map.put("countAttribute", productSet.size());//供应的商品种类
-//                map.put("countAttribute", iSupplierMapper.getSupplierProductByProductId(supplier.getId()) == null ? "0" : iSupplierMapper.getSupplierProductByProductId(supplier.getId()));//供应的商品种类
-//                map.put("countStock", iSupplierMapper.getSupplierProductByStock(supplier.getId()));//库存小于50的
                 map.put("countStock", countStock);//库存小于50的
-                map.put("state", supplier.getState());//供应商状态  1正常供货 2停止供货
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                map.put("createDate", sdf.format(supplier.getCreateDate() == null ? new Date() : supplier.getCreateDate()));
                 mapList.add(map);
             }
-            PageInfo pageResult = new PageInfo(supplierList);
             pageResult.setList(mapList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
