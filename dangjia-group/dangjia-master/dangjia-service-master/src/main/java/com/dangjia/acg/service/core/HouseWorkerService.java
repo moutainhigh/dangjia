@@ -1005,7 +1005,7 @@ public class HouseWorkerService {
                     workerDetailMapper.insert(workerDetail);
                 } else {
                     houseFlowApplyMapper.insert(hfa);
-                    return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）巡查成功");
+//                    return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）巡查成功");
                 }
 
             } else if (applyType == 6) {//无人巡查

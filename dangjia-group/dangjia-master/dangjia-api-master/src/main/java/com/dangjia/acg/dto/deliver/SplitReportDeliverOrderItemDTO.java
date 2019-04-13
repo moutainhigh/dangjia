@@ -16,6 +16,9 @@ public class SplitReportDeliverOrderItemDTO {
     private String productName;
     private String productSn;
     private String productId;
+    private String shopcount;//购买总数
+    private String askCount;//已要总数
+    private String receive;//收货数量
     private BigDecimal supCost;
     private BigDecimal num;
     private BigDecimal price;
