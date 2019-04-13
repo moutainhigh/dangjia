@@ -662,8 +662,7 @@ public class HouseWorkerService {
      * @return 拼接好的URL
      */
     private String getH5Url(String url, String userToken, String cityId, String name) {
-        String address = String.format(url, userToken, cityId, name);
-        return address;
+        return String.format(url, userToken, cityId, name);
     }
 
 
@@ -1020,7 +1019,7 @@ public class HouseWorkerService {
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 houseFlowApplyMapper.insert(hfa);
             }
-            /**********保存巡查图片,验收节点图片等信息************/
+            //保存巡查图片,验收节点图片等信息
             if (StringUtil.isNotEmpty(imageList)) {
                 JSONArray imageObjArr = JSON.parseArray(imageList);
                 for (int i = 0; i < imageObjArr.size(); i++) {//上传材料照片
@@ -1048,10 +1047,10 @@ public class HouseWorkerService {
                         technologyRecordMapper.insert(technologyRecord);
                     } else {
                         String[] imageArr = imageUrl.split(",");
-                        for (int j = 0; j < imageArr.length; j++) {
+                        for (String anImageArr : imageArr) {
                             HouseFlowApplyImage houseFlowApplyImage = new HouseFlowApplyImage();
                             houseFlowApplyImage.setHouseFlowApplyId(hfa.getId());
-                            houseFlowApplyImage.setImageUrl(imageArr[j]);
+                            houseFlowApplyImage.setImageUrl(anImageArr);
                             houseFlowApplyImage.setImageType(imageType);//图片类型 0：材料照片；1：进度照片；2:现场照片；3:其他
                             houseFlowApplyImage.setImageTypeName(imageObj.getString("imageTypeName"));//图片类型名称 例如：材料照片；进度照片
                             houseFlowApplyImageMapper.insert(houseFlowApplyImage);
@@ -1059,11 +1058,32 @@ public class HouseWorkerService {
                     }
                 }
             }
-            /*每日完工自动审核*/
-            if (applyType == 0) {//每日完工
-                houseFlowApplyService.checkWorker(hfa.getId());
+            //* 0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4每日开工,5有效巡查,6无人巡查,7追加巡查
+            String msg;
+            switch (applyType) {
+                case 0:
+                    msg = "每日完工申请成功";
+                    //每日完工
+                    houseFlowApplyService.checkWorker(hfa.getId());
+                    break;
+                case 1:
+                    msg = "阶段完工申请成功";
+                    break;
+                case 2:
+                    msg = "整体完工申请成功";
+                    break;
+                case 3:
+                    msg = "停工申请成功";
+                    break;
+                case 4:
+                    msg = "工作开始啦！";
+                    break;
+                default:
+                    msg = "巡查成功";
+                    break;
+
             }
-            return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）巡查成功");
+            return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）" + msg);
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
@@ -1190,10 +1210,10 @@ public class HouseWorkerService {
             if (listHouseWorker != null) {
                 for (HouseWorker houseWorker : listHouseWorker) {
                     HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("houseFlowId", houseFlow.getId());//任务id
                     if (houseFlow == null || (worker.getWorkerType() != null && worker.getWorkerType() != 3 && houseFlow.getWorkType() == 2))
                         continue;
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("houseFlowId", houseFlow.getId());//任务id
                     House house = houseMapper.selectByPrimaryKey(houseWorker.getHouseId());//查询房产信息.
                     if (house == null) continue;
                     Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
