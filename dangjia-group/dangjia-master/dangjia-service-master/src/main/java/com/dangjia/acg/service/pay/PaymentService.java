@@ -168,6 +168,9 @@ public class PaymentService {
         try {
             PayOrder payOrder = payOrderMapper.selectByPrimaryKey(payOrderId);
 
+            if(payOrder.getState()==2){
+                return ServerResponse.createBySuccessMessage("支付成功");
+            }
             Example example = new Example(BusinessOrder.class);
             example.createCriteria().andEqualTo(BusinessOrder.NUMBER, payOrder.getBusinessOrderNumber());
             List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);

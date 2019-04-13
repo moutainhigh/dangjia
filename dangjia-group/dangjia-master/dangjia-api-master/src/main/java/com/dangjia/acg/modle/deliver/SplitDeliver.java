@@ -126,4 +126,9 @@ public class SplitDeliver extends BaseEntity {
     @Desc(value = "收货照片")
     @ApiModelProperty("收货照片")
     private String image;//收货照片 多张
+
+    @Column(name = "operator_id")
+    @Desc(value = "操作收货人id")
+    @ApiModelProperty("操作收货人id")
+    private String operatorId;
 }

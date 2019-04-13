@@ -6,6 +6,7 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
@@ -343,7 +344,7 @@ public class MendOrderCheckService {
                 workerDetail.setHouseId(mendOrder.getHouseId());
                 workerDetail.setMoney(refund);
                 workerDetail.setApplyMoney(refund);
-                workerDetail.setWalletMoney(haveMoney);
+                workerDetail.setWalletMoney(surplusMoney);
                 workerDetail.setState(6);//退人工退款
                 workerDetailMapper.insert(workerDetail);
 
@@ -382,11 +383,11 @@ public class MendOrderCheckService {
                 WorkerDetail workerDetail = new WorkerDetail();
                 workerDetail.setName("退材料退款");
                 workerDetail.setWorkerId(member.getId());
-                workerDetail.setWorkerName(member.getName() == null?member.getNickName() : member.getName());
+                workerDetail.setWorkerName(CommonUtil.isEmpty(member.getName()) ?member.getNickName() : member.getName());
                 workerDetail.setHouseId(mendOrder.getHouseId());
                 workerDetail.setMoney(new BigDecimal(mendOrder.getTotalAmount()));
                 workerDetail.setApplyMoney(new BigDecimal(mendOrder.getTotalAmount()));
-                workerDetail.setWalletMoney(haveMoney);
+                workerDetail.setWalletMoney(surplusMoney);
                 if (mendOrder.getType() == 2){
                     workerDetail.setState(5);//进钱//工匠退 登记剩余
                 }else {

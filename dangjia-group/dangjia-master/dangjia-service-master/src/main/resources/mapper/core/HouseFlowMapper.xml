@@ -37,6 +37,48 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             modify_date as modifyDate
     </sql>
 
+    <sql id="member_all_columns">
+               m.id,
+               m.user_name AS userName,
+               m.password,
+               m.nick_name AS nickName,
+               m.name,
+               m.mobile,
+               m.qrcode,
+               m.superiorId,
+               m.invite_num AS inviteNum,
+               m.gift,
+               m.invitation_code AS invitationCode,
+               m.others_invitation_code AS othersInvitationCode,
+               m.head,
+               m.idcaoda,
+               m.idcaodb,
+               m.idcaodall,
+               m.worker_type AS workerType,
+               m.worker_type_id AS workerTypeId,
+               m.idnumber,
+               m.worker_price AS workerPrice,
+               m.have_money AS haveMoney,
+               m.surplus_money AS surplusMoney,
+               m.retention_money AS retentionMoney,
+               m.deposit as deposit,
+               m.check_type AS checkType,
+               m.praise_rate AS praiseRate,
+               m.volume as volume,
+               m.evaluation_score AS evaluationScore,
+               m.is_crowned AS isCrowned,
+               m.smscode as smscode,
+               m.paycode as paycode,
+               m.referrals as referrals,
+               m.remarks as remarks,
+               m.real_name_state as realNameState,
+               m.real_name_describe as realNameDescribe,
+               m.check_describe as checkDescribe,
+               m.create_date AS createDate,
+               m.data_status AS dataStatus,
+               m.modify_date AS modifyDate
+    </sql>
+
     <!--根据houseId和工种类型id-->
     <select id="getByWorkerTypeId" resultType="com.dangjia.acg.modle.core.HouseFlow">
         select
@@ -138,6 +180,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and state= 0 order by sort asc
     </select>
 
+    <select id="getNextHouseFlow1" resultType="com.dangjia.acg.modle.core.HouseFlow">
+        select
+        <include refid="new_columns" />
+        from dj_core_house_flow
+        where house_id=#{houseId}
+        and state= 0 ORDER BY modify_date desc LIMIT 1
+    </select>
+
     <!--设计精算管家外可用工序-->
     <select id="getWorkerFlow" resultType="com.dangjia.acg.modle.core.HouseFlow">
         select
@@ -147,6 +197,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and state=0
         and worker_type not in (1,2,3)
         order by sort asc
+    </select>
+    <select id="getMemberByHouseIdAndWorkerType" resultType="com.dangjia.acg.modle.member.Member">
+        SELECT
+        <include refid="member_all_columns" />
+        FROM dj_core_house_flow chf
+        INNER JOIN dj_member m on m.id = chf.worker_id
+        WHERE chf.house_id = #{houseId}
+        AND chf.worker_type =#{workerType}
     </select>
 </mapper>
 

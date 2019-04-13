@@ -125,7 +125,7 @@ public class WalletService {
             workerDetail.setWorkerName(worker.getName());
             workerDetail.setMoney(new BigDecimal(money));
             workerDetail.setState(1);//出
-            workerDetail.setWalletMoney(haveMoney);
+            workerDetail.setWalletMoney(surplusMoneys);
             workerDetailMapper.insert(workerDetail);
 
             worker.setHaveMoney(haveMoney);//更新已有钱

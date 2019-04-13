@@ -142,6 +142,10 @@ public class EngineerService {
             houseFlow.setGrabLock(1);
             houseFlow.setNominator(workerId);
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+
+            HouseWorker houseWorker=houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(),houseFlow.getWorkerTypeId(),1);
+            houseWorker.setWorkerId(workerId);
+            houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -241,9 +245,11 @@ public class EngineerService {
         Example example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId);
         example.orderBy(HouseFlow.SORT).desc();
+        String workerId="";
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (HouseFlow houseFlow : houseFlowList) {
+            workerId=houseFlow.getWorkerId();
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             Map<String, Object> map = new HashMap<>();
             map.put("houseFlowId", houseFlow.getId());
@@ -257,10 +263,16 @@ public class EngineerService {
             map.put("workType", houseFlow.getWorkType());//抢单状态，1还没有发布，只是默认房产,2等待被抢，3有工匠抢单,4已采纳已支付
             if (houseFlow.getWorkType() == 3) {//待支付
                 HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
+                if(houseWorker!=null&&CommonUtil.isEmpty(workerId)){
+                    workerId=houseWorker.getWorkerId();
+                }
                 map.put("houseWorkerId", houseWorker.getId());
             } else if (houseFlow.getWorkType() == 4) {//已支付
                 HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 6);
                if(houseWorker!=null) {
+                   if(CommonUtil.isEmpty(workerId)){
+                       workerId=houseWorker.getWorkerId();
+                   }
                    map.put("houseWorkerId", houseWorker.getId());
                }
             }
@@ -273,7 +285,6 @@ public class EngineerService {
             map.put("workPrice", houseFlow.getWorkPrice());//工钱
             map.put("patrol", houseFlow.getPatrol());//巡查次数
             map.put("workerId", houseFlow.getWorkerId());//工人ID
-
             if (houseFlow.getWorkerType() == 1) {//设计
                 map.put("designerOk", house.getDesignerOk());
             }
@@ -281,8 +292,8 @@ public class EngineerService {
                 map.put("budgetOk", house.getBudgetOk());
             }
 
-            if (houseFlow.getWorkType() > 2) {
-                Member worker = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
+            if (houseFlow.getWorkType() > 2&&!CommonUtil.isEmpty(workerId)) {
+                Member worker = memberMapper.selectByPrimaryKey(workerId);
                 if (worker != null) {
                     map.put("workerName", worker.getName());//工人姓名
                     map.put("mobile", worker.getMobile());//电话

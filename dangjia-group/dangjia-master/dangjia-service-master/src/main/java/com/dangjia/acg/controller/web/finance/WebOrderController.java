@@ -23,7 +23,7 @@ public class WebOrderController implements WebOrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getAllOrders(HttpServletRequest request, PageDTO pageDTO, String likeMobile, String likeAddress) {
-        return webOrderService.getAllOrders(pageDTO, likeMobile, likeAddress);
+    public ServerResponse getAllOrders(HttpServletRequest request, PageDTO pageDTO, Integer state, String searchKey) {
+        return webOrderService.getAllOrders(pageDTO, state, searchKey);
     }
 }

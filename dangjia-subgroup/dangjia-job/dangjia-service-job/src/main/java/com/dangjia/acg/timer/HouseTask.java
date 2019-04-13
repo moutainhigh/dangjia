@@ -1,10 +1,15 @@
 package com.dangjia.acg.timer;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.app.core.HouseFlowApplyAPI;
 import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.config.ConfigMessageAPI;
 import com.dangjia.acg.api.data.TechnologyRecordAPI;
 import com.dangjia.acg.common.constants.DjConstants;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.activity.Activity;
 import com.dangjia.acg.modle.config.ConfigMessage;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.house.House;
@@ -26,19 +31,30 @@ import java.util.List;
  */
 @Component
 public class HouseTask {
-
   @Autowired
   private TechnologyRecordAPI technologyRecordAPI;
-
   @Autowired
   private ConfigMessageAPI configMessageAPI;
+
   @Autowired
   private HouseAPI houseAPI;
-
-
+  @Autowired
+  private HouseFlowApplyAPI houseFlowApplyAPI;
 
   private Logger log = LoggerFactory.getLogger(HouseTask.class);
   private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+
+  /**
+   * 定时审核完工申请
+   */
+  @Scheduled(cron = "0 0/1 * * * ?")//1分钟执行一次
+  public void couponApply() {
+    log.info(format.format(new Date()) + "开始执行完工申请检测任务...");
+    houseFlowApplyAPI.couponApply();
+    log.info(format.format(new Date()) + "结束执行完工申请检测任务...");
+  }
+
 
   /**
    * 检测每日还未开工提醒

@@ -112,7 +112,9 @@ public class ForMasterService {
     public List<BudgetMaterial> caiLiao(String houseFlowId){
         try{
             Example example = new Example(BudgetMaterial.class);
-            example.createCriteria().andEqualTo(BudgetMaterial.HOUSE_FLOW_ID, houseFlowId).andEqualTo(BudgetMaterial.DELETE_STATE, 0)
+            example.createCriteria()
+                    .andEqualTo(BudgetMaterial.HOUSE_FLOW_ID, houseFlowId)
+                    .andEqualTo(BudgetMaterial.DELETE_STATE, 0)
                     .andEqualTo(BudgetMaterial.STETA,1);
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.selectByExample(example);
             for (BudgetMaterial budgetMaterial : budgetMaterialList){

@@ -93,6 +93,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         FROM
             `dj_deliver_order_split` s
         INNER JOIN dj_deliver_order_split_item si ON si.order_split_id = s.id
+        INNER JOIN dj_deliver_split_deliver sd ON si.split_deliver_id = sd.id
         WHERE
             s.number = #{number}
         ORDER BY
@@ -108,16 +109,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             si.product_sn productSn,
             si.product_id productId,
             sum(si.num) num,
+            sum(si.shop_count) shopcount,
+            sum(si.ask_count) askCount,
+            sum(si.receive) receive,
             (si.price * si.num) totalPrice
         FROM
             `dj_deliver_order_split` s
         INNER JOIN dj_deliver_order_split_item si ON si.order_split_id = s.id
+        INNER JOIN dj_deliver_split_deliver sd ON si.split_deliver_id = sd.id
         WHERE
             s.house_id = #{houseId}
         GROUP BY
             si.product_sn
         ORDER BY
-            si.create_date DESC
+            si.category_id DESC
 	</select>
 
 
@@ -128,6 +133,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             sd.supplier_name supplierName,
             sd.supplier_telephone supplierTelephone,
             si.house_id houseId,
+            sum(si.shop_count) shopcount,
+            sum(si.ask_count) askCount,
+            sum(si.receive) receive,
             sum(si.num) num,
             sd.send_time sendTime,
             si.create_date createDate,
