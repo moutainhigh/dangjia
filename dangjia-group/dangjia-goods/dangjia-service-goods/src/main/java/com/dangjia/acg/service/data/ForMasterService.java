@@ -112,7 +112,9 @@ public class ForMasterService {
     public List<BudgetMaterial> caiLiao(String houseFlowId){
         try{
             Example example = new Example(BudgetMaterial.class);
-            example.createCriteria().andEqualTo(BudgetMaterial.HOUSE_FLOW_ID, houseFlowId).andEqualTo(BudgetMaterial.DELETE_STATE, 0)
+            example.createCriteria()
+                    .andEqualTo(BudgetMaterial.HOUSE_FLOW_ID, houseFlowId)
+                    .andEqualTo(BudgetMaterial.DELETE_STATE, 0)
                     .andEqualTo(BudgetMaterial.STETA,1);
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.selectByExample(example);
             for (BudgetMaterial budgetMaterial : budgetMaterialList){
@@ -133,7 +135,7 @@ public class ForMasterService {
                 }
             }
             //业主取消的材料又改为待付款
-            budgetMaterialMapper.updateSelf(houseFlowId);
+//            budgetMaterialMapper.updateSelf(houseFlowId);
             return budgetMaterialList;
         }catch (Exception e){
             e.printStackTrace();
