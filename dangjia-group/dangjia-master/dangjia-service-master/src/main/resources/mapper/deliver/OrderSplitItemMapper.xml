@@ -138,7 +138,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             si.create_date createDate,
             sd.number,
             si.price,
-            sum(si.price * si.shop_count) totalPrice
+            sum(si.price * si.num) totalPrice
         FROM
             `dj_deliver_order_split_item` si
         INNER JOIN dj_deliver_split_deliver sd ON si.split_deliver_id = sd.id
