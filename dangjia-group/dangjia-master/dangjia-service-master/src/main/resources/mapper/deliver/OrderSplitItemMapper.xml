@@ -93,6 +93,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         FROM
             `dj_deliver_order_split` s
         INNER JOIN dj_deliver_order_split_item si ON si.order_split_id = s.id
+        INNER JOIN dj_deliver_split_deliver sd ON si.split_deliver_id = sd.id
         WHERE
             s.number = #{number}
         ORDER BY
