@@ -142,6 +142,10 @@ public class EngineerService {
             houseFlow.setGrabLock(1);
             houseFlow.setNominator(workerId);
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+
+            HouseWorker houseWorker=houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(),houseFlow.getWorkerTypeId(),1);
+            houseWorker.setWorkerId(workerId);
+            houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
