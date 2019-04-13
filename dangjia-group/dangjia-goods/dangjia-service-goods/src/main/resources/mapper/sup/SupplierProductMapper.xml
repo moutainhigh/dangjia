@@ -33,6 +33,6 @@
         where
         product_id =#{productId}
         and is_supply =1
-        order by price asc
+        order by price desc
     </select>
 </mapper>

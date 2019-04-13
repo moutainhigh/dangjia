@@ -339,6 +339,7 @@ public class OrderSplitService {
         try {
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplitId);
+            example.orderBy(OrderSplitItem.CATEGORY_ID).desc();
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             List<Map> mapList=new ArrayList<>();
             for (OrderSplitItem v : orderSplitItemList) {

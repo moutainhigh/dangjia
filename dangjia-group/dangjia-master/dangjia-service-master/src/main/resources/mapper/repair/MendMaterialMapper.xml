@@ -69,7 +69,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         FROM dj_repair_mend_materiel
         where
             mend_order_id = #{mendOrderId}
-        ORDER BY create_date desc
+        ORDER BY category_id and create_date desc
     </select>
 
 </mapper>

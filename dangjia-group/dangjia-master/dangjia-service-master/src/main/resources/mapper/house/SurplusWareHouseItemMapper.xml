@@ -62,7 +62,7 @@
             and product_name LIKE CONCAT('%',#{productName},'%')
         </if>
         GROUP BY whi.product_id
-        ORDER BY whi.create_date desc
+        ORDER BY wh.type and  whi.create_date desc
     </select>
 
 

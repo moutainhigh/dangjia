@@ -298,7 +298,7 @@
 		FROM dj_actuary_budget_material
 		where house_id=#{houseId}
 		and worker_type_id =#{workerTypeId}
-		ORDER BY create_date desc
+		ORDER BY product_sn and create_date desc
 	</select>
 
 	<!-- 根据houseId和workerTypeId查询房子材料精算 -->
