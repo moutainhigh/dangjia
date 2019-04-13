@@ -6,6 +6,7 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
@@ -382,7 +383,7 @@ public class MendOrderCheckService {
                 WorkerDetail workerDetail = new WorkerDetail();
                 workerDetail.setName("退材料退款");
                 workerDetail.setWorkerId(member.getId());
-                workerDetail.setWorkerName(member.getName() == null?member.getNickName() : member.getName());
+                workerDetail.setWorkerName(CommonUtil.isEmpty(member.getName()) ?member.getNickName() : member.getName());
                 workerDetail.setHouseId(mendOrder.getHouseId());
                 workerDetail.setMoney(new BigDecimal(mendOrder.getTotalAmount()));
                 workerDetail.setApplyMoney(new BigDecimal(mendOrder.getTotalAmount()));

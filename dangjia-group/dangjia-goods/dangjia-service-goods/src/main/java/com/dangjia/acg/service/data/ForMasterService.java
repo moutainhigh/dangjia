@@ -135,7 +135,7 @@ public class ForMasterService {
                 }
             }
             //业主取消的材料又改为待付款
-//            budgetMaterialMapper.updateSelf(houseFlowId);
+            budgetMaterialMapper.updateSelf(houseFlowId);
             return budgetMaterialList;
         }catch (Exception e){
             e.printStackTrace();
