@@ -109,6 +109,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             si.product_sn productSn,
             si.product_id productId,
             sum(si.num) num,
+            sum(si.shop_count) shopcount,
+            sum(si.ask_count) askCount,
+            sum(si.receive) receive,
             (si.price * si.num) totalPrice
         FROM
             `dj_deliver_order_split` s
@@ -119,7 +122,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         GROUP BY
             si.product_sn
         ORDER BY
-            si.create_date DESC
+            si.category_id DESC
 	</select>
 
 
