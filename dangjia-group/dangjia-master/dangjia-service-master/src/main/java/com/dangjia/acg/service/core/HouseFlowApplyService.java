@@ -602,19 +602,14 @@ public class HouseFlowApplyService {
         if(worker.getSurplusMoney() == null){//可取余额 赋初始值为0
             worker.setSurplusMoney(new BigDecimal(0.0));
         }
-        BigDecimal mid = worker.getHaveMoney().subtract(worker.getRetentionMoney());//可取等于 获得减押金
-        if(mid.compareTo(BigDecimal.ZERO) == 1){//大于0
-            worker.setSurplusMoney(mid);
-        }else{
-            worker.setSurplusMoney(BigDecimal.ZERO);
-        }
+
 
         BigDecimal surplusMoney = worker.getSurplusMoney().add(hwo.getRepairPrice());
         BigDecimal workerPrice = worker.getWorkerPrice().add(hwo.getRepairPrice());
         BigDecimal haveMoney = worker.getHaveMoney().add(hwo.getRepairPrice());
-        worker.setWorkerPrice(workerPrice);
-        worker.setHaveMoney(haveMoney);
-        worker.setSurplusMoney(surplusMoney);
+        worker.setWorkerPrice(workerPrice);//总共获得钱
+        worker.setHaveMoney(haveMoney);//可取 + 滞留金
+        worker.setSurplusMoney(surplusMoney);//可取钱
         memberMapper.updateByPrimaryKeySelective(worker);
 
         WorkerDetail workerDetail = new WorkerDetail();

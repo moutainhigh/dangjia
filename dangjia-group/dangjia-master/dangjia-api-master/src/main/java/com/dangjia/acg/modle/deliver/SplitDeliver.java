@@ -112,6 +112,11 @@ public class SplitDeliver extends BaseEntity {
     @ApiModelProperty("下单时间")
     private Date submitTime;
 
+    @Column(name = "rec_time")
+    @Desc(value = "收货时间")
+    @ApiModelProperty("收货时间")
+    private Date recTime;
+
     @Column(name = "sup_State")
     @Desc(value = "大管家可收货状态(0:大管家不可收货;1:大管家可收货)")
     @ApiModelProperty("大管家可收货状态(0:大管家不可收货;1:大管家可收货)")

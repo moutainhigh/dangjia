@@ -19,7 +19,7 @@ public class SplitDeliverDTO {
     private Date createDate;// 创建日期
     private Date sendTime; //发货时间
     private Date submitTime;//下单时间
-    private Date modifyDate;//收货时间
+    private Date recTime;//收货时间
     private Double totalAmount;
     private Integer tol;//多少种商品
 
