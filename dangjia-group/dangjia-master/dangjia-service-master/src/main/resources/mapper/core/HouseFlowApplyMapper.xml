@@ -92,7 +92,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <!--根据工人和房子id查询自己已经被巡查多少次 -->
-    <select id="getCountValidPatrolByHouseId" parameterType="java.lang.String" resultType="java.lang.Long">
+    <select id="countPatrol" parameterType="java.lang.String" resultType="java.lang.Long">
        select
        count(*)
        from
@@ -100,8 +100,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
        where
 	       house_id = #{houseId}
 	   and apply_type = 5
-        <if test="workerId != null">
-            AND worker_id=#{workerId}
+        <if test="workerTypeId != null">
+            AND worker_type_id=#{workerTypeId}
         </if>
     </select>
 
