@@ -616,4 +616,8 @@ public class ProductService {
         return productsDTO;
     }
 
+    public List<Product> queryProductData(String name, String categoryId,String productType, String[] productId){
+        List<Product>  productList = iProductMapper.queryProductData(name,categoryId,productType,productId);
+        return productList;
+    }
 }

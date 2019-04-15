@@ -204,7 +204,7 @@ public class FillMaterielService {
                 productType="1";
             }
             PageHelper.startPage(pageNum, pageSize);
-            List<Product>  productList = iProductMapper.queryProductData(name,categoryId,productType);
+            List<Product>  productList = iProductMapper.queryProductData(name,categoryId,productType,null);
             PageInfo pageResult = new PageInfo(productList);
             if (productList.size() > 0) {
                 for (int i = 0; i < productList.size(); i++) {

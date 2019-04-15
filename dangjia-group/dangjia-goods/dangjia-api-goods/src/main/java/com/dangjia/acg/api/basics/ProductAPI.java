@@ -2,6 +2,7 @@ package com.dangjia.acg.api.basics;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.basics.Product;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Api(description = "货品管理接口")
 @FeignClient("dangjia-service-goods")
@@ -117,6 +119,14 @@ public interface ProductAPI {
     ServerResponse queryProductListByGoodsIdAndLabelId(@RequestParam("request") HttpServletRequest request,
                                                        @RequestParam("jsonArr") String goodsArr,
                                                        @RequestParam("labelId") String labelId);
+
+    @PostMapping("/basics/product/data")
+    @ApiOperation(value = "商品库检索查询", notes = "商品库检索查询")
+    List<Product> queryProductData(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("name") String name,
+                                   @RequestParam("categoryId") String categoryId,
+                                   @RequestParam("productType") String productType,
+                                   @RequestParam("productId") String[] productId);
 
 	/*@PostMapping("/basics/product/getSwitchProduct")
 	@ApiOperation(value = "根据系列和属性查询切换货品", notes = "根据系列和属性查询切换货品")
