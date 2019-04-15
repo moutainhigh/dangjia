@@ -9,11 +9,11 @@ public enum IWorkTypeEnum implements IBaseEnum {
     BIG_HOUSEKEEPER(3, "大管家"),
     TEAR_DOWN(4, "拆除"),
     PUNCH(5, "打孔"),
-    PLUMBER(6, "水电工"),
+    PLUMBER(6, "水电"),
     WATERPROOF(7, "防水"),
     MASON(8, "泥工"),
     WOODWORKING(9, "木工"),
-    PAINTER(10, "油漆工"),
+    PAINTER(10, "油漆"),
     INSTALLATION(11, "安装"),
     ;
 
