@@ -24,7 +24,7 @@ public class ConstructionByWorkerIdBean {
     private String houseMemberName;//业主名称
     private String houseMemberPhone;//业主电话
     private String houseName;//房子名称
-    private int ifBackOut;//大管家是否可放弃，true:可放弃；false:不可放弃,0：可放弃；1：申请停工；2：已停工
+    private int ifBackOut;//0可放弃；1：申请停工；2：已停工 3 审核中
     private List<String> promptList;//消息提示
     private int workerType;//0:大管家；1：工匠
     private List<BigListBean> bigList;//菜单
