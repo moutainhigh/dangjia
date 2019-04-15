@@ -274,7 +274,7 @@ public class HouseWorkerService {
                     bean.setHouseMemberPhone("");
                     bean.setUserId("");//
                 }
-                Long allPatrol = houseFlowApplyMapper.getCountValidPatrolByHouseId(house.getId(), null);
+                Long allPatrol = houseFlowApplyMapper.countPatrol(house.getId(), null);
                 bean.setAllPatrol("总巡查次数" + (allPatrol == null ? 0 : allPatrol));
                 List<ConstructionByWorkerIdBean.WokerFlowListBean> workerFlowList = new ArrayList<>();
                 boolean houseIsStart = false;
@@ -303,7 +303,7 @@ public class HouseWorkerService {
                         wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
                         wfr.setWorkerPhone(worker2 == null ? "" : worker2.getMobile());//工人手机
                         wfr.setPatrolSecond("巡查次数" +
-                                houseFlowApplyMapper.getCountValidPatrolByHouseId(house.getId(), worker2 == null ? "0" : worker2.getId()));//巡查次数
+                                houseFlowApplyMapper.countPatrol(house.getId(), worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
                         wfr.setPatrolStandard("巡查标准" + hfl.getPatrol());//巡查标准
                         HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker2 == null ? "" : worker2.getId(), new Date());//查询今日开工记录
                         if (todayStart == null) {//没有今日开工记录
