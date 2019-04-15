@@ -585,7 +585,7 @@
         </if>
 
         <if test="productId!=null and productId!=''">
-            p.id in
+            AND p.id in
             <foreach collection="productId" item="id" index="index" open="(" close=")" separator=",">
                 #{id}
             </foreach>
