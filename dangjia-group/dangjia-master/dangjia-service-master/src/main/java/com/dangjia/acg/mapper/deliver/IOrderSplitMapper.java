@@ -5,6 +5,8 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
+import java.util.List;
+
 /**
  * author: zmj
  * Date: 2018/11/9 0009
@@ -14,4 +16,8 @@ import tk.mybatis.mapper.common.Mapper;
 public interface IOrderSplitMapper extends Mapper<OrderSplit> {
 
     void cancelOrderSplit(@Param("orderSplitId") String orderSplitId);
+
+    List<String> getOrderProduct(@Param("houseId") String houseId, @Param("workerTypeId") String workerTypeId, @Param("memberId") String memberId);
+
+
 }

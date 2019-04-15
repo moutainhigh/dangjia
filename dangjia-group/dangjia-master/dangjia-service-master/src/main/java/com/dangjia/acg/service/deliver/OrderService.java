@@ -412,11 +412,17 @@ public class OrderService {
 
             JSONArray arr = JSONArray.parseArray(productArr);
             List productList=new ArrayList();
+            Map mapczai=new HashMap();
             for(int i=0; i<arr.size(); i++) {
                 JSONObject obj = arr.getJSONObject(i);
                 Double num = Double.parseDouble(obj.getString("num"));
                 String productId = obj.getString("productId");
                 Warehouse warehouse = warehouseMapper.getByProductId(productId, houseId);//定位到仓库id
+
+                //判断如果该商品已经插入，则不再进行第二次插入，防止数据重复展示
+                if(mapczai.get(orderSplit.getId()+"-"+productId+"-"+houseId)!=null){
+                    continue;
+                }
                 if(warehouse!=null) {
                     OrderSplitItem orderSplitItem = new OrderSplitItem();
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
@@ -457,7 +463,7 @@ public class OrderService {
                     orderSplitItem.setHouseId(houseId);
                     orderSplitItemMapper.insert(orderSplitItem);
                 }
-
+                mapczai.put(orderSplit.getId()+"-"+productId+"-"+houseId,"1");
                 //计算补货数量
                 if(warehouse!=null) {
                     //仓库剩余数

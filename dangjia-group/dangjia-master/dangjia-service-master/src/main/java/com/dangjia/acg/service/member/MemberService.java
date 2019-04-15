@@ -196,6 +196,7 @@ public class MemberService {
         redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
         redisClient.put(userRole, accessToken.getUserToken());
         groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
+        groupInfoService.registerJGUsers("gj", new String[]{accessToken.getMemberId()}, new String[1]);
         return ServerResponse.createBySuccess("登录成功，正在跳转", accessToken);
     }
 
@@ -883,6 +884,8 @@ public class MemberService {
                 }
             }
             redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
+            groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
+            groupInfoService.registerJGUsers("gj", new String[]{accessToken.getMemberId()}, new String[1]);
         }
     }
 }
