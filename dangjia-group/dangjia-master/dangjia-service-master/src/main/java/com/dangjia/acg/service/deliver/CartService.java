@@ -154,8 +154,15 @@ public class CartService {
             List<Product> products= productAPI.queryProductData(request,name,categoryId,productType,productIdArr);
             PageInfo pageResult = new PageInfo(products);
             for (Product product : products) {
-                Warehouse warehouse = warehouseMapper.getByProductId(product.getId(),houseId);
-                if(warehouse == null) continue;
+                Example example = new Example(Warehouse.class);
+                Example.Criteria criteria = example.createCriteria();
+                criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
+                criteria.andEqualTo(Warehouse.PRODUCT_ID, product.getId());
+                List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
+                if(warehouseList==null||warehouseList.size()==0){
+                    continue;
+                }
+                Warehouse warehouse = warehouseList.get(0);
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
