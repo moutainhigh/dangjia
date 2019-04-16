@@ -82,7 +82,9 @@ public class CartService {
                     cart.setProductName(product.getName());
                     cart.setMemberId(operator.getId());
                     cart.setPrice(product.getPrice());
+                    cart.setWorkerTypeId(operator.getWorkerTypeId());
                     cart.setUnitName(product.getUnitName());
+                    cart.setCategoryId(product.getCategoryId());
                     cartMapper.insert(cart);
                 }
             }
