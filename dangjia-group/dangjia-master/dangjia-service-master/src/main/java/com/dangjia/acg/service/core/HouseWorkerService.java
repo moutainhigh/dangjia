@@ -192,6 +192,11 @@ public class HouseWorkerService {
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计师抢单提醒",
                         String.format(DjConstants.PushMessage.DESIGNER_GRABS_THE_BILL, house.getHouseName()), "");
             }
+            //通知业主精算师抢单成功
+            if (worker.getWorkerType() == 2) {//精算师
+                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "精算师抢单提醒",
+                        String.format(DjConstants.PushMessage.BUDGET_GRABS_THE_BILL, house.getHouseName()), "");
+            }
             //通知业主大管家抢单成功
             if (worker.getWorkerType() == 3) {//大管家
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家抢单提醒",
