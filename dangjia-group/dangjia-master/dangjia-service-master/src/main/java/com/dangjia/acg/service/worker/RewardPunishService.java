@@ -305,7 +305,7 @@ public class RewardPunishService {
                     bigDecimal2 = member.getEvaluationScore().subtract(bigDecimal);
                     member.setEvaluationScore(bigDecimal2);
                     //加积分流水
-                    workIntegral.setIntegral(bigDecimal);
+                    workIntegral.setIntegral(new BigDecimal("-"+bigDecimal.doubleValue()));
                     iWorkIntegralMapper.insert(workIntegral);
                 }
                 if (rewardPunishCondition.getType() == 2) {

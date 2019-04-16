@@ -149,8 +149,8 @@ public class CartService {
             String[] productIdArr = productIdList.toArray(new String[productIdList.size()]);
             request.setAttribute(Constants.CITY_ID, cityId);
 
-            PageInfo pageResult= productAPI.queryProductData(request,pageDTO,name,categoryId,productType,productIdArr);
-            List<Product> products=pageResult.getList();
+            List<Product> products= productAPI.queryProductData(request,pageDTO,name,categoryId,productType,productIdArr);
+            PageInfo pageResult = new PageInfo(products);
             for (Product product : products) {
                 Example example = new Example(Warehouse.class);
                 Example.Criteria criteria = example.createCriteria();

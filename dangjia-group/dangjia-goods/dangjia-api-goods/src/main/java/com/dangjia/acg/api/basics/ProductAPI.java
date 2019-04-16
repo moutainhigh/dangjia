@@ -2,6 +2,7 @@ package com.dangjia.acg.api.basics;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.basics.Product;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Api(description = "货品管理接口")
 @FeignClient("dangjia-service-goods")
@@ -120,8 +122,8 @@ public interface ProductAPI {
 
     @PostMapping("/basics/product/data")
     @ApiOperation(value = "商品库检索查询", notes = "商品库检索查询")
-    PageInfo queryProductData(@RequestParam("request") HttpServletRequest request,
-                                    @RequestParam("pageDTO") PageDTO pageDTO,
+    List<Product> queryProductData(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("pageDTO") PageDTO pageDTO,
                                    @RequestParam("name") String name,
                                    @RequestParam("categoryId") String categoryId,
                                    @RequestParam("productType") String productType,
