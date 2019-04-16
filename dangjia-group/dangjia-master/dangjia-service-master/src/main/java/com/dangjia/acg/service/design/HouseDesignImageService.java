@@ -145,6 +145,7 @@ public class HouseDesignImageService {
                     houseFlow.setHouseId(house.getId());
                     houseFlow.setState(workerType.getState());
                     houseFlow.setSort(workerType.getSort());
+                    houseFlow.setWorkType(2);//设置可抢单
 //                    houseFlow.setWorkType(3);//自动抢单待支付精算费
 //                    houseFlow.setWorkerId("2c911c24606f21720160726f5e6a00df");
                     //这里算出精算费
