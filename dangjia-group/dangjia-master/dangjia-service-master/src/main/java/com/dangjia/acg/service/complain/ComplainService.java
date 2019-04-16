@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.complain;
 
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
@@ -13,13 +12,14 @@ import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
 import com.dangjia.acg.dto.worker.RewardPunishRecordDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
+import com.dangjia.acg.mapper.core.IHouseConstructionRecordMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
-import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
@@ -27,6 +27,7 @@ import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.complain.Complain;
+import com.dangjia.acg.modle.core.HouseConstructionRecord;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -40,6 +41,7 @@ import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.core.HouseWorkerSupService;
 import com.dangjia.acg.service.deliver.SplitDeliverService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -55,8 +57,6 @@ import java.util.List;
 @Service
 public class ComplainService {
     @Autowired
-    private RedisClient redisClient;
-    @Autowired
     private IMemberMapper memberMapper;
     @Autowired
     private IComplainMapper complainMapper;
@@ -65,7 +65,7 @@ public class ComplainService {
     @Autowired
     private IRewardPunishRecordMapper rewardPunishRecordMapper;
     @Autowired
-    private IHouseWorkerMapper houseWorkerMapper;
+    private ITechnologyRecordMapper technologyRecordMapper;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
@@ -76,18 +76,14 @@ public class ComplainService {
     private SupplierProductAPI supplierProductAPI;
     @Autowired
     private UserMapper userMapper;
-
     @Autowired
     private ISplitDeliverMapper splitDeliverMapper;
-
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
     private IHouseMapper houseMapper;
-
     @Autowired
     private IRewardPunishConditionMapper iRewardPunishConditionMapper;
-
     @Autowired
     private IWorkIntegralMapper iWorkIntegralMapper;
     @Autowired
@@ -95,6 +91,10 @@ public class ComplainService {
     @Autowired
     private IWorkerDetailMapper iWorkerDetailMapper;
 
+    @Autowired
+    private IHouseConstructionRecordMapper houseConstructionRecordMapper;
+    @Autowired
+    private HouseWorkerSupService houseWorkerSupService;
     /**
      * 添加申诉
      *
@@ -162,6 +162,10 @@ public class ComplainService {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(complain.getBusinessId());
             houseFlowApply.setMemberCheck(4);
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
+
+            HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
+            houseWorkerSupService.saveHouseConstructionRecord(houseFlowApply, hcr);
+
         }
         return ServerResponse.createBySuccessMessage("提交成功");
     }
@@ -284,7 +288,7 @@ public class ComplainService {
      * @param files       附件 以，分割 如：data/f.dow,data/f2.dow
      * @return
      */
-    public ServerResponse updataComplain(String userId, String complainId, Integer state, String description, String files) {
+    public ServerResponse updataComplain(String userId, String complainId, Integer state, String description, String files,String operateId,String operateName) {
         if (CommonUtil.isEmpty(complainId)) {
             return ServerResponse.createByErrorMessage("参数不正确");
         }
@@ -296,7 +300,8 @@ public class ComplainService {
         complain.setUserId(userId);
         complain.setDescription(description);
         complain.setFiles(files);
-
+        complain.setOperateId(operateId);
+        complain.setOperateName(userMapper.selectByPrimaryKey(operateId).getUsername());
 
         if (state == 2) {   // 申诉成功后要对对应的业务逻辑进行处理
             if (complain.getComplainType() != null)
@@ -384,10 +389,19 @@ public class ComplainService {
                         houseFlowApply.setMemberCheck(2);
                         houseFlowApply.setSupervisorCheck(2);
                         houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
+
+                        HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
+                        hcr.setMemberCheck(2);
+                        hcr.setSupervisorCheck(2);
+                        houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
+
+
                         //不通过停工申请
                         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowId());
                         houseFlow.setPause(0);
                         houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+                        //不通过节点验收
+                        technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(),houseFlowApply.getWorkerTypeId());
                         break;
 
                     case 3:// 3：大管家（开工后）要求换人.

@@ -178,7 +178,14 @@ public class TechnologyRecordService {
                 if (technologyRecordList.size() == 0){ //没有验收
                     trd.setState(0);
                 }else {
-                    trd.setState(1);//已验收
+                    TechnologyRecord technologyRecord = technologyRecordList.get(0);
+                    if(technologyRecord.getState() == 2){//不通过
+                        trd.setState(0);
+                    }else if (technologyRecord.getState() == 0){
+                        trd.setState(0);//未验收
+                    }else {
+                        trd.setState(1);//已验收
+                    }
                 }
                 trList.add(trd);
             }

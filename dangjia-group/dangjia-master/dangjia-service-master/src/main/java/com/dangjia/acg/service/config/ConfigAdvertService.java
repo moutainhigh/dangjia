@@ -43,24 +43,24 @@ public class ConfigAdvertService {
      * @param configAdvert
      * @return
      */
-    public ServerResponse getConfigAdverts(HttpServletRequest request, String userToken, ConfigAdvert configAdvert) {
-        Example example = new Example(ConfigAdvert.class);
-        Example.Criteria criteria = example.createCriteria();
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken != null) {//有效的token
-            criteria.andNotEqualTo(ConfigAdvert.TYPE, 3);
-        }
-        if (!CommonUtil.isEmpty(configAdvert.getAppType())) {
-            criteria.andEqualTo(ConfigAdvert.APP_TYPE, configAdvert.getAppType());
-            criteria.andEqualTo(ConfigAdvert.IS_SHOW, true);
-        }
-        if (!CommonUtil.isEmpty(configAdvert.getCityId())) {
-            criteria.andEqualTo(ConfigAdvert.CITY_ID, configAdvert.getCityId());
-        }
-        if (!CommonUtil.isEmpty(configAdvert.getAdvertType())) {
-            criteria.andEqualTo(ConfigAdvert.ADVERT_TYPE, configAdvert.getAdvertType());
-        }
-        List<ConfigAdvert> list = configAdvertMapper.selectByExample(example);
+    public ServerResponse getConfigAdverts(HttpServletRequest request, ConfigAdvert configAdvert) {
+//        Example example = new Example(ConfigAdvert.class);
+//        Example.Criteria criteria = example.createCriteria();
+//        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+//        if (accessToken != null) {//有效的token
+//            criteria.andNotEqualTo(ConfigAdvert.TYPE, 3);
+//        }
+//        if (!CommonUtil.isEmpty(configAdvert.getAppType())) {
+//            criteria.andEqualTo(ConfigAdvert.APP_TYPE, configAdvert.getAppType());
+//            criteria.andEqualTo(ConfigAdvert.SHOW, true);
+//        }
+//        if (!CommonUtil.isEmpty(configAdvert.getCityId())) {
+//            criteria.andEqualTo(ConfigAdvert.CITY_ID, configAdvert.getCityId());
+//        }
+//        if (!CommonUtil.isEmpty(configAdvert.getAdvertType())) {
+//            criteria.andEqualTo(ConfigAdvert.ADVERT_TYPE, configAdvert.getAdvertType());
+//        }
+        List<ConfigAdvert> list = configAdvertMapper.selectConfigAdvertByDataStatus();
         if (list.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
                     , "查无数据");

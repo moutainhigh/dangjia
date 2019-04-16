@@ -374,7 +374,7 @@ public class HouseService {
                 nodeDTO.setTotal(6);
                 if (house.getBudgetOk() == 0) {
                     nodeDTO.setRank(1);
-                    nodeDTO.setNameB("未开始");
+                    nodeDTO.setNameB("待支付");
                 } else if (house.getBudgetOk() == 1) {
                     nodeDTO.setRank(2);
                     nodeDTO.setNameB("精算中");

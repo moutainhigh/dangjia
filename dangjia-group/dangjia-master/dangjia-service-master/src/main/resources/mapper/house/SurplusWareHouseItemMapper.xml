@@ -79,7 +79,7 @@
         <if test="productId!=null and productId!=''">
             and product_id = #{productId}
         </if>
-        ORDER BY wh.create_date desc
+        ORDER BY wh.create_date desc    <!-- 毛寅宇已修改 -->
     </select>
 
 
