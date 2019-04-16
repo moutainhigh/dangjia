@@ -30,8 +30,8 @@ public class ConfigAdvertController implements ConfigAdvertAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getConfigAdverts(HttpServletRequest request, String userToken, ConfigAdvert configAdvert) {
-        return configAdvertService.getConfigAdverts(request, userToken, configAdvert);
+    public ServerResponse getConfigAdverts(HttpServletRequest request, ConfigAdvert configAdvert) {
+        return configAdvertService.getConfigAdverts(request, configAdvert);
     }
 
     /**

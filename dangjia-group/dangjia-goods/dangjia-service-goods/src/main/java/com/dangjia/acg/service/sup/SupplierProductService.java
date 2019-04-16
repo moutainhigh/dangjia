@@ -45,8 +45,8 @@ public class SupplierProductService {
      */
     public ServerResponse supplierList(String productId) {
         try {
-            List<SupplierProduct> supplierProductList = iSupplierProductMapper.querySupplierProduct(productId);
-            List<SupplierDTO> supplierDTOList = new ArrayList<SupplierDTO>();
+            List<SupplierProduct> supplierProductList = iSupplierProductMapper.querySupplierProduct(null,productId);
+            List<SupplierDTO> supplierDTOList = new ArrayList<>();
             for (SupplierProduct supplierProduct : supplierProductList) {
                 Supplier supplier = iSupplierMapper.selectByPrimaryKey(supplierProduct.getSupplierId());
                 if (supplier != null) {
@@ -105,7 +105,7 @@ public class SupplierProductService {
     public ServerResponse querySupplierProductByPid(PageDTO pageDTO, String productId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<SupplierProduct> spList = iSupplierProductMapper.querySupplierProduct(productId);
+            List<SupplierProduct> spList = iSupplierProductMapper.querySupplierProduct(null,productId);
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (int i = 0; i < spList.size(); i++) {
                 SupplierProduct supplierProduct = spList.get(i);

@@ -6,11 +6,14 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.mapper.core.IHouseConstructionRecordMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.modle.core.HouseConstructionRecord;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -49,6 +52,8 @@ public class HouseWorkerSupService {
     private ConfigUtil configUtil;
     @Autowired
     private MendMaterielAPI mendMaterielAPI;
+    @Autowired
+    private IHouseConstructionRecordMapper houseConstructionRecordMapper;
 
     /**
      * 管家审核验收申请h
@@ -134,11 +139,25 @@ public class HouseWorkerSupService {
             hfa.setStartDate(start);
             hfa.setEndDate(end);
             houseFlowApplyMapper.insert(hfa);
-
+            HouseConstructionRecord hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+                    , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
+            houseConstructionRecordMapper.insert(hcr);
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("申请失败");
+        }
+    }
+
+    public void saveHouseConstructionRecord(HouseFlowApply hfa, HouseConstructionRecord hcr) {
+        if (CommonUtil.isEmpty(hcr)) {
+            hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+                    , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
+            houseConstructionRecordMapper.insert(hcr);
+        } else {
+            hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+                    , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
+            houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
         }
     }
 }
