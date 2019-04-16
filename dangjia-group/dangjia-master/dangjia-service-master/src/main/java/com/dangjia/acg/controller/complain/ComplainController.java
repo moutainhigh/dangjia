@@ -21,7 +21,8 @@ public class ComplainController implements ComplainAPI {
     //添加申诉
     @Override
     @ApiMethod
-    public ServerResponse addComplain(HttpServletRequest request, String userToken,  String memberId,Integer complainType, String businessId, String houseId,String files) {
+    public ServerResponse addComplain(HttpServletRequest request, String userToken,  String memberId,Integer complainType, String businessId,
+                                      String houseId,String files) {
         return complainService.addComplain(userToken,  memberId, complainType, businessId, houseId, files);
     }
 
@@ -35,8 +36,9 @@ public class ComplainController implements ComplainAPI {
     //修改申诉
     @Override
     @ApiMethod
-    public ServerResponse updataComplain(HttpServletRequest request, String userId, String complainId, Integer state, String description, String files) {
-        return complainService.updataComplain(userId, complainId, state, description, files);
+    public ServerResponse updataComplain(HttpServletRequest request, String userId, String complainId, Integer state, String description,
+                                         String files,String operateId,String operateName) {
+        return complainService.updataComplain(userId, complainId, state, description, files,operateId,operateName);
     }
 
     @Override

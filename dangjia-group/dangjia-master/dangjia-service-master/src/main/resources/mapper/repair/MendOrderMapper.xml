@@ -140,7 +140,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             and
             house_id = #{houseId}
         </if>
-        ORDER BY create_date desc
+        ORDER BY category_id desc
     </select>
 
     <!-- 查询退货单 -->
@@ -155,7 +155,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             and
             house_id = #{houseId}
         </if>
-        ORDER BY create_date desc
+        ORDER BY create_date desc   <!-- 毛寅宇已修改 -->
     </select>
 
     <!-- 查询补货单 -->
@@ -170,7 +170,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             and
             house_id = #{houseId}
         </if>
-        ORDER BY create_date desc
+        ORDER BY create_date desc    <!-- 毛寅宇已修改 -->
     </select>
 
     <!-- 按state 和 收货地址 搜索 -->

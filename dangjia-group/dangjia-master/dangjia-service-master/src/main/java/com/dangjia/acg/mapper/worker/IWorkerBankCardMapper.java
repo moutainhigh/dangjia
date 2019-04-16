@@ -10,8 +10,10 @@ import java.util.List;
 /**银行卡绑定
  * zmj
  */
+
 @Repository
 public interface IWorkerBankCardMapper extends Mapper<WorkerBankCard> {
     List<WorkerBankCard> getByWorkerid(@Param("workerId")String workerId);
+
 }
 

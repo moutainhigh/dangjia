@@ -11,12 +11,14 @@ import java.util.List;
 @Data
 public class ComplainDTO {
     protected String id;
-    private String memberId;
+    private String memberId;  //对象Id
     private String memberName;
     private String memberNickName;
     private String memberMobile;
     private Integer complainType;
-    private String userId;
+    private String userId;   //发起人ID
+    private String operateId; //操作人Id
+    private String operateName;  //操作人姓名
     private String userName;
     private Integer status;
     private String description;//处理描述

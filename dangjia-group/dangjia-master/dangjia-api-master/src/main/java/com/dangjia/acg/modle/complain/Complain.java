@@ -73,6 +73,16 @@ public class Complain extends BaseEntity {
     @ApiModelProperty("发起人名称")
     private String userName;
 
+    @Column(name = "operate_id")
+    @Desc(value = "操作人ID")
+    @ApiModelProperty("操作人ID")
+    private String operateId;
+
+    @Column(name = "operate_name")
+    @Desc(value = "操作人姓名")
+    @ApiModelProperty("操作人姓名")
+    private String operateName;
+
 
     @Column(name = "user_nick_name")
     @Desc(value = "发起人昵称")
