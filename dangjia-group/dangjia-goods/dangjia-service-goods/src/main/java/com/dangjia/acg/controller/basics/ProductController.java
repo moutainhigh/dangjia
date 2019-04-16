@@ -4,7 +4,6 @@ import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.service.basics.GoodsService;
 import com.dangjia.acg.service.basics.ProductService;
 import com.github.pagehelper.PageInfo;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 /**
  * 
