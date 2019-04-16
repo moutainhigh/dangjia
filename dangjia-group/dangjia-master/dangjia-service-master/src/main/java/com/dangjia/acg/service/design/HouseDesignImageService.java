@@ -145,20 +145,20 @@ public class HouseDesignImageService {
                     houseFlow.setHouseId(house.getId());
                     houseFlow.setState(workerType.getState());
                     houseFlow.setSort(workerType.getSort());
-                    houseFlow.setWorkType(3);//自动抢单待支付精算费
-                    houseFlow.setWorkerId("2c911c24606f21720160726f5e6a00df");
+//                    houseFlow.setWorkType(3);//自动抢单待支付精算费
+//                    houseFlow.setWorkerId("2c911c24606f21720160726f5e6a00df");
                     //这里算出精算费
                     WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
                     houseFlow.setWorkPrice(house.getSquare().multiply(workDeposit.getBudgetCost()));
                     houseFlowMapper.insert(houseFlow);
-                    HouseWorker houseWorker = new HouseWorker();
-                    houseWorker.setHouseId(house.getId());
-                    houseWorker.setWorkerId("2c911c24606f21720160726f5e6a00df");//当家精算
-                    houseWorker.setWorkerTypeId(houseFlow.getWorkerTypeId());
-                    houseWorker.setWorkerType(houseFlow.getWorkerType());
-                    houseWorker.setWorkType(1);//已抢单
-                    houseWorker.setIsSelect(1);
-                    houseWorkerMapper.insert(houseWorker);
+//                    HouseWorker houseWorker = new HouseWorker();
+//                    houseWorker.setHouseId(house.getId());
+//                    houseWorker.setWorkerId("2c911c24606f21720160726f5e6a00df");//当家精算
+//                    houseWorker.setWorkerTypeId(houseFlow.getWorkerTypeId());
+//                    houseWorker.setWorkerType(houseFlow.getWorkerType());
+//                    houseWorker.setWorkType(1);//已抢单
+//                    houseWorker.setIsSelect(1);
+//                    houseWorkerMapper.insert(houseWorker);
                 }
             } else if (type == 0) {//不通过
                 house.setDesignerOk(8);

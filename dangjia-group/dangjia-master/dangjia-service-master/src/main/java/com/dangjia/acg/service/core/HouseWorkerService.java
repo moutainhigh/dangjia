@@ -17,6 +17,7 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.ConstructionByWorkerIdBean;
 import com.dangjia.acg.dto.core.HomePageBean;
+import com.dangjia.acg.dto.house.HouseChatDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
@@ -161,11 +162,20 @@ public class HouseWorkerService {
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             houseFlow.setGrabNumber(houseFlow.getGrabNumber() + 1);
             houseFlow.setWorkType(3);//等待支付
+
+            houseFlow.setWorkerId(worker.getId());
+
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
             if (worker.getWorkerType() == 1) {//设计师
                 house.setDesignerOk(4);//有设计抢单待业主支付
                 houseMapper.updateByPrimaryKeySelective(house);
             }
+             //我改的
+            if(worker.getWorkerType() ==2){
+                house.setBudgetOk(0);//有精算抢单待业主支付
+                houseMapper.updateByPrimaryKeySelective(house);
+            }
+
             houseWorkerMapper.doModifyAllByWorkerId(worker.getId());//将所有houseWorker的选中状态IsSelect改为0未选中
             HouseWorker houseWorker = new HouseWorker();
             houseWorker.setHouseId(house.getId());
@@ -199,7 +209,17 @@ public class HouseWorkerService {
 
 
             }
-            return ServerResponse.createBySuccessMessage("抢单成功");
+            Example example=new Example(WorkerType.class);
+            example.createCriteria().andEqualTo(WorkerType.TYPE,worker.getWorkerType());
+            List<WorkerType> workerType= workerTypeMapper.selectByExample(example);
+            String text="业主您好,我是"+workerType.get(0).getName()+worker.getName()+"已成功抢单";
+//            String houseId=houseFlowMapper.selectByPrimaryKey(houseFlowId).getHouseId();
+//            String memberId = houseMapper.selectByPrimaryKey(houseId).getMemberId();
+            HouseChatDTO h=new HouseChatDTO();
+            h.setTargetId(house.getMemberId());
+            h.setTargetAppKey("0989b0db447914c7bcb17a46");
+            h.setText(text);
+            return ServerResponse.createBySuccess("抢单成功",h);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("抢单失败");
