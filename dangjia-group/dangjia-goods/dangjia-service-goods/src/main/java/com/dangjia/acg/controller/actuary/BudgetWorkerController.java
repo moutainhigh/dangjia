@@ -227,4 +227,8 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
     public JSONArray getWorkerGoodsList(String houseId, String houseFlowId){
         return budgetWorkerService.getWorkerGoodsList(houseId, houseFlowId);
     }
+
+    public boolean workerPatrolList(String workerGoodsId){
+        return budgetWorkerService.workerPatrolList(workerGoodsId);
+    }
 }

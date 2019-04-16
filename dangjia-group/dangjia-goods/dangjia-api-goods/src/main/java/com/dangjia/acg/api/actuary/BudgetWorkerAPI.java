@@ -199,4 +199,8 @@ public interface BudgetWorkerAPI {
     @PostMapping("/actuary/budgetWorker/getWorkerGoodsList")
     @ApiOperation(value = "精算查询包含工艺的人工商品", notes = "精算查询包含工艺的人工商品")
     JSONArray getWorkerGoodsList(@RequestParam("houseId")String houseId, @RequestParam("houseFlowId")String houseFlowId);
+
+    @PostMapping("/actuary/budgetWorker/workerPatrolList")
+    @ApiOperation(value = "是否有巡查工艺节点", notes = "是否有巡查工艺节点")
+    boolean workerPatrolList(@RequestParam("workerGoodsId")String workerGoodsId);
 }
