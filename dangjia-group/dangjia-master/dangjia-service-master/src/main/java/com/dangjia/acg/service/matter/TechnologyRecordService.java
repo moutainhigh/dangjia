@@ -16,6 +16,7 @@ import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
+import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
@@ -25,6 +26,7 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.repair.MendWorker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.util.StringUtil;
@@ -56,6 +58,8 @@ public class TechnologyRecordService {
     private RedisClient redisClient;
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
+    @Autowired
+    private IMendWorkerMapper mendWorkerMapper;
 
 
     /**
@@ -140,6 +144,18 @@ public class TechnologyRecordService {
         }else {//工匠提交的验收节点
             //含工艺人工商品
             jsonArray = budgetWorkerAPI.getWorkerGoodsList(houseFlow.getHouseId(),houseFlowId);
+            /*
+                补人工的节点也加入进来
+            */
+            List<MendWorker> mendWorkerList = mendWorkerMapper.mendWorkerList(house.getId(),worker.getWorkerTypeId());
+            for (MendWorker mendWorker : mendWorkerList){
+                if (budgetWorkerAPI.workerPatrolList(mendWorker.getWorkerGoodsId())){
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("workerGoodsId", mendWorker.getWorkerGoodsId());
+                    jsonObject.put("workerGoodsName", mendWorker.getWorkerGoodsName());
+                    jsonArray.add(jsonObject);
+                }
+            }
         }
 
         for(int i=0; i<jsonArray.size(); i++){

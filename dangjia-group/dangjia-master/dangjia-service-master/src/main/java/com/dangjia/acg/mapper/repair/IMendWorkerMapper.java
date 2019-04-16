@@ -11,4 +11,6 @@ import java.util.List;
 public interface IMendWorkerMapper extends Mapper<MendWorker>{
 
     List<MendWorker> byMendOrderId(@Param("mendOrderId") String mendOrderId);
+
+    List<MendWorker> mendWorkerList(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId);
 }

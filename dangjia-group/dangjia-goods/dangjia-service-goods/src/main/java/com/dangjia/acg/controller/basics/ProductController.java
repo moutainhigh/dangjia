@@ -218,8 +218,8 @@ public class ProductController implements ProductAPI {
 	}
 
 	@Override
-	public PageInfo queryProductData(HttpServletRequest request,PageDTO pageDTO,String name, String categoryId, String productType, String[] productId){
-		PageInfo  productList = productService.queryProductData(pageDTO,name, categoryId,productType,productId);
+	public PageInfo queryProductData(HttpServletRequest request,Integer pageNum, Integer pageSize,String name, String categoryId, String productType, String[] productId){
+		PageInfo  productList = productService.queryProductData( pageNum,  pageSize,name, categoryId,productType,productId);
 		return productList;
 	}
 
