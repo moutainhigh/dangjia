@@ -3,6 +3,7 @@ package com.dangjia.acg.service.core;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowApplyDTO;
@@ -74,6 +75,9 @@ public class HouseFlowApplyService {
     private ConfigUtil configUtil;
     @Autowired
     private IMendOrderMapper mendOrderMapper;
+
+    @Autowired
+    private HouseWorkerSupService houseWorkerSupService;
     /*@Autowired
     private ConfigMessageService configMessageService;
     @Autowired
@@ -278,9 +282,7 @@ public class HouseFlowApplyService {
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
 
             HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(hfa.getId());
-            hcr.setMemberCheck(1);
-            houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
-
+            houseWorkerSupService.saveHouseConstructionRecord(hfa, hcr);
 
 
             return ServerResponse.createBySuccessMessage("操作成功");
@@ -648,8 +650,7 @@ public class HouseFlowApplyService {
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
 
             HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(hfa.getId());
-            hcr.setMemberCheck(1);
-            houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
+            houseWorkerSupService.saveHouseConstructionRecord(hfa, hcr);
 
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(hfa.getHouseFlowId());
             hf.setWorkSteta(2);
@@ -743,6 +744,7 @@ public class HouseFlowApplyService {
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }
+
 
     /**
      * 验收详情

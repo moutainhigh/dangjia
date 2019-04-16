@@ -39,6 +39,7 @@ import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.core.HouseWorkerSupService;
 import com.dangjia.acg.service.deliver.SplitDeliverService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -92,6 +93,8 @@ public class ComplainService {
     private IWorkerDetailMapper iWorkerDetailMapper;
     @Autowired
     private IHouseConstructionRecordMapper houseConstructionRecordMapper;
+    @Autowired
+    private HouseWorkerSupService houseWorkerSupService;
 
     /**
      * 添加申诉
@@ -114,16 +117,16 @@ public class ComplainService {
         if ((complainType == 2 || complainType == 3) && CommonUtil.isEmpty(houseId)) {
             return ServerResponse.createByErrorMessage("参数错误");
         }
-        Example example =new Example(Complain.class);
+        Example example = new Example(Complain.class);
         example.createCriteria()
-                .andEqualTo(Complain.MEMBER_ID,memberId)
-                .andEqualTo(Complain.COMPLAIN_TYPE,complainType)
-                .andEqualTo(Complain.BUSINESS_ID,businessId)
-                .andEqualTo(Complain.STATUS,0);
-       List list= complainMapper.selectByExample(example);
-       if(list.size()>0){
-           return ServerResponse.createByErrorMessage("请勿重复提交申请！");
-       }
+                .andEqualTo(Complain.MEMBER_ID, memberId)
+                .andEqualTo(Complain.COMPLAIN_TYPE, complainType)
+                .andEqualTo(Complain.BUSINESS_ID, businessId)
+                .andEqualTo(Complain.STATUS, 0);
+        List list = complainMapper.selectByExample(example);
+        if (list.size() > 0) {
+            return ServerResponse.createByErrorMessage("请勿重复提交申请！");
+        }
         Complain complain = new Complain();
         complain.setMemberId(memberId);
         complain.setComplainType(complainType);
@@ -145,7 +148,7 @@ public class ComplainService {
             if (member != null) {
                 if (!CommonUtil.isEmpty(member.getWorkerTypeId())) {
                     WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                    if(workerType!=null) {
+                    if (workerType != null) {
                         field = workerType.getName() + "-";
                     }
                 }
@@ -157,11 +160,14 @@ public class ComplainService {
         complain.setContent(getUserName(complain.getComplainType(), complain.getMemberId(), complain.getHouseId()));
         complainMapper.insertSelective(complain);
 
-        if (complain.getComplainType() != null&&complain.getComplainType()==2){
+        if (complain.getComplainType() != null && complain.getComplainType() == 2) {
             //将申请进程更新为申述中。。
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(complain.getBusinessId());
             houseFlowApply.setMemberCheck(4);
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
+
+            HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
+            houseWorkerSupService.saveHouseConstructionRecord(houseFlowApply, hcr);
         }
         return ServerResponse.createBySuccessMessage("提交成功");
     }
@@ -284,7 +290,7 @@ public class ComplainService {
      * @param files       附件 以，分割 如：data/f.dow,data/f2.dow
      * @return
      */
-    public ServerResponse updataComplain(String userId, String complainId, Integer state, String description, String files, String operateId,String operateName) {
+    public ServerResponse updataComplain(String userId, String complainId, Integer state, String description, String files, String operateId, String operateName) {
         if (CommonUtil.isEmpty(complainId)) {
             return ServerResponse.createByErrorMessage("参数不正确");
         }
@@ -429,8 +435,8 @@ public class ComplainService {
                         }
                         break;
                 }
-        }else{
-            if (complain.getComplainType() != null&&complain.getComplainType()==2){
+        } else {
+            if (complain.getComplainType() != null && complain.getComplainType() == 2) {
                 //将申请进程打回待审核。。
                 HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(complain.getBusinessId());
                 houseFlowApply.setMemberCheck(0);

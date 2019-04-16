@@ -9,6 +9,7 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.CourseDTO;
@@ -32,6 +33,7 @@ import com.dangjia.acg.modle.matter.WorkerDisclosureHouseFlow;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.HouseWorkerSupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -84,6 +86,8 @@ public class StewardService {
     private ConfigMessageService configMessageService;
     @Autowired
     private IHouseConstructionRecordMapper houseConstructionRecordMapper;
+    @Autowired
+    private HouseWorkerSupService houseWorkerSupService;
 
     /**
      * 管家巡查扫验证二维码
@@ -204,7 +208,18 @@ public class StewardService {
         }
 
     }
-
+private void saveHouseConstructionRecord(HouseFlowApply hfa, HouseConstructionRecord hcr) {
+        if (CommonUtil.isEmpty(hcr)) {
+            hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+                    , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
+            houseConstructionRecordMapper.insert(hcr);
+        } else {
+            hcr.setMemberCheck(hfa.getMemberCheck());
+            hcr.setContent(hfa.getApplyDec());
+            hcr.setSupervisorCheck(hfa.getSupervisorCheck());
+            houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
+        }
+    }
     /**
      * 管家审核停工申请
      * state 1通过 0不通过
@@ -219,9 +234,7 @@ public class StewardService {
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
                 HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
-                hcr.setMemberCheck(1);
-                hcr.setSupervisorCheck(1);
-                houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
+                houseWorkerSupService.saveHouseConstructionRecord(houseFlowApply, hcr);
 
             } else {
                 houseFlowApply.setMemberCheck(2);
@@ -229,9 +242,7 @@ public class StewardService {
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
                 HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
-                hcr.setMemberCheck(2);
-                hcr.setSupervisorCheck(2);
-                houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
+                houseWorkerSupService.saveHouseConstructionRecord(houseFlowApply, hcr);
 
                 //不通过停工申请
                 HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowId());

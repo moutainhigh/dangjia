@@ -39,6 +39,7 @@ import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
+import com.dangjia.acg.service.core.HouseWorkerSupService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +92,8 @@ public class EvaluateService {
 
     @Autowired
     private IHouseConstructionRecordMapper houseConstructionRecordMapper;
+    @Autowired
+    private HouseWorkerSupService houseWorkerSupService;
 
     /**
      * 获取积分记录
@@ -161,9 +164,7 @@ public class EvaluateService {
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
             HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
-            hcr.setContent(content);
-            hcr.setSupervisorCheck(2);
-            houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
+            houseWorkerSupService.saveHouseConstructionRecord(houseFlowApply, hcr);
 
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS,house.getHouseName()) ,"5");
@@ -252,8 +253,7 @@ public class EvaluateService {
 
 
             HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
-            hcr.setSupervisorCheck(1);
-            houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
+            houseWorkerSupService.saveHouseConstructionRecord(houseFlowApply, hcr);
             /*
              * 大管家每次审核拿钱 新算法 2018.08.03
              */
