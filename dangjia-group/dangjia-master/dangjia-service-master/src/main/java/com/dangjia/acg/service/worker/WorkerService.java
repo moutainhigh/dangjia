@@ -3,9 +3,11 @@ package com.dangjia.acg.service.worker;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
@@ -28,6 +30,7 @@ import com.dangjia.acg.modle.worker.WorkerBankCard;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -35,7 +38,8 @@ import tk.mybatis.mapper.entity.Example;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
-/**工匠管理
+/**
+ * 工匠管理
  * zmj
  */
 @Service
@@ -114,15 +118,16 @@ public class WorkerService {
 
     /**
      * 我的资料
+     *
      * @param userToken
      * @return
      */
-    public ServerResponse getWorker(String userToken){
+    public ServerResponse getWorker(String userToken) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
-            return ServerResponse.createBySuccess("获取工匠基本信息成功",worker);
-        }catch (Exception e){
+            return ServerResponse.createBySuccess("获取工匠基本信息成功", worker);
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错，获取工匠基本信息失败");
         }
@@ -130,20 +135,21 @@ public class WorkerService {
 
     /**
      * 提现记录
+     *
      * @param userToken
      * @return
      */
-    public ServerResponse getWithdrawDeposit(String userToken, PageDTO pageDTO){
+    public ServerResponse getWithdrawDeposit(String userToken, PageDTO pageDTO) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
             Example example = new Example(HouseFlow.class);
             example.createCriteria().andEqualTo("workerId", worker.getId());
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<WithdrawDeposit> wdList=withdrawDepositMapper.selectByExample(example);
+            List<WithdrawDeposit> wdList = withdrawDepositMapper.selectByExample(example);
             PageInfo pageResult = new PageInfo(wdList);
-            return ServerResponse.createBySuccess("获取工匠提现记录成功",pageResult);
-        }catch (Exception e){
+            return ServerResponse.createBySuccess("获取工匠提现记录成功", pageResult);
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("获取工匠提现记录失败");
         }
@@ -151,10 +157,11 @@ public class WorkerService {
 
     /**
      * 我的任务
+     *
      * @param userToken
      * @return
      */
-    public ServerResponse getHouseWorkerList(String userToken,PageDTO pageDTO){
+    public ServerResponse getHouseWorkerList(String userToken, PageDTO pageDTO) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
@@ -162,14 +169,16 @@ public class WorkerService {
             example.createCriteria().andEqualTo(HouseWorkerOrder.WORKER_ID, worker.getId());
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             example.orderBy(HouseFlow.CREATE_DATE).desc();
-            List<HouseWorkerOrder> hwList=houseWorkerOrderMapper.selectByExample(example);
-            List<Map> hwMapList= new ArrayList<>();
-            for (HouseWorkerOrder hw:hwList) {
-                Map hwMap=BeanUtils.beanToMap(hw);
-                House house=houseMapper.selectByPrimaryKey(hw.getHouseId());
-                if(house!=null) {
-                    Member member=memberMapper.selectByPrimaryKey(house.getMemberId());
-                    if(member!=null) {hwMap.put(Member.NICK_NAME,member.getNickName());}
+            List<HouseWorkerOrder> hwList = houseWorkerOrderMapper.selectByExample(example);
+            List<Map> hwMapList = new ArrayList<>();
+            for (HouseWorkerOrder hw : hwList) {
+                Map hwMap = BeanUtils.beanToMap(hw);
+                House house = houseMapper.selectByPrimaryKey(hw.getHouseId());
+                if (house != null) {
+                    Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                    if (member != null) {
+                        hwMap.put(Member.NICK_NAME, member.getNickName());
+                    }
                     hwMap.put("houseName", house.getHouseName());
                     hwMap.put("buildSquare", house.getBuildSquare());
                 }
@@ -177,8 +186,8 @@ public class WorkerService {
             }
             PageInfo pageResult = new PageInfo(hwList);
             pageResult.setList(hwMapList);
-            return ServerResponse.createBySuccess("获取我的任务成功",pageResult);
-        }catch (Exception e){
+            return ServerResponse.createBySuccess("获取我的任务成功", pageResult);
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("获取我的任务失败");
         }
@@ -186,21 +195,22 @@ public class WorkerService {
 
     /**
      * 我的任务-详情流水
+     *
      * @param userToken
      * @return
      */
-    public ServerResponse getHouseWorkerDetail(String userToken,PageDTO pageDTO,String houseId){
+    public ServerResponse getHouseWorkerDetail(String userToken, PageDTO pageDTO, String houseId) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
             Example example = new Example(WorkerDetail.class);
-            example.createCriteria().andEqualTo(WorkerDetail.WORKER_ID, worker.getId()).andEqualTo(WorkerDetail.HOUSE_ID,houseId);
+            example.createCriteria().andEqualTo(WorkerDetail.WORKER_ID, worker.getId()).andEqualTo(WorkerDetail.HOUSE_ID, houseId);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             example.orderBy(WorkerDetail.CREATE_DATE).desc();
-            List<WorkerDetail> hwList=workerDetailMapper.selectByExample(example);
+            List<WorkerDetail> hwList = workerDetailMapper.selectByExample(example);
             PageInfo pageResult = new PageInfo(hwList);
-            return ServerResponse.createBySuccess("获取我的任务成功",pageResult);
-        }catch (Exception e){
+            return ServerResponse.createBySuccess("获取我的任务成功", pageResult);
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("获取我的任务失败");
         }
@@ -208,70 +218,110 @@ public class WorkerService {
 
     /**
      * 我的银行卡
+     *
      * @param userToken
      * @return
      */
-    public ServerResponse getMyBankCard(String userToken){
+    public ServerResponse getMyBankCard(String userToken) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
             Example example = new Example(WorkerBankCard.class);
-            example.createCriteria().andEqualTo(WorkerBankCard.WORKER_ID, worker.getId());
-            List<WorkerBankCard> wbList=workerBankCardMapper.selectByExample(example);
-            List<Map<String,Object>> mapList=new ArrayList<>();
-            for(WorkerBankCard wb:wbList){
-                Map<String,Object> map = BeanUtils.beanToMap(wb);
+            example.createCriteria().andEqualTo(WorkerBankCard.WORKER_ID, worker.getId())
+                    .andEqualTo(WorkerBankCard.DATA_STATUS, 0);
+            List<WorkerBankCard> wbList = workerBankCardMapper.selectByExample(example);
+            List<Map<String, Object>> mapList = new ArrayList<>();
+            for (WorkerBankCard wb : wbList) {
+                Map<String, Object> map = BeanUtils.beanToMap(wb);
                 BankCard bankCard = bankCardMapper.selectByPrimaryKey(wb.getBankCardId());
                 bankCard.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-                map.put("bankCardName",bankCard==null?"":bankCard.getBankName());//银行名称
-                map.put("bankCardImage",bankCard==null?"":bankCard.getBankCardImage());//银行卡图片
+                map.put("bankCardName", bankCard == null ? "" : bankCard.getBankName());//银行名称
+                map.put("bankCardImage", bankCard == null ? "" : bankCard.getBankCardImage());//银行卡图片
                 mapList.add(map);
             }
-            return ServerResponse.createBySuccess("获取我的银行卡成功",mapList);
-        }catch (Exception e){
+            return ServerResponse.createBySuccess("获取我的银行卡成功", mapList);
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("获取我的银行卡失败");
         }
     }
+
     /**
      * 新增银行卡
+     *
      * @param bankCard
      * @return
      */
-    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken,String bankCardId,WorkerBankCard bankCard) {
+    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken, WorkerBankCard bankCard) {
         try {
+            if (CommonUtil.isEmpty(bankCard.getBankCardNumber())) {
+                return ServerResponse.createByErrorMessage("请输入银行卡卡号");
+            }
+            if (CommonUtil.isEmpty(bankCard.getBankCardId())) {
+                return ServerResponse.createByErrorMessage("请选择银行卡类型");
+            }
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            if (accessToken == null) {//无效的token
+                return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            }
+            Example example = new Example(WorkerBankCard.class);
+            example.createCriteria().andEqualTo(WorkerBankCard.BANK_CARD_NUMBER, bankCard.getBankCardNumber())
+                    .andEqualTo(WorkerBankCard.WORKER_ID, accessToken.getMember().getId());
+            if (workerBankCardMapper.selectByExample(example).size() > 0) {
+                return ServerResponse.createByErrorMessage("添加失败，银行卡以被使用！");
+            }
             bankCard.setWorkerId(accessToken.getMember().getId());
             bankCard.setDataStatus(0);
             bankCard.setStatus(0);
-//            if(CommonUtil.isEmpty(bankCardId)) {
-//                Example example = new Example(WorkerBankCard.class);
-//                example.createCriteria().andEqualTo(WorkerBankCard.BANK_CARD_NUMBER, bankCard.getBankCardNumber());
-//                if (workerBankCardMapper.selectByExample(example).size() > 0) {
-//                    return ServerResponse.createByErrorMessage("添加失败，银行卡以被使用！");
-//                }
-                this.workerBankCardMapper.insertSelective(bankCard);
-//            }else{
-//                bankCard.setId(bankCardId);
-//                this.workerBankCardMapper.updateByPrimaryKeySelective(bankCard);
-//            }
+            this.workerBankCardMapper.insertSelective(bankCard);
             return ServerResponse.createBySuccessMessage("保存成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             return ServerResponse.createByErrorMessage("操作失败，请您稍后再试");
         }
     }
+
+    /**
+     * 删除银行卡
+     *
+     * @param request
+     * @param userToken
+     * @param workerBankCardId 银行卡ID
+     * @return
+     */
+    public ServerResponse delMyBankCard(HttpServletRequest request, String userToken, String workerBankCardId) {
+        try {
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            if (accessToken == null) {//无效的token
+                return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            }
+            WorkerBankCard workerBankCard = workerBankCardMapper.selectByPrimaryKey(workerBankCardId);
+            if (workerBankCard == null) {
+                return ServerResponse.createByErrorMessage("没有找到对应的银行卡");
+            }
+            if (!accessToken.getMember().getId().equals(workerBankCard.getWorkerId())) {
+                return ServerResponse.createByErrorMessage("您无权删除此卡");
+            }
+            workerBankCard.setDataStatus(1);
+            workerBankCardMapper.updateByPrimaryKeySelective(workerBankCard);
+            return ServerResponse.createBySuccessMessage("删除成功");
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage("操作失败，请您稍后再试");
+        }
+    }
+
     /**
      * 我的二维码
+     *
      * @param userToken
      * @return
      */
-    public ServerResponse getMyQrcode(String userToken){
+    public ServerResponse getMyQrcode(String userToken) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
-            return ServerResponse.createBySuccess("获取我的二维码成功",address+worker.getQrcode());
-        }catch (Exception e){
+            return ServerResponse.createBySuccess("获取我的二维码成功", address + worker.getQrcode());
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("获取我的二维码失败");
         }
@@ -279,10 +329,11 @@ public class WorkerService {
 
     /**
      * 邀请排行榜
+     *
      * @param userToken
      * @return
      */
-    public ServerResponse getRanking(String userToken){
+    public ServerResponse getRanking(String userToken) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
@@ -290,19 +341,19 @@ public class WorkerService {
             example.createCriteria().andEqualTo("superiorId", worker.getId());
             List<Member> workerList = memberMapper.selectByExample(example);
             workerList.add(worker);
-            for(Member w : workerList){
+            for (Member w : workerList) {
                 Example example2 = new Example(Member.class);
                 example2.createCriteria().andEqualTo("superiorId", w.getId());
                 List<Member> mList = memberMapper.selectByExample(example);
                 w.setInviteNum(mList.size());
             }
-            Collections.sort(workerList,new Comparator<Member>() {
+            Collections.sort(workerList, new Comparator<Member>() {
                 public int compare(Member w1, Member w2) {
-                    return (int)(w2.getInviteNum() - w1.getInviteNum());
+                    return (int) (w2.getInviteNum() - w1.getInviteNum());
                 }
             });
-            return ServerResponse.createBySuccess("获取邀请排行榜成功",workerList);
-        }catch (Exception e){
+            return ServerResponse.createBySuccess("获取邀请排行榜成功", workerList);
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("获取邀请排行榜失败");
         }
@@ -310,18 +361,19 @@ public class WorkerService {
 
     /**
      * 接单记录
+     *
      * @param userToken
      * @return
      */
-    public ServerResponse getTakeOrder(String userToken){
+    public ServerResponse getTakeOrder(String userToken) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
             Example example = new Example(HouseWorker.class);
             example.createCriteria().andEqualTo("workerId", worker.getId());
             List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);
-            return ServerResponse.createBySuccess("获取接单记录成功",hwList);
-        }catch (Exception e){
+            return ServerResponse.createBySuccess("获取接单记录成功", hwList);
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("获取接单记录失败");
         }
