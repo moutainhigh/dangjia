@@ -3,7 +3,6 @@ package com.dangjia.acg.service.complain;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.model.PageDTO;
@@ -35,7 +34,6 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
@@ -139,7 +137,9 @@ public class ComplainService {
             if (member != null) {
                 if (!CommonUtil.isEmpty(member.getWorkerTypeId())) {
                     WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                    field = workerType.getName() + "-";
+                    if(workerType!=null) {
+                        field = workerType.getName() + "-";
+                    }
                 }
                 complain.setUserMobile(member.getMobile());
                 complain.setUserName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
