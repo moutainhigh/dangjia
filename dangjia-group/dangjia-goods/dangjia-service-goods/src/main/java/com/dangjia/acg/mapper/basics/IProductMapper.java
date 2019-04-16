@@ -70,7 +70,7 @@ public interface IProductMapper extends Mapper<Product> {
 
     List<Product> queryRepairBudgetMaterial(@Param("houseId") String houseId, @Param("name") String name, @Param("categoryId") String categoryId);
 
-    List<Product> queryProductData(@Param("name") String name, @Param("categoryId") String categoryId, @Param("productType") String productType);
+    List<Product> queryProductData(@Param("name") String name, @Param("categoryId") String categoryId, @Param("productType") String productType,@Param("productId")String[] productId);
 
     Product getSwitchProduct(@Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String[] valueIdArr);
 

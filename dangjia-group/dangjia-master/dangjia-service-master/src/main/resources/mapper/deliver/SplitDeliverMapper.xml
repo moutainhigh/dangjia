@@ -23,6 +23,7 @@
         supplier_telephone AS supMobile,
         supplier_name AS supName,
         operator_id AS operatorId,
+        rec_time AS recTime,
         modify_date AS modifyDate,
         create_date AS createDate
         FROM
