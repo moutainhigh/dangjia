@@ -8,6 +8,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.modle.core.HouseConstructionRecord;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseFlowApplyImage;
 import com.dangjia.acg.modle.core.HouseWorker;
@@ -40,11 +41,12 @@ public class HouseApplyChangeOnYsService {
     private IMemberMapper memberMapper;
     private IHouseWorkerMapper houseWorkerMapper;
     private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
+    private IHouseConstructionRecordMapper houseConstructionRecordMapper;
 
     @Autowired
     public HouseApplyChangeOnYsService(IHouseFlowMapper houseFlowMapper, IWorkerTypeMapper workerTypeMapper
             , ConfigUtil configUtil, IHouseFlowApplyMapper houseFlowApplyMapper, IMemberMapper memberMapper, IHouseWorkerMapper houseWorkerMapper
-            , IHouseFlowApplyImageMapper houseFlowApplyImageMapper) {
+            , IHouseFlowApplyImageMapper houseFlowApplyImageMapper, IHouseConstructionRecordMapper houseConstructionRecordMapper) {
         this.houseFlowMapper = houseFlowMapper;
         this.workerTypeMapper = workerTypeMapper;
         this.configUtil = configUtil;
@@ -52,6 +54,7 @@ public class HouseApplyChangeOnYsService {
         this.memberMapper = memberMapper;
         this.houseWorkerMapper = houseWorkerMapper;
         this.houseFlowApplyImageMapper = houseFlowApplyImageMapper;
+        this.houseConstructionRecordMapper = houseConstructionRecordMapper;
     }
 
 
@@ -75,7 +78,9 @@ public class HouseApplyChangeOnYsService {
             return ServerResponse.createByErrorMessage("请指定houseId");
         }
         PageHelper.startPage(pageNum, pageSize);
-        List<HouseFlowApply> hfaList = houseFlowApplyMapper.queryHfaByHouseId(houseId, workerTypeId);
+//        List<HouseFlowApply> hfaList = houseFlowApplyMapper.queryHfaByHouseId(houseId, workerTypeId);
+        // 以后查询施工记录表
+        List<HouseConstructionRecord> hfaList = houseConstructionRecordMapper.getHouseConstructionRecordByHouseId(houseId);
         PageInfo pageResult = new PageInfo(hfaList);
         List<Map<String, Object>> listMap = this.houseFlowApplyDetail(hfaList);
         if (listMap == null) {
@@ -92,11 +97,11 @@ public class HouseApplyChangeOnYsService {
      *
      * @version 1.31 冲刺
      */
-    private List<Map<String, Object>> houseFlowApplyDetail(List<HouseFlowApply> hfaList) {
+    private List<Map<String, Object>> houseFlowApplyDetail( List<HouseConstructionRecord> hfaList) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<Map<String, Object>> listMap = new ArrayList<>();
-            for (HouseFlowApply hfa : hfaList) {
+            for (HouseConstructionRecord hfa : hfaList) {
                 // 如果为交底巡查验收三种属性就调用getHouseFlowApplyMapOnPatrol将显示人为大管家
                 if (hfa.getApplyType() == 1 || hfa.getApplyType() == 2
                         || hfa.getApplyType() == 5 || hfa.getApplyType() == 6 || hfa.getApplyType() == 7) {
@@ -122,7 +127,7 @@ public class HouseApplyChangeOnYsService {
      * @return 以map形式返回一条数据
      * @link getHouseFlowApplyMap
      */
-    private Map<String, Object> getHouseFlowApplyMapOnPatrol(HouseFlowApply hfa, String address) {
+    private Map<String, Object> getHouseFlowApplyMapOnPatrol(HouseConstructionRecord hfa, String address) {
         Map<Integer, String> applyTypeMap = new HashMap<>();
         applyTypeMap.put(DjConstants.ApplyType.MEIRI_WANGGONG, "每日完工");
         applyTypeMap.put(DjConstants.ApplyType.JIEDUAN_WANGONG, "阶段完工");
@@ -145,7 +150,7 @@ public class HouseApplyChangeOnYsService {
         example.createCriteria().andEqualTo("houseId", hfa.getHouseId()).andEqualTo("workerId", hfa.getWorkerId());
         List<HouseWorker> listHw = houseWorkerMapper.selectByExample(example);
         changeConstruction(map, listHw);
-        map.put("content", hfa.getApplyDec());
+        map.put("content", hfa.getContent());
         example = new Example(HouseFlowApplyImage.class);
         example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, hfa.getId());
         List<HouseFlowApplyImage> hfaiList = houseFlowApplyImageMapper.selectByExample(example);
@@ -169,7 +174,7 @@ public class HouseApplyChangeOnYsService {
      * @return 以map形式返回一条数据
      * @link getHouseFlowApplyMapOnPatrol
      */
-    private Map<String, Object> getHouseFlowApplyMap(HouseFlowApply hfa, String address) {
+    private Map<String, Object> getHouseFlowApplyMap(HouseConstructionRecord hfa, String address) {
         Map<Integer, String> applyTypeMap = new HashMap<>();
         applyTypeMap.put(DjConstants.ApplyType.MEIRI_WANGGONG, "每日完工");
         applyTypeMap.put(DjConstants.ApplyType.JIEDUAN_WANGONG, "阶段完工");
@@ -192,7 +197,7 @@ public class HouseApplyChangeOnYsService {
         example.createCriteria().andEqualTo("houseId", hfa.getHouseId()).andEqualTo("workerId", hfa.getWorkerId());
         List<HouseWorker> listHw = houseWorkerMapper.selectByExample(example);
         changeConstruction(map, listHw);
-        map.put("content", hfa.getApplyDec());
+        map.put("content", hfa.getContent());
         example = new Example(HouseFlowApplyImage.class);
         example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, hfa.getId());
         List<HouseFlowApplyImage> hfaiList = houseFlowApplyImageMapper.selectByExample(example);

@@ -12,6 +12,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * 实体类 - 房间
@@ -62,9 +63,32 @@ public class HouseChoiceCase extends BaseEntity {
     @Desc(value = "金额")
     @ApiModelProperty("金额")
     private BigDecimal money;//
+
+    @Column(name = "show_time_start")
+    @Desc(value = "定时展示开始时间")
+    @ApiModelProperty("定时展示开始时间")
+    private Date showTimeStart;
+
+    @Column(name = "show_time_end")
+    @Desc(value = "定时展示结束时间")
+    @ApiModelProperty("定时展示结束时间")
+    private Date showTimeEnd;
+
+    @Column(name = "to_show")
+    @Desc(value = "是否显示")
+    @ApiModelProperty("是否显示")
+    private String toShow;
+
+    @Column(name = "to_show")
+    @Desc(value = "是否显示")
+    @ApiModelProperty("是否显示")
+    private String inShow;
+
     //所有图片字段加入域名和端口，形成全路径
-    public void initPath(String address){
-        this.image= StringUtils.isEmpty(this.image)?null:address+this.image;
-    };
+    public void initPath(String address) {
+        this.image = StringUtils.isEmpty(this.image) ? null : address + this.image;
+    }
+
+    ;
 
 }

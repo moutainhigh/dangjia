@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.core.IHouseConstructionRecordMapper">
+    <sql id="all_columns">
+               id,
+               create_date         AS createDate,
+               modify_date         AS modifyDate,
+               house_id            AS houseId,
+               content,
+               worker_id           AS workerId,
+               work_type           AS workType,
+               apply_type          AS applyType,
+               house_flow_apply_id AS houseFlowApplyId,
+               member_check        AS memberCheck,
+               supervisor_check    AS supervisorCheck,
+               house_flow_id       AS houseFlowId
+    </sql>
+
+    <select id="getHouseConstructionRecordByHouseId" resultType="com.dangjia.acg.modle.core.HouseConstructionRecord">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_house_construction_record
+        WHERE (apply_type = 0 OR supervisor_check = 1)
+        AND house_id = #{houseId,jdbcType=VARCHAR}
+        ORDER BY create_date DESC
+
+    </select>
+    <select id="selectHcrByHouseFlowApplyId" resultType="com.dangjia.acg.modle.core.HouseConstructionRecord">
+        SELECT
+        <include refid="all_columns"/>
+        FROM
+        dj_house_construction_record
+        WHERE
+        house_flow_apply_id = #{houseFlowApplyId}
+    </select>
+</mapper>
+

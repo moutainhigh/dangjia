@@ -404,7 +404,7 @@ public class SupplierService {
                     sp.setModifyDate(new Date());
                     iSupplierMapper.updateSupplierProduct(sp);
                 }
-                List<SupplierProduct> supplierProducts = iSupplierProductMapper.querySupplierProduct(sp.getProductId());
+                List<SupplierProduct> supplierProducts = iSupplierProductMapper.querySupplierProduct(null,sp.getProductId());
                 //更新 对应 product 的平均价格
                 Product oldProduct = iProductMapper.selectByPrimaryKey(sp.getProductId());
                 if (supplierProducts.size() > 0) {

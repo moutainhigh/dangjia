@@ -21,7 +21,6 @@ import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
@@ -54,8 +53,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+
 @Service
 public class ComplainService {
+    @Autowired
+    private RedisClient redisClient;
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -64,6 +66,8 @@ public class ComplainService {
     private ConfigUtil configUtil;
     @Autowired
     private IRewardPunishRecordMapper rewardPunishRecordMapper;
+    @Autowired
+    private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
@@ -74,22 +78,24 @@ public class ComplainService {
     private SupplierProductAPI supplierProductAPI;
     @Autowired
     private UserMapper userMapper;
+
     @Autowired
     private ISplitDeliverMapper splitDeliverMapper;
+
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
     private IHouseMapper houseMapper;
+
     @Autowired
     private IRewardPunishConditionMapper iRewardPunishConditionMapper;
+
     @Autowired
     private IWorkIntegralMapper iWorkIntegralMapper;
     @Autowired
     private SplitDeliverService splitDeliverService;
     @Autowired
     private IWorkerDetailMapper iWorkerDetailMapper;
-    @Autowired
-    private ITechnologyRecordMapper technologyRecordMapper;
 
     /**
      * 添加申诉
@@ -384,11 +390,6 @@ public class ComplainService {
                         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowId());
                         houseFlow.setPause(0);
                         houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-
-                        /*
-                        节点不通过
-                         */
-                        technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(),houseFlowApply.getWorkerTypeId());
                         break;
 
                     case 3:// 3：大管家（开工后）要求换人.

@@ -27,7 +27,7 @@ public interface ConfigAdvertAPI {
     @PostMapping("/config/adverts/list")
     @ApiOperation(value = "获取所有广告", notes = "获取所有广告")
     ServerResponse getConfigAdverts(@RequestParam("request") HttpServletRequest request,
-                                    @RequestParam("userToken") String userToken,
+//                                    @RequestParam("userToken") String userToken,
                                     @RequestParam("configAdvert") ConfigAdvert configAdvert);
 
     /**

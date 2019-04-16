@@ -3,6 +3,7 @@ package com.dangjia.acg.service.core;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowApplyDTO;
@@ -74,9 +75,18 @@ public class HouseFlowApplyService {
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
+    private HouseWorkerSupService houseWorkerSupService;
+    /*@Autowired
+    private ConfigMessageService configMessageService;
+    @Autowired
+    private RedisClient redisClient;*/
+    @Autowired
     private IChangeOrderMapper changeOrderMapper;
     @Autowired
     private ITechnologyRecordMapper technologyRecordMapper;
+
+    @Autowired
+    private IHouseConstructionRecordMapper houseConstructionRecordMapper;
 
 
     /**
@@ -167,6 +177,7 @@ public class HouseFlowApplyService {
                 //修改进程
                 HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(),hwo.getWorkerTypeId());
                 houseFlow.setWorkSteta(2);
+
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                 //处理工人拿钱
                 workerMoney(hwo,hfa);
@@ -275,6 +286,10 @@ public class HouseFlowApplyService {
             hfa.setMemberCheck(1);
             hfa.setPayState(1);
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
+
+            HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(hfa.getId());
+            houseWorkerSupService.saveHouseConstructionRecord(hfa, hcr);
+
 
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
@@ -640,6 +655,9 @@ public class HouseFlowApplyService {
             hfa.setMemberCheck(1);//通过
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
 
+            HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(hfa.getId());
+            houseWorkerSupService.saveHouseConstructionRecord(hfa, hcr);
+
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(hfa.getHouseFlowId());
             hf.setWorkSteta(2);
             houseFlowMapper.updateByPrimaryKeySelective(hf);
@@ -732,6 +750,7 @@ public class HouseFlowApplyService {
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }
+
 
     /**
      * 验收详情

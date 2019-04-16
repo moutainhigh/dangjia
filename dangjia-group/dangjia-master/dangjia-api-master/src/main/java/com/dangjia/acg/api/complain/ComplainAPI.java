@@ -43,6 +43,8 @@ public interface ComplainAPI {
                                   @RequestParam("complainId") String complainId,
                                   @RequestParam("state") Integer state,
                                   @RequestParam("description") String description,
+                                  @RequestParam("operateId") String operateId,  //操作人id
+                                  @RequestParam("operateName") String operateName,  //操作人姓名
                                   @RequestParam("files") String files);
 
     @PostMapping("/complain/getComplain")
