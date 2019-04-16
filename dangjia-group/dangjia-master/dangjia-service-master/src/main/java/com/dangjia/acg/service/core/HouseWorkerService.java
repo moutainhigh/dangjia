@@ -1055,7 +1055,7 @@ public class HouseWorkerService {
                             technologyRecord.setWorkerTypeId(technology.getWorkerTypeId());
                         }
                         technologyRecord.setImage(imageUrl);
-                        technologyRecord.setState(1);//已验收
+                        technologyRecord.setState(0);//未验收
                         technologyRecord.setModifyDate(new Date());
                         technologyRecordMapper.insert(technologyRecord);
                     } else {

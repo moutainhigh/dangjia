@@ -8,6 +8,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowApplyDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
@@ -73,13 +74,9 @@ public class HouseFlowApplyService {
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
-    private IMendOrderMapper mendOrderMapper;
-    /*@Autowired
-    private ConfigMessageService configMessageService;
-    @Autowired
-    private RedisClient redisClient;*/
-    @Autowired
     private IChangeOrderMapper changeOrderMapper;
+    @Autowired
+    private ITechnologyRecordMapper technologyRecordMapper;
 
 
     /**
@@ -153,6 +150,12 @@ public class HouseFlowApplyService {
             }
             //工匠订单
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());
+
+
+            /*
+            节点审核通过
+             */
+            technologyRecordMapper.passTecRecord(hwo.getHouseId(),hwo.getWorkerTypeId());
 
             if(hfa.getApplyType() == 2){//整体完工
                 /**验证未处理补人工订单*/
