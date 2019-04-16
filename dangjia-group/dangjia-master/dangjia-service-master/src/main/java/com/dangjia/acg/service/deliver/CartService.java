@@ -69,7 +69,7 @@ public class CartService {
         if(list.size()>0){
             Cart cart1=list.get(0);
             if(cart.getShopCount()<0){
-                cartMapper.updateByPrimaryKeySelective(cart1);
+                cartMapper.delete(cart1);
             }
             cart1.setShopCount(cart.getShopCount());
             cartMapper.updateByPrimaryKeySelective(cart1);
