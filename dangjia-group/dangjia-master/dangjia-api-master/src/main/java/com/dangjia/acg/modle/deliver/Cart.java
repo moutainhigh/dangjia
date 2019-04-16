@@ -66,4 +66,6 @@ public class Cart extends BaseEntity {
 	@Column(name = "unit_name")
 	private String unitName;//单位
 
+	@Column(name = "category_id")
+	private String categoryId;//分类id
 }
