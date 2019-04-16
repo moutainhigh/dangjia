@@ -81,6 +81,9 @@ public class HouseFlowApplyService {
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
 
+    @Autowired
+    private IHouseConstructionRecordMapper houseConstructionRecordMapper;
+
 
     /**
      * 工匠端工地记录
@@ -164,6 +167,7 @@ public class HouseFlowApplyService {
                 //修改进程
                 HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(),hwo.getWorkerTypeId());
                 houseFlow.setWorkSteta(2);
+
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                 //处理工人拿钱
                 workerMoney(hwo,hfa);
@@ -272,6 +276,12 @@ public class HouseFlowApplyService {
             hfa.setMemberCheck(1);
             hfa.setPayState(1);
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
+
+            HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(hfa.getId());
+            hcr.setMemberCheck(1);
+            houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
+
+
 
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
@@ -641,6 +651,10 @@ public class HouseFlowApplyService {
             HouseFlowApply hfa = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             hfa.setMemberCheck(1);//通过
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
+
+            HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(hfa.getId());
+            hcr.setMemberCheck(1);
+            houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
 
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(hfa.getHouseFlowId());
             hf.setWorkSteta(2);

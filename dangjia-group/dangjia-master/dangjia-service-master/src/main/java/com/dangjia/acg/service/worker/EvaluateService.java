@@ -14,6 +14,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.WorkIntegralDTO;
+import com.dangjia.acg.mapper.core.IHouseConstructionRecordMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -24,6 +25,7 @@ import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.core.HouseConstructionRecord;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.house.House;
@@ -86,6 +88,9 @@ public class EvaluateService {
     private ForMasterAPI forMasterAPI;
     @Autowired
     private IMaterialRecordMapper materialRecordMapper;
+
+    @Autowired
+    private IHouseConstructionRecordMapper houseConstructionRecordMapper;
 
     /**
      * 获取积分记录
@@ -155,6 +160,10 @@ public class EvaluateService {
             houseFlowApply.setSupervisorCheck(2);
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
+            HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
+            hcr.setContent(content);
+            hcr.setSupervisorCheck(2);
+            houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
 
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS,house.getHouseName()) ,"5");
@@ -240,6 +249,11 @@ public class EvaluateService {
             calendar.add(Calendar.DAY_OF_YEAR, 7);//业主倒计时
             houseFlowApply.setEndDate(calendar.getTime());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
+
+
+            HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
+            hcr.setSupervisorCheck(1);
+            houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
             /*
              * 大管家每次审核拿钱 新算法 2018.08.03
              */
