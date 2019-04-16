@@ -118,6 +118,16 @@ public class ComplainService {
         if ((complainType == 2 || complainType == 3) && CommonUtil.isEmpty(houseId)) {
             return ServerResponse.createByErrorMessage("参数错误");
         }
+        Example example =new Example(Complain.class);
+        example.createCriteria()
+                .andEqualTo(Complain.MEMBER_ID,memberId)
+                .andEqualTo(Complain.COMPLAIN_TYPE,complainType)
+                .andEqualTo(Complain.BUSINESS_ID,businessId)
+                .andEqualTo(Complain.STATUS,0);
+       List list= complainMapper.selectByExample(example);
+       if(list.size()>0){
+           return ServerResponse.createByErrorMessage("请勿重复提交申请！");
+       }
         Complain complain = new Complain();
         complain.setMemberId(memberId);
         complain.setComplainType(complainType);
@@ -148,6 +158,13 @@ public class ComplainService {
         }
         complain.setContent(getUserName(complain.getComplainType(), complain.getMemberId(), complain.getHouseId()));
         complainMapper.insertSelective(complain);
+
+        if (complain.getComplainType() != null&&complain.getComplainType()==2){
+            //将申请进程更新为申述中。。
+            HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(complain.getBusinessId());
+            houseFlowApply.setMemberCheck(4);
+            houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
+        }
         return ServerResponse.createBySuccessMessage("提交成功");
     }
 
@@ -408,6 +425,13 @@ public class ComplainService {
                         }
                         break;
                 }
+        }else{
+            if (complain.getComplainType() != null&&complain.getComplainType()==2){
+                //将申请进程打回待审核。。
+                HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(complain.getBusinessId());
+                houseFlowApply.setMemberCheck(0);
+                houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
+            }
         }
         complainMapper.updateByPrimaryKeySelective(complain);
         return ServerResponse.createBySuccessMessage("提交成功");
