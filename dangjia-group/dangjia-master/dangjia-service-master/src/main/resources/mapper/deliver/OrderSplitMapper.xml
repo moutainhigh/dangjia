@@ -43,5 +43,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         GROUP BY
             s.product_id
 	</select>
+
+    <select id="getOrderCategory" resultType="java.lang.String">
+        SELECT
+        s.category_id categoryId
+        FROM
+        (
+        SELECT
+        oi.category_id
+        FROM
+        `dj_deliver_order` o
+        INNER JOIN dj_deliver_order_item oi ON o.id = oi.order_id
+        WHERE
+        o.house_id = #{houseId}
+        AND o.worker_type_id =#{workerTypeId}
+        AND o.payment > 0
+        AND o.type = 2
+        <if test="memberId!=null and memberId!=''">
+            UNION ALL
+            SELECT
+            category_id
+            FROM
+            dj_deliver_cart
+            WHERE
+            house_id = #{houseId}
+            AND worker_type_id = #{workerTypeId}
+            AND member_id = #{memberId}
+        </if>
+
+        ) s
+        GROUP BY
+        s.category_id
+    </select>
 </mapper>
 
