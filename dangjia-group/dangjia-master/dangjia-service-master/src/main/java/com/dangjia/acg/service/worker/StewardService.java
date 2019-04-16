@@ -210,7 +210,7 @@ public class StewardService {
     }
 private void saveHouseConstructionRecord(HouseFlowApply hfa, HouseConstructionRecord hcr) {
         if (CommonUtil.isEmpty(hcr)) {
-            hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+            hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                     , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
             houseConstructionRecordMapper.insert(hcr);
         } else {

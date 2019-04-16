@@ -4,9 +4,7 @@ import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
@@ -65,17 +63,20 @@ public class HouseConstructionRecord extends BaseEntity {
     @ApiModelProperty("进程ID")
     private String houseFlowId;//houseflowid
 
-    public HouseConstructionRecord(String id, String applyDec, String workType, String houseId, String workerId
+    public static HouseConstructionRecord setHouseConstructionRecord(String id, String applyDec, String workType, String houseId, String workerId
             , Integer applyType, Integer supervisorCheck, Integer memberCheck, String houseFlowId){
-        this.applyType=applyType;
-        this.houseFlowApplyId=id;
-        this.content=applyDec;
-        this.workType=workType;
-        this.houseId=houseId;
-        this.workerId=workerId;
-        this.supervisorCheck=supervisorCheck;
-        this.memberCheck=memberCheck;
-        this.houseFlowId=houseFlowId;
+        HouseConstructionRecord houseConstructionRecord =new HouseConstructionRecord();
+        houseConstructionRecord.setApplyType(applyType);
+        houseConstructionRecord.setHouseFlowApplyId(id);
+        houseConstructionRecord.setContent(applyDec);
+        houseConstructionRecord.setWorkType(workType);
+        houseConstructionRecord.setHouseId(houseId);
+        houseConstructionRecord.setWorkerId(workerId);
+        houseConstructionRecord.setSupervisorCheck(supervisorCheck);
+        houseConstructionRecord.setMemberCheck(memberCheck);
+        houseConstructionRecord.setHouseFlowId(houseFlowId);
+        return houseConstructionRecord;
     }
+
 
 }

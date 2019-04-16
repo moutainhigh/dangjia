@@ -2,7 +2,6 @@ package com.dangjia.acg.service.core;
 
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.repair.MendMaterielAPI;
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -140,7 +139,7 @@ public class HouseWorkerSupService {
             hfa.setStartDate(start);
             hfa.setEndDate(end);
             houseFlowApplyMapper.insert(hfa);
-            HouseConstructionRecord hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+            HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                     , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
             houseConstructionRecordMapper.insert(hcr);
             return ServerResponse.createBySuccessMessage("操作成功");
@@ -152,11 +151,12 @@ public class HouseWorkerSupService {
 
     public void saveHouseConstructionRecord(HouseFlowApply hfa, HouseConstructionRecord hcr) {
         if (CommonUtil.isEmpty(hcr)) {
-            hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+
+            hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                     , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
             houseConstructionRecordMapper.insert(hcr);
         } else {
-            hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+            hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                     , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
             houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
         }

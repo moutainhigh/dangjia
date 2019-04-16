@@ -915,7 +915,7 @@ public class HouseWorkerService {
                 }
                 hfa.setOtherMoney((workPrice).subtract(haveMoney).subtract(hfa.getApplyMoney()));
                 hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经完工了");//描述
-                HouseConstructionRecord hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+                HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                         , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
                 houseConstructionRecordMapper.insert(hcr);
                 houseFlowApplyMapper.insert(hfa);
@@ -938,7 +938,7 @@ public class HouseWorkerService {
                 hfa.setStartDate(calendar.getTime());
                 // 阶段完工,管家审核通过工匠完工申请 @link checkOk()
 
-                HouseConstructionRecord hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+                HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                         , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
                 houseConstructionRecordMapper.insert(hcr);
                 houseFlowApplyMapper.insert(hfa);
@@ -956,7 +956,7 @@ public class HouseWorkerService {
                 hfa.setStartDate(calendar.getTime());
 
                 houseFlowApplyMapper.insert(hfa);
-                HouseConstructionRecord hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+                HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                         , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
                 houseConstructionRecordMapper.insert(hcr);
                 configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "整体完工申请",
@@ -970,7 +970,7 @@ public class HouseWorkerService {
                 hfa.setMemberCheck(0);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
                 hfa.setPayState(1);//标记为新停工申请
                 houseFlowApplyMapper.insert(hfa);
-                HouseConstructionRecord hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+                HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                         , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
                 houseConstructionRecordMapper.insert(hcr);
                 houseFlow.setPause(1);//0:正常；1暂停；
@@ -994,7 +994,7 @@ public class HouseWorkerService {
                 houseFlow.setPause(0);//0:正常；1暂停；
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发每日开工将暂停状态改为正常
                 houseFlowApplyMapper.insert(hfa);
-                HouseConstructionRecord hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+                HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                         , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
                 houseConstructionRecordMapper.insert(hcr);
                 return ServerResponse.createBySuccessMessage("操作成功");
@@ -1031,7 +1031,7 @@ public class HouseWorkerService {
                     //大管家剩余
                     hfa.setOtherMoney(supervisorHWO.getWorkPrice().subtract(supervisorHWO.getHaveMoney()));
                     houseFlowApplyMapper.insert(hfa);
-                    HouseConstructionRecord hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+                    HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                             , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
                     houseConstructionRecordMapper.insert(hcr);
 
@@ -1063,7 +1063,7 @@ public class HouseWorkerService {
                     workerDetailMapper.insert(workerDetail);
                 } else {
                     houseFlowApplyMapper.insert(hfa);
-                    HouseConstructionRecord hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+                    HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                             , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
                     houseConstructionRecordMapper.insert(hcr);
 //                    return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）巡查成功");
@@ -1074,14 +1074,14 @@ public class HouseWorkerService {
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 houseFlowApplyMapper.insert(hfa);
-                HouseConstructionRecord hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+                HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                         , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
                 houseConstructionRecordMapper.insert(hcr);
             } else if (applyType == 7) {//追加巡查
                 hfa.setApplyDec("业主您好，我是您的大管家，我已经巡查了工地，现场情况如下");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
-                HouseConstructionRecord hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+                HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                         , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
                 houseConstructionRecordMapper.insert(hcr);
                 houseFlowApplyMapper.insert(hfa);
@@ -1373,7 +1373,7 @@ public class HouseWorkerService {
             hfa.setOtherMoney(new BigDecimal(0.0));
             hfa.setSuspendDay(0);
             houseFlowApplyMapper.insert(hfa);
-            HouseConstructionRecord hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+            HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                     , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
             houseConstructionRecordMapper.insert(hcr);
             House house = houseMapper.selectByPrimaryKey(hfa.getHouseId());
