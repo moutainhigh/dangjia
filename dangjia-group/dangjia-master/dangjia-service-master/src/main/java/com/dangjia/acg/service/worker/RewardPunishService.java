@@ -293,7 +293,7 @@ public class RewardPunishService {
                     member.setHaveMoney(haveMoney);
                     //加流水记录
                     workerDetail.setMoney(bigDecimal);
-                    workerDetail.setState(1);
+                    workerDetail.setState(2);
                     iWorkerDetailMapper.insert(workerDetail);
                 }
 
@@ -315,7 +315,7 @@ public class RewardPunishService {
                     member.setHaveMoney(haveMoney);
                     //加流水记录
                     workerDetail.setMoney(new BigDecimal("-"+bigDecimal.doubleValue()));
-                    workerDetail.setState(0);
+                    workerDetail.setState(3);
                     iWorkerDetailMapper.insert(workerDetail);
                 }
             }
