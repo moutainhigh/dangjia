@@ -72,6 +72,7 @@ public class HouseWorkerSupService {
         HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
         houseFlowApply.setMemberCheck(memberCheck);
         houseFlowApply.setModifyDate(new Date());
+        houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
