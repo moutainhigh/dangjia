@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.complain;
 
-import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -51,7 +50,6 @@ import tk.mybatis.mapper.entity.Example;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 
 @Service
@@ -409,12 +407,10 @@ public class ComplainService {
                     case 4:// 4:部分收货申诉
                         ServerResponse response = splitDeliverService.splitDeliverDetail(complain.getBusinessId());
                         if (response.isSuccess()) {
-                            JSONObject json = (JSONObject) response.getResultObj();
-                            Map<String, Object> json_map = json.getInnerMap();
-                            List<Map<String, Object>> list_Map = (List<Map<String, Object>>) json_map.get("splitDeliverItemDTOList");
-                            for (Map<String, Object> tmp : list_Map) {
-                                String id = tmp.get("id").toString();
-                                OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
+                            SplitDeliverDTO json = (SplitDeliverDTO) response.getResultObj();
+                            List<SplitDeliverItemDTO> list_Map = json.getSplitDeliverItemDTOList();
+                            for (SplitDeliverItemDTO tmp : list_Map) {
+                                OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(tmp.getId());
                                 if (orderSplitItem.getReceive() == null || (orderSplitItem.getNum() > orderSplitItem.getReceive())) {
                                     orderSplitItem.setReceive(orderSplitItem.getNum());
                                     orderSplitItemMapper.updateByPrimaryKey(orderSplitItem);

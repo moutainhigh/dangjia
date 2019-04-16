@@ -69,12 +69,12 @@ public class CartService {
         if(list.size()>0){
             Cart cart1=list.get(0);
             if(cart.getShopCount()<0){
-                cartMapper.updateByPrimaryKeySelective(cart1);
+                cartMapper.delete(cart1);
             }
             cart1.setShopCount(cart.getShopCount());
             cartMapper.updateByPrimaryKeySelective(cart1);
         }else{
-            if(cart.getShopCount()<0){
+            if(cart.getShopCount()>0){
                 ServerResponse serverResponse=productAPI.getProductById(request,cart.getProductId());
                 if(serverResponse!=null&&serverResponse.getResultObj()!=null){
                     Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
@@ -82,7 +82,9 @@ public class CartService {
                     cart.setProductName(product.getName());
                     cart.setMemberId(operator.getId());
                     cart.setPrice(product.getPrice());
+                    cart.setWorkerTypeId(operator.getWorkerTypeId());
                     cart.setUnitName(product.getUnitName());
+                    cart.setCategoryId(product.getCategoryId());
                     cartMapper.insert(cart);
                 }
             }
