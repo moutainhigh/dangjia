@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.common.constants.Constants;
@@ -148,14 +149,13 @@ public class CartService {
             }
             String[] productIdArr = productIdList.toArray(new String[productIdList.size()]);
             request.setAttribute(Constants.CITY_ID, cityId);
-
-            PageInfo pageResult= productAPI.queryProductData(request,pageDTO,name,categoryId,productType,productIdArr);
-            List<Product> products=pageResult.getList();
-            for (Product product : products) {
+            PageInfo pageResult= productAPI.queryProductData(request,pageDTO.getPageNum(),pageDTO.getPageSize(),name,categoryId,productType,productIdArr);
+            List<JSONObject> products=pageResult.getList();
+            for (JSONObject product : products) {
                 Example example = new Example(Warehouse.class);
                 Example.Criteria criteria = example.createCriteria();
                 criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
-                criteria.andEqualTo(Warehouse.PRODUCT_ID, product.getId());
+                criteria.andEqualTo(Warehouse.PRODUCT_ID, product.get(Product.ID));
                 List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
                 if(warehouseList==null||warehouseList.size()==0){
                     continue;
