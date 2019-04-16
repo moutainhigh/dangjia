@@ -17,7 +17,6 @@ import com.dangjia.acg.modle.deliver.Cart;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -150,9 +149,8 @@ public class CartService {
             String[] productIdArr = productIdList.toArray(new String[productIdList.size()]);
             request.setAttribute(Constants.CITY_ID, cityId);
 
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Product> products= productAPI.queryProductData(request,name,categoryId,productType,productIdArr);
-            PageInfo pageResult = new PageInfo(products);
+            PageInfo pageResult= productAPI.queryProductData(request,pageDTO,name,categoryId,productType,productIdArr);
+            List<Product> products=pageResult.getList();
             for (Product product : products) {
                 Example example = new Example(Warehouse.class);
                 Example.Criteria criteria = example.createCriteria();
