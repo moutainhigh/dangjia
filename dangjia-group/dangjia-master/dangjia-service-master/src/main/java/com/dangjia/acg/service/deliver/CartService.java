@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.common.constants.Constants;
@@ -18,7 +19,6 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.github.pagehelper.PageInfo;
-import com.google.gson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -149,10 +149,9 @@ public class CartService {
             }
             String[] productIdArr = productIdList.toArray(new String[productIdList.size()]);
             request.setAttribute(Constants.CITY_ID, cityId);
-
             PageInfo pageResult= productAPI.queryProductData(request,pageDTO,name,categoryId,productType,productIdArr);
-            List<JsonObject> products=pageResult.getList();
-            for (JsonObject product : products) {
+            List<JSONObject> products=pageResult.getList();
+            for (JSONObject product : products) {
                 Example example = new Example(Warehouse.class);
                 Example.Criteria criteria = example.createCriteria();
                 criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
