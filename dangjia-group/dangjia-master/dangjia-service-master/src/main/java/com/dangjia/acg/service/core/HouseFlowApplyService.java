@@ -76,10 +76,6 @@ public class HouseFlowApplyService {
     private ConfigUtil configUtil;
     @Autowired
     private HouseWorkerSupService houseWorkerSupService;
-    /*@Autowired
-    private ConfigMessageService configMessageService;
-    @Autowired
-    private RedisClient redisClient;*/
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
     @Autowired
