@@ -616,8 +616,10 @@ public class ProductService {
         return productsDTO;
     }
 
-    public List<Product> queryProductData(String name, String categoryId,String productType, String[] productId){
+    public PageInfo queryProductData(Integer pageNum, Integer pageSize, String name, String categoryId, String productType, String[] productId){
+        PageHelper.startPage(pageNum, pageSize);
         List<Product>  productList = iProductMapper.queryProductData(name,categoryId,productType,productId);
-        return productList;
+        PageInfo pageResult = new PageInfo(productList);
+        return pageResult;
     }
 }

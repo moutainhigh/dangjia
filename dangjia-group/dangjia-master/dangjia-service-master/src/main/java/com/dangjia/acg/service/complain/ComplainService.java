@@ -76,18 +76,14 @@ public class ComplainService {
     private SupplierProductAPI supplierProductAPI;
     @Autowired
     private UserMapper userMapper;
-
     @Autowired
     private ISplitDeliverMapper splitDeliverMapper;
-
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
     private IHouseMapper houseMapper;
-
     @Autowired
     private IRewardPunishConditionMapper iRewardPunishConditionMapper;
-
     @Autowired
     private IWorkIntegralMapper iWorkIntegralMapper;
     @Autowired
@@ -135,6 +131,8 @@ public class ComplainService {
         complain.setUserId(getUserID(complainType, businessId, houseId));
         complain.setHouseId(houseId);
         complain.setFiles(files);
+
+
 //        1:工匠被处罚后不服.2：业主要求整改.3：要求换人.4:部分收货申诉.
         if (complainType == 4) {
             Supplier supplier = supplierProductAPI.getSupplier(complain.getUserId());
@@ -286,7 +284,7 @@ public class ComplainService {
      * @param files       附件 以，分割 如：data/f.dow,data/f2.dow
      * @return
      */
-    public ServerResponse updataComplain(String userId, String complainId, Integer state, String description, String files) {
+    public ServerResponse updataComplain(String userId, String complainId, Integer state, String description, String files, String operateId,String operateName) {
         if (CommonUtil.isEmpty(complainId)) {
             return ServerResponse.createByErrorMessage("参数不正确");
         }
@@ -298,7 +296,8 @@ public class ComplainService {
         complain.setUserId(userId);
         complain.setDescription(description);
         complain.setFiles(files);
-
+        complain.setOperateId(operateId);
+        complain.setOperateName(userMapper.selectByPrimaryKey(userId).getUsername());
 
         if (state == 2) {   // 申诉成功后要对对应的业务逻辑进行处理
             if (complain.getComplainType() != null)

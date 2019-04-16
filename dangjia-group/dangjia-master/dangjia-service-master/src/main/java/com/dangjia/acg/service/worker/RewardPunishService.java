@@ -293,7 +293,7 @@ public class RewardPunishService {
                     member.setHaveMoney(haveMoney);
                     //加流水记录
                     workerDetail.setMoney(bigDecimal);
-                    workerDetail.setState(1);
+                    workerDetail.setState(2);
                     iWorkerDetailMapper.insert(workerDetail);
                 }
 
@@ -305,7 +305,7 @@ public class RewardPunishService {
                     bigDecimal2 = member.getEvaluationScore().subtract(bigDecimal);
                     member.setEvaluationScore(bigDecimal2);
                     //加积分流水
-                    workIntegral.setIntegral(bigDecimal);
+                    workIntegral.setIntegral(new BigDecimal("-"+bigDecimal.doubleValue()));
                     iWorkIntegralMapper.insert(workIntegral);
                 }
                 if (rewardPunishCondition.getType() == 2) {
@@ -315,7 +315,7 @@ public class RewardPunishService {
                     member.setHaveMoney(haveMoney);
                     //加流水记录
                     workerDetail.setMoney(bigDecimal);
-                    workerDetail.setState(0);
+                    workerDetail.setState(3);
                     iWorkerDetailMapper.insert(workerDetail);
                 }
             }

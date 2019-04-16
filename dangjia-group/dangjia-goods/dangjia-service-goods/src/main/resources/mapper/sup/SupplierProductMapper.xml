@@ -27,12 +27,18 @@
     </select>
 
     <!--根据货品id查询供应商货品供应关系-->
-    <select id="querySupplierProduct" resultType="com.dangjia.acg.modle.sup.SupplierProduct">
-        select <include refid="new_columns"/>
-        from dj_sup_supplier_product
-        where
-        product_id =#{productId}
-        and is_supply =1
-        order by price desc
+   <select id="querySupplierProduct" resultType="com.dangjia.acg.modle.sup.SupplierProduct">
+        select <include refid="new_columns"/>FROM
+        dj_sup_supplier_product  sp
+        INNER JOIN dj_basics_product p ON sp.product_id=p.id
+        WHERE  is_supply = 1
+        <if test="productId!=null and productId!=''">
+            and product_id =#{productId}
+        </if>
+        <if test="supplierId!=null and supplierId!=''">
+            and supplier_id =#{supplierId}
+        </if>
+        ORDER BY
+        p.category_id DESC
     </select>
 </mapper>

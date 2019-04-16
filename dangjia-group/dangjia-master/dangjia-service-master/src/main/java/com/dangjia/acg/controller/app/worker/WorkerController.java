@@ -91,11 +91,22 @@ public class WorkerController implements WorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken,String bankCardId, WorkerBankCard bankCard){
-        return  workerService.addMyBankCard(request,userToken,bankCardId,bankCard);
+    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken,WorkerBankCard bankCard){
+        return  workerService.addMyBankCard(request,userToken,bankCard);
     }
 
-                                          /**
+    /**
+     * 删除银行卡
+     * @param userToken
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse delMyBankCard(HttpServletRequest request, String userToken,String workerBankCardId){
+        return  workerService.delMyBankCard(request,userToken,workerBankCardId);
+    }
+
+    /**
      * 邀请排行榜
      * @param userToken
      * @return
