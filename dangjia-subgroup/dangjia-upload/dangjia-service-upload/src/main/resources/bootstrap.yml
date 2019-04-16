@@ -13,8 +13,6 @@ spring:
     multipart:
       max-file-size: 25MB
       max-request-size: 100MB
-      maxFileSize: 10MB
-      maxRequestSize: 10MB
 logging:
   config: classpath:logback-spring.xml
 spring.sleuth.feign.enabled: false
