@@ -77,4 +77,5 @@ public class HouseConstructionRecord extends BaseEntity {
         this.memberCheck=memberCheck;
         this.houseFlowId=houseFlowId;
     }
+
 }

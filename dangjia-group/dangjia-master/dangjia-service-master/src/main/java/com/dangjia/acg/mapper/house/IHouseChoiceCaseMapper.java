@@ -4,6 +4,8 @@ import com.dangjia.acg.modle.house.HouseChoiceCase;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * author: Ronalcheng
@@ -12,4 +14,9 @@ import tk.mybatis.mapper.common.Mapper;
  */
 @Repository
 public interface IHouseChoiceCaseMapper extends Mapper<HouseChoiceCase> {
+
+    List<String> getTimeOutAd();
+
+    List<String> getTimingAd();
+
 }
