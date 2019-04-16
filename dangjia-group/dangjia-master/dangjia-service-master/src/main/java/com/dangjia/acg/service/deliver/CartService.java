@@ -18,6 +18,7 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.github.pagehelper.PageInfo;
+import com.google.gson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -149,13 +150,13 @@ public class CartService {
             String[] productIdArr = productIdList.toArray(new String[productIdList.size()]);
             request.setAttribute(Constants.CITY_ID, cityId);
 
-            List<Product> products= productAPI.queryProductData(request,pageDTO,name,categoryId,productType,productIdArr);
-            PageInfo pageResult = new PageInfo(products);
-            for (Product product : products) {
+            PageInfo pageResult= productAPI.queryProductData(request,pageDTO,name,categoryId,productType,productIdArr);
+            List<JsonObject> products=pageResult.getList();
+            for (JsonObject product : products) {
                 Example example = new Example(Warehouse.class);
                 Example.Criteria criteria = example.createCriteria();
                 criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
-                criteria.andEqualTo(Warehouse.PRODUCT_ID, product.getId());
+                criteria.andEqualTo(Warehouse.PRODUCT_ID, product.get(Product.ID));
                 List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
                 if(warehouseList==null||warehouseList.size()==0){
                     continue;
