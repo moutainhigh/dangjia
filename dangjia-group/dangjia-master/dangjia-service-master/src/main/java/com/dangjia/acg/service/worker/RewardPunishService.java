@@ -314,7 +314,7 @@ public class RewardPunishService {
                     member.setSurplusMoney(bigDecimal2);
                     member.setHaveMoney(haveMoney);
                     //加流水记录
-                    workerDetail.setMoney(new BigDecimal("-"+bigDecimal.doubleValue()));
+                    workerDetail.setMoney(bigDecimal);
                     workerDetail.setState(3);
                     iWorkerDetailMapper.insert(workerDetail);
                 }
