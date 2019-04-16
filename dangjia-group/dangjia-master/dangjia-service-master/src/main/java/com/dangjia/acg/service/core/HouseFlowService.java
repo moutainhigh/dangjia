@@ -322,7 +322,7 @@ public class HouseFlowService {
 
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(RewardPunishRecord.class);
-            example.createCriteria().andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId());
+            example.createCriteria().andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId()).andEqualTo(RewardPunishRecord.STATE, "0");
             List<RewardPunishRecord> recordList = rewardPunishRecordMapper.selectByExample(example);
             if (hf.getWorkType() >= 3) {
                 return ServerResponse.createByErrorMessage("订单已经被抢了！");

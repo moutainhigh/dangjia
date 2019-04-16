@@ -180,7 +180,7 @@ public class WalletService {
             Member member = accessToken.getMember();
             member = memberMapper.selectByPrimaryKey(member.getId());
             Example example = new Example(RewardPunishRecord.class);
-            example.createCriteria().andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId());
+            example.createCriteria().andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId()).andEqualTo(RewardPunishRecord.STATE, "0");
             List<RewardPunishRecord> recordList = rewardPunishRecordMapper.selectByExample(example);
             //通过查看奖罚限制抢单时间限制抢单
             for (RewardPunishRecord record : recordList) {
