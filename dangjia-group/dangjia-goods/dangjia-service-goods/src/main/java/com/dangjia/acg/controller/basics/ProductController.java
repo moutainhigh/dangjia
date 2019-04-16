@@ -217,6 +217,12 @@ public class ProductController implements ProductAPI {
 		return goodsService.queryProductListByGoodsIdAndLabelId(goodsArr,labelId);
 	}
 
+	@Override
+	@ApiMethod
+	public PageInfo queryProductData(HttpServletRequest request,PageDTO pageDTO,String name, String categoryId, String productType, String[] productId){
+		PageInfo  productList = productService.queryProductData(pageDTO,name, categoryId,productType,productId);
+		return productList;
+	}
 
 	/**
 	 * 根据系列和属性查询切换货品

@@ -3,6 +3,7 @@ package com.dangjia.acg.service.basics;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -616,4 +617,10 @@ public class ProductService {
         return productsDTO;
     }
 
+    public PageInfo queryProductData(PageDTO pageDTO, String name, String categoryId, String productType, String[] productId){
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<Product>  productList = iProductMapper.queryProductData(name,categoryId,productType,productId);
+        PageInfo pageResult = new PageInfo(productList);
+        return pageResult;
+    }
 }

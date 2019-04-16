@@ -118,6 +118,15 @@ public interface ProductAPI {
                                                        @RequestParam("jsonArr") String goodsArr,
                                                        @RequestParam("labelId") String labelId);
 
+    @PostMapping("/basics/product/data")
+    @ApiOperation(value = "商品库检索查询", notes = "商品库检索查询")
+    PageInfo queryProductData(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("pageDTO") PageDTO pageDTO,
+                                   @RequestParam("name") String name,
+                                   @RequestParam("categoryId") String categoryId,
+                                   @RequestParam("productType") String productType,
+                                   @RequestParam("productId") String[] productId);
+
 	/*@PostMapping("/basics/product/getSwitchProduct")
 	@ApiOperation(value = "根据系列和属性查询切换货品", notes = "根据系列和属性查询切换货品")
 	  ServerResponse getSwitchProduct(@RequestParam("request")HttpServletRequest request,@RequestParam("brandSeriesId")String brandSeriesId,
