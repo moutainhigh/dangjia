@@ -49,7 +49,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             r.create_date,
             r.modify_date,
             r.data_status,
-            CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') house_name,
+            CONCAT(
+            h.residential,
+            IFNULL(h.building, '*'),
+            '栋',
+            (case h.unit when (null or '') then ''  else  CONCAT(h.unit,'单元') end ),
+            IFNULL(h.number, '*'),
+            '号'
+            ) house_name,
             u.nick_name memberName,
             t.id tid,
             t.`name` tname,
@@ -100,7 +107,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         r.create_date,
         r.modify_date,
         r.data_status,
-        CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') house_name,
+        CONCAT(
+        h.residential,
+        IFNULL(h.building, '*'),
+        '栋',
+        (case h.unit when (null or '') then ''  else  CONCAT(h.unit,'单元') end ),
+        IFNULL(h.number, '*'),
+        '号'
+        ) house_name,
         u.nick_name memberName,
         t.id tid,
         t.`name` tname,
