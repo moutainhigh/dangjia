@@ -175,28 +175,42 @@ public class CartService {
                 criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
                 criteria.andEqualTo(Warehouse.PRODUCT_ID, product.get(Product.ID));
                 List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
-                if(warehouseList==null||warehouseList.size()==0){
-                    continue;
-                }
-                Warehouse warehouse = warehouseList.get(0);
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
-                warehouseDTO.setImage(address + warehouse.getImage());
-                warehouseDTO.setShopCount(warehouse.getShopCount());
-                warehouseDTO.setAskCount(warehouse.getAskCount());
-                warehouseDTO.setBackCount(warehouse.getBackCount());
-                warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
-                warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getBackCount() - warehouse.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
-                warehouseDTO.setProductName(warehouse.getProductName());
-                warehouseDTO.setPrice(warehouse.getPrice());
-                warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
-                warehouseDTO.setReceive(warehouse.getReceive());
-                warehouseDTO.setUnitName(warehouse.getUnitName());
-                warehouseDTO.setProductType(warehouse.getProductType());
-                warehouseDTO.setAskTime(warehouse.getAskTime());
-                warehouseDTO.setRepTime(warehouse.getRepTime());
-                warehouseDTO.setBackTime(warehouse.getBackTime());
-                warehouseDTO.setProductId(warehouse.getProductId());
-                warehouseDTOS.add(warehouseDTO);
+                warehouseDTO.setProductId(String.valueOf(product.get(Product.ID)));
+                warehouseDTO.setProductName(String.valueOf(product.get(Product.NAME)));
+                warehouseDTO.setPrice(Double.parseDouble(String.valueOf(product.get(Product.PRICE))));
+                warehouseDTO.setUnitName(String.valueOf(product.get(Product.UNIT_NAME)));
+                warehouseDTO.setProductType(Integer.parseInt(productType));
+                warehouseDTO.setImage(address + product.get(Product.IMAGE));
+                if (warehouseList.size() > 0) {
+                    Warehouse warehouse = warehouseList.get(0);
+                    warehouseDTO.setImage(address + warehouse.getImage());
+                    warehouseDTO.setShopCount(warehouse.getShopCount());
+                    warehouseDTO.setAskCount(warehouse.getAskCount());
+                    warehouseDTO.setBackCount(warehouse.getBackCount());
+                    warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
+                    warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getBackCount() - warehouse.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
+                    warehouseDTO.setPrice(warehouse.getPrice());
+                    warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
+                    warehouseDTO.setReceive(warehouse.getReceive());
+                    warehouseDTO.setAskTime(warehouse.getAskTime());
+                    warehouseDTO.setRepTime(warehouse.getRepTime());
+                    warehouseDTO.setBackTime(warehouse.getBackTime());
+                    warehouseDTOS.add(warehouseDTO);
+                }else{
+                    warehouseDTO.setShopCount(0.0);
+                    warehouseDTO.setRepairCount(0.0);
+                    warehouseDTO.setRealCount(0.0);
+                    warehouseDTO.setAskCount(0.0);//已要数量
+                    warehouseDTO.setSurCount(0.0);
+                    warehouseDTO.setBackCount(0.0);//退总数
+                    warehouseDTO.setReceive(0.0);
+                    warehouseDTO.setTolPrice(0.0);
+                    warehouseDTO.setAskTime(0);
+                    warehouseDTO.setRepTime(0);
+                    warehouseDTO.setBackTime(0);
+                    warehouseDTOS.add(warehouseDTO);
+                }
             }
             pageResult.setList(warehouseDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);
