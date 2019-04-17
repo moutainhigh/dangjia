@@ -18,7 +18,14 @@
         c.description as description,
         c.business_id as businessId,
         c.house_id as houseId,
-        CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') as houseName,
+        CONCAT(
+        h.residential,
+        IFNULL(h.building, '*'),
+        '栋',
+        (case h.unit when (null or '') then ''  else  CONCAT(h.unit,'单元') end ),
+        IFNULL(h.number, '*'),
+        '号'
+        ) as houseName,
         c.files as files,
         c.create_date as createDate,
         c.modify_date as modifyDate
@@ -48,7 +55,14 @@
         c.description as description,
         c.business_id as businessId,
         c.house_id as houseId,
-        CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') as houseName,
+        CONCAT(
+        h.residential,
+        IFNULL(h.building, '*'),
+        '栋',
+        (case h.unit when (null or '') then ''  else  CONCAT(h.unit,'单元') end ),
+        IFNULL(h.number, '*'),
+        '号'
+        ) as houseName,
         c.files as files,
         c.create_date as createDate,
         c.modify_date as modifyDate,
