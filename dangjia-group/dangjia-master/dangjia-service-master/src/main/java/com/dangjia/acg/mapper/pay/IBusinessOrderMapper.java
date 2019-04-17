@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.pay;
 
+import com.dangjia.acg.dto.deliver.OrderItemByDTO;
 import com.dangjia.acg.dto.deliver.WebOrderDTO;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import org.apache.ibatis.annotations.Param;
@@ -21,4 +22,6 @@ public interface IBusinessOrderMapper extends Mapper<BusinessOrder> {
     BusinessOrder byTaskId(@Param("taskId") String taskId, @Param("type") int type);
 
     List<WebOrderDTO> getWebOrderList(@Param("state") Integer state, @Param("searchKey") String searchKey);
+
+    List<OrderItemByDTO> getOrderItem(@Param("number") String number);
 }

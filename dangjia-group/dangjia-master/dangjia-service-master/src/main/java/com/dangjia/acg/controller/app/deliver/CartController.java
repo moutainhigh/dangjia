@@ -69,4 +69,10 @@ public class CartController implements CartAPI {
     public ServerResponse askAndQuit(HttpServletRequest request, String userToken, PageDTO pageDTO, String houseId, String categoryId, String name){
         return cartService.askAndQuit( request,  userToken,  pageDTO,  houseId,  categoryId,  name);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryGoodsCategory(HttpServletRequest request, String userToken,String houseId){
+        return cartService.queryGoodsCategory( request,  userToken, houseId);
+    }
 }

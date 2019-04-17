@@ -371,25 +371,28 @@ public class HouseService {
             } else if (workerType.getType() == 2) {//精算
                 //默认0未开始,1已开始精算,-1已精算没有发给业主,2已发给业主,3审核通过,4审核不通过
                 nodeDTO.setState(0);
-                nodeDTO.setTotal(6);
+                nodeDTO.setTotal(7);
                 if (house.getBudgetOk() == 0) {
                     nodeDTO.setRank(1);
-                    nodeDTO.setNameB("待支付");
+                    nodeDTO.setNameB("待抢单");
                 } else if (house.getBudgetOk() == 1) {
-                    nodeDTO.setRank(2);
+                    nodeDTO.setRank(3);
                     nodeDTO.setNameB("精算中");
                 } else if (house.getBudgetOk() == -1) {
-                    nodeDTO.setRank(3);
+                    nodeDTO.setRank(4);
                     nodeDTO.setNameB("未发送精算");
                 } else if (house.getBudgetOk() == 2) {
-                    nodeDTO.setRank(4);
+                    nodeDTO.setRank(5);
                     nodeDTO.setNameB("待审核精算");
                 } else if (house.getBudgetOk() == 4) {
-                    nodeDTO.setRank(5);
+                    nodeDTO.setRank(6);
                     nodeDTO.setNameB("修改精算");
                 } else if (house.getBudgetOk() == 3) {
-                    nodeDTO.setRank(6);
+                    nodeDTO.setRank(7);
                     nodeDTO.setNameB("精算完成");
+                }else if (house.getBudgetOk() == 5) {
+                    nodeDTO.setRank(2);
+                    nodeDTO.setNameB("待支付");
                 }
             } else if (workerType.getType() == 3) {//管家
                 //管家状态1未发布,2待抢单,3待支付,4已支付,5完工

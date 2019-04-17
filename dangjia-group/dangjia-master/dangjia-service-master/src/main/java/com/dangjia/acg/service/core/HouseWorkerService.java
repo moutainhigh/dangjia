@@ -174,9 +174,9 @@ public class HouseWorkerService {
                 house.setDesignerOk(4);//有设计抢单待业主支付
                 houseMapper.updateByPrimaryKeySelective(house);
             }
-            //我改的
-            if (worker.getWorkerType() == 2) {
-                house.setBudgetOk(0);//有精算抢单待业主支付
+             //我改的
+            if(worker.getWorkerType() ==2){
+                house.setBudgetOk(5);//有精算抢单待业主支付
                 houseMapper.updateByPrimaryKeySelective(house);
             }
 
@@ -218,17 +218,17 @@ public class HouseWorkerService {
 
 
             }
-            Example example = new Example(WorkerType.class);
-            example.createCriteria().andEqualTo(WorkerType.TYPE, worker.getWorkerType());
-            List<WorkerType> workerType = workerTypeMapper.selectByExample(example);
-            String text = "业主您好,我是" + workerType.get(0).getName() + worker.getName() + "已成功抢单";
+            Example example=new Example(WorkerType.class);
+            example.createCriteria().andEqualTo(WorkerType.TYPE,worker.getWorkerType());
+            List<WorkerType> workerType= workerTypeMapper.selectByExample(example);
+            String text="业主您好,我是"+workerType.get(0).getName()+worker.getName()+"已成功抢单";
 //            String houseId=houseFlowMapper.selectByPrimaryKey(houseFlowId).getHouseId();
 //            String memberId = houseMapper.selectByPrimaryKey(houseId).getMemberId();
-            HouseChatDTO h = new HouseChatDTO();
+            HouseChatDTO h=new HouseChatDTO();
             h.setTargetId(house.getMemberId());
             h.setTargetAppKey("0989b0db447914c7bcb17a46");
             h.setText(text);
-            return ServerResponse.createBySuccess("抢单成功", h);
+            return ServerResponse.createBySuccess("抢单成功",h);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("抢单失败");
@@ -279,18 +279,18 @@ public class HouseWorkerService {
              */
             Example example = new Example(HouseFlowApply.class);
             example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, hf.getId()).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                    .andEqualTo(HouseFlowApply.PAY_STATE, 1);
+                   .andEqualTo(HouseFlowApply.PAY_STATE, 1);
             List<HouseFlowApply> HFAList = houseFlowApplyMapper.selectByExample(example);
             if (HFAList.size() > 0) {
                 HouseFlowApply hfa = HFAList.get(0);
-                if (hfa.getMemberCheck() == 0) {
+                if(hfa.getMemberCheck() == 0){
                     bean.setIfBackOut(3);
-                } else if (hfa.getMemberCheck() == 1) {
+                }else if (hfa.getMemberCheck() == 1){
                     bean.setIfBackOut(2);
-                } else {
+                }else {
                     bean.setIfBackOut(1);
                 }
-            } else {
+            }else {
                 bean.setIfBackOut(1);
             }
 
@@ -652,7 +652,6 @@ public class HouseWorkerService {
 
     /**
      * 显示当前需要申请的状态
-     *
      * @param hf           自己的任务状态
      * @param promptList   消息
      * @param buttonList   按钮

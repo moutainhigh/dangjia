@@ -2,6 +2,7 @@ package com.dangjia.acg.service.finance;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.deliver.OrderItemByDTO;
 import com.dangjia.acg.dto.deliver.WebOrderDTO;
 import com.dangjia.acg.mapper.activity.IActivityRedPackMapper;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
@@ -26,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,6 +110,22 @@ public class WebOrderService {
         }
     }
 
+    /**
+     * 获取订单详情
+     * @param businessNumber
+     * @return
+     */
+    public ServerResponse getOrderItem(PageDTO pageDTO,String businessNumber){
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<OrderItemByDTO> orderItemList= iBusinessOrderMapper.getOrderItem(businessNumber);
+        PageInfo pageResult = new PageInfo(orderItemList);
+        if(orderItemList!=null){
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        }else {
+            return ServerResponse.createByErrorMessage("无数据");
+        }
+
+    }
 
 }
 

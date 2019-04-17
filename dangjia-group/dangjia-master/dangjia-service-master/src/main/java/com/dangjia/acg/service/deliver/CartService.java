@@ -3,6 +3,7 @@ package com.dangjia.acg.service.deliver;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -13,6 +14,7 @@ import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.mapper.deliver.ICartMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.deliver.Cart;
 import com.dangjia.acg.modle.house.Warehouse;
@@ -25,7 +27,9 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: qyx
@@ -47,6 +51,9 @@ public class CartService {
 
     @Autowired
     private IWarehouseMapper warehouseMapper;
+
+    @Autowired
+    private GoodsCategoryAPI goodsCategoryAPI;
 
     /**
      * 设置购物车商品数量
@@ -135,6 +142,7 @@ public class CartService {
     public ServerResponse askAndQuit(HttpServletRequest request, String userToken, PageDTO pageDTO, String houseId, String categoryId, String name) {
         try {
             String cityId = request.getParameter(Constants.CITY_ID);
+
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
@@ -190,5 +198,27 @@ public class CartService {
         }
     }
 
+    //查询分类
+    public ServerResponse queryGoodsCategory(HttpServletRequest request, String userToken,String houseId) {
+        try {
+            String cityId = request.getParameter(Constants.CITY_ID);
+            request.setAttribute(Constants.CITY_ID, cityId);
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            Member worker = accessToken.getMember();
+            List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+            List<String> orderCategory = orderSplitMapper.getOrderCategory(houseId,worker.getWorkerTypeId(),worker.getId());
+            for (String categoryId : orderCategory) {
+                GoodsCategory goodsCategory=goodsCategoryAPI.getGoodsCategory(request,categoryId);
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("id", goodsCategory.getId());
+                map.put("name", goodsCategory.getName());
+                mapList.add(map);
+            }
+            return ServerResponse.createBySuccess("查询成功", mapList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
 }

@@ -74,5 +74,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			b.create_date DESC
 	</select>
 
+	<select id="getOrderItem" resultType="com.dangjia.acg.dto.deliver.OrderItemByDTO">
+     SELECT
+	it.product_sn AS productSn,
+	it.product_name AS productName,
+	it.image AS image,
+	it.price AS price,
+	it.shop_count AS shopCount,
+	it.total_price AS totalPrice,
+	it.worker_goods_sn AS goodsSn,
+	it.worker_goods_name AS goodsName,
+	IFNULL( it.product_type, 2 ) AS type
+    FROM
+	dj_pay_business_order AS p
+	INNER JOIN dj_deliver_order AS o ON p.number = o.business_order_number
+	INNER JOIN dj_deliver_order_item AS it ON o.id = it.order_id
+    WHERE
+	p.number = #{number}
+    ORDER BY
+	it.product_type
+	</select>
 </mapper>
 
