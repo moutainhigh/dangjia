@@ -33,7 +33,7 @@ import java.util.Map;
  * author: Ronalcheng
  * Date: 2019/3/27 0027
  * Time: 9:55
- *  1.31业务补充
+ * 1.31业务补充
  */
 @Service
 public class HouseWorkerSupService {
@@ -59,15 +59,15 @@ public class HouseWorkerSupService {
      * 材料审查
      * 剩余材料列表
      */
-    public ServerResponse surplusList(String houseFlowApplyId){
+    public ServerResponse surplusList(String houseFlowApplyId) {
         HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
-        return mendMaterielAPI.surplusList(houseFlowApply.getWorkerTypeId(),houseFlowApply.getHouseId());
+        return mendMaterielAPI.surplusList(houseFlowApply.getWorkerTypeId(), houseFlowApply.getHouseId());
     }
 
     /**
      * 审核停工
      */
-    public ServerResponse auditApply(String houseFlowApplyId,Integer memberCheck){
+    public ServerResponse auditApply(String houseFlowApplyId, Integer memberCheck) {
         HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
         houseFlowApply.setMemberCheck(memberCheck);
         houseFlowApply.setModifyDate(new Date());
@@ -78,7 +78,7 @@ public class HouseWorkerSupService {
     /**
      * 审核停工页面内容
      */
-    public ServerResponse tingGongPage(String houseFlowApplyId){
+    public ServerResponse tingGongPage(String houseFlowApplyId) {
         HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
         Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
@@ -88,11 +88,11 @@ public class HouseWorkerSupService {
         map.put("workName", workerType.getName());
         map.put("name", worker.getName());
         map.put("praiseRate", worker.getPraiseRate() == null ? "100%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
-        map.put("mobile",worker.getMobile());
-        map.put("memberId",worker.getId());
-        map.put("applyDec",houseFlowApply.getApplyDec());
-        map.put("startDate",sdf.format(houseFlowApply.getStartDate()));
-        map.put("endDate",sdf.format(houseFlowApply.getEndDate()));
+        map.put("mobile", worker.getMobile());
+        map.put("memberId", worker.getId());
+        map.put("applyDec", houseFlowApply.getApplyDec());
+        map.put("startDate", sdf.format(houseFlowApply.getStartDate()));
+        map.put("endDate", sdf.format(houseFlowApply.getEndDate()));
         map.put("createDate", houseFlowApply.getCreateDate());
         return ServerResponse.createBySuccess("获取成功", map);
     }
@@ -100,20 +100,20 @@ public class HouseWorkerSupService {
     /**
      * 工匠申请停工
      */
-    public ServerResponse applyShutdown(String userToken, String houseFlowId, String applyDec, String startDate, String endDate){
-        try{
+    public ServerResponse applyShutdown(String userToken, String houseFlowId, String applyDec, String startDate, String endDate) {
+        try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
 
             Example example = new Example(HouseFlowApply.class);
-            example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE,3)
-                    .andEqualTo(HouseFlowApply.MEMBER_CHECK,1).andEqualTo(HouseFlowApply.PAY_STATE,1);
+            example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
+                    .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.PAY_STATE, 1);
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
-            if(houseFlowApplyList.size() > 0){
+            if (houseFlowApplyList.size() > 0) {
 //                HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
 //                if(houseFlowApply.getStartDate().before(new Date()) && houseFlowApply.getEndDate().after(new Date())){
-                    return ServerResponse.createByErrorMessage("工序处于停工期间!");
+                return ServerResponse.createByErrorMessage("工序处于停工期间!");
 //                }
             }
 
@@ -134,16 +134,14 @@ public class HouseWorkerSupService {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Date start = sdf.parse(startDate);
             Date end = sdf.parse(endDate);
-            long day =(end.getTime() - start.getTime())/(24*60*60*1000) + 1;
-            hfa.setSuspendDay((int)day);//申请停工天数 计算
+            long day = (end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000) + 1;
+            hfa.setSuspendDay((int) day);//申请停工天数 计算
             hfa.setStartDate(start);
             hfa.setEndDate(end);
             houseFlowApplyMapper.insert(hfa);
-            HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
-                    , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
-            houseConstructionRecordMapper.insert(hcr);
+            saveHouseConstructionRecord(hfa, new HouseConstructionRecord());
             return ServerResponse.createBySuccessMessage("操作成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("申请失败");
         }
@@ -151,14 +149,28 @@ public class HouseWorkerSupService {
 
     public void saveHouseConstructionRecord(HouseFlowApply hfa, HouseConstructionRecord hcr) {
         if (CommonUtil.isEmpty(hcr)) {
-
-            hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+            hcr = buildHcr(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                     , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
             houseConstructionRecordMapper.insert(hcr);
         } else {
-            hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+            hcr = buildHcr(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                     , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
             houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
         }
+    }
+
+    private HouseConstructionRecord buildHcr(String id, String applyDec, String workType, String houseId, String workerId
+            , Integer applyType, Integer supervisorCheck, Integer memberCheck, String houseFlowId) {
+        HouseConstructionRecord hcr = new HouseConstructionRecord();
+        hcr.setApplyType(applyType);
+        hcr.setHouseFlowApplyId(id);
+        hcr.setContent(applyDec);
+        hcr.setWorkType(workType);
+        hcr.setHouseId(houseId);
+        hcr.setWorkerId(workerId);
+        hcr.setSupervisorCheck(supervisorCheck);
+        hcr.setMemberCheck(memberCheck);
+        hcr.setHouseFlowId(houseFlowId);
+        return hcr;
     }
 }

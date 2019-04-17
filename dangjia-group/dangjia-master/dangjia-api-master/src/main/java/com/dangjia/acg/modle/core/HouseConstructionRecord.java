@@ -63,20 +63,4 @@ public class HouseConstructionRecord extends BaseEntity {
     @ApiModelProperty("进程ID")
     private String houseFlowId;//houseflowid
 
-    public static HouseConstructionRecord setHouseConstructionRecord(String id, String applyDec, String workType, String houseId, String workerId
-            , Integer applyType, Integer supervisorCheck, Integer memberCheck, String houseFlowId){
-        HouseConstructionRecord houseConstructionRecord =new HouseConstructionRecord();
-        houseConstructionRecord.setApplyType(applyType);
-        houseConstructionRecord.setHouseFlowApplyId(id);
-        houseConstructionRecord.setContent(applyDec);
-        houseConstructionRecord.setWorkType(workType);
-        houseConstructionRecord.setHouseId(houseId);
-        houseConstructionRecord.setWorkerId(workerId);
-        houseConstructionRecord.setSupervisorCheck(supervisorCheck);
-        houseConstructionRecord.setMemberCheck(memberCheck);
-        houseConstructionRecord.setHouseFlowId(houseFlowId);
-        return houseConstructionRecord;
-    }
-
-
 }
