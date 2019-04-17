@@ -371,7 +371,7 @@ public class HouseService {
             } else if (workerType.getType() == 2) {//精算
                 //默认0未开始,1已开始精算,-1已精算没有发给业主,2已发给业主,3审核通过,4审核不通过
                 nodeDTO.setState(0);
-                nodeDTO.setTotal(6);
+                nodeDTO.setTotal(7);
                 if (house.getBudgetOk() == 0) {
                     nodeDTO.setRank(1);
                     nodeDTO.setNameB("待抢单");
