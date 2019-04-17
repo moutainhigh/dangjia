@@ -231,4 +231,8 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
     public boolean workerPatrolList(String workerGoodsId){
         return budgetWorkerService.workerPatrolList(workerGoodsId);
     }
+
+    public boolean patrolList(String workerGoodsId){
+        return budgetWorkerService.patrolList(workerGoodsId);
+    }
 }

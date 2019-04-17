@@ -916,4 +916,13 @@ public class BudgetWorkerService {
         }
     }
 
+    public boolean patrolList(String workerGoodsId){
+        List<Technology> tList = iTechnologyMapper.patrolList(workerGoodsId);
+        if(tList.size() > 0){
+            return true;
+        }else {
+            return false;
+        }
+    }
+
 }

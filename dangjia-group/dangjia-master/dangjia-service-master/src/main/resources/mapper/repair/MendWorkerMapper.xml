@@ -43,5 +43,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and mw.mend_order_id = mo.id
     </select>
 
+    <!--查询房子已支付补人工-->
+    <select id="houseMendWorkerList" resultType="com.dangjia.acg.modle.repair.MendWorker">
+        select
+        mw.worker_goods_id as workerGoodsId,
+        mw.worker_goods_name as workerGoodsName
+        from
+        dj_repair_mend_order mo,dj_repair_mend_worker mw
+        where mo.type = 1
+        and mo.state = 4
+        and mo.house_id = #{houseId}
+        and mw.mend_order_id = mo.id
+    </select>
+
+
 </mapper>
 
