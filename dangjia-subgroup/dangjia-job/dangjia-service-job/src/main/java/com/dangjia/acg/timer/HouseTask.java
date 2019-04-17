@@ -50,9 +50,14 @@ public class HouseTask {
    */
   @Scheduled(cron = "0 0/1 * * * ?")//1分钟执行一次
   public void couponApply() {
-    log.info(format.format(new Date()) + "开始执行完工申请检测任务...");
+
+    log.info(format.format(new Date()) + "开始执行完工申请管家检测任务...");
+    houseFlowApplyAPI.supCouponApply();
+    log.info(format.format(new Date()) + "结束执行完工申请管家检测任务...");
+
+    log.info(format.format(new Date()) + "开始执行完工申请业主检测任务...");
     houseFlowApplyAPI.couponApply();
-    log.info(format.format(new Date()) + "结束执行完工申请检测任务...");
+    log.info(format.format(new Date()) + "结束执行完工申请业主检测任务...");
   }
 
 
