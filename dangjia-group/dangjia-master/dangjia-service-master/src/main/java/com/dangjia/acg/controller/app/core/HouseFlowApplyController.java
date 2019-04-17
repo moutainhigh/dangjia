@@ -21,6 +21,11 @@ public class HouseFlowApplyController implements HouseFlowApplyAPI {
     @Autowired
     private TimingApplyService timingApplyService;
 
+    @Override
+    @ApiMethod
+    public void supCouponApply(){
+        timingApplyService.supCouponApply();
+    }
 
     @Override
     @ApiMethod

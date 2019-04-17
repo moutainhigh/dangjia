@@ -16,8 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(value = "业主验收审核", description = "业主验收审核")
 public interface HouseFlowApplyAPI {
 
+
+    @PostMapping("app/core/houseFlowApply/supCouponApply")
+    @ApiOperation(value = "自动审核到时管家未审核申请", notes = "自动审核到时管家未审核申请")
+    void supCouponApply();
+
     @PostMapping("app/core/houseFlowApply/couponApply")
-    @ApiOperation(value = "审核到时业主未审核申请", notes = "审核到时业主未审核申请")
+    @ApiOperation(value = "自动审核到时业主未审核申请", notes = "自动审核到时业主未审核申请")
     void couponApply();
 
     @PostMapping("app/core/houseFlowApply/houseRecord")
