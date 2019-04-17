@@ -1061,9 +1061,7 @@ public class HouseWorkerService {
                     workerDetailMapper.insert(workerDetail);
                 } else {
                     houseFlowApplyMapper.insert(hfa);
-                    HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
-                            , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
-                    houseConstructionRecordMapper.insert(hcr);
+                    houseWorkerSupService.saveHouseConstructionRecord(hfa, new HouseConstructionRecord());
 //                    return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）巡查成功");
                 }
 
@@ -1072,16 +1070,12 @@ public class HouseWorkerService {
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 houseFlowApplyMapper.insert(hfa);
-                HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
-                        , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
-                houseConstructionRecordMapper.insert(hcr);
+                houseWorkerSupService.saveHouseConstructionRecord(hfa,new HouseConstructionRecord());
             } else if (applyType == 7) {//追加巡查
                 hfa.setApplyDec("业主您好，我是您的大管家，我已经巡查了工地，现场情况如下");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
-                HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
-                        , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
-                houseConstructionRecordMapper.insert(hcr);
+                houseWorkerSupService.saveHouseConstructionRecord(hfa, new HouseConstructionRecord());
                 houseFlowApplyMapper.insert(hfa);
 
             }
@@ -1371,9 +1365,7 @@ public class HouseWorkerService {
             hfa.setOtherMoney(new BigDecimal(0.0));
             hfa.setSuspendDay(0);
             houseFlowApplyMapper.insert(hfa);
-            HouseConstructionRecord hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
-                    , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
-            houseConstructionRecordMapper.insert(hcr);
+            houseWorkerSupService.saveHouseConstructionRecord(hfa, new HouseConstructionRecord());
             House house = houseMapper.selectByPrimaryKey(hfa.getHouseId());
             house.setTaskNumber(house.getTaskNumber() + 1);
             houseMapper.updateByPrimaryKeySelective(house);
