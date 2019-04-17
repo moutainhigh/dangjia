@@ -38,5 +38,5 @@ public class TechnologyRecord extends BaseEntity {
     private String image;//图片
 
     @Column(name = "state")
-    private Integer state;//验收状态0:未验收;1:已验收,2:已退
+    private Integer state;//验收状态0:未验收;1:已验收,2 不通过
 }

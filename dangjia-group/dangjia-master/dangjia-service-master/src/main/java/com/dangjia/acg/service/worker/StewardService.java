@@ -208,18 +208,6 @@ public class StewardService {
         }
 
     }
-private void saveHouseConstructionRecord(HouseFlowApply hfa, HouseConstructionRecord hcr) {
-        if (CommonUtil.isEmpty(hcr)) {
-            hcr = new HouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
-                    , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
-            houseConstructionRecordMapper.insert(hcr);
-        } else {
-            hcr.setMemberCheck(hfa.getMemberCheck());
-            hcr.setContent(hfa.getApplyDec());
-            hcr.setSupervisorCheck(hfa.getSupervisorCheck());
-            houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
-        }
-    }
     /**
      * 管家审核停工申请
      * state 1通过 0不通过

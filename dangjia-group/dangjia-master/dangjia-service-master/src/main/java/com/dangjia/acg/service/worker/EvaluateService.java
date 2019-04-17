@@ -20,6 +20,7 @@ import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseItemMapper;
+import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
@@ -89,6 +90,8 @@ public class EvaluateService {
     private ForMasterAPI forMasterAPI;
     @Autowired
     private IMaterialRecordMapper materialRecordMapper;
+    @Autowired
+    private ITechnologyRecordMapper technologyRecordMapper;
 
     @Autowired
     private IHouseConstructionRecordMapper houseConstructionRecordMapper;
@@ -165,6 +168,13 @@ public class EvaluateService {
 
             HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
             houseWorkerSupService.saveHouseConstructionRecord(houseFlowApply, hcr);
+
+            /*
+            验收节点不通过
+             */
+            technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(),houseFlowApply.getWorkerTypeId());
+
+
 
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS,house.getHouseName()) ,"5");

@@ -19,5 +19,9 @@ public interface ITechnologyRecordMapper extends Mapper<TechnologyRecord> {
     /**查询节点*/
     List<TechnologyRecord> checkByTechnologyId(@Param("houseId")String houseId,@Param("technologyId")String technologyId
     ,@Param("workerTypeId")String workerTypeId);
+
+    int passTecRecord(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
+
+    int passNoTecRecord(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
 }
 

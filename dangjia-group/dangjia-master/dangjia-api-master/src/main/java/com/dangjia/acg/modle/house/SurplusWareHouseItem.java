@@ -41,4 +41,9 @@ public class SurplusWareHouseItem extends BaseEntity {
 	@ApiModelProperty("清点商品的数量")
 	private Integer productCount;
 
+	@Column(name = "category_id")
+	@Desc(value = "分类id")
+	@ApiModelProperty("分类id")
+	private String categoryId;//分类id
+
 }
