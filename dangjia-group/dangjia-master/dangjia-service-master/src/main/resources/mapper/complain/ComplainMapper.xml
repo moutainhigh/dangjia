@@ -22,7 +22,7 @@
         h.residential,
         IFNULL(h.building, '*'),
         '栋',
-        (case h.unit when (null or '') then ''  else  CONCAT(h.unit,'单元') end ),
+        IFNULL(CONCAT(h.unit, '单元'),'' ),
         IFNULL(h.number, '*'),
         '号'
         ) as houseName,
@@ -59,7 +59,7 @@
         h.residential,
         IFNULL(h.building, '*'),
         '栋',
-        (case h.unit when (null or '') then ''  else  CONCAT(h.unit,'单元') end ),
+        IFNULL(CONCAT(h.unit, '单元'),'' ),
         IFNULL(h.number, '*'),
         '号'
         ) as houseName,

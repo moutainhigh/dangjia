@@ -98,7 +98,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             house.residential,
             IFNULL(house.building, '*'),
             '栋',
-            (case house.unit when (null or '') then ''  else  CONCAT(house.unit,'单元') end ),
+            IFNULL(CONCAT(house.unit, '单元'),'' ),
             IFNULL(house.number, '*'),
             '号'
             )  LIKE CONCAT('%',#{likeAddress},'%')
