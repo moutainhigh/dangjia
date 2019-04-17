@@ -19,8 +19,6 @@ public class TimingApplyService {
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
-    private HouseFlowApplyService houseFlowApplyService;
-    @Autowired
     private EvaluateService evaluateService;
 
     /**
@@ -39,7 +37,11 @@ public class TimingApplyService {
     public void couponApply(){
         List<HouseFlowApply> houseFlowApplyList =  houseFlowApplyMapper.couponApply();
         for (HouseFlowApply houseFlowApply : houseFlowApplyList){
-            houseFlowApplyService.checkWorker(houseFlowApply.getId());
+            if(houseFlowApply.getWorkerType() == 3){
+                evaluateService.saveEvaluateSupervisor(houseFlowApply.getId(),"",5);
+            }else {
+                evaluateService.saveEvaluate(houseFlowApply.getId(),"",5,"",5);
+            }
         }
     }
 }
