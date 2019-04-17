@@ -196,8 +196,10 @@ public class SurplusWareDivertService {
                 }else {
                     product = forMasterAPI.getProduct("", productId);
                 }
-                if (product != null)
+                if (product != null) {
+                    newSurplusWareHouseItem.setCategoryId(product.getCategoryId());
                     newSurplusWareHouseItem.setProductName(product.getName());
+                }
 
                 iSurplusWareHouseItemMapper.insert(newSurplusWareHouseItem);
             } else {
