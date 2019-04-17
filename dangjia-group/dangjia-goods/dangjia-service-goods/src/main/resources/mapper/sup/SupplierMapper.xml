@@ -231,7 +231,7 @@
 			<if test="likeProductName!=null and likeProductName!=''">
 				and p.name like CONCAT('%',#{likeProductName},'%')
 			</if>
-		ORDER BY p.product_sn and  p.create_date desc
+		ORDER BY p.category_id desc
     </select>
 	<!-- 根据供应商查询在供应的货品种类-->
 	<select id="getSupplierProductByProductId" parameterType="java.lang.String" resultType="java.lang.Integer">
