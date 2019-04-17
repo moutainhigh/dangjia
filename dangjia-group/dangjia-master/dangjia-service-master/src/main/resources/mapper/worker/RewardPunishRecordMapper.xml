@@ -53,7 +53,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             h.residential,
             IFNULL(h.building, '*'),
             '栋',
-            (case h.unit when (null or '') then ''  else  CONCAT(h.unit,'单元') end ),
+        IFNULL(CONCAT(h.unit, '单元'),'' ),
             IFNULL(h.number, '*'),
             '号'
             ) house_name,
@@ -111,7 +111,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         h.residential,
         IFNULL(h.building, '*'),
         '栋',
-        (case h.unit when (null or '') then ''  else  CONCAT(h.unit,'单元') end ),
+        IFNULL(CONCAT(h.unit, '单元'),'' ),
         IFNULL(h.number, '*'),
         '号'
         ) house_name,
