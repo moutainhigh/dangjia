@@ -166,13 +166,15 @@ public class EvaluateService {
             houseFlowApply.setSupervisorCheck(2);
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
+            HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
+            houseWorkerSupService.saveHouseConstructionRecord(houseFlowApply, hcr);
+
             /*
             验收节点不通过
              */
             technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(),houseFlowApply.getWorkerTypeId());
 
-            HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
-            houseWorkerSupService.saveHouseConstructionRecord(houseFlowApply, hcr);
+
 
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS,house.getHouseName()) ,"5");
