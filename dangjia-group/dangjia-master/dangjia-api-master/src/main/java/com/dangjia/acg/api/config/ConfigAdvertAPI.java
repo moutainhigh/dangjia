@@ -19,30 +19,22 @@ import javax.servlet.http.HttpServletRequest;
 @Api(value = "广告接口", description = "广告接口")
 public interface ConfigAdvertAPI {
     /**
-     * 获取广告
+     * 获取所有广告
      *
-     * @param configAdvert 逻辑判断
-     * @return 相应的数据
+     * @param configAdvert
+     * @return
      */
     @PostMapping("/config/adverts/list")
     @ApiOperation(value = "获取所有广告", notes = "获取所有广告")
     ServerResponse getConfigAdverts(@RequestParam("request") HttpServletRequest request,
-//                                    @RequestParam("userToken") String userToken,
+                                    @RequestParam("userToken") String userToken,
                                     @RequestParam("configAdvert") ConfigAdvert configAdvert);
-
-    /**
-     * 获取所有广告
-     *
-     * @return 广告JSON
-     */
-    @PostMapping("/config/adverts/allList")
-    @ApiOperation(value = "获取所有广告", notes = "获取所有广告")
-    ServerResponse getAllConfigAdverts();
 
     /**
      * 删除广告
      *
-     * @param id 待删除的Id
+     * @param id
+     * @return
      */
     @PostMapping("/config/adverts/del")
     @ApiOperation(value = "删除广告", notes = "删除广告")
@@ -52,7 +44,8 @@ public interface ConfigAdvertAPI {
     /**
      * 修改广告
      *
-     * @param configAdvert 待修改的参数
+     * @param configAdvert
+     * @return
      */
     @PostMapping("/config/adverts/edit")
     @ApiOperation(value = "修改广告", notes = "修改广告")
@@ -62,7 +55,8 @@ public interface ConfigAdvertAPI {
     /**
      * 新增广告
      *
-     * @param configAdvert 待保存的数据
+     * @param configAdvert
+     * @return
      */
     @PostMapping("/config/adverts/add")
     @ApiOperation(value = "新增广告", notes = "新增广告")
