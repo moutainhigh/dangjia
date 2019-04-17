@@ -28,46 +28,43 @@ public class ConfigAdvertScheduler {
         // 将超时的广告设置为不展示
         List<String> timeOutAd = configAdvertMapper.getTimeOutAd();
         if (timeOutAd.size() > 0) {
-            ConfigAdvert configAdvert = new ConfigAdvert();
-            configAdvert.setToShow(0);
             for (String n : timeOutAd) {
-                configAdvert.setId(n);
-                configAdvertMapper.updateByPrimaryKey(configAdvert);
+                ConfigAdvert configAdvert = configAdvertMapper.selectByPrimaryKey(n);
+                configAdvert.setToShow(0);
+                configAdvertMapper.updateByPrimaryKeySelective(configAdvert);
             }
         }
 
         // 将符合时间的广告设置为定时展示
         List<String> timingAd = configAdvertMapper.getTimingAd();
         if (timingAd.size() > 0) {
-            ConfigAdvert configAdvert = new ConfigAdvert();
-            configAdvert.setToShow(3);
             for (String n : timingAd) {
-                configAdvert.setId(n);
-                configAdvertMapper.updateByPrimaryKey(configAdvert);
+                ConfigAdvert configAdvert = configAdvertMapper.selectByPrimaryKey(n);
+                configAdvert.setToShow(3);
+                configAdvertMapper.updateByPrimaryKeySelective(configAdvert);
             }
         }
     }
 
     @Scheduled(cron = "15 * * * * ? ")
     public void selectTimingFeatured() {
-        List<String> timeOutAd = houseChoiceCaseMapper.getTimeOutAd();
-        if (timeOutAd.size() > 0) {
-            HouseChoiceCase houseChoiceCase = new HouseChoiceCase();
-            houseChoiceCase.setToShow("0");
-            for (String n : timeOutAd) {
-                houseChoiceCase.setId(n);
-                houseChoiceCaseMapper.updateByPrimaryKey(houseChoiceCase);
+        // 将符合时间的精选案例设置为不展示
+        List<String> timeOutFeatured = houseChoiceCaseMapper.getTimeOutAd();
+        if (timeOutFeatured.size() > 0) {
+            for (String n : timeOutFeatured) {
+                HouseChoiceCase houseChoiceCase = houseChoiceCaseMapper.selectByPrimaryKey(n);
+                houseChoiceCase.setToShow(0);
+                houseChoiceCaseMapper.updateByPrimaryKeySelective(houseChoiceCase);
             }
         }
 
-        // 将符合时间的广告设置为展示
-        List<String> timingAd = houseChoiceCaseMapper.getTimingAd();
-        if (timingAd.size() > 0) {
-            HouseChoiceCase houseChoiceCase = new HouseChoiceCase();
-            houseChoiceCase.setToShow("1");
-            for (String n : timingAd) {
-                houseChoiceCase.setId(n);
-                houseChoiceCaseMapper.updateByPrimaryKey(houseChoiceCase);
+        // 将符合时间的精选案例设置为展示
+        List<String> timingFeatured = houseChoiceCaseMapper.getTimingAd();
+        if (timingFeatured.size() > 0) {
+            for (String n : timingFeatured) {
+                HouseChoiceCase houseChoiceCase = houseChoiceCaseMapper.selectByPrimaryKey(n);
+                houseChoiceCase.setToShow(3);
+                houseChoiceCaseMapper.updateByPrimaryKeySelective(houseChoiceCase);
             }
         }
 

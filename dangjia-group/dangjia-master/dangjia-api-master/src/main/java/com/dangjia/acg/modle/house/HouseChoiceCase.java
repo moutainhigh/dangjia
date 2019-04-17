@@ -4,6 +4,7 @@ import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.models.auth.In;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 import org.apache.commons.lang.StringUtils;
@@ -77,12 +78,7 @@ public class HouseChoiceCase extends BaseEntity {
     @Column(name = "to_show")
     @Desc(value = "是否显示")
     @ApiModelProperty("是否显示")
-    private String toShow;
-
-    @Column(name = "to_show")
-    @Desc(value = "是否显示")
-    @ApiModelProperty("是否显示")
-    private String inShow;
+    private Integer toShow;
 
     //所有图片字段加入域名和端口，形成全路径
     public void initPath(String address) {
