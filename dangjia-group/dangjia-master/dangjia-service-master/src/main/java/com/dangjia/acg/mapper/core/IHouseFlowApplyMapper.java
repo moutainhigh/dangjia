@@ -11,6 +11,8 @@ import java.util.List;
 @Repository
 public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
 
+    List<HouseFlowApply> supCouponApply();
+
     List<HouseFlowApply> couponApply();
 
     List<HouseFlowApply> noPassList(@Param("houseFlowId") String houseFlowId);

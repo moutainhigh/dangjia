@@ -409,9 +409,9 @@ public class MendOrderService {
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
-                String urlyz= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+houseId+"&roleType=1";
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "补人工变更", String.format
-                        (DjConstants.PushMessage.YZ_B_010, house.getHouseName()), urlyz);
+//                String urlyz= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+houseId+"&roleType=1";
+//                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "补人工变更", String.format
+//                        (DjConstants.PushMessage.YZ_B_010, house.getHouseName()), urlyz);
 
                 String url= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+houseId+"&roleType=3";
                 configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "补人工变更", String.format

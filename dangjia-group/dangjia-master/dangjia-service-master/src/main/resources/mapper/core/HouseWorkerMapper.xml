@@ -29,7 +29,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         hw.is_select as isSelect,
         hw.create_date as createDate,
         hw.modify_date as modifyDate,
-        CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') houseName
+        CONCAT(
+		h.residential,
+		IFNULL(h.building, '*'),
+		'栋',
+		(case h.unit when (null or '') then ''  else  CONCAT(h.unit,'单元') end ),
+		IFNULL(h.number, '*'),
+		'号'
+	) houseName
         from `dj_core_house_worker` hw
         INNER JOIN dj_house h ON hw.house_id=h.id
         WHERE

@@ -3,53 +3,5 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.config.IConfigAdvertMapper">
-    <sql id="all_columns">
-               id,
-               create_date     createDate,
-               modify_date     modifyDate,
-               data_status     dataStatus,
-               app_type        appType,
-               to_show         toShow,
-               `name`,
-               city_id         cityId,
-               advert_type     advertType,
-               type            type,
-               `data`,
-               image,
-               show_time_start showTimeStart,
-               show_time_end   showTimeEnd
-    </sql>
-    <select id="selectAllConfigAdvert"
-            resultType="com.dangjia.acg.modle.config.ConfigAdvert">
-        SELECT
-        <include refid="all_columns"/>
-        FROM dj_config_advert
-        WHERE data_status = '0'
-    </select>
-
-    <select id="getTimeOutAd" resultType="java.lang.String">
-        SELECT id
-        FROM dj_config_advert
-        WHERE now() > show_time_end
-          and to_show = 3
-    </select>
-    <select id="getTimingAd" resultType="java.lang.String">
-        SELECT id
-        FROM dj_config_advert
-        WHERE now() BETWEEN show_time_start
-                      AND show_time_end
-          AND to_show = 2
-    </select>
-    <select id="selectConfigAdvert" resultType="com.dangjia.acg.modle.config.ConfigAdvert">
-        SELECT
-        <include refid="all_columns"/>
-        FROM
-        dj_config_advert
-        WHERE data_status = '0'
-        AND ( to_show = 1 OR to_show = 3 )
-        <if test="cityId!=null">AND city_id = #{cityId}</if>
-        <if test="appType!=null">AND app_type = #{appType}</if>
-        <if test="advertType!=null">AND advert_type = #{advertType}</if>
-    </select>
 </mapper>
 
