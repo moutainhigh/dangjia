@@ -141,12 +141,20 @@ public class TechnologyRecordService {
         JSONArray jsonArray;
         if(worker.getWorkerType() == 3){ //管家查询管家应验收节点
             jsonArray = budgetWorkerAPI.getAllTechnologyByHouseId(house.getId());
+            /* 补人工的节点也加入进来 */
+            List<MendWorker> mendWorkerList = mendWorkerMapper.houseMendWorkerList(house.getId());
+            for (MendWorker mendWorker : mendWorkerList){
+                if (budgetWorkerAPI.patrolList(mendWorker.getWorkerGoodsId())){
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("workerGoodsId", mendWorker.getWorkerGoodsId());
+                    jsonObject.put("workerGoodsName", mendWorker.getWorkerGoodsName());
+                    jsonArray.add(jsonObject);
+                }
+            }
         }else {//工匠提交的验收节点
             //含工艺人工商品
             jsonArray = budgetWorkerAPI.getWorkerGoodsList(houseFlow.getHouseId(),houseFlowId);
-            /*
-                补人工的节点也加入进来
-            */
+            /* 补人工的节点也加入进来 */
             List<MendWorker> mendWorkerList = mendWorkerMapper.mendWorkerList(house.getId(),worker.getWorkerTypeId());
             for (MendWorker mendWorker : mendWorkerList){
                 if (budgetWorkerAPI.workerPatrolList(mendWorker.getWorkerGoodsId())){

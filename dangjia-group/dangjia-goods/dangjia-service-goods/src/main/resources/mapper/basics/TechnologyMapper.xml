@@ -18,7 +18,7 @@
         modify_date
 	</sql>
 
-    <!--查询巡查工艺 人工,材料共用 -->
+    <!--管家巡查工艺 -->
     <select id="patrolList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Technology">
         select
             <include refid="all_columns" />
