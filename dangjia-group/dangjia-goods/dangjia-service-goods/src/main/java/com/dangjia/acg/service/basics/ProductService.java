@@ -9,6 +9,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.basics.Goods;
+import com.dangjia.acg.modle.basics.GroupLink;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Brand;
@@ -54,6 +55,9 @@ public class ProductService {
     private IGoodsMapper goodsMapper;
     @Autowired
     private TechnologyService technologyService;
+
+    @Autowired
+    private IGroupLinkMapper iGroupLinkMapper;
 
     private static Logger LOG = LoggerFactory.getLogger(ProductService.class);
 
@@ -499,10 +503,16 @@ public class ProductService {
             product.setId(id);
             product.setName(name);
             iProductMapper.updateByPrimaryKeySelective(product);
-            return ServerResponse.createBySuccessMessage("删除成功");
+
+            Example example=new Example(GroupLink.class);
+            example.createCriteria().andEqualTo("productId",id);
+            GroupLink oldLabel =new GroupLink();
+            oldLabel.setProductName(name);
+            iGroupLinkMapper.updateByExampleSelective(oldLabel,example);
+            return ServerResponse.createBySuccessMessage("更新成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("删除失败");
+            return ServerResponse.createByErrorMessage("更新成功");
         }
     }
     /**
