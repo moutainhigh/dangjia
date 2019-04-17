@@ -203,4 +203,8 @@ public interface BudgetWorkerAPI {
     @PostMapping("/actuary/budgetWorker/workerPatrolList")
     @ApiOperation(value = "是否有巡查工艺节点", notes = "是否有巡查工艺节点")
     boolean workerPatrolList(@RequestParam("workerGoodsId")String workerGoodsId);
+
+    @PostMapping("/actuary/budgetWorker/patrolList")
+    @ApiOperation(value = "管家巡查工艺", notes = "管家巡查工艺")
+    boolean patrolList(@RequestParam("workerGoodsId")String workerGoodsId);
 }
