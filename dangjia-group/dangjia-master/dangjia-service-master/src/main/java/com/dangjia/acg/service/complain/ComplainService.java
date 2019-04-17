@@ -300,8 +300,10 @@ public class ComplainService {
         complain.setUserId(userId);
         complain.setDescription(description);
         complain.setFiles(files);
-        complain.setOperateId(operateId);
-        complain.setOperateName(userMapper.selectByPrimaryKey(operateId).getUsername());
+        if(!CommonUtil.isEmpty(operateId)) {
+            complain.setOperateId(operateId);
+            complain.setOperateName(userMapper.selectByPrimaryKey(operateId).getUsername());
+        }
 
         if (state == 2) {   // 申诉成功后要对对应的业务逻辑进行处理
             if (complain.getComplainType() != null)
