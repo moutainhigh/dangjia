@@ -27,45 +27,44 @@ import java.util.Map;
  */
 @Service
 public class ConfigAdvertService {
-    @Autowired
-    public ConfigAdvertService(IConfigAdvertMapper configAdvertMapper, ConfigUtil configUtil) {
-        this.configAdvertMapper = configAdvertMapper;
-        this.configUtil = configUtil;
-    }
 
+    @Autowired
     private IConfigAdvertMapper configAdvertMapper;
 
+    @Autowired
     private ConfigUtil configUtil;
 
+    @Autowired
+    private RedisClient redisClient;
+
     /**
-     * 获取广告
+     * 获取所有广告
      *
-     * @param configAdvert 获取广告的判断逻辑字段
+     * @param configAdvert
+     * @return
      */
-    public ServerResponse getConfigAdverts(HttpServletRequest request, ConfigAdvert configAdvert) {
-//        Example example = new Example(ConfigAdvert.class);
-//        Example.Criteria criteria = example.createCriteria();
-//        if (!CommonUtil.isEmpty(configAdvert.getAppType())) {
-//            criteria.andEqualTo(ConfigAdvert.APP_TYPE, configAdvert.getAppType());
-//            criteria.andEqualTo(ConfigAdvert.TO_SHOW, 1);
-//        }
-//        if (!CommonUtil.isEmpty(configAdvert.getCityId())) {
-//            criteria.andEqualTo(ConfigAdvert.CITY_ID, configAdvert.getCityId());
-//        }
-//        if (!CommonUtil.isEmpty(configAdvert.getAdvertType())) {
-//            criteria.andEqualTo(ConfigAdvert.ADVERT_TYPE, configAdvert.getAdvertType());
-//        }
-        List<ConfigAdvert> list = configAdvertMapper.selectConfigAdvert(configAdvert.getCityId()
-                , configAdvert.getAppType(), configAdvert.getAdvertType());
+    public ServerResponse getConfigAdverts(HttpServletRequest request, String userToken, ConfigAdvert configAdvert) {
+        Example example = new Example(ConfigAdvert.class);
+        Example.Criteria criteria = example.createCriteria();
+        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+        if (accessToken != null) {//有效的token
+            criteria.andNotEqualTo(ConfigAdvert.TYPE, 3);
+        }
+        if (!CommonUtil.isEmpty(configAdvert.getAppType())) {
+            criteria.andEqualTo(ConfigAdvert.APP_TYPE, configAdvert.getAppType());
+            criteria.andEqualTo(ConfigAdvert.IS_SHOW, true);
+        }
+        if (!CommonUtil.isEmpty(configAdvert.getCityId())) {
+            criteria.andEqualTo(ConfigAdvert.CITY_ID, configAdvert.getCityId());
+        }
+        if (!CommonUtil.isEmpty(configAdvert.getAdvertType())) {
+            criteria.andEqualTo(ConfigAdvert.ADVERT_TYPE, configAdvert.getAdvertType());
+        }
+        List<ConfigAdvert> list = configAdvertMapper.selectByExample(example);
         if (list.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
                     , "查无数据");
         }
-        List<Map> listMap = getUrlListMap(list);
-        return ServerResponse.createBySuccess("查询成功", listMap);
-    }
-
-    private List<Map> getUrlListMap(List<ConfigAdvert> list) {
         List<Map> listMap = new ArrayList<>();
         for (ConfigAdvert v : list) {
             Map map = BeanUtils.beanToMap(v);
@@ -74,19 +73,17 @@ public class ConfigAdvertService {
             map.put(ConfigAdvert.IMAGE, v.getImage());
             listMap.add(map);
         }
-        return listMap;
+        return ServerResponse.createBySuccess("查询成功", listMap);
     }
 
     /**
      * 删除
      *
-     * @param id 待删除的Id
+     * @param id
+     * @return
      */
-    public ServerResponse delConfigAdvert(String id) {
-        ConfigAdvert configAdvert = new ConfigAdvert();
-        configAdvert.setId(id);
-        configAdvert.setDataStatus(1);
-        if (this.configAdvertMapper.updateByPrimaryKey(configAdvert) > 0) {
+    public ServerResponse delConfigAdvert(HttpServletRequest request, String id) {
+        if (this.configAdvertMapper.deleteByPrimaryKey(String.valueOf(id)) > 0) {
             return ServerResponse.createBySuccessMessage("ok");
         } else {
             return ServerResponse.createByErrorMessage("删除失败，请您稍后再试");
@@ -96,9 +93,10 @@ public class ConfigAdvertService {
     /**
      * 修改
      *
-     * @param configAdvert 待修改数据，需要包含ID
+     * @param configAdvert
+     * @return
      */
-    public ServerResponse editConfigAdvert(ConfigAdvert configAdvert) {
+    public ServerResponse editConfigAdvert(HttpServletRequest request, ConfigAdvert configAdvert) {
         //查看该权限是否有子节点，如果有，先删除子节点
         if (this.configAdvertMapper.updateByPrimaryKeySelective(configAdvert) > 0) {
             return ServerResponse.createBySuccessMessage("ok");
@@ -110,29 +108,15 @@ public class ConfigAdvertService {
     /**
      * 新增
      *
-     * @param configAdvert 待保存数据
+     * @param configAdvert
+     * @return
      */
-    public ServerResponse addConfigAdvert(ConfigAdvert configAdvert) {
+    public ServerResponse addConfigAdvert(HttpServletRequest request, ConfigAdvert configAdvert) {
         //查看该权限是否有子节点，如果有，先删除子节点
         if (this.configAdvertMapper.insertSelective(configAdvert) > 0) {
             return ServerResponse.createBySuccessMessage("ok");
         } else {
             return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");
         }
-    }
-
-    /**
-     * 获取所有的未被逻辑删除的广告数据
-     *
-     * @return 未被逻辑删除的广告数据
-     */
-    public ServerResponse getAllConfigAdverts() {
-        List<ConfigAdvert> list = configAdvertMapper.selectAllConfigAdvert();
-        if (list.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
-                    , "查无数据");
-        }
-        List<Map> listMap = getUrlListMap(list);
-        return ServerResponse.createBySuccess("查询成功", listMap);
     }
 }

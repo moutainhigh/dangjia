@@ -23,61 +23,50 @@ public class ConfigAdvertController implements ConfigAdvertAPI {
 
 
     /**
-     * 获取广告
-     *
-     * @param configAdvert APP端需要的控制逻辑
-     * @return 需要展示的数据
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse getConfigAdverts(HttpServletRequest request, ConfigAdvert configAdvert) {
-        return configAdvertService.getConfigAdverts(request, configAdvert);
-    }
-
-    /**
      * 获取所有广告
      *
-     * @return 广告List
+     * @param configAdvert
+     * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse getAllConfigAdverts() {
-        return configAdvertService.getAllConfigAdverts();
+    public ServerResponse getConfigAdverts(HttpServletRequest request, String userToken, ConfigAdvert configAdvert) {
+        return configAdvertService.getConfigAdverts(request, userToken, configAdvert);
     }
 
     /**
      * 删除广告
      *
-     * @param id 待删除的ID
-     * @return 状态说明
+     * @param id
+     * @return
      */
     @Override
     @ApiMethod
     public ServerResponse delConfigAdvert(HttpServletRequest request, String id) {
-        return configAdvertService.delConfigAdvert(id);
+        return configAdvertService.delConfigAdvert(request, id);
     }
 
     /**
      * 修改广告
      *
-     * @param configAdvert 需要修改的广告数据
-     * @return 状态说明
+     * @param configAdvert
+     * @return
      */
     @Override
     @ApiMethod
     public ServerResponse editConfigAdvert(HttpServletRequest request, ConfigAdvert configAdvert) {
-        return configAdvertService.editConfigAdvert(configAdvert);
+        return configAdvertService.editConfigAdvert(request, configAdvert);
     }
 
     /**
      * 新增广告
      *
-     * @param configAdvert 临时数据
-     * @return 状态说明
+     * @param configAdvert
+     * @return
      */
     @Override
     @ApiMethod
     public ServerResponse addConfigAdvert(HttpServletRequest request, ConfigAdvert configAdvert) {
-        return configAdvertService.addConfigAdvert(configAdvert);
+        return configAdvertService.addConfigAdvert(request, configAdvert);
     }
 }
