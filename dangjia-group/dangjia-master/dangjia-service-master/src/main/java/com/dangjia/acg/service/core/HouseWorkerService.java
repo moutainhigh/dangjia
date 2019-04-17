@@ -174,7 +174,7 @@ public class HouseWorkerService {
             }
              //我改的
             if(worker.getWorkerType() ==2){
-                house.setBudgetOk(0);//有精算抢单待业主支付
+                house.setBudgetOk(5);//有精算抢单待业主支付
                 houseMapper.updateByPrimaryKeySelective(house);
             }
 
