@@ -404,6 +404,29 @@ public class ComplainService {
                         houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                         //不通过节点验收
                         technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(),houseFlowApply.getWorkerTypeId());
+
+                        //业主不通过工匠发起阶段/整体完工申请驳回次数超过两次后将扣工人钱
+                        List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.noPassList(houseFlow.getId());
+                        if (houseFlowApplyList.size() > 2){
+
+                            BigDecimal money=new BigDecimal(100);
+                            member = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
+                            WorkerDetail workerDetail = new WorkerDetail();
+                            workerDetail.setName("阶段/整体完工第"+houseFlowApplyList.size()+"次驳回,次数超过两次，工钱扣除");
+                            workerDetail.setWorkerId(member.getId());
+                            workerDetail.setWorkerName(member.getName());
+                            workerDetail.setHouseId(houseFlowApply.getHouseId());
+                            workerDetail.setMoney(money);
+                            workerDetail.setState(3);
+                            iWorkerDetailMapper.insert(workerDetail);
+
+                            BigDecimal surplusMoney = member.getSurplusMoney().subtract(money);
+                            BigDecimal haveMoney = member.getHaveMoney().subtract(money);
+                            member.setSurplusMoney(surplusMoney);
+                            member.setHaveMoney(haveMoney);
+                            memberMapper.updateByPrimaryKeySelective(member);
+
+                        }
                         break;
 
                     case 3:// 3：大管家（开工后）要求换人.
