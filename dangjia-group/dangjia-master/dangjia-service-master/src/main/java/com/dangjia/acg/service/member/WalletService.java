@@ -200,7 +200,7 @@ public class WalletService {
             }
             //工匠关联银卡
             example = new Example(WorkerBankCard.class);
-            example.createCriteria().andEqualTo(WorkerBankCard.WORKER_ID, member.getId());
+            example.createCriteria().andEqualTo(WorkerBankCard.WORKER_ID, member.getId()).andEqualTo(WorkerBankCard.DATA_STATUS,0);
             List<WorkerBankCard> workerBankCardList = workerBankCardMapper.selectByExample(example);
             if (workerBankCardList.size() == 0) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "请绑定银行卡");
