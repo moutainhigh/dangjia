@@ -26,4 +26,11 @@ public interface WebOrderAPI {
                                 @RequestParam("state") Integer state,
                                 @RequestParam("searchKey") String searchKey);
 
+
+    @PostMapping("web/finance/order/getOrderItem")
+    @ApiOperation(value = "订单流水详情", notes = "订单流水详情")
+    ServerResponse getOrderItem(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("pageDTO") PageDTO pageDTO,
+                                @RequestParam("businessNumber") String businessNumber);
+
 }
