@@ -446,13 +446,15 @@ public class HouseWorkerService {
                             promptList.add("您已提交业主验收申请，请耐心等待业主审核！");
                         }
                     }
-                } else if (houseFlowApplyList != null && houseFlowApplyList.size() != 0) {//今日已提交过巡查
-                    List<HouseFlowApply> hfalistApp7 = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 7, worker.getId(), new Date());
+                } else if (houseFlowApplyList.size() != 0) {//今日已提交过有人或无人巡查
+                    /*List<HouseFlowApply> hfalistApp7 = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 7, worker.getId(), new Date());
                     if (hfalistApp7 == null || hfalistApp7.size() == 0) {
                         buttonList.add(getButton("追加巡查", 4));
                     } else {
                         promptList.add("今日已巡查");
-                    }
+                    }*/
+                    /**追加巡查不限次数 2019.04.17*/
+                    buttonList.add(getButton("追加巡查", 4));
                 } else {
                     buttonList.add(getButton("巡查工地", 1));
                     //bean.setIfBackOut(1);
