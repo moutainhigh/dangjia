@@ -25,7 +25,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 WHERE
                     o.house_id = #{houseId}
                 AND o.worker_type_id =#{workerTypeId}
-                AND oi.product_type =#{product_type}
+                AND oi.product_type =#{productType}
                 AND o.payment > 0
                 AND o.type = 2
                 <if test="memberId!=null and memberId!=''">
@@ -37,7 +37,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                     WHERE
                     house_id = #{houseId}
                     AND worker_type_id = #{workerTypeId}
-                    AND product_type =#{product_type}
+                    AND product_type =#{productType}
                     AND member_id = #{memberId}
                 </if>
 
@@ -58,7 +58,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         INNER JOIN dj_deliver_order_item oi ON o.id = oi.order_id
         WHERE
         o.house_id = #{houseId}
-        AND oi.product_type =#{product_type}
+        AND oi.product_type =#{productType}
         AND o.worker_type_id =#{workerTypeId}
         AND o.payment > 0
         AND o.type = 2
@@ -71,7 +71,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             WHERE
             house_id = #{houseId}
             AND worker_type_id = #{workerTypeId}
-            AND product_type =#{product_type}
+            AND product_type =#{productType}
             AND member_id = #{memberId}
         </if>
 
