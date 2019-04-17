@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.basics.ProductAPI;
+import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
@@ -15,6 +16,7 @@ import com.dangjia.acg.mapper.deliver.ICartMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
+import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.deliver.Cart;
 import com.dangjia.acg.modle.house.Warehouse;
@@ -55,6 +57,10 @@ public class CartService {
     @Autowired
     private GoodsCategoryAPI goodsCategoryAPI;
 
+
+    @Autowired
+    private ForMasterAPI forMasterAPI;
+
     /**
      * 设置购物车商品数量
      * @param request
@@ -85,11 +91,13 @@ public class CartService {
                 ServerResponse serverResponse=productAPI.getProductById(request,cart.getProductId());
                 if(serverResponse!=null&&serverResponse.getResultObj()!=null){
                     Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
+                    Goods goods=forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), product.getGoodsId());
                     cart.setProductSn(product.getProductSn());
                     cart.setProductName(product.getName());
                     cart.setMemberId(operator.getId());
                     cart.setPrice(product.getPrice());
                     cart.setWorkerTypeId(operator.getWorkerTypeId());
+                    cart.setProductType(goods.getType());
                     cart.setUnitName(product.getUnitName());
                     cart.setCategoryId(product.getCategoryId());
                     cartMapper.insert(cart);
@@ -152,7 +160,7 @@ public class CartService {
             }
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
 
-            List<String> productIdList = orderSplitMapper.getOrderProduct(houseId,worker.getWorkerTypeId(),worker.getId());
+            List<String> productIdList = orderSplitMapper.getOrderProduct(houseId,productType,worker.getWorkerTypeId(),worker.getId());
 
             if(productIdList==null||productIdList.size()==0){
                 return ServerResponse.createBySuccessMessage("查询成功");
@@ -205,8 +213,12 @@ public class CartService {
             request.setAttribute(Constants.CITY_ID, cityId);
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
+            String productType="0";
+            if(worker.getWorkerType() == 3){
+                productType="1";
+            }
             List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
-            List<String> orderCategory = orderSplitMapper.getOrderCategory(houseId,worker.getWorkerTypeId(),worker.getId());
+            List<String> orderCategory = orderSplitMapper.getOrderCategory(houseId,productType,worker.getWorkerTypeId(),worker.getId());
             for (String categoryId : orderCategory) {
                 GoodsCategory goodsCategory=goodsCategoryAPI.getGoodsCategory(request,categoryId);
                 Map<String, Object> map = new HashMap<String, Object>();
