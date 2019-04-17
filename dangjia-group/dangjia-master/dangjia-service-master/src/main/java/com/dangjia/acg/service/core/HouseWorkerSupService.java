@@ -139,7 +139,6 @@ public class HouseWorkerSupService {
             hfa.setStartDate(start);
             hfa.setEndDate(end);
             houseFlowApplyMapper.insert(hfa);
-
             saveHouseConstructionRecord(hfa, new HouseConstructionRecord());
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
@@ -150,13 +149,28 @@ public class HouseWorkerSupService {
 
     public void saveHouseConstructionRecord(HouseFlowApply hfa, HouseConstructionRecord hcr) {
         if (CommonUtil.isEmpty(hcr)) {
-            hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+            hcr = buildHcr(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                     , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
             houseConstructionRecordMapper.insert(hcr);
         } else {
-            hcr = HouseConstructionRecord.setHouseConstructionRecord(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
+            hcr = buildHcr(hfa.getId(), hfa.getApplyDec(), hfa.getWorkerType().toString(), hfa.getHouseId()
                     , hfa.getWorkerId(), hfa.getApplyType(), hfa.getSupervisorCheck(), hfa.getMemberCheck(), hfa.getHouseFlowId());
             houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
         }
+    }
+
+    private HouseConstructionRecord buildHcr(String id, String applyDec, String workType, String houseId, String workerId
+            , Integer applyType, Integer supervisorCheck, Integer memberCheck, String houseFlowId) {
+        HouseConstructionRecord hcr = new HouseConstructionRecord();
+        hcr.setApplyType(applyType);
+        hcr.setHouseFlowApplyId(id);
+        hcr.setContent(applyDec);
+        hcr.setWorkType(workType);
+        hcr.setHouseId(houseId);
+        hcr.setWorkerId(workerId);
+        hcr.setSupervisorCheck(supervisorCheck);
+        hcr.setMemberCheck(memberCheck);
+        hcr.setHouseFlowId(houseFlowId);
+        return hcr;
     }
 }
