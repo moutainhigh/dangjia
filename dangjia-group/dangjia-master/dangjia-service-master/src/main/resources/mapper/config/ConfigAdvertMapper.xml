@@ -19,24 +19,19 @@
                show_time_start showTimeStart,
                show_time_end   showTimeEnd
     </sql>
-    <select id="selectConfigAdvertByDataStatus" resultType="com.dangjia.acg.modle.config.ConfigAdvert">
-        SELECT
-        <include refid="all_columns"/>
-        FROM dj_config_advert
-    </select>
-    <select id="selectConfigAdvertByDataStatusAndCityId"
+    <select id="selectAllConfigAdvert"
             resultType="com.dangjia.acg.modle.config.ConfigAdvert">
         SELECT
         <include refid="all_columns"/>
         FROM dj_config_advert
-        WHERE city_id=#{cityId}
+        WHERE data_status = '0'
     </select>
 
     <select id="getTimeOutAd" resultType="java.lang.String">
         SELECT id
         FROM dj_config_advert
         WHERE now() > show_time_end
-          and to_show = 1
+          and to_show = 3
     </select>
     <select id="getTimingAd" resultType="java.lang.String">
         SELECT id
@@ -44,6 +39,17 @@
         WHERE now() BETWEEN show_time_start
                       AND show_time_end
           AND to_show = 2
+    </select>
+    <select id="selectConfigAdvert" resultType="com.dangjia.acg.modle.config.ConfigAdvert">
+        SELECT
+        <include refid="all_columns"/>
+        FROM
+        dj_config_advert
+        WHERE data_status = '0'
+        AND ( to_show = 1 OR to_show = 3 )
+        <if test="cityId!=null">AND city_id = #{cityId}</if>
+        <if test="appType!=null">AND app_type = #{appType}</if>
+        <if test="advertType!=null">AND advert_type = #{advertType}</if>
     </select>
 </mapper>
 
