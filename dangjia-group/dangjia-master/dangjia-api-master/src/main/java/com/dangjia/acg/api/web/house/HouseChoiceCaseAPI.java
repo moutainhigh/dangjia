@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 @Api(value = "房屋精选案例接口", description = "房屋精选案例接口")
 public interface HouseChoiceCaseAPI {
     /**
-     * 获取所有房屋精选案例
+     * 获取房屋精选案例
      *
      * @param houseChoiceCase
      * @return
@@ -28,8 +28,17 @@ public interface HouseChoiceCaseAPI {
     @PostMapping("/config/choice/list")
     @ApiOperation(value = "获取所有房屋精选案例", notes = "获取所有房屋精选案例")
     ServerResponse getHouseChoiceCases(@RequestParam("request") HttpServletRequest request,
-                                       @RequestParam("houseChoiceCase") PageDTO pageDTO,
+                                       @RequestParam("pageDTO") PageDTO pageDTO,
                                        @RequestParam("houseChoiceCase") HouseChoiceCase houseChoiceCase);
+
+    /**
+     * 获取所有房屋精选案例
+     *
+     * @return 所有房屋的LIST
+     */
+    @PostMapping("/config/choice/allList")
+    @ApiOperation(value = "获取所有房屋精选案例", notes = "获取所有房屋精选案例")
+    ServerResponse getAllHouseChoiceCases(@RequestParam("pageDTO")PageDTO pageDTO);
 
     /**
      * 删除房屋精选案例

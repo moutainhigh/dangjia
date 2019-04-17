@@ -28,15 +28,10 @@ public class ConfigAdvert extends BaseEntity {
     @ApiModelProperty("来源应用（1:业主端，2:工匠端）")
     private String appType;
 
-    @Column(name = "in_show")
-    @Desc(value = "是否显示")
-    @ApiModelProperty("是否显示")
-    private String toShow;
-
     @Column(name = "to_show")
-    @Desc(value = "是否显示")
-    @ApiModelProperty("是否显示")
-    private String inShow;
+    @Desc(value = "展示方式 0: 不展示 1：展示 2: 定时展示")
+    @ApiModelProperty("展示方式 0: 不展示 1：展示 2: 定时展示")
+    private Integer toShow;
 
     @Column(name = "name")
     @Desc(value = "广告名称")

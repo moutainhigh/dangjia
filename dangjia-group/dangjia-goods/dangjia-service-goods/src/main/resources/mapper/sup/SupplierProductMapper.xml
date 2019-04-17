@@ -28,15 +28,26 @@
 
     <!--根据货品id查询供应商货品供应关系-->
    <select id="querySupplierProduct" resultType="com.dangjia.acg.modle.sup.SupplierProduct">
-        select <include refid="new_columns"/>FROM
+        select
+           sp.id,
+           sp.product_id AS productId,
+           sp.supplier_id AS supplierId,
+           sp.price,
+           sp.stock,
+           sp.is_supply AS isSupply,
+           sp.goods_id AS goodsId,
+           sp.create_date AS createDate,
+           sp.modify_date AS modifyDate,
+           sp.data_status AS dataStatus
+       FROM
         dj_sup_supplier_product  sp
         INNER JOIN dj_basics_product p ON sp.product_id=p.id
-        WHERE  is_supply = 1
+        WHERE  sp.is_supply = 1
         <if test="productId!=null and productId!=''">
-            and product_id =#{productId}
+            and sp.product_id =#{productId}
         </if>
         <if test="supplierId!=null and supplierId!=''">
-            and supplier_id =#{supplierId}
+            and sp.supplier_id =#{supplierId}
         </if>
         ORDER BY
         p.category_id DESC
