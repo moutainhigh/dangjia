@@ -9,7 +9,7 @@ import java.math.BigDecimal;
  */
 @Data
 public class OrderItemByDTO {
-    private String productId;
+    private String productSn;
     private String productName;
 
     private String image;
@@ -18,7 +18,7 @@ public class OrderItemByDTO {
     private BigDecimal totalPrice;
 
     private String goodsName;
-    private String goodsId;
+    private String goodsSn;
 
     private int type;
 }
