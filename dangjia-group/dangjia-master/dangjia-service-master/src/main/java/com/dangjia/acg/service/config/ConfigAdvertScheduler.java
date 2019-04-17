@@ -29,18 +29,18 @@ public class ConfigAdvertScheduler {
         List<String> timeOutAd = configAdvertMapper.getTimeOutAd();
         if (timeOutAd.size() > 0) {
             ConfigAdvert configAdvert = new ConfigAdvert();
-            configAdvert.setToShow("0");
+            configAdvert.setToShow(0);
             for (String n : timeOutAd) {
                 configAdvert.setId(n);
                 configAdvertMapper.updateByPrimaryKey(configAdvert);
             }
         }
 
-        // 将符合时间的广告设置为展示
+        // 将符合时间的广告设置为定时展示
         List<String> timingAd = configAdvertMapper.getTimingAd();
         if (timingAd.size() > 0) {
             ConfigAdvert configAdvert = new ConfigAdvert();
-            configAdvert.setToShow("1");
+            configAdvert.setToShow(3);
             for (String n : timingAd) {
                 configAdvert.setId(n);
                 configAdvertMapper.updateByPrimaryKey(configAdvert);

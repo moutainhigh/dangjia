@@ -16,8 +16,8 @@ import java.util.List;
 @Repository
 public interface IConfigAdvertMapper extends Mapper<ConfigAdvert> {
 
-    List<ConfigAdvert> selectConfigAdvertByDataStatusAndCityId(@Param("cityId") String cityId);
-    List<ConfigAdvert> selectConfigAdvertByDataStatus();
+    List<ConfigAdvert> selectAllConfigAdvert();
+    List<ConfigAdvert> selectConfigAdvert(@Param("cityId") String cityId,@Param("appType") String appType , @Param("advertType") String advertType);
 
     List<String> getTimeOutAd();
 
