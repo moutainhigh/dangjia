@@ -1,14 +1,18 @@
 package com.dangjia.acg.service.house;
 
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.house.IHouseChoiceCaseMapper;
 import com.dangjia.acg.modle.activity.Activity;
+import com.dangjia.acg.modle.config.ConfigAdvert;
 import com.dangjia.acg.modle.house.HouseChoiceCase;
+import com.dangjia.acg.modle.member.AccessToken;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +22,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -41,28 +46,46 @@ public class HouseChoiceCaseService {
      * @param houseChoiceCase
      * @return
      */
-    public ServerResponse getHouseChoiceCases(HttpServletRequest request, PageDTO pageDTO, HouseChoiceCase houseChoiceCase) {
-        String jdAddress= configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-//        Example example = new Example(HouseChoiceCase.class);
-//        Example.Criteria criteria=example.createCriteria();
-//        if(!CommonUtil.isEmpty(houseChoiceCase.getCityId())) {
-//            criteria.andEqualTo("cityId", houseChoiceCase.getCityId());
-//        }
-////        //随机排序
-//        if(request.getParameter("isRand")!=null){
-//            criteria.andEqualTo(HouseChoiceCase.DATA_STATUS, 0);
-//            example.setOrderByClause(" rand() ");
-//            pageDTO.setPageNum(0);
-//        }else {
-//            example.orderBy(Activity.MODIFY_DATE).desc();
-//        }
+    public ServerResponse getHouseChoiceCases(HttpServletRequest request, Integer from, PageDTO pageDTO, HouseChoiceCase houseChoiceCase) {
+        String jdAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        Example example = new Example(HouseChoiceCase.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (!CommonUtil.isEmpty(houseChoiceCase.getCityId())) {
+            criteria.andEqualTo("cityId", houseChoiceCase.getCityId());
+        }
+        if (from == null || from == 0) {//App端调用
+            criteria.andCondition(" ( is_show = 0 or ( is_show = 2 and " + DateUtil.format(new Date()) + " BETWEEN show_time_start and show_time_end) )");
+        }
+        //随机排序
+        if (request.getParameter("isRand") != null) {
+            criteria.andEqualTo(HouseChoiceCase.DATA_STATUS, 0);
+            example.setOrderByClause(" rand() ");
+            pageDTO.setPageNum(0);
+        } else {
+            example.orderBy(Activity.MODIFY_DATE).desc();
+        }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<HouseChoiceCase> list = houseChoiceCaseMapper.getHouseChoiceCase(houseChoiceCase.getCityId());
-
+        List<HouseChoiceCase> list = houseChoiceCaseMapper.selectByExample(example);
+        List<Map> listmap = new ArrayList();
         PageInfo pageResult = new PageInfo(list);
-        List<Map> listMap = getListMap(jdAddress,list);
-
-        pageResult.setList(listMap);
+        for (HouseChoiceCase v : list) {
+            Map map = BeanUtils.beanToMap(v);
+            if (!CommonUtil.isEmpty(v.getAddress())) {
+                String[] address = StringUtils.split(v.getAddress(), ",");
+                String[] addressUrl = StringUtils.split(v.getAddress(), ",");
+                map.put("addressUrl", addressUrl);
+                for (int i = 0; i < address.length; i++) {
+                    address[i] = jdAddress + address[i];
+                }
+                map.put("address", address);
+            }
+            if (!CommonUtil.isEmpty(v.getImage())) {
+                map.put("imageUrl", v.getImage());
+                map.put("image", jdAddress + v.getImage());
+            }
+            listmap.add(map);
+        }
+        pageResult.setList(listmap);
         return ServerResponse.createBySuccess("ok", pageResult);
     }
 
@@ -89,20 +112,7 @@ public class HouseChoiceCaseService {
      * @return
      */
     public ServerResponse editHouseChoiceCase(HttpServletRequest request, HouseChoiceCase houseChoiceCase) {
-        if (!CommonUtil.isEmpty(houseChoiceCase.getTitle())) {
-            Example example = new Example(HouseChoiceCase.class);
-            example.createCriteria().andEqualTo(HouseChoiceCase.TITLE, houseChoiceCase.getTitle()).andNotEqualTo(HouseChoiceCase.ID, houseChoiceCase.getId());
-            List list = houseChoiceCaseMapper.selectByExample(example);
-            if (list.size() > 0) {
-                return ServerResponse.createByErrorMessage("修改失败，案例名称不能重复！");
-            }
-        }
-        //查看该权限是否有子节点，如果有，先删除子节点
-        if (this.houseChoiceCaseMapper.updateByPrimaryKeySelective(houseChoiceCase) > 0) {
-            return ServerResponse.createBySuccessMessage("ok");
-        } else {
-            return ServerResponse.createByErrorMessage("修改失败，请您稍后再试");
-        }
+        return setHouseChoiceCase(request, 1, houseChoiceCase);
     }
 
     /**
@@ -112,52 +122,37 @@ public class HouseChoiceCaseService {
      * @return
      */
     public ServerResponse addHouseChoiceCase(HttpServletRequest request, HouseChoiceCase houseChoiceCase) {
+        return setHouseChoiceCase(request, 0, houseChoiceCase);
+    }
+
+    private ServerResponse setHouseChoiceCase(HttpServletRequest request, int type, HouseChoiceCase houseChoiceCase) {
         if (!CommonUtil.isEmpty(houseChoiceCase.getTitle())) {
             Example example = new Example(HouseChoiceCase.class);
-            example.createCriteria().andEqualTo(HouseChoiceCase.TITLE, houseChoiceCase.getTitle());
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo(HouseChoiceCase.TITLE, houseChoiceCase.getTitle());
+            if (type == 1) {
+                criteria.andNotEqualTo(HouseChoiceCase.ID, houseChoiceCase.getId());
+            }
             List list = houseChoiceCaseMapper.selectByExample(example);
             if (list.size() > 0) {
-                return ServerResponse.createByErrorMessage("新增失败，案例名称不能重复！");
+                return ServerResponse.createByErrorMessage("案例名称不能重复");
             }
         }
-        //查看该权限是否有子节点，如果有，先删除子节点
-        if (this.houseChoiceCaseMapper.insertSelective(houseChoiceCase) > 0) {
-            return ServerResponse.createBySuccessMessage("ok");
-        } else {
-            return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");
+        if (houseChoiceCase.getIsShow() == 3 && (
+                CommonUtil.isEmpty(houseChoiceCase.getShowTimeStart()) ||
+                        CommonUtil.isEmpty(houseChoiceCase.getShowTimeEnd()))) {
+            return ServerResponse.createByErrorMessage("请选择开始和结束时间");
         }
-    }
-
-    public ServerResponse getAllHouseChoiceCases(PageDTO pageDTO) {
-        String jdAddress= configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<HouseChoiceCase> list = houseChoiceCaseMapper.getAllHouseChoiceCase();
-
-        PageInfo pageResult = new PageInfo(list);
-        List<Map> listMap = getListMap(jdAddress, list);
-        pageResult.setList(listMap);
-        return ServerResponse.createBySuccess("ok", pageResult);
-    }
-
-    private List<Map> getListMap(String jdAddress, List<HouseChoiceCase> list) {
-        List<Map> listMap = new ArrayList();
-        for (HouseChoiceCase v : list) {
-            Map map = BeanUtils.beanToMap(v);
-            if (!CommonUtil.isEmpty(v.getAddress())) {
-                String[] address = StringUtils.split(v.getAddress(), ",");
-                String[] addressUrl = StringUtils.split(v.getAddress(), ",");
-                map.put("addressUrl", addressUrl);
-                for (int i = 0; i < address.length; i++) {
-                    address[i] = jdAddress + address[i];
-                }
-                map.put("address", address);
+        if (type == 0) {//新增
+            if (this.houseChoiceCaseMapper.insertSelective(houseChoiceCase) <= 0) {
+                return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");
             }
-            if (!CommonUtil.isEmpty(v.getImage())) {
-                map.put("imageUrl", v.getImage());
-                map.put("image", jdAddress + v.getImage());
+        } else {//修改
+            if (this.houseChoiceCaseMapper.updateByPrimaryKeySelective(houseChoiceCase) <= 0) {
+                return ServerResponse.createByErrorMessage("修改失败，请您稍后再试");
             }
-            listMap.add(map);
         }
-        return listMap;
+
+        return ServerResponse.createBySuccessMessage("操作成功");
     }
 }

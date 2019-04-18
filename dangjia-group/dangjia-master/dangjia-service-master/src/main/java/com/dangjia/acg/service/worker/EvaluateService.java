@@ -14,7 +14,6 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.WorkIntegralDTO;
-import com.dangjia.acg.mapper.core.IHouseConstructionRecordMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -26,7 +25,6 @@ import com.dangjia.acg.mapper.worker.IEvaluateMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Product;
-import com.dangjia.acg.modle.core.HouseConstructionRecord;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.house.House;
@@ -91,9 +89,6 @@ public class EvaluateService {
     private IMaterialRecordMapper materialRecordMapper;
     @Autowired
     private ITechnologyRecordMapper technologyRecordMapper;
-
-    @Autowired
-    private IHouseConstructionRecordMapper houseConstructionRecordMapper;
     @Autowired
     private HouseWorkerSupService houseWorkerSupService;
 
@@ -167,9 +162,6 @@ public class EvaluateService {
             houseFlowApply.setApplyDec(content);
             houseFlowApply.setSupervisorCheck(2);
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-
-            HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
-            houseWorkerSupService.saveHouseConstructionRecord(houseFlowApply, hcr);
 
             /*
             验收节点不通过
@@ -285,8 +277,6 @@ public class EvaluateService {
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
 
-            HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
-            houseWorkerSupService.saveHouseConstructionRecord(houseFlowApply, hcr);
             /*
              * 大管家每次审核拿钱 新算法 2018.08.03
              */

@@ -9,7 +9,6 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
-import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.CourseDTO;
@@ -22,7 +21,6 @@ import com.dangjia.acg.mapper.matter.IWorkerDisclosureHouseFlowMapper;
 import com.dangjia.acg.mapper.matter.IWorkerDisclosureMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.complain.Complain;
-import com.dangjia.acg.modle.core.HouseConstructionRecord;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -84,8 +82,6 @@ public class StewardService {
     private IComplainMapper complainMapper;
     @Autowired
     private ConfigMessageService configMessageService;
-    @Autowired
-    private IHouseConstructionRecordMapper houseConstructionRecordMapper;
     @Autowired
     private HouseWorkerSupService houseWorkerSupService;
 
@@ -221,16 +217,10 @@ public class StewardService {
                 houseFlowApply.setSupervisorCheck(1);
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
-                HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
-                houseWorkerSupService.saveHouseConstructionRecord(houseFlowApply, hcr);
-
             } else {
                 houseFlowApply.setMemberCheck(2);
                 houseFlowApply.setSupervisorCheck(2);
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-
-                HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
-                houseWorkerSupService.saveHouseConstructionRecord(houseFlowApply, hcr);
 
                 //不通过停工申请
                 HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowId());
