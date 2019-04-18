@@ -1351,6 +1351,9 @@ public class HouseWorkerService {
             hfa.setApplyMoney(supervisor.getWorkPrice().multiply(new BigDecimal(0.5)));//通过后拿剩下百分之50减押金
             hfa.setOtherMoney(new BigDecimal(0.0));
             hfa.setSuspendDay(0);
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DAY_OF_YEAR, 7);//业主倒计时
+            hfa.setEndDate(calendar.getTime());
             houseFlowApplyMapper.insert(hfa);
             House house = houseMapper.selectByPrimaryKey(hfa.getHouseId());
             house.setTaskNumber(house.getTaskNumber() + 1);

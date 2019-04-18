@@ -75,16 +75,14 @@ public class HouseChoiceCase extends BaseEntity {
     @ApiModelProperty("定时展示结束时间")
     private Date showTimeEnd;
 
-    @Column(name = "to_show")
-    @Desc(value = "是否显示")
-    @ApiModelProperty("是否显示")
-    private Integer toShow;
+    @Column(name = "is_show")
+    @Desc(value = "展示方式 0: 展示 1：不展示 2: 定时展示")
+    @ApiModelProperty("展示方式 0: 展示 1：不展示 2: 定时展示")
+    private int isShow;
 
     //所有图片字段加入域名和端口，形成全路径
     public void initPath(String address) {
         this.image = StringUtils.isEmpty(this.image) ? null : address + this.image;
     }
-
-    ;
 
 }

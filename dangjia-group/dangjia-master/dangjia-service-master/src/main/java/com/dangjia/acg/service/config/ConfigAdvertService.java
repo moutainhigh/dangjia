@@ -7,6 +7,7 @@ import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.config.IConfigAdvertMapper;
 import com.dangjia.acg.modle.config.ConfigAdvert;
@@ -17,6 +18,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +54,7 @@ public class ConfigAdvertService {
                 criteria.andNotEqualTo(ConfigAdvert.TYPE, 3);
             }
             criteria.andEqualTo(ConfigAdvert.APP_TYPE, configAdvert.getAppType());
-            criteria.andCondition(" ( is_show = 0 or ( is_show = 2 and now() BETWEEN show_time_start and show_time_end) )");
+            criteria.andCondition(" ( is_show = 0 or ( is_show = 2 and '" + DateUtil.format(new Date()) + "' BETWEEN show_time_start and show_time_end) )");
         }
         if (!CommonUtil.isEmpty(configAdvert.getCityId())) {
             criteria.andEqualTo(ConfigAdvert.CITY_ID, configAdvert.getCityId());
