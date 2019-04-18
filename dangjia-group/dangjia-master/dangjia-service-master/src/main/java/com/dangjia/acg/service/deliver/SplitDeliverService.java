@@ -172,8 +172,8 @@ public class SplitDeliverService {
             splitDeliverDTO.setSupMobile(splitDeliver.getShipMobile());
             if(StringUtil.isNotEmpty(splitDeliver.getOperatorId())){
                 Member operator = memberMapper.selectByPrimaryKey(splitDeliver.getOperatorId());
-                if(StringUtil.isNotEmpty(operator.getWorkerTypeId())){
-                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(operator.getWorkerTypeId());
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(operator.getWorkerTypeId());
+                if(workerType != null){
                     splitDeliverDTO.setOperatorName(workerType.getName()+"-" + (operator.getName() == null ? operator.getNickName() : operator.getName()));
                 }else {
                     splitDeliverDTO.setOperatorName("业主-" + operator.getName() == null ? operator.getNickName() : operator.getName());

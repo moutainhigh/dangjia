@@ -763,6 +763,9 @@ public class HouseFlowApplyService {
                 for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList){
                     imageList.add(local+houseFlowApplyImage.getImageUrl());
                 }
+                if(houseFlowApply.getEndDate() != null){
+                    houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate().getTime() - new Date().getTime()); //业主自动审核时间
+                }
                 houseFlowApplyDTO.setImageList(imageList);
                 houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(),"yyyy-MM-dd HH:mm"));
                 return ServerResponse.createBySuccess("查询管家整体申请成功", houseFlowApplyDTO);
