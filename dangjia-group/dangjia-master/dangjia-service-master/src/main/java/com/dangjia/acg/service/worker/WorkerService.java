@@ -30,7 +30,6 @@ import com.dangjia.acg.modle.worker.WorkerBankCard;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -76,6 +75,14 @@ public class WorkerService {
             Member worker = accessToken.getMember();
             House house = houseMapper.selectByPrimaryKey(houseId);
             List<Map<String, Object>> listMap = new ArrayList<Map<String, Object>>();//返回通讯录list
+
+            Member member = memberMapper.selectByPrimaryKey(house.getMemberId());//房主
+            Map<String, Object> map2 = new HashMap<String, Object>();
+            map2.put("workerTypeName", "业主");
+            map2.put("workerName", member.getNickName() == null ? member.getName() : member.getNickName());
+            map2.put("workerPhone", member.getMobile());
+            map2.put("workerId", member.getId());
+            listMap.add(map2);
             if (worker != null) {
                 if (worker.getWorkerType() == 3) {//大管家
                     List<HouseWorker> listHouseWorker = houseWorkerMapper.paidListByHouseId(houseId);
@@ -99,14 +106,7 @@ public class WorkerService {
                     map.put("workerName", worker2.getName());//大管家
                     map.put("workerPhone", worker2.getMobile());
                     map.put("workerId", worker2.getId());
-                    Member member = memberMapper.selectByPrimaryKey(house.getMemberId());//房主
-                    Map<String, Object> map2 = new HashMap<String, Object>();
-                    map2.put("workerTypeName", "业主");
-                    map2.put("workerName", member.getNickName() == null ? member.getName() : member.getNickName());
-                    map2.put("workerPhone", member.getMobile());
-                    map2.put("workerId", member.getId());
                     listMap.add(map);
-                    listMap.add(map2);
                 }
             }
             return ServerResponse.createBySuccess("获取成功", listMap);
