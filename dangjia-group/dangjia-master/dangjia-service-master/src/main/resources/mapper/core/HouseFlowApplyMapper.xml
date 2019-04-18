@@ -34,7 +34,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where
             member_check = 0
         and ( ((apply_type=1 or apply_type=2) and (supervisor_check = 1)) or apply_type=0 )
-        and NOW() > end_date
+        and #{time} > end_date
     </select>
 
     <!--查询待管家审核-->
@@ -44,7 +44,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where
            (apply_type=1 or apply_type=2)
         and supervisor_check = 0
-        and NOW() > start_date
+        and #{time} > start_date
     </select>
 
 
