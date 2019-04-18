@@ -216,6 +216,7 @@ public class RedPackService {
      */
     public ServerResponse editActivityRedPack(HttpServletRequest request, ActivityRedPack activityRedPack,int[] num, BigDecimal[] money,  BigDecimal[] satisfyMoney) {
         activityRedPack.setModifyDate(new Date());
+        activityRedPack.setDeleteState(0);
         if(activityRedPack.getNum()!=null&&activityRedPack.getNum()>0){
             activityRedPack.setSurplusNums(activityRedPack.getNum());
         }
