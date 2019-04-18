@@ -24,51 +24,50 @@ public class WebHouseChoiceCaseController implements HouseChoiceCaseAPI {
 
 
     /**
-     * 获取房屋精选案例
+     * 获取所有房屋精选案例
+     *
      * @param houseChoiceCase
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse getHouseChoiceCases(HttpServletRequest request, PageDTO pageDTO, HouseChoiceCase houseChoiceCase) {
-        return houseChoiceCaseService.getHouseChoiceCases(request,pageDTO,houseChoiceCase);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse getAllHouseChoiceCases(PageDTO pageDTO) {
-        return houseChoiceCaseService.getAllHouseChoiceCases(pageDTO);
+    public ServerResponse getHouseChoiceCases(HttpServletRequest request, Integer from, PageDTO pageDTO, HouseChoiceCase houseChoiceCase) {
+        return houseChoiceCaseService.getHouseChoiceCases(request, from, pageDTO, houseChoiceCase);
     }
 
     /**
      * 删除房屋精选案例
+     *
      * @param id
      * @return
      */
     @Override
     @ApiMethod
     public ServerResponse delHouseChoiceCase(HttpServletRequest request, String id) {
-        return houseChoiceCaseService.delHouseChoiceCase(request,id);
+        return houseChoiceCaseService.delHouseChoiceCase(request, id);
     }
 
     /**
      * 修改房屋精选案例
+     *
      * @param houseChoiceCase
      * @return
      */
     @Override
     @ApiMethod
     public ServerResponse editHouseChoiceCase(HttpServletRequest request, HouseChoiceCase houseChoiceCase) {
-        return houseChoiceCaseService.editHouseChoiceCase(request,houseChoiceCase);
+        return houseChoiceCaseService.editHouseChoiceCase(request, houseChoiceCase);
     }
+
     /**
      * 新增房屋精选案例
+     *
      * @param houseChoiceCase
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse addHouseChoiceCase(HttpServletRequest request,HouseChoiceCase houseChoiceCase) {
-        return houseChoiceCaseService.addHouseChoiceCase(request,houseChoiceCase);
+    public ServerResponse addHouseChoiceCase(HttpServletRequest request, HouseChoiceCase houseChoiceCase) {
+        return houseChoiceCaseService.addHouseChoiceCase(request, houseChoiceCase);
     }
 }
