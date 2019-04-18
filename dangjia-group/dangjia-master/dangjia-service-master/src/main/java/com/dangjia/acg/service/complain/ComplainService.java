@@ -12,7 +12,6 @@ import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
 import com.dangjia.acg.dto.worker.RewardPunishRecordDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
-import com.dangjia.acg.mapper.core.IHouseConstructionRecordMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
@@ -27,7 +26,6 @@ import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.complain.Complain;
-import com.dangjia.acg.modle.core.HouseConstructionRecord;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -90,9 +88,6 @@ public class ComplainService {
     private SplitDeliverService splitDeliverService;
     @Autowired
     private IWorkerDetailMapper iWorkerDetailMapper;
-
-    @Autowired
-    private IHouseConstructionRecordMapper houseConstructionRecordMapper;
     @Autowired
     private HouseWorkerSupService houseWorkerSupService;
     /**
@@ -163,8 +158,6 @@ public class ComplainService {
             houseFlowApply.setMemberCheck(4);
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
-            HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
-            houseWorkerSupService.saveHouseConstructionRecord(houseFlowApply, hcr);
 
         }
         return ServerResponse.createBySuccessMessage("提交成功");
@@ -391,11 +384,6 @@ public class ComplainService {
                         houseFlowApply.setMemberCheck(2);
                         houseFlowApply.setSupervisorCheck(2);
                         houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-
-                        HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(houseFlowApply.getId());
-                        hcr.setMemberCheck(2);
-                        hcr.setSupervisorCheck(2);
-                        houseConstructionRecordMapper.updateByPrimaryKeySelective(hcr);
 
 
                         //不通过停工申请

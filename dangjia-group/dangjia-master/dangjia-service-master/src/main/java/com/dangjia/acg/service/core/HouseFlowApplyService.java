@@ -3,7 +3,6 @@ package com.dangjia.acg.service.core;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowApplyDTO;
@@ -12,7 +11,6 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
-import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
@@ -81,8 +79,6 @@ public class HouseFlowApplyService {
     @Autowired
     private ITechnologyRecordMapper technologyRecordMapper;
 
-    @Autowired
-    private IHouseConstructionRecordMapper houseConstructionRecordMapper;
 
 
     /**
@@ -283,8 +279,6 @@ public class HouseFlowApplyService {
             hfa.setPayState(1);
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
 
-            HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(hfa.getId());
-            houseWorkerSupService.saveHouseConstructionRecord(hfa, hcr);
 
 
             return ServerResponse.createBySuccessMessage("操作成功");
@@ -650,9 +644,6 @@ public class HouseFlowApplyService {
             HouseFlowApply hfa = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             hfa.setMemberCheck(1);//通过
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
-
-            HouseConstructionRecord hcr = houseConstructionRecordMapper.selectHcrByHouseFlowApplyId(hfa.getId());
-            houseWorkerSupService.saveHouseConstructionRecord(hfa, hcr);
 
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(hfa.getHouseFlowId());
             hf.setWorkSteta(2);
