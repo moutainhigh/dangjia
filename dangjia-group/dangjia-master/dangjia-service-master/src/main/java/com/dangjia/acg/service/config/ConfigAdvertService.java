@@ -54,7 +54,7 @@ public class ConfigAdvertService {
                 criteria.andNotEqualTo(ConfigAdvert.TYPE, 3);
             }
             criteria.andEqualTo(ConfigAdvert.APP_TYPE, configAdvert.getAppType());
-            criteria.andCondition(" ( is_show = 0 or ( is_show = 2 and " + DateUtil.format(new Date()) + " BETWEEN show_time_start and show_time_end) )");
+            criteria.andCondition(" ( is_show = 0 or ( is_show = 2 and '" + DateUtil.format(new Date()) + "' BETWEEN show_time_start and show_time_end) )");
         }
         if (!CommonUtil.isEmpty(configAdvert.getCityId())) {
             criteria.andEqualTo(ConfigAdvert.CITY_ID, configAdvert.getCityId());
