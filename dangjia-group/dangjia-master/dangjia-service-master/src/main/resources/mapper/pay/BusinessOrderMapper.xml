@@ -84,6 +84,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	it.total_price AS totalPrice,
 	it.worker_goods_sn AS goodsSn,
 	it.worker_goods_name AS goodsName,
+	it.unit_name AS unitName,
 	IFNULL( it.product_type, 2 ) AS type
     FROM
 	dj_pay_business_order AS p

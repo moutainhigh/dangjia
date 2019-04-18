@@ -1,35 +1,26 @@
 package com.dangjia.acg.service.finance;
 
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.OrderItemByDTO;
 import com.dangjia.acg.dto.deliver.WebOrderDTO;
 import com.dangjia.acg.mapper.activity.IActivityRedPackMapper;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
-import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
-import com.dangjia.acg.mapper.pay.IPayOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.core.HouseFlow;
-import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.pay.BusinessOrder;
-import com.dangjia.acg.modle.pay.PayOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,6 +43,8 @@ public class WebOrderService {
     @Autowired
     private IMendOrderMapper mendOrderMapper;
 
+    @Autowired
+    private ConfigUtil configUtil;
     /**
      * 所有订单流水
      *
@@ -116,9 +109,14 @@ public class WebOrderService {
      * @return
      */
     public ServerResponse getOrderItem(PageDTO pageDTO,String businessNumber){
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<OrderItemByDTO> orderItemList= iBusinessOrderMapper.getOrderItem(businessNumber);
         PageInfo pageResult = new PageInfo(orderItemList);
+        for (OrderItemByDTO orderItemByDTO : orderItemList) {
+            orderItemByDTO.setImage(imageAddress+orderItemByDTO.getImage());
+        }
+        pageResult.setList(orderItemList);
         if(orderItemList!=null){
             return ServerResponse.createBySuccess("查询成功", pageResult);
         }else {
