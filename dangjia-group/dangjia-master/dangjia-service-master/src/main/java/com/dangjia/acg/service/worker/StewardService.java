@@ -14,10 +14,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.CourseDTO;
 import com.dangjia.acg.dto.worker.WorkerDetailDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
-import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
-import com.dangjia.acg.mapper.core.IHouseFlowMapper;
-import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
-import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.matter.IWorkerDisclosureHouseFlowMapper;
@@ -34,6 +31,7 @@ import com.dangjia.acg.modle.matter.WorkerDisclosureHouseFlow;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.HouseWorkerSupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -84,6 +82,8 @@ public class StewardService {
     private IComplainMapper complainMapper;
     @Autowired
     private ConfigMessageService configMessageService;
+    @Autowired
+    private HouseWorkerSupService houseWorkerSupService;
 
     /**
      * 管家巡查扫验证二维码
@@ -204,7 +204,6 @@ public class StewardService {
         }
 
     }
-
     /**
      * 管家审核停工申请
      * state 1通过 0不通过
@@ -217,10 +216,12 @@ public class StewardService {
                 houseFlowApply.setMemberCheck(1);
                 houseFlowApply.setSupervisorCheck(1);
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
+
             } else {
                 houseFlowApply.setMemberCheck(2);
                 houseFlowApply.setSupervisorCheck(2);
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
+
                 //不通过停工申请
                 HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowId());
                 hf.setPause(0);
@@ -362,14 +363,14 @@ public class StewardService {
 
             //查询是否存在申诉。防止重复申诉
             Member stewardHouse = memberMapper.getSupervisor(houseFlow.getHouseId());
-            Example example=new Example(Complain.class);
-            example.createCriteria().andEqualTo(Complain.USER_ID,stewardHouse.getId()).andEqualTo(Complain.HOUSE_ID,houseFlow.getHouseId()).andEqualTo(Complain.STATUS,0);
-            List<Complain> complains=complainMapper.selectByExample(example);
-            if(complains.size()>0){
-                Map map= BeanUtils.beanToMap(courseDTO);
-                map.put(Complain.STATUS,0);
+            Example example = new Example(Complain.class);
+            example.createCriteria().andEqualTo(Complain.USER_ID, stewardHouse.getId()).andEqualTo(Complain.HOUSE_ID, houseFlow.getHouseId()).andEqualTo(Complain.STATUS, 0);
+            List<Complain> complains = complainMapper.selectByExample(example);
+            if (complains.size() > 0) {
+                Map map = BeanUtils.beanToMap(courseDTO);
+                map.put(Complain.STATUS, 0);
                 return ServerResponse.createBySuccess("获取进程详情成功", map);
-            }else{
+            } else {
                 return ServerResponse.createBySuccess("获取进程详情成功", courseDTO);
             }
 

@@ -1,9 +1,6 @@
 package com.dangjia.acg.service.complain;
 
-import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.model.PageDTO;
@@ -17,11 +14,11 @@ import com.dangjia.acg.dto.worker.RewardPunishRecordDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
-import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
@@ -35,7 +32,6 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
@@ -43,6 +39,7 @@ import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.core.HouseWorkerSupService;
 import com.dangjia.acg.service.deliver.SplitDeliverService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -53,13 +50,10 @@ import tk.mybatis.mapper.entity.Example;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 
 @Service
 public class ComplainService {
-    @Autowired
-    private RedisClient redisClient;
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -69,7 +63,7 @@ public class ComplainService {
     @Autowired
     private IRewardPunishRecordMapper rewardPunishRecordMapper;
     @Autowired
-    private IHouseWorkerMapper houseWorkerMapper;
+    private ITechnologyRecordMapper technologyRecordMapper;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
@@ -80,25 +74,22 @@ public class ComplainService {
     private SupplierProductAPI supplierProductAPI;
     @Autowired
     private UserMapper userMapper;
-
     @Autowired
     private ISplitDeliverMapper splitDeliverMapper;
-
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
     private IHouseMapper houseMapper;
-
     @Autowired
     private IRewardPunishConditionMapper iRewardPunishConditionMapper;
-
     @Autowired
     private IWorkIntegralMapper iWorkIntegralMapper;
     @Autowired
     private SplitDeliverService splitDeliverService;
     @Autowired
     private IWorkerDetailMapper iWorkerDetailMapper;
-
+    @Autowired
+    private HouseWorkerSupService houseWorkerSupService;
     /**
      * 添加申诉
      *
@@ -113,89 +104,112 @@ public class ComplainService {
      * @return
      */
 
-    public ServerResponse addComplain(String userToken,String memberId, Integer complainType, String businessId, String houseId, String files) {
+    public ServerResponse addComplain(String userToken, String memberId, Integer complainType, String businessId, String houseId, String files) {
         if (CommonUtil.isEmpty(complainType) || CommonUtil.isEmpty(businessId)) {
             return ServerResponse.createByErrorMessage("参数错误");
         }
-        if((complainType==2||complainType==3)&&CommonUtil.isEmpty(houseId)){
+        if ((complainType == 2 || complainType == 3) && CommonUtil.isEmpty(houseId)) {
             return ServerResponse.createByErrorMessage("参数错误");
         }
+        Example example =new Example(Complain.class);
+        example.createCriteria()
+                .andEqualTo(Complain.MEMBER_ID,memberId)
+                .andEqualTo(Complain.COMPLAIN_TYPE,complainType)
+                .andEqualTo(Complain.BUSINESS_ID,businessId)
+                .andEqualTo(Complain.STATUS,0);
+       List list= complainMapper.selectByExample(example);
+       if(list.size()>0){
+           return ServerResponse.createByErrorMessage("请勿重复提交申请！");
+       }
         Complain complain = new Complain();
         complain.setMemberId(memberId);
         complain.setComplainType(complainType);
         complain.setBusinessId(businessId);
-        complain.setUserId(getUserID(complainType,businessId,houseId));
+        complain.setUserId(getUserID(complainType, businessId, houseId));
         complain.setHouseId(houseId);
         complain.setFiles(files);
 //        1:工匠被处罚后不服.2：业主要求整改.3：要求换人.4:部分收货申诉.
-        if(complainType==4){
-           Supplier supplier=supplierProductAPI.getSupplier(complain.getUserId());
+        if (complainType == 4) {
+            Supplier supplier = supplierProductAPI.getSupplier(complain.getUserId());
             complain.setUserMobile(supplier.getTelephone());
             complain.setUserName(supplier.getName());
-            complain.setUserNickName("供应商-"+supplier.getCheckPeople());
-        }else{
-            String field="业主-";
-            Member member=memberMapper.selectByPrimaryKey(complain.getUserId());
-            if(!CommonUtil.isEmpty(member.getWorkerTypeId())) {
-                WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                field= workerType.getName()+"-";
-            }
-            if(member!=null) {
+            complain.setUserNickName("供应商-" + supplier.getCheckPeople());
+        } else {
+            String field = "业主-";
+            Member member = memberMapper.selectByPrimaryKey(complain.getUserId());
+            if (member != null) {
+                if (!CommonUtil.isEmpty(member.getWorkerTypeId())) {
+                    WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                    if(workerType!=null) {
+                        field = workerType.getName() + "-";
+                    }
+                }
                 complain.setUserMobile(member.getMobile());
-                complain.setUserName(CommonUtil.isEmpty(member.getName())?member.getNickName():member.getName());
-                complain.setUserNickName(field+member.getNickName());
+                complain.setUserName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
+                complain.setUserNickName(field + member.getNickName());
             }
         }
-        complain.setContent(getUserName(complain.getComplainType(),complain.getMemberId(),complain.getHouseId()));
+        complain.setContent(getUserName(complain.getComplainType(), complain.getMemberId(), complain.getHouseId()));
         complainMapper.insertSelective(complain);
+
+        if (complain.getComplainType() != null&&complain.getComplainType()==2){
+            //将申请进程更新为申述中。。
+            HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(complain.getBusinessId());
+            houseFlowApply.setMemberCheck(4);
+            houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
+
+
+        }
         return ServerResponse.createBySuccessMessage("提交成功");
     }
 
     /**
      * 根据类型和业务ID加房子ID获得发起人的用户ID
+     *
      * @param complainType 业务类型
-     * @param businessId 业务ID
-     * @param houseId 房子ID
+     * @param businessId   业务ID
+     * @param houseId      房子ID
      * @return
      */
-    public String getUserID(Integer complainType, String businessId , String houseId ){
-        String userid="";
+    public String getUserID(Integer complainType, String businessId, String houseId) {
+        String userid = "";
         if (complainType != null)
             switch (complainType) {
                 case 1://奖罚
                     RewardPunishRecord rewardPunishRecord = rewardPunishRecordMapper.selectByPrimaryKey(businessId);
-                    userid=rewardPunishRecord.getMemberId();
+                    userid = rewardPunishRecord.getMemberId();
                     break;
                 case 2://2：业主要求整改.
-                    House house= houseMapper.selectByPrimaryKey(houseId);
+                    House house = houseMapper.selectByPrimaryKey(houseId);
                     Member stewardHouse = memberMapper.selectByPrimaryKey(house.getMemberId());
-                    userid=stewardHouse.getId();
+                    userid = stewardHouse.getId();
                     break;
                 case 3:// 3：大管家（开工后）要求换人.
                     stewardHouse = memberMapper.getSupervisor(houseId);
-                    userid=stewardHouse.getId();
+                    userid = stewardHouse.getId();
                     break;
                 case 4:// 4:部分收货申诉
                     SplitDeliver response = splitDeliverMapper.selectByPrimaryKey(businessId);
-                    userid=response.getSupplierId();
+                    userid = response.getSupplierId();
             }
         return userid;
     }
 
     /**
      * 根据用户ID获取对象名称
+     *
      * @param memberId
      * @return
      */
-    public String getUserName(Integer complainType,String memberId,String houseid){
-        if(complainType==4) {
+    public String getUserName(Integer complainType, String memberId, String houseid) {
+        if (complainType == 4) {
             House house = houseMapper.selectByPrimaryKey(houseid);
             return house.getHouseName();
-        }else{
-            String field="业主-";
-            String userName="";
-            Member member=memberMapper.selectByPrimaryKey(memberId);
-            if(member!=null) {
+        } else {
+            String field = "业主-";
+            String userName = "";
+            Member member = memberMapper.selectByPrimaryKey(memberId);
+            if (member != null) {
                 if (!CommonUtil.isEmpty(member.getWorkerTypeId())) {
                     WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
                     field = workerType.getName() + "-";
@@ -203,15 +217,16 @@ public class ComplainService {
                 userName = field + (CommonUtil.isEmpty(member.getName()) ? member.getUserName() : member.getName());
                 return userName;
             }
-            MainUser user =userMapper.selectByPrimaryKey(memberId);
-            if(user!=null) {
-                field="客服-";
-                userName=field+user.getUsername();
+            MainUser user = userMapper.selectByPrimaryKey(memberId);
+            if (user != null) {
+                field = "客服-";
+                userName = field + user.getUsername();
                 return userName;
             }
             return userName;
         }
     }
+
     /**
      * 查询申诉
      *
@@ -266,7 +281,7 @@ public class ComplainService {
      * @param files       附件 以，分割 如：data/f.dow,data/f2.dow
      * @return
      */
-    public ServerResponse updataComplain(String userId, String complainId, Integer state, String description, String files) {
+    public ServerResponse updataComplain(String userId, String complainId, Integer state, String description, String files,String operateId,String operateName) {
         if (CommonUtil.isEmpty(complainId)) {
             return ServerResponse.createByErrorMessage("参数不正确");
         }
@@ -278,7 +293,10 @@ public class ComplainService {
         complain.setUserId(userId);
         complain.setDescription(description);
         complain.setFiles(files);
-
+        if(!CommonUtil.isEmpty(operateId)) {
+            complain.setOperateId(operateId);
+            complain.setOperateName(userMapper.selectByPrimaryKey(operateId).getUsername());
+        }
 
         if (state == 2) {   // 申诉成功后要对对应的业务逻辑进行处理
             if (complain.getComplainType() != null)
@@ -288,17 +306,17 @@ public class ComplainService {
                         //1.获取被罚的工人id
                         //2.获取奖罚条例的类型来判断是奖励还是处罚
                         //3.获取条例的明细列表
-                        if(rewardPunishRecord.getType()==null){
+                        if (rewardPunishRecord.getType() == null) {
                             break;
                         }
-                        Member member= memberMapper.selectByPrimaryKey(rewardPunishRecord.getMemberId());
-                        Example example =new Example(RewardPunishCondition.class);
-                        example.createCriteria().andEqualTo(RewardPunishCondition.REWARD_PUNISH_CORRELATION_ID,rewardPunishRecord.getRewardPunishCorrelationId());
-                        List<RewardPunishCondition> rewardPunishConditionList =  iRewardPunishConditionMapper.selectByExample(example);
-                        for(RewardPunishCondition rewardPunishCondition:rewardPunishConditionList) {
+                        Member member = memberMapper.selectByPrimaryKey(rewardPunishRecord.getMemberId());
+                        Example example = new Example(RewardPunishCondition.class);
+                        example.createCriteria().andEqualTo(RewardPunishCondition.REWARD_PUNISH_CORRELATION_ID, rewardPunishRecord.getRewardPunishCorrelationId());
+                        List<RewardPunishCondition> rewardPunishConditionList = iRewardPunishConditionMapper.selectByExample(example);
+                        for (RewardPunishCondition rewardPunishCondition : rewardPunishConditionList) {
                             BigDecimal bigDecimal = rewardPunishCondition.getQuantity();
-                            String strBigDecimal="-"+bigDecimal.doubleValue();
-                            BigDecimal b=new BigDecimal(strBigDecimal);
+                            String strBigDecimal = "-" + bigDecimal.doubleValue();
+                            BigDecimal b = new BigDecimal(strBigDecimal);
                             BigDecimal bigDecimal2;
                             WorkIntegral workIntegral = new WorkIntegral();
                             WorkerDetail workerDetail = new WorkerDetail();
@@ -335,7 +353,8 @@ public class ComplainService {
                                 }
 
                                 //罚
-                            }  if (rewardPunishRecord.getType() == 1) {
+                            }
+                            if (rewardPunishRecord.getType() == 1) {
                                 if (rewardPunishCondition.getType() == 1) {
                                     bigDecimal2 = member.getEvaluationScore().add(bigDecimal);
                                     member.setEvaluationScore(bigDecimal2);
@@ -361,14 +380,41 @@ public class ComplainService {
                         rewardPunishRecordMapper.updateByPrimaryKeySelective(rewardPunishRecord);
                         break;
                     case 2://2：业主要求整改.
-                        HouseFlowApply houseFlowApply=houseFlowApplyMapper.selectByPrimaryKey(complain.getBusinessId());
+                        HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(complain.getBusinessId());
                         houseFlowApply.setMemberCheck(2);
                         houseFlowApply.setSupervisorCheck(2);
                         houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
+
+
                         //不通过停工申请
                         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowId());
                         houseFlow.setPause(0);
                         houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+                        //不通过节点验收
+                        technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(),houseFlowApply.getWorkerTypeId());
+
+                        //业主不通过工匠发起阶段/整体完工申请驳回次数超过两次后将扣工人钱
+                        List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.noPassList(houseFlow.getId());
+                        if (houseFlowApplyList.size() > 2){
+
+                            BigDecimal money=new BigDecimal(100);
+                            member = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
+                            WorkerDetail workerDetail = new WorkerDetail();
+                            workerDetail.setName("阶段/整体完工第"+houseFlowApplyList.size()+"次驳回,次数超过两次，工钱扣除");
+                            workerDetail.setWorkerId(member.getId());
+                            workerDetail.setWorkerName(member.getName());
+                            workerDetail.setHouseId(houseFlowApply.getHouseId());
+                            workerDetail.setMoney(money);
+                            workerDetail.setState(3);
+                            iWorkerDetailMapper.insert(workerDetail);
+
+                            BigDecimal surplusMoney = member.getSurplusMoney().subtract(money);
+                            BigDecimal haveMoney = member.getHaveMoney().subtract(money);
+                            member.setSurplusMoney(surplusMoney);
+                            member.setHaveMoney(haveMoney);
+                            memberMapper.updateByPrimaryKeySelective(member);
+
+                        }
                         break;
 
                     case 3:// 3：大管家（开工后）要求换人.
@@ -388,12 +434,10 @@ public class ComplainService {
                     case 4:// 4:部分收货申诉
                         ServerResponse response = splitDeliverService.splitDeliverDetail(complain.getBusinessId());
                         if (response.isSuccess()) {
-                            JSONObject json = (JSONObject)response.getResultObj();
-                            Map<String, Object> json_map = json.getInnerMap();
-                            List<Map<String, Object>> list_Map = (List<Map<String, Object>>) json_map.get("splitDeliverItemDTOList");
-                            for (Map<String, Object> tmp : list_Map) {
-                                String id = tmp.get("id").toString();
-                                OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
+                            SplitDeliverDTO json = (SplitDeliverDTO) response.getResultObj();
+                            List<SplitDeliverItemDTO> list_Map = json.getSplitDeliverItemDTOList();
+                            for (SplitDeliverItemDTO tmp : list_Map) {
+                                OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(tmp.getId());
                                 if (orderSplitItem.getReceive() == null || (orderSplitItem.getNum() > orderSplitItem.getReceive())) {
                                     orderSplitItem.setReceive(orderSplitItem.getNum());
                                     orderSplitItemMapper.updateByPrimaryKey(orderSplitItem);
@@ -404,6 +448,13 @@ public class ComplainService {
                         }
                         break;
                 }
+        }else{
+            if (complain.getComplainType() != null&&complain.getComplainType()==2){
+                //将申请进程打回待审核。。
+                HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(complain.getBusinessId());
+                houseFlowApply.setMemberCheck(0);
+                houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
+            }
         }
         complainMapper.updateByPrimaryKeySelective(complain);
         return ServerResponse.createBySuccessMessage("提交成功");
@@ -440,13 +491,13 @@ public class ComplainService {
         }
 
         //添加返回体
-        if (complain.getComplainType() != null){
-            if(complain.getComplainType()==1){//奖罚
-                RewardPunishRecordDTO rewardPunishRecordDTO=new RewardPunishRecordDTO();
+        if (complain.getComplainType() != null) {
+            if (complain.getComplainType() == 1) {//奖罚
+                RewardPunishRecordDTO rewardPunishRecordDTO = new RewardPunishRecordDTO();
                 rewardPunishRecordDTO.setId(complain.getBusinessId());
                 complain.setData(rewardPunishRecordMapper.queryRewardPunishRecord(rewardPunishRecordDTO));
             }
-            if(complain.getComplainType()==4){//收货
+            if (complain.getComplainType() == 4) {//收货
                 SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(complain.getBusinessId());
                 SplitDeliverDTO splitDeliverDTO = new SplitDeliverDTO();
                 splitDeliverDTO.setShipState(splitDeliver.getShippingState());//发货状态
@@ -454,7 +505,7 @@ public class ComplainService {
                 splitDeliverDTO.setCreateDate(splitDeliver.getCreateDate());
                 splitDeliverDTO.setSendTime(splitDeliver.getSendTime());
                 splitDeliverDTO.setSubmitTime(splitDeliver.getSubmitTime());
-                splitDeliverDTO.setModifyDate(splitDeliver.getModifyDate());//收货时间
+                splitDeliverDTO.setRecTime(splitDeliver.getRecTime() == null ? splitDeliver.getModifyDate() : splitDeliver.getRecTime());//收货时间
                 splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
                 splitDeliverDTO.setSupState(splitDeliver.getSupState());//大管家收货状态
                 splitDeliverDTO.setSupName(splitDeliver.getSupplierName());
@@ -464,7 +515,7 @@ public class ComplainService {
                 example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
                 List<SplitDeliverItemDTO> splitDeliverItemDTOList = new ArrayList<>();
-                for (OrderSplitItem orderSplitItem : orderSplitItemList){
+                for (OrderSplitItem orderSplitItem : orderSplitItemList) {
                     SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
                     splitDeliverItemDTO.setImage(address + orderSplitItem.getImage());
                     splitDeliverItemDTO.setProductSn(orderSplitItem.getProductSn());

@@ -230,10 +230,7 @@ public class SupplierService {
             for (Supplier supplier : supplierList) {
                 Map<String, Object> map = BeanUtils.beanToMap(supplier);
                 //查找所有的货品 供应商
-                Example example =new Example(SupplierProduct.class);
-                example.createCriteria().andEqualTo(SupplierProduct.SUPPLIER_ID,supplier.getId()).andEqualTo(SupplierProduct.IS_SUPPLY,1);
-                List<SupplierProduct> pList = iSupplierProductMapper.selectByExample(example);
-
+                List<SupplierProduct> pList = iSupplierProductMapper.querySupplierProduct(supplier.getId(),null);
                 Set<String> goodsSet = new HashSet();
                 Set<String> productSet = new HashSet();
                 Integer countStock = 0;
@@ -404,7 +401,7 @@ public class SupplierService {
                     sp.setModifyDate(new Date());
                     iSupplierMapper.updateSupplierProduct(sp);
                 }
-                List<SupplierProduct> supplierProducts = iSupplierProductMapper.querySupplierProduct(sp.getProductId());
+                List<SupplierProduct> supplierProducts = iSupplierProductMapper.querySupplierProduct(null,sp.getProductId());
                 //更新 对应 product 的平均价格
                 Product oldProduct = iProductMapper.selectByPrimaryKey(sp.getProductId());
                 if (supplierProducts.size() > 0) {

@@ -18,25 +18,26 @@ import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
-import com.dangjia.acg.mapper.house.ISurplusWareHouseItemMapper;
+import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
+import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
-import com.dangjia.acg.modle.house.SurplusWareHouseItem;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.ChangeOrder;
-import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
+import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
+import com.dangjia.acg.service.core.HouseWorkerSupService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +87,14 @@ public class EvaluateService {
     private ForMasterAPI forMasterAPI;
     @Autowired
     private IMaterialRecordMapper materialRecordMapper;
+    @Autowired
+    private ITechnologyRecordMapper technologyRecordMapper;
+    @Autowired
+    private HouseWorkerSupService houseWorkerSupService;
 
+
+    @Autowired
+    private IWorkerDetailMapper iWorkerDetailMapper;
     /**
      * 获取积分记录
      * @param userToken
@@ -155,6 +163,33 @@ public class EvaluateService {
             houseFlowApply.setSupervisorCheck(2);
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
+            /*
+            验收节点不通过
+             */
+            technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(),houseFlowApply.getWorkerTypeId());
+
+            //业主不通过工匠发起阶段/整体完工申请驳回次数超过两次后将扣工人钱
+            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.noPassList(houseFlowApply.getHouseFlowId());
+            if (houseFlowApplyList.size() > 2){
+
+                BigDecimal money=new BigDecimal(100);
+                Member member = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
+                WorkerDetail workerDetail = new WorkerDetail();
+                workerDetail.setName("阶段/整体完工第"+houseFlowApplyList.size()+"次驳回,次数超过两次，工钱扣除");
+                workerDetail.setWorkerId(member.getId());
+                workerDetail.setWorkerName(member.getName());
+                workerDetail.setHouseId(houseFlowApply.getHouseId());
+                workerDetail.setMoney(money);
+                workerDetail.setState(3);
+                iWorkerDetailMapper.insert(workerDetail);
+
+                BigDecimal surplusMoney = member.getSurplusMoney().subtract(money);
+                BigDecimal haveMoney = member.getHaveMoney().subtract(money);
+                member.setSurplusMoney(surplusMoney);
+                member.setHaveMoney(haveMoney);
+                memberMapper.updateByPrimaryKeySelective(member);
+
+            }
 
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS,house.getHouseName()) ,"5");
@@ -240,6 +275,8 @@ public class EvaluateService {
             calendar.add(Calendar.DAY_OF_YEAR, 7);//业主倒计时
             houseFlowApply.setEndDate(calendar.getTime());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
+
+
             /*
              * 大管家每次审核拿钱 新算法 2018.08.03
              */

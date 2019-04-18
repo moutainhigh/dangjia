@@ -28,6 +28,7 @@ public interface HouseChoiceCaseAPI {
     @PostMapping("/config/choice/list")
     @ApiOperation(value = "获取所有房屋精选案例", notes = "获取所有房屋精选案例")
     ServerResponse getHouseChoiceCases(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("from") Integer from,
                                        @RequestParam("houseChoiceCase") PageDTO pageDTO,
                                        @RequestParam("houseChoiceCase") HouseChoiceCase houseChoiceCase);
 

@@ -8,9 +8,9 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowApplyDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
-import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
@@ -73,13 +73,12 @@ public class HouseFlowApplyService {
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
-    private IMendOrderMapper mendOrderMapper;
-    /*@Autowired
-    private ConfigMessageService configMessageService;
-    @Autowired
-    private RedisClient redisClient;*/
+    private HouseWorkerSupService houseWorkerSupService;
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
+    @Autowired
+    private ITechnologyRecordMapper technologyRecordMapper;
+
 
 
     /**
@@ -154,6 +153,12 @@ public class HouseFlowApplyService {
             //工匠订单
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());
 
+
+            /*
+            节点审核通过
+             */
+            technologyRecordMapper.passTecRecord(hwo.getHouseId(),hwo.getWorkerTypeId());
+
             if(hfa.getApplyType() == 2){//整体完工
                 /**验证未处理补人工订单*/
                 List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(hfa.getHouseId(),hfa.getWorkerTypeId());
@@ -164,6 +169,7 @@ public class HouseFlowApplyService {
                 //修改进程
                 HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(),hwo.getWorkerTypeId());
                 houseFlow.setWorkSteta(2);
+
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                 //处理工人拿钱
                 workerMoney(hwo,hfa);
@@ -272,6 +278,8 @@ public class HouseFlowApplyService {
             hfa.setMemberCheck(1);
             hfa.setPayState(1);
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
+
+
 
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
@@ -602,19 +610,14 @@ public class HouseFlowApplyService {
         if(worker.getSurplusMoney() == null){//可取余额 赋初始值为0
             worker.setSurplusMoney(new BigDecimal(0.0));
         }
-        BigDecimal mid = worker.getHaveMoney().subtract(worker.getRetentionMoney());//可取等于 获得减押金
-        if(mid.compareTo(BigDecimal.ZERO) == 1){//大于0
-            worker.setSurplusMoney(mid);
-        }else{
-            worker.setSurplusMoney(BigDecimal.ZERO);
-        }
+
 
         BigDecimal surplusMoney = worker.getSurplusMoney().add(hwo.getRepairPrice());
         BigDecimal workerPrice = worker.getWorkerPrice().add(hwo.getRepairPrice());
         BigDecimal haveMoney = worker.getHaveMoney().add(hwo.getRepairPrice());
-        worker.setWorkerPrice(workerPrice);
-        worker.setHaveMoney(haveMoney);
-        worker.setSurplusMoney(surplusMoney);
+        worker.setWorkerPrice(workerPrice);//总共获得钱
+        worker.setHaveMoney(haveMoney);//可取 + 滞留金
+        worker.setSurplusMoney(surplusMoney);//可取钱
         memberMapper.updateByPrimaryKeySelective(worker);
 
         WorkerDetail workerDetail = new WorkerDetail();
@@ -735,6 +738,7 @@ public class HouseFlowApplyService {
         }
     }
 
+
     /**
      * 验收详情
      * 1.30 1.31 共用
@@ -758,6 +762,9 @@ public class HouseFlowApplyService {
                 List<String> imageList = new ArrayList<String>();
                 for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList){
                     imageList.add(local+houseFlowApplyImage.getImageUrl());
+                }
+                if(houseFlowApply.getEndDate() != null){
+                    houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate().getTime() - new Date().getTime()); //业主自动审核时间
                 }
                 houseFlowApplyDTO.setImageList(imageList);
                 houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(),"yyyy-MM-dd HH:mm"));

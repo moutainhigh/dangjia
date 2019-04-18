@@ -583,6 +583,13 @@
             LIKE CONCAT('%',#{name},'%')
             )
         </if>
+
+        <if test="productId!=null and productId!=''">
+            AND p.id in
+            <foreach collection="productId" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
         <if test="categoryId!=null and categoryId!=''">
             AND (ca.parent_top=#{categoryId} OR p.category_id=#{categoryId})
         </if>
@@ -621,44 +628,13 @@
         AND bp.type = 1
         AND bg.data_status = 0
         <if test="name!=null and name!=''">
-            AND (
-            bp.NAME LIKE CONCAT( '%',#{name}, '%' )
-            OR bb.NAME LIKE CONCAT( '%',#{name}, '%' )
-            OR bbs.NAME LIKE CONCAT( '%', #{name}, '%' )
-            )
+            AND CONCAT(bp. NAME, bb. NAME, bbs. NAME) LIKE CONCAT('%', #{name}, '%')
         </if>
         GROUP BY
-        bg.id
+        bp.goods_id
         ORDER BY
-        bg.create_date DESC
-
-        <!--SELECT pg.id,pg.goods_id goodsId, g.`name`, pg.image, pg.price , pg.convert_unit convertUnit FROM-->
-        <!--dj_basics_goods g-->
-        <!--INNER JOIN (-->
-        <!--SELECT-->
-        <!--p.id,-->
-        <!--p.goods_id,-->
-        <!--p.convert_unit,-->
-        <!--p.image,-->
-        <!--p.price-->
-        <!--FROM-->
-        <!--dj_basics_product p-->
-        <!--WHERE-->
-        <!--p.maket = 1-->
-        <!--AND p.type = 1-->
-        <!--ORDER BY-->
-        <!--p.create_date DESC-->
-        <!--) pg ON g.id = pg.goods_id-->
-        <!--WHERE-->
-        <!--g.data_status = 0-->
-        <!--<if test="name!=null and name!=''">-->
-        <!--AND-->
-        <!--g.name LIKE CONCAT('%',#{name},'%')-->
-        <!--</if>-->
-        <!--GROUP BY-->
-        <!--g.id-->
-        <!--ORDER BY-->
-        <!--g.create_date DESC-->
+        bg.category_id,
+        bg.`name` DESC
     </select>
     <select id="selectProductByGoodsIdAndBrandIdAndBrandSeriesId"
             resultType="com.dangjia.acg.modle.basics.Product">

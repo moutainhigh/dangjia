@@ -58,7 +58,14 @@
             AND house.visit_state=1
             AND member.id = house.member_id
             <if test="residential!=null and residential!=''">
-                AND CONCAT(house.residential,house.building,'栋',house.unit,'单元',house.number,'号') LIKE
+                AND CONCAT(
+                house.residential,
+                IFNULL(house.building, '*'),
+                '栋',
+                IFNULL(CONCAT(house.unit, '单元'),'' ),
+                IFNULL(house.number, '*'),
+                '号'
+                )  LIKE
                 CONCAT('%',#{residential},'%')
             </if>
             <if test="mobile!=null and mobile!=''">
@@ -118,7 +125,14 @@
         FROM dj_house as house
         WHERE 1=1
         <if test="likeAddress!=null and likeAddress!=''">
-            AND CONCAT(house.residential,house.building,'栋',house.unit,'单元',house.number,'号') LIKE
+            AND CONCAT(
+            house.residential,
+            IFNULL(house.building, '*'),
+            '栋',
+            IFNULL(CONCAT(house.unit, '单元'),'' ),
+            IFNULL(house.number, '*'),
+            '号'
+            )  LIKE
             CONCAT('%',#{likeAddress},'%')
 
         </if>
@@ -201,7 +215,6 @@
         h.work_deposit_id as workDepositId,
         h.create_date AS createDate,
         h.modify_date AS modifyDate,
-        h.number as number,
         h.city_id as cityId,
         h.modeling_layout_id as modelingLayoutId,
         h.village_id as villageId,
@@ -225,7 +238,14 @@
             AND (
             m.mobile like CONCAT('%',#{searchKey},'%')
             or
-            CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') LIKE CONCAT('%',#{searchKey},'%')
+            CONCAT(
+            h.residential,
+            IFNULL(h.building, '*'),
+            '栋',
+            IFNULL(CONCAT(h.unit, '单元'),'' ),
+            IFNULL(h.number, '*'),
+            '号'
+            ) LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
         ORDER by
@@ -238,7 +258,14 @@
     <select id="getActuaryAll" resultType="com.dangjia.acg.dto.house.HouseListDTO">
         SELECT
         h.id as houseId,
-        CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') houseName,
+        CONCAT(
+        h.residential,
+        IFNULL(h.building, '*'),
+        '栋',
+        IFNULL(CONCAT(h.unit, '单元'),'' ),
+        IFNULL(h.number, '*'),
+        '号'
+        ) houseName,
         h.city_name as cityName,
         h.budget_ok as budgetOk,
         h.custom_sort as customSort,
@@ -278,7 +305,14 @@
             AND (
             m.mobile like CONCAT('%',#{searchKey},'%')
             or
-            CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') LIKE CONCAT('%',#{searchKey},'%')
+            CONCAT(
+            h.residential,
+            IFNULL(h.building, '*'),
+            '栋',
+            IFNULL(CONCAT(h.unit, '单元'),'' ),
+            IFNULL(h.number, '*'),
+            '号'
+            ) LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
         ORDER by  h.create_date  desc
@@ -337,7 +371,14 @@
 
         <if test="searchKey!=null and searchKey!=''">
             and ( m.mobile like CONCAT('%',#{searchKey},'%')
-            or CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') LIKE CONCAT('%',#{searchKey},'%')
+            or CONCAT(
+            h.residential,
+            IFNULL(h.building, '*'),
+            '栋',
+            IFNULL(CONCAT(h.unit, '单元'),'' ),
+            IFNULL(h.number, '*'),
+            '号'
+            ) LIKE CONCAT('%',#{searchKey},'%')
             or m.nick_name like CONCAT('%',#{searchKey},'%')
             or m.name like CONCAT('%',#{searchKey},'%')
             )

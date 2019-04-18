@@ -5,7 +5,6 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.service.house.HouseApplyChangeOnYsService;
 import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,8 +21,6 @@ public class HouseController implements HouseAPI {
     @Autowired
     private HouseService houseService;
 
-    @Autowired
-    private HouseApplyChangeOnYsService houseApplyChangeOnYsService;
 
     /**
      * 切换房产
@@ -146,7 +143,7 @@ public class HouseController implements HouseAPI {
     /**
      * 施工记录
      *
-     * @param houseId 房子ID @Instance: 515421101553658147172
+     * @param houseId 房子ID @Instance: 835240771552816792532
      * @param pageDTO 分页内容
      * @return 施工记录列表 @see swagger:房产接口-> 施工记录
      *
@@ -154,8 +151,7 @@ public class HouseController implements HouseAPI {
     @Override
     @ApiMethod
     public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO) {
-//        return  houseService.queryConstructionRecord(houseId, pageDTO.getPageNum(), pageDTO.getPageSize(), null);
-        return houseApplyChangeOnYsService.queryConstructionRecord(houseId, pageDTO.getPageNum(), pageDTO.getPageSize(), null);
+        return  houseService.queryConstructionRecord(houseId, pageDTO.getPageNum(), pageDTO.getPageSize(), null);
     }
 
     @Override

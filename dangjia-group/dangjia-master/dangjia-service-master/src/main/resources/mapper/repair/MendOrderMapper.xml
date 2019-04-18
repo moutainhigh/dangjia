@@ -140,7 +140,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             and
             house_id = #{houseId}
         </if>
-        ORDER BY create_date desc
+        ORDER BY category_id desc
     </select>
 
     <!-- 查询退货单 -->
@@ -214,7 +214,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </if>
 
         <if test="likeAddress!=null and likeAddress!=''">
-            AND CONCAT(house.residential,house.building,'栋',house.unit,'单元',house.number,'号') LIKE CONCAT('%',#{likeAddress},'%')
+            AND CONCAT(
+            house.residential,
+            IFNULL(house.building, '*'),
+            '栋',
+            IFNULL(CONCAT(house.unit, '单元'),'' ),
+            IFNULL(house.number, '*'),
+            '号'
+            )  LIKE CONCAT('%',#{likeAddress},'%')
 
         </if>
 

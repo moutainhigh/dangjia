@@ -96,8 +96,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         INNER JOIN dj_deliver_split_deliver sd ON si.split_deliver_id = sd.id
         WHERE
             s.number = #{number}
-        ORDER BY
-            si.create_date DESC
+       ORDER BY
+            si.category_id DESC
 	</select>
 
 

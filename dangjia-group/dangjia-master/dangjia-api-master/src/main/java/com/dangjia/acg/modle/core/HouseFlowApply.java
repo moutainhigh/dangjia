@@ -74,8 +74,8 @@ public class HouseFlowApply extends BaseEntity {
 	private String applyDec;//applydec
 
 	@Column(name = "member_check")
-	@Desc(value = "用户审核结果,0未审核，1审核通过，2审核不通过，3自动审核")
-	@ApiModelProperty("用户审核结果,0未审核，1审核通过，2审核不通过，3自动审核")
+	@Desc(value = "用户审核结果,0未审核，1审核通过，2审核不通过，3自动审核，4申述中")
+	@ApiModelProperty("用户审核结果,0未审核，1审核通过，2审核不通过，3自动审核，4申述中")
 	private Integer memberCheck;//membercheck
 
 	@Column(name = "supervisor_check")

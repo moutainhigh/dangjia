@@ -10,7 +10,10 @@ import java.util.List;
 
 @Repository
 public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
-    List<HouseFlowApply> couponApply();
+
+    List<HouseFlowApply> supCouponApply(@Param("time")Date time);
+
+    List<HouseFlowApply> couponApply(@Param("time")Date time);
 
     List<HouseFlowApply> noPassList(@Param("houseFlowId") String houseFlowId);
     /**删除未审核申请*/
@@ -22,8 +25,8 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
     List<HouseFlowApply> checkPendingApply(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
     /**管家已审核业主未审核申请*/
     List<HouseFlowApply> getMemberCheckList(@Param("houseId") String houseId);
-
     Long getCountValidPatrolByHouseId(@Param("houseId") String houseId,@Param("workerId") String workerId);
+    Long countPatrol(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId);
     HouseFlowApply getTodayStart(@Param("houseId") String houseId, @Param("workerId") String workerId, @Param("time")Date time);
     HouseFlowApply checkHouseFlowApply(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
     List<HouseFlowApply> getSupervisorCheckList(@Param("houseId") String houseId);

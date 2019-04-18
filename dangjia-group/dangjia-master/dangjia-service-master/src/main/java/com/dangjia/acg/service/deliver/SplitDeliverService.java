@@ -76,6 +76,7 @@ public class SplitDeliverService {
             splitDeliver.setOperatorId(operator.getId());
             splitDeliver.setShippingState(4);//部分收货
             splitDeliver.setImage(image);//收货图片
+            splitDeliver.setRecTime(new Date());
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             JSONArray arr = JSONArray.parseArray(splitItemList);
             for(int i=0; i<arr.size(); i++) {
@@ -112,6 +113,7 @@ public class SplitDeliverService {
             splitDeliver.setShippingState(2);//收货
             splitDeliver.setOperatorId(operator.getId());
             splitDeliver.setImage(image);//收货图片
+            splitDeliver.setRecTime(new Date());
             splitDeliver.setModifyDate(new Date());//收货时间
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             orderSplitItemMapper.affirmSplitDeliver(splitDeliverId);
@@ -162,7 +164,7 @@ public class SplitDeliverService {
             splitDeliverDTO.setCreateDate(splitDeliver.getCreateDate());
             splitDeliverDTO.setSendTime(splitDeliver.getSendTime());
             splitDeliverDTO.setSubmitTime(splitDeliver.getSubmitTime());
-            splitDeliverDTO.setModifyDate(splitDeliver.getModifyDate());//收货时间
+            splitDeliverDTO.setRecTime(splitDeliver.getRecTime() == null? splitDeliver.getModifyDate() : splitDeliver.getRecTime());//收货时间
             splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
             splitDeliverDTO.setSupState(splitDeliver.getSupState());//大管家收货状态
             splitDeliverDTO.setSupName(splitDeliver.getSupplierName());
@@ -170,8 +172,8 @@ public class SplitDeliverService {
             splitDeliverDTO.setSupMobile(splitDeliver.getShipMobile());
             if(StringUtil.isNotEmpty(splitDeliver.getOperatorId())){
                 Member operator = memberMapper.selectByPrimaryKey(splitDeliver.getOperatorId());
-                if(StringUtil.isNotEmpty(operator.getWorkerTypeId())){
-                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(operator.getWorkerTypeId());
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(operator.getWorkerTypeId());
+                if(workerType != null){
                     splitDeliverDTO.setOperatorName(workerType.getName()+"-" + (operator.getName() == null ? operator.getNickName() : operator.getName()));
                 }else {
                     splitDeliverDTO.setOperatorName("业主-" + operator.getName() == null ? operator.getNickName() : operator.getName());
@@ -241,7 +243,7 @@ public class SplitDeliverService {
                 splitDeliverDTO.setShipState(splitDeliver.getShippingState());
                 splitDeliverDTO.setNumber(splitDeliver.getNumber());
                 splitDeliverDTO.setSendTime(splitDeliver.getSendTime());//发货时间
-                splitDeliverDTO.setModifyDate(splitDeliver.getModifyDate());//收货时间
+                splitDeliverDTO.setRecTime(splitDeliver.getRecTime() == null? splitDeliver.getModifyDate() : splitDeliver.getRecTime());//收货时间
                 Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), splitDeliver.getSupplierId());
                 if(supplier != null){
                     splitDeliverDTO.setSupId(supplier.getId());//供应商id

@@ -204,7 +204,11 @@ public class HouseFlowService {
                         HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
                         BigDecimal workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", workPrice.doubleValue()));//工钱
-                    } else {
+                    }
+                    else if (houseFlow.getWorkerType()==2){
+                        allgrabBean.setWorkertotal("¥" + String.format("%.2f",houseFlow.getWorkPrice().doubleValue()));
+                    }
+                    else {
                         ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(request, houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
                         if (serverResponse.isSuccess()) {
                             if (serverResponse.getResultObj() != null) {
@@ -322,7 +326,7 @@ public class HouseFlowService {
 
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(RewardPunishRecord.class);
-            example.createCriteria().andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId());
+            example.createCriteria().andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId()).andEqualTo(RewardPunishRecord.STATE, "0");
             List<RewardPunishRecord> recordList = rewardPunishRecordMapper.selectByExample(example);
             if (hf.getWorkType() >= 3) {
                 return ServerResponse.createByErrorMessage("订单已经被抢了！");

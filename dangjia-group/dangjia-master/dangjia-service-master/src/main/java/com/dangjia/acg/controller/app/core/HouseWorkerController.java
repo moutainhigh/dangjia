@@ -68,7 +68,7 @@ public class HouseWorkerController implements HouseWorkerAPI {
     @Override
     @ApiMethod
     public ServerResponse getHouseFlowApply(String userToken, String houseFlowApplyId){
-        return houseWorkerService.getHouseFlowApply(userToken, houseFlowApplyId);
+        return houseWorkerService.getHouseFlowApply(houseFlowApplyId);
     }
     /**
      * 提交审核、停工
@@ -100,7 +100,7 @@ public class HouseWorkerController implements HouseWorkerAPI {
     @Override
     @ApiMethod
     public ServerResponse getAdvanceInAdvance(String userToken, String houseFlowId) {
-        return houseWorkerService.getAdvanceInAdvance(userToken, houseFlowId);
+        return houseWorkerService.getAdvanceInAdvance(houseFlowId);
     }
 
     /**

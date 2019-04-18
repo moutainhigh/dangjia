@@ -73,13 +73,12 @@
 		whi.product_name as productName,
 		whi.product_count as productCount
 		FROM dj_house_surplus_ware_house as wh
-		left  JOIN dj_house_surplus_ware_house_item as whi
-		on (wh.id = whi.surplus_ware_house_id )
-		WHERE 1=1
+		INNER JOIN dj_house_surplus_ware_house_item as whi on (wh.id = whi.surplus_ware_house_id )
+		WHERE wh.data_status=0
         <if test="productId!=null and productId!=''">
             and product_id = #{productId}
         </if>
-        ORDER BY wh.create_date desc
+        ORDER BY whi.category_id desc
     </select>
 
 

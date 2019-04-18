@@ -53,8 +53,13 @@ public interface WorkerAPI {
     @ApiOperation(value = "添加银行卡", notes = "添加银行卡")
     ServerResponse addMyBankCard(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("userToken") String userToken,
-                                 @RequestParam("bankCardId") String bankCardId,
                                  @RequestParam("bankCard") WorkerBankCard bankCard);
+
+    @PostMapping("app/worker/delMyBankCard")
+    @ApiOperation(value = "删除银行卡", notes = "删除银行卡")
+    ServerResponse delMyBankCard(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("userToken") String userToken,
+                                 @RequestParam("workerBankCardId") String workerBankCardId);
 
     @PostMapping("app/worker/getRanking")
     @ApiOperation(value = "邀请排行榜", notes = "邀请排行榜")
@@ -74,5 +79,4 @@ public interface WorkerAPI {
     @PostMapping("/app/rewardPunish/get")
     @ApiOperation(value = "奖罚详情", notes = "奖罚详情")
     ServerResponse getRewardPunishRecord(@RequestParam("recordId") String recordId);
-
 }

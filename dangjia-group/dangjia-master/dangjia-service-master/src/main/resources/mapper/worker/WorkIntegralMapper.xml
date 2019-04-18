@@ -19,7 +19,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </sql>
     <!--积分流水 -->
     <select id="queryWorkIntegral" resultType="com.dangjia.acg.dto.worker.WorkIntegralDTO">
-        SELECT <include refid="new_columns" />,CONCAT(h.residential,h.building,'栋',h.unit,'单元',h.number,'号') houseName
+        SELECT <include refid="new_columns" />,
+        CONCAT(
+        h.residential,
+        IFNULL(h.building, '*'),
+        '栋',
+        IFNULL(CONCAT(h.unit, '单元'),'' ),
+        IFNULL(h.number, '*'),
+        '号'
+        ) houseName
         FROM
         `dj_worker_work_integral` hi
         INNER JOIN dj_house h ON hi.house_id = h.id

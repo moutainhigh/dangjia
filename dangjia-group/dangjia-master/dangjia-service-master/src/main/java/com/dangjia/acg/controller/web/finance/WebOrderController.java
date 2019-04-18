@@ -26,4 +26,10 @@ public class WebOrderController implements WebOrderAPI {
     public ServerResponse getAllOrders(HttpServletRequest request, PageDTO pageDTO, Integer state, String searchKey) {
         return webOrderService.getAllOrders(pageDTO, state, searchKey);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getOrderItem(HttpServletRequest request,PageDTO pageDTO, String businessNumber) {
+        return webOrderService.getOrderItem(pageDTO,businessNumber);
+    }
 }

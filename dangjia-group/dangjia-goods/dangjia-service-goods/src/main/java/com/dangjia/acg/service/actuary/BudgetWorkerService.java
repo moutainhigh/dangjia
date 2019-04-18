@@ -830,11 +830,11 @@ public class BudgetWorkerService {
                     if (abw.getShopCount() + abw.getRepairCount() - abw.getBackCount() > 0) {
                         WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
                         List<Technology> tList = iTechnologyMapper.patrolList(wg.getId());
-                        for (Technology t : tList) {
-                            JSONObject map = new JSONObject();
-                            map.put("technologyId", t.getId());
-                            map.put("technologyName", t.getName());
-                            jsonArray.add(map);
+                        if (tList.size() > 0){
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("workerGoodsId",  wg.getId());
+                            jsonObject.put("workerGoodsName", wg.getName());
+                            jsonArray.add(jsonObject);
                         }
                     }
                 }
@@ -846,11 +846,11 @@ public class BudgetWorkerService {
                     Product product = iProductMapper.selectByPrimaryKey(warehouse.getProductId());
                     if(product == null) continue;
                     List<Technology> tList = iTechnologyMapper.patrolList(product.getId());
-                    for (Technology t : tList) {
-                        Map<String, Object> map = new HashMap<>();
-                        map.put("technologyId", t.getId());
-                        map.put("technologyName", t.getName());
-                        jsonArray.add(map);
+                    if (tList.size() > 0){
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("workerGoodsId",  product.getId());
+                        jsonObject.put("workerGoodsName", product.getName());
+                        jsonArray.add(jsonObject);
                     }
                 }
             }
@@ -904,6 +904,24 @@ public class BudgetWorkerService {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public boolean workerPatrolList(String workerGoodsId){
+        List<Technology> tList = iTechnologyMapper.workerPatrolList(workerGoodsId);
+        if(tList.size() > 0){
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    public boolean patrolList(String workerGoodsId){
+        List<Technology> tList = iTechnologyMapper.patrolList(workerGoodsId);
+        if(tList.size() > 0){
+            return true;
+        }else {
+            return false;
         }
     }
 

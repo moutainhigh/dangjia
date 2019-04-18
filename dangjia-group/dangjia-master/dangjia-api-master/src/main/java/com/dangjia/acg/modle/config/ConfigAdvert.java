@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  * 实体类 - 广告表
@@ -28,9 +29,9 @@ public class ConfigAdvert extends BaseEntity {
     private String appType;
 
     @Column(name = "is_show")
-    @Desc(value = "是否显示")
-    @ApiModelProperty("是否显示")
-    private boolean isShow;
+    @Desc(value = "展示方式 0: 展示 1：不展示 2: 定时展示")
+    @ApiModelProperty("展示方式 0: 展示 1：不展示 2: 定时展示")
+    private int isShow;
 
     @Column(name = "name")
     @Desc(value = "广告名称")
@@ -62,10 +63,22 @@ public class ConfigAdvert extends BaseEntity {
     @ApiModelProperty("广告图片")
     private String image;
 
+    @Column(name = "show_time_start")
+    @Desc(value = "定时展示开始时间")
+    @ApiModelProperty("定时展示开始时间")
+    private Date showTimeStart;
+
+    @Column(name = "show_time_end")
+    @Desc(value = "定时展示结束时间")
+    @ApiModelProperty("定时展示结束时间")
+    private Date showTimeEnd;
+
     //所有图片字段加入域名和端口，形成全路径
     public void initPath(String address){
         this.image= StringUtils.isEmpty(this.image)?null:address+this.image;
         this.data= StringUtils.isEmpty(this.data)?null:this.data+"&title="+this.name;
-    };
+    }
+
+
 
 }
