@@ -11,9 +11,9 @@ import java.util.List;
 @Repository
 public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
 
-    List<HouseFlowApply> supCouponApply();
+    List<HouseFlowApply> supCouponApply(@Param("time")Date time);
 
-    List<HouseFlowApply> couponApply();
+    List<HouseFlowApply> couponApply(@Param("time")Date time);
 
     List<HouseFlowApply> noPassList(@Param("houseFlowId") String houseFlowId);
     /**删除未审核申请*/
