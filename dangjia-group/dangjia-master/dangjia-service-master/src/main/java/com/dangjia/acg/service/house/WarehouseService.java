@@ -76,6 +76,8 @@ public class WarehouseService {
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
+
+            House house = houseMapper.selectByPrimaryKey(houseId);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             Example example=new Example(Warehouse.class);
             Example.Criteria criteria=example.createCriteria();
@@ -95,7 +97,6 @@ public class WarehouseService {
             LOG.info(" warehouseList size:" + warehouseList.size());
             PageInfo pageResult = new PageInfo(warehouseList);
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
-            House house = houseMapper.selectByPrimaryKey(houseId);
             for (Warehouse warehouse : warehouseList) {
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
                 BeanUtils.beanToBean(warehouse,warehouseDTO);
