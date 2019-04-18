@@ -6,6 +6,7 @@ import com.dangjia.acg.service.worker.EvaluateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,7 +26,7 @@ public class TimingApplyService {
      * 管家自动审核
      */
     public void supCouponApply(){
-        List<HouseFlowApply> houseFlowApplyList =  houseFlowApplyMapper.supCouponApply();
+        List<HouseFlowApply> houseFlowApplyList =  houseFlowApplyMapper.supCouponApply(new Date());
         for (HouseFlowApply houseFlowApply : houseFlowApplyList){
             evaluateService.checkOk(houseFlowApply.getId(),"",5);
         }
@@ -35,7 +36,7 @@ public class TimingApplyService {
      * 查询到时业主未审核申请
      */
     public void couponApply(){
-        List<HouseFlowApply> houseFlowApplyList =  houseFlowApplyMapper.couponApply();
+        List<HouseFlowApply> houseFlowApplyList =  houseFlowApplyMapper.couponApply(new Date());
         for (HouseFlowApply houseFlowApply : houseFlowApplyList){
             if(houseFlowApply.getWorkerType() == 3){
                 evaluateService.saveEvaluateSupervisor(houseFlowApply.getId(),"",5);
