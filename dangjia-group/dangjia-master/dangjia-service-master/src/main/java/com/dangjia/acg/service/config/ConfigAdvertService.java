@@ -46,13 +46,13 @@ public class ConfigAdvertService {
     public ServerResponse getConfigAdverts(HttpServletRequest request, String userToken, ConfigAdvert configAdvert) {
         Example example = new Example(ConfigAdvert.class);
         Example.Criteria criteria = example.createCriteria();
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken != null) {//有效的token
-            criteria.andNotEqualTo(ConfigAdvert.TYPE, 3);
-        }
-        if (!CommonUtil.isEmpty(configAdvert.getAppType())) {
+        if (!CommonUtil.isEmpty(configAdvert.getAppType())) {//App端调用
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            if (accessToken != null) {//登录情况下屏蔽推荐登录的广告
+                criteria.andNotEqualTo(ConfigAdvert.TYPE, 3);
+            }
             criteria.andEqualTo(ConfigAdvert.APP_TYPE, configAdvert.getAppType());
-            criteria.andEqualTo(ConfigAdvert.IS_SHOW, true);
+            criteria.andCondition(" ( is_show = 0 or ( is_show = 2 and now() BETWEEN show_time_start and show_time_end) )");
         }
         if (!CommonUtil.isEmpty(configAdvert.getCityId())) {
             criteria.andEqualTo(ConfigAdvert.CITY_ID, configAdvert.getCityId());
@@ -60,6 +60,7 @@ public class ConfigAdvertService {
         if (!CommonUtil.isEmpty(configAdvert.getAdvertType())) {
             criteria.andEqualTo(ConfigAdvert.ADVERT_TYPE, configAdvert.getAdvertType());
         }
+        criteria.andEqualTo(ConfigAdvert.DATA_STATUS, 0);
         List<ConfigAdvert> list = configAdvertMapper.selectByExample(example);
         if (list.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
@@ -83,8 +84,13 @@ public class ConfigAdvertService {
      * @return
      */
     public ServerResponse delConfigAdvert(HttpServletRequest request, String id) {
-        if (this.configAdvertMapper.deleteByPrimaryKey(String.valueOf(id)) > 0) {
-            return ServerResponse.createBySuccessMessage("ok");
+        ConfigAdvert configAdvert = configAdvertMapper.selectByPrimaryKey(id);
+        if (configAdvert == null) {
+            return ServerResponse.createByErrorMessage("广告不存在");
+        }
+        configAdvert.setDataStatus(1);
+        if (configAdvertMapper.updateByPrimaryKeySelective(configAdvert) > 0) {
+            return ServerResponse.createBySuccessMessage("删除成功");
         } else {
             return ServerResponse.createByErrorMessage("删除失败，请您稍后再试");
         }
@@ -97,12 +103,7 @@ public class ConfigAdvertService {
      * @return
      */
     public ServerResponse editConfigAdvert(HttpServletRequest request, ConfigAdvert configAdvert) {
-        //查看该权限是否有子节点，如果有，先删除子节点
-        if (this.configAdvertMapper.updateByPrimaryKeySelective(configAdvert) > 0) {
-            return ServerResponse.createBySuccessMessage("ok");
-        } else {
-            return ServerResponse.createByErrorMessage("修改失败，请您稍后再试");
-        }
+        return setConfigAdvert(request, 1, configAdvert);
     }
 
     /**
@@ -112,11 +113,35 @@ public class ConfigAdvertService {
      * @return
      */
     public ServerResponse addConfigAdvert(HttpServletRequest request, ConfigAdvert configAdvert) {
-        //查看该权限是否有子节点，如果有，先删除子节点
-        if (this.configAdvertMapper.insertSelective(configAdvert) > 0) {
-            return ServerResponse.createBySuccessMessage("ok");
-        } else {
-            return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");
-        }
+        return setConfigAdvert(request, 0, configAdvert);
     }
+
+    private ServerResponse setConfigAdvert(HttpServletRequest request, int type, ConfigAdvert configAdvert) {
+        //查看该权限是否有子节点，如果有，先删除子节点
+        if (configAdvert.getIsShow() == 3 && (
+                CommonUtil.isEmpty(configAdvert.getShowTimeStart()) ||
+                        CommonUtil.isEmpty(configAdvert.getShowTimeEnd()))) {
+            return ServerResponse.createByErrorMessage("请选择开始和结束时间");
+        }
+        if ((configAdvert.getType() == 0 || configAdvert.getType() == 1) && CommonUtil.isEmpty(configAdvert.getData())) {
+            return ServerResponse.createByErrorMessage(configAdvert.getType() == 0 ? "请输入跳转地址" : "请选择房子");
+        }
+        if (CommonUtil.isEmpty(configAdvert.getImage())) {
+            return ServerResponse.createByErrorMessage("请上传图片");
+        }
+        if (CommonUtil.isEmpty(configAdvert.getCityId())) {
+            return ServerResponse.createByErrorMessage("请选择城市");
+        }
+        if (type == 0) {//新增
+            if (this.configAdvertMapper.insertSelective(configAdvert) <= 0) {
+                return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");
+            }
+        } else {//修改
+            if (this.configAdvertMapper.updateByPrimaryKeySelective(configAdvert) <= 0) {
+                return ServerResponse.createByErrorMessage("修改失败，请您稍后再试");
+            }
+        }
+        return ServerResponse.createBySuccessMessage("操作成功");
+    }
+
 }

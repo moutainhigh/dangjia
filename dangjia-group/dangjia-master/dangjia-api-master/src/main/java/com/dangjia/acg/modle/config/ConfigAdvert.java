@@ -29,9 +29,9 @@ public class ConfigAdvert extends BaseEntity {
     private String appType;
 
     @Column(name = "is_show")
-    @Desc(value = "是否显示")
-    @ApiModelProperty("是否显示")
-    private boolean isShow;
+    @Desc(value = "展示方式 0: 展示 1：不展示 2: 定时展示")
+    @ApiModelProperty("展示方式 0: 展示 1：不展示 2: 定时展示")
+    private int isShow;
 
     @Column(name = "name")
     @Desc(value = "广告名称")
@@ -62,11 +62,6 @@ public class ConfigAdvert extends BaseEntity {
     @Desc(value = "广告图片")
     @ApiModelProperty("广告图片")
     private String image;
-
-    @Column(name = "to_show")
-    @Desc(value = "展示方式 0: 不展示 1：展示 2: 定时展示")
-    @ApiModelProperty("展示方式 0: 不展示 1：展示 2: 定时展示")
-    private Integer toShow;
 
     @Column(name = "show_time_start")
     @Desc(value = "定时展示开始时间")
