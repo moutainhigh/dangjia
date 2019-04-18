@@ -56,9 +56,9 @@ public class HouseChoiceCaseService {
         if (from == null || from == 0) {//App端调用
             criteria.andCondition(" ( is_show = 0 or ( is_show = 2 and '" + DateUtil.format(new Date()) + "' BETWEEN show_time_start and show_time_end) )");
         }
+        criteria.andEqualTo(HouseChoiceCase.DATA_STATUS, 0);
         //随机排序
         if (request.getParameter("isRand") != null) {
-            criteria.andEqualTo(HouseChoiceCase.DATA_STATUS, 0);
             example.setOrderByClause(" rand() ");
             pageDTO.setPageNum(0);
         } else {
