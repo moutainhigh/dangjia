@@ -393,5 +393,18 @@
          INNER join dj_house h on m.id=h.member_id where m.id=#{memberId} and h.data_status =0 and h.visit_state =1
          ORDER BY create_date DESC limit 1
     </select>
+    
+    <select id="getRepairMend" resultType="com.dangjia.acg.dto.repair.RepairMendDTO">
+        SELECT
+            o.type as type,
+            m.shop_count as shopCount
+            FROM
+            dj_repair_mend_order o
+            INNER JOIN dj_repair_mend_materiel m ON m.mend_order_id = o.id
+            WHERE
+            o.type IN ( 2, 4 )
+            AND o.house_id = #{houseId}
+            AND m.product_id = #{productId}
+    </select>
 </mapper>
 
