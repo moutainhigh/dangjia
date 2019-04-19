@@ -464,7 +464,7 @@ public class OrderSplitService {
                 Map map =BeanUtils.beanToMap(orderSplit);
                 example = new Example(SplitDeliver.class);
                 example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId())
-                        .andEqualTo(SplitDeliver.SHIPPING_STATE, 0).andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplit.getId());
+                        .andCondition(" shipping_state in (0,4)").andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplit.getId());
                 int splitDeliverList = splitDeliverMapper.selectCountByExample(example);
                 map.put("num",splitDeliverList);
                 orderSplitMaps.add(map);
