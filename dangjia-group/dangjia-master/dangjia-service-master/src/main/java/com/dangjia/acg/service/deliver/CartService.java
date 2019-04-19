@@ -240,8 +240,10 @@ public class CartService {
             for (String categoryId : orderCategory) {
                 GoodsCategory goodsCategory=goodsCategoryAPI.getGoodsCategory(request,categoryId);
                 Map<String, Object> map = new HashMap<String, Object>();
-                map.put("id", goodsCategory.getId());
-                map.put("name", goodsCategory.getName());
+                if(goodsCategory!=null){
+                    map.put("id", goodsCategory.getId());
+                    map.put("name", goodsCategory.getName());
+                }
                 mapList.add(map);
             }
             return ServerResponse.createBySuccess("查询成功", mapList);
