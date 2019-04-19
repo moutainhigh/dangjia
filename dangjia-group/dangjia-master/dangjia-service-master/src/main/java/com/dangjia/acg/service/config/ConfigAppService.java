@@ -84,9 +84,11 @@ public class ConfigAppService {
      */
     public ServerResponse checkConfigApp(HttpServletRequest request, ConfigApp configApp) {
         Example example = new Example(ConfigApp.class);
-        example.createCriteria()
-                .andEqualTo("appType", configApp.getAppType())
-                .andGreaterThan("versionCode", configApp.getVersionCode());
+        Example.Criteria criteria=example.createCriteria();
+        criteria.andEqualTo("appType", configApp.getAppType());
+        if(!CommonUtil.isEmpty(configApp.getVersionCode())&&configApp.getVersionCode()>0) {
+            criteria.andGreaterThan("versionCode", configApp.getVersionCode());
+        }
         example.orderBy("createDate").desc();
         PageHelper.startPage(0, 1);
         List<ConfigApp> list = configAppMapper.selectByExample(example);
