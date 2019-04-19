@@ -159,8 +159,12 @@ public class CartService {
                 productType="1";
             }
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
-
-            List<String> productIdList = orderSplitMapper.getOrderProduct(houseId,productType,worker.getWorkerTypeId(),worker.getId());
+            List<String> productIdList;
+            if(worker.getWorkerType() == 3){
+                productIdList = orderSplitMapper.getOrderProduct(houseId,productType,"",worker.getId());
+            }else {
+                productIdList = orderSplitMapper.getOrderProduct(houseId,productType,worker.getWorkerTypeId(),worker.getId());
+            }
 
             if(productIdList==null||productIdList.size()==0){
                 return ServerResponse.createBySuccessMessage("查询成功");
