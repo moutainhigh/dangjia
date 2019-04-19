@@ -39,7 +39,12 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     public ServerResponse splitDeliverList(String supplierId, int shipState) {
         return orderSplitService.splitDeliverList(supplierId, shipState);
     }
-
+    /**
+     * 撤回供应商待发货的订单（整单撤回）
+     */
+    public ServerResponse withdrawSupplier(String orderSplitId){
+        return orderSplitService.withdrawSupplier(orderSplitId);
+    }
     /**
      * 发送供应商
      * 分发不同供应商
