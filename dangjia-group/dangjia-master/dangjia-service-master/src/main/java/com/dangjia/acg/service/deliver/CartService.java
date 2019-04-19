@@ -159,8 +159,12 @@ public class CartService {
                 productType="1";
             }
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
-
-            List<String> productIdList = orderSplitMapper.getOrderProduct(houseId,productType,worker.getWorkerTypeId(),worker.getId());
+            List<String> productIdList;
+            if(worker.getWorkerType() == 3){
+                productIdList = orderSplitMapper.getOrderProduct(houseId,productType,"",worker.getId());
+            }else {
+                productIdList = orderSplitMapper.getOrderProduct(houseId,productType,worker.getWorkerTypeId(),worker.getId());
+            }
 
             if(productIdList==null||productIdList.size()==0){
                 return ServerResponse.createBySuccessMessage("查询成功");
@@ -236,8 +240,10 @@ public class CartService {
             for (String categoryId : orderCategory) {
                 GoodsCategory goodsCategory=goodsCategoryAPI.getGoodsCategory(request,categoryId);
                 Map<String, Object> map = new HashMap<String, Object>();
-                map.put("id", goodsCategory.getId());
-                map.put("name", goodsCategory.getName());
+                if(goodsCategory!=null){
+                    map.put("id", goodsCategory.getId());
+                    map.put("name", goodsCategory.getName());
+                }
                 mapList.add(map);
             }
             return ServerResponse.createBySuccess("查询成功", mapList);

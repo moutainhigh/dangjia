@@ -572,16 +572,9 @@ public class PaymentService {
                 houseExpend.setWorkerMoney(houseExpend.getWorkerMoney() + hwo.getWorkPrice().doubleValue());//人工
                 houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
 
-
                 /*处理人工和取消的材料改到自购精算*/
-                if(this.renGong(businessOrderNumber, hwo, payState, houseFlowId)){
-                    /*处理材料*/
-                    Double caiPrice = forMasterAPI.getBudgetCaiPrice(hwo.getHouseId(), houseFlow.getWorkerTypeId(), house.getCityId());//精算材料钱
-                    Double serPrice = forMasterAPI.getBudgetSerPrice(hwo.getHouseId(), houseFlow.getWorkerTypeId(), house.getCityId());//精算服务钱
-                    if(caiPrice > 0 || serPrice > 0){
-                        this.caiLiao(businessOrderNumber, hwo, payState, houseFlowId);
-                    }
-                }
+                budgetCorrect(businessOrderNumber,payState,houseFlowId);
+
                 /*处理保险订单*/
                 this.insurance(hwo, payState);
             }
@@ -724,6 +717,19 @@ public class PaymentService {
         }
     }
 
+    public void budgetCorrect(String businessOrderNumber,  String payState, String houseFlowId){
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
+        /*处理人工和取消的材料改到自购精算*/
+        if(this.renGong(businessOrderNumber, hwo, payState, houseFlowId)){
+            /*处理材料*/
+            Double caiPrice = forMasterAPI.getBudgetCaiPrice(hwo.getHouseId(), houseFlow.getWorkerTypeId(), houseFlow.getCityId());//精算材料钱
+            Double serPrice = forMasterAPI.getBudgetSerPrice(hwo.getHouseId(), houseFlow.getWorkerTypeId(), houseFlow.getCityId());//精算服务钱
+            if(caiPrice > 0 || serPrice > 0){
+                this.caiLiao(businessOrderNumber, hwo, payState, houseFlowId);
+            }
+        }
+    }
     /**
      * 生成仓库
      * type 1 工序抢单任务进来的
