@@ -173,7 +173,7 @@ public class TechnologyRecordService {
 
             WorkNodeDTO workNodeDTOA = new WorkNodeDTO();
             workNodeDTOA.setTecName(workerGoodsName);//商品名
-            JSONArray tecArray = budgetWorkerAPI.getTecList(workerGoodsId);
+            JSONArray tecArray = budgetWorkerAPI.getTecList(worker.getWorkerType(),workerGoodsId);
             List<TechnologyRecordDTO> trList = new ArrayList<>();
             for(int j=0; j<tecArray.size(); j++){
                 JSONObject tecObject = tecArray.getJSONObject(j);
