@@ -127,6 +127,16 @@ public class Warehouse extends BaseEntity {
 	@ApiModelProperty("退次数")
 	private Integer backTime;//退次数
 
+	@Column(name = "work_back")
+	@Desc(value = "工人退")
+	@ApiModelProperty("工人退")
+	private Double workBack;//工人退
+
+	@Column(name = "owner_back")
+	@Desc(value = "业主退")
+	@ApiModelProperty("业主退")
+	private Double ownerBack;//业主退
+
 	public void initPath(String address){
 		this.image = StringUtils.isEmpty(this.image)?null:address+this.image;
 	}

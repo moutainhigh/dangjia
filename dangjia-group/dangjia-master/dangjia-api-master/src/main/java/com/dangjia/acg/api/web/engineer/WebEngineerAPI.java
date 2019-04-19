@@ -5,8 +5,11 @@ import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * author: Ronalcheng
@@ -81,4 +84,13 @@ public interface WebEngineerAPI {
     ServerResponse artisanList(@RequestParam("name") String name,
                                @RequestParam("workerTypeId") String workerTypeId,
                                @RequestParam("pageDTO") PageDTO pageDTO);
+
+    @PostMapping(value = "web/engineer/getWareHouse")
+    @ApiOperation(value = "仓库列表", notes = "仓库列表")
+    ServerResponse getWareHouse(@RequestParam("houseId") String houseId,
+                               @RequestParam("pageDTO") PageDTO pageDTO);
+
+    @GetMapping("/web/engineer/exportWareHouse")
+    @ApiOperation(value = "导出仓库", notes = "导出仓库", produces = "*/*,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream")
+    ServerResponse exportWareHouse(@RequestParam("response") HttpServletResponse response, @RequestParam("houseId") String houseId,@RequestParam("userName") String userName,@RequestParam("address") String address);
 }
