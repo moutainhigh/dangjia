@@ -255,8 +255,10 @@ public class SplitDeliverService {
                 example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
                 splitDeliverDTO.setTol(orderSplitItemList.size());//几种
-                splitDeliverDTO.setName(orderSplitItemList.get(0).getProductName());
-                splitDeliverDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + orderSplitItemList.get(0).getImage());
+                if(orderSplitItemList.size()>0) {
+                    splitDeliverDTO.setName(orderSplitItemList.get(0).getProductName());
+                    splitDeliverDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + orderSplitItemList.get(0).getImage());
+                }
                 splitDeliverDTOList.add(splitDeliverDTO);
             }
 
