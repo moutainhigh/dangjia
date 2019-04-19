@@ -1,21 +1,22 @@
 package com.dangjia.acg.service.engineer;
 
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.excel.ExportExcel;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.deliver.OrderItemByDTO;
 import com.dangjia.acg.dto.engineer.ArtisanDTO;
 import com.dangjia.acg.dto.house.WareDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
-import com.dangjia.acg.export.actuary.TActuaryGoods;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
+import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
+import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
@@ -23,8 +24,8 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.repair.MendMateriel;
-import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.worker.RewardPunishCondition;
+import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletResponse;
+import java.text.DateFormat;
 import java.util.*;
 
 /**
@@ -67,6 +69,13 @@ public class EngineerService {
 
     @Autowired
     private IMendMaterialMapper iMendMaterialMapper;
+
+    @Autowired
+    private IRewardPunishRecordMapper rewardPunishRecordMapper;
+
+    @Autowired
+    private IRewardPunishConditionMapper rewardPunishConditionMapper;
+
     /**
      * 已支付换工匠
      */
@@ -151,16 +160,25 @@ public class EngineerService {
 
     /**
      * 指定/修改指定工匠
+     * #1.3.2版 指定
      */
     public ServerResponse setLockWorker(String houseFlowId, String workerId) {
         try {
+            ServerResponse serverResponse=setGrabVerification(workerId,houseFlowId);
+            if(serverResponse.getResultCode()!= EventStatus.SUCCESS.getCode()){
+                return serverResponse;
+            }
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             houseFlow.setGrabLock(1);
             houseFlow.setNominator(workerId);
+            houseFlow.setWorkType(3);//等待支付
+            houseFlow.setWorkerId(workerId);
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
 
             HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
             houseWorker.setWorkerId(workerId);
+            houseWorker.setWorkType(1);//已抢单
+            houseWorker.setIsSelect(1);
             houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
@@ -168,7 +186,97 @@ public class EngineerService {
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }
+//    /**
+//     * 指定/修改指定工匠
+//     * #1.3.1版 指定
+//     */
+//    public ServerResponse setLockWorker(String houseFlowId, String workerId) {
+//        try {
+//            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+//            houseFlow.setGrabLock(1);
+//            houseFlow.setNominator(workerId);
+//            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+//
+//            HouseWorker houseWorker=houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(),houseFlow.getWorkerTypeId(),1);
+//            houseWorker.setWorkerId(workerId);
+//            houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+//            return ServerResponse.createBySuccessMessage("操作成功");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ServerResponse.createByErrorMessage("操作失败");
+//        }
+//    }
 
+    /**
+     * 指定工匠验证
+     *
+     * @param memberId 用户登录信息
+     * @return
+     */
+    private ServerResponse setGrabVerification(String memberId, String houseFlowId) {
+        try {
+            Member member = memberMapper.selectByPrimaryKey(memberId);
+
+            HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+            if (member.getCheckType() == 0) {
+                //审核中的人不能抢单
+                return ServerResponse.createByErrorMessage("该工匠正在审核中！");
+            }
+            if (member.getCheckType() == 1) {
+                //审核未通过 的人不能抢单
+                return ServerResponse.createByErrorMessage("该工匠审核未通过！");
+            }
+            if (member.getCheckType() == 3) {
+                //被禁用的帐户不能抢单
+                return ServerResponse.createByErrorMessage("该工匠已经被禁用！");
+            }
+            if (member.getCheckType() == 4) {
+                //冻结的帐户不能抢单
+                return ServerResponse.createByErrorMessage("该工匠已冻结");
+            }
+            if (member.getCheckType() == 5) {
+                return ServerResponse.createByErrorMessage("该工匠未提交资料审核,请通知工匠完善资料并提交审核！");
+            }
+            House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
+            if (house.getVisitState() == 2) {
+                return ServerResponse.createByErrorMessage("该房已休眠");
+            }
+            Example example = new Example(RewardPunishRecord.class);
+            example.createCriteria().andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId()).andEqualTo(RewardPunishRecord.STATE, "0");
+            List<RewardPunishRecord> recordList = rewardPunishRecordMapper.selectByExample(example);
+            //通过查看奖罚限制抢单时间限制抢单
+            for (RewardPunishRecord record : recordList) {
+                example = new Example(RewardPunishCondition.class);
+                example.createCriteria().andEqualTo("rewardPunishCorrelationId", record.getRewardPunishCorrelationId());
+                List<RewardPunishCondition> conditionList = rewardPunishConditionMapper.selectByExample(example);
+                for (RewardPunishCondition rewardPunishCondition : conditionList) {
+                    if (rewardPunishCondition.getType() == 3) {
+                        Date wraprDate = rewardPunishCondition.getEndTime();
+                        DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
+                        Date date = new Date();
+                        if (date.getTime() < wraprDate.getTime()) {
+                            return ServerResponse.createByErrorMessage("该工匠处于平台处罚期内，" + longDateFormat.format(wraprDate) + "以后才能抢单！");
+                        }
+                    }
+                }
+            }
+            //抢单时间限制
+            if (member.getWorkerType() > 3) {//其他工人
+                long num = houseWorkerMapper.grabControl(member.getId());//查询未完工工地
+                WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                if (member.getWorkerType() != 7 && num >= wt.getMethods()) {
+                    return ServerResponse.createByErrorMessage("该工匠达到持单上限，无法设置！");
+                }
+
+            }
+
+            // 抢单详情
+            return ServerResponse.createBySuccess("通过验证", "ok");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("验证出错！");
+        }
+    }
     /**
      * 抢单记录
      */
@@ -487,8 +595,8 @@ public class EngineerService {
 
     public ServerResponse getWareHouse(String houseId, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum,pageSize);
-         Example example=new Example(Warehouse.class);
-         example.createCriteria().andEqualTo(Warehouse.HOUSE_ID,houseId);
+        Example example=new Example(Warehouse.class);
+        example.createCriteria().andEqualTo(Warehouse.HOUSE_ID,houseId);
         example.orderBy(Warehouse.PRODUCT_SN).desc();
         List<Warehouse> warehouseList = iWarehouseMapper.selectByExample(example);
         if (warehouseList==null){
