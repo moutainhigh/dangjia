@@ -232,12 +232,19 @@ public class CartService {
                 productType="1";
             }
             List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+            int i=0;
             List<String> orderCategory = orderSplitMapper.getOrderCategory(houseId,productType,worker.getWorkerTypeId(),worker.getId());
             for (String categoryId : orderCategory) {
                 GoodsCategory goodsCategory=goodsCategoryAPI.getGoodsCategory(request,categoryId);
                 Map<String, Object> map = new HashMap<String, Object>();
-                map.put("id", goodsCategory.getId());
-                map.put("name", goodsCategory.getName());
+                if(goodsCategory!=null){
+                    map.put("id", goodsCategory.getId());
+                    map.put("name", goodsCategory.getName());
+                }else{
+                    i++;
+                    map.put("id", categoryId);
+                    map.put("name", "其他("+i+")");
+                }
                 mapList.add(map);
             }
             return ServerResponse.createBySuccess("查询成功", mapList);

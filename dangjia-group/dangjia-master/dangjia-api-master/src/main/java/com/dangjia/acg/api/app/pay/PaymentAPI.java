@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(value = "业主支付接口", description = "业主支付接口")
 public interface PaymentAPI {
 
+    @PostMapping("app/pay/payment/correct")
+    @ApiOperation(value = "已付款，材料人工冲正", notes = "已付款，材料人工冲正")
+    void budgetCorrect(String businessOrderNumber,  String payState, String houseFlowId);
+
     @PostMapping("app/pay/payment/setPaying")
     @ApiOperation(value = "待付款提前付款", notes = "待付款提前付款")
     ServerResponse setPaying(@RequestParam("userToken") String userToken,

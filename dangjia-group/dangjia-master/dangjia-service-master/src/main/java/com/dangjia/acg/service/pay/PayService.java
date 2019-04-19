@@ -11,7 +11,6 @@ import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.pay.IPayOrderMapper;
-import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
@@ -21,6 +20,7 @@ import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.xml.sax.InputSource;
 import tk.mybatis.mapper.entity.Example;
@@ -52,6 +52,8 @@ public class PayService {
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
 
+    @Value("${spring.profiles.active}")
+    private String active;
     protected static final Logger LOG = LoggerFactory.getLogger(PayService.class);
 
     /**
@@ -242,11 +244,10 @@ public class PayService {
         payOrder.setState(0);// 0未支付,1已支付
         payOrderMapper.insert(payOrder);
 
-        /****临时支付金额 写活暂且用设计师一个字段****/
-        WorkerType workerType = workerTypeMapper.selectByPrimaryKey("1");
-        if (workerType.getMethods() != 0){
+        if(active!=null&&!"pre".equals(active)){
             payOrder.setPrice(new BigDecimal("0.01"));
         }
+
         return payOrder;
     }
 
