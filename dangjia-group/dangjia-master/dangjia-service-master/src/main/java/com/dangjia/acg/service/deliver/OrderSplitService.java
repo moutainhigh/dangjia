@@ -21,7 +21,6 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
-import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
@@ -30,7 +29,6 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
-import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -194,7 +192,27 @@ public class OrderSplitService {
         return ServerResponse.createBySuccess("查询成功", splitDeliverList);
     }
 
-
+    /**
+     * 撤回供应商待发货的订单（整单撤回）
+     */
+    public ServerResponse withdrawSupplier(String orderSplitId) {
+        try {
+            OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(orderSplitId);
+            //将发货单设置为撤回状态
+            Example example1 = new Example(SplitDeliver.class);
+            example1.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId())
+                    .andEqualTo(SplitDeliver.SHIPPING_STATE, 0).andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplitId);
+            SplitDeliver deliver=new SplitDeliver();
+            deliver.setShippingState(4);
+            splitDeliverMapper.updateByExampleSelective(deliver,example1);
+            orderSplit.setApplyStatus(1);//撤回给材料员
+            orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
     /**
      * 发送供应商
      * 分发不同供应商
@@ -249,11 +267,12 @@ public class OrderSplitService {
 
                 SupplierProduct supplierProduct = forMasterAPI.getSupplierProduct(house.getCityId(), supplierId, orderSplitItem.getProductId());
                 orderSplitItem.setSupCost(supplierProduct.getPrice());//供应价
+                orderSplitItem.setSplitDeliverId(splitDeliver.getId());
                 orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
 
                 splitDeliver.setTotalAmount(supplierProduct.getPrice() * orderSplitItem.getNum() + splitDeliver.getTotalAmount());//累计供应商价总价
                 splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
-                orderSplitItemMapper.setSupplierId(id, splitDeliver.getId());
+//                orderSplitItemMapper.setSupplierId(id, splitDeliver.getId());
             }
             orderSplit.setApplyStatus(2);//发给供应商
             orderSplitMapper.updateByPrimaryKeySelective(orderSplit);

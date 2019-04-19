@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.house;
 
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -10,9 +9,7 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.house.IHouseChoiceCaseMapper;
 import com.dangjia.acg.modle.activity.Activity;
-import com.dangjia.acg.modle.config.ConfigAdvert;
 import com.dangjia.acg.modle.house.HouseChoiceCase;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;

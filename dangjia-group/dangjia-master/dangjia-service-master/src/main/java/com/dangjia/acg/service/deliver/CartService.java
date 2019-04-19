@@ -159,8 +159,12 @@ public class CartService {
                 productType="1";
             }
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
-
-            List<String> productIdList = orderSplitMapper.getOrderProduct(houseId,productType,worker.getWorkerTypeId(),worker.getId());
+            List<String> productIdList;
+            if(worker.getWorkerType() == 3){
+                productIdList = orderSplitMapper.getOrderProduct(houseId,productType,"",worker.getId());
+            }else {
+                productIdList = orderSplitMapper.getOrderProduct(houseId,productType,worker.getWorkerTypeId(),worker.getId());
+            }
 
             if(productIdList==null||productIdList.size()==0){
                 return ServerResponse.createBySuccessMessage("查询成功");
@@ -232,7 +236,6 @@ public class CartService {
                 productType="1";
             }
             List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
-            int i=0;
             List<String> orderCategory = orderSplitMapper.getOrderCategory(houseId,productType,worker.getWorkerTypeId(),worker.getId());
             for (String categoryId : orderCategory) {
                 GoodsCategory goodsCategory=goodsCategoryAPI.getGoodsCategory(request,categoryId);
@@ -240,10 +243,6 @@ public class CartService {
                 if(goodsCategory!=null){
                     map.put("id", goodsCategory.getId());
                     map.put("name", goodsCategory.getName());
-                }else{
-                    i++;
-                    map.put("id", categoryId);
-                    map.put("name", "其他("+i+")");
                 }
                 mapList.add(map);
             }
