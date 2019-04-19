@@ -42,6 +42,8 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     /**
      * 撤回供应商待发货的订单（整单撤回）
      */
+    @Override
+    @ApiMethod
     public ServerResponse withdrawSupplier(String orderSplitId){
         return orderSplitService.withdrawSupplier(orderSplitId);
     }

@@ -243,8 +243,9 @@ public class CartService {
                 if(goodsCategory!=null){
                     map.put("id", goodsCategory.getId());
                     map.put("name", goodsCategory.getName());
+                    mapList.add(map);
                 }
-                mapList.add(map);
+
             }
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {

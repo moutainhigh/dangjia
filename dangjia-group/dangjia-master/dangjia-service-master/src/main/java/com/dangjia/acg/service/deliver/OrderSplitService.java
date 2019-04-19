@@ -93,7 +93,7 @@ public class OrderSplitService {
                 return ServerResponse.createByErrorMessage("无供应商结算单");
 
             //配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收）
-            if (!(srcSplitDeliver.getShippingState() == 2 || srcSplitDeliver.getShippingState() == 4))
+            if (!(srcSplitDeliver.getShippingState() == 2 || srcSplitDeliver.getShippingState() == 4|| srcSplitDeliver.getShippingState() == 6))
                 return ServerResponse.createByErrorMessage("当前为未收货状态，不能申请结算");
 
             srcSplitDeliver.setDeliveryFee(splitDeliver.getDeliveryFee());
@@ -203,7 +203,7 @@ public class OrderSplitService {
             example1.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId())
                     .andEqualTo(SplitDeliver.SHIPPING_STATE, 0).andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplitId);
             SplitDeliver deliver=new SplitDeliver();
-            deliver.setShippingState(4);
+            deliver.setShippingState(6);
             splitDeliverMapper.updateByExampleSelective(deliver,example1);
 
             Example example = new Example(OrderSplitItem.class);
@@ -215,7 +215,7 @@ public class OrderSplitService {
                 boolean isAdd=false;
                 if(!CommonUtil.isEmpty(v.getSplitDeliverId())) {
                     deliver = splitDeliverMapper.selectByPrimaryKey(v.getSplitDeliverId());
-                    if(deliver.getShippingState()==0||deliver.getShippingState()==4){
+                    if(deliver.getShippingState()==0||deliver.getShippingState()==6){
                         isAdd=true;
                     }
                 }else{
@@ -464,7 +464,7 @@ public class OrderSplitService {
                 Map map =BeanUtils.beanToMap(orderSplit);
                 example = new Example(SplitDeliver.class);
                 example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId())
-                        .andCondition(" shipping_state in (0,4)").andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplit.getId());
+                        .andCondition(" shipping_state in (0,6)").andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplit.getId());
                 int splitDeliverList = splitDeliverMapper.selectCountByExample(example);
                 map.put("num",splitDeliverList);
                 orderSplitMaps.add(map);
