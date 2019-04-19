@@ -30,7 +30,7 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
     HouseFlowApply getTodayStart(@Param("houseId") String houseId, @Param("workerId") String workerId, @Param("time")Date time);
     HouseFlowApply checkHouseFlowApply(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
     List<HouseFlowApply> getSupervisorCheckList(@Param("houseId") String houseId);
-    List<HouseFlowApply> getTodayHouseFlowApplyBy56(@Param("houseId") String houseId,@Param("time")Date time);
+    List<HouseFlowApply> getTodayPatrol(@Param("houseId") String houseId,@Param("time")Date time);
     HouseFlowApply checkSupervisorApply(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
     List<HouseFlowApply> getTodayHouseFlowApply(@Param("houseFlowId") String houseFlowId,@Param("applyType") Integer applyType,
                                                 @Param("workerId") String workerId,@Param("time")Date time);

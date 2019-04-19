@@ -421,7 +421,7 @@ public class HouseWorkerService {
                 //查询是否全部整体完工
                 List<HouseFlow> checkFinishList = houseFlowMapper.checkAllFinish(hf.getHouseId(), hf.getId());
                 //查询是否今天已经上传过巡查
-                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApplyBy56(hf.getHouseId(), new Date());
+                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayPatrol(hf.getHouseId(), new Date());
                 if (hf.getSupervisorStart() == 0) {//已开工之后都是巡查工地；1：巡查工地2：申请业主验收；3:确认开工
                     List<HouseFlow> listStart = houseFlowMapper.getHouseIsStart(hf.getHouseId());
                     if (listStart.size() > 0) {
@@ -444,7 +444,7 @@ public class HouseWorkerService {
                             promptList.add("您已提交业主验收申请，请耐心等待业主审核！");
                         }
                     }
-                } else if (houseFlowApplyList.size() != 0) {//今日已提交过有人或无人巡查
+                } else if (houseFlowApplyList.size() != 0) {//今日已提交过有人巡查
                     /*List<HouseFlowApply> hfalistApp7 = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 7, worker.getId(), new Date());
                     if (hfalistApp7 == null || hfalistApp7.size() == 0) {
                         buttonList.add(getButton("追加巡查", 4));
@@ -979,9 +979,9 @@ public class HouseWorkerService {
                 Date lateDate = DateUtil.toDate(s2);
                 Date newDate2 = new Date();//当前时间
                 Long downTime = newDate2.getTime() - lateDate.getTime();//对比12点
-                if (downTime > 0) {
-                    return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
-                }
+//                if (downTime > 0) {
+//                    return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
+//                }
                 hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经开工了");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
