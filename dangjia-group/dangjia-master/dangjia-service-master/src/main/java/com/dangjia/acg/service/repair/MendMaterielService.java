@@ -117,10 +117,6 @@ public class MendMaterielService {
     public ServerResponse mendMaterialList(String mendOrderId) {
         MendOrder mendOrder= mendOrderMapper.selectByPrimaryKey(mendOrderId);
         List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderId);
-        //非工匠退材料或者业主退材料直接返回，
-        if(mendOrder.getType()!=2 ||mendOrder.getType()!=4){
-            return ServerResponse.createBySuccess("查询成功", mendMaterielList);
-        }
         List<Map> mendMaterielMaps=new ArrayList<>();
         for (MendMateriel mendMateriel : mendMaterielList) {
             mendMateriel.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
