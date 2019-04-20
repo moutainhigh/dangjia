@@ -176,4 +176,9 @@ public interface MessageAPI {
             @ApiParam(name ="title",value = "通知标题")@RequestParam("title")String title,
             @ApiParam(name ="alert",value = "通知内容")@RequestParam("alert")String alert,
             @ApiParam(name ="speak",value = "语音内容")@RequestParam("speak")String speak);
+
+
+    @RequestMapping(value = "getAppKey", method = RequestMethod.POST)
+    @ApiOperation(value = "获取极光IM AppKey", notes = "获取极光IM AppKey")
+    String getAppKey(@ApiParam(name ="appType",value = "应用类型（zx=当家装修，gj=当家工匠）")@RequestParam("appType")String appType);
 }

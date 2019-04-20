@@ -2,13 +2,16 @@ package com.dangjia.acg.service.repair;
 
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -39,6 +43,8 @@ public class MendMaterielService {
     private IHouseMapper houseMapper;
     @Autowired
     private IMemberMapper memberMapper;
+    @Autowired
+    private IWarehouseMapper warehouseMapper;
 
     @Autowired
     private static Logger LOG = LoggerFactory.getLogger(MendMaterielService.class);
@@ -109,11 +115,29 @@ public class MendMaterielService {
      * 根据mendOrderId查明细
      */
     public ServerResponse mendMaterialList(String mendOrderId) {
+        MendOrder mendOrder= mendOrderMapper.selectByPrimaryKey(mendOrderId);
         List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderId);
+        //非工匠退材料或者业主退材料直接返回，
+        if(mendOrder.getType()!=2 ||mendOrder.getType()!=4){
+            return ServerResponse.createBySuccess("查询成功", mendMaterielList);
+        }
+        List<Map> mendMaterielMaps=new ArrayList<>();
         for (MendMateriel mendMateriel : mendMaterielList) {
             mendMateriel.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+            Map map = BeanUtils.beanToMap(mendMateriel);
+            Warehouse warehouse=warehouseMapper.getByProductId(mendMateriel.getProductId(),mendOrder.getHouseId());
+            //工匠退材料新增已收货数量字段
+            if(mendOrder.getType()==2){
+                map.put(Warehouse.RECEIVE,warehouse.getReceive());
+            }
+            //业主退材料增加未发货数量
+            if(mendOrder.getType()==4){
+                //未发货数量=已要 - 已收
+                map.put(Warehouse.RECEIVE,warehouse.getAskCount()-warehouse.getReceive());
+            }
+            mendMaterielMaps.add(map);
         }
-        return ServerResponse.createBySuccess("查询成功", mendMaterielList);
+        return ServerResponse.createBySuccess("查询成功", mendMaterielMaps);
     }
 
     /**
