@@ -66,7 +66,7 @@ public class WarehouseService {
                 AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
                 Member member=accessToken.getMember();
                 if(type==null){
-                    if(member.getWorkerType()==3){
+                    if(member.getWorkerType()!=null&&member.getWorkerType()==3){
                         type=1;
                     }else{
                         type=0;
@@ -126,7 +126,7 @@ public class WarehouseService {
                 AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
                 Member member=accessToken.getMember();
                 if(type==null){
-                    if(member.getWorkerType()==3){
+                    if(member.getWorkerType()!=null&&member.getWorkerType()==3){
                         type=1;
                     }else{
                         type=0;
