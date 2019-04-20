@@ -117,23 +117,25 @@ public class MendMaterielService {
     public ServerResponse mendMaterialList(String mendOrderId) {
         MendOrder mendOrder= mendOrderMapper.selectByPrimaryKey(mendOrderId);
         List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderId);
-        //非工匠退材料或者业主退材料直接返回，
-        if(mendOrder.getType()!=2 ||mendOrder.getType()!=4){
-            return ServerResponse.createBySuccess("查询成功", mendMaterielList);
-        }
         List<Map> mendMaterielMaps=new ArrayList<>();
         for (MendMateriel mendMateriel : mendMaterielList) {
             mendMateriel.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             Map map = BeanUtils.beanToMap(mendMateriel);
             Warehouse warehouse=warehouseMapper.getByProductId(mendMateriel.getProductId(),mendOrder.getHouseId());
-            //工匠退材料新增已收货数量字段
-            if(mendOrder.getType()==2){
-                map.put(Warehouse.RECEIVE,warehouse.getReceive());
-            }
-            //业主退材料增加未发货数量
-            if(mendOrder.getType()==4){
-                //未发货数量=已要 - 已收
-                map.put(Warehouse.RECEIVE,warehouse.getAskCount()-warehouse.getReceive());
+            if(warehouse==null){
+                map.put(Warehouse.RECEIVE, "0");
+            }else {
+                Double receive = warehouse.getReceive() == null ? 0d : warehouse.getReceive();
+                Double askCount = warehouse.getAskCount() == null ? 0d : warehouse.getAskCount();
+                //工匠退材料新增已收货数量字段
+                if (mendOrder.getType() == 2) {
+                    map.put(Warehouse.RECEIVE, receive);
+                }
+                //业主退材料增加未发货数量
+                if (mendOrder.getType() == 4) {
+                    //未发货数量=已要 - 已收
+                    map.put(Warehouse.RECEIVE, askCount - receive);
+                }
             }
             mendMaterielMaps.add(map);
         }
