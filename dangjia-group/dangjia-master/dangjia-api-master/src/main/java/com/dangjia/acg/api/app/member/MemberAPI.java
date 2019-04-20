@@ -180,6 +180,13 @@ public interface MemberAPI {
 
     @RequestMapping(value = "member/getMyInvitation", method = RequestMethod.POST)
     @ApiOperation(value = "我的邀请码", notes = "我的邀请码")
-    ServerResponse getMyInvitation(String userToken);
+    ServerResponse getMyInvitation(@RequestParam("userToken") String userToken);
+
+
+    @RequestMapping(value = "member/getMembers", method = RequestMethod.POST)
+    @ApiOperation(value = "通过手机号/ID获取用户信息", notes = "通过手机号/ID获取用户信息")
+    ServerResponse getMembers(@RequestParam("userToken") String userToken,
+                              @RequestParam("memberId") String memberId,
+                              @RequestParam("phone") String phone);
 }
 
