@@ -371,4 +371,9 @@ public class MessageService  extends BaseService {
             LOG.error("Sendno: " + payload.getSendno());
         }
     }
+
+
+    public String getAppKey(String appType) {
+        return getAppkey(appType);
+    }
 }
