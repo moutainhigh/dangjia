@@ -128,7 +128,6 @@ public class House extends BaseEntity {
             "8施工图片审核不通过," +
             "3施工图(全部图)审核通过"
     )
-
     private Integer designerOk;
 
     @Column(name = "budget_ok")

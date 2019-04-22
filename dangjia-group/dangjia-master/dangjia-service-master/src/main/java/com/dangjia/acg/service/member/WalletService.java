@@ -82,10 +82,15 @@ public class WalletService {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
             }
             Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+
             if (worker == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
             }
             worker = memberMapper.selectByPrimaryKey(worker.getId());
+            if (worker.getIsJob()) {
+                //冻结的帐户不能提现
+                return ServerResponse.createByErrorMessage("账户冻结，无法提现");
+            }
             if (!paycode.equals(worker.getPaycode())) {
                 return ServerResponse.createByErrorMessage("验证码错误！");
             }

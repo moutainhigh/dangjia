@@ -230,7 +230,7 @@ public class EngineerService {
                 //被禁用的帐户不能抢单
                 return ServerResponse.createByErrorMessage("该工匠已经被禁用！");
             }
-            if (member.getCheckType() == 4) {
+            if (member.getIsJob()) {
                 //冻结的帐户不能抢单
                 return ServerResponse.createByErrorMessage("该工匠已冻结");
             }

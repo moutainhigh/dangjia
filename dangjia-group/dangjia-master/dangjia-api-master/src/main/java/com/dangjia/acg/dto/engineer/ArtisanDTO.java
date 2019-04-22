@@ -18,7 +18,7 @@ public class ArtisanDTO {
     private String workerTypeName;//工种
     private Date createDate;//创建时间
     private Integer inviteNum;//存放邀约人数
-    private Integer checkType;//状态:0审核中，1审核未通过,2审核已通过, 3账户已禁用, 4账户冻结, 5未提交资料
+    private Integer checkType;//状态:0审核中，1审核未通过,2审核已通过, 3账户已禁用,  5未提交资料
     private BigDecimal evaluationScore;//评价积分
     private Integer volume;//成交量
     private String superior;//邀请人
