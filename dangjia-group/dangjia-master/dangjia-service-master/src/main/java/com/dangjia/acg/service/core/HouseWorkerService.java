@@ -784,8 +784,7 @@ public class HouseWorkerService {
 
     /**
      * 提交审核、停工
-     *
-     * @Deprecated
+     *  applyType   0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
      */
     public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId, Integer suspendDay,
                                             String applyDec, String imageList, String houseFlowId2) {
@@ -797,11 +796,19 @@ public class HouseWorkerService {
                 .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.PAY_STATE, 1);
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
         if (houseFlowApplyList.size() > 0) {
-            HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
-            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
-            if (houseFlowApply.getStartDate().before(new Date()) && houseFlowApply.getEndDate().after(new Date())) {
-                return ServerResponse.createByErrorMessage("工序(" + workerType.getName() + ")处于停工期间!");
+            if(applyType == 4){
+                for(HouseFlowApply hfa : houseFlowApplyList){
+                    hfa.setMemberCheck(2);//不通过不通过
+                    houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
+                }
+            }else {
+                HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
+                if (houseFlowApply.getStartDate().before(new Date()) && houseFlowApply.getEndDate().after(new Date())) {
+                    return ServerResponse.createByErrorMessage("工序(" + workerType.getName() + ")处于停工期间!");
+                }
             }
+
         }
 
         //暂停施工
@@ -810,7 +817,6 @@ public class HouseWorkerService {
             House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
             if (house != null) {
                 if (hf.getPause() == 1) {
-
                     WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
                     return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "该工序（" + workerType.getName() + "）已暂停施工,请勿提交申请！");
                 }

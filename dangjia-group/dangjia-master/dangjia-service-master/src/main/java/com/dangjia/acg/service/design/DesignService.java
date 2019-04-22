@@ -3,6 +3,7 @@ package com.dangjia.acg.service.design;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.design.HouseDesignImageDTO;
 import com.dangjia.acg.dto.house.DesignDTO;
@@ -46,43 +47,57 @@ public class DesignService {
 
     /**
      * 发送设计图业主
-     * 设计状态:默认0未确定设计师,4有设计抢单待支付,1已支付设计师待发平面图,5平面图发给业主,6平面图审核不通过,7通过平面图待发施工图,
-     * 2已发给业主施工图,8施工图片审核不通过,3施工图(全部图)审核通过
+     * 设计状态:
+     *   0=未确定设计师
+     *   4=设计待抢单
+     *   1=已支付-设计师待量房
+     *   9=量房图确认，设计师待发平面图
+     *   5=平面图发给业主
+     *   6=平面图审核不通过
+     *   7=通过平面图待发施工图
+     *   2=已发给业主施工图
+     *   8=施工图片审核不通过
+     *   3=施工图(全部图)审核通过
      */
     public ServerResponse sendPictures(HttpServletRequest request, String houseId, int designerOk) {
         House house = houseMapper.selectByPrimaryKey(houseId);
         Example example = new Example(HouseDesignImage.class);
-        List<HouseDesignImage> houseDesignImageList;
-        if (designerOk == 1 || designerOk == 6) {
-            example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId).andEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID, "1");
-            houseDesignImageList = houseDesignImageMapper.selectByExample(example);
-            if (houseDesignImageList.size() == 0) {
-                return ServerResponse.createByErrorMessage("请上传平面图");
-            }
-
-            house.setDesignerOk(5);//平面图发给业主
-            houseMapper.updateByPrimaryKeySelective(house);
-            //app推送给业主
-            configMessageService.addConfigMessage(null, "gj", house.getMemberId(), "0", "设计图上传提醒",
-                    String.format(DjConstants.PushMessage.PLANE_UPLOADING, house.getHouseName()), "");
-            return ServerResponse.createBySuccessMessage("发送成功");
-        } else if (designerOk == 7 || designerOk == 8) {
-            example.createCriteria().andEqualTo("houseId", houseId).andNotEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID, "1")
-                    .andIsNotNull(HouseDesignImage.IMAGEURL);
-            houseDesignImageList = houseDesignImageMapper.selectByExample(example);
-            if (houseDesignImageList.size() == 0) {
-                return ServerResponse.createByErrorMessage("请上传施工图");
-            }
-
-            house.setDesignerOk(2);//施工图(其它图)发给业主
-            houseMapper.updateByPrimaryKeySelective(house);
-            //app推送给业主
-            configMessageService.addConfigMessage(null, "gj", house.getMemberId(), "0", "设计图上传提醒",
-                    String.format(DjConstants.PushMessage.CONSTRUCTION_UPLOADING, house.getHouseName()), "");
-
-            return ServerResponse.createBySuccessMessage("发送成功");
+        Example.Criteria criteria=example.createCriteria();
+        criteria.andEqualTo(HouseDesignImage.HOUSE_ID, houseId);
+        String alert="";
+        String imgName="";
+        //判断待量房及不通过的量房图
+        if (designerOk == 1 ) {
+            imgName="量房";
+            criteria.andEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID, "0");
+            house.setDesignerOk(9);//量房图发给业主
         }
-        return ServerResponse.createByErrorMessage("参数异常,发送失败");
+        //判断平面房及不通过的平面图
+        if (designerOk == 9 || designerOk == 6) {
+            imgName="平面";
+            criteria.andEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID, "1");
+            house.setDesignerOk(5);//平面图发给业主
+            alert= String.format(DjConstants.PushMessage.PLANE_UPLOADING, house.getHouseName());
+        }
+        //判断待施工及不通过的施工图
+        if (designerOk == 7 || designerOk == 8) {
+            imgName="施工";
+            criteria.andNotEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID, "1");
+            criteria.andNotEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID, "0");
+            criteria.andIsNotNull(HouseDesignImage.IMAGEURL);
+            house.setDesignerOk(2);//施工图(其它图)发给业主
+            alert= String.format(DjConstants.PushMessage.CONSTRUCTION_UPLOADING, house.getHouseName());
+        }
+        List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);
+        if (houseDesignImageList.size() == 0) {
+            return ServerResponse.createByErrorMessage("请上传"+imgName+"图");
+        }
+        houseMapper.updateByPrimaryKeySelective(house);
+        if(!CommonUtil.isEmpty(alert)) {
+            //app推送给业主
+            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", imgName + "图上传提醒", alert, "");
+        }
+        return ServerResponse.createBySuccessMessage("发送成功");
     }
 
     /**
@@ -91,6 +106,7 @@ public class DesignService {
     public ServerResponse uploadPictures(HttpServletRequest request, String houseId, String designImageTypeId, String imageurl) {
         try {
             HouseDesignImage hdi = designImageTypeMapper.getHouseDesignImage(houseId, designImageTypeId);
+
             if (hdi == null) {
                 hdi = new HouseDesignImage();
                 hdi.setHouseId(houseId);
