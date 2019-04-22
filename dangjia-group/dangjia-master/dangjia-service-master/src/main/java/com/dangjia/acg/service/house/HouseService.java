@@ -16,10 +16,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.core.NodeDTO;
-import com.dangjia.acg.dto.house.FlowRecordDTO;
-import com.dangjia.acg.dto.house.HouseDTO;
-import com.dangjia.acg.dto.house.HouseListDTO;
-import com.dangjia.acg.dto.house.ShareDTO;
+import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.design.IHouseDesignImageMapper;
 import com.dangjia.acg.mapper.house.IHouseExpendMapper;
@@ -298,8 +295,11 @@ public class HouseService {
             nodeDTO.setColor("#F0643C");
             nodeDTO.setNameC("自带设计");
             nodeDTO.setState(0);
-            nodeDTO.setTotal(8);
+            nodeDTO.setTotal(9);
             if (house.getDesignerOk() == 1) {
+                nodeDTO.setRank(2);
+                nodeDTO.setNameB("待量房");
+            } else if (house.getDesignerOk() == 9) {
                 nodeDTO.setRank(2);
                 nodeDTO.setNameB("待上传平面图");
             } else if (house.getDesignerOk() == 5) {
@@ -1353,5 +1353,6 @@ public class HouseService {
         }
 
     }
+
 }
 
