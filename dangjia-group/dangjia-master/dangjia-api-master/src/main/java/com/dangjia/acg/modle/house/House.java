@@ -4,7 +4,6 @@ import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 import org.apache.http.util.TextUtils;
@@ -117,8 +116,19 @@ public class House extends BaseEntity {
     @Column(name = "designer_ok")
     @Desc(value = "设计状态,默认0未确定设计师,4有设计抢单待支付,1已支付设计师待发平面图,5平面图发给业主,6平面图审核不通过,7通过平面图待发施工图,2已发给业主施工图" +
             ",8施工图片审核不通过,3施工图(全部图)审核通过")
-    @ApiModelProperty("设计状态,默认0未确定设计师,4有设计抢单待支付,1已支付设计师待发平面图,5平面图发给业主,6平面图审核不通过,7通过平面图待发施工图,2已发给业主施工图" +
-            ",8施工图片审核不通过,3施工图(全部图)审核通过")
+    @ApiModelProperty("设计状态,默认" +
+            "0未确定设计师," +
+            "4设计待抢单," +
+            "1已支付-设计师待量房," +
+            "9量房图发给业主," +
+            "5平面图发给业主," +
+            "6平面图审核不通过," +
+            "7通过平面图待发施工图," +
+            "2已发给业主施工图," +
+            "8施工图片审核不通过," +
+            "3施工图(全部图)审核通过"
+    )
+
     private Integer designerOk;
 
     @Column(name = "budget_ok")
