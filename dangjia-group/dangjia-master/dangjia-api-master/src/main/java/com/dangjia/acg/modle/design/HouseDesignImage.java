@@ -46,5 +46,9 @@ public class HouseDesignImage extends BaseEntity {
 	@ApiModelProperty("额外付费图 1是, 0不是")
 	private Integer sell;//
 
+	@Column(name = "type")
+	@Desc(value = "图类型")
+	@ApiModelProperty("图类型：【0量房图，1平面图，2施工图】")
+	private Integer type;
 
 }

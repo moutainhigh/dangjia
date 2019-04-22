@@ -103,7 +103,7 @@ public class EvaluateService {
     public ServerResponse queryWorkIntegral(HttpServletRequest request, PageDTO pageDTO, String userToken) {
         AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<WorkIntegralDTO> list = workIntegralMapper.queryWorkIntegral(accessToken.getMemberId());
+        List<WorkIntegralDTO> list = workIntegralMapper.queryWorkIntegral(accessToken.getMember().getId());
         PageInfo pageResult = new PageInfo(list);
         return ServerResponse.createBySuccess("ok",pageResult);
     }

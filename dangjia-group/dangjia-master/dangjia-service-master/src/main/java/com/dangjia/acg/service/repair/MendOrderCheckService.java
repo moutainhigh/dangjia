@@ -128,12 +128,18 @@ public class MendOrderCheckService {
             if(mendOrderCheck == null){
                 return ServerResponse.createByErrorMessage("审核流程不存在该角色");
             }
+            if(mendOrderCheck.getState()!=0){
+                return ServerResponse.createBySuccessMessage("审核成功");
+            }
             mendOrderCheck.setState(state);
             mendOrderCheck.setAuditorId(auditorId);//审核人
             mendOrderCheck.setModifyDate(new Date());
             mendOrderCheckMapper.updateByPrimaryKeySelective(mendOrderCheck);
 
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
+            if(mendOrder.getState()!=0&&mendOrder.getState()!=1){
+                return ServerResponse.createBySuccessMessage("审核成功");
+            }
             if (state == 1){
                 mendOrder.setState(2);//不通过取消
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
