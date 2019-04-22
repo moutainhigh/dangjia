@@ -332,7 +332,7 @@ public class ComplainService {
                             if (rewardPunishRecord.getType() == 0) {
                                 //奖励
                                 //4.根据每个条例的明细类型（奖或罚）来判断，该工人是否扣除或者增加（只对账户余额和积分进行增减）
-                                //1积分;2钱;3限制接单;4冻结账号
+                                //1积分;2钱;3限制接单;
                                 //5.对工人原有的基础之上重新set账户余额或者积分并进行更新（update）
                                 if (rewardPunishCondition.getType() == 1) {
                                     bigDecimal2 = member.getEvaluationScore().subtract(bigDecimal);

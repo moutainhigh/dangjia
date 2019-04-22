@@ -145,7 +145,7 @@ public class Member extends BaseEntity {
 
     @Column(name = "check_type")//type
     @Desc(value = "审核状态")
-    @ApiModelProperty("审核状态:  0审核中，1审核未通过不能抢单不能发申请,  2审核已通过 可抢单可发申请, 3账户已禁用 不能抢单不能发申请,  4账户冻结可发申请 不能抢单,5未提交资料")
+    @ApiModelProperty("审核状态:  0审核中，1审核未通过不能抢单不能发申请,  2审核已通过 可抢单可发申请, 3账户已禁用 不能抢单不能发申请, 5未提交资料")
     private Integer checkType;
 
     @Column(name = "praise_rate")//favorable
@@ -163,6 +163,10 @@ public class Member extends BaseEntity {
     @ApiModelProperty("评价积分,70分以下押金按每单总额百分之五收取,铜牌工匠70.1-80上限为2000元,银牌工匠80.1-90上限为1500元,金牌工匠90.1~上限为500元")
     private BigDecimal evaluationScore;//评价积分,70分以下押金按每单总额百分之五收取,铜牌工匠70.1-80上限为2000元,银牌工匠80.1-90上限为1500元,金牌工匠90.1~上限为500元
 
+    @Column(name = "is_job")
+    @Desc(value = "是否冻结（0：正常；1，冻结）")
+    @ApiModelProperty("是否冻结（0：正常；1，冻结）")
+    private Boolean isJob;
 
     @Column(name = "is_crowned")//crowned
     @Desc(value = "是否是皇冠")
