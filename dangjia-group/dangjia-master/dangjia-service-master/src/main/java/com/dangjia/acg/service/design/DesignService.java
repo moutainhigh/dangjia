@@ -2,6 +2,7 @@ package com.dangjia.acg.service.design;
 
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -14,6 +15,8 @@ import com.dangjia.acg.modle.design.DesignImageType;
 import com.dangjia.acg.modle.design.HouseDesignImage;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -191,9 +194,11 @@ public class DesignService {
      *                   默认0未确定设计师,4有设计抢单待支付,1已支付设计师待发平面图,5平面图发给业主,6平面图审核不通过,
      *                   7通过平面图待发施工图,2已发给业主施工图,8施工图片审核不通过,3施工图(全部图)审核通过
      */
-    public ServerResponse getDesignList(HttpServletRequest request, int designerOk, String mobile, String residential, String number) {
+    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerOk, String mobile, String residential, String number) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<DesignDTO> designDTOList = houseMapper.getDesignList(designerOk, mobile, residential, number);
+        PageInfo pageResult = new PageInfo(designDTOList);
         for (DesignDTO designDTO : designDTOList) {
             HouseDesignImage hdi = designImageTypeMapper.getHouseDesignImage(designDTO.getHouseId(), "1");//1某个房子的平面图
             if (hdi != null) {
@@ -202,6 +207,7 @@ public class DesignService {
             }
 
         }
-        return ServerResponse.createBySuccess("查询用户列表成功", designDTOList);
+        pageResult.setList(designDTOList);
+        return ServerResponse.createBySuccess("查询用户列表成功", pageResult);
     }
 }
