@@ -275,8 +275,6 @@ public class EvaluateService {
             calendar.add(Calendar.DAY_OF_YEAR, 7);//业主倒计时
             houseFlowApply.setEndDate(calendar.getTime());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-
-
             /*
              * 大管家每次审核拿钱 新算法 2018.08.03
              */
@@ -285,6 +283,23 @@ public class EvaluateService {
                 //大管家的hf
                 HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);
                 houseFlowApply.setSupervisorMoney(supervisorHF.getCheckMoney());
+
+                //添加一条记录
+                HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
+                hfa.setHouseFlowId(houseFlowApply.getHouseFlowId());//工序id
+                hfa.setWorkerId(supervisor.getId());//工人id
+                hfa.setWorkerTypeId(supervisor.getWorkerTypeId());//工种id
+                hfa.setWorkerType(supervisor.getWorkerType());//工种类型
+                hfa.setHouseId(houseFlowApply.getHouseId());//房子id
+                hfa.setApplyType(houseFlowApply.getApplyType());//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
+                hfa.setApplyMoney(new BigDecimal(0));//申请得钱
+                hfa.setSupervisorMoney(new BigDecimal(0));
+                hfa.setOtherMoney(new BigDecimal(0));
+                hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
+                hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
+                hfa.setPayState(0);//是否付款
+                hfa.setApplyDec("业主您好，我是大管家，我已验收了" + worker.getName() + (houseFlowApply.getApplyType() == 1?"的阶段完工":"的整体完工"));//描述
+                houseFlowApplyMapper.insert(hfa);
             }
             if(houseFlowApply.getApplyType() == 1){
                 //阶段审核
