@@ -43,7 +43,8 @@
         w.check_describe as checkDescribe,
         w.create_date AS createDate,
         w.data_status AS dataStatus,
-        w.modify_date AS modifyDate
+        w.modify_date AS modifyDate,
+        w.is_job AS isJob
     </sql>
 
     <!-- 工匠列表 -->

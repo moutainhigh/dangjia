@@ -65,4 +65,11 @@ public interface WebHouseAPI {
     @PostMapping("web/house/getAllHouseByVisitState")
     @ApiOperation(value = "根据房子装修状态查询所有的房子", notes = "根据房子装修状态查询所有的房子")
     ServerResponse getAllHouseByVisitState(@RequestParam("visitState") Integer visitState);
+
+    @PostMapping("web/house/getHistoryWorker")
+    @ApiOperation(value = "查询节点的历史工匠", notes = "查询节点的历史工匠")
+    ServerResponse getHistoryWorker(@RequestParam("houseId") String houseId,
+                                    @RequestParam("workerTypeId") String workerTypeId,
+                                    @RequestParam("workId") String workId,
+                                    @RequestParam("pageDTO") PageDTO pageDTO);
 }

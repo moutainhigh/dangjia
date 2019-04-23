@@ -164,4 +164,10 @@ public class WebEngineerController implements WebEngineerAPI {
     public ServerResponse exportWareHouse(HttpServletResponse response,String houseId,String userName,String address) {
         return engineerService.exportWareHouse(response,houseId,userName,address);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse freeze(String  memberId,boolean type) {
+        return engineerService.freeze(memberId,type);
+    }
 }

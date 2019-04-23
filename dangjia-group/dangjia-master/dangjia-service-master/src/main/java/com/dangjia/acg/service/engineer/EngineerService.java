@@ -425,6 +425,14 @@ public class EngineerService {
                     map.put("mobile", worker.getMobile());//电话
                 }
             }
+            Example example1 = new Example(HouseWorker.class);
+            example1.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId()).andEqualTo(HouseWorker.WORKER_TYPE_ID, houseFlow.getWorkerTypeId()).andNotEqualTo(HouseWorker.WORKER_ID,houseFlow.getWorkerId());
+            List<HouseWorker> houseWorkers = houseWorkerMapper.selectByExample(example1);
+            if(houseWorkers.size()==0){
+                map.put("show","0");
+            }else {
+                map.put("show","1");
+            }
             mapList.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", mapList);
@@ -578,7 +586,7 @@ public class EngineerService {
                 artisanDTO.setRealNameState(member.getRealNameState());
                 artisanDTO.setRealNameDescribe(member.getRealNameDescribe());
                 artisanDTO.setCheckDescribe(member.getCheckDescribe());
-
+                artisanDTO.setIsJob(member.getIsJob());
                 if (StringUtil.isNotEmpty(member.getSuperiorId())) {
                     Member superior = memberMapper.selectByPrimaryKey(member.getSuperiorId());
                     if (superior != null) {
@@ -684,5 +692,18 @@ public class EngineerService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("导出Excel失败");
         }
+    }
+
+    public ServerResponse freeze(String  memberId,boolean type) {
+        try {
+            Member member = memberMapper.selectByPrimaryKey(memberId);
+            member.setIsJob(type);
+            memberMapper.updateByPrimaryKeySelective(member);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+
     }
 }
