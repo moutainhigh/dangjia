@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.web.design;
 
 import com.dangjia.acg.api.web.design.WebDesignAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.design.DesignService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +35,8 @@ public class WebDesignController implements WebDesignAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getDesignList(HttpServletRequest request,int designerOk,String mobile,String residential,String number){
-        return designService.getDesignList(request,designerOk,mobile,residential,number);
+    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerOk, String mobile, String residential, String number){
+        return designService.getDesignList(request,pageDTO,designerOk,mobile,residential,number);
     }
 
     @Override

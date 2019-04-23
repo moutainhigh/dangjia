@@ -9,6 +9,8 @@ import com.dangjia.acg.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * author: Ronalcheng
  * Date: 2019/1/4 0004
@@ -149,5 +151,17 @@ public class WebEngineerController implements WebEngineerAPI {
     @ApiMethod
     public ServerResponse artisanList(String name, String workerTypeId, PageDTO pageDTO) {
         return engineerService.artisanList(name, workerTypeId, pageDTO.getPageNum(), pageDTO.getPageSize());
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getWareHouse(String houseId,PageDTO pageDTO) {
+        return engineerService.getWareHouse(houseId, pageDTO.getPageNum(), pageDTO.getPageSize());
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse exportWareHouse(HttpServletResponse response,String houseId,String userName,String address) {
+        return engineerService.exportWareHouse(response,houseId,userName,address);
     }
 }

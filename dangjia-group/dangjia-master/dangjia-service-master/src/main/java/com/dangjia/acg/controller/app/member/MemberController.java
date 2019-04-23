@@ -187,5 +187,11 @@ public class MemberController implements MemberAPI {
     public ServerResponse getMyInvitation(String userToken) {
         return memberService.getMyInvitation(userToken);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getMembers(String userToken, String memberId, String phone) {
+        return memberService.getMembers(userToken, memberId, phone);
+    }
 }
 

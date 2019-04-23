@@ -161,14 +161,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and supervisor_check = 0
     </select>
 
-    <!--大管家查询自己今天是否已上传过巡查 -->
-    <select id="getTodayHouseFlowApplyBy56"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+    <!--大管家查询自己今天是否已上传过有人巡查 -->
+    <select id="getTodayPatrol"  resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select <include refid="all_columns" />
         from dj_core_house_flow_apply
         where
             to_days(create_date) = to_days(#{time})
         and house_id = #{houseId}
-        and apply_type in(5,6)
+        and apply_type = 5
         order by create_date desc
     </select>
 

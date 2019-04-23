@@ -3,6 +3,7 @@ package com.dangjia.acg.mapper.house;
 import com.dangjia.acg.dto.house.DesignDTO;
 import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.dto.house.HouseListDTO;
+import com.dangjia.acg.dto.repair.RepairMendDTO;
 import com.dangjia.acg.modle.house.House;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -50,4 +51,5 @@ public interface IHouseMapper extends Mapper<House> {
 
     Date getHouseDateByMemberId(@Param("memberId") String memberId);
 
+    List<RepairMendDTO> getRepairMend(@Param("houseId") String houseId,@Param("productId") String productId);
 }

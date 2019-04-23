@@ -24,7 +24,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 INNER JOIN dj_deliver_order_item oi ON o.id = oi.order_id
                 WHERE
                     o.house_id = #{houseId}
-                AND o.worker_type_id =#{workerTypeId}
+                <if test="workerTypeId!=null and workerTypeId!=''">
+                    AND o.worker_type_id =#{workerTypeId}
+                </if>
                 AND oi.product_type =#{productType}
                 AND o.payment > 0
                 AND o.type = 2

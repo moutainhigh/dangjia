@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.member;
 
+import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.common.constants.Constants;
@@ -45,10 +46,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -291,7 +289,6 @@ public class MemberService {
             user.setIsCrowned(0);
             user.setHead("qrcode/logo.png");
             memberMapper.insertSelective(user);
-//			memberMapper.updateByPrimaryKeySelective(user);
             clueService.sendUser(user, user.getMobile());
             updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
@@ -362,8 +359,13 @@ public class MemberService {
                 user.setWorkerTypeId(wt.getId());
                 user.setWorkerType(wt.getType());
             }
+            user.setCreateDate(null);
             memberMapper.updateByPrimaryKeySelective(user);
             user = memberMapper.selectByPrimaryKey(user.getId());
+            if (user.getIsJob()) {
+                //冻结的帐户不能修改资料信息
+                return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
+            }
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             accessToken = TokenUtil.generateAccessToken(user);
             accessToken.setUserToken(userToken);
@@ -525,12 +527,12 @@ public class MemberService {
      * @throws Exception
      */
     public ServerResponse updateForgotPassword(String phone, String password, String token) {
-        Member user = new Member();
-        user.setMobile(phone);
-        user = memberMapper.getUser(user);
         if (CommonUtil.isEmpty(token)) {
             return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "身份认证错误,无认证参数！");
         }
+        Member user = new Member();
+        user.setMobile(phone);
+        user = memberMapper.getUser(user);
         if (user == null) {
             return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "电话号码未注册！");
         } else {
@@ -692,7 +694,6 @@ public class MemberService {
                 srcMember.setMobile(member.getMobile());
             if (StringUtils.isNotBlank(member.getRemarks()))
                 srcMember.setRemarks(member.getRemarks());
-
             memberMapper.updateByPrimaryKeySelective(srcMember);
             return ServerResponse.createBySuccessMessage("保存成功");
         } catch (Exception e) {
@@ -887,5 +888,76 @@ public class MemberService {
             groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
             groupInfoService.registerJGUsers("gj", new String[]{accessToken.getMemberId()}, new String[1]);
         }
+    }
+
+    @Autowired
+    private MessageAPI messageAPI;
+
+    /**
+     * 获取用户信息
+     *
+     * @param userToken
+     * @param memberId
+     * @param phone
+     * @return
+     */
+    public ServerResponse getMembers(String userToken, String memberId, String phone) {
+        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+        if (accessToken == null) {//无效的token
+            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+        }
+        Member member = null;
+        if (!CommonUtil.isEmpty(memberId)) {
+            member = memberMapper.selectByPrimaryKey(memberId);
+        } else if (!CommonUtil.isEmpty(phone)) {
+            Member user = new Member();
+            user.setMobile(phone);
+            member = memberMapper.getUser(user);
+        }
+        if (member == null) {
+            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "查无该用户");
+        }
+        member.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+        List<Map<String, Object>> datas = new ArrayList<>();
+        Example example = new Example(MemberInfo.class);
+        example.createCriteria().andEqualTo(MemberInfo.MEMBER_ID, member.getId()).andEqualTo(MemberInfo.POLICY_ID, 1);
+        List<MemberInfo> infos = memberInfoMapper.selectByExample(example);
+        if (infos != null && infos.size() > 0) {//有业主
+            Map<String, Object> map = new HashMap<>();
+            map.put("memberType", 0);
+            map.put("id", member.getId());
+            map.put("nickName", member.getNickName());
+            map.put("name", member.getNickName());
+            map.put("mobile", member.getMobile());
+            map.put("head", member.getHead());
+            map.put("appKey", messageAPI.getAppKey("zx"));
+            datas.add(map);
+        }
+        example = new Example(MemberInfo.class);
+        example.createCriteria().andEqualTo(MemberInfo.MEMBER_ID, member.getId()).andEqualTo(MemberInfo.POLICY_ID, 2);
+        infos = memberInfoMapper.selectByExample(example);
+        if (infos != null && infos.size() > 0) {//有工匠
+            Map<String, Object> map = new HashMap<>();
+            map.put("memberType", 1);
+            map.put("id", member.getId());
+            map.put("nickName", member.getNickName());
+            map.put("name", member.getNickName());
+            map.put("mobile", member.getMobile());
+            map.put("head", member.getHead());
+            if (!CommonUtil.isEmpty(member.getWorkerTypeId())) {
+                WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                map.put("workerTypeId", member.getWorkerTypeId());
+                if (wt != null) {
+                    map.put("workerName", wt.getName());
+                }
+            }
+            map.put("appKey", messageAPI.getAppKey("gj"));
+            datas.add(map);
+        }
+
+        if (datas.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "查无该用户");
+        }
+        return ServerResponse.createBySuccess("查询成功", datas);
     }
 }

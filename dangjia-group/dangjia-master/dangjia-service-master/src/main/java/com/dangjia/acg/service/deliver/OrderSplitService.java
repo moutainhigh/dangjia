@@ -21,7 +21,6 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
-import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
@@ -30,7 +29,6 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
-import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -95,7 +93,7 @@ public class OrderSplitService {
                 return ServerResponse.createByErrorMessage("无供应商结算单");
 
             //配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收）
-            if (!(srcSplitDeliver.getShippingState() == 2 || srcSplitDeliver.getShippingState() == 4))
+            if (!(srcSplitDeliver.getShippingState() == 2 || srcSplitDeliver.getShippingState() == 4|| srcSplitDeliver.getShippingState() == 6))
                 return ServerResponse.createByErrorMessage("当前为未收货状态，不能申请结算");
 
             srcSplitDeliver.setDeliveryFee(splitDeliver.getDeliveryFee());
@@ -194,7 +192,51 @@ public class OrderSplitService {
         return ServerResponse.createBySuccess("查询成功", splitDeliverList);
     }
 
+    /**
+     * 撤回供应商待发货的订单（整单撤回）
+     */
+    public ServerResponse withdrawSupplier(String orderSplitId) {
+        try {
+            OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(orderSplitId);
+            //将发货单设置为撤回状态
+            Example example1 = new Example(SplitDeliver.class);
+            example1.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId())
+                    .andEqualTo(SplitDeliver.SHIPPING_STATE, 0).andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplitId);
+            SplitDeliver deliver=new SplitDeliver();
+            deliver.setShippingState(6);
+            splitDeliverMapper.updateByExampleSelective(deliver,example1);
 
+            Example example = new Example(OrderSplitItem.class);
+            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplitId);
+            example.orderBy(OrderSplitItem.CATEGORY_ID).desc();
+            List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+            List<Map> mapList=new ArrayList<>();
+            for (OrderSplitItem v : orderSplitItemList) {
+                boolean isAdd=false;
+                if(!CommonUtil.isEmpty(v.getSplitDeliverId())) {
+                    deliver = splitDeliverMapper.selectByPrimaryKey(v.getSplitDeliverId());
+                    if(deliver.getShippingState()==0||deliver.getShippingState()==6){
+                        isAdd=true;
+                    }
+                }else{
+                    isAdd=true;
+                }
+                if (isAdd){
+                    v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                    Map map = BeanUtils.beanToMap(v);
+                    String supplierId = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductSn());
+                    if (!CommonUtil.isEmpty(supplierId)) {
+                        map.put(SplitDeliver.SUPPLIER_ID, supplierId);
+                    }
+                    mapList.add(map);
+                }
+            }
+            return ServerResponse.createBySuccess("查询成功", mapList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
     /**
      * 发送供应商
      * 分发不同供应商
@@ -249,11 +291,12 @@ public class OrderSplitService {
 
                 SupplierProduct supplierProduct = forMasterAPI.getSupplierProduct(house.getCityId(), supplierId, orderSplitItem.getProductId());
                 orderSplitItem.setSupCost(supplierProduct.getPrice());//供应价
+                orderSplitItem.setSplitDeliverId(splitDeliver.getId());
                 orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
 
                 splitDeliver.setTotalAmount(supplierProduct.getPrice() * orderSplitItem.getNum() + splitDeliver.getTotalAmount());//累计供应商价总价
                 splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
-                orderSplitItemMapper.setSupplierId(id, splitDeliver.getId());
+//                orderSplitItemMapper.setSupplierId(id, splitDeliver.getId());
             }
             orderSplit.setApplyStatus(2);//发给供应商
             orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
@@ -415,7 +458,18 @@ public class OrderSplitService {
             .andNotEqualTo(OrderSplit.APPLY_STATUS,4);//过滤业主未支付
             example.orderBy(OrderSplit.CREATE_DATE).desc();
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
-            return ServerResponse.createBySuccess("查询成功", orderSplitList);
+            List<Map> orderSplitMaps=new ArrayList<>();
+            //查询时候存在待发货的单据，用于撤回待发货的发货单
+            for (OrderSplit orderSplit : orderSplitList) {
+                Map map =BeanUtils.beanToMap(orderSplit);
+                example = new Example(SplitDeliver.class);
+                example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId())
+                        .andCondition(" shipping_state in (0,6)").andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplit.getId());
+                int splitDeliverList = splitDeliverMapper.selectCountByExample(example);
+                map.put("num",splitDeliverList);
+                orderSplitMaps.add(map);
+            }
+            return ServerResponse.createBySuccess("查询成功", orderSplitMaps);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

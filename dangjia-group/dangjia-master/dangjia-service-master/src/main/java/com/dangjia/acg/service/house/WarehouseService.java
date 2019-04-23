@@ -227,4 +227,8 @@ public class WarehouseService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+    public static void main(String[] args) {
+        System.out.println();
+    }
 }
