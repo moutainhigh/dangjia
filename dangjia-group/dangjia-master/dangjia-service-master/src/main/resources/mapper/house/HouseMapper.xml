@@ -54,7 +54,15 @@
         FROM dj_house house ,dj_member member
         <where>
             house.data_status=0
-            AND house.designer_ok=#{designerOk}
+            <if test="designerOk == 7">
+                AND house.designer_ok in (2,7,8)
+            </if>
+            <if test="designerOk == 9">
+                AND house.designer_ok in (5,6,9)
+            </if>
+            <if test="!(designerOk == 7 or designerOk  == 9)">
+                AND house.designer_ok=#{designerOk}
+            </if>
             AND house.visit_state=1
             AND member.id = house.member_id
             <if test="residential!=null and residential!=''">
@@ -293,10 +301,10 @@
         WHERE
         h.data_status =0 and h.designer_ok=3
         <if test="budgetOk!=null and budgetOk!=''">
-            <if test="budgetOk=='2' or budgetOk=='4'">
-                and  (budget_ok =2 || budget_ok = 4)
+            <if test="budgetOk==1">
+                and  (budget_ok =1 or budget_ok = 4)
             </if>
-            <if test="!(budgetOk=='2' or budgetOk=='4')">
+            <if test="budgetOk!=1">
                 and  budget_ok =#{budgetOk}
             </if>
         </if>
@@ -392,6 +400,19 @@
          from dj_member m
          INNER join dj_house h on m.id=h.member_id where m.id=#{memberId} and h.data_status =0 and h.visit_state =1
          ORDER BY create_date DESC limit 1
+    </select>
+    
+    <select id="getRepairMend" resultType="com.dangjia.acg.dto.repair.RepairMendDTO">
+        SELECT
+            o.type as type,
+            m.shop_count as shopCount
+            FROM
+            dj_repair_mend_order o
+            INNER JOIN dj_repair_mend_materiel m ON m.mend_order_id = o.id
+            WHERE
+            o.type IN ( 2, 4 )
+            AND o.house_id = #{houseId}
+            AND m.product_id = #{productId}
     </select>
 </mapper>
 
