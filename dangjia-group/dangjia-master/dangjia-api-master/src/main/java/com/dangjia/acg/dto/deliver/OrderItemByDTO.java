@@ -22,5 +22,6 @@ public class OrderItemByDTO {
     private String goodsSn;
 
     private int type;
+    private String red;
 }
 

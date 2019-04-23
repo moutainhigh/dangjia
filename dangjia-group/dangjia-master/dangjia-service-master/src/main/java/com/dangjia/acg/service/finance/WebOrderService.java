@@ -8,12 +8,14 @@ import com.dangjia.acg.dto.deliver.OrderItemByDTO;
 import com.dangjia.acg.dto.deliver.WebOrderDTO;
 import com.dangjia.acg.mapper.activity.IActivityRedPackMapper;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
+import com.dangjia.acg.mapper.activity.IActivityRedPackRuleMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
+import com.dangjia.acg.modle.activity.ActivityRedPackRule;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.github.pagehelper.PageHelper;
@@ -21,6 +23,7 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -45,6 +48,9 @@ public class WebOrderService {
 
     @Autowired
     private ConfigUtil configUtil;
+
+    @Autowired
+    private IActivityRedPackRuleMapper activityRedPackRuleMapper;
     /**
      * 所有订单流水
      *
@@ -112,6 +118,23 @@ public class WebOrderService {
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<OrderItemByDTO> orderItemList= iBusinessOrderMapper.getOrderItem(businessNumber);
+        ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(businessNumber);
+        String red = null;
+        if(activityRedPackRecord!=null) {
+            ActivityRedPack activityRedPack = iActivityRedPackMapper.selectByPrimaryKey(activityRedPackRecord.getRedPackId());
+            ActivityRedPackRule activityRedPackRule = activityRedPackRuleMapper.selectByPrimaryKey(activityRedPackRecord.getRedPackRuleId());
+            //0为减免金额券 1 为折扣券 2代金券'
+            if (activityRedPack.getType() == 0) {
+                red = "满" + activityRedPackRule.getSatisfyMoney().stripTrailingZeros().toPlainString() + "减" + activityRedPackRule.getMoney().stripTrailingZeros().toPlainString();
+            } else if (activityRedPack.getType() == 1) {
+                red = "折扣券" + activityRedPackRule.getMoney().stripTrailingZeros().toPlainString() + "折";
+            } else {
+                red = "代金券" + activityRedPackRule.getMoney().stripTrailingZeros().toPlainString() + "元";
+            }
+        }else {
+            red="无";
+        }
+        orderItemList.get(0).setRed(red);
         PageInfo pageResult = new PageInfo(orderItemList);
         for (OrderItemByDTO orderItemByDTO : orderItemList) {
             orderItemByDTO.setImage(imageAddress+orderItemByDTO.getImage());
