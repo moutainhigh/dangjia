@@ -207,7 +207,6 @@ public class TechnologyRecordService {
      * 获取上传图片列表
      * applyType 0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
      */
-    @Deprecated
     public ServerResponse uploadingImageList(String nodeArr){
         try{
             List<Map<String,Object>> listMap = new ArrayList<>();
@@ -247,7 +246,6 @@ public class TechnologyRecordService {
      * @deprecated use the standard {@link com.dangjia.acg.service.matter.TechnologyRecordService
      * @see  workNodeList(String userToken, String houseFlowId, Integer applyType)} constraint instead
      */
-    @Deprecated
     public ServerResponse technologyRecordList(String houseFlowId){
         try{
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
