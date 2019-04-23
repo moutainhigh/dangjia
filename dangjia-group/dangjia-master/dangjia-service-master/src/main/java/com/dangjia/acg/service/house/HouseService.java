@@ -1354,5 +1354,37 @@ public class HouseService {
 
     }
 
+    public ServerResponse getHistoryWorker(String houseId,String workerTypeId,String workId,PageDTO pageDTO){
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            Example example = new Example(HouseWorker.class);
+            example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseId).andEqualTo(HouseWorker.WORKER_TYPE_ID, workerTypeId).andNotEqualTo(HouseWorker.WORKER_ID,workId);
+            List<HouseWorker> houseWorkers = houseWorkerMapper.selectByExample(example);
+            PageInfo pageResult = new PageInfo(houseWorkers);
+            List<HouseWorkDTO> houseWorkDTOS = new ArrayList<>();
+            for (HouseWorker h : houseWorkers) {
+                HouseWorkDTO houseWorkDTO = new HouseWorkDTO();
+                Member member = memberMapper.selectByPrimaryKey(h.getWorkerId());
+                Example example1 = new Example(WorkerDetail.class);
+                example1.createCriteria().andEqualTo(WorkerDetail.HOUSE_ID,houseId).andEqualTo(WorkerDetail.WORKER_ID,h.getWorkerId());
+                List<WorkerDetail> workerDetails = workerDetailMapper.selectByExample(example1);
+                double money=0;
+                for (WorkerDetail w:workerDetails){
+                    money+=w.getMoney().doubleValue();
+                }
+                houseWorkDTO.setWorkName(member.getName());
+                houseWorkDTO.setPhone(member.getMobile());
+                houseWorkDTO.setModifyDate(h.getModifyDate());
+                houseWorkDTO.setWorkerId(h.getWorkerId());
+                houseWorkDTO.setHaveMoney(new BigDecimal(money));
+                houseWorkDTOS.add(houseWorkDTO);
+            }
+            pageResult.setList(houseWorkDTOS);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        }catch (Exception e){
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
 }
 

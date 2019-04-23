@@ -8,6 +8,7 @@ import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -57,6 +58,12 @@ public class WebHouseController implements WebHouseAPI {
     @ApiMethod
     public ServerResponse getAllHouseByVisitState(Integer visitState) {
         return houseService.getAllHouseByVisitState(visitState);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getHistoryWorker(String houseId,String workerTypeId,String workId,PageDTO pageDTO) {
+        return houseService.getHistoryWorker(houseId,workerTypeId,workId, pageDTO);
     }
 
 

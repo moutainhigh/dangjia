@@ -93,4 +93,8 @@ public interface WebEngineerAPI {
     @GetMapping("/web/engineer/exportWareHouse")
     @ApiOperation(value = "导出仓库", notes = "导出仓库", produces = "*/*,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream")
     ServerResponse exportWareHouse(@RequestParam("response") HttpServletResponse response, @RequestParam("houseId") String houseId,@RequestParam("userName") String userName,@RequestParam("address") String address);
+
+    @PostMapping(value = "web/engineer/freeze")
+    @ApiOperation(value = "冻结账户", notes = "冻结账户")
+    ServerResponse freeze(@RequestParam("memberId") String  memberId,@RequestParam("type") boolean type);
 }

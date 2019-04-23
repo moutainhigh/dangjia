@@ -27,4 +27,6 @@ public class ArtisanDTO {
     private String realNameDescribe;
     private String checkDescribe;
 
+    private Boolean isJob;
+
 }
