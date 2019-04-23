@@ -62,6 +62,10 @@ public class WarehouseService {
      */
     public ServerResponse warehouseList(String  userToken,Integer pageNum, Integer pageSize, String houseId, String categoryId, String name, Integer type) {
         try {
+            if (StringUtil.isEmpty(houseId)) {
+                return ServerResponse.createByErrorMessage("houseId不能为空");
+            }
+            House house = houseMapper.selectByPrimaryKey(houseId);
             if(!CommonUtil.isEmpty(userToken)){
                 AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
                 Member member=accessToken.getMember();
@@ -72,12 +76,12 @@ public class WarehouseService {
                         type=0;
                     }
                 }
-            }
-            if (StringUtil.isEmpty(houseId)) {
-                return ServerResponse.createByErrorMessage("houseId不能为空");
+                if(house.getMemberId().equals(member.getId())){
+                    type=null;
+                }
             }
 
-            House house = houseMapper.selectByPrimaryKey(houseId);
+
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             Example example=new Example(Warehouse.class);
             Example.Criteria criteria=example.createCriteria();
@@ -122,6 +126,10 @@ public class WarehouseService {
      */
     public ServerResponse warehouseGmList(HttpServletRequest request,String  userToken, String houseId, String name, Integer type) {
         try {
+            if (StringUtil.isEmpty(houseId)) {
+                return ServerResponse.createByErrorMessage("houseId不能为空");
+            }
+            House house = houseMapper.selectByPrimaryKey(houseId);
             if(!CommonUtil.isEmpty(userToken)){
                 AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
                 Member member=accessToken.getMember();
@@ -132,11 +140,11 @@ public class WarehouseService {
                         type=0;
                     }
                 }
+                if(house.getMemberId().equals(member.getId())){
+                    type=null;
+                }
             }
             String cityId = request.getParameter(Constants.CITY_ID);
-            if (StringUtil.isEmpty(houseId)) {
-                return ServerResponse.createByErrorMessage("houseId不能为空");
-            }
             Map<String, Map> maps = new HashMap<>();
             Map map=new HashMap();
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
@@ -218,5 +226,9 @@ public class WarehouseService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println();
     }
 }
