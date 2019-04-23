@@ -3,6 +3,7 @@ package com.dangjia.acg.controller.app.core;
 import com.dangjia.acg.api.app.core.HouseWorkerAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +18,8 @@ public class HouseWorkerController implements HouseWorkerAPI {
 
     @Autowired
     private HouseWorkerService houseWorkerService;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     /**
      *  根据工人id查询所有房子任务
@@ -50,7 +53,7 @@ public class HouseWorkerController implements HouseWorkerAPI {
     @Override
     @ApiMethod
     public ServerResponse getConstructionByWorkerId(String userToken, String cityId) {
-        return houseWorkerService.getConstructionByWorkerId(userToken, cityId);
+        return constructionService.getConstructionView(userToken);
     }
 
     /**

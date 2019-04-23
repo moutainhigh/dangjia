@@ -78,7 +78,7 @@ public class ClueService {
             if (!CommonUtil.isEmpty(values)) {
                 criteria.andCondition(" CONCAT(owername,phone,wechat,address) like CONCAT('%','" + values + "','%')");
             }
-            example.orderBy("modifyDate").desc();
+            example.orderBy(Clue.MODIFY_DATE).desc();
             PageHelper.startPage(pageNum, pageSize);
             List<Clue> clues = clueMapper.selectByExample(example);
             PageInfo pageResult = new PageInfo(clues);
