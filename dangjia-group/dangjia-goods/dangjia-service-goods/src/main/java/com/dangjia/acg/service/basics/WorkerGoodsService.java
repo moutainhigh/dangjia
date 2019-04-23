@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sun.security.x509.OtherName;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
@@ -53,19 +54,16 @@ public class WorkerGoodsService {
     private static Logger LOG = LoggerFactory.getLogger(WorkerGoodsService.class);
 
     public ServerResponse<PageInfo> getWorkerGoodses(Integer pageNum, Integer pageSize, String workerTypeId, String searchKey, String showGoods) {
-        if (pageNum == null) {
-            pageNum = 1;
-        }
-        if (pageSize == null) {
-            pageSize = 10;
-        }
+
         PageHelper.startPage(pageNum, pageSize);
         List<WorkerGoods> productList = iWorkerGoodsMapper.selectList(StringUtils.isBlank(workerTypeId) ? null : workerTypeId,
                 StringUtils.isBlank(searchKey) ? null : searchKey, StringUtils.isBlank(showGoods) ? null : showGoods);
+
         if (productList == null || productList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "暂无工价商品");
         }
-        List<WorkerGoodsDTO> workerGoodsResults = new ArrayList<WorkerGoodsDTO>();
+        List<WorkerGoodsDTO> workerGoodsResults = new ArrayList<>();
+
         for (WorkerGoods workerGoods : productList) {
             WorkerGoodsDTO workerGoodsResult = assembleWorkerGoodsResult(workerGoods);
             workerGoodsResults.add(workerGoodsResult);
@@ -73,6 +71,8 @@ public class WorkerGoodsService {
         PageInfo pageResult = new PageInfo(productList);
         pageResult.setList(workerGoodsResults);
         return ServerResponse.createBySuccess("获取工价商品列表成功", pageResult);
+
+
     }
 
 
@@ -123,6 +123,8 @@ public class WorkerGoodsService {
             workerGoodsResult.setWorkerDecUrl(workerGoods.getWorkerDec());
             workerGoodsResult.setUnitId(workerGoods.getUnitId());
             workerGoodsResult.setUnitName(workerGoods.getUnitName());
+            workerGoodsResult.setOtherName(workerGoods.getOtherName());
+
 
             String workerTypeName = "";
             ServerResponse response = workerTypeAPI.getWorkerType(workerGoods.getWorkerTypeId());
@@ -285,6 +287,10 @@ public class WorkerGoodsService {
                     return ServerResponse.createByErrorMessage("商品编号不能重复");
 
             }
+
+//            WorkerGoods workerO = iWorkerGoodsMapper.selectByPrimaryKey(workerGoods.getOtherName());
+//            workerGoods.setOtherName(workerGoods.getOtherName());
+//            iWorkerGoodsMapper.updateByPrimaryKey(workerO);
 
             String ret = technologyService.insertTechnologyList(technologyJsonList, workerGoods.getWorkerTypeId(), 1, workerGoods.getId());
             if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示

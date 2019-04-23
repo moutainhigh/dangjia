@@ -194,6 +194,7 @@
 			bp.`name` LIKE CONCAT('%',#{name}, '%' )
 			OR bb.`name` LIKE CONCAT('%',#{name}, '%' )
 			OR bbs.`name` LIKE CONCAT( '%', #{name}, '%' )
+			OR bp.`other_name` LIKE CONCAT( '%', #{name}, '%' )
 			)
 		</if>
 		GROUP BY bg.id
@@ -234,6 +235,7 @@
 			bp.`name` LIKE CONCAT('%',#{name}, '%' )
 			OR bb.`name` LIKE CONCAT('%',#{name}, '%' )
 			OR bbs.`name` LIKE CONCAT( '%', #{name}, '%' )
+			OR bp.`other_name` LIKE CONCAT( '%', #{name}, '%' )
 			)
 		</if>
 		GROUP BY bg.id

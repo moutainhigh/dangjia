@@ -58,5 +58,7 @@ public class WorkerGoods extends BaseEntity {
     private Integer showGoods;//是否展示 1展示；0不展示
 //    private Integer showGoods;//是否展示 0展示；1不展示
 
+    @Column(name = "other_name")
+    private String otherName;//人工商品别名
 
 }
