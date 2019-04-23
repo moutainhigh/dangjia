@@ -28,7 +28,7 @@ public class ActuaryController implements ActuaryAPI {
     @Override
     @ApiMethod
     public ServerResponse getActuaryWaitPay(HttpServletRequest request,PageDTO pageDTO,String name){
-        return actuaryService.getActuaryAll(request,pageDTO,name,"4");
+        return actuaryService.getActuaryAll(request,pageDTO,name,"5");
 
     }
 

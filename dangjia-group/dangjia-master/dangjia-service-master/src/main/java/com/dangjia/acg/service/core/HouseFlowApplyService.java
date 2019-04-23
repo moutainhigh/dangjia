@@ -168,8 +168,11 @@ public class HouseFlowApplyService {
 
                 //修改进程
                 HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(),hwo.getWorkerTypeId());
-                houseFlow.setWorkSteta(2);
+                if(houseFlow.getWorkSteta()==2){
+                    return ServerResponse.createBySuccessMessage("操作成功");
+                }
 
+                houseFlow.setWorkSteta(2);
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                 //处理工人拿钱
                 workerMoney(hwo,hfa);
@@ -217,6 +220,9 @@ public class HouseFlowApplyService {
 
                 //修改进程
                 HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(),hwo.getWorkerTypeId());
+                if(hf.getWorkSteta()==1){
+                    return ServerResponse.createBySuccessMessage("操作成功");
+                }
                 hf.setWorkSteta(1);
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
 

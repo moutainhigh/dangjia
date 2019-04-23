@@ -301,10 +301,10 @@
         WHERE
         h.data_status =0 and h.designer_ok=3
         <if test="budgetOk!=null and budgetOk!=''">
-            <if test="budgetOk=='2' or budgetOk=='4'">
-                and  (budget_ok =2 || budget_ok = 4)
+            <if test="budgetOk=='1' or budgetOk=='4'">
+                and  (budget_ok =1 || budget_ok = 4)
             </if>
-            <if test="!(budgetOk=='2' or budgetOk=='4')">
+            <if test="!(budgetOk=='1' or budgetOk=='4')">
                 and  budget_ok =#{budgetOk}
             </if>
         </if>
