@@ -176,10 +176,12 @@ public class EngineerService {
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
 
             HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
-            houseWorker.setWorkerId(workerId);
-            houseWorker.setWorkType(1);//已抢单
-            houseWorker.setIsSelect(1);
-            houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+            if(houseWorker!=null) {
+                houseWorker.setWorkerId(workerId);
+                houseWorker.setWorkType(1);//已抢单
+                houseWorker.setIsSelect(1);
+                houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+            }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
