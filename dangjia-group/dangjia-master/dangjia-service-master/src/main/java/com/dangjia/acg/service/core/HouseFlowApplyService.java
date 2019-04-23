@@ -528,6 +528,30 @@ public class HouseFlowApplyService {
     private void workerMoney(HouseWorkerOrder hwo,HouseFlowApply hfa){
         try{
             Member worker = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
+            if(hfa.getApplyType() == 2){//整体完工申请
+                if(hwo.getRepairPrice().compareTo(new BigDecimal(0)) > 0){
+                    /*有补的人工钱加入工人流水*/
+                    BigDecimal surplusMoney = worker.getSurplusMoney().add(hwo.getRepairPrice());
+                    BigDecimal workerPrice = worker.getWorkerPrice().add(hwo.getRepairPrice());
+                    BigDecimal haveMoney = worker.getHaveMoney().add(hwo.getRepairPrice());
+                    worker.setWorkerPrice(workerPrice);//总共获得钱
+                    worker.setHaveMoney(haveMoney);//可取 + 滞留金
+                    worker.setSurplusMoney(surplusMoney);//可取钱
+
+                    WorkerDetail workerDetail = new WorkerDetail();
+                    workerDetail.setName("补人工钱");
+                    workerDetail.setWorkerId(hwo.getWorkerId());
+                    workerDetail.setWorkerName(worker.getName());
+                    workerDetail.setHouseId(hwo.getHouseId());
+                    workerDetail.setMoney(hwo.getRepairPrice());
+                    workerDetail.setState(0);//进钱
+                    workerDetail.setHaveMoney(hwo.getHaveMoney());
+                    workerDetail.setHouseWorkerOrderId(hwo.getId());
+                    workerDetail.setWalletMoney(surplusMoney);
+                    workerDetail.setApplyMoney(hwo.getRepairPrice());
+                    workerDetailMapper.insert(workerDetail);
+                }
+            }
             WorkerType workerType=workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
             //处理工人得到的钱
             if(hwo.getHaveMoney() == null){
@@ -570,14 +594,9 @@ public class HouseFlowApplyService {
             WorkerDetail workerDetail = new WorkerDetail();
             if(hfa.getApplyType() == 2){//整体完工申请
                 workerDetail.setName(workerType.getName()+"整体完工");
-                if(hwo.getRepairPrice().compareTo(new BigDecimal(0)) > 0){
-                    /*有补的人工钱加入工人流水*/
-                    this.workerDetailRepair(hwo);
-                }
             }else{
                 workerDetail.setName(workerType.getName()+"阶段完工");
             }
-
             workerDetail.setWorkerId(hwo.getWorkerId());
             workerDetail.setWorkerName(worker.getName());
             workerDetail.setHouseId(hwo.getHouseId());
@@ -593,11 +612,13 @@ public class HouseFlowApplyService {
             if(worker.getHaveMoney() == null){//工人已获取
                 worker.setHaveMoney(new BigDecimal(0.0));
             }
-            worker.setHaveMoney(haveMoney);
-
             if(worker.getSurplusMoney() == null){//可取余额 赋初始值为0
                 worker.setSurplusMoney(new BigDecimal(0.0));
             }
+
+            worker.setHaveMoney(haveMoney);
+
+
             BigDecimal mid = worker.getHaveMoney().subtract(worker.getRetentionMoney());//可取等于 获得减押金
             if(mid.compareTo(BigDecimal.ZERO) == 1){//大于0
                 worker.setSurplusMoney(mid);
@@ -616,42 +637,6 @@ public class HouseFlowApplyService {
         }catch (Exception e){
             e.printStackTrace();
         }
-    }
-    /**补人工算钱*/
-    private void workerDetailRepair(HouseWorkerOrder hwo){
-        Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
-        //处理工钱
-        if(worker.getWorkerPrice()==null){//总钱
-            worker.setWorkerPrice(new BigDecimal(0.0));
-        }
-        if(worker.getHaveMoney() == null){//工人已获取
-            worker.setHaveMoney(new BigDecimal(0.0));
-        }
-        if(worker.getSurplusMoney() == null){//可取余额 赋初始值为0
-            worker.setSurplusMoney(new BigDecimal(0.0));
-        }
-
-
-        BigDecimal surplusMoney = worker.getSurplusMoney().add(hwo.getRepairPrice());
-        BigDecimal workerPrice = worker.getWorkerPrice().add(hwo.getRepairPrice());
-        BigDecimal haveMoney = worker.getHaveMoney().add(hwo.getRepairPrice());
-        worker.setWorkerPrice(workerPrice);//总共获得钱
-        worker.setHaveMoney(haveMoney);//可取 + 滞留金
-        worker.setSurplusMoney(surplusMoney);//可取钱
-        memberMapper.updateByPrimaryKeySelective(worker);
-
-        WorkerDetail workerDetail = new WorkerDetail();
-        workerDetail.setName("补人工钱");
-        workerDetail.setWorkerId(hwo.getWorkerId());
-        workerDetail.setWorkerName(worker.getName());
-        workerDetail.setHouseId(hwo.getHouseId());
-        workerDetail.setMoney(hwo.getRepairPrice());
-        workerDetail.setState(0);//进钱
-        workerDetail.setHaveMoney(hwo.getHaveMoney());
-        workerDetail.setHouseWorkerOrderId(hwo.getId());
-        workerDetail.setWalletMoney(surplusMoney);
-        workerDetail.setApplyMoney(hwo.getRepairPrice());
-        workerDetailMapper.insert(workerDetail);
     }
 
 

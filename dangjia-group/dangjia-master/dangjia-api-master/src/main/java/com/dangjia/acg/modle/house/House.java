@@ -131,8 +131,8 @@ public class House extends BaseEntity {
     private Integer designerOk;
 
     @Column(name = "budget_ok")
-    @Desc(value = "精算状态:-1已精算没有发给业主,默认0未开始,1已开始精算,2已发给业主,3审核通过,4审核不通过")
-    @ApiModelProperty("精算状态:-1已精算没有发给业主,默认0未开始,1已开始精算,2已发给业主,3审核通过,4审核不通过")
+    @Desc(value = "精算状态:-1已精算没有发给业主,默认0未开始,1已开始精算,2已发给业主,3审核通过,4审核不通过,5业主待支付")
+    @ApiModelProperty("精算状态:-1已精算没有发给业主,默认0未开始,1已开始精算,2已发给业主,3审核通过,4审核不通过,5业主待支付")
     private Integer budgetOk;
 
     @Column(name = "decoration_type")
