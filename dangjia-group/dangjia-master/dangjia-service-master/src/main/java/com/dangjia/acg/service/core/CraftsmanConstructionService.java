@@ -446,6 +446,9 @@ public class CraftsmanConstructionService {
             if (hf.getWorkSteta() == 2) {//完工了屏蔽完工禁止显示的了的
                 criteria.andEqualTo(MenuConfiguration.SHOW_TYPE, 1);
             }
+            if (hf.getWorkType() != 4) {//完工了屏蔽完工禁止显示的了的
+                criteria.andEqualTo(MenuConfiguration.SHOW_PAYMENT, 1);
+            }
             menuCondition(bean, criteria);
             example.orderBy(MenuConfiguration.SORT).asc();
             List<MenuConfiguration> menuConfigurations2 = iMenuConfigurationMapper.selectByExample(example);
