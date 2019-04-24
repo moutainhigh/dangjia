@@ -40,7 +40,7 @@ public class DjConstants {
         public final static String GJJINGSUANLIST = "jsCraftsman?userToken=%s&cityId=%s&title=%s";//精算
         public final static String CONFIRMQIANGDAN = "confirmQiangdan?userToken=%s&cityId=%s&title=%s";//抢单确认
         public final static String GJMANAGERJINGSUAN = "gjManagerJingSuan?userToken=%s&cityId=%s&title=%s";//精算
-        public final static String GJMANAGERISOK = "gjManagerIsOk?userToken=%s&cityId=%s&title=%s";//已抢单
+        public final static String GJMANAGERISOK = "gjManagerIsOk?title=%s";//已抢单
         public final static String COMFIRMAPPLY = "comfirmApply?userToken=%s&cityId=%s&title=%s";//审核申请
         public final static String COMFIRMSTOPPROJECT = "comfirmStopProject?userToken=%s&cityId=%s&title=%s";//审核停工
         public final static String COMFIRMFAIL = "comfirmFail?userToken=%s&cityId=%s&title=%s";//审核不通过
