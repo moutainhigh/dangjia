@@ -287,11 +287,8 @@ public class HouseFlowApplyService {
                 if(worker.getRetentionMoney() == null){
                     worker.setRetentionMoney(new BigDecimal(0.0));
                 }
-                BigDecimal mid = worker.getHaveMoney().subtract(worker.getRetentionMoney());
-                if(mid.compareTo(BigDecimal.ZERO) == 1){//大于0
-                    worker.setSurplusMoney(mid);
-                }else{
-                    worker.setSurplusMoney(BigDecimal.ZERO);
+                if(hfa.getApplyMoney().doubleValue()>0){//大于0
+                    worker.setSurplusMoney(surplusMoney);
                 }
                 memberMapper.updateByPrimaryKeySelective(worker);
             }
@@ -427,11 +424,8 @@ public class HouseFlowApplyService {
         if(worker.getSurplusMoney() == null){//可取余额 赋初始值为0
             worker.setSurplusMoney(new BigDecimal(0.0));
         }
-        BigDecimal mid = worker.getHaveMoney().subtract(worker.getRetentionMoney());//可取等于 获得减押金
-        if(mid.compareTo(BigDecimal.ZERO) == 1){//大于0
-            worker.setSurplusMoney(mid);
-        }else{
-            worker.setSurplusMoney(BigDecimal.ZERO);
+        if(supervisorMoney.doubleValue()>0){//大于0
+            worker.setSurplusMoney(surplusMoney);
         }
         memberMapper.updateByPrimaryKeySelective(worker);
     }
@@ -618,12 +612,8 @@ public class HouseFlowApplyService {
 
             worker.setHaveMoney(haveMoney);
 
-
-            BigDecimal mid = worker.getHaveMoney().subtract(worker.getRetentionMoney());//可取等于 获得减押金
-            if(mid.compareTo(BigDecimal.ZERO) == 1){//大于0
-                worker.setSurplusMoney(mid);
-            }else{
-                worker.setSurplusMoney(BigDecimal.ZERO);
+            if(applymoney.doubleValue()>0){//大于0
+                worker.setSurplusMoney(surplusMoney);
             }
 
             //成交量加1
@@ -719,13 +709,9 @@ public class HouseFlowApplyService {
             if(worker.getSurplusMoney() == null){//可取余额 赋初始值为0
                 worker.setSurplusMoney(new BigDecimal(0.0));
             }
-            BigDecimal mid = worker.getHaveMoney().subtract(worker.getRetentionMoney());//可取等于 获得减押金
-            if(mid.compareTo(BigDecimal.ZERO) == 1){//大于0
-                worker.setSurplusMoney(mid);
-            }else{
-                worker.setSurplusMoney(new BigDecimal(0.0));
+            if(applyMoney.doubleValue()>0){//大于0
+                worker.setSurplusMoney(surplusMoney);
             }
-
             hwo.setHaveMoney(hwo.getWorkPrice());//已经得到的钱
             houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
 
