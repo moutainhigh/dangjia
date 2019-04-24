@@ -163,5 +163,160 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		and date_format(create_date, '%Y-%m') = #{createDate}
 		ORDER BY create_date DESC
     </select>
+
+    <select id="getHouseWallet" resultType="com.dangjia.acg.dto.finance.WebWorkerDetailDTO">
+        SELECT
+            a.apply_type state,
+            a.NAME,
+            a.create_date createDate,
+            a.apply_money money,
+            a.star
+        FROM
+            (
+        <if test="workerType!=null and workerType!='' and workerType=='3'">
+
+
+                (
+                    SELECT
+                        '3' apply_type,
+                        '巡查工地收入' NAME,
+                        a.create_date,
+                        a.supervisor_money apply_money,
+                        IFNULL(avg(e.star), 0) star
+                    FROM
+                        `dj_core_house_flow_apply` a
+                    LEFT JOIN dj_worker_evaluate e ON a.id = e.house_flow_apply_id  AND e.butler_id=#{workerId}
+                    AND e.state = 1
+                    WHERE
+                        a.`house_id` = #{houseId} -- 仅限大管家
+                    AND a.member_check = 1
+                    AND a.supervisor_money > 0
+                    AND a.apply_type IN (5)
+                    GROUP BY
+                        a.id
+                )
+                UNION ALL
+                    (
+                        SELECT
+                            '4' apply_type,
+                            (
+                                CASE
+                                WHEN a.apply_type = 1 THEN
+                                    '阶段完工验收'
+                                WHEN a.apply_type = 2 THEN
+                                    '整体完工验收'
+                                END
+                            ) NAME,
+                            a.create_date,
+                            a.supervisor_money apply_money,
+                            IFNULL(avg(e.star), 0) star
+                        FROM
+                            `dj_core_house_flow_apply` a
+                        LEFT JOIN dj_worker_evaluate e ON a.id = e.house_flow_apply_id AND e.butler_id=#{workerId}
+                        AND e.state = 1
+                        WHERE
+                            a.`house_id` = #{houseId} -- 仅限大管家
+                        AND a.member_check = 1
+                        AND a.supervisor_money > 0
+                        AND a.apply_type IN (1, 2)
+                        GROUP BY
+                            a.id
+                    )
+                UNION ALL
+        </if>
+                    (
+                        SELECT
+                            a.apply_type,
+                            (
+                                CASE
+                                WHEN a.apply_type = 0 THEN
+                                    '每日完工收入'
+                                WHEN a.apply_type = 1 THEN
+                                    '阶段完工收入'
+                                WHEN a.apply_type = 2 THEN
+                                    '整体完工收入'
+                                END
+                            ) NAME,
+                            a.create_date,
+                            a.apply_money,
+                            IFNULL(avg(e.star), 0) star
+                        FROM
+                            `dj_core_house_flow_apply` a
+                        LEFT JOIN dj_worker_evaluate e ON a.id = e.house_flow_apply_id
+                        AND e.state = 1
+                        WHERE
+                            a.`house_id` = #{houseId}   and a.worker_id=#{workerId}
+                        AND a.member_check = 1
+                        AND a.apply_money > 0
+                        AND a.apply_type IN (0,1, 2)
+                        GROUP BY
+                            a.id
+                    )
+                UNION ALL
+                    (
+                        SELECT
+                            (
+                                CASE
+                                WHEN a.type = 1 THEN
+                                    8
+                                WHEN a.type != 1 THEN
+                                    9
+                                END
+                            ) apply_type,
+                            (
+                                CASE
+                                WHEN a.type = 1 THEN
+                                    '补人工收入'
+                                WHEN a.type != 1 THEN
+                                    '退人工支出'
+                                END
+                            ) NAME,
+                            a.create_date,
+                            a.total_amount apply_money,
+                            0 star
+                        FROM
+                            dj_repair_mend_order a
+                        INNER JOIN dj_core_house_flow f ON f.house_id = a.house_id
+                        AND f.worker_type_id = a.worker_type_id
+                        WHERE
+                          a.`house_id` = #{houseId}   and f.worker_id=#{workerId}
+                        AND a.type IN (1, 3)
+                        AND a.state IN (3, 4)
+                    )
+                UNION ALL
+                    (
+                        SELECT
+                            (
+                                CASE
+                                WHEN c.type = 1 THEN
+                                    11
+                                WHEN c.type != 1 THEN
+                                    10
+                                END
+                            ) apply_type,
+                            (
+                                CASE
+                                WHEN c.type = 1 THEN
+                                    '处罚支出'
+                                WHEN c.type != 1 THEN
+                                    '奖励收入'
+                                END
+                            ) NAME,
+                            a.create_date,
+                            pc.quantity apply_money,
+                            0 star
+                        FROM
+                            dj_worker_reward_punish_record a
+                        INNER JOIN dj_worker_reward_punish_correlation c ON a.reward_punish_correlation_id = c.id
+                        INNER JOIN dj_worker_reward_punish_condition pc ON pc.reward_punish_correlation_id = c.id
+                        WHERE
+                         a.`house_id` = #{houseId} AND a.member_id=#{workerId}
+                        AND pc.type IN (1, 2)
+                        AND a.state = 0
+                    )
+            ) a
+        ORDER BY
+            a.create_date DESC
+    </select>
 </mapper>
 
