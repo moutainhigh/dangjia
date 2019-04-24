@@ -378,44 +378,39 @@ public class GoodsService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Goods> goodsList = iGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
+            PageInfo pageResult = new PageInfo(goodsList);
             List<Map<String, Object>> gMapList = new ArrayList<>();
             for (Goods goods : goodsList) {
                 Map<String, Object> gMap = BeanUtils.beanToMap(goods);
                 List<Map<String, Object>> mapList = new ArrayList<>();
                 gMap.put("goodsUnitName", iUnitMapper.selectByPrimaryKey(goods.getUnitId()).getName());
-                if (2 != goods.getBuy())//非自购
-                {
+                if (2 != goods.getBuy()){
                     List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
                     for (Product p : productList) {
                         //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
-                        if (type!=null&&type != p.getType() && -1 != type) //不等于 type 的不返回给前端
+                        if (type!=null&& !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
                             continue;
-
-                        String imgUrlStr = "";
-                        String imgStr = "";
+                        StringBuilder imgUrlStr = new StringBuilder();
+                        StringBuilder imgStr = new StringBuilder();
                         if (!CommonUtil.isEmpty(p.getImage())) {
                             String[] imgArr = p.getImage().split(",");
                             for (int i = 0; i < imgArr.length; i++) {
                                 if (i == imgArr.length - 1) {
-                                    imgStr += address + imgArr[i];
-                                    imgUrlStr += imgArr[i];
+                                    imgStr.append(address).append(imgArr[i]);
+                                    imgUrlStr.append(imgArr[i]);
                                 } else {
-                                    imgStr += address + imgArr[i] + ",";
-                                    imgUrlStr += imgArr[i] + ",";
+                                    imgStr.append(address).append(imgArr[i]).append(",");
+                                    imgUrlStr.append(imgArr[i]).append(",");
                                 }
                             }
                         }
-                        p.setImage(imgStr);
-
+                        p.setImage(imgStr.toString());
                         Map<String, Object> map = BeanUtils.beanToMap(p);
-                        map.put("imageUrl", imgUrlStr);
-
+                        map.put("imageUrl", imgUrlStr.toString());
                         map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
-
                         String strNewValueNameArr = "";
                         if (StringUtils.isNotBlank(p.getValueIdArr())) {
                             String[] newValueNameArr = p.getValueIdArr().split(",");
-
                             for (int i = 0; i < newValueNameArr.length; i++) {
                                 String valueId = newValueNameArr[i];
                                 if (StringUtils.isNotBlank(valueId)) {
@@ -429,7 +424,6 @@ public class GoodsService {
                             }
                         }
                         map.put("newValueNameArr", strNewValueNameArr);
-
                         if (!StringUtils.isNotBlank(p.getLabelId())) {
                             map.put("labelId", "");
                             map.put("labelName", "");
@@ -442,11 +436,9 @@ public class GoodsService {
                         mapList.add(map);
                     }
                 }
-
                 gMap.put("productList", mapList);
                 gMapList.add(gMap);
             }
-            PageInfo pageResult = new PageInfo(goodsList);
             pageResult.setList(gMapList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {

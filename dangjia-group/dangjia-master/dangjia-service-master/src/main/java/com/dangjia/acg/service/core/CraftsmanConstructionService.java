@@ -309,8 +309,15 @@ public class CraftsmanConstructionService {
                     case 0://0未审核
                         bean.setIfBackOut(3);//0可放弃；1：申请停工；2：已停工 3 审核中
                         break;
-                    case 1://TODO 需要修改 1审核通过
-                        bean.setIfBackOut(2);//0可放弃；1：申请停工；2：已停工 3 审核中
+                    case 1://1审核通过
+                        Date date = new Date();
+                        if (hfa.getStartDate() != null && date.getTime() < hfa.getStartDate().getTime()) {
+                            bean.setIfBackOut(3);//0可放弃；1：申请停工；2：已停工 3 审核中
+                        } else if (hfa.getEndDate() != null && date.getTime() > hfa.getEndDate().getTime()) {
+                            bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
+                        } else {
+                            bean.setIfBackOut(2);//0可放弃；1：申请停工；2：已停工 3 审核中
+                        }
                         break;
                     default://2审核不通过
                         bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
