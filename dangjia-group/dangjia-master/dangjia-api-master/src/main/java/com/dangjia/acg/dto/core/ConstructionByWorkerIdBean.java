@@ -14,30 +14,29 @@ import java.util.List;
  */
 @Data
 public class ConstructionByWorkerIdBean {
-    private String userId;//大管家查询时为业主ID,工匠查询是为大管家ID
+    private String userId = "";//大管家查询时为业主ID,工匠查询是为大管家ID
     private int taskNumber;//任务数量
-    private String allPatrol;//总巡查次数
+    private String allPatrol = "总巡查次数:0";//总巡查次数
     private BigDecimal alreadyMoney;//已得钱
     private BigDecimal alsoMoney;//还可得钱
     private String houseFlowId;//进程id
     private String houseIsStart;//今日未开工
-    private String houseMemberName;//业主名称
-    private String houseMemberPhone;//业主电话
-    private String houseName;//房子名称
-    private int ifBackOut;//0可放弃；1：申请停工；2：已停工 3 审核中
+    private String houseMemberName = "";//业主名称
+    private String houseMemberPhone = "";//业主电话
+    private String houseName = "";//房子名称
+    private int ifBackOut = 1;//0可放弃；1：申请停工；2：已停工 3 审核中
     private List<String> promptList;//消息提示
-    private int workerType;//0:大管家；1：工匠
+    private int workerType;//0:大管家；1：工匠；2：设计师；3：精算师
     private List<BigListBean> bigList;//菜单
     private List<ButtonListBean> buttonList;//按钮
     private List<WokerFlowListBean> wokerFlowList;//施工进程列表
-
     private String everyDay;//每日完工天数
     private int ifDisclose;//0:未支付；1：未交底；2:已交底
-    private String supervisorCountOrder;//大管家总单数
-    private String supervisorEvation;//大管家积分
-    private String supervisorName;//大管家名字
-    private String supervisorPhone;//大管家电话
-    private String supervisorPraiseRate;//大管家好评率
+    private String supervisorCountOrder = "总单数:0";//大管家总单数
+    private String supervisorPraiseRate = "总单数:0";//大管家好评率
+    private String supervisorEvation = "好评率:0%";//大管家积分
+    private String supervisorName = "无";//大管家名字
+    private String supervisorPhone = "无";//大管家电话
     private String suspendDay;//暂停天数
     private String totalDay;//总开工天数
     private String footMessageTitle;// 今日开工任务

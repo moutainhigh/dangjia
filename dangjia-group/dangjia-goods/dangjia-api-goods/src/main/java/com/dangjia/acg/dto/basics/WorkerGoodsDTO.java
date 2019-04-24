@@ -53,6 +53,8 @@ public class WorkerGoodsDTO {
     private String createDate;
     @ApiModelProperty("modifyDate")
     private String modifyDate;
+    @ApiModelProperty("otherName")
+    private String otherName;
 
 
     @ExcelField(titile = "精算数", offset = 6)

@@ -23,6 +23,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.matter.IWorkerEverydayMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
@@ -33,6 +34,7 @@ import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
@@ -76,8 +78,6 @@ public class HouseWorkerService {
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
-    private IWorkerEverydayMapper workerEverydayMapper;
-    @Autowired
     private IWorkerDetailMapper workerDetailMapper;
     @Autowired
     private WorkerGoodsAPI workerGoodsAPI;
@@ -100,7 +100,7 @@ public class HouseWorkerService {
     @Autowired
     private HouseFlowApplyService houseFlowApplyService;
     @Autowired
-    private HouseWorkerSupService houseWorkerSupService;
+    private IMenuConfigurationMapper iMenuConfigurationMapper;
     @Value("${spring.profiles.active}")
     private String active;
 
@@ -237,484 +237,6 @@ public class HouseWorkerService {
     }
 
     /**
-     * 根据工人id查询自己的施工界面
-     */
-    public ServerResponse getConstructionByWorkerId(String userToken, String cityId) {
-        try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
-            if (worker == null) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), EventStatus.USER_TOKEN_ERROR.getDesc());
-            }
-            if (worker.getWorkerType() == null) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "请上传资料");
-            }
-            if (worker.getWorkerType() == 1 || worker.getWorkerType() == 2) {//设计师/精算师不支持直接返回
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "设计师/精算师请在后台管理中查看施工详情");
-            }
-
-            HouseWorker hw;
-            List<HouseWorker> houseWorkerList = houseWorkerMapper.getAllHouseWorker(worker.getId());//查询所有已抢待支付和已支付
-            if (houseWorkerList.size() == 0) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "您暂无施工中的记录,快去接单吧！");
-            }
-            List<HouseWorker> selectList = houseWorkerMapper.getDetailHouseWorker(worker.getId());//查询选中
-
-            if (selectList.size() == 0) {//没有选中的任务
-                hw = houseWorkerList.get(0);
-                hw.setIsSelect(1);//设置成默认
-                houseWorkerMapper.updateByPrimaryKeySelective(hw);
-            } else {
-                hw = selectList.get(0);
-            }
-
-            List<HouseFlow> hfList = houseFlowMapper.getAllFlowByHouseId(hw.getHouseId());
-            House house = houseMapper.selectByPrimaryKey(hw.getHouseId());//查询房产信息
-            HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hw.getHouseId(), hw.getWorkerTypeId());//查询自己的任务状态
-            ConstructionByWorkerIdBean bean = new ConstructionByWorkerIdBean();
-
-            /*
-               停工按钮状态
-               memberCheck  0未审核，1审核通过，2审核不通过
-               ifBackOut  0可放弃；1：申请停工；2：已停工 3 审核中
-             */
-            Example example = new Example(HouseFlowApply.class);
-            example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, hf.getId()).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                    .andEqualTo(HouseFlowApply.PAY_STATE, 1);
-            List<HouseFlowApply> HFAList = houseFlowApplyMapper.selectByExample(example);
-            if (HFAList.size() > 0) {
-                HouseFlowApply hfa = HFAList.get(0);
-                if (hfa.getMemberCheck() == 0) {
-                    bean.setIfBackOut(3);
-                } else if (hfa.getMemberCheck() == 1) {
-                    bean.setIfBackOut(2);
-                } else {
-                    bean.setIfBackOut(1);
-                }
-            } else {
-                bean.setIfBackOut(1);
-            }
-
-            bean.setWorkerType(worker.getWorkerType() == 3 ? 0 : 1);
-            bean.setHouseFlowId(hf.getId());
-            if (hf.getPause() == 1) {//已暂停  停工有两种情况需要处理
-                bean.setIfBackOut(2);
-            }
-            String houseName = house.getHouseName();
-            bean.setHouseName(houseName);
-            HouseWorkerOrder hwo = houseWorkerOrderMapper.getHouseWorkerOrder(hw.getHouseId(), worker.getId(), hw.getWorkerTypeId());
-            if (hwo == null) {
-                bean.setAlreadyMoney(new BigDecimal(0));//已得钱
-                bean.setAlsoMoney(new BigDecimal(0));//还可得钱
-            } else {
-                BigDecimal alsoMoney = (hwo.getWorkPrice() == null ? new BigDecimal(0) :
-                        hwo.getWorkPrice()).subtract(hwo.getHaveMoney() == null ? new BigDecimal(0) : hwo.getHaveMoney());//还可得钱
-                bean.setAlreadyMoney(hwo.getHaveMoney());//已得钱
-                bean.setAlsoMoney(alsoMoney);//还可得钱
-            }
-            bean.setBigList(getBigList(userToken, cityId, house, worker, hf));//添加菜单到返回体中
-            List<String> promptList = new ArrayList<>();//消息提示list
-            List<ConstructionByWorkerIdBean.ButtonListBean> buttonList = new ArrayList<>();
-            if (worker.getWorkerType() == 3) {//大管家
-                Member houseMember = memberMapper.selectByPrimaryKey(house.getMemberId());//业主
-                if (houseMember != null) {
-                    bean.setHouseMemberName(houseMember.getNickName());//业主名称
-                    bean.setHouseMemberPhone(houseMember.getMobile());//业主电话
-                    bean.setUserId(houseMember.getId());//
-                } else {
-                    bean.setHouseMemberName("");
-                    bean.setHouseMemberPhone("");
-                    bean.setUserId("");//
-                }
-                Long allPatrol = houseFlowApplyMapper.countPatrol(house.getId(), null);
-                bean.setAllPatrol("总巡查次数" + (allPatrol == null ? 0 : allPatrol));
-                List<ConstructionByWorkerIdBean.WokerFlowListBean> workerFlowList = new ArrayList<>();
-                boolean houseIsStart = false;
-                if (hf.getWorkerType() == 3 && hf.getWorkType() == 4 && hf.getSupervisorStart() == 1) {//当业主支付大管家费用并且确认开工之后之后才出现
-                    for (HouseFlow hfl : hfList) {
-                        if ((hfl.getWorkerType() == 1 || hfl.getWorkerType() == 2 || hfl.getWorkerType() == 3)) {
-                            //当业主支付大管家费用并且确认开工之后之后才出现
-                            continue;
-                        }
-                        ConstructionByWorkerIdBean.WokerFlowListBean wfr = new ConstructionByWorkerIdBean.WokerFlowListBean();
-                        example = new Example(HouseWorker.class);
-                        example.createCriteria().andEqualTo("houseId",
-                                house.getId()).andEqualTo("workerTypeId",
-                                hfl.getWorkerTypeId()).andEqualTo("workType", 6);
-                        List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//根据房子id和工匠type查询房子对应的工人
-                        HouseWorker houseWorker = new HouseWorker();
-                        if (hwList.size() > 0) {
-                            houseWorker = hwList.get(0);
-                        }
-                        Member worker2 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
-                        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfl.getWorkerTypeId());
-                        wfr.setHouseFlowId(hfl.getId());//进程id
-                        wfr.setHouseFlowtype(hfl.getWorkerType());//进程类型
-                        wfr.setHouseFlowName(workerType == null ? "" : workerType.getName());//大进程名
-                        wfr.setWorkerName(worker2 == null ? "" : worker2.getName());//工人名称
-                        wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
-                        wfr.setWorkerPhone(worker2 == null ? "" : worker2.getMobile());//工人手机
-                        wfr.setPatrolSecond("巡查次数" +
-                                houseFlowApplyMapper.countPatrol(house.getId(), worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
-                        wfr.setPatrolStandard("巡查标准" + hfl.getPatrol());//巡查标准
-                        HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker2 == null ? "" : worker2.getId(), new Date());//查询今日开工记录
-                        if (todayStart == null) {//没有今日开工记录
-                            wfr.setIsStart(0);//今日是否开工0:否；1：是；
-                        } else {
-                            wfr.setIsStart(1);//今日是否开工0:否；1：是；
-                            houseIsStart = true;
-                        }
-                        String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                                String.format(DjConstants.GJPageAddress.GJMANAGERISOK, userToken, cityId, houseName) + "&houseId=" + house.getId() + "&houseFlowId=" + hfl.getId();
-                        wfr.setDetailUrl(url);//进程详情链接
-                        HouseFlowApply houseFlowApp = houseFlowApplyMapper.checkHouseFlowApply(hfl.getId(), worker2 == null ? "" : worker2.getId());//根据工种任务id和工人id查询此工人待审核
-                        if (houseFlowApp != null && houseFlowApp.getApplyType() == 1) {//阶段完工申请
-                            wfr.setButtonTitle("阶段完工申请");//按钮提示
-                            promptList.add("我是" + (workerType == null ? "" : workerType.getName()) + "工" + (worker2 == null ? "" : worker2.getName() + ",我提交了阶段完工申请"));
-                            wfr.setState(4);//装修进度0：未进场；1：待业主支付；2：待交底；3：施工中；4：阶段完工；5：收尾施工；6：整体完工
-                        } else if (houseFlowApp != null && houseFlowApp.getApplyType() == 2) {
-                            wfr.setButtonTitle("整体完工申请");//按钮提示
-                            wfr.setState(6);
-                            promptList.add("我是" + (workerType == null ? "" : workerType.getName()) + "工" + (worker2 == null ? "" : worker2.getName() + ",我提交了整体完工申请"));
-                        } else if (hfl.getWorkType() < 2) {//未发布工种抢单
-                            wfr.setButtonTitle("提前进场");//按钮提示
-                            wfr.setState(0);
-                        } else if (hfl.getWorkType() < 4) {//待抢单和已抢单
-                            wfr.setButtonTitle("正在进场");//按钮提示
-                            wfr.setState(1);
-                        } else if (hfl.getWorkSteta() == 3) {
-                            wfr.setButtonTitle("去交底");
-                            wfr.setState(2);
-                        } else if ((hfl.getWorkType() == 4 && hfl.getWorkSteta() == 0) || hfl.getWorkSteta() == 4) {
-                            wfr.setButtonTitle("施工中");
-                            wfr.setState(3);
-                        } else if (hfl.getWorkSteta() == 1) {
-                            wfr.setButtonTitle("已阶段完工");
-                            wfr.setState(4);
-                        } else if (hfl.getWorkSteta() == 5) {
-                            wfr.setButtonTitle("收尾施工中");
-                            wfr.setState(5);
-                        } else if (hfl.getWorkSteta() == 2) {
-                            wfr.setButtonTitle("已整体完工");
-                            wfr.setState(6);
-                        }
-                        if (houseFlowApp != null && houseFlowApp.getApplyType() == 3) {
-                            wfr.setButtonTitle("停工申请");//按钮提示
-                            promptList.add("我是" + (workerType == null ? "" : workerType.getName()) + "工" + (worker2 == null ? "" : worker2.getName() + ",我提交了停工申请"));
-                        }
-                        if (hfl.getPause() == 1) {
-                            wfr.setButtonTitle("已停工");//按钮提示
-                        }
-                        workerFlowList.add(wfr);
-                    }
-                }
-                bean.setHouseIsStart(houseIsStart ? "今日已开工" : "今日未开工");
-                bean.setWokerFlowList(workerFlowList);
-                int count = 0;
-                for (HouseWorker houseWorker : houseWorkerList) {//循环所有订单任务
-                    List<HouseFlowApply> supervisorCheckList = houseFlowApplyMapper.getSupervisorCheckList(houseWorker.getHouseId());//查询所有待大管家审核
-                    count += supervisorCheckList.size();
-                }
-                bean.setTaskNumber(count);//总任务数量
-                bean.setIfDisclose(0);
-                if (hf.getWorkType() == 3) {//如果是已抢单待支付。则提醒业主支付
-                    bean.setIfBackOut(0);
-                    promptList.add("请联系业主支付您的大管家费用");
-                }
-                //查询是否全部整体完工
-                List<HouseFlow> checkFinishList = houseFlowMapper.checkAllFinish(hf.getHouseId(), hf.getId());
-                //查询是否今天已经上传过巡查
-                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayPatrol(hf.getHouseId(), new Date());
-                if (hf.getSupervisorStart() == 0) {//已开工之后都是巡查工地；1：巡查工地2：申请业主验收；3:确认开工
-                    List<HouseFlow> listStart = houseFlowMapper.getHouseIsStart(hf.getHouseId());
-                    if (listStart.size() > 0) {
-                        hf.setSupervisorStart(1);//改为开工状态(兼容老数据)
-                        houseFlowMapper.updateByPrimaryKeySelective(hf);
-                        buttonList.add(getButton("巡查工地", 1));
-                        //bean.setIfBackOut(1);
-                    } else if (hf.getWorkType() == 4) {//支付之后显示按钮
-                        buttonList.add(getButton("确认开工", 3));
-                        //bean.setIfBackOut(1);
-                    }
-                } else if (checkFinishList.size() == 0) {//所有工种都整体完工，申请业主验收
-                    if (house.getHaveComplete() == 1) {
-                        promptList.add("该房子已竣工!");
-                    } else {
-                        HouseFlowApply houseFlowApp = houseFlowApplyMapper.checkSupervisorApply(hf.getId(), worker.getId());//查询大管家是否有验收申请
-                        if (houseFlowApp == null) {//没有发验收申请
-                            buttonList.add(getButton("申请业主验收", 2));
-                        } else {
-                            promptList.add("您已提交业主验收申请，请耐心等待业主审核！");
-                        }
-                    }
-                } else if (houseFlowApplyList.size() != 0) {//今日已提交过有人巡查
-                    /*List<HouseFlowApply> hfalistApp7 = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 7, worker.getId(), new Date());
-                    if (hfalistApp7 == null || hfalistApp7.size() == 0) {
-                        buttonList.add(getButton("追加巡查", 4));
-                    } else {
-                        promptList.add("今日已巡查");
-                    }*/
-                    /**追加巡查不限次数 2019.04.17*/
-                    buttonList.add(getButton("追加巡查", 4));
-                } else {
-                    buttonList.add(getButton("巡查工地", 1));
-                    //bean.setIfBackOut(1);
-                }
-            } else {
-                List<HouseFlowApply> earliestTimeList = houseFlowApplyMapper.getEarliestTimeHouseApply(house.getId(), worker.getId());
-                HouseFlowApply earliestTime = null;
-                if (earliestTimeList.size() > 0) {
-                    earliestTime = earliestTimeList.get(0);
-                }
-                HouseFlowApply checkFlowApp = houseFlowApplyMapper.checkHouseFlowApply(hf.getId(), worker.getId());//根据工种任务id和工人id查询此工人待审核
-                Long suspendDay = houseFlowApplyMapper.getSuspendApply(house.getId(), worker.getId());//根据房子id和工人id查询暂停天数
-                Long everyEndDay = houseFlowApplyMapper.getEveryDayApply(house.getId(), worker.getId());//根据房子id和工人id查询每日完工申请天数
-                long totalDay = 0;
-                if (earliestTime != null) {
-                    Date EarliestDay = earliestTime.getCreateDate();//最早开工时间
-                    Date newDate = new Date();
-                    totalDay = DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
-                    if (suspendDay != null) {
-                        totalDay = totalDay - suspendDay;
-                        if (totalDay <= 0) totalDay = 0;
-                    }
-                }
-                bean.setTotalDay("总开工天数" + totalDay);
-                bean.setEveryDay("每日完工天数" + (everyEndDay == null ? "0" : everyEndDay));
-                bean.setSuspendDay("暂停天数" + (suspendDay == null ? "0" : suspendDay));
-                if (hw.getWorkType() == 1) {
-                    bean.setIfDisclose(0);
-                } else if (hf.getWorkSteta() == 3) {
-                    bean.setIfDisclose(1);
-                } else {
-                    bean.setIfDisclose(2);
-                }
-                //房产信息
-                HouseWorker supervisorWorker = houseWorkerMapper.getHwByHidAndWtype(hf.getHouseId(), 3);//查询大管家的
-                Member workerSup = memberMapper.selectByPrimaryKey(supervisorWorker == null ? "" : supervisorWorker.getWorkerId());//查询大管家
-                bean.setSupervisorName(workerSup == null ? "无" : workerSup.getName());//大管家名字
-                bean.setSupervisorPhone(workerSup == null ? "无" : workerSup.getMobile());
-                bean.setUserId(workerSup == null ? "无" : workerSup.getId());
-                bean.setSupervisorEvation("积分 " + (workerSup == null ? "0.00" : workerSup.getEvaluationScore()));//大管家积分
-
-                Long supervisorCountOrder = houseWorkerMapper.getCountOrderByWorkerId(workerSup == null ? "" : workerSup.getId());
-
-                bean.setSupervisorCountOrder("总单数 " + (supervisorCountOrder == null ? "0" : supervisorCountOrder));//大管家总单数
-                bean.setSupervisorPraiseRate("好评率 " + ((workerSup != null ? workerSup.getPraiseRate().multiply(new BigDecimal(100)) : 0) + "%"));//大管家好评率
-                if (hf.getWorkType() == 3) {//如果是已抢单待支付。则提醒业主支付
-                    promptList.add("请联系业主支付您的工匠费用");
-                    bean.setIfBackOut(0);
-                } else if (hf.getPause() == 1) {
-                    promptList.add("您已停工");
-                    //bean.setIfBackOut(2);
-                } else if (hf.getWorkSteta() == 1) {
-                    promptList.add("您已阶段完工");
-                    //bean.setIfBackOut(2);
-                }
-
-                if (hf.getWorkSteta() == 2) {
-                    promptList.add("您已整体完工");
-                    //bean.setIfBackOut(2);
-                } else if (hf.getWorkType() == 4) {
-                    if (hf.getWorkSteta() == 3) {//待交底
-                        buttonList.add(getButton("找大管家交底", 1));
-                        //bean.setIfBackOut(1);
-                    } else if (worker.getWorkerType() == 4) {//如果是拆除，只有整体完工
-                        setDisplayState(hf, promptList, buttonList, checkFlowApp, true);
-                    } else {//已交底
-                        bean.setFootMessageTitle("");//每日开工事项
-                        bean.setFootMessageDescribe("");//每日开工事项
-                        HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker.getId(), new Date());//查询今日开工记录
-                        List<ConstructionByWorkerIdBean.BigListBean.ListMapBean> workerEverydayList = new ArrayList<>();
-                        if (todayStart == null) {//没有今日开工记录
-                            buttonList.add(getButton("今日开工", 2));
-                            List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(1);//事项类型  1 开工事项 2 完工事项
-                            for (WorkerEveryday day : listWorDay) {
-                                ConstructionByWorkerIdBean.BigListBean.ListMapBean listMapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
-                                listMapBean.setName(day.getName());
-                                workerEverydayList.add(listMapBean);
-                            }
-                            bean.setFootMessageTitle("今日开工任务");//每日开工事项
-                            bean.setFootMessageDescribe("（每日十二点前今日开工）");//每日开工事项
-                        } else {
-                            List<HouseFlowApply> allAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 2, worker.getId(), new Date());//查询今天是否已提交整体完工
-                            List<HouseFlowApply> stageAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 1, worker.getId(), new Date());//查询今天是否已提交阶段完工
-                            List<HouseFlowApply> flowAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId(), new Date());//查询是否已提交今日完工
-                            if (allAppList.size() > 0) {
-                                promptList.add("今日已申请整体完工");
-                            } else if (stageAppList.size() > 0) {
-                                promptList.add("今日已申请阶段完工");
-                            } else if (flowAppList != null && flowAppList.size() > 0) {//已提交今日完工
-                                promptList.add("今日已完工");
-                            } else {
-                                buttonList.add(getButton("今日完工", 3));
-                                List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(2);//事项类型  1 开工事项 2 完工事项
-                                for (WorkerEveryday day : listWorDay) {
-                                    ConstructionByWorkerIdBean.BigListBean.ListMapBean listMapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
-                                    listMapBean.setName(day.getName());
-                                    workerEverydayList.add(listMapBean);
-                                }
-                                bean.setFootMessageTitle("今日完工任务");//每日开工事项
-                                bean.setFootMessageDescribe("");//每日开工事项
-                            }
-
-                            if (hf.getWorkSteta() == 1) {
-                                setDisplayState(hf, promptList, buttonList, checkFlowApp, true);
-                            } else {
-                                setDisplayState(hf, promptList, buttonList, checkFlowApp, false);
-                            }
-                        }
-                        bean.setWorkerEverydayList(workerEverydayList);//每日完工事项
-                    }
-                }
-            }
-            bean.setPromptList(promptList);
-            bean.setButtonList(buttonList);
-            return ServerResponse.createBySuccess("获取施工列表成功！", bean);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("获取施工出错！");
-        }
-    }
-
-    /**
-     * 获取施工页面菜单
-     */
-    private List<ConstructionByWorkerIdBean.BigListBean> getBigList(String userToken, String cityId, House house, Member worker, HouseFlow hf) {
-        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-        List<ConstructionByWorkerIdBean.BigListBean> bigList = new ArrayList<>();
-        //添加工程资料菜单
-        String[] edNames = {"施工图", "精算", "工价工艺", "工地记录", "巡查二维码", "通讯录"};
-        int[] edTypes = {0, 0, 0, 0, 1, 0};//0=不需原生定位处理  1=需原生定位处理
-        int[] edShowTypes = {0, 0, 0, 0, 2, 0};//1：大管家有的，2：工匠有的，0：都有
-        String[] edImages = {"artisan_25.png", "artisan_26.png", "artisan_27.png", "artisan_29.png", "erweima.png", "artisan_30.png"};
-        String[] edUrls = {DjConstants.GJPageAddress.PROJECTDRAWINGLIST, DjConstants.GJPageAddress.GJJINGSUANLIST, DjConstants.GJPageAddress.GJPRICE,
-                DjConstants.YZPageAddress.CONSTUCTIONRECORD, DjConstants.GJPageAddress.QRCODE, DjConstants.GJPageAddress.PROJECTADRESSLIST};//H5路由
-        ConstructionByWorkerIdBean.BigListBean bigListBean = new ConstructionByWorkerIdBean.BigListBean();
-        bigListBean.setName("工程资料");
-        List<ConstructionByWorkerIdBean.BigListBean.ListMapBean> listMap = new ArrayList<>();
-        String houseFlowId = houseFlowMapper.selectHouseFlowId(house.getId(), worker.getWorkerTypeId());
-        for (int i = 0; i < edNames.length; i++) {
-            if (worker.getWorkerType() == 3) {
-                if (edShowTypes[i] == 2) continue;
-            } else {
-                if (edShowTypes[i] == 1) continue;
-            }
-            String name = edNames[i];
-            ConstructionByWorkerIdBean.BigListBean.ListMapBean mapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
-            mapBean.setName(name);
-            mapBean.setUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + getH5Url(edUrls[i], userToken, cityId, name)
-                    + "&houseId=" + house.getId() + "&houseFlowId=" + houseFlowId);
-            mapBean.setImage(address + "gongjiang/" + edImages[i]);
-            mapBean.setType(edTypes[i]);
-            listMap.add(mapBean);
-        }
-        bigListBean.setListMap(listMap);
-        bigList.add(bigListBean);
-        //添加其他菜单
-        String[] qtNames = {"货品管理", "材料用量", "收货", "人工变更", "补人工", "要补退记录", "服务管理"};
-        int[] qtTypes = {0, 0, 0, 0, 0, 0, 0};
-        int[] qtShowTypes = {2, 1, 0, 1, 2, 0, 1};//1：大管家有的，2：工匠有的，0：都有
-        String[] qtImages = {"artisan_22.png", "artisan_37@2x.png", "artisan_38@2x.png", "artisan_54@3x.png", "artisan_54@3x.png", "artisan_24.png", "fuwuguanli@2x.png"};
-        String[] qtUrls = {DjConstants.GJPageAddress.HPMANAGE, DjConstants.GJPageAddress.MATERIALCONSUMPTION, DjConstants.GJPageAddress.RECIVEGOODSLIST,
-                DjConstants.GJPageAddress.CHANGEARTIFICIAL,
-                DjConstants.GJPageAddress.ADDARTIFICIAL, DjConstants.YZPageAddress.REFUNDLIST, DjConstants.GJPageAddress.SERVICEMANAGE};//H5路由
-        bigListBean = new ConstructionByWorkerIdBean.BigListBean();
-        bigListBean.setName("材料人工");
-        listMap = new ArrayList<>();
-        for (int i = 0; i < qtNames.length; i++) {
-            //整体完工后"材料人工"只留下"要补退记录"
-            if (hf.getWorkSteta() == 2) {
-                if (!qtNames[i].equals("要补退记录")) {
-                    continue;
-                }
-            }
-            ConstructionByWorkerIdBean.BigListBean.ListMapBean mapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
-            if (worker.getWorkerType() == 3) {
-                if (qtShowTypes[i] == 2) continue;
-            } else {
-                if (qtShowTypes[i] == 1) continue;
-            }
-            String name = qtNames[i];
-            if (worker.getWorkerType() == 3) {
-                mapBean.setUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + getH5Url(qtUrls[i], userToken, cityId, name) +
-                        "&houseId=" + house.getId() + "&houseFlowId=" + houseFlowId + "&roleType=2");//管家
-            } else {
-                mapBean.setUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + getH5Url(qtUrls[i], userToken, cityId, name) +
-                        "&houseId=" + house.getId() + "&houseFlowId=" + houseFlowId + "&roleType=3");//工匠
-            }
-            mapBean.setName(name);
-            mapBean.setImage(address + "gongjiang/" + qtImages[i]);
-            mapBean.setType(qtTypes[i]);
-            listMap.add(mapBean);
-        }
-        bigListBean.setListMap(listMap);
-        bigList.add(bigListBean);
-        return bigList;
-    }
-
-    /**
-     * 显示当前需要申请的状态
-     *
-     * @param hf           自己的任务状态
-     * @param promptList   消息
-     * @param buttonList   按钮
-     * @param checkFlowApp 此工人待审核申请
-     * @param isShow       true 整体完工 false 阶段完工
-     */
-    private void setDisplayState(HouseFlow hf, List<String> promptList, List<ConstructionByWorkerIdBean.ButtonListBean> buttonList, HouseFlowApply checkFlowApp, boolean isShow) {
-        if (isShow) {//整体完工
-            if (checkFlowApp == null) {
-                if (hf.getWorkSteta() != 2) {
-                    buttonList.add(getButton("申请整体完工", 5));
-                }
-            } else if (checkFlowApp.getSupervisorCheck() == 0) {
-                promptList.add("已申请整体完工,等待大管家审核");
-            } else if (checkFlowApp.getSupervisorCheck() == 1) {
-                promptList.add("大管家已审核您的整体完工,待业主审核");
-            }
-        } else {//阶段完工申请
-            if (checkFlowApp == null) {
-                if (hf.getWorkSteta() != 1 && hf.getWorkSteta() != 2) {
-                    buttonList.add(getButton("申请阶段完工", 4));
-                }
-            } else if (checkFlowApp.getSupervisorCheck() == 0) {
-                promptList.add("已申请阶段完工,等待大管家审核");
-            } else if (checkFlowApp.getSupervisorCheck() == 1) {
-                promptList.add("大管家已审核您的阶段完工,待业主审核");
-            }
-        }
-    }
-
-    /**
-     * 获取按钮对象
-     *
-     * @param name 按钮名称
-     * @param type 按钮类型
-     * @return 按钮对象
-     */
-    private ConstructionByWorkerIdBean.ButtonListBean getButton(String name, int type) {
-        ConstructionByWorkerIdBean.ButtonListBean buttonListBean = new ConstructionByWorkerIdBean.ButtonListBean();
-        buttonListBean.setButtonType(type);
-        buttonListBean.setButtonTypeName(name);
-        return buttonListBean;
-    }
-
-    /**
-     * 公用拼接H5地址
-     *
-     * @param url       路由
-     * @param userToken userToken
-     * @param cityId    cityId
-     * @param name      name
-     * @return 拼接好的URL
-     */
-    private String getH5Url(String url, String userToken, String cityId, String name) {
-        return String.format(url, userToken, cityId, name);
-    }
-
-
-    /**
      * 获取我的界面
      *
      * @param userToken 用户登录信息
@@ -723,7 +245,8 @@ public class HouseWorkerService {
      */
     public ServerResponse getMyHomePage(String userToken, String cityId) {
         try {
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
             worker = memberMapper.selectByPrimaryKey(worker.getId());
@@ -732,7 +255,7 @@ public class HouseWorkerService {
             }
             HomePageBean homePageBean = new HomePageBean();
             homePageBean.setWorkerId(worker.getId());
-            homePageBean.setIoflow(CommonUtil.isEmpty(worker.getHead()) ? null : address + worker.getHead());
+            homePageBean.setIoflow(CommonUtil.isEmpty(worker.getHead()) ? null : imageAddress + worker.getHead());
             homePageBean.setWorkerName(worker.getName());
             homePageBean.setEvaluation(worker.getEvaluationScore());
             homePageBean.setFavorable(worker.getPraiseRate() == null ? "0.00%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
@@ -750,24 +273,36 @@ public class HouseWorkerService {
             } else {
                 stringBuffer.append("皇冠");
             }
-
             stringBuffer.append(worker.getWorkerType() != null && worker.getWorkerType() == 3 ? "大管家" : "工匠");
             homePageBean.setGradeName(stringBuffer.toString());
-            String[] names = {"我的任务", "我的银行卡", "提现记录",
-                    "接单记录", "奖罚记录", "工价工艺", "我的邀请码", "帮助中心"};
-            String[] urls = {DjConstants.GJPageAddress.MYTASK, DjConstants.YZPageAddress.BANKCARDALREADYADD, DjConstants.GJPageAddress.CASHRECORD,
-                    DjConstants.GJPageAddress.ORDERRECORD, DjConstants.GJPageAddress.JIANGFALIST,
-                    DjConstants.GJPageAddress.GJPRICE, DjConstants.GJPageAddress.MYINVITECODE, DjConstants.GJPageAddress.HELPCENTER};
-            String[] imageUrls = {"artisan_40.png", "artisan_41.png", "artisan_39.png",
-                    "artisan_61.png", "artisan_69.png", "artisan_36.png", "artisan_42.png", "artisan_60.png"};
+            Example example = new Example(MenuConfiguration.class);
+            Example.Criteria criteria = example.createCriteria()
+                    .andEqualTo(MenuConfiguration.DATA_STATUS, 0)
+                    .andEqualTo(MenuConfiguration.MENU_TYPE, 1);
+            switch (worker.getWorkerType()) {
+                case 1://设计师
+                    criteria.andEqualTo(MenuConfiguration.SHOW_DESIGNER, 1);
+                    break;
+                case 2://精算师
+                    criteria.andEqualTo(MenuConfiguration.SHOW_ACTUARIES, 1);
+                    break;
+                case 3://大管家
+                    criteria.andEqualTo(MenuConfiguration.SHOW_HOUSEKEEPER, 1);
+                    break;
+                default://工匠
+                    criteria.andEqualTo(MenuConfiguration.SHOW_CRAFTSMAN, 1);
+                    break;
+            }
+            example.orderBy(MenuConfiguration.SORT).asc();
+            List<MenuConfiguration> menuConfigurations = iMenuConfigurationMapper.selectByExample(example);
             List<HomePageBean.ListBean> list = new ArrayList<>();
-            for (int i = 0; i < names.length; i++) {
-                String name = names[i];
+            for (MenuConfiguration configuration : menuConfigurations) {
+                configuration.initPath(imageAddress, webAddress);
                 HomePageBean.ListBean listBean = new HomePageBean.ListBean();
-                listBean.setName(name);
-                listBean.setUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + getH5Url(urls[i], userToken, cityId, name));
-                listBean.setImageUrl(address + "gongjiang/" + imageUrls[i]);
-                listBean.setType(urls[i].equals("") ? 1 : 0);
+                listBean.setName(configuration.getName());
+                listBean.setUrl(configuration.getUrl());
+                listBean.setImageUrl(configuration.getImage());
+                listBean.setType(configuration.getType());
                 list.add(listBean);
             }
             homePageBean.setList(list);
@@ -788,7 +323,7 @@ public class HouseWorkerService {
 
     /**
      * 提交审核、停工
-     *  applyType   0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
+     * applyType   0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
      */
     public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId, Integer suspendDay,
                                             String applyDec, String imageList, String houseFlowId2) {
@@ -800,12 +335,12 @@ public class HouseWorkerService {
                 .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.PAY_STATE, 1);
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
         if (houseFlowApplyList.size() > 0) {
-            if(applyType == 4){
-                for(HouseFlowApply hfa : houseFlowApplyList){
+            if (applyType == 4) {
+                for (HouseFlowApply hfa : houseFlowApplyList) {
                     hfa.setMemberCheck(2);//不通过不通过
                     houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
                 }
-            }else {
+            } else {
                 HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
                 if (houseFlowApply.getStartDate().before(new Date()) && houseFlowApply.getEndDate().after(new Date())) {

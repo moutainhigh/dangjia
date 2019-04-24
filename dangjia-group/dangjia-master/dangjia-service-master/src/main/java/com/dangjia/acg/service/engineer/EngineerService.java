@@ -168,19 +168,40 @@ public class EngineerService {
             if(serverResponse.getResultCode()!= EventStatus.SUCCESS.getCode()){
                 return serverResponse;
             }
+            Member worker = memberMapper.selectByPrimaryKey(workerId);
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             houseFlow.setGrabLock(1);
             houseFlow.setNominator(workerId);
             houseFlow.setWorkType(3);//等待支付
             houseFlow.setWorkerId(workerId);
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-
+            House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
+
+            if (worker.getWorkerType() == 1) {//设计师
+                house.setDesignerOk(4);//有设计抢单待业主支付
+                houseMapper.updateByPrimaryKeySelective(house);
+            }
+            //我改的
+            if (worker.getWorkerType() == 2) {
+                house.setBudgetOk(5);//有精算抢单待业主支付
+                houseMapper.updateByPrimaryKeySelective(house);
+            }
+
             if(houseWorker!=null) {
                 houseWorker.setWorkerId(workerId);
                 houseWorker.setWorkType(1);//已抢单
                 houseWorker.setIsSelect(1);
                 houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+            }else{
+                houseWorker = new HouseWorker();
+                houseWorker.setHouseId(house.getId());
+                houseWorker.setWorkerId(worker.getId());
+                houseWorker.setWorkerTypeId(houseFlow.getWorkerTypeId());
+                houseWorker.setWorkerType(houseFlow.getWorkerType());
+                houseWorker.setWorkType(1);//已抢单
+                houseWorker.setIsSelect(1);
+                houseWorkerMapper.insert(houseWorker);
             }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
