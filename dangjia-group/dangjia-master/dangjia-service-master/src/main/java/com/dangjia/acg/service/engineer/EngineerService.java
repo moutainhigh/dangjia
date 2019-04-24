@@ -194,7 +194,7 @@ public class EngineerService {
                 houseWorker.setIsSelect(1);
                 houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
             }else{
-                HouseWorker houseWorker = new HouseWorker();
+                houseWorker = new HouseWorker();
                 houseWorker.setHouseId(house.getId());
                 houseWorker.setWorkerId(worker.getId());
                 houseWorker.setWorkerTypeId(houseFlow.getWorkerTypeId());
