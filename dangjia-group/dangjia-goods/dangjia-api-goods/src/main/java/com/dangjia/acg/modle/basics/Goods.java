@@ -39,5 +39,8 @@ public class Goods extends BaseEntity{
 	@Column(name = "unit_id")
     private String unitId;//单位
 
+    @Column(name = "other_name")
+    private String otherName;//货品别名
+
 
 }

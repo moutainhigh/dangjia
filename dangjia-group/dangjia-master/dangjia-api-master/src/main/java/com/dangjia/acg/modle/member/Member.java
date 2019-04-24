@@ -217,6 +217,4 @@ public class Member extends BaseEntity {
         this.idcaodb = StringUtils.isEmpty(this.idcaodb) ? null : address + this.idcaodb;//身份证反面
         this.idcaodall = StringUtils.isEmpty(this.idcaodall) ? null : address + this.idcaodall;//半身照
     }
-
-    ;
 }
