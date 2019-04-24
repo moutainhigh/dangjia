@@ -111,10 +111,10 @@ public class MenuConfigurationService {
             String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             for (MenuConfiguration configuration : menuConfigurations) {
+                Map<String, Object> mapSeries = BeanUtils.beanToMap(configuration);
+                configuration.initPath(imageAddress, webAddress);
                 String imageUrl = configuration.getImage();
                 String webUrl = configuration.getUrl();
-                configuration.initPath(imageAddress, webAddress);
-                Map<String, Object> mapSeries = BeanUtils.beanToMap(configuration);
                 mapSeries.put("imageUrl", imageUrl);
                 mapSeries.put("webUrl", webUrl);
                 datas.add(mapSeries);
