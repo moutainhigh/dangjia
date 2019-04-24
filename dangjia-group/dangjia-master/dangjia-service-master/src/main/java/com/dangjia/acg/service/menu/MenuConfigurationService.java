@@ -48,6 +48,13 @@ public class MenuConfigurationService {
             iMenuConfigurationMapper.insert(menuConfiguration);
         } else {
             iMenuConfigurationMapper.updateByPrimaryKeySelective(menuConfiguration);
+            if (CommonUtil.isEmpty(menuConfiguration.getParentId())) {
+                menuConfiguration = iMenuConfigurationMapper.selectByPrimaryKey(menuConfiguration.getId());
+                if (menuConfiguration != null && !CommonUtil.isEmpty(menuConfiguration.getParentId())) {
+                    menuConfiguration.setParentId(null);
+                    iMenuConfigurationMapper.updateByPrimaryKey(menuConfiguration);
+                }
+            }
         }
         return ServerResponse.createBySuccessMessage("提交成功");
     }
