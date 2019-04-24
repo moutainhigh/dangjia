@@ -114,6 +114,9 @@ public class OrderSplitService {
     public ServerResponse sentSplitDeliver(String splitDeliverId) {
         try {
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+            if(splitDeliver.getShippingState()==6){
+                return ServerResponse.createBySuccessMessage("材料员已撤回！");
+            }
             splitDeliver.setSendTime(new Date());
             splitDeliver.setShippingState(1);//已发待收
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
@@ -202,6 +205,10 @@ public class OrderSplitService {
             Example example1 = new Example(SplitDeliver.class);
             example1.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId())
                     .andEqualTo(SplitDeliver.SHIPPING_STATE, 0).andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplitId);
+            List list=splitDeliverMapper.selectByExample(example1);
+            if(list.size()==0){
+                return ServerResponse.createBySuccessMessage("供应商已发货！");
+            }
             SplitDeliver deliver=new SplitDeliver();
             deliver.setShippingState(6);
             splitDeliverMapper.updateByExampleSelective(deliver,example1);

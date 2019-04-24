@@ -22,6 +22,19 @@ public class WebWalletController implements WebWalletAPI {
     @Autowired
     private WebWalletService webWalletService;
 
+    /**
+     * --         0每日完工  1阶段完工，
+     * --         2整体完工  3巡查, 4验收,
+     * --         8补人工, 9退人工, 10奖 11罚
+     * @param houseId
+     * @param userToken
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseWallet(String houseId,  String  userToken){
+        return webWalletService.getHouseWallet(houseId,userToken);
+    }
 
     @Override
     @ApiMethod

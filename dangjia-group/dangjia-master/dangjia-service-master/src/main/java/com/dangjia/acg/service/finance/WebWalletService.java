@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.finance;
 
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.finance.WebWorkerDetailDTO;
@@ -7,6 +9,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.github.pagehelper.PageHelper;
@@ -33,6 +36,57 @@ public class WebWalletService {
     @Autowired
     private IHouseMapper iHouseMapper;
 
+    @Autowired
+    private RedisClient redisClient;
+    /**
+     * --         0每日完工  1阶段完工，
+     * --         2整体完工  3巡查, 4验收,
+     * --         8补人工, 9退人工, 10奖 11罚
+     * @param houseId
+     * @param userToken
+     * @return
+     */
+    public ServerResponse getHouseWallet(String houseId,  String  userToken){
+        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+        Member member=accessToken.getMember();
+        List<WebWorkerDetailDTO> workerDetailDTOList = iWorkerDetailMapper.getHouseWallet(houseId, member.getId(), String.valueOf(member.getWorkerType()));
+        for (int i = 0; i < workerDetailDTOList.size(); i++) {
+            WebWorkerDetailDTO webWorkerDetailDTO=workerDetailDTOList.get(i);
+            webWorkerDetailDTO=calculateIntegralMoney(houseId,webWorkerDetailDTO);
+            workerDetailDTOList.remove(i);
+            workerDetailDTOList.add(i,webWorkerDetailDTO);
+        }
+        return ServerResponse.createBySuccess("查询成功", workerDetailDTOList);
+    }
+    public WebWorkerDetailDTO calculateIntegralMoney(String houseId,WebWorkerDetailDTO webWorkerDetailDTO){
+//     * --         0每日完工  1阶段完工，
+//     * --         2整体完工  3巡查, 4验收,
+        int star=webWorkerDetailDTO.getStar();
+
+        webWorkerDetailDTO.setHaveMoney(webWorkerDetailDTO.getMoney());
+        BigDecimal supervisorMoney = webWorkerDetailDTO.getMoney();
+        if(webWorkerDetailDTO.getState()==4){
+            if(star == 0 || star == 5){
+                supervisorMoney = webWorkerDetailDTO.getMoney();//大管家的验收收入
+            }else if(star == 3 || star == 4){
+                supervisorMoney =webWorkerDetailDTO.getMoney().multiply(new BigDecimal(0.8));
+            }else{
+                supervisorMoney = new BigDecimal(0);//为0元
+            }
+        }
+        if(webWorkerDetailDTO.getState()==1 || webWorkerDetailDTO.getState()==2){
+            //工人钱
+            if(star >= 4){
+                supervisorMoney = webWorkerDetailDTO.getMoney();
+            }else if(star > 2){
+                supervisorMoney = webWorkerDetailDTO.getMoney().multiply(new BigDecimal(0.97));
+            }else if(star <= 2){
+                supervisorMoney = webWorkerDetailDTO.getMoney().multiply(new BigDecimal(0.95));
+            }
+        }
+        webWorkerDetailDTO.setMoney(supervisorMoney);
+        return webWorkerDetailDTO;
+    }
     /**
      * 所有用户（工人和业主）流水
      */

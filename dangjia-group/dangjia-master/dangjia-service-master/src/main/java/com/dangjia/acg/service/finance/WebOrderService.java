@@ -134,10 +134,10 @@ public class WebOrderService {
         }else {
             red="无";
         }
-        orderItemList.get(0).setRed(red);
         PageInfo pageResult = new PageInfo(orderItemList);
         for (OrderItemByDTO orderItemByDTO : orderItemList) {
             orderItemByDTO.setImage(imageAddress+orderItemByDTO.getImage());
+            orderItemByDTO.setRed(red);
         }
         pageResult.setList(orderItemList);
         if(orderItemList!=null){

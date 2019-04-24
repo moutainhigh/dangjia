@@ -25,5 +25,6 @@ public class WebWorkerDetailDTO {
     private BigDecimal haveMoney;//工匠订单当时拿到的钱
     private Date createDate;// 创建日期
     private Date modifyDate;// 修改日期
+    private Integer star;//星级
     private BigDecimal walletMoney;//钱包当时钱
 }

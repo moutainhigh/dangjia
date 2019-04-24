@@ -583,8 +583,7 @@
             p.`name`,
             IFNULL(p.value_name_arr,''),
             b.`name`,
-            bs.`name`,
-            IFNULL( p.other_name,'')
+            bs.`name`
             )
             LIKE CONCAT('%',#{name},'%')
             )
@@ -634,7 +633,7 @@
         AND bp.type = 1
         AND bg.data_status = 0
         <if test="name!=null and name!=''">
-            AND CONCAT(bg. NAME,bp. NAME, bb. NAME, bbs. NAME,IFNULL( bp.other_name,'')) LIKE CONCAT('%', #{name}, '%')
+            AND CONCAT(bg. NAME,bp. NAME, bb. NAME, bbs. NAME) LIKE CONCAT('%', #{name}, '%')
         </if>
         GROUP BY
         bp.goods_id

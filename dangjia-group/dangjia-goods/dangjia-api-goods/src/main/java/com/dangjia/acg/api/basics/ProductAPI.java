@@ -43,7 +43,8 @@ public interface ProductAPI {
                              @RequestParam("sales") Integer sales,
                              @RequestParam("unitId") String unitId,
                              @RequestParam("type") Integer type,
-                             @RequestParam("arrString") String arrString);
+                             @RequestParam("arrString") String arrString,
+                             @RequestParam("otherName") String otherName);
 
     @PostMapping("/basics/product/queryBrandByGid")
     @ApiOperation(value = "根据商品id查询关联品牌", notes = "根据商品id查询关联品牌")
@@ -81,7 +82,8 @@ public interface ProductAPI {
                                @RequestParam("sales") Integer sales,
                                @RequestParam("unitId") String unitId,
                                @RequestParam("type") Integer type,
-                               @RequestParam("arrString") String arrString);
+                               @RequestParam("arrString") String arrString,
+                               @RequestParam("otherName") String otherName);
 
     @PostMapping("/basics/product/getProductById")
     @ApiOperation(value = "根据货品id查询货品对象", notes = "根据货品id查询货品对象")

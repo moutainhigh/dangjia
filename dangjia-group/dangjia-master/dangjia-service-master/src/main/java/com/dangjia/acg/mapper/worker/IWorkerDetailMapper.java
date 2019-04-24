@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.worker;
 
+import com.dangjia.acg.dto.finance.WebWorkerDetailDTO;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -35,6 +36,20 @@ public interface IWorkerDetailMapper extends Mapper<WorkerDetail> {
 
     //所有流水
     List<WorkerDetail> getAllWallet(@Param("workerId") String workerId, @Param("houseId") String houseId,
+
                                     @Param("likeMobile") String likeMobile, @Param("likeAddress") String likeAddress);
+
+    /**
+     * --         0每日完工  1阶段完工，
+     * --         2整体完工  3巡查, 4验收,
+     * --         8补人工, 9退人工, 10奖 11罚
+     * @param houseId
+     * @param workerId
+     * @param workerType
+     * @return
+     */
+    List<WebWorkerDetailDTO> getHouseWallet(@Param("houseId") String houseId, @Param("workerId") String workerId,@Param("workerType") String workerType);
+
+
 }
 
