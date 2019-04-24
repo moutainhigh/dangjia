@@ -68,7 +68,10 @@ public class MenuConfigurationService {
             Example example = new Example(MenuConfiguration.class);
             Example.Criteria criteria = example.createCriteria()
                     .andEqualTo(MenuConfiguration.DATA_STATUS, 0);
-            if (menuConfiguration.getParentId().equals("-1")) {
+            if (menuConfiguration == null) {
+                menuConfiguration = new MenuConfiguration();
+            }
+            if (menuConfiguration.getParentId() != null && menuConfiguration.getParentId().equals("-1")) {
                 criteria.andIsNull(MenuConfiguration.PARENT_ID);
             } else if (!CommonUtil.isEmpty(menuConfiguration.getParentId())) {
                 criteria.andEqualTo(MenuConfiguration.PARENT_ID, menuConfiguration.getParentId());
@@ -118,6 +121,12 @@ public class MenuConfigurationService {
                 configuration.initPath(imageAddress, webAddress);
                 String imageUrl = configuration.getImage();
                 String webUrl = configuration.getUrl();
+                if (!CommonUtil.isEmpty(configuration.getParentId())) {
+                    MenuConfiguration menuConfiguration1 = iMenuConfigurationMapper.selectByPrimaryKey(configuration.getParentId());
+                    if (menuConfiguration1 != null) {
+                        mapSeries.put("parentName", menuConfiguration1.getName());
+                    }
+                }
                 mapSeries.put("imageUrl", imageUrl);
                 mapSeries.put("webUrl", webUrl);
                 datas.add(mapSeries);
