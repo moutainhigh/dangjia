@@ -86,6 +86,11 @@ public class MenuConfiguration extends BaseEntity {
     @ApiModelProperty("业主端是否显示：0:不显示，1:显示")
     private Integer showProprietor;
 
+    @Column(name = "show_payment")
+    @Desc(value = "未支付是否显示：0:不显示，1:显示")
+    @ApiModelProperty("未支付是否显示：0:不显示，1:显示")
+    private Integer showPayment;
+
     @Column(name = "sort")
     @Desc(value = "优先顺序")
     @ApiModelProperty("优先顺序")

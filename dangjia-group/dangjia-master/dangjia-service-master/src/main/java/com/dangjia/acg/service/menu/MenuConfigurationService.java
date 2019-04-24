@@ -100,6 +100,9 @@ public class MenuConfigurationService {
             if (!CommonUtil.isEmpty(menuConfiguration.getShowProprietor())) {
                 criteria.andEqualTo(MenuConfiguration.SHOW_PROPRIETOR, menuConfiguration.getShowProprietor());
             }
+            if (!CommonUtil.isEmpty(menuConfiguration.getShowPayment())) {
+                criteria.andEqualTo(MenuConfiguration.SHOW_PAYMENT, menuConfiguration.getShowPayment());
+            }
             example.orderBy(MenuConfiguration.SORT).asc();
             List<MenuConfiguration> menuConfigurations = iMenuConfigurationMapper.selectByExample(example);
             if (menuConfigurations.size() <= 0) {
