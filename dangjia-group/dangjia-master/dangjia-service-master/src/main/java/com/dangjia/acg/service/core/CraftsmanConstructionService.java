@@ -309,8 +309,15 @@ public class CraftsmanConstructionService {
                     case 0://0未审核
                         bean.setIfBackOut(3);//0可放弃；1：申请停工；2：已停工 3 审核中
                         break;
-                    case 1://TODO 需要修改 1审核通过
-                        bean.setIfBackOut(2);//0可放弃；1：申请停工；2：已停工 3 审核中
+                    case 1://1审核通过
+                        Date date = new Date();
+                        if (hfa.getStartDate() != null && date.getTime() < hfa.getStartDate().getTime()) {
+                            bean.setIfBackOut(3);//0可放弃；1：申请停工；2：已停工 3 审核中
+                        } else if (hfa.getEndDate() != null && date.getTime() > hfa.getEndDate().getTime()) {
+                            bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
+                        } else {
+                            bean.setIfBackOut(2);//0可放弃；1：申请停工；2：已停工 3 审核中
+                        }
                         break;
                     default://2审核不通过
                         bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
@@ -443,10 +450,10 @@ public class CraftsmanConstructionService {
                     .andEqualTo(MenuConfiguration.DATA_STATUS, 0)
                     .andEqualTo(MenuConfiguration.MENU_TYPE, 0)
                     .andEqualTo(MenuConfiguration.PARENT_ID, menuConfiguration.getId());
-            if (hf.getWorkSteta() == 2) {//完工了屏蔽完工禁止显示的了的
+            if (hf.getWorkSteta() == 2) {//完工了屏蔽完工禁止显示的
                 criteria.andEqualTo(MenuConfiguration.SHOW_TYPE, 1);
             }
-            if (hf.getWorkType() != 4) {//完工了屏蔽完工禁止显示的了的
+            if (hf.getWorkType() != 4) {//未支付屏蔽未支付禁止显示的
                 criteria.andEqualTo(MenuConfiguration.SHOW_PAYMENT, 1);
             }
             menuCondition(bean, criteria);
@@ -456,16 +463,16 @@ public class CraftsmanConstructionService {
                 int roleType;
                 switch (bean.getWorkerType()) {//0:大管家；1：工匠；2：设计师；3：精算师
                     case 0:
-                        roleType = 2;
+                        roleType = 2;//0:设计师；1：精算师；2：大管家；3：工匠
                         break;
                     case 1:
-                        roleType = 3;
+                        roleType = 3;//0:设计师；1：精算师；2：大管家；3：工匠
                         break;
                     case 2:
-                        roleType = 0;
+                        roleType = 0;//0:设计师；1：精算师；2：大管家；3：工匠
                         break;
                     default:
-                        roleType = 1;
+                        roleType = 1;//0:设计师；1：精算师；2：大管家；3：工匠
                         break;
                 }
                 configuration.initPath(imageAddress, webAddress, house.getId(), hf.getId(), roleType);

@@ -300,25 +300,25 @@ public class HouseService {
                 nodeDTO.setRank(2);
                 nodeDTO.setNameB("待量房");
             } else if (house.getDesignerOk() == 9) {
-                nodeDTO.setRank(2);
+                nodeDTO.setRank(3);
                 nodeDTO.setNameB("待上传平面图");
             } else if (house.getDesignerOk() == 5) {
-                nodeDTO.setRank(3);
+                nodeDTO.setRank(4);
                 nodeDTO.setNameB("待审核平面图");
             } else if (house.getDesignerOk() == 6) {
-                nodeDTO.setRank(4);
+                nodeDTO.setRank(5);
                 nodeDTO.setNameB("修改平面图");
             } else if (house.getDesignerOk() == 7) {
-                nodeDTO.setRank(5);
+                nodeDTO.setRank(6);
                 nodeDTO.setNameB("待上传施工图");
             } else if (house.getDesignerOk() == 2) {
-                nodeDTO.setRank(6);
+                nodeDTO.setRank(7);
                 nodeDTO.setNameB("待审核施工图");
             } else if (house.getDesignerOk() == 8) {
-                nodeDTO.setRank(7);
+                nodeDTO.setRank(8);
                 nodeDTO.setNameB("修改施工图");
             } else if (house.getDesignerOk() == 3) {
-                nodeDTO.setRank(8);
+                nodeDTO.setRank(9);
                 nodeDTO.setNameB("设计完成");
             } else {
                 nodeDTO.setRank(1);
