@@ -11,6 +11,7 @@
 		type,
 		buy,
 		sales,
+        other_name as otherName,
 		unit_id,
 		create_date,
 		modify_date
@@ -196,7 +197,6 @@
 			bp.`name` LIKE CONCAT('%',#{name}, '%' )
 			OR bb.`name` LIKE CONCAT('%',#{name}, '%' )
 			OR bbs.`name` LIKE CONCAT( '%', #{name}, '%' )
-			OR bp.`other_name` LIKE CONCAT( '%', #{name}, '%' )
 			OR bg.`other_name` LIKE CONCAT( '%', #{name}, '%' )
 			)
 		</if>
@@ -239,7 +239,7 @@
 			bp.`name` LIKE CONCAT('%',#{name}, '%' )
 			OR bb.`name` LIKE CONCAT('%',#{name}, '%' )
 			OR bbs.`name` LIKE CONCAT( '%', #{name}, '%' )
-			OR bp.`other_name` LIKE CONCAT( '%', #{name}, '%' )
+			OR bg.`other_name` LIKE CONCAT( '%', #{name}, '%' )
 			)
 		</if>
 		GROUP BY bg.id

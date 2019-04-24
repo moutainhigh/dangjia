@@ -83,7 +83,5 @@ public class Product extends BaseEntity {
     @Column(name = "value_id_arr")
     private String valueIdArr;// 属性选项Id集合    AttributeValue
 
-    @Column(name = "other_name")
-    private String otherName;//商品别名
     
 }

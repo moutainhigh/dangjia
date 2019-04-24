@@ -68,7 +68,7 @@ public class GoodsService {
      * @return
      */
     public ServerResponse saveGoods(String name, String categoryId, Integer buy,
-                                    Integer sales, String unitId, Integer type, String arrString) {
+                                    Integer sales, String unitId, Integer type, String arrString,String otherName) {
         try {
             if (!StringUtils.isNotBlank(name))
                 return ServerResponse.createByErrorMessage("名字不能为空");
@@ -88,6 +88,7 @@ public class GoodsService {
 
             Goods goods = new Goods();
             goods.setName(name);
+            goods.setOtherName(otherName);//别名
             goods.setCategoryId(categoryId);//分类
             goods.setBuy(buy);//购买性质
             goods.setSales(sales);//退货性质
@@ -205,7 +206,7 @@ public class GoodsService {
      * @return
      */
     public ServerResponse updateGoods(String id, String name, String categoryId, Integer buy,
-                                      Integer sales, String unitId, Integer type, String arrString) {
+                                      Integer sales, String unitId, Integer type, String arrString,String otherName) {
         try {
             Goods oldGoods = iGoodsMapper.selectByPrimaryKey(id);
             if (!oldGoods.getName().equals(name)) {
@@ -222,6 +223,7 @@ public class GoodsService {
             goods.setSales(sales);//退货性质
             goods.setUnitId(unitId);//单位
             goods.setType(type);//goods性质
+            goods.setOtherName(otherName);
             goods.setModifyDate(new Date());
             iGoodsMapper.updateByPrimaryKeySelective(goods);
             if (buy != 2) //非自购goods ，有品牌
