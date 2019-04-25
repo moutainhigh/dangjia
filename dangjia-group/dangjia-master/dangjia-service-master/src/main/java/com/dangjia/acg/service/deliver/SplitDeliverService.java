@@ -256,6 +256,10 @@ public class SplitDeliverService {
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
                 splitDeliverDTO.setTol(orderSplitItemList.size());//几种
                 if(orderSplitItemList.size()>0) {
+                    splitDeliverDTO.setTotalPrice(0d);
+                    for (OrderSplitItem orderSplitItem : orderSplitItemList) {
+                        splitDeliverDTO.setTotalPrice(splitDeliverDTO.getTotalPrice()+orderSplitItem.getTotalPrice());
+                    }
                     splitDeliverDTO.setName(orderSplitItemList.get(0).getProductName());
                     splitDeliverDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + orderSplitItemList.get(0).getImage());
                 }

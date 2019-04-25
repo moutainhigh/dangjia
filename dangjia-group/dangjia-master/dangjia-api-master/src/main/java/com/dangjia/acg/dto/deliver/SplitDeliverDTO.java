@@ -22,7 +22,7 @@ public class SplitDeliverDTO {
     private Date recTime;//收货时间
     private Double totalAmount;
     private Integer tol;//多少种商品
-
+    private Double totalPrice; //销售总价
     private String name;//一件名
     private String image;//一张图
     private Integer supState;//0:大管家不可收货;1:大管家可收货
