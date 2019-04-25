@@ -451,7 +451,7 @@ public class EngineerService {
                 }
             }
             Example example1 = new Example(HouseWorker.class);
-            example1.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId()).andEqualTo(HouseWorker.WORKER_TYPE_ID, houseFlow.getWorkerTypeId()).andNotEqualTo(HouseWorker.WORKER_ID,houseFlow.getWorkerId());
+            example1.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId()).andEqualTo(HouseWorker.WORKER_TYPE_ID, houseFlow.getWorkerTypeId()).andNotEqualTo(HouseWorker.WORK_TYPE,6).andNotEqualTo(HouseWorker.WORK_TYPE,1);
             List<HouseWorker> houseWorkers = houseWorkerMapper.selectByExample(example1);
             if(houseWorkers.size()==0){
                 map.put("show","0");

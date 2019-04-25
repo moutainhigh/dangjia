@@ -1358,7 +1358,8 @@ public class HouseService {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Example example = new Example(HouseWorker.class);
-            example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseId).andEqualTo(HouseWorker.WORKER_TYPE_ID, workerTypeId).andNotEqualTo(HouseWorker.WORKER_ID,workId);
+            example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseId).andEqualTo(HouseWorker.WORKER_TYPE_ID, workerTypeId).andNotEqualTo(HouseWorker.WORK_TYPE,6).andNotEqualTo(HouseWorker.WORK_TYPE,1);
+            example.orderBy(HouseWorker.MODIFY_DATE).desc();
             List<HouseWorker> houseWorkers = houseWorkerMapper.selectByExample(example);
             PageInfo pageResult = new PageInfo(houseWorkers);
             List<HouseWorkDTO> houseWorkDTOS = new ArrayList<>();
