@@ -432,67 +432,9 @@ public class HouseFlowApplyService {
 
     /**处理工人押金*/
     public void deposit(HouseFlowApply hfa){
-        if(hfa.getWorkerType() > 5 || hfa.getWorkerType() == 3){//收滞留金
+        if(hfa.getWorkerType() >= 3 && hfa.getWorkerType() != 4){//精算，设计，拆除除外
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());
             Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
-            /*
-             * 工匠积分70分以下每单滞留金无上限,70以上含80以下2000元
-             * 80含以上90以下1500元,90分含以上500元
-             */
-            if(worker.getEvaluationScore().compareTo(new BigDecimal(70))>=0 && worker.getEvaluationScore().compareTo(new BigDecimal(80))<0 ){
-                worker.setDeposit(new BigDecimal(2000));//设置滞留金2000元
-                //实际滞留金减上限
-                BigDecimal bd = worker.getRetentionMoney().subtract(worker.getDeposit());
-                if(bd.compareTo(BigDecimal.ZERO) == 1){//实际多于2000元退押金
-                    //记录流水
-                    //WorkerDetail workerDetail = new WorkerDetail();
-                    /*workerDetail.setName("涨积分退滞留金");
-                    workerDetail.setWorkerId(worker.getId());
-                    workerDetail.setWorkerName(worker.getName());
-                    workerDetail.setHouseId(hwo.getHouseId());
-                    workerDetail.setMoney(bd);
-                    workerDetail.setState(0);//进钱
-                    workerDetailMapper.insert(workerDetail);*/
-                    worker.setRetentionMoney(worker.getDeposit());//实际2000元
-                    worker.setSurplusMoney(worker.getSurplusMoney().add(bd));
-                }
-            }else if(worker.getEvaluationScore().compareTo(new BigDecimal(80))>=0 && worker.getEvaluationScore().compareTo(new BigDecimal(90))<0){
-                worker.setDeposit(new BigDecimal(1500));//设置滞留金上限1500元
-                //实际滞留金减上限
-                BigDecimal bd = worker.getRetentionMoney().subtract(worker.getDeposit());
-                if(bd.compareTo(BigDecimal.ZERO) == 1){
-                    //记录流水
-                    /*WorkerDetail workerDetail = new WorkerDetail();
-                    workerDetail.setName("涨积分退滞留金 ");
-                    workerDetail.setWorkerId(worker.getId());
-                    workerDetail.setWorkerName(worker.getName());
-                    workerDetail.setHouseId(hwo.getHouseId());
-                    workerDetail.setMoney(bd);
-                    workerDetail.setState(0);//进钱
-                    workerDetailMapper.insert(workerDetail);*/
-                    worker.setRetentionMoney(worker.getDeposit());//实际2000元
-                    worker.setSurplusMoney(worker.getSurplusMoney().add(bd));
-                }
-            }else if(worker.getEvaluationScore().compareTo(new BigDecimal(90))>=0){
-                worker.setDeposit(new BigDecimal(500));//设置滞留金上限500元
-                //实际滞留金减上限
-                BigDecimal bd = worker.getRetentionMoney().subtract(worker.getDeposit());
-                if(bd.compareTo(BigDecimal.ZERO) == 1){
-                   /* //记录流水
-                    WorkerDetail workerDetail = new WorkerDetail();
-                    workerDetail.setName(" 涨积分退滞留金");
-                    workerDetail.setWorkerId(worker.getId());
-                    workerDetail.setWorkerName(worker.getName());
-                    workerDetail.setHouseId(hwo.getHouseId());
-                    workerDetail.setMoney(bd);
-                    workerDetail.setState(0);//进钱
-                    workerDetailMapper.insert(workerDetail);*/
-                    worker.setRetentionMoney(worker.getDeposit());//实际2000元
-                    worker.setSurplusMoney(worker.getSurplusMoney().add(bd));
-                }
-            }else{
-                worker.setDeposit(new BigDecimal(99999));//重新设置无上限
-            }
 
             //BigDecimal deposit = workDepositService.getWorkDepositByList().getDeposit();//获取押金比例 5%
             BigDecimal deposit = new BigDecimal(0.05);
@@ -513,8 +455,40 @@ public class HouseFlowApplyService {
                     worker.setRetentionMoney(worker.getRetentionMoney().add(mid));
                 }
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
-                memberMapper.updateByPrimaryKeySelective(worker);
             }
+
+            /*
+             * 工匠积分70分以下每单滞留金无上限,70以上含80以下2000元
+             * 80含以上90以下1500元,90分含以上500元
+             */
+            if(worker.getEvaluationScore().doubleValue()>=70 && worker.getEvaluationScore().doubleValue()<80){
+                worker.setDeposit(new BigDecimal(2000));//设置滞留金2000元
+            }else if(worker.getEvaluationScore().doubleValue()>=80 && worker.getEvaluationScore().doubleValue()<90){
+                worker.setDeposit(new BigDecimal(1500));//设置滞留金上限1500元
+            }else if(worker.getEvaluationScore().doubleValue()>=90){
+                worker.setDeposit(new BigDecimal(500));//设置滞留金上限500元
+            }else{
+                worker.setDeposit(new BigDecimal(99999));//重新设置无上限
+            }
+            //实际滞留金减上限
+            BigDecimal bd = worker.getRetentionMoney().subtract(worker.getDeposit());
+            if(bd.doubleValue()>0){
+                //记录流水
+                BigDecimal surplusMoney=worker.getSurplusMoney().add(bd);
+                WorkerDetail workerDetail = new WorkerDetail();
+                workerDetail.setName("涨积分退滞留金");
+                workerDetail.setWorkerId(worker.getId());
+                workerDetail.setWorkerName(worker.getName());
+                workerDetail.setHouseId(hwo.getHouseId());
+                workerDetail.setMoney(bd);
+                workerDetail.setHaveMoney(surplusMoney);
+                workerDetail.setWalletMoney(surplusMoney);
+                workerDetail.setState(0);//进钱
+                workerDetailMapper.insert(workerDetail);
+                worker.setRetentionMoney(worker.getDeposit());//实际1500元
+                worker.setSurplusMoney(worker.getSurplusMoney().add(bd));
+            }
+            memberMapper.updateByPrimaryKeySelective(worker);
         }
     }
 
