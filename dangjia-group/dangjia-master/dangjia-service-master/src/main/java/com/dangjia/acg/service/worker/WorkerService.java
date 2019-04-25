@@ -211,9 +211,9 @@ public class WorkerService {
                             }
                         }
                     }
-                    hwMap.put("suspendDay", suspendDay);
-                    hwMap.put("everyEndDay", everyEndDay);
-                    hwMap.put("totalDay", totalDay);
+                    hwMap.put("suspendDay",suspendDay == null ? 0 : suspendDay);//暂停天数
+                    hwMap.put("everyEndDay", everyEndDay == null ? 0 :everyEndDay);//每日完工申请天数
+                    hwMap.put("totalDay", totalDay);//总开工数
                 }
                 hwMapList.add(hwMap);
             }
