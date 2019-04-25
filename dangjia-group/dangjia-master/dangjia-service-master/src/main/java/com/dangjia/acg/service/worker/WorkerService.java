@@ -8,7 +8,9 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
@@ -19,6 +21,7 @@ import com.dangjia.acg.mapper.worker.IWithdrawDepositMapper;
 import com.dangjia.acg.mapper.worker.IWorkerBankCardMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.house.House;
@@ -66,6 +69,8 @@ public class WorkerService {
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
 
+    @Autowired
+    private IHouseFlowApplyMapper houseFlowApplyMapper;
     /**
      * 查询通讯录
      */
@@ -181,6 +186,34 @@ public class WorkerService {
                     }
                     hwMap.put("houseName", house.getHouseName());
                     hwMap.put("buildSquare", house.getBuildSquare());
+
+                    Long suspendDay = houseFlowApplyMapper.getSuspendApply(house.getId(), worker.getId());//根据房子id和工人id查询暂停天数
+                    Long everyEndDay = houseFlowApplyMapper.getEveryDayApply(house.getId(), worker.getId());//根据房子id和工人id查询每日完工申请天数
+                    long totalDay =0;
+                    List<HouseFlowApply> earliestTime = houseFlowApplyMapper.getEarliestTimeHouseApply(house.getId(), worker.getId());//查询最早的每日开工申请
+                    if (earliestTime != null && earliestTime.size() > 0) {
+                        Date EarliestDay = earliestTime.get(0).getCreateDate();//最早开工时间
+                        Example example1= new Example(HouseFlowApply.class);
+                        example1.createCriteria().andEqualTo(HouseFlowApply.WORKER_ID,worker.getId())
+                                .andEqualTo(HouseFlowApply.HOUSE_ID,house.getId()).andEqualTo(HouseFlowApply.APPLY_TYPE,2);
+                        List<HouseFlowApply>  houseFlowApplies= houseFlowApplyMapper.selectByExample(example1);
+                        Date newDate = new Date();
+                        if(houseFlowApplies.size()>0){
+                            newDate=houseFlowApplies.get(0).getModifyDate();
+                        }
+                        long num = DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
+                        if (suspendDay == null) {
+                            totalDay = num;//总开工天数
+                        } else {
+                            long aa = num - suspendDay;
+                            if (aa >= 0) {
+                                totalDay = aa;
+                            }
+                        }
+                    }
+                    hwMap.put("suspendDay", suspendDay);
+                    hwMap.put("everyEndDay", everyEndDay);
+                    hwMap.put("totalDay", totalDay);
                 }
                 hwMapList.add(hwMap);
             }
