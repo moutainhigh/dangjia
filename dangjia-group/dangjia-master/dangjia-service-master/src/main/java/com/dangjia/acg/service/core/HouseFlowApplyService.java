@@ -444,16 +444,30 @@ public class HouseFlowApplyService {
             if(worker.getRetentionMoney().compareTo(worker.getDeposit()) == -1 && hwo.getRetentionMoney() == null){//押金没收够并且没有算过押金
                 //算订单的5%
                 BigDecimal mid = hwo.getWorkPrice().multiply(deposit);
+                BigDecimal retentionMoney=hwo.getWorkPrice();
                 if(worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == -1 ||
                         worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == 0){
                     //实际滞留金
                     hwo.setRetentionMoney(mid);
-                    worker.setRetentionMoney(worker.getRetentionMoney().add(mid));
+                    retentionMoney=worker.getRetentionMoney().add(mid);
+                    worker.setRetentionMoney(retentionMoney);
                 }else{
                     mid = worker.getDeposit().subtract(worker.getRetentionMoney());//只收这么多了
                     hwo.setRetentionMoney(mid);
+                    retentionMoney=worker.getRetentionMoney().add(mid);
                     worker.setRetentionMoney(worker.getRetentionMoney().add(mid));
                 }
+                //记录流水
+                WorkerDetail workerDetail = new WorkerDetail();
+                workerDetail.setName("收入转入滞留金");
+                workerDetail.setWorkerId(worker.getId());
+                workerDetail.setWorkerName(worker.getName());
+                workerDetail.setHouseId(hwo.getHouseId());
+                workerDetail.setMoney(mid);
+                workerDetail.setHaveMoney(retentionMoney);
+                workerDetail.setWalletMoney(retentionMoney);
+                workerDetail.setState(2);//进钱
+                workerDetailMapper.insert(workerDetail);
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
             }
 
