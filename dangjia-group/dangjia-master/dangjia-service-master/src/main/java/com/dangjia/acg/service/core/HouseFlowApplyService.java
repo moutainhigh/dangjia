@@ -178,7 +178,6 @@ public class HouseFlowApplyService {
                 workerMoney(hwo,hfa);
                 //大管家拿钱
                 stewardMoney(hfa);
-
                 //设置保险时间
                 WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByWorkerTypeId(hwo.getWorkerTypeId(), hwo.getHouseId());
                 if(wtso != null){
@@ -259,6 +258,7 @@ public class HouseFlowApplyService {
                 hwo.setHaveMoney(hwo.getHaveMoney().add(hfa.getApplyMoney()));
                 hwo.setEveryMoney(hwo.getEveryMoney().add(hfa.getApplyMoney()));//每日完工得到的钱，同时每日完工得到不会再清空
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
+
                 //记录流水
                 Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
                 BigDecimal surplusMoney = worker.getSurplusMoney().add(hfa.getApplyMoney());
