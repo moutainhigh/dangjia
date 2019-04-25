@@ -158,6 +158,10 @@ public class WalletService {
             if (member == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
             }
+            if (member.getIsJob()) {
+                //冻结的帐户不能修改资料信息
+                return ServerResponse.createByErrorMessage("账户冻结，无法提现");
+            }
             int paycode = (int) (Math.random() * 9000 + 1000);
             JsmsUtil.SMS(paycode, member.getMobile());
             //记录短信发送
