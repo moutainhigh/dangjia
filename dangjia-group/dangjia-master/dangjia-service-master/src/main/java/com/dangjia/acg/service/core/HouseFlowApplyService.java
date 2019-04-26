@@ -291,6 +291,7 @@ public class HouseFlowApplyService {
                     worker.setSurplusMoney(surplusMoney);
                 }
                 memberMapper.updateByPrimaryKeySelective(worker);
+
             }
             hfa.setMemberCheck(1);
             hfa.setPayState(1);
@@ -464,7 +465,7 @@ public class HouseFlowApplyService {
                 workerDetail.setState(0);//进钱
                 workerDetailMapper.insert(workerDetail);
                 worker.setRetentionMoney(worker.getDeposit());//实际1500元
-                worker.setSurplusMoney(worker.getSurplusMoney().add(bd));
+                worker.setSurplusMoney(surplusMoney);
             }
             //BigDecimal deposit = workDepositService.getWorkDepositByList().getDeposit();//获取押金比例 5%
             BigDecimal deposit = new BigDecimal(0.05);
@@ -474,7 +475,7 @@ public class HouseFlowApplyService {
             if(worker.getRetentionMoney().doubleValue() < worker.getDeposit().doubleValue()){//押金没收够并且没有算过押金
                 //算订单的5%
                 BigDecimal mid = hwo.getWorkPrice().multiply(deposit);
-                BigDecimal retentionMoney=null;
+                BigDecimal retentionMoney;
                 if(worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == -1 ||
                         worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == 0){
                     //实际滞留金
@@ -485,7 +486,8 @@ public class HouseFlowApplyService {
                     mid = worker.getDeposit().subtract(worker.getRetentionMoney());//只收这么多了
                     hwo.setRetentionMoney(mid);
                     retentionMoney=worker.getRetentionMoney().add(mid);
-                    worker.setRetentionMoney(worker.getRetentionMoney().add(mid));
+                    worker.setRetentionMoney(retentionMoney);
+
                 }
                 //记录流水
                 WorkerDetail workerDetail = new WorkerDetail();
@@ -499,9 +501,11 @@ public class HouseFlowApplyService {
                 workerDetail.setState(2);//进钱
                 workerDetailMapper.insert(workerDetail);
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
+
+                //申请的钱已进入滞留金余额，将减去滞留金的钱，存入账户余额
+                BigDecimal applyMoney=  hfa.getApplyMoney().subtract(mid);
+                hfa.setApplyMoney(applyMoney);
             }
-
-
             memberMapper.updateByPrimaryKeySelective(worker);
         }
     }
