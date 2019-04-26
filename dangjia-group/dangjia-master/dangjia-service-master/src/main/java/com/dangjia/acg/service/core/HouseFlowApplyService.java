@@ -471,10 +471,10 @@ public class HouseFlowApplyService {
             if(worker.getRetentionMoney() == null){
                 worker.setRetentionMoney(new BigDecimal(0.0));
             }
-            if(worker.getRetentionMoney().compareTo(worker.getDeposit()) == -1 && hwo.getRetentionMoney() == null){//押金没收够并且没有算过押金
+            if(worker.getRetentionMoney().doubleValue() < worker.getDeposit().doubleValue()){//押金没收够并且没有算过押金
                 //算订单的5%
                 BigDecimal mid = hwo.getWorkPrice().multiply(deposit);
-                BigDecimal retentionMoney=hwo.getWorkPrice();
+                BigDecimal retentionMoney=null;
                 if(worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == -1 ||
                         worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == 0){
                     //实际滞留金
