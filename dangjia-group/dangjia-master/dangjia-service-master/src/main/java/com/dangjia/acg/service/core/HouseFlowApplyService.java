@@ -435,7 +435,37 @@ public class HouseFlowApplyService {
         if(hfa.getWorkerType() >= 3 && hfa.getWorkerType() != 4){//精算，设计，拆除除外
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());
             Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
-
+            /*
+             * 工匠积分70分以下每单滞留金无上限,70以上含80以下2000元
+             * 80含以上90以下1500元,90分含以上500元
+             */
+            if(worker.getEvaluationScore().doubleValue()>=70 && worker.getEvaluationScore().doubleValue()<80){
+                worker.setDeposit(new BigDecimal(2000));//设置滞留金2000元
+            }else if(worker.getEvaluationScore().doubleValue()>=80 && worker.getEvaluationScore().doubleValue()<90){
+                worker.setDeposit(new BigDecimal(1500));//设置滞留金上限1500元
+            }else if(worker.getEvaluationScore().doubleValue()>=90){
+                worker.setDeposit(new BigDecimal(500));//设置滞留金上限500元
+            }else{
+                worker.setDeposit(new BigDecimal(99999));//重新设置无上限
+            }
+            //实际滞留金减上限
+            BigDecimal bd = worker.getRetentionMoney().subtract(worker.getDeposit());
+            if(bd.doubleValue()>0){
+                //记录流水
+                BigDecimal surplusMoney=worker.getSurplusMoney().add(bd);
+                WorkerDetail workerDetail = new WorkerDetail();
+                workerDetail.setName("涨积分退滞留金");
+                workerDetail.setWorkerId(worker.getId());
+                workerDetail.setWorkerName(worker.getName());
+                workerDetail.setHouseId(hwo.getHouseId());
+                workerDetail.setMoney(bd);
+                workerDetail.setHaveMoney(surplusMoney);
+                workerDetail.setWalletMoney(surplusMoney);
+                workerDetail.setState(0);//进钱
+                workerDetailMapper.insert(workerDetail);
+                worker.setRetentionMoney(worker.getDeposit());//实际1500元
+                worker.setSurplusMoney(worker.getSurplusMoney().add(bd));
+            }
             //BigDecimal deposit = workDepositService.getWorkDepositByList().getDeposit();//获取押金比例 5%
             BigDecimal deposit = new BigDecimal(0.05);
             if(worker.getRetentionMoney() == null){
@@ -471,37 +501,7 @@ public class HouseFlowApplyService {
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
             }
 
-            /*
-             * 工匠积分70分以下每单滞留金无上限,70以上含80以下2000元
-             * 80含以上90以下1500元,90分含以上500元
-             */
-            if(worker.getEvaluationScore().doubleValue()>=70 && worker.getEvaluationScore().doubleValue()<80){
-                worker.setDeposit(new BigDecimal(2000));//设置滞留金2000元
-            }else if(worker.getEvaluationScore().doubleValue()>=80 && worker.getEvaluationScore().doubleValue()<90){
-                worker.setDeposit(new BigDecimal(1500));//设置滞留金上限1500元
-            }else if(worker.getEvaluationScore().doubleValue()>=90){
-                worker.setDeposit(new BigDecimal(500));//设置滞留金上限500元
-            }else{
-                worker.setDeposit(new BigDecimal(99999));//重新设置无上限
-            }
-            //实际滞留金减上限
-            BigDecimal bd = worker.getRetentionMoney().subtract(worker.getDeposit());
-            if(bd.doubleValue()>0){
-                //记录流水
-                BigDecimal surplusMoney=worker.getSurplusMoney().add(bd);
-                WorkerDetail workerDetail = new WorkerDetail();
-                workerDetail.setName("涨积分退滞留金");
-                workerDetail.setWorkerId(worker.getId());
-                workerDetail.setWorkerName(worker.getName());
-                workerDetail.setHouseId(hwo.getHouseId());
-                workerDetail.setMoney(bd);
-                workerDetail.setHaveMoney(surplusMoney);
-                workerDetail.setWalletMoney(surplusMoney);
-                workerDetail.setState(0);//进钱
-                workerDetailMapper.insert(workerDetail);
-                worker.setRetentionMoney(worker.getDeposit());//实际1500元
-                worker.setSurplusMoney(worker.getSurplusMoney().add(bd));
-            }
+
             memberMapper.updateByPrimaryKeySelective(worker);
         }
     }
