@@ -93,7 +93,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     WHERE
 	p.number = #{number}
     ORDER BY
-	it.product_sn desc
+	it.create_date desc
 	</select>
 </mapper>
 

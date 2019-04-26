@@ -336,6 +336,7 @@ public class EngineerService {
         example.createCriteria().andEqualTo(HouseWorkerOrder.HOUSE_ID, houseId);
         example.orderBy(HouseWorkerOrder.CREATE_DATE).desc();
         List<HouseWorkerOrder> houseWorkerOrderList = houseWorkerOrderMapper.selectByExample(example);
+        House house = houseMapper.selectByPrimaryKey(houseId);
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (HouseWorkerOrder hwo : houseWorkerOrderList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hwo.getWorkerTypeId());
@@ -344,7 +345,10 @@ public class EngineerService {
             Map<String, Object> map = new HashMap<>();
             map.put("name", worker.getName());
             map.put("workerId", worker.getId());
+            map.put("designerOk", house.getDesignerOk());
+            map.put("budgetOk", house.getBudgetOk());
             map.put("workerTypeId", worker.getWorkerTypeId());
+            map.put("workerType", worker.getWorkerType());
             map.put("workerTypeName", workerType.getName());
             map.put("mobile", worker.getMobile());
             map.put("createDate", worker.getCreateDate());
