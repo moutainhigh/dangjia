@@ -291,6 +291,7 @@ public class HouseFlowApplyService {
                     worker.setSurplusMoney(surplusMoney);
                 }
                 memberMapper.updateByPrimaryKeySelective(worker);
+
             }
             hfa.setMemberCheck(1);
             hfa.setPayState(1);
@@ -435,42 +436,6 @@ public class HouseFlowApplyService {
         if(hfa.getWorkerType() >= 3 && hfa.getWorkerType() != 4){//精算，设计，拆除除外
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());
             Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
-
-            //BigDecimal deposit = workDepositService.getWorkDepositByList().getDeposit();//获取押金比例 5%
-            BigDecimal deposit = new BigDecimal(0.05);
-            if(worker.getRetentionMoney() == null){
-                worker.setRetentionMoney(new BigDecimal(0.0));
-            }
-            if(worker.getRetentionMoney().compareTo(worker.getDeposit()) == -1 && hwo.getRetentionMoney() == null){//押金没收够并且没有算过押金
-                //算订单的5%
-                BigDecimal mid = hwo.getWorkPrice().multiply(deposit);
-                BigDecimal retentionMoney=hwo.getWorkPrice();
-                if(worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == -1 ||
-                        worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == 0){
-                    //实际滞留金
-                    hwo.setRetentionMoney(mid);
-                    retentionMoney=worker.getRetentionMoney().add(mid);
-                    worker.setRetentionMoney(retentionMoney);
-                }else{
-                    mid = worker.getDeposit().subtract(worker.getRetentionMoney());//只收这么多了
-                    hwo.setRetentionMoney(mid);
-                    retentionMoney=worker.getRetentionMoney().add(mid);
-                    worker.setRetentionMoney(worker.getRetentionMoney().add(mid));
-                }
-                //记录流水
-                WorkerDetail workerDetail = new WorkerDetail();
-                workerDetail.setName("收入转入滞留金");
-                workerDetail.setWorkerId(worker.getId());
-                workerDetail.setWorkerName(worker.getName());
-                workerDetail.setHouseId(hwo.getHouseId());
-                workerDetail.setMoney(mid);
-                workerDetail.setHaveMoney(retentionMoney);
-                workerDetail.setWalletMoney(retentionMoney);
-                workerDetail.setState(2);//进钱
-                workerDetailMapper.insert(workerDetail);
-                houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
-            }
-
             /*
              * 工匠积分70分以下每单滞留金无上限,70以上含80以下2000元
              * 80含以上90以下1500元,90分含以上500元
@@ -500,7 +465,46 @@ public class HouseFlowApplyService {
                 workerDetail.setState(0);//进钱
                 workerDetailMapper.insert(workerDetail);
                 worker.setRetentionMoney(worker.getDeposit());//实际1500元
-                worker.setSurplusMoney(worker.getSurplusMoney().add(bd));
+                worker.setSurplusMoney(surplusMoney);
+            }
+            //BigDecimal deposit = workDepositService.getWorkDepositByList().getDeposit();//获取押金比例 5%
+            BigDecimal deposit = new BigDecimal(0.05);
+            if(worker.getRetentionMoney() == null){
+                worker.setRetentionMoney(new BigDecimal(0.0));
+            }
+            if(worker.getRetentionMoney().doubleValue() < worker.getDeposit().doubleValue()){//押金没收够并且没有算过押金
+                //算订单的5%
+                BigDecimal mid = hwo.getWorkPrice().multiply(deposit);
+                BigDecimal retentionMoney;
+                if(worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == -1 ||
+                        worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == 0){
+                    //实际滞留金
+                    hwo.setRetentionMoney(mid);
+                    retentionMoney=worker.getRetentionMoney().add(mid);
+                    worker.setRetentionMoney(retentionMoney);
+                }else{
+                    mid = worker.getDeposit().subtract(worker.getRetentionMoney());//只收这么多了
+                    hwo.setRetentionMoney(mid);
+                    retentionMoney=worker.getRetentionMoney().add(mid);
+                    worker.setRetentionMoney(retentionMoney);
+
+                }
+                //记录流水
+                WorkerDetail workerDetail = new WorkerDetail();
+                workerDetail.setName("收入转入滞留金");
+                workerDetail.setWorkerId(worker.getId());
+                workerDetail.setWorkerName(worker.getName());
+                workerDetail.setHouseId(hwo.getHouseId());
+                workerDetail.setMoney(mid);
+                workerDetail.setHaveMoney(retentionMoney);
+                workerDetail.setWalletMoney(retentionMoney);
+                workerDetail.setState(2);//进钱
+                workerDetailMapper.insert(workerDetail);
+                houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
+
+                //处理阶段申请的钱，将减去滞留金的钱，存入账户余额
+                BigDecimal applyMoney=  hfa.getApplyMoney().subtract(mid);
+                hfa.setApplyMoney(applyMoney);
             }
             memberMapper.updateByPrimaryKeySelective(worker);
         }
