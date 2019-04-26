@@ -502,7 +502,7 @@ public class HouseFlowApplyService {
                 workerDetailMapper.insert(workerDetail);
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
 
-                //申请的钱已进入滞留金余额，将减去滞留金的钱，存入账户余额
+                //处理阶段申请的钱，将减去滞留金的钱，存入账户余额
                 BigDecimal applyMoney=  hfa.getApplyMoney().subtract(mid);
                 hfa.setApplyMoney(applyMoney);
             }

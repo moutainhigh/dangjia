@@ -101,7 +101,7 @@
         create_date as createDate,
         modify_date as modifyDate
         from dj_basics_worker_goods
-        where data_status = 0
+        where data_status = 0 and show_goods=1
         <if test="name!=null and workerTypeId!=''">
             and
             name LIKE CONCAT('%',#{name},'%')
