@@ -454,6 +454,14 @@ public class EngineerService {
             }else {
                 map.put("show","1");
             }
+            Example example2=new Example(HouseWorkerOrder.class);
+            example2.createCriteria().andEqualTo(HouseWorkerOrder.HOUSE_ID,houseFlow.getHouseId()).andEqualTo(HouseWorkerOrder.WORKER_TYPE_ID,houseFlow.getWorkerTypeId());
+            List<HouseWorkerOrder> houseWorkerOrderList = houseWorkerOrderMapper.selectByExample(example2);
+            if(houseWorkerOrderList.size()==0){
+                map.put("havaMoney",0);
+            }else {
+                map.put("havaMoney",houseWorkerOrderList.get(0).getHaveMoney());
+            }
             mapList.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", mapList);
@@ -574,13 +582,13 @@ public class EngineerService {
     /**
      * 工匠列表
      */
-    public ServerResponse artisanList(String name, String workerTypeId, Integer pageNum, Integer pageSize) {
+    public ServerResponse artisanList(String name, String workerTypeId,String type, Integer pageNum, Integer pageSize) {
         if (pageNum == null) pageNum = 1;
         if (pageSize == null) pageSize = 10;
 
         try {
             PageHelper.startPage(pageNum, pageSize);
-            List<Member> memberList = memberMapper.artisanList(name, workerTypeId);
+            List<Member> memberList = memberMapper.artisanList(name, workerTypeId,type);
             PageInfo pageResult = new PageInfo(memberList);
             List<ArtisanDTO> artisanDTOS = new ArrayList<>();
             for (Member member : memberList) {
