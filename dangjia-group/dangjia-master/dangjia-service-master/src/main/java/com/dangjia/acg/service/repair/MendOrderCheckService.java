@@ -367,11 +367,11 @@ public class MendOrderCheckService {
                     warehouse.setBackTime(warehouse.getBackTime() + 1);//更新退次数
                     if (mendOrder.getType() == 2){
 //                        warehouse.setReceive(warehouse.getReceive() - mendMateriel.getShopCount()); //收货数量-工匠退数量
-                        warehouse.setWorkBack(warehouse.getWorkBack()==null?0D:warehouse.getWorkBack() + mendMateriel.getShopCount()); //收货数量+工匠退数量
+                        warehouse.setWorkBack(warehouse.getWorkBack()==null?mendMateriel.getShopCount():(warehouse.getWorkBack() + mendMateriel.getShopCount())); //收货数量+工匠退数量
                     }
                     if (mendOrder.getType() == 4){
 //                        warehouse.setShopCount(warehouse.getShopCount() - mendMateriel.getShopCount()); //购买数量-业主退数量
-                        warehouse.setOwnerBack(warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack() + mendMateriel.getShopCount()); //购买数量+业主退数量
+                        warehouse.setOwnerBack(warehouse.getOwnerBack()==null?mendMateriel.getShopCount():(warehouse.getOwnerBack() + mendMateriel.getShopCount())); //购买数量+业主退数量
                     }
                     warehouseMapper.updateByPrimaryKeySelective(warehouse);
                 }

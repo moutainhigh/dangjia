@@ -65,11 +65,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!-- 根据mendOrderId查询所有 -->
     <select id="byMendOrderId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.repair.MendMateriel">
         SELECT
-            <include refid="all_columns"/>
+        <include refid="all_columns"/>
         FROM dj_repair_mend_materiel
         where
-            mend_order_id = #{mendOrderId}
+        mend_order_id = #{mendOrderId}
         ORDER BY category_id, create_date desc
+    </select>
+
+    <!-- 根据mendOrderId查询所有 -->
+    <select id="getMendOrderGoods" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.repair.MendMateriel">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_repair_mend_materiel
+        where
+        mend_order_id = #{mendOrderId} and product_id=#{productId}
+        LIMIT 1
     </select>
 
 </mapper>

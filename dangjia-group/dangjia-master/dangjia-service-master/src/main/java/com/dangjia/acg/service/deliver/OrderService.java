@@ -467,7 +467,7 @@ public class OrderService {
                 //计算补货数量
                 if(warehouse!=null) {
                     //仓库剩余数
-                    Double surCount = warehouse.getShopCount() - warehouse.getAskCount() - warehouse.getBackCount();
+                    Double surCount = warehouse.getShopCount() - warehouse.getAskCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack());
                     //多出的数
                     Double overflowCount = (num - surCount);
                     if (overflowCount > 0) {
