@@ -226,7 +226,7 @@ public class HouseFlowApplyService {
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
 
                 //处理押金
-                deposit(hfa);
+                deposit(hwo,hfa);
                 //处理工人拿钱
                 workerMoney(hwo,hfa);
                 //大管家拿钱
@@ -396,7 +396,7 @@ public class HouseFlowApplyService {
         houseFlowApply.setWorkerId(worker.getId());
         houseFlowApply.setWorkerTypeId(worker.getWorkerTypeId());
         houseFlowApply.setHouseId(hwo.getHouseId());
-        deposit(houseFlowApply);
+        deposit(hwo,houseFlowApply);
 
         BigDecimal surplusMoney = worker.getSurplusMoney().add(supervisorMoney);
         //记录流水
@@ -432,7 +432,7 @@ public class HouseFlowApplyService {
     }
 
     /**处理工人押金*/
-    public void deposit(HouseFlowApply hfa){
+    public void deposit(HouseWorkerOrder hwo,HouseFlowApply hfa){
         if(hfa.getWorkerType() >= 3 && hfa.getWorkerType() != 4){//精算，设计，拆除除外
             Member worker = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
             /*
@@ -472,7 +472,6 @@ public class HouseFlowApplyService {
                 worker.setRetentionMoney(new BigDecimal(0.0));
             }
             if(worker.getRetentionMoney().doubleValue() < worker.getDeposit().doubleValue()){//押金没收够并且没有算过押金
-                HouseWorkerOrder hwo = houseWorkerOrderMapper.getHouseWorkerOrder(hfa.getHouseId(), hfa.getWorkerId(),hfa.getWorkerTypeId());
                 //算订单的5%
                 BigDecimal mid = hwo.getWorkPrice().multiply(deposit);
                 BigDecimal retentionMoney;
@@ -500,8 +499,6 @@ public class HouseFlowApplyService {
 
                 BigDecimal retentionMoneyOrder=  hwo.getRetentionMoney().add(mid);
                 hwo.setRetentionMoney(retentionMoneyOrder);
-                houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
-
                 //处理阶段申请的钱，将减去滞留金的钱，存入账户余额
                 BigDecimal applyMoney=  hfa.getApplyMoney().subtract(mid);
                 hfa.setApplyMoney(applyMoney);
