@@ -524,6 +524,9 @@ public class CraftsmanConstructionService {
             if (hf.getWorkType() != 4) {//未支付屏蔽未支付禁止显示的
                 criteria.andEqualTo(MenuConfiguration.SHOW_PAYMENT, 1);
             }
+            if (house.getDecorationType() == 2) {//如果是自带设计不查询量房
+                criteria.andNotEqualTo(MenuConfiguration.TYPE, 2);
+            }
             menuCondition(bean, criteria);
             example.orderBy(MenuConfiguration.SORT).asc();
             List<MenuConfiguration> menuConfigurations2 = iMenuConfigurationMapper.selectByExample(example);
