@@ -96,7 +96,7 @@ public class FillMaterielService {
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
                 warehouseDTO.setAskCount(warehouse.getAskCount());
-                warehouseDTO.setBackCount(warehouse.getWorkBack());
+                warehouseDTO.setBackCount((warehouse.getWorkBack()==null?0D:warehouse.getWorkBack()));
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                 warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack()) - warehouse.getReceive());//所有买的数量 - 退货 - 收的
                 warehouseDTO.setProductName(warehouse.getProductName());
@@ -157,7 +157,7 @@ public class FillMaterielService {
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
                 warehouseDTO.setAskCount(warehouse.getAskCount());
-                warehouseDTO.setBackCount(warehouse.getWorkBack());
+                warehouseDTO.setBackCount((warehouse.getWorkBack()==null?0D:warehouse.getWorkBack()));
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                 warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack()) - warehouse.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
                 warehouseDTO.setProductName(warehouse.getProductName());
@@ -245,7 +245,7 @@ public class FillMaterielService {
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
                 warehouseDTO.setAskCount(warehouse.getAskCount());
-                warehouseDTO.setBackCount(warehouse.getWorkBack());
+                warehouseDTO.setBackCount((warehouse.getWorkBack()==null?0D:warehouse.getWorkBack()));
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                 warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack())- warehouse.getAskCount() );
                 warehouseDTO.setProductName(warehouse.getProductName());
