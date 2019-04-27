@@ -522,7 +522,11 @@ public class CraftsmanConstructionService {
         } else {
             BigDecimal alsoMoney = (hwo.getWorkPrice() == null ? new BigDecimal(0) :
                     hwo.getWorkPrice()).subtract(hwo.getHaveMoney() == null ? new BigDecimal(0) : hwo.getHaveMoney());//还可得钱
-            bean.setAlreadyMoney(hwo.getHaveMoney());//已得钱
+
+            //已得到的钱+滞留金的钱=已得总钱
+            BigDecimal alreadyMoney = (hwo.getHaveMoney() == null ? new BigDecimal(0) :
+                    hwo.getHaveMoney()).add(hwo.getRetentionMoney() == null ? new BigDecimal(0) : hwo.getRetentionMoney());//已得钱
+            bean.setAlreadyMoney(alreadyMoney);//已得钱
             bean.setAlsoMoney(alsoMoney);//还可得钱
         }
     }

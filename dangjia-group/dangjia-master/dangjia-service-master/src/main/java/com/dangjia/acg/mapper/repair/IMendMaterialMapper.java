@@ -14,4 +14,6 @@ public interface IMendMaterialMapper extends Mapper<MendMateriel>{
                                               @Param("categoryId")String categoryId, @Param("name")String name);
 
     List<MendMateriel> byMendOrderId(@Param("mendOrderId") String mendOrderId);
+    MendMateriel getMendOrderGoods(@Param("mendOrderId") String mendOrderId,@Param("productId") String productId);
+
 }

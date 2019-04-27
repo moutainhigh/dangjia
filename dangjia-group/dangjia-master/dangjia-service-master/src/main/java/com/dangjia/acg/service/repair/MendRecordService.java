@@ -4,6 +4,7 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDetail;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
@@ -67,6 +68,7 @@ public class MendRecordService {
             if(type == 5){
                 OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
                 mendOrderDetail.setNumber(orderSplit.getNumber());
+                mendOrderDetail.setMendOrderId(orderSplit.getMendNumber());
                 mendOrderDetail.setType(5);
                 mendOrderDetail.setState(orderSplit.getApplyStatus());
                 mendOrderDetail.setCreateDate(orderSplit.getCreateDate());
@@ -91,7 +93,15 @@ public class MendRecordService {
                     map.put("name", orderSplitItem.getProductName());
                     map.put("price", "¥" + String.format("%.2f",orderSplitItem.getPrice())+"/"+orderSplitItem.getUnitName());
                     map.put("shopCount", orderSplitItem.getNum());//本次数量
+                    map.put("repairCount","0");
                     map.put("totalPrice", orderSplitItem.getTotalPrice());
+                    if(!CommonUtil.isEmpty(orderSplit.getMendNumber())) {
+                        MendMateriel mendMateriel = mendMaterialMapper.getMendOrderGoods(orderSplit.getMendNumber(),orderSplitItem.getProductId());
+                        if(mendMateriel!=null){
+                            map.put("repairCount",mendMateriel.getShopCount());
+                        }
+
+                    }
                     mapList.add(map);
                 }
                 mendOrderDetail.setMapList(mapList);
@@ -236,7 +246,7 @@ public class MendRecordService {
                 returnMap.add(map);
             }
 
-
+//            List<MendOrder> mendOrderList;
             if(roleType == 3){//工匠
                 mendOrderList = mendOrderMapper.workerMendOrder(houseId,1,worker.getWorkerTypeId());
             }else {
