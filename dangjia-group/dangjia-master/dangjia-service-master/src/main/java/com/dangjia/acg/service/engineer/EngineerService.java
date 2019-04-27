@@ -5,6 +5,7 @@ import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.excel.ExportExcel;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.engineer.ArtisanDTO;
@@ -17,10 +18,7 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
-import com.dangjia.acg.modle.core.HouseFlow;
-import com.dangjia.acg.modle.core.HouseWorker;
-import com.dangjia.acg.modle.core.HouseWorkerOrder;
-import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
@@ -573,9 +571,30 @@ public class EngineerService {
                     map.put("supName", supervisor.getName());
                     map.put("supMobile", supervisor.getMobile());
                 }
-                map.put("pause", house.getPause()); //0正常,1暂停
-                map.put("createDate", house.getCreateDate());
+                //HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart1(house.getId(),new Date());//查询今日开工记录
+                map.put("pause", house.getCreateDate()==null ?"0":"1"); //0正常,1暂停
+                Example example=new Example(HouseFlow.class);
+                example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,house.getId()).andEqualTo(HouseFlow.SUPERVISOR_START,1);
+                List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+                map.put("createDate", houseFlows.size()==0 ? "":houseFlows.get(0).getReleaseTime());
                 map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工
+
+                example=new Example(HouseFlow.class);
+                example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,house.getId()).andEqualTo(HouseFlow.WORK_STETA,2).andEqualTo(HouseFlow.WORKER_TYPE_ID,3);
+                List<HouseFlow> houseFlowss = houseFlowMapper.selectByExample(example);
+                Date date;
+                if (houseFlowss.size()==0){
+                    date=new Date();
+                }else {
+                    date=houseFlowss.get(0).getModifyDate();
+                }
+                int startDay=0;
+                if(houseFlows.size()!=0) {
+                     startDay = DateUtil.daysofTwo(houseFlows.get(0).getReleaseTime(), date);
+                }
+                map.put("startDay",startDay);
+                int buildDay = houseMapper.getBuildDay(house.getId());
+                map.put("buildDay",buildDay);
                 mapList.add(map);
             }
         }

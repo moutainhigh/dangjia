@@ -351,7 +351,6 @@
         h.city_id as cityId,
         h.modeling_layout_id as modelingLayoutId,
         h.money,
-        h.pause,
         h.show_house as showHouse,
         h.village_id as villageId,
         h.refer_house_id as referHouseId,
@@ -366,11 +365,12 @@
         h.is_select as isSelect,
         h.visit_state as visitState,
         h.data_status as dataStatus,
-        h.create_date as createDate,
+        f.create_date as createDate,
         h.modify_date as modifyDate
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
+        LEFT JOIN dj_core_house_flow_apply f ON  f.house_id=h.id and f.apply_type=4 and  and to_days(f.create_date) = to_days(#{time})
         WHERE
         h.data_status =0
         <if test="visitState!=-1">
@@ -391,7 +391,7 @@
             or m.name like CONCAT('%',#{searchKey},'%')
             )
         </if>
-        ORDER by h.create_date desc
+        ORDER by h.create_date desc,f.modify_date desc
     </select>
 
     <select id="getHouseDateByMemberId" parameterType="String" resultType="date">
@@ -413,6 +413,25 @@
             o.type IN ( 2, 4 ) and o.state = 4
             AND o.house_id = #{houseId}
             AND m.product_id = #{productId}
+    </select>
+
+    <select id="getBuildDay" resultType="int">
+        SELECT
+            count( * )
+        FROM
+            (
+            SELECT
+                date_format( create_date, '%Y-%c-%d' ) AS post_date
+            FROM
+                dj_core_house_flow_apply
+            WHERE
+                house_id = #{houseId}
+                AND apply_type = '0'
+            GROUP BY
+                post_date
+            ORDER BY
+                create_date DESC
+            ) a;
     </select>
 </mapper>
 

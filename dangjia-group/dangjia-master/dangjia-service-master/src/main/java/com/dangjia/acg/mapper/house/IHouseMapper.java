@@ -52,4 +52,6 @@ public interface IHouseMapper extends Mapper<House> {
     Date getHouseDateByMemberId(@Param("memberId") String memberId);
 
     List<RepairMendDTO> getRepairMend(@Param("houseId") String houseId,@Param("productId") String productId);
+
+    int getBuildDay(@Param("houseId") String houseId);
 }

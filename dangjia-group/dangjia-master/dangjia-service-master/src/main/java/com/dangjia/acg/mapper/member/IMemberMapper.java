@@ -33,7 +33,11 @@ public interface IMemberMapper extends Mapper<Member> {
      */
     List<Member> getMemberListByName(@Param("searchKey") String searchKey,
                                       @Param("stage") Integer stage, @Param("userRole") String userRole,
-                                      @Param("childsLabelIdArr")String[] childsLabelIdArr,@Param("orderBy") String orderBy);
+                                      @Param("childsLabelIdArr")String[] childsLabelIdArr,@Param("orderBy") String orderBy,
+                                     @Param("type") String type,
+                                     @Param("userId") String userId,
+                                     @Param("beginDate") String beginDate,
+                                     @Param("endDate") String endDate);
 
     List<Map<String,Object>> getMemberList();
 //    //查询所有业主关联客服的所有数据

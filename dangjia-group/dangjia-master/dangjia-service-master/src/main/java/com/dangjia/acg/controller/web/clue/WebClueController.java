@@ -39,8 +39,8 @@ public class WebClueController implements WebClueAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getClueList (Integer stage,String values, PageDTO pageDTO){
-        return clueService.getClueList(stage,values,pageDTO.getPageNum(),pageDTO.getPageSize());
+    public ServerResponse getClueList (Integer stage,String values,String memberId,String beginDate,String endDate, PageDTO pageDTO){
+        return clueService.getClueList(stage,values,memberId,beginDate,endDate,pageDTO.getPageNum(),pageDTO.getPageSize());
     }
 
     @Override
