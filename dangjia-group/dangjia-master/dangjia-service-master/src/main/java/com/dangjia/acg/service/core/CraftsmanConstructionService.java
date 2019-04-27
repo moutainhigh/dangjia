@@ -6,6 +6,7 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.ConstructionByWorkerIdBean;
@@ -24,10 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Ruking.Cheng
@@ -67,7 +67,7 @@ public class CraftsmanConstructionService {
      * @param userToken userToken
      * @return 施工页面信息
      */
-    public ServerResponse getConstructionView(String userToken) {
+    public ServerResponse getConstructionView(HttpServletRequest request, String userToken) {
         ConstructionByWorkerIdBean bean = new ConstructionByWorkerIdBean();//公用返回体
         Object object = getMember(userToken);
         if (object instanceof ServerResponse) {
@@ -90,15 +90,17 @@ public class CraftsmanConstructionService {
         if (hf == null) {
             return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "没有查到该任务");
         }
+        bean.setHouseId(house.getId());
+        bean.setHouseName(house.getHouseName());
         switch (worker.getWorkerType()) {
             case 1://设计师
-                return getDesignerBean(bean, hw, worker, house, hf);
+                return getDesignerBean(request, bean, hw, house, hf);
             case 2://精算师
-                return getActuariesBean(bean, hw, worker, house, hf);
+                return getActuariesBean(request, bean, hw, worker, house, hf);
             case 3://大管家
-                return getHousekeeperBean(bean, hw, worker, house, hf);
+                return getHousekeeperBean(request, bean, hw, worker, house, hf);
             default://工匠
-                return getCraftsmanBean(bean, hw, worker, house, hf);
+                return getCraftsmanBean(request, bean, hw, worker, house, hf);
         }
 
     }
@@ -106,28 +108,78 @@ public class CraftsmanConstructionService {
     /**
      * 设计师
      */
-    private ServerResponse getDesignerBean(ConstructionByWorkerIdBean bean, HouseWorker hw, Member worker, House house, HouseFlow hf) {
+    private ServerResponse getDesignerBean(HttpServletRequest request, ConstructionByWorkerIdBean bean, HouseWorker hw, House house, HouseFlow hf) {
+        if (!getApiVersion(request)) {
+            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "设计师/精算师请在后台管理中查看施工详情");
+        }
         bean.setWorkerType(2);//0:大管家；1：工匠；2：设计师；3：精算师
-        // TODO 设计师/精算师不支持直接返回
-        return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "设计师/精算师请在后台管理中查看施工详情");
+        bean.setHouseFlowId(hf.getId());
+        bean.setDecorationType(house.getDecorationType());
+        setMoney(bean, hw);
+        Member houseMember = memberMapper.selectByPrimaryKey(house.getMemberId());//业主
+        if (houseMember != null) {
+            bean.setHouseMemberName(houseMember.getNickName());//业主名称
+            bean.setHouseMemberPhone(houseMember.getMobile());//业主电话
+            bean.setUserId(houseMember.getId());//
+        }
+        setMenus(bean, house, hf);
+        Map<String, Object> dataMap = house.getDesignDatas();
+        bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
+        List<ConstructionByWorkerIdBean.ButtonListBean> buttonList = new ArrayList<>();
+        if (house.getDecorationType() != 2 && house.getDesignerOk() == 1) {
+            buttonList.add(getButton("去量房", 2));
+        }
+        bean.setButtonList(buttonList);
+        return ServerResponse.createBySuccess("获取施工列表成功！", bean);
+    }
+
+    /**
+     * 判断
+     *
+     * @param request
+     * @return
+     */
+    private boolean getApiVersion(HttpServletRequest request) {
+        if (!CommonUtil.isEmpty(request.getParameter("apiVersion"))) {
+            try {
+                int apiVersion = Integer.parseInt(request.getParameter("apiVersion"));
+                if (apiVersion >= 132) {
+                    return true;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return false;
     }
 
     /**
      * 精算师
      */
-    private ServerResponse getActuariesBean(ConstructionByWorkerIdBean bean, HouseWorker hw, Member worker, House house, HouseFlow hf) {
+    private ServerResponse getActuariesBean(HttpServletRequest request, ConstructionByWorkerIdBean bean, HouseWorker hw, Member worker, House house, HouseFlow hf) {
+        if (!getApiVersion(request)) {
+            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "设计师/精算师请在后台管理中查看施工详情");
+        }
         bean.setWorkerType(3);//0:大管家；1：工匠；2：设计师；3：精算师
-        //TODO 设计师/精算师不支持直接返回
-        return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "设计师/精算师请在后台管理中查看施工详情");
+        bean.setHouseFlowId(hf.getId());
+        setMoney(bean, hw);
+        Member houseMember = memberMapper.selectByPrimaryKey(house.getMemberId());//业主
+        if (houseMember != null) {
+            bean.setHouseMemberName(houseMember.getNickName());//业主名称
+            bean.setHouseMemberPhone(houseMember.getMobile());//业主电话
+            bean.setUserId(houseMember.getId());//
+        }
+        setMenus(bean, house, hf);
+        Map<String, Object> dataMap = house.getBudgetDatas();
+        bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
+        return ServerResponse.createBySuccess("获取施工列表成功！", bean);
     }
 
     /**
      * 大管家
      */
-    private ServerResponse getHousekeeperBean(ConstructionByWorkerIdBean bean, HouseWorker hw, Member worker, House house, HouseFlow hf) {
+    private ServerResponse getHousekeeperBean(HttpServletRequest request, ConstructionByWorkerIdBean bean, HouseWorker hw, Member worker, House house, HouseFlow hf) {
         bean.setWorkerType(0);//0:大管家；1：工匠；2：设计师；3：精算师
         bean.setHouseFlowId(hf.getId());
-        bean.setHouseName(house.getHouseName());
         setMoney(bean, hw);
         Member houseMember = memberMapper.selectByPrimaryKey(house.getMemberId());//业主
         if (houseMember != null) {
@@ -252,6 +304,15 @@ public class CraftsmanConstructionService {
         } else if (checkFinishList.size() == 0) {//所有工种都整体完工，申请业主验收
             if (house.getHaveComplete() == 1) {
                 promptList.add("该房子已竣工!");
+                if (getApiVersion(request)) {
+                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                            "takeMoneyDetailed" +
+                            "?title=拿钱明细" +
+                            "&houseId=" + house.getId() +
+                            "&houseFlowId=" + hf.getId() +
+                            "&houseName=" + house.getHouseName();
+                    buttonList.add(getButton("查看拿钱明细", url, 0));
+                }
             } else {
                 HouseFlowApply houseFlowApp = houseFlowApplyMapper.checkSupervisorApply(hf.getId(), worker.getId());//查询大管家是否有验收申请
                 if (houseFlowApp == null) {//没有发验收申请
@@ -267,17 +328,16 @@ public class CraftsmanConstructionService {
         }
         bean.setPromptList(promptList);
         bean.setButtonList(buttonList);
-        return ServerResponse.createBySuccess("获取施工列表成功！", bean);
+        return ServerResponse.createBySuccess("获取施工列表成功", bean);
     }
 
 
     /**
      * 工匠
      */
-    private ServerResponse getCraftsmanBean(ConstructionByWorkerIdBean bean, HouseWorker hw, Member worker, House house, HouseFlow hf) {
+    private ServerResponse getCraftsmanBean(HttpServletRequest request, ConstructionByWorkerIdBean bean, HouseWorker hw, Member worker, House house, HouseFlow hf) {
         bean.setWorkerType(1);//0:大管家；1：工匠；2：设计师；3：精算师
         bean.setHouseFlowId(hf.getId());
-        bean.setHouseName(house.getHouseName());
         setMoney(bean, hw);
         //房产信息
         HouseWorker supervisorWorker = houseWorkerMapper.getHwByHidAndWtype(hf.getHouseId(), 3);//查询大管家的
@@ -330,7 +390,6 @@ public class CraftsmanConstructionService {
         setMenus(bean, house, hf);
         List<String> promptList = new ArrayList<>();//消息提示list
         List<ConstructionByWorkerIdBean.ButtonListBean> buttonList = new ArrayList<>();
-
         List<HouseFlowApply> earliestTimeList = houseFlowApplyMapper.getEarliestTimeHouseApply(house.getId(), worker.getId());
         HouseFlowApply earliestTime = null;
         if (earliestTimeList.size() > 0) {
@@ -369,6 +428,15 @@ public class CraftsmanConstructionService {
         }
         if (hf.getWorkSteta() == 2) {
             promptList.add("您已整体完工");
+            if (getApiVersion(request)) {
+                String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                        "takeMoneyDetailed" +
+                        "?title=拿钱明细" +
+                        "&houseId=" + house.getId() +
+                        "&houseFlowId=" + hf.getId() +
+                        "&houseName=" + house.getHouseName();
+                buttonList.add(getButton("查看拿钱明细", url, 0));
+            }
         } else if (hf.getWorkType() == 4) {
             if (hf.getWorkSteta() == 3) {//待交底
                 buttonList.add(getButton("找大管家交底", 1));
@@ -422,7 +490,7 @@ public class CraftsmanConstructionService {
         }
         bean.setPromptList(promptList);
         bean.setButtonList(buttonList);
-        return ServerResponse.createBySuccess("获取施工列表成功！", bean);
+        return ServerResponse.createBySuccess("获取施工列表成功", bean);
     }
 
 
@@ -572,8 +640,13 @@ public class CraftsmanConstructionService {
      * @return 按钮对象
      */
     private ConstructionByWorkerIdBean.ButtonListBean getButton(String name, int type) {
+        return getButton(name, null, type);
+    }
+
+    private ConstructionByWorkerIdBean.ButtonListBean getButton(String name, String url, int type) {
         ConstructionByWorkerIdBean.ButtonListBean buttonListBean = new ConstructionByWorkerIdBean.ButtonListBean();
         buttonListBean.setButtonType(type);
+        buttonListBean.setUrl(url);
         buttonListBean.setButtonTypeName(name);
         return buttonListBean;
     }
@@ -585,7 +658,7 @@ public class CraftsmanConstructionService {
      * @param userToken userToken
      * @return Member/ServerResponse
      */
-    private Object getMember(String userToken) {
+    public Object getMember(String userToken) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {
             return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), EventStatus.USER_TOKEN_ERROR.getDesc());

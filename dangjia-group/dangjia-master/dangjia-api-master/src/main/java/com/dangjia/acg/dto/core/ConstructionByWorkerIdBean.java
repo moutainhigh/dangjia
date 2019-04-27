@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ruking.Cheng
@@ -42,6 +43,9 @@ public class ConstructionByWorkerIdBean {
     private String footMessageTitle;// 今日开工任务
     private String footMessageDescribe;//（每日十二点前今日开工）
     private List<BigListBean.ListMapBean> workerEverydayList;//	每日开工事项
+    private List<Map<String, Object>> dataList;//设计师和精算流程返回体
+    private Integer decorationType;//"装修类型: 0表示没有开始，1远程设计，2自带设计，3共享装修")
+    private String houseId;
 
     @Data
     public static class BigListBean {
@@ -53,14 +57,15 @@ public class ConstructionByWorkerIdBean {
             private String image;
             private String name;
             private String url;
-            private int type;
+            private int type;//0:跳转URL，1:获取定位后跳转URL，2:量房，3：传平面图，4：传施工图
             private int state;//0无 1有点
         }
     }
 
     @Data
     public static class ButtonListBean {
-        private int buttonType;//主按钮提示1：巡查工地2：申请业主验收；3:确认开工--主按钮提示 1:找大管家交底2:今日开工;3：今日完工;4阶段完工；5整体完工
+        private String url;
+        private int buttonType;//0:跳转URL，主按钮提示1：巡查工地2：申请业主验收；3:确认开工--主按钮提示 1:找大管家交底2:今日开工;3：今日完工;4阶段完工；5整体完工
         private String buttonTypeName;//主按钮提示 巡查工地;申请业主验收;确认开工--主按钮提示 1:找大管家交底2:今日开工;3：今日完工;4阶段完工；5整体完工
     }
 

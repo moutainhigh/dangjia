@@ -139,11 +139,11 @@ public class TaskService {
      */
     private List<Task> getTask(String houseId, String userToken) {
         House house = houseMapper.selectByPrimaryKey(houseId);
-        List<Task> taskList = new ArrayList<Task>();
+        List<Task> taskList = new ArrayList<>();
         //查询待支付工序
         Example example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 3).andEqualTo(HouseFlow.HOUSE_ID, houseId)
-                .andNotEqualTo(HouseFlow.STATE,2);
+                .andNotEqualTo(HouseFlow.STATE, 2);
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         for (HouseFlow houseFlow : houseFlowList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
@@ -188,25 +188,14 @@ public class TaskService {
             task.setTaskId(mendOrder.getId());
             taskList.add(task);
         }
-
         //设计审核任务
-        if (house.getDesignerOk() == 5) {
+        if (house.getDesignerOk() == 5 || house.getDesignerOk() == 2) {
             Task task = new Task();
             task.setDate(DateUtil.dateToString(house.getModifyDate(), "yyyy-MM-dd HH:mm"));
-            task.setName("平面图审核");
+            task.setName(house.getDesignerOk() == 5 ? "平面图审核" : "施工图审核");
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/sheji.png");
-            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.DESIGNLIST, userToken, house.getCityId(), "平面图审核") + "&houseId=" + house.getId();
-            task.setHtmlUrl(url);
-            task.setType(3);
-            task.setTaskId("");
-            taskList.add(task);
-        }
-        if (house.getDesignerOk() == 2) {
-            Task task = new Task();
-            task.setDate(DateUtil.dateToString(house.getModifyDate(), "yyyy-MM-dd HH:mm"));
-            task.setName("施工图审核");
-            task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/sheji.png");
-            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.DESIGNLIST, userToken, house.getCityId(), "施工图审核") + "&houseId=" + house.getId();
+            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                    String.format(DjConstants.YZPageAddress.DESIGNLIST, userToken, house.getCityId(), task.getName()) + "&houseId=" + house.getId();
             task.setHtmlUrl(url);
             task.setType(3);
             task.setTaskId("");
@@ -218,7 +207,8 @@ public class TaskService {
             task.setDate(DateUtil.dateToString(house.getModifyDate(), "yyyy-MM-dd HH:mm"));
             task.setName("精算审核");
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/jingsuan.png");
-            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.CONFIRMACTUARY, userToken, house.getCityId(), "精算审核") + "&houseId=" + house.getId();
+            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                    String.format(DjConstants.YZPageAddress.CONFIRMACTUARY, userToken, house.getCityId(), "精算审核") + "&houseId=" + house.getId();
             task.setHtmlUrl(url);
             task.setType(3);
             task.setTaskId("");
@@ -227,7 +217,7 @@ public class TaskService {
         //验收任务
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getMemberCheckList(houseId);
         for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
-            if (houseFlowApply.getApplyType() == 0){
+            if (houseFlowApply.getApplyType() == 0) {
                 houseFlowApplyService.checkWorker(houseFlowApply.getId());
                 continue;
             }
@@ -251,10 +241,10 @@ public class TaskService {
 
         //审核申请停工任务
         example = new Example(HouseFlowApply.class);
-        example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andEqualTo(HouseFlowApply.APPLY_TYPE,3)
-                .andEqualTo(HouseFlowApply.MEMBER_CHECK,0).andEqualTo(HouseFlowApply.PAY_STATE,1);
+        example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
+                .andEqualTo(HouseFlowApply.MEMBER_CHECK, 0).andEqualTo(HouseFlowApply.PAY_STATE, 1);
         houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
-        for(HouseFlowApply hfa : houseFlowApplyList){
+        for (HouseFlowApply hfa : houseFlowApplyList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(hfa.getModifyDate(), "yyyy-MM-dd HH:mm"));

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -39,21 +40,15 @@ public class BrandService {
     private ConfigUtil configUtil;
 
     //查询所有品牌
-    public ServerResponse<PageInfo> getAllBrand(Integer pageNum, Integer pageSize) {
+    public ServerResponse<PageInfo> getAllBrand(PageDTO pageDTO) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
-            if (pageNum == null) {
-                pageNum = 1;
-            }
-            if (pageSize == null) {
-                pageSize = 10;
-            }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            PageHelper.startPage(pageNum, pageSize);
             List<Brand> Brandlist = iBrandMapper.getBrands();
-            List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+            List<Map<String, Object>> list = new ArrayList<>();
             for (Brand brand : Brandlist) {
-                Map<String, Object> obj = new HashMap<String, Object>();
-                Map<String, Object> map = new HashMap<String, Object>();
+                Map<String, Object> obj = new HashMap<>();
+                Map<String, Object> map = new HashMap<>();
                 map.put("id", brand.getId());
                 map.put("name", brand.getName());
                 map.put("createDate", brand.getCreateDate().getTime());
@@ -204,17 +199,11 @@ public class BrandService {
     }
 
     //根据品牌名称查询品牌
-    public ServerResponse<PageInfo> getBrandByName(Integer pageNum, Integer pageSize, String name) {
+    public ServerResponse<PageInfo> getBrandByName(PageDTO pageDTO, String name) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
-            if (pageNum == null) {
-                pageNum = 1;
-            }
-            if (pageSize == null) {
-                pageSize = 10;
-            }
-            PageHelper.startPage(pageNum, pageSize);
             List<Brand> Brandlist = iBrandMapper.getBrandByNames(name);
-            List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+            List<Map<String, Object>> list = new ArrayList<>();
             for (Brand brand : Brandlist) {
                 List<BrandSeries> mapList = iBrandSeriesMapper.queryBrandSeries(brand.getId());
                 String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);

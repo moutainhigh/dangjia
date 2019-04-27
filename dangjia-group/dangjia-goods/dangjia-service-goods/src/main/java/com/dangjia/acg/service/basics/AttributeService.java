@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.IAttributeMapper;
@@ -48,18 +49,12 @@ public class AttributeService {
     private static Logger LOG = LoggerFactory.getLogger(AttributeService.class);
 
     //根据类别id查询关联属性
-    public ServerResponse<PageInfo> queryGoodsAttribute(Integer pageNum, Integer pageSize, String goodsCategoryId, String likeAttrName) {
+    public ServerResponse<PageInfo> queryGoodsAttribute(PageDTO pageDTO, String goodsCategoryId, String likeAttrName) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         try {
-            if (pageNum == null) {
-                pageNum = 1;
-            }
-            if (pageSize == null) {
-                pageSize = 10;
-            }
-            PageHelper.startPage(pageNum, pageSize);
-            List<Attribute> caList = new ArrayList<Attribute>();
-            List<Map<String, Object>> rListMap = new ArrayList<Map<String, Object>>();
+            List<Attribute> caList = new ArrayList<>();
+            List<Map<String, Object>> rListMap = new ArrayList<>();
 //            if (goodsCategoryId == null || "".equals(goodsCategoryId)) {
 //                caList = iAttributeMapper.query();
 //            } else {
@@ -113,25 +108,19 @@ public class AttributeService {
     }
 
     //根据属性名称模糊查询属性
-    public ServerResponse<PageInfo> queryGoodsAttributelikeName(Integer pageNum, Integer pageSize, String name) {
+    public ServerResponse<PageInfo> queryGoodsAttributelikeName(PageDTO pageDTO, String name) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         try {
-            if (pageNum == null) {
-                pageNum = 1;
-            }
-            if (pageSize == null) {
-                pageSize = 10;
-            }
-            PageHelper.startPage(pageNum, pageSize);
-            List<Attribute> caList = new ArrayList<Attribute>();
-            List<Map<String, Object>> rListMap = new ArrayList<Map<String, Object>>();
+            List<Attribute> caList;
+            List<Map<String, Object>> rListMap = new ArrayList<>();
             if (name == null || "".equals(name)) {
                 caList = iAttributeMapper.query();
             } else {
                 caList = iAttributeMapper.queryGoodsAttributelikeName(name);
             }
             for (Attribute ca : caList) {
-                Map<String, Object> caMap = new HashMap<String, Object>();
+                Map<String, Object> caMap = new HashMap<>();
                 caMap.put("id", ca.getId());
                 caMap.put("name", ca.getName());
                 caMap.put("type", ca.getType());
@@ -139,9 +128,9 @@ public class AttributeService {
                 caMap.put("createDate", sdf.format(ca.getCreateDate()));
                 caMap.put("modifyDate", sdf.format(ca.getModifyDate()));
                 List<AttributeValue> avList = iAttributeValueMapper.queryByAttributeId(ca.getId());
-                List<Map<String, Object>> avListMap = new ArrayList<Map<String, Object>>();
+                List<Map<String, Object>> avListMap = new ArrayList<>();
                 for (AttributeValue av : avList) {
-                    Map<String, Object> avMap = new HashMap<String, Object>();
+                    Map<String, Object> avMap = new HashMap();
                     avMap.put("avId", av.getId());
                     avMap.put("avName", av.getName());
                     avMap.put("image", address + av.getImage());
