@@ -117,6 +117,7 @@ public class WebOrderService {
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<OrderItemByDTO> orderItemList= iBusinessOrderMapper.getOrderItem(businessNumber);
+        PageInfo pageResult = new PageInfo(orderItemList);
         ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(businessNumber);
         String red = null;
         if(activityRedPackRecord!=null) {
@@ -133,7 +134,7 @@ public class WebOrderService {
         }else {
             red="无";
         }
-        PageInfo pageResult = new PageInfo(orderItemList);
+
         for (OrderItemByDTO orderItemByDTO : orderItemList) {
             orderItemByDTO.setImage(imageAddress+orderItemByDTO.getImage());
             orderItemByDTO.setRed(red);
