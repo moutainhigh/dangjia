@@ -232,21 +232,21 @@ public class MendRecordService {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();
 
-            Example example = new Example(MendOrder.class);
-            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,0)
-            .andNotEqualTo(MendOrder.STATE,0);
-            List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
-            if(mendOrderList.size() > 0){
-                Map<String,Object> map = new HashMap<>();
-                map.put("houseId", houseId);
-                map.put("type", 0);
-                map.put("image", address + "iconWork/zero.png");
-                map.put("name", "补材料/服务记录");
-                map.put("size", "共"+mendOrderList.size()+"条");
-                returnMap.add(map);
-            }
+//            Example example = new Example(MendOrder.class);
+//            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,0)
+//            .andNotEqualTo(MendOrder.STATE,0);
+//            List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
+//            if(mendOrderList.size() > 0){
+//                Map<String,Object> map = new HashMap<>();
+//                map.put("houseId", houseId);
+//                map.put("type", 0);
+//                map.put("image", address + "iconWork/zero.png");
+//                map.put("name", "补材料/服务记录");
+//                map.put("size", "共"+mendOrderList.size()+"条");
+//                returnMap.add(map);
+//            }
 
-//            List<MendOrder> mendOrderList;
+            List<MendOrder> mendOrderList;
             if(roleType == 3){//工匠
                 mendOrderList = mendOrderMapper.workerMendOrder(houseId,1,worker.getWorkerTypeId());
             }else {
@@ -261,7 +261,7 @@ public class MendRecordService {
                 map.put("size", "共"+mendOrderList.size()+"条");
                 returnMap.add(map);
             }
-            example = new Example(MendOrder.class);
+            Example  example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,2)
                     .andNotEqualTo(MendOrder.STATE,0);
             mendOrderList = mendOrderMapper.selectByExample(example);
