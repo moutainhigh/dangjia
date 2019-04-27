@@ -141,7 +141,7 @@ public class WebEngineerController implements WebEngineerAPI {
     @Override
     @ApiMethod
     public ServerResponse getHouseList(PageDTO pageDTO, Integer visitState, String searchKey) {
-        return engineerService.getHouseList(pageDTO.getPageNum(), pageDTO.getPageSize(), visitState, searchKey);
+        return engineerService.getHouseList(pageDTO, visitState, searchKey);
     }
 
     /**
@@ -149,25 +149,25 @@ public class WebEngineerController implements WebEngineerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse artisanList(String name, String workerTypeId,String type, PageDTO pageDTO) {
-        return engineerService.artisanList(name, workerTypeId, type,pageDTO.getPageNum(), pageDTO.getPageSize());
+    public ServerResponse artisanList(String name, String workerTypeId, String type, PageDTO pageDTO) {
+        return engineerService.artisanList(name, workerTypeId, type, pageDTO);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getWareHouse(String houseId,PageDTO pageDTO) {
-        return engineerService.getWareHouse(houseId, pageDTO.getPageNum(), pageDTO.getPageSize());
+    public ServerResponse getWareHouse(String houseId, PageDTO pageDTO) {
+        return engineerService.getWareHouse(houseId, pageDTO);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse exportWareHouse(HttpServletResponse response,String houseId,String userName,String address) {
-        return engineerService.exportWareHouse(response,houseId,userName,address);
+    public ServerResponse exportWareHouse(HttpServletResponse response, String houseId, String userName, String address) {
+        return engineerService.exportWareHouse(response, houseId, userName, address);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse freeze(String  memberId,boolean type) {
-        return engineerService.freeze(memberId,type);
+    public ServerResponse freeze(String memberId, boolean type) {
+        return engineerService.freeze(memberId, type);
     }
 }

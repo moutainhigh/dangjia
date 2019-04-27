@@ -44,7 +44,10 @@ public class MenuConfigurationService {
         if (CommonUtil.isEmpty(menuConfiguration.getSort())) {
             menuConfiguration.setSort(99);
         }
-        if (CommonUtil.isEmpty(menuConfiguration.getId())) {
+
+        Example example = new Example(MenuConfiguration.class);
+        example.createCriteria().andEqualTo(MenuConfiguration.ID, menuConfiguration.getId());
+        if (iMenuConfigurationMapper.selectCountByExample(example) <= 0) {
             iMenuConfigurationMapper.insert(menuConfiguration);
         } else {
             iMenuConfigurationMapper.updateByPrimaryKeySelective(menuConfiguration);

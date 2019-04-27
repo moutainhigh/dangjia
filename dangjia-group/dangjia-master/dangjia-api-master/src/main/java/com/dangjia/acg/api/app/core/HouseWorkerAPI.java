@@ -7,6 +7,8 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * author: Ronalcheng
  * Date: 2018/11/5 0005
@@ -33,7 +35,8 @@ public interface HouseWorkerAPI {
 
     @PostMapping("app/core/houseWorker/getConstructionByWorkerId")
     @ApiOperation(value = "根据工人查询自己的施工界面", notes = "根据工人查询自己的施工界面")
-    ServerResponse getConstructionByWorkerId(@RequestParam("userToken") String userToken,
+    ServerResponse getConstructionByWorkerId(@RequestParam("request") HttpServletRequest request,
+                                             @RequestParam("userToken") String userToken,
                                              @RequestParam("cityId") String cityId);
 
     @PostMapping("app/core/houseWorker/getMyHomePage")

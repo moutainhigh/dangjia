@@ -29,7 +29,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
     @Override
     @ApiMethod
     public ServerResponse<PageInfo> getAllList(HttpServletRequest request, PageDTO pageDTO, String name, Integer state) {
-        return goodsGroupService.getAllList(pageDTO.getPageNum(), pageDTO.getPageSize(), name, state);
+        return goodsGroupService.getAllList(pageDTO, name, state);
     }
 
     /*

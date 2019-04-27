@@ -8,6 +8,8 @@ import com.dangjia.acg.service.core.HouseWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * author: Ronalcheng
  * Date: 2018/11/5 0005
@@ -22,13 +24,14 @@ public class HouseWorkerController implements HouseWorkerAPI {
     private CraftsmanConstructionService constructionService;
 
     /**
-     *  根据工人id查询所有房子任务
+     * 根据工人id查询所有房子任务
      */
     @Override
     @ApiMethod
-    public ServerResponse queryWorkerHouse(String userToken){
+    public ServerResponse queryWorkerHouse(String userToken) {
         return houseWorkerService.queryWorkerHouse(userToken);
     }
+
     /**
      * 抢单
      */
@@ -52,8 +55,8 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getConstructionByWorkerId(String userToken, String cityId) {
-        return constructionService.getConstructionView(userToken);
+    public ServerResponse getConstructionByWorkerId(HttpServletRequest request, String userToken, String cityId) {
+        return constructionService.getConstructionView(request, userToken);
     }
 
     /**
@@ -64,15 +67,17 @@ public class HouseWorkerController implements HouseWorkerAPI {
     public ServerResponse getMyHomePage(String userToken, String cityId) {
         return houseWorkerService.getMyHomePage(userToken, cityId);
     }
+
     /**
      * 获取申请单明细
      */
 
     @Override
     @ApiMethod
-    public ServerResponse getHouseFlowApply(String userToken, String houseFlowApplyId){
+    public ServerResponse getHouseFlowApply(String userToken, String houseFlowApplyId) {
         return houseWorkerService.getHouseFlowApply(houseFlowApplyId);
     }
+
     /**
      * 提交审核、停工
      *
