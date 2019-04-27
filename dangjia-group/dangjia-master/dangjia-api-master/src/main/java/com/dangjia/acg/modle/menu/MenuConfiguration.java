@@ -47,8 +47,8 @@ public class MenuConfiguration extends BaseEntity {
     private String url;
 
     @Column(name = "type")
-    @Desc(value = "0:跳转URL，1:获取定位后跳转URL")
-    @ApiModelProperty("0:跳转URL，1:获取定位后跳转URL")
+    @Desc(value = "0:跳转URL，1:获取定位后跳转URL，2:量房，3：传平面图，4：传施工图")
+    @ApiModelProperty("0:跳转URL，1:获取定位后跳转URL,2:量房，3：传平面图，4：传施工图")
     private Integer type;
 
     @Column(name = "menu_type")
@@ -103,15 +103,15 @@ public class MenuConfiguration extends BaseEntity {
 
     //所有图片字段加入域名和端口，形成全路径
     public void initPath(String imageAddress, String webAddress, String houseId, String houseFlowId, Integer roleType) {
-        StringBuffer data = new StringBuffer();
+        StringBuilder data = new StringBuilder();
         if (!CommonUtil.isEmpty(houseId)) {
-            data.append("&houseId=" + houseId);
+            data.append("&houseId=").append(houseId);
         }
         if (!CommonUtil.isEmpty(houseFlowId)) {
-            data.append("&houseFlowId=" + houseFlowId);
+            data.append("&houseFlowId=").append(houseFlowId);
         }
         if (!CommonUtil.isEmpty(roleType)) {
-            data.append("&roleType=" + roleType);
+            data.append("&roleType=").append(roleType);
         }
         this.image = CommonUtil.isEmpty(this.image) ? null : imageAddress + this.image;
         this.url = CommonUtil.isEmpty(this.url) ? null : webAddress + this.url + "?title=" + name + data.toString();

@@ -22,8 +22,7 @@ public interface WebDesignAPI {
     @PostMapping("web/design/sendPictures")
     @ApiOperation(value = "发送设计图给业主", notes = "发送设计图给业主")
     ServerResponse sendPictures(@RequestParam("request") HttpServletRequest request,
-                                @RequestParam("houseId") String houseId,
-                                @RequestParam("designerOk") int designerOk);
+                                @RequestParam("houseId") String houseId);
 
     @PostMapping("web/design/uploadPictures")
     @ApiOperation(value = "上传图片", notes = "上传图片")

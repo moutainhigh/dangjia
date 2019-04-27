@@ -47,6 +47,7 @@
         house.residential as residential,
         house.building as building,
         house.unit as unit,
+        house.decoration_type as decorationType,
         house.number as number,
         member.nick_name as nickName,
         member.name as name,

@@ -154,10 +154,8 @@ public class PaymentService {
     private IHouseDistributionMapper iHouseDistributionMapper;
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
-
     @Autowired
     private IOrderSplitMapper orderSplitMapper;
-
     @Autowired
     private IOrderSplitItemMapper orderSplitItemMapper;
     /**
@@ -532,7 +530,6 @@ public class PaymentService {
             houseFlow.setWorkSteta(3);//待交底
             houseFlow.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-
             if (hwo.getWorkerType() == 1) { //设计费用处理
                 Order order = new Order();
                 order.setHouseId(hwo.getHouseId());
@@ -546,10 +543,8 @@ public class PaymentService {
                 order.setType(1);//人工订单
                 order.setPayment(payState);
                 orderMapper.insert(order);
-
                 house.setDesignerOk(1);
                 houseMapper.updateByPrimaryKeySelective(house);
-
             } else if (hwo.getWorkerType() == 2) {//精算费用处理
                 Order order = new Order();
                 WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
@@ -562,7 +557,6 @@ public class PaymentService {
                 order.setType(1);//人工订单
                 order.setPayment(payState);
                 orderMapper.insert(order);
-
                 house.setBudgetOk(1);//房间工种表里标记开始精算
                 houseMapper.updateByPrimaryKeySelective(house);
             } else {//其它工种

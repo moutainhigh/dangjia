@@ -33,7 +33,6 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.other.WorkDeposit;
-import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,20 +163,9 @@ public class HouseWorkerService {
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             houseFlow.setGrabNumber(houseFlow.getGrabNumber() + 1);
             houseFlow.setWorkType(3);//等待支付
-
             houseFlow.setWorkerId(worker.getId());
-
+            grabSheet(worker, house, houseFlow, houseMapper);
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-            if (worker.getWorkerType() == 1) {//设计师
-                house.setDesignerOk(4);//有设计抢单待业主支付
-                houseMapper.updateByPrimaryKeySelective(house);
-            }
-            //我改的
-            if (worker.getWorkerType() == 2) {
-                house.setBudgetOk(5);//有精算抢单待业主支付
-                houseMapper.updateByPrimaryKeySelective(house);
-            }
-
             houseWorkerMapper.doModifyAllByWorkerId(worker.getId());//将所有houseWorker的选中状态IsSelect改为0未选中
             HouseWorker houseWorker = new HouseWorker();
             houseWorker.setHouseId(house.getId());
@@ -230,6 +218,25 @@ public class HouseWorkerService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("抢单失败");
+        }
+    }
+
+    /**
+     * 设置设计和精算的一些状态
+     *
+     * @param worker      工匠
+     * @param house       房子
+     * @param houseFlow   工序
+     * @param houseMapper 房子表mapper
+     */
+    public void grabSheet(Member worker, House house, HouseFlow houseFlow, IHouseMapper houseMapper) {
+        if (worker.getWorkerType() == 1) {//设计师
+            house.setDesignerOk(house.getDecorationType() == 2 ? 1 : 4);//有设计抢单待业主支付
+            houseFlow.setWorkType(house.getDecorationType() == 2 ? 4 : 3);
+            houseMapper.updateByPrimaryKeySelective(house);
+        } else if (worker.getWorkerType() == 2) {
+            house.setBudgetOk(5);//有精算抢单待业主支付
+            houseMapper.updateByPrimaryKeySelective(house);
         }
     }
 
@@ -401,10 +408,10 @@ public class HouseWorkerService {
             }
 
             /*提交申请进行控制*/
-            List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
-            if (changeOrderList.size() > 0) {
-                return ServerResponse.createByErrorMessage("该工种（" + workerType.getName() + "）有未处理变更单,通知管家处理");
-            }
+//            List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
+//            if (changeOrderList.size() > 0) {
+//                return ServerResponse.createByErrorMessage("该工种（" + workerType.getName() + "）有未处理变更单,通知管家处理");
+//            }
 
             //包括所有申请 和 巡查
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(houseFlowId, applyType, workerId, new Date());

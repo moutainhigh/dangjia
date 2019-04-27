@@ -371,6 +371,7 @@ public class OrderService {
         try{
             AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
             Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+
             Example example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 4)
                     .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
@@ -378,7 +379,10 @@ public class OrderService {
             if(orderSplitList.size()>0){
                 return ServerResponse.createByErrorMessage("存在业主未处理的补货单，无法提交要货！");
             }
-
+            ServerResponse serverResponse=mendOrderService.mendChecking(houseId,worker.getWorkerTypeId(),0);
+            if(!serverResponse.isSuccess()){
+                return ServerResponse.createByErrorMessage(serverResponse.getResultMsg());
+            }
             example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
                     .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
@@ -495,7 +499,7 @@ public class OrderService {
             //补货材料列表
             String mendMaterialArr=JSON.toJSONString(productList);
             if(!CommonUtil.isEmpty(mendMaterialArr)&&productList.size()>0){
-                ServerResponse serverResponse= mendOrderService.saveMendMaterial( userToken, houseId, mendMaterialArr);
+                serverResponse= mendOrderService.saveMendMaterial( userToken, houseId, mendMaterialArr);
                 if (serverResponse.isSuccess()) {
                     if (serverResponse.getResultObj() != null) {
                         //保存补货ID

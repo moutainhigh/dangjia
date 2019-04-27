@@ -17,7 +17,7 @@ import javax.persistence.Table;
 @Data
 @Entity
 @Table(name = "dj_core_house_worker")
-@ApiModel(description = "工序")
+@ApiModel(description = "工人订单表")
 @FieldNameConstants(prefix = "")
 public class HouseWorker extends BaseEntity {
 

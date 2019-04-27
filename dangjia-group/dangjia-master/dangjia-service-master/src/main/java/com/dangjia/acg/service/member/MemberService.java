@@ -342,6 +342,11 @@ public class MemberService {
         if (accessToken == null) {//无效的token
             return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
         }
+        Member member = memberMapper.selectByPrimaryKey(user.getId());
+        if (member.getIsJob()) {
+            //冻结的帐户不能修改资料信息
+            return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
+        }
         user.setId(accessToken.getMember().getId());
         user.setCheckType(accessToken.getMember().getCheckType());//提交资料，审核中
         if (!CommonUtil.isEmpty(user.getIdnumber())) {
@@ -362,10 +367,7 @@ public class MemberService {
             user.setCreateDate(null);
             memberMapper.updateByPrimaryKeySelective(user);
             user = memberMapper.selectByPrimaryKey(user.getId());
-            if (user.getIsJob()) {
-                //冻结的帐户不能修改资料信息
-                return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
-            }
+
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             accessToken = TokenUtil.generateAccessToken(user);
             accessToken.setUserToken(userToken);
