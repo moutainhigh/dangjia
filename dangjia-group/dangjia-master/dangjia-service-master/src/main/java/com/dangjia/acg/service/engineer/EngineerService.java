@@ -530,18 +530,19 @@ public class EngineerService {
                 map.put("address", house.getHouseName());
                 map.put("memberName", member.getNickName() == null ? member.getName() : member.getNickName());
                 map.put("mobile", member.getMobile());
+                map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工
                 Member supervisor = memberMapper.getSupervisor(house.getId());
                 if (supervisor != null) {
                     map.put("supName", supervisor.getName());
                     map.put("supMobile", supervisor.getMobile());
                 }
-                //HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart1(house.getId(),new Date());//查询今日开工记录
-                map.put("pause", house.getCreateDate()==null ?"0":"1"); //0正常,1暂停
+                HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart1(house.getId(),new Date());//查询今日开工记录
+                map.put("pause", todayStart==null ?"0":"1"); //0否,1是
+
                 Example example=new Example(HouseFlow.class);
                 example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,house.getId()).andEqualTo(HouseFlow.SUPERVISOR_START,1);
                 List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
                 map.put("createDate", houseFlows.size()==0 ? "":houseFlows.get(0).getReleaseTime());
-                map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工
 
                 example=new Example(HouseFlow.class);
                 example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,house.getId()).andEqualTo(HouseFlow.WORK_STETA,2).andEqualTo(HouseFlow.WORKER_TYPE_ID,3);

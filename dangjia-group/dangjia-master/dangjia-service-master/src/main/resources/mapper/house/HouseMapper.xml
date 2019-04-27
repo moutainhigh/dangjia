@@ -366,12 +366,11 @@
         h.is_select as isSelect,
         h.visit_state as visitState,
         h.data_status as dataStatus,
-        f.create_date as createDate,
+        h.create_date as createDate,
         h.modify_date as modifyDate
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
-        LEFT JOIN dj_core_house_flow_apply f ON  f.house_id=h.id and f.apply_type=4 and  and to_days(f.create_date) = to_days(#{time})
         WHERE
         h.data_status =0
         <if test="visitState!=-1">
@@ -392,7 +391,7 @@
             or m.name like CONCAT('%',#{searchKey},'%')
             )
         </if>
-        ORDER by h.create_date desc,f.modify_date desc
+        ORDER by h.modify_date desc
     </select>
 
     <select id="getHouseDateByMemberId" parameterType="String" resultType="date">
