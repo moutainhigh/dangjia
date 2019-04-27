@@ -3,6 +3,7 @@ package com.dangjia.acg.service.repair;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -191,7 +192,7 @@ public class MendMaterielService {
 
                     Member worker = memberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
                     mendOrderDTO.setApplyMemberId(worker.getId());
-                    mendOrderDTO.setApplyName(worker.getName());
+                    mendOrderDTO.setApplyName(CommonUtil.isEmpty(worker.getName())?worker.getNickName():worker.getName());
                     mendOrderDTO.setApplyMobile(worker.getMobile());
                     mendOrderDTO.setType(mendOrder.getType());
                     mendOrderDTO.setState(mendOrder.getState());
