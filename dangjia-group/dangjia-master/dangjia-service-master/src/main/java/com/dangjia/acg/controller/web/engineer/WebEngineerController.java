@@ -149,8 +149,8 @@ public class WebEngineerController implements WebEngineerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse artisanList(String name, String workerTypeId, PageDTO pageDTO) {
-        return engineerService.artisanList(name, workerTypeId, pageDTO.getPageNum(), pageDTO.getPageSize());
+    public ServerResponse artisanList(String name, String workerTypeId,String type, PageDTO pageDTO) {
+        return engineerService.artisanList(name, workerTypeId, type,pageDTO.getPageNum(), pageDTO.getPageSize());
     }
 
     @Override
