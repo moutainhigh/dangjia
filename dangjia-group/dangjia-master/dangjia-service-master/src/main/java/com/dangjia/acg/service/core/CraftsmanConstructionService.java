@@ -428,6 +428,7 @@ public class CraftsmanConstructionService {
         }
         if (hf.getWorkSteta() == 2) {
             promptList.add("您已整体完工");
+            bean.setIfBackOut(2);
             if (getApiVersion(request)) {
                 String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                         "takeMoneyDetailed" +
