@@ -17,8 +17,8 @@
         FROM
             dj_design_quantity_room
         WHERE
-            house_id = 803071991552462681019
-            AND type = 0
+            house_id = #{houseId}
+            AND type =  #{type}
             AND data_status = 0
         ORDER BY
             create_date DESC
