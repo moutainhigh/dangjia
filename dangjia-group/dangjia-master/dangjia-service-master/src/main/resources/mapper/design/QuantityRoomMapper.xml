@@ -5,12 +5,20 @@
 <mapper namespace="com.dangjia.acg.mapper.design.IQuantityRoomMapper">
     <select id="getQuantityRoom" resultType="com.dangjia.acg.dto.design.QuantityRoomDTO">
         SELECT
-            *
+            id,
+            create_date AS createDate,
+            modify_date AS modifyDate,
+            data_status AS dataStatus,
+            house_id AS houseId,
+            member_id AS memberId,
+            user_id AS userId,
+            type,
+            operation_type AS operationType
         FROM
             dj_design_quantity_room
         WHERE
-            house_id = #{houseId}
-            AND type =  #{type}
+            house_id = 803071991552462681019
+            AND type = 0
             AND data_status = 0
         ORDER BY
             create_date DESC

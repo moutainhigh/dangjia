@@ -21,7 +21,7 @@ import javax.persistence.Table;
  */
 @Data
 @Entity
-@Table(name = "dj_design_design_image_type")
+@Table(name = "dj_design_quantity_room_images")
 @FieldNameConstants(prefix = "")
 @ApiModel(description = "设计相关操作记录图片储存表（目前就只有量房）")
 public class QuantityRoomImages extends BaseEntity {

@@ -41,8 +41,8 @@ public class MenuConfigurationService {
         if (CommonUtil.isEmpty(menuConfiguration.getMenuType())) {
             return ServerResponse.createByErrorMessage("请传入菜单类别");
         }
-        if (CommonUtil.isEmpty(menuConfiguration.getSort())) {
-            menuConfiguration.setSort(99);
+        if (CommonUtil.isEmpty(menuConfiguration.getParentId())) {
+            menuConfiguration.setParentId(null);
         }
 
         Example example = new Example(MenuConfiguration.class);

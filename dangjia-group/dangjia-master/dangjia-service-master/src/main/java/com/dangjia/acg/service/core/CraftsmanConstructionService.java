@@ -464,10 +464,13 @@ public class CraftsmanConstructionService {
                     List<HouseFlowApply> flowAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId(), new Date());//查询是否已提交今日完工
                     if (allAppList.size() > 0) {
                         promptList.add("今日已申请整体完工");
+                        bean.setIfBackOut(2);
                     } else if (stageAppList.size() > 0) {
                         promptList.add("今日已申请阶段完工");
+                        bean.setIfBackOut(2);
                     } else if (flowAppList != null && flowAppList.size() > 0) {//已提交今日完工
                         promptList.add("今日已完工");
+                        bean.setIfBackOut(2);
                     } else {
                         buttonList.add(getButton("今日完工", 3));
                         List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(2);//事项类型  1 开工事项 2 完工事项
@@ -478,12 +481,11 @@ public class CraftsmanConstructionService {
                         }
                         bean.setFootMessageTitle("今日完工任务");//每日开工事项
                         bean.setFootMessageDescribe("");//每日开工事项
-                    }
-
-                    if (hf.getWorkSteta() == 1) {
-                        setDisplayState(hf, promptList, buttonList, checkFlowApp, true);
-                    } else {
-                        setDisplayState(hf, promptList, buttonList, checkFlowApp, false);
+                        if (hf.getWorkSteta() == 1) {
+                            setDisplayState(hf, promptList, buttonList, checkFlowApp, true);
+                        } else {
+                            setDisplayState(hf, promptList, buttonList, checkFlowApp, false);
+                        }
                     }
                 }
                 bean.setWorkerEverydayList(workerEverydayList);//每日完工事项
