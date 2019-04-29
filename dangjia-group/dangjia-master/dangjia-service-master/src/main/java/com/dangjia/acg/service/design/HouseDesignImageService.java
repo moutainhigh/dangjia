@@ -20,7 +20,9 @@ import com.dangjia.acg.mapper.design.IHouseDesignImageMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
@@ -31,7 +33,9 @@ import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.WorkDeposit;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +79,10 @@ public class HouseDesignImageService {
     private IQuantityRoomMapper quantityRoomMapper;
     @Autowired
     private IQuantityRoomImagesMapper quantityRoomImagesMapper;
+    @Autowired
+    private IMemberMapper memberMapper;
+    @Autowired
+    private UserMapper userMapper;
 
 
     /**
@@ -313,6 +321,20 @@ public class HouseDesignImageService {
         QuantityRoomDTO quantityRoomDTO = quantityRoomMapper.getQuantityRoom(houseId, 0);
         if (quantityRoomDTO == null) {
             return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无量房信息");
+        }
+        quantityRoomDTO.setUserType(-1);
+        if (!CommonUtil.isEmpty(quantityRoomDTO.getMemberId())) {
+            Member member = memberMapper.selectByPrimaryKey(quantityRoomDTO.getMemberId());
+            if (member != null) {
+                quantityRoomDTO.setUserType(0);
+                quantityRoomDTO.setUserName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
+            }
+        } else if (!CommonUtil.isEmpty(quantityRoomDTO.getUserId())) {
+            MainUser mainUser = userMapper.selectByPrimaryKey(quantityRoomDTO.getUserId());
+            if (mainUser != null) {
+                quantityRoomDTO.setUserType(1);
+                quantityRoomDTO.setUserName(mainUser.getUsername());
+            }
         }
         Example example = new Example(QuantityRoomImages.class);
         example.createCriteria()
