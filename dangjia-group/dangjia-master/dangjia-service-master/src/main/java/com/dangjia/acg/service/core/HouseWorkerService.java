@@ -764,7 +764,7 @@ public class HouseWorkerService {
             } else if (houseFlow.getWorkType() == null) {
                 houseFlow.setWorkType(0);//
             }
-            // 重新调整施工顺序
+            /*// 重新调整施工顺序
             int sort = 4;
             // 先确定已开工顺序
             List<HouseFlow> hflist = houseFlowMapper.getForCheckMoney(houseFlow.getHouseId());
@@ -776,11 +776,11 @@ public class HouseWorkerService {
                 }
             }
             houseFlow.setSort(sort);// 本次提前位置
-            sort++;
+            sort++;*/
             houseFlow.setWorkType(2);
             houseFlow.setReleaseTime(new Date());//发布时间
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-
+            /*
             for (HouseFlow hf : hflist) {
                 if (hf.getWorkType() < 2) {
                     hf.setSort(sort);
@@ -788,6 +788,7 @@ public class HouseWorkerService {
                     houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                 }
             }
+            */
             return ServerResponse.createBySuccessMessage("提前进场成功");
         } catch (Exception e) {
             e.printStackTrace();

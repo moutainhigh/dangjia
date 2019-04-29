@@ -585,16 +585,13 @@ public class HouseFlowService {
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             houseFlow.setSupervisorStart(1);//大管家进度改为已开工
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-            List<HouseFlow> houseFlowList = houseFlowMapper.getNextHouseFlow(houseFlow.getSort(), houseFlow.getHouseId());//根据当前工序查下一工序
-            if (houseFlowList.size() > 0) {
-                HouseFlow nextHF = houseFlowList.get(0);
+            HouseFlow nextHF = houseFlowMapper.getNextHouseFlow(houseFlow.getHouseId());//根据当前工序查下一工序
+            if (nextHF!=null) {
                 nextHF.setWorkType(2);//把下一个工种弄成待抢单
                 nextHF.setReleaseTime(new Date());//发布时间
                 houseFlowMapper.updateByPrimaryKeySelective(nextHF);
-
                 //通知下一个工种 抢单
                 configMessageService.addConfigMessage(null, "gj", "wtId" + nextHF.getWorkerTypeId() + nextHF.getCityId(), "0", "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "4");
-
             }
             configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家开工", DjConstants.PushMessage.STEWARD_CONSTRUCTION, "");
 
