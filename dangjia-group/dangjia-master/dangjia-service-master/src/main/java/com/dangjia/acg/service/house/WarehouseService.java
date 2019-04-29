@@ -106,7 +106,8 @@ public class WarehouseService {
                 BeanUtils.beanToBean(warehouse,warehouseDTO);
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
-                warehouseDTO.setSurCount(warehouse.getShopCount()  - warehouse.getBackCount() - warehouse.getAskCount());//剩余数量 所有买的数量 - 退货 - 收的
+                warehouseDTO.setReceive(warehouse.getReceive());
+                warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack()) - warehouse.getAskCount());//剩余数量 所有买的数量 - 业主退货 - 要的
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                 warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
                 warehouseDTO.setRepairCount(warehouse.getRepairCount());
@@ -199,7 +200,8 @@ public class WarehouseService {
                         BeanUtils.beanToBean(warehouse, warehouseDTO);
                         warehouseDTO.setImage(address + warehouse.getImage());
                         warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
-                        warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getAskCount() - warehouse.getBackCount());
+                        warehouseDTO.setReceive(warehouse.getReceive());
+                        warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack()) - warehouse.getAskCount());
                         warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                         warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(cityId,warehouse.getProductId()));
                         warehouseDTOS.add(warehouseDTO);

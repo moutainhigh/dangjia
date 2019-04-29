@@ -3,6 +3,7 @@ package com.dangjia.acg.service.repair;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -125,16 +126,14 @@ public class MendMaterielService {
             if(warehouse==null){
                 map.put(Warehouse.RECEIVE, "0");
             }else {
-                Double receive = warehouse.getReceive() == null ? 0d : warehouse.getReceive();
-                Double askCount = warehouse.getAskCount() == null ? 0d : warehouse.getAskCount();
                 //工匠退材料新增已收货数量字段
                 if (mendOrder.getType() == 2) {
-                    map.put(Warehouse.RECEIVE, receive);
+                    map.put(Warehouse.RECEIVE, warehouse.getReceive() == null ? 0d : warehouse.getReceive());
                 }
                 //业主退材料增加未发货数量
                 if (mendOrder.getType() == 4) {
                     //未发货数量=已要 - 已收
-                    map.put(Warehouse.RECEIVE, askCount - receive);
+                    map.put(Warehouse.RECEIVE, warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack()) - warehouse.getAskCount());
                 }
             }
             mendMaterielMaps.add(map);
@@ -191,7 +190,7 @@ public class MendMaterielService {
 
                     Member worker = memberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
                     mendOrderDTO.setApplyMemberId(worker.getId());
-                    mendOrderDTO.setApplyName(worker.getName());
+                    mendOrderDTO.setApplyName(CommonUtil.isEmpty(worker.getName())?worker.getNickName():worker.getName());
                     mendOrderDTO.setApplyMobile(worker.getMobile());
                     mendOrderDTO.setType(mendOrder.getType());
                     mendOrderDTO.setState(mendOrder.getState());

@@ -366,6 +366,7 @@ public class RewardPunishService {
                 criteria.andEqualTo(RewardPunishRecord.MEMBER_ID,workerId);
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            example.orderBy(RewardPunishRecord.CREATE_DATE).desc();
             List<RewardPunishRecord> recordList=rewardPunishRecordMapper.selectByExample(example);
             PageInfo pageResult = new PageInfo(recordList);
             if(recordList!=null&&recordList.size()>0){

@@ -890,10 +890,15 @@ public class BudgetWorkerService {
     /**
      * 根据人工商品查询工艺
      */
-    public JSONArray getTecList(String workerGoodsId) {
+    public JSONArray getTecList(int workerType,String workerGoodsId) {
         try {
             JSONArray jsonArray = new JSONArray();
-            List<Technology> tList = iTechnologyMapper.workerPatrolList(workerGoodsId);
+            List<Technology> tList;
+            if(workerType == 3){
+                tList = iTechnologyMapper.patrolList(workerGoodsId);
+            }else {
+                tList = iTechnologyMapper.workerPatrolList(workerGoodsId);
+            }
             for (Technology t : tList) {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("technologyId", t.getId());

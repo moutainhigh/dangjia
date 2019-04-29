@@ -20,6 +20,9 @@ import javax.servlet.http.HttpServletRequest;
 @Api(value = "工人和业主支付订单流水", description = "工人和业主支付订单流水")
 public interface WebWalletAPI {
 
+    @PostMapping("web/finance/wallet/getHouseWallet")
+    @ApiOperation(value = "工人拿钱明细", notes = "工人拿钱明细")
+    ServerResponse getHouseWallet(@RequestParam("houseId") String houseId,  @RequestParam("userToken") String  userToken);
     /**
      * 所有订单流水
      */

@@ -23,25 +23,25 @@ public class WebDesignController implements WebDesignAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse sendPictures(HttpServletRequest request,String houseId,int designerOk){
-        return designService.sendPictures(request,houseId,designerOk);
+    public ServerResponse sendPictures(HttpServletRequest request, String houseId) {
+        return designService.sendPictures(houseId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse uploadPictures(HttpServletRequest request,String houseId,String designImageTypeId,String imageurl){
-        return designService.uploadPictures(request,houseId,designImageTypeId,imageurl);
+    public ServerResponse uploadPictures(HttpServletRequest request, String houseId, String designImageTypeId, String imageurl) {
+        return designService.uploadPictures(houseId, designImageTypeId, imageurl);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerOk, String mobile, String residential, String number){
-        return designService.getDesignList(request,pageDTO,designerOk,mobile,residential,number);
+    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerOk, String mobile, String residential, String number) {
+        return designService.getDesignList(pageDTO, designerOk, mobile, residential, number);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getImagesList(HttpServletRequest request, String houseId){
-        return designService.getImagesList(request,houseId);
+    public ServerResponse getImagesList(HttpServletRequest request, String houseId) {
+        return designService.getImagesList(houseId);
     }
 }

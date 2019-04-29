@@ -123,7 +123,7 @@ public class SplitDeliver extends BaseEntity {
     private Integer supState;
 
     @Column(name = "shipping_state")
-    @Desc(value = "配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收）")
+    @Desc(value = "配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收,5已结算,6材料员撤回(只待发货才能撤回)）")
     @ApiModelProperty("配送状态")
     private Integer shippingState;
 

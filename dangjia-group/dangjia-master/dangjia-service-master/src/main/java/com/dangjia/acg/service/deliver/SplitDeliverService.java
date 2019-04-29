@@ -233,6 +233,7 @@ public class SplitDeliverService {
             }else {
                 example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId).andEqualTo(SplitDeliver.SHIPPING_STATE,shipState);
             }
+            example.orderBy(SplitDeliver.CREATE_DATE).desc();
             List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
             List<SplitDeliverDTO> splitDeliverDTOList = new ArrayList<>();
             for (SplitDeliver splitDeliver : splitDeliverList){
@@ -256,6 +257,10 @@ public class SplitDeliverService {
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
                 splitDeliverDTO.setTol(orderSplitItemList.size());//几种
                 if(orderSplitItemList.size()>0) {
+                    splitDeliverDTO.setTotalPrice(0d);
+                    for (OrderSplitItem orderSplitItem : orderSplitItemList) {
+                        splitDeliverDTO.setTotalPrice(splitDeliverDTO.getTotalPrice()+orderSplitItem.getTotalPrice());
+                    }
                     splitDeliverDTO.setName(orderSplitItemList.get(0).getProductName());
                     splitDeliverDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + orderSplitItemList.get(0).getImage());
                 }

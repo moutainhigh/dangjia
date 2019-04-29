@@ -7,6 +7,7 @@
         worker_goods_sn,
         image,
         unit_id,
+        other_name ,
         unit_name,
         price,
         sales,
@@ -28,6 +29,7 @@
         unit_id as unitId,
         unit_name as unitName,
         price,
+        other_name as otherName,
         sales,
         work_explain as workExplain,
         worker_dec as workerDec,
@@ -43,7 +45,9 @@
         </if>
         <if test="searchKey != null">
             AND (worker_goods_sn like CONCAT('%',#{searchKey},'%')
-            OR name like CONCAT('%',#{searchKey},'%'))
+            OR name like CONCAT('%',#{searchKey},'%')
+            OR other_name like CONCAT('%',#{searchKey},'%')
+            )
         </if>
         <if test="showGoods != null">
             AND show_goods=#{showGoods}
@@ -88,6 +92,7 @@
         unit_name as unitName,
         price,
         sales,
+        other_name as otherName,
         work_explain as workExplain,
         worker_dec as workerDec,
         worker_standard as workerStandard,
@@ -96,7 +101,7 @@
         create_date as createDate,
         modify_date as modifyDate
         from dj_basics_worker_goods
-        where data_status = 0
+        where data_status = 0 and show_goods=1
         <if test="name!=null and workerTypeId!=''">
             and
             name LIKE CONCAT('%',#{name},'%')
@@ -118,6 +123,7 @@
         unit_id as unitId,
         unit_name as unitName,
         price,
+        other_name as otherName,
         sales,
         work_explain as workExplain,
         worker_dec as workerDec,
@@ -149,6 +155,7 @@
         unit_id as unitId,
         unit_name as unitName,
         price,
+        other_name as otherName,
         sales,
         work_explain as workExplain,
         worker_dec as workerDec,
@@ -180,6 +187,7 @@
         unit_id as unitId,
         unit_name as unitName,
         price,
+        other_name as otherName,
         sales,
         work_explain as workExplain,
         worker_dec as workerDec,

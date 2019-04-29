@@ -35,8 +35,8 @@ public class RewardPunishCondition extends BaseEntity {
 	private String name;
 
     @Column(name = "type")
-    @Desc(value = "奖罚类型1积分;2钱;3限制接单;4冻结账号")
-    @ApiModelProperty("奖罚类型1积分;2钱;3限制接单;4冻结账号")
+    @Desc(value = "奖罚类型1积分;2钱;3限制接单;4冻结账号（去除）")
+    @ApiModelProperty("奖罚类型1积分;2钱;3限制接单;4冻结账号（去除）")
 	private Integer type;
 
     @Column(name = "quantity")

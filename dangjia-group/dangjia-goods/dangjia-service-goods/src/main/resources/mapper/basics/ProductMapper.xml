@@ -207,8 +207,10 @@
         FROM dj_basics_product
         where data_status = 0
         <if test="name!=null and name!=''">
-            and
-            name LIKE CONCAT('%',#{name},'%')
+            and (
+            name LIKE CONCAT('%',#{name},'%') or
+            other_name LIKE CONCAT('%',#{name},'%')
+            )
         </if>
         ORDER BY create_date desc
     </select>
@@ -521,8 +523,11 @@
         and abm.steta=1
         and abm.house_id =#{houseId}
         <if test="name!=null and name!=''">
-            AND
-            abm.product_name LIKE CONCAT('%',#{name},'%')
+            AND (
+                abm.product_name LIKE CONCAT('%',#{name},'%')
+                or
+                p.other_name LIKE CONCAT('%',#{name},'%')
+            )
         </if>
         <if test="categoryId!=null and categoryId!=''">
             AND
@@ -628,7 +633,7 @@
         AND bp.type = 1
         AND bg.data_status = 0
         <if test="name!=null and name!=''">
-            AND CONCAT(bp. NAME, bb. NAME, bbs. NAME) LIKE CONCAT('%', #{name}, '%')
+            AND CONCAT(bg. NAME,bp. NAME, bb. NAME, bbs. NAME) LIKE CONCAT('%', #{name}, '%')
         </if>
         GROUP BY
         bp.goods_id

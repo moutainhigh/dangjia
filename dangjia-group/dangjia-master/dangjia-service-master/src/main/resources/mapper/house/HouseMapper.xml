@@ -47,6 +47,7 @@
         house.residential as residential,
         house.building as building,
         house.unit as unit,
+        house.decoration_type as decorationType,
         house.number as number,
         member.nick_name as nickName,
         member.name as name,
@@ -410,7 +411,7 @@
             dj_repair_mend_order o
             INNER JOIN dj_repair_mend_materiel m ON m.mend_order_id = o.id
             WHERE
-            o.type IN ( 2, 4 )
+            o.type IN ( 2, 4 ) and o.state = 4
             AND o.house_id = #{houseId}
             AND m.product_id = #{productId}
     </select>

@@ -78,7 +78,7 @@ public class ClueService {
             if (!CommonUtil.isEmpty(values)) {
                 criteria.andCondition(" CONCAT(owername,phone,wechat,address) like CONCAT('%','" + values + "','%')");
             }
-            example.orderBy("modifyDate").desc();
+            example.orderBy(Clue.MODIFY_DATE).desc();
             PageHelper.startPage(pageNum, pageSize);
             List<Clue> clues = clueMapper.selectByExample(example);
             PageInfo pageResult = new PageInfo(clues);
@@ -137,6 +137,7 @@ public class ClueService {
 
             ImportExcel clue = new ImportExcel(file, 0, 0);
             List<Clue> clueList = clue.getDataList(Clue.class, 0);
+            int num=0;
             for (Clue c : clueList) {
                 if (Validator.isMobileNo(c.getPhone())) {
                     c.setCusService(userId);
@@ -145,10 +146,15 @@ public class ClueService {
                     //表示从来没有过线索和注册过
                     if (clue1 == null && member == null) {
                         clueMapper.insert(c);
+                        num++;
                     }
                 }
             }
-            return ServerResponse.createBySuccessMessage("更新成功");
+            if(num>0){
+                return ServerResponse.createBySuccessMessage("导入成功");
+            }else {
+                return ServerResponse.createByErrorMessage("导入失败,请检查数据格式");
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("生成失败");

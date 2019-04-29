@@ -93,6 +93,8 @@ public class MemberService {
      */
     @Autowired
     private RedisClient redisClient;
+    @Autowired
+    private MessageAPI messageAPI;
 
     /**
      * 获取用户手机号
@@ -343,6 +345,11 @@ public class MemberService {
             return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
         }
         user.setId(accessToken.getMember().getId());
+        Member member = memberMapper.selectByPrimaryKey(user.getId());
+        if (member.getIsJob()) {
+            //冻结的帐户不能修改资料信息
+            return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
+        }
         user.setCheckType(accessToken.getMember().getCheckType());//提交资料，审核中
         if (!CommonUtil.isEmpty(user.getIdnumber())) {
             String idCard = RKIDCardUtil.getIDCardValidate(user.getIdnumber());
@@ -362,10 +369,7 @@ public class MemberService {
             user.setCreateDate(null);
             memberMapper.updateByPrimaryKeySelective(user);
             user = memberMapper.selectByPrimaryKey(user.getId());
-            if (user.getIsJob()) {
-                //冻结的帐户不能修改资料信息
-                return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
-            }
+
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             accessToken = TokenUtil.generateAccessToken(user);
             accessToken.setUserToken(userToken);
@@ -407,6 +411,10 @@ public class MemberService {
         Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
+        }
+        if (user.getIsJob()) {
+            //冻结的帐户不能修改资料信息
+            return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
         }
         if (user.getRealNameState() == 1) {
             return ServerResponse.createByErrorMessage("您的资料正在审核中，请勿重复提交");
@@ -459,6 +467,10 @@ public class MemberService {
         Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
+        }
+        if (user.getIsJob()) {
+            //冻结的帐户不能修改资料信息
+            return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
         }
         if (user.getCheckType() != 5 && user.getCheckType() != 1) {
             return ServerResponse.createByErrorMessage("您已提交过工种，不能再次提交");
@@ -536,6 +548,10 @@ public class MemberService {
         if (user == null) {
             return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "电话号码未注册！");
         } else {
+            if (user.getIsJob()) {
+                //冻结的帐户不能修改资料信息
+                return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
+            }
             String mytoken = redisClient.getCache(Constants.TEMP_TOKEN + phone, String.class);
             if (!token.equals(mytoken)) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "身份认证错误，身份不匹配！");
@@ -694,6 +710,10 @@ public class MemberService {
                 srcMember.setMobile(member.getMobile());
             if (StringUtils.isNotBlank(member.getRemarks()))
                 srcMember.setRemarks(member.getRemarks());
+            if (srcMember.getIsJob()) {
+                //冻结的帐户不能修改资料信息
+                return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
+            }
             memberMapper.updateByPrimaryKeySelective(srcMember);
             return ServerResponse.createBySuccessMessage("保存成功");
         } catch (Exception e) {
@@ -807,6 +827,10 @@ public class MemberService {
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
+        if (user.getIsJob()) {
+            //冻结的帐户不能修改资料信息
+            return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
+        }
         if (user.getRealNameState() == 0) {
             return ServerResponse.createByErrorMessage("请通知用户提交相关资料");
         }
@@ -839,6 +863,10 @@ public class MemberService {
         Member user = memberMapper.selectByPrimaryKey(workerId);
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
+        }
+        if (user.getIsJob()) {
+            //冻结的帐户不能修改资料信息
+            return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
         }
         if (user.getRealNameState() != 3) {
             return ServerResponse.createByErrorMessage("请先审核'实名认证'");
@@ -890,8 +918,6 @@ public class MemberService {
         }
     }
 
-    @Autowired
-    private MessageAPI messageAPI;
 
     /**
      * 获取用户信息

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.design.IQuantityRoomMapper">
+    <select id="getQuantityRoom" resultType="com.dangjia.acg.dto.design.QuantityRoomDTO">
+        SELECT
+            id,
+            create_date AS createDate,
+            modify_date AS modifyDate,
+            data_status AS dataStatus,
+            house_id AS houseId,
+            member_id AS memberId,
+            user_id AS userId,
+            type,
+            operation_type AS operationType
+        FROM
+            dj_design_quantity_room
+        WHERE
+            house_id = 803071991552462681019
+            AND type = 0
+            AND data_status = 0
+        ORDER BY
+            create_date DESC
+            LIMIT 1;
+    </select>
+</mapper>
+

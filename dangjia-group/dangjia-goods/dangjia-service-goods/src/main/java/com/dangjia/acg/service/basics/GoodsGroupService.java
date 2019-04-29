@@ -179,14 +179,14 @@ public class GoodsGroupService {
      *
      * @return
      */
-    public ServerResponse<PageInfo> getAllList(Integer pageNum, Integer pageSize, String name, Integer state) {
+    public ServerResponse<PageInfo> getAllList(PageDTO pageDTO, String name, Integer state) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
-            PageHelper.startPage(pageNum, pageSize);
             List<GoodsGroup> gList = iGoodsGroupMapper.getAllList(name, state);
-            List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+            List<Map<String, Object>> list = new ArrayList<>();
             for (GoodsGroup goodsGroup : gList) {
-                Map<String, Object> obj = new HashMap<String, Object>();
-                Map<String, Object> map = new HashMap<String, Object>();
+                Map<String, Object> obj = new HashMap<>();
+                Map<String, Object> map = new HashMap<>();
                 map.put("id", goodsGroup.getId());
                 map.put("name", goodsGroup.getName());
                 map.put("state", goodsGroup.getState());

@@ -89,8 +89,8 @@ public class ProductController implements ProductAPI {
 	@Override
 	@ApiMethod
   	public ServerResponse saveGoods(HttpServletRequest request,String name,String categoryId,Integer buy,
-			Integer sales,String unitId,Integer type,String arrString){
-		return goodsService.saveGoods(name, categoryId, buy, sales, unitId, type, arrString);
+			Integer sales,String unitId,Integer type,String arrString,String otherName){
+		return goodsService.saveGoods(name, categoryId, buy, sales, unitId, type, arrString,otherName);
   		
   	}
     
@@ -139,8 +139,8 @@ public class ProductController implements ProductAPI {
 	@Override
 	@ApiMethod
   	public ServerResponse updateGoods(HttpServletRequest request,String id,String name,String categoryId,Integer buy,
-			Integer sales,String unitId,Integer type,String arrString){
-		return goodsService.updateGoods(id,name, categoryId, buy, sales, unitId, type, arrString);
+			Integer sales,String unitId,Integer type,String arrString,String otherName){
+		return goodsService.updateGoods(id,name, categoryId, buy, sales, unitId, type, arrString,otherName);
   		
   	}
 

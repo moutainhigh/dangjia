@@ -16,6 +16,7 @@ import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseMapper;
 import com.dangjia.acg.mapper.repair.*;
@@ -25,6 +26,7 @@ import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -50,6 +52,10 @@ import java.util.List;
  */
 @Service
 public class MendOrderService {
+
+
+    @Autowired
+    private IOrderSplitMapper orderSplitMapper;
     @Autowired
     private IMendOrderMapper mendOrderMapper;
     @Autowired
@@ -179,10 +185,13 @@ public class MendOrderService {
             if (house.getVisitState() == 3 || house.getHaveComplete() == 1){
                 return ServerResponse.createByErrorMessage("该房子已完工");
             }
-
+            ServerResponse serverResponse=mendChecking(houseId,null,4);
+            if(!serverResponse.isSuccess()){
+                return ServerResponse.createByErrorMessage(serverResponse.getResultMsg());
+            }
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 4)//业主退材料
-                    .andLessThan(MendOrder.STATE, 2);//小于2 包括审核中状态
+                    .andEqualTo(MendOrder.STATE, 0);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             MendOrder mendOrder;
             if (mendOrderList.size() > 0) {
@@ -318,23 +327,15 @@ public class MendOrderService {
 //                return ServerResponse.createByErrorMessage("该工种已阶段完工,不能退人工!");
 //            }
 
-            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
-            if (houseFlowApplyList.size() > 0) {
-                return ServerResponse.createByErrorMessage("该工种有未处理完工申请");
+            ServerResponse serverResponse=mendChecking(houseId,workerTypeId,3);
+            if(!serverResponse.isSuccess()){
+                return ServerResponse.createByErrorMessage(serverResponse.getResultMsg());
             }
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 3)
                     .andEqualTo(MendOrder.WORKER_TYPE_ID, workerTypeId)
-                    .andEqualTo(MendOrder.STATE, 1);
-            List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
-            if(mendOrderList.size()>0){
-                return ServerResponse.createByErrorMessage("该工种有未处理完的退人工申请");
-            }
-            example = new Example(MendOrder.class);
-            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 3)
-                    .andEqualTo(MendOrder.WORKER_TYPE_ID, workerTypeId)
                     .andEqualTo(MendOrder.STATE, 0);
-            mendOrderList = mendOrderMapper.selectByExample(example);
+            List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
 
             MendOrder mendOrder;
             if (mendOrderList.size() > 0) {
@@ -509,9 +510,9 @@ public class MendOrderService {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member steward = accessToken.getMember();//管家
 
-            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
-            if (houseFlowApplyList.size() > 0) {
-                return ServerResponse.createByErrorMessage("该工种有未处理完工申请");
+            ServerResponse serverResponse=mendChecking(houseId,workerTypeId,1);
+            if(!serverResponse.isSuccess()){
+                return ServerResponse.createByErrorMessage(serverResponse.getResultMsg());
             }
 
             Example example = new Example(MendOrder.class);
@@ -702,10 +703,14 @@ public class MendOrderService {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = accessToken.getMember();//工匠
 
+            ServerResponse serverResponse=mendChecking(houseId,worker.getWorkerTypeId(),2);
+            if(!serverResponse.isSuccess()){
+                return ServerResponse.createByErrorMessage(serverResponse.getResultMsg());
+            }
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 2)//退材料
                     .andEqualTo(MendOrder.WORKER_TYPE_ID, worker.getWorkerTypeId())
-                    .andLessThan(MendOrder.STATE, 2);//小于2 包括审核中状态
+                    .andEqualTo(MendOrder.STATE, 0);//小于2 包括审核中状态
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             MendOrder mendOrder;
             if (mendOrderList.size() > 0) {
@@ -835,7 +840,7 @@ public class MendOrderService {
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
                     .andEqualTo(MendOrder.WORKER_TYPE_ID, worker.getWorkerTypeId())
-                    .andLessThan(MendOrder.STATE, 2);//处理中
+                    .andEqualTo(MendOrder.STATE, 0);//处理中
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             MendOrder mendOrder;
             if (mendOrderList.size() > 0) {
@@ -933,6 +938,82 @@ public class MendOrderService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public ServerResponse mendChecking(String houseId,String workerTypeId,Integer type){
+
+        if((type == 1 || type == 3)&&!CommonUtil.isEmpty(workerTypeId)){
+            String msg;
+            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
+            if (houseFlowApplyList.size() > 0) {
+                switch (houseFlowApplyList.get(0).getApplyType()) {
+                    case 0:
+                        msg ="每日完工申请";
+                        break;
+                    case 1:
+                        msg ="阶段完工申请";
+                        break;
+                    case 2:
+                        msg ="整体完工申请";
+                        break;
+                    case 3:
+                        msg ="停工申请";
+                        break;
+                    case 4:
+                        msg ="每日开工申请";
+                        break;
+                    default:
+                        msg ="巡查申请";
+                        break;
+                }
+                return ServerResponse.createByErrorMessage("该工种有未处理的"+msg);
+            }
+        }
+        String typeName;
+        switch (type) {
+            case 0:
+                typeName ="补材料";
+                break;
+            case 1:
+                typeName ="补人工";
+                break;
+            case 2:
+                typeName ="退材料";
+                break;
+            case 3:
+                typeName ="退人工";
+                break;
+            case 4:
+                typeName ="业主退材料";
+                break;
+            default:
+                typeName ="要货";
+                break;
+        }
+        Example example = new Example(MendOrder.class);
+        if(CommonUtil.isEmpty(workerTypeId)){
+            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, type)
+                    .andEqualTo(MendOrder.STATE, 1);
+        }else{
+            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, type)
+                    .andEqualTo(MendOrder.WORKER_TYPE_ID, workerTypeId)
+                    .andEqualTo(MendOrder.STATE, 1);
+        }
+
+        List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
+        if(mendOrderList.size()>0){
+            return ServerResponse.createByErrorMessage("该工种有未处理完的"+typeName);
+        }
+        if(!CommonUtil.isEmpty(workerTypeId) && type==0) {
+            example = new Example(OrderSplit.class);
+            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.WORKER_TYPE_ID, workerTypeId)
+                    .andCondition(" apply_status in(1,4) ");
+            List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
+            if (orderSplitList.size() > 0) {
+                return ServerResponse.createByErrorMessage("该工种有未处理完的要货");
+            }
+        }
+        return ServerResponse.createBySuccess("认证成功");
     }
 
 }

@@ -3,6 +3,7 @@ package com.dangjia.acg.service.basics;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -36,17 +37,11 @@ public class BrandSeriesService{
 	@Autowired
 	private ConfigUtil configUtil;
 	//查询所有
-	public ServerResponse<PageInfo> getAllBrandExplain(Integer pageNum, Integer pageSize){
+	public ServerResponse<PageInfo> getAllBrandExplain(PageDTO pageDTO) {
+		PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 		try {
-			if (pageNum == null) {
-				pageNum = 1;
-			}
-			if (pageSize == null) {
-				pageSize = 10;
-			}
 			String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-			PageHelper.startPage(pageNum, pageSize);
-			List<Map<String, Object>> mapList=new ArrayList<Map<String,Object>>();
+			List<Map<String, Object>> mapList=new ArrayList<>();
 			List<BrandSeries> BrandExList = iBrandSeriesMapper.queryBrandSeries(null);
 			for (BrandSeries brandExplain : BrandExList) {
 				Map<String, Object> map=BeanUtils.beanToMap(brandExplain);

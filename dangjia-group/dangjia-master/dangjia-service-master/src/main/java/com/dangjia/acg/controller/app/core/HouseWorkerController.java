@@ -3,9 +3,12 @@ package com.dangjia.acg.controller.app.core;
 import com.dangjia.acg.api.app.core.HouseWorkerAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * author: Ronalcheng
@@ -17,15 +20,18 @@ public class HouseWorkerController implements HouseWorkerAPI {
 
     @Autowired
     private HouseWorkerService houseWorkerService;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     /**
-     *  根据工人id查询所有房子任务
+     * 根据工人id查询所有房子任务
      */
     @Override
     @ApiMethod
-    public ServerResponse queryWorkerHouse(String userToken){
+    public ServerResponse queryWorkerHouse(String userToken) {
         return houseWorkerService.queryWorkerHouse(userToken);
     }
+
     /**
      * 抢单
      */
@@ -49,8 +55,8 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getConstructionByWorkerId(String userToken, String cityId) {
-        return houseWorkerService.getConstructionByWorkerId(userToken, cityId);
+    public ServerResponse getConstructionByWorkerId(HttpServletRequest request, String userToken, String cityId) {
+        return constructionService.getConstructionView(request, userToken);
     }
 
     /**
@@ -61,15 +67,17 @@ public class HouseWorkerController implements HouseWorkerAPI {
     public ServerResponse getMyHomePage(String userToken, String cityId) {
         return houseWorkerService.getMyHomePage(userToken, cityId);
     }
+
     /**
      * 获取申请单明细
      */
 
     @Override
     @ApiMethod
-    public ServerResponse getHouseFlowApply(String userToken, String houseFlowApplyId){
+    public ServerResponse getHouseFlowApply(String userToken, String houseFlowApplyId) {
         return houseWorkerService.getHouseFlowApply(houseFlowApplyId);
     }
+
     /**
      * 提交审核、停工
      *

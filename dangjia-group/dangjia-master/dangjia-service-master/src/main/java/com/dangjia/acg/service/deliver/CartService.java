@@ -191,12 +191,12 @@ public class CartService {
                     warehouseDTO.setImage(address + warehouse.getImage());
                     warehouseDTO.setShopCount(warehouse.getShopCount());
                     warehouseDTO.setAskCount(warehouse.getAskCount());
-                    warehouseDTO.setBackCount(warehouse.getBackCount());
+                    warehouseDTO.setBackCount((warehouse.getWorkBack()==null?0D:warehouse.getWorkBack()));
                     warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
-                    warehouseDTO.setSurCount(warehouse.getShopCount() - warehouse.getBackCount() - warehouse.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
+                    warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack())- warehouse.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
                     warehouseDTO.setPrice(warehouse.getPrice());
                     warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
-                    warehouseDTO.setReceive(warehouse.getReceive());
+                    warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack()==null?0D:warehouse.getWorkBack()));
                     warehouseDTO.setAskTime(warehouse.getAskTime());
                     warehouseDTO.setRepTime(warehouse.getRepTime());
                     warehouseDTO.setBackTime(warehouse.getBackTime());
