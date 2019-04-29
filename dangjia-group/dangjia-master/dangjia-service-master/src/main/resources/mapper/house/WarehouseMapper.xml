@@ -12,6 +12,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		stay_count as stayCount,
 		rob_count as robCount,
 		ask_count as askCount,
+		work_back as workBack,
+		owner_back as ownerBack,
 		receive,
 		back_count as backCount,
 		product_id as productId,
