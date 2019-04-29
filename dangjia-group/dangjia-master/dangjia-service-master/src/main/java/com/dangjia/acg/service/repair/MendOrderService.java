@@ -710,7 +710,7 @@ public class MendOrderService {
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 2)//退材料
                     .andEqualTo(MendOrder.WORKER_TYPE_ID, worker.getWorkerTypeId())
-                    .andLessThan(MendOrder.STATE, 0);//小于2 包括审核中状态
+                    .andEqualTo(MendOrder.STATE, 0);//小于2 包括审核中状态
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             MendOrder mendOrder;
             if (mendOrderList.size() > 0) {
