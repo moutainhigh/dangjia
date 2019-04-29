@@ -233,6 +233,7 @@ public class SplitDeliverService {
             }else {
                 example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId).andEqualTo(SplitDeliver.SHIPPING_STATE,shipState);
             }
+            example.orderBy(SplitDeliver.CREATE_DATE).desc();
             List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
             List<SplitDeliverDTO> splitDeliverDTOList = new ArrayList<>();
             for (SplitDeliver splitDeliver : splitDeliverList){

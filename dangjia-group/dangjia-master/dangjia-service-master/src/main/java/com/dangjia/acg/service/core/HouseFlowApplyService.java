@@ -231,7 +231,7 @@ public class HouseFlowApplyService {
 
                 // 查询是否有阶段完工或整体完工的记录，存在则不开放下一工种
                 Example example=new Example(HouseFlow.class);
-                example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,hf.getHouseId()).andCondition(" work_steta  in (0,1,2) and worker_type >3 ");
+                example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,hf.getHouseId()).andCondition(" work_steta NOT IN (0,1,2) and worker_type >3 ");
                 example.orderBy(HouseFlow.SORT).asc();
                 int num=houseFlowMapper.selectCountByExample(example);
                 if(num==0) {

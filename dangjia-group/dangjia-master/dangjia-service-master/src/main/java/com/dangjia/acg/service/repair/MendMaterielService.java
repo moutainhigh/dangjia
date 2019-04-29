@@ -126,17 +126,14 @@ public class MendMaterielService {
             if(warehouse==null){
                 map.put(Warehouse.RECEIVE, "0");
             }else {
-                Double receive = warehouse.getReceive() == null ? 0d : warehouse.getReceive();
-                Double askCount = warehouse.getAskCount() == null ? 0d : warehouse.getAskCount();
-                Double workBack = warehouse.getWorkBack() == null ? 0d : warehouse.getWorkBack();
                 //工匠退材料新增已收货数量字段
                 if (mendOrder.getType() == 2) {
-                    map.put(Warehouse.RECEIVE, receive);
+                    map.put(Warehouse.RECEIVE, warehouse.getReceive() == null ? 0d : warehouse.getReceive());
                 }
                 //业主退材料增加未发货数量
                 if (mendOrder.getType() == 4) {
                     //未发货数量=已要 - 已收
-                    map.put(Warehouse.RECEIVE, askCount - receive - workBack);
+                    map.put(Warehouse.RECEIVE, warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack()) - warehouse.getAskCount());
                 }
             }
             mendMaterielMaps.add(map);
