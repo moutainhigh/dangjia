@@ -1,7 +1,6 @@
 package com.dangjia.acg.mapper.core;
 
 import com.dangjia.acg.modle.core.HouseFlow;
-import com.dangjia.acg.modle.member.Member;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -40,7 +39,7 @@ public interface IHouseFlowMapper extends Mapper<HouseFlow> {
     /**
      * 查下个未开工的工种
      */
-    List<HouseFlow> getNextHouseFlow(@Param("sort") int sort, @Param("houseId") String houseId);
+    HouseFlow getNextHouseFlow(@Param("houseId") String houseId);
 
     List<HouseFlow> getWorkerFlow(@Param("houseId") String houseId);
 }

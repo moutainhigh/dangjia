@@ -128,6 +128,22 @@ public class CraftsmanConstructionService {
         List<ConstructionByWorkerIdBean.ButtonListBean> buttonList = new ArrayList<>();
         if (house.getDecorationType() != 2 && house.getDesignerOk() == 1) {
             buttonList.add(getButton("去量房", 2));
+        }else{
+            switch (house.getDesignerOk()) {
+                case 1://1已支付-设计师待量房
+                case 9://9量房图发给业主
+                    buttonList.add(getButton("上传平面图", 3));
+                    break;
+                case 6://6平面图审核不通过（NG，可编辑平面图）
+                    buttonList.add(getButton("修改平面图", 3));
+                    break;
+                case 7://7通过平面图待发施工图（OK，可编辑施工图）
+                    buttonList.add(getButton("上传施工图", 4));
+                    break;
+                case 8://8施工图片审核不通过（NG，可编辑施工图）
+                    buttonList.add(getButton("修改施工图", 4));
+                    break;
+            }
         }
         bean.setButtonList(buttonList);
         return ServerResponse.createBySuccess("获取施工列表成功！", bean);
@@ -464,10 +480,13 @@ public class CraftsmanConstructionService {
                     List<HouseFlowApply> flowAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId(), new Date());//查询是否已提交今日完工
                     if (allAppList.size() > 0) {
                         promptList.add("今日已申请整体完工");
+                        bean.setIfBackOut(2);
                     } else if (stageAppList.size() > 0) {
                         promptList.add("今日已申请阶段完工");
+                        bean.setIfBackOut(2);
                     } else if (flowAppList != null && flowAppList.size() > 0) {//已提交今日完工
                         promptList.add("今日已完工");
+                        bean.setIfBackOut(2);
                     } else {
                         buttonList.add(getButton("今日完工", 3));
                         List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(2);//事项类型  1 开工事项 2 完工事项
@@ -478,12 +497,11 @@ public class CraftsmanConstructionService {
                         }
                         bean.setFootMessageTitle("今日完工任务");//每日开工事项
                         bean.setFootMessageDescribe("");//每日开工事项
-                    }
-
-                    if (hf.getWorkSteta() == 1) {
-                        setDisplayState(hf, promptList, buttonList, checkFlowApp, true);
-                    } else {
-                        setDisplayState(hf, promptList, buttonList, checkFlowApp, false);
+                        if (hf.getWorkSteta() == 1) {
+                            setDisplayState(hf, promptList, buttonList, checkFlowApp, true);
+                        } else {
+                            setDisplayState(hf, promptList, buttonList, checkFlowApp, false);
+                        }
                     }
                 }
                 bean.setWorkerEverydayList(workerEverydayList);//每日完工事项

@@ -128,6 +128,7 @@ public class MendMaterielService {
             }else {
                 Double receive = warehouse.getReceive() == null ? 0d : warehouse.getReceive();
                 Double askCount = warehouse.getAskCount() == null ? 0d : warehouse.getAskCount();
+                Double workBack = warehouse.getWorkBack() == null ? 0d : warehouse.getWorkBack();
                 //工匠退材料新增已收货数量字段
                 if (mendOrder.getType() == 2) {
                     map.put(Warehouse.RECEIVE, receive);
@@ -135,7 +136,7 @@ public class MendMaterielService {
                 //业主退材料增加未发货数量
                 if (mendOrder.getType() == 4) {
                     //未发货数量=已要 - 已收
-                    map.put(Warehouse.RECEIVE, askCount - receive);
+                    map.put(Warehouse.RECEIVE, askCount - receive - workBack);
                 }
             }
             mendMaterielMaps.add(map);

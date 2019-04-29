@@ -157,9 +157,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select
         <include refid="new_columns" />
         from dj_core_house_flow
-        where sort &gt; #{sort}
-        and house_id=#{houseId}
-        and state= 0 order by sort asc
+        where  house_id=#{houseId}
+        AND work_type = 1
+        ORDER BY sort ASC
+        LIMIT 1
     </select>
 
 

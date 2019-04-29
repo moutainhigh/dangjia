@@ -198,15 +198,12 @@ public class HouseFlowApplyService {
                     int num=houseFlowMapper.selectCountByExample(example);
                     if(num==0) {
                         //查下工种
-                        List<HouseFlow> houseFlowList = houseFlowMapper.getNextHouseFlow(houseFlow.getSort(), houseFlow.getHouseId());
-                        if (houseFlowList.size() > 0) {//有下一个工种
-                            HouseFlow nextHouseFlow = houseFlowList.get(0);
-                            if (nextHouseFlow.getWorkType() == 1) {//下个工种还没有开工，让它变成被抢壮态
-                                nextHouseFlow.setWorkType(2);
-                                nextHouseFlow.setReleaseTime(new Date());//发布时间
-                                houseFlowMapper.updateByPrimaryKeySelective(nextHouseFlow);
+                        HouseFlow nextHouseFlow = houseFlowMapper.getNextHouseFlow(houseFlow.getHouseId());
+                        if (nextHouseFlow!=null) {//下个工种还没有开工，让它变成被抢壮态
+                            nextHouseFlow.setWorkType(2);
+                            nextHouseFlow.setReleaseTime(new Date());//发布时间
+                            houseFlowMapper.updateByPrimaryKeySelective(nextHouseFlow);
 
-                            }
                         }
                     }
                 }
@@ -239,13 +236,11 @@ public class HouseFlowApplyService {
                 int num=houseFlowMapper.selectCountByExample(example);
                 if(num==0) {
                     //查下工种
-                    List<HouseFlow> houseFlowList = houseFlowMapper.getNextHouseFlow(hf.getSort(), hf.getHouseId());
-                    if (houseFlowList.size() > 0 ) {
-                        if (houseFlowList.get(0).getWorkType() == 1) {//下个工种还没有开工，让它变成被抢壮态
-                            houseFlowList.get(0).setWorkType(2);
-                            houseFlowList.get(0).setReleaseTime(new Date());//发布时间
-                            houseFlowMapper.updateByPrimaryKeySelective(houseFlowList.get(0));
-                        }
+                    HouseFlow houseFlowList = houseFlowMapper.getNextHouseFlow(hf.getHouseId());
+                    if (houseFlowList!=null) {
+                        houseFlowList.setWorkType(2);
+                        houseFlowList.setReleaseTime(new Date());//发布时间
+                        houseFlowMapper.updateByPrimaryKeySelective(houseFlowList);
                     }
                 }
             }else if(hfa.getApplyType() == 0){ //每日完工,处理钱

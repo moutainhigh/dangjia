@@ -285,7 +285,7 @@ public class HouseDesignImageService {
         quantityRoomMapper.insert(quantityRoom);
         String[] image = images.split(",");
         for (String s : image) {
-            if (CommonUtil.isEmpty(s.trim())) {
+            if (!CommonUtil.isEmpty(s.trim())) {
                 QuantityRoomImages quantityRoomImages = new QuantityRoomImages();
                 quantityRoomImages.setHouseId(houseId);
                 quantityRoomImages.setQuantityRoomId(quantityRoom.getId());
@@ -320,7 +320,7 @@ public class HouseDesignImageService {
                 .andEqualTo(QuantityRoomImages.DATA_STATUS, 0);
         example.orderBy(QuantityRoomImages.CREATE_DATE).desc();
         List<QuantityRoomImages> quantityRoomImages = quantityRoomImagesMapper.selectByExample(example);
-        if (quantityRoomImages.size() <= 0) {
+        if (quantityRoomImages == null || quantityRoomImages.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无量房图片");
         }
         String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
