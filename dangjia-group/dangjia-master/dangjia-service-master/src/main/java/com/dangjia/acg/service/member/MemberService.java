@@ -93,6 +93,8 @@ public class MemberService {
      */
     @Autowired
     private RedisClient redisClient;
+    @Autowired
+    private MessageAPI messageAPI;
 
     /**
      * 获取用户手机号
@@ -916,8 +918,6 @@ public class MemberService {
         }
     }
 
-    @Autowired
-    private MessageAPI messageAPI;
 
     /**
      * 获取用户信息
