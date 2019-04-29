@@ -327,7 +327,7 @@ public class HouseDesignImageService {
         for (QuantityRoomImages quantityRoomImage : quantityRoomImages) {
             quantityRoomImage.initPath(imageAddress);
         }
-        quantityRoomDTO.setIamges(quantityRoomImages);
+        quantityRoomDTO.setImages(quantityRoomImages);
         return ServerResponse.createBySuccess("获取成功", quantityRoomDTO);
     }
 }

@@ -3,6 +3,7 @@ package com.dangjia.acg.service.core;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.basics.WorkerGoodsAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
@@ -88,8 +89,6 @@ public class HouseWorkerService {
     @Autowired
     private HouseFlowService houseFlowService;
     @Autowired
-    private IChangeOrderMapper changeOrderMapper;
-    @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired
     private ConfigMessageService configMessageService;
@@ -97,6 +96,8 @@ public class HouseWorkerService {
     private HouseFlowApplyService houseFlowApplyService;
     @Autowired
     private IMenuConfigurationMapper iMenuConfigurationMapper;
+    @Autowired
+    private MessageAPI messageAPI;
     @Value("${spring.profiles.active}")
     private String active;
 
@@ -195,14 +196,11 @@ public class HouseWorkerService {
             if (worker.getWorkerType() > 3) {//其他工匠
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠抢单提醒",
                         String.format(DjConstants.PushMessage.CRAFTSMAN_RUSH_TO_PURCHASE, house.getHouseName()), "4");
-
                 //通知大管家已有工匠抢单
                 //通知大管家抢单
                 HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
                 configMessageService.addConfigMessage(null, "gj", houseFlowDgj.getWorkerId(), "0", "工匠抢单提醒",
                         String.format(DjConstants.PushMessage.STEWARD_TWO_RUSH_TO_PURCHASE, house.getHouseName()), "4");
-
-
             }
             Example example = new Example(WorkerType.class);
             example.createCriteria().andEqualTo(WorkerType.TYPE, worker.getWorkerType());
@@ -212,7 +210,7 @@ public class HouseWorkerService {
 //            String memberId = houseMapper.selectByPrimaryKey(houseId).getMemberId();
             HouseChatDTO h = new HouseChatDTO();
             h.setTargetId(house.getMemberId());
-            h.setTargetAppKey("0989b0db447914c7bcb17a46");
+            h.setTargetAppKey(messageAPI.getAppKey("zx"));
             h.setText(text);
             return ServerResponse.createBySuccess("抢单成功", h);
         } catch (Exception e) {

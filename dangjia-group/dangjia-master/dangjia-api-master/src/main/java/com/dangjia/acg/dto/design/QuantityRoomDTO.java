@@ -15,5 +15,5 @@ import java.util.List;
  */
 @Data
 public class QuantityRoomDTO extends QuantityRoom {
-    private List<QuantityRoomImages> iamges;
+    private List<QuantityRoomImages> images;
 }
