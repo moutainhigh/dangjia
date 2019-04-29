@@ -199,7 +199,7 @@ public class HouseFlowApplyService {
                     if(num==0) {
                         //查下工种
                         HouseFlow nextHouseFlow = houseFlowMapper.getNextHouseFlow(houseFlow.getHouseId());
-                        if (nextHouseFlow!=null&&nextHouseFlow.getWorkType() == 1) {//下个工种还没有开工，让它变成被抢壮态
+                        if (nextHouseFlow!=null) {//下个工种还没有开工，让它变成被抢壮态
                             nextHouseFlow.setWorkType(2);
                             nextHouseFlow.setReleaseTime(new Date());//发布时间
                             houseFlowMapper.updateByPrimaryKeySelective(nextHouseFlow);
@@ -238,11 +238,9 @@ public class HouseFlowApplyService {
                     //查下工种
                     HouseFlow houseFlowList = houseFlowMapper.getNextHouseFlow(hf.getHouseId());
                     if (houseFlowList!=null) {
-                        if (houseFlowList.getWorkType() == 1) {//下个工种还没有开工，让它变成被抢壮态
-                            houseFlowList.setWorkType(2);
-                            houseFlowList.setReleaseTime(new Date());//发布时间
-                            houseFlowMapper.updateByPrimaryKeySelective(houseFlowList);
-                        }
+                        houseFlowList.setWorkType(2);
+                        houseFlowList.setReleaseTime(new Date());//发布时间
+                        houseFlowMapper.updateByPrimaryKeySelective(houseFlowList);
                     }
                 }
             }else if(hfa.getApplyType() == 0){ //每日完工,处理钱

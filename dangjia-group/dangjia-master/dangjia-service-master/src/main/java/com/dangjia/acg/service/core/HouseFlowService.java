@@ -37,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -83,6 +84,8 @@ public class HouseFlowService {
     private IRewardPunishConditionMapper rewardPunishConditionMapper;
     @Autowired
     private IHouseStyleTypeMapper houseStyleTypeMapper;
+    @Value("${spring.profiles.active}")
+    private String active;
 
     private static Logger LOG = LoggerFactory.getLogger(HouseFlowService.class);
 
@@ -151,7 +154,7 @@ public class HouseFlowService {
             /*待抢单*/
             Example example = new Example(HouseFlow.class);
             example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 2).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
-                    .andEqualTo(HouseFlow.CITY_ID, cityId).andNotEqualTo(HouseFlow.STATE,2);
+                    .andEqualTo(HouseFlow.CITY_ID, cityId).andNotEqualTo(HouseFlow.STATE, 2);
             List<HouseFlow> hfList = houseFlowMapper.selectByExample(example);
 
             example = new Example(HouseWorker.class);
@@ -192,23 +195,23 @@ public class HouseFlowService {
                         }
                     }
                     Member mem = memberMapper.selectByPrimaryKey(house.getMemberId());
-                    if(mem==null){continue;}
+                    if (mem == null) {
+                        continue;
+                    }
                     allgrabBean.setWorkerTypeId(workerTypeId);
                     allgrabBean.setHouseFlowId(houseFlow.getId());
                     allgrabBean.setHouseName(house.getHouseName());
                     allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
                     allgrabBean.setHouseMember("业主 " + mem.getNickName() == null ? mem.getName() : mem.getNickName());//业主名称
-                    allgrabBean.setWorkertotal("¥0" );//工钱
+                    allgrabBean.setWorkertotal("¥0");//工钱
                     double totalPrice = 0;
-                    if (houseFlow.getWorkerType() == 1&&!CommonUtil.isEmpty(house.getStyle())) {//设计师
+                    if (houseFlow.getWorkerType() == 1 && !CommonUtil.isEmpty(house.getStyle())) {//设计师
                         HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
                         BigDecimal workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", workPrice.doubleValue()));//工钱
-                    }
-                    else if (houseFlow.getWorkerType()==2){
-                        allgrabBean.setWorkertotal("¥" + String.format("%.2f",houseFlow.getWorkPrice().doubleValue()));
-                    }
-                    else {
+                    } else if (houseFlow.getWorkerType() == 2) {
+                        allgrabBean.setWorkertotal("¥" + String.format("%.2f", houseFlow.getWorkPrice().doubleValue()));
+                    } else {
                         ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(request, houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
                         if (serverResponse.isSuccess()) {
                             if (serverResponse.getResultObj() != null) {
@@ -374,15 +377,17 @@ public class HouseFlowService {
                     }
                 }
             }
-           //抢单时间限制
-            example = new Example(HouseFlowCountDownTime.class);
-            example.createCriteria().andEqualTo(HouseFlowCountDownTime.WORKER_ID, member.getId()).andEqualTo(HouseFlowCountDownTime.HOUSE_FLOW_ID, hf.getId());
-            List<HouseFlowCountDownTime> houseFlowDownTimeList = houseFlowCountDownTimeMapper.selectByExample(example);
-            if (houseFlowDownTimeList.size() > 0) {
-                HouseFlowCountDownTime houseFlowCountDownTime = houseFlowDownTimeList.get(0);
-                long countDownTime = houseFlowCountDownTime.getCountDownTime().getTime() - new Date().getTime();//获取倒计时
-                if (countDownTime > 0) {//未到时间不能抢单
-                    return ServerResponse.createByErrorMessage("您还在排队时间内，请稍后抢单！");
+            //抢单时间限制
+            if (active != null && active.equals("pre")) {
+                example = new Example(HouseFlowCountDownTime.class);
+                example.createCriteria().andEqualTo(HouseFlowCountDownTime.WORKER_ID, member.getId()).andEqualTo(HouseFlowCountDownTime.HOUSE_FLOW_ID, hf.getId());
+                List<HouseFlowCountDownTime> houseFlowDownTimeList = houseFlowCountDownTimeMapper.selectByExample(example);
+                if (houseFlowDownTimeList.size() > 0) {
+                    HouseFlowCountDownTime houseFlowCountDownTime = houseFlowDownTimeList.get(0);
+                    long countDownTime = houseFlowCountDownTime.getCountDownTime().getTime() - new Date().getTime();//获取倒计时
+                    if (countDownTime > 0) {//未到时间不能抢单
+                        return ServerResponse.createByErrorMessage("您还在排队时间内，请稍后抢单！");
+                    }
                 }
             }
             if (member.getWorkerType() > 3) {//其他工人
@@ -586,7 +591,7 @@ public class HouseFlowService {
             houseFlow.setSupervisorStart(1);//大管家进度改为已开工
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
             HouseFlow nextHF = houseFlowMapper.getNextHouseFlow(houseFlow.getHouseId());//根据当前工序查下一工序
-            if (nextHF!=null) {
+            if (nextHF != null) {
                 nextHF.setWorkType(2);//把下一个工种弄成待抢单
                 nextHF.setReleaseTime(new Date());//发布时间
                 houseFlowMapper.updateByPrimaryKeySelective(nextHF);
