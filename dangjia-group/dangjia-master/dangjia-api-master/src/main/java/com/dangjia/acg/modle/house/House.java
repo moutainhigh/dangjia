@@ -380,7 +380,7 @@ public class House extends BaseEntity {
             }
         } else {
             dataMap.put("total", 6);
-            nameBs = new String[]{"开始自带设计", "业主支付", "量房阶段", "平面图阶段", "施工图阶段", "完成"};
+            nameBs = new String[]{"开始远程设计", "业主支付", "量房阶段", "平面图阶段", "施工图阶段", "完成"};
             switch (getDesignerOk()) {
                 case 0://0未确定设计师
                     dataMap.put("rank", 1);

@@ -428,6 +428,7 @@ public class CraftsmanConstructionService {
         }
         if (hf.getWorkSteta() == 2) {
             promptList.add("您已整体完工");
+            bean.setIfBackOut(2);
             if (getApiVersion(request)) {
                 String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                         "takeMoneyDetailed" +
@@ -523,6 +524,9 @@ public class CraftsmanConstructionService {
             }
             if (hf.getWorkType() != 4) {//未支付屏蔽未支付禁止显示的
                 criteria.andEqualTo(MenuConfiguration.SHOW_PAYMENT, 1);
+            }
+            if (house.getDecorationType() == 2) {//如果是自带设计不查询量房
+                criteria.andNotEqualTo(MenuConfiguration.TYPE, 2);
             }
             menuCondition(bean, criteria);
             example.orderBy(MenuConfiguration.SORT).asc();
