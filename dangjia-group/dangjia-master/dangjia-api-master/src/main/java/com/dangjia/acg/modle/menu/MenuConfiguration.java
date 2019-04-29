@@ -96,6 +96,19 @@ public class MenuConfiguration extends BaseEntity {
     @ApiModelProperty("优先顺序")
     private Integer sort;
 
+    public MenuConfiguration() {
+        this.type = 0;
+        this.menuType = 0;
+        this.showDesigner = 0;
+        this.showActuaries = 0;
+        this.showHousekeeper = 0;
+        this.showCraftsman = 0;
+        this.showType = 0;
+        this.showProprietor = 0;
+        this.showPayment = 0;
+        this.sort = 99;
+    }
+
     //所有图片字段加入域名和端口，形成全路径
     public void initPath(String imageAddress, String webAddress) {
         initPath(imageAddress, webAddress, null, null, null);
