@@ -191,7 +191,7 @@ public class MendOrderService {
             }
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 4)//业主退材料
-                    .andLessThan(MendOrder.STATE, 0);
+                    .andEqualTo(MendOrder.STATE, 0);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             MendOrder mendOrder;
             if (mendOrderList.size() > 0) {
