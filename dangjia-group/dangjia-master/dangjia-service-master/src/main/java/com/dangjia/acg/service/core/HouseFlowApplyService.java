@@ -193,7 +193,7 @@ public class HouseFlowApplyService {
                 if(hfa.getWorkerType() == 4){//是拆除的整体完工通知下个工种开工
                     // 查询是否有阶段完工或整体完工的记录，存在则不开放下一工种
                     Example example=new Example(HouseFlow.class);
-                    example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,houseFlow.getHouseId()).andCondition(" sort < "+houseFlow.getSort()+" and work_steta not in (1,2) and worker_type >3 ");
+                    example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,houseFlow.getHouseId()).andCondition(" work_steta not in (0,1,2) and worker_type >3 ");
                     example.orderBy(HouseFlow.SORT).asc();
                     int num=houseFlowMapper.selectCountByExample(example);
                     if(num==0) {
@@ -234,7 +234,7 @@ public class HouseFlowApplyService {
 
                 // 查询是否有阶段完工或整体完工的记录，存在则不开放下一工种
                 Example example=new Example(HouseFlow.class);
-                example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,hf.getHouseId()).andCondition(" sort < "+hf.getSort()+" and work_steta  in (1,2) and worker_type >3 ");
+                example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,hf.getHouseId()).andCondition(" work_steta  in (0,1,2) and worker_type >3 ");
                 example.orderBy(HouseFlow.SORT).asc();
                 int num=houseFlowMapper.selectCountByExample(example);
                 if(num==0) {

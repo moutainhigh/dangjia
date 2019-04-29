@@ -191,7 +191,7 @@ public class MendOrderService {
             }
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 4)//业主退材料
-                    .andLessThan(MendOrder.STATE, 0);
+                    .andEqualTo(MendOrder.STATE, 0);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             MendOrder mendOrder;
             if (mendOrderList.size() > 0) {
@@ -710,7 +710,7 @@ public class MendOrderService {
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 2)//退材料
                     .andEqualTo(MendOrder.WORKER_TYPE_ID, worker.getWorkerTypeId())
-                    .andLessThan(MendOrder.STATE, 0);//小于2 包括审核中状态
+                    .andEqualTo(MendOrder.STATE, 0);//小于2 包括审核中状态
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             MendOrder mendOrder;
             if (mendOrderList.size() > 0) {
@@ -1004,7 +1004,7 @@ public class MendOrderService {
         if(mendOrderList.size()>0){
             return ServerResponse.createByErrorMessage("该工种有未处理完的"+typeName);
         }
-        if(!CommonUtil.isEmpty(workerTypeId)) {
+        if(!CommonUtil.isEmpty(workerTypeId) && type==0) {
             example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.WORKER_TYPE_ID, workerTypeId)
                     .andCondition(" apply_status in(1,4) ");
