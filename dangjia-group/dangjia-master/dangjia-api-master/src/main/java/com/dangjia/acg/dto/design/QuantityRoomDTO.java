@@ -15,5 +15,7 @@ import java.util.List;
  */
 @Data
 public class QuantityRoomDTO extends QuantityRoom {
+    private int userType;//操作人类型：-1为未知，0为App，1为中台
+    private String userName;//操作人名称
     private List<QuantityRoomImages> images;
 }
