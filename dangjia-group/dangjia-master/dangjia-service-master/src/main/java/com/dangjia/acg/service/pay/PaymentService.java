@@ -1160,7 +1160,7 @@ public class PaymentService {
 //                  String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
 //                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=5";
 //                    actuaryDTO.setUrl(url);
-                    if(accessToken!=null&&accessToken.getMember()!=null&&accessToken.getMember().getWorkerType()!=null&&accessToken.getMember().getWorkerType()==3){
+                    if(workerType.getType()==3){
                         actuaryDTO.setName("补服务花费");
                         actuaryDTO.setButton("补服务明细");
                     }
@@ -1567,7 +1567,7 @@ public class PaymentService {
                             String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                             + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getId() + "&type=5" ;
 
-                    if(accessToken!=null&&accessToken.getMember()!=null&&accessToken.getMember().getWorkerType()!=null&&accessToken.getMember().getWorkerType()==3){
+                    if(workerType.getType()==3){
                         actuaryDTO.setName("补服务花费");
                         actuaryDTO.setButton("补服务明细");
                     }
