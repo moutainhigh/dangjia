@@ -230,6 +230,8 @@ public class SplitDeliverService {
             Example example = new Example(SplitDeliver.class);
             if (shipState == 5){
                 example.createCriteria().andEqualTo(SplitDeliver.ORDER_SPLIT_ID, houseId);//中台用
+            }else if (shipState == 2){
+                example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId).andCondition("shipping_state in(2,4)");
             }else {
                 example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId).andEqualTo(SplitDeliver.SHIPPING_STATE,shipState);
             }

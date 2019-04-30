@@ -1154,11 +1154,16 @@ public class PaymentService {
                 } else if (mendOrder.getType() == 0) {
                     actuaryDTO.setImage(imageAddress + "icon/bucailiao.png");
                     actuaryDTO.setKind(workerType.getName());
-                    actuaryDTO.setName("补材料花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
-//                    actuaryDTO.setButton("补材料明细"); String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
+                    actuaryDTO.setName("补材料花费");
+                    actuaryDTO.setButton("补材料明细");
+//                  String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
 //                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=5";
 //                    actuaryDTO.setUrl(url);
+                    if(accessToken!=null&&accessToken.getMember()!=null&&accessToken.getMember().getWorkerType()!=null&&accessToken.getMember().getWorkerType()==3){
+                        actuaryDTO.setName("补服务花费");
+                        actuaryDTO.setButton("补服务明细");
+                    }
                     actuaryDTO.setType(5);
                 }
 
@@ -1331,6 +1336,7 @@ public class PaymentService {
      */
     public ServerResponse getPaymentPage(String userToken, String houseId, String taskId, int type) {
         try {
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             House house = houseMapper.selectByPrimaryKey(houseId);
             PaymentDTO paymentDTO = new PaymentDTO();
@@ -1560,6 +1566,11 @@ public class PaymentService {
                     String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                             String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                             + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getId() + "&type=5" ;
+
+                    if(accessToken!=null&&accessToken.getMember()!=null&&accessToken.getMember().getWorkerType()!=null&&accessToken.getMember().getWorkerType()==3){
+                        actuaryDTO.setName("补服务花费");
+                        actuaryDTO.setButton("补服务明细");
+                    }
                     actuaryDTO.setUrl(url);
                     actuaryDTO.setType(5);
                 }
