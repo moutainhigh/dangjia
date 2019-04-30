@@ -12,10 +12,12 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.WorkIntegralDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
+import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
@@ -27,6 +29,7 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -49,6 +52,7 @@ import tk.mybatis.mapper.entity.Example;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -92,6 +96,8 @@ public class EvaluateService {
     @Autowired
     private HouseWorkerSupService houseWorkerSupService;
 
+    @Autowired
+    private IWorkerTypeMapper workerTypeMapper;
 
     @Autowired
     private IWorkerDetailMapper iWorkerDetailMapper;
@@ -201,6 +207,44 @@ public class EvaluateService {
         }
     }
 
+//    管家审核通过工匠完工申请，工匠扣钱
+    public void supervisorOvertime(HouseFlowApply houseFlowApply){
+        //每超时一天扣除一次余额，每扣除一次  结束时间将延后一天，继续等待管家审核
+        if(houseFlowApply.getStartDate().getTime()<=new Date().getTime()){
+
+            House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+            Member member = memberMapper.getSupervisor(houseFlowApply.getHouseId());//houseId获得大管家
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
+            BigDecimal money=new BigDecimal(100);
+            BigDecimal surplusMoney = member.getSurplusMoney().subtract(money);
+            BigDecimal haveMoney = member.getHaveMoney().subtract(money);
+            WorkerDetail workerDetail = new WorkerDetail();
+            workerDetail.setName("阶段/整体完工申请，审核超时，工钱扣除");
+            workerDetail.setWorkerId(member.getId());
+            workerDetail.setWorkerName(member.getName());
+            workerDetail.setHouseId(houseFlowApply.getHouseId());
+            workerDetail.setMoney(money);
+            workerDetail.setWalletMoney(surplusMoney);
+            workerDetail.setHaveMoney(haveMoney);
+            workerDetail.setState(3);
+            iWorkerDetailMapper.insert(workerDetail);
+
+
+            member.setSurplusMoney(surplusMoney);
+            member.setHaveMoney(haveMoney);
+            memberMapper.updateByPrimaryKeySelective(member);
+
+            //当前时间延后一天等待审核
+            houseFlowApply.setStartDate(DateUtil.addDateDays(new Date(),1));
+            houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
+
+
+            configMessageService.addConfigMessage(null,"gj",member.getId(),"0","阶段/整体审核超时扣钱提醒",String.format(DjConstants.PushMessage.STEWARD_SHENGHECHAOSHI,house.getHouseName(),workerType.getName()) ,"6");
+
+        }
+
+
+    }
     /**
      * 管家审核通过工匠完工申请
      * 1.31 增加 剩余材料登记
