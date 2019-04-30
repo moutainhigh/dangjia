@@ -223,6 +223,12 @@ public class DesignService {
      * @param designerOk 设计状态:
      *                   默认0未确定设计师,4有设计抢单待支付,1已支付设计师待发平面图,5平面图发给业主,6平面图审核不通过,
      *                   7通过平面图待发施工图,2已发给业主施工图,8施工图片审核不通过,3施工图(全部图)审核通过
+     *
+     * 。。。。。。。。。。。。。。。。。⦧--6。。⦧--8
+     * 远程设计流程：0---4---1---9---5---7---2---3
+     *
+     * 。。。。。。。。。。。。⦧--6。。⦧--8
+     * 自带设计流程：0---1---5---7---2---3
      */
     public ServerResponse getDesignList(PageDTO pageDTO, int designerOk, String mobile, String residential, String number) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
