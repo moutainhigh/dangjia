@@ -206,6 +206,8 @@ public class DjConstants {
         public final static String CRAFTSMAN_TWO_REPLACE = "工匠您好！经多方协调，【%s】已将您更换，请重新抢单，再接再厉！";
         public final static String OWNER_TWO_FINISHED = "业主您好！【%s】【%s】阶段/整体完工已通过大管家的审核，请查看并对工匠和大管家分别评分，谢谢！";
 
+        public final static String STEWARD_SHENGHECHAOSHI = "大管家您好！【%s】【%s】阶段/整体完工申请，审核超时，将从您的账户中扣除100,将延后一天等待审核！";
+
 
         public final static String ACTUARIAL_COMPLETION = "业主您好！您的美宅【%s】精算已完成，请等待大管家抢单。";
         public final static String REPLACEMENT_OF_CRAFTSMEN = "工匠您好！经多方协调，【%s】已更换工匠，请查看!";
