@@ -28,7 +28,9 @@ public class TimingApplyService {
     public void supCouponApply(){
         List<HouseFlowApply> houseFlowApplyList =  houseFlowApplyMapper.supCouponApply(new Date());
         for (HouseFlowApply houseFlowApply : houseFlowApplyList){
-            evaluateService.checkOk(houseFlowApply.getId(),"",5);
+            //取消自动审核，改为超时扣钱
+//            evaluateService.checkOk(houseFlowApply.getId(),"",5);
+
         }
     }
 

@@ -22,7 +22,7 @@ public interface WarehouseAPI {
                                  @RequestParam("houseId") String houseId,
                                  @RequestParam("categoryId") String categoryId,
                                  @RequestParam("name") String name,
-                                 @RequestParam("type") Integer type);
+                                 @RequestParam("type") String type);
 
     @PostMapping("app/house/warehouse/warehouseGmList")
     @ApiOperation(value = "我购买的材料", notes = "我购买的材料")
@@ -30,5 +30,5 @@ public interface WarehouseAPI {
                                    @RequestParam("userToken") String  userToken,
                                  @RequestParam("houseId") String houseId,
                                  @RequestParam("name") String name,
-                                 @RequestParam("type") Integer type);
+                                 @RequestParam("type") String type);
 }

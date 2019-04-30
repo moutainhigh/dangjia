@@ -17,8 +17,6 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
-import com.dangjia.acg.modle.member.AccessToken;
-import com.dangjia.acg.modle.member.Member;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -60,34 +58,19 @@ public class WarehouseService {
      * 查询仓库材料
      * type 0材料 1服务 2所有
      */
-    public ServerResponse warehouseList(String  userToken,Integer pageNum, Integer pageSize, String houseId, String categoryId, String name, Integer type) {
+    public ServerResponse warehouseList(String  userToken,Integer pageNum, Integer pageSize, String houseId, String categoryId, String name, String type) {
         try {
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
             House house = houseMapper.selectByPrimaryKey(houseId);
-            if(!CommonUtil.isEmpty(userToken)){
-                AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-                Member member=accessToken.getMember();
-                if(type==null){
-                    if(member.getWorkerType()!=null&&member.getWorkerType()==3){
-                        type=1;
-                    }else{
-                        type=0;
-                    }
-                }
-                if(house.getMemberId().equals(member.getId())){
-                    type=null;
-                }
-            }
-
 
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             Example example=new Example(Warehouse.class);
             Example.Criteria criteria=example.createCriteria();
             criteria.andEqualTo(Warehouse.HOUSE_ID,houseId);
 
-            if(type!=null&&type<2){
+            if(!CommonUtil.isEmpty(type)){
                 criteria.andEqualTo(Warehouse.PRODUCT_TYPE,type);
             }
             if(!CommonUtil.isEmpty(categoryId)){
@@ -107,6 +90,7 @@ public class WarehouseService {
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                 warehouseDTO.setReceive(warehouse.getReceive());
+                warehouseDTO.setBackCount((warehouse.getWorkBack()==null?0D:warehouse.getWorkBack()));
                 warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack()) - warehouse.getAskCount());//剩余数量 所有买的数量 - 业主退货 - 要的
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                 warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
@@ -125,38 +109,24 @@ public class WarehouseService {
      * 查询仓库材料（已购买）
      * type 0材料 1服务 2人工
      */
-    public ServerResponse warehouseGmList(HttpServletRequest request,String  userToken, String houseId, String name, Integer type) {
+    public ServerResponse warehouseGmList(HttpServletRequest request,String  userToken, String houseId, String name, String type) {
         try {
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
             }
             House house = houseMapper.selectByPrimaryKey(houseId);
-            if(!CommonUtil.isEmpty(userToken)){
-                AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-                Member member=accessToken.getMember();
-                if(type==null){
-                    if(member.getWorkerType()!=null&&member.getWorkerType()==3){
-                        type=1;
-                    }else{
-                        type=0;
-                    }
-                }
-                if(house.getMemberId().equals(member.getId())){
-                    type=null;
-                }
-            }
             String cityId = request.getParameter(Constants.CITY_ID);
             Map<String, Map> maps = new HashMap<>();
             Map map=new HashMap();
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            if(type!=null&&type==2){
+            if(!CommonUtil.isEmpty(type)&&"2".equals(type)){
                 List<BudgetItemDTO> budgetItemDTOS= actuaryOpeAPI.getHouseWorkerInfo(cityId,"3",houseId,address);
                 map.put("goodsItemDTOList",budgetItemDTOS);
             }else {
                 Example example = new Example(Warehouse.class);
                 Example.Criteria criteria = example.createCriteria();
                 criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
-                if (type != null && type < 2) {
+                if (!CommonUtil.isEmpty(type)) {
                     criteria.andEqualTo(Warehouse.PRODUCT_TYPE, type);
                 }
                 if (!CommonUtil.isEmpty(name)) {
@@ -200,6 +170,7 @@ public class WarehouseService {
                         BeanUtils.beanToBean(warehouse, warehouseDTO);
                         warehouseDTO.setImage(address + warehouse.getImage());
                         warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
+                        warehouseDTO.setBackCount((warehouse.getWorkBack()==null?0D:warehouse.getWorkBack()));
                         warehouseDTO.setReceive(warehouse.getReceive());
                         warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack()) - warehouse.getAskCount());
                         warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
