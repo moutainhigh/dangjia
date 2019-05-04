@@ -69,6 +69,7 @@ public class SurplusWareHouseItemService {
 
             List<SurplusWareHouseProductDTO> dtoList = iSurplusWareHouseItemMapper.getAllProductsLikeAddressOrPName(address, productName);
             LOG.info(" getAllProductsLikeAddressOrPName list:" + dtoList);
+            PageInfo pageResult = new PageInfo(dtoList);
             for (SurplusWareHouseProductDTO pto : dtoList) {
                 Integer count = 0;
                 Integer allProductCount = 0;
@@ -87,8 +88,6 @@ public class SurplusWareHouseItemService {
                 if (surplusWareDivert != null)
                     pto.setMinDivertDate(surplusWareDivert.getDivertDate());
             }
-
-            PageInfo pageResult = new PageInfo(dtoList);
             pageResult.setList(dtoList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
 //            return ServerResponse.createByErrorMessage("查询失败");
