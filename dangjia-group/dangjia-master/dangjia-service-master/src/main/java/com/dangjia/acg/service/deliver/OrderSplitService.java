@@ -431,19 +431,19 @@ public class OrderSplitService {
                 deliverHouseDTO.setHouseId(house.getId());
                 deliverHouseDTO.setCreateDate(house.getCreateDate());
                 deliverHouseDTO.setHouseName(house.getHouseName());
-
+                deliverHouseDTO.setName("-");
+                deliverHouseDTO.setMobile("-");
                 if (member != null) {
                     deliverHouseDTO.setName(member.getName() == null ? member.getNickName() : member.getName());
                     deliverHouseDTO.setMobile(member.getMobile());
-
-                    Example example = new Example(OrderSplit.class);
-                    example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, house.getId()).andEqualTo(OrderSplit.APPLY_STATUS, 2);//已发给供应商
-                    deliverHouseDTO.setSent(orderSplitMapper.selectCountByExample(example));
-                    example = new Example(OrderSplit.class);
-                    example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, house.getId()).andEqualTo(OrderSplit.APPLY_STATUS, 1);//要货申请中
-                    deliverHouseDTO.setWait(orderSplitMapper.selectCountByExample(example));
-                    deliverHouseDTOList.add(deliverHouseDTO);
                 }
+                Example example = new Example(OrderSplit.class);
+                example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, house.getId()).andEqualTo(OrderSplit.APPLY_STATUS, 2);//已发给供应商
+                deliverHouseDTO.setSent(orderSplitMapper.selectCountByExample(example));
+                example = new Example(OrderSplit.class);
+                example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, house.getId()).andEqualTo(OrderSplit.APPLY_STATUS, 1);//要货申请中
+                deliverHouseDTO.setWait(orderSplitMapper.selectCountByExample(example));
+                deliverHouseDTOList.add(deliverHouseDTO);
             }
             pageResult.setList(deliverHouseDTOList);
             return ServerResponse.createBySuccess("查询成功", pageResult);

@@ -1156,13 +1156,13 @@ public class PaymentService {
                     actuaryDTO.setKind(workerType.getName());
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
                     actuaryDTO.setName("补材料花费");
-                    actuaryDTO.setButton("补材料明细");
+//                    actuaryDTO.setButton("补材料明细");
 //                  String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
 //                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=5";
 //                    actuaryDTO.setUrl(url);
                     if(workerType.getType()==3){
                         actuaryDTO.setName("补服务花费");
-                        actuaryDTO.setButton("补服务明细");
+//                        actuaryDTO.setButton("补服务明细");
                     }
                     actuaryDTO.setType(5);
                 }
