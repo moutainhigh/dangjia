@@ -219,27 +219,89 @@ public class DesignService {
 
     /**
      * 设计任务列表
-     *
-     * @param designerOk 设计状态:
-     *                   默认0未确定设计师,4有设计抢单待支付,1已支付设计师待发平面图,5平面图发给业主,6平面图审核不通过,
-     *                   7通过平面图待发施工图,2已发给业主施工图,8施工图片审核不通过,3施工图(全部图)审核通过
-     *
      * 。。。。。。。。。。。。。。。。。⦧--6。。⦧--8
      * 远程设计流程：0---4---1---9---5---7---2---3
      *
      * 。。。。。。。。。。。。⦧--6。。⦧--8
      * 自带设计流程：0---1---5---7---2---3
+     *
+     * @param pageDTO      分页码
+     * @param designerType 0：未支付和设计师未抢单，1：带量房，2：平面图，3：施工图，4：完工
+     * @param searchKey    业主手机号/房子名称
      */
-    public ServerResponse getDesignList(PageDTO pageDTO, int designerOk, String mobile, String residential, String number) {
-        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+    public ServerResponse getDesignList(PageDTO pageDTO, int designerType, String searchKey) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerOk, mobile, residential, number);
+        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, searchKey);
         PageInfo pageResult = new PageInfo(designDTOList);
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         for (DesignDTO designDTO : designDTOList) {
             HouseDesignImage hdi = designImageTypeMapper.getHouseDesignImage(designDTO.getHouseId(), "1");//1某个房子的平面图
             if (hdi != null) {
                 designDTO.setImage(hdi.getImageurl());
                 designDTO.setImageUrl(address + hdi.getImageurl());
+            }
+            if (designDTO.getDecorationType() == 2) {//自带设计流程
+                switch (designDTO.getDesignerOk()) {
+                    case 0://0未确定设计师
+                        designDTO.setSchedule("待抢单");
+                        break;
+                    case 4://4设计待抢单
+                    case 1://1已支付-设计师待量房
+                    case 9://9量房图发给业主
+                        designDTO.setSchedule("待上传平面图");
+                        break;
+                    case 5://5平面图发给业主 （发给了业主）
+                        designDTO.setSchedule("待审核平面图");
+                        break;
+                    case 6://6平面图审核不通过（NG，可编辑平面图）
+                        designDTO.setSchedule("待修改平面图");
+                        break;
+                    case 7://7通过平面图待发施工图（OK，可编辑施工图）
+                        designDTO.setSchedule("待上传施工图");
+                        break;
+                    case 2://2已发给业主施工图 （发给了业主）
+                        designDTO.setSchedule("待审核施工图");
+                        break;
+                    case 8://8施工图片审核不通过（NG，可编辑施工图）
+                        designDTO.setSchedule("待修改施工图");
+                        break;
+                    case 3://施工图(全部图)审核通过（OK，完成）
+                        designDTO.setSchedule("完成");
+                        break;
+                }
+            } else {
+                switch (designDTO.getDesignerOk()) {
+                    case 0://0未确定设计师
+                        designDTO.setSchedule("待抢单");
+                        break;
+                    case 4://4设计待抢单
+                        designDTO.setSchedule("待业主支付");
+                        break;
+                    case 1://1已支付-设计师待量房
+                        designDTO.setSchedule("待量房");
+                        break;
+                    case 9://9量房图发给业主
+                        designDTO.setSchedule("待上传平面图");
+                        break;
+                    case 5://5平面图发给业主 （发给了业主）
+                        designDTO.setSchedule("待审核平面图");
+                        break;
+                    case 6://6平面图审核不通过（NG，可编辑平面图）
+                        designDTO.setSchedule("待修改平面图");
+                        break;
+                    case 7://7通过平面图待发施工图（OK，可编辑施工图）
+                        designDTO.setSchedule("待上传施工图");
+                        break;
+                    case 2://2已发给业主施工图 （发给了业主）
+                        designDTO.setSchedule("待审核施工图");
+                        break;
+                    case 8://8施工图片审核不通过（NG，可编辑施工图）
+                        designDTO.setSchedule("待修改施工图");
+                        break;
+                    case 3://施工图(全部图)审核通过（OK，完成）
+                        designDTO.setSchedule("完成");
+                        break;
+                }
             }
         }
         pageResult.setList(designDTOList);

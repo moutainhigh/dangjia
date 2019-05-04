@@ -35,7 +35,12 @@ public interface WebClueAPI {
      */
     @PostMapping("web/clue/getClueList")
     @ApiOperation(value = "查询线索", notes = "查询线索")
-     ServerResponse getClueList (@RequestParam("stage") Integer stage, @RequestParam("values") String values,@RequestParam("pageDTO") PageDTO pageDTO);
+     ServerResponse getClueList (@RequestParam("stage") Integer stage,
+                                 @RequestParam("values") String values,
+                                 @RequestParam("memberId") String memberId,
+                                 @RequestParam("beginDate") String beginDate,
+                                 @RequestParam("endDate") String endDate,
+                                 @RequestParam("pageDTO") PageDTO pageDTO);
 
     /**
      *通过状态查找线索

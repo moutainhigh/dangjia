@@ -32,7 +32,11 @@ public interface WebMemberAPI {
                                  @RequestParam("searchKey") String searchKey,
                                  @RequestParam("parentId") String parentId,
                                  @RequestParam("childId") String childId,
-                                 @RequestParam("orderBy") String orderBy);
+                                 @RequestParam("orderBy") String orderBy,
+                                 @RequestParam("type") String type,
+                                 @RequestParam("userId") String userId,
+                                 @RequestParam("beginDate") String beginDate,
+                                 @RequestParam("endDate") String endDate);
 
     @PostMapping("web/member/setMember")
     @ApiOperation(value = "修改业主信息", notes = "修改业主信息")
