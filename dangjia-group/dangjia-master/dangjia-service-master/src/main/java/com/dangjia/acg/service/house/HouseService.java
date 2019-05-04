@@ -863,7 +863,7 @@ public class HouseService {
 //            if (accessToken != null) {
 //                shareDTO.setName(house.getHouseName());
 //            } else {
-            shareDTO.setName(house.getResidential() + "**"+"栋"+(TextUtils.isEmpty(house.getUnit()) ? "" : house.getUnit() + "单元") + house.getNumber() + "房");
+            shareDTO.setName(house.getResidential() + "**" + "栋" + (TextUtils.isEmpty(house.getUnit()) ? "" : house.getUnit() + "单元") + house.getNumber() + "房");
 //            }
         } else {
             shareDTO.setName("*栋*单元*号");
@@ -1039,15 +1039,9 @@ public class HouseService {
     /**
      * 施工记录
      */
-    public ServerResponse queryConstructionRecord(String houseId, Integer pageNum, Integer pageSize, String workerTypeId) {
+    public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO, String workerTypeId) {
         // 施工记录的内容需要更改
-        if (pageNum == null) {
-            pageNum = 1;
-        }
-        if (pageSize == null) {
-            pageSize = 10;
-        }
-        PageHelper.startPage(pageNum, pageSize);
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<HouseFlowApply> hfaList = houseFlowApplyMapper.queryAllHfaByHouseId(houseId, workerTypeId);
         PageInfo pageResult = new PageInfo(hfaList);
         List<Map<String, Object>> listMap = this.houseFlowApplyDetail(hfaList);

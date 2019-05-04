@@ -151,7 +151,7 @@ public class HouseController implements HouseAPI {
     @Override
     @ApiMethod
     public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO) {
-        return  houseService.queryConstructionRecord(houseId, pageDTO.getPageNum(), pageDTO.getPageSize(), null);
+        return  houseService.queryConstructionRecord(houseId, pageDTO, null);
     }
 
     @Override
