@@ -239,7 +239,7 @@ public class EvaluateService {
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
 
-            configMessageService.addConfigMessage(null,"gj",member.getId(),"0","阶段/整体审核超时扣钱提醒",String.format(DjConstants.PushMessage.STEWARD_SHENGHECHAOSHI,house.getHouseName(),workerType.getName()) ,"6");
+            configMessageService.addConfigMessage(null,"gj",member.getId(),"0","阶段/整体审核超时扣钱提醒",String.format(DjConstants.PushMessage.STEWARD_SHENGHECHAOSHI,house.getHouseName(),workerType.getName()) ,"0");
 
         }
 

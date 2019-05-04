@@ -466,7 +466,8 @@ public class HouseFlowApplyService {
             if(worker.getRetentionMoney() == null){
                 worker.setRetentionMoney(new BigDecimal(0.0));
             }
-            if(worker.getRetentionMoney().doubleValue() < worker.getDeposit().doubleValue()){//押金没收够并且没有算过押金
+            //申请的钱为空时将不考虑滞留金转入
+            if(hfa!=null&&hfa.getApplyMoney() != null&&worker.getRetentionMoney().doubleValue() < worker.getDeposit().doubleValue()){//押金没收够并且没有算过押金
                 //算订单的5%
                 BigDecimal mid = hwo.getWorkPrice().multiply(deposit);
                 BigDecimal retentionMoney;
@@ -494,6 +495,7 @@ public class HouseFlowApplyService {
 
                 BigDecimal retentionMoneyOrder=  hwo.getRetentionMoney().add(mid);
                 hwo.setRetentionMoney(retentionMoneyOrder);
+
                 //处理阶段申请的钱，将减去滞留金的钱，存入账户余额
                 BigDecimal applyMoney=  hfa.getApplyMoney().subtract(mid);
                 hfa.setApplyMoney(applyMoney);
