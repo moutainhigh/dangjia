@@ -728,7 +728,11 @@ public class MendOrderService {
                 mendOrder.setWorkerTypeId(worker.getWorkerTypeId());
                 mendOrder.setApplyMemberId(worker.getId());
                 mendOrder.setType(2);//退材料
-                mendOrder.setOrderName("退材料");
+                if (worker.getWorkerType() == 3) {//管家退服务
+                    mendOrder.setOrderName("退服务");
+                }else {
+                    mendOrder.setOrderName("退材料");
+                }
                 mendOrder.setState(0);//生成中
                 mendOrder.setTotalAmount(0.0);
 
@@ -859,7 +863,11 @@ public class MendOrderService {
                 mendOrder.setWorkerTypeId(worker.getWorkerTypeId());
                 mendOrder.setApplyMemberId(worker.getId());
                 mendOrder.setType(0);//补材料
-                mendOrder.setOrderName("补材料");
+                if (worker.getWorkerType() == 3) {//管家退服务
+                    mendOrder.setOrderName("补服务");
+                }else {
+                    mendOrder.setOrderName("补材料");
+                }
                 mendOrder.setState(0);//生成中
                 mendOrder.setTotalAmount(0.0);
                 if (!this.createMendCheck(mendOrder)) {
