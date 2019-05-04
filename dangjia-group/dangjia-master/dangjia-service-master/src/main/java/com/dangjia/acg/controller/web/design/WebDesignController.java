@@ -35,8 +35,8 @@ public class WebDesignController implements WebDesignAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerOk, String mobile, String residential, String number) {
-        return designService.getDesignList(pageDTO, designerOk, mobile, residential, number);
+    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey) {
+        return designService.getDesignList(pageDTO, designerType, searchKey);
     }
 
     @Override

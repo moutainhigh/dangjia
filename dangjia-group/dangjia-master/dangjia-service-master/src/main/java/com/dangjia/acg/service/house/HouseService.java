@@ -863,7 +863,7 @@ public class HouseService {
 //            if (accessToken != null) {
 //                shareDTO.setName(house.getHouseName());
 //            } else {
-            shareDTO.setName(house.getNoNumberHouseName());
+            shareDTO.setName(house.getResidential() + "**"+"栋"+(TextUtils.isEmpty(house.getUnit()) ? "" : house.getUnit() + "单元") + house.getNumber() + "房");
 //            }
         } else {
             shareDTO.setName("*栋*单元*号");

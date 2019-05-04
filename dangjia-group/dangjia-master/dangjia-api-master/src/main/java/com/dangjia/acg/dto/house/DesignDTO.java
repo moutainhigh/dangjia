@@ -15,6 +15,7 @@ public class DesignDTO {
     private String building;
     private String unit;
     private String number;
+    private String schedule;//进度
     private String name;//业主姓名
     private String nickName;//昵称
     private String mobile;// 电话
