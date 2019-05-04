@@ -16,7 +16,6 @@ import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.modle.core.*;
@@ -93,14 +92,21 @@ public class EngineerService {
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
             hwo.setAfterChange(hwo.getWorkPrice().subtract(hwo.getHaveMoney()));
             hwo.setWorkerId(workerId);
+            hwo.setModifyDate(new Date());
             houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
 
             //删除老工人已发出未审核的申请
             houseFlowApplyMapper.deleteNotMemberCheck(houseWorker.getHouseId(), houseWorker.getWorkerId());
+
             HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
+            houseFlow.setNominator(workerId);
+            houseFlow.setWorkType(4);
             houseFlow.setWorkerId(workerId);
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
 
+
+            houseWorker.setWorkType(6);
+            houseWorker.setIsSelect(1);
             houseWorker.setWorkerId(workerId);
             houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
 //            }
