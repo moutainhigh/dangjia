@@ -127,7 +127,15 @@ public class ChangeOrderService {
     public ServerResponse workerSubmit(String userToken,String houseId,Integer type,String contentA,String contentB,String workerTypeId){
         AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
         Member member = accessToken.getMember();
-        List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseId, member.getWorkerTypeId());
+        ChangeOrder changeOrder = new ChangeOrder();
+        changeOrder.setHouseId(houseId);
+        if (type == 1){
+            changeOrder.setWorkerTypeId(member.getWorkerTypeId());
+        }else if (type == 2){
+            changeOrder.setWorkerTypeId(workerTypeId);
+        }
+
+        List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseId, changeOrder.getWorkerTypeId());
         if (changeOrderList.size() > 0){
             return ServerResponse.createByErrorMessage("该工种有未处理变更单,通知管家处理");
         }
@@ -137,27 +145,12 @@ public class ChangeOrderService {
             return ServerResponse.createByErrorMessage("该工种有未处理完工申请");
         }
 
-        if (type == 1){
-            ChangeOrder changeOrder = new ChangeOrder();
-            changeOrder.setHouseId(houseId);
-            changeOrder.setWorkerTypeId(member.getWorkerTypeId());
-            changeOrder.setWorkerId(member.getId());
-            changeOrder.setType(type);
-            changeOrder.setContentA(contentA);
-            changeOrder.setContentB(contentB);
-            changeOrder.setState(0);
-            changeOrderMapper.insert(changeOrder);
-        }else if (type == 2){
-            ChangeOrder changeOrder = new ChangeOrder();
-            changeOrder.setHouseId(houseId);
-            changeOrder.setWorkerTypeId(workerTypeId);
-            changeOrder.setMemberId(member.getId());
-            changeOrder.setType(type);
-            changeOrder.setContentA(contentA);
-            changeOrder.setContentB(contentB);
-            changeOrder.setState(0);
-            changeOrderMapper.insert(changeOrder);
-        }
+        changeOrder.setMemberId(member.getId());
+        changeOrder.setType(type);
+        changeOrder.setContentA(contentA);
+        changeOrder.setContentB(contentB);
+        changeOrder.setState(0);
+        changeOrderMapper.insert(changeOrder);
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 }
