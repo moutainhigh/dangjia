@@ -33,11 +33,10 @@ public interface WebDesignAPI {
 
     @PostMapping("web/design/getList")
     @ApiOperation(value = "设计师任务列表", notes = "设计师任务列表")
-    ServerResponse getDesignList(@RequestParam("request") HttpServletRequest request,@RequestParam("pageDTO") PageDTO pageDTO,
-                                 @RequestParam("designerOk") int designerOk,
-                                 @RequestParam("mobile") String mobile,
-                                 @RequestParam("residential") String residential,
-                                 @RequestParam("number") String number);
+    ServerResponse getDesignList(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("pageDTO") PageDTO pageDTO,
+                                 @RequestParam("designerType") int designerType,
+                                 @RequestParam("searchKey") String searchKey);
 
     @PostMapping("web/design/getImagesList")
     @ApiOperation(value = "设计图列表", notes = "设计图列表")

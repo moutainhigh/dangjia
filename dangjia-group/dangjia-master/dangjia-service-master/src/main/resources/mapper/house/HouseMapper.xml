@@ -42,45 +42,53 @@
     </sql>
     <select id="getDesignList" resultType="com.dangjia.acg.dto.house.DesignDTO">
         SELECT
-        house.id as houseId,
-        house.designer_ok as designerOk,
-        house.residential as residential,
-        house.building as building,
-        house.unit as unit,
-        house.decoration_type as decorationType,
-        house.number as number,
-        member.nick_name as nickName,
-        member.name as name,
-        member.mobile as mobile
-        FROM dj_house house ,dj_member member
-        <where>
-            house.data_status=0
-            <if test="designerOk == 7">
-                AND house.designer_ok in (2,7,8)
-            </if>
-            <if test="designerOk == 9">
-                AND house.designer_ok in (1,5,6,9)
-            </if>
-            <if test="!(designerOk == 7 or designerOk  == 9)">
-                AND house.designer_ok=#{designerOk}
-            </if>
-            AND house.visit_state=1
-            AND member.id = house.member_id
-            <if test="residential!=null and residential!=''">
-                AND CONCAT(
-                house.residential,
-                IFNULL(house.building, '*'),
-                '栋',
-                IFNULL(CONCAT(house.unit, '单元'),'' ),
-                IFNULL(house.number, '*'),
-                '号'
-                )  LIKE
-                CONCAT('%',#{residential},'%')
-            </if>
-            <if test="mobile!=null and mobile!=''">
-                AND member.mobile like #{mobile}
-            </if>
-        </where>
+        house.id AS houseId,
+        house.designer_ok AS designerOk,
+        house.residential AS residential,
+        house.building AS building,
+        house.unit AS unit,
+        house.decoration_type AS decorationType,
+        house.number AS number,
+        member.nick_name AS nickName,
+        member.NAME AS NAME,
+        member.mobile AS mobile
+        FROM
+        dj_house house
+        INNER JOIN dj_member member ON member.id = house.member_id
+        WHERE
+        house.data_status=0
+        AND house.visit_state=1
+        <if test="designerType == 0">
+            AND house.designer_ok in (0,4)
+        </if>
+        <if test="designerType == 1">
+            AND house.decoration_type !=2
+            AND house.designer_ok =1
+        </if>
+        <if test="designerType == 2">
+            AND ((house.decoration_type !=2
+            AND house.designer_ok in (1,5,6))
+            or (house.decoration_type =2
+            AND house.designer_ok in (9,5,6)))
+        </if>
+        <if test="designerType == 3">
+            AND house.designer_ok in (2,7,8)
+        </if>
+        <if test="designerType == 4">
+            AND house.designer_ok =3
+        </if>
+        <if test="searchKey!=null and searchKey!=''">
+            AND (CONCAT(
+            house.residential,
+            IFNULL(house.building, '*'),
+            '栋',
+            IFNULL(CONCAT(house.unit, '单元'),'' ),
+            IFNULL(house.number, '*'),
+            '号'
+            ) like CONCAT('%',#{searchKey},'%')
+            OR member.mobile like CONCAT('%',#{searchKey},'%')
+            )
+        </if>
         ORDER BY house.create_date DESC
     </select>
 
@@ -141,7 +149,7 @@
             IFNULL(CONCAT(house.unit, '单元'),'' ),
             IFNULL(house.number, '*'),
             '号'
-            )  LIKE
+            ) LIKE
             CONCAT('%',#{likeAddress},'%')
 
         </if>
@@ -303,10 +311,10 @@
         h.data_status =0 and h.designer_ok=3
         <if test="budgetOk!=null and budgetOk!=''">
             <if test="budgetOk==1">
-                and  (budget_ok =1 or budget_ok = 4)
+                and (budget_ok =1 or budget_ok = 4)
             </if>
             <if test="budgetOk!=1">
-                and  budget_ok =#{budgetOk}
+                and budget_ok =#{budgetOk}
             </if>
         </if>
 
@@ -324,7 +332,7 @@
             ) LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
-        ORDER by  h.create_date  desc
+        ORDER by h.create_date desc
 
     </select>
 
@@ -404,7 +412,7 @@
          INNER join dj_house h on m.id=h.member_id where m.id=#{memberId} and h.data_status =0 and h.visit_state =1
          ORDER BY create_date DESC limit 1
     </select>
-    
+
     <select id="getRepairMend" resultType="com.dangjia.acg.dto.repair.RepairMendDTO">
         SELECT
             o.type as type,
