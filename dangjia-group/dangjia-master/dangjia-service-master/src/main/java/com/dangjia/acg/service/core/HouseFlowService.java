@@ -588,6 +588,8 @@ public class HouseFlowService {
         try {
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);//查询大管家houseFlow
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+            house.setModifyDate(new Date());
+            houseMapper.updateByPrimaryKeySelective(house);
             houseFlow.setSupervisorStart(1);//大管家进度改为已开工
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
             HouseFlow nextHF = houseFlowMapper.getNextHouseFlow(houseFlow.getHouseId());//根据当前工序查下一工序
