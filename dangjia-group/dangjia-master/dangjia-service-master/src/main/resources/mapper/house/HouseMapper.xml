@@ -67,9 +67,9 @@
         </if>
         <if test="designerType == 2">
             AND ((house.decoration_type !=2
-            AND house.designer_ok in (1,5,6))
+            AND house.designer_ok in (9,5,6))
             or (house.decoration_type =2
-            AND house.designer_ok in (9,5,6)))
+            AND house.designer_ok in (1,5,6)))
         </if>
         <if test="designerType == 3">
             AND house.designer_ok in (2,7,8)

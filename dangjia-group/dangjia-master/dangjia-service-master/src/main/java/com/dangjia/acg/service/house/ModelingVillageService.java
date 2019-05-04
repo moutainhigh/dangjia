@@ -71,25 +71,13 @@ public class ModelingVillageService {
     }
 
     public ServerResponse getVillageAllListByCityId(HttpServletRequest request, PageDTO pageDTO, String cityId, String likeVillageName) {
-
         try {
-            if (pageDTO == null) {
-                pageDTO = new PageDTO();
-            }
-            if (pageDTO.getPageNum() == null) {
-                pageDTO.setPageNum(1);
-            }
-            if (pageDTO.getPageSize() == null) {
-                pageDTO.setPageSize(10);
-            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-
             List<ModelingVillage> allVillageList = modelingVillageMapper.getAllVillage(cityId, likeVillageName);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             LOG.info("getVillageAllListByCityId allVillageList size:" + allVillageList.size() + " cityId:" + cityId);
             List<Map<String, Object>> mapList = new ArrayList<>();
-            for (int i = 0; i < allVillageList.size(); i++) {
-                ModelingVillage modelingVillage = allVillageList.get(i);
+            for (ModelingVillage modelingVillage : allVillageList) {
                 Map<String, Object> modelingVillageMap = BeanUtils.beanToMap(modelingVillage);
                 List<ModelingLayout> modelingLayoutList = modelingLayoutMapper.queryModelingLayoutByVillageId(modelingVillage.getId());
                 List<Map<String, Object>> modelingLayoutMapList = new ArrayList<>();
@@ -101,7 +89,6 @@ public class ModelingVillageService {
                 }
                 mapList.add(modelingVillageMap);
             }
-
             PageInfo pageResult = new PageInfo(allVillageList);
             pageResult.setList(mapList);
             return ServerResponse.createBySuccess("查询小区成功", pageResult);
@@ -115,13 +102,10 @@ public class ModelingVillageService {
         try {
             LOG.info("setVillage :" + jsonStr);
             JSONObject villageObj = JSONObject.parseObject(jsonStr);
-
             String villageId = villageObj.getString("id");//小区id
             String villageName = villageObj.getString("name");//小区name
-
             if (!StringUtils.isNotBlank(villageName))
                 return ServerResponse.createByErrorMessage("小区名称不能为空");
-
             ModelingVillage modelingVillage = null; //新增的 小区id
             if (!StringUtils.isNotBlank(villageId))//没有id则新增
             {
@@ -195,10 +179,10 @@ public class ModelingVillageService {
             }
 
             String[] deleteLayoutIds = villageObj.getString("deleteLayoutIds").split(",");//要删除的户型id数组，逗号分隔
-            for (int j = 0; j < deleteLayoutIds.length; j++) {
-                if (modelingLayoutMapper.selectByPrimaryKey(deleteLayoutIds[j]) != null) {
-                    if (modelingLayoutMapper.deleteByPrimaryKey(deleteLayoutIds[j]) < 0)
-                        return ServerResponse.createByErrorMessage("删除id：" + deleteLayoutIds[j] + "失败");
+            for (String deleteLayoutId : deleteLayoutIds) {
+                if (modelingLayoutMapper.selectByPrimaryKey(deleteLayoutId) != null) {
+                    if (modelingLayoutMapper.deleteByPrimaryKey(deleteLayoutId) < 0)
+                        return ServerResponse.createByErrorMessage("删除id：" + deleteLayoutId + "失败");
                 }
             }
 
@@ -258,7 +242,7 @@ public class ModelingVillageService {
             villageClassifyDTO.setVillageDTOList(hotList);//热门集合
             villageClassifyDTOList.add(villageClassifyDTO);
             villageClassifyDTOList.addAll(mvlist);
-            if(mvlist!=null&&mvlist.size()>0) {
+            if(mvlist.size() > 0) {
                 redisClient.putListCaches("vresult:" + cityId, mvlist);
             }
             return ServerResponse.createBySuccess("根据城市查询小区成功", villageClassifyDTOList);

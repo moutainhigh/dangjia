@@ -291,6 +291,9 @@ public class RewardPunishService {
                     BigDecimal haveMoney = member.getHaveMoney().add(bigDecimal);
                     member.setSurplusMoney(bigDecimal2);
                     member.setHaveMoney(haveMoney);
+
+                    workerDetail.setWalletMoney(bigDecimal2);
+                    workerDetail.setHaveMoney(haveMoney);
                     //加流水记录
                     workerDetail.setMoney(bigDecimal);
                     workerDetail.setState(2);
@@ -313,6 +316,9 @@ public class RewardPunishService {
                     BigDecimal haveMoney = member.getHaveMoney().subtract(bigDecimal);
                     member.setSurplusMoney(bigDecimal2);
                     member.setHaveMoney(haveMoney);
+
+                    workerDetail.setWalletMoney(bigDecimal2);
+                    workerDetail.setHaveMoney(haveMoney);
                     //加流水记录
                     workerDetail.setMoney(bigDecimal);
                     workerDetail.setState(3);

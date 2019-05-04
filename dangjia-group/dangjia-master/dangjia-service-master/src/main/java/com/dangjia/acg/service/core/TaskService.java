@@ -166,6 +166,9 @@ public class TaskService {
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
             task.setName(workerType.getName() + "补材料");
+            if(workerType.getType()==3){
+                task.setName(workerType.getName() + "补服务");
+            }
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/buchailiao.png");
             task.setHtmlUrl("");
             task.setType(2);
