@@ -337,8 +337,13 @@ public class ActuaryOperationService {
     public ServerResponse getCommo(String gId, int type) {
         try {
             if (type == 1||type == 4) {//人工
-                BudgetWorker budgetWorker = budgetWorkerMapper.selectByPrimaryKey(gId);
-                WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());//人工商品
+                WorkerGoods workerGoods;
+                if(type == 1) {
+                    BudgetWorker budgetWorker = budgetWorkerMapper.selectByPrimaryKey(gId);
+                    workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());//人工商品
+                }else{
+                    workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
+                }
                 WGoodsDTO wGoodsDTO = new WGoodsDTO();
                 wGoodsDTO.setImage(getImage(workerGoods.getImage()));
                 wGoodsDTO.setPrice("¥" + String.format("%.2f", workerGoods.getPrice()) + "/" + workerGoods.getUnitName());
@@ -350,10 +355,17 @@ public class ActuaryOperationService {
                 }
                 wGoodsDTO.setTechnologyList(technologyList);
                 return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
-            } else if (type == 2 || type == 3 || type == 5) {//材料商品  服务商品
-                BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(gId);
-                Product product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());//当前 货品
-                GoodsDTO goodsDTO = goodsDetail(product, budgetMaterial.getId());
+            } else if (type == 2 || type == 3 || type == 5 ) {//材料商品  服务商品
+                Product product;
+                String budgetMaterialId=null;
+                if(type == 5) {
+                    BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(gId);
+                    product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());//当前 货品
+                    budgetMaterialId=budgetMaterial.getId();
+                }else{
+                    product = productMapper.selectByPrimaryKey(gId);//当前 货品
+                }
+                GoodsDTO goodsDTO = goodsDetail(product, budgetMaterialId);
                 if (goodsDTO != null) {
                     return ServerResponse.createBySuccess("查询成功", goodsDTO);
                 } else {
@@ -685,6 +697,7 @@ public class ActuaryOperationService {
 //                    flowActuaryDTO.setUrl(url);
                     flowActuaryDTO.setPrice("¥" + String.format("%.2f", bw.getPrice()) + "/" + bw.getUnitName());
                     flowActuaryDTO.setTotalPrice(bw.getPrice() * bw.getShopCount());
+                    flowActuaryDTO.setBudgetMaterialId(bw.getWorkerGoodsId());
                     flowActuaryDTOList.add(flowActuaryDTO);
                 }
                 flowDTO.setSumTotal(new BigDecimal(mendOrderInfoDTO.getTotalAmount()));//合计
@@ -711,7 +724,7 @@ public class ActuaryOperationService {
                     }
                     flowActuaryDTO.setConvertCount(converCount);
                     flowActuaryDTO.setBuy(0);
-                    flowActuaryDTO.setBudgetMaterialId(mendMateriel.getId());
+                    flowActuaryDTO.setBudgetMaterialId(mendMateriel.getProductId());
                     flowActuaryDTO.setName(mendMateriel.getProductName());
                     flowActuaryDTO.setUnitName(convertUnit.getName());
                     flowActuaryDTOList.add(flowActuaryDTO);
