@@ -336,7 +336,7 @@ public class ActuaryOperationService {
      */
     public ServerResponse getCommo(String gId, int type) {
         try {
-            if (type == 1) {//人工
+            if (type == 1||type == 4) {//人工
                 BudgetWorker budgetWorker = budgetWorkerMapper.selectByPrimaryKey(gId);
                 WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());//人工商品
                 WGoodsDTO wGoodsDTO = new WGoodsDTO();
@@ -350,7 +350,7 @@ public class ActuaryOperationService {
                 }
                 wGoodsDTO.setTechnologyList(technologyList);
                 return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
-            } else if (type == 2 || type == 3) {//材料商品  服务商品
+            } else if (type == 2 || type == 3 || type == 5) {//材料商品  服务商品
                 BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(gId);
                 Product product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());//当前 货品
                 GoodsDTO goodsDTO = goodsDetail(product, budgetMaterial.getId());
@@ -374,7 +374,7 @@ public class ActuaryOperationService {
      */
     public ServerResponse getGoodsDetail(String gId, String cityId, int type) {
         try {
-            if (type == 1) {//人工
+            if (type == 1||type == 4) {//人工
                 WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
                 WGoodsDTO wGoodsDTO = new WGoodsDTO();
                 if (!CommonUtil.isEmpty(workerGoods.getImage())) {
@@ -389,7 +389,7 @@ public class ActuaryOperationService {
                 }
                 wGoodsDTO.setTechnologyList(technologyList);
                 return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
-            } else if (type == 2 || type == 3) {//材料商品  服务商品
+            } else if (type == 2 || type == 3|| type == 5) {//材料商品  服务商品
                 Product product = productMapper.selectByPrimaryKey(gId);//当前 货品
                 GoodsDTO goodsDTO = goodsDetail(product, null);
                 if (goodsDTO != null) {
