@@ -358,7 +358,7 @@ public class ActuaryOperationService {
             } else if (type == 2 || type == 3 || type == 5 ) {//材料商品  服务商品
                 Product product;
                 String budgetMaterialId=null;
-                if(type == 5) {
+                if(type != 5) {
                     BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(gId);
                     product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());//当前 货品
                     budgetMaterialId=budgetMaterial.getId();
