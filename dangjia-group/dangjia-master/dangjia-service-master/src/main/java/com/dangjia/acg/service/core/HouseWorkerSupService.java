@@ -103,7 +103,7 @@ public class HouseWorkerSupService {
 
             Example example = new Example(HouseFlowApply.class);
             example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                    .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.PAY_STATE, 1);
+                    .andCondition(" member_check in (1,3) ").andEqualTo(HouseFlowApply.PAY_STATE, 1);
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
             if (houseFlowApplyList.size() > 0) {
 //                HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);

@@ -143,11 +143,11 @@ public class HouseFlowApplyService {
      * 业主审核工匠
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse checkWorker(String houseFlowApplyId){
+    public ServerResponse checkWorker(String houseFlowApplyId,boolean isAuto){
         try {
             //HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             HouseFlowApply hfa = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
-            if(hfa.getMemberCheck() == 1){
+            if(hfa.getMemberCheck() == 1||hfa.getMemberCheck() == 3){
                 return ServerResponse.createByErrorMessage("重复审核");
             }
             //工匠订单
@@ -288,7 +288,11 @@ public class HouseFlowApplyService {
                 memberMapper.updateByPrimaryKeySelective(worker);
 
             }
-            hfa.setMemberCheck(1);
+            if(isAuto){
+                hfa.setMemberCheck(3);
+            }else{
+                hfa.setMemberCheck(1);
+            }
             hfa.setPayState(1);
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
 
@@ -620,10 +624,15 @@ public class HouseFlowApplyService {
     /**
      * 业主审核大管家完工申请
      */
-    public ServerResponse checkSupervisor(String houseFlowApplyId){
+    public ServerResponse checkSupervisor(String houseFlowApplyId,boolean isAuto){
         try{
             HouseFlowApply hfa = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
-            hfa.setMemberCheck(1);//通过
+
+            if(isAuto){
+                hfa.setMemberCheck(3);//自动通过
+            }else{
+                hfa.setMemberCheck(1);//通过
+            }
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
 
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(hfa.getHouseFlowId());

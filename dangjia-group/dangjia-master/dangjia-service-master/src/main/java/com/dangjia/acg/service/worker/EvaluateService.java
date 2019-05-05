@@ -368,11 +368,11 @@ public class EvaluateService {
      * 业主评价管家完工 最后完工
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveEvaluateSupervisor(String houseFlowApplyId,String content,int star){
+    public ServerResponse saveEvaluateSupervisor(String houseFlowApplyId,String content,int star,boolean isAuto){
         try{
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            if(houseFlowApply.getMemberCheck() == 1){
+            if(houseFlowApply.getMemberCheck() == 1||houseFlowApply.getMemberCheck() == 3){
                 return ServerResponse.createByErrorMessage("重复审核");
             }
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
@@ -396,7 +396,7 @@ public class EvaluateService {
             updateFavorable(worker.getId());
 
             //业主审核管家
-            houseFlowApplyService.checkSupervisor(houseFlowApplyId);
+            houseFlowApplyService.checkSupervisor(houseFlowApplyId,isAuto);
 
             configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","业主评价",String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE,house.getHouseName()) ,"6");
             return ServerResponse.createBySuccessMessage("操作成功");
@@ -412,11 +412,11 @@ public class EvaluateService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveEvaluate(String houseFlowApplyId,String wContent,int wStar
-            ,String sContent, int sStar){
+            ,String sContent, int sStar,boolean isAuto){
         try{
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            if(houseFlowApply.getMemberCheck() == 1){
+            if(houseFlowApply.getMemberCheck() == 1||houseFlowApply.getMemberCheck() == 3){
                 return ServerResponse.createByErrorMessage("重复审核");
             }
             if(houseFlowApply.getApplyType()!= 0) {
@@ -481,7 +481,7 @@ public class EvaluateService {
             updateFavorable(supervisor.getId());
 
             //业主审核
-            ServerResponse serverResponse=houseFlowApplyService.checkWorker(houseFlowApplyId);
+            ServerResponse serverResponse=houseFlowApplyService.checkWorker(houseFlowApplyId,isAuto);
             if(serverResponse.getResultCode()!= EventStatus.SUCCESS.getCode()){
 
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();

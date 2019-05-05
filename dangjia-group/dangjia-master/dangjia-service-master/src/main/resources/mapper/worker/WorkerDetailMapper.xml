@@ -189,7 +189,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                     AND e.state = 1
                     WHERE
                         a.`house_id` = #{houseId} -- 仅限大管家
-                    AND a.member_check = 1
+                    AND a.member_check  in(1,3)
                     AND a.supervisor_money > 0
                     AND a.apply_type IN (5)
                     GROUP BY
@@ -216,7 +216,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                         AND e.state = 1
                         WHERE
                             a.`house_id` = #{houseId} -- 仅限大管家
-                        AND a.member_check = 1
+                        AND a.member_check  in(1,3)
                         AND a.supervisor_money > 0
                         AND a.apply_type IN (1, 2)
                         GROUP BY
@@ -246,7 +246,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                         AND e.state = 1
                         WHERE
                             a.`house_id` = #{houseId}   and a.worker_id=#{workerId}
-                        AND a.member_check = 1
+                        AND a.member_check in(1,3)
                         AND a.apply_money > 0
                         AND a.apply_type IN (0,1, 2)
                         GROUP BY

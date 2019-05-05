@@ -11,7 +11,6 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
-import com.dangjia.acg.common.enums.IWorkTypeEnum;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
@@ -24,7 +23,6 @@ import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
-import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.core.*;
@@ -334,7 +332,7 @@ public class HouseWorkerService {
 
         Example example = new Example(HouseFlowApply.class);
         example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.PAY_STATE, 1);
+                .andCondition(" member_check in (1,3)" ).andEqualTo(HouseFlowApply.PAY_STATE, 1);
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
         if (houseFlowApplyList.size() > 0) {
             if (applyType == 4) {
@@ -656,7 +654,7 @@ public class HouseWorkerService {
                 case 0:
                     msg = "每日完工申请成功";
                     //每日完工
-                    houseFlowApplyService.checkWorker(hfa.getId());
+                    houseFlowApplyService.checkWorker(hfa.getId(),false);
                     break;
                 case 1:
                     msg = "阶段完工申请成功";
