@@ -221,7 +221,7 @@ public class TaskService {
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getMemberCheckList(houseId);
         for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
             if (houseFlowApply.getApplyType() == 0) {
-                houseFlowApplyService.checkWorker(houseFlowApply.getId());
+                houseFlowApplyService.checkWorker(houseFlowApply.getId(),false);
                 continue;
             }
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());

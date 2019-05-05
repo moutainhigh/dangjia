@@ -202,7 +202,7 @@ public class HouseFlowService {
                     allgrabBean.setHouseFlowId(houseFlow.getId());
                     allgrabBean.setHouseName(house.getHouseName());
                     allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
-                    allgrabBean.setHouseMember("业主 " + mem.getNickName() == null ? mem.getName() : mem.getNickName());//业主名称
+                    allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                     allgrabBean.setWorkertotal("¥0");//工钱
                     double totalPrice = 0;
                     if (houseFlow.getWorkerType() == 1 && !CommonUtil.isEmpty(house.getStyle())) {//设计师

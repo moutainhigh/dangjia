@@ -45,7 +45,7 @@ public class HouseFlowApplyController implements HouseFlowApplyAPI {
     @Override
     @ApiMethod
     public ServerResponse checkWorker(String userToken, String houseFlowApplyId){
-        return houseFlowApplyService.checkWorker(houseFlowApplyId);
+        return houseFlowApplyService.checkWorker(houseFlowApplyId,false);
     }
 
     @Override
