@@ -373,7 +373,7 @@ public class EngineerService {
         Example example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId);
         example.orderBy(HouseFlow.SORT).desc();
-        String workerId = "";
+        String workerId;
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (HouseFlow houseFlow : houseFlowList) {
@@ -669,8 +669,6 @@ public class EngineerService {
 
     public ServerResponse exportWareHouse(HttpServletResponse response, String houseId, String userName, String address) {
         try {
-
-
             Example example = new Example(Warehouse.class);
             example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId);
             example.orderBy(Warehouse.PRODUCT_SN).desc();

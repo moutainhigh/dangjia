@@ -97,15 +97,6 @@ public class MenuConfiguration extends BaseEntity {
     private Integer sort;
 
     public MenuConfiguration() {
-        this.type = 0;
-        this.menuType = 0;
-        this.showDesigner = 0;
-        this.showActuaries = 0;
-        this.showHousekeeper = 0;
-        this.showCraftsman = 0;
-        this.showType = 0;
-        this.showProprietor = 0;
-        this.showPayment = 0;
         this.sort = 99;
     }
 
