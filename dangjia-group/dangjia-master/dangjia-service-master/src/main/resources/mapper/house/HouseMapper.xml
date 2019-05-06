@@ -55,9 +55,10 @@
         FROM
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
-        WHERE
-        house.data_status=0
-        AND house.visit_state=1
+        WHERE house.visit_state=1
+        <if test="dataStatus!=null and dataStatus!=''">
+            AND house.data_status=#{dataStatus}
+        </if>
         <if test="designerType == 0">
             AND house.designer_ok in (0,4)
         </if>
@@ -308,7 +309,10 @@
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
         WHERE
-        h.data_status =0 and h.designer_ok=3
+         h.designer_ok=3
+        <if test="dataStatus!=null and dataStatus!=''">
+            AND h.data_status=#{dataStatus}
+        </if>
         <if test="budgetOk!=null and budgetOk!=''">
             <if test="budgetOk==1">
                 and (budget_ok =1 or budget_ok = 4)

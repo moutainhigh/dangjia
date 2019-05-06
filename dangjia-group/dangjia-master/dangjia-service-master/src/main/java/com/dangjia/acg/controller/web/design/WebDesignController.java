@@ -38,7 +38,11 @@ public class WebDesignController implements WebDesignAPI {
     public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey) {
         return designService.getDesignList(pageDTO, designerType, searchKey);
     }
-
+    @Override
+    @ApiMethod
+    public ServerResponse invalidHouse(String houseId) {
+        return designService.invalidHouse(houseId);
+    }
     @Override
     @ApiMethod
     public ServerResponse getImagesList(HttpServletRequest request, String houseId) {

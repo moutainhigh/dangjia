@@ -4,7 +4,6 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.design.HouseDesignImageDTO;
 import com.dangjia.acg.dto.house.DesignDTO;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
-import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -216,7 +214,19 @@ public class DesignService {
             return ServerResponse.createByErrorMessage("异常");
         }
     }
+    public ServerResponse invalidHouse(String houseId) {
+        House house = houseMapper.selectByPrimaryKey(houseId);
+        if(house.getDataStatus()==0) {
+            house.setDataStatus(1);
+            houseMapper.updateByPrimaryKeySelective(house);
+            return ServerResponse.createBySuccessMessage("作废成功");
+        }else{
+            house.setDataStatus(0);
+            houseMapper.updateByPrimaryKeySelective(house);
+            return ServerResponse.createBySuccessMessage("还原成功");
+        }
 
+    }
     /**
      * 设计任务列表
      * 。。。。。。。。。。。。。。。。。⦧--6。。⦧--8
@@ -226,12 +236,17 @@ public class DesignService {
      * 自带设计流程：0---1---5---7---2---3
      *
      * @param pageDTO      分页码
-     * @param designerType 0：未支付和设计师未抢单，1：带量房，2：平面图，3：施工图，4：完工
+     * @param designerType 0：未支付和设计师未抢单，1：带量房，2：平面图，3：施工图，4：完工，-1：移除
      * @param searchKey    业主手机号/房子名称
      */
     public ServerResponse getDesignList(PageDTO pageDTO, int designerType, String searchKey) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, searchKey);
+        String dataStatus="0";//正常数据
+        if(designerType<0){
+            //当类型小于0时，则查询移除的数据
+            dataStatus="1";
+        }
+        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, searchKey,dataStatus);
         PageInfo pageResult = new PageInfo(designDTOList);
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         for (DesignDTO designDTO : designDTOList) {

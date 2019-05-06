@@ -30,4 +30,8 @@ public interface MendRecordAPI {
     @ApiOperation(value = "要补退记录", notes = "要补退记录")
     ServerResponse mendList(@RequestParam("userToken") String userToken,@RequestParam("houseId") String houseId
             ,@RequestParam("roleType") int roleType);
+
+    @PostMapping(value = "app/repair/mendRecord/backOrder")
+    @ApiOperation(value = "撤回补货要货订单", notes = "撤回补货要货订单")
+    ServerResponse backOrder(@RequestParam("mendOrderId") String mendOrderId,@RequestParam("type") Integer type);
 }

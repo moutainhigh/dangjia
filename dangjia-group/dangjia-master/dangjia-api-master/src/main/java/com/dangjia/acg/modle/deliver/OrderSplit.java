@@ -37,8 +37,8 @@ public class OrderSplit extends BaseEntity {
 	private String houseId;//houseid
 
 	@Column(name = "apply_status")
-	@Desc(value = "后台审核状态：0生成中, 1申请中, 2通过(发给供应商), 3不通过, 4待业主支付")
-	@ApiModelProperty("后台审核状态：0生成中, 1申请中, 2通过(发给供应商), 3不通过, 4待业主支付")
+	@Desc(value = "后台审核状态：0生成中, 1申请中, 2通过(发给供应商), 3不通过, 4待业主支付,5已撤回")
+	@ApiModelProperty("后台审核状态：0生成中, 1申请中, 2通过(发给供应商), 3不通过, 4待业主支付,5已撤回")
 	private Integer applyStatus;
 
 	@Column(name = "supervisor_id")

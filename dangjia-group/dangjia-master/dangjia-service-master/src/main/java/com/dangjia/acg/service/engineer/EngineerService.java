@@ -13,12 +13,16 @@ import com.dangjia.acg.dto.engineer.ArtisanDTO;
 import com.dangjia.acg.dto.house.WareDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
 import com.dangjia.acg.mapper.core.*;
+import com.dangjia.acg.mapper.disclosure.DiscloSureMapper;
+import com.dangjia.acg.mapper.disclosure.ItemsMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.modle.core.*;
+import com.dangjia.acg.modle.disclosure.DiscloSure;
+import com.dangjia.acg.modle.disclosure.Items;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
@@ -70,7 +74,10 @@ public class EngineerService {
     private IRewardPunishRecordMapper rewardPunishRecordMapper;
     @Autowired
     private IRewardPunishConditionMapper rewardPunishConditionMapper;
-
+    @Autowired
+    private DiscloSureMapper disclosureMapper;
+    @Autowired
+    private ItemsMapper itemsMapper;
     /**
      * 已支付换工匠
      */
@@ -726,5 +733,145 @@ public class EngineerService {
             return ServerResponse.createByErrorMessage("操作失败");
         }
 
+    }
+
+    /**
+     * 获取工地交底事项
+     * @param type
+     * @param pageDTO
+     * @return
+     */
+    public ServerResponse getSureList(Integer type,Integer dataStatus,String search,PageDTO pageDTO) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        Example example=new Example(DiscloSure.class);
+        Example.Criteria criteria= example.createCriteria();
+        if(dataStatus!=null){
+            criteria.andEqualTo(DiscloSure.DATA_STATUS,dataStatus);
+        }
+        criteria.andEqualTo(DiscloSure.TYPE,type);
+        if(search!=null && search!=""){
+            criteria.andLike(DiscloSure.SURE_NAME,"%"+search+"%");
+        }
+        example.orderBy(DiscloSure.MODIFY_DATE).desc();
+        List<DiscloSure> disclosures = disclosureMapper.selectByExample(example);
+        PageInfo pageResult = new PageInfo(disclosures);
+        if(type==0){
+        List<Object> list=new ArrayList<>();
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        for (DiscloSure d:disclosures){
+            Map<String,Object> map=new HashMap<>();
+            map.put("id",d.getId());
+            map.put("name",d.getSureName());
+            map.put("desc",d.getSureDesc());
+            map.put("img",d.getSureImg());
+            map.put("imgUrl",imageAddress + d.getSureImg());
+            map.put("status",d.getDataStatus());
+            map.put("createDate",d.getCreateDate());
+            map.put("modifyDate",d.getModifyDate());
+            list.add(map);
+        }
+        pageResult.setList(list);}
+        return ServerResponse.createBySuccess("查询成功", pageResult);
+    }
+    public ServerResponse addSure(String sureName,String sureDesc, String sureImg,Integer dataStatus,Integer type){
+        try{
+            DiscloSure disclosure=new DiscloSure();
+            disclosure.setSureName(sureName);
+            disclosure.setSureDesc(sureDesc);
+            disclosure.setSureImg(sureImg);
+            disclosure.setType(type);
+            if(dataStatus!=null){
+                disclosure.setDataStatus(dataStatus);
+            }
+            disclosureMapper.insert(disclosure);
+            return ServerResponse.createBySuccessMessage("添加成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("添加失败");
+        }
+    }
+
+    public ServerResponse updateSure(String sureName, String sureDesc, String sureImg,Integer dataStatus, String id){
+        try{
+            DiscloSure disclosure = disclosureMapper.selectByPrimaryKey(id);
+            if(sureName!=null && sureName!="" ){
+                disclosure.setSureName(sureName);
+                disclosure.setModifyDate(new Date());
+            }
+            if(sureDesc!=null && sureDesc!=""){
+                disclosure.setSureDesc(sureDesc);
+                disclosure.setModifyDate(new Date());
+            }
+            if(sureImg!=null && sureImg!=""){
+                disclosure.setSureImg(sureImg);
+                disclosure.setModifyDate(new Date());
+            }
+            if(dataStatus!=null){
+                disclosure.setDataStatus(dataStatus);
+                disclosure.setModifyDate(new Date());
+            }
+            disclosureMapper.updateByPrimaryKeySelective(disclosure);
+            return ServerResponse.createBySuccessMessage("修改成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("修改失败");
+        }
+    }
+
+    public ServerResponse addItems(String name, Integer type, Integer dataStatus){
+        try{
+             Items items =new Items();
+             items.setName(name);
+             items.setType(type);
+            if(dataStatus!=null){
+                items.setDataStatus(dataStatus);
+            }
+            itemsMapper.insert(items);
+            return ServerResponse.createBySuccessMessage("添加成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("添加失败");
+        }
+    }
+
+    public ServerResponse getItemsList(Integer type, Integer dataStatus,String search, PageDTO pageDTO){
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        Example example=new Example(Items.class);
+        if(dataStatus!=null){
+            example.createCriteria().andEqualTo(Items.DATA_STATUS,dataStatus);
+        }
+        if(type!=null){
+            example.createCriteria().andEqualTo(Items.TYPE,type);
+        }
+        if(search!=null && search!=""){
+            example.createCriteria().andLike(Items.NAME,"%"+search+"%");
+        }
+        example.orderBy(Items.MODIFY_DATE).desc();
+        List<Items> Items = itemsMapper.selectByExample(example);
+        PageInfo pageResult = new PageInfo(Items);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
+    }
+
+    public ServerResponse updateItems(String name, Integer type, Integer dataStatus, String id){
+        try{
+            Items items = itemsMapper.selectByPrimaryKey(id);
+            if(name!=null && name!=""){
+                items.setName(name);
+                items.setModifyDate(new Date());
+            }
+            if(type!=null ){
+                items.setType(type);
+                items.setModifyDate(new Date());
+            }
+            if(dataStatus!=null){
+                items.setDataStatus(dataStatus);
+                items.setModifyDate(new Date());
+            }
+            itemsMapper.updateByPrimaryKeySelective(items);
+            return ServerResponse.createBySuccessMessage("修改成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("修改失败");
+        }
     }
 }

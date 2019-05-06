@@ -170,4 +170,40 @@ public class WebEngineerController implements WebEngineerAPI {
     public ServerResponse freeze(String memberId, boolean type) {
         return engineerService.freeze(memberId, type);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getSureList(Integer type,Integer dataStatus,String search,PageDTO pageDTO) {
+        return engineerService.getSureList(type,dataStatus,search,pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addSure(String sureName, String sureDesc, String sureImg,Integer dataStatus,Integer type) {
+        return engineerService.addSure(sureName,sureDesc,sureImg,dataStatus,type);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse updateSure(String sureName, String sureDesc, String sureImg,Integer dataStatus, String id) {
+        return engineerService.updateSure(sureName,sureDesc,sureImg,dataStatus,id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getItemsList( Integer type, Integer dataStatus, String search,PageDTO pageDTO) {
+        return engineerService.getItemsList(type,dataStatus,search,pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addItems(String name, Integer type, Integer dataStatus) {
+        return engineerService.addItems(name,type,dataStatus);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse updateItems(String name, Integer type, Integer dataStatus, String id) {
+        return engineerService.updateItems(name,type,dataStatus,id);
+    }
 }

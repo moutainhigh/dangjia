@@ -37,7 +37,7 @@ public class MendOrderCheck extends BaseEntity {
     @Column(name = "state")
     @Desc(value = "审核状态")
     @ApiModelProperty("审核状态")
-    private Integer state; //0处理中,1未通过,2已通过
+    private Integer state; //0处理中,1未通过,2已通过 3已撤回
 
     @Column(name = "auditor_id")
     @Desc(value = "审核人id")
