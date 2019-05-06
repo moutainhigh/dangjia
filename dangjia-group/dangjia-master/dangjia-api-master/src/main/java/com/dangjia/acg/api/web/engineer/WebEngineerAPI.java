@@ -98,4 +98,36 @@ public interface WebEngineerAPI {
     @PostMapping(value = "web/engineer/freeze")
     @ApiOperation(value = "冻结账户", notes = "冻结账户")
     ServerResponse freeze(@RequestParam("memberId") String  memberId,@RequestParam("type") boolean type);
+
+    @PostMapping(value = "web/engineer/getSureList")
+    @ApiOperation(value = "获取工地交底/帮助事项", notes = "获取工地交底/帮助事项")
+    ServerResponse getSureList(@RequestParam("type") Integer type, @RequestParam("dataStatus") Integer dataStatus,
+                               @RequestParam("search") String search,@RequestParam("pageDTO") PageDTO pageDTO);
+
+    @PostMapping(value = "web/engineer/addSure")
+    @ApiOperation(value = "添加工地交底/帮助事项", notes = "添加工地交底/帮助事项")
+    ServerResponse addSure(@RequestParam("sureName") String sureName,@RequestParam("sureDesc") String sureDesc,
+                           @RequestParam("sureImg") String sureImg, @RequestParam("dataStatus") Integer dataStatus,
+                           @RequestParam("type") Integer type);
+
+    @PostMapping(value = "web/engineer/updateSure")
+    @ApiOperation(value = "修改工地交底/帮助事项", notes = "修改工地交底/帮助事项")
+    ServerResponse updateSure(@RequestParam("sureName") String sureName,@RequestParam("sureDesc") String sureDesc,
+                           @RequestParam("sureImg") String sureImg, @RequestParam("dataStatus") Integer dataStatus,
+                              @RequestParam("id") String id);
+
+    @PostMapping(value = "web/engineer/getItemsList")
+    @ApiOperation(value = "查询开工完工事项", notes = "查询开工完工事项")
+    ServerResponse getItemsList(@RequestParam("type") Integer type,@RequestParam("dataStatus") Integer dataStatus,
+                                @RequestParam("search") String search,@RequestParam("pageDTO") PageDTO pageDTO);
+
+    @PostMapping(value = "web/engineer/addItems")
+    @ApiOperation(value = "添加开工完工事项", notes = "添加开工完工事项")
+    ServerResponse addItems(@RequestParam("name") String name, @RequestParam("type") Integer type,
+                            @RequestParam("dataStatus") Integer dataStatus);
+
+    @PostMapping(value = "web/engineer/updateItems")
+    @ApiOperation(value = "修改开工完工事项", notes = "修改开工完工事项")
+    ServerResponse updateItems(@RequestParam("name") String name, @RequestParam("type") Integer type,
+                               @RequestParam("dataStatus") Integer dataStatus,@RequestParam("id") String id);
 }
