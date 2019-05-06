@@ -375,8 +375,8 @@
         h.is_select as isSelect,
         (
         case
+        when h.visit_state = 3 or h.visit_state = 2  then h.visit_state
         when (f.supervisor_start = 1 or f.supervisor_start = 0)  and h.visit_state !=2 then f.supervisor_start
-        when !(f.supervisor_start = 1 or f.supervisor_start = 0) then h.visit_state
         end
         )  as visitState,
         h.data_status as dataStatus,
