@@ -1,8 +1,6 @@
 package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
@@ -93,6 +91,8 @@ public class OrderService {
     @Autowired
     private MendOrderService mendOrderService;
 
+    @Autowired
+    private ICartMapper cartMapper;
     /**
      * 订单详情
      */
@@ -418,13 +418,18 @@ public class OrderService {
                 orderSplitMapper.insert(orderSplit);
             }
 
-            JSONArray arr = JSONArray.parseArray(productArr);
+            //获取要货购物车数据
+            example = new Example(Cart.class);
+            example.createCriteria()
+                    .andEqualTo(Cart.HOUSE_ID,houseId)
+                    .andEqualTo(Cart.WORKER_TYPE_ID,worker.getWorkerTypeId())
+                    .andEqualTo(Cart.MEMBER_ID,worker.getId());
+            List<Cart> cartList=cartMapper.selectByExample(example);
             List productList=new ArrayList();
             Map mapczai=new HashMap();
-            for(int i=0; i<arr.size(); i++) {
-                JSONObject obj = arr.getJSONObject(i);
-                Double num = Double.parseDouble(obj.getString("num"));
-                String productId = obj.getString("productId");
+            for(int i=0; i<cartList.size(); i++) {
+                Double num =cartList.get(i).getShopCount();
+                String productId =cartList.get(i).getProductId();
                 Warehouse warehouse = warehouseMapper.getByProductId(productId, houseId);//定位到仓库id
 
                 //判断如果该商品已经插入，则不再进行第二次插入，防止数据重复展示
