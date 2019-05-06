@@ -52,8 +52,6 @@ public class WorkerService {
     @Autowired
     private CraftsmanConstructionService constructionService;
     @Autowired
-    private RedisClient redisClient;
-    @Autowired
     private IWithdrawDepositMapper withdrawDepositMapper;
     @Autowired
     private IHouseWorkerOrderMapper houseWorkerOrderMapper;
@@ -97,7 +95,7 @@ public class WorkerService {
             if (worker.getWorkerType() == 3) {//大管家
                 List<HouseWorker> listHouseWorker = houseWorkerMapper.paidListByHouseId(houseId);
                 for (HouseWorker houseWorker : listHouseWorker) {
-                    Map<String, Object> map = new HashMap<String, Object>();
+                    Map<String, Object> map = new HashMap<>();
                     Member worker2 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
                     if (worker2 == null) {
                         continue;

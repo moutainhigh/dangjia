@@ -33,13 +33,13 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
     @Override
     @ApiMethod
     public ServerResponse checkPass(String userToken, String houseId, int type) {
-        return houseDesignImageService.checkPass(houseId, type);
+        return houseDesignImageService.checkPass(userToken, houseId, type);
     }
 
     @Override
     @ApiMethod
     public ServerResponse checkDesign(String userToken, String houseId) {
-        return houseDesignImageService.checkDesign(houseId);
+        return houseDesignImageService.checkDesign(userToken, houseId);
     }
 
     @Override

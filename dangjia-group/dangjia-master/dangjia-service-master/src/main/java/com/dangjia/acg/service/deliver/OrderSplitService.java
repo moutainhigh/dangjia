@@ -130,7 +130,24 @@ public class OrderSplitService {
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }
-
+    /**
+     * 工匠拒绝收货，打回供应商待发货
+     */
+    public ServerResponse rejectionSplitDeliver(String splitDeliverId) {
+        try {
+            SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+            if(splitDeliver.getShippingState()==0){
+                return ServerResponse.createBySuccessMessage("您已经拒收！");
+            }
+            splitDeliver.setSendTime(null);
+            splitDeliver.setShippingState(0);//已发待收
+            splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
     /**
      * 发货单明细
      */
@@ -190,7 +207,11 @@ public class OrderSplitService {
      */
     public ServerResponse splitDeliverList(String supplierId, int shipState) {
         Example example = new Example(SplitDeliver.class);
-        example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId).andEqualTo(SplitDeliver.SHIPPING_STATE, shipState);
+        if(shipState==2){
+            example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId).andCondition(" shipping_state in(2,4) ");
+        }else {
+            example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId).andEqualTo(SplitDeliver.SHIPPING_STATE, shipState);
+        }
         List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
         return ServerResponse.createBySuccess("查询成功", splitDeliverList);
     }

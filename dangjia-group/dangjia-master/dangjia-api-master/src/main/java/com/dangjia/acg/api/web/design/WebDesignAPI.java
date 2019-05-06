@@ -38,6 +38,11 @@ public interface WebDesignAPI {
                                  @RequestParam("designerType") int designerType,
                                  @RequestParam("searchKey") String searchKey);
 
+    @PostMapping("web/house/invalid")
+    @ApiOperation(value = "房子作废", notes = "房子作废")
+    ServerResponse invalidHouse(@RequestParam("houseId")  String houseId);
+
+
     @PostMapping("web/design/getImagesList")
     @ApiOperation(value = "设计图列表", notes = "设计图列表")
     ServerResponse getImagesList(@RequestParam("request") HttpServletRequest request,

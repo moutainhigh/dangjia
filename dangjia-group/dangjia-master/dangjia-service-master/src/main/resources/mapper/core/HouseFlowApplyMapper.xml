@@ -149,6 +149,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and house_id = #{houseId}
         and apply_type = 4
         and to_days(create_date) = to_days(#{time})
+        LIMIT 1
     </select>
 
     <!--查询待审核的申请(不算每日完工) -->
