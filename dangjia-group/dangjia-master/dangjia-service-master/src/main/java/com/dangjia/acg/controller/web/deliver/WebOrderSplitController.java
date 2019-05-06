@@ -24,6 +24,14 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     public ServerResponse sentSplitDeliver(String splitDeliverId) {
         return orderSplitService.sentSplitDeliver(splitDeliverId);
     }
+    /**
+     * 供应商发货
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse rejectionSplitDeliver(String splitDeliverId) {
+        return orderSplitService.rejectionSplitDeliver(splitDeliverId);
+    }
 
     /**
      * 发货单明细
