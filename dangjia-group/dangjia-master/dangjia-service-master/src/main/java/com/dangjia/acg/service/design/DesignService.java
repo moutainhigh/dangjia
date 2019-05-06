@@ -4,7 +4,6 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.design.HouseDesignImageDTO;
 import com.dangjia.acg.dto.house.DesignDTO;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
-import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -90,7 +88,12 @@ public class DesignService {
             }
         }
     }
-
+    public ServerResponse invalidHouse(String houseId) {
+        House house = houseMapper.selectByPrimaryKey(houseId);
+        house.setDataStatus(1);
+        houseMapper.updateByPrimaryKeySelective(house);
+        return ServerResponse.createBySuccessMessage("发送成功");
+    }
     /**
      * 发送平面图给业主
      *
