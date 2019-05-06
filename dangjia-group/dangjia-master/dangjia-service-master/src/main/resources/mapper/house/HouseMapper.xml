@@ -377,7 +377,7 @@
         case
         when h.visit_state = 3  then 3
         when (h.visit_state = 2 or h.pause=1) then 2
-        when (f.supervisor_start = 1 or f.supervisor_start = 0)  and h.visit_state !=2 and h.visit_state !=2 and h.pause=0 then f.supervisor_start
+        when (f.supervisor_start = 1 or f.supervisor_start = 0)  and h.visit_state !=2  and h.pause=0 then f.supervisor_start
         end
         )  as visitState,
         h.data_status as dataStatus,
