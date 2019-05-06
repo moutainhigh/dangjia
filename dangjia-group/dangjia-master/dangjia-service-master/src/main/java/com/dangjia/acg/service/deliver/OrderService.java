@@ -502,7 +502,7 @@ public class OrderService {
                     map.put("productId", productId);
                     productList.add(map);
                 }
-                if(numObj>0&&product.getType()==1&&product.getMaket()==1){
+                if(numObj>0&&(product.getType()==0||product.getMaket()==0)){
                     return ServerResponse.createByErrorMessage("商品（"+product.getName()+"）已下架，无法要货！");
                 }
             }

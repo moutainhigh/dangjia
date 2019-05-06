@@ -342,10 +342,6 @@
 
     <select id="getHouseListLikeSearchKey" resultType="com.dangjia.acg.modle.house.House">
         SELECT
-        m.id as memberId,
-        m.nick_name as memberNickName,
-        m.name as memberName,
-        m.mobile as mobile,
         h.id as id,
         h.building,
         h.city_name as cityName,
@@ -377,19 +373,26 @@
         h.work_deposit_id as workDepositId,
         h.custom_sort as customSort,
         h.is_select as isSelect,
-        h.visit_state as visitState,
+        (
+        case
+        when h.visit_state = 3  then 3
+        when (h.visit_state = 2 or h.pause=1) then 2
+        when (f.supervisor_start = 1 or f.supervisor_start = 0)  and h.visit_state !=2  and h.pause=0 then f.supervisor_start
+        end
+        )  as visitState,
         h.data_status as dataStatus,
         h.create_date as createDate,
         h.modify_date as modifyDate
         FROM
         dj_house h
+        INNER JOIN dj_core_house_flow f ON h.id=f.house_id and f.worker_type=3
         INNER JOIN dj_member m ON h.member_id = m.id
         WHERE
         h.data_status =0
-        <if test="visitState==-1">
-            and h.visit_state !=2
+        <if test="visitState==0 || visitState==1">
+            and f.supervisor_start = #{visitState}  and h.visit_state !=2   and h.pause=0
         </if>
-        <if test="visitState!=-1">
+        <if test="visitState==2 || visitState==3">
             and h.visit_state = #{visitState}
         </if>
 
