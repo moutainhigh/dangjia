@@ -91,6 +91,7 @@ public class MendRecordService {
                         map.put("goodsType", "服务");
                     }
                     map.put("name", orderSplitItem.getProductName());
+                    map.put("productId", orderSplitItem.getProductId());
                     map.put("price", "¥" + String.format("%.2f",orderSplitItem.getPrice())+"/"+orderSplitItem.getUnitName());
                     map.put("shopCount", orderSplitItem.getNum());//本次数量
                     map.put("repairCount","0");
@@ -127,6 +128,8 @@ public class MendRecordService {
                         }else {
                             map.put("goodsType", "服务");
                         }
+
+                        map.put("productId", mendMateriel.getProductId());
                         map.put("name", mendMateriel.getProductName());
                         map.put("price", "¥" + String.format("%.2f",mendMateriel.getPrice())+"/"+mendMateriel.getUnitName());
                         map.put("shopCount", mendMateriel.getShopCount());
