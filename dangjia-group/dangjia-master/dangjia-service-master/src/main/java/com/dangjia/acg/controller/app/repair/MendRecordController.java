@@ -44,4 +44,10 @@ public class MendRecordController implements MendRecordAPI {
     public ServerResponse mendList(String userToken,String houseId, int roleType){
         return mendRecordService.mendList(userToken,houseId,roleType);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse backOrder(String mendOrderId,Integer type) {
+        return mendRecordService.backOrder(mendOrderId,type);
+    }
 }

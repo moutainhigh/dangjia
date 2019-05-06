@@ -65,7 +65,7 @@ public class ChangeOrder extends BaseEntity {
     private String contentB;
 
     @Column(name = "state")
-    @Desc(value = "0管家处理中,1管家取消,2管家通过(补:业主审核中,退:工匠审核中),3管家重新提交数量,4补人工支付完成,5待业主支付,6退人工完成")
+    @Desc(value = "0管家处理中,1管家取消,2管家通过(补:业主审核中,退:工匠审核中),3管家重新提交数量,4补人工支付完成,5待业主支付,6退人工完成,7已撤回")
     @ApiModelProperty(" ")
     private Integer state;
 }

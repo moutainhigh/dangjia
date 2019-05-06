@@ -101,7 +101,12 @@ public class MendOrderCheckService {
             example.createCriteria().andEqualTo(MendOrderCheck.MEND_ORDER_ID,mendOrderId);
             example.orderBy(MendOrderCheck.SORT).asc();
             List<MendOrderCheck> mendOrderCheckList = mendOrderCheckMapper.selectByExample(example);
-
+            MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
+            if(mendOrder!=null && mendOrder.getState()==5){
+                for(MendOrderCheck m:mendOrderCheckList){
+                    m.setState(3);
+                }
+            }
             return ServerResponse.createBySuccess("查询成功",mendOrderCheckList);
         }catch (Exception e){
             e.printStackTrace();

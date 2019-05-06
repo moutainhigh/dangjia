@@ -40,7 +40,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         FROM dj_repair_change_order
         where  worker_type_id = #{workerTypeId}
         and  house_id = #{houseId}
-        and  state not in (1,4,6)
+        and  state not in (1,4,6,7)
     </select>
 
 </mapper>

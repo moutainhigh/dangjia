@@ -68,8 +68,8 @@ public class MendOrder extends BaseEntity {
 	private Integer type;
 
 	@Column(name = "state")
-	@Desc(value = "0生成中,1处理中,2不通过取消,3已通过,4已结算")
-	@ApiModelProperty("0生成中,1处理中,2不通过取消,3已通过,4已结算")
+	@Desc(value = "0生成中,1处理中,2不通过取消,3已通过,4已结算,5已撤回")
+	@ApiModelProperty("0生成中,1处理中,2不通过取消,3已通过,4已结算,5已撤回")
 	private Integer state;
 
 	@Column(name = "total_amount")

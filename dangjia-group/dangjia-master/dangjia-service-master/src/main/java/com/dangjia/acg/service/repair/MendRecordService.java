@@ -9,18 +9,14 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDetail;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
-import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
-import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
-import com.dangjia.acg.mapper.repair.IMendOrderMapper;
-import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
+import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.mapper.repair.*;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
+import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.repair.ChangeOrder;
-import com.dangjia.acg.modle.repair.MendMateriel;
-import com.dangjia.acg.modle.repair.MendOrder;
-import com.dangjia.acg.modle.repair.MendWorker;
+import com.dangjia.acg.modle.repair.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -55,7 +51,10 @@ public class MendRecordService {
     private IChangeOrderMapper changeOrderMapper;
     @Autowired
     private RedisClient redisClient;
-
+    @Autowired
+    private IMendOrderCheckMapper mendOrderCheckMapper;
+    @Autowired
+    private IWarehouseMapper warehouseMapper;
     /**
      * 要补退明细
      * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货
@@ -322,6 +321,87 @@ public class MendRecordService {
         }catch (Exception e){
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 撤回补货要货订单
+     * @param mendOrderId
+     * @return
+     */
+    public ServerResponse  backOrder(String mendOrderId,Integer type){
+        //工匠/大管家要货撤回
+        if (type!=null && type==1){
+            OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
+            Integer applyStatus = orderSplit.getApplyStatus();
+            Example example = new Example(OrderSplitItem.class);
+            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
+            List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+            //无补货且在申请中
+           if(orderSplit.getMendNumber()==null && applyStatus==1){
+               for (OrderSplitItem orderSplitItem : orderSplitItemList){
+                   Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
+                   warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());//更新仓库已要总数
+                   warehouse.setAskTime(warehouse.getAskTime() - 1);//更新该货品被要次数
+                   warehouseMapper.updateByPrimaryKeySelective(warehouse);
+               }
+               orderSplit.setApplyStatus(5);
+               orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
+               return ServerResponse.createBySuccessMessage("撤回成功");
+           }else if(orderSplit.getMendNumber()!=null) {
+               MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(orderSplit.getMendNumber());
+               //未支付
+               if (mendOrder.getState()==1){
+                   orderSplit.setApplyStatus(5);
+                   orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
+                   //业主的补货支付被撤回
+                   mendOrder.setState(5);
+                   mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+                   return ServerResponse.createBySuccessMessage("撤回成功");
+               }
+               //已支付
+               else if(mendOrder.getState()==4){
+                   for (OrderSplitItem orderSplitItem : orderSplitItemList){
+                       int i=0;//这个没用,只是为了不出现重复的标志
+                       Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
+                       warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());//更新仓库已要总数
+                       warehouse.setAskTime(warehouse.getAskTime() - 1);//更新该货品被要次数
+                       warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                   }
+                   orderSplit.setApplyStatus(5);
+                   orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
+                   return ServerResponse.createBySuccessMessage("撤回成功");
+               }else {
+                   return ServerResponse.createByErrorMessage("撤回失败");
+               }
+           }else {
+               return ServerResponse.createByErrorMessage("撤回失败");
+           }
+        }
+        //工匠退材料//工匠补人工//业主申请退人工
+        else{
+            Example example=new Example(MendOrderCheck.class);
+           example.createCriteria().andEqualTo(MendOrderCheck.MEND_ORDER_ID,mendOrderId);
+            List<MendOrderCheck> mendOrderChecks = mendOrderCheckMapper.selectByExample(example);
+            boolean flag=false;
+            for (MendOrderCheck m:mendOrderChecks){
+                if(m.getState()==0){
+                    flag=true;
+                }
+            }
+            MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
+            if(flag && mendOrder.getState()!=5){
+                mendOrder.setState(5);
+                mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+                if(mendOrder.getType()==1 || mendOrder.getType()==3){
+                    ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
+                    changeOrder.setState(7);
+                    changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+                }
+                return ServerResponse.createBySuccessMessage("撤回成功");
+            }else {
+                return ServerResponse.createByErrorMessage("撤回失败");
+            }
         }
     }
 }
