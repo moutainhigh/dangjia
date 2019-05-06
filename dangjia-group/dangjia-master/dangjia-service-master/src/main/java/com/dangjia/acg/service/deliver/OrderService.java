@@ -16,10 +16,7 @@ import com.dangjia.acg.dto.deliver.ItemDTO;
 import com.dangjia.acg.dto.deliver.OrderDTO;
 import com.dangjia.acg.dto.deliver.OrderItemDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
-import com.dangjia.acg.mapper.deliver.IOrderItemMapper;
-import com.dangjia.acg.mapper.deliver.IOrderMapper;
-import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
-import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
+import com.dangjia.acg.mapper.deliver.*;
 import com.dangjia.acg.mapper.design.IDesignImageTypeMapper;
 import com.dangjia.acg.mapper.design.IHouseDesignImageMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -30,10 +27,7 @@ import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.WorkerType;
-import com.dangjia.acg.modle.deliver.Order;
-import com.dangjia.acg.modle.deliver.OrderItem;
-import com.dangjia.acg.modle.deliver.OrderSplit;
-import com.dangjia.acg.modle.deliver.OrderSplitItem;
+import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.design.DesignImageType;
 import com.dangjia.acg.modle.design.HouseDesignImage;
 import com.dangjia.acg.modle.house.House;
@@ -92,6 +86,8 @@ public class OrderService {
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
 
+    @Autowired
+    private ISplitDeliverMapper splitDeliverMapper;
     @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired
@@ -375,9 +371,17 @@ public class OrderService {
             Example example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 4)
                     .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
-            List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
-            if(orderSplitList.size()>0){
+            int orderSplitnum= orderSplitMapper.selectCountByExample(example);
+            if(orderSplitnum>0){
                 return ServerResponse.createByErrorMessage("存在业主未处理的补货单，无法提交要货！");
+            }
+
+            example = new Example(SplitDeliver.class);
+            example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId)
+                    .andEqualTo(SplitDeliver.SHIPPING_STATE, 1).andCondition(" DATE_SUB(CURDATE(), INTERVAL 7 DAY) > date(send_time) ");
+            int list=splitDeliverMapper.selectCountByExample(example);
+            if(list>0){
+                return ServerResponse.createBySuccessMessage("存在供应商发货后7天还未签收,无法提交要货！");
             }
             ServerResponse serverResponse=mendOrderService.mendChecking(houseId,worker.getWorkerTypeId(),0);
             if(!serverResponse.isSuccess()){
@@ -386,7 +390,7 @@ public class OrderService {
             example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
                     .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
-            orderSplitList = orderSplitMapper.selectByExample(example);
+            List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             OrderSplit orderSplit;
             House house = houseMapper.selectByPrimaryKey(houseId);
             if (orderSplitList.size() > 0){
