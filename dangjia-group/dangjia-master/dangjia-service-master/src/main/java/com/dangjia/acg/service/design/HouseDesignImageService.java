@@ -37,6 +37,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,8 @@ import java.util.Map;
 public class HouseDesignImageService {
     @Autowired
     private IHouseMapper houseMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
     @Autowired
     private IHouseDesignImageMapper houseDesignImageMapper;
     @Autowired
@@ -132,10 +135,18 @@ public class HouseDesignImageService {
      * 。。。。。。。。。。。。⦧--6。。⦧--8
      * 自带设计流程：0---1---5---7---2---3
      */
-    public ServerResponse checkPass(String houseId, int type) {
+    public ServerResponse checkPass(String userToken, String houseId, int type) {
         House house = houseMapper.selectByPrimaryKey(houseId);
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
+        }
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member worker = (Member) object;
+        if (!worker.getId().equals(house.getMemberId())) {
+            return ServerResponse.createByErrorMessage("您无权操作此房产");
         }
         Example examples = new Example(HouseFlow.class);
         examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.WORKER_TYPE, "1");
@@ -201,7 +212,12 @@ public class HouseDesignImageService {
     /**
      * 审核设计图
      */
-    public ServerResponse checkDesign(String houseId) {
+    public ServerResponse checkDesign(String userToken, String houseId) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member worker = (Member) object;
         Map<String, Object> map = new HashMap<>();
         House house = houseMapper.selectByPrimaryKey(houseId);
         List<HouseDesignImageDTO> houseDesignImageDTOList = new ArrayList<>();
@@ -219,13 +235,17 @@ public class HouseDesignImageService {
             houseDesignImageDTO.setImageurl(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + houseDesignImage.getImageurl());
             houseDesignImageDTO.setName("平面图");
             houseDesignImageDTOList.add(houseDesignImageDTO);
-            map.put("button", "确认平面图");
+            if (worker.getId().equals(house.getMemberId())) {
+                map.put("button", "确认平面图");
+            }
             map.put("list", houseDesignImageDTOList);
             return ServerResponse.createBySuccess("查询成功", map);
         } else if (house.getDesignerOk() == 2) {
             ServerResponse serverResponse = designService.getImagesList(houseId);
             map.put("list", serverResponse.getResultObj());
-            map.put("button", "确认施工图");
+            if (worker.getId().equals(house.getMemberId())) {
+                map.put("button", "确认施工图");
+            }
             return ServerResponse.createBySuccess("查询成功", map);
         }
         return ServerResponse.createByErrorMessage("查询失败");
