@@ -18,6 +18,7 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.deliver.Cart;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -183,11 +184,11 @@ public class CartService {
                 warehouseDTO.setProductId(String.valueOf(product.get(Product.ID)));
                 warehouseDTO.setProductName(String.valueOf(product.get(Product.NAME)));
                 warehouseDTO.setPrice(Double.parseDouble(String.valueOf(product.get(Product.PRICE))));
-                warehouseDTO.setUnitName(String.valueOf(product.get(Product.UNIT_NAME)));
                 warehouseDTO.setProductType(Integer.parseInt(productType));
                 warehouseDTO.setImage(address + product.get(Product.IMAGE));
                 if (warehouseList.size() > 0) {
                     Warehouse warehouse = warehouseList.get(0);
+                    warehouseDTO.setUnitName(warehouse.getUnitName());
                     warehouseDTO.setImage(address + warehouse.getImage());
                     warehouseDTO.setShopCount(warehouse.getShopCount());
                     warehouseDTO.setAskCount(warehouse.getAskCount());
@@ -202,6 +203,8 @@ public class CartService {
                     warehouseDTO.setBackTime(warehouse.getBackTime());
                     warehouseDTOS.add(warehouseDTO);
                 }else{
+                    String unit = forMasterAPI.getUnitName(cityId,String.valueOf(product.get(Product.CONVERT_UNIT)));
+                    warehouseDTO.setUnitName(unit);
                     warehouseDTO.setShopCount(0.0);
                     warehouseDTO.setRepairCount(0.0);
                     warehouseDTO.setRealCount(0.0);
