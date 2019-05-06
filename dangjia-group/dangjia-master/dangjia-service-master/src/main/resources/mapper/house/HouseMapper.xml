@@ -377,7 +377,12 @@
         h.work_deposit_id as workDepositId,
         h.custom_sort as customSort,
         h.is_select as isSelect,
-        h.visit_state as visitState,
+        (
+        case
+        when f.supervisor_start &lt; 2  and h.visit_state !=2 then f.supervisor_start
+        when h.visit_state &gt;1 then h.visit_state
+        end
+        )  as visitState,
         h.data_status as dataStatus,
         h.create_date as createDate,
         h.modify_date as modifyDate
