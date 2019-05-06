@@ -1355,7 +1355,7 @@ public class PaymentService {
                 }
                 example = new Example(HouseWorker.class);
                 example.createCriteria().andEqualTo(HouseWorker.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
-                        .andEqualTo(HouseWorker.HOUSE_ID, houseId).andEqualTo(HouseWorker.WORK_TYPE, 1);
+                        .andEqualTo(HouseWorker.HOUSE_ID, houseId).andEqualTo(HouseWorker.WORK_TYPE, 1).andEqualTo(HouseWorker.IS_SELECT, 1);
                 List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
                 if (houseWorkerList.size() != 1) {
                     return ServerResponse.createByErrorMessage("抢单异常,联系平台部");

@@ -381,7 +381,7 @@ public class OrderService {
                     .andEqualTo(SplitDeliver.SHIPPING_STATE, 1).andCondition(" DATE_SUB(CURDATE(), INTERVAL 7 DAY) > date(send_time) ");
             int list=splitDeliverMapper.selectCountByExample(example);
             if(list>0){
-                return ServerResponse.createBySuccessMessage("存在供应商发货后7天还未签收,无法提交要货！");
+                return ServerResponse.createByErrorMessage("存在供应商发货后7天还未签收,无法提交要货！");
             }
             ServerResponse serverResponse=mendOrderService.mendChecking(houseId,worker.getWorkerTypeId(),0);
             if(!serverResponse.isSuccess()){
@@ -431,6 +431,7 @@ public class OrderService {
                 if(mapczai.get(orderSplit.getId()+"-"+productId+"-"+houseId)!=null){
                     continue;
                 }
+                Product product=forMasterAPI.getProduct(house.getCityId(), productId);
                 if(warehouse!=null) {
                     OrderSplitItem orderSplitItem = new OrderSplitItem();
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
@@ -451,7 +452,7 @@ public class OrderService {
                     orderSplitItem.setHouseId(houseId);
                     orderSplitItemMapper.insert(orderSplitItem);
                 }else{
-                    Product product=forMasterAPI.getProduct(house.getCityId(), productId);
+
                     Goods goods=forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
                     OrderSplitItem orderSplitItem = new OrderSplitItem();
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
@@ -472,6 +473,7 @@ public class OrderService {
                     orderSplitItemMapper.insert(orderSplitItem);
                 }
                 mapczai.put(orderSplit.getId()+"-"+productId+"-"+houseId,"1");
+                Double numObj=0D;
                 //计算补货数量
                 if(warehouse!=null) {
                     //仓库剩余数
@@ -479,6 +481,7 @@ public class OrderService {
                     //多出的数
                     Double overflowCount = (num - surCount);
                     if (overflowCount > 0) {
+                        numObj=overflowCount;
                         Map map = new HashMap();
                         map.put("num", overflowCount);
                         map.put("productId", productId);
@@ -486,6 +489,7 @@ public class OrderService {
                     }else {
                         //如果剩余数为负数
                         if (surCount < 0) {
+                            numObj=num;
                             Map map = new HashMap();
                             map.put("num", num);
                             map.put("productId", productId);
@@ -493,10 +497,14 @@ public class OrderService {
                         }
                     }
                 }else{
+                    numObj=num;
                     Map map = new HashMap();
                     map.put("num", num);
                     map.put("productId", productId);
                     productList.add(map);
+                }
+                if(numObj>0&&product.getType()==1&&product.getMaket()==1){
+                    return ServerResponse.createBySuccessMessage("商品（"+product.getName()+"）已下架，无法要货！");
                 }
             }
 
