@@ -130,7 +130,24 @@ public class OrderSplitService {
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }
-
+    /**
+     * 工匠拒绝收货，打回供应商待发货
+     */
+    public ServerResponse rejectionSplitDeliver(String splitDeliverId) {
+        try {
+            SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+            if(splitDeliver.getShippingState()==0){
+                return ServerResponse.createBySuccessMessage("您已经拒收！");
+            }
+            splitDeliver.setSendTime(null);
+            splitDeliver.setShippingState(0);//已发待收
+            splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
     /**
      * 发货单明细
      */
