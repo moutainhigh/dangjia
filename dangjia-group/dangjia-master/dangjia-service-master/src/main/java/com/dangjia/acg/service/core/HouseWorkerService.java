@@ -360,6 +360,7 @@ public class HouseWorkerService {
                     return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "该工序（" + workerType.getName() + "）已暂停施工,请勿提交申请！");
                 }
                 if (house.getPause() != null) {
+
                     if (house.getPause() == 1) {
                         return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "该房子已暂停施工,请勿提交申请！");
                     }

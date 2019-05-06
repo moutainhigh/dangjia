@@ -303,12 +303,10 @@ public class HouseFlowService {
     public int getCustomSortIndex(String customSort, String workerType) {
         String[] strArr = customSort.split(",");
         int indexSort = 3;
-        if (strArr != null) {
-            for (int i = 0; i < strArr.length; i++) {
-                if (strArr[i].equals(workerType))
-                    return indexSort;
-                indexSort++;
-            }
+        for (String aStrArr : strArr) {
+            if (aStrArr.equals(workerType))
+                return indexSort;
+            indexSort++;
         }
         LOG.info("getCustomSortIndex 返回错误 -1 customSort:" + customSort + " workerType:" + workerType);
         return -1;
