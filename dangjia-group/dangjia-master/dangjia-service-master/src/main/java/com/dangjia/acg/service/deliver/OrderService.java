@@ -503,7 +503,7 @@ public class OrderService {
                     productList.add(map);
                 }
                 if(numObj>0&&product.getType()==1&&product.getMaket()==1){
-                    return ServerResponse.createBySuccessMessage("商品（"+product.getName()+"）已下架，无法要货！");
+                    return ServerResponse.createByErrorMessage("商品（"+product.getName()+"）已下架，无法要货！");
                 }
             }
 
