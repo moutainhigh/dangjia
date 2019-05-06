@@ -20,7 +20,23 @@ public class ActuaryController implements ActuaryAPI {
 
     @Autowired
     private ActuaryService actuaryService;
+    /**
+     * 返回作废的精算列表
+     *   budgetOk:
+     *          1=待提交精算
+     *          2=待业主确认
+     *          3=已完成
+     *          5=待业主支付
+     *          -1=废弃的精算
+     *
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getActuaryBudgetOk(HttpServletRequest request,PageDTO pageDTO,String name,String budgetOk){
+        return actuaryService.getActuaryAll(request,pageDTO,name,budgetOk);
 
+    }
     /**
      * 返回待业主支付精算列表
      * @return
