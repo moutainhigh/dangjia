@@ -426,16 +426,11 @@ public class OrderService {
                     .andEqualTo(Cart.MEMBER_ID,worker.getId());
             List<Cart> cartList=cartMapper.selectByExample(example);
             List productList=new ArrayList();
-            Map mapczai=new HashMap();
             for(int i=0; i<cartList.size(); i++) {
                 Double num =cartList.get(i).getShopCount();
                 String productId =cartList.get(i).getProductId();
                 Warehouse warehouse = warehouseMapper.getByProductId(productId, houseId);//定位到仓库id
 
-                //判断如果该商品已经插入，则不再进行第二次插入，防止数据重复展示
-                if(mapczai.get(orderSplit.getId()+"-"+productId+"-"+houseId)!=null){
-                    continue;
-                }
                 Product product=forMasterAPI.getProduct(house.getCityId(), productId);
                 if(warehouse!=null) {
                     OrderSplitItem orderSplitItem = new OrderSplitItem();
@@ -477,7 +472,6 @@ public class OrderService {
                     orderSplitItem.setHouseId(houseId);
                     orderSplitItemMapper.insert(orderSplitItem);
                 }
-                mapczai.put(orderSplit.getId()+"-"+productId+"-"+houseId,"1");
                 Double numObj=0D;
                 //计算补货数量
                 if(warehouse!=null) {
