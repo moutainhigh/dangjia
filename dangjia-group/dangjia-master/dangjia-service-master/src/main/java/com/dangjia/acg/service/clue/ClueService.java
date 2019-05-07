@@ -79,6 +79,10 @@ public class ClueService {
                 criteria.andCondition(" CONCAT(owername,phone,wechat,address) like CONCAT('%','" + values + "','%')");
             }
             if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
+                if(beginDate.equals(endDate)){
+                    beginDate=beginDate+" "+"00:00:00";
+                    endDate=endDate+" "+"23:59:59";
+                }
                 criteria.andBetween(Clue.CREATE_DATE,beginDate,endDate);
             }
             if(memberId!=null && memberId!=""){

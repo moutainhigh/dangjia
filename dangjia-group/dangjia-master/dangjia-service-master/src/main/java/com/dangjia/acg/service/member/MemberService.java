@@ -20,6 +20,7 @@ import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.*;
 import com.dangjia.acg.mapper.user.UserMapper;
+import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
@@ -608,6 +609,12 @@ public class MemberService {
             String[] childsLabelIdArr = new String[childsLabelIdList.size()];
             childsLabelIdList.toArray(childsLabelIdArr);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
+                if(beginDate.equals(endDate)){
+                    beginDate=beginDate+" "+"00:00:00";
+                    endDate=endDate+" "+"23:59:59";
+                }
+            }
             List<Member> list = memberMapper.getMemberListByName(searchKey, stage, userRole, childsLabelIdArr, orderBy,type,userId,beginDate,endDate);
             PageInfo pageResult = new PageInfo(list);
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
