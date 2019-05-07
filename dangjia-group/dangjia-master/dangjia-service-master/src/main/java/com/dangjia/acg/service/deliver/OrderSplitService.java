@@ -13,6 +13,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.DeliverHouseDTO;
 import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverDetailDTO;
+import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
@@ -21,6 +22,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
@@ -75,6 +77,8 @@ public class OrderSplitService {
     private IWorkerDetailMapper workerDetailMapper;
 
     @Autowired
+    private IComplainMapper complainMapper;
+    @Autowired
     private ConfigMessageService configMessageService;
 
     /**
@@ -85,6 +89,7 @@ public class OrderSplitService {
      */
     public ServerResponse setSplitDeliver(SplitDeliver splitDeliver) {
         try {
+
             if (!StringUtils.isNoneBlank(splitDeliver.getId()))
                 return ServerResponse.createByErrorMessage("id 不能为null");
 
@@ -96,6 +101,15 @@ public class OrderSplitService {
             if (!(srcSplitDeliver.getShippingState() == 2 || srcSplitDeliver.getShippingState() == 4|| srcSplitDeliver.getShippingState() == 6))
                 return ServerResponse.createByErrorMessage("当前为未收货状态，不能申请结算");
 
+            Example example =new Example(Complain.class);
+            example.createCriteria()
+                    .andEqualTo(Complain.COMPLAIN_TYPE,4)
+                    .andEqualTo(Complain.BUSINESS_ID,splitDeliver.getId())
+                    .andEqualTo(Complain.STATUS,0);
+            List list= complainMapper.selectByExample(example);
+            if(list.size()>0){
+                return ServerResponse.createByErrorMessage("请勿重复提交申请！");
+            }
             srcSplitDeliver.setDeliveryFee(splitDeliver.getDeliveryFee());
             srcSplitDeliver.setApplyMoney(splitDeliver.getApplyMoney());
             srcSplitDeliver.setApplyState(0);//供应商申请结算的状态0申请中；1不通过；2通过
@@ -182,6 +196,7 @@ public class OrderSplitService {
                 orderSplitItemDTO.setCost(orderSplitItem.getCost());
                 orderSplitItemDTO.setSupCost(orderSplitItem.getSupCost());
                 orderSplitItemDTO.setUnitName(orderSplitItem.getUnitName());
+                orderSplitItemDTO.setAskCount(orderSplitItem.getAskCount());
                 orderSplitItemDTO.setShopCount(String.valueOf(orderSplitItem.getShopCount()));
                 orderSplitItemDTO.setImage(address + orderSplitItem.getImage());
                 orderSplitItemDTO.setReceive(String.valueOf(orderSplitItem.getReceive()));
