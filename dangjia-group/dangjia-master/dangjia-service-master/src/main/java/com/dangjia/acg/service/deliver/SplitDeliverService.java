@@ -199,7 +199,7 @@ public class SplitDeliverService {
                 SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
                 splitDeliverItemDTO.setImage(address + orderSplitItem.getImage());
                 splitDeliverItemDTO.setProductName(orderSplitItem.getProductName());
-                splitDeliverItemDTO.setTotalPrice(orderSplitItem.getTotalPrice());
+                splitDeliverItemDTO.setTotalPrice(orderSplitItem.getPrice()*orderSplitItem.getReceive());
                 splitDeliverItemDTO.setShopCount(orderSplitItem.getShopCount());
                 splitDeliverItemDTO.setNum(orderSplitItem.getNum());
                 splitDeliverItemDTO.setUnitName(orderSplitItem.getUnitName());
