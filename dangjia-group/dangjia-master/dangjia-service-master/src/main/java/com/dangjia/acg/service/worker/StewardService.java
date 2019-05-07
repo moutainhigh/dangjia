@@ -253,6 +253,12 @@ public class StewardService {
                 workerDisclosure.setDetails(content);
                 wdList.add(workerDisclosure);
             }
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            for (WorkerDisclosure w:wdList){
+                if(w.getImg()!=null) {
+                    w.setImg(imageAddress + w.getImg());
+                }
+            }
             return ServerResponse.createBySuccess("查询成功", wdList);
         } catch (Exception e) {
             e.printStackTrace();

@@ -7,8 +7,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!--查询保存的交底内容-->
     <select id="getWorkerDisclosureList" resultType="com.dangjia.acg.modle.matter.WorkerDisclosure">
 		select
-		    name,
-		    details
+		    wd.name,
+		    wd.details,
+		    wd.img
 		from dj_matter_worker_disclosure wd
 		where
 	        wd.id in
