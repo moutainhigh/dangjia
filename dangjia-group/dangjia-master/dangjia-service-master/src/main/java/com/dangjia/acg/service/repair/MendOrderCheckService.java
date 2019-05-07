@@ -315,7 +315,7 @@ public class MendOrderCheckService {
      * 审核完毕 结算补退单
      * type  0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料
      */
-    private ServerResponse settleMendOrder(MendOrder mendOrder){
+    public ServerResponse settleMendOrder(MendOrder mendOrder){
         try{
             if(mendOrder.getType() == 1){
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
@@ -418,9 +418,6 @@ public class MendOrderCheckService {
                 mendOrder.setState(4);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
 
-                if (mendOrder.getType() == 4){//业主退款成功即业主退材料
-                    configMessageService.addConfigMessage(null,"gj",member.getId(),"0","退款结果", DjConstants.PushMessage.REFUND_SUCCESS ,"");
-                }
             }
 
             return ServerResponse.createBySuccessMessage("流程全部通过");

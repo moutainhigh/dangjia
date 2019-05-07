@@ -13,18 +13,18 @@ import com.dangjia.acg.dto.engineer.ArtisanDTO;
 import com.dangjia.acg.dto.house.WareDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
 import com.dangjia.acg.mapper.core.*;
-import com.dangjia.acg.mapper.disclosure.DiscloSureMapper;
-import com.dangjia.acg.mapper.disclosure.ItemsMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.mapper.matter.IWorkerDisclosureMapper;
+import com.dangjia.acg.mapper.matter.IWorkerEverydayMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.modle.core.*;
-import com.dangjia.acg.modle.disclosure.DiscloSure;
-import com.dangjia.acg.modle.disclosure.Items;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.modle.matter.WorkerDisclosure;
+import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
@@ -75,9 +75,9 @@ public class EngineerService {
     @Autowired
     private IRewardPunishConditionMapper rewardPunishConditionMapper;
     @Autowired
-    private DiscloSureMapper disclosureMapper;
+    private IWorkerEverydayMapper iWorkerEverydayMapper;
     @Autowired
-    private ItemsMapper itemsMapper;
+    private IWorkerDisclosureMapper iWorkerDisclosureMapper;
     /**
      * 已支付换工匠
      */
@@ -741,31 +741,31 @@ public class EngineerService {
      * @param pageDTO
      * @return
      */
-    public ServerResponse getSureList(Integer type,Integer dataStatus,String search,PageDTO pageDTO) {
+    public ServerResponse getSureList(Integer type,Integer state,String search,PageDTO pageDTO) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        Example example=new Example(DiscloSure.class);
+        Example example=new Example(WorkerDisclosure.class);
         Example.Criteria criteria= example.createCriteria();
-        if(dataStatus!=null){
-            criteria.andEqualTo(DiscloSure.DATA_STATUS,dataStatus);
+        if(state!=null){
+            criteria.andEqualTo(WorkerDisclosure.STATE,state);
         }
-        criteria.andEqualTo(DiscloSure.TYPE,type);
+        criteria.andEqualTo(WorkerDisclosure.TYPE,type);
         if(search!=null && search!=""){
-            criteria.andLike(DiscloSure.SURE_NAME,"%"+search+"%");
+            criteria.andLike(WorkerDisclosure.NAME,"%"+search+"%");
         }
-        example.orderBy(DiscloSure.MODIFY_DATE).desc();
-        List<DiscloSure> disclosures = disclosureMapper.selectByExample(example);
-        PageInfo pageResult = new PageInfo(disclosures);
+        example.orderBy(WorkerDisclosure.MODIFY_DATE).desc();
+        List<WorkerDisclosure> workerDisclosures = iWorkerDisclosureMapper.selectByExample(example);
+        PageInfo pageResult = new PageInfo(workerDisclosures);
         if(type==0){
         List<Object> list=new ArrayList<>();
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-        for (DiscloSure d:disclosures){
+        for (WorkerDisclosure d:workerDisclosures){
             Map<String,Object> map=new HashMap<>();
             map.put("id",d.getId());
-            map.put("name",d.getSureName());
-            map.put("desc",d.getSureDesc());
-            map.put("img",d.getSureImg());
-            map.put("imgUrl",imageAddress + d.getSureImg());
-            map.put("status",d.getDataStatus());
+            map.put("name",d.getName());
+            map.put("desc",d.getDetails());
+            map.put("img",d.getImg());
+            map.put("imgUrl",imageAddress + d.getImg());
+            map.put("status",d.getState());
             map.put("createDate",d.getCreateDate());
             map.put("modifyDate",d.getModifyDate());
             list.add(map);
@@ -773,17 +773,23 @@ public class EngineerService {
         pageResult.setList(list);}
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
-    public ServerResponse addSure(String sureName,String sureDesc, String sureImg,Integer dataStatus,Integer type){
+    public ServerResponse addSure(String name, String details, String img,Integer state,Integer type){
         try{
-            DiscloSure disclosure=new DiscloSure();
-            disclosure.setSureName(sureName);
-            disclosure.setSureDesc(sureDesc);
-            disclosure.setSureImg(sureImg);
-            disclosure.setType(type);
-            if(dataStatus!=null){
-                disclosure.setDataStatus(dataStatus);
+            WorkerDisclosure workerDisclosure=new WorkerDisclosure();
+            if(name!="" && name!=null){
+                workerDisclosure.setName(name);
             }
-            disclosureMapper.insert(disclosure);
+            if(details!="" && details!=null){
+                workerDisclosure.setDetails(details);
+            }
+            if(img!="" && img!=null){
+                workerDisclosure.setImg(img);
+            }
+            if(state!=null){
+                workerDisclosure.setState(state);
+            }
+            workerDisclosure.setType(type);
+            iWorkerDisclosureMapper.insert(workerDisclosure);
             return ServerResponse.createBySuccessMessage("添加成功");
         }catch (Exception e){
             e.printStackTrace();
@@ -791,26 +797,24 @@ public class EngineerService {
         }
     }
 
-    public ServerResponse updateSure(String sureName, String sureDesc, String sureImg,Integer dataStatus, String id){
+    public ServerResponse updateSure(String name, String details, String img,Integer state,String id){
         try{
-            DiscloSure disclosure = disclosureMapper.selectByPrimaryKey(id);
-            if(sureName!=null && sureName!="" ){
-                disclosure.setSureName(sureName);
-                disclosure.setModifyDate(new Date());
+            WorkerDisclosure workerDisclosure = iWorkerDisclosureMapper.selectByPrimaryKey(id);
+            if(name!=null && name!="" ){
+                workerDisclosure.setName(name);
+                workerDisclosure.setModifyDate(new Date());
             }
-            if(sureDesc!=null && sureDesc!=""){
-                disclosure.setSureDesc(sureDesc);
-                disclosure.setModifyDate(new Date());
+            if(details!=null && details!=""){
+                workerDisclosure.setDetails(details);
+                workerDisclosure.setModifyDate(new Date());
             }
-            if(sureImg!=null && sureImg!=""){
-                disclosure.setSureImg(sureImg);
-                disclosure.setModifyDate(new Date());
+            if(state!=null){
+                workerDisclosure.setState(state);
+                workerDisclosure.setModifyDate(new Date());
             }
-            if(dataStatus!=null){
-                disclosure.setDataStatus(dataStatus);
-                disclosure.setModifyDate(new Date());
-            }
-            disclosureMapper.updateByPrimaryKeySelective(disclosure);
+            workerDisclosure.setImg(img);
+            workerDisclosure.setModifyDate(new Date());
+            iWorkerDisclosureMapper.updateByPrimaryKeySelective(workerDisclosure);
             return ServerResponse.createBySuccessMessage("修改成功");
         }catch (Exception e){
             e.printStackTrace();
@@ -818,15 +822,15 @@ public class EngineerService {
         }
     }
 
-    public ServerResponse addItems(String name, Integer type, Integer dataStatus){
+    public ServerResponse addItems(String name, Integer type, Integer state){
         try{
-             Items items =new Items();
-             items.setName(name);
-             items.setType(type);
-            if(dataStatus!=null){
-                items.setDataStatus(dataStatus);
+            WorkerEveryday workerEveryday =new WorkerEveryday();
+            workerEveryday.setName(name);
+            workerEveryday.setType(type);
+            if(state!=null){
+                workerEveryday.setState(state);
             }
-            itemsMapper.insert(items);
+            iWorkerEverydayMapper.insert(workerEveryday);
             return ServerResponse.createBySuccessMessage("添加成功");
         }catch (Exception e){
             e.printStackTrace();
@@ -834,40 +838,40 @@ public class EngineerService {
         }
     }
 
-    public ServerResponse getItemsList(Integer type, Integer dataStatus,String search, PageDTO pageDTO){
+    public ServerResponse getItemsList(Integer type, Integer state,String search, PageDTO pageDTO){
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        Example example=new Example(Items.class);
-        if(dataStatus!=null){
-            example.createCriteria().andEqualTo(Items.DATA_STATUS,dataStatus);
+        Example example=new Example(WorkerEveryday.class);
+        if(state!=null){
+            example.createCriteria().andEqualTo(WorkerEveryday.STATE,state);
         }
         if(type!=null){
-            example.createCriteria().andEqualTo(Items.TYPE,type);
+            example.createCriteria().andEqualTo(WorkerEveryday.TYPE,type);
         }
         if(search!=null && search!=""){
-            example.createCriteria().andLike(Items.NAME,"%"+search+"%");
+            example.createCriteria().andLike(WorkerEveryday.NAME,"%"+search+"%");
         }
-        example.orderBy(Items.MODIFY_DATE).desc();
-        List<Items> Items = itemsMapper.selectByExample(example);
-        PageInfo pageResult = new PageInfo(Items);
+        example.orderBy(WorkerEveryday.MODIFY_DATE).desc();
+        List<WorkerEveryday> workerEverydays = iWorkerEverydayMapper.selectByExample(example);
+        PageInfo pageResult = new PageInfo(workerEverydays);
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
-    public ServerResponse updateItems(String name, Integer type, Integer dataStatus, String id){
+    public ServerResponse updateItems(String name, Integer type, Integer state, String id){
         try{
-            Items items = itemsMapper.selectByPrimaryKey(id);
+            WorkerEveryday workerEveryday = iWorkerEverydayMapper.selectByPrimaryKey(id);
             if(name!=null && name!=""){
-                items.setName(name);
-                items.setModifyDate(new Date());
+                workerEveryday.setName(name);
+                workerEveryday.setModifyDate(new Date());
             }
             if(type!=null ){
-                items.setType(type);
-                items.setModifyDate(new Date());
+                workerEveryday.setType(type);
+                workerEveryday.setModifyDate(new Date());
             }
-            if(dataStatus!=null){
-                items.setDataStatus(dataStatus);
-                items.setModifyDate(new Date());
+            if(state!=null){
+                workerEveryday.setState(state);
+                workerEveryday.setModifyDate(new Date());
             }
-            itemsMapper.updateByPrimaryKeySelective(items);
+            iWorkerEverydayMapper.updateByPrimaryKeySelective(workerEveryday);
             return ServerResponse.createBySuccessMessage("修改成功");
         }catch (Exception e){
             e.printStackTrace();

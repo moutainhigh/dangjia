@@ -84,6 +84,8 @@ public class MendOrderService {
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private ConfigMessageService configMessageService;
+    @Autowired
+    private MendOrderCheckService mendOrderCheckService;
 
     @Autowired
     private ISurplusWareHouseMapper iSurplusWareHouseMapper;
@@ -139,6 +141,9 @@ public class MendOrderService {
                 mendOrder.setState(1);//平台审核
                 mendOrder.setModifyDate(new Date());//更新时间
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+
+                //业主退，自动退材料钱至业主钱包（立即）
+                mendOrderCheckService.settleMendOrder(mendOrder);
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
         } catch (Exception e) {
@@ -633,13 +638,13 @@ public class MendOrderService {
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
-                if (worker.getWorkerType() == 3) {
-                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家退服务", String.format
-                            (DjConstants.PushMessage.STEWARD_T_SERVER, house.getHouseName()), "");
-                } else {
-                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠退材料", String.format
-                            (DjConstants.PushMessage.CRAFTSMAN_T_MATERIAL, house.getHouseName()), "");
-                }
+//                if (worker.getWorkerType() == 3) {
+//                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家退服务", String.format
+//                            (DjConstants.PushMessage.STEWARD_T_SERVER, house.getHouseName()), "");
+//                } else {
+//                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠退材料", String.format
+//                            (DjConstants.PushMessage.CRAFTSMAN_T_MATERIAL, house.getHouseName()), "");
+//                }
 
                 //生成 退货材料的剩余临时仓库
                 SurplusWareHouse srcSurplusWareHouse = iSurplusWareHouseMapper.getSurplusWareHouseByHouseId(house.getId());
