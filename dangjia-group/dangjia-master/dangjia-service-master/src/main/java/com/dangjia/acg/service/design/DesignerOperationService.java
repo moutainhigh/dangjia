@@ -377,7 +377,7 @@ public class DesignerOperationService {
                 quantityRoomImages = new QuantityRoomImages();
                 quantityRoomImages.setHouseId(houseId);
                 quantityRoomImages.setQuantityRoomId(quantityRoom.getId());
-                quantityRoomImages.setName("平面布置图");
+                quantityRoomImages.setName("平面图");
                 quantityRoomImages.setImage(imageString);
                 quantityRoomImages.setSort(0);
                 quantityRoomImagesMapper.insert(quantityRoomImages);
