@@ -2,6 +2,7 @@ package com.dangjia.acg.service.basics;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.product.MasterProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -12,11 +13,13 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.IBrandMapper;
 import com.dangjia.acg.mapper.basics.IBrandSeriesMapper;
+import com.dangjia.acg.mapper.basics.IProductMapper;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.BrandSeries;
+import com.dangjia.acg.service.product.MasterProductService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -38,6 +41,12 @@ public class BrandService {
     private IBrandSeriesMapper iBrandSeriesMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private IProductMapper iProductMapper;
+    @Autowired
+    private ProductService productService;
+    @Autowired
+    private MasterProductAPI masterProductAPI;
 
     //查询所有品牌
     public ServerResponse<PageInfo> getAllBrand(PageDTO pageDTO) {
@@ -117,6 +126,7 @@ public class BrandService {
     public ServerResponse update(String id, String name, String brandSeriesList) {
         try {
             List<Brand> brList = iBrandMapper.getBrandByName(name);
+            Brand brand1 = iBrandMapper.selectByPrimaryKey(id);
             if (brList.size() == 1) {
                 Brand br = brList.get(0);
                 if (br != null && !br.getId().equals(id)) {
@@ -125,13 +135,24 @@ public class BrandService {
             } else if (brList.size() > 1) {
                 return ServerResponse.createByErrorMessage("品牌名称存在重复数据:" + name);
             }
-
-
             Brand brand = new Brand();
             brand.setId(id);
             brand.setName(name);
             brand.setModifyDate(new Date());
             iBrandMapper.updateByPrimaryKeySelective(brand);
+            //修改品牌对应的product名称也更新
+            Example example=new Example(Product.class);
+            example.createCriteria().andEqualTo(Product.BRAND_ID,id);
+            List<Product> products = iProductMapper.selectByExample(example);
+            if(products.size()>0||null!=products) {
+                for (Product product : products) {
+                    product.setName(product.getName().replace(brand1.getName(), name));
+                    //调用product相关联的表更新
+                    productService.updateProductByProductId(product);
+                    masterProductAPI.updateProductByProductId(product.getId(),product.getCategoryId(),product.getBrandSeriesId()
+                            ,product.getBrandId(),product.getName(),product.getUnitId(),product.getUnitName());
+                }
+            }
             JSONArray brandSeriesLists = JSONArray.parseArray(brandSeriesList);
             for (int i = 0; i < brandSeriesLists.size(); i++) {
                 JSONObject brandSeries = brandSeriesLists.getJSONObject(i);
@@ -152,6 +173,11 @@ public class BrandService {
                 } else {
                     bSeries.setId(brandSeriesId);
                     iBrandSeriesMapper.updateByPrimaryKeySelective(bSeries);
+                    for (Product product : products) {
+                        productService.updateProductByProductId(product);
+                        masterProductAPI.updateProductByProductId(product.getId(),product.getCategoryId(),product.getBrandSeriesId()
+                                ,product.getBrandId(),product.getName(),product.getUnitId(),product.getUnitName());
+                    }
                 }
             }
             return ServerResponse.createBySuccessMessage("修改成功");

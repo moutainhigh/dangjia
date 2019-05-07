@@ -1,7 +1,9 @@
 package com.dangjia.acg.service.basics;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
 import com.github.pagehelper.PageHelper;
@@ -11,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -29,6 +32,8 @@ public class UnitService {
      */
     @Autowired
     private IUnitMapper iUnitMapper;
+    @Autowired
+    private IProductMapper iProductMapper;
 
     protected static final Logger LOG = LoggerFactory.getLogger(UnitService.class);
 
@@ -120,6 +125,16 @@ public class UnitService {
                 unit.setLinkUnitIdArr(unit.getId() + "," + linkUnitIdArr);//包括本身
             unit.setModifyDate(new Date());
             iUnitMapper.updateByPrimaryKeySelective(unit);
+            Example example=new Example(Product.class);
+            example.createCriteria().andEqualTo(Product.UNIT_ID,unitId);
+            List<Product> products = iProductMapper.selectByExample(example);
+            if(products.size()>0||null!=products){
+                for (Product product : products) {
+                    product.setUnitId(unitId);
+                    product.setUnitName(unitName);
+                    iProductMapper.updateByPrimaryKeySelective(product);
+                }
+            }
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
             e.printStackTrace();

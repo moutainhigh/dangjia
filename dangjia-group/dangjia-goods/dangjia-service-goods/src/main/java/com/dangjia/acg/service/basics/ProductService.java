@@ -2,12 +2,17 @@ package com.dangjia.acg.service.basics;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.product.MasterProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.BaseException;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.ProductDTO;
+import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.GroupLink;
 import com.dangjia.acg.modle.basics.Label;
@@ -22,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
@@ -55,9 +61,14 @@ public class ProductService {
     private IGoodsMapper goodsMapper;
     @Autowired
     private TechnologyService technologyService;
-
     @Autowired
     private IGroupLinkMapper iGroupLinkMapper;
+    @Autowired
+    private IBudgetMaterialMapper iBudgetMaterialMapper;
+    @Autowired
+    private ProductService productService;
+    @Autowired
+    private MasterProductAPI masterProductAPI;
 
     private static Logger LOG = LoggerFactory.getLogger(ProductService.class);
 
@@ -497,13 +508,15 @@ public class ProductService {
      * @param id
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateProductById(String id,String name) {
         try {
             Product product = new Product();
             product.setId(id);
             product.setName(name);
             iProductMapper.updateByPrimaryKeySelective(product);
-
+            productService.updateProductByProductId(product);
+//            masterProductAPI.updateProductByProductId(product);
             Example example=new Example(GroupLink.class);
             example.createCriteria().andEqualTo("productId",id);
             GroupLink oldLabel =new GroupLink();
@@ -511,8 +524,7 @@ public class ProductService {
             iGroupLinkMapper.updateByExampleSelective(oldLabel,example);
             return ServerResponse.createBySuccessMessage("更新成功");
         } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("更新成功");
+            throw new BaseException(ServerCode.WRONG_PARAM, "更新成功");
         }
     }
     /**
@@ -631,5 +643,43 @@ public class ProductService {
         List<Product>  productList = iProductMapper.queryProductData(name,categoryId,productType,productId);
         PageInfo pageResult = new PageInfo(productList);
         return pageResult;
+    }
+
+
+
+    /**
+     * 修改product名称全局跟新商品
+     * @param product
+     * @return
+     * @throws RuntimeException
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse updateProductByProductId(Product product){
+        try {
+            iProductMapper.updateByPrimaryKeySelective(product);
+            Example example=new Example(GroupLink.class);
+            example.createCriteria().andEqualTo(GroupLink.PRODUCT_ID,product.getId());
+            List<GroupLink> groupLinks = iGroupLinkMapper.selectByExample(example);
+            if(groupLinks.size()>0||null!=groupLinks) {
+                for (GroupLink groupLink : groupLinks) {
+                    groupLink.setProductId(product.getId());
+                    groupLink.setProductName(product.getName());
+                    iGroupLinkMapper.updateByPrimaryKeySelective(groupLink);
+                }
+            }
+            example.createCriteria().andEqualTo(BudgetMaterial.PRODUCT_ID,product.getId());
+            List<BudgetMaterial> budgetMaterials = iBudgetMaterialMapper.selectByExample(example);
+            if(budgetMaterials.size()>0||null!=budgetMaterials) {
+                for (BudgetMaterial budgetMaterial : budgetMaterials) {
+                    budgetMaterial.setProductId(product.getId());
+                    budgetMaterial.setProductName(product.getName());
+                    budgetMaterial.setUnitName(product.getUnitName());
+                    iBudgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
+                }
+            }
+        } catch (Exception e) {
+            throw new BaseException(ServerCode.WRONG_PARAM,"修改失败");
+        }
+        return ServerResponse.createBySuccessMessage("修改成功");
     }
 }
