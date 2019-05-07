@@ -347,7 +347,7 @@ public class StewardService {
                     String.format(DjConstants.GJPageAddress.JFREGULATIONS, userToken, houseFlow.getCityId(), "选择奖罚条例"));//奖罚页面
             if (houseFlow.getWorkType() == 4 && houseFlow.getWorkSteta() == 3) {//待交底
                 Example example = new Example(WorkerDisclosure.class);
-                example.createCriteria().andEqualTo("state", 1);
+                example.createCriteria().andEqualTo("state", 1).andEqualTo("type",0);
                 List<WorkerDisclosure> wdList = workerDisclosureMapper.selectByExample(example);
                 courseDTO.setWorkerDisclosureList(wdList);
                 courseDTO.setApplyType(0);//没有申请
