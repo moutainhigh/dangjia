@@ -12,7 +12,6 @@ import com.dangjia.acg.dto.other.HouseDetailsDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderMapper;
-import com.dangjia.acg.mapper.design.IHouseDesignImageMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -39,8 +38,6 @@ import java.util.Map;
 public class IndexPageService {
     @Autowired
     private IHouseMapper houseMapper;
-    @Autowired
-    private IHouseDesignImageMapper houseDesignImageMapper;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
@@ -100,7 +97,7 @@ public class IndexPageService {
             }
             Order order = orderMapper.getWorkerOrder(houseId, "2");
             if (order != null) {
-                mapReady.put("typeB", "¥" + (order == null ? 0 : String.format("%.2f", order.getTotalAmount().doubleValue())));
+                mapReady.put("typeB", "¥" + (order.getTotalAmount() == null ? 0 : String.format("%.2f", order.getTotalAmount().doubleValue())));
                 totalPrice = totalPrice.add(order.getTotalAmount());
             } else {
                 mapReady.put("typeB", "¥" + 0);

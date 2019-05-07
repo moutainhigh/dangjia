@@ -40,15 +40,6 @@ public class HouseStyleTypeService {
      * 设计风格列表
      */
     public ServerResponse getStyleList(HttpServletRequest request, PageDTO pageDTO) {
-        if (pageDTO == null) {
-            pageDTO = new PageDTO();
-        }
-        if (pageDTO.getPageNum() == null) {
-            pageDTO.setPageNum(1);
-        }
-        if (pageDTO.getPageSize() == null) {
-            pageDTO.setPageSize(10);
-        }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<HouseStyleType> houseStyleTypeList = houseStyleTypeMapper.selectAll();
         PageInfo pageResult = new PageInfo(houseStyleTypeList);
@@ -73,7 +64,6 @@ public class HouseStyleTypeService {
         try {
             if (houseStyleTypeMapper.getStyleByName(name) != null)
                 return ServerResponse.createByErrorMessage("风格名称已存在");
-
             HouseStyleType houseStyleType = new HouseStyleType();
             houseStyleType.setName(name);
             houseStyleType.setPrice(new BigDecimal(price));
@@ -99,7 +89,6 @@ public class HouseStyleTypeService {
             HouseStyleType houseStyleType = houseStyleTypeMapper.selectByPrimaryKey(id);
             if (houseStyleType == null)
                 return ServerResponse.createByErrorMessage("没有该风格");
-
             if (!houseStyleType.getName().equals(name)) {
                 if (houseStyleTypeMapper.getStyleByName(name) != null)
                     return ServerResponse.createByErrorMessage("风格名称已存在");
@@ -114,25 +103,5 @@ public class HouseStyleTypeService {
             return ServerResponse.createByErrorMessage("修改失败");
         }
     }
-
-    public ServerResponse deleteStyle(HttpServletRequest request, String id) {
-        try {
-            if (true)
-                return ServerResponse.createByErrorMessage("不能执行删除操作");
-
-            HouseStyleType houseStyleType = houseStyleTypeMapper.selectByPrimaryKey(id);
-            if (houseStyleType == null)
-                return ServerResponse.createByErrorMessage("没有该风格");
-
-            houseStyleTypeMapper.deleteByPrimaryKey(id);
-            return ServerResponse.createBySuccessMessage("删除成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("删除失败");
-        }
-
-
-    }
-
 
 }

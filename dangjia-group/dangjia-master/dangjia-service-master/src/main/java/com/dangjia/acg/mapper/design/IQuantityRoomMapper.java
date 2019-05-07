@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
+import java.util.List;
+
 
 /**
  * @author Ruking.Cheng
@@ -17,4 +19,8 @@ import tk.mybatis.mapper.common.Mapper;
 @Repository
 public interface IQuantityRoomMapper extends Mapper<QuantityRoom> {
     QuantityRoomDTO getQuantityRoom(@Param("houseId") String houseId, @Param("type") Integer type);
+
+    QuantityRoomDTO getIdQuantityRoom(@Param("quantityRoomId") String quantityRoomId);
+
+    List<QuantityRoomDTO> getQuantityRoomList(@Param("houseId") String houseId, @Param("type") Integer type);
 }
