@@ -196,6 +196,9 @@ public class SplitDeliverService {
             List<SplitDeliverItemDTO> splitDeliverItemDTOList = new ArrayList<>();
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
             for (OrderSplitItem orderSplitItem : orderSplitItemList) {
+                if(orderSplitItem.getReceive()==null){
+                    orderSplitItem.setReceive(0D);
+                }
                 SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
                 splitDeliverItemDTO.setImage(address + orderSplitItem.getImage());
                 splitDeliverItemDTO.setProductName(orderSplitItem.getProductName());
