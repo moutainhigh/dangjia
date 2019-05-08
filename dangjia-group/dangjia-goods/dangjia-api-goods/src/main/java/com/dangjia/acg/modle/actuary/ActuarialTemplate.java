@@ -1,7 +1,6 @@
 package com.dangjia.acg.modle.actuary;
 
 import com.dangjia.acg.common.annotation.Desc;
-import com.dangjia.acg.common.annotation.ExcelField;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

@@ -8,8 +8,6 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
-import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.repair.MendWorker;
 import com.github.pagehelper.PageHelper;
@@ -17,7 +15,6 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

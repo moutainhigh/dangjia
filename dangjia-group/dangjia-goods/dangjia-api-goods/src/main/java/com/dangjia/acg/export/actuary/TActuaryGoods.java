@@ -3,8 +3,6 @@ package com.dangjia.acg.export.actuary;
 import com.dangjia.acg.common.annotation.ExcelField;
 import lombok.Data;
 
-import javax.persistence.Column;
-
 /**
  * 导出精算材料表
  *

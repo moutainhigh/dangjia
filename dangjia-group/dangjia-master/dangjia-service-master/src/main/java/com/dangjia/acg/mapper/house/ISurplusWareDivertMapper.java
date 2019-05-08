@@ -1,8 +1,6 @@
 package com.dangjia.acg.mapper.house;
 
 import com.dangjia.acg.modle.house.SurplusWareDivert;
-import com.dangjia.acg.modle.house.SurplusWareHouse;
-import com.dangjia.acg.modle.house.SurplusWareHouseItem;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;

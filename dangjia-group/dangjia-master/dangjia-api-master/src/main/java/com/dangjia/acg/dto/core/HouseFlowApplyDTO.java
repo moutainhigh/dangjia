@@ -1,11 +1,7 @@
 package com.dangjia.acg.dto.core;
 
-import com.dangjia.acg.common.annotation.Desc;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Column;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 

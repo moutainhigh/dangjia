@@ -5,8 +5,6 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
-import java.util.List;
-
 /**
  * author: Ronalcheng
  * Date: 2018/11/7 0007

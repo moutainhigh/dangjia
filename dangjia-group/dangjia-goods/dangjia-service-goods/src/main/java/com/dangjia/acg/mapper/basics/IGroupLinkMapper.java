@@ -1,6 +1,5 @@
 package com.dangjia.acg.mapper.basics;
 
-import com.dangjia.acg.modle.basics.GoodsGroup;
 import com.dangjia.acg.modle.basics.GroupLink;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;

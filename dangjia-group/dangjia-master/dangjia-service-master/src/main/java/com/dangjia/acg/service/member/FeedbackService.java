@@ -16,7 +16,6 @@ import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Feedback;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.service.core.WorkerTypeService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;

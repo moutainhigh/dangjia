@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.security.x509.OtherName;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;

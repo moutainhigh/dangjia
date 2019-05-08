@@ -4,7 +4,6 @@ import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.models.auth.In;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 import org.apache.commons.lang.StringUtils;
