@@ -11,12 +11,14 @@ import com.dangjia.acg.dto.core.ButtonDTO;
 import com.dangjia.acg.dto.core.Task;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
+import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseExpendMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseExpend;
@@ -57,6 +59,8 @@ public class TaskService {
     private IHouseExpendMapper houseExpendMapper;
     @Autowired
     private HouseFlowApplyService houseFlowApplyService;
+    @Autowired
+    private IHouseWorkerMapper houseWorkerMapper;
 
 
     /**
@@ -86,6 +90,22 @@ public class TaskService {
                 houseExpendMapper.insert(houseExpend);
             }
             //}
+        }
+        //该工匠所选择的工地
+        example = new Example(HouseWorker.class);
+        example.createCriteria()
+                .andEqualTo(HouseWorker.IS_SELECT,1)
+                .andEqualTo(HouseWorker.WORKER_ID,  member.getId());
+        List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
+        if(houseWorkerList!=null&&houseWorkerList.size()>0){
+//            查询工匠当前选择的工地
+            House house = houseMapper.selectByPrimaryKey(houseWorkerList.get(0).getHouseId());
+            if(houseList==null){
+                houseList=new ArrayList<>();
+            }
+            //设为选中
+            house.setIsSelect(1);
+            houseList.add(house);
         }
         String houseId = null;
         if (houseList.size() > 1) {
