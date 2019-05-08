@@ -955,7 +955,7 @@ public class MendOrderService {
 
     public ServerResponse mendChecking(String houseId,String workerTypeId,Integer type){
 
-        if((type == 1 || type == 3)&&!CommonUtil.isEmpty(workerTypeId)){
+        if((type == 3)&&!CommonUtil.isEmpty(workerTypeId)){
             String msg;
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
             if (houseFlowApplyList.size() > 0) {

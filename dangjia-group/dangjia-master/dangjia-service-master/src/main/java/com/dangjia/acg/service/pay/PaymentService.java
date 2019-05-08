@@ -410,7 +410,12 @@ public class PaymentService {
                 HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(mendOrder.getHouseId(), mendOrder.getWorkerTypeId());
                 HouseWorkerOrder houseWorkerOrdernew = new HouseWorkerOrder();
                 houseWorkerOrdernew.setId(houseWorkerOrder.getId());
-                houseWorkerOrdernew.setRepairPrice(houseWorkerOrder.getRepairPrice().add(new BigDecimal(mendOrder.getTotalAmount())));
+                //还可得的补人工钱，分别在阶段或者整体申请时拿钱
+                BigDecimal repairPrice=houseWorkerOrder.getRepairPrice().add(new BigDecimal(mendOrder.getTotalAmount()));
+                houseWorkerOrdernew.setRepairPrice(repairPrice);
+                //记录总补人工钱
+                BigDecimal repairTotalPrice=houseWorkerOrdernew.getRepairTotalPrice().add(houseWorkerOrdernew.getRepairPrice());
+                houseWorkerOrdernew.setRepairTotalPrice(repairTotalPrice);
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(houseWorkerOrdernew);
 
                 Example example = new Example(MendWorker.class);
