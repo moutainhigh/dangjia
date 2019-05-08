@@ -123,7 +123,7 @@ public class BrandService {
     }
 
     //修改品牌
-    public ServerResponse update(String id, String name, String brandSeriesList) {
+    public ServerResponse update(String id, String name, String brandSeriesList)throws Exception {
         try {
             List<Brand> brList = iBrandMapper.getBrandByName(name);
             Brand brand1 = iBrandMapper.selectByPrimaryKey(id);

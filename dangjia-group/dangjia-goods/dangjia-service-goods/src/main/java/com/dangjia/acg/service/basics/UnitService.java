@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.basics;
 
+import com.dangjia.acg.api.product.MasterProductAPI;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
@@ -34,6 +35,8 @@ public class UnitService {
     private IUnitMapper iUnitMapper;
     @Autowired
     private IProductMapper iProductMapper;
+    @Autowired
+    private MasterProductAPI masterProductAPI;
 
     protected static final Logger LOG = LoggerFactory.getLogger(UnitService.class);
 
@@ -133,6 +136,8 @@ public class UnitService {
                     product.setUnitId(unitId);
                     product.setUnitName(unitName);
                     iProductMapper.updateByPrimaryKeySelective(product);
+                    masterProductAPI.updateProductByProductId(product.getId(),product.getCategoryId(),
+                            product.getBrandSeriesId(),product.getBrandId(),product.getName(),product.getUnitId(),product.getUnitName());
                 }
             }
             return ServerResponse.createBySuccessMessage("修改成功");
