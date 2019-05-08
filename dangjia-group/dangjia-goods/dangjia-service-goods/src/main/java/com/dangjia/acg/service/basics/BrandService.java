@@ -150,8 +150,8 @@ public class BrandService {
                     product.setName(product.getName().replace(brand1.getName(), name));
                     //调用product相关联的表更新
                     productService.updateProductByProductId(product);
-                    masterProductAPI.updateProductByProductId(product.getId(),product.getCategoryId(),product.getBrandSeriesId()
-                            ,product.getBrandId(),product.getName(),product.getUnitId(),product.getUnitName());
+                    masterProductAPI.updateProductByProductId(product.getId(),product.getCategoryId(),
+                            product.getBrandSeriesId(),product.getBrandId(),product.getName(),product.getUnitId(),product.getUnitName());
                 }
             }
             JSONArray brandSeriesLists = JSONArray.parseArray(brandSeriesList);

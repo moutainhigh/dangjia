@@ -104,6 +104,15 @@ public class TaskService {
                 houseId = houseList.get(0).getId();
             }
             buttonDTO.setHouseId(houseId);
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            //业主
+            if(house.getMemberId().equals(member.getId())){
+                buttonDTO.setTaskList(getTask(houseId, userToken));
+            }
+            //大管家
+            if(member.getWorkerType()!=3){
+                buttonDTO.setTaskList(getWorkerTask(houseId, userToken));
+            }
             buttonDTO.setTaskList(getTask(houseId, userToken));
         } else if (houseList.size() == 1) {
             buttonDTO = this.getButton(houseList.get(0).getId(), userToken);
@@ -132,7 +141,38 @@ public class TaskService {
         }
         return button;
     }
-
+    /**
+     * 工匠任务列表 需加上补货补人工任务
+     * type 1支付任务,2补货补人工,3其它任务
+     */
+    private List<Task> getWorkerTask(String houseId, String userToken) {
+        AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+        Member worker = accessToken.getMember();
+        List<Task> taskList = new ArrayList<>();
+        if(worker.getWorkerType()!=3){
+            return taskList;
+        }
+        //退材料退服务
+        Example example = new Example(MendOrder.class);
+        example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 2)
+                .andEqualTo(MendOrder.STATE, 3);//退材料审核状态全通过
+        List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
+        for (MendOrder mendOrder : mendOrderList) {
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
+            Task task = new Task();
+            task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
+            task.setName( "退材料待审核处理");
+            if(workerType.getType()==3){
+                task.setName("退服务待审核处理");
+            }
+            task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/buchailiao.png");
+            task.setHtmlUrl("");
+            task.setType(2);
+            task.setTaskId(mendOrder.getId());
+            taskList.add(task);
+        }
+        return taskList;
+    }
     /**
      * 任务列表 需加上补货补人工任务
      * type 1支付任务,2补货补人工,3其它任务

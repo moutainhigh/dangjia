@@ -9,10 +9,13 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDetail;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.*;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
@@ -55,6 +58,11 @@ public class MendRecordService {
     private IMendOrderCheckMapper mendOrderCheckMapper;
     @Autowired
     private IWarehouseMapper warehouseMapper;
+
+    @Autowired
+    private IHouseMapper houseMapper;
+    @Autowired
+    private IMemberMapper memberMapper;
     /**
      * 要补退明细
      * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货
@@ -66,6 +74,11 @@ public class MendRecordService {
 
             if(type == 5){
                 OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
+                mendOrderDetail.setHouseId(orderSplit.getHouseId());
+                mendOrderDetail.setApplicantId(orderSplit.getSupervisorId());
+                mendOrderDetail.setApplicantName(orderSplit.getSupervisorName());
+                mendOrderDetail.setApplicantMobile(orderSplit.getSupervisorTel());
+                mendOrderDetail.setApplicantId(orderSplit.getSupervisorId());
                 mendOrderDetail.setNumber(orderSplit.getNumber());
                 mendOrderDetail.setMendOrderId(orderSplit.getMendNumber());
                 mendOrderDetail.setType(5);
@@ -111,10 +124,19 @@ public class MendRecordService {
                 mendOrderDetail.setMendOrderId(mendOrderId);
                 mendOrderDetail.setNumber(mendOrder.getNumber());
                 mendOrderDetail.setType(mendOrder.getType());
-                mendOrderDetail.setState(mendOrder.getState());//0生成中,1处理中,2不通过取消,3已通过,4已结算
+                mendOrderDetail.setState(mendOrder.getState());//0生成中,1材料员待审核,2不通过取消,3，材料员已审核，大管家待核对,4已结算
                 mendOrderDetail.setTotalAmount(mendOrder.getTotalAmount());
                 mendOrderDetail.setCreateDate(mendOrder.getCreateDate());
                 mendOrderDetail.setModifyDate(mendOrder.getModifyDate());
+                mendOrderDetail.setApplicantId(mendOrder.getApplyMemberId());
+                mendOrderDetail.setHouseId(mendOrder.getHouseId());
+                if(!CommonUtil.isEmpty(mendOrder.getApplyMemberId())) {
+                    Member member = memberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
+                    if(member!=null){
+                        mendOrderDetail.setApplicantName(member.getNickName());
+                        mendOrderDetail.setApplicantMobile(member.getMobile());
+                    }
+                }
 
                 List<Map<String,Object>> mapList = new ArrayList<>();
                 if (mendOrder.getType() == 0 || mendOrder.getType() == 2 || mendOrder.getType() == 4){
@@ -164,6 +186,21 @@ public class MendRecordService {
                 if(mendOrder.getType() == 1 || mendOrder.getType() == 3){//补退人工
                     ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
                     mendOrderDetail.setChangeOrder(changeOrder);
+                }
+            }
+
+
+            //得到房子名称及业主信息
+            if(!CommonUtil.isEmpty(mendOrderDetail.getHouseId())) {
+                House house=houseMapper.selectByPrimaryKey(mendOrderDetail.getHouseId());
+                if(house!=null) {
+                    mendOrderDetail.setHouseName(house.getHouseName());//房名
+                    mendOrderDetail.setMemberId(house.getMemberId());//业主ID
+                    Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                    if (member != null) {
+                        mendOrderDetail.setMemberName(member.getNickName());//业主名称
+                        mendOrderDetail.setMemberMobile(member.getMobile());//业主手机号
+                    }
                 }
             }
 

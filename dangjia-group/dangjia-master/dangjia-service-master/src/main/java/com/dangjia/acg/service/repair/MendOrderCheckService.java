@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.repair;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
@@ -29,6 +31,7 @@ import com.dangjia.acg.modle.house.WarehouseDetail;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
+import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.deliver.OrderSplitService;
@@ -119,7 +122,68 @@ public class MendOrderCheckService {
      *  state  1不通过,2通过
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse checkMendOrder(String userToken,String mendOrderId,String roleType,Integer state){
+    public ServerResponse checkMendOrder(String userToken,String mendOrderId,String roleType,Integer state,String productArr){
+        try {
+
+            MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
+            if(mendOrder.getState()!=0&&mendOrder.getState()!=1){
+                return ServerResponse.createBySuccessMessage("审核成功");
+            }
+            //工匠、管家对材料服务流程变化
+            if(mendOrder.getType()==2) {
+                House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
+                if (state == 1) {
+                    mendOrder.setState(2);//不通过取消
+                    mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+                    Example example = new Example(OrderSplit.class);
+                    example.createCriteria().andEqualTo(OrderSplit.MEND_NUMBER, mendOrderId);
+                    List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
+                    //判断是否存在要货
+                    if (orderSplitList.size() > 0) {
+                        for (OrderSplit orderSplit : orderSplitList) {
+                            //要货单打回
+                            orderSplit.setApplyStatus(3);//不通过
+                            orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
+                        }
+                    }
+                } else {
+                    mendOrder.setState(3);//通过
+                    mendOrder.setCarriage(0.0);//运费
+                    mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+                    /*全部通过执行补退单不同操作  计算运费*/
+                }
+                if (!CommonUtil.isEmpty(productArr)) {
+                    JSONArray arr = JSONArray.parseArray(productArr);
+                    for (int i = 0; i < arr.size(); i++) {
+                        JSONObject obj = arr.getJSONObject(i);
+                        String id = obj.getString("id");
+                        String supplierId = obj.getString("supplierId");
+                        Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), supplierId);
+                        MendMateriel mendMateriel = mendMaterialMapper.selectByPrimaryKey(id);
+                        mendMateriel.setSupplierId(supplierId);//供应商id
+                        mendMateriel.setSupplierTelephone(supplier.getTelephone());//供应商联系电话
+                        mendMateriel.setSupplierName(supplier.getName());//供应商供应商名称
+                        mendMaterialMapper.updateByPrimaryKeySelective(mendMateriel);
+                    }
+                }
+                return ServerResponse.createBySuccessMessage("审核成功");
+            }else{
+                //除工匠和大管家退材料
+                return checkMendWorkerOrder( userToken, mendOrder, roleType, state);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
+
+    /** 审核补退人工单
+     *  roleType 角色  1业主,2管家,3工匠,4材料员,5供应商
+     *  state  1不通过,2通过
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse checkMendWorkerOrder(String userToken,MendOrder mendOrder,String roleType,Integer state){
         try {
             String auditorId;
             if(roleType.equals("4")){
@@ -129,7 +193,7 @@ public class MendOrderCheckService {
                 Member member = accessToken.getMember();
                 auditorId = member.getId();
             }
-            MendOrderCheck mendOrderCheck = mendOrderCheckMapper.getByMendOrderId(mendOrderId,roleType);
+            MendOrderCheck mendOrderCheck = mendOrderCheckMapper.getByMendOrderId(mendOrder.getId(),roleType);
             if(mendOrderCheck == null){
                 return ServerResponse.createByErrorMessage("审核流程不存在该角色");
             }
@@ -141,10 +205,6 @@ public class MendOrderCheckService {
             mendOrderCheck.setModifyDate(new Date());
             mendOrderCheckMapper.updateByPrimaryKeySelective(mendOrderCheck);
 
-            MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
-            if(mendOrder.getState()!=0&&mendOrder.getState()!=1){
-                return ServerResponse.createBySuccessMessage("审核成功");
-            }
             if (state == 1){
                 mendOrder.setState(2);//不通过取消
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
@@ -156,7 +216,7 @@ public class MendOrderCheckService {
 
                 }
                 Example example = new Example(OrderSplit.class);
-                example.createCriteria().andEqualTo(OrderSplit.MEND_NUMBER,mendOrderId);
+                example.createCriteria().andEqualTo(OrderSplit.MEND_NUMBER,mendOrder.getId());
                 List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
                 //判断是否存在要货
                 if (orderSplitList.size() >0) {
@@ -170,7 +230,7 @@ public class MendOrderCheckService {
             }else {
                 boolean flag = true;
                 Example example = new Example(MendOrderCheck.class);
-                example.createCriteria().andEqualTo(MendOrderCheck.MEND_ORDER_ID, mendOrderId);
+                example.createCriteria().andEqualTo(MendOrderCheck.MEND_ORDER_ID, mendOrder.getId());
                 List<MendOrderCheck> mendOrderCheckList = mendOrderCheckMapper.selectByExample(example);//所有审核角色
                 for (MendOrderCheck m : mendOrderCheckList){
                     if (m.getState() != 2 ){
@@ -312,10 +372,40 @@ public class MendOrderCheckService {
     }
 
     /**
+     * 大管家确认退货单
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse confirmMendOrder(String userToken,String mendOrderId,String productArr){
+        try {
+            MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
+            if(mendOrder.getState()==4){
+                return ServerResponse.createBySuccessMessage("提交成功");
+            }
+            //工匠、管家对材料服务流程变化
+            if (!CommonUtil.isEmpty(productArr)) {
+                JSONArray arr = JSONArray.parseArray(productArr);
+                for (int i = 0; i < arr.size(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    String id = obj.getString("id");
+                    String shopCount = obj.getString("shopCount");
+                    MendMateriel mendMateriel = mendMaterialMapper.selectByPrimaryKey(id);
+                    mendMateriel.setShopCount(Double.parseDouble(shopCount));//更新退货数
+                    mendMaterialMapper.updateByPrimaryKeySelective(mendMateriel);
+                }
+            }
+            //退材料钱至业主钱包（立即）
+            return settleMendOrder(mendOrder);
+        }catch (Exception e){
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
+    /**
      * 审核完毕 结算补退单
      * type  0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料
      */
-    private ServerResponse settleMendOrder(MendOrder mendOrder){
+    public ServerResponse settleMendOrder(MendOrder mendOrder){
         try{
             if(mendOrder.getType() == 1){
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
@@ -418,9 +508,6 @@ public class MendOrderCheckService {
                 mendOrder.setState(4);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
 
-                if (mendOrder.getType() == 4){//业主退款成功即业主退材料
-                    configMessageService.addConfigMessage(null,"gj",member.getId(),"0","退款结果", DjConstants.PushMessage.REFUND_SUCCESS ,"");
-                }
             }
 
             return ServerResponse.createBySuccessMessage("流程全部通过");

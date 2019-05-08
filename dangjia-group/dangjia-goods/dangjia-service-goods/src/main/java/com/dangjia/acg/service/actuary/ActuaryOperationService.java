@@ -269,24 +269,10 @@ public class ActuaryOperationService {
         try {
             if (!StringUtils.isNoneBlank(goodsId))
                 return ServerResponse.createByErrorMessage("goodsId 不能为null");
-//            if (!StringUtils.isNoneBlank(brandId))
-//                return ServerResponse.createByErrorMessage("brandId 不能为null");
-//            if (!StringUtils.isNoneBlank(brandSeriesId))
-//                return ServerResponse.createByErrorMessage("brandSeriesId 不能为null");
-//            if (!StringUtils.isNoneBlank(attributeIdArr))
-//                return ServerResponse.createByErrorMessage("attributeIdArr 不能为null");
-            if (!StringUtils.isNoneBlank(budgetMaterialId))
-                return ServerResponse.createByErrorMessage("budgetMaterialId 不能为null");
+//            if (!StringUtils.isNoneBlank(budgetMaterialId))
+//                return ServerResponse.createByErrorMessage("budgetMaterialId 不能为null");
 
             String[] valueIdArr = attributeIdArr.split(",");
-            LOG.info("selectProduct goodsId :" + goodsId);
-            LOG.info("selectProduct brandId :" + brandId);
-            LOG.info("selectProduct brandSeriesId :" + brandSeriesId);
-            LOG.info("selectProduct attributeIdArr :" + attributeIdArr);
-            LOG.info("selectProduct budgetMaterialId :" + budgetMaterialId);
-            for (String str : valueIdArr) {
-                LOG.info("valueIdArr str:" + str);
-            }
             Example example = new Example(Product.class);
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo(Product.TYPE, 1);
