@@ -55,12 +55,12 @@
         FROM
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
-        WHERE house.visit_state=1
+        WHERE house.visit_state=1 and house.budget_ok=0
         <if test="dataStatus!=null and dataStatus!=''">
             AND house.data_status=#{dataStatus}
         </if>
         <if test="designerType == 0">
-            AND house.designer_ok in (0,4)
+            AND house.designer_ok =4
         </if>
         <if test="designerType == 1">
             AND house.decoration_type !=2
