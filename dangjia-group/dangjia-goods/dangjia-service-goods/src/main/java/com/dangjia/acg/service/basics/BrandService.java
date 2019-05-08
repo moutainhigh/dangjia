@@ -17,7 +17,6 @@ import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.BrandSeries;
-import com.dangjia.acg.service.product.MasterProductService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,7 +122,7 @@ public class BrandService {
     }
 
     //修改品牌
-    public ServerResponse update(String id, String name, String brandSeriesList)throws Exception {
+    public ServerResponse update(String id, String name, String brandSeriesList) {
         try {
             List<Brand> brList = iBrandMapper.getBrandByName(name);
             Brand brand1 = iBrandMapper.selectByPrimaryKey(id);

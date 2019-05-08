@@ -8,8 +8,6 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import com.dangjia.acg.modle.basics.Product;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created with IntelliJ IDEA.
