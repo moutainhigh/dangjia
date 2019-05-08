@@ -37,7 +37,7 @@ public interface BrandSeriesAPI {
      * @return
      */
     @PostMapping("/basics/brandSeries/updateBrandExplain")
-    @ApiOperation(value = "修改", notes = "修改")
+    @ApiOperation(value = "修改品牌系列", notes = "修改品牌系列")
     ServerResponse updateBrandExplain(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("id") String id,
                                       @RequestParam("name") String name,

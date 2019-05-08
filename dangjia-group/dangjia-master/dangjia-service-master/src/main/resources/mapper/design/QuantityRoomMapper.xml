@@ -24,5 +24,44 @@
             create_date DESC
             LIMIT 1;
     </select>
+    <select id="getIdQuantityRoom" resultType="com.dangjia.acg.dto.design.QuantityRoomDTO">
+        SELECT
+            id,
+            create_date AS createDate,
+            modify_date AS modifyDate,
+            data_status AS dataStatus,
+            house_id AS houseId,
+            member_id AS memberId,
+            user_id AS userId,
+            type,
+            operation_type AS operationType
+        FROM
+            dj_design_quantity_room
+        WHERE
+            id = #{quantityRoomId}
+        ORDER BY
+            create_date DESC
+            LIMIT 1;
+    </select>
+    <select id="getQuantityRoomList" resultType="com.dangjia.acg.dto.design.QuantityRoomDTO">
+         SELECT
+            id,
+            create_date AS createDate,
+            modify_date AS modifyDate,
+            data_status AS dataStatus,
+            house_id AS houseId,
+            member_id AS memberId,
+            user_id AS userId,
+            type,
+            operation_type AS operationType
+        FROM
+            dj_design_quantity_room
+        WHERE
+            house_id = #{houseId}
+            AND type =  #{type}
+            AND data_status = 0
+        ORDER BY
+            create_date DESC
+    </select>
 </mapper>
 
