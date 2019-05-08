@@ -72,7 +72,7 @@ public class FileCommonService {
         Map<String, Object> paramMap = new HashedMap();
         String webAddress = filePath+ DateUtil.convert(new Date(), DateUtil.FORMAT1);
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_PATH, String.class) +webAddress+"/";
-        String fileName = System.currentTimeMillis() + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+        String fileName = System.currentTimeMillis()+ Math.random() + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
         fileName = new String(fileName.getBytes(), "UTF-8");
         File path = new File(address);
         if (!path.exists()) {
