@@ -40,6 +40,7 @@ public class ActuaryService {
         if(Integer.parseInt(budgetOk)<0){
             //当类型小于0时，则查询移除的数据
             dataStatus="1";
+            budgetOk="";
         }
         List<HouseListDTO> houseList = houseMapper.getActuaryAll(budgetOk,name,dataStatus);
         PageInfo pageResult = new PageInfo(houseList);
