@@ -1,6 +1,7 @@
 package com.dangjia.acg.modle.attribute;
 
 import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.basics.Goods;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
