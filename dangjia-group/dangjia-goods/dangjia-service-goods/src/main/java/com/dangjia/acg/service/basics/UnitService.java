@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.text.SimpleDateFormat;
@@ -105,6 +106,7 @@ public class UnitService {
     }
 
     //修改商品单位
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse update(String unitId, String unitName, String linkUnitIdArr) {
         try {
             LOG.info("linkUnitIdArr :" + linkUnitIdArr);
