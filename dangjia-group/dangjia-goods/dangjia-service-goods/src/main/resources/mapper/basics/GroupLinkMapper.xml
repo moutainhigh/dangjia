@@ -223,4 +223,6 @@
 		SET is_switch=#{isSwitch},modify_date=SYSDATE()
 		where product_id=#{productId}
 	</update>
+
+
 </mapper>

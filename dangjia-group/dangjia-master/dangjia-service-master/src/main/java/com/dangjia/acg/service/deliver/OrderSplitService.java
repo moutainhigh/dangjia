@@ -267,9 +267,9 @@ public class OrderSplitService {
                 if (isAdd){
                     v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
                     Map map = BeanUtils.beanToMap(v);
-                    String supplierId = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductSn());
-                    if (!CommonUtil.isEmpty(supplierId)) {
-                        map.put(SplitDeliver.SUPPLIER_ID, supplierId);
+                    List<String> supplierId = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductSn());
+                    if (supplierId.size()>0) {
+                        map.put(SplitDeliver.SUPPLIER_ID, supplierId.get(0));
                     }
                     mapList.add(map);
                 }
@@ -431,9 +431,9 @@ public class OrderSplitService {
 
                 v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
                 Map map= BeanUtils.beanToMap(v);
-               String  supplierId=splitDeliverMapper.getSupplierGoodsId(v.getHouseId(),v.getProductSn());
-                if(!CommonUtil.isEmpty(supplierId)){
-                    map.put(SplitDeliver.SUPPLIER_ID,supplierId);
+                List<String> supplierId = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductSn());
+                if (supplierId.size()>0) {
+                    map.put(SplitDeliver.SUPPLIER_ID, supplierId.get(0));
                 }
                 mapList.add(map);
             }

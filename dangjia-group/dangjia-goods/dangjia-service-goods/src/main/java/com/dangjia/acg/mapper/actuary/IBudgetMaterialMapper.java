@@ -77,4 +77,7 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 	Double getAbmCasualByHfId(@Param("houseFlowId")String houseFlowId);
 
 	void insertByBatch(@Param("list")List<BudgetMaterial> list);
+
+
+
 }

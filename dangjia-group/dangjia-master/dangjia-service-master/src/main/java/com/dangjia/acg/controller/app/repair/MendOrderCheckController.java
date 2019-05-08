@@ -25,7 +25,14 @@ public class MendOrderCheckController implements MendOrderCheckAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse checkMendOrder(String userToken, String mendOrderId, String roleType, Integer state){
-        return mendOrderCheckService.checkMendOrder(userToken,mendOrderId,roleType,state);
+    public ServerResponse checkMendOrder(String userToken, String mendOrderId, String roleType, Integer state,String productArr){
+        return mendOrderCheckService.checkMendOrder(userToken,mendOrderId,roleType,state,productArr);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse confirmMendOrder(String userToken, String mendOrderId, String productArr){
+        return mendOrderCheckService.confirmMendOrder(userToken,mendOrderId,productArr);
+    }
+
 }

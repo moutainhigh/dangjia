@@ -2,15 +2,21 @@ package com.dangjia.acg.service.basics;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.product.MasterProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.BaseException;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.Goods;
+import com.dangjia.acg.modle.basics.GroupLink;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Brand;
@@ -18,13 +24,18 @@ import com.dangjia.acg.modle.brand.BrandSeries;
 import com.dangjia.acg.modle.brand.GoodsSeries;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import jdk.nashorn.internal.ir.RuntimeNode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -52,6 +63,15 @@ public class GoodsService {
     private ILabelMapper iLabelMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private ProductService productService;
+    @Autowired
+    private MasterProductAPI masterProductAPI;
+    @Autowired
+    private IGroupLinkMapper iGroupLinkMapper;
+    @Autowired
+    private IBudgetMaterialMapper iBudgetMaterialMapper;
+
 
     /**
      * 保存goods
@@ -205,6 +225,7 @@ public class GoodsService {
      * @param arrString
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateGoods(String id, String name, String categoryId, Integer buy,
                                       Integer sales, String unitId, Integer type, String arrString,String otherName) {
         try {
@@ -226,6 +247,39 @@ public class GoodsService {
             goods.setOtherName(otherName);
             goods.setModifyDate(new Date());
             iGoodsMapper.updateByPrimaryKeySelective(goods);
+            //修改品牌对应的product名称也更新
+            Example example=new Example(Product.class);
+            //关联goods的表goods名称更新
+            example.createCriteria().andEqualTo(GroupLink.GOODS_ID,id);
+            List<GroupLink> groupLinks = iGroupLinkMapper.selectByExample(example);
+            if(groupLinks.size()>0||null!=groupLinks){
+                for (GroupLink groupLink : groupLinks) {
+                    groupLink.setGoodsId(id);
+                    groupLink.setGoodsName(name);
+                    iGroupLinkMapper.updateByPrimaryKeySelective(groupLink);
+                }
+            }
+            example.createCriteria().andEqualTo(BudgetMaterial.GOODS_ID);
+            List<BudgetMaterial> budgetMaterials = iBudgetMaterialMapper.selectByExample(example);
+            if(budgetMaterials.size()>0||null!=budgetMaterials){
+                for (BudgetMaterial budgetMaterial : budgetMaterials) {
+                    budgetMaterial.setGoodsId(id);
+                    budgetMaterial.setGoodsName(name);
+                    iBudgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
+                }
+            }
+            example.createCriteria().andEqualTo(Product.GOODS_ID,id);
+            List<Product> products = iProductMapper.selectByExample(example);
+            if(products.size()>0||null!=products) {
+                for (Product product : products) {
+                    product.setName(product.getName().replace(oldGoods.getName(), name));
+                    //调用product相关联的表更新
+                    productService.updateProductByProductId(product);
+                    //master跟product相关联的表更新
+                    masterProductAPI.updateProductByProductId(product.getId(),product.getCategoryId(),product.getBrandSeriesId()
+                            ,product.getBrandId(),product.getName(),product.getUnitId(),product.getUnitName());
+                }
+            }
             if (buy != 2) //非自购goods ，有品牌
             {
                 if (!StringUtils.isNoneBlank(arrString)) {
@@ -258,15 +312,10 @@ public class GoodsService {
                         iGoodsSeriesMapper.insert(gs);
                     }
                 }
-
-
             }
-
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("修改失败");
-
+            throw new BaseException(ServerCode.WRONG_PARAM, "修改失败");
         }
     }
 
