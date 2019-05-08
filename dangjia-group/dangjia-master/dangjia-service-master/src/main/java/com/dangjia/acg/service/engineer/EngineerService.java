@@ -854,7 +854,7 @@ public class EngineerService {
         if(search!=null && search!=""){
             example.createCriteria().andLike(WorkerEveryday.NAME,"%"+search+"%");
         }
-        example.orderBy(WorkerEveryday.MODIFY_DATE).desc();
+        example.orderBy(WorkerEveryday.TYPE).orderBy(WorkerEveryday.MODIFY_DATE).desc();
         List<WorkerEveryday> workerEverydays = iWorkerEverydayMapper.selectByExample(example);
         PageInfo pageResult = new PageInfo(workerEverydays);
         return ServerResponse.createBySuccess("查询成功", pageResult);
