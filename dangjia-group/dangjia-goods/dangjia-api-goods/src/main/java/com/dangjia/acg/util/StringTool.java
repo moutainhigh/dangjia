@@ -1,5 +1,8 @@
 package com.dangjia.acg.util;
 
+import com.github.pagehelper.util.StringUtil;
+import org.apache.commons.lang.StringUtils;
+
 import javax.servlet.http.HttpServletRequest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -7,8 +10,23 @@ import java.util.regex.Pattern;
  
 
 public class StringTool {
-	
 
+	//取第一张图
+	public static String getImage(String images,String imageLocal) {
+		try {
+			if (StringUtil.isNotEmpty(images)) {
+				String[] imageArr = images.split(",");
+				for (int i = 0; i < imageArr.length; i++) {
+					imageArr[i] = imageLocal + imageArr[i];
+				}
+				return StringUtils.join(imageArr, ",");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "";//图片上传错误
+		}
+		return "";//暂无图片
+	}
 	public static String equalEmptyResult(String result) {
 		if (result == null || result.isEmpty())
 			return "";

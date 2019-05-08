@@ -6,6 +6,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.actuary.GoodsDTO;
 import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.basics.Goods;
@@ -15,6 +16,7 @@ import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.BrandSeries;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -631,5 +633,27 @@ public class ProductService {
         List<Product>  productList = iProductMapper.queryProductData(name,categoryId,productType,productId);
         PageInfo pageResult = new PageInfo(productList);
         return pageResult;
+    }
+
+    /**
+     * 商品明细获取
+     */
+    public GoodsDTO goodsDetail(Product product, String budgetMaterialId) {
+        String imageLocal=configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        GoodsDTO goodsDTO = new GoodsDTO();//长图  品牌系列图+属性图(多个)
+        Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());//当前 商品
+        goodsDTO.setProductId(product.getId());
+        goodsDTO.setGoodsId(goods.getId());
+        goodsDTO.setImage(StringTool.getImage(product.getImage(),imageLocal));//图一张
+        String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
+        goodsDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
+        goodsDTO.setName(product.getName());
+        goodsDTO.setUnitName(convertUnitName);//单位
+        goodsDTO.setProductType(goods.getType());//材料类型
+
+        //该商品关联所有品牌系列
+        List<BrandSeries> brandSeriesList = iBrandSeriesMapper.queryBrandByGid(goods.getId());
+
+        return null;
     }
 }

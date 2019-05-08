@@ -60,7 +60,7 @@
         WHERE
             si.house_id = #{houseId}
         AND si.product_sn =  #{productSn}
-        ORDER BY si.create_date DESC LIMIT 1
+        ORDER BY si.create_date DESC
     </select>
 
 </mapper>
