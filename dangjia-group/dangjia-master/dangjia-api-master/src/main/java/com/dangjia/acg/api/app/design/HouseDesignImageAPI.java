@@ -355,6 +355,7 @@ public interface HouseDesignImageAPI {
      * @method POST
      * @url app/design/getDesign
      * @return_param verification int 0：不显示审核按钮，1：显示审核按钮
+     * @return_param historyRecord int 是否暂时历史记录0：不显示,1：显示
      * @return_param button string 确认平面图
      * @return_param data List 图片集合
      * @return_param data-id string id
