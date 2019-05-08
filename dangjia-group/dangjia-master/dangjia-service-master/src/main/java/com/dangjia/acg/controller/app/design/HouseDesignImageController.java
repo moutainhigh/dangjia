@@ -30,6 +30,8 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
         return designerOperationService.sendPictures(houseId);
     }
 
+//    @Overrideerride
+//    @ApiMethod
 //    public ServerResponse uploadPictures(HttpServletRequest request, String houseId, String designImageTypeId, String imageurl) {
 //        return designDataService.uploadPictures(houseId, designImageTypeId, imageurl);
 //    }

@@ -18,6 +18,7 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.deliver.Cart;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.AccessToken;
