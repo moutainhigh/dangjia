@@ -41,8 +41,8 @@ public class QuantityRoom extends BaseEntity {
     private String userId;
 
     @Column(name = "type")
-    @Desc(value = "事务类型：0:量房，1待扩展")
-    @ApiModelProperty("事务类型：0:量房，1待扩展")
+    @Desc(value = "事务类型：0:量房，1平面图，2施工图")
+    @ApiModelProperty("事务类型：0:量房，1平面图，2施工图")
     private Integer type;//
 
     @Column(name = "operation_type")

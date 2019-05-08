@@ -16,9 +16,9 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.core.NodeDTO;
+import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.mapper.core.*;
-import com.dangjia.acg.mapper.design.IHouseDesignImageMapper;
 import com.dangjia.acg.mapper.house.IHouseExpendMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingLayoutMapper;
@@ -34,7 +34,7 @@ import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.*;
-import com.dangjia.acg.modle.design.HouseDesignImage;
+import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.matter.RenovationManual;
@@ -50,6 +50,7 @@ import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.HouseFlowService;
+import com.dangjia.acg.service.design.DesignDataService;
 import com.dangjia.acg.service.member.GroupInfoService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -93,8 +94,8 @@ public class HouseService {
     private IModelingLayoutMapper modelingLayoutMapper;
     @Autowired
     private IModelingVillageMapper modelingVillageMapper;
-    @Autowired
-    private IHouseDesignImageMapper houseDesignImageMapper;
+    //    @Autowired
+//    private IHouseDesignImageMapper houseDesignImageMapper;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
@@ -133,6 +134,8 @@ public class HouseService {
     private HouseFlowService houseFlowService;
     @Autowired
     private IMendOrderMapper mendOrderMapper;
+    @Autowired
+    private DesignDataService designDataService;
 
     @Autowired
     private IWorkDepositMapper workDepositMapper;
@@ -855,7 +858,6 @@ public class HouseService {
     }
 
     private ShareDTO convertHouse(House house, AccessToken accessToken) {
-        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         ModelingLayout ml = modelingLayoutMapper.selectByPrimaryKey(house.getModelingLayoutId());
         ShareDTO shareDTO = new ShareDTO();
         shareDTO.setType("1");
@@ -893,15 +895,22 @@ public class HouseService {
         String jobLocationDetail = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                 String.format(DjConstants.YZPageAddress.JOBLOCATIONDETAIL, accessToken != null ? accessToken.getUserToken() : "", house.getCityId(), "施工现场") + "&houseId=" + house.getId();
         shareDTO.setUrl(jobLocationDetail);
-        Example example = new Example(HouseDesignImage.class);
-        example.createCriteria().andEqualTo("houseId", house.getId());
-        List<HouseDesignImage> houseDesignImages = houseDesignImageMapper.selectByExample(example);
-        if ((houseDesignImages != null) && (houseDesignImages.size() > 0)) {
-            shareDTO.setImageNum(houseDesignImages.size() + "张图片");
-            shareDTO.setImage(address + houseDesignImages.get(0).getImageurl() + "?x-image-process=image/resize,w_500,h_500/quality,q_80");//户型图片
-        } else {
-            shareDTO.setImageNum(0 + "张图片");
-            shareDTO.setImage("");//户型图片
+        shareDTO.setImageNum(0 + "张图片");
+        shareDTO.setImage("");//户型图片
+        ServerResponse serverResponse = designDataService.getPlaneMap(house.getId());
+        if (serverResponse.isSuccess()) {
+            QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+            List<QuantityRoomImages> images = quantityRoomDTO.getImages();
+            if (images != null && images.size() > 0) {
+                shareDTO.setImage(images.get(0).getImage());
+                serverResponse = designDataService.getConstructionPlans(house.getId());
+                if (serverResponse.isSuccess()) {
+                    quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+                    if (quantityRoomDTO.getImages() != null) {
+                        shareDTO.setImageNum(quantityRoomDTO.getImages().size() + "张图片");
+                    }
+                }
+            }
         }
         return shareDTO;
     }

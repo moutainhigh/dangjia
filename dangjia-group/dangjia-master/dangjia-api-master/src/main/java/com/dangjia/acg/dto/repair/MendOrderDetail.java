@@ -19,9 +19,21 @@ public class MendOrderDetail {
     private Integer type;
     private Integer state;
     private Double totalAmount;
-
     private Date createDate;
     private Date modifyDate;
+
+
+    private String houseId;//房ID
+    private String houseName;//房名
+
+    private String memberId;//业主ID
+    private String memberName;//业主名称
+    private String memberMobile;//业主手机号
+
+
+    private String applicantId;//申请人ID
+    private String applicantName;//申请人名称
+    private String applicantMobile;//申请人手机号
 
     private ChangeOrder changeOrder;
     private List<Map<String,Object>> mapList;

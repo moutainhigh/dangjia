@@ -50,4 +50,6 @@ public interface IGroupLinkMapper extends Mapper<GroupLink> {
     //根据关联组id删除货品关联关系
     void deleteGroupLinkById(@Param("id") String id);
 
+
+
 }

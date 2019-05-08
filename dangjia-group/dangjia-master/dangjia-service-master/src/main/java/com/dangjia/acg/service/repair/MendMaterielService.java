@@ -1,11 +1,13 @@
 package com.dangjia.acg.service.repair;
 
+import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDTO;
+import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -16,6 +18,7 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.sup.Supplier;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -47,6 +50,10 @@ public class MendMaterielService {
     @Autowired
     private IWarehouseMapper warehouseMapper;
 
+    @Autowired
+    private ForMasterAPI forMasterAPI;
+    @Autowired
+    private ISplitDeliverMapper splitDeliverMapper;
     @Autowired
     private static Logger LOG = LoggerFactory.getLogger(MendMaterielService.class);
 
@@ -117,6 +124,7 @@ public class MendMaterielService {
      */
     public ServerResponse mendMaterialList(String mendOrderId) {
         MendOrder mendOrder= mendOrderMapper.selectByPrimaryKey(mendOrderId);
+        House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
         List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderId);
         List<Map> mendMaterielMaps=new ArrayList<>();
         for (MendMateriel mendMateriel : mendMaterielList) {
@@ -135,6 +143,15 @@ public class MendMaterielService {
                     //未发货数量=已要 - 已收
                     map.put(Warehouse.RECEIVE, warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack()) - warehouse.getAskCount());
                 }
+            }
+            List<String> supplierId = splitDeliverMapper.getSupplierGoodsId(mendOrder.getHouseId(), mendMateriel.getProductSn());
+            List<Supplier> suppliers=new ArrayList<>();
+            if (supplierId.size()>0) {
+                for (int i = 0; i < supplierId.size(); i++) {
+                    Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), supplierId.get(i));
+                    suppliers.add(supplier);
+                }
+                map.put("suppliers", suppliers);
             }
             mendMaterielMaps.add(map);
         }

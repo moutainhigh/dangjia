@@ -217,9 +217,9 @@ public class MendOrderService {
                 mendOrder.setState(0);//生成中
                 mendOrder.setTotalAmount(0.0);
 
-                if (!this.createMendCheck(mendOrder)) {
-                    return ServerResponse.createByErrorMessage("添加审核流程失败");
-                }
+//                if (!this.createMendCheck(mendOrder)) {
+//                    return ServerResponse.createByErrorMessage("添加审核流程失败");
+//                }
                 mendOrderMapper.insert(mendOrder);
             }
 
@@ -741,20 +741,20 @@ public class MendOrderService {
                 mendOrder.setState(0);//生成中
                 mendOrder.setTotalAmount(0.0);
 
-                if (!this.createMendCheck(mendOrder)) {
-                    return ServerResponse.createByErrorMessage("添加审核流程失败");
-                }
-                mendOrderMapper.insert(mendOrder);
-
-                if (worker.getWorkerType() == 3) {//管家退服务
-                    MendOrderCheck mendOrderCheck = mendOrderCheckMapper.getByMendOrderId(mendOrder.getId(), "2");
-                    if (mendOrderCheck != null) {
-                        mendOrderCheck.setState(2);
-                        mendOrderCheck.setAuditorId(worker.getId());//审核人
-                        mendOrderCheck.setModifyDate(new Date());
-                        mendOrderCheckMapper.updateByPrimaryKeySelective(mendOrderCheck);
-                    }
-                }
+//                if (!this.createMendCheck(mendOrder)) {
+//                    return ServerResponse.createByErrorMessage("添加审核流程失败");
+//                }
+//                mendOrderMapper.insert(mendOrder);
+//
+//                if (worker.getWorkerType() == 3) {//管家退服务
+//                    MendOrderCheck mendOrderCheck = mendOrderCheckMapper.getByMendOrderId(mendOrder.getId(), "2");
+//                    if (mendOrderCheck != null) {
+//                        mendOrderCheck.setState(2);
+//                        mendOrderCheck.setAuditorId(worker.getId());//审核人
+//                        mendOrderCheck.setModifyDate(new Date());
+//                        mendOrderCheckMapper.updateByPrimaryKeySelective(mendOrderCheck);
+//                    }
+//                }
             }
 
             if (this.addMendMateriel(productArr, mendOrder)) {

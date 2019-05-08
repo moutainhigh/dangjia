@@ -115,6 +115,7 @@ public class CraftsmanConstructionService {
         bean.setWorkerType(2);//0:大管家；1：工匠；2：设计师；3：精算师
         bean.setHouseFlowId(hf.getId());
         bean.setDecorationType(house.getDecorationType());
+        bean.setDesignerOk(house.getDesignerOk());
         setMoney(bean, hw);
         Member houseMember = memberMapper.selectByPrimaryKey(house.getMemberId());//业主
         if (houseMember != null) {
@@ -128,7 +129,7 @@ public class CraftsmanConstructionService {
         List<ConstructionByWorkerIdBean.ButtonListBean> buttonList = new ArrayList<>();
         if (house.getDecorationType() != 2 && house.getDesignerOk() == 1) {
             buttonList.add(getButton("去量房", 2));
-        }else{
+        } else {
             switch (house.getDesignerOk()) {
                 case 1://1已支付-设计师待量房
                 case 9://9量房图发给业主

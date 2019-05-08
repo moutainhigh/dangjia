@@ -25,5 +25,5 @@ public interface ISplitDeliverMapper extends Mapper<SplitDeliver> {
                                                         @Param("searchKey") String searchKey,
                                                         @Param("beginDate") String beginDate,
                                                         @Param("endDate") String endDate);
-    String getSupplierGoodsId( @Param("houseId") String houseId, @Param("productSn") String productSn);
+    List<String> getSupplierGoodsId( @Param("houseId") String houseId, @Param("productSn") String productSn);
 }

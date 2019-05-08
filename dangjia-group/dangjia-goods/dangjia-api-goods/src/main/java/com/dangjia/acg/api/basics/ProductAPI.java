@@ -134,4 +134,15 @@ public interface ProductAPI {
 	@ApiOperation(value = "根据系列和属性查询切换货品", notes = "根据系列和属性查询切换货品")
 	  ServerResponse getSwitchProduct(@RequestParam("request")HttpServletRequest request,@RequestParam("brandSeriesId")String brandSeriesId,
 											@RequestParam("attributeIdArr")String attributeIdArr);*/
+
+//	@PostMapping("/basics/product/updateProductByProductId")
+//    @ApiOperation(value = "修改商品库内商品,全局更新", notes ="修改商品库内商品,全局更新")
+//	ServerResponse updateProductByProductId(@RequestParam("request") HttpServletRequest request,
+//                                            @RequestParam("id") String id,
+//                                            @RequestParam("categoryId") String  categoryId,
+//                                            @RequestParam("brandSeriesId") String brandSeriesId,
+//                                            @RequestParam("brandId") String brandId,
+//                                            @RequestParam("name") String name,
+//                                            @RequestParam("unitId") String unitId,
+//                                            @RequestParam("unitName") String unitName);
 }

@@ -46,6 +46,7 @@ public class ConstructionByWorkerIdBean {
     private List<Map<String, Object>> dataList;//设计师和精算流程返回体
     private Integer decorationType;//"装修类型: 0表示没有开始，1远程设计，2自带设计，3共享装修")
     private String houseId;
+    private Integer designerOk;
 
     @Data
     public static class BigListBean {

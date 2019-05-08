@@ -39,10 +39,4 @@ public class WebHouseStyleTypeController implements WebHouseStyleTypeAPI {
         return houseStyleTypeService.updataStyle(request,id,name,price);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse deleteStyle(HttpServletRequest request, String id) {
-        return houseStyleTypeService.deleteStyle(request,id);
-    }
-
 }

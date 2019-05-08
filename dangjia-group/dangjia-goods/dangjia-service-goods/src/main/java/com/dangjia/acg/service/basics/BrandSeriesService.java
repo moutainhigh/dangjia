@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.basics;
 
+import com.dangjia.acg.api.product.MasterProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -8,12 +9,20 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.IBrandSeriesMapper;
+import com.dangjia.acg.mapper.basics.IProductMapper;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.BrandSeries;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.shiro.session.mgt.SessionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +45,12 @@ public class BrandSeriesService{
 	private IBrandSeriesMapper iBrandSeriesMapper;
 	@Autowired
 	private ConfigUtil configUtil;
+	@Autowired
+	private IProductMapper iProductMapper;
+	@Autowired
+	private ProductService productService;
+	@Autowired
+	private MasterProductAPI masterProductAPI;
 	//查询所有
 	public ServerResponse<PageInfo> getAllBrandExplain(PageDTO pageDTO) {
 		PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
@@ -58,17 +73,32 @@ public class BrandSeriesService{
 		}
 	}
 	//修改
+	@Transactional(rollbackFor = Exception.class)
 	public ServerResponse update(String id,String name,String content ){
 		try {
+			BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(id);
 			BrandSeries brandEx = new BrandSeries();
 			brandEx.setId(id);
 			brandEx.setName(name);
 			brandEx.setContent(content);
 			brandEx.setModifyDate(new Date());
 			iBrandSeriesMapper.updateByPrimaryKeySelective(brandEx);
+			//修改品牌系列对应的product名称也更新
+			Example example=new Example(Product.class);
+			example.createCriteria().andEqualTo(Product.BRAND_SERIES_ID,id);
+			List<Product> products = iProductMapper.selectByExample(example);
+			if(products.size()>0||null!=products) {
+				for (Product product : products) {
+					product.setName(product.getName().replace(brandSeries.getName(), name));
+					//调用product相关联的表更新
+					productService.updateProductByProductId(product);
+					//master相关联表更新
+					masterProductAPI.updateProductByProductId(product.getId(),product.getCategoryId(),product.getBrandSeriesId()
+							,product.getBrandId(),product.getName(),product.getUnitId(),product.getUnitName());
+				}
+			}
 			return ServerResponse.createBySuccessMessage("修改成功");
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new BaseException(ServerCode.WRONG_PARAM, "修改失败");
 		}
 		

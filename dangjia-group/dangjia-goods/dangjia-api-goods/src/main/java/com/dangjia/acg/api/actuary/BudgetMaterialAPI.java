@@ -80,4 +80,6 @@ public interface BudgetMaterialAPI {
     @ApiOperation(value = "根据商品Id查询货品", notes = "根据商品Id查询货品")
     ServerResponse getAllProductByGoodsId(@RequestParam("request") HttpServletRequest request,
                                           @RequestParam("goodsId") String goodsId);
+
+
 }
