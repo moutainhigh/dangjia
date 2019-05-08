@@ -447,7 +447,7 @@ public class EngineerService {
                 map.put("havaMoney", 0);
             } else {
                 map.put("havaMoney", houseWorkerOrderList.get(0).getHaveMoney());
-                map.put("workPrice", houseFlow.getWorkPrice().add(houseWorkerOrderList.get(0).getRepairPrice()));
+                map.put("workPrice", houseWorkerOrderList.get(0).getWorkPrice().add(houseWorkerOrderList.get(0).getRepairPrice()));
                 if(houseFlow.getWorkSteta()==2) {
                     map.put("havaMoney", houseWorkerOrderList.get(0).getHaveMoney().add(houseWorkerOrderList.get(0).getRepairPrice()));
                 }
