@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;

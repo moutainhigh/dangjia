@@ -2,7 +2,6 @@ package com.dangjia.acg.modle.member;
 
 import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
-import com.google.gson.FieldNamingStrategy;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

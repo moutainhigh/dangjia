@@ -5,7 +5,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.modle.basics.Product;
-import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;

@@ -1,6 +1,5 @@
 package com.dangjia.acg.dto.matter;
 
-import com.dangjia.acg.modle.matter.TechnologyRecord;
 import lombok.Data;
 
 import java.util.List;

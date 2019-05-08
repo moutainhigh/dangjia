@@ -1,8 +1,5 @@
 package com.dangjia.acg.dto.member;
 
-import com.dangjia.acg.modle.member.Customer;
-import com.dangjia.acg.modle.member.CustomerRecord;
-import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberLabel;
 import lombok.Data;
 
