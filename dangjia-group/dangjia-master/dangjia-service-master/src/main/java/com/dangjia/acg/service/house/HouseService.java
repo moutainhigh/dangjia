@@ -1070,6 +1070,7 @@ public class HouseService {
         Example example=new Example(HouseConstructionRecord.class);
         example.createCriteria().andEqualTo(HouseConstructionRecord.HOUSE_ID,houseId);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        example.orderBy(HouseConstructionRecord.CREATE_DATE).desc();
         List<HouseConstructionRecord> hfaList = houseConstructionRecordMapper.selectByExample(example);
         PageInfo pageResult = new PageInfo(hfaList);
         List<Map<String, Object>> listMap = new ArrayList<>();
@@ -1119,6 +1120,7 @@ public class HouseService {
         }
         if(hfa.getSourceType()==1) {
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(hfa.getSourceId());
+            map.put("type", mendOrder.getType());
             map.put("number", mendOrder.getNumber());
             if (mendOrder.getType() == 2 && StringUtil.isNotEmpty(mendOrder.getImageArr())){
                 String[] imageArr = mendOrder.getImageArr().split(",");
@@ -1128,7 +1130,6 @@ public class HouseService {
                         imageList.add(address + imageArr[i]);
                     }
                     map.put("imgArr", imageList);
-                    map.put("type", mendOrder.getType());
                 }
             }
         }
