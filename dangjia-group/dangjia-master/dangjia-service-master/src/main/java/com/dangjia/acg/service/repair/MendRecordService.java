@@ -4,6 +4,7 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDetail;
@@ -153,7 +154,7 @@ public class MendRecordService {
                 if (mendOrder.getType() == 0 || mendOrder.getType() == 2 || mendOrder.getType() == 4){
                     List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderId);
                     for (MendMateriel mendMateriel : mendMaterielList){
-                        Map<String,Object> map = new HashMap<>();
+                        Map<String,Object> map = BeanUtils.beanToMap(mendMateriel);
                         map.put("image", address + mendMateriel.getImage());
                         if (mendMateriel.getProductType() == 0){
                             map.put("goodsType", "材料");
