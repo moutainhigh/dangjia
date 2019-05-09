@@ -1,6 +1,8 @@
 package com.dangjia.acg.common.constants;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 公共应用常量类
@@ -136,7 +138,42 @@ public class DjConstants {
         public final static Integer ZHENGTI_WANGONG_SUCCESS = 102;// 整体完工审核
         public final static Integer NO_PASS = 666;// 整体完工
     }
+    /**
+     * ApplyType 任务进程-申请类型
+     */
+    public static class RecordType {
+        public final static Integer MEIRI_WANGGONG = 0;//0每日完工申请
+        public final static Integer JIEDUAN_WANGONG = 1;// 1阶段完工申请
+        public final static Integer ZHENGTI_WANGONG = 2;// 2整体完工申请
+        public final static Integer TINGGONG = 3;// 3停工申请
+        public final static Integer MEIRI_KAIGONG = 4;// 4：每日开工
+        public final static Integer YOUXIAO_XUNCHA = 5;// 5有效巡查
+        public final static Integer JJ_TINGGONG = 6;// 6同意停工
+        public final static Integer TY_TINGGONG = 7;// 7拒绝停工
+        public final static Integer BURENGONG = 8;// 8补人工
+        public final static Integer TUIRENGONG = 9;// 9退人工
+        public final static Integer BUCAILIAO = 10;// 10补材料
+        public final static Integer TUICAILIAO = 11;// 11退材料
+        public final static Integer YZ_TUICAILIAO = 12;// 12业主退材料
 
+        public final static Map getRecordTypeMap(){
+            Map<Integer, String> applyTypeMap = new HashMap<>();
+            applyTypeMap.put(DjConstants.RecordType.MEIRI_WANGGONG, "每日完工申请");
+            applyTypeMap.put(DjConstants.RecordType.JIEDUAN_WANGONG, "阶段完工申请");
+            applyTypeMap.put(DjConstants.RecordType.ZHENGTI_WANGONG, "整体完工申请");
+            applyTypeMap.put(DjConstants.RecordType.TINGGONG, "停工申请");
+            applyTypeMap.put(DjConstants.RecordType.MEIRI_KAIGONG, "每日开工");
+            applyTypeMap.put(DjConstants.RecordType.YOUXIAO_XUNCHA, "巡查");
+            applyTypeMap.put(DjConstants.RecordType.JJ_TINGGONG, "同意停工");
+            applyTypeMap.put(DjConstants.RecordType.TY_TINGGONG, "拒绝停工");
+            applyTypeMap.put(DjConstants.RecordType.BURENGONG, "补人工");
+            applyTypeMap.put(DjConstants.RecordType.TUIRENGONG, "退人工");
+            applyTypeMap.put(DjConstants.RecordType.BUCAILIAO, "补材料");
+            applyTypeMap.put(DjConstants.RecordType.TUICAILIAO, "退材料");
+            applyTypeMap.put(DjConstants.RecordType.YZ_TUICAILIAO, "业主退材料");
+            return applyTypeMap;
+        }
+    }
 
     /**
      * Type 工序类型 人工1 材料2 服务3

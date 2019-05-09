@@ -15,6 +15,7 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -48,6 +49,8 @@ public class HouseWorkerSupService {
     private ConfigUtil configUtil;
     @Autowired
     private MendMaterielAPI mendMaterielAPI;
+    @Autowired
+    private HouseService houseService;
 
     /**
      * 管家审核验收申请h
@@ -134,6 +137,7 @@ public class HouseWorkerSupService {
             hfa.setStartDate(start);
             hfa.setEndDate(end);
             houseFlowApplyMapper.insert(hfa);
+            houseService.insertConstructionRecord(hfa);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();

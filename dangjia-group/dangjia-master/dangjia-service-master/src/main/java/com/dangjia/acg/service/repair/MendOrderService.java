@@ -33,6 +33,7 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,6 +92,8 @@ public class MendOrderService {
     private ISurplusWareHouseMapper iSurplusWareHouseMapper;
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
+    @Autowired
+    private HouseService houseService;
 
 
     /**
@@ -141,7 +144,7 @@ public class MendOrderService {
                 mendOrder.setState(1);//平台审核
                 mendOrder.setModifyDate(new Date());//更新时间
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-
+                houseService.insertConstructionRecord(mendOrder);
                 //业主退，自动退材料钱至业主钱包（立即）
                 mendOrderCheckService.settleMendOrder(mendOrder);
                 return ServerResponse.createBySuccessMessage("操作成功");
@@ -252,7 +255,7 @@ public class MendOrderService {
                 MendOrder mendOrder = mendOrderList.get(0);
                 mendOrder.setState(1);
                 mendOrderMapper.updateByPrimaryKey(mendOrder);
-
+                houseService.insertConstructionRecord(mendOrder);
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
                 changeOrder.setState(2);//通过->工匠业主审核
                 changeOrderMapper.updateByPrimaryKey(changeOrder);
@@ -409,7 +412,7 @@ public class MendOrderService {
                 MendOrder mendOrder = mendOrderList.get(0);
                 mendOrder.setState(1);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-
+                houseService.insertConstructionRecord(mendOrder);
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
                 changeOrder.setState(2);//通过->工匠业主审核
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
@@ -636,7 +639,7 @@ public class MendOrderService {
                 mendOrder.setState(1);//处理中
                 mendOrder.setModifyDate(new Date());//更新退货
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-
+                houseService.insertConstructionRecord(mendOrder);
                 House house = houseMapper.selectByPrimaryKey(houseId);
 //                if (worker.getWorkerType() == 3) {
 //                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家退服务", String.format
@@ -790,7 +793,7 @@ public class MendOrderService {
                 mendOrder.setState(1);//处理中
                 mendOrder.setModifyDate(new Date());
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-
+                houseService.insertConstructionRecord(mendOrder);
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 if (worker.getWorkerType() == 3) {
                     configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家补服务", String.format
