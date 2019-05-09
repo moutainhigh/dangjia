@@ -317,8 +317,29 @@ public class DesignDataService {
             return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相关记录");
         }
         PageInfo pageResult = new PageInfo(quantityRoomDTOS);
+        for (QuantityRoomDTO quantityRoomDTO : quantityRoomDTOS) {
+            quantityRoomDTO.setUserType(-1);
+            getUserName(quantityRoomDTO);
+        }
+        pageResult.setList(quantityRoomDTOS);
         return ServerResponse.createBySuccess("查询历史记录成功", pageResult);
 
+    }
+
+    private void getUserName(QuantityRoomDTO quantityRoomDTO) {
+        if (!CommonUtil.isEmpty(quantityRoomDTO.getMemberId())) {
+            Member member = memberMapper.selectByPrimaryKey(quantityRoomDTO.getMemberId());
+            if (member != null) {
+                quantityRoomDTO.setUserType(0);
+                quantityRoomDTO.setUserName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
+            }
+        } else if (!CommonUtil.isEmpty(quantityRoomDTO.getUserId())) {
+            MainUser mainUser = userMapper.selectByPrimaryKey(quantityRoomDTO.getUserId());
+            if (mainUser != null) {
+                quantityRoomDTO.setUserType(1);
+                quantityRoomDTO.setUserName(mainUser.getUsername());
+            }
+        }
     }
 
     /**
@@ -354,19 +375,7 @@ public class DesignDataService {
             return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相关信息");
         }
         quantityRoomDTO.setUserType(-1);
-        if (!CommonUtil.isEmpty(quantityRoomDTO.getMemberId())) {
-            Member member = memberMapper.selectByPrimaryKey(quantityRoomDTO.getMemberId());
-            if (member != null) {
-                quantityRoomDTO.setUserType(0);
-                quantityRoomDTO.setUserName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
-            }
-        } else if (!CommonUtil.isEmpty(quantityRoomDTO.getUserId())) {
-            MainUser mainUser = userMapper.selectByPrimaryKey(quantityRoomDTO.getUserId());
-            if (mainUser != null) {
-                quantityRoomDTO.setUserType(1);
-                quantityRoomDTO.setUserName(mainUser.getUsername());
-            }
-        }
+        getUserName(quantityRoomDTO);
         Example example = new Example(QuantityRoomImages.class);
         example.createCriteria()
                 .andEqualTo(QuantityRoomImages.QUANTITY_ROOM_ID, quantityRoomDTO.getId())
