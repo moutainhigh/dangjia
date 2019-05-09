@@ -414,6 +414,9 @@ public class PaymentService {
                 BigDecimal repairPrice=houseWorkerOrder.getRepairPrice().add(new BigDecimal(mendOrder.getTotalAmount()));
                 houseWorkerOrdernew.setRepairPrice(repairPrice);
                 //记录总补人工钱
+                if(houseWorkerOrdernew.getRepairTotalPrice()==null){
+                    houseWorkerOrdernew.setRepairTotalPrice(new BigDecimal(0));
+                }
                 BigDecimal repairTotalPrice=houseWorkerOrdernew.getRepairTotalPrice().add(houseWorkerOrdernew.getRepairPrice());
                 houseWorkerOrdernew.setRepairTotalPrice(repairTotalPrice);
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(houseWorkerOrdernew);
