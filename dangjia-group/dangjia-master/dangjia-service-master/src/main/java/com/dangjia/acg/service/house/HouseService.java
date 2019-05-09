@@ -1100,7 +1100,7 @@ public class HouseService {
         }
         map.put("workerName", member.getName());//工人名称
         map.put("content", hfa.getContent());
-        map.put("sourceType", hfa.getSourceType());
+        map.put("sourceType", hfa.getApplyType());
 
         Example example = new Example(HouseFlowApplyImage.class);
         if(hfa.getSourceType()==0) {
