@@ -1093,7 +1093,11 @@ public class HouseService {
         map.put("id", hfa.getSourceId());
         Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
         map.put("workerHead", address + member.getHead());//工人头像
-        map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+        if(hfa.getWorkerType()!=null) {
+            map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+        }else{
+            map.put("workerTypeName","业主");//工匠类型
+        }
         map.put("workerName", member.getName());//工人名称
         map.put("content", hfa.getContent());
         map.put("sourceType", hfa.getSourceType());
