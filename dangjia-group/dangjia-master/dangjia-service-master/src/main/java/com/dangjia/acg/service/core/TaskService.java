@@ -114,34 +114,46 @@ public class TaskService {
             }
         }
         String houseId = null;
-        if (houseList.size() > 1) {
-            buttonDTO.setState(2);
-            for (House house : houseList) {
-                if (house.getVisitState() == 0) {//0待确认开工,1装修中,2休眠中,3已完工
-                    buttonDTO.setState(3);
-                    buttonDTO.setHouseType(house.getHouseType());
-                    buttonDTO.setDrawings(house.getDrawings());
+        //大管家
+        if(!CommonUtil.isEmpty(userRole)&&"2".equals(userRole)&&member.getWorkerType()!=3){
+            if (houseList.size() > 0) {
+                buttonDTO.setState(2);
+                for (House house : houseList) {
+                    if (house.getIsSelect() == 1 && house.getVisitState() == 1) {//当前选中且开工
+                        houseId = house.getId();
+                    }
                 }
-                if (house.getIsSelect() == 1 && house.getVisitState() == 1) {//当前选中且开工
-                    houseId = house.getId();
+                if (houseId == null) {//有很多房子但是没有isSelect为1的
+                    houseId = houseList.get(0).getId();
                 }
-            }
-            if (houseId == null) {//有很多房子但是没有isSelect为1的
-                houseId = houseList.get(0).getId();
-            }
-            buttonDTO.setHouseId(houseId);
-            //业主
-            if(!CommonUtil.isEmpty(userRole)&&"1".equals(userRole)) {
-                buttonDTO.setTaskList(getTask(houseId, userToken));
-            }
-            //大管家
-            if(!CommonUtil.isEmpty(userRole)&&"2".equals(userRole)&&member.getWorkerType()!=3){
+                buttonDTO.setHouseId(houseId);
                 buttonDTO.setTaskList(getWorkerTask(houseId, userToken));
             }
-        } else if (houseList.size() == 1) {
-            buttonDTO = this.getButton(houseList.get(0).getId(), userToken);
-        } else {
-            buttonDTO.setState(0);
+            buttonDTO.setTaskList(getWorkerTask(houseId, userToken));
+        }else {
+            if (houseList.size() > 1) {
+                buttonDTO.setState(2);
+                for (House house : houseList) {
+                    if (house.getVisitState() == 0) {//0待确认开工,1装修中,2休眠中,3已完工
+                        buttonDTO.setState(3);
+                        buttonDTO.setHouseType(house.getHouseType());
+                        buttonDTO.setDrawings(house.getDrawings());
+                    }
+                    if (house.getIsSelect() == 1 && house.getVisitState() == 1) {//当前选中且开工
+                        houseId = house.getId();
+                    }
+                }
+                if (houseId == null) {//有很多房子但是没有isSelect为1的
+                    houseId = houseList.get(0).getId();
+                }
+                buttonDTO.setHouseId(houseId);
+                //业主
+                buttonDTO.setTaskList(getTask(houseId, userToken));
+            } else if (houseList.size() == 1) {
+                buttonDTO = this.getButton(houseList.get(0).getId(), userToken);
+            } else {
+                buttonDTO.setState(0);
+            }
         }
         return ServerResponse.createBySuccess("查询成功", buttonDTO);
     }
