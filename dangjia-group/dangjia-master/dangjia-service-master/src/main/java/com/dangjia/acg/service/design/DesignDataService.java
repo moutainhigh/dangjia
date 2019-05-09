@@ -277,7 +277,7 @@ public class DesignDataService {
                 map.put("data", quantityRoomDTO.getImages());
                 map.put("verification", 1);
                 map.put("button", "确认施工图");
-                map.put("historyRecord", worker.getWorkerType() == 2 ? 1 : 0);//是否暂时历史记录
+                map.put("historyRecord", 0);//是否暂时历史记录
                 return ServerResponse.createBySuccess("查询成功", map);
             }
         } else {
@@ -297,6 +297,7 @@ public class DesignDataService {
             }
             map.put("data", quantityRoomImages);
             map.put("verification", 0);
+            map.put("historyRecord", (worker.getWorkerType() != null && worker.getWorkerType() == 2) ? 1 : 0);//是否暂时历史记录
             return ServerResponse.createBySuccess("查询成功", map);
         }
     }
