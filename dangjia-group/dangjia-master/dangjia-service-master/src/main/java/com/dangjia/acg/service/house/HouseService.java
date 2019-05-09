@@ -1128,6 +1128,7 @@ public class HouseService {
                         imageList.add(address + imageArr[i]);
                     }
                     map.put("imgArr", imageList);
+                    map.put("type", mendOrder.getType());
                 }
             }
         }
