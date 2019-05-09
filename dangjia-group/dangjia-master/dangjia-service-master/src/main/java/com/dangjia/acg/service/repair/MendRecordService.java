@@ -69,14 +69,17 @@ public class MendRecordService {
      */
     public ServerResponse mendOrderDetail(String userToken,String mendOrderId,Integer type){
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
+            Member worker=null;
+            if(!CommonUtil.isEmpty(userToken)) {
+                AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+                worker = accessToken.getMember();
+            }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             MendOrderDetail mendOrderDetail = new MendOrderDetail();
             mendOrderDetail.setIsShow(0);
             if(type == 5){
                 OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
-                if(worker.getWorkerTypeId().equals(orderSplit.getWorkerTypeId())){
+                if(worker!=null&&worker.getWorkerTypeId().equals(orderSplit.getWorkerTypeId())){
                     mendOrderDetail.setIsShow(1);
                 }
                 mendOrderDetail.setHouseId(orderSplit.getHouseId());
@@ -126,7 +129,7 @@ public class MendRecordService {
 
             }else {
                 MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
-                if(worker.getWorkerTypeId().equals(mendOrder.getWorkerTypeId())){
+                if(worker!=null&&worker.getWorkerTypeId().equals(mendOrder.getWorkerTypeId())){
                     mendOrderDetail.setIsShow(1);
                 }
                 mendOrderDetail.setMendOrderId(mendOrderId);
