@@ -203,7 +203,7 @@ public class TaskService {
             }
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/buchailiao.png");
             task.setHtmlUrl("");
-            task.setType(2);
+            task.setType(4);
             task.setTaskId(mendOrder.getId());
             taskList.add(task);
         }
