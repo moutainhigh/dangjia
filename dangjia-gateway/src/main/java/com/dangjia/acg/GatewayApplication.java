@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
 
 @SpringBootApplication
 @ComponentScan(basePackages = "com.dangjia.acg", excludeFilters={
-@ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value= ErrorAdvice.class)})
+		@ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value= ErrorAdvice.class)})
 @EnableEurekaClient
 @EnableZuulProxy
 public class GatewayApplication {

@@ -5,7 +5,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.modle.basics.Product;
-import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -14,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.text.SimpleDateFormat;
@@ -105,6 +105,7 @@ public class UnitService {
     }
 
     //修改商品单位
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse update(String unitId, String unitName, String linkUnitIdArr) {
         try {
             LOG.info("linkUnitIdArr :" + linkUnitIdArr);

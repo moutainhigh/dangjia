@@ -21,6 +21,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.*;
@@ -122,7 +123,8 @@ public class BrandService {
     }
 
     //修改品牌
-    public ServerResponse update(String id, String name, String brandSeriesList) {
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse update(String id, String name, String brandSeriesList){
         try {
             List<Brand> brList = iBrandMapper.getBrandByName(name);
             Brand brand1 = iBrandMapper.selectByPrimaryKey(id);
@@ -148,8 +150,8 @@ public class BrandService {
                     product.setName(product.getName().replace(brand1.getName(), name));
                     //调用product相关联的表更新
                     productService.updateProductByProductId(product);
-                    masterProductAPI.updateProductByProductId(product.getId(),product.getCategoryId(),product.getBrandSeriesId()
-                            ,product.getBrandId(),product.getName(),product.getUnitId(),product.getUnitName());
+                    masterProductAPI.updateProductByProductId(product.getId(),product.getCategoryId(),
+                            product.getBrandSeriesId(),product.getBrandId(),product.getName(),product.getUnitId(),product.getUnitName());
                 }
             }
             JSONArray brandSeriesLists = JSONArray.parseArray(brandSeriesList);

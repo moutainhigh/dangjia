@@ -447,7 +447,7 @@ public class EngineerService {
                 map.put("havaMoney", 0);
             } else {
                 map.put("havaMoney", houseWorkerOrderList.get(0).getHaveMoney());
-                map.put("workPrice", houseFlow.getWorkPrice().add(houseWorkerOrderList.get(0).getRepairPrice()));
+                map.put("workPrice", houseWorkerOrderList.get(0).getWorkPrice().add(houseWorkerOrderList.get(0).getRepairPrice()));
                 if(houseFlow.getWorkSteta()==2) {
                     map.put("havaMoney", houseWorkerOrderList.get(0).getHaveMoney().add(houseWorkerOrderList.get(0).getRepairPrice()));
                 }
@@ -854,7 +854,7 @@ public class EngineerService {
         if(search!=null && search!=""){
             example.createCriteria().andLike(WorkerEveryday.NAME,"%"+search+"%");
         }
-        example.orderBy(WorkerEveryday.MODIFY_DATE).desc();
+        example.orderBy(WorkerEveryday.TYPE).orderBy(WorkerEveryday.MODIFY_DATE).desc();
         List<WorkerEveryday> workerEverydays = iWorkerEverydayMapper.selectByExample(example);
         PageInfo pageResult = new PageInfo(workerEverydays);
         return ServerResponse.createBySuccess("查询成功", pageResult);
