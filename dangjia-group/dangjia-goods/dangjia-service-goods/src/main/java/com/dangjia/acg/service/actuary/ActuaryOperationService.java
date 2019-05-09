@@ -704,11 +704,7 @@ public class ActuaryOperationService {
                     flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnit.getName());
                     flowActuaryDTO.setTotalPrice(mendMateriel.getTotalPrice());
                     flowActuaryDTO.setShopCount(mendMateriel.getShopCount());
-                    Double converCount = (mendMateriel.getShopCount() / product.getConvertQuality());
-                    if(convertUnit.getType()==1){
-                        converCount=Math.ceil(converCount);
-                    }
-                    flowActuaryDTO.setConvertCount(converCount);
+                    flowActuaryDTO.setConvertCount(mendMateriel.getShopCount());
                     flowActuaryDTO.setBuy(0);
                     flowActuaryDTO.setBudgetMaterialId(mendMateriel.getProductId());
                     flowActuaryDTO.setName(mendMateriel.getProductName());
