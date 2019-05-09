@@ -18,6 +18,7 @@ public class MendOrderDetail {
     private String number;//单号
     private Integer type;
     private Integer state;
+    private Integer isShow;//是否显示重新买回按钮
     private Double totalAmount;
     private Date createDate;
     private Date modifyDate;

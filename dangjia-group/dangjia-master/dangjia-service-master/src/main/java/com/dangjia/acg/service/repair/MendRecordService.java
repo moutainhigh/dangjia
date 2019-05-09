@@ -67,13 +67,18 @@ public class MendRecordService {
      * 要补退明细
      * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货
      */
-    public ServerResponse mendOrderDetail(String mendOrderId,Integer type){
+    public ServerResponse mendOrderDetail(String userToken,String mendOrderId,Integer type){
         try {
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            Member worker = accessToken.getMember();
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             MendOrderDetail mendOrderDetail = new MendOrderDetail();
-
+            mendOrderDetail.setIsShow(0);
             if(type == 5){
                 OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
+                if(worker.getWorkerTypeId().equals(orderSplit.getWorkerTypeId())){
+                    mendOrderDetail.setIsShow(1);
+                }
                 mendOrderDetail.setHouseId(orderSplit.getHouseId());
                 mendOrderDetail.setApplicantId(orderSplit.getSupervisorId());
                 mendOrderDetail.setApplicantName(orderSplit.getSupervisorName());
@@ -121,6 +126,9 @@ public class MendRecordService {
 
             }else {
                 MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
+                if(worker.getWorkerTypeId().equals(mendOrder.getWorkerTypeId())){
+                    mendOrderDetail.setIsShow(1);
+                }
                 mendOrderDetail.setMendOrderId(mendOrderId);
                 mendOrderDetail.setNumber(mendOrder.getNumber());
                 mendOrderDetail.setType(mendOrder.getType());
