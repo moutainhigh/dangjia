@@ -151,9 +151,22 @@ public class HouseController implements HouseAPI {
     @Override
     @ApiMethod
     public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO) {
-        return  houseService.queryConstructionRecord(houseId, pageDTO, null);
+//        return  houseService.queryConstructionRecord(houseId, pageDTO, null);
+        return  houseService.queryConstructionRecordAll(houseId, pageDTO);
     }
-
+    /**
+     * 施工记录
+     *
+     * @param houseId 房子ID @Instance: 835240771552816792532
+     * @param pageDTO 分页内容
+     * @return 施工记录列表 @see swagger:房产接口-> 施工记录
+     *
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryConstructionRecordAll(String houseId, PageDTO pageDTO) {
+        return  houseService.queryConstructionRecordAll(houseId, pageDTO);
+    }
     @Override
     @ApiMethod
     public ServerResponse getHouseFlowApply(String houseFlowApplyId) {
