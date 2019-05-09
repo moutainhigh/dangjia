@@ -5,6 +5,7 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.ButtonDTO;
@@ -66,7 +67,7 @@ public class TaskService {
     /**
      * 任务列表
      */
-    public ServerResponse getTaskList(String userToken) {
+    public ServerResponse getTaskList(String userToken,String userRole) {
         ButtonDTO buttonDTO = new ButtonDTO();
         if (StringUtils.isEmpty(userToken)) {
             buttonDTO.setState(0);
@@ -74,38 +75,43 @@ public class TaskService {
         }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         Member member = accessToken.getMember();
+        List<House>  houseList = new ArrayList<>();
         //该城市该用户所有房产
-        Example example = new Example(House.class);
-        example.createCriteria()
-                .andEqualTo(House.MEMBER_ID, member.getId())
-                .andNotEqualTo(House.VISIT_STATE, 2)
-                .andEqualTo(House.DATA_STATUS, 0);
-        List<House> houseList = houseMapper.selectByExample(example);
-        for (House house : houseList) {
-            //if(house.getType() == 2){//老用户
-            HouseExpend houseExpend = houseExpendMapper.getByHouseId(house.getId());
-            if (houseExpend == null) {
-                houseExpend = new HouseExpend(true);
-                houseExpend.setHouseId(house.getId());
-                houseExpendMapper.insert(houseExpend);
+        if(!CommonUtil.isEmpty(userRole)&&"1".equals(userRole)) {
+            Example example = new Example(House.class);
+            example.createCriteria()
+                    .andEqualTo(House.MEMBER_ID, member.getId())
+                    .andNotEqualTo(House.VISIT_STATE, 2)
+                    .andEqualTo(House.DATA_STATUS, 0);
+            houseList = houseMapper.selectByExample(example);
+            for (House house : houseList) {
+                //if(house.getType() == 2){//老用户
+                HouseExpend houseExpend = houseExpendMapper.getByHouseId(house.getId());
+                if (houseExpend == null) {
+                    houseExpend = new HouseExpend(true);
+                    houseExpend.setHouseId(house.getId());
+                    houseExpendMapper.insert(houseExpend);
+                }
+                //}
             }
-            //}
         }
-        //该工匠所选择的工地
-        example = new Example(HouseWorker.class);
-        example.createCriteria()
-                .andEqualTo(HouseWorker.IS_SELECT,1)
-                .andEqualTo(HouseWorker.WORKER_ID,  member.getId());
-        List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
-        if(houseWorkerList!=null&&houseWorkerList.size()>0){
+        if(!CommonUtil.isEmpty(userRole)&&"2".equals(userRole)) {
+            //该工匠所选择的工地
+            Example example = new Example(HouseWorker.class);
+            example.createCriteria()
+                    .andEqualTo(HouseWorker.IS_SELECT, 1)
+                    .andEqualTo(HouseWorker.WORKER_ID, member.getId());
+            List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
+            if (houseWorkerList != null && houseWorkerList.size() > 0) {
 //            查询工匠当前选择的工地
-            House house = houseMapper.selectByPrimaryKey(houseWorkerList.get(0).getHouseId());
-            if(houseList==null){
-                houseList=new ArrayList<>();
+                House house = houseMapper.selectByPrimaryKey(houseWorkerList.get(0).getHouseId());
+                if (houseList == null) {
+                    houseList = new ArrayList<>();
+                }
+                //设为选中
+                house.setIsSelect(1);
+                houseList.add(house);
             }
-            //设为选中
-            house.setIsSelect(1);
-            houseList.add(house);
         }
         String houseId = null;
         if (houseList.size() > 1) {
@@ -124,16 +130,14 @@ public class TaskService {
                 houseId = houseList.get(0).getId();
             }
             buttonDTO.setHouseId(houseId);
-            House house = houseMapper.selectByPrimaryKey(houseId);
             //业主
-            if(house.getMemberId().equals(member.getId())){
+            if(!CommonUtil.isEmpty(userRole)&&"1".equals(userRole)) {
                 buttonDTO.setTaskList(getTask(houseId, userToken));
             }
             //大管家
-            if(member.getWorkerType()!=3){
+            if(!CommonUtil.isEmpty(userRole)&&"2".equals(userRole)&&member.getWorkerType()!=3){
                 buttonDTO.setTaskList(getWorkerTask(houseId, userToken));
             }
-            buttonDTO.setTaskList(getTask(houseId, userToken));
         } else if (houseList.size() == 1) {
             buttonDTO = this.getButton(houseList.get(0).getId(), userToken);
         } else {
