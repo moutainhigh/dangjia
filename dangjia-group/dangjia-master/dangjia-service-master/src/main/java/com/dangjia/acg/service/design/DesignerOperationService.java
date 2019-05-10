@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -354,14 +355,13 @@ public class DesignerOperationService {
         quantityRoom.setHouseId(houseId);
         quantityRoom.setType(type);
         quantityRoom.setOperationType(0);
-        QuantityRoomImages quantityRoomImages;
         switch (type) {
             case 0:
                 String[] image = imageString.split(",");
                 for (int i = 0; i < image.length; i++) {
                     String s = image[i];
                     if (!CommonUtil.isEmpty(s.trim())) {
-                        quantityRoomImages = new QuantityRoomImages();
+                        QuantityRoomImages quantityRoomImages = new QuantityRoomImages();
                         quantityRoomImages.setHouseId(houseId);
                         quantityRoomImages.setQuantityRoomId(quantityRoom.getId());
                         quantityRoomImages.setName("量房");
@@ -374,7 +374,7 @@ public class DesignerOperationService {
                 houseMapper.updateByPrimaryKeySelective(house);
                 break;
             case 1:
-                quantityRoomImages = new QuantityRoomImages();
+                QuantityRoomImages quantityRoomImages = new QuantityRoomImages();
                 quantityRoomImages.setHouseId(houseId);
                 quantityRoomImages.setQuantityRoomId(quantityRoom.getId());
                 quantityRoomImages.setName("平面图");
@@ -388,18 +388,28 @@ public class DesignerOperationService {
                     if (jsonArray == null || jsonArray.size() <= 0) {
                         return ServerResponse.createByErrorMessage("图片传入格式有误");
                     }
+                    List<QuantityRoomImages> quantityRoomImagesList = new ArrayList<>();
                     for (int i = 0; i < jsonArray.size(); i++) {
                         JSONObject object = jsonArray.getJSONObject(i);
                         if (!CommonUtil.isEmpty(object.getString("image"))
                                 && !CommonUtil.isEmpty(object.getString("name"))) {
-                            quantityRoomImages = new QuantityRoomImages();
-                            quantityRoomImages.setHouseId(houseId);
-                            quantityRoomImages.setQuantityRoomId(quantityRoom.getId());
-                            quantityRoomImages.setName(object.getString("name"));
-                            quantityRoomImages.setImage(object.getString("image"));
-                            quantityRoomImages.setSort(object.getInteger("sort"));
-                            quantityRoomImagesMapper.insert(quantityRoomImages);
+                            QuantityRoomImages images = new QuantityRoomImages();
+                            images.setHouseId(houseId);
+                            images.setQuantityRoomId(quantityRoom.getId());
+                            images.setName(object.getString("name"));
+                            images.setImage(object.getString("image"));
+                            images.setSort(object.getInteger("sort"));
+                            quantityRoomImagesList.add(images);
+                        } else {
+                            return ServerResponse.createByErrorMessage("图片传入参数有误，请确认图片名和地址无误");
                         }
+                    }
+                    if (quantityRoomImagesList.size() > 0) {
+                        for (QuantityRoomImages images : quantityRoomImagesList) {
+                            quantityRoomImagesMapper.insert(images);
+                        }
+                    } else {
+                        return ServerResponse.createByErrorMessage("请传入图片");
                     }
                 } catch (Exception e) {
                     return ServerResponse.createByErrorMessage("图片传入格式有误");

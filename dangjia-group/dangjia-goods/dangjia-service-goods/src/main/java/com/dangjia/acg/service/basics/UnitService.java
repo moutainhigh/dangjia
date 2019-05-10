@@ -135,10 +135,10 @@ public class UnitService {
                 unit.setLinkUnitIdArr(unit.getId() + "," + linkUnitIdArr);//包括本身
             unit.setModifyDate(new Date());
             iUnitMapper.updateByPrimaryKeySelective(unit);
+            iProductMapper.updateProductByUnitId(unitName,unitId);
             Example example=new Example(Product.class);
             example.createCriteria().andEqualTo(Product.UNIT_ID,unitId);
             List<Product> products = iProductMapper.selectByExample(example);
-            iProductMapper.updateProductByUnitId(unitName,unitId);
             iBudgetMaterialMapper.updateBudgetMaterialByUnitName(unitName,products);
             masterProductAPI.updateProductByProductId(JSON.toJSONString(products),null,null,null,null);
             return ServerResponse.createBySuccessMessage("修改成功");

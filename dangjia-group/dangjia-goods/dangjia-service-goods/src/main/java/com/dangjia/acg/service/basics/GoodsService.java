@@ -251,7 +251,6 @@ public class GoodsService {
             List<Product> list = iProductMapper.selectByExample(example);
             //更新master库相关商品名称
             masterProductAPI.updateProductByProductId(JSON.toJSONString(list),null,null,null,id);
-//            masterProductAPI.updateProductByProductId(null,null,id,null);
             if (buy != 2) //非自购goods ，有品牌
             {
                 if (!StringUtils.isNoneBlank(arrString)) {

@@ -1429,7 +1429,7 @@ public class HouseService {
                 MendOrder mendOrder=(MendOrder)sourceOjb;
                 houseConstructionRecord.setHouseId(mendOrder.getHouseId());
                 houseConstructionRecord.setSourceId(mendOrder.getId());
-                houseConstructionRecord.setContent(mendOrder.getOrderName());
+                houseConstructionRecord.setContent("发起了"+mendOrder.getOrderName());
                 houseConstructionRecord.setWorkerId(mendOrder.getApplyMemberId());
                 WorkerType workerType=workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
                 houseConstructionRecord.setWorkerType(workerType.getType());

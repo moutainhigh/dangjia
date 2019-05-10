@@ -171,7 +171,9 @@ public class BrandService {
                     iBrandSeriesMapper.updateByPrimaryKeySelective(bSeries);
                     //对应的product名称也更新
                     productService.updateProductName(brandSeries1.getName(),brandSeriesName,brandSeriesId,null,null,null);
-//                    masterProductAPI.updateProductByProductId(brandSeriesId,null,null,null);
+                    example.createCriteria().andEqualTo(Product.BRAND_SERIES_ID,brandSeriesId);
+                    List<Product> list1 = iProductMapper.selectByExample(example);
+                    masterProductAPI.updateProductByProductId(JSONArray.toJSONString(list1),null,id,null,null);
                 }
             }
             return ServerResponse.createBySuccessMessage("修改成功");
