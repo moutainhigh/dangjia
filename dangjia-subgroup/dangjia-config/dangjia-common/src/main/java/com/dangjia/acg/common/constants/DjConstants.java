@@ -120,6 +120,8 @@ public class DjConstants {
         public final static String CONSTUCTIONRECORD = "constuctionRecord?userToken=%s&cityId=%s&title=%s";//施工记录
         public final static String YZREGISTERPROTOCOL = "yzRegisterProtocol?userToken=%s&cityId=%s&title=%s";//注册协议
 
+        public final static String TUIPRODUCTEXAMINE = "tuiProductExamine?userToken=%s&cityId=%s&title=%s";//大管家确认退货审核
+
     }
 
     /**
