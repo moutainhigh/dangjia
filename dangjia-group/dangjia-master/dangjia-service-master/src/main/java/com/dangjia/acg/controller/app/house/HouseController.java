@@ -195,6 +195,7 @@ public class HouseController implements HouseAPI {
      * @return
      */
     @Override
+    @ApiMethod
     public House getHouseById(String houseId) {
         return houseService.getHouseById(houseId);
     }

@@ -50,6 +50,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.design.DesignDataService;
 import com.dangjia.acg.service.member.GroupInfoService;
+import com.dangjia.acg.util.HouseUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -296,7 +297,7 @@ public class HouseService {
             nodeDTO.setColor("#F0643C");
             nodeDTO.setNameC("自带设计");
             nodeDTO.setState(0);
-            Map<String, Object> dataMap = house.getDesignDatas();
+            Map<String, Object> dataMap = HouseUtil.getDesignDatas(house.getDecorationType(),house.getDesignerOk());
             nodeDTO.setTotal((Integer) dataMap.get("total"));
             nodeDTO.setRank((Integer) dataMap.get("rank"));
             nodeDTO.setNameB((String) dataMap.get("nameB"));
@@ -317,14 +318,14 @@ public class HouseService {
                     courseList.remove(0);
                 }
                 nodeDTO.setState(0);
-                Map<String, Object> dataMap = house.getDesignDatas();
+                Map<String, Object> dataMap = HouseUtil.getDesignDatas(house.getDecorationType(),house.getDesignerOk());
                 nodeDTO.setTotal((Integer) dataMap.get("total"));
                 nodeDTO.setRank((Integer) dataMap.get("rank"));
                 nodeDTO.setNameB((String) dataMap.get("nameB"));
             } else if (workerType.getType() == 2) {//精算
                 //默认0未开始,1已开始精算,-1已精算没有发给业主,2已发给业主,3审核通过,4审核不通过
                 nodeDTO.setState(0);
-                Map<String, Object> dataMap = house.getBudgetDatas();
+                Map<String, Object> dataMap =  HouseUtil.getBudgetDatas(house.getBudgetOk());
                 nodeDTO.setTotal((Integer) dataMap.get("total"));
                 nodeDTO.setRank((Integer) dataMap.get("rank"));
                 nodeDTO.setNameB((String) dataMap.get("nameB"));
