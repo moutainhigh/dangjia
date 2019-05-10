@@ -250,7 +250,9 @@ public class GoodsService {
             example.createCriteria().andEqualTo(Product.GOODS_ID,id);
             List<Product> list = iProductMapper.selectByExample(example);
             //更新master库相关商品名称
-            masterProductAPI.updateProductByProductId(JSON.toJSONString(list),null,null,null,id);
+            if(list.size()>0||null!=list) {
+                masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, id);
+            }
             if (buy != 2) //非自购goods ，有品牌
             {
                 if (!StringUtils.isNoneBlank(arrString)) {
