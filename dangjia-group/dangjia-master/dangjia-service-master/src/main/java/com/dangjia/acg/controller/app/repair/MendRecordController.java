@@ -23,8 +23,8 @@ public class MendRecordController implements MendRecordAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse mendOrderDetail(String mendOrderId,Integer type){
-        return mendRecordService.mendOrderDetail(mendOrderId,type);
+    public ServerResponse mendOrderDetail(String userToken, String mendOrderId, Integer type){
+        return mendRecordService.mendOrderDetail( userToken,mendOrderId,type);
     }
 
     /**

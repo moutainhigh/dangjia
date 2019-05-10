@@ -330,17 +330,17 @@ public class DesignerOperationService {
                 break;
             case 1:
                 if (house.getDecorationType() == 2) {
-                    if (house.getDesignerOk() != 1 || house.getDesignerOk() != 6) {
+                    if (house.getDesignerOk() != 1 && house.getDesignerOk() != 6) {
                         return ServerResponse.createByErrorMessage("该阶段无法上传平面图");
                     }
                 } else {
-                    if (house.getDesignerOk() != 9 || house.getDesignerOk() != 6) {
+                    if (house.getDesignerOk() != 9 && house.getDesignerOk() != 6) {
                         return ServerResponse.createByErrorMessage("该阶段无法上传平面图");
                     }
                 }
                 break;
             case 2:
-                if (house.getDesignerOk() != 7 || house.getDesignerOk() != 8) {
+                if (house.getDesignerOk() != 7 && house.getDesignerOk() != 8) {
                     return ServerResponse.createByErrorMessage("该阶段无法上传施工图");
                 }
                 break;

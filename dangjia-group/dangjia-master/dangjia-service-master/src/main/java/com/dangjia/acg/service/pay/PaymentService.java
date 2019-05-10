@@ -410,7 +410,15 @@ public class PaymentService {
                 HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(mendOrder.getHouseId(), mendOrder.getWorkerTypeId());
                 HouseWorkerOrder houseWorkerOrdernew = new HouseWorkerOrder();
                 houseWorkerOrdernew.setId(houseWorkerOrder.getId());
-                houseWorkerOrdernew.setRepairPrice(houseWorkerOrder.getRepairPrice().add(new BigDecimal(mendOrder.getTotalAmount())));
+                //还可得的补人工钱，分别在阶段或者整体申请时拿钱
+                BigDecimal repairPrice=houseWorkerOrder.getRepairPrice().add(new BigDecimal(mendOrder.getTotalAmount()));
+                houseWorkerOrdernew.setRepairPrice(repairPrice);
+                //记录总补人工钱
+                if(houseWorkerOrdernew.getRepairTotalPrice()==null){
+                    houseWorkerOrdernew.setRepairTotalPrice(new BigDecimal(0));
+                }
+                BigDecimal repairTotalPrice=houseWorkerOrdernew.getRepairTotalPrice().add(houseWorkerOrdernew.getRepairPrice());
+                houseWorkerOrdernew.setRepairTotalPrice(repairTotalPrice);
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(houseWorkerOrdernew);
 
                 Example example = new Example(MendWorker.class);
@@ -1356,7 +1364,7 @@ public class PaymentService {
                 }
                 example = new Example(HouseWorker.class);
                 example.createCriteria().andEqualTo(HouseWorker.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
-                        .andEqualTo(HouseWorker.HOUSE_ID, houseId).andEqualTo(HouseWorker.WORK_TYPE, 1).andEqualTo(HouseWorker.IS_SELECT, 1);
+                        .andEqualTo(HouseWorker.HOUSE_ID, houseId).andEqualTo(HouseWorker.WORK_TYPE, 1);
                 List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
                 if (houseWorkerList.size() != 1) {
                     return ServerResponse.createByErrorMessage("抢单异常,联系平台部");

@@ -512,7 +512,8 @@ public class HouseFlowApplyService {
     private void workerMoney(HouseWorkerOrder hwo,HouseFlowApply hfa){
         try{
             Member worker = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
-            if(hfa.getApplyType() == 2){//整体完工申请
+            WorkerType workerType=workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
+            if(hfa.getApplyType() == 1||hfa.getApplyType() == 2){//整体/阶段完工申请
                 if(hwo.getRepairPrice().compareTo(new BigDecimal(0)) > 0){
                     /*有补的人工钱加入工人流水*/
                     BigDecimal surplusMoney = worker.getSurplusMoney().add(hwo.getRepairPrice());
@@ -523,7 +524,11 @@ public class HouseFlowApplyService {
                     worker.setSurplusMoney(surplusMoney);//可取钱
 
                     WorkerDetail workerDetail = new WorkerDetail();
-                    workerDetail.setName("补人工钱");
+                    if(hfa.getApplyType() == 2){//整体完工申请
+                        workerDetail.setName(workerType.getName()+"整体完工补人工钱");
+                    }else{
+                        workerDetail.setName(workerType.getName()+"阶段完工补人工钱");
+                    }
                     workerDetail.setWorkerId(hwo.getWorkerId());
                     workerDetail.setWorkerName(worker.getName());
                     workerDetail.setHouseId(hwo.getHouseId());
@@ -536,7 +541,6 @@ public class HouseFlowApplyService {
                     workerDetailMapper.insert(workerDetail);
                 }
             }
-            WorkerType workerType=workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
             //处理工人得到的钱
             if(hwo.getHaveMoney() == null){
                 hwo.setHaveMoney(new BigDecimal(0.0));
@@ -569,7 +573,10 @@ public class HouseFlowApplyService {
             }else if(star <= 2){
                 applymoney = hfa.getApplyMoney().multiply(new BigDecimal(0.95));
             }
-
+            //整体完工前均能发起，阶段完工发起的，阶段完工时拿钱（还可拿钱立即体现增加金额），
+            // 阶段完工后整体完工前发起的，整体完工时拿钱（还可拿钱立即体现增加金额）
+            //清空补人工钱，用于整体完工时记录新的补人工钱
+            hwo.setRepairPrice(new BigDecimal(0.0));
             hwo.setHaveMoney(hwo.getHaveMoney().add(applymoney));
             houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
             BigDecimal haveMoney = worker.getHaveMoney().add(applymoney);

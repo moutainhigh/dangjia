@@ -41,6 +41,7 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
 import com.dangjia.acg.service.core.HouseWorkerSupService;
+import com.dangjia.acg.service.house.HouseService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +102,10 @@ public class EvaluateService {
 
     @Autowired
     private IWorkerDetailMapper iWorkerDetailMapper;
+    @Autowired
+    private HouseService houseService;
+
+
     /**
      * 获取积分记录
      * @param userToken
@@ -344,6 +349,7 @@ public class EvaluateService {
                 hfa.setPayState(0);//是否付款
                 hfa.setApplyDec("业主您好，我是大管家，我已验收了" + worker.getName() + (houseFlowApply.getApplyType() == 1?"的阶段完工":"的整体完工"));//描述
                 houseFlowApplyMapper.insert(hfa);
+                houseService.insertConstructionRecord(hfa);
             }
             if(houseFlowApply.getApplyType() == 1){
                 //阶段审核

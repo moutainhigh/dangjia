@@ -60,6 +60,7 @@
         WHERE
             si.house_id = #{houseId}
         AND si.product_sn =  #{productSn}
+        GROUP BY d.supplier_id
         ORDER BY si.create_date DESC
     </select>
 

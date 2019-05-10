@@ -63,6 +63,12 @@ public class SurplusWareHouseService {
     public ServerResponse getAllSurplusWareHouse(PageDTO pageDTO, Integer state, String address, String productName, String beginDate, String endDate) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
+                if(beginDate.equals(endDate)){
+                    beginDate=beginDate+" "+"00:00:00";
+                    endDate=endDate+" "+"23:59:59";
+                }
+            }
             List<SurplusWareHouse> list = iSurplusWareHouseMapper.getAllSurplusWareHouse(state, address, productName, beginDate, endDate);
 
             List<SurplusWareHouseDTO> surplusWareHouseDTOList = new ArrayList<>();

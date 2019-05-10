@@ -675,7 +675,7 @@ public class ActuaryOperationService {
                 for (MendWorker bw : budgetWorkerList) {
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
                     flowActuaryDTO.setName(bw.getWorkerGoodsName());
-                    flowActuaryDTO.setImage(bw.getImage());
+                    flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + bw.getImage());
                     flowActuaryDTO.setTypeName(typsValue);
                     flowActuaryDTO.setShopCount(bw.getShopCount());
 //                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
@@ -704,11 +704,7 @@ public class ActuaryOperationService {
                     flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnit.getName());
                     flowActuaryDTO.setTotalPrice(mendMateriel.getTotalPrice());
                     flowActuaryDTO.setShopCount(mendMateriel.getShopCount());
-                    Double converCount = (mendMateriel.getShopCount() / product.getConvertQuality());
-                    if(convertUnit.getType()==1){
-                        converCount=Math.ceil(converCount);
-                    }
-                    flowActuaryDTO.setConvertCount(converCount);
+                    flowActuaryDTO.setConvertCount(mendMateriel.getShopCount());
                     flowActuaryDTO.setBuy(0);
                     flowActuaryDTO.setBudgetMaterialId(mendMateriel.getProductId());
                     flowActuaryDTO.setName(mendMateriel.getProductName());

@@ -21,6 +21,7 @@ import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
+import com.dangjia.acg.util.HouseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -127,7 +128,7 @@ public class CraftsmanConstructionService {
             bean.setUserId(houseMember.getId());//
         }
         setMenus(bean, house, hf);
-        Map<String, Object> dataMap = house.getDesignDatas();
+        Map<String, Object> dataMap = HouseUtil.getDesignDatas(house.getDecorationType(),house.getDesignerOk());
         bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         List<ConstructionByWorkerIdBean.ButtonListBean> buttonList = new ArrayList<>();
         if (house.getDecorationType() != 2 && house.getDesignerOk() == 1) {
@@ -189,7 +190,7 @@ public class CraftsmanConstructionService {
             bean.setUserId(houseMember.getId());//
         }
         setMenus(bean, house, hf);
-        Map<String, Object> dataMap = house.getBudgetDatas();
+        Map<String, Object> dataMap =  HouseUtil.getBudgetDatas(house.getBudgetOk());
         bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         return ServerResponse.createBySuccess("获取施工列表成功！", bean);
     }

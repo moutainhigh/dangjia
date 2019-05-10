@@ -265,6 +265,7 @@ public class DesignDataService {
                 QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
                 map.put("data", quantityRoomDTO.getImages());
                 map.put("verification", 1);
+                map.put("historyRecord", 0);//是否暂时历史记录
                 map.put("button", "确认平面图");
                 return ServerResponse.createBySuccess("查询成功", map);
             } else {
@@ -276,6 +277,7 @@ public class DesignDataService {
                 map.put("data", quantityRoomDTO.getImages());
                 map.put("verification", 1);
                 map.put("button", "确认施工图");
+                map.put("historyRecord", 0);//是否暂时历史记录
                 return ServerResponse.createBySuccess("查询成功", map);
             }
         } else {
@@ -295,6 +297,7 @@ public class DesignDataService {
             }
             map.put("data", quantityRoomImages);
             map.put("verification", 0);
+            map.put("historyRecord", (worker.getWorkerType() != null && worker.getWorkerType() == 2) ? 1 : 0);//是否暂时历史记录
             return ServerResponse.createBySuccess("查询成功", map);
         }
     }
@@ -314,8 +317,29 @@ public class DesignDataService {
             return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相关记录");
         }
         PageInfo pageResult = new PageInfo(quantityRoomDTOS);
+        for (QuantityRoomDTO quantityRoomDTO : quantityRoomDTOS) {
+            quantityRoomDTO.setUserType(-1);
+            getUserName(quantityRoomDTO);
+        }
+        pageResult.setList(quantityRoomDTOS);
         return ServerResponse.createBySuccess("查询历史记录成功", pageResult);
 
+    }
+
+    private void getUserName(QuantityRoomDTO quantityRoomDTO) {
+        if (!CommonUtil.isEmpty(quantityRoomDTO.getMemberId())) {
+            Member member = memberMapper.selectByPrimaryKey(quantityRoomDTO.getMemberId());
+            if (member != null) {
+                quantityRoomDTO.setUserType(0);
+                quantityRoomDTO.setUserName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
+            }
+        } else if (!CommonUtil.isEmpty(quantityRoomDTO.getUserId())) {
+            MainUser mainUser = userMapper.selectByPrimaryKey(quantityRoomDTO.getUserId());
+            if (mainUser != null) {
+                quantityRoomDTO.setUserType(1);
+                quantityRoomDTO.setUserName(mainUser.getUsername());
+            }
+        }
     }
 
     /**
@@ -351,19 +375,7 @@ public class DesignDataService {
             return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相关信息");
         }
         quantityRoomDTO.setUserType(-1);
-        if (!CommonUtil.isEmpty(quantityRoomDTO.getMemberId())) {
-            Member member = memberMapper.selectByPrimaryKey(quantityRoomDTO.getMemberId());
-            if (member != null) {
-                quantityRoomDTO.setUserType(0);
-                quantityRoomDTO.setUserName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
-            }
-        } else if (!CommonUtil.isEmpty(quantityRoomDTO.getUserId())) {
-            MainUser mainUser = userMapper.selectByPrimaryKey(quantityRoomDTO.getUserId());
-            if (mainUser != null) {
-                quantityRoomDTO.setUserType(1);
-                quantityRoomDTO.setUserName(mainUser.getUsername());
-            }
-        }
+        getUserName(quantityRoomDTO);
         Example example = new Example(QuantityRoomImages.class);
         example.createCriteria()
                 .andEqualTo(QuantityRoomImages.QUANTITY_ROOM_ID, quantityRoomDTO.getId())

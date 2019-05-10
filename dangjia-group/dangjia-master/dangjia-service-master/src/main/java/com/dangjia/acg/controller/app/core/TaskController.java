@@ -20,10 +20,11 @@ public class TaskController implements TaskAPI {
 
     /**
      * 任务列表
+     * userRole：app应用 1为业主  ，2为工匠
      */
     @Override
     @ApiMethod
-    public ServerResponse getTaskList(String userToken){
-        return taskService.getTaskList(userToken);
+    public ServerResponse getTaskList(String userToken,String userRole){
+        return taskService.getTaskList(userToken, userRole);
     }
 }
