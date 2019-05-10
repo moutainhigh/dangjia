@@ -53,7 +53,7 @@ public class MendDeliver extends BaseEntity {
 	@ApiModelProperty("供应商申请结算的价格")
 	private Double applyMoney;
 
-	@Column(name = "apply_money")
+	@Column(name = "apply_state")
 	@Desc(value = "供应商申请结算的状态：0未结算；1已结算")
 	@ApiModelProperty("供应商申请结算的状态：0未结算；1已结算")
 	private Integer applyState;
