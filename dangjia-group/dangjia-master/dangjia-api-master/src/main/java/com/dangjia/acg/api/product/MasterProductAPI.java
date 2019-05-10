@@ -1,16 +1,12 @@
 package com.dangjia.acg.api.product;
 
 
-
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.basics.Product;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
