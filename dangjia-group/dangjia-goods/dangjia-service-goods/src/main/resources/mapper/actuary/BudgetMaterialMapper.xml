@@ -425,4 +425,35 @@
 		</foreach>
 	</insert>
 
+	<!--更新货品名称-->
+	<update id="updateBudgetMaterialById" parameterType="java.lang.String">
+		UPDATE dj_actuary_budget_material p1
+		INNER JOIN `dj_basics_product` p ON p.id = p1.product_id
+		SET p1.product_name = p.`name`
+		WHERE 1=1
+		<if test="null!=brandSeriesId and ''!=brandSeriesId">
+			or p.brand_series_id = #{brandSeriesId};
+		</if>
+		<if test="null!=brandId and ''!=brandId">
+			or p.brand_id=#{brandId}
+		</if>
+		<if test="null!=goodsId and ''!=goodsId">
+			or p.goods_id=#{goodsId}
+		</if>
+		<if test="null!=id and ''!=id">
+			or p.id=#{id}
+		</if>
+	</update>
+
+	<!--更新单位-->
+	<update id="updateBudgetMaterialByUnitName" parameterType="java.lang.String">
+		UPDATE dj_actuary_budget_material
+		SET unit_name=#{unitName}
+		where product_id in
+		<foreach collection="products" index="index" item="item"
+				 separator="," open="(" close=")">
+		#{item.id}
+		</foreach>
+	</update>
+
 </mapper>

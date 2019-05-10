@@ -1,7 +1,9 @@
 package com.dangjia.acg.service.basics;
 
+import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.product.MasterProductAPI;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.modle.basics.Product;
@@ -37,6 +39,10 @@ public class UnitService {
     private IProductMapper iProductMapper;
     @Autowired
     private MasterProductAPI masterProductAPI;
+    @Autowired
+    private ProductService productService;
+    @Autowired
+    private IBudgetMaterialMapper iBudgetMaterialMapper;
 
     protected static final Logger LOG = LoggerFactory.getLogger(UnitService.class);
 
@@ -106,7 +112,7 @@ public class UnitService {
 
     //修改商品单位
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse update(String unitId, String unitName, String linkUnitIdArr) {
+    public ServerResponse update(String unitId, String unitName, String linkUnitIdArr)throws RuntimeException {
         try {
             LOG.info("linkUnitIdArr :" + linkUnitIdArr);
             if (!StringUtils.isNotBlank(unitName))
@@ -132,15 +138,9 @@ public class UnitService {
             Example example=new Example(Product.class);
             example.createCriteria().andEqualTo(Product.UNIT_ID,unitId);
             List<Product> products = iProductMapper.selectByExample(example);
-            if(products.size()>0||null!=products){
-                for (Product product : products) {
-                    product.setUnitId(unitId);
-                    product.setUnitName(unitName);
-                    iProductMapper.updateByPrimaryKeySelective(product);
-                    masterProductAPI.updateProductByProductId(product.getId(),product.getCategoryId(),
-                            product.getBrandSeriesId(),product.getBrandId(),product.getName(),product.getUnitId(),product.getUnitName());
-                }
-            }
+            iProductMapper.updateProductByUnitId(unitName,unitId);
+            iBudgetMaterialMapper.updateBudgetMaterialByUnitName(unitName,products);
+            masterProductAPI.updateProductByProductId(JSON.toJSONString(products),null,null,null,null);
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
             e.printStackTrace();

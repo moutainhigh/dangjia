@@ -142,18 +142,12 @@ public class BrandService {
             brand.setModifyDate(new Date());
             iBrandMapper.updateByPrimaryKeySelective(brand);
             //修改品牌对应的product名称也更新
+            productService.updateProductName(brand1.getName(),name,null,id,null,null);
             Example example=new Example(Product.class);
             example.createCriteria().andEqualTo(Product.BRAND_ID,id);
-            List<Product> products = iProductMapper.selectByExample(example);
-            if(products.size()>0||null!=products) {
-                for (Product product : products) {
-                    product.setName(product.getName().replace(brand1.getName(), name));
-                    //调用product相关联的表更新
-                    productService.updateProductByProductId(product);
-                    masterProductAPI.updateProductByProductId(product.getId(),product.getCategoryId(),
-                            product.getBrandSeriesId(),product.getBrandId(),product.getName(),product.getUnitId(),product.getUnitName());
-                }
-            }
+            List<Product> list = iProductMapper.selectByExample(example);
+            //更新master库相关商品名称
+            masterProductAPI.updateProductByProductId(JSONArray.toJSONString(list),null,id,null,null);
             JSONArray brandSeriesLists = JSONArray.parseArray(brandSeriesList);
             for (int i = 0; i < brandSeriesLists.size(); i++) {
                 JSONObject brandSeries = brandSeriesLists.getJSONObject(i);
@@ -173,12 +167,11 @@ public class BrandService {
                     iBrandSeriesMapper.insert(bSeries);
                 } else {
                     bSeries.setId(brandSeriesId);
+                    BrandSeries brandSeries1 = iBrandSeriesMapper.selectByPrimaryKey(brandSeriesId);
                     iBrandSeriesMapper.updateByPrimaryKeySelective(bSeries);
-                    for (Product product : products) {
-                        productService.updateProductByProductId(product);
-                        masterProductAPI.updateProductByProductId(product.getId(),product.getCategoryId(),product.getBrandSeriesId()
-                                ,product.getBrandId(),product.getName(),product.getUnitId(),product.getUnitName());
-                    }
+                    //对应的product名称也更新
+                    productService.updateProductName(brandSeries1.getName(),brandSeriesName,brandSeriesId,null,null,null);
+//                    masterProductAPI.updateProductByProductId(brandSeriesId,null,null,null);
                 }
             }
             return ServerResponse.createBySuccessMessage("修改成功");

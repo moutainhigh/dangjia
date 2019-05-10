@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.basics;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.product.MasterProductAPI;
@@ -23,6 +24,7 @@ import com.dangjia.acg.modle.brand.Unit;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -511,13 +513,18 @@ public class ProductService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateProductById(String id,String name) {
         try {
+            Product product1 = iProductMapper.selectByPrimaryKey(id);
             Product product = new Product();
             product.setId(id);
             product.setName(name);
             iProductMapper.updateByPrimaryKeySelective(product);
-            productService.updateProductByProductId(product);
-//            masterProductAPI.updateProductByProductId(product);
-            Example example=new Example(GroupLink.class);
+            productService.updateProductName(product1.getName(),name,null,null,null,id);
+            Example example=new Example(Product.class);
+            example.createCriteria().andEqualTo(Product.ID,id);
+            List<Product> list = iProductMapper.selectByExample(example);
+            //更新master库相关商品名称
+            masterProductAPI.updateProductByProductId(JSON.toJSONString(list),id,null,null,null);
+            example=new Example(GroupLink.class);
             example.createCriteria().andEqualTo("productId",id);
             GroupLink oldLabel =new GroupLink();
             oldLabel.setProductName(name);
@@ -648,35 +655,20 @@ public class ProductService {
 
 
     /**
-     * 修改product名称全局跟新商品
-     * @param product
+     * 修改product名称全局更新商品
+     * @param brandSeriesId
+     * @param brandId
+     * @param goodsId
      * @return
-     * @throws RuntimeException
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse updateProductByProductId(Product product){
+    public ServerResponse updateProductName( String oldName,String newName,String brandSeriesId,String brandId,String goodsId,String id){
         try {
-            iProductMapper.updateByPrimaryKeySelective(product);
-            Example example=new Example(GroupLink.class);
-            example.createCriteria().andEqualTo(GroupLink.PRODUCT_ID,product.getId());
-            List<GroupLink> groupLinks = iGroupLinkMapper.selectByExample(example);
-            if(groupLinks.size()>0||null!=groupLinks) {
-                for (GroupLink groupLink : groupLinks) {
-                    groupLink.setProductId(product.getId());
-                    groupLink.setProductName(product.getName());
-                    iGroupLinkMapper.updateByPrimaryKeySelective(groupLink);
-                }
-            }
-            example.createCriteria().andEqualTo(BudgetMaterial.PRODUCT_ID,product.getId());
-            List<BudgetMaterial> budgetMaterials = iBudgetMaterialMapper.selectByExample(example);
-            if(budgetMaterials.size()>0||null!=budgetMaterials) {
-                for (BudgetMaterial budgetMaterial : budgetMaterials) {
-                    budgetMaterial.setProductId(product.getId());
-                    budgetMaterial.setProductName(product.getName());
-                    budgetMaterial.setUnitName(product.getUnitName());
-                    iBudgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
-                }
-            }
+            //更新商品名称
+            iProductMapper.updateProductById(oldName,newName,brandSeriesId,brandId,goodsId,id);
+            //更新相关联商品名称
+            iGroupLinkMapper.updateGroupLinkById(brandSeriesId,brandId,goodsId,id);
+            iBudgetMaterialMapper.updateBudgetMaterialById(brandSeriesId,brandId,goodsId,id);
         } catch (Exception e) {
             throw new BaseException(ServerCode.WRONG_PARAM,"修改失败");
         }

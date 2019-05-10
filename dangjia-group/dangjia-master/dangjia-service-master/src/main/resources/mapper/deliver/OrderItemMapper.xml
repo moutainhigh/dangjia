@@ -60,6 +60,26 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			order_id = #{orderId}
 		ORDER BY create_date desc
 	</select>
+	<!--更新名称-->
+	<!--更新商品名称-->
+	<update id="updateOrderItemById" parameterType="java.lang.String">
+		UPDATE dj_deliver_order_item p1
+		SET p1.product_name =
+		<foreach collection="lists" item="item" index="index"
+				 separator=" " open="case id" close="end">
+			when id then #{item.name}
+		</foreach>
+		,p1.unit_name=
+		<foreach collection="lists" item="item" index="index"
+				 separator=" " open="case id" close="end">
+			when id then #{item.unitName}
+		</foreach>
+		where product_id in
+		<foreach collection="lists" index="index" item="item"
+				 separator="," open="(" close=")">
+			#{item.id,jdbcType=BIGINT}
+		</foreach>
+	</update>
 
 </mapper>
 
