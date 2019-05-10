@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.actuary;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.core.HouseFlowAPI;
@@ -660,7 +661,7 @@ public class BudgetWorkerService {
             BudgetResult budgetResult = new BudgetResult();
             budgetResult.setWorkerBudget(0.0);
             budgetResult.setMaterialBudget(0.0);
-            House house = houseAPI.getHouseById(houseId);
+            House house= JSON.parseObject(JSON.toJSONString(houseAPI.getHouseById(houseId)),House.class);
             List<HouseFlow> hflist = houseFlowAPI.getWorkerFlow(house.getId());
             RlistResult rlistResult;
             budgetResult.setBudgetDec(house.getCityName() + "/" + house.getResidential() + "/" + house.getSquare() + "m²");
