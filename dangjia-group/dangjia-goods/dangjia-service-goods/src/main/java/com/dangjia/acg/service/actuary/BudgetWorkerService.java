@@ -785,6 +785,7 @@ public class BudgetWorkerService {
 
         } catch (Exception e) {
             e.printStackTrace();
+            LOG.error("系统出错，查询估价失败",e);
             return ServerResponse.createByErrorMessage("系统出错，查询估价失败");
         }
     }
