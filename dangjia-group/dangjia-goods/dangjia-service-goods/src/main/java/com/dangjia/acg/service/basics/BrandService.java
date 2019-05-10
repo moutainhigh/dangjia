@@ -147,7 +147,9 @@ public class BrandService {
             example.createCriteria().andEqualTo(Product.BRAND_ID,id);
             List<Product> list = iProductMapper.selectByExample(example);
             //更新master库相关商品名称
-            masterProductAPI.updateProductByProductId(JSONArray.toJSONString(list),null,id,null,null);
+            if(list.size()>0||null!=list) {
+                masterProductAPI.updateProductByProductId(JSONArray.toJSONString(list), null, id, null, null);
+            }
             JSONArray brandSeriesLists = JSONArray.parseArray(brandSeriesList);
             for (int i = 0; i < brandSeriesLists.size(); i++) {
                 JSONObject brandSeries = brandSeriesLists.getJSONObject(i);
@@ -173,7 +175,9 @@ public class BrandService {
                     productService.updateProductName(brandSeries1.getName(),brandSeriesName,brandSeriesId,null,null,null);
                     example.createCriteria().andEqualTo(Product.BRAND_SERIES_ID,brandSeriesId);
                     List<Product> list1 = iProductMapper.selectByExample(example);
-                    masterProductAPI.updateProductByProductId(JSONArray.toJSONString(list1),null,id,null,null);
+                    if(list1.size()>0||null!=list1) {
+                        masterProductAPI.updateProductByProductId(JSONArray.toJSONString(list1), null, id, null, null);
+                    }
                 }
             }
             return ServerResponse.createBySuccessMessage("修改成功");
