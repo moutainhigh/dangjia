@@ -56,6 +56,12 @@ public class WebWithdrawDepositService {
     public ServerResponse getAllWithdraw(PageDTO pageDTO, String searchKey, Integer state, String beginDate, String endDate) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
+                if(beginDate.equals(endDate)){
+                    beginDate=beginDate+" "+"00:00:00";
+                    endDate=endDate+" "+"23:59:59";
+                }
+            }
             List<WebWithdrawDTO> withdrawDTOList = iWithdrawDepositMapper.getWebWithdrawList(state, searchKey, beginDate, endDate);
             PageInfo pageResult = new PageInfo(withdrawDTOList);
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
