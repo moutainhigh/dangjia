@@ -139,11 +139,12 @@ public class UnitService {
             Example example=new Example(Product.class);
             example.createCriteria().andEqualTo(Product.UNIT_ID,unitId);
             List<Product> products = iProductMapper.selectByExample(example);
-            iBudgetMaterialMapper.updateBudgetMaterialByUnitName(unitName,products);
-            masterProductAPI.updateProductByProductId(JSON.toJSONString(products),null,null,null,null);
+            if(products.size()>0||null!=products) {
+                iBudgetMaterialMapper.updateBudgetMaterialByUnitName(unitName, products);
+                masterProductAPI.updateProductByProductId(JSON.toJSONString(products), null, null, null, null);
+            }
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
-            e.printStackTrace();
             return ServerResponse.createByErrorMessage("修改失败");
         }
     }

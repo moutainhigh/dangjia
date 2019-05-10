@@ -87,7 +87,9 @@ public class BrandSeriesService{
 			example.createCriteria().andEqualTo(Product.BRAND_SERIES_ID,id);
 			List<Product> list = iProductMapper.selectByExample(example);
 			//更新master库相关商品名称
-			masterProductAPI.updateProductByProductId(JSON.toJSONString(list),id,null,null,null);
+			if(list.size()>0||null!=list) {
+				masterProductAPI.updateProductByProductId(JSON.toJSONString(list), id, null, null, null);
+			}
 			return ServerResponse.createBySuccessMessage("修改成功");
 		} catch (Exception e) {
 			e.printStackTrace();
