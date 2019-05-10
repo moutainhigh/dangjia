@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.deliver;
 
+import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderDTO;
 import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderItemDTO;
 import com.dangjia.acg.dto.deliver.SplitReportSupplierDTO;
@@ -41,4 +42,7 @@ public interface IOrderSplitItemMapper extends Mapper<OrderSplitItem> {
     List<SplitReportSupplierDTO> getSplitReportGoodsSuppliers(@Param("houseId")String houseId,@Param("productSn")String productSn);
     /********************查看统计 结束**********************/
 
+    /*更新商品名称*/
+    void updateOrderSplitItemById(@Param("lists") JSONArray lists, @Param("brandSeriesId") String brandSeriesId, @Param("brandId") String brandId,
+                                  @Param("goodsId") String goodsId, @Param("id") String id);
 }

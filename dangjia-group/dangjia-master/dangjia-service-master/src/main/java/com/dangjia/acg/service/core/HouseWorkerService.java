@@ -337,7 +337,7 @@ public class HouseWorkerService {
 
         Example example = new Example(HouseFlowApply.class);
         example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                .andCondition(" member_check in (1,3)" ).andEqualTo(HouseFlowApply.PAY_STATE, 1);
+                .andCondition(" member_check in (1,3)").andEqualTo(HouseFlowApply.PAY_STATE, 1);
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
         if (houseFlowApplyList.size() > 0) {
             if (applyType == 4) {
@@ -408,16 +408,14 @@ public class HouseWorkerService {
                     || supervisorHF.getCheckMoney().compareTo(new BigDecimal(0)) == 0) {
                 this.calculateSup(supervisorHF);
             }
-
             /*提交申请进行控制*/
 //            List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
 //            if (changeOrderList.size() > 0) {
 //                return ServerResponse.createByErrorMessage("该工种（" + workerType.getName() + "）有未处理变更单,通知管家处理");
 //            }
-
             //包括所有申请 和 巡查
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(houseFlowId, applyType, workerId, new Date());
-            if (houseFlowApplyList.size() > 0) {
+            if (applyType != 7 && houseFlowApplyList.size() > 0) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "您今日已提交过此申请,请勿重复提交！");
             }
 
@@ -666,7 +664,7 @@ public class HouseWorkerService {
                 case 0:
                     msg = "每日完工申请成功";
                     //每日完工
-                    houseFlowApplyService.checkWorker(hfa.getId(),false);
+                    houseFlowApplyService.checkWorker(hfa.getId(), false);
                     break;
                 case 1:
                     msg = "阶段完工申请成功";

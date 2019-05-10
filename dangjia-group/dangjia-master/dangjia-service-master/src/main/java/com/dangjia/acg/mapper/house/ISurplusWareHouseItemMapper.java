@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.house;
 
+import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.dto.house.SurplusWareHouseProductDTO;
 import com.dangjia.acg.modle.house.SurplusWareHouseItem;
 import org.apache.ibatis.annotations.Param;
@@ -27,5 +28,9 @@ public interface ISurplusWareHouseItemMapper extends Mapper<SurplusWareHouseItem
 
     //获取某个临时仓库 的所有剩余材料 的某个 材料
     SurplusWareHouseItem getAllSurplusWareHouseItemByProductId(@Param("surplusWareHouseId") String surplusWareHouseId, @Param("productId") String productId);
+
+    //更新商品名称
+    void updateSurplusWareHouseItemById(@Param("lists") JSONArray lists, @Param("brandSeriesId") String brandSeriesId, @Param("brandId") String brandId,
+                                        @Param("goodsId") String goodsId, @Param("id") String id);
 }
 
