@@ -1325,6 +1325,7 @@ public class HouseService {
             return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "暂无所需报价");
         } catch (Exception e) {
             e.printStackTrace();
+            LOG.error("系统出错，查询参考报价失败",e);
             return ServerResponse.createByErrorMessage("系统出错,查询参考报价失败");
         }
     }
