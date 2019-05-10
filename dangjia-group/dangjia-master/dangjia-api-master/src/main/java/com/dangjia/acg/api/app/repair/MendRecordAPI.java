@@ -22,6 +22,11 @@ public interface MendRecordAPI {
                                    @RequestParam("mendOrderId") String mendOrderId,
                                    @RequestParam("type") Integer type);
 
+    @PostMapping(value = "app/repair/mendRecord/mendDeliverDetail")
+    @ApiOperation(value = "供应商退明细", notes = "供应商退明细")
+    ServerResponse mendDeliverDetail(@RequestParam("userToken") String userToken,
+                                   @RequestParam("mendDeliverId") String mendDeliverId);
+
     @PostMapping(value = "app/repair/mendRecord/recordList")
     @ApiOperation(value = "记录列表", notes = "记录列表")
     ServerResponse recordList(@RequestParam("houseId") String houseId,

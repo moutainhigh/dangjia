@@ -31,8 +31,8 @@ public class MendOrderCheckController implements MendOrderCheckAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse confirmMendOrder(String userToken, String mendOrderId, String productArr){
-        return mendOrderCheckService.confirmMendOrder(userToken,mendOrderId,productArr);
+    public ServerResponse confirmMendOrder(String userToken, String mendOrderId,String mendDeliverId, String productArr){
+        return mendOrderCheckService.confirmMendOrder(userToken,mendOrderId, mendDeliverId,productArr);
     }
 
 }

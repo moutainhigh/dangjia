@@ -26,7 +26,14 @@ public class MendRecordController implements MendRecordAPI {
     public ServerResponse mendOrderDetail(String userToken, String mendOrderId, Integer type){
         return mendRecordService.mendOrderDetail( userToken,mendOrderId,type);
     }
-
+    /**
+     * 供应商退明细
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse mendDeliverDetail(String userToken, String mendDeliverId){
+        return mendRecordService.mendDeliverDetail( userToken,mendDeliverId);
+    }
     /**
      *  记录列表
      */
