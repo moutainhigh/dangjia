@@ -171,6 +171,12 @@ public class MendMaterielService {
             if (pageSize == null) {
                 pageSize = 10;
             }
+            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
+                if(beginDate.equals(endDate)){
+                    beginDate=beginDate+" "+"00:00:00";
+                    endDate=endDate+" "+"23:59:59";
+                }
+            }
             PageHelper.startPage(pageNum, pageSize);
 //            List<MendOrder> mendOrderList = mendOrderMapper.materialOrderState(houseId);
             List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(houseId, 0, beginDate, endDate, likeAddress);
