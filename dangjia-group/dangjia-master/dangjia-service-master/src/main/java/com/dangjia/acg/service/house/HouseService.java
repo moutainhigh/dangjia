@@ -695,6 +695,12 @@ public class HouseService {
     public ServerResponse getList(PageDTO pageDTO, Integer visitState, String startDate, String endDate, String searchKey, String orderBy, String memberId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            if(startDate!=null && startDate!="" && endDate!=null && endDate!=""){
+                if(startDate.equals(endDate)){
+                    startDate=startDate+" "+"00:00:00";
+                    endDate=endDate+" "+"23:59:59";
+                }
+            }
             List<HouseListDTO> houseList = iHouseMapper.getHouseList(memberId, visitState, startDate, endDate, orderBy, searchKey);
             if (houseList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()

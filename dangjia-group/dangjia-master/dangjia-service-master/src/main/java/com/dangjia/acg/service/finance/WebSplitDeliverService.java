@@ -44,6 +44,12 @@ public class WebSplitDeliverService {
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate) && (applyState == 0 || applyState == -1)) {
                 applyState = -2;
             }
+            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
+                if(beginDate.equals(endDate)){
+                    beginDate=beginDate+" "+"00:00:00";
+                    endDate=endDate+" "+"23:59:59";
+                }
+            }
             List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(applyState, searchKey, beginDate, endDate);
             PageInfo pageResult = new PageInfo(webSplitDeliverItemDTOLists);
             return ServerResponse.createBySuccess("查询成功", pageResult);
