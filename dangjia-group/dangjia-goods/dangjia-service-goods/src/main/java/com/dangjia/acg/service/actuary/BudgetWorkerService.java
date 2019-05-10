@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.actuary;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.core.HouseFlowAPI;
@@ -37,9 +36,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -658,10 +660,13 @@ public class BudgetWorkerService {
      */
     public ServerResponse gatEstimateBudgetByHId(String houseId) {
         try {
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                    .getRequest();
+            request.setAttribute("information","1");
             BudgetResult budgetResult = new BudgetResult();
             budgetResult.setWorkerBudget(0.0);
             budgetResult.setMaterialBudget(0.0);
-            House house= JSON.parseObject(JSON.toJSONString(houseAPI.getHouseById(houseId)),House.class);
+            House house = houseAPI.getHouseById(houseId);
             List<HouseFlow> hflist = houseFlowAPI.getWorkerFlow(house.getId());
             RlistResult rlistResult;
             budgetResult.setBudgetDec(house.getCityName() + "/" + house.getResidential() + "/" + house.getSquare() + "m²");
