@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.core;
 
 import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.coche.HouseUtil;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -27,7 +28,10 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ruking.Cheng
@@ -123,7 +127,7 @@ public class CraftsmanConstructionService {
             bean.setUserId(houseMember.getId());//
         }
         setMenus(bean, house, hf);
-        Map<String, Object> dataMap = house.getDesignDatas();
+        Map<String, Object> dataMap = HouseUtil.getDesignDatas(house.getDecorationType(),house.getDesignerOk());
         bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         List<ConstructionByWorkerIdBean.ButtonListBean> buttonList = new ArrayList<>();
         if (house.getDecorationType() != 2 && house.getDesignerOk() == 1) {
@@ -185,7 +189,7 @@ public class CraftsmanConstructionService {
             bean.setUserId(houseMember.getId());//
         }
         setMenus(bean, house, hf);
-        Map<String, Object> dataMap = house.getBudgetDatas();
+        Map<String, Object> dataMap = HouseUtil.getBudgetDatas(house.getBudgetOk());
         bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         return ServerResponse.createBySuccess("获取施工列表成功！", bean);
     }
