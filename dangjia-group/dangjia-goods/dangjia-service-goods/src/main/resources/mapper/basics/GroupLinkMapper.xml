@@ -223,6 +223,25 @@
 		SET is_switch=#{isSwitch},modify_date=SYSDATE()
 		where product_id=#{productId}
 	</update>
+	<!--更新货品名-->
+	<update id="updateGroupLinkById" parameterType="java.lang.String">
+		UPDATE dj_basics_group_link p1
+		INNER JOIN `dj_basics_product` p ON p.id = p1.product_id
+		SET p1.product_name = p.`name`
+		WHERE 1=1
+		<if test="null!=brandSeriesId and ''!=brandSeriesId">
+			or p.brand_series_id = #{brandSeriesId};
+		</if>
+		<if test="null!=brandId and ''!=brandId">
+			or p.brand_id=#{brandId}
+		</if>
+		<if test="null!=goodsId and ''!=goodsId">
+			or p.goods_id=#{goodsId}
+		</if>
+		<if test="null!=id and ''!=id">
+			or p.id=#{id}
+		</if>
+	</update>
 
 
 </mapper>

@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.basics;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.product.MasterProductAPI;
@@ -244,38 +245,13 @@ public class GoodsService {
             goods.setModifyDate(new Date());
             iGoodsMapper.updateByPrimaryKeySelective(goods);
             //修改品牌对应的product名称也更新
+            productService.updateProductName(oldGoods.getName(),name,null,null,id,null);
             Example example=new Example(Product.class);
-            //关联goods的表goods名称更新
-            example.createCriteria().andEqualTo(GroupLink.GOODS_ID,id);
-            List<GroupLink> groupLinks = iGroupLinkMapper.selectByExample(example);
-            if(groupLinks.size()>0||null!=groupLinks){
-                for (GroupLink groupLink : groupLinks) {
-                    groupLink.setGoodsId(id);
-                    groupLink.setGoodsName(name);
-                    iGroupLinkMapper.updateByPrimaryKeySelective(groupLink);
-                }
-            }
-            example.createCriteria().andEqualTo(BudgetMaterial.GOODS_ID);
-            List<BudgetMaterial> budgetMaterials = iBudgetMaterialMapper.selectByExample(example);
-            if(budgetMaterials.size()>0||null!=budgetMaterials){
-                for (BudgetMaterial budgetMaterial : budgetMaterials) {
-                    budgetMaterial.setGoodsId(id);
-                    budgetMaterial.setGoodsName(name);
-                    iBudgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
-                }
-            }
             example.createCriteria().andEqualTo(Product.GOODS_ID,id);
-            List<Product> products = iProductMapper.selectByExample(example);
-            if(products.size()>0||null!=products) {
-                for (Product product : products) {
-                    product.setName(product.getName().replace(oldGoods.getName(), name));
-                    //调用product相关联的表更新
-                    productService.updateProductByProductId(product);
-                    //master跟product相关联的表更新
-                    masterProductAPI.updateProductByProductId(product.getId(),product.getCategoryId(),product.getBrandSeriesId()
-                            ,product.getBrandId(),product.getName(),product.getUnitId(),product.getUnitName());
-                }
-            }
+            List<Product> list = iProductMapper.selectByExample(example);
+            //更新master库相关商品名称
+            masterProductAPI.updateProductByProductId(JSON.toJSONString(list),null,null,null,id);
+//            masterProductAPI.updateProductByProductId(null,null,id,null);
             if (buy != 2) //非自购goods ，有品牌
             {
                 if (!StringUtils.isNoneBlank(arrString)) {

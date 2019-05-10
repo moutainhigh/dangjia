@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.basics;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.api.product.MasterProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
@@ -80,24 +82,17 @@ public class BrandSeriesService{
 			brandEx.setModifyDate(new Date());
 			iBrandSeriesMapper.updateByPrimaryKeySelective(brandEx);
 			//修改品牌系列对应的product名称也更新
+			productService.updateProductName(brandSeries.getName(),name,id,null,null,null);
 			Example example=new Example(Product.class);
 			example.createCriteria().andEqualTo(Product.BRAND_SERIES_ID,id);
-			List<Product> products = iProductMapper.selectByExample(example);
-			if(products.size()>0||null!=products) {
-				for (Product product : products) {
-					product.setName(product.getName().replace(brandSeries.getName(), name));
-					//调用product相关联的表更新
-					productService.updateProductByProductId(product);
-					//master相关联表更新
-					masterProductAPI.updateProductByProductId(product.getId(),product.getCategoryId(),product.getBrandSeriesId()
-							,product.getBrandId(),product.getName(),product.getUnitId(),product.getUnitName());
-				}
-			}
+			List<Product> list = iProductMapper.selectByExample(example);
+			//更新master库相关商品名称
+			masterProductAPI.updateProductByProductId(JSON.toJSONString(list),id,null,null,null);
 			return ServerResponse.createBySuccessMessage("修改成功");
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new BaseException(ServerCode.WRONG_PARAM, "修改失败");
 		}
-		
 	}
 	//新增
 	public ServerResponse insert(String name,String content,String brandId){

@@ -80,6 +80,20 @@
         </if>
         ORDER BY whi.category_id desc
     </select>
+	<!--更新商品名称-->
+	<update id="updateSurplusWareHouseItemById" parameterType="java.lang.String">
+		UPDATE dj_house_surplus_ware_house_item p1
+		SET p1.product_name =
+		<foreach collection="lists" item="item" index="index"
+				 separator=" " open="case id" close="end">
+			when id then #{item.name}
+		</foreach>
+		where product_id in
+		<foreach collection="lists" index="index" item="item"
+				 separator="," open="(" close=")">
+			#{item.id,jdbcType=BIGINT}
+		</foreach>
+	</update>
 
 
 
