@@ -523,7 +523,9 @@ public class ProductService {
             example.createCriteria().andEqualTo(Product.ID,id);
             List<Product> list = iProductMapper.selectByExample(example);
             //更新master库相关商品名称
-            masterProductAPI.updateProductByProductId(JSON.toJSONString(list),id,null,null,null);
+            if(list.size()>0||null!=list) {
+                masterProductAPI.updateProductByProductId(JSON.toJSONString(list), id, null, null, null);
+            }
             example=new Example(GroupLink.class);
             example.createCriteria().andEqualTo("productId",id);
             GroupLink oldLabel =new GroupLink();
