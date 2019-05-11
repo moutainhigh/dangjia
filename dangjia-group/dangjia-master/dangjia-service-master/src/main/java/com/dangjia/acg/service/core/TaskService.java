@@ -133,7 +133,9 @@ public class TaskService {
                 buttonDTO.setHouseId(houseId);
                 buttonDTO.setTaskList(getWorkerTask(houseId, userToken));
             }
-        }else {
+        }
+        //业主待处理任务
+        if(!CommonUtil.isEmpty(userRole)&&"1".equals(userRole)) {
             if (houseList.size() > 1) {
                 buttonDTO.setState(2);
                 for (House house : houseList) {
