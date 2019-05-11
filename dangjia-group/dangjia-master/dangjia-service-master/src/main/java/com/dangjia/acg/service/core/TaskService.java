@@ -16,6 +16,7 @@ import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseExpendMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.repair.IMendDeliverMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
@@ -25,6 +26,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseExpend;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendOrder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +65,8 @@ public class TaskService {
     @Autowired
     private IHouseWorkerMapper houseWorkerMapper;
 
+    @Autowired
+    private IMendDeliverMapper mendDeliverMapper;
 
     /**
      * 任务列表
@@ -115,7 +119,7 @@ public class TaskService {
         }
         String houseId = null;
         //大管家
-        if(!CommonUtil.isEmpty(userRole)&&"2".equals(userRole)&&member.getWorkerType()!=3){
+        if(!CommonUtil.isEmpty(userRole)&&"2".equals(userRole)&&member.getWorkerType()==3){
             if (houseList.size() > 0) {
                 buttonDTO.setState(2);
                 for (House house : houseList) {
@@ -129,8 +133,9 @@ public class TaskService {
                 buttonDTO.setHouseId(houseId);
                 buttonDTO.setTaskList(getWorkerTask(houseId, userToken));
             }
-            buttonDTO.setTaskList(getWorkerTask(houseId, userToken));
-        }else {
+        }
+        //业主待处理任务
+        if(!CommonUtil.isEmpty(userRole)&&"1".equals(userRole)) {
             if (houseList.size() > 1) {
                 buttonDTO.setState(2);
                 for (House house : houseList) {
@@ -182,6 +187,8 @@ public class TaskService {
      * type 1支付任务,2补货补人工,3其它任务
      */
     private List<Task> getWorkerTask(String houseId, String userToken) {
+
+        House house = houseMapper.selectByPrimaryKey(houseId);
         AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
         Member worker = accessToken.getMember();
         List<Task> taskList = new ArrayList<>();
@@ -189,11 +196,13 @@ public class TaskService {
             return taskList;
         }
         //退材料退服务
-        Example example = new Example(MendOrder.class);
-        example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 2)
-                .andEqualTo(MendOrder.STATE, 3);//退材料审核状态全通过
-        List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
-        for (MendOrder mendOrder : mendOrderList) {
+        Example example = new Example(MendDeliver.class);
+        example.createCriteria().andEqualTo(MendDeliver.HOUSE_ID, houseId)
+                .andEqualTo(MendDeliver.SHIPPING_STATE, 0);
+        List<MendDeliver> mendDeliverList = mendDeliverMapper.selectByExample(example);
+
+        for (MendDeliver mendDeliver : mendDeliverList) {
+            MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendDeliver.getMendOrderId());
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
@@ -202,9 +211,11 @@ public class TaskService {
                 task.setName("退服务待审核处理");
             }
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/buchailiao.png");
-            task.setHtmlUrl("");
+            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                    String.format(DjConstants.YZPageAddress.TUIPRODUCTEXAMINE, userToken, house.getCityId(), "退材料/服务审核") + "&mendDeliverId=" + mendDeliver.getId();
+            task.setHtmlUrl(url);
             task.setType(4);
-            task.setTaskId(mendOrder.getId());
+            task.setTaskId(mendDeliver.getId());
             taskList.add(task);
         }
         return taskList;

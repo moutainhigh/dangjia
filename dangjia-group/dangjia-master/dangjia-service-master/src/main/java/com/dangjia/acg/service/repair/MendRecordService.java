@@ -61,9 +61,79 @@ public class MendRecordService {
     private IWarehouseMapper warehouseMapper;
 
     @Autowired
+    private IMendDeliverMapper mendDeliverMapper;
+    @Autowired
     private IHouseMapper houseMapper;
     @Autowired
     private IMemberMapper memberMapper;
+
+    /**
+     * 要补退明细
+     * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货
+     */
+    public ServerResponse mendDeliverDetail(String userToken,String mendDeliverId){
+        try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            MendOrderDetail mendOrderDetail = new MendOrderDetail();
+            mendOrderDetail.setIsShow(0);
+            MendDeliver mendDeliver = mendDeliverMapper.selectByPrimaryKey(mendDeliverId);
+            MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendDeliver.getMendOrderId());
+            mendOrderDetail.setMendOrderId(mendDeliver.getMendOrderId());
+            mendOrderDetail.setNumber(mendOrder.getNumber());
+            mendOrderDetail.setType(mendOrder.getType());
+            mendOrderDetail.setState(mendOrder.getState());//0生成中,1材料员待审核,2不通过取消,3，材料员已审核，大管家待核对,4已结算
+            mendOrderDetail.setTotalAmount(mendOrder.getTotalAmount());
+            mendOrderDetail.setCreateDate(mendOrder.getCreateDate());
+            mendOrderDetail.setModifyDate(mendOrder.getModifyDate());
+            mendOrderDetail.setApplicantId(mendOrder.getApplyMemberId());
+            mendOrderDetail.setHouseId(mendOrder.getHouseId());
+            mendOrderDetail.setApplicantName(mendDeliver.getShipName());
+            mendOrderDetail.setApplicantMobile(mendDeliver.getShipMobile());
+            List<Map<String,Object>> mapList = new ArrayList<>();
+            Example example =new Example(MendMateriel.class);
+            example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID,mendOrder.getId())
+                    .andEqualTo(MendMateriel.REPAIR_MEND_DELIVER_ID,mendDeliver.getId());
+            List<MendMateriel> mendMaterielList = mendMaterialMapper.selectByExample(example);
+            for (MendMateriel mendMateriel : mendMaterielList){
+                Map<String,Object> map = BeanUtils.beanToMap(mendMateriel);
+                map.put("image", address + mendMateriel.getImage());
+                if (mendMateriel.getProductType() == 0){
+                    map.put("goodsType", "材料");
+                }else {
+                    map.put("goodsType", "服务");
+                }
+
+                map.put("productId", mendMateriel.getProductId());
+                map.put("name", mendMateriel.getProductName());
+                map.put("price", "¥" + String.format("%.2f",mendMateriel.getPrice())+"/"+mendMateriel.getUnitName());
+                map.put("shopCount", mendMateriel.getShopCount());//申请数量
+                map.put("actualCount", mendMateriel.getActualCount());//实际修改数量
+                map.put("totalPrice", mendMateriel.getTotalPrice());
+                mapList.add(map);
+            }
+            mendOrderDetail.setMapList(mapList);
+
+            //得到房子名称及业主信息
+            if(!CommonUtil.isEmpty(mendOrderDetail.getHouseId())) {
+                House house=houseMapper.selectByPrimaryKey(mendOrderDetail.getHouseId());
+                if(house!=null) {
+                    mendOrderDetail.setHouseName(house.getHouseName());//房名
+                    mendOrderDetail.setMemberId(house.getMemberId());//业主ID
+                    Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                    if (member != null) {
+                        mendOrderDetail.setMemberName(member.getNickName());//业主名称
+                        mendOrderDetail.setMemberMobile(member.getMobile());//业主手机号
+                    }
+                }
+            }
+
+            return ServerResponse.createBySuccess("查询成功",mendOrderDetail);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
     /**
      * 要补退明细
      * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货

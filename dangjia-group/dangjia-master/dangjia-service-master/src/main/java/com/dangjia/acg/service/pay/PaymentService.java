@@ -1154,7 +1154,7 @@ public class PaymentService {
                     actuaryDTO.setKind(workerType.getName());
                     actuaryDTO.setName("补人工花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
-                    actuaryDTO.setButton("补人工明细");
+//                    actuaryDTO.setButton("补人工明细");
 //                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
 //                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=4";
 //                    actuaryDTO.setUrl(url);

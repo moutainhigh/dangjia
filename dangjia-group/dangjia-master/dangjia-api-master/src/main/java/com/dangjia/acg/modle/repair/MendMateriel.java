@@ -91,6 +91,23 @@ public class MendMateriel extends BaseEntity {
 	@ApiModelProperty("供应商供应商名称")
 	private String supplierName;//
 
+	@Column(name = "repair_mend_deliver_id")
+	@Desc(value = "供应商退货单号")
+	@ApiModelProperty("供应商退货单号")
+	private String repairMendDeliverId;//
+
+
+	@Column(name = "actual_count")
+	@Desc(value = "实际总数")
+	@ApiModelProperty("实际总数")
+	private Double actualCount;//
+
+	@Column(name = "actual_price")
+	@Desc(value = "实际总价")
+	@ApiModelProperty("实际总价")
+	private Double actualPrice;//
+
+
 	public void initPath(String address){
 		this.image = StringUtils.isEmpty(this.image)?null:address+this.image;
 	}

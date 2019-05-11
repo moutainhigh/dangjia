@@ -68,8 +68,8 @@ public class MendOrder extends BaseEntity {
 	private Integer type;
 
 	@Column(name = "state")
-	@Desc(value = "0生成中,1处理中,2不通过取消,3已通过,4已结算,5已撤回")
-	@ApiModelProperty("0生成中,1处理中,2不通过取消,3已通过,4已结算,5已撤回")
+	@Desc(value = "0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回")
+	@ApiModelProperty("0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回")
 	private Integer state;
 
 	@Column(name = "total_amount")
@@ -81,4 +81,11 @@ public class MendOrder extends BaseEntity {
 	@Desc(value = "运费")
 	@ApiModelProperty("运费")
 	private Double carriage;
+
+
+	@Column(name = "actual_total_amount")
+	@Desc(value = "实际总价（不含运费）")
+	@ApiModelProperty("实际总价（不含运费）")
+	private Double actualTotalAmount;
+
 }
