@@ -30,4 +30,7 @@ public interface IWorkerGoodsMapper extends Mapper<WorkerGoods> {
     Double getWorkertoCheck(@Param("houseId") String houseId,@Param("houseFlowId") String houseFlowId);
     Double getPayedWorker(@Param("houseId") String houseId,@Param("houseFlowId") String houseFlowId);
     List<WorkerGoods> queryRepairBudgetWorker(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId,@Param("name") String name);
+
+    /*更新单位*/
+    void updateWorkerGoodsByUnitId(@Param("unitId") String unitId,@Param("unitName") String unitName);
 }
