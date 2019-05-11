@@ -119,7 +119,7 @@ public class TaskService {
         }
         String houseId = null;
         //大管家
-        if(!CommonUtil.isEmpty(userRole)&&"2".equals(userRole)&&member.getWorkerType()!=3){
+        if(!CommonUtil.isEmpty(userRole)&&"2".equals(userRole)&&member.getWorkerType()==3){
             if (houseList.size() > 0) {
                 buttonDTO.setState(2);
                 for (House house : houseList) {
