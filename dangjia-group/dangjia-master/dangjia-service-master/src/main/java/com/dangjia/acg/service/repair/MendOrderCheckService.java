@@ -200,6 +200,7 @@ public class MendOrderCheckService {
                         mendDeliver.setApplyMoney(supplierProduct.getPrice() * mendMateriel.getShopCount() + mendDeliver.getApplyMoney());//累计供应商价总价
                         mendDeliver.setTotalAmount(mendMateriel.getPrice() * mendMateriel.getShopCount() + mendDeliver.getTotalAmount());//累计退货总价
                         mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
+                        mendMateriel.setRepairMendDeliverId(mendDeliver.getId());
                         mendMaterialMapper.updateByPrimaryKeySelective(mendMateriel);
 
                     }
