@@ -23,7 +23,6 @@ import com.dangjia.acg.mapper.repair.*;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.HouseFlow;
-import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplit;
@@ -958,33 +957,33 @@ public class MendOrderService {
 
     public ServerResponse mendChecking(String houseId,String workerTypeId,Integer type){
 
-        if((type == 3)&&!CommonUtil.isEmpty(workerTypeId)){
-            String msg;
-            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
-            if (houseFlowApplyList.size() > 0) {
-                switch (houseFlowApplyList.get(0).getApplyType()) {
-                    case 0:
-                        msg ="每日完工申请";
-                        break;
-                    case 1:
-                        msg ="阶段完工申请";
-                        break;
-                    case 2:
-                        msg ="整体完工申请";
-                        break;
-                    case 3:
-                        msg ="停工申请";
-                        break;
-                    case 4:
-                        msg ="每日开工申请";
-                        break;
-                    default:
-                        msg ="巡查申请";
-                        break;
-                }
-                return ServerResponse.createByErrorMessage("该工种有未处理的"+msg);
-            }
-        }
+//        if((type == 3)&&!CommonUtil.isEmpty(workerTypeId)){
+//            String msg;
+//            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
+//            if (houseFlowApplyList.size() > 0) {
+//                switch (houseFlowApplyList.get(0).getApplyType()) {
+//                    case 0:
+//                        msg ="每日完工申请";
+//                        break;
+//                    case 1:
+//                        msg ="阶段完工申请";
+//                        break;
+//                    case 2:
+//                        msg ="整体完工申请";
+//                        break;
+//                    case 3:
+//                        msg ="停工申请";
+//                        break;
+//                    case 4:
+//                        msg ="每日开工申请";
+//                        break;
+//                    default:
+//                        msg ="巡查申请";
+//                        break;
+//                }
+//                return ServerResponse.createByErrorMessage("该工种有未处理的"+msg);
+//            }
+//        }
         String typeName;
         switch (type) {
             case 0:
