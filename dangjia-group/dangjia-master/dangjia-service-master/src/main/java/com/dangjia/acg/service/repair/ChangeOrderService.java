@@ -10,8 +10,6 @@ import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
-import com.dangjia.acg.modle.core.HouseFlowApply;
-import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
@@ -61,7 +59,7 @@ public class ChangeOrderService {
             changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
 
             House house = houseMapper.selectByPrimaryKey(changeOrder.getHouseId());
-            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(changeOrder.getWorkerTypeId());
+//            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(changeOrder.getWorkerTypeId());
             if (changeOrder.getType() == 1){//补
                 /*configMessageService.addConfigMessage(null,"gj",house.getMemberId(),"0","工匠补人工申请",String.format
                         (DjConstants.PushMessage.STEWARD_B_CHECK_WORK,house.getHouseName(),workerType.getName()) ,"");*/
@@ -140,10 +138,10 @@ public class ChangeOrderService {
             return ServerResponse.createByErrorMessage("该工种有未处理变更单,通知管家处理");
         }
 
-        List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
-        if (houseFlowApplyList.size() > 0) {
-            return ServerResponse.createByErrorMessage("该工种有未处理完工申请");
-        }
+//        List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
+//        if (houseFlowApplyList.size() > 0) {
+//            return ServerResponse.createByErrorMessage("该工种有未处理的阶段/整体完工申请");
+//        }
 
         changeOrder.setMemberId(member.getId());
         changeOrder.setType(type);

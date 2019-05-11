@@ -17,6 +17,7 @@ import com.dangjia.acg.modle.core.WorkerType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -206,7 +207,7 @@ public class ActuaryOpeService {
             BudgetDTO budgetDTO = new BudgetDTO();
             budgetDTO.setWorkerPrice(budgetWorkerMapper.getHouseWorkerPrice(houseId,null));
             budgetDTO.setCaiPrice(budgetMaterialMapper.getHouseCaiPrice(houseId));
-            budgetDTO.setTotalPrice(budgetDTO.getWorkerPrice() + budgetDTO.getCaiPrice());
+            budgetDTO.setTotalPrice(new BigDecimal((budgetDTO.getWorkerPrice() + budgetDTO.getCaiPrice())));
             if (type == 1) {//人工
                 List<BudgetItemDTO> budgetItemDTOList=getHouseWorkerInfo(houseId,null,address);
                 budgetDTO.setBudgetItemDTOList(budgetItemDTOList);

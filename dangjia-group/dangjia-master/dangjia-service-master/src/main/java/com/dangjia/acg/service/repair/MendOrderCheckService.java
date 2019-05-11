@@ -200,6 +200,7 @@ public class MendOrderCheckService {
                         mendDeliver.setApplyMoney(supplierProduct.getPrice() * mendMateriel.getShopCount() + mendDeliver.getApplyMoney());//累计供应商价总价
                         mendDeliver.setTotalAmount(mendMateriel.getPrice() * mendMateriel.getShopCount() + mendDeliver.getTotalAmount());//累计退货总价
                         mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
+                        mendMateriel.setRepairMendDeliverId(mendDeliver.getId());
                         mendMaterialMapper.updateByPrimaryKeySelective(mendMateriel);
 
                     }
@@ -477,7 +478,11 @@ public class MendOrderCheckService {
 
                 HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(mendOrder.getHouseId(), mendOrder.getWorkerTypeId());
                 BigDecimal refund = new BigDecimal(mendOrder.getTotalAmount());
-                houseWorkerOrder.setWorkPrice(houseWorkerOrder.getWorkPrice().subtract(refund));//减掉工钱
+                if(houseWorkerOrder.getWorkPrice().doubleValue()<refund.doubleValue()){
+                    refund=houseWorkerOrder.getWorkPrice();
+                }
+                BigDecimal workPrice=(houseWorkerOrder.getWorkPrice().subtract(refund));//减掉工钱
+                houseWorkerOrder.setWorkPrice(workPrice);//剩余工钱
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(houseWorkerOrder);
 
                 List<MendWorker> mendWorkerList = mendWorkerMapper.byMendOrderId(mendOrder.getId());
