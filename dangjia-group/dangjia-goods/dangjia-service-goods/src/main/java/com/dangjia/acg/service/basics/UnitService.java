@@ -6,6 +6,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
+import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Unit;
 import com.github.pagehelper.PageHelper;
@@ -43,6 +44,8 @@ public class UnitService {
     private ProductService productService;
     @Autowired
     private IBudgetMaterialMapper iBudgetMaterialMapper;
+    @Autowired
+    private IWorkerGoodsMapper iWorkerGoodsMapper;
 
     protected static final Logger LOG = LoggerFactory.getLogger(UnitService.class);
 
@@ -136,6 +139,7 @@ public class UnitService {
             unit.setModifyDate(new Date());
             iUnitMapper.updateByPrimaryKeySelective(unit);
             iProductMapper.updateProductByUnitId(unitName,unitId);
+            iWorkerGoodsMapper.updateWorkerGoodsByUnitId(unitId,unitName);
             Example example=new Example(Product.class);
             example.createCriteria().andEqualTo(Product.UNIT_ID,unitId);
             List<Product> products = iProductMapper.selectByExample(example);
