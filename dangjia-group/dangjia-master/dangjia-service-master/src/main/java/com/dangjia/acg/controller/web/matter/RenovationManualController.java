@@ -21,55 +21,59 @@ public class RenovationManualController implements WebRenovationManualAPI {
     private RenovationManualService renovationManualService;
 
     /**
-     *根据工序id查询所有装修指南
-     * @param workerTypeId
+     * 根据工序id查询所有装修指南
+     *
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse queryRenovationManual(PageDTO pageDTO, RenovationManual renovationManual){
-        return renovationManualService.queryRenovationManual(pageDTO.getPageNum(), pageDTO.getPageSize(),renovationManual);
+    public ServerResponse queryRenovationManual(PageDTO pageDTO, RenovationManual renovationManual) {
+        return renovationManualService.queryRenovationManual(pageDTO, renovationManual);
     }
 
-     /**
-     *新增装修指南
+    /**
+     * 新增装修指南
+     *
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse addRenovationManual(RenovationManual renovationManual){
+    public ServerResponse addRenovationManual(RenovationManual renovationManual) {
         return renovationManualService.addRenovationManual(renovationManual);
     }
 
     /**
      * 修改装修指南
+     *
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse updateRenovationManual(RenovationManual renovationManual){
+    public ServerResponse updateRenovationManual(RenovationManual renovationManual) {
         return renovationManualService.updateRenovationManual(renovationManual);
     }
 
     /**
      * 删除装修指南
+     *
      * @param id
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse deleteRenovationManual(String id){
+    public ServerResponse deleteRenovationManual(String id) {
         return renovationManualService.deleteRenovationManual(id);
     }
 
     /**
      * 根据id查询装修指南对象
+     *
      * @param id
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse getRenovationManualById(String id){
+    public ServerResponse getRenovationManualById(String id) {
         return renovationManualService.getRenovationManualById(id);
     }
 

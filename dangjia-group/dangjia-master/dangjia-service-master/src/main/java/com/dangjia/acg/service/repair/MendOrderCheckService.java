@@ -2,9 +2,7 @@ package com.dangjia.acg.service.repair;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -28,13 +26,13 @@ import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.house.WarehouseDetail;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.deliver.OrderSplitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,7 +58,7 @@ public class MendOrderCheckService {
     @Autowired
     private IMendOrderMapper mendOrderMapper;
     @Autowired
-    private RedisClient redisClient;
+    private CraftsmanConstructionService constructionService;
     @Autowired
     private IHouseWorkerOrderMapper houseWorkerOrderMapper;
     @Autowired
@@ -228,8 +226,11 @@ public class MendOrderCheckService {
             if(roleType.equals("4")){
                 auditorId = "4";
             }else {
-                AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-                Member member = accessToken.getMember();
+                Object object = constructionService.getMember(userToken);
+                if (object instanceof ServerResponse) {
+                    return (ServerResponse) object;
+                }
+                Member member = (Member) object;
                 auditorId = member.getId();
             }
             MendOrderCheck mendOrderCheck = mendOrderCheckMapper.getByMendOrderId(mendOrder.getId(),roleType);
@@ -416,8 +417,11 @@ public class MendOrderCheckService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse confirmMendOrder(String userToken,String mendOrderId,String mendDeliverId,String productArr){
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member operator = accessToken.getMember();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member operator = (Member) object;
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
             MendDeliver mendDeliver = mendDeliverMapper.selectByPrimaryKey(mendDeliverId);
             if(mendDeliver==null){

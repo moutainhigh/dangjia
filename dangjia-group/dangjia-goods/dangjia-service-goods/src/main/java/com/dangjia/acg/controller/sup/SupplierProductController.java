@@ -26,12 +26,14 @@ public class SupplierProductController implements SupplierProductAPI {
     private SupplierService supplierService;
     @Autowired
     private SupplierProductService supplierProductService;
+
     /**
      * 查询指定供应商
      */
     public Supplier getSupplier(String productId) {
         return supplierService.getSupplier(productId);
     }
+
     /**
      * 供应商登录
      */
@@ -107,8 +109,8 @@ public class SupplierProductController implements SupplierProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse querySupplierProduct(HttpServletRequest request, int type, String supplierId, String categoryId,String likeProductName, PageDTO pageDTO) {
-        return supplierService.querySupplierProduct(type, supplierId, categoryId,likeProductName, pageDTO.getPageNum(), pageDTO.getPageSize());
+    public ServerResponse querySupplierProduct(HttpServletRequest request, int type, String supplierId, String categoryId, String likeProductName, PageDTO pageDTO) {
+        return supplierService.querySupplierProduct(type, supplierId, categoryId, likeProductName, pageDTO);
     }
 
     /**
@@ -147,7 +149,7 @@ public class SupplierProductController implements SupplierProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse querySupplierProductByPid(PageDTO pageDTO,String productId) {
-        return supplierProductService.querySupplierProductByPid(pageDTO,productId);
+    public ServerResponse querySupplierProductByPid(PageDTO pageDTO, String productId) {
+        return supplierProductService.querySupplierProductByPid(pageDTO, productId);
     }
 }

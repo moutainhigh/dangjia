@@ -30,6 +30,7 @@ import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.activity.RedPackPayService;
 import com.dangjia.acg.service.clue.ClueService;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.RKIDCardUtil;
 import com.dangjia.acg.util.TokenUtil;
 import com.github.pagehelper.PageHelper;
@@ -88,6 +89,8 @@ public class MemberService {
     private ClueService clueService;
     @Autowired
     private IHouseDistributionMapper iHouseDistributionMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
     /****
      * 注入配置
      */
@@ -730,8 +733,11 @@ public class MemberService {
      * @return
      */
     public ServerResponse getMyInvitation(String userToken) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        Member member = accessToken.getMember();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
         Example example = new Example(Member.class);
         example.createCriteria().andEqualTo(Member.OTHERS_INVITATION_CODE, member.getInvitationCode());
         Map memberMap = BeanUtils.beanToMap(member);

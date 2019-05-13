@@ -2,7 +2,6 @@ package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
@@ -20,7 +19,6 @@ import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.deliver.Cart;
 import com.dangjia.acg.modle.house.Warehouse;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageInfo;
@@ -41,8 +39,6 @@ import java.util.Map;
  */
 @Service
 public class CartService {
-    @Autowired
-    private RedisClient redisClient;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
@@ -73,8 +69,11 @@ public class CartService {
      */
     public ServerResponse setCart(HttpServletRequest request, String userToken, Cart cart){
         request.setAttribute(Constants.CITY_ID,request.getParameter(Constants.CITY_ID));
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        Member operator = accessToken.getMember();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member operator = (Member) object;
         Example example = new Example(Cart.class);
         example.createCriteria()
                 .andEqualTo(Cart.HOUSE_ID,cart.getHouseId())
@@ -117,8 +116,11 @@ public class CartService {
      * @return
      */
     public ServerResponse clearCart(String userToken, Cart cart){
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        Member operator = accessToken.getMember();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member operator = (Member) object;
         Example example = new Example(Cart.class);
         example.createCriteria()
                 .andEqualTo(Cart.HOUSE_ID,cart.getHouseId())
@@ -135,8 +137,11 @@ public class CartService {
      * @return
      */
     public ServerResponse queryCart(String userToken, Cart cart){
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        Member operator = accessToken.getMember();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member operator = (Member) object;
         Example example = new Example(Cart.class);
         example.createCriteria()
                 .andEqualTo(Cart.HOUSE_ID,cart.getHouseId())

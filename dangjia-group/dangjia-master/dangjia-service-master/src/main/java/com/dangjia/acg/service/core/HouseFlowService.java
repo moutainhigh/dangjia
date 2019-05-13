@@ -86,6 +86,8 @@ public class HouseFlowService {
     private IHouseStyleTypeMapper houseStyleTypeMapper;
     @Value("${spring.profiles.active}")
     private String active;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     private static Logger LOG = LoggerFactory.getLogger(HouseFlowService.class);
 
@@ -133,20 +135,14 @@ public class HouseFlowService {
      */
     public ServerResponse getGrabList(String userToken, String cityId) {
         try {
-            if (CommonUtil.isEmpty(userToken)) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), EventStatus.USER_TOKEN_ERROR.getDesc());
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
+            Member member = (Member) object;
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             request.setAttribute(Constants.CITY_ID, cityId);
             List<AllgrabBean> grabList = new ArrayList<>();//返回的任务list
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (accessToken == null) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
-            }
-            Member member = accessToken.getMember();
-            if (member == null) {
-                return ServerResponse.createByErrorMessage("用户不存在");
-            }
             String workerTypeId = "4";
             if (StringUtil.isNotEmpty(member.getWorkerTypeId())) {
                 workerTypeId = member.getWorkerTypeId();
@@ -322,9 +318,11 @@ public class HouseFlowService {
      */
     public ServerResponse setGrabVerification(String userToken, String cityId, String houseFlowId) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member = accessToken.getMember();
-
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(RewardPunishRecord.class);
             example.createCriteria().andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId()).andEqualTo(RewardPunishRecord.STATE, "0");

@@ -31,6 +31,7 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.repair.MendOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -71,10 +72,8 @@ public class OrderService {
     private IHouseMapper houseMapper;
     @Autowired
     private IBusinessOrderMapper businessOrderMapper;
-//    @Autowired
-//    private IHouseDesignImageMapper houseDesignImageMapper;
-//    @Autowired
-//    private IDesignImageTypeMapper designImageTypeMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
     @Autowired
     private ConfigMessageService configMessageService;
     @Autowired
@@ -192,9 +191,11 @@ public class OrderService {
      */
     public ServerResponse businessOrderList(String userToken){
         try{
-            AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-            Member member = accessToken.getMember();
-
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
             List<BusinessOrder> businessOrderList = businessOrderMapper.byMemberId(member.getId());
             List<BusinessOrderDTO> businessOrderDTOS = new ArrayList<>();
             for (BusinessOrder businessOrder : businessOrderList){
