@@ -21,6 +21,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         check_money as checkMoney,
         business_order_number as businessOrderNumber,
         repair_price as repairPrice,
+        repair_total_price  as repairTotalPrice,
         create_date as createDate,
         modify_date as modifyDate
     </sql>
