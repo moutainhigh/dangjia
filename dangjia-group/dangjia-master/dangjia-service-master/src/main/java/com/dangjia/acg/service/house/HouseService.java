@@ -44,6 +44,7 @@ import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.other.WorkDeposit;
+import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -1408,7 +1409,10 @@ public class HouseService {
     }
 
 //    0每日完工申请，1阶段完工申请，2整体完工申请,4：每日开工,5巡查,8补人工,9退人工,10补材料,11退材料,12业主退材料
-    public void insertConstructionRecord(Object sourceOjb) {
+public void insertConstructionRecord(Object sourceOjb){
+    insertConstructionRecordAll(sourceOjb,null);
+}
+public void insertConstructionRecordAll(Object sourceOjb, ChangeOrder changeOrder ) {
         try {
             // 施工记录的内容
             HouseConstructionRecord houseConstructionRecord=new HouseConstructionRecord();
@@ -1431,9 +1435,22 @@ public class HouseService {
                 houseConstructionRecord.setHouseId(mendOrder.getHouseId());
                 houseConstructionRecord.setSourceId(mendOrder.getId());
                 houseConstructionRecord.setContent("发起了"+mendOrder.getOrderName());
-                houseConstructionRecord.setWorkerId(mendOrder.getApplyMemberId());
-                WorkerType workerType=workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
-                houseConstructionRecord.setWorkerType(workerType.getType());
+
+                if(mendOrder.getType()==1||mendOrder.getType()==3) {
+                    if (changeOrder != null && !CommonUtil.isEmpty(changeOrder.getMemberId())) {
+                        houseConstructionRecord.setWorkerId(changeOrder.getMemberId());
+                        houseConstructionRecord.setWorkerType(null);
+                    }
+                    if (changeOrder != null && !CommonUtil.isEmpty(changeOrder.getWorkerId())) {
+                        houseConstructionRecord.setWorkerId(changeOrder.getWorkerId());
+                        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(changeOrder.getWorkerTypeId());
+                        houseConstructionRecord.setWorkerType(workerType.getType());
+                    }
+                }else{
+                    houseConstructionRecord.setWorkerId(mendOrder.getApplyMemberId());
+                    WorkerType workerType=workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
+                    houseConstructionRecord.setWorkerType(workerType.getType());
+                }
                 if(mendOrder.getType()==0){
                     houseConstructionRecord.setApplyType(10);
                 }else if(mendOrder.getType()==1){
