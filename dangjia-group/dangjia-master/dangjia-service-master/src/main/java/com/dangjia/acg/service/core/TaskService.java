@@ -69,16 +69,16 @@ public class TaskService {
      * 任务列表
      */
     public ServerResponse getTaskList(String userToken, String userRole) {
-        Object object = constructionService.getMember(userToken);
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
-        }
-        Member member = (Member) object;
         ButtonDTO buttonDTO = new ButtonDTO();
         if (StringUtils.isEmpty(userToken)) {
             buttonDTO.setState(0);
             return ServerResponse.createBySuccess("查询成功", buttonDTO);
         }
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
         List<House> houseList = new ArrayList<>();
         //该城市该用户所有房产
         if (!CommonUtil.isEmpty(userRole) && "1".equals(userRole)) {
