@@ -2,9 +2,7 @@ package com.dangjia.acg.service.repair;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -12,7 +10,6 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
-import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
@@ -28,7 +25,6 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -63,10 +59,6 @@ public class MendOrderService {
     private IMendMaterialMapper mendMaterialMapper;
     @Autowired
     private IMendWorkerMapper mendWorkerMapper;
-    @Autowired
-    private IHouseFlowApplyMapper houseFlowApplyMapper;
-    @Autowired
-    private RedisClient redisClient;
     @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired
@@ -188,9 +180,11 @@ public class MendOrderService {
      */
     public ServerResponse landlordBack(String userToken, String houseId, String productArr) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member = accessToken.getMember();//业主
-
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
             House house = houseMapper.selectByPrimaryKey(houseId);
             if (house.getVisitState() == 3 || house.getHaveComplete() == 1){
                 return ServerResponse.createByErrorMessage("该房子已完工");
@@ -330,9 +324,11 @@ public class MendOrderService {
                 return ServerResponse.createByErrorMessage("未传变更单id");
             }
 
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member steward = accessToken.getMember();//管家
-
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member steward = (Member) object;
             HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseId, workerTypeId);
 //            if (houseFlow.getWorkSteta() == 1 || houseFlow.getWorkSteta() == 2) {
 //                return ServerResponse.createByErrorMessage("该工种已阶段完工,不能退人工!");
@@ -517,10 +513,11 @@ public class MendOrderService {
             if(StringUtil.isEmpty(changeOrderId)){
                 return ServerResponse.createByErrorMessage("未传变更单id");
             }
-
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member steward = accessToken.getMember();//管家
-
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member steward = (Member) object;
             ServerResponse serverResponse=mendChecking(houseId,workerTypeId,1);
             if(!serverResponse.isSuccess()){
                 return ServerResponse.createByErrorMessage(serverResponse.getResultMsg());

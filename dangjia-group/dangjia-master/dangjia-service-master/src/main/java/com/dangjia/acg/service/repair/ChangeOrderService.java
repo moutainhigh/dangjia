@@ -1,7 +1,5 @@
 package com.dangjia.acg.service.repair;
 
-import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -17,11 +15,11 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,8 +40,6 @@ public class ChangeOrderService {
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
-    private RedisClient redisClient;
-    @Autowired
     private IHouseMapper houseMapper;
     @Autowired
     private ConfigMessageService configMessageService;
@@ -51,6 +47,8 @@ public class ChangeOrderService {
     private IMendOrderMapper mendOrderMapper;
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
@@ -62,8 +60,11 @@ public class ChangeOrderService {
      */
     public ServerResponse supCheckChangeOrder(String userToken,String changeOrderId,Integer check){
         try {
-            AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-            Member member = accessToken.getMember();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
             ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(changeOrderId);
             changeOrder.setState(check);
             changeOrder.setSupId(member.getId());
@@ -102,10 +103,11 @@ public class ChangeOrderService {
      * type 1工匠 2业主 3管家
      */
     public ServerResponse queryChangeOrder(String userToken,String houseId,Integer type){
-        /*Example example = new Example(ChangeOrder.class);
-        example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId);*/
-        AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-        Member member = accessToken.getMember();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
         List<ChangeOrder> changeOrderList;
         if (type == 1){
             changeOrderList = changeOrderMapper.getList(houseId,member.getWorkerTypeId());
@@ -134,8 +136,11 @@ public class ChangeOrderService {
      * type 1工匠补  2业主退
      */
     public ServerResponse workerSubmit(String userToken,String houseId,Integer type,String contentA,String contentB,String workerTypeId){
-        AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-        Member member = accessToken.getMember();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
         ChangeOrder changeOrder = new ChangeOrder();
         changeOrder.setHouseId(houseId);
         if (type == 1){
@@ -173,8 +178,11 @@ public class ChangeOrderService {
      * return 状态正常则不弹出提示，异常则弹出并且待确认继续确认
      */
     public ServerResponse checkHouseFlowApply(String userToken,String houseId,Integer type,String workerTypeId){
-        AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-        Member member = accessToken.getMember();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
         if (type == 1){
             workerTypeId=member.getWorkerTypeId();
         }

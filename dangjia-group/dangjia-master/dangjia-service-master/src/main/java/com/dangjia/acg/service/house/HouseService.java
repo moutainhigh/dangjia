@@ -48,6 +48,7 @@ import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.design.DesignDataService;
 import com.dangjia.acg.service.member.GroupInfoService;
@@ -138,6 +139,8 @@ public class HouseService {
     private DesignDataService designDataService;
     @Autowired
     private HouseConstructionRecordMapper houseConstructionRecordMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     @Autowired
     private IWorkDepositMapper workDepositMapper;
@@ -247,8 +250,11 @@ public class HouseService {
      * APP我的房产
      */
     public ServerResponse getMyHouse(String userToken, String cityId) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        Member member = accessToken.getMember();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
         //该城市该用户所有开工房产
         Example example = new Example(House.class);
         example.createCriteria()
@@ -929,8 +935,11 @@ public class HouseService {
             String imgUrl = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             Member member = null;
             if (!CommonUtil.isEmpty(userToken)) {
-                AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-                member = accessToken.getMember();
+                Object object = constructionService.getMember(userToken);
+                if (object instanceof ServerResponse) {
+                    return (ServerResponse) object;
+                }
+                member = (Member) object;
             }
             Map<String, Object> returnMap = new HashMap<>();//返回对象
             List<Map<String, Object>> workerTypeList = new ArrayList<>();
@@ -991,8 +1000,11 @@ public class HouseService {
      */
     public ServerResponse saveRenovationManual(String userToken, String saveList) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member = accessToken.getMember();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
             if (saveList != null) {
                 Example example = new Example(RenovationManualMember.class);
                 example.createCriteria().andEqualTo("memberId", member.getId());

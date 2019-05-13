@@ -34,7 +34,7 @@ public class UnitController implements UnitAPI {
     @Override
     @ApiMethod
     public ServerResponse<PageInfo> getAllUnit(HttpServletRequest request, PageDTO pageDTO) {
-        return unitService.getAllUnit(pageDTO.getPageNum(), pageDTO.getPageSize());
+        return unitService.getAllUnit(pageDTO);
     }
 
     /**

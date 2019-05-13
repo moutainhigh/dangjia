@@ -23,47 +23,52 @@ public class WalletController implements WalletAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse checkFinish(String userToken, Integer paycode, Double money, String workerBankCardId,Integer roleType){
-        return walletService.checkFinish(userToken,paycode,money,workerBankCardId,roleType);
+    public ServerResponse checkFinish(String userToken, Integer paycode, Double money, String workerBankCardId, Integer roleType) {
+        return walletService.checkFinish(userToken, paycode, money, workerBankCardId, roleType);
     }
+
     /**
      * 提现验证码
      */
     @Override
     @ApiMethod
-    public ServerResponse getPaycode(String userToken){
+    public ServerResponse getPaycode(String userToken) {
         return walletService.getPaycode(userToken);
     }
+
     /**
      * 获取提现信息
      */
     @Override
     @ApiMethod
-    public ServerResponse getWithdraw(String userToken){
+    public ServerResponse getWithdraw(String userToken) {
         return walletService.getWithdraw(userToken);
     }
+
     /**
      * 流水详情
      */
     @Override
     @ApiMethod
-    public ServerResponse getExtractDetail(String userToken, String workerDetailId){
+    public ServerResponse getExtractDetail(String userToken, String workerDetailId) {
         return walletService.getExtractDetail(workerDetailId);
     }
+
     /**
      * 支出 收入
      */
     @Override
     @ApiMethod
-    public ServerResponse workerDetail(String userToken, int type,PageDTO pageDTO){
-        return walletService.workerDetail(userToken,type,pageDTO.getPageNum(), pageDTO.getPageSize());
+    public ServerResponse workerDetail(String userToken, int type, PageDTO pageDTO) {
+        return walletService.workerDetail(userToken, type, pageDTO);
     }
+
     /**
      * 钱包信息, 查询余额
      */
     @Override
     @ApiMethod
-    public ServerResponse walletInformation(String userToken){
+    public ServerResponse walletInformation(String userToken) {
         return walletService.walletInformation(userToken);
     }
 }

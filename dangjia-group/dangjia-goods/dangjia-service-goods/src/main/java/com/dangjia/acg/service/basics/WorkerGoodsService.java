@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -52,9 +53,8 @@ public class WorkerGoodsService {
 
     private static Logger LOG = LoggerFactory.getLogger(WorkerGoodsService.class);
 
-    public ServerResponse<PageInfo> getWorkerGoodses(Integer pageNum, Integer pageSize, String workerTypeId, String searchKey, String showGoods) {
-
-        PageHelper.startPage(pageNum, pageSize);
+    public ServerResponse<PageInfo> getWorkerGoodses(PageDTO pageDTO, String workerTypeId, String searchKey, String showGoods) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<WorkerGoods> productList = iWorkerGoodsMapper.selectList(StringUtils.isBlank(workerTypeId) ? null : workerTypeId,
                 StringUtils.isBlank(searchKey) ? null : searchKey, StringUtils.isBlank(showGoods) ? null : showGoods);
 
@@ -75,27 +75,28 @@ public class WorkerGoodsService {
     }
 
 
-    public WorkerGoodsDTO getWorkerGoodsDTO(String workerGoodsSn,String workerTypeId,String shopCount){
-        Example example=new Example(WorkerGoods.class);
+    public WorkerGoodsDTO getWorkerGoodsDTO(String workerGoodsSn, String workerTypeId, String shopCount) {
+        Example example = new Example(WorkerGoods.class);
         example.createCriteria()
-                .andEqualTo(WorkerGoods.DATA_STATUS,'0')
-                .andEqualTo(WorkerGoods.SHOW_GOODS,1)
-                .andEqualTo(WorkerGoods.WORKER_GOODS_SN,workerGoodsSn)
-                .andEqualTo(WorkerGoods.WORKER_TYPE_ID,workerTypeId)
+                .andEqualTo(WorkerGoods.DATA_STATUS, '0')
+                .andEqualTo(WorkerGoods.SHOW_GOODS, 1)
+                .andEqualTo(WorkerGoods.WORKER_GOODS_SN, workerGoodsSn)
+                .andEqualTo(WorkerGoods.WORKER_TYPE_ID, workerTypeId)
         ;
-        List<WorkerGoods> workerGoods=iWorkerGoodsMapper.selectByExample(example);
-        WorkerGoodsDTO workerGoodsDTO=new WorkerGoodsDTO();
-        if(workerGoods!=null&&workerGoods.size()>0){
-            workerGoodsDTO=assembleWorkerGoodsResult(workerGoods.get(0));
+        List<WorkerGoods> workerGoods = iWorkerGoodsMapper.selectByExample(example);
+        WorkerGoodsDTO workerGoodsDTO = new WorkerGoodsDTO();
+        if (workerGoods != null && workerGoods.size() > 0) {
+            workerGoodsDTO = assembleWorkerGoodsResult(workerGoods.get(0));
             workerGoodsDTO.setShopCount(shopCount);
-        }else{
+        } else {
             workerGoodsDTO.setWorkerGoodsSn(workerGoodsSn);
             workerGoodsDTO.setWorkerTypeId(workerTypeId);
-            workerGoodsDTO.setMsg("找不到该人工商品（"+workerGoodsSn+"）,请检查是否创建或者停用！");
+            workerGoodsDTO.setMsg("找不到该人工商品（" + workerGoodsSn + "）,请检查是否创建或者停用！");
         }
         return workerGoodsDTO;
     }
-    public String getImageAddress(String address,String image){
+
+    public String getImageAddress(String address, String image) {
         String imgStr = "";
         if (!CommonUtil.isEmpty(image)) {
             String[] imgArr = image.split(",");
@@ -109,6 +110,7 @@ public class WorkerGoodsService {
         }
         return imgStr;
     }
+
     private WorkerGoodsDTO assembleWorkerGoodsResult(WorkerGoods workerGoods) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
@@ -116,9 +118,9 @@ public class WorkerGoodsService {
             workerGoodsResult.setId(workerGoods.getId());
             workerGoodsResult.setName(workerGoods.getName());
             workerGoodsResult.setWorkerGoodsSn(workerGoods.getWorkerGoodsSn());
-            workerGoodsResult.setImage(getImageAddress(address,workerGoods.getImage()));
+            workerGoodsResult.setImage(getImageAddress(address, workerGoods.getImage()));
             workerGoodsResult.setImageUrl(workerGoods.getImage());
-            workerGoodsResult.setWorkerDec(getImageAddress(address,workerGoods.getWorkerDec()));
+            workerGoodsResult.setWorkerDec(getImageAddress(address, workerGoods.getWorkerDec()));
             workerGoodsResult.setWorkerDecUrl(workerGoods.getWorkerDec());
             workerGoodsResult.setUnitId(workerGoods.getUnitId());
             workerGoodsResult.setUnitName(workerGoods.getUnitName());
@@ -151,7 +153,7 @@ public class WorkerGoodsService {
                 technologyResult.setName(technology.getName());
                 technologyResult.setWorkerTypeId(technology.getWorkerTypeId());
                 technologyResult.setContent(technology.getContent());
-                technologyResult.setImage(getImageAddress(address,technology.getImage()));
+                technologyResult.setImage(getImageAddress(address, technology.getImage()));
                 technologyResult.setImageUrl(technology.getImage());
                 technologyResult.setSampleImage(technology.getSampleImage());
                 technologyResult.setSampleImageUrl(address + technology.getSampleImage());

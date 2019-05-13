@@ -84,9 +84,7 @@ public class HouseFlowApplyService {
      * 工匠端工地记录
      */
     public ServerResponse houseRecord(String userToken, String houseId, Integer pageNum, Integer pageSize){
-//        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         try{
-            //        Member worker = accessToken.getMember();
             if(pageNum==null){
                 pageNum=1;
             }

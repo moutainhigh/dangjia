@@ -41,6 +41,7 @@ public class SupplierService {
     @Autowired
     private IGoodsMapper goodsMapper;
     private static Logger LOG = LoggerFactory.getLogger(SupplierService.class);
+
     /**
      * 查询指定供应商
      */
@@ -48,16 +49,17 @@ public class SupplierService {
         Supplier supplier = iSupplierMapper.selectByPrimaryKey(productId);
         return supplier;
     }
+
     /**
      * 供应商登录
      */
     public ServerResponse byTelephone(String telephone) {
         try {
-            List<Supplier> suppliers= iSupplierMapper.queryByTelephone(telephone);
-            if (suppliers == null||suppliers.size()==0) {
+            List<Supplier> suppliers = iSupplierMapper.queryByTelephone(telephone);
+            if (suppliers == null || suppliers.size() == 0) {
                 return ServerResponse.createByErrorMessage("查询失败，未查到供应记录");
             } else {
-                Supplier  supplier=suppliers.get(0);
+                Supplier supplier = suppliers.get(0);
                 return ServerResponse.createBySuccess("查询成功", supplier.getId());
             }
         } catch (Exception e) {
@@ -229,7 +231,7 @@ public class SupplierService {
             for (Supplier supplier : supplierList) {
                 Map<String, Object> map = BeanUtils.beanToMap(supplier);
                 //查找所有的货品 供应商
-                List<SupplierProduct> pList = iSupplierProductMapper.querySupplierProduct(supplier.getId(),null);
+                List<SupplierProduct> pList = iSupplierProductMapper.querySupplierProduct(supplier.getId(), null);
                 Set<String> goodsSet = new HashSet();
                 Set<String> productSet = new HashSet();
                 Integer countStock = 0;
@@ -257,9 +259,9 @@ public class SupplierService {
     /**
      * 查询所有商品供应关系0:仅供应商品;1:所有商品
      */
-    public ServerResponse querySupplierProduct(int type, String supplierId, String categoryId, String likeProductName, Integer pageNum, Integer pageSize) {
+    public ServerResponse querySupplierProduct(int type, String supplierId, String categoryId, String likeProductName, PageDTO pageDTO) {
         try {
-            PageHelper.startPage(pageNum, pageSize);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Map<String, Object>> listMap = new ArrayList<>();
             if (type == 0) {//仅供应商品
                 List<Product> pList = iSupplierMapper.querySupplierProduct(supplierId, likeProductName, 1);
@@ -400,7 +402,7 @@ public class SupplierService {
                     sp.setModifyDate(new Date());
                     iSupplierMapper.updateSupplierProduct(sp);
                 }
-                List<SupplierProduct> supplierProducts = iSupplierProductMapper.querySupplierProduct(null,sp.getProductId());
+                List<SupplierProduct> supplierProducts = iSupplierProductMapper.querySupplierProduct(null, sp.getProductId());
                 //更新 对应 product 的平均价格
                 Product oldProduct = iProductMapper.selectByPrimaryKey(sp.getProductId());
                 if (supplierProducts.size() > 0) {

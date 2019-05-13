@@ -1,7 +1,5 @@
 package com.dangjia.acg.service.finance;
 
-import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.finance.WebWorkerDetailDTO;
@@ -9,9 +7,9 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -35,9 +33,8 @@ public class WebWalletService {
     private IWorkerDetailMapper iWorkerDetailMapper;
     @Autowired
     private IHouseMapper iHouseMapper;
-
     @Autowired
-    private RedisClient redisClient;
+    private CraftsmanConstructionService constructionService;
 
     /**
      * --         0每日完工  1阶段完工，
@@ -49,8 +46,11 @@ public class WebWalletService {
      * @return
      */
     public ServerResponse getHouseWallet(String houseId, String userToken) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        Member member = accessToken.getMember();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
         List<WebWorkerDetailDTO> workerDetailDTOList = iWorkerDetailMapper.getHouseWallet(houseId, member.getId(), String.valueOf(member.getWorkerType()));
         for (int i = 0; i < workerDetailDTOList.size(); i++) {
             WebWorkerDetailDTO webWorkerDetailDTO = workerDetailDTOList.get(i);
