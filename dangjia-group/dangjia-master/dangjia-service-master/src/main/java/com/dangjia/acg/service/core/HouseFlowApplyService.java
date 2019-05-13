@@ -739,6 +739,7 @@ public class HouseFlowApplyService {
         try{
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             HouseFlowApplyDTO houseFlowApplyDTO = new HouseFlowApplyDTO();
+            houseFlowApplyDTO.setHouseId(houseFlowApply.getHouseId());
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             String local=configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             if (houseFlowApply.getWorkerType() == 3){//是管家发起的
