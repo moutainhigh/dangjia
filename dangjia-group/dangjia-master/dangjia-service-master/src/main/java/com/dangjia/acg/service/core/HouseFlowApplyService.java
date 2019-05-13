@@ -19,7 +19,6 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.worker.Evaluate;
@@ -161,10 +160,10 @@ public class HouseFlowApplyService {
 
             if(hfa.getApplyType() == 2){//整体完工
                 /**验证未处理补人工订单*/
-                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(hfa.getHouseId(),hfa.getWorkerTypeId());
-                if (changeOrderList.size() > 0){
-                    return ServerResponse.createByErrorMessage("该工种有未处理人工变更单,通知管家处理");
-                }
+//                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(hfa.getHouseId(),hfa.getWorkerTypeId());
+//                if (changeOrderList.size() > 0){
+//                    return ServerResponse.createByErrorMessage("该工种有未处理人工变更单,通知管家处理");
+//                }
 
                 //修改进程
                 HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(),hwo.getWorkerTypeId());
@@ -209,10 +208,10 @@ public class HouseFlowApplyService {
                 }
 
             }else if(hfa.getApplyType() == 1){//阶段完工
-                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(hfa.getHouseId(),hfa.getWorkerTypeId());
-                if (changeOrderList.size() > 0){
-                    return ServerResponse.createByErrorMessage("该工种有未处理人工变更单,通知管家处理");
-                }
+//                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(hfa.getHouseId(),hfa.getWorkerTypeId());
+//                if (changeOrderList.size() > 0){
+//                    return ServerResponse.createByErrorMessage("该工种有未处理人工变更单,通知管家处理");
+//                }
 
                 //修改进程
                 HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(),hwo.getWorkerTypeId());
@@ -519,8 +518,8 @@ public class HouseFlowApplyService {
                     BigDecimal surplusMoney = worker.getSurplusMoney().add(hwo.getRepairPrice());
                     BigDecimal workerPrice = worker.getWorkerPrice().add(hwo.getRepairPrice());
                     BigDecimal haveMoney = worker.getHaveMoney().add(hwo.getRepairPrice());
-                    worker.setWorkerPrice(workerPrice);//总共获得钱
-                    worker.setHaveMoney(haveMoney);//可取 + 滞留金
+                    worker.setWorkerPrice(workerPrice);//总共获得钱+ 补人工
+                    worker.setHaveMoney(haveMoney);//可取 + 滞留金 + 补人工
                     worker.setSurplusMoney(surplusMoney);//可取钱
 
                     WorkerDetail workerDetail = new WorkerDetail();

@@ -21,6 +21,7 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -66,6 +67,8 @@ public class MendRecordService {
     private IHouseMapper houseMapper;
     @Autowired
     private IMemberMapper memberMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     /**
      * 要补退明细
@@ -350,9 +353,11 @@ public class MendRecordService {
         try{
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<Map<String,Object>> returnMap = new ArrayList<>();
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
-
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
 //            Example example = new Example(MendOrder.class);
 //            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,0)
 //            .andNotEqualTo(MendOrder.STATE,0);

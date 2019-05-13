@@ -6,10 +6,14 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
+import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.HouseWorkerOrder;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
@@ -19,6 +23,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +50,8 @@ public class ChangeOrderService {
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
 
+    @Autowired
+    private IHouseWorkerOrderMapper houseWorkerOrderMapper;
     /**
      * 管家审核变更单
      *  check 1不通过 2通过
@@ -150,5 +157,48 @@ public class ChangeOrderService {
         changeOrder.setState(0);
         changeOrderMapper.insert(changeOrder);
         return ServerResponse.createBySuccessMessage("操作成功");
+    }
+    /**
+     * 请求地址：app/repair/changeOrder/checkHouseFlowApply
+     * 说明：申请退人工或业主验收检测
+     * userToken：用户TOKEN
+     * houseId：房子ID
+     * workerTypeId：工序ID
+     * type 1阶段验收检测  2退人工检测
+     *
+     * return 状态正常则不弹出提示，异常则弹出并且待确认继续确认
+     */
+    public ServerResponse checkHouseFlowApply(String userToken,String houseId,Integer type,String workerTypeId){
+        AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+        Member member = accessToken.getMember();
+        if (type == 1){
+            workerTypeId=member.getWorkerTypeId();
+        }
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);
+        HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, workerTypeId);
+        if (houseWorkerOrder != null) {
+            BigDecimal remain = houseWorkerOrder.getWorkPrice().add(houseWorkerOrder.getRepairTotalPrice()).subtract(houseWorkerOrder.getHaveMoney());//剩下的
+            remain =remain.setScale(2,BigDecimal.ROUND_HALF_UP);
+            if (type == 1) {
+                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseId,workerTypeId);
+                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
+                if (changeOrderList.size() > 0&&houseFlowApplyList.size() > 0) {
+                    HouseFlowApply houseFlowApply=houseFlowApplyList.get(0);
+                    remain=remain.subtract(houseFlowApply.getApplyMoney()) ;
+                    remain =remain.setScale(2,BigDecimal.ROUND_HALF_UP);
+                    if(remain.doubleValue()<0){//负数冲正
+                        remain=new BigDecimal(0);
+                    }
+                    return ServerResponse.createByErrorMessage("审核通过后 ，可退人工金额上限为"+remain+"元，确定验收吗？");
+                }
+            }
+            if (type == 2) {
+                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
+                if (houseFlowApplyList.size() > 0) {
+                    return ServerResponse.createByErrorMessage("当前" + workerType.getName() + "阶段完工正在申请中，可退人工金额上限为"+remain+"元，确定申请退人工吗？");
+                }
+            }
+        }
+        return ServerResponse.createBySuccessMessage("检测通过");
     }
 }

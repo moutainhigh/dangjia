@@ -56,4 +56,12 @@ public class ChangeOrderController implements ChangeOrderAPI {
     public ServerResponse workerSubmit(String userToken,String houseId,Integer type,String contentA,String contentB,String workerTypeId){
         return changeOrderService.workerSubmit(userToken,houseId,type,contentA,contentB,workerTypeId);
     }
+
+    /**
+     * 申请退人工或业主验收检测
+     * type 1阶段验收检测  2退人工检测
+     */
+    public ServerResponse checkHouseFlowApply(String userToken,String houseId,Integer type,String workerTypeId){
+        return changeOrderService.checkHouseFlowApply(userToken,houseId,type,workerTypeId);
+    }
 }

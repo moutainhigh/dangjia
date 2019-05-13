@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.matter.TechnologyRecordDTO;
@@ -22,9 +21,9 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendWorker;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.util.StringUtil;
@@ -53,7 +52,7 @@ public class TechnologyRecordService {
     @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired
-    private RedisClient redisClient;
+    private CraftsmanConstructionService constructionService;
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
@@ -124,9 +123,11 @@ public class TechnologyRecordService {
      * applyType 0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
      */
     public ServerResponse workNodeList(String userToken, String houseFlowId){
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        Member worker = accessToken.getMember();
-
+        Object object1 = constructionService.getMember(userToken);
+        if (object1 instanceof ServerResponse) {
+            return (ServerResponse) object1;
+        }
+        Member worker = (Member) object1;
         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
         House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
         if (house.getPause() != null) {

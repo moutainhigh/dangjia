@@ -32,6 +32,7 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -93,6 +94,8 @@ public class MendOrderService {
     private IChangeOrderMapper changeOrderMapper;
     @Autowired
     private HouseService houseService;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
 
     /**
@@ -299,7 +302,7 @@ public class MendOrderService {
                 HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, mendOrder.getWorkerTypeId());
                 if (houseWorkerOrder != null) {
                     BigDecimal totalAmount = new BigDecimal(mendOrder.getTotalAmount());//退的钱
-                    BigDecimal remain = houseWorkerOrder.getWorkPrice().add(houseWorkerOrder.getRepairPrice()).subtract(houseWorkerOrder.getHaveMoney());//剩下的
+                    BigDecimal remain = houseWorkerOrder.getWorkPrice().add(houseWorkerOrder.getRepairTotalPrice()).subtract(houseWorkerOrder.getHaveMoney());//剩下的
                     if (remain.compareTo(totalAmount) < 0) {
                         return ServerResponse.createByErrorMessage("工钱退超过剩余,退多了");
                     }
@@ -621,8 +624,11 @@ public class MendOrderService {
      */
     public ServerResponse confirmBackMendMaterial(String userToken, String houseId, String imageArr) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();//工匠
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 2)
                     .andEqualTo(MendOrder.WORKER_TYPE_ID, worker.getWorkerTypeId())
@@ -676,8 +682,11 @@ public class MendOrderService {
      */
     public ServerResponse backMendMaterialList(String userToken, String houseId) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();//工匠
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 2)
                     .andEqualTo(MendOrder.WORKER_TYPE_ID, worker.getWorkerTypeId())
@@ -707,9 +716,11 @@ public class MendOrderService {
      */
     public ServerResponse backMendMaterial(String userToken, String houseId, String productArr) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();//工匠
-
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             ServerResponse serverResponse=mendChecking(houseId,worker.getWorkerTypeId(),2);
             if(!serverResponse.isSuccess()){
                 return ServerResponse.createByErrorMessage(serverResponse.getResultMsg());
@@ -776,8 +787,11 @@ public class MendOrderService {
      */
     public ServerResponse confirmMendMaterial(String userToken, String houseId) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();//工匠
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
                     .andEqualTo(MendOrder.WORKER_TYPE_ID, worker.getWorkerTypeId())
@@ -814,8 +828,11 @@ public class MendOrderService {
      */
     public ServerResponse getMendMaterialList(String userToken, String houseId) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();//工匠
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
                     .andEqualTo(MendOrder.WORKER_TYPE_ID, worker.getWorkerTypeId())
@@ -845,9 +862,11 @@ public class MendOrderService {
      */
     public ServerResponse saveMendMaterial(String userToken, String houseId, String productArr) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();//工匠
-
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
                     .andEqualTo(MendOrder.WORKER_TYPE_ID, worker.getWorkerTypeId())

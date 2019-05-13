@@ -1,7 +1,5 @@
 package com.dangjia.acg.service.core;
 
-import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -24,7 +22,6 @@ import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseExpend;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -53,8 +50,6 @@ public class TaskService {
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
-    private RedisClient redisClient;
-    @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
     private IMendOrderMapper mendOrderMapper;
@@ -67,21 +62,26 @@ public class TaskService {
 
     @Autowired
     private IMendDeliverMapper mendDeliverMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     /**
      * 任务列表
      */
-    public ServerResponse getTaskList(String userToken,String userRole) {
+    public ServerResponse getTaskList(String userToken, String userRole) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
         ButtonDTO buttonDTO = new ButtonDTO();
         if (StringUtils.isEmpty(userToken)) {
             buttonDTO.setState(0);
             return ServerResponse.createBySuccess("查询成功", buttonDTO);
         }
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        Member member = accessToken.getMember();
-        List<House>  houseList = new ArrayList<>();
+        List<House> houseList = new ArrayList<>();
         //该城市该用户所有房产
-        if(!CommonUtil.isEmpty(userRole)&&"1".equals(userRole)) {
+        if (!CommonUtil.isEmpty(userRole) && "1".equals(userRole)) {
             Example example = new Example(House.class);
             example.createCriteria()
                     .andEqualTo(House.MEMBER_ID, member.getId())
@@ -99,7 +99,7 @@ public class TaskService {
                 //}
             }
         }
-        if(!CommonUtil.isEmpty(userRole)&&"2".equals(userRole)) {
+        if (!CommonUtil.isEmpty(userRole) && "2".equals(userRole)) {
             //该工匠所选择的工地
             Example example = new Example(HouseWorker.class);
             example.createCriteria()
@@ -109,9 +109,6 @@ public class TaskService {
             if (houseWorkerList != null && houseWorkerList.size() > 0) {
 //            查询工匠当前选择的工地
                 House house = houseMapper.selectByPrimaryKey(houseWorkerList.get(0).getHouseId());
-                if (houseList == null) {
-                    houseList = new ArrayList<>();
-                }
                 //设为选中
                 house.setIsSelect(1);
                 houseList.add(house);
@@ -119,7 +116,7 @@ public class TaskService {
         }
         String houseId = null;
         //大管家
-        if(!CommonUtil.isEmpty(userRole)&&"2".equals(userRole)&&member.getWorkerType()==3){
+        if (!CommonUtil.isEmpty(userRole) && "2".equals(userRole) && member.getWorkerType() == 3) {
             if (houseList.size() > 0) {
                 buttonDTO.setState(2);
                 for (House house : houseList) {
@@ -131,11 +128,11 @@ public class TaskService {
                     houseId = houseList.get(0).getId();
                 }
                 buttonDTO.setHouseId(houseId);
-                buttonDTO.setTaskList(getWorkerTask(houseId, userToken));
+                buttonDTO.setTaskList(getWorkerTask(houseId, userToken, member));
             }
         }
         //业主待处理任务
-        if(!CommonUtil.isEmpty(userRole)&&"1".equals(userRole)) {
+        if (!CommonUtil.isEmpty(userRole) && "1".equals(userRole)) {
             if (houseList.size() > 1) {
                 buttonDTO.setState(2);
                 for (House house : houseList) {
@@ -182,17 +179,15 @@ public class TaskService {
         }
         return button;
     }
+
     /**
      * 工匠任务列表 需加上补货补人工任务
      * type 1支付任务,2补货补人工,3其它任务
      */
-    private List<Task> getWorkerTask(String houseId, String userToken) {
-
+    private List<Task> getWorkerTask(String houseId, String userToken, Member worker) {
         House house = houseMapper.selectByPrimaryKey(houseId);
-        AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-        Member worker = accessToken.getMember();
         List<Task> taskList = new ArrayList<>();
-        if(worker.getWorkerType()!=3){
+        if (worker.getWorkerType() != 3) {
             return taskList;
         }
         //退材料退服务
@@ -206,8 +201,8 @@ public class TaskService {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
-            task.setName( "退材料待审核处理");
-            if(workerType.getType()==3){
+            task.setName("退材料待审核处理");
+            if (workerType.getType() == 3) {
                 task.setName("退服务待审核处理");
             }
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/buchailiao.png");
@@ -220,6 +215,7 @@ public class TaskService {
         }
         return taskList;
     }
+
     /**
      * 任务列表 需加上补货补人工任务
      * type 1支付任务,2补货补人工,3其它任务
@@ -253,7 +249,7 @@ public class TaskService {
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
             task.setName(workerType.getName() + "补材料");
-            if(workerType.getType()==3){
+            if (workerType.getType() == 3) {
                 task.setName(workerType.getName() + "补服务");
             }
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/buchailiao.png");
@@ -308,7 +304,7 @@ public class TaskService {
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getMemberCheckList(houseId);
         for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
             if (houseFlowApply.getApplyType() == 0) {
-                houseFlowApplyService.checkWorker(houseFlowApply.getId(),false);
+                houseFlowApplyService.checkWorker(houseFlowApply.getId(), false);
                 continue;
             }
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());

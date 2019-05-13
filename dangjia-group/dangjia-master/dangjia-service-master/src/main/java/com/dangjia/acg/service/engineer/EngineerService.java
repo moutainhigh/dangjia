@@ -343,7 +343,7 @@ public class EngineerService {
             map.put("totalPrice", hwo.getTotalPrice());//工钱+材料
             map.put("materialPrice", hwo.getMaterialPrice());//材料钱
             map.put("workPrice", hwo.getWorkPrice());//工钱
-            map.put("repairPrice", hwo.getRepairPrice());//补人工钱
+            map.put("repairPrice", hwo.getRepairTotalPrice());//补人工钱
             map.put("haveMoney", hwo.getHaveMoney());//已拿钱
             map.put("everyMoney", hwo.getEveryMoney());//每日申请累计钱
             map.put("checkMoney", hwo.getCheckMoney());//管家巡查累计
@@ -447,9 +447,9 @@ public class EngineerService {
                 map.put("havaMoney", 0);
             } else {
                 map.put("havaMoney", houseWorkerOrderList.get(0).getHaveMoney());
-                map.put("workPrice", houseWorkerOrderList.get(0).getWorkPrice().add(houseWorkerOrderList.get(0).getRepairPrice()));
+                map.put("workPrice", houseWorkerOrderList.get(0).getWorkPrice().add(houseWorkerOrderList.get(0).getRepairTotalPrice()));
                 if(houseFlow.getWorkSteta()==2) {
-                    map.put("havaMoney", houseWorkerOrderList.get(0).getHaveMoney().add(houseWorkerOrderList.get(0).getRepairPrice()));
+                    map.put("havaMoney", houseWorkerOrderList.get(0).getHaveMoney().add(houseWorkerOrderList.get(0).getRepairTotalPrice()));
                 }
             }
             mapList.add(map);
