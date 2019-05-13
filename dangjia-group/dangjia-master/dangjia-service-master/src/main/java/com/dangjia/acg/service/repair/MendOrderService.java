@@ -755,7 +755,7 @@ public class MendOrderService {
 //                if (!this.createMendCheck(mendOrder)) {
 //                    return ServerResponse.createByErrorMessage("添加审核流程失败");
 //                }
-//                mendOrderMapper.insert(mendOrder);
+                mendOrderMapper.insert(mendOrder);
 //
 //                if (worker.getWorkerType() == 3) {//管家退服务
 //                    MendOrderCheck mendOrderCheck = mendOrderCheckMapper.getByMendOrderId(mendOrder.getId(), "2");
