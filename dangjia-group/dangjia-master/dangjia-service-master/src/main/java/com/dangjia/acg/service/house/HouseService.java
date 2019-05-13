@@ -1407,6 +1407,7 @@ public class HouseService {
         }
     }
 
+//    0每日完工申请，1阶段完工申请，2整体完工申请,4：每日开工,5巡查,8补人工,9退人工,10补材料,11退材料,12业主退材料
     public void insertConstructionRecord(Object sourceOjb) {
         try {
             // 施工记录的内容

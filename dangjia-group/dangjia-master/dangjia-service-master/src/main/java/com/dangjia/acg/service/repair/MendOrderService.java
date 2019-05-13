@@ -299,7 +299,7 @@ public class MendOrderService {
                 HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, mendOrder.getWorkerTypeId());
                 if (houseWorkerOrder != null) {
                     BigDecimal totalAmount = new BigDecimal(mendOrder.getTotalAmount());//退的钱
-                    BigDecimal remain = houseWorkerOrder.getWorkPrice().add(houseWorkerOrder.getRepairPrice()).subtract(houseWorkerOrder.getHaveMoney());//剩下的
+                    BigDecimal remain = houseWorkerOrder.getWorkPrice().add(houseWorkerOrder.getRepairTotalPrice()).subtract(houseWorkerOrder.getHaveMoney());//剩下的
                     if (remain.compareTo(totalAmount) < 0) {
                         return ServerResponse.createByErrorMessage("工钱退超过剩余,退多了");
                     }

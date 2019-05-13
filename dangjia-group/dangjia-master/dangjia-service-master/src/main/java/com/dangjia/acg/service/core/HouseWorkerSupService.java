@@ -137,7 +137,7 @@ public class HouseWorkerSupService {
             hfa.setStartDate(start);
             hfa.setEndDate(end);
             houseFlowApplyMapper.insert(hfa);
-            houseService.insertConstructionRecord(hfa);
+//            houseService.insertConstructionRecord(hfa);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
