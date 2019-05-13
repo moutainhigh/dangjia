@@ -4,11 +4,13 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -48,6 +50,8 @@ public class ChangeOrderService {
     @Autowired
     private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IHouseWorkerOrderMapper houseWorkerOrderMapper;
     /**
@@ -204,6 +208,11 @@ public class ChangeOrderService {
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
                 if (houseFlowApplyList.size() > 0) {
                     return ServerResponse.createByErrorMessage("当前" + workerType.getName() + "阶段完工正在申请中，可退人工金额上限为"+remain+"元，确定申请退人工吗？");
+                }
+                HouseFlow houseFlow=houseFlowMapper.getByWorkerTypeId(houseId, workerTypeId);
+                if (houseFlow.getWorkSteta()==1) {
+                    return ServerResponse.createByErrorMessage("当前" + workerType.getName() + "已阶段完工，可退人工金额上限为"+remain+"元，确定申请退人工吗？");
+
                 }
             }
         }

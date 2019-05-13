@@ -110,21 +110,8 @@ public class MendRecordService {
                 mapList.add(map);
             }
             mendOrderDetail.setMapList(mapList);
-
             //得到房子名称及业主信息
-            if (!CommonUtil.isEmpty(mendOrderDetail.getHouseId())) {
-                House house = houseMapper.selectByPrimaryKey(mendOrderDetail.getHouseId());
-                if (house != null) {
-                    mendOrderDetail.setHouseName(house.getHouseName());//房名
-                    mendOrderDetail.setMemberId(house.getMemberId());//业主ID
-                    Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                    if (member != null) {
-                        mendOrderDetail.setMemberName(member.getNickName());//业主名称
-                        mendOrderDetail.setMemberMobile(member.getMobile());//业主手机号
-                    }
-                }
-            }
-
+            setMendOrder(mendOrderDetail);
             return ServerResponse.createBySuccess("查询成功", mendOrderDetail);
         } catch (Exception e) {
             e.printStackTrace();
@@ -258,8 +245,8 @@ public class MendRecordService {
                     String[] imageArr = mendOrder.getImageArr().split(",");
                     if (imageArr.length > 0) {
                         List<String> imageList = new ArrayList<>();
-                        for (int i = 0; i < imageArr.length; i++) {
-                            imageList.add(address + imageArr[i]);
+                        for (String anImageArr : imageArr) {
+                            imageList.add(address + anImageArr);
                         }
                         mendOrderDetail.setImageList(imageList);
                     }
@@ -270,26 +257,27 @@ public class MendRecordService {
                     mendOrderDetail.setChangeOrder(changeOrder);
                 }
             }
-
-
             //得到房子名称及业主信息
-            if (!CommonUtil.isEmpty(mendOrderDetail.getHouseId())) {
-                House house = houseMapper.selectByPrimaryKey(mendOrderDetail.getHouseId());
-                if (house != null) {
-                    mendOrderDetail.setHouseName(house.getHouseName());//房名
-                    mendOrderDetail.setMemberId(house.getMemberId());//业主ID
-                    Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                    if (member != null) {
-                        mendOrderDetail.setMemberName(member.getNickName());//业主名称
-                        mendOrderDetail.setMemberMobile(member.getMobile());//业主手机号
-                    }
-                }
-            }
-
+            setMendOrder(mendOrderDetail);
             return ServerResponse.createBySuccess("查询成功", mendOrderDetail);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    private void setMendOrder(MendOrderDetail mendOrderDetail) {
+        if (!CommonUtil.isEmpty(mendOrderDetail.getHouseId())) {
+            House house = houseMapper.selectByPrimaryKey(mendOrderDetail.getHouseId());
+            if (house != null) {
+                mendOrderDetail.setHouseName(house.getHouseName());//房名
+                mendOrderDetail.setMemberId(house.getMemberId());//业主ID
+                Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                if (member != null) {
+                    mendOrderDetail.setMemberName(member.getNickName());//业主名称
+                    mendOrderDetail.setMemberMobile(member.getMobile());//业主手机号
+                }
+            }
         }
     }
 
@@ -458,24 +446,21 @@ public class MendRecordService {
         //工匠/大管家要货撤回
         if (type != null && type == 1) {
             OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
+            //后台审核状态：0生成中, 1申请中, 2通过(发给供应商), 3不通过, 4待业主支付,5已撤回
             Integer applyStatus = orderSplit.getApplyStatus();
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             //无补货且在申请中
             if (orderSplit.getMendNumber() == null && applyStatus == 1) {
-                for (OrderSplitItem orderSplitItem : orderSplitItemList) {
-                    Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
-                    warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());//更新仓库已要总数
-                    warehouse.setAskTime(warehouse.getAskTime() - 1);//更新该货品被要次数
-                    warehouseMapper.updateByPrimaryKeySelective(warehouse);
-                }
+                updateWarehouseList(orderSplit, orderSplitItemList);
                 orderSplit.setApplyStatus(5);
                 orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
                 return ServerResponse.createBySuccessMessage("撤回成功");
             } else if (orderSplit.getMendNumber() != null) {
                 MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(orderSplit.getMendNumber());
                 //未支付
+                //0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回
                 if (mendOrder.getState() == 1) {
                     orderSplit.setApplyStatus(5);
                     orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
@@ -486,13 +471,7 @@ public class MendRecordService {
                 }
                 //已支付
                 else if (mendOrder.getState() == 4) {
-                    for (OrderSplitItem orderSplitItem : orderSplitItemList) {
-                        int i = 0;//这个没用,只是为了不出现重复的标志
-                        Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
-                        warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());//更新仓库已要总数
-                        warehouse.setAskTime(warehouse.getAskTime() - 1);//更新该货品被要次数
-                        warehouseMapper.updateByPrimaryKeySelective(warehouse);
-                    }
+                    updateWarehouseList(orderSplit, orderSplitItemList);
                     orderSplit.setApplyStatus(5);
                     orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
                     return ServerResponse.createBySuccessMessage("撤回成功");
@@ -500,7 +479,7 @@ public class MendRecordService {
                     return ServerResponse.createByErrorMessage("撤回失败");
                 }
             } else {
-                return ServerResponse.createByErrorMessage("撤回失败");
+                return ServerResponse.createByErrorMessage("该货单已发送给供应商发货，无法撤回");
             }
         }
         //工匠退材料//工匠补人工//业主申请退人工
@@ -510,11 +489,13 @@ public class MendRecordService {
             List<MendOrderCheck> mendOrderChecks = mendOrderCheckMapper.selectByExample(example);
             boolean flag = false;
             for (MendOrderCheck m : mendOrderChecks) {
+                //0处理中,1未通过,2已通过 3已撤回
                 if (m.getState() == 0) {
                     flag = true;
                 }
             }
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
+            //"0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回"
             if (flag && mendOrder.getState() != 5) {
                 mendOrder.setState(5);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
@@ -527,6 +508,15 @@ public class MendRecordService {
             } else {
                 return ServerResponse.createByErrorMessage("撤回失败");
             }
+        }
+    }
+
+    private void updateWarehouseList(OrderSplit orderSplit, List<OrderSplitItem> orderSplitItemList) {
+        for (OrderSplitItem orderSplitItem : orderSplitItemList) {
+            Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
+            warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());//更新仓库已要总数
+            warehouse.setAskTime(warehouse.getAskTime() - 1);//更新该货品被要次数
+            warehouseMapper.updateByPrimaryKeySelective(warehouse);
         }
     }
 }
