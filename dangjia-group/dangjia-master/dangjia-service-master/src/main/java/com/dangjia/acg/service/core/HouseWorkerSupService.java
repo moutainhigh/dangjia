@@ -2,7 +2,6 @@ package com.dangjia.acg.service.core;
 
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.repair.MendMaterielAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -13,7 +12,6 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +34,7 @@ import java.util.Map;
 @Service
 public class HouseWorkerSupService {
     @Autowired
-    private RedisClient redisClient;
+    private CraftsmanConstructionService constructionService;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
@@ -100,8 +98,11 @@ public class HouseWorkerSupService {
      */
     public ServerResponse applyShutdown(String userToken, String houseFlowId, String applyDec, String startDate, String endDate) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
 
             Example example = new Example(HouseFlowApply.class);

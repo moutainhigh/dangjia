@@ -1,7 +1,5 @@
 package com.dangjia.acg.service.core;
 
-import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -24,7 +22,6 @@ import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseExpend;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendOrder;

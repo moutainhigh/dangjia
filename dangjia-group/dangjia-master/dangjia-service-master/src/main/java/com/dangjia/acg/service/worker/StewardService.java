@@ -34,6 +34,7 @@ import com.dangjia.acg.modle.matter.WorkerDisclosureHouseFlow;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseWorkerSupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -86,7 +87,7 @@ public class StewardService {
     @Autowired
     private ConfigMessageService configMessageService;
     @Autowired
-    private HouseWorkerSupService houseWorkerSupService;
+    private CraftsmanConstructionService constructionService;
 
     /**
      * 管家巡查扫验证二维码
@@ -294,8 +295,11 @@ public class StewardService {
      */
     public ServerResponse tellCode(String userToken, String code) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             String[] str = code.split("=");
             String houseFlowId = str[1];
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);//查询houseFlow

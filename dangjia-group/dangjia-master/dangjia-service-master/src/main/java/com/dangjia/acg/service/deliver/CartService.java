@@ -22,6 +22,7 @@ import com.dangjia.acg.modle.deliver.Cart;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,8 @@ public class CartService {
 
     @Autowired
     private ForMasterAPI forMasterAPI;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     /**
      * 设置购物车商品数量
@@ -150,9 +153,11 @@ public class CartService {
     public ServerResponse askAndQuit(HttpServletRequest request, String userToken, PageDTO pageDTO, String houseId, String categoryId, String name) {
         try {
             String cityId = request.getParameter(Constants.CITY_ID);
-
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             String productType="0";
             if(worker.getWorkerType() == 3){
@@ -231,8 +236,11 @@ public class CartService {
         try {
             String cityId = request.getParameter(Constants.CITY_ID);
             request.setAttribute(Constants.CITY_ID, cityId);
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             String productType="0";
             if(worker.getWorkerType() == 3){
                 productType="1";
