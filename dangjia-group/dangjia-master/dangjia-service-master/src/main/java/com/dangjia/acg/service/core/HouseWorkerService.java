@@ -103,6 +103,8 @@ public class HouseWorkerService {
     private MessageAPI messageAPI;
     @Value("${spring.profiles.active}")
     private String active;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     /**
      * 根据工人id查询所有房子任务
@@ -155,11 +157,14 @@ public class HouseWorkerService {
      */
     public ServerResponse setWorkerGrab(String userToken, String cityId, String houseFlowId) {
         try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             ServerResponse serverResponse = houseFlowService.setGrabVerification(userToken, cityId, houseFlowId);
             if (!serverResponse.isSuccess())
                 return serverResponse;
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             if (houseFlow.getWorkType() == 3) {
                 return ServerResponse.createByErrorMessage("该订单已被抢");
@@ -250,10 +255,13 @@ public class HouseWorkerService {
      */
     public ServerResponse getMyHomePage(String userToken, String cityId) {
         try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
             worker = memberMapper.selectByPrimaryKey(worker.getId());
             if (worker == null) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), EventStatus.USER_TOKEN_ERROR.getDesc());
@@ -332,9 +340,11 @@ public class HouseWorkerService {
      */
     public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId, Integer suspendDay,
                                             String applyDec, String imageList, String houseFlowId2) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        Member worker = accessToken.getMember();
-
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member worker = (Member) object;
         Example example = new Example(HouseFlowApply.class);
         example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
                 .andCondition(" member_check in (1,3)").andEqualTo(HouseFlowApply.PAY_STATE, 1);
@@ -805,8 +815,11 @@ public class HouseWorkerService {
      */
     public ServerResponse getHouseFlowList(String userToken) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             List<HouseWorker> listHouseWorker = houseWorkerMapper.getAllHouseWorker(worker.getId());
             List<Map<String, Object>> listMap = new ArrayList<>();//返回通讯录list
             if (listHouseWorker != null) {
@@ -856,8 +869,11 @@ public class HouseWorkerService {
      */
     public ServerResponse setSwitchHouseFlow(String userToken, String houseFlowId) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             List<HouseWorker> listHouseWorker = houseWorkerMapper.getAllHouseWorker(worker.getId());
             for (HouseWorker houseWorker : listHouseWorker) {
                 HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
@@ -881,8 +897,11 @@ public class HouseWorkerService {
      */
     public ServerResponse setSupervisorApply(String userToken, String houseFlowId) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);//查询houseFlow
             HouseWorker hw = houseWorkerMapper.getHwByHidAndWtype(houseFlow.getHouseId(), worker.getWorkerType());//这是查的大管家houseworker
             HouseFlowApply houseFlowApp = houseFlowApplyMapper.checkSupervisorApply(houseFlow.getId(), hw.getWorkerId());//查询大管家是否有验收申请
