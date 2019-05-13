@@ -204,7 +204,13 @@ public class FillMaterielService {
     public ServerResponse repairLibraryMaterial(String userToken, String categoryId, String name, Integer pageNum, Integer pageSize) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            if (accessToken == null) {
+                return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), EventStatus.USER_TOKEN_ERROR.getDesc());
+            }
             Member worker = accessToken.getMember();
+            if (worker == null) {
+                return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), EventStatus.USER_TOKEN_ERROR.getDesc());
+            }
             List<GoodsDTO> goodsDTOList = new ArrayList<>();
             String productType = "0";
             if (worker.getWorkerType() == 3) {//大管家
@@ -236,7 +242,13 @@ public class FillMaterielService {
     public ServerResponse workerTypeBudget(String userToken, String houseId, String categoryId, String name, Integer pageNum, Integer pageSize) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            if (accessToken == null) {
+                return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), EventStatus.USER_TOKEN_ERROR.getDesc());
+            }
             Member worker = accessToken.getMember();
+            if (worker == null) {
+                return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), EventStatus.USER_TOKEN_ERROR.getDesc());
+            }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageNum, pageSize);
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name, "0");

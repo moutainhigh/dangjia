@@ -84,9 +84,7 @@ public class HouseFlowApplyService {
      * 工匠端工地记录
      */
     public ServerResponse houseRecord(String userToken, String houseId, Integer pageNum, Integer pageSize){
-//        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         try{
-            //        Member worker = accessToken.getMember();
             if(pageNum==null){
                 pageNum=1;
             }
@@ -744,6 +742,7 @@ public class HouseFlowApplyService {
             if (houseFlowApply.getWorkerType() == 3){//是管家发起的
                 houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
                 houseFlowApplyDTO.setApplyType(3);//管家提交的整体完工申请
+                houseFlowApplyDTO.setWorkerTypeId(houseFlowApply.getWorkerTypeId());
                 houseFlowApplyDTO.setHeadA(local+worker.getHead());
                 houseFlowApplyDTO.setNameA(worker.getName());
                 houseFlowApplyDTO.setMobileA(worker.getMobile());
@@ -772,6 +771,7 @@ public class HouseFlowApplyService {
             houseFlowApplyDTO.setManagerId(steward.getId());
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
             houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());
+            houseFlowApplyDTO.setWorkerTypeId(houseFlowApply.getWorkerTypeId());
             houseFlowApplyDTO.setHeadA(local+worker.getHead());
             houseFlowApplyDTO.setNameA(worker.getName());
             houseFlowApplyDTO.setMobileA(worker.getMobile());

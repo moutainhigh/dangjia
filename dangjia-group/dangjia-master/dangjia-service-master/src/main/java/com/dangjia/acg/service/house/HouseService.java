@@ -44,9 +44,11 @@ import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.other.WorkDeposit;
+import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.design.DesignDataService;
 import com.dangjia.acg.service.member.GroupInfoService;
@@ -137,6 +139,8 @@ public class HouseService {
     private DesignDataService designDataService;
     @Autowired
     private HouseConstructionRecordMapper houseConstructionRecordMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     @Autowired
     private IWorkDepositMapper workDepositMapper;
@@ -246,8 +250,11 @@ public class HouseService {
      * APP我的房产
      */
     public ServerResponse getMyHouse(String userToken, String cityId) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        Member member = accessToken.getMember();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
         //该城市该用户所有开工房产
         Example example = new Example(House.class);
         example.createCriteria()
@@ -928,8 +935,11 @@ public class HouseService {
             String imgUrl = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             Member member = null;
             if (!CommonUtil.isEmpty(userToken)) {
-                AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-                member = accessToken.getMember();
+                Object object = constructionService.getMember(userToken);
+                if (object instanceof ServerResponse) {
+                    return (ServerResponse) object;
+                }
+                member = (Member) object;
             }
             Map<String, Object> returnMap = new HashMap<>();//返回对象
             List<Map<String, Object>> workerTypeList = new ArrayList<>();
@@ -990,8 +1000,11 @@ public class HouseService {
      */
     public ServerResponse saveRenovationManual(String userToken, String saveList) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member = accessToken.getMember();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
             if (saveList != null) {
                 Example example = new Example(RenovationManualMember.class);
                 example.createCriteria().andEqualTo("memberId", member.getId());
@@ -1408,7 +1421,10 @@ public class HouseService {
     }
 
 //    0每日完工申请，1阶段完工申请，2整体完工申请,4：每日开工,5巡查,8补人工,9退人工,10补材料,11退材料,12业主退材料
-    public void insertConstructionRecord(Object sourceOjb) {
+public void insertConstructionRecord(Object sourceOjb){
+    insertConstructionRecordAll(sourceOjb,null);
+}
+public void insertConstructionRecordAll(Object sourceOjb, ChangeOrder changeOrder ) {
         try {
             // 施工记录的内容
             HouseConstructionRecord houseConstructionRecord=new HouseConstructionRecord();
@@ -1431,9 +1447,22 @@ public class HouseService {
                 houseConstructionRecord.setHouseId(mendOrder.getHouseId());
                 houseConstructionRecord.setSourceId(mendOrder.getId());
                 houseConstructionRecord.setContent("发起了"+mendOrder.getOrderName());
-                houseConstructionRecord.setWorkerId(mendOrder.getApplyMemberId());
-                WorkerType workerType=workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
-                houseConstructionRecord.setWorkerType(workerType.getType());
+
+                if(mendOrder.getType()==1||mendOrder.getType()==3) {
+                    if (changeOrder != null && !CommonUtil.isEmpty(changeOrder.getMemberId())) {
+                        houseConstructionRecord.setWorkerId(changeOrder.getMemberId());
+                        houseConstructionRecord.setWorkerType(null);
+                    }
+                    if (changeOrder != null && !CommonUtil.isEmpty(changeOrder.getWorkerId())) {
+                        houseConstructionRecord.setWorkerId(changeOrder.getWorkerId());
+                        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(changeOrder.getWorkerTypeId());
+                        houseConstructionRecord.setWorkerType(workerType.getType());
+                    }
+                }else{
+                    houseConstructionRecord.setWorkerId(mendOrder.getApplyMemberId());
+                    WorkerType workerType=workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
+                    houseConstructionRecord.setWorkerType(workerType.getType());
+                }
                 if(mendOrder.getType()==0){
                     houseConstructionRecord.setApplyType(10);
                 }else if(mendOrder.getType()==1){

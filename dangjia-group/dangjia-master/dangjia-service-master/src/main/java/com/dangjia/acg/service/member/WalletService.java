@@ -5,6 +5,7 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -25,6 +26,7 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.BankCard;
 import com.dangjia.acg.modle.worker.*;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -69,6 +71,8 @@ public class WalletService {
     private IRewardPunishConditionMapper rewardPunishConditionMapper;
     @Autowired
     private ISmsMapper smsMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
 
     /**
@@ -184,9 +188,12 @@ public class WalletService {
      */
     public ServerResponse getWithdraw(String userToken) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);//图片地址
-            Member member = accessToken.getMember();
             member = memberMapper.selectByPrimaryKey(member.getId());
             Example example = new Example(RewardPunishRecord.class);
             example.createCriteria().andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId()).andEqualTo(RewardPunishRecord.STATE, "0");
@@ -278,17 +285,14 @@ public class WalletService {
     /**
      * 支出 收入
      */
-    public ServerResponse workerDetail(String userToken, int type, Integer pageNum, Integer pageSize) {
+    public ServerResponse workerDetail(String userToken, int type, PageDTO pageDTO) {
         try {
-            if (pageNum == null) {
-                pageNum = 1;
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
-            if (pageSize == null) {
-                pageSize = 10;
-            }
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member = accessToken.getMember();
-            PageHelper.startPage(pageNum, pageSize);
+            Member member = (Member) object;
             PageInfo pageResult;
             List<WorkerDetail> outDetailList;
             List<DetailDTO> detailDTOList = new ArrayList<DetailDTO>();
@@ -332,8 +336,11 @@ public class WalletService {
      */
     public ServerResponse walletInformation(String userToken) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member member = accessToken.getMember();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
             member = memberMapper.selectByPrimaryKey(member.getId());
             WalletDTO walletDTO = new WalletDTO();
             Double workerPrice = workerDetailMapper.getCountWorkerDetailByWid(member.getId());

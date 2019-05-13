@@ -2,6 +2,7 @@ package com.dangjia.acg.service.basics;
 
 import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.product.MasterProductAPI;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
@@ -50,15 +51,9 @@ public class UnitService {
     protected static final Logger LOG = LoggerFactory.getLogger(UnitService.class);
 
     //查询所有的单位
-    public ServerResponse<PageInfo> getAllUnit(Integer pageNum, Integer pageSize) {
+    public ServerResponse<PageInfo> getAllUnit(PageDTO pageDTO) {
         try {
-            if (pageNum == null) {
-                pageNum = 1;
-            }
-            if (pageSize == null) {
-                pageSize = 10;
-            }
-            PageHelper.startPage(pageNum, pageSize);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
             List<Unit> unitList = iUnitMapper.getUnit();
             for (Unit unit : unitList) {
