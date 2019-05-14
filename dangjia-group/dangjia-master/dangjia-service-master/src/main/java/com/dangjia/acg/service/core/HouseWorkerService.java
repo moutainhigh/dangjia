@@ -250,7 +250,6 @@ public class HouseWorkerService {
      * 获取我的界面
      *
      * @param userToken 用户登录信息
-     * @param cityId    城市ID
      * @return 我的页面
      */
     public ServerResponse getMyHomePage(String userToken) {
@@ -269,7 +268,7 @@ public class HouseWorkerService {
             HomePageBean homePageBean = new HomePageBean();
             homePageBean.setWorkerId(worker.getId());
             homePageBean.setIoflow(CommonUtil.isEmpty(worker.getHead()) ? null : imageAddress + worker.getHead());
-            homePageBean.setWorkerName(worker.getName() == null ? worker.getNickName() : worker.getName());
+            homePageBean.setWorkerName(CommonUtil.isEmpty(worker.getName()) ? worker.getNickName() : worker.getName());
             homePageBean.setEvaluation(worker.getEvaluationScore() == null ? new BigDecimal(60) : worker.getEvaluationScore());
             homePageBean.setFavorable(worker.getPraiseRate() == null ? "0.00%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
             StringBuilder stringBuffer = new StringBuilder();
