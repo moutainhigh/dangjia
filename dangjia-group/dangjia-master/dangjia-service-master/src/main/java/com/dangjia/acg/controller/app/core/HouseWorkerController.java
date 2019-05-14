@@ -65,7 +65,7 @@ public class HouseWorkerController implements HouseWorkerAPI {
     @Override
     @ApiMethod
     public ServerResponse getMyHomePage(String userToken, String cityId) {
-        return houseWorkerService.getMyHomePage(userToken, cityId);
+        return houseWorkerService.getMyHomePage(userToken);
     }
 
     /**
