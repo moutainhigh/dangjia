@@ -465,7 +465,7 @@ public class OrderService {
                     orderSplitItem.setCost(product.getCost());
                     orderSplitItem.setShopCount(0d);
                     orderSplitItem.setNum(num);
-                    orderSplitItem.setUnitName(product.getUnitName());
+                    orderSplitItem.setUnitName(forMasterAPI.getUnitName(house.getCityId(),product.getConvertUnit()));
                     orderSplitItem.setTotalPrice(product.getPrice() * num);//单项总价 销售价
                     orderSplitItem.setProductType(goods.getType());
                     orderSplitItem.setCategoryId(product.getCategoryId());

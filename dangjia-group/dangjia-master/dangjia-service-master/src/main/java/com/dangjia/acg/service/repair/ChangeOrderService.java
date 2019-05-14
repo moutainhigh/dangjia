@@ -144,6 +144,7 @@ public class ChangeOrderService {
         ChangeOrder changeOrder = new ChangeOrder();
         changeOrder.setHouseId(houseId);
         if (type == 1){
+            changeOrder.setWorkerId(member.getId());
             changeOrder.setWorkerTypeId(member.getWorkerTypeId());
         }else if (type == 2){
             changeOrder.setWorkerTypeId(workerTypeId);
