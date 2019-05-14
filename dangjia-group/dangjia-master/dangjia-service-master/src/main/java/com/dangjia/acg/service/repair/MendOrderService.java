@@ -253,7 +253,7 @@ public class MendOrderService {
                 mendOrderMapper.updateByPrimaryKey(mendOrder);
 
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
-                houseService.insertConstructionRecord(mendOrder);
+                houseService.insertConstructionRecordAll(mendOrder,changeOrder);
                 changeOrder.setState(2);//通过->工匠业主审核
                 changeOrderMapper.updateByPrimaryKey(changeOrder);
 //                House house = houseMapper.selectByPrimaryKey(houseId);
@@ -411,8 +411,8 @@ public class MendOrderService {
                 MendOrder mendOrder = mendOrderList.get(0);
                 mendOrder.setState(1);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-                houseService.insertConstructionRecord(mendOrder);
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
+                houseService.insertConstructionRecordAll(mendOrder,changeOrder);
                 changeOrder.setState(2);//通过->工匠业主审核
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
 
