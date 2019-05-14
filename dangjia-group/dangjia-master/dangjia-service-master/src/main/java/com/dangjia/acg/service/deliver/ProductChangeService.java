@@ -61,14 +61,13 @@ public class ProductChangeService {
      * @param request
      * @param userToken
      * @param houseId
-     * @param categoryId
      * @param srcProductId
      * @param destProductId
      * @param srcSurCount
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse insertProductChange(HttpServletRequest request, String userToken, String houseId, String categoryId, String srcProductId, String destProductId, Double srcSurCount){
+    public ServerResponse insertProductChange(HttpServletRequest request, String userToken, String houseId, String srcProductId, String destProductId, Double srcSurCount){
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -91,7 +90,6 @@ public class ProductChangeService {
             example.createCriteria()
                     .andEqualTo(ProductChange.HOUSE_ID, houseId)
                     .andEqualTo(ProductChange.MEMBER_ID, operator.getId())
-                    .andEqualTo(ProductChange.CATEGORY_ID, categoryId)
                     .andEqualTo(ProductChange.SRC_PRODUCT_ID, srcProductId);
             List<ProductChange> list = productChangeMapper.selectByExample(example);
             if(!CommonUtil.isEmpty(list)) {
@@ -109,7 +107,6 @@ public class ProductChangeService {
                 ProductChange productChange = new ProductChange();
                 productChange.setMemberId(operator.getId());
                 productChange.setHouseId(houseId);
-                productChange.setCategoryId(categoryId);
                 // src
                 productChange.setSrcProductId(srcProduct.getId());
                 productChange.setSrcProductSn(srcProduct.getProductSn());
@@ -181,7 +178,7 @@ public class ProductChangeService {
                 productChangeDTO.setId(change.getId());
                 productChangeDTO.setHouseId(change.getHouseId());
                 productChangeDTO.setMemberId(StringUtils.isNotBlank(change.getMemberId()) ? change.getMemberId() : "");
-                productChangeDTO.setCategoryId(change.getCategoryId());
+                productChangeDTO.setCategoryId(StringUtils.isNotBlank(change.getCategoryId()) ? change.getCategoryId() : "");
                 productChangeDTO.setSrcProductId(change.getSrcProductId());
                 productChangeDTO.setSrcProductSn(change.getSrcProductSn());
                 productChangeDTO.setSrcProductName(change.getSrcProductName());
