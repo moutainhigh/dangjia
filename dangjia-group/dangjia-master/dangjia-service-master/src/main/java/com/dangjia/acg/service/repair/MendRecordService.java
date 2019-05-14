@@ -135,6 +135,7 @@ public class MendRecordService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             MendOrderDetail mendOrderDetail = new MendOrderDetail();
             mendOrderDetail.setIsShow(0);
+            mendOrderDetail.setIsAuditor(0);
             if (type == 5) {
                 OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
                 if (worker != null &&worker.getWorkerTypeId()!=null&& worker.getWorkerTypeId().equals(orderSplit.getWorkerTypeId())) {
@@ -187,6 +188,17 @@ public class MendRecordService {
 
             } else {
                 MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
+                House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
+                if(mendOrder.getType()==0 ||mendOrder.getType()==1){
+                    if (worker != null && worker.getId().equals(house.getMemberId())) {
+                        mendOrderDetail.setIsAuditor(1);
+                    }
+                }
+                if(mendOrder.getType()==3){
+                    if (worker != null && worker.getWorkerTypeId()!=null&&worker.getWorkerTypeId().equals(mendOrder.getWorkerTypeId())) {
+                        mendOrderDetail.setIsAuditor(1);
+                    }
+                }
                 if (worker != null && worker.getWorkerTypeId()!=null&&worker.getWorkerTypeId().equals(mendOrder.getWorkerTypeId())) {
                     mendOrderDetail.setIsShow(1);
                 }
