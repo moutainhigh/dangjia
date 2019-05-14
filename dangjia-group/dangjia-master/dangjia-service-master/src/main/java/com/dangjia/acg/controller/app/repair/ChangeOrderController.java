@@ -61,6 +61,8 @@ public class ChangeOrderController implements ChangeOrderAPI {
      * 申请退人工或业主验收检测
      * type 1阶段验收检测  2退人工检测
      */
+    @Override
+    @ApiMethod
     public ServerResponse checkHouseFlowApply(String userToken,String houseId,Integer type,String workerTypeId){
         return changeOrderService.checkHouseFlowApply(userToken,houseId,type,workerTypeId);
     }
