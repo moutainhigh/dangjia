@@ -70,13 +70,10 @@ public class TaskService {
      */
     public ServerResponse getTaskList(String userToken, String userRole) {
         ButtonDTO buttonDTO = new ButtonDTO();
-        if (StringUtils.isEmpty(userToken)) {
-            buttonDTO.setState(0);
-            return ServerResponse.createBySuccess("查询成功", buttonDTO);
-        }
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
+            buttonDTO.setState(0);
+            return ServerResponse.createBySuccess("查询成功", buttonDTO);
         }
         Member member = (Member) object;
         List<House> houseList = new ArrayList<>();
