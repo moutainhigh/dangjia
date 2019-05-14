@@ -186,6 +186,7 @@ public class OrderSplitService {
 
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliverId);
+            example.orderBy(OrderSplitItem.CATEGORY_ID).desc();
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             List<OrderSplitItemDTO> orderSplitItemDTOS = new ArrayList<>();
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
