@@ -100,7 +100,7 @@ public class MendRecordService {
                 } else {
                     map.put("goodsType", "服务");
                 }
-
+                map.put("supplierTelephone", mendMateriel.getSupplierTelephone());
                 map.put("productId", mendMateriel.getProductId());
                 map.put("name", mendMateriel.getProductName());
                 map.put("price", "¥" + String.format("%.2f", mendMateriel.getPrice()) + "/" + mendMateriel.getUnitName());
