@@ -26,7 +26,6 @@ public class ProductChangeController implements ProductChangeAPI {
      * @param request
      * @param userToken
      * @param houseId
-     * @param categoryId
      * @param srcProductId
      * @param destProductId
      * @param srcSurCount
@@ -34,8 +33,8 @@ public class ProductChangeController implements ProductChangeAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertProductChange(HttpServletRequest request, String userToken, String houseId, String categoryId, String srcProductId, String destProductId, Double srcSurCount) {
-        return productChangeService.insertProductChange(request, userToken, houseId, categoryId, srcProductId, destProductId, srcSurCount);
+    public ServerResponse insertProductChange(HttpServletRequest request, String userToken, String houseId, String srcProductId, String destProductId, Double srcSurCount) {
+        return productChangeService.insertProductChange(request, userToken, houseId, srcProductId, destProductId, srcSurCount);
     }
 
     /**
