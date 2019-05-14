@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.deliver.IProductChangeMapper">
+
+	<sql id="all_columns">
+		id,
+		house_id as houseId,
+		member_id as memberId,
+		category_id as categoryId,
+		src_product_id as srcProductId,
+		src_product_sn as srcProductSn,
+		src_product_name as srcProductName,
+		src_price as srcPrice,
+		src_sur_count as srcSurCount,
+		src_unit_name as srcUnitName,
+		src_image as srcImage,
+		dest_product_id as destProductId,
+		dest_product_sn as destProductSn,
+		dest_product_name as destProductName,
+		dest_price as destPrice,
+		dest_sur_count as destSurCount,
+		dest_unit_name as destUnitName,
+		dest_image as destImage,
+		difference_price as differencePrice,
+		type,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+    <!-- 根据houseId查询商品换货对象 -->
+	<select id="queryByHouseId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.deliver.ProductChange">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_deliver_product_change
+		where 1=1
+		<if test="houseId!=null and houseId!=''">
+			and house_id=#{houseId}
+		</if>
+		<if test="type!=null and type!=''">
+			and type=#{type}
+		</if>
+		ORDER BY create_date desc
+	</select>
+
+</mapper>

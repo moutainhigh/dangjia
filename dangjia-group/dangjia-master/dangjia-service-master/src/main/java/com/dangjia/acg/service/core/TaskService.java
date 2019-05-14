@@ -207,7 +207,7 @@ public class TaskService {
             }
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/buchailiao.png");
             String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                    String.format(DjConstants.YZPageAddress.TUIPRODUCTEXAMINE, userToken, house.getCityId(), "退材料/服务审核") + "&mendDeliverId=" + mendDeliver.getId();
+                    String.format(DjConstants.YZPageAddress.TUIPRODUCTEXAMINE, userToken, house.getCityId(), task.getName()) + "&mendDeliverId=" + mendDeliver.getId()+ "&houseId=" + mendOrder.getHouseId();
             task.setHtmlUrl(url);
             task.setType(4);
             task.setTaskId(mendDeliver.getId());
