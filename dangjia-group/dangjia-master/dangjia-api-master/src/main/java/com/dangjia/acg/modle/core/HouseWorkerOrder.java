@@ -119,6 +119,7 @@ public class HouseWorkerOrder extends BaseEntity {
 			this.retentionMoney = new BigDecimal(0);//retentionmoney
 			this.afterChange = new BigDecimal(0);//afterchange
 			this.repairPrice = new BigDecimal(0);//repairprice
+			this.repairTotalPrice = new BigDecimal(0);
 			this.haveMoney = new BigDecimal(0);//havemaoney
 			this.everyMoney = new BigDecimal(0);//everydaypaymaoney
 			this.checkMoney = new BigDecimal(0);
