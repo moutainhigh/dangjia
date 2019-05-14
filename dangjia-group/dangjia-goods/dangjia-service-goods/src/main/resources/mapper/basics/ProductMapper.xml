@@ -573,9 +573,9 @@
         </if>
         WHERE   p.data_status = 0
 
-        <if test="productId==null or productId==''">
-            AND p.type = 1
-        </if>
+        <!--<if test="productId==null or productId==''">-->
+            <!--AND p.type = 1-->
+        <!--</if>-->
 
         <if test="productType!=null and productType!=''">
             AND g.type =#{productType}
