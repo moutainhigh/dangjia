@@ -19,6 +19,7 @@ public class MendOrderDetail {
     private Integer type;
     private Integer state;
     private Integer isShow;//是否显示重新买回按钮
+    private Integer isAuditor;//是否显示审核按钮
     private Double totalAmount;
     private Date createDate;
     private Date modifyDate;
