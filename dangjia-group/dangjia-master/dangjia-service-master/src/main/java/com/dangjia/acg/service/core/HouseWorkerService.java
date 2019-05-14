@@ -430,7 +430,7 @@ public class HouseWorkerService {
 //            }
             //包括所有申请 和 巡查
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(houseFlowId, applyType, workerId, new Date());
-            if (applyType != 7 && houseFlowApplyList.size() > 0) {
+            if (applyType != 6 && applyType != 7 && houseFlowApplyList.size() > 0) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "您今日已提交过此申请,请勿重复提交！");
             }
 
