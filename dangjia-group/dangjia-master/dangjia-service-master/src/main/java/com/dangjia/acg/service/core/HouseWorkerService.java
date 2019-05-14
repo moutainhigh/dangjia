@@ -250,10 +250,9 @@ public class HouseWorkerService {
      * 获取我的界面
      *
      * @param userToken 用户登录信息
-     * @param cityId    城市ID
      * @return 我的页面
      */
-    public ServerResponse getMyHomePage(String userToken, String cityId) {
+    public ServerResponse getMyHomePage(String userToken) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -269,12 +268,14 @@ public class HouseWorkerService {
             HomePageBean homePageBean = new HomePageBean();
             homePageBean.setWorkerId(worker.getId());
             homePageBean.setIoflow(CommonUtil.isEmpty(worker.getHead()) ? null : imageAddress + worker.getHead());
-            homePageBean.setWorkerName(worker.getName());
-            homePageBean.setEvaluation(worker.getEvaluationScore());
+            homePageBean.setWorkerName(CommonUtil.isEmpty(worker.getName()) ? worker.getNickName() : worker.getName());
+            homePageBean.setEvaluation(worker.getEvaluationScore() == null ? new BigDecimal(60) : worker.getEvaluationScore());
             homePageBean.setFavorable(worker.getPraiseRate() == null ? "0.00%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
             StringBuilder stringBuffer = new StringBuilder();
-            if (worker.getIsCrowned() != 1) {
-                if (Double.parseDouble(worker.getEvaluationScore().toString()) > 90) {
+            if (worker.getIsCrowned() == null || worker.getIsCrowned() != 1) {
+                if (worker.getEvaluationScore() == null) {
+                    stringBuffer.append("普通");
+                } else if (Double.parseDouble(worker.getEvaluationScore().toString()) > 90) {
                     stringBuffer.append("金牌");
                 } else if (Double.parseDouble(worker.getEvaluationScore().toString()) > 80) {
                     stringBuffer.append("银牌");
@@ -292,19 +293,23 @@ public class HouseWorkerService {
             Example.Criteria criteria = example.createCriteria()
                     .andEqualTo(MenuConfiguration.DATA_STATUS, 0)
                     .andEqualTo(MenuConfiguration.MENU_TYPE, 1);
-            switch (worker.getWorkerType()) {
-                case 1://设计师
-                    criteria.andEqualTo(MenuConfiguration.SHOW_DESIGNER, 1);
-                    break;
-                case 2://精算师
-                    criteria.andEqualTo(MenuConfiguration.SHOW_ACTUARIES, 1);
-                    break;
-                case 3://大管家
-                    criteria.andEqualTo(MenuConfiguration.SHOW_HOUSEKEEPER, 1);
-                    break;
-                default://工匠
-                    criteria.andEqualTo(MenuConfiguration.SHOW_CRAFTSMAN, 1);
-                    break;
+            if (worker.getWorkerType() == null) {
+                criteria.andEqualTo(MenuConfiguration.SHOW_CRAFTSMAN, 1);
+            } else {
+                switch (worker.getWorkerType()) {
+                    case 1://设计师
+                        criteria.andEqualTo(MenuConfiguration.SHOW_DESIGNER, 1);
+                        break;
+                    case 2://精算师
+                        criteria.andEqualTo(MenuConfiguration.SHOW_ACTUARIES, 1);
+                        break;
+                    case 3://大管家
+                        criteria.andEqualTo(MenuConfiguration.SHOW_HOUSEKEEPER, 1);
+                        break;
+                    default://工匠
+                        criteria.andEqualTo(MenuConfiguration.SHOW_CRAFTSMAN, 1);
+                        break;
+                }
             }
             example.orderBy(MenuConfiguration.SORT).asc();
             List<MenuConfiguration> menuConfigurations = iMenuConfigurationMapper.selectByExample(example);

@@ -476,10 +476,19 @@ public class MendRecordService {
                     orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
                     return ServerResponse.createBySuccessMessage("撤回成功");
                 } else {
-                    return ServerResponse.createByErrorMessage("撤回失败");
+                    return getServerResponse(mendOrder);
                 }
             } else {
-                return ServerResponse.createByErrorMessage("该货单已发送给供应商发货，无法撤回");
+                switch (applyStatus) {
+                    case 2:
+                        return ServerResponse.createByErrorMessage("该货单已发送给供应商发货，无法撤回");
+                    case 3:
+                        return ServerResponse.createByErrorMessage("该货单已被打回，无法撤回");
+                    case 5:
+                        return ServerResponse.createByErrorMessage("该货单已撤回，请误重复操作");
+                    default:
+                        return ServerResponse.createByErrorMessage("撤回失败");
+                }
             }
         }
         //工匠退材料//工匠补人工//业主申请退人工
@@ -506,8 +515,24 @@ public class MendRecordService {
                 }
                 return ServerResponse.createBySuccessMessage("撤回成功");
             } else {
-                return ServerResponse.createByErrorMessage("撤回失败");
+                if (!flag) {
+                    return ServerResponse.createBySuccessMessage("无可撤回的单");
+                }
+                return getServerResponse(mendOrder);
             }
+        }
+    }
+
+    private ServerResponse getServerResponse(MendOrder mendOrder) {
+        switch (mendOrder.getState()) {
+            case 3:
+                return ServerResponse.createByErrorMessage("该货单已发送给供应商发货，无法撤回");
+            case 2:
+                return ServerResponse.createByErrorMessage("该货单已被打回，无法撤回");
+            case 5:
+                return ServerResponse.createByErrorMessage("该货单已撤回，请误重复操作");
+            default:
+                return ServerResponse.createByErrorMessage("撤回失败");
         }
     }
 
