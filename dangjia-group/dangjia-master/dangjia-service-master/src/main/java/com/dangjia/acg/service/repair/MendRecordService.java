@@ -137,7 +137,7 @@ public class MendRecordService {
             mendOrderDetail.setIsShow(0);
             if (type == 5) {
                 OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
-                if (worker != null && worker.getWorkerTypeId().equals(orderSplit.getWorkerTypeId())) {
+                if (worker != null &&worker.getWorkerTypeId()!=null&& worker.getWorkerTypeId().equals(orderSplit.getWorkerTypeId())) {
                     mendOrderDetail.setIsShow(1);
                 }
                 mendOrderDetail.setHouseId(orderSplit.getHouseId());
@@ -187,7 +187,7 @@ public class MendRecordService {
 
             } else {
                 MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
-                if (worker != null && worker.getWorkerTypeId().equals(mendOrder.getWorkerTypeId())) {
+                if (worker != null && worker.getWorkerTypeId()!=null&&worker.getWorkerTypeId().equals(mendOrder.getWorkerTypeId())) {
                     mendOrderDetail.setIsShow(1);
                 }
                 mendOrderDetail.setMendOrderId(mendOrderId);

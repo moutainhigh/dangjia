@@ -14,6 +14,7 @@ import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseExpendMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendDeliverMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
@@ -23,9 +24,9 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseExpend;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendOrder;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -65,6 +66,8 @@ public class TaskService {
     @Autowired
     private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private IChangeOrderMapper changeOrderMapper;
     /**
      * 任务列表
      */
@@ -258,18 +261,21 @@ public class TaskService {
         //补人工任务
         example = new Example(MendOrder.class);
         example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 1)
-                .andEqualTo(MendOrder.STATE, 3);//审核状态
+                .andEqualTo(MendOrder.STATE, 1);//审核状态
         mendOrderList = mendOrderMapper.selectByExample(example);
         for (MendOrder mendOrder : mendOrderList) {
-            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
-            Task task = new Task();
-            task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
-            task.setName(workerType.getName() + "补人工");
-            task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/burengong.png");
-            task.setHtmlUrl("");
-            task.setType(2);
-            task.setTaskId(mendOrder.getId());
-            taskList.add(task);
+            ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
+            if( changeOrder.getState()==2) {//大管家已经同意
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
+                Task task = new Task();
+                task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
+                task.setName(workerType.getName() + "补人工");
+                task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/burengong.png");
+                task.setHtmlUrl("");
+                task.setType(2);
+                task.setTaskId(mendOrder.getId());
+                taskList.add(task);
+            }
         }
         //设计审核任务
         if (house.getDesignerOk() == 5 || house.getDesignerOk() == 2) {
