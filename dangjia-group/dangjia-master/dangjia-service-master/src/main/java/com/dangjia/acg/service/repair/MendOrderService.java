@@ -16,8 +16,8 @@ import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseMapper;
+import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.repair.*;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
@@ -25,6 +25,7 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
+import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -51,6 +52,8 @@ import java.util.List;
 public class MendOrderService {
 
 
+    @Autowired
+    private IWarehouseMapper warehouseMapper;
     @Autowired
     private IOrderSplitMapper orderSplitMapper;
     @Autowired
@@ -916,29 +919,27 @@ public class MendOrderService {
      */
     private boolean addMendMateriel(String productArr, MendOrder mendOrder) {
         try {
-            House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
             mendOrder.setTotalAmount(0.0);
             JSONArray jsonArray = JSONArray.parseArray(productArr);
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
                 MendMateriel mendMateriel = new MendMateriel();//补退材料明细
                 String productId = obj.getString("productId");
+                Warehouse warehouse=warehouseMapper.getByProductId(mendMateriel.getProductId(),mendOrder.getHouseId());
                 double num = Double.parseDouble(obj.getString("num"));
-                Product product = forMasterAPI.getProduct(house.getCityId(), productId);
                 mendMateriel.setMendOrderId(mendOrder.getId());
                 mendMateriel.setProductId(productId);
-                mendMateriel.setProductSn(product.getProductSn());
-                mendMateriel.setProductName(product.getName());
-                mendMateriel.setPrice(product.getPrice());
-                mendMateriel.setCost(product.getCost());
-                String unitName = forMasterAPI.getUnitName(house.getCityId(), product.getConvertUnit());
-                mendMateriel.setUnitName(unitName);
+                mendMateriel.setProductSn(warehouse.getProductSn());
+                mendMateriel.setProductName(warehouse.getProductName());
+                mendMateriel.setPrice(warehouse.getPrice());
+                mendMateriel.setCost(warehouse.getCost());
+                mendMateriel.setUnitName(warehouse.getUnitName());
                 mendMateriel.setShopCount(num);
-                mendMateriel.setTotalPrice(num * product.getPrice());
+                mendMateriel.setTotalPrice(num * warehouse.getPrice());
                 mendOrder.setTotalAmount(mendOrder.getTotalAmount() + mendMateriel.getTotalPrice());//修改总价
-                mendMateriel.setProductType(forMasterAPI.getGoods(house.getCityId(), product.getGoodsId()).getType());//0：材料；1：服务
-                mendMateriel.setCategoryId(product.getCategoryId());
-                mendMateriel.setImage(product.getImage());
+                mendMateriel.setProductType(warehouse.getProductType());//0：材料；1：服务
+                mendMateriel.setCategoryId(warehouse.getCategoryId());
+                mendMateriel.setImage(warehouse.getImage());
                 mendMaterialMapper.insertSelective(mendMateriel);
             }
             mendOrder.setModifyDate(new Date());
