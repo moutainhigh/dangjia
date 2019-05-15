@@ -154,7 +154,6 @@ public class PaymentService {
     private IOrderSplitMapper orderSplitMapper;
     @Autowired
     private IOrderSplitItemMapper orderSplitItemMapper;
-
     /**
      * 服务器回调
      */
@@ -924,6 +923,54 @@ public class PaymentService {
                 actuaryDTO.setPrice("¥" + String.format("%.2f", houseDistribution.getPrice()));
                 actuaryDTO.setType(6);
                 actuaryDTOList.add(actuaryDTO);
+            }else if (type == 2) {
+                MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(houseDistributionId);
+                if (mendOrder == null) {
+                    return ServerResponse.createByErrorMessage("订单记录不存在");
+                }
+
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
+                Example example = new Example(BusinessOrder.class);
+                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andEqualTo(BusinessOrder.STATE, 1);
+                List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
+                BusinessOrder businessOrder;
+                if (businessOrderList.size() == 0) {
+                    businessOrder = new BusinessOrder();
+                    businessOrder.setMemberId(mendOrder.getApplyMemberId()); //公众号唯一标识
+                    businessOrder.setHouseId(mendOrder.getHouseId());
+                    businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+                    businessOrder.setState(1);//刚生成
+                    businessOrder.setTotalPrice(new BigDecimal(mendOrder.getTotalAmount()));
+                    businessOrder.setDiscountsPrice(new BigDecimal(0));
+                    businessOrder.setPayPrice(new BigDecimal(mendOrder.getTotalAmount()));
+                    businessOrder.setType(2);//记录支付类型任务类型
+                    businessOrder.setTaskId(houseDistributionId);//保存任务ID
+                    businessOrderMapper.insert(businessOrder);
+                } else {
+                    businessOrder = businessOrderList.get(0);
+                }
+
+                paymentDTO.setTotalPrice(new BigDecimal(mendOrder.getTotalAmount()));
+                paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
+                paymentDTO.setPayPrice(new BigDecimal(mendOrder.getTotalAmount()));//实付
+                ActuaryDTO actuaryDTO = new ActuaryDTO();
+                if (mendOrder.getType() == 1) {
+                    actuaryDTO.setImage(imageAddress + "icon/burengong.png");
+                    actuaryDTO.setKind(workerType.getName());
+                    actuaryDTO.setName("补人工花费");
+                    actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
+                    actuaryDTO.setType(4);
+
+                } else if (mendOrder.getType() == 0) {
+                    actuaryDTO.setImage(imageAddress + "icon/bucailiao.png");
+                    actuaryDTO.setKind(workerType.getName());
+                    actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
+                    actuaryDTO.setName("补材料花费");
+                    if (workerType.getType() == 3) {
+                        actuaryDTO.setName("补服务花费");
+                    }
+                    actuaryDTO.setType(5);
+                }
             } else {
                 Example example = new Example(BusinessOrder.class);
                 example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andEqualTo(BusinessOrder.STATE, 1);
