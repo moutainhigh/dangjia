@@ -30,4 +30,5 @@ public class WarehouseDTO {
     private int backTime; //退次数
 
     private String brandSeriesName;//品牌系列名
+    private int changeType; //商品是否更换
 }
