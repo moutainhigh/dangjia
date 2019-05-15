@@ -134,9 +134,8 @@ public class ProductChangeService {
                 productChange.setDestSurCount(0.0);
                 // 未处理
                 productChange.setType(0);
-                // 计算价差(更换后的商品price - 原商品price)
-                BigDecimal differPrice = BigDecimal.valueOf(MathUtil.sub(destProduct.getPrice(), srcProduct.getPrice()));
-                productChange.setDifferencePrice(differPrice);
+                // 差价默认为0
+                productChange.setDifferencePrice(BigDecimal.ZERO);
                 productChangeMapper.insert(productChange);
             }
         }catch (Exception e){
