@@ -92,12 +92,12 @@ public class ProductChangeController implements ProductChangeAPI {
     /**
      * 补退差价回调
      * @param request
-     * @param houseId
+     * @param id
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse orderBackFun(HttpServletRequest request, String houseId) {
-        return productChangeService.orderBackFun(request, houseId);
+    public ServerResponse orderBackFun(HttpServletRequest request, String id) {
+        return productChangeService.orderBackFun(request, id);
     }
 }
