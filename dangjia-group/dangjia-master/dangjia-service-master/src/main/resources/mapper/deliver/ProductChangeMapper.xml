@@ -42,5 +42,33 @@
 		</if>
 		ORDER BY create_date desc
 	</select>
+	<!--更新换货前商品名称-->
+	<update id="updateProductNameById">
+		UPDATE dj_deliver_product_change p1
+		SET p1.src_product_name =
+		<foreach collection="lists" item="item" index="index"
+				 separator=" " open="case src_product_id" close="end">
+			when #{item.id} then #{item.name}
+		</foreach>
+		where src_product_id in
+		<foreach collection="lists" index="index" item="item"
+				 separator="," open="(" close=")">
+			#{item.id,jdbcType=BIGINT}
+		</foreach>
+	</update>
+    <!--更新换货后商品名-->
+	<update id="updateProductNameById2">
+		UPDATE dj_deliver_product_change p1
+		SET p1.dest_product_name =
+		<foreach collection="lists" item="item" index="index"
+				 separator=" " open="case dest_product_id" close="end">
+			when #{item.id} then #{item.name}
+		</foreach>
+		where dest_product_id in
+		<foreach collection="lists" index="index" item="item"
+				 separator="," open="(" close=")">
+			#{item.id,jdbcType=BIGINT}
+		</foreach>
+	</update>
 
 </mapper>

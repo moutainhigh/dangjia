@@ -224,7 +224,7 @@ public class GoodsService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateGoods(String id, String name, String categoryId, Integer buy,
-                                      Integer sales, String unitId, Integer type, String arrString,String otherName) {
+                                      Integer sales, String unitId, Integer type, String arrString,String otherName)throws RuntimeException {
         try {
             Goods oldGoods = iGoodsMapper.selectByPrimaryKey(id);
             if (!oldGoods.getName().equals(name)) {

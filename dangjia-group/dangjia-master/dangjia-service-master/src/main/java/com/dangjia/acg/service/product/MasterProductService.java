@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.deliver.IOrderItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
+import com.dangjia.acg.mapper.deliver.IProductChangeMapper;
 import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseItemMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
@@ -11,6 +12,7 @@ import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
+import com.dangjia.acg.modle.deliver.ProductChange;
 import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
 import com.dangjia.acg.modle.house.SurplusWareHouseItem;
@@ -43,12 +45,16 @@ public class MasterProductService {
     private IOrderSplitItemMapper iOrderSplitItemMapper;
     @Autowired
     private IOrderItemMapper iOrderItemMapper;
+    @Autowired
+    private IProductChangeMapper iProductChangeMapper;
 
 
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateProductByProductId(String products,String brandSeriesId,String brandId,String goodsId,String id) throws RuntimeException {
         try {
             JSONArray lists = JSONArray.parseArray(products);
+            iProductChangeMapper.updateProductNameById(lists,brandSeriesId,brandId,goodsId,id);
+            iProductChangeMapper.updateProductNameById2(lists,brandSeriesId,brandId,goodsId,id);
             iMendMaterialMapper.updateMendMaterialById(lists,brandSeriesId,brandId,goodsId,id);
             iWarehouseMapper.updateWareHouseById(lists,brandSeriesId,brandId,goodsId,id);
             iSurplusWareHouseItemMapper.updateSurplusWareHouseItemById(lists,brandSeriesId,brandId,goodsId,id);
