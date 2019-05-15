@@ -234,16 +234,15 @@ public class MendOrderCheckService {
                 auditorId = member.getId();
             }
             MendOrderCheck mendOrderCheck = mendOrderCheckMapper.getByMendOrderId(mendOrder.getId(),roleType);
-            if(mendOrderCheck == null){
-                return ServerResponse.createByErrorMessage("审核流程不存在该角色");
-            }
-            if(mendOrderCheck.getState()!=0){
-                return ServerResponse.createBySuccessMessage("审核成功");
-            }
-            mendOrderCheck.setState(state);
-            mendOrderCheck.setAuditorId(auditorId);//审核人
-            mendOrderCheck.setModifyDate(new Date());
-            mendOrderCheckMapper.updateByPrimaryKeySelective(mendOrderCheck);
+            if(mendOrderCheck != null){
+                if(mendOrderCheck.getState()!=0){
+                    return ServerResponse.createBySuccessMessage("审核成功");
+                }
+                mendOrderCheck.setState(state);
+                mendOrderCheck.setAuditorId(auditorId);//审核人
+                mendOrderCheck.setModifyDate(new Date());
+                mendOrderCheckMapper.updateByPrimaryKeySelective(mendOrderCheck);
+                }
 
             if (state == 1){
                 mendOrder.setState(2);//不通过取消
