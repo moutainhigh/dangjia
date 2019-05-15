@@ -64,6 +64,7 @@ import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.member.GroupInfoService;
+import com.dangjia.acg.service.repair.MendOrderCheckService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -154,6 +155,9 @@ public class PaymentService {
     private IOrderSplitMapper orderSplitMapper;
     @Autowired
     private IOrderSplitItemMapper orderSplitItemMapper;
+    @Autowired
+    private MendOrderCheckService mendOrderCheckService;
+
     /**
      * 服务器回调
      */
@@ -306,7 +310,15 @@ public class PaymentService {
         try {
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(businessOrder.getTaskId());
             HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
+            House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
+            //处理审核通过
+            if(mendOrder.getType() == 0||mendOrder.getType() == 1){
+                //获取业主当前最新的userToken
+               String userRole = "role1:" + house.getMemberId();
+               String userToken = redisClient.getCache(userRole, String.class);
+               mendOrderCheckService.checkMendWorkerOrder(userToken,mendOrder,"1",2);
+            }
             if (mendOrder.getType() == 0) {//补货
                 houseExpend.setMaterialMoney(houseExpend.getMaterialMoney() + businessOrder.getTotalPrice().doubleValue());//材料
                 houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
@@ -437,7 +449,7 @@ public class PaymentService {
                 order.setPayment(payState);// 支付方式
                 order.setType(1);//人工
                 orderMapper.insert(order);
-                House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+
                 for (MendWorker mendWorker : mendWorkerList) {
                     OrderItem orderItem = new OrderItem();
                     orderItem.setOrderId(order.getId());
