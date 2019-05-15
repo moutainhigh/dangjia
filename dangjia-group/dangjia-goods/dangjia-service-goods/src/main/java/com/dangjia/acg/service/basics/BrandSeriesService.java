@@ -72,7 +72,7 @@ public class BrandSeriesService{
 	}
 	//修改
 	@Transactional(rollbackFor = Exception.class)
-	public ServerResponse update(String id,String name,String content ){
+	public ServerResponse update(String id,String name,String content )throws RuntimeException{
 		try {
 			BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(id);
 			BrandSeries brandEx = new BrandSeries();

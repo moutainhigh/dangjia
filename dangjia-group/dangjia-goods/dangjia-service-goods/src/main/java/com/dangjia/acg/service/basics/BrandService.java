@@ -124,7 +124,7 @@ public class BrandService {
 
     //修改品牌
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse update(String id, String name, String brandSeriesList){
+    public ServerResponse update(String id, String name, String brandSeriesList)throws RuntimeException{
         try {
             List<Brand> brList = iBrandMapper.getBrandByName(name);
             Brand brand1 = iBrandMapper.selectByPrimaryKey(id);
