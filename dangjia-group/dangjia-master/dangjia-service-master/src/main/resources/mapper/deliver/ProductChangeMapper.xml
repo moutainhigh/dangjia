@@ -42,6 +42,21 @@
 		</if>
 		ORDER BY create_date desc
 	</select>
+    <!--查询根据房子id和原商品id查询仓库商品是否有更换-->
+    <select id="queryProductChangeExist"  resultType="java.lang.Integer">
+        SELECT COUNT(id) FROM dj_deliver_product_change
+        where 1=1
+        <if test="houseId!=null and houseId!=''">
+            and house_id=#{houseId}
+        </if>
+        <if test="srcProductId!=null and srcProductId!=''">
+            and src_product_id=#{srcProductId}
+        </if>
+        <if test="type!=null and type!=''">
+            and type=#{type}
+        </if>
+        LIMIT 1
+    </select>
 	<!--更新换货前商品名称-->
 	<update id="updateProductNameById">
 		UPDATE dj_deliver_product_change p1

@@ -18,6 +18,15 @@ public interface IProductChangeMapper extends Mapper<ProductChange> {
     /**根据houseId查询商品换货对象*/
     List<ProductChange> queryByHouseId(@Param("houseId") String houseId, @Param("type") String type);
 
+    /**
+     * 查询根据房子id和原商品id查询仓库商品是否有更换
+     * @param houseId
+     * @param srcProductId
+     * @param type
+     * @return
+     */
+    int queryProductChangeExist(@Param("houseId") String houseId, @Param("srcProductId") String srcProductId, @Param("type") String type);
+
     /*更新换货前商品名称*/
     void updateProductNameById(@Param("lists") JSONArray lists, @Param("brandSeriesId") String brandSeriesId, @Param("brandId") String brandId,
                                @Param("goodsId") String goodsId, @Param("id") String id);

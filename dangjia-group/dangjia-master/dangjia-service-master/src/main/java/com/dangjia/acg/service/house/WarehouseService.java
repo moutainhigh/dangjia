@@ -12,6 +12,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.budget.BudgetItemDTO;
 import com.dangjia.acg.dto.house.WarehouseDTO;
+import com.dangjia.acg.mapper.deliver.IProductChangeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
@@ -48,6 +49,8 @@ public class WarehouseService {
     private ActuaryOpeAPI actuaryOpeAPI;
     @Autowired
     private IHouseMapper houseMapper;
+    @Autowired
+    private IProductChangeMapper productChangeMapper;
 
     @Autowired
     private RedisClient redisClient;
@@ -175,6 +178,12 @@ public class WarehouseService {
                         warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack()) - warehouse.getAskCount());
                         warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                         warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(cityId,warehouse.getProductId()));
+                        // type为空时查询 是否更换
+                        if(CommonUtil.isEmpty(type)) {
+                            if (productChangeMapper.queryProductChangeExist(warehouse.getHouseId(), warehouse.getProductId(), "0") > 0) {
+                                warehouseDTO.setChangeType(1);
+                            }
+                        }
                         warehouseDTOS.add(warehouseDTO);
                         rowPrice = rowPrice.add(new BigDecimal(warehouseDTO.getTolPrice()));
                     }
