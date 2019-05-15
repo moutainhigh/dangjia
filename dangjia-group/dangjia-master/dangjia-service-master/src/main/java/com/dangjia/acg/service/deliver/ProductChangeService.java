@@ -275,15 +275,20 @@ public class ProductChangeService {
         try {
             // 查询db中是否有该房子的换货订单
             List<ProductChangeOrder> list = productChangeOrderMapper.queryOrderByHouseId(houseId, "0");
+            // 计算总价差额
+            BigDecimal differPrice = calcDifferPrice(houseId);
             if(null != list && list.size() > 0){
                 order = list.get(0);
+                order.setDifferencePrice(differPrice);
+                order.setModifyDate(new Date());
+                productChangeOrderMapper.updateByPrimaryKey(order);
             } else {
                 order = new ProductChangeOrder();
                 order.setHouseId(houseId);
                 // 默认未支付
                 order.setType(0);
                 order.setNumber(System.currentTimeMillis()+"-"+generateWord());
-                order.setDifferencePrice(calcDifferPrice(houseId));
+                order.setDifferencePrice(differPrice);
                 productChangeOrderMapper.insert(order);
             }
         }catch (Exception e){
