@@ -322,12 +322,8 @@ public class ProductChangeService {
         String msg = "";
         try {
             // 查询
-            Example example = new Example(ProductChangeOrder.class);
-            example.createCriteria()
-                    .andEqualTo(ProductChangeOrder.ID, id);
-            List<ProductChangeOrder> list = productChangeOrderMapper.selectByExample(example);
-            if(null != list && list.size() > 0){
-                ProductChangeOrder order = list.get(0);
+            ProductChangeOrder order = productChangeOrderMapper.selectByPrimaryKey(id);
+            if(order!=null){
                 String houseId = order.getHouseId();
                 // 计算总价差额
                 BigDecimal totalDifferPrice = calcDifferPrice(houseId);
