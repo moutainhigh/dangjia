@@ -2,11 +2,13 @@ package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.basics.ProductAPI;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.MathUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.ProductChangeDTO;
 import com.dangjia.acg.dto.deliver.ProductChangeOrderDTO;
 import com.dangjia.acg.mapper.deliver.IProductChangeMapper;
@@ -23,6 +25,8 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,6 +59,9 @@ public class ProductChangeService {
     private IMemberMapper memberMapper;
     @Autowired
     private IWorkerDetailMapper workerDetailMapper;
+    @Autowired
+    private ConfigUtil configUtil;
+    private static Logger LOG = LoggerFactory.getLogger(ProductChangeService.class);
 
     /**
      * 添加更换商品
@@ -107,6 +114,7 @@ public class ProductChangeService {
                 ProductChange productChange = new ProductChange();
                 productChange.setMemberId(operator.getId());
                 productChange.setHouseId(houseId);
+                productChange.setCategoryId(StringUtils.isNotBlank(srcProduct.getCategoryId()) ? srcProduct.getCategoryId() : "");
                 // src
                 productChange.setSrcProductId(srcProduct.getId());
                 productChange.setSrcProductSn(srcProduct.getProductSn());
@@ -168,6 +176,7 @@ public class ProductChangeService {
      */
     public ServerResponse applyProductChange(HttpServletRequest request,String houseId) {
         try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<ProductChangeDTO> list = new ArrayList<>();
             ProductChangeOrderDTO productChangeOrderDTO = new ProductChangeOrderDTO();
             ProductChangeOrder order = insertProductChangeOrder(houseId);
@@ -185,14 +194,14 @@ public class ProductChangeService {
                 productChangeDTO.setSrcPrice(change.getSrcPrice());
                 productChangeDTO.setSrcSurCount(change.getSrcSurCount());
                 productChangeDTO.setSrcUnitName(change.getSrcUnitName());
-                productChangeDTO.setSrcImage(change.getSrcImage());
+                productChangeDTO.setSrcImage(address + change.getSrcImage());
                 productChangeDTO.setDestProductId(change.getDestProductId());
                 productChangeDTO.setDestProductSn(change.getDestProductSn());
                 productChangeDTO.setDestProductName(change.getDestProductName());
                 productChangeDTO.setDestPrice(change.getDestPrice());
                 productChangeDTO.setDestSurCount(change.getDestSurCount());
                 productChangeDTO.setDestUnitName(change.getDestUnitName());
-                productChangeDTO.setDestImage(change.getDestImage());
+                productChangeDTO.setDestImage(address + change.getDestImage());
                 // 差额
                 productChangeDTO.setDifferencePrice(change.getDifferencePrice());
                 productChangeDTO.setType(change.getType());
@@ -266,15 +275,20 @@ public class ProductChangeService {
         try {
             // 查询db中是否有该房子的换货订单
             List<ProductChangeOrder> list = productChangeOrderMapper.queryOrderByHouseId(houseId, "0");
+            // 计算总价差额
+            BigDecimal differPrice = calcDifferPrice(houseId);
             if(null != list && list.size() > 0){
                 order = list.get(0);
+                order.setDifferencePrice(differPrice);
+                order.setModifyDate(new Date());
+                productChangeOrderMapper.updateByPrimaryKey(order);
             } else {
                 order = new ProductChangeOrder();
                 order.setHouseId(houseId);
                 // 默认未支付
                 order.setType(0);
                 order.setNumber(System.currentTimeMillis()+"-"+generateWord());
-                order.setDifferencePrice(calcDifferPrice(houseId));
+                order.setDifferencePrice(differPrice);
                 productChangeOrderMapper.insert(order);
             }
         }catch (Exception e){
