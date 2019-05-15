@@ -21,10 +21,7 @@ import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
-import com.dangjia.acg.mapper.deliver.IOrderItemMapper;
-import com.dangjia.acg.mapper.deliver.IOrderMapper;
-import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
-import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
+import com.dangjia.acg.mapper.deliver.*;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -44,10 +41,7 @@ import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
-import com.dangjia.acg.modle.deliver.Order;
-import com.dangjia.acg.modle.deliver.OrderItem;
-import com.dangjia.acg.modle.deliver.OrderSplit;
-import com.dangjia.acg.modle.deliver.OrderSplitItem;
+import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.*;
@@ -63,6 +57,7 @@ import com.dangjia.acg.modle.repair.MendWorker;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.deliver.ProductChangeService;
 import com.dangjia.acg.service.member.GroupInfoService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
 import com.github.pagehelper.PageInfo;
@@ -157,6 +152,11 @@ public class PaymentService {
     private IOrderSplitItemMapper orderSplitItemMapper;
     @Autowired
     private MendOrderCheckService mendOrderCheckService;
+    @Autowired
+    private ProductChangeService productChangeService;
+
+    @Autowired
+    private IProductChangeOrderMapper productChangeOrderMapper;
 
     /**
      * 服务器回调
@@ -198,6 +198,13 @@ public class PaymentService {
                 houseDistribution.setState(1);//已支付
                 iHouseDistributionMapper.updateByPrimaryKeySelective(houseDistribution);
                 return ServerResponse.createBySuccessMessage("支付成功");
+            }else if (businessOrder.getType() == 6) {//待付款 更换结算
+                HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                        .getRequest();
+                House house= houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+                request.setAttribute(Constants.CITY_ID, house.getCityId());
+                //待付款 提前付材料
+                productChangeService.orderBackFun(request,businessOrder.getTaskId());
             }
 
             HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
@@ -933,6 +940,42 @@ public class PaymentService {
                 actuaryDTO.setKind("验房定金");
                 actuaryDTO.setName("当家装修验房定金");
                 actuaryDTO.setPrice("¥" + String.format("%.2f", houseDistribution.getPrice()));
+                actuaryDTO.setType(6);
+                actuaryDTOList.add(actuaryDTO);
+            }else  if (type == 6) {
+                ProductChangeOrder productChangeOrder = productChangeOrderMapper.selectByPrimaryKey(houseDistributionId);
+                if (productChangeOrder == null) {
+                    return ServerResponse.createByErrorMessage("订单记录不存在");
+                }
+                House house = houseMapper.selectByPrimaryKey(productChangeOrder.getHouseId());
+                Example example = new Example(BusinessOrder.class);
+                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andEqualTo(BusinessOrder.STATE, 1);
+                List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
+                BusinessOrder businessOrder;
+                if (businessOrderList.size() == 0) {
+                    businessOrder = new BusinessOrder();
+                    businessOrder.setMemberId(house.getMemberId()); //公众号唯一标识
+                    businessOrder.setHouseId(productChangeOrder.getHouseId());
+                    businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+                    businessOrder.setState(1);//刚生成
+                    businessOrder.setTotalPrice(productChangeOrder.getDifferencePrice());
+                    businessOrder.setDiscountsPrice(new BigDecimal(0));
+                    businessOrder.setPayPrice(productChangeOrder.getDifferencePrice());
+                    businessOrder.setType(6);//记录支付类型任务类型
+                    businessOrder.setTaskId(houseDistributionId);//保存任务ID
+                    businessOrderMapper.insert(businessOrder);
+                } else {
+                    businessOrder = businessOrderList.get(0);
+                }
+
+                paymentDTO.setTotalPrice(productChangeOrder.getDifferencePrice());
+                paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
+                paymentDTO.setPayPrice(productChangeOrder.getDifferencePrice());//实付
+                ActuaryDTO actuaryDTO = new ActuaryDTO();
+                actuaryDTO.setImage(imageAddress + "icon/bucailiao.png");
+                actuaryDTO.setKind("更换结算");
+                actuaryDTO.setName("当家装修更换结算");
+                actuaryDTO.setPrice("¥" + String.format("%.2f", productChangeOrder.getDifferencePrice().doubleValue()));
                 actuaryDTO.setType(6);
                 actuaryDTOList.add(actuaryDTO);
             }else if (type == 2) {

@@ -70,7 +70,7 @@ public class BusinessOrder extends BaseEntity {
 	private BigDecimal payPrice;//
 
 	@Column(name = "type")
-	@Desc(value = "支付类型 1工序支付任务,2补货补人工 ,4待付款进来只付材料")
-	@ApiModelProperty("支付类型 1工序支付任务,2补货补人工 ,4待付款进来只付材料")
-	private Integer type; // 1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销
+	@Desc(value = "支付类型  1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销, 6换货单")
+	@ApiModelProperty("支付类型  1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销, 6换货单")
+	private Integer type; // 1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销, 6换货单
 }
