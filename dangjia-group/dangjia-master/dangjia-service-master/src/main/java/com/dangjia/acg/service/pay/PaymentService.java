@@ -284,6 +284,13 @@ public class PaymentService {
                 returnMap.put("businessOrderNumber", businessOrderNumber);
                 returnMap.put("price", houseDistribution.getPrice());
                 return ServerResponse.createBySuccess("支付成功", returnMap);
+            }else if (businessOrder.getType() == 6) {//待付款 更换结算
+                HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                        .getRequest();
+                House house= houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+                request.setAttribute(Constants.CITY_ID, house.getCityId());
+                //待付款 提前付材料
+                productChangeService.orderBackFun(request,businessOrder.getTaskId());
             }
 
             HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
