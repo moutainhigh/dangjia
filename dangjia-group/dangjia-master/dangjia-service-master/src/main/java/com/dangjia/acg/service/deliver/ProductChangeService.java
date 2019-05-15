@@ -314,43 +314,46 @@ public class ProductChangeService {
     /**
      * 补退差价回调
      * @param request
-     * @param houseId
+     * @param id
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse orderBackFun(HttpServletRequest request, String houseId){
+    public ServerResponse orderBackFun(HttpServletRequest request, String id){
         String msg = "";
         try {
             // 查询
-            List<ProductChangeOrder> list = productChangeOrderMapper.queryOrderByHouseId(houseId, "0");
-            if(null != list && list.size() > 0){
+            ProductChangeOrder order = productChangeOrderMapper.selectByPrimaryKey(id);
+            if(order!=null){
+                String houseId = order.getHouseId();
                 // 计算总价差额
                 BigDecimal totalDifferPrice = calcDifferPrice(houseId);
-                ProductChangeOrder order = list.get(0);
                 // 判断总价差额是否小于等于0
-                if(totalDifferPrice.compareTo(BigDecimal.ZERO) == -1){
+                if(totalDifferPrice.compareTo(BigDecimal.ZERO) == -1 || totalDifferPrice.compareTo(BigDecimal.ZERO) == 0){
                     // 0未支付 1已支付 2已退款
                     order.setType(2);
-                    /*退钱给业主*/
-                    Member member = memberMapper.selectByPrimaryKey(houseMapper.selectByPrimaryKey(houseId).getMemberId());
-                    BigDecimal haveMoney = member.getHaveMoney().add(totalDifferPrice);
-                    BigDecimal surplusMoney = member.getSurplusMoney().add(totalDifferPrice);
-                    //记录流水
-                    WorkerDetail workerDetail = new WorkerDetail();
-                    workerDetail.setName("业主换材料退款");
-                    workerDetail.setWorkerId(member.getId());
-                    workerDetail.setWorkerName(CommonUtil.isEmpty(member.getName()) ?member.getNickName() : member.getName());
-                    workerDetail.setHouseId(houseId);
-                    workerDetail.setMoney(totalDifferPrice);
-                    workerDetail.setApplyMoney(totalDifferPrice);
-                    workerDetail.setWalletMoney(surplusMoney);
-                    workerDetail.setState(4);//进钱//业主退
-                    workerDetailMapper.insert(workerDetail);
+                    // 总价差额不等于 0 时，退钱到业主钱包
+                    if(totalDifferPrice.compareTo(BigDecimal.ZERO) != 0) {
+                        /*退钱给业主*/
+                        Member member = memberMapper.selectByPrimaryKey(houseMapper.selectByPrimaryKey(houseId).getMemberId());
+                        BigDecimal haveMoney = member.getHaveMoney().add(totalDifferPrice);
+                        BigDecimal surplusMoney = member.getSurplusMoney().add(totalDifferPrice);
+                        //记录流水
+                        WorkerDetail workerDetail = new WorkerDetail();
+                        workerDetail.setName("业主换材料退款");
+                        workerDetail.setWorkerId(member.getId());
+                        workerDetail.setWorkerName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
+                        workerDetail.setHouseId(houseId);
+                        workerDetail.setMoney(totalDifferPrice);
+                        workerDetail.setApplyMoney(totalDifferPrice);
+                        workerDetail.setWalletMoney(surplusMoney);
+                        workerDetail.setState(4);//进钱//业主退
+                        workerDetailMapper.insert(workerDetail);
 
-                    member.setHaveMoney(haveMoney);
-                    member.setSurplusMoney(surplusMoney);
-                    memberMapper.updateByPrimaryKeySelective(member);
-                    msg = "您已成功更换商品，系统将在24小时内退差价进您的钱包。";
+                        member.setHaveMoney(haveMoney);
+                        member.setSurplusMoney(surplusMoney);
+                        memberMapper.updateByPrimaryKeySelective(member);
+                        msg = "您已成功更换商品，系统将在24小时内退差价进您的钱包。";
+                    }
                 }else {
                     order.setType(1);
                 }

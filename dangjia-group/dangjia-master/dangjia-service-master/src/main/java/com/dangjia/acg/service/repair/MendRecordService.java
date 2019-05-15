@@ -515,6 +515,9 @@ public class MendRecordService {
                     flag = true;
                 }
             }
+            if(mendOrderChecks==null||mendOrderChecks.size()==0){
+                flag = true;
+            }
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
             //"0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回"
             if (flag && mendOrder.getState() != 5) {

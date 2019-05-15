@@ -39,5 +39,5 @@ public interface ProductChangeAPI {
 
     @PostMapping("app/deliver/productChangeOrder/orderBackFun")
     @ApiOperation(value = "补退差价回调", notes = "补退差价回调")
-    ServerResponse orderBackFun(HttpServletRequest request, String houseId);
+    ServerResponse orderBackFun(HttpServletRequest request, String id);
 }
