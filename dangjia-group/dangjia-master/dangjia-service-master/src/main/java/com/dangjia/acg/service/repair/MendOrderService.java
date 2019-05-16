@@ -887,27 +887,46 @@ public class MendOrderService {
      */
     private boolean addMendMateriel(String productArr, MendOrder mendOrder) {
         try {
+            House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
             mendOrder.setTotalAmount(0.0);
             JSONArray jsonArray = JSONArray.parseArray(productArr);
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
                 MendMateriel mendMateriel = new MendMateriel();//补退材料明细
                 String productId = obj.getString("productId");
-                Warehouse warehouse=warehouseMapper.getByProductId(productId,mendOrder.getHouseId());
                 double num = Double.parseDouble(obj.getString("num"));
+
+                Warehouse warehouse=warehouseMapper.getByProductId(productId,mendOrder.getHouseId());
+                if(warehouse!=null){
+                    mendMateriel.setProductSn(warehouse.getProductSn());
+                    mendMateriel.setProductName(warehouse.getProductName());
+                    mendMateriel.setPrice(warehouse.getPrice());
+                    mendMateriel.setCost(warehouse.getCost());
+                    mendMateriel.setUnitName(warehouse.getUnitName());
+                    mendMateriel.setTotalPrice(num * warehouse.getPrice());
+                    mendMateriel.setProductType(warehouse.getProductType());//0：材料；1：服务
+                    mendMateriel.setCategoryId(warehouse.getCategoryId());
+                    mendMateriel.setImage(warehouse.getImage());
+                }else{
+                    Product product = forMasterAPI.getProduct(house.getCityId(), productId);
+                    mendMateriel.setProductSn(product.getProductSn());
+                    mendMateriel.setProductName(product.getName());
+                    mendMateriel.setPrice(product.getPrice());
+                    mendMateriel.setCost(product.getCost());
+                    mendMateriel.setTotalPrice(num * product.getPrice());
+                    mendMateriel.setCategoryId(product.getCategoryId());
+                    mendMateriel.setImage(product.getImage());
+                    String unitName = forMasterAPI.getUnitName(house.getCityId(), product.getConvertUnit());
+                    mendMateriel.setUnitName(unitName);
+                    mendMateriel.setProductType(forMasterAPI.getGoods(house.getCityId(), product.getGoodsId()).getType());//0：材料；1：服务
+                }
+
                 mendMateriel.setMendOrderId(mendOrder.getId());
                 mendMateriel.setProductId(productId);
-                mendMateriel.setProductSn(warehouse.getProductSn());
-                mendMateriel.setProductName(warehouse.getProductName());
-                mendMateriel.setPrice(warehouse.getPrice());
-                mendMateriel.setCost(warehouse.getCost());
-                mendMateriel.setUnitName(warehouse.getUnitName());
                 mendMateriel.setShopCount(num);
-                mendMateriel.setTotalPrice(num * warehouse.getPrice());
                 mendOrder.setTotalAmount(mendOrder.getTotalAmount() + mendMateriel.getTotalPrice());//修改总价
-                mendMateriel.setProductType(warehouse.getProductType());//0：材料；1：服务
-                mendMateriel.setCategoryId(warehouse.getCategoryId());
-                mendMateriel.setImage(warehouse.getImage());
+
+                mendMaterialMapper.insertSelective(mendMateriel);
             }
             mendOrder.setModifyDate(new Date());
             mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
