@@ -251,4 +251,12 @@
 			)
 		</foreach>
 	</insert>
+
+	<!--更新人工商品名称-->
+	<update id="updateBudgetMaterialById" parameterType="java.lang.String">
+		UPDATE dj_actuary_budget_worker p1
+		INNER JOIN `dj_basics_worker_goods` p ON p.id = p1.worker_goods_id
+		SET p1.name = p.`name`,p1.image=p.image,p1.price=p.price,p1.unit_name=p.unit_name
+		WHERE p.id=#{id}
+	</update>
 </mapper>

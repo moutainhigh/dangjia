@@ -464,12 +464,12 @@ public class ProductChangeService {
                         BigDecimal shopCount = BigDecimal.valueOf(wareHouse.getShopCount()).add(BigDecimal.valueOf(change.getDestSurCount()));
                         wareHouse.setShopCount(shopCount.doubleValue());
                         warehouseMapper.updateByPrimaryKey(wareHouse);
-                        // 修改原仓库商品 买的数量 原买的数量-更换数
-                        BigDecimal oldShopCount = BigDecimal.valueOf(oldWareHouse.getShopCount()).subtract(BigDecimal.valueOf(change.getDestSurCount()));
-                        oldWareHouse.setShopCount(oldShopCount.doubleValue());
-                        oldWareHouse.setModifyDate(new Date());
-                        warehouseMapper.updateByPrimaryKey(oldWareHouse);
                     }
+                    // 修改原仓库商品 买的数量 原买的数量-更换数
+                    BigDecimal oldShopCount = BigDecimal.valueOf(oldWareHouse.getShopCount()).subtract(BigDecimal.valueOf(change.getDestSurCount()));
+                    oldWareHouse.setShopCount(oldShopCount.doubleValue());
+                    oldWareHouse.setModifyDate(new Date());
+                    warehouseMapper.updateByPrimaryKey(oldWareHouse);
                     // 处理新商品------end
                     change.setType(1);
                     productChangeMapper.updateByPrimaryKey(change);

@@ -2,6 +2,7 @@ package com.dangjia.acg.service.product;
 
 import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.mapper.deliver.ICartMapper;
 import com.dangjia.acg.mapper.deliver.IOrderItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.IProductChangeMapper;
@@ -47,12 +48,15 @@ public class MasterProductService {
     private IOrderItemMapper iOrderItemMapper;
     @Autowired
     private IProductChangeMapper iProductChangeMapper;
+    @Autowired
+    private ICartMapper iCartMapper;
 
 
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateProductByProductId(String products,String brandSeriesId,String brandId,String goodsId,String id) throws RuntimeException {
         try {
             JSONArray lists = JSONArray.parseArray(products);
+            iCartMapper.updateCartById(lists,brandSeriesId,brandId,goodsId,id);
             iProductChangeMapper.updateProductNameById(lists,brandSeriesId,brandId,goodsId,id);
             iProductChangeMapper.updateProductNameById2(lists,brandSeriesId,brandId,goodsId,id);
             iMendMaterialMapper.updateMendMaterialById(lists,brandSeriesId,brandId,goodsId,id);
@@ -62,7 +66,7 @@ public class MasterProductService {
             iOrderSplitItemMapper.updateOrderSplitItemById(lists,brandSeriesId,brandId,goodsId,id);
             iOrderItemMapper.updateOrderItemById(lists,brandSeriesId,brandId,goodsId,id);
             return ServerResponse.createBySuccessMessage("更新成功");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
            return ServerResponse.createByErrorMessage("更新失败");
         }
     }

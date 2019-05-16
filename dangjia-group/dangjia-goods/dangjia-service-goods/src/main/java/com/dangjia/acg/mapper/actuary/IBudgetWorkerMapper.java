@@ -51,4 +51,7 @@ public interface IBudgetWorkerMapper extends Mapper<BudgetWorker> {
 	Map<String,Object> getWorkerTotalPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 
 	void insertByBatch(@Param("list")List<BudgetWorker> list);
+
+	/*更新人工商品名称及属性*/
+	void updateBudgetMaterialById(@Param("id") String id);
 }

@@ -480,7 +480,7 @@ public class ActuaryOperationService {
             }
 
             Example example =new Example(Product.class);
-            example.createCriteria().andEqualTo(Product.GOODS_ID,goods.getId()).andEqualTo(Product.TYPE,1).andEqualTo(Product.MAKET,1);
+            example.createCriteria().andEqualTo(Product.GOODS_ID,goods.getId());
             List<Product> products = productMapper.selectByExample(example);
             Map<String,Product> productsMaps=new HashMap<>();
             //装置货品下所有商品
@@ -682,7 +682,7 @@ public class ActuaryOperationService {
                     String convertUnitName = bm.getUnitName();
                     if (product != null) {
                         flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
-                        String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO, userToken,
+                        String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMODITY, userToken,
                                 cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + type;
                         flowActuaryDTO.setUrl(url);
                         flowActuaryDTO.setAttribute(getAttributes(product));//拼接属性品牌
