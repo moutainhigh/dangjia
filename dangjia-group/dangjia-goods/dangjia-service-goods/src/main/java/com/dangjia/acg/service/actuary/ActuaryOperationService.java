@@ -842,39 +842,42 @@ public class ActuaryOperationService {
             for (BrandSeries brandSerie : brandSeries) {
                 //属性 id
                 if(brandSerie!=null){
+                    boolean isShow=false;
                     for (Product product1 : productList) {
                         if(brandSerie.getId().equals(product1.getBrandSeriesId())){
-                            AttributeValueDTO avDTO = new AttributeValueDTO();
-                            avDTO.setAttributeValueId(brandSerie.getId());
-                            avDTO.setName(brandSerie.getName());
-                            if (isContainsValue(brandSerie.getId(), product.getBrandSeriesId())) {//如果包含该属性
-                                avDTO.setState(1);//选中
-                                if (StringUtils.isNoneBlank(brandSerie.getImage())) {
-                                    imageList.add(getImage(brandSerie.getImage()));//属性图
-                                }
-                            } else {
-                                avDTO.setState(0);//未选中
+                            isShow=true;
+                        }
+                    }
+                    if(isShow) {
+                        AttributeValueDTO avDTO = new AttributeValueDTO();
+                        avDTO.setAttributeValueId(brandSerie.getId());
+                        avDTO.setName(brandSerie.getName());
+                        if (isContainsValue(brandSerie.getId(), product.getBrandSeriesId())) {//如果包含该属性
+                            avDTO.setState(1);//选中
+                            if (StringUtils.isNoneBlank(brandSerie.getImage())) {
+                                imageList.add(getImage(brandSerie.getImage()));//属性图
+                            }
+                        } else {
+                            avDTO.setState(0);//未选中
 
-                                List<String> valueIdArr=  productsMaps.get(brandSerie.getId());
-                                if(valueIdArr==null||valueIdArr.size()==0){
+                            List<String> valueIdArr = productsMaps.get(brandSerie.getId());
+                            if (valueIdArr == null || valueIdArr.size() == 0) {
+                                avDTO.setState(2);//不能选中
+                            } else {
+                                boolean isExist = false;
+                                String attributeVal = product.getBrandId() + "," + brandSerie.getId() + "," + product.getValueIdArr();
+                                for (String s : valueIdArr) {
+                                    if (s.equals(attributeVal)) {
+                                        isExist = true;
+                                        break;
+                                    }
+                                }
+                                if (!isExist) {
                                     avDTO.setState(2);//不能选中
-                                }else {
-                                    boolean isExist = false;
-                                    String attributeVal = product.getBrandId() + "," + brandSerie.getId() + "," + product.getValueIdArr();
-                                    for (String s : valueIdArr) {
-                                        if (s.equals(attributeVal)) {
-                                            isExist = true;
-                                            break;
-                                        }
-                                    }
-                                    if (!isExist) {
-                                        avDTO.setState(2);//不能选中
-                                    }
                                 }
                             }
-                            attributeValueDTOList.add(avDTO);//添加属性值
-
                         }
+                        attributeValueDTOList.add(avDTO);//添加属性值
                     }
                 }
             }
