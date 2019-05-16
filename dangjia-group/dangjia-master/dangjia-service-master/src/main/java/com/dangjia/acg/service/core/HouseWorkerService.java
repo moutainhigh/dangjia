@@ -815,7 +815,7 @@ public class HouseWorkerService {
                     HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
                     BigDecimal remain = houseWorkerOrder.getWorkPrice().add(houseWorkerOrder.getRepairPrice());
                     map.put("houseName", house.getHouseName());//地址
-                    map.put("releaseTime", houseFlow.getReleaseTime() == null ? "" : houseFlow.getReleaseTime().getTime());//发布时间
+                    map.put("releaseTime", houseFlow.getReleaseTime());//发布时间
                     map.put("square", (house.getSquare() == null ? "0" : house.getSquare()) + "m²");//面积
                     map.put("memberName", member.getName());//业主姓名
                     map.put("price", "¥" + (String.format("%.2f", remain.doubleValue())));//价格
