@@ -56,6 +56,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
         try {
             return workerGoodsService.setWorkerGoods(workerGoods, technologyJsonList,deleteTechnologyIds);
         } catch (Exception e) {
+            e.printStackTrace();
             return ServerResponse.createByErrorMessage("新增或更新工价商品失败");
         }
     }

@@ -429,7 +429,7 @@
 	<update id="updateBudgetMaterialById" parameterType="java.lang.String">
 		UPDATE dj_actuary_budget_material p1
 		INNER JOIN `dj_basics_product` p ON p.id = p1.product_id
-		SET p1.product_name = p.`name`
+		SET p1.product_name = p.`name`,p1.image=p.image
 		WHERE 1=1
 		<if test="null!=brandSeriesId and ''!=brandSeriesId">
 			or p.brand_series_id = #{brandSeriesId};

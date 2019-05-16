@@ -56,6 +56,36 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and mw.mend_order_id = mo.id
     </select>
 
+    <!--更新人工商品名称及属性-->
+    <update id="updateMendWorkerById">
+        UPDATE dj_repair_mend_worker p1
+        SET p1.worker_goods_name =
+        <foreach collection="lists" item="item" index="index"
+                 separator=" " open="case id" close="end">
+            when id then #{item.name}
+        </foreach>
+        ,p1.unit_name=
+        <foreach collection="lists" item="item" index="index"
+                 separator=" " open="case id" close="end">
+            when id then #{item.unitName}
+        </foreach>
+        ,p1.image=
+        <foreach collection="lists" item="item" index="index"
+                 separator=" " open="case id" close="end">
+            when id then #{item.image}
+        </foreach>
+        ,p1.price=
+        <foreach collection="lists" item="item" index="index"
+                 separator=" " open="case id" close="end">
+            when id then #{item.price}
+        </foreach>
+        where p1.worker_goods_id in
+        <foreach collection="lists" index="index" item="item"
+                 separator="," open="(" close=")">
+            #{item.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
 
 </mapper>
 
