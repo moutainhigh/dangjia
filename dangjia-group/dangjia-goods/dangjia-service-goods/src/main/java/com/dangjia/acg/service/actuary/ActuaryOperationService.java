@@ -480,7 +480,7 @@ public class ActuaryOperationService {
             }
 
             Example example =new Example(Product.class);
-            example.createCriteria().andEqualTo(Product.GOODS_ID,goods.getId()).andEqualTo(Product.TYPE,1).andEqualTo(Product.MAKET,1);
+            example.createCriteria().andEqualTo(Product.GOODS_ID,goods.getId());
             List<Product> products = productMapper.selectByExample(example);
             Map<String,Product> productsMaps=new HashMap<>();
             //装置货品下所有商品
