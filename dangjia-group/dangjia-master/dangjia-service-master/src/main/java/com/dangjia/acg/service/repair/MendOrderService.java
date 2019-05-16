@@ -893,7 +893,7 @@ public class MendOrderService {
                 JSONObject obj = jsonArray.getJSONObject(i);
                 MendMateriel mendMateriel = new MendMateriel();//补退材料明细
                 String productId = obj.getString("productId");
-                Warehouse warehouse=warehouseMapper.getByProductId(mendMateriel.getProductId(),mendOrder.getHouseId());
+                Warehouse warehouse=warehouseMapper.getByProductId(productId,mendOrder.getHouseId());
                 double num = Double.parseDouble(obj.getString("num"));
                 mendMateriel.setMendOrderId(mendOrder.getId());
                 mendMateriel.setProductId(productId);
