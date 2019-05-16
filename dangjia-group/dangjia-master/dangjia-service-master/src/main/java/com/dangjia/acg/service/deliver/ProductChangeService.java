@@ -346,18 +346,20 @@ public class ProductChangeService {
                     order.setType(2);
                     // 总价差额不等于 0 时，退钱到业主钱包
                     if(totalDifferPrice.compareTo(BigDecimal.ZERO) != 0) {
+                        // 取绝对值 -12 = 12
+                        BigDecimal toDifferPrice = BigDecimal.valueOf(Math.abs(totalDifferPrice.doubleValue()));
                         /*退钱给业主*/
                         Member member = memberMapper.selectByPrimaryKey(houseMapper.selectByPrimaryKey(houseId).getMemberId());
-                        BigDecimal haveMoney = member.getHaveMoney().add(totalDifferPrice);
-                        BigDecimal surplusMoney = member.getSurplusMoney().add(totalDifferPrice);
+                        BigDecimal haveMoney = member.getHaveMoney().add(toDifferPrice);
+                        BigDecimal surplusMoney = member.getSurplusMoney().add(toDifferPrice);
                         //记录流水
                         WorkerDetail workerDetail = new WorkerDetail();
                         workerDetail.setName("业主换材料退款");
                         workerDetail.setWorkerId(member.getId());
                         workerDetail.setWorkerName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
                         workerDetail.setHouseId(houseId);
-                        workerDetail.setMoney(totalDifferPrice);
-                        workerDetail.setApplyMoney(totalDifferPrice);
+                        workerDetail.setMoney(toDifferPrice);
+                        workerDetail.setApplyMoney(toDifferPrice);
                         workerDetail.setWalletMoney(surplusMoney);
                         workerDetail.setState(4);//进钱//业主退
                         workerDetailMapper.insert(workerDetail);
@@ -409,69 +411,72 @@ public class ProductChangeService {
      */
     private boolean changeGmProduct(HttpServletRequest request, String houseId){
         // 查询
-        Example example = new Example(ProductChange.class);
-        example.createCriteria().andEqualTo(ProductChange.HOUSE_ID, houseId);
-        List<ProductChange> list = productChangeMapper.selectByExample(example);
+        List<ProductChange> list = productChangeMapper.queryByHouseId(houseId, "0");
         Product destProduct = null;
         if(null != list && list.size() > 0){
             for (ProductChange change : list){
-                // 原商品仓库
-                Warehouse oldWareHouse = warehouseMapper.getByProductId(change.getSrcProductId(), houseId);
-                // 新商品仓库
-                Warehouse wareHouse = warehouseMapper.getByProductId(change.getDestProductId(), houseId);
-                // 更换后的商品
-                ServerResponse destResponse = productAPI.getProductById(request, change.getDestProductId());
-                if(destResponse!=null&&destResponse.getResultObj()!=null) {
-                    destProduct = JSON.parseObject(JSON.toJSONString(destResponse.getResultObj()), Product.class);
-                }
-                // 处理新商品------begin
-                if(null == wareHouse){
-                    // 新商品没有则添加
-                    Warehouse newWareHouse = new Warehouse();
-                    newWareHouse.setHouseId(houseId);
-                    newWareHouse.setShopCount(change.getDestSurCount());
-                    newWareHouse.setRepairCount(0.0);
-                    newWareHouse.setStayCount(0.0);
-                    newWareHouse.setRobCount(0.0);
-                    newWareHouse.setAskCount(0.0);//已要数量
-                    newWareHouse.setBackCount(0.0);//退总数
-                    newWareHouse.setReceive(0.0);
-                    newWareHouse.setProductId(destProduct.getId());
-                    newWareHouse.setProductSn(destProduct.getProductSn());
-                    newWareHouse.setProductName(destProduct.getName());
-                    newWareHouse.setPrice(destProduct.getPrice());
-                    newWareHouse.setCost(destProduct.getCost());
-                    newWareHouse.setUnitName(destProduct.getUnitName());
-                    newWareHouse.setProductType(0);
-                    newWareHouse.setCategoryId(destProduct.getCategoryId());
-                    newWareHouse.setImage(destProduct.getImage());
-                    newWareHouse.setPayTime(0);
-                    newWareHouse.setAskTime(0);
-                    newWareHouse.setRepTime(0);//补次数
-                    newWareHouse.setBackTime(0);
-                    warehouseMapper.insert(newWareHouse);
-                } else {
-                    // 新商品有则修改
-                    // 商品剩余数 剩余数量 所有买的数量 - 业主退货 - 要的
-                    double surCount = wareHouse.getShopCount() - (wareHouse.getOwnerBack()==null?0D:wareHouse.getOwnerBack()) - wareHouse.getAskCount();
-                    if(BigDecimal.valueOf(change.getDestSurCount()).compareTo(BigDecimal.valueOf(surCount)) == 1){
-                        return false;
+                // 更换数大于0的商品，才做处理
+                if(change.getDestSurCount().compareTo(0.0) == 1) {
+                    // 原商品仓库
+                    Warehouse oldWareHouse = warehouseMapper.getByProductId(change.getSrcProductId(), houseId);
+                    // 新商品仓库
+                    Warehouse wareHouse = warehouseMapper.getByProductId(change.getDestProductId(), houseId);
+                    // 更换后的商品
+                    ServerResponse destResponse = productAPI.getProductById(request, change.getDestProductId());
+                    if (destResponse != null && destResponse.getResultObj() != null) {
+                        destProduct = JSON.parseObject(JSON.toJSONString(destResponse.getResultObj()), Product.class);
                     }
-                    wareHouse.setModifyDate(new Date());
-                    // 计算所有买的数量 买的数量+更换数
-                    BigDecimal shopCount = BigDecimal.valueOf(wareHouse.getShopCount()).add(BigDecimal.valueOf(change.getDestSurCount()));
-                    wareHouse.setShopCount(shopCount.doubleValue());
-                    warehouseMapper.updateByPrimaryKey(wareHouse);
-                    // 修改原仓库商品 买的数量 原买的数量-更换数
-                    BigDecimal oldShopCount = BigDecimal.valueOf(oldWareHouse.getShopCount()).subtract(BigDecimal.valueOf(change.getDestSurCount()));
-                    oldWareHouse.setShopCount(oldShopCount.doubleValue());
-                    oldWareHouse.setModifyDate(new Date());
-                    warehouseMapper.updateByPrimaryKey(oldWareHouse);
-
+                    // 处理新商品------begin
+                    if (null == wareHouse) {
+                        // 新商品没有则添加
+                        Warehouse newWareHouse = new Warehouse();
+                        newWareHouse.setHouseId(houseId);
+                        newWareHouse.setShopCount(change.getDestSurCount());
+                        newWareHouse.setRepairCount(0.0);
+                        newWareHouse.setStayCount(0.0);
+                        newWareHouse.setRobCount(0.0);
+                        newWareHouse.setAskCount(0.0);//已要数量
+                        newWareHouse.setBackCount(0.0);//退总数
+                        newWareHouse.setReceive(0.0);
+                        newWareHouse.setProductId(destProduct.getId());
+                        newWareHouse.setProductSn(destProduct.getProductSn());
+                        newWareHouse.setProductName(destProduct.getName());
+                        newWareHouse.setPrice(destProduct.getPrice());
+                        newWareHouse.setCost(destProduct.getCost());
+                        newWareHouse.setUnitName(destProduct.getUnitName());
+                        newWareHouse.setProductType(0);
+                        newWareHouse.setCategoryId(destProduct.getCategoryId());
+                        newWareHouse.setImage(destProduct.getImage());
+                        newWareHouse.setPayTime(0);
+                        newWareHouse.setAskTime(0);
+                        newWareHouse.setRepTime(0);//补次数
+                        newWareHouse.setBackTime(0);
+                        warehouseMapper.insert(newWareHouse);
+                    } else {
+                        // 新商品有则修改
+                        // 商品剩余数 剩余数量 所有买的数量 - 业主退货 - 要的
+                        double surCount = wareHouse.getShopCount() - (wareHouse.getOwnerBack() == null ? 0D : wareHouse.getOwnerBack()) - wareHouse.getAskCount();
+                        if (BigDecimal.valueOf(change.getDestSurCount()).compareTo(BigDecimal.valueOf(surCount)) == 1) {
+                            return false;
+                        }
+                        wareHouse.setModifyDate(new Date());
+                        // 计算所有买的数量 买的数量+更换数
+                        BigDecimal shopCount = BigDecimal.valueOf(wareHouse.getShopCount()).add(BigDecimal.valueOf(change.getDestSurCount()));
+                        wareHouse.setShopCount(shopCount.doubleValue());
+                        warehouseMapper.updateByPrimaryKey(wareHouse);
+                        // 修改原仓库商品 买的数量 原买的数量-更换数
+                        BigDecimal oldShopCount = BigDecimal.valueOf(oldWareHouse.getShopCount()).subtract(BigDecimal.valueOf(change.getDestSurCount()));
+                        oldWareHouse.setShopCount(oldShopCount.doubleValue());
+                        oldWareHouse.setModifyDate(new Date());
+                        warehouseMapper.updateByPrimaryKey(oldWareHouse);
+                    }
+                    // 处理新商品------end
+                    change.setType(1);
+                    productChangeMapper.updateByPrimaryKey(change);
+                }else {
+                    // 为0的，则删除
+                    productChangeMapper.deleteByPrimaryKey(change.getId());
                 }
-                // 处理新商品------end
-                change.setType(1);
-                productChangeMapper.updateByPrimaryKey(change);
             }
         }
         return true;

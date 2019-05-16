@@ -21,6 +21,7 @@ import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.deliver.OrderSplit;
@@ -29,6 +30,7 @@ import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -76,6 +78,8 @@ public class OrderSplitService {
     @Autowired
     private IWorkerDetailMapper workerDetailMapper;
 
+    @Autowired
+    private IMendOrderMapper mendOrderMapper;
     @Autowired
     private IComplainMapper complainMapper;
     @Autowired
@@ -410,6 +414,12 @@ public class OrderSplitService {
 
             orderSplit.setApplyStatus(3);
             orderSplitMapper.updateByPrimaryKey(orderSplit);
+
+            if(!CommonUtil.isEmpty(orderSplit.getMendNumber())) {
+                MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(orderSplit.getMendNumber());
+                mendOrder.setState(2);//不通过取消
+                mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+            }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
