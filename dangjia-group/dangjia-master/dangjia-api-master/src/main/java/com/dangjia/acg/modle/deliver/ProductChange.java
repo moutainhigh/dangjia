@@ -30,6 +30,11 @@ public class ProductChange extends BaseEntity {
 	@ApiModelProperty("房子ID")
 	private String houseId;
 
+	@Column(name = "order_id")
+	@Desc(value = "订单id")
+	@ApiModelProperty("订单id")
+	private String orderId;
+
 	@Column(name = "member_id")
 	@Desc(value = "用户ID")
 	@ApiModelProperty("用户ID")
