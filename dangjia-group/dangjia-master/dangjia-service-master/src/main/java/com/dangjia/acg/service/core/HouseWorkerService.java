@@ -536,9 +536,7 @@ public class HouseWorkerService {
                 houseFlowApplyMapper.insert(hfa);
                 return ServerResponse.createBySuccessMessage("操作成功");
             } else if (applyType == 5) {//有人巡
-//                hfa.setApplyDec("业主您好,我是" + workerType.getName() + ",大管家已经巡查了");//描述
-                hfa.setApplyDec("业主您好，我是您的大管家，我已经巡查了工地(" +
-                        IWorkTypeEnum.getValue(workerType.getType()) + "工序)，现场情况如下");
+                hfa.setApplyDec("业主您好,我是" + workerType.getName() + ",大管家已经巡查了");//描述
                 //描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
