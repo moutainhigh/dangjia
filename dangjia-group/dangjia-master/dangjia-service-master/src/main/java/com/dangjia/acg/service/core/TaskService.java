@@ -242,7 +242,7 @@ public class TaskService {
         //补材料补服务
         example = new Example(MendOrder.class);
         example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
-                .andEqualTo(MendOrder.STATE, 3);//补材料审核状态全通过
+                .andEqualTo(MendOrder.STATE, 1);//补材料审核状态全通过
         List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
         for (MendOrder mendOrder : mendOrderList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
