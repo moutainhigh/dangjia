@@ -856,7 +856,7 @@ public class HouseWorkerService {
             List<HouseWorker> listHouseWorker = houseWorkerMapper.getAllHouseWorker(worker.getId());
             for (HouseWorker houseWorker : listHouseWorker) {
                 HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
-                if (houseFlow.getId().equals(houseFlowId)) {//选中的任务isSelect改为1
+                if (houseFlow != null && houseFlow.getId().equals(houseFlowId)) {//选中的任务isSelect改为1
                     houseWorker.setIsSelect(1);
                     houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 } else {//其他改为0
