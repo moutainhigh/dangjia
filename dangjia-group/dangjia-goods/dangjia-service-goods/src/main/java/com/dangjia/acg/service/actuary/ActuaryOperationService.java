@@ -537,6 +537,9 @@ public class ActuaryOperationService {
      * @return
      */
     private boolean isContainsValue(String value, String strArr) {
+        if(CommonUtil.isEmpty(value)){
+            return true;
+        }
         String[] arr = strArr.split(",");
         if (arr != null) {
             for (String str : arr) {
@@ -736,6 +739,13 @@ public class ActuaryOperationService {
         return attributes.replaceAll(","," ");
     }
 
+    private String listToStr(String brandId,String brandSeriesId,String valueIdArr){
+        List list=new ArrayList();
+        if(!CommonUtil.isEmpty(brandId)){list.add(brandId);}
+        if(!CommonUtil.isEmpty(brandSeriesId)){list.add(brandSeriesId);}
+        if(!CommonUtil.isEmpty(valueIdArr)){list.add(valueIdArr);}
+        return StringUtils.join(list,",");
+    }
     //根据品牌系列找属性品牌
     private List<AttributeDTO> getAllAttributes(Product product, List<Product> productList, List<String> imageList) {
 
@@ -743,29 +753,37 @@ public class ActuaryOperationService {
         //装置货品下所有商品
         for (Product product1 : productList) {
             //品牌集合
-            List brandList=productsMaps.get(product1.getBrandId());
-            if(brandList==null||brandList.size()==0){
-                brandList=new ArrayList();
-            }
-            brandList.add(product1.getBrandId()+","+product1.getBrandSeriesId()+","+product1.getValueIdArr());
-            productsMaps.put(product1.getBrandId(),brandList);
-            //系列集合
-            List brandSeriesList=productsMaps.get(product1.getBrandSeriesId());
-            if(brandSeriesList==null||brandSeriesList.size()==0){
-                brandSeriesList=new ArrayList();
-            }
-            brandSeriesList.add(product1.getBrandId()+","+product1.getBrandSeriesId()+","+product1.getValueIdArr());
-            productsMaps.put(product1.getBrandSeriesId(),brandSeriesList);
+            if(!CommonUtil.isEmpty(product1.getBrandId())) {
 
-           String[] strVIs = product1.getValueIdArr().split(",");
-            for (String strVI : strVIs) {
-                //属性集合
-                List valueIdArr=productsMaps.get(strVI);
-                if(valueIdArr==null||valueIdArr.size()==0){
-                    valueIdArr=new ArrayList();
+                List brandList = productsMaps.get(product1.getBrandId());
+                if (brandList == null || brandList.size() == 0) {
+                    brandList = new ArrayList();
                 }
-                valueIdArr.add(product1.getBrandId()+","+product1.getBrandSeriesId()+","+product1.getValueIdArr());
-                productsMaps.put(strVI,valueIdArr);
+                brandList.add(listToStr(product1.getBrandId(), product1.getBrandSeriesId(), product1.getValueIdArr()));
+                productsMaps.put(product1.getBrandId(), brandList);
+            }
+            //系列集合
+            if(!CommonUtil.isEmpty(product1.getBrandSeriesId())) {
+                List brandSeriesList = productsMaps.get(product1.getBrandSeriesId());
+                if (brandSeriesList == null || brandSeriesList.size() == 0) {
+                    brandSeriesList = new ArrayList();
+                }
+                brandSeriesList.add(listToStr(product1.getBrandId(), product1.getBrandSeriesId(), product1.getValueIdArr()));
+                productsMaps.put(product1.getBrandSeriesId(), brandSeriesList);
+
+            }
+            if(!CommonUtil.isEmpty(product1.getValueIdArr())) {
+                String[] strVIs = product1.getValueIdArr().split(",");
+                for (String strVI : strVIs) {
+                    //属性集合
+                    List valueIdArr = productsMaps.get(strVI);
+                    if (valueIdArr == null || valueIdArr.size() == 0) {
+                        valueIdArr = new ArrayList();
+                    }
+
+                    valueIdArr.add(listToStr(product1.getBrandId(), product1.getBrandSeriesId(), product1.getValueIdArr()));
+                    productsMaps.put(strVI, valueIdArr);
+                }
             }
         }
 
@@ -813,7 +831,7 @@ public class ActuaryOperationService {
                         }else {
                             boolean isExist = false;
                             for (Product product1 : productList) {
-                                String attributeVal = brand.getId() + "," + product1.getBrandSeriesId() + "," + product1.getValueIdArr();
+                                String attributeVal = listToStr(brand.getId(),product1.getBrandSeriesId() , product1.getValueIdArr());
                                 for (String s : valueIdArr) {
                                     if (s.equals(attributeVal)) {
                                         isExist = true;
@@ -865,7 +883,7 @@ public class ActuaryOperationService {
                                 avDTO.setState(2);//不能选中
                             } else {
                                 boolean isExist = false;
-                                String attributeVal = product.getBrandId() + "," + brandSerie.getId() + "," + product.getValueIdArr();
+                                String attributeVal = listToStr(product.getBrandId(),brandSerie.getId() , product.getValueIdArr());
                                 for (String s : valueIdArr) {
                                     if (s.equals(attributeVal)) {
                                         isExist = true;
