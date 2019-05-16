@@ -50,6 +50,11 @@
 				 separator=" " open="case src_product_id" close="end">
 			when #{item.id} then #{item.name}
 		</foreach>
+		,p1.src_image=
+		<foreach collection="lists" item="item" index="index"
+				 separator=" " open="case src_product_id" close="end">
+			when #{item.id} then #{item.image}
+		</foreach>
 		where src_product_id in
 		<foreach collection="lists" index="index" item="item"
 				 separator="," open="(" close=")">
@@ -63,6 +68,11 @@
 		<foreach collection="lists" item="item" index="index"
 				 separator=" " open="case dest_product_id" close="end">
 			when #{item.id} then #{item.name}
+		</foreach>
+		,p1.dest_image=
+		<foreach collection="lists" item="item" index="index"
+				 separator=" " open="case dest_product_id" close="end">
+			when #{item.id} then #{item.image}
 		</foreach>
 		where dest_product_id in
 		<foreach collection="lists" index="index" item="item"

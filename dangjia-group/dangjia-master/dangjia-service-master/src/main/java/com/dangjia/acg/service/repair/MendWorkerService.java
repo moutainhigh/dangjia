@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.repair;
 
+import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -14,6 +15,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -31,10 +33,6 @@ public class MendWorkerService {
     private IMendWorkerMapper mendWorkerMapper;
     @Autowired
     private ConfigUtil configUtil;
-    @Autowired
-    private IHouseMapper houseMapper;
-    @Autowired
-    private IMemberMapper memberMapper;
 
     @Autowired
     private MendMaterielService mendMaterielService;
@@ -102,6 +100,19 @@ public class MendWorkerService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+
+    /*更新人工商品*/
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse updateMendWorkerById(String workerGoods) throws RuntimeException{
+        try {
+            JSONArray lists = JSONArray.parseArray(workerGoods);
+            System.out.println(lists);
+            mendWorkerMapper.updateMendWorkerById(lists);
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage("更新失败");
+        }
+        return ServerResponse.createBySuccessMessage("更新成功");
     }
 
 }

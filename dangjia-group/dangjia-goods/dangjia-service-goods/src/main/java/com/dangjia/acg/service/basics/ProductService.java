@@ -403,6 +403,14 @@ public class ProductService {
                     product.setId(productId);
                     product.setModifyDate(new Date());
                     iProductMapper.updateByPrimaryKey(product);
+                    productService.updateProductName(product.getName(),product.getName(),null,null,null,productId);
+                    Example example=new Example(Product.class);
+                    example.createCriteria().andEqualTo(Product.ID,productId);
+                    List<Product> list = iProductMapper.selectByExample(example);
+                    //更新master库相关商品名称
+                    if(list.size()>0||null!=list) {
+                        masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, null);
+                    }
                 }
 
                 LOG.info("insertProduct productId:" + product.getId());
@@ -524,13 +532,13 @@ public class ProductService {
             List<Product> list = iProductMapper.selectByExample(example);
             //更新master库相关商品名称
             if(list.size()>0||null!=list) {
-                masterProductAPI.updateProductByProductId(JSON.toJSONString(list), id, null, null, null);
+                masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, null);
             }
-            example=new Example(GroupLink.class);
-            example.createCriteria().andEqualTo("productId",id);
-            GroupLink oldLabel =new GroupLink();
-            oldLabel.setProductName(name);
-            iGroupLinkMapper.updateByExampleSelective(oldLabel,example);
+//            example=new Example(GroupLink.class);
+//            example.createCriteria().andEqualTo("productId",id);
+//            GroupLink oldLabel =new GroupLink();
+//            oldLabel.setProductName(name);
+//            iGroupLinkMapper.updateByExampleSelective(oldLabel,example);
             return ServerResponse.createBySuccessMessage("更新成功");
         } catch (Exception e) {
             throw new BaseException(ServerCode.WRONG_PARAM, "更新成功");
@@ -562,7 +570,6 @@ public class ProductService {
         }
         try {
             pt.setLabelId(labelId);
-            iProductMapper.updateByPrimaryKeySelective(pt);
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
             e.printStackTrace();

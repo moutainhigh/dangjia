@@ -1,6 +1,8 @@
 package com.dangjia.acg.service.basics;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.app.repair.MasterMendWorkerAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
@@ -10,6 +12,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.TechnologyDTO;
 import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
+import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
 import com.dangjia.acg.modle.basics.Technology;
@@ -23,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
@@ -49,6 +53,10 @@ public class WorkerGoodsService {
     private WorkerTypeAPI workerTypeAPI;
     @Autowired
     private TechnologyService technologyService;
+    @Autowired
+    private IBudgetWorkerMapper iBudgetWorkerMapper;
+    @Autowired
+    private MasterMendWorkerAPI masterMendWorkerAPI;
 
 
     private static Logger LOG = LoggerFactory.getLogger(WorkerGoodsService.class);
@@ -260,7 +268,8 @@ public class WorkerGoodsService {
 //    }
 
 
-    public ServerResponse<String> setWorkerGoods(WorkerGoods workerGoods, String technologyJsonList, String deleteTechnologyIds) {
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse<String> setWorkerGoods(WorkerGoods workerGoods, String technologyJsonList, String deleteTechnologyIds){
 
         LOG.info("insertTechnologyList workerGoods:" + workerGoods + "  technologyJsonList:" + technologyJsonList);
         List<WorkerGoods> workerGoodsList = iWorkerGoodsMapper.selectByName(workerGoods.getName(), workerGoods.getWorkerTypeId());
@@ -299,8 +308,17 @@ public class WorkerGoodsService {
 
             if (StringUtils.isNotBlank(workerGoods.getId()) && workerG != null) {
                 workerGoods.setModifyDate(new Date());
-                if (iWorkerGoodsMapper.updateByPrimaryKeySelective(workerGoods) < 0)
+                if (iWorkerGoodsMapper.updateByPrimaryKeySelective(workerGoods) < 0) {
                     return ServerResponse.createByErrorMessage("更新工价商品失败");
+                }else{
+                    //相关联表也更新
+                    iBudgetWorkerMapper.updateBudgetMaterialById(workerGoods.getId());
+                    Example example=new Example(WorkerGoods.class);
+                    example.createCriteria().andEqualTo(WorkerGoods.ID,workerGoods.getId());
+                    List<WorkerGoods> list = iWorkerGoodsMapper.selectByExample(example);
+                    System.out.println(list);
+                    masterMendWorkerAPI.updateMendWorker(JSON.toJSONString(list));
+                }
             } else {
                 workerGoods.setCreateDate(new Date());
                 workerGoods.setModifyDate(new Date());
@@ -308,11 +326,13 @@ public class WorkerGoodsService {
                     return ServerResponse.createByErrorMessage("新增工价商品失败");
             }
 
-            String[] deleteTechnologyIdArr = deleteTechnologyIds.split(",");
-            for (int i = 0; i < deleteTechnologyIdArr.length; i++) {
-                if (iTechnologyMapper.selectByPrimaryKey(deleteTechnologyIdArr[i]) != null) {
-                    if (iTechnologyMapper.deleteByPrimaryKey(deleteTechnologyIdArr[i]) < 0)
-                        return ServerResponse.createByErrorMessage("删除id：" + deleteTechnologyIdArr[i] + "失败");
+            if(null!=deleteTechnologyIds&&""!=deleteTechnologyIds) {
+                String[] deleteTechnologyIdArr = deleteTechnologyIds.split(",");
+                for (int i = 0; i < deleteTechnologyIdArr.length; i++) {
+                    if (iTechnologyMapper.selectByPrimaryKey(deleteTechnologyIdArr[i]) != null) {
+                        if (iTechnologyMapper.deleteByPrimaryKey(deleteTechnologyIdArr[i]) < 0)
+                            return ServerResponse.createByErrorMessage("删除id：" + deleteTechnologyIdArr[i] + "失败");
+                    }
                 }
             }
 

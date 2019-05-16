@@ -98,6 +98,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                  separator=" " open="case id" close="end">
             when id then #{item.unitName}
         </foreach>
+        ,p1.image=
+        <foreach collection="lists" item="item" index="index"
+                 separator=" " open="case id" close="end">
+            when id then #{item.image}
+        </foreach>
         where product_id in
         <foreach collection="lists" index="index" item="item"
                  separator="," open="(" close=")">
