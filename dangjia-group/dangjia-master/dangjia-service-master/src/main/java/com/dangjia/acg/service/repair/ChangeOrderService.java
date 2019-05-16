@@ -66,9 +66,12 @@ public class ChangeOrderService {
             }
             Member member = (Member) object;
             ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(changeOrderId);
-            changeOrder.setState(check);
-            changeOrder.setSupId(member.getId());
-            changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+            //大管家未确认，不做任何变更
+            if (check != 2) {
+                changeOrder.setState(check);
+                changeOrder.setSupId(member.getId());
+                changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+            }
 
             House house = houseMapper.selectByPrimaryKey(changeOrder.getHouseId());
 //            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(changeOrder.getWorkerTypeId());

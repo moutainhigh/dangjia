@@ -839,13 +839,18 @@ public class HouseWorkerService {
                     Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
                     if (member == null) continue;
                     //房产信息
+                    map.put("price", "¥0.00");//价格
                     HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
-                    BigDecimal remain = houseWorkerOrder.getWorkPrice().add(houseWorkerOrder.getRepairPrice());
+                    if(houseWorkerOrder!=null){
+                        if(houseWorkerOrder.getWorkPrice()==null){houseWorkerOrder.setWorkPrice(new BigDecimal(0));}
+                        if(houseWorkerOrder.getRepairPrice()==null){houseWorkerOrder.setRepairPrice(new BigDecimal(0));}
+                        BigDecimal remain = houseWorkerOrder.getWorkPrice().add(houseWorkerOrder.getRepairPrice());
+                        map.put("price", "¥" + (String.format("%.2f", remain.doubleValue())));//价格
+                    }
                     map.put("houseName", house.getHouseName());//地址
                     map.put("releaseTime", houseFlow.getReleaseTime() == null ? "" : houseFlow.getReleaseTime().getTime());//发布时间
                     map.put("square", (house.getSquare() == null ? "0" : house.getSquare()) + "m²");//面积
                     map.put("memberName", member.getName());//业主姓名
-                    map.put("price", "¥" + (String.format("%.2f", remain.doubleValue())));//价格
                     if (houseFlow.getPause() == 0) {//正常施工
                         map.put("isItNormal", "正常施工");
                     } else {
