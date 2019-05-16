@@ -31,7 +31,7 @@ public interface ProductChangeAPI {
 
     @PostMapping("app/deliver/productChange/setDestSurCount")
     @ApiOperation(value = "设置商品更换数", notes = "设置商品更换数")
-    ServerResponse setDestSurCount(HttpServletRequest request, String id, Double destSurCount);
+    ServerResponse setDestSurCount(HttpServletRequest request, String id, Double destSurCount, String orderId);
 
     @PostMapping("app/deliver/productChangeOrder/queryOrderByHouseId")
     @ApiOperation(value = "根据houseId查询更换商品订单", notes = "根据houseId查询更换商品订单")
