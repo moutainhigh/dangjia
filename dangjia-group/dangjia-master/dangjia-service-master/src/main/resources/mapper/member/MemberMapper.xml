@@ -62,6 +62,11 @@
             and
             w.worker_type_id = #{workerTypeId}
         </if>
+        <if test="checkType!=null and checkType!=''">
+            and
+            w.check_type = #{checkType}
+        </if>
+
         and
         w.worker_type_id is not null
         <if test="type==null or type==''">

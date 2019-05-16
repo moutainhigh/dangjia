@@ -88,10 +88,6 @@ public interface IProductMapper extends Mapper<Product> {
     void updateProductById(@Param("oldName") String oldName,@Param("newName") String newName,@Param("brandSeriesId") String brandSeriesId,@Param("brandId") String brandId,
                            @Param("goodsId") String goodsId,@Param("id") String id);
 
-    /*查询商品*/
-    List<Product> selectProductById(@Param("brandSeriesId") String brandSeriesId,@Param("brandId") String brandId,
-                                    @Param("goodsId") String goodsId,@Param("id") String id);
-
     /*更新单位*/
     void updateProductByUnitId(@Param("unitName") String unitName,@Param("unitId") String unitId);
 }

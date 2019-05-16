@@ -83,7 +83,7 @@ public interface WebEngineerAPI {
     @ApiOperation(value = "工匠列表", notes = "工匠列表")
     ServerResponse artisanList(@RequestParam("name") String name,
                                @RequestParam("workerTypeId") String workerTypeId,
-                               @RequestParam("type") String type,
+                               @RequestParam("type") String type, @RequestParam("checkType") String checkType ,
                                @RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping(value = "web/engineer/getWareHouse")
