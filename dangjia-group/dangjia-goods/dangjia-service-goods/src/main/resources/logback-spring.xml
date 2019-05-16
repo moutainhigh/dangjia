@@ -13,31 +13,11 @@
         <!-- 添加附加的appender,最多只能添加一个 -->
         <appender-ref ref="FILE"/>
     </appender>
-
-    <springProfile name="default">
-        <logger name="com.dangjia.acg" level="DEBUG"/>
-    </springProfile>
-    <springProfile name="dev">
-        <logger name="com.dangjia.acg" level="DEBUG"/>
-        <logger name="java.sql" level="debug" />
-        <logger name="org.mybatis" level="debug" />
-        <logger name="tk.mybatis" level="debug"></logger>
-        <logger name="org.apache.http" level="info"></logger>
-    </springProfile>
-    <springProfile name="test">
-        <logger name="com.dangjia.acg" level="DEBUG"/>
-        <logger name="java.sql" level="debug" />
-        <logger name="org.mybatis" level="debug" />
-        <logger name="tk.mybatis" level="debug"></logger>
-        <logger name="org.apache.http" level="info"></logger>
-    </springProfile>
-    <springProfile name="int">
-        <logger name="com.dangjia.acg" level="INFO"/>
-        <logger name="java.sql" level="INFO" />
-        <logger name="org.mybatis" level="INFO" />
-        <logger name="tk.mybatis" level="INFO"></logger>
-        <logger name="org.apache.http" level="INFO"></logger>
-    </springProfile>
+    <logger name="com.dangjia.acg" level="DEBUG"/>
+    <logger name="java.sql" level="debug" />
+    <logger name="org.mybatis" level="debug" />
+    <logger name="tk.mybatis" level="debug"></logger>
+    <logger name="org.apache.http" level="info"></logger>
     <root level="INFO">
         <!--<appender-ref ref="ASYNC"/>-->
         <!--<appender-ref ref="FILE"/>-->
