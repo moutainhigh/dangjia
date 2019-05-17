@@ -272,25 +272,25 @@ public class ActuaryOperationService {
 //            if (!StringUtils.isNoneBlank(budgetMaterialId))
 //                return ServerResponse.createByErrorMessage("budgetMaterialId 不能为null");
 
-            String[] valueIdArr = attributeIdArr.split(",");
-            Example example = new Example(Product.class);
-            Example.Criteria criteria = example.createCriteria();
-            if (!CommonUtil.isEmpty(goodsId)) {
-                criteria.andEqualTo(Product.GOODS_ID, goodsId);
-            }
+//            String[] valueIdArr = attributeIdArr.split(",");
+//            Example example = new Example(Product.class);
+//            Example.Criteria criteria = example.createCriteria();
+//            if (!CommonUtil.isEmpty(goodsId)) {
+//                criteria.andEqualTo(Product.GOODS_ID, goodsId);
+//            }
+//
+//            if (valueIdArr == null || valueIdArr.length == 0 || CommonUtil.isEmpty(attributeIdArr)) {
+//                criteria.andCondition(" (isnull(value_id_arr) or value_id_arr = '') ");
+//            } else {
+//                for (String val : valueIdArr) {
+//                    if(!CommonUtil.isEmpty(val)) {
+//                        criteria.andCondition("  CONCAT(IFNULL(brand_id,''),',',IFNULL(brand_series_id,''),',',IFNULL(value_id_arr,'')) LIKE '%" + val + "%' ");
+//                    }
+//                }
+//            }
+//            List<Product> products = productMapper.selectByExample(example);
 
-            if (valueIdArr == null || valueIdArr.length == 0 || CommonUtil.isEmpty(attributeIdArr)) {
-                criteria.andCondition(" (isnull(value_id_arr) or value_id_arr = '') ");
-            } else {
-                for (String val : valueIdArr) {
-                    if(!CommonUtil.isEmpty(val)) {
-                        criteria.andCondition("  CONCAT(IFNULL(brand_id,''),',',IFNULL(brand_series_id,''),',',IFNULL(value_id_arr,'')) LIKE '%" + val + "%' ");
-                    }
-                }
-            }
-            List<Product> products = productMapper.selectByExample(example);
-
-            Product product = products.get(0);
+            Product product = productMapper.selectByPrimaryKey(selectVal);
             GoodsDTO goodsDTO = goodsDetail(product, budgetMaterialId);
             if (goodsDTO != null) {
                 return ServerResponse.createBySuccess("查询成功", goodsDTO);
@@ -458,26 +458,22 @@ public class ActuaryOperationService {
                 LOG.info("pIdTargetGroupSet size:" + pIdTargetGroupSet.size() + "  " + pIdTargetGroupSet + "  " + groupLinkTargetList);
             }
 
-            Example example =new Example(Product.class);
-            example.createCriteria().andEqualTo(Product.GOODS_ID,goods.getId());
-            List<Product> products = productMapper.selectByExample(example);
-            Map<String,Product> productsMaps=new HashMap<>();
-            //装置货品下所有商品
-            for (Product product1 : products) {
-                productsMaps.put(product1.getId(),product1);
-            }
+
             List<Product> productList = new ArrayList<>();
             if (srcGoodsGroup != null) {//是关联组
                 for (String pId : pIdTargetGroupSet) {
                     //如果没有品牌，就只遍历属性
-                    Product pt = productsMaps.get(pId);
+                    Product pt = productMapper.selectByPrimaryKey(pId);
                     if (StringUtils.isNoneBlank(pt.getAttributeIdArr())
                             && StringUtils.isNoneBlank(pt.getValueIdArr())) {
                         productList.add(pt);
                     }
                 }
             } else {
-                productList = products;
+                Example example =new Example(Product.class);
+                example.createCriteria().andEqualTo(Product.GOODS_ID,goods.getId());
+                example.orderBy(Product.VALUE_ID_ARR);
+                productList = productMapper.selectByExample(example);
             }
             List<AttributeDTO> attrList = getAllAttributes( product, productList, imageList);
             goodsDTO.setAttrList(attrList);
@@ -977,7 +973,7 @@ public class ActuaryOperationService {
                     }
                 }
                 AttributeValueDTO avDTO = new AttributeValueDTO();
-                avDTO.setAttributeValueId(atId.getBrandId()+","+atId.getBrandSeriesId()+","+atId.getValueIdArr());
+                avDTO.setAttributeValueId(atId.getId());
                 avDTO.setName(strbuf.toString().trim());
                 if (atId.getId().equals(product.getId())) {//如果包含该属性
                     avDTO.setState(1);//选中
