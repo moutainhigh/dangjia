@@ -445,7 +445,7 @@
                 dj_core_house_flow_apply
             WHERE
                 house_id = #{houseId}
-                AND apply_type = '0'
+                AND apply_type in (0,1,2)
             GROUP BY
                 post_date
             ORDER BY

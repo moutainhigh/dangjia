@@ -567,19 +567,26 @@ public class EngineerService {
                 map.put("createDate", houseFlows.size()==0 ? "":houseFlows.get(0).getReleaseTime());
 
                 Example example1=new Example(HouseFlowApply.class);
-                example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID,house.getId()).andEqualTo(HouseFlowApply.WORKER_TYPE_ID,3).andEqualTo(HouseFlowApply.MEMBER_CHECK,1);
+                example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID,house.getId()).andEqualTo(HouseFlowApply.MEMBER_CHECK,1).andEqualTo(HouseFlowApply.APPLY_TYPE,3);
                 List<HouseFlowApply> houseFlowss = houseFlowApplyMapper.selectByExample(example1);
+                int suspendDay=0;//停工天数
+                for (HouseFlowApply flowss : houseFlowss) {
+                    suspendDay+=flowss.getSuspendDay();
+                }
                 Date date;
-                if (houseFlowss.size()==0){
+                if (house.getVisitState()!=3){
                     date=new Date();
                 }else {
-                    date=houseFlowss.get(0).getModifyDate();
+                    date=house.getModifyDate();
                 }
                 int startDay=0;
                 if(houseFlows.size()!=0) {
                      startDay = DateUtil.daysofTwo(houseFlows.get(0).getReleaseTime(), date);
                 }
-                map.put("startDay",startDay);
+                map.put("startDay", 0);
+                if(suspendDay<startDay) {
+                    map.put("startDay", (startDay - suspendDay));
+                }
                 int buildDay = houseMapper.getBuildDay(house.getId());
                 map.put("buildDay",buildDay);
                 mapList.add(map);
