@@ -27,5 +27,40 @@
 		</if>
 		ORDER BY create_date desc
 	</select>
+	<!-- 按state 和 收货地址 搜索 -->
+	<select id="queryOrderByStateAndLikeAddress" resultType="com.dangjia.acg.modle.deliver.ProductChangeOrder">
+		SELECT
+		prco.id,
+		prco.number,
+		prco.data_status as dataStatus,
+		prco.create_date as createDate,
+		prco.modify_date as modifyDate,
+		house.id as houseId
+		FROM dj_deliver_product_change_order as prco
+		left  JOIN dj_house as house
+		on (prco.house_id = house.id  )
+		where 1=1
+		and prco.type > 0
+		<if test = "houseId!=null and houseId!=''">
+			and prco.house_id = #{houseId}
+		</if>
+		<if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+			and prco.create_date between  #{beginDate}  and #{endDate}
+		</if>
+
+		<if test="likeAddress!=null and likeAddress!=''">
+			AND CONCAT(
+			house.residential,
+			IFNULL(house.building, '*'),
+			'栋',
+			IFNULL(CONCAT(house.unit, '单元'),'' ),
+			IFNULL(house.number, '*'),
+			'号'
+			)  LIKE CONCAT('%',#{likeAddress},'%')
+
+		</if>
+
+		ORDER BY prco.create_date desc
+	</select>
 
 </mapper>

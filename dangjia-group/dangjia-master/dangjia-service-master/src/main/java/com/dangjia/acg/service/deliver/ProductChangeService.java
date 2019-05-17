@@ -10,20 +10,27 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.ProductChangeDTO;
+import com.dangjia.acg.dto.deliver.ProductChangeItemDTO;
 import com.dangjia.acg.dto.deliver.ProductChangeOrderDTO;
+import com.dangjia.acg.dto.deliver.ProductOrderDTO;
 import com.dangjia.acg.mapper.deliver.IProductChangeMapper;
 import com.dangjia.acg.mapper.deliver.IProductChangeOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.deliver.ProductChange;
 import com.dangjia.acg.modle.deliver.ProductChangeOrder;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +68,8 @@ public class ProductChangeService {
     private IWorkerDetailMapper workerDetailMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private IBusinessOrderMapper businessOrderMapper;
     private static Logger LOG = LoggerFactory.getLogger(ProductChangeService.class);
 
     /**
@@ -97,7 +106,8 @@ public class ProductChangeService {
             example.createCriteria()
                     .andEqualTo(ProductChange.HOUSE_ID, houseId)
                     .andEqualTo(ProductChange.MEMBER_ID, operator.getId())
-                    .andEqualTo(ProductChange.SRC_PRODUCT_ID, srcProductId);
+                    .andEqualTo(ProductChange.SRC_PRODUCT_ID, srcProductId)
+                    .andEqualTo(ProductChange.TYPE, 0);
             List<ProductChange> list = productChangeMapper.selectByExample(example);
             if(!CommonUtil.isEmpty(list)) {
                 ProductChange change = list.get(0);
@@ -108,6 +118,7 @@ public class ProductChangeService {
                 change.setDestPrice(destProduct.getPrice());
                 change.setDestImage(destProduct.getImage());
                 change.setDestSurCount(0.0);
+                change.setDifferencePrice(BigDecimal.ZERO);
                 change.setModifyDate(new Date());
                 productChangeMapper.updateByPrimaryKeySelective(change);
             }else {
@@ -229,11 +240,14 @@ public class ProductChangeService {
      * @param request
      * @param id
      * @param destSurCount
+     * @param orderId
      * @return
      */
-    public ServerResponse setDestSurCount(HttpServletRequest request, String id, Double destSurCount){
+    public ServerResponse setDestSurCount(HttpServletRequest request, String id, Double destSurCount, String orderId){
         try {
             ProductChange productChange = productChangeMapper.selectByPrimaryKey(id);
+            // 查询订单表
+            ProductChangeOrder order = productChangeOrderMapper.selectByPrimaryKey(orderId);
             if(null != productChange){
                 // 剩余数
                 BigDecimal srcCount = BigDecimal.valueOf(productChange.getSrcSurCount());
@@ -255,7 +269,15 @@ public class ProductChangeService {
                 }
                 productChange.setDifferencePrice(differPrice);
                 productChange.setModifyDate(new Date());
+                productChange.setOrderId(orderId);
+                // 修改商品更换表
                 productChangeMapper.updateByPrimaryKeySelective(productChange);
+                // 修改商品更换订单表
+                // 计算总价差额
+                order.setDifferencePrice(differPrice.add(order.getDifferencePrice()));
+                order.setModifyDate(new Date());
+                productChangeOrderMapper.updateByPrimaryKeySelective(order);
+
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -274,6 +296,8 @@ public class ProductChangeService {
         try {
             // 查询db中是否有该房子的换货订单
             List<ProductChangeOrder> list = productChangeOrderMapper.queryOrderByHouseId(houseId, "0");
+            // 当前房子有更换的商品时
+            int count = productChangeMapper.queryProductChangeExist(houseId, null, "0");
             // 计算总价差额
             BigDecimal differPrice = calcDifferPrice(houseId);
             if(null != list && list.size() > 0){
@@ -281,7 +305,7 @@ public class ProductChangeService {
                 order.setDifferencePrice(differPrice);
                 order.setModifyDate(new Date());
                 productChangeOrderMapper.updateByPrimaryKey(order);
-            } else {
+            } else if(count > 0){
                 order = new ProductChangeOrder();
                 order.setHouseId(houseId);
                 // 默认未支付
@@ -354,7 +378,7 @@ public class ProductChangeService {
                         BigDecimal surplusMoney = member.getSurplusMoney().add(toDifferPrice);
                         //记录流水
                         WorkerDetail workerDetail = new WorkerDetail();
-                        workerDetail.setName("业主换材料退款");
+                        workerDetail.setName("业主换货");
                         workerDetail.setWorkerId(member.getId());
                         workerDetail.setWorkerName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
                         workerDetail.setHouseId(houseId);
@@ -376,7 +400,7 @@ public class ProductChangeService {
                 productChangeOrderMapper.updateByPrimaryKey(order);
                 // 更换已购买商品，没有新增，有则修改
                 if(!changeGmProduct(request, houseId)){
-                    return ServerResponse.createByErrorMessage("操作失败");
+                    return ServerResponse.createByErrorMessage("不能大于商品剩余数");
                 }
             }
         }catch (Exception e){
@@ -389,6 +413,7 @@ public class ProductChangeService {
     /**
      * 计算总价差额
      * @param houseId
+     *
      * @return
      */
     private BigDecimal calcDifferPrice(String houseId){
@@ -453,9 +478,9 @@ public class ProductChangeService {
                         newWareHouse.setBackTime(0);
                         warehouseMapper.insert(newWareHouse);
                     } else {
-                        // 新商品有则修改
+                        // 原商品剩余数
                         // 商品剩余数 剩余数量 所有买的数量 - 业主退货 - 要的
-                        double surCount = wareHouse.getShopCount() - (wareHouse.getOwnerBack() == null ? 0D : wareHouse.getOwnerBack()) - wareHouse.getAskCount();
+                        double surCount = oldWareHouse.getShopCount() - (oldWareHouse.getOwnerBack() == null ? 0D : oldWareHouse.getOwnerBack()) - oldWareHouse.getAskCount();
                         if (BigDecimal.valueOf(change.getDestSurCount()).compareTo(BigDecimal.valueOf(surCount)) == 1) {
                             return false;
                         }
@@ -464,12 +489,12 @@ public class ProductChangeService {
                         BigDecimal shopCount = BigDecimal.valueOf(wareHouse.getShopCount()).add(BigDecimal.valueOf(change.getDestSurCount()));
                         wareHouse.setShopCount(shopCount.doubleValue());
                         warehouseMapper.updateByPrimaryKey(wareHouse);
-                        // 修改原仓库商品 买的数量 原买的数量-更换数
-                        BigDecimal oldShopCount = BigDecimal.valueOf(oldWareHouse.getShopCount()).subtract(BigDecimal.valueOf(change.getDestSurCount()));
-                        oldWareHouse.setShopCount(oldShopCount.doubleValue());
-                        oldWareHouse.setModifyDate(new Date());
-                        warehouseMapper.updateByPrimaryKey(oldWareHouse);
                     }
+                    // 修改原仓库商品 买的数量 原买的数量-更换数
+                    BigDecimal oldShopCount = BigDecimal.valueOf(oldWareHouse.getShopCount()).subtract(BigDecimal.valueOf(change.getDestSurCount()));
+                    oldWareHouse.setShopCount(oldShopCount.doubleValue());
+                    oldWareHouse.setModifyDate(new Date());
+                    warehouseMapper.updateByPrimaryKey(oldWareHouse);
                     // 处理新商品------end
                     change.setType(1);
                     productChangeMapper.updateByPrimaryKey(change);
@@ -481,4 +506,167 @@ public class ProductChangeService {
         }
         return true;
     }
+
+    /**
+     * 查询业主退货列表
+     * materialOrderState
+     */
+    public ServerResponse changeOrderState(String houseId, Integer pageNum, Integer pageSize, String beginDate, String endDate, String likeAddress) {
+        try {
+            if (pageNum == null) {
+                pageNum = 1;
+            }
+            if (pageSize == null) {
+                pageSize = 10;
+            }
+            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
+                if(beginDate.equals(endDate)){
+                    beginDate=beginDate+" "+"00:00:00";
+                    endDate=endDate+" "+"23:59:59";
+                }
+            }
+            PageHelper.startPage(pageNum, pageSize);
+            List<ProductChangeOrder> productChangeOrderList = productChangeOrderMapper.queryOrderByStateAndLikeAddress(houseId, beginDate, endDate, likeAddress);
+            PageInfo pageResult = new PageInfo(productChangeOrderList);
+            List<ProductOrderDTO> productOrderDTOList = getProductOrderDTOList(productChangeOrderList);
+            pageResult.setList(productOrderDTOList);
+
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 处理dto
+     * @param productChangeOrderList
+     * @return
+     */
+    private List<ProductOrderDTO> getProductOrderDTOList(List<ProductChangeOrder> productChangeOrderList){
+        List<ProductOrderDTO> productOrderDTOS = new ArrayList<ProductOrderDTO>();
+        for (ProductChangeOrder order : productChangeOrderList) {
+            ProductOrderDTO orderDTO = new ProductOrderDTO();
+            orderDTO.setId(order.getId());
+            orderDTO.setNumber(order.getNumber());
+            orderDTO.setCreateDate(order.getCreateDate());
+            orderDTO.setHouseId(order.getHouseId());
+            House house = houseMapper.selectByPrimaryKey(order.getHouseId());
+            if (house != null) {
+                if (house.getVisitState() != 0) {
+                    orderDTO.setAddress(house.getHouseName());
+                    Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                    orderDTO.setMemberName(member.getNickName() == null ? member.getName() : member.getNickName());
+                    orderDTO.setMemberId(member.getId());
+                    orderDTO.setMemberMobile(member.getMobile());
+                    orderDTO.setType("业主换货");
+                    productOrderDTOS.add(orderDTO);
+                }
+            }
+        }
+        return productOrderDTOS;
+    }
+
+    /**
+     * 根据OrderIdhouseId查询商品更换明细
+     */
+    public ServerResponse queryChangeDetail(String orderId, String houseId) {
+        ProductOrderDTO productOrderDTO = new ProductOrderDTO();
+        Example example = new Example(ProductChange.class);
+        example.createCriteria()
+                .andEqualTo(ProductChange.HOUSE_ID, houseId)
+                .andEqualTo(ProductChange.ORDER_ID, orderId)
+                .andEqualTo(ProductChange.TYPE, "1");
+        List<ProductChange> productChangeList = productChangeMapper.selectByExample(example);
+        House house = houseMapper.selectByPrimaryKey(houseId);
+        Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+        // 房子地址
+        productOrderDTO.setAddress(house.getHouseName());
+        // 业主
+        productOrderDTO.setMemberName(member.getNickName() == null ? member.getName() : member.getNickName());
+        // 手机号码
+        productOrderDTO.setMemberMobile(member.getMobile());
+        // 明细list
+        List<ProductChangeItemDTO> itemDTOList = new ArrayList<>();
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        BigDecimal totalDifferPrice = BigDecimal.ZERO;
+        for (ProductChange change : productChangeList) {
+            // 合计退差价
+            totalDifferPrice = totalDifferPrice.add(change.getDifferencePrice());
+            for(int i =0; i <=1; i++){
+                // 处理itemDTo
+                ProductChangeItemDTO itemDTO = getItemDTO(change, address, i);
+                itemDTOList.add(itemDTO);
+                productOrderDTO.setProductChangeItemDTOList(itemDTOList);
+            }
+        }
+        productOrderDTO.setTotalDifferPrice(totalDifferPrice);
+        return ServerResponse.createBySuccess("查询成功", productOrderDTO);
+    }
+
+    /**
+     * 根据taskId查询商品支付流水
+     */
+    public ServerResponse queryPayChangeDetail(String number, String taskId) {
+        // 查询支付信息
+        Example example = new Example(BusinessOrder.class);
+        example.createCriteria().andEqualTo(BusinessOrder.NUMBER, number);
+        List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
+        BusinessOrder businessOrder = businessOrderList.get(0);
+        // 查询商品更换订单表
+        Example productExample = new Example(ProductChange.class);
+        productExample.createCriteria()
+                .andEqualTo(ProductChange.HOUSE_ID, businessOrder.getHouseId())
+                .andEqualTo(ProductChange.ORDER_ID, taskId)
+                .andEqualTo(ProductChange.TYPE, "1");
+        List<ProductChange> productChangeList = productChangeMapper.selectByExample(productExample);
+        // 房子信息
+        House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+        ProductOrderDTO productOrderDTO = new ProductOrderDTO();
+        // 房子地址
+        productOrderDTO.setAddress(house.getHouseName());
+        // 订单号
+        productOrderDTO.setNumber(businessOrder.getNumber());
+        List<ProductChangeItemDTO> itemDTOList = new ArrayList<>();
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        // 总补差价
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        for (ProductChange change : productChangeList) {
+            // 合计补差价
+            totalPrice = totalPrice.add(change.getDifferencePrice());
+            ProductChangeItemDTO itemDTO = getItemDTO(change, address, 1);
+            itemDTOList.add(itemDTO);
+            productOrderDTO.setProductChangeItemDTOList(itemDTOList);
+        }
+        productOrderDTO.setTotalDifferPrice(totalPrice);
+        return ServerResponse.createBySuccess("查询成功", productOrderDTO);
+    }
+
+
+
+    /**
+     * 转换ITEMDTO
+     * @param change
+     * @return
+     */
+    private ProductChangeItemDTO getItemDTO(ProductChange change, String address, int temp){
+        ProductChangeItemDTO itemDTO = new ProductChangeItemDTO();
+        itemDTO.setImage(address + (temp == 0 ?  change.getSrcImage() : change.getDestImage()));
+        itemDTO.setProductId(temp == 0 ?  change.getSrcProductId() : change.getDestProductId());
+        itemDTO.setProductSn(temp == 0 ?  change.getSrcProductSn() : change.getDestProductSn());
+        itemDTO.setProductName(temp == 0 ?  change.getSrcProductName() : change.getDestProductName());
+        itemDTO.setPrice(temp == 0 ?  change.getSrcPrice() : change.getDestPrice());
+        itemDTO.setUnitName(temp == 0 ?  change.getSrcUnitName() : change.getDestUnitName());
+        // 差价
+        double differPrice = MathUtil.sub(change.getDestPrice(), change.getSrcPrice());
+        itemDTO.setDifferPrice(temp == 0 ?  "" : String.valueOf(differPrice));
+        itemDTO.setSrcSurCount(temp == 0 ?  change.getSrcSurCount() : 0.0);
+        itemDTO.setDestSurCount(temp == 0 ?  MathUtil.sub(change.getSrcSurCount(), change.getDestSurCount()) : change.getDestSurCount());
+        if(temp == 1){
+            double totalMoney = MathUtil.mul(differPrice, change.getDestSurCount());
+            itemDTO.setTotalMoney(BigDecimal.valueOf(totalMoney));
+        }
+        return itemDTO;
+    }
+
 }

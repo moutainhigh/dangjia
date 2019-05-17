@@ -72,8 +72,8 @@ public class ProductChangeController implements ProductChangeAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setDestSurCount(HttpServletRequest request, String id, Double destSurCount) {
-        return productChangeService.setDestSurCount(request, id, destSurCount);
+    public ServerResponse setDestSurCount(HttpServletRequest request, String id, Double destSurCount, String orderId) {
+        return productChangeService.setDestSurCount(request, id, destSurCount, orderId);
     }
 
 

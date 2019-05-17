@@ -911,19 +911,28 @@ public class HouseService {
         shareDTO.setUrl(jobLocationDetail);
         shareDTO.setImageNum(0 + "张图片");
         shareDTO.setImage("");//户型图片
-        ServerResponse serverResponse = designDataService.getPlaneMap(house.getId());
+//        ServerResponse serverResponse = designDataService.getPlaneMap(house.getId());
+//        if (serverResponse.isSuccess()) {
+//            QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+//            List<QuantityRoomImages> images = quantityRoomDTO.getImages();
+//            if (images != null && images.size() > 0) {
+//                shareDTO.setImage(images.get(0).getImage());
+//                serverResponse = designDataService.getConstructionPlans(house.getId());
+//                if (serverResponse.isSuccess()) {
+//                    quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+//                    if (quantityRoomDTO.getImages() != null) {
+//                        shareDTO.setImageNum(quantityRoomDTO.getImages().size() + "张图片");
+//                    }
+//                }
+//            }
+//        }
+        ServerResponse serverResponse = designDataService.getConstructionPlans(house.getId());
         if (serverResponse.isSuccess()) {
             QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
             List<QuantityRoomImages> images = quantityRoomDTO.getImages();
             if (images != null && images.size() > 0) {
-                shareDTO.setImage(images.get(0).getImage());
-                serverResponse = designDataService.getConstructionPlans(house.getId());
-                if (serverResponse.isSuccess()) {
-                    quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
-                    if (quantityRoomDTO.getImages() != null) {
-                        shareDTO.setImageNum(quantityRoomDTO.getImages().size() + "张图片");
-                    }
-                }
+                shareDTO.setImage(images.get(0).getImage() + "?x-image-process=image/resize,w_500,h_500/quality,q_80");
+                shareDTO.setImageNum(quantityRoomDTO.getImages().size() + "张图片");
             }
         }
         return shareDTO;
