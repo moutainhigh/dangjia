@@ -57,162 +57,6 @@ public class DesignDataService {
     @Autowired
     private UserMapper userMapper;
 
-//    /**
-//     * 上传图片
-//     */
-//    public ServerResponse uploadPictures(String houseId, String designImageTypeId, String imageurl) {
-//        try {
-//            HouseDesignImage hdi = designImageTypeMapper.getHouseDesignImage(houseId, designImageTypeId);
-//
-//            if (hdi == null) {
-//                hdi = new HouseDesignImage();
-//                hdi.setHouseId(houseId);
-//                hdi.setDesignImageTypeId(designImageTypeId);
-//                hdi.setImageurl(imageurl);
-//                hdi.setSell(0);
-//                houseDesignImageMapper.insert(hdi);
-//            } else {
-//                hdi.setHouseId(houseId);
-//                hdi.setDesignImageTypeId(designImageTypeId);
-//                hdi.setImageurl(imageurl);
-//                houseDesignImageMapper.updateByPrimaryKeySelective(hdi);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ServerResponse.createByErrorMessage("上传失败");
-//        }
-//        return ServerResponse.createBySuccessMessage("上传成功");
-//    }
-//
-//    /**
-//     * 设计图列表
-//     */
-//    public ServerResponse getImagesList(String houseId) {
-//        try {
-//            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-//            List<String> designImageList = designImageTypeMapper.getDesignImageIdList(houseId);
-//            if (designImageList == null || designImageList.size() == 0) {
-//                return ServerResponse.createByErrorMessage("找不到房子对应图类型");
-//            }
-//            String typeList = designImageList.get(0);
-//            typeList = typeList.replaceAll("'", "");
-//            typeList = typeList.replaceAll(" ", "");
-//            String[] typeArray = StringUtils.split(typeList, ",");
-//            //查询所有风格
-//            List<DesignImageType> designImageTypeList = designImageTypeMapper.getDesignImageTypeList(typeArray);
-//            List<HouseDesignImageDTO> houseDesignImageDTOList = new ArrayList<>();
-//            HouseDesignImageDTO houseDesignImageDTO;
-//            for (DesignImageType designImageType : designImageTypeList) {
-//                HouseDesignImage hdi = designImageTypeMapper.getHouseDesignImage(houseId, designImageType.getId());
-//                if (hdi == null) {
-//                    houseDesignImageDTO = new HouseDesignImageDTO();
-//                    houseDesignImageDTO.setHouseId(houseId);
-//                    houseDesignImageDTO.setDesignImageTypeId(designImageType.getId());
-//                    houseDesignImageDTO.setImageurl(null);
-//                    houseDesignImageDTO.setImage(null);
-//                    houseDesignImageDTO.setName(designImageType.getName());
-//                    houseDesignImageDTO.setSell(designImageType.getSell());
-//                    houseDesignImageDTO.setPrice(new BigDecimal(0));
-//                } else {
-//                    houseDesignImageDTO = new HouseDesignImageDTO();
-//                    houseDesignImageDTO.setHouseId(houseId);
-//                    houseDesignImageDTO.setDesignImageTypeId(designImageType.getId());
-//                    if (StringUtil.isNotEmpty(hdi.getImageurl())) {
-//                        houseDesignImageDTO.setImageurl(address + hdi.getImageurl());
-//                        houseDesignImageDTO.setImage(hdi.getImageurl());
-//                    } else {
-//                        houseDesignImageDTO.setImageurl(null);
-//                        houseDesignImageDTO.setImage(null);
-//                    }
-//                    houseDesignImageDTO.setName(designImageType.getName());
-//                    houseDesignImageDTO.setSell(designImageType.getSell());
-//                    houseDesignImageDTO.setPrice(new BigDecimal(0));
-//                }
-//                houseDesignImageDTOList.add(houseDesignImageDTO);
-//            }
-//            return ServerResponse.createBySuccess("查询列表成功", houseDesignImageDTOList);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ServerResponse.createByErrorMessage("异常");
-//        }
-//    }
-//
-//    /**
-//     * 查看施工图
-//     */
-//    public ServerResponse designImageList(String houseId) {
-//        try {
-//            if (StringUtil.isEmpty(houseId)) {
-//                return ServerResponse.createByErrorMessage("houseId不能为空");
-//            }
-//            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-//            List<HouseDesignImageDTO> houseDesignImageList = houseDesignImageMapper.queryHouseDesignImage(houseId);
-//            if (houseDesignImageList == null || houseDesignImageList.size() == 0) {
-//                return ServerResponse.createByErrorMessage("找不到房子对应图类型");
-//            }
-//            for (HouseDesignImageDTO houseDesignImage : houseDesignImageList) {
-//                if (!CommonUtil.isEmpty(houseDesignImage.getImageurl())) {
-//                    if (StringUtil.isNotEmpty(houseDesignImage.getImageurl())) {
-//                        houseDesignImage.setImageurl(address + houseDesignImage.getImageurl());
-//                    }
-//                }
-//            }
-//            return ServerResponse.createBySuccess("查询成功", houseDesignImageList);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ServerResponse.createByErrorMessage("查询失败");
-//        }
-//    }
-//
-//
-//    /**
-//     * 审核设计图
-//     */
-//    public ServerResponse checkDesign(String userToken, String houseId) {
-//        Object object = constructionService.getMember(userToken);
-//        if (object instanceof ServerResponse) {
-//            return (ServerResponse) object;
-//        }
-//        Member worker = (Member) object;
-//        Map<String, Object> map = new HashMap<>();
-//        House house = houseMapper.selectByPrimaryKey(houseId);
-//        if (house == null) {
-//            return ServerResponse.createByErrorMessage("没有查询到相关房子");
-//        }
-//        Example example = new Example(HouseDesignImage.class);
-//        if (house.getDesignerOk() == 5) {
-//            List<HouseDesignImageDTO> houseDesignImageDTOList = new ArrayList<>();
-//            example.createCriteria()
-//                    .andEqualTo(HouseDesignImage.HOUSE_ID, houseId)
-//                    .andEqualTo(HouseDesignImage.DESIGN_IMAGE_TYPE_ID, "1");
-//            example.orderBy(HouseDesignImage.CREATE_DATE).desc();
-//            List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);
-//            if (houseDesignImageList.size() <= 0) {
-//                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "暂无平面图");
-//            }
-//            HouseDesignImage houseDesignImage = houseDesignImageList.get(0);
-//            HouseDesignImageDTO houseDesignImageDTO = new HouseDesignImageDTO();
-//            houseDesignImageDTO.setImageurl(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + houseDesignImage.getImageurl());
-//            houseDesignImageDTO.setName("平面图");
-//            houseDesignImageDTOList.add(houseDesignImageDTO);
-//            if (worker.getId().equals(house.getMemberId())) {
-//                map.put("button", "确认平面图");
-//            }
-//            map.put("list", houseDesignImageDTOList);
-//            return ServerResponse.createBySuccess("查询成功", map);
-//        } else if (house.getDesignerOk() == 2) {
-//            ServerResponse serverResponse = getImagesList(houseId);
-//            if (!serverResponse.isSuccess()) {
-//                return serverResponse;
-//            }
-//            map.put("list", serverResponse.getResultObj());
-//            if (worker.getId().equals(house.getMemberId())) {
-//                map.put("button", "确认施工图");
-//            }
-//            return ServerResponse.createBySuccess("查询成功", map);
-//        }
-//        return ServerResponse.createByErrorMessage("查询失败");
-//    }
 
     /**
      * 获取平面图
@@ -282,12 +126,12 @@ public class DesignDataService {
             }
         } else {
             List<QuantityRoomImages> quantityRoomImages = new ArrayList<>();
-            ServerResponse serverResponse = getPlaneMap(houseId);
-            if (serverResponse.isSuccess()) {
-                QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
-                quantityRoomImages.addAll(quantityRoomDTO.getImages());
-            }
-            serverResponse = getConstructionPlans(houseId);
+//            ServerResponse serverResponse = getPlaneMap(houseId);
+//            if (serverResponse.isSuccess()) {
+//                QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+//                quantityRoomImages.addAll(quantityRoomDTO.getImages());
+//            }
+            ServerResponse serverResponse = getConstructionPlans(houseId);
             if (serverResponse.isSuccess()) {
                 QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
                 quantityRoomImages.addAll(quantityRoomDTO.getImages());
@@ -416,6 +260,9 @@ public class DesignDataService {
         PageInfo pageResult = new PageInfo(designDTOList);
         for (DesignDTO designDTO : designDTOList) {
             ServerResponse serverResponse = getPlaneMap(designDTO.getHouseId());
+            if (!serverResponse.isSuccess()) {
+                serverResponse = getConstructionPlans(designDTO.getHouseId());
+            }
             if (serverResponse.isSuccess()) {
                 QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
                 List<QuantityRoomImages> images = quantityRoomDTO.getImages();
