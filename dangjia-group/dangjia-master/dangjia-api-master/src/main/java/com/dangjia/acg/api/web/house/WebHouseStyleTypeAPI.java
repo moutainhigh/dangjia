@@ -36,4 +36,9 @@ public interface WebHouseStyleTypeAPI {
                                @RequestParam("id") String id,
                                @RequestParam("name") String name,
                                @RequestParam("price") String price);
+
+    @PostMapping("web/houseStyle/getStyleNames")
+    @ApiOperation(value = "获取图片名称列表", notes = "获取图片名称列表")
+    ServerResponse getStyleNames(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("houseId") String houseId);
 }

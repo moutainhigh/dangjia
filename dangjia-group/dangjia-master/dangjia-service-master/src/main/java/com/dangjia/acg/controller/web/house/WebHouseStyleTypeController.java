@@ -23,20 +23,25 @@ public class WebHouseStyleTypeController implements WebHouseStyleTypeAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getList(HttpServletRequest request, PageDTO pageDTO){
-        return houseStyleTypeService.getStyleList(request,pageDTO);
+    public ServerResponse getList(HttpServletRequest request, PageDTO pageDTO) {
+        return houseStyleTypeService.getStyleList(request, pageDTO);
     }
 
     @Override
     @ApiMethod
     public ServerResponse addStyle(HttpServletRequest request, String name, String price) {
-        return houseStyleTypeService.addStyle(request,name,price);
+        return houseStyleTypeService.addStyle(request, name, price);
     }
 
     @Override
     @ApiMethod
     public ServerResponse updataStyle(HttpServletRequest request, String id, String name, String price) {
-        return houseStyleTypeService.updataStyle(request,id,name,price);
+        return houseStyleTypeService.updataStyle(request, id, name, price);
+    }
+
+    @Override
+    public ServerResponse getStyleNames(HttpServletRequest request, String houseId) {
+        return houseStyleTypeService.getStyleNames(houseId);
     }
 
 }

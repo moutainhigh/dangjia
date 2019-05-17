@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.design;
 
+import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -104,4 +105,12 @@ public class HouseStyleTypeService {
         }
     }
 
+
+    public ServerResponse getStyleNames(String houseId) {
+        List<String> names = houseStyleTypeMapper.getStyleNames(houseId);
+        if (names == null || names.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相关信息");
+        }
+        return ServerResponse.createBySuccess("获取成功", names);
+    }
 }

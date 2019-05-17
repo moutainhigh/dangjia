@@ -5,6 +5,8 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
+import java.util.List;
+
 /**
  * author: Ronalcheng
  * Date: 2018/11/7 0007
@@ -15,4 +17,6 @@ import tk.mybatis.mapper.common.Mapper;
 public interface IHouseStyleTypeMapper extends Mapper<HouseStyleType> {
 
     HouseStyleType getStyleByName(@Param("name") String name);
+
+    List<String> getStyleNames(@Param("houseId") String houseId);
 }
