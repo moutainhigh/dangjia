@@ -932,27 +932,10 @@ public class ActuaryOperationService {
                             avDTO.setState(2);//不能选中
                         }else {
                             boolean isExist = false;
-                            String[] strAtIdArr = product.getValueIdArr().split(",");
-                            List<String> list=new ArrayList<>();
-                            for (String s : strAtIdArr) {
-                                //剔除本身同属性
-                                AttributeValue strV=iAttributeValueMapper.selectByPrimaryKey(s);
-                                if(!strV.getAttributeId().equals(attributeValue.getAttributeId())){
-                                    list.add(s);
-                                }
-                            }
-                            list.add(product.getBrandId());
-                            list.add(product.getBrandSeriesId());
-                            list.add(attributeValue.getId());
                             for (String s : valueIdArr) {
-                                int num=0;
-                                for (String s1 : list) {
-                                    if (isContainsValue(s1, s)) {
-                                        num++;
-                                    }
-                                }
-                                //如果全部匹配则可选
-                                if (num==list.size()) {
+                                if (isContainsValue(product.getBrandId(), s) &&
+                                        isContainsValue(product.getBrandSeriesId(), s) &&
+                                        isContainsValue(attributeValue.getId(), s)) {
                                     isExist = true;
                                     break;
                                 }
