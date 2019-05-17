@@ -34,8 +34,7 @@ public interface MendMaterielAPI {
     @ApiOperation(value = "选择货", notes = "选择货")
     ServerResponse selectProduct(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("goodsId") String goodsId,
-                                 @RequestParam("brandId") String brandId,
-                                 @RequestParam("brandSeriesId") String brandSeriesId,
+                                 @RequestParam("selectVal") String selectVal,
                                  @RequestParam("attributeIdArr") String attributeIdArr);
 
 
