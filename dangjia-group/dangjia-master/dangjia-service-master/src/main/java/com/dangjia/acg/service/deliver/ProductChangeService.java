@@ -118,6 +118,7 @@ public class ProductChangeService {
                 change.setDestPrice(destProduct.getPrice());
                 change.setDestImage(destProduct.getImage());
                 change.setDestSurCount(0.0);
+                change.setDifferencePrice(BigDecimal.ZERO);
                 change.setModifyDate(new Date());
                 productChangeMapper.updateByPrimaryKeySelective(change);
             }else {
