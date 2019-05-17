@@ -287,6 +287,8 @@ public class ProductChangeService {
         try {
             // 查询db中是否有该房子的换货订单
             List<ProductChangeOrder> list = productChangeOrderMapper.queryOrderByHouseId(houseId, "0");
+            // 当前房子有更换的商品时
+            int count = productChangeMapper.queryProductChangeExist(houseId, null, "0");
             // 计算总价差额
             BigDecimal differPrice = calcDifferPrice(houseId);
             if(null != list && list.size() > 0){
@@ -294,7 +296,7 @@ public class ProductChangeService {
                 order.setDifferencePrice(differPrice);
                 order.setModifyDate(new Date());
                 productChangeOrderMapper.updateByPrimaryKey(order);
-            } else {
+            } else if(count > 0){
                 order = new ProductChangeOrder();
                 order.setHouseId(houseId);
                 // 默认未支付
