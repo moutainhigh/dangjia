@@ -262,10 +262,10 @@ public class ActuaryOperationService {
      * 选择货品刷新页面
      *
      * @param goodsId
-     * @param brandSeriesId
+     * @param selectVal
      * @param attributeIdArr 属性值id集合
      */
-    public ServerResponse selectProduct(String goodsId, String brandId, String brandSeriesId, String attributeIdArr, String budgetMaterialId) {
+    public ServerResponse selectProduct(String goodsId, String selectVal, String attributeIdArr, String budgetMaterialId) {
         try {
             if (!StringUtils.isNoneBlank(goodsId))
                 return ServerResponse.createByErrorMessage("goodsId 不能为null");
@@ -275,8 +275,6 @@ public class ActuaryOperationService {
             String[] valueIdArr = attributeIdArr.split(",");
             Example example = new Example(Product.class);
             Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo(Product.TYPE, 1);
-            criteria.andEqualTo(Product.MAKET, 1);
             if (!CommonUtil.isEmpty(goodsId)) {
                 criteria.andEqualTo(Product.GOODS_ID, goodsId);
             }
@@ -291,27 +289,7 @@ public class ActuaryOperationService {
                 }
             }
             List<Product> products = productMapper.selectByExample(example);
-            if (products == null || products.size() == 0) {
 
-                example = new Example(Product.class);
-                 criteria = example.createCriteria();
-                criteria.andEqualTo(Product.TYPE, 1);
-                criteria.andEqualTo(Product.MAKET, 1);
-                if (!CommonUtil.isEmpty(goodsId)) {
-                    criteria.andEqualTo(Product.GOODS_ID, goodsId);
-                }
-
-                if (valueIdArr == null || valueIdArr.length == 0 || CommonUtil.isEmpty(attributeIdArr)) {
-                    criteria.andCondition(" (isnull(value_id_arr) or value_id_arr = '') ");
-                } else {
-                    criteria.andEqualTo(Product.BRAND_ID,valueIdArr[0]);
-                }
-                products = productMapper.selectByExample(example);
-//                return ServerResponse.createBySuccess("暂无该货号", "");
-            }
-            if (products == null || products.size() == 0) {
-                return ServerResponse.createBySuccess("暂无该货号", "");
-            }
             Product product = products.get(0);
             GoodsDTO goodsDTO = goodsDetail(product, budgetMaterialId);
             if (goodsDTO != null) {
@@ -429,6 +407,7 @@ public class ActuaryOperationService {
             Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());//当前 商品
             goodsDTO.setProductId(product.getId());
             goodsDTO.setGoodsId(goods.getId());
+            goodsDTO.setMaket(product.getMaket());
             goodsDTO.setImage(getImage(product.getImage()));//图一张
             String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
             goodsDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
@@ -747,7 +726,7 @@ public class ActuaryOperationService {
         return StringUtils.join(list,",");
     }
     //根据品牌系列找属性品牌
-    private List<AttributeDTO> getAllAttributes(Product product, List<Product> productList, List<String> imageList) {
+    private List<AttributeDTO> getAllAttributes1(Product product, List<Product> productList, List<String> imageList) {
 
         Map<String,List> productsMaps=new HashMap<>();//商品组合临时集合
         //装置货品下所有商品
@@ -931,12 +910,12 @@ public class ActuaryOperationService {
                         if(valueIdArr==null||valueIdArr.size()==0){
                             avDTO.setState(2);//不能选中
                         }else {
-                            boolean isExist = false;
+                            boolean isExist = true;
                             for (String s : valueIdArr) {
-                                if (isContainsValue(product.getBrandId(), s) &&
-                                        isContainsValue(product.getBrandSeriesId(), s) &&
-                                        isContainsValue(attributeValue.getId(), s)) {
-                                    isExist = true;
+                                if (!isContainsValue(product.getBrandId(), s) ||
+                                       !isContainsValue(product.getBrandSeriesId(), s) ||
+                                        !isContainsValue(attributeValue.getId(), s)) {
+                                    isExist = false;
                                     break;
                                 }
                             }
@@ -954,7 +933,64 @@ public class ActuaryOperationService {
 
         return attributeDTOList;
     }
+    //根据品牌系列找属性品牌
+    private List<AttributeDTO> getAllAttributes(Product product, List<Product> productList, List<String> imageList) {
 
+        List<AttributeDTO> attributeDTOList = new ArrayList<>();
+
+        //品牌
+        if(productList.size()>0) {
+            AttributeDTO attributeDTO = new AttributeDTO();
+            attributeDTO.setId("0");
+            attributeDTO.setName("规格");
+            List<AttributeValueDTO> attributeValueDTOList = new ArrayList<>();
+            for (Product atId : productList) {
+                StringBuffer strbuf=new StringBuffer();
+                if(!CommonUtil.isEmpty(atId.getBrandId())) {
+                    Brand brand = iBrandMapper.selectByPrimaryKey(atId.getBrandId());
+                    strbuf.append(brand.getName()+" ");
+
+                }
+                if(!CommonUtil.isEmpty(atId.getBrandSeriesId())) {
+                    BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(atId.getBrandSeriesId());
+                    strbuf.append(brandSeries.getName()+" ");
+
+                    if (atId.getId().equals(product.getId())) {//如果包含该属性
+                        if (StringUtils.isNoneBlank(brandSeries.getImage())) {
+                            imageList.add(getImage(brandSeries.getImage()));//属性图
+                        }
+                    }
+                }
+                if(!CommonUtil.isEmpty(atId.getValueIdArr())) {
+                    strbuf.append(atId.getValueNameArr().replaceAll(","," "));
+
+                    if (atId.getId().equals(product.getId())) {//如果包含该属性
+                        String[] strAtIdArr = atId.getValueIdArr().split(",");
+                        if (StringUtils.isNoneBlank(strAtIdArr)) {
+                            for (String atValId : strAtIdArr) {
+                                AttributeValue strVIs=iAttributeValueMapper.selectByPrimaryKey(atValId);
+                                if (strVIs!=null&&StringUtils.isNoneBlank(strVIs.getImage())) {
+                                    imageList.add(getImage(strVIs.getImage()));//属性图
+                                }
+                            }
+                        }
+                    }
+                }
+                AttributeValueDTO avDTO = new AttributeValueDTO();
+                avDTO.setAttributeValueId(atId.getBrandId()+","+atId.getBrandSeriesId()+","+atId.getValueIdArr());
+                avDTO.setName(strbuf.toString().trim());
+                if (atId.getId().equals(product.getId())) {//如果包含该属性
+                    avDTO.setState(1);//选中
+                } else {
+                    avDTO.setState(0);//未选中
+                }
+                attributeValueDTOList.add(avDTO);//添加属性值
+            }
+            attributeDTO.setValueDTOList(attributeValueDTOList);
+            attributeDTOList.add(attributeDTO);
+        }
+        return attributeDTOList;
+    }
     /**
      * 精算详情 productType  0：材料；1：服务
      */

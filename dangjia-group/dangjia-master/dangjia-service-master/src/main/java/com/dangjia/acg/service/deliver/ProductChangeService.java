@@ -246,6 +246,8 @@ public class ProductChangeService {
     public ServerResponse setDestSurCount(HttpServletRequest request, String id, Double destSurCount, String orderId){
         try {
             ProductChange productChange = productChangeMapper.selectByPrimaryKey(id);
+            // 查询订单表
+            ProductChangeOrder order = productChangeOrderMapper.selectByPrimaryKey(orderId);
             if(null != productChange){
                 // 剩余数
                 BigDecimal srcCount = BigDecimal.valueOf(productChange.getSrcSurCount());
@@ -268,7 +270,14 @@ public class ProductChangeService {
                 productChange.setDifferencePrice(differPrice);
                 productChange.setModifyDate(new Date());
                 productChange.setOrderId(orderId);
+                // 修改商品更换表
                 productChangeMapper.updateByPrimaryKeySelective(productChange);
+                // 修改商品更换订单表
+                // 计算总价差额
+                order.setDifferencePrice(differPrice.add(order.getDifferencePrice()));
+                order.setModifyDate(new Date());
+                productChangeOrderMapper.updateByPrimaryKeySelective(order);
+
             }
         }catch (Exception e){
             e.printStackTrace();

@@ -47,8 +47,7 @@ public interface ActuaryOperationAPI {
     @ApiOperation(value = "选择货品", notes = "选择货品")
     ServerResponse selectProduct(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("goodsId") String goodsId,
-                                 @RequestParam("brandId") String brandId,
-                                 @RequestParam("brandSeriesId") String brandSeriesId,
+                                 @RequestParam("selectVal") String selectVal,
                                  @RequestParam("attributeIdArr") String attributeIdArr,
                                  @RequestParam("budgetMaterialId") String budgetMaterialId);
 

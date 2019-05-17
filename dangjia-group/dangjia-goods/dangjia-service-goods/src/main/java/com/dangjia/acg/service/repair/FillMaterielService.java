@@ -192,8 +192,8 @@ public class FillMaterielService {
     /**
      * 选择货品
      */
-    public ServerResponse selectProduct(String goodsId, String brandId, String brandSeriesId, String attributeIdArr) {
-        return actuaryOperationService.selectProduct(goodsId, brandId, brandSeriesId, attributeIdArr, "");
+    public ServerResponse selectProduct(String goodsId, String selectVal,  String attributeIdArr) {
+        return actuaryOperationService.selectProduct(goodsId, selectVal, attributeIdArr, "");
     }
 
 
