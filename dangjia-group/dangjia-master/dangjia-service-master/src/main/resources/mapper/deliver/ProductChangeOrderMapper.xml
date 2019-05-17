@@ -32,7 +32,6 @@
 		SELECT
 		prco.id,
 		prco.number,
-		type,
 		prco.data_status as dataStatus,
 		prco.create_date as createDate,
 		prco.modify_date as modifyDate,

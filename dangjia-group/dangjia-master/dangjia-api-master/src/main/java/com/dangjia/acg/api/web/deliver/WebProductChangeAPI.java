@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RequestParam;
  * Date: 2019-5-16
  */
 @FeignClient("dangjia-service-master")
-@Api(value = "Web端换货", description = "Web端换货")
+@Api(value = "Web端换货流程接口", description = "Web端换货流程接口")
 public interface WebProductChangeAPI {
 
     @PostMapping(value = "web/deliver/productChange/changeOrderState")
-    @ApiOperation(value = "房子id查询换货单列表", notes = "房子id查询换货单列表")
+    @ApiOperation(value = "查询换货单列表", notes = "查询换货单列表")
     ServerResponse changeOrderState(@RequestParam("houseId") String houseId,
                                       @RequestParam("pageNum") Integer pageNum,
                                       @RequestParam("pageSize") Integer pageSize,
@@ -30,5 +30,5 @@ public interface WebProductChangeAPI {
 
     @PostMapping("web/deliver/productChange/queryPayChangeDetail")
     @ApiOperation(value = "支付订单换货详情", notes = "支付订单换货详情")
-    ServerResponse queryPayChangeDetail(String number, String orderId, String houseId);
+    ServerResponse queryPayChangeDetail(String number, String taskId);
 }
