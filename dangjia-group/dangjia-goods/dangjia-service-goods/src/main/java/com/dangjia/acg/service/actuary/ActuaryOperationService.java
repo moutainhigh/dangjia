@@ -458,26 +458,22 @@ public class ActuaryOperationService {
                 LOG.info("pIdTargetGroupSet size:" + pIdTargetGroupSet.size() + "  " + pIdTargetGroupSet + "  " + groupLinkTargetList);
             }
 
-            Example example =new Example(Product.class);
-            example.createCriteria().andEqualTo(Product.GOODS_ID,goods.getId());
-            List<Product> products = productMapper.selectByExample(example);
-            Map<String,Product> productsMaps=new HashMap<>();
-            //装置货品下所有商品
-            for (Product product1 : products) {
-                productsMaps.put(product1.getId(),product1);
-            }
+
             List<Product> productList = new ArrayList<>();
             if (srcGoodsGroup != null) {//是关联组
                 for (String pId : pIdTargetGroupSet) {
                     //如果没有品牌，就只遍历属性
-                    Product pt = productsMaps.get(pId);
+                    Product pt = productMapper.selectByPrimaryKey(pId);
                     if (StringUtils.isNoneBlank(pt.getAttributeIdArr())
                             && StringUtils.isNoneBlank(pt.getValueIdArr())) {
                         productList.add(pt);
                     }
                 }
             } else {
-                productList = products;
+                Example example =new Example(Product.class);
+                example.createCriteria().andEqualTo(Product.GOODS_ID,goods.getId());
+                example.orderBy(Product.VALUE_ID_ARR);
+                productList = productMapper.selectByExample(example);
             }
             List<AttributeDTO> attrList = getAllAttributes( product, productList, imageList);
             goodsDTO.setAttrList(attrList);
