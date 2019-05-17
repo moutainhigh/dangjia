@@ -18,6 +18,7 @@ import com.dangjia.acg.mapper.deliver.IProductChangeOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.deliver.ProductChange;
@@ -25,6 +26,7 @@ import com.dangjia.acg.modle.deliver.ProductChangeOrder;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
@@ -66,6 +68,8 @@ public class ProductChangeService {
     private IWorkerDetailMapper workerDetailMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private IBusinessOrderMapper businessOrderMapper;
     private static Logger LOG = LoggerFactory.getLogger(ProductChangeService.class);
 
     /**
@@ -384,7 +388,7 @@ public class ProductChangeService {
                 productChangeOrderMapper.updateByPrimaryKey(order);
                 // 更换已购买商品，没有新增，有则修改
                 if(!changeGmProduct(request, houseId)){
-                    return ServerResponse.createByErrorMessage("操作失败");
+                    return ServerResponse.createByErrorMessage("不能大于商品剩余数");
                 }
             }
         }catch (Exception e){
@@ -397,6 +401,7 @@ public class ProductChangeService {
     /**
      * 计算总价差额
      * @param houseId
+     *
      * @return
      */
     private BigDecimal calcDifferPrice(String houseId){
@@ -461,9 +466,9 @@ public class ProductChangeService {
                         newWareHouse.setBackTime(0);
                         warehouseMapper.insert(newWareHouse);
                     } else {
-                        // 新商品有则修改
+                        // 原商品剩余数
                         // 商品剩余数 剩余数量 所有买的数量 - 业主退货 - 要的
-                        double surCount = wareHouse.getShopCount() - (wareHouse.getOwnerBack() == null ? 0D : wareHouse.getOwnerBack()) - wareHouse.getAskCount();
+                        double surCount = oldWareHouse.getShopCount() - (oldWareHouse.getOwnerBack() == null ? 0D : oldWareHouse.getOwnerBack()) - oldWareHouse.getAskCount();
                         if (BigDecimal.valueOf(change.getDestSurCount()).compareTo(BigDecimal.valueOf(surCount)) == 1) {
                             return false;
                         }
@@ -563,8 +568,11 @@ public class ProductChangeService {
         List<ProductChange> productChangeList = productChangeMapper.selectByExample(example);
         House house = houseMapper.selectByPrimaryKey(houseId);
         Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+        // 房子地址
         productOrderDTO.setAddress(house.getHouseName());
+        // 业主
         productOrderDTO.setMemberName(member.getNickName() == null ? member.getName() : member.getNickName());
+        // 手机号码
         productOrderDTO.setMemberMobile(member.getMobile());
         // 明细list
         List<ProductChangeItemDTO> itemDTOList = new ArrayList<>();
@@ -581,6 +589,44 @@ public class ProductChangeService {
             }
         }
         productOrderDTO.setTotalDifferPrice(totalDifferPrice);
+        return ServerResponse.createBySuccess("查询成功", productOrderDTO);
+    }
+
+    /**
+     * 根据taskId查询商品支付流水
+     */
+    public ServerResponse queryPayChangeDetail(String number, String taskId) {
+        // 查询支付信息
+        Example example = new Example(BusinessOrder.class);
+        example.createCriteria().andEqualTo(BusinessOrder.NUMBER, number);
+        List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
+        BusinessOrder businessOrder = businessOrderList.get(0);
+        // 查询商品更换订单表
+        Example productExample = new Example(ProductChange.class);
+        productExample.createCriteria()
+                .andEqualTo(ProductChange.HOUSE_ID, businessOrder.getHouseId())
+                .andEqualTo(ProductChange.ORDER_ID, taskId)
+                .andEqualTo(ProductChange.TYPE, "1");
+        List<ProductChange> productChangeList = productChangeMapper.selectByExample(productExample);
+        // 房子信息
+        House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+        ProductOrderDTO productOrderDTO = new ProductOrderDTO();
+        // 房子地址
+        productOrderDTO.setAddress(house.getHouseName());
+        // 订单号
+        productOrderDTO.setNumber(businessOrder.getNumber());
+        List<ProductChangeItemDTO> itemDTOList = new ArrayList<>();
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        // 总补差价
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        for (ProductChange change : productChangeList) {
+            // 合计补差价
+            totalPrice = totalPrice.add(change.getDifferencePrice());
+            ProductChangeItemDTO itemDTO = getItemDTO(change, address, 1);
+            itemDTOList.add(itemDTO);
+            productOrderDTO.setProductChangeItemDTOList(itemDTOList);
+        }
+        productOrderDTO.setTotalDifferPrice(totalPrice);
         return ServerResponse.createBySuccess("查询成功", productOrderDTO);
     }
 
