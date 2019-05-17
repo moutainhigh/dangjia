@@ -120,7 +120,7 @@ public class ProductChangeService {
                 change.setDestSurCount(0.0);
                 change.setDifferencePrice(BigDecimal.ZERO);
                 change.setModifyDate(new Date());
-                productChangeMapper.updateByPrimaryKeySelective(change);
+                productChangeMapper.updateByPrimaryKey(change);
             }else {
                 ProductChange productChange = new ProductChange();
                 productChange.setMemberId(operator.getId());
@@ -271,12 +271,12 @@ public class ProductChangeService {
                 productChange.setModifyDate(new Date());
                 productChange.setOrderId(orderId);
                 // 修改商品更换表
-                productChangeMapper.updateByPrimaryKeySelective(productChange);
+                productChangeMapper.updateByPrimaryKey(productChange);
                 // 修改商品更换订单表
                 // 计算总价差额
-                order.setDifferencePrice(differPrice.add(order.getDifferencePrice()));
+                order.setDifferencePrice(calcDifferPrice(productChange.getHouseId()));
                 order.setModifyDate(new Date());
-                productChangeOrderMapper.updateByPrimaryKeySelective(order);
+                productChangeOrderMapper.updateByPrimaryKey(order);
 
             }
         }catch (Exception e){
