@@ -40,6 +40,7 @@ public class WebHouseStyleTypeController implements WebHouseStyleTypeAPI {
     }
 
     @Override
+    @ApiMethod
     public ServerResponse getStyleNames(HttpServletRequest request, String houseId) {
         return houseStyleTypeService.getStyleNames(houseId);
     }
