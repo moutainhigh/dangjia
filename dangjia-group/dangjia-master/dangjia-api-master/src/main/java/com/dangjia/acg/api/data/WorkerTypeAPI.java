@@ -19,30 +19,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient("dangjia-service-master")
 @Api(value = "工种接口", description = "工种接口")
 public interface WorkerTypeAPI {
-//
-//    @PostMapping("/data/workerType/getWorkerTypeRegister")
-//    @ApiOperation(value = "除设计防水工种列表", notes = "除设计精算防水工种列表")
-//    ServerResponse getWorkerTypeRegister();
-//
-//    @PostMapping("/data/workerType/getWorkerTypeList")
-//    @ApiOperation(value = "除设计精算防水工种列表", notes = "除设计精算防水工种列表")
-//    ServerResponse getWorkerTypeList();
-//
-//    @PostMapping("/data/workerType/list")
-//    @ApiOperation(value = "所有可用工种列表", notes = "所有可用工种列表")
-//    ServerResponse getWorkerTypeListAll();
-//
-//    @PostMapping("/data/workerType/getNameByWorkerTypeId")
-//    @ApiOperation(value = "根据workerTypeId返回工种名字", notes = "根据workerTypeId返回工种名字")
-//    ServerResponse getNameByWorkerTypeId(@RequestParam("workerTypeId")String workerTypeId);
 
     @PostMapping("/data/workerType/unfinishedFlow")
     @ApiOperation(value = "已进场未完工工种", notes = "已进场未完工工种")
-    ServerResponse unfinishedFlow(@RequestParam("houseId")String houseId);
+    ServerResponse unfinishedFlow(@RequestParam("houseId") String houseId);
 
     @PostMapping("/data/workerType/queryWorkerType")
     @ApiOperation(value = "根据workerTypeId返回工种对象", notes = "根据workerTypeId返回工种对象")
-    WorkerType queryWorkerType(@RequestParam("workerTypeId")String workerTypeId);
+    WorkerType queryWorkerType(@RequestParam("workerTypeId") String workerTypeId);
 
 
     @PostMapping("/data/workerType/getWorkerTypeList")
