@@ -206,7 +206,11 @@ public class SplitDeliverService {
                 SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
                 splitDeliverItemDTO.setImage(address + orderSplitItem.getImage());
                 splitDeliverItemDTO.setProductName(orderSplitItem.getProductName());
-                splitDeliverItemDTO.setTotalPrice(orderSplitItem.getPrice()*orderSplitItem.getReceive());
+                if(splitDeliver.getShippingState()==2||splitDeliver.getShippingState()==4||splitDeliver.getShippingState()==5){
+                    splitDeliverItemDTO.setTotalPrice(orderSplitItem.getPrice()*orderSplitItem.getReceive());
+                }else{
+                    splitDeliverItemDTO.setTotalPrice(orderSplitItem.getPrice()*orderSplitItem.getNum());
+                }
                 splitDeliverItemDTO.setShopCount(orderSplitItem.getShopCount());
                 splitDeliverItemDTO.setNum(orderSplitItem.getNum());
                 splitDeliverItemDTO.setUnitName(orderSplitItem.getUnitName());
