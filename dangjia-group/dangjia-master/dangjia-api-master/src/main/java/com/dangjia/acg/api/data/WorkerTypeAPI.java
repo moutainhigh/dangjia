@@ -46,7 +46,7 @@ public interface WorkerTypeAPI {
 
 
     @PostMapping("/data/workerType/getWorkerTypeList")
-    @ApiOperation(value = "获取工种列表", notes = "type：-1：全部，0：除精算防水工种列表，1：除设计精算防水工种列表")
+    @ApiOperation(value = "获取工种列表", notes = "type：-1：全部，0：除精算防水工种列表，1：除设计精算防水工种列表，2：App选择工种专用")
     ServerResponse getWorkerTypeList(@RequestParam("type") Integer type);
 
     @PostMapping("/data/workerType/getWorkerType")

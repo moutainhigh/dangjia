@@ -721,7 +721,7 @@ public class ActuaryOperationService {
         if(!CommonUtil.isEmpty(valueIdArr)){list.add(valueIdArr);}
         return StringUtils.join(list,",");
     }
-    //根据品牌系列找属性品牌
+    //根据品牌系列找属性品牌(先保留，暂无使用)
     private List<AttributeDTO> getAllAttributes1(Product product, List<Product> productList, List<String> imageList) {
 
         Map<String,List> productsMaps=new HashMap<>();//商品组合临时集合
