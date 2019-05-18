@@ -9,6 +9,7 @@ import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
+import com.dangjia.acg.mapper.repair.IMendOrderCheckMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
@@ -18,10 +19,12 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.repair.MendOrderCheck;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -50,6 +53,8 @@ public class ChangeOrderService {
     @Autowired
     private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private IMendOrderCheckMapper mendOrderCheckMapper;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
@@ -127,6 +132,20 @@ public class ChangeOrderService {
                 }
             }
             Map<String,Object> map = BeanUtils.beanToMap(changeOrder);
+            if (changeOrder.getState() == 1){
+                map.put("roleType","2");
+                List<MendOrder> mendOrderList = mendOrderMapper.getByChangeOrderId(changeOrder.getId());
+                if (mendOrderList.size() >0){
+                    Example example=new Example(MendOrderCheck.class);
+                    example.createCriteria().andEqualTo(MendOrderCheck.STATE,1).andEqualTo(MendOrderCheck.MEND_ORDER_ID,mendOrderList.get(0).getId());
+                    example.orderBy(MendOrderCheck.CREATE_DATE).desc();
+                    List<MendOrderCheck> list=mendOrderCheckMapper.selectByExample(example);
+                    if(list.size()>0){
+                        map.put("roleType",list.get(0).getRoleType());//1业主,2管家,3工匠,4材料员,5供应商
+                    }
+                }
+            }
+
             map.put("changeOrderId", changeOrder.getId());
             map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(changeOrder.getWorkerTypeId()).getName());
             returnMap.add(map);
