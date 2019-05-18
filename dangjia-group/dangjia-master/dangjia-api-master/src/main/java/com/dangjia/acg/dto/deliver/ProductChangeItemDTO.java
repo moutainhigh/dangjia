@@ -13,24 +13,45 @@ import java.math.BigDecimal;
 public class ProductChangeItemDTO {
 
     private String id;
-    // 商品图片
-    private String image;
-    // 商品ID
-    private String productId;
-    // 商品编号
-    private String productSn;
-    // 商品名称
-    private String productName;
-    // 单价 5.0元/个
-    private Double price;
-    // 单位名称
-    private String unitName;
-    // 差价
-    private String differPrice;
-    // 换货前数量
-    private Double srcSurCount;
-    // 换货后数量
-    private Double destSurCount;
-    // 合计
-    private BigDecimal totalMoney;
+    // src商品图片
+    private String srcImage;
+    // src商品ID
+    private String srcProductId;
+    // src商品编号
+    private String srcProductSn;
+    // src商品名称
+    private String srcProductName;
+    // src单价 5.0元/个
+    private Double srcPrice;
+    // src单位名称
+    private String srcUnitName;
+    // src差价
+    private String srcDifferPrice;
+    // src换货前数量
+    private Double srcBeforeCount;
+    // src换货后数量
+    private Double srcAfterCount;
+    // src合计
+    private BigDecimal srcTotalMoney;
+
+    // dest商品图片
+    private String destImage;
+    // dest商品ID
+    private String destProductId;
+    // dest商品编号
+    private String destProductSn;
+    // dest商品名称
+    private String destProductName;
+    // dest单价 5.0元/个
+    private Double destPrice;
+    // dest单位名称
+    private String destUnitName;
+    // dest差价
+    private String destDifferPrice;
+    // dest换货前数量
+    private Double destBeforeCount;
+    // dest换货后数量
+    private Double destAfterCount;
+    // dest合计
+    private BigDecimal destTotalMoney;
 }

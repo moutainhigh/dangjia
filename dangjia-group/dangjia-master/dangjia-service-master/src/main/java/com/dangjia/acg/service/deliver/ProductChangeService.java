@@ -593,12 +593,10 @@ public class ProductChangeService {
         for (ProductChange change : productChangeList) {
             // 合计退差价
             totalDifferPrice = totalDifferPrice.add(change.getDifferencePrice());
-            for(int i =0; i <=1; i++){
                 // 处理itemDTo
-                ProductChangeItemDTO itemDTO = getItemDTO(change, address, i);
+                ProductChangeItemDTO itemDTO = getItemDTO(change, address, 0);
                 itemDTOList.add(itemDTO);
                 productOrderDTO.setProductChangeItemDTOList(itemDTOList);
-            }
         }
         productOrderDTO.setTotalDifferPrice(totalDifferPrice);
         return ServerResponse.createBySuccess("查询成功", productOrderDTO);
@@ -651,21 +649,29 @@ public class ProductChangeService {
      */
     private ProductChangeItemDTO getItemDTO(ProductChange change, String address, int temp){
         ProductChangeItemDTO itemDTO = new ProductChangeItemDTO();
-        itemDTO.setImage(address + (temp == 0 ?  change.getSrcImage() : change.getDestImage()));
-        itemDTO.setProductId(temp == 0 ?  change.getSrcProductId() : change.getDestProductId());
-        itemDTO.setProductSn(temp == 0 ?  change.getSrcProductSn() : change.getDestProductSn());
-        itemDTO.setProductName(temp == 0 ?  change.getSrcProductName() : change.getDestProductName());
-        itemDTO.setPrice(temp == 0 ?  change.getSrcPrice() : change.getDestPrice());
-        itemDTO.setUnitName(temp == 0 ?  change.getSrcUnitName() : change.getDestUnitName());
-        // 差价
-        double differPrice = MathUtil.sub(change.getDestPrice(), change.getSrcPrice());
-        itemDTO.setDifferPrice(temp == 0 ?  "" : String.valueOf(differPrice));
-        itemDTO.setSrcSurCount(temp == 0 ?  change.getSrcSurCount() : 0.0);
-        itemDTO.setDestSurCount(temp == 0 ?  MathUtil.sub(change.getSrcSurCount(), change.getDestSurCount()) : change.getDestSurCount());
-        if(temp == 1){
-            double totalMoney = MathUtil.mul(differPrice, change.getDestSurCount());
-            itemDTO.setTotalMoney(BigDecimal.valueOf(totalMoney));
+        if(temp == 0) {
+            // src
+            itemDTO.setSrcImage(address + change.getSrcImage());
+            itemDTO.setSrcProductId(change.getSrcProductId());
+            itemDTO.setSrcProductSn(change.getSrcProductSn());
+            itemDTO.setSrcProductName(change.getSrcProductName());
+            itemDTO.setSrcPrice(change.getSrcPrice());
+            itemDTO.setSrcUnitName(change.getSrcUnitName());
+            itemDTO.setSrcBeforeCount(change.getSrcSurCount());
+            itemDTO.setSrcAfterCount(MathUtil.sub(change.getSrcSurCount(), change.getDestSurCount()));
         }
+        // dest
+        itemDTO.setDestImage(address + change.getDestImage());
+        itemDTO.setDestProductId(change.getDestProductId());
+        itemDTO.setDestProductSn(change.getDestProductSn());
+        itemDTO.setDestProductName(change.getDestProductName());
+        itemDTO.setDestPrice(change.getDestPrice());
+        itemDTO.setDestUnitName(change.getDestUnitName());
+        double  destDifferPrice = MathUtil.sub(change.getDestPrice(), change.getSrcPrice());
+        itemDTO.setDestDifferPrice((destDifferPrice > 0 ? "+" + destDifferPrice : destDifferPrice) +"元/"+change.getDestUnitName());
+        itemDTO.setDestBeforeCount(0.0);
+        itemDTO.setDestAfterCount(change.getDestSurCount());
+        itemDTO.setDestTotalMoney(change.getDifferencePrice());
         return itemDTO;
     }
 
