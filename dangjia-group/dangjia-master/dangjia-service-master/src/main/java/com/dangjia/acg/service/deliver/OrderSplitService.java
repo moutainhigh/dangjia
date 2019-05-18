@@ -212,9 +212,9 @@ public class OrderSplitService {
                 orderSplitItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(),orderSplitItem.getProductId()));
                 orderSplitItemDTO.setBrandName(forMasterAPI.brandName(house.getCityId(),orderSplitItem.getProductId()));
                 if(splitDeliver.getShippingState()==2||splitDeliver.getShippingState()==4||splitDeliver.getShippingState()==5){
-                    orderSplitItemDTO.setTotalPrice(orderSplitItem.getSupCost()*orderSplitItem.getReceive());
+                    orderSplitItemDTO.setTotalPrice(new BigDecimal(orderSplitItem.getSupCost()*orderSplitItem.getReceive()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
                 }else{
-                    orderSplitItemDTO.setTotalPrice(orderSplitItem.getSupCost()*orderSplitItem.getNum());
+                    orderSplitItemDTO.setTotalPrice(new BigDecimal(orderSplitItem.getSupCost()*orderSplitItem.getNum()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
                 }
                 orderSplitItemDTOS.add(orderSplitItemDTO);
                 detailDTO.setApplyMoney(new BigDecimal(detailDTO.getApplyMoney() + orderSplitItemDTO.getTotalPrice()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
