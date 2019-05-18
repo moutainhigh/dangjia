@@ -93,6 +93,10 @@ public class WebOrderService {
                     if (webOrderDTO.getType() == 5) {
                         webOrderDTO.setTypeText("验房分销");
                     }
+                    // 换货单
+                    if (webOrderDTO.getType() == 6) {
+                        webOrderDTO.setTypeText("换货补差价");
+                    }
                 }
                 ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(webOrderDTO.getOrderId());
                 if (activityRedPackRecord != null) {

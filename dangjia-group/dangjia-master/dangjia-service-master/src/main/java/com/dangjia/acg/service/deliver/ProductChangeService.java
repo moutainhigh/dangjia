@@ -378,7 +378,7 @@ public class ProductChangeService {
                         BigDecimal surplusMoney = member.getSurplusMoney().add(toDifferPrice);
                         //记录流水
                         WorkerDetail workerDetail = new WorkerDetail();
-                        workerDetail.setName("业主换货");
+                        workerDetail.setName("业主换材料退款");
                         workerDetail.setWorkerId(member.getId());
                         workerDetail.setWorkerName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
                         workerDetail.setHouseId(houseId);
