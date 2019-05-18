@@ -78,7 +78,7 @@ public class SplitDeliverService {
             splitDeliver.setShippingState(4);//部分收货
             splitDeliver.setImage(image);//收货图片
             splitDeliver.setRecTime(new Date());
-            splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
+
             JSONArray arr = JSONArray.parseArray(splitItemList);
             for (int i = 0; i < arr.size(); i++) {
                 JSONObject obj = arr.getJSONObject(i);
@@ -91,7 +91,9 @@ public class SplitDeliverService {
                 Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), splitDeliver.getHouseId());
                 warehouse.setReceive(warehouse.getReceive() + receive);
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                splitDeliver.setApplyMoney(splitDeliver.getApplyMoney() + (orderSplitItem.getSupCost()*orderSplitItem.getReceive()));
             }
+            splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
             //业主
             configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "装修材料部分收货", String.format
@@ -119,7 +121,6 @@ public class SplitDeliverService {
             splitDeliver.setImage(image);//收货图片
             splitDeliver.setRecTime(new Date());
             splitDeliver.setModifyDate(new Date());//收货时间
-            splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             orderSplitItemMapper.affirmSplitDeliver(splitDeliverId);
             /*统计收货数量*/
             Example example = new Example(OrderSplitItem.class);
@@ -129,7 +130,10 @@ public class SplitDeliverService {
                 Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), splitDeliver.getHouseId());
                 warehouse.setReceive(warehouse.getReceive() + orderSplitItem.getNum());
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                splitDeliver.setApplyMoney(splitDeliver.getApplyMoney() + (orderSplitItem.getSupCost()*orderSplitItem.getReceive()));
             }
+
+            splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
             //业主
             configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "装修材料已收货", String.format
