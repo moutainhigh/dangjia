@@ -10,6 +10,7 @@ import com.dangjia.acg.mapper.config.IConfigAppMapper;
 import com.dangjia.acg.modle.config.ConfigApp;
 import com.dangjia.acg.modle.config.ConfigAppHistory;
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -34,24 +35,6 @@ public class ConfigAppService {
     @Autowired
     private IConfigAppHistoryMapper configAppHistoryMapper;
 
-    public List<ConfigApp>  queryConfigApps(HttpServletRequest request, ConfigApp configApp){
-        Example example = new Example(ConfigApp.class);
-        Example.Criteria criteria=example.createCriteria();
-        if(!CommonUtil.isEmpty(configApp.getAppType())) {
-            criteria.andEqualTo("appType", configApp.getAppType());
-        }
-        if (!CommonUtil.isEmpty(configApp.getName())) {
-            criteria.andLike("name", "%" + configApp.getName() + "%");
-        }
-        example.orderBy("createDate").desc();
-        if (!CommonUtil.isEmpty(request.getAttribute("pageNum"))) {
-            Integer pageNum = (Integer) request.getAttribute("pageNum");
-            Integer pageSize = (Integer) request.getAttribute("pageSize");
-            PageHelper.startPage(pageNum, pageSize);
-        }
-        List<ConfigApp> list = configAppMapper.selectByExample(example);
-        return list;
-    }
 
     /**
      * 获取所有版本应用
@@ -68,13 +51,12 @@ public class ConfigAppService {
             criteria.andLike("name", "%" + configApp.getName() + "%");
         }
         example.orderBy("createDate").desc();
-        if (!CommonUtil.isEmpty(request.getAttribute("pageNum"))) {
-            Integer pageNum = (Integer) request.getAttribute("pageNum");
-            Integer pageSize = (Integer) request.getAttribute("pageSize");
-            PageHelper.startPage(pageNum, pageSize);
-        }
+        Integer pageNum = Integer.parseInt(request.getParameter("pageNum"));
+        Integer pageSize = Integer.parseInt(request.getParameter("pageSize"));
+        PageHelper.startPage(pageNum, pageSize);
         List<ConfigApp> list = configAppMapper.selectByExample(example);
-        return ServerResponse.createBySuccess("ok",list);
+        PageInfo pageResult = new PageInfo(list);
+        return ServerResponse.createBySuccess("ok",pageResult);
     }
 
     /**
