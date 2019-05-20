@@ -220,7 +220,7 @@ public class ChangeOrderService {
                     if(remain.doubleValue()<0){//负数冲正
                         remain=new BigDecimal(0);
                     }
-                    return ServerResponse.createByErrorMessage("审核通过后 ，可退人工金额上限为"+remain+"元，确定验收吗？");
+                    return ServerResponse.createByErrorMessage("审核通过后 ，可退人工金额上限为"+remain+"元(不包含滞留金)，确定验收吗？");
                 }
             }
             if (type == 2) {
