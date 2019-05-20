@@ -149,15 +149,10 @@ public class UnitService {
     }
 
     //
-    public ServerResponse selectById(String id) {
+    public ServerResponse getUnitById(String id) {
         try {
             Unit unit = iUnitMapper.selectByPrimaryKey(id);
-            Map<String, Object> map = new HashMap<String, Object>();
-            String dateStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(unit.getCreateDate());
-            map.put("id", unit.getId());
-            map.put("creatDate", dateStr);
-            map.put("name", unit.getName());
-            return ServerResponse.createBySuccess("查询成功", map);
+            return ServerResponse.createBySuccess("查询成功", unit);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
