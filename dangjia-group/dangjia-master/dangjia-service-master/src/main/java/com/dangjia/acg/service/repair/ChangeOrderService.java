@@ -215,8 +215,7 @@ public class ChangeOrderService {
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
                 if (changeOrderList.size() > 0&&houseFlowApplyList.size() > 0) {
                     HouseFlowApply houseFlowApply=houseFlowApplyList.get(0);
-                    remain=remain.subtract(houseFlowApply.getApplyMoney()) ;
-                    remain =remain.setScale(2,BigDecimal.ROUND_HALF_UP);
+                    remain=houseFlowApply.getOtherMoney();//剩下的钱
                     if(remain.doubleValue()<0){//负数冲正
                         remain=new BigDecimal(0);
                     }
