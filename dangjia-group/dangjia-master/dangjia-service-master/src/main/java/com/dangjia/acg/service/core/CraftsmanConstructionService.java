@@ -626,7 +626,7 @@ public class CraftsmanConstructionService {
             alreadyMoney= alreadyMoney.add(havaMoney);
             bean.setAlreadyMoney(alreadyMoney);//已得钱
 
-            alsoMoney=alsoMoney.add((hwo.getRepairPrice() == null ? new BigDecimal(0) :hwo.getRepairPrice()));
+            alsoMoney=alsoMoney.add((hwo.getRepairPrice() == null ? new BigDecimal(0) :hwo.getRepairPrice())).subtract(hwo.getRetentionMoney() == null ? new BigDecimal(0) : hwo.getRetentionMoney());
             bean.setAlsoMoney(alsoMoney);//还可得钱
         }
     }
