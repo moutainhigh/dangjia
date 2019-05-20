@@ -10,9 +10,8 @@ import java.math.BigDecimal;
  * 中台-补退换货流程-换货详情
  */
 @Data
-public class ProductChangeItemDTO {
+public class ProductChangeItemDTO{
 
-    private String id;
     // src商品图片
     private String srcImage;
     // src商品ID
@@ -54,4 +53,19 @@ public class ProductChangeItemDTO {
     private Double destAfterCount;
     // dest合计
     private BigDecimal destTotalMoney;
+
+    // 支付订单流水换货单商品详情begin
+    private String productSn;
+    private String productName;
+    private String unitName;
+
+    private String image;
+    // 单价
+    private BigDecimal price;
+    // 差价
+    private BigDecimal differPrice;
+    // 数量
+    private Double shopCount;
+    private BigDecimal totalPrice;
+    // 支付订单流水换货单商品详情end
 }

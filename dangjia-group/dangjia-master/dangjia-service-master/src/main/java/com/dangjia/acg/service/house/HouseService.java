@@ -1466,13 +1466,17 @@ public class HouseService {
                     }
                     if (changeOrder != null && !CommonUtil.isEmpty(changeOrder.getWorkerId())) {
                         houseConstructionRecord.setWorkerId(changeOrder.getWorkerId());
-                        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(changeOrder.getWorkerTypeId());
-                        houseConstructionRecord.setWorkerType(workerType.getType());
+                        if(!CommonUtil.isEmpty(changeOrder.getWorkerTypeId())) {
+                            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(changeOrder.getWorkerTypeId());
+                            houseConstructionRecord.setWorkerType(workerType.getType());
+                        }
                     }
                 } else {
                     houseConstructionRecord.setWorkerId(mendOrder.getApplyMemberId());
-                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
-                    houseConstructionRecord.setWorkerType(workerType.getType());
+                    if(!CommonUtil.isEmpty(mendOrder.getWorkerTypeId())) {
+                            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
+                            houseConstructionRecord.setWorkerType(workerType.getType());
+                    }
                 }
                 if (mendOrder.getType() == 0) {
                     houseConstructionRecord.setApplyType(10);

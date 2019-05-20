@@ -28,6 +28,9 @@ public class WorkerTypeService {
     public ServerResponse unfinishedFlow(String houseId) {
         try {
             List<WorkerType> workerTypeList = workerTypeMapper.unfinishedFlow(houseId);
+            if(workerTypeList.size()==0){
+                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相关记录");
+            }
             return ServerResponse.createBySuccess("查询成功", workerTypeList);
         } catch (Exception e) {
             e.printStackTrace();
