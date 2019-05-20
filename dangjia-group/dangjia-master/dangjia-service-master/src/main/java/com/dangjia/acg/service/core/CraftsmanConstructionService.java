@@ -621,7 +621,12 @@ public class CraftsmanConstructionService {
             //已得到的钱+滞留金的钱=已得总钱
             BigDecimal alreadyMoney = (hwo.getHaveMoney() == null ? new BigDecimal(0) :
                     hwo.getHaveMoney()).add(hwo.getRetentionMoney() == null ? new BigDecimal(0) : hwo.getRetentionMoney());//已得钱
+
+            BigDecimal havaMoney=hwo.getRepairTotalPrice().subtract(hwo.getRepairPrice());
+            alreadyMoney= alreadyMoney.add(havaMoney);
             bean.setAlreadyMoney(alreadyMoney);//已得钱
+
+            alsoMoney=alsoMoney.add(hwo.getRepairPrice());
             bean.setAlsoMoney(alsoMoney);//还可得钱
         }
     }
