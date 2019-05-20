@@ -244,17 +244,20 @@ public class TaskService {
         example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
                 .andEqualTo(MendOrder.STATE, 1);//补材料审核状态全通过
         List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
+         String DESIGNLIST = "refundItemDetail?userToken=%s&cityId=%s&title=%s";//设计图
         for (MendOrder mendOrder : mendOrderList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
-            task.setName(workerType.getName() + "补材料");
+            task.setName(workerType.getName() + "补材料审核");
             if (workerType.getType() == 3) {
-                task.setName(workerType.getName() + "补服务");
+                task.setName(workerType.getName() + "补服务审核");
             }
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/buchailiao.png");
-            task.setHtmlUrl("");
-            task.setType(2);
+            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                    String.format(DESIGNLIST, house.getCityId(), task.getName()) + "&type=0&mendOrderId=" + mendOrder.getId() + "&roleType=1&state=" + mendOrder.getState();
+            task.setHtmlUrl(url);
+            task.setType(3);
             task.setTaskId(mendOrder.getId());
             taskList.add(task);
         }
@@ -269,10 +272,12 @@ public class TaskService {
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
                 Task task = new Task();
                 task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
-                task.setName(workerType.getName() + "补人工");
+                task.setName(workerType.getName() + "补人工审核");
                 task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/burengong.png");
-                task.setHtmlUrl("");
-                task.setType(2);
+                String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                        String.format(DESIGNLIST, house.getCityId(), task.getName()) + "&type=0&mendOrderId=" + mendOrder.getId() + "&roleType=1&state=" + mendOrder.getState();
+                task.setHtmlUrl(url);
+                task.setType(3);
                 task.setTaskId(mendOrder.getId());
                 taskList.add(task);
             }
