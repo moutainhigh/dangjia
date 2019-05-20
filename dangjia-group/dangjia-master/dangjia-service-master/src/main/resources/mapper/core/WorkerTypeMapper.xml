@@ -12,7 +12,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where hf.state = 0
         and hf.work_type = 4
         and hf.work_steta != 2
-        and hf.worker_type > 2
+        and hf.worker_type > 3
         and hf.house_id=#{houseId}
         and wt.id = hf.worker_type_id
         order by hf.sort asc
