@@ -205,10 +205,6 @@ public class ChangeOrderService {
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        Member member = (Member) object;
-        if (type == 1){
-            workerTypeId=member.getWorkerTypeId();
-        }
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);
         HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, workerTypeId);
         if (houseWorkerOrder != null) {
