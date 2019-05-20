@@ -622,11 +622,11 @@ public class CraftsmanConstructionService {
             BigDecimal alreadyMoney = (hwo.getHaveMoney() == null ? new BigDecimal(0) :
                     hwo.getHaveMoney()).add(hwo.getRetentionMoney() == null ? new BigDecimal(0) : hwo.getRetentionMoney());//已得钱
 
-            BigDecimal havaMoney=hwo.getRepairTotalPrice().subtract(hwo.getRepairPrice());
+            BigDecimal havaMoney=(hwo.getRepairTotalPrice() == null ? new BigDecimal(0) :hwo.getRepairTotalPrice()).subtract((hwo.getRepairPrice() == null ? new BigDecimal(0) :hwo.getRepairPrice()));
             alreadyMoney= alreadyMoney.add(havaMoney);
             bean.setAlreadyMoney(alreadyMoney);//已得钱
 
-            alsoMoney=alsoMoney.add(hwo.getRepairPrice());
+            alsoMoney=alsoMoney.add((hwo.getRepairPrice() == null ? new BigDecimal(0) :hwo.getRepairPrice()));
             bean.setAlsoMoney(alsoMoney);//还可得钱
         }
     }
