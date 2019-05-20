@@ -965,13 +965,12 @@ public class MendOrderService {
                     mendMateriel.setUnitName(unitName);
                     mendMateriel.setProductType(forMasterAPI.getGoods(house.getCityId(), product.getGoodsId()).getType());//0：材料；1：服务
                 }
-
-                Object object=unitAPI.getUnitById(request,product.getConvertUnit());
+                ServerResponse serverResponse=unitAPI.getUnitById(request,product.getConvertUnit());
                 Unit unit;
-                if(object instanceof JSONObject){
-                    unit= JSON.parseObject(JSON.toJSONString(object), Unit.class);
+                if(serverResponse.getResultObj() instanceof JSONObject){
+                    unit= JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
                 }else{
-                    unit=(Unit)object;
+                    unit=(Unit)serverResponse.getResultObj();
                 }
                 if(unit.getType()==1){
                     num=Math.ceil(num);
