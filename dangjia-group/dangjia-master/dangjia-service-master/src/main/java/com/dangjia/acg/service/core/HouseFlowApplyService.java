@@ -368,16 +368,19 @@ public class HouseFlowApplyService {
         if(hfa.getSupervisorMoney() == null){
             hfa.setSupervisorMoney(new BigDecimal(0));
         }
-
+        //评分扣钱
+        BigDecimal deductPrice = new BigDecimal(0);
         BigDecimal supervisorMoney;
         if(star == 0 || star == 5){
             supervisorMoney = hfa.getSupervisorMoney();//大管家的验收收入
         }else if(star == 3 || star == 4){
             supervisorMoney = hfa.getSupervisorMoney().multiply(new BigDecimal(0.8));
+            deductPrice = hfa.getSupervisorMoney().subtract(supervisorMoney);
         }else{
             supervisorMoney = new BigDecimal(0);//为0元
+            deductPrice = hfa.getSupervisorMoney();
         }
-
+        hwo.setDeductPrice(hwo.getDeductPrice().add(deductPrice));
         hwo.setHaveMoney(hwo.getHaveMoney().add(supervisorMoney));
         //大管家验收钱
         hwo.setEveryMoney(hwo.getEveryMoney().add(supervisorMoney));
@@ -493,9 +496,7 @@ public class HouseFlowApplyService {
                 workerDetail.setState(2);//进钱
                 workerDetailMapper.insert(workerDetail);
                 //实际滞留金
-
-                BigDecimal retentionMoneyOrder=  hwo.getRetentionMoney().add(mid);
-                hwo.setRetentionMoney(retentionMoneyOrder);
+                hwo.setRetentionMoney(mid);
 
                 //处理阶段申请的钱，将减去滞留金的钱，存入账户余额
                 BigDecimal applyMoney=  hfa.getApplyMoney().subtract(mid);
