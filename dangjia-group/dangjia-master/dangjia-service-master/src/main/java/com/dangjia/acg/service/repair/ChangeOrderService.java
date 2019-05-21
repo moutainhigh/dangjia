@@ -223,6 +223,8 @@ public class ChangeOrderService {
                 }
             }
             if (type == 2) {
+                remain = remain.subtract(houseWorkerOrder.getRetentionMoney()).subtract(houseWorkerOrder.getDeductPrice());//剩下的
+                remain =remain.setScale(2,BigDecimal.ROUND_HALF_UP);
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
                 if (houseFlowApplyList.size() > 0) {
                     return ServerResponse.createByErrorMessage("当前" + workerType.getName() + "阶段完工正在申请中，可退人工金额上限为"+remain+"元，确定申请退人工吗？");

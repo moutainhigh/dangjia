@@ -1,8 +1,11 @@
 package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.api.basics.UnitAPI;
+import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -74,6 +77,9 @@ public class ProductChangeService {
     private IBusinessOrderMapper businessOrderMapper;
     @Autowired
     private UnitAPI unitAPI;
+
+    @Autowired
+    private ForMasterAPI forMasterAPI;
     private static Logger LOG = LoggerFactory.getLogger(ProductChangeService.class);
 
     /**
@@ -136,10 +142,15 @@ public class ProductChangeService {
                 change.setDestUnitName(null == wareHouse ? destUnit.getName() : wareHouse.getUnitName());
                 change.setDestPrice(destProduct.getPrice());
                 change.setDestImage(destProduct.getImage());
-                change.setDestSurCount(0.0);
+                change.setDestSurCount(srcSurCount);
                 // 类型 0 材料 1 服务
                 change.setProductType(productType);
-                change.setDifferencePrice(BigDecimal.ZERO);
+                // 差额单价
+                BigDecimal price = BigDecimal.valueOf(MathUtil.sub(change .getDestPrice(), change.getSrcPrice()));
+                // 差价= 更换数*差额单价
+                BigDecimal differPrice = price.multiply(BigDecimal.valueOf(srcSurCount));
+                // 差价默认为可以更换数量的最大值
+                change.setDifferencePrice(differPrice);
                 change.setModifyDate(new Date());
                 productChangeMapper.updateByPrimaryKey(change);
             }else {
@@ -164,13 +175,17 @@ public class ProductChangeService {
                 productChange.setDestUnitName(null == wareHouse ? destUnit.getName() : wareHouse.getUnitName());
                 productChange.setDestImage(destProduct.getImage());
                 // 更换数默认为0
-                productChange.setDestSurCount(0.0);
+                productChange.setDestSurCount(srcSurCount);
                 // 未处理
                 productChange.setType(0);
                 // 类型 0 材料 1 服务
                 productChange.setProductType(productType);
-                // 差价默认为0
-                productChange.setDifferencePrice(BigDecimal.ZERO);
+                // 差额单价
+                BigDecimal price = BigDecimal.valueOf(MathUtil.sub(productChange .getDestPrice(), productChange.getSrcPrice()));
+                // 差价= 更换数*差额单价
+                BigDecimal differPrice = price.multiply(BigDecimal.valueOf(srcSurCount));
+                // 差价默认为可以更换数量的最大值
+                productChange.setDifferencePrice(differPrice);
                 productChangeMapper.insert(productChange);
             }
         }catch (Exception e){
@@ -269,9 +284,12 @@ public class ProductChangeService {
      */
     public ServerResponse setDestSurCount(HttpServletRequest request, String id, Double destSurCount, String orderId){
         try {
+
             ProductChange productChange = productChangeMapper.selectByPrimaryKey(id);
             // 查询订单表
             ProductChangeOrder order = productChangeOrderMapper.selectByPrimaryKey(orderId);
+            House house = houseMapper.selectByPrimaryKey(productChange.getHouseId());
+            request.setAttribute(Constants.CITY_ID, house.getCityId());
             if(null != productChange){
                 // 剩余数
                 BigDecimal srcCount = BigDecimal.valueOf(productChange.getSrcSurCount());
@@ -279,6 +297,17 @@ public class ProductChangeService {
                 BigDecimal destCount = BigDecimal.valueOf(destSurCount);
                 if(destCount.compareTo(srcCount) == 1){
                     return ServerResponse.createByErrorMessage("不能大于商品剩余数");
+                }
+                Unit unit;
+                Product product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
+                ServerResponse serverResponse=unitAPI.getUnitById(request,product.getConvertUnit());
+                if(serverResponse.getResultObj() instanceof JSONObject){
+                    unit= JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
+                }else{
+                    unit=(Unit)serverResponse.getResultObj();
+                }
+                if(unit.getType()==1){
+                    destSurCount=Math.ceil(destSurCount);
                 }
                 productChange.setDestSurCount(destSurCount);
                 // 差额单价
@@ -417,7 +446,7 @@ public class ProductChangeService {
                 order.setDifferencePrice(totalDifferPrice);
                 productChangeOrderMapper.updateByPrimaryKey(order);
                 // 更换已购买商品，没有新增，有则修改
-                if(!changeGmProduct(request, houseId)){
+                if(!changeGmProduct(request, houseId, order.getId())){
                     return ServerResponse.createByErrorMessage("不能大于商品剩余数");
                 }
             }
@@ -452,12 +481,13 @@ public class ProductChangeService {
      * @param request
      * @param houseId
      */
-    private boolean changeGmProduct(HttpServletRequest request, String houseId){
+    private boolean changeGmProduct(HttpServletRequest request, String houseId, String orderId){
         // 查询
         List<ProductChange> list = productChangeMapper.queryByHouseId(houseId, "0");
         Product destProduct = null;
         Unit destUnit = null;
         if(null != list && list.size() > 0){
+            int num = 0;
             for (ProductChange change : list){
                 // 更换数大于0的商品，才做处理
                 if(change.getDestSurCount().compareTo(0.0) == 1) {
@@ -526,7 +556,12 @@ public class ProductChangeService {
                 }else {
                     // 为0的，则删除
                     productChangeMapper.deleteByPrimaryKey(change.getId());
+                    num += 1;
                 }
+            }
+            // 如果存在一个或多个更换数为 0 的商品，则不生成订单
+            if(num == list.size()){
+                productChangeOrderMapper.deleteByPrimaryKey(orderId);
             }
         }
         return true;
