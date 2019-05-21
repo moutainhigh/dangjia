@@ -446,7 +446,7 @@ public class ProductChangeService {
                 order.setDifferencePrice(totalDifferPrice);
                 productChangeOrderMapper.updateByPrimaryKey(order);
                 // 更换已购买商品，没有新增，有则修改
-                if(!changeGmProduct(request, houseId)){
+                if(!changeGmProduct(request, houseId, order.getId())){
                     return ServerResponse.createByErrorMessage("不能大于商品剩余数");
                 }
             }
@@ -481,12 +481,13 @@ public class ProductChangeService {
      * @param request
      * @param houseId
      */
-    private boolean changeGmProduct(HttpServletRequest request, String houseId){
+    private boolean changeGmProduct(HttpServletRequest request, String houseId, String orderId){
         // 查询
         List<ProductChange> list = productChangeMapper.queryByHouseId(houseId, "0");
         Product destProduct = null;
         Unit destUnit = null;
         if(null != list && list.size() > 0){
+            int num = 0;
             for (ProductChange change : list){
                 // 更换数大于0的商品，才做处理
                 if(change.getDestSurCount().compareTo(0.0) == 1) {
@@ -555,7 +556,12 @@ public class ProductChangeService {
                 }else {
                     // 为0的，则删除
                     productChangeMapper.deleteByPrimaryKey(change.getId());
+                    num += 1;
                 }
+            }
+            // 如果存在一个或多个更换数为 0 的商品，则不生成订单
+            if(num == list.size()){
+                productChangeOrderMapper.deleteByPrimaryKey(orderId);
             }
         }
         return true;
