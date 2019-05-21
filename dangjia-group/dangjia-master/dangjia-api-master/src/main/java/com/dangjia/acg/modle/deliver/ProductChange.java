@@ -125,4 +125,8 @@ public class ProductChange extends BaseEntity {
 	@ApiModelProperty("0未处理 1已处理")
 	private Integer type;
 
+	@Column(name = "product_type")
+	@Desc(value = "0：材料；1：服务")
+	@ApiModelProperty("0：材料；1：服务")
+	private Integer productType; //0：材料；1：服务
 }
