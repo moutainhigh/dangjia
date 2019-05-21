@@ -187,6 +187,7 @@ public class OrderSplitService {
             detailDTO.setMemo(splitDeliver.getMemo());
             detailDTO.setReason(splitDeliver.getReason());
             detailDTO.setTotalAmount(0.0);
+            detailDTO.setApplyMoney(0.0);
 
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliverId);
@@ -195,6 +196,9 @@ public class OrderSplitService {
             List<OrderSplitItemDTO> orderSplitItemDTOS = new ArrayList<>();
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
             for (OrderSplitItem orderSplitItem : orderSplitItemList) {
+                if(orderSplitItem.getReceive()==null){
+                    orderSplitItem.setReceive(0D);
+                }
                 OrderSplitItemDTO orderSplitItemDTO = new OrderSplitItemDTO();
                 orderSplitItemDTO.setProductName(orderSplitItem.getProductName());
                 orderSplitItemDTO.setNum(orderSplitItem.getNum());
@@ -207,9 +211,14 @@ public class OrderSplitService {
                 orderSplitItemDTO.setReceive(orderSplitItem.getReceive());
                 orderSplitItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(),orderSplitItem.getProductId()));
                 orderSplitItemDTO.setBrandName(forMasterAPI.brandName(house.getCityId(),orderSplitItem.getProductId()));
-                orderSplitItemDTO.setTotalPrice(new BigDecimal(orderSplitItem.getSupCost() * orderSplitItem.getNum()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());//成本价 * 数量
+                if(splitDeliver.getShippingState()==2||splitDeliver.getShippingState()==4||splitDeliver.getShippingState()==5){
+                    orderSplitItemDTO.setTotalPrice(new BigDecimal(orderSplitItem.getSupCost()*orderSplitItem.getReceive()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
+                }else{
+                    orderSplitItemDTO.setTotalPrice(new BigDecimal(orderSplitItem.getSupCost()*orderSplitItem.getNum()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
+                }
                 orderSplitItemDTOS.add(orderSplitItemDTO);
-                detailDTO.setTotalAmount(new BigDecimal(detailDTO.getTotalAmount() + orderSplitItemDTO.getTotalPrice()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
+                detailDTO.setApplyMoney(new BigDecimal(detailDTO.getApplyMoney() + orderSplitItemDTO.getTotalPrice()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
+                detailDTO.setTotalAmount(new BigDecimal(detailDTO.getTotalAmount() + (orderSplitItem.getSupCost()*orderSplitItem.getNum())).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
             }
             detailDTO.setSize(orderSplitItemList.size());
             detailDTO.setOrderSplitItemDTOS(orderSplitItemDTOS);

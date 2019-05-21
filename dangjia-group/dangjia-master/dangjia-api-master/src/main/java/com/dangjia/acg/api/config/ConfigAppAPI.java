@@ -55,7 +55,10 @@ public interface ConfigAppAPI {
     @PostMapping("/config/app/edit")
     @ApiOperation(value = "修改版本应用", notes = "修改版本应用")
     ServerResponse editConfigApp(@RequestParam("request") HttpServletRequest request,
-                                 @RequestParam("configApp") ConfigApp configApp);
+                                 @RequestParam("configApp") ConfigApp configApp,
+                                 @RequestParam("isForceds")  String isForceds,
+                                 @RequestParam("versionCodes") String versionCodes,
+                                 @RequestParam("historyIds")  String historyIds);
 
     /**
      * 新增版本应用
@@ -66,6 +69,8 @@ public interface ConfigAppAPI {
     @PostMapping("/config/app/add")
     @ApiOperation(value = "新增版本应用", notes = "新增版本应用")
     ServerResponse addConfigApp(@RequestParam("request") HttpServletRequest request,
-                                @RequestParam("configApp") ConfigApp configApp);
-
+                                @RequestParam("configApp") ConfigApp configApp,
+                                @RequestParam("isForceds")  String isForceds,
+                                @RequestParam("versionCodes") String versionCodes,
+                                @RequestParam("historyIds")  String historyIds);
 }

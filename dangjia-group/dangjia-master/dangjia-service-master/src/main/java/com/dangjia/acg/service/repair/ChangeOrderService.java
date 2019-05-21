@@ -9,6 +9,7 @@ import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
+import com.dangjia.acg.mapper.repair.IMendOrderCheckMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
@@ -18,10 +19,12 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.repair.MendOrderCheck;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -50,6 +53,8 @@ public class ChangeOrderService {
     @Autowired
     private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private IMendOrderCheckMapper mendOrderCheckMapper;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
@@ -127,6 +132,20 @@ public class ChangeOrderService {
                 }
             }
             Map<String,Object> map = BeanUtils.beanToMap(changeOrder);
+            if (changeOrder.getState() == 1){
+                map.put("roleType","2");
+                List<MendOrder> mendOrderList = mendOrderMapper.getByChangeOrderId(changeOrder.getId());
+                if (mendOrderList.size() >0){
+                    Example example=new Example(MendOrderCheck.class);
+                    example.createCriteria().andEqualTo(MendOrderCheck.STATE,1).andEqualTo(MendOrderCheck.MEND_ORDER_ID,mendOrderList.get(0).getId());
+                    example.orderBy(MendOrderCheck.CREATE_DATE).desc();
+                    List<MendOrderCheck> list=mendOrderCheckMapper.selectByExample(example);
+                    if(list.size()>0){
+                        map.put("roleType",list.get(0).getRoleType());//1业主,2管家,3工匠,4材料员,5供应商
+                    }
+                }
+            }
+
             map.put("changeOrderId", changeOrder.getId());
             map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(changeOrder.getWorkerTypeId()).getName());
             returnMap.add(map);
@@ -186,26 +205,21 @@ public class ChangeOrderService {
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        Member member = (Member) object;
-        if (type == 1){
-            workerTypeId=member.getWorkerTypeId();
-        }
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);
         HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, workerTypeId);
         if (houseWorkerOrder != null) {
-            BigDecimal remain = houseWorkerOrder.getWorkPrice().add(houseWorkerOrder.getRepairTotalPrice()).subtract(houseWorkerOrder.getHaveMoney());//剩下的
+            BigDecimal remain = houseWorkerOrder.getWorkPrice().subtract(houseWorkerOrder.getHaveMoney());//剩下的
             remain =remain.setScale(2,BigDecimal.ROUND_HALF_UP);
             if (type == 1) {
                 List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseId,workerTypeId);
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
                 if (changeOrderList.size() > 0&&houseFlowApplyList.size() > 0) {
                     HouseFlowApply houseFlowApply=houseFlowApplyList.get(0);
-                    remain=remain.subtract(houseFlowApply.getApplyMoney()) ;
-                    remain =remain.setScale(2,BigDecimal.ROUND_HALF_UP);
+                    remain=houseFlowApply.getOtherMoney();//剩下的钱
                     if(remain.doubleValue()<0){//负数冲正
                         remain=new BigDecimal(0);
                     }
-                    return ServerResponse.createByErrorMessage("审核通过后 ，可退人工金额上限为"+remain+"元，确定验收吗？");
+                    return ServerResponse.createByErrorMessage("审核通过后 ，可退人工金额上限为"+remain+"元(不包含滞留金)，确定验收吗？");
                 }
             }
             if (type == 2) {

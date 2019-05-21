@@ -20,7 +20,7 @@ public class WebProductChangeController implements WebProductChangeAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse changeOrderState(String houseId, Integer pageNum, Integer pageSize, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse queryChangeOrderState(String houseId, Integer pageNum, Integer pageSize, String beginDate, String endDate, String likeAddress) {
         return productChangeService.changeOrderState(houseId, pageNum, pageSize, beginDate, endDate, likeAddress);
     }
 

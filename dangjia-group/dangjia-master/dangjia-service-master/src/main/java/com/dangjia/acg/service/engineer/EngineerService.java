@@ -39,6 +39,7 @@ import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.util.*;
 
@@ -446,11 +447,10 @@ public class EngineerService {
             if (houseWorkerOrderList.size() == 0) {
                 map.put("havaMoney", 0);
             } else {
-                map.put("havaMoney", houseWorkerOrderList.get(0).getHaveMoney());
+                BigDecimal havaMoney=houseWorkerOrderList.get(0).getRepairTotalPrice().subtract(houseWorkerOrderList.get(0).getRepairPrice());
+                havaMoney= houseWorkerOrderList.get(0).getHaveMoney().add(havaMoney);
                 map.put("workPrice", houseWorkerOrderList.get(0).getWorkPrice().add(houseWorkerOrderList.get(0).getRepairTotalPrice()));
-                if(houseFlow.getWorkSteta()==2) {
-                    map.put("havaMoney", houseWorkerOrderList.get(0).getHaveMoney().add(houseWorkerOrderList.get(0).getRepairTotalPrice()));
-                }
+                map.put("havaMoney", havaMoney);
             }
             mapList.add(map);
         }

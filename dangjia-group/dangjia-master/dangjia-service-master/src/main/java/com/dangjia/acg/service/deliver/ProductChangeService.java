@@ -2,6 +2,7 @@ package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.basics.ProductAPI;
+import com.dangjia.acg.api.basics.UnitAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -21,6 +22,7 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.deliver.ProductChange;
 import com.dangjia.acg.modle.deliver.ProductChangeOrder;
 import com.dangjia.acg.modle.house.House;
@@ -70,6 +72,8 @@ public class ProductChangeService {
     private ConfigUtil configUtil;
     @Autowired
     private IBusinessOrderMapper businessOrderMapper;
+    @Autowired
+    private UnitAPI unitAPI;
     private static Logger LOG = LoggerFactory.getLogger(ProductChangeService.class);
 
     /**
@@ -90,6 +94,10 @@ public class ProductChangeService {
                 return (ServerResponse) object;
             }
             Member operator = (Member) object;
+            // 原商品仓库
+            Warehouse oldWareHouse = warehouseMapper.getByProductId(srcProductId, houseId);
+            // 新商品仓库
+            Warehouse wareHouse = warehouseMapper.getByProductId(destProductId, houseId);
             // 原商品
             ServerResponse srcResponse = productAPI.getProductById(request, srcProductId);
             // 更换后的商品
@@ -97,9 +105,19 @@ public class ProductChangeService {
             boolean flag = (srcResponse!=null&&srcResponse.getResultObj()!=null && destResponse!=null&&destResponse.getResultObj()!=null);
             Product srcProduct = null;
             Product destProduct = null;
+            Unit srcUnit = null;
+            Unit destUnit = null;
             if(flag) {
                 srcProduct = JSON.parseObject(JSON.toJSONString(srcResponse.getResultObj()), Product.class);
                 destProduct = JSON.parseObject(JSON.toJSONString(destResponse.getResultObj()), Product.class);
+                // 查询转换单位
+                ServerResponse srcUnitResponse= unitAPI.getUnitById(request, srcProduct.getConvertUnit());
+                ServerResponse destUnitResponse= unitAPI.getUnitById(request, destProduct.getConvertUnit());
+                boolean flagB = (srcUnitResponse!=null&&srcUnitResponse.getResultObj()!=null && destUnitResponse!=null&&destUnitResponse.getResultObj()!=null);
+                if(flagB){
+                    srcUnit = JSON.parseObject(JSON.toJSONString(srcUnitResponse.getResultObj()), Unit.class);
+                    destUnit = JSON.parseObject(JSON.toJSONString(destUnitResponse.getResultObj()), Unit.class);
+                }
             }
             // 查询
             Example example = new Example(ProductChange.class);
@@ -114,13 +132,13 @@ public class ProductChangeService {
                 change.setDestProductId(destProduct.getId());
                 change.setDestProductSn(destProduct.getProductSn());
                 change.setDestProductName(destProduct.getName());
-                change.setDestUnitName(destProduct.getUnitName());
+                change.setDestUnitName(null == wareHouse ? destUnit.getName() : wareHouse.getUnitName());
                 change.setDestPrice(destProduct.getPrice());
                 change.setDestImage(destProduct.getImage());
                 change.setDestSurCount(0.0);
                 change.setDifferencePrice(BigDecimal.ZERO);
                 change.setModifyDate(new Date());
-                productChangeMapper.updateByPrimaryKeySelective(change);
+                productChangeMapper.updateByPrimaryKey(change);
             }else {
                 ProductChange productChange = new ProductChange();
                 productChange.setMemberId(operator.getId());
@@ -132,14 +150,15 @@ public class ProductChangeService {
                 productChange.setSrcProductName(srcProduct.getName());
                 productChange.setSrcPrice(srcProduct.getPrice());
                 productChange.setSrcSurCount(srcSurCount);
-                productChange.setSrcUnitName(srcProduct.getUnitName());
+                // 仓库商品有单位，则取仓库单位，反之取商品转换单位
+                productChange.setSrcUnitName(null == oldWareHouse ? srcUnit.getName() : oldWareHouse.getUnitName());
                 productChange.setSrcImage(srcProduct.getImage());
                 // dest
                 productChange.setDestProductId(destProduct.getId());
                 productChange.setDestProductSn(destProduct.getProductSn());
                 productChange.setDestProductName(destProduct.getName());
                 productChange.setDestPrice(destProduct.getPrice());
-                productChange.setDestUnitName(destProduct.getUnitName());
+                productChange.setDestUnitName(null == wareHouse ? destUnit.getName() : wareHouse.getUnitName());
                 productChange.setDestImage(destProduct.getImage());
                 // 更换数默认为0
                 productChange.setDestSurCount(0.0);
@@ -259,24 +278,18 @@ public class ProductChangeService {
                 productChange.setDestSurCount(destSurCount);
                 // 差额单价
                 BigDecimal price = BigDecimal.valueOf(MathUtil.sub(productChange .getDestPrice(), productChange.getSrcPrice()));
-                BigDecimal differPrice = BigDecimal.ZERO;
-                if(price.compareTo(BigDecimal.ZERO) == 0){
-                    // 两个商品价格相等 差价=更换数*商品价格
-                    differPrice = BigDecimal.valueOf(productChange.getDestPrice()).multiply(BigDecimal.valueOf(destSurCount));
-                } else {
-                    // 不相等 差价=更换数*差额单价
-                    differPrice = price.multiply(BigDecimal.valueOf(destSurCount));
-                }
+                // 差价= 更换数*差额单价
+                BigDecimal differPrice = price.multiply(BigDecimal.valueOf(destSurCount));
                 productChange.setDifferencePrice(differPrice);
                 productChange.setModifyDate(new Date());
                 productChange.setOrderId(orderId);
                 // 修改商品更换表
-                productChangeMapper.updateByPrimaryKeySelective(productChange);
+                productChangeMapper.updateByPrimaryKey(productChange);
                 // 修改商品更换订单表
                 // 计算总价差额
-                order.setDifferencePrice(differPrice.add(order.getDifferencePrice()));
+                order.setDifferencePrice(calcDifferPrice(productChange.getHouseId()));
                 order.setModifyDate(new Date());
-                productChangeOrderMapper.updateByPrimaryKeySelective(order);
+                productChangeOrderMapper.updateByPrimaryKey(order);
 
             }
         }catch (Exception e){
@@ -378,7 +391,7 @@ public class ProductChangeService {
                         BigDecimal surplusMoney = member.getSurplusMoney().add(toDifferPrice);
                         //记录流水
                         WorkerDetail workerDetail = new WorkerDetail();
-                        workerDetail.setName("业主换货");
+                        workerDetail.setName("业主换材料退款");
                         workerDetail.setWorkerId(member.getId());
                         workerDetail.setWorkerName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
                         workerDetail.setHouseId(houseId);
@@ -438,6 +451,7 @@ public class ProductChangeService {
         // 查询
         List<ProductChange> list = productChangeMapper.queryByHouseId(houseId, "0");
         Product destProduct = null;
+        Unit destUnit = null;
         if(null != list && list.size() > 0){
             for (ProductChange change : list){
                 // 更换数大于0的商品，才做处理
@@ -450,6 +464,11 @@ public class ProductChangeService {
                     ServerResponse destResponse = productAPI.getProductById(request, change.getDestProductId());
                     if (destResponse != null && destResponse.getResultObj() != null) {
                         destProduct = JSON.parseObject(JSON.toJSONString(destResponse.getResultObj()), Product.class);
+                        ServerResponse destUnitResponse= unitAPI.getUnitById(request, destProduct.getConvertUnit());
+                        boolean flagB = destUnitResponse!=null&&destUnitResponse.getResultObj()!=null;
+                        if(flagB){
+                            destUnit = JSON.parseObject(JSON.toJSONString(destUnitResponse.getResultObj()), Unit.class);
+                        }
                     }
                     // 处理新商品------begin
                     if (null == wareHouse) {
@@ -468,7 +487,8 @@ public class ProductChangeService {
                         newWareHouse.setProductName(destProduct.getName());
                         newWareHouse.setPrice(destProduct.getPrice());
                         newWareHouse.setCost(destProduct.getCost());
-                        newWareHouse.setUnitName(destProduct.getUnitName());
+                        // 取商品转换单位
+                        newWareHouse.setUnitName(destUnit.getName());
                         newWareHouse.setProductType(0);
                         newWareHouse.setCategoryId(destProduct.getCategoryId());
                         newWareHouse.setImage(destProduct.getImage());
@@ -593,12 +613,10 @@ public class ProductChangeService {
         for (ProductChange change : productChangeList) {
             // 合计退差价
             totalDifferPrice = totalDifferPrice.add(change.getDifferencePrice());
-            for(int i =0; i <=1; i++){
                 // 处理itemDTo
-                ProductChangeItemDTO itemDTO = getItemDTO(change, address, i);
+                ProductChangeItemDTO itemDTO = getItemDTO(change, address, 0);
                 itemDTOList.add(itemDTO);
                 productOrderDTO.setProductChangeItemDTOList(itemDTOList);
-            }
         }
         productOrderDTO.setTotalDifferPrice(totalDifferPrice);
         return ServerResponse.createBySuccess("查询成功", productOrderDTO);
@@ -651,21 +669,41 @@ public class ProductChangeService {
      */
     private ProductChangeItemDTO getItemDTO(ProductChange change, String address, int temp){
         ProductChangeItemDTO itemDTO = new ProductChangeItemDTO();
-        itemDTO.setImage(address + (temp == 0 ?  change.getSrcImage() : change.getDestImage()));
-        itemDTO.setProductId(temp == 0 ?  change.getSrcProductId() : change.getDestProductId());
-        itemDTO.setProductSn(temp == 0 ?  change.getSrcProductSn() : change.getDestProductSn());
-        itemDTO.setProductName(temp == 0 ?  change.getSrcProductName() : change.getDestProductName());
-        itemDTO.setPrice(temp == 0 ?  change.getSrcPrice() : change.getDestPrice());
-        itemDTO.setUnitName(temp == 0 ?  change.getSrcUnitName() : change.getDestUnitName());
-        // 差价
-        double differPrice = MathUtil.sub(change.getDestPrice(), change.getSrcPrice());
-        itemDTO.setDifferPrice(temp == 0 ?  "" : String.valueOf(differPrice));
-        itemDTO.setSrcSurCount(temp == 0 ?  change.getSrcSurCount() : 0.0);
-        itemDTO.setDestSurCount(temp == 0 ?  MathUtil.sub(change.getSrcSurCount(), change.getDestSurCount()) : change.getDestSurCount());
-        if(temp == 1){
-            double totalMoney = MathUtil.mul(differPrice, change.getDestSurCount());
-            itemDTO.setTotalMoney(BigDecimal.valueOf(totalMoney));
+        if(temp == 0) {
+            // src
+            itemDTO.setSrcImage(address + change.getSrcImage());
+            itemDTO.setSrcProductId(change.getSrcProductId());
+            itemDTO.setSrcProductSn(change.getSrcProductSn());
+            itemDTO.setSrcProductName(change.getSrcProductName());
+            itemDTO.setSrcPrice(change.getSrcPrice());
+            itemDTO.setSrcUnitName(change.getSrcUnitName());
+            itemDTO.setSrcBeforeCount(change.getSrcSurCount());
+            itemDTO.setSrcAfterCount(MathUtil.sub(change.getSrcSurCount(), change.getDestSurCount()));
+            // dest
+            itemDTO.setDestImage(address + change.getDestImage());
+            itemDTO.setDestProductId(change.getDestProductId());
+            itemDTO.setDestProductSn(change.getDestProductSn());
+            itemDTO.setDestProductName(change.getDestProductName());
+            itemDTO.setDestPrice(change.getDestPrice());
+            itemDTO.setDestUnitName(change.getDestUnitName());
+            double  destDifferPrice = MathUtil.sub(change.getDestPrice(), change.getSrcPrice());
+            itemDTO.setDestDifferPrice((destDifferPrice > 0 ? "+" + destDifferPrice : destDifferPrice) +"元/"+change.getDestUnitName());
+            itemDTO.setDestBeforeCount(0.0);
+            itemDTO.setDestAfterCount(change.getDestSurCount());
+            itemDTO.setDestTotalMoney(change.getDifferencePrice());
+        }else if(temp == 1){
+            // 支付单换货详情
+            itemDTO.setImage(address + change.getDestImage());
+            itemDTO.setProductSn(change.getDestProductSn());
+            itemDTO.setProductName(change.getDestProductName());
+            itemDTO.setPrice(BigDecimal.valueOf(change.getDestPrice()));
+            itemDTO.setUnitName(change.getDestUnitName());
+            double  destDifferPrice = MathUtil.sub(change.getDestPrice(), change.getSrcPrice());
+            itemDTO.setDifferPrice(BigDecimal.valueOf(destDifferPrice));
+            itemDTO.setShopCount(change.getDestSurCount());
+            itemDTO.setTotalPrice(change.getDifferencePrice());
         }
+
         return itemDTO;
     }
 

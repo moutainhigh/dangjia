@@ -1,8 +1,11 @@
 package com.dangjia.acg.service.repair;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.basics.UnitAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -20,6 +23,7 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.repair.*;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -36,9 +40,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -92,6 +99,8 @@ public class MendOrderService {
     private HouseService houseService;
     @Autowired
     private CraftsmanConstructionService constructionService;
+    @Autowired
+    private UnitAPI unitAPI;
 
 
     /**
@@ -920,7 +929,10 @@ public class MendOrderService {
      */
     private boolean addMendMateriel(String productArr, MendOrder mendOrder) {
         try {
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                    .getRequest();
             House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
+            request.setAttribute(Constants.CITY_ID, house.getCityId());
             mendOrder.setTotalAmount(0.0);
             JSONArray jsonArray = JSONArray.parseArray(productArr);
             for (int i = 0; i < jsonArray.size(); i++) {
@@ -930,6 +942,7 @@ public class MendOrderService {
                 double num = Double.parseDouble(obj.getString("num"));
 
                 Warehouse warehouse=warehouseMapper.getByProductId(productId,mendOrder.getHouseId());
+                Product product = forMasterAPI.getProduct(house.getCityId(), productId);
                 if(warehouse!=null){
                     mendMateriel.setProductSn(warehouse.getProductSn());
                     mendMateriel.setProductName(warehouse.getProductName());
@@ -941,7 +954,6 @@ public class MendOrderService {
                     mendMateriel.setCategoryId(warehouse.getCategoryId());
                     mendMateriel.setImage(warehouse.getImage());
                 }else{
-                    Product product = forMasterAPI.getProduct(house.getCityId(), productId);
                     mendMateriel.setProductSn(product.getProductSn());
                     mendMateriel.setProductName(product.getName());
                     mendMateriel.setPrice(product.getPrice());
@@ -953,7 +965,16 @@ public class MendOrderService {
                     mendMateriel.setUnitName(unitName);
                     mendMateriel.setProductType(forMasterAPI.getGoods(house.getCityId(), product.getGoodsId()).getType());//0：材料；1：服务
                 }
-
+                ServerResponse serverResponse=unitAPI.getUnitById(request,product.getConvertUnit());
+                Unit unit;
+                if(serverResponse.getResultObj() instanceof JSONObject){
+                    unit= JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
+                }else{
+                    unit=(Unit)serverResponse.getResultObj();
+                }
+                if(unit.getType()==1){
+                    num=Math.ceil(num);
+                }
                 mendMateriel.setMendOrderId(mendOrder.getId());
                 mendMateriel.setProductId(productId);
                 mendMateriel.setShopCount(num);

@@ -64,8 +64,8 @@ public class UnitController implements UnitAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse selectunitById(HttpServletRequest request, String unitId) {
-        return unitService.selectById(unitId);
+    public ServerResponse getUnitById(HttpServletRequest request, String unitId) {
+        return unitService.getUnitById(unitId);
     }
 
     /**

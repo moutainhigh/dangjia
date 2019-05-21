@@ -34,7 +34,6 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
@@ -424,12 +423,6 @@ public class EvaluateService {
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             if(houseFlowApply.getMemberCheck() == 1||houseFlowApply.getMemberCheck() == 3){
                 return ServerResponse.createByErrorMessage("重复审核");
-            }
-            if(houseFlowApply.getApplyType()!= 0) {
-                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseFlowApply.getHouseId(), houseFlowApply.getWorkerTypeId());
-                if (changeOrderList.size() > 0) {
-                    return ServerResponse.createByErrorMessage("该工种有未处理人工变更单！");
-                }
             }
             //在worker中根据评论星数修改工人的积分
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());

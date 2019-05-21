@@ -368,16 +368,19 @@ public class HouseFlowApplyService {
         if(hfa.getSupervisorMoney() == null){
             hfa.setSupervisorMoney(new BigDecimal(0));
         }
-
+        //评分扣钱
+        BigDecimal deductPrice = new BigDecimal(0);
         BigDecimal supervisorMoney;
         if(star == 0 || star == 5){
             supervisorMoney = hfa.getSupervisorMoney();//大管家的验收收入
         }else if(star == 3 || star == 4){
             supervisorMoney = hfa.getSupervisorMoney().multiply(new BigDecimal(0.8));
+            deductPrice = hfa.getSupervisorMoney().subtract(supervisorMoney);
         }else{
             supervisorMoney = new BigDecimal(0);//为0元
+            deductPrice = hfa.getSupervisorMoney();
         }
-
+        hwo.setDeductPrice(hwo.getDeductPrice().add(deductPrice));
         hwo.setHaveMoney(hwo.getHaveMoney().add(supervisorMoney));
         //大管家验收钱
         hwo.setEveryMoney(hwo.getEveryMoney().add(supervisorMoney));
@@ -493,9 +496,7 @@ public class HouseFlowApplyService {
                 workerDetail.setState(2);//进钱
                 workerDetailMapper.insert(workerDetail);
                 //实际滞留金
-
-                BigDecimal retentionMoneyOrder=  hwo.getRetentionMoney().add(mid);
-                hwo.setRetentionMoney(retentionMoneyOrder);
+                hwo.setRetentionMoney(mid);
 
                 //处理阶段申请的钱，将减去滞留金的钱，存入账户余额
                 BigDecimal applyMoney=  hfa.getApplyMoney().subtract(mid);
@@ -542,6 +543,10 @@ public class HouseFlowApplyService {
             if(hwo.getHaveMoney() == null){
                 hwo.setHaveMoney(new BigDecimal(0.0));
             }
+            //处理工人评分扣钱
+            if(hwo.getDeductPrice() == null){
+                hwo.setDeductPrice(new BigDecimal(0.0));
+            }
             HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(),hwo.getWorkerTypeId());
 
             //查工匠被管家的评价
@@ -563,17 +568,23 @@ public class HouseFlowApplyService {
             Double star = (double) ((star1 + star2)/2);
             //工人钱
             BigDecimal applymoney = new BigDecimal(0);
+            //评分扣钱
+            BigDecimal deductPrice = new BigDecimal(0);
+
             if(star >= 4){
                 applymoney = hfa.getApplyMoney();
             }else if(star > 2){
                 applymoney = hfa.getApplyMoney().multiply(new BigDecimal(0.97));
+                deductPrice= hfa.getApplyMoney().subtract(applymoney);
             }else if(star <= 2){
                 applymoney = hfa.getApplyMoney().multiply(new BigDecimal(0.95));
+                deductPrice= hfa.getApplyMoney().subtract(applymoney);
             }
             //整体完工前均能发起，阶段完工发起的，阶段完工时拿钱（还可拿钱立即体现增加金额），
             // 阶段完工后整体完工前发起的，整体完工时拿钱（还可拿钱立即体现增加金额）
-            //清空补人工钱，用于整体完工时记录新的补人工钱
+            //清空补人工钱，用于整体完工时记录新的补人工钱CraftsmanConstructionService
             hwo.setRepairPrice(new BigDecimal(0.0));
+            hwo.setDeductPrice(hwo.getDeductPrice().add(deductPrice));
             hwo.setHaveMoney(hwo.getHaveMoney().add(applymoney));
             houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
             BigDecimal haveMoney = worker.getHaveMoney().add(applymoney);
