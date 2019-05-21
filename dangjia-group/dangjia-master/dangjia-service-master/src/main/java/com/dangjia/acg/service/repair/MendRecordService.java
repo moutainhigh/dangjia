@@ -93,6 +93,8 @@ public class MendRecordService {
                     .andEqualTo(MendMateriel.REPAIR_MEND_DELIVER_ID, mendDeliver.getId());
             List<MendMateriel> mendMaterielList = mendMaterialMapper.selectByExample(example);
             for (MendMateriel mendMateriel : mendMaterielList) {
+                /*统计收货数量*/
+                Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(), mendOrder.getHouseId());
                 Map<String, Object> map = BeanUtils.beanToMap(mendMateriel);
                 map.put("image", address + mendMateriel.getImage());
                 if (mendMateriel.getProductType() == 0) {
@@ -105,6 +107,7 @@ public class MendRecordService {
                 map.put("name", mendMateriel.getProductName());
                 map.put("price", "¥" + String.format("%.2f", mendMateriel.getPrice()) + "/" + mendMateriel.getUnitName());
                 map.put("shopCount", mendMateriel.getShopCount());//申请数量
+                map.put("receive", warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));//申请数量
                 map.put("actualCount", mendMateriel.getActualCount());//实际修改数量
                 map.put("totalPrice", mendMateriel.getTotalPrice());
                 mapList.add(map);
