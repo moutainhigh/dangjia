@@ -1,8 +1,11 @@
 package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.api.basics.UnitAPI;
+import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -74,6 +77,9 @@ public class ProductChangeService {
     private IBusinessOrderMapper businessOrderMapper;
     @Autowired
     private UnitAPI unitAPI;
+
+    @Autowired
+    private ForMasterAPI forMasterAPI;
     private static Logger LOG = LoggerFactory.getLogger(ProductChangeService.class);
 
     /**
@@ -269,9 +275,12 @@ public class ProductChangeService {
      */
     public ServerResponse setDestSurCount(HttpServletRequest request, String id, Double destSurCount, String orderId){
         try {
+
             ProductChange productChange = productChangeMapper.selectByPrimaryKey(id);
             // 查询订单表
             ProductChangeOrder order = productChangeOrderMapper.selectByPrimaryKey(orderId);
+            House house = houseMapper.selectByPrimaryKey(productChange.getHouseId());
+            request.setAttribute(Constants.CITY_ID, house.getCityId());
             if(null != productChange){
                 // 剩余数
                 BigDecimal srcCount = BigDecimal.valueOf(productChange.getSrcSurCount());
@@ -279,6 +288,17 @@ public class ProductChangeService {
                 BigDecimal destCount = BigDecimal.valueOf(destSurCount);
                 if(destCount.compareTo(srcCount) == 1){
                     return ServerResponse.createByErrorMessage("不能大于商品剩余数");
+                }
+                Unit unit;
+                Product product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
+                ServerResponse serverResponse=unitAPI.getUnitById(request,product.getConvertUnit());
+                if(serverResponse.getResultObj() instanceof JSONObject){
+                    unit= JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
+                }else{
+                    unit=(Unit)serverResponse.getResultObj();
+                }
+                if(unit.getType()==1){
+                    destSurCount=Math.ceil(destSurCount);
                 }
                 productChange.setDestSurCount(destSurCount);
                 // 差额单价
