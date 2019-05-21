@@ -29,12 +29,13 @@ public class ProductChangeController implements ProductChangeAPI {
      * @param srcProductId
      * @param destProductId
      * @param srcSurCount
+     * @param productType
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse insertProductChange(HttpServletRequest request, String userToken, String houseId, String srcProductId, String destProductId, Double srcSurCount) {
-        return productChangeService.insertProductChange(request, userToken, houseId, srcProductId, destProductId, srcSurCount);
+    public ServerResponse insertProductChange(HttpServletRequest request, String userToken, String houseId, String srcProductId, String destProductId, Double srcSurCount,Integer productType) {
+        return productChangeService.insertProductChange(request, userToken, houseId, srcProductId, destProductId, srcSurCount, productType);
     }
 
     /**

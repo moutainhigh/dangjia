@@ -114,22 +114,23 @@ public class ConfigAppService {
      * @param configApp
      * @return
      */
-    public ServerResponse editConfigApp(HttpServletRequest request, ConfigApp configApp) {
+    public ServerResponse editConfigApp(HttpServletRequest request, ConfigApp configApp,String[] isForceds,String[] versionCode,String[] historyId) {
         Example example = new Example(ConfigAppHistory.class);
         Example.Criteria criteria=example.createCriteria();
         criteria.andEqualTo("appId",configApp.getId());
-        configAppHistoryMapper.deleteByExample(criteria);
+        configAppHistoryMapper.deleteByExample(example);
         if(this.configAppMapper.updateByPrimaryKeySelective(configApp)>0){
-            Boolean[] isForceds=(Boolean[]) request.getAttribute("isForced");
-            String[] cersionCode=(String[]) request.getAttribute("cersionCode");
-            String[] historyIds=(String[]) request.getAttribute("historyId");
-            for (int i = 0; i <historyIds.length ; i++) {
+            for (int i = 0; i <historyId.length ; i++) {
                 ConfigAppHistory configAppHistory=new ConfigAppHistory();
-                if(!CommonUtil.isEmpty(historyIds[i])){
+                if(!CommonUtil.isEmpty(historyId[i])){
                     configAppHistory.setAppId(configApp.getId());
-                    configAppHistory.setHistoryId(historyIds[i]);
-                    configAppHistory.setIsForced(isForceds[i]);
-                    configAppHistory.setVersionCode(cersionCode[i]);
+                    configAppHistory.setHistoryId(historyId[i]);
+                    configAppHistory.setIsForced(true);
+                    if("0".equals(isForceds[i])) {
+                        configAppHistory.setIsForced(false);
+                    }
+
+                    configAppHistory.setVersionCode(versionCode[i]);
                     configAppHistoryMapper.insert(configAppHistory);
                 }
             }
@@ -143,19 +144,20 @@ public class ConfigAppService {
      * @param configApp
      * @return
      */
-    public ServerResponse addConfigApp(HttpServletRequest request,ConfigApp configApp) {
+    public ServerResponse addConfigApp(HttpServletRequest request,ConfigApp configApp,String[] isForceds,String[] versionCode,String[] historyId) {
+        configApp.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
         if(this.configAppMapper.insertSelective(configApp)>0){
-            Boolean[] isForceds=(Boolean[]) request.getAttribute("isForceds");
             if(isForceds!=null){
-                String[] vcersionCode=(String[]) request.getAttribute("vcersionCodes");
-                String[] historyIds=(String[]) request.getAttribute("historyIds");
-                for (int i = 0; i <historyIds.length ; i++) {
+                for (int i = 0; i <historyId.length ; i++) {
                     ConfigAppHistory configAppHistory=new ConfigAppHistory();
-                    if(!CommonUtil.isEmpty(historyIds[i])){
+                    if(!CommonUtil.isEmpty(historyId[i])){
                         configAppHistory.setAppId(configApp.getId());
-                        configAppHistory.setHistoryId(historyIds[i]);
-                        configAppHistory.setIsForced(isForceds[i]);
-                        configAppHistory.setVersionCode(vcersionCode[i]);
+                        configAppHistory.setIsForced(true);
+                        if("0".equals(isForceds[i])) {
+                            configAppHistory.setIsForced(false);
+                        }
+                        configAppHistory.setIsForced(Boolean.parseBoolean(isForceds[i]));
+                        configAppHistory.setVersionCode(versionCode[i]);
                         configAppHistoryMapper.insert(configAppHistory);
                     }
                 }

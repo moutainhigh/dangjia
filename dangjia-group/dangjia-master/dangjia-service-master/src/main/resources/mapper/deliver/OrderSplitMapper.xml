@@ -32,17 +32,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 AND o.type = 2
                 <if test="memberId!=null and memberId!=''">
                     UNION ALL
-                    SELECT
-                    product_id
-                    FROM
-                    dj_deliver_cart
-                    WHERE
-                    house_id = #{houseId}
-                    AND worker_type_id = #{workerTypeId}
-                    AND product_type =#{productType}
-                    AND member_id = #{memberId}
+                        SELECT
+                          product_id
+                        FROM
+                          dj_deliver_cart
+                        WHERE
+                            house_id = #{houseId}
+                            AND worker_type_id = #{workerTypeId}
+                            AND product_type =#{productType}
+                            AND member_id = #{memberId}
                 </if>
-
+                UNION ALL
+                select  dest_product_id as product_id
+                from dj_deliver_product_change pc
+                where  pc.type = 1 and pc.house_id = #{houseId}
+                and pc.product_type = #{productType}
             ) s
         GROUP BY
             s.product_id
@@ -76,7 +80,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             AND product_type =#{productType}
             AND member_id = #{memberId}
         </if>
-
+          UNION ALL
+            select  dest_product_id as product_id
+            from dj_deliver_product_change pc
+            where  pc.type = 1 and pc.house_id = #{houseId}
+            and pc.product_type = #{productType}
         ) s
         GROUP BY
         s.category_id

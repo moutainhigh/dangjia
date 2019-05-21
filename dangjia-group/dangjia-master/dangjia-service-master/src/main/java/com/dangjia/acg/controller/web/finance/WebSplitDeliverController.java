@@ -36,4 +36,17 @@ public class WebSplitDeliverController implements WebSplitDeliverAPI {
     public ServerResponse setSplitDeliver(HttpServletRequest request, SplitDeliver splitDeliver) {
         return webSplitDeliverService.setSplitDeliver(splitDeliver);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getOrderSplitList(HttpServletRequest request, String supplierId) {
+        return webSplitDeliverService.getOrderSplitList(supplierId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse splitDeliverList(String splitDeliverId) {
+        return webSplitDeliverService.splitDeliverList(splitDeliverId);
+    }
+
 }

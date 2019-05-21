@@ -47,6 +47,8 @@
             or ship_name like CONCAT('%',#{searchKey},'%')
             or supplier_name like CONCAT('%',#{searchKey},'%'))
         </if>
+        GROUP BY
+        supplier_id
         ORDER BY
         create_date DESC
     </select>
@@ -62,6 +64,53 @@
         AND si.product_sn =  #{productSn}
         GROUP BY d.supplier_id
         ORDER BY si.create_date DESC
+    </select>
+    
+    <!--根据供应商id查询要货列表-->
+    <select id="getOrderSplitList" resultType="com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO">
+        SELECT
+        b.id AS splitDeliverId,
+        a.id AS orderSplitId,
+        a.number,a.apply_status AS applyState,
+        a.create_date AS createDate,
+        b.supplier_id AS supplierId,
+        a.house_id AS houseId,
+        b.shipping_state AS shipState
+        FROM dangjia_master.dj_deliver_order_split a
+        INNER JOIN dangjia_master.dj_deliver_split_deliver b
+        ON a.id=b.order_split_id
+        WHERE b.data_status = 0
+        AND b.apply_state IS NOT NULL
+        AND b.apply_state != 3
+        AND supplier_id=#{supplierId}
+        ORDER BY a.create_date DESC
+    </select>
+
+    <!--供应商查看货单详情-->
+    <select id="splitDeliverList" resultType="com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO">
+        SELECT
+        id AS splitDeliverId,
+        number AS number,
+        total_amount AS totalAmount,
+        apply_money AS applyMoney,
+        apply_state AS applyState,
+        ship_address AS shipAddress,
+        supplier_id AS supplierId,
+        supplier_telephone AS supMobile,
+        supplier_name AS supName,
+        operator_id AS operatorId,
+        rec_time AS recTime,
+        modify_date AS modifyDate,
+        create_date AS createDate
+        FROM
+        dj_deliver_split_deliver
+        WHERE
+        data_status = 0
+        and apply_state IS not NULL
+        and apply_state != 3
+        and id=#{splitDeliverId}
+        ORDER BY
+        create_date DESC
     </select>
 
 </mapper>

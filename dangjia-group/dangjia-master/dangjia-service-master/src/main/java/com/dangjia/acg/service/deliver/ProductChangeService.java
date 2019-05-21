@@ -2,6 +2,7 @@ package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.basics.ProductAPI;
+import com.dangjia.acg.api.basics.UnitAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -21,6 +22,7 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.deliver.ProductChange;
 import com.dangjia.acg.modle.deliver.ProductChangeOrder;
 import com.dangjia.acg.modle.house.House;
@@ -70,6 +72,8 @@ public class ProductChangeService {
     private ConfigUtil configUtil;
     @Autowired
     private IBusinessOrderMapper businessOrderMapper;
+    @Autowired
+    private UnitAPI unitAPI;
     private static Logger LOG = LoggerFactory.getLogger(ProductChangeService.class);
 
     /**
@@ -80,16 +84,21 @@ public class ProductChangeService {
      * @param srcProductId
      * @param destProductId
      * @param srcSurCount
+     * @param productType 0:材料 1：服务
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse insertProductChange(HttpServletRequest request, String userToken, String houseId, String srcProductId, String destProductId, Double srcSurCount){
+    public ServerResponse insertProductChange(HttpServletRequest request, String userToken, String houseId, String srcProductId, String destProductId, Double srcSurCount, Integer productType){
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
             Member operator = (Member) object;
+            // 原商品仓库
+            Warehouse oldWareHouse = warehouseMapper.getByProductId(srcProductId, houseId);
+            // 新商品仓库
+            Warehouse wareHouse = warehouseMapper.getByProductId(destProductId, houseId);
             // 原商品
             ServerResponse srcResponse = productAPI.getProductById(request, srcProductId);
             // 更换后的商品
@@ -97,9 +106,19 @@ public class ProductChangeService {
             boolean flag = (srcResponse!=null&&srcResponse.getResultObj()!=null && destResponse!=null&&destResponse.getResultObj()!=null);
             Product srcProduct = null;
             Product destProduct = null;
+            Unit srcUnit = null;
+            Unit destUnit = null;
             if(flag) {
                 srcProduct = JSON.parseObject(JSON.toJSONString(srcResponse.getResultObj()), Product.class);
                 destProduct = JSON.parseObject(JSON.toJSONString(destResponse.getResultObj()), Product.class);
+                // 查询转换单位
+                ServerResponse srcUnitResponse= unitAPI.getUnitById(request, srcProduct.getConvertUnit());
+                ServerResponse destUnitResponse= unitAPI.getUnitById(request, destProduct.getConvertUnit());
+                boolean flagB = (srcUnitResponse!=null&&srcUnitResponse.getResultObj()!=null && destUnitResponse!=null&&destUnitResponse.getResultObj()!=null);
+                if(flagB){
+                    srcUnit = JSON.parseObject(JSON.toJSONString(srcUnitResponse.getResultObj()), Unit.class);
+                    destUnit = JSON.parseObject(JSON.toJSONString(destUnitResponse.getResultObj()), Unit.class);
+                }
             }
             // 查询
             Example example = new Example(ProductChange.class);
@@ -114,10 +133,12 @@ public class ProductChangeService {
                 change.setDestProductId(destProduct.getId());
                 change.setDestProductSn(destProduct.getProductSn());
                 change.setDestProductName(destProduct.getName());
-                change.setDestUnitName(destProduct.getUnitName());
+                change.setDestUnitName(null == wareHouse ? destUnit.getName() : wareHouse.getUnitName());
                 change.setDestPrice(destProduct.getPrice());
                 change.setDestImage(destProduct.getImage());
                 change.setDestSurCount(0.0);
+                // 类型 0 材料 1 服务
+                change.setProductType(productType);
                 change.setDifferencePrice(BigDecimal.ZERO);
                 change.setModifyDate(new Date());
                 productChangeMapper.updateByPrimaryKey(change);
@@ -132,19 +153,22 @@ public class ProductChangeService {
                 productChange.setSrcProductName(srcProduct.getName());
                 productChange.setSrcPrice(srcProduct.getPrice());
                 productChange.setSrcSurCount(srcSurCount);
-                productChange.setSrcUnitName(srcProduct.getUnitName());
+                // 仓库商品有单位，则取仓库单位，反之取商品转换单位
+                productChange.setSrcUnitName(null == oldWareHouse ? srcUnit.getName() : oldWareHouse.getUnitName());
                 productChange.setSrcImage(srcProduct.getImage());
                 // dest
                 productChange.setDestProductId(destProduct.getId());
                 productChange.setDestProductSn(destProduct.getProductSn());
                 productChange.setDestProductName(destProduct.getName());
                 productChange.setDestPrice(destProduct.getPrice());
-                productChange.setDestUnitName(destProduct.getUnitName());
+                productChange.setDestUnitName(null == wareHouse ? destUnit.getName() : wareHouse.getUnitName());
                 productChange.setDestImage(destProduct.getImage());
                 // 更换数默认为0
                 productChange.setDestSurCount(0.0);
                 // 未处理
                 productChange.setType(0);
+                // 类型 0 材料 1 服务
+                productChange.setProductType(productType);
                 // 差价默认为0
                 productChange.setDifferencePrice(BigDecimal.ZERO);
                 productChangeMapper.insert(productChange);
@@ -438,6 +462,7 @@ public class ProductChangeService {
         // 查询
         List<ProductChange> list = productChangeMapper.queryByHouseId(houseId, "0");
         Product destProduct = null;
+        Unit destUnit = null;
         if(null != list && list.size() > 0){
             for (ProductChange change : list){
                 // 更换数大于0的商品，才做处理
@@ -450,6 +475,11 @@ public class ProductChangeService {
                     ServerResponse destResponse = productAPI.getProductById(request, change.getDestProductId());
                     if (destResponse != null && destResponse.getResultObj() != null) {
                         destProduct = JSON.parseObject(JSON.toJSONString(destResponse.getResultObj()), Product.class);
+                        ServerResponse destUnitResponse= unitAPI.getUnitById(request, destProduct.getConvertUnit());
+                        boolean flagB = destUnitResponse!=null&&destUnitResponse.getResultObj()!=null;
+                        if(flagB){
+                            destUnit = JSON.parseObject(JSON.toJSONString(destUnitResponse.getResultObj()), Unit.class);
+                        }
                     }
                     // 处理新商品------begin
                     if (null == wareHouse) {
@@ -468,7 +498,8 @@ public class ProductChangeService {
                         newWareHouse.setProductName(destProduct.getName());
                         newWareHouse.setPrice(destProduct.getPrice());
                         newWareHouse.setCost(destProduct.getCost());
-                        newWareHouse.setUnitName(destProduct.getUnitName());
+                        // 取商品转换单位
+                        newWareHouse.setUnitName(destUnit.getName());
                         newWareHouse.setProductType(0);
                         newWareHouse.setCategoryId(destProduct.getCategoryId());
                         newWareHouse.setImage(destProduct.getImage());
