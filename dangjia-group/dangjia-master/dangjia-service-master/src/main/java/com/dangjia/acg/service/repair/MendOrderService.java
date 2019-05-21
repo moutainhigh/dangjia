@@ -940,7 +940,6 @@ public class MendOrderService {
                 String productId = obj.getString("productId");
                 MendMateriel mendMateriel = saveMendMaterial(mendOrder,house,productId,obj.getString("num"));
                 mendOrder.setTotalAmount(mendOrder.getTotalAmount() + mendMateriel.getTotalPrice());//修改总价
-                mendMaterialMapper.insertSelective(mendMateriel);
             }
             mendOrder.setModifyDate(new Date());
             mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
