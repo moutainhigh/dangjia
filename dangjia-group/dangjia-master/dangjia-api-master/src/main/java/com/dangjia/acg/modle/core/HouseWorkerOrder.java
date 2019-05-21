@@ -94,6 +94,12 @@ public class HouseWorkerOrder extends BaseEntity {
 	@ApiModelProperty("补人总工钱")
 	private BigDecimal repairTotalPrice;
 
+
+	@Column(name = "deduct_price")
+	@Desc(value = "订单评分扣除的工钱")
+	@ApiModelProperty("订单评分扣除的工钱")
+	private BigDecimal deductPrice;
+
 	@Column(name = "have_money")
 	@Desc(value = "订单已经拿到的钱")
 	@ApiModelProperty("订单已经拿到的钱")

@@ -542,6 +542,10 @@ public class HouseFlowApplyService {
             if(hwo.getHaveMoney() == null){
                 hwo.setHaveMoney(new BigDecimal(0.0));
             }
+            //处理工人评分扣钱
+            if(hwo.getDeductPrice() == null){
+                hwo.setDeductPrice(new BigDecimal(0.0));
+            }
             HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(),hwo.getWorkerTypeId());
 
             //查工匠被管家的评价
@@ -563,17 +567,23 @@ public class HouseFlowApplyService {
             Double star = (double) ((star1 + star2)/2);
             //工人钱
             BigDecimal applymoney = new BigDecimal(0);
+            //评分扣钱
+            BigDecimal deductPrice = new BigDecimal(0);
+
             if(star >= 4){
                 applymoney = hfa.getApplyMoney();
             }else if(star > 2){
                 applymoney = hfa.getApplyMoney().multiply(new BigDecimal(0.97));
+                deductPrice= hfa.getApplyMoney().subtract(applymoney);
             }else if(star <= 2){
                 applymoney = hfa.getApplyMoney().multiply(new BigDecimal(0.95));
+                deductPrice= hfa.getApplyMoney().subtract(applymoney);
             }
             //整体完工前均能发起，阶段完工发起的，阶段完工时拿钱（还可拿钱立即体现增加金额），
             // 阶段完工后整体完工前发起的，整体完工时拿钱（还可拿钱立即体现增加金额）
-            //清空补人工钱，用于整体完工时记录新的补人工钱
+            //清空补人工钱，用于整体完工时记录新的补人工钱CraftsmanConstructionService
             hwo.setRepairPrice(new BigDecimal(0.0));
+            hwo.setDeductPrice(hwo.getDeductPrice().add(deductPrice));
             hwo.setHaveMoney(hwo.getHaveMoney().add(applymoney));
             houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
             BigDecimal haveMoney = worker.getHaveMoney().add(applymoney);
