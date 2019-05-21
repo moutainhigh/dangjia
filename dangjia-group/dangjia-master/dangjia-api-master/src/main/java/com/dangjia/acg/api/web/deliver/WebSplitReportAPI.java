@@ -18,10 +18,12 @@ public interface WebSplitReportAPI {
     @ApiOperation(value = "指定房子所有发货的供应商", notes = "指定房子所有发货的供应商")
     ServerResponse getSplitReportSuppliers(@RequestParam("houseId") String houseId);
 
+    /*根据供应商和房子查看要货订单*/
     @PostMapping("web/deliver/split/report/deliverOrder")
     @ApiOperation(value = "指定供应商所有的要货订单", notes = "指定供应商所有的要货订单")
     ServerResponse getSplitReportDeliverOrders(@RequestParam("houseId") String houseId,@RequestParam("supplierId") String supplierId);
 
+    /*根据要货单号查询要货单明细*/
     @PostMapping("web/deliver/split/report/deliverOrderItems")
     @ApiOperation(value = "要货订单明细", notes = "要货订单明细")
     ServerResponse getSplitReportDeliverOrderItems(@RequestParam("number") String number);
@@ -34,5 +36,10 @@ public interface WebSplitReportAPI {
     @PostMapping("web/deliver/split/report/goods")
     @ApiOperation(value = "要货单商品列表统计（商品维度）", notes = "要货单商品列表统计（商品维度）")
     ServerResponse getSplitReportGoodsOrderItems(@RequestParam("pageDTO") PageDTO pageDTO, String houseId);
+
+    /*供应商结算统计查看*/
+    @PostMapping("web/deliver/split/report/House")
+    @ApiOperation(value = "指定供应商所有发货的房子", notes = "指定供应商所有发货的房子")
+    ServerResponse getSplitReportHouse(@RequestParam("supplierId") String supplierId);
 
 }

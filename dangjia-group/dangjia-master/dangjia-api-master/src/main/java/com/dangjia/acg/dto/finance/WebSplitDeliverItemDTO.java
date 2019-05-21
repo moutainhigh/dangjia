@@ -12,6 +12,7 @@ import java.util.Date;
  */
 @Data
 public class WebSplitDeliverItemDTO {
+    private String orderSplitId;//要货单id
     private String splitDeliverId;//发货表 id
     private String supMobile;//供货商电话
     private String supName;//供应商名字
@@ -23,4 +24,8 @@ public class WebSplitDeliverItemDTO {
     private String supplierId;//供应商id
     private Date modifyDate;//收货时间
     private Date createDate;// 创建日期
+    private String houseId;//房子Id
+    private int shipState;//供应商发货状态
+    private int sent; //已处理数
+    private int wait; //待处理数
 }

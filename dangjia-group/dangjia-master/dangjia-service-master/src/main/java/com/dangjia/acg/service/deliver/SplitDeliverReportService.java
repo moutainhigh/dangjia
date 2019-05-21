@@ -67,5 +67,12 @@ public class SplitDeliverReportService {
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
+    /*指定供应商所有发货的房子*/
+    public ServerResponse getSplitReportHouse(String supplierId){
+        List<SplitReportSupplierDTO> splitReportHouse = orderSplitItemMapper.getSplitReportHouse(supplierId);
+        return ServerResponse.createBySuccess("查询成功", splitReportHouse);
+    }
+
+
 
 }
