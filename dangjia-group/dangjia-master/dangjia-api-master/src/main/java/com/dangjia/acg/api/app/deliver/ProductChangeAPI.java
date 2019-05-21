@@ -19,7 +19,7 @@ public interface ProductChangeAPI {
 
     @PostMapping("app/deliver/productChange/insertProductChange")
     @ApiOperation(value = "添加更换商品", notes = "添加更换商品")
-    ServerResponse insertProductChange(HttpServletRequest request, String userToken, String houseId, String srcProductId, String destProductId, Double srcSurCount);
+    ServerResponse insertProductChange(HttpServletRequest request, String userToken, String houseId, String srcProductId, String destProductId, Double srcSurCount, Integer productType);
 
     @PostMapping("app/deliver/productChange/queryChangeByHouseId")
     @ApiOperation(value = "根据houseId查询更换商品列表", notes = "根据houseId查询更换商品列表")

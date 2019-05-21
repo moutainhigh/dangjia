@@ -42,7 +42,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                     AND product_type =#{productType}
                     AND member_id = #{memberId}
                 </if>
-
+                UNION ALL
+                select
+                DISTINCT dest_product_id as product_id
+                from dj_deliver_product_change pc
+                where pc.house_id = #{houseId}
+                and pc.product_type = #{productType}
             ) s
         GROUP BY
             s.product_id
@@ -76,7 +81,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             AND product_type =#{productType}
             AND member_id = #{memberId}
         </if>
-
+        UNION ALL
+        select
+        DISTINCT dest_product_id as product_id
+        from dj_deliver_product_change pc
+        where pc.house_id = #{houseId}
+        and pc.product_type = #{productType}
         ) s
         GROUP BY
         s.category_id

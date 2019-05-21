@@ -84,10 +84,11 @@ public class ProductChangeService {
      * @param srcProductId
      * @param destProductId
      * @param srcSurCount
+     * @param productType 0:材料 1：服务
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse insertProductChange(HttpServletRequest request, String userToken, String houseId, String srcProductId, String destProductId, Double srcSurCount){
+    public ServerResponse insertProductChange(HttpServletRequest request, String userToken, String houseId, String srcProductId, String destProductId, Double srcSurCount, Integer productType){
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -136,6 +137,8 @@ public class ProductChangeService {
                 change.setDestPrice(destProduct.getPrice());
                 change.setDestImage(destProduct.getImage());
                 change.setDestSurCount(0.0);
+                // 类型 0 材料 1 服务
+                change.setProductType(productType);
                 change.setDifferencePrice(BigDecimal.ZERO);
                 change.setModifyDate(new Date());
                 productChangeMapper.updateByPrimaryKey(change);
@@ -164,6 +167,8 @@ public class ProductChangeService {
                 productChange.setDestSurCount(0.0);
                 // 未处理
                 productChange.setType(0);
+                // 类型 0 材料 1 服务
+                productChange.setProductType(productType);
                 // 差价默认为0
                 productChange.setDifferencePrice(BigDecimal.ZERO);
                 productChangeMapper.insert(productChange);
