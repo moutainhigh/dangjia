@@ -95,6 +95,8 @@ public class MendOrderCheckService {
     private OrderSplitService orderSplitService;
     @Autowired
     private IOrderSplitItemMapper orderSplitItemMapper;
+    @Autowired
+    private MendOrderService mendOrderService;
 
     /**
      * 根据mendOrderId查询审核情况
@@ -421,6 +423,7 @@ public class MendOrderCheckService {
             }
             Member operator = (Member) object;
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
+            House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
             MendDeliver mendDeliver = mendDeliverMapper.selectByPrimaryKey(mendDeliverId);
             if(mendDeliver==null){
                 return ServerResponse.createBySuccessMessage("提交失败，请联系平台部！");
@@ -438,8 +441,14 @@ public class MendOrderCheckService {
                 for (int i = 0; i < arr.size(); i++) {
                     JSONObject obj = arr.getJSONObject(i);
                     String id = obj.getString("id");
+                    String productId = obj.getString("productId");
                     String shopCount = obj.getString("shopCount");
-                    MendMateriel mendMateriel = mendMaterialMapper.selectByPrimaryKey(id);
+                    MendMateriel mendMateriel;
+                    if(!CommonUtil.isEmpty(id)){
+                         mendMateriel = mendMaterialMapper.selectByPrimaryKey(id);
+                    }else{
+                         mendMateriel = mendOrderService.saveMendMaterial(mendOrder,house,productId,shopCount);
+                    }
                     mendMateriel.setActualCount(Double.parseDouble(shopCount));//实际退货数
                     mendMateriel.setActualPrice(mendMateriel.getActualCount() * mendMateriel.getPrice());
                     actualTotalAmount=actualTotalAmount+mendMateriel.getActualPrice();

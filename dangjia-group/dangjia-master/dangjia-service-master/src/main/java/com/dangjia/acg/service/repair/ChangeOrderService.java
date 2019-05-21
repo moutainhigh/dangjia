@@ -223,6 +223,9 @@ public class ChangeOrderService {
                 }
             }
             if (type == 2) {
+                if(houseWorkerOrder.getDeductPrice()==null){
+                    houseWorkerOrder.setDeductPrice(new BigDecimal(0));
+                }
                 remain = remain.subtract(houseWorkerOrder.getRetentionMoney()).subtract(houseWorkerOrder.getDeductPrice());//剩下的
                 remain =remain.setScale(2,BigDecimal.ROUND_HALF_UP);
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
