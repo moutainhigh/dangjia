@@ -5,6 +5,7 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.config.ConfigApp;
 import com.dangjia.acg.service.config.ConfigAppService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -59,8 +60,11 @@ public class ConfigAppController implements ConfigAppAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse editConfigApp(HttpServletRequest request, ConfigApp configApp) {
-        return configAppService.editConfigApp(request,configApp);
+    public ServerResponse editConfigApp(HttpServletRequest request, ConfigApp configApp,String isForceds,String versionCodes,String historyIds) {
+        String[] isForced = StringUtils.split(isForceds,",");
+        String[] versionCode = StringUtils.split(versionCodes,",");
+        String[] historyId = StringUtils.split(historyIds,",");
+        return configAppService.editConfigApp(request,configApp,isForced,versionCode,historyId);
     }
     /**
      * 新增版本应用
@@ -69,7 +73,10 @@ public class ConfigAppController implements ConfigAppAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse addConfigApp(HttpServletRequest request,ConfigApp configApp) {
-        return configAppService.addConfigApp(request,configApp);
+    public ServerResponse addConfigApp(HttpServletRequest request,ConfigApp configApp,String isForceds,String versionCodes,String historyIds) {
+        String[] isForced = StringUtils.split(isForceds,",");
+        String[] versionCode = StringUtils.split(versionCodes,",");
+        String[] historyId = StringUtils.split(historyIds,",");
+        return configAppService.addConfigApp(request,configApp,isForced,versionCode,historyId);
     }
 }

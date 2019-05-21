@@ -615,19 +615,23 @@ public class CraftsmanConstructionService {
             bean.setAlreadyMoney(new BigDecimal(0));//已得钱
             bean.setAlsoMoney(new BigDecimal(0));//还可得钱
         } else {
-            BigDecimal alsoMoney = (hwo.getWorkPrice() == null ? new BigDecimal(0) :
-                    hwo.getWorkPrice()).subtract(hwo.getHaveMoney() == null ? new BigDecimal(0) : hwo.getHaveMoney());//还可得钱
+            BigDecimal workPrice =hwo.getWorkPrice() == null ? new BigDecimal(0) : hwo.getWorkPrice();//总共钱
+            BigDecimal haveMoney =hwo.getHaveMoney() == null ? new BigDecimal(0) : hwo.getHaveMoney();//已得到的钱
+            BigDecimal repairPrice =hwo.getRepairPrice() == null ? new BigDecimal(0) : hwo.getRepairPrice();//当前阶段补人工钱
+            BigDecimal repairTotalPrice =hwo.getRepairTotalPrice() == null ? new BigDecimal(0) : hwo.getRepairTotalPrice();//补人工总钱
+            BigDecimal retentionMoney =hwo.getRetentionMoney() == null ? new BigDecimal(0) : hwo.getRetentionMoney();//滞留金
+            BigDecimal deductPrice =hwo.getDeductPrice() == null ? new BigDecimal(0) : hwo.getDeductPrice();//评价积分扣除的钱
+            //总共钱-已得到的钱+补人工钱-滞留金-评价扣的钱=还可得钱
+            BigDecimal alsoMoney = new BigDecimal(workPrice.doubleValue()-haveMoney.doubleValue()+repairPrice.doubleValue()-retentionMoney.doubleValue()-deductPrice.doubleValue());
+            bean.setAlsoMoney(alsoMoney);//还可得钱
 
-            //已得到的钱+滞留金的钱=已得总钱
-            BigDecimal alreadyMoney = (hwo.getHaveMoney() == null ? new BigDecimal(0) :
-                    hwo.getHaveMoney()).add(hwo.getRetentionMoney() == null ? new BigDecimal(0) : hwo.getRetentionMoney());//已得钱
 
-            BigDecimal havaMoney=(hwo.getRepairTotalPrice() == null ? new BigDecimal(0) :hwo.getRepairTotalPrice()).subtract((hwo.getRepairPrice() == null ? new BigDecimal(0) :hwo.getRepairPrice()));
-            alreadyMoney= alreadyMoney.add(havaMoney);
+            //已得到的钱+滞留金的钱+（补人工总钱-当前阶段补人工钱）=已得总钱
+            BigDecimal alreadyMoney = new BigDecimal(haveMoney.doubleValue()+retentionMoney.doubleValue()+(repairTotalPrice.doubleValue()-repairPrice.doubleValue()));
             bean.setAlreadyMoney(alreadyMoney);//已得钱
 
-            alsoMoney=alsoMoney.add((hwo.getRepairPrice() == null ? new BigDecimal(0) :hwo.getRepairPrice()));
-            bean.setAlsoMoney(alsoMoney);//还可得钱
+
+
         }
     }
 

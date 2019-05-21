@@ -508,7 +508,10 @@ public class HouseWorkerService {
                         String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED, house.getHouseName(), workerType.getName()), "5");
                 //***整体完工申请***//
             } else if (applyType == 2) {
-                hfa.setApplyMoney(workPrice.subtract(haveMoney));
+                BigDecimal retentionMoney =hwo.getRetentionMoney() == null ? new BigDecimal(0) : hwo.getRetentionMoney();//滞留金
+                BigDecimal deductPrice =hwo.getDeductPrice() == null ? new BigDecimal(0) : hwo.getDeductPrice();//评价积分扣除的钱
+                BigDecimal alsoMoney = new BigDecimal(workPrice.doubleValue()-haveMoney.doubleValue()-retentionMoney.doubleValue()-deductPrice.doubleValue());
+                hfa.setApplyMoney(alsoMoney);
 //                hfa.setApplyDec("业主您好，我是大管家，我已验收了" + workerType.getName() + "的整体完工");//描述
                 hfa.setApplyDec("我是" + workerType.getName() + ",我已申请了整体完工");//描述
                 hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
