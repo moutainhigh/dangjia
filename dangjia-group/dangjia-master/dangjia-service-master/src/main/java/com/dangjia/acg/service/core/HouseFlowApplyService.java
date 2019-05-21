@@ -368,6 +368,9 @@ public class HouseFlowApplyService {
         if(hfa.getSupervisorMoney() == null){
             hfa.setSupervisorMoney(new BigDecimal(0));
         }
+        if(hwo.getDeductPrice() == null){
+            hwo.setDeductPrice(new BigDecimal(0));
+        }
         //评分扣钱
         BigDecimal deductPrice = new BigDecimal(0);
         BigDecimal supervisorMoney;

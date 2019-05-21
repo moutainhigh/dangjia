@@ -222,7 +222,6 @@ public class OrderSplitService {
             }
             detailDTO.setSize(orderSplitItemList.size());
             detailDTO.setOrderSplitItemDTOS(orderSplitItemDTOS);
-
             return ServerResponse.createBySuccess("查询成功", detailDTO);
         } catch (Exception e) {
             e.printStackTrace();
@@ -244,6 +243,8 @@ public class OrderSplitService {
         List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
         return ServerResponse.createBySuccess("查询成功", splitDeliverList);
     }
+
+
 
     /**
      * 撤回供应商待发货的订单（整单撤回）

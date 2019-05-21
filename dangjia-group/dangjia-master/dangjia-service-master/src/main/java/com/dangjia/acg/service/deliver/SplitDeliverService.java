@@ -178,7 +178,7 @@ public class SplitDeliverService {
             splitDeliverDTO.setSupName(splitDeliver.getSupplierName());
             splitDeliverDTO.setSupId(splitDeliver.getSupervisorId());
             splitDeliverDTO.setSupMobile(splitDeliver.getShipMobile());
-            if (StringUtil.isNotEmpty(splitDeliver.getOperatorId())) {
+            if (StringUtil.isNotEmpty(splitDeliver.getOperatorId())) {//收货人名
                 Member operator = memberMapper.selectByPrimaryKey(splitDeliver.getOperatorId());
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(operator.getWorkerTypeId());
                 if (workerType != null) {
@@ -228,7 +228,6 @@ public class SplitDeliverService {
                 splitDeliverItemDTOList.add(splitDeliverItemDTO);
             }
             splitDeliverDTO.setSplitDeliverItemDTOList(splitDeliverItemDTOList);//明细
-
             return ServerResponse.createBySuccess("查询成功", splitDeliverDTO);
         } catch (Exception e) {
             e.printStackTrace();
