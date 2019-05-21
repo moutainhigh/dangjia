@@ -329,7 +329,7 @@ public class WorkerService {
             if (workerBankCard == null) {
                 return ServerResponse.createByErrorMessage("没有找到对应的银行卡");
             }
-            if (!worker.equals(workerBankCard.getWorkerId())) {
+            if (!worker.getId().equals(workerBankCard.getWorkerId())) {
                 return ServerResponse.createByErrorMessage("您无权删除此卡");
             }
             workerBankCard.setDataStatus(1);
