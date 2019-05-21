@@ -142,10 +142,15 @@ public class ProductChangeService {
                 change.setDestUnitName(null == wareHouse ? destUnit.getName() : wareHouse.getUnitName());
                 change.setDestPrice(destProduct.getPrice());
                 change.setDestImage(destProduct.getImage());
-                change.setDestSurCount(0.0);
+                change.setDestSurCount(srcSurCount);
                 // 类型 0 材料 1 服务
                 change.setProductType(productType);
-                change.setDifferencePrice(BigDecimal.ZERO);
+                // 差额单价
+                BigDecimal price = BigDecimal.valueOf(MathUtil.sub(change .getDestPrice(), change.getSrcPrice()));
+                // 差价= 更换数*差额单价
+                BigDecimal differPrice = price.multiply(BigDecimal.valueOf(srcSurCount));
+                // 差价默认为可以更换数量的最大值
+                change.setDifferencePrice(differPrice);
                 change.setModifyDate(new Date());
                 productChangeMapper.updateByPrimaryKey(change);
             }else {
@@ -170,13 +175,17 @@ public class ProductChangeService {
                 productChange.setDestUnitName(null == wareHouse ? destUnit.getName() : wareHouse.getUnitName());
                 productChange.setDestImage(destProduct.getImage());
                 // 更换数默认为0
-                productChange.setDestSurCount(0.0);
+                productChange.setDestSurCount(srcSurCount);
                 // 未处理
                 productChange.setType(0);
                 // 类型 0 材料 1 服务
                 productChange.setProductType(productType);
-                // 差价默认为0
-                productChange.setDifferencePrice(BigDecimal.ZERO);
+                // 差额单价
+                BigDecimal price = BigDecimal.valueOf(MathUtil.sub(productChange .getDestPrice(), productChange.getSrcPrice()));
+                // 差价= 更换数*差额单价
+                BigDecimal differPrice = price.multiply(BigDecimal.valueOf(srcSurCount));
+                // 差价默认为可以更换数量的最大值
+                productChange.setDifferencePrice(differPrice);
                 productChangeMapper.insert(productChange);
             }
         }catch (Exception e){
