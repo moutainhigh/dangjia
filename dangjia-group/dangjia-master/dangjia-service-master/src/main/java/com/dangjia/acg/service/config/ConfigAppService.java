@@ -131,14 +131,18 @@ public class ConfigAppService {
         Example example = new Example(ConfigAppHistory.class);
         Example.Criteria criteria=example.createCriteria();
         criteria.andEqualTo("appId",configApp.getId());
-        configAppHistoryMapper.deleteByExample(criteria);
+        configAppHistoryMapper.deleteByExample(example);
         if(this.configAppMapper.updateByPrimaryKeySelective(configApp)>0){
             for (int i = 0; i <historyId.length ; i++) {
                 ConfigAppHistory configAppHistory=new ConfigAppHistory();
                 if(!CommonUtil.isEmpty(historyId[i])){
                     configAppHistory.setAppId(configApp.getId());
                     configAppHistory.setHistoryId(historyId[i]);
-                    configAppHistory.setIsForced(Boolean.parseBoolean(isForceds[i]));
+                    configAppHistory.setIsForced(true);
+                    if("0".equals(isForceds[i])) {
+                        configAppHistory.setIsForced(false);
+                    }
+
                     configAppHistory.setVersionCode(versionCode[i]);
                     configAppHistoryMapper.insert(configAppHistory);
                 }
@@ -161,7 +165,10 @@ public class ConfigAppService {
                     ConfigAppHistory configAppHistory=new ConfigAppHistory();
                     if(!CommonUtil.isEmpty(historyId[i])){
                         configAppHistory.setAppId(configApp.getId());
-                        configAppHistory.setHistoryId(historyId[i]);
+                        configAppHistory.setIsForced(true);
+                        if("0".equals(isForceds[i])) {
+                            configAppHistory.setIsForced(false);
+                        }
                         configAppHistory.setIsForced(Boolean.parseBoolean(isForceds[i]));
                         configAppHistory.setVersionCode(versionCode[i]);
                         configAppHistoryMapper.insert(configAppHistory);
