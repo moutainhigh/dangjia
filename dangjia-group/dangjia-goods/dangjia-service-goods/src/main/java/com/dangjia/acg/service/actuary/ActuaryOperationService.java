@@ -333,8 +333,12 @@ public class ActuaryOperationService {
                 String budgetMaterialId=null;
                 if(type != 5) {
                     BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(gId);
-                    product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());//当前 货品
-                    budgetMaterialId=budgetMaterial.getId();
+                    if(budgetMaterial!=null) {
+                        product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());//当前 货品
+                        budgetMaterialId = budgetMaterial.getId();
+                    }else{
+                        product = productMapper.selectByPrimaryKey(gId);//当前 货品
+                    }
                 }else{
                     product = productMapper.selectByPrimaryKey(gId);//当前 货品
                 }
