@@ -283,14 +283,8 @@ public class ProductChangeService {
                 productChange.setDestSurCount(destSurCount);
                 // 差额单价
                 BigDecimal price = BigDecimal.valueOf(MathUtil.sub(productChange .getDestPrice(), productChange.getSrcPrice()));
-                BigDecimal differPrice = BigDecimal.ZERO;
-                if(price.compareTo(BigDecimal.ZERO) == 0){
-                    // 两个商品价格相等 差价=更换数*商品价格
-                    differPrice = BigDecimal.valueOf(productChange.getDestPrice()).multiply(BigDecimal.valueOf(destSurCount));
-                } else {
-                    // 不相等 差价=更换数*差额单价
-                    differPrice = price.multiply(BigDecimal.valueOf(destSurCount));
-                }
+                // 差价= 更换数*差额单价
+                BigDecimal differPrice = price.multiply(BigDecimal.valueOf(destSurCount));
                 productChange.setDifferencePrice(differPrice);
                 productChange.setModifyDate(new Date());
                 productChange.setOrderId(orderId);

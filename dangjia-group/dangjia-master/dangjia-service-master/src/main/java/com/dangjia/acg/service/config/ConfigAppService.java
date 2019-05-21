@@ -3,6 +3,7 @@ package com.dangjia.acg.service.config;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.config.IConfigAppHistoryMapper;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -55,10 +58,20 @@ public class ConfigAppService {
         Integer pageSize = Integer.parseInt(request.getParameter("pageSize"));
         PageHelper.startPage(pageNum, pageSize);
         List<ConfigApp> list = configAppMapper.selectByExample(example);
+        List listh=new ArrayList();
         PageInfo pageResult = new PageInfo(list);
+        for (ConfigApp app : list) {
+            Map map = BeanUtils.beanToMap(app);
+            Example exampleHistory = new Example(ConfigAppHistory.class);
+            Example.Criteria criteriaHistory=exampleHistory.createCriteria();
+            criteriaHistory.andEqualTo("appId",app.getId());
+            List<ConfigAppHistory> historyList =configAppHistoryMapper.selectByExample(exampleHistory);
+            map.put("historyList",historyList);
+            listh.add(map);
+        }
+        pageResult.setList(listh);
         return ServerResponse.createBySuccess("ok",pageResult);
     }
-
     /**
      * 版本检测
      * @param configApp

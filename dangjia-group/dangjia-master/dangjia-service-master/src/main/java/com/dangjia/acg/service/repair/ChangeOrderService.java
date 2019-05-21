@@ -205,14 +205,10 @@ public class ChangeOrderService {
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        Member member = (Member) object;
-        if (type == 1){
-            workerTypeId=member.getWorkerTypeId();
-        }
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);
         HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, workerTypeId);
         if (houseWorkerOrder != null) {
-            BigDecimal remain = houseWorkerOrder.getWorkPrice().add(houseWorkerOrder.getRepairTotalPrice()).subtract(houseWorkerOrder.getHaveMoney());//剩下的
+            BigDecimal remain = houseWorkerOrder.getWorkPrice().subtract(houseWorkerOrder.getHaveMoney());//剩下的
             remain =remain.setScale(2,BigDecimal.ROUND_HALF_UP);
             if (type == 1) {
                 List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseId,workerTypeId);
