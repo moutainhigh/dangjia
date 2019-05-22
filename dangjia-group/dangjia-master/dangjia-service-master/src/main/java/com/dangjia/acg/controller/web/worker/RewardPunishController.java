@@ -82,16 +82,4 @@ public class RewardPunishController implements RewardPunishAPI {
         return rewardPunishService.addRewardPunishRecord(userToken, userId,rewardPunishRecord);
     }
 
-    /**
-     *修改奖罚记录
-     * @param userToken
-     * @param rewardPunishRecord
-     * @return
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse updateRewardPunishRecord(String userToken,String userId,RewardPunishRecord rewardPunishRecord){
-        return rewardPunishService.updateRewardPunishRecord(userToken, userId,rewardPunishRecord);
-    }
-
 }
