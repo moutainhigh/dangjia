@@ -13,6 +13,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.WorkIntegralDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
@@ -398,6 +399,13 @@ public class EvaluateService {
             houseFlowApplyService.checkSupervisor(houseFlowApplyId,isAuto);
 
             configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","业主评价",String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE,house.getHouseName()) ,"6");
+
+            //短信通知业务本门
+            Map<String,String> temp_para=new HashMap();
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
+            temp_para.put("house_name",house.getHouseName());
+            temp_para.put("worker_name",workerType.getName());
+            JsmsUtil.sendSMS("15675101794","164425",temp_para);
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();

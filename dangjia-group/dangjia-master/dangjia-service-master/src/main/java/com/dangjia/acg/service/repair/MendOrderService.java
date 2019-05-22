@@ -1035,8 +1035,12 @@ public class MendOrderService {
                     }
                 }
                 if(isCheck) {
-                    return ServerResponse.createByErrorMessage("该工种已发起整体完工申请，不能发起补/退人工");
+                    return ServerResponse.createByErrorMessage("该工种已发起整体完工申请，不能发起补/退人工申请");
                 }
+            }
+            HouseFlow houseFlow=houseFlowMapper.getByWorkerTypeId(houseId,workerTypeId);
+            if(houseFlow.getWorkSteta()==2){
+                return ServerResponse.createByErrorMessage("该工种已整体完工，不能发起补/退人工申请");
             }
         }
         String typeName;
