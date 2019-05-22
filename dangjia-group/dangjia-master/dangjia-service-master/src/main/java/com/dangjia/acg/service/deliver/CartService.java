@@ -192,6 +192,10 @@ public class CartService {
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
                 warehouseDTO.setProductId(String.valueOf(product.get(Product.ID)));
                 warehouseDTO.setProductName(String.valueOf(product.get(Product.NAME)));
+                warehouseDTO.setMaket(1);
+                if("0".equals(product.get(Product.MAKET))||"0".equals(product.get(Product.TYPE))) {
+                    warehouseDTO.setMaket(0);
+                }
                 warehouseDTO.setPrice(Double.parseDouble(String.valueOf(product.get(Product.PRICE))));
                 warehouseDTO.setProductType(Integer.parseInt(productType));
                 warehouseDTO.setImage(address + product.get(Product.IMAGE));

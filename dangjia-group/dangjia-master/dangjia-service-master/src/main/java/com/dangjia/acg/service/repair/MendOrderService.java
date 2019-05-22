@@ -22,6 +22,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.repair.*;
+import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.brand.Unit;
@@ -115,14 +116,14 @@ public class MendOrderService {
         MendOrderInfoDTO mendOrderInfoDTO = new MendOrderInfoDTO();
         mendOrderInfoDTO.setTotalAmount(0.0);
         try {
-            if("0".equals(type)){
+            if ("0".equals(type)) {
                 List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(workerTypeId);
                 for (MendMateriel v : mendMaterielList) {
                     v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
                     mendOrderInfoDTO.setTotalAmount(mendOrderInfoDTO.getTotalAmount() + v.getTotalPrice());
                 }
                 mendOrderInfoDTO.setMendMateriels(mendMaterielList);
-            }else if("1".equals(type)){
+            } else if ("1".equals(type)) {
                 List<MendWorker> mendWorkerList = mendWorkerMapper.byMendOrderId(workerTypeId);
                 for (MendWorker v : mendWorkerList) {
                     v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
@@ -203,11 +204,11 @@ public class MendOrderService {
             }
             Member member = (Member) object;
             House house = houseMapper.selectByPrimaryKey(houseId);
-            if (house.getVisitState() == 3 || house.getHaveComplete() == 1){
+            if (house.getVisitState() == 3 || house.getHaveComplete() == 1) {
                 return ServerResponse.createByErrorMessage("该房子已完工");
             }
-            ServerResponse serverResponse=mendChecking(houseId,null,4);
-            if(!serverResponse.isSuccess()){
+            ServerResponse serverResponse = mendChecking(houseId, null, 4);
+            if (!serverResponse.isSuccess()) {
                 return ServerResponse.createByErrorMessage(serverResponse.getResultMsg());
             }
             Example example = new Example(MendOrder.class);
@@ -238,12 +239,7 @@ public class MendOrderService {
 //                }
                 mendOrderMapper.insert(mendOrder);
             }
-
-            if (this.addMendMateriel(productArr, mendOrder)) {
-                return ServerResponse.createBySuccessMessage("保存成功");
-            } else {
-                return ServerResponse.createByErrorMessage("添加明细失败");
-            }
+            return this.addMendMateriel(productArr, mendOrder);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("保存失败");
@@ -270,7 +266,7 @@ public class MendOrderService {
                 mendOrderMapper.updateByPrimaryKey(mendOrder);
 
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
-                houseService.insertConstructionRecordAll(mendOrder,changeOrder);
+                houseService.insertConstructionRecordAll(mendOrder, changeOrder);
                 changeOrder.setState(2);//通过->工匠业主审核
                 changeOrderMapper.updateByPrimaryKey(changeOrder);
 //                House house = houseMapper.selectByPrimaryKey(houseId);
@@ -279,11 +275,11 @@ public class MendOrderService {
 
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
-                String urlyz= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+houseId+"&roleType=1";
+                String urlyz = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + houseId + "&roleType=1";
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "退人工变更", String.format
                         (DjConstants.PushMessage.YZ_T_003, house.getHouseName()), urlyz);
 
-                String url= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+houseId+"&roleType=3";
+                String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + houseId + "&roleType=3";
                 configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "退人工变更", String.format
                         (DjConstants.PushMessage.GJ_T_010, house.getHouseName()), url);
                 return ServerResponse.createBySuccessMessage("操作成功");
@@ -337,7 +333,7 @@ public class MendOrderService {
      */
     public ServerResponse backMendWorker(String userToken, String houseId, String workerGoodsArr, String workerTypeId, String changeOrderId) {
         try {
-            if(StringUtil.isEmpty(changeOrderId)){
+            if (StringUtil.isEmpty(changeOrderId)) {
                 return ServerResponse.createByErrorMessage("未传变更单id");
             }
 
@@ -351,8 +347,8 @@ public class MendOrderService {
 //                return ServerResponse.createByErrorMessage("该工种已阶段完工,不能退人工!");
 //            }
 
-            ServerResponse serverResponse=mendChecking(houseId,workerTypeId,3);
-            if(!serverResponse.isSuccess()){
+            ServerResponse serverResponse = mendChecking(houseId, workerTypeId, 3);
+            if (!serverResponse.isSuccess()) {
                 return ServerResponse.createByErrorMessage(serverResponse.getResultMsg());
             }
             Example example = new Example(MendOrder.class);
@@ -393,7 +389,7 @@ public class MendOrderService {
 
             if (this.addMendWorker(workerGoodsArr, mendOrder, workerTypeId)) {
                 WorkerType workType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
-                if(workType.getType()!=3) {
+                if (workType.getType() != 3) {
                     House house = houseMapper.selectByPrimaryKey(houseId);
                     String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "changeArtificial?userToken=" + userToken + "&cityId=" + house.getCityId() + "&title=人工变更&houseId=" + houseId + "&houseFlowId=" + houseFlow.getId() + "&roleType=2";
                     configMessageService.addConfigMessage(null, "gj", houseFlow.getWorkerId(), "0", "退人工", String.format
@@ -429,7 +425,7 @@ public class MendOrderService {
                 mendOrder.setState(1);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
-                houseService.insertConstructionRecordAll(mendOrder,changeOrder);
+                houseService.insertConstructionRecordAll(mendOrder, changeOrder);
                 changeOrder.setState(2);//通过->工匠业主审核
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
 
@@ -438,7 +434,7 @@ public class MendOrderService {
 //                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "补人工变更", String.format
 //                        (DjConstants.PushMessage.YZ_B_010, house.getHouseName()), urlyz);
 
-                String url= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+houseId+"&roleType=3";
+                String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + houseId + "&roleType=3";
                 configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "补人工变更", String.format
                         (DjConstants.PushMessage.GJ_B_002, house.getHouseName()), url);
                 return ServerResponse.createBySuccessMessage("操作成功");
@@ -476,6 +472,7 @@ public class MendOrderService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
     /**
      * 明细
      */
@@ -484,10 +481,10 @@ public class MendOrderService {
         mendOrderInfoDTO.setTotalAmount(0.0);
         try {
             Example example = new Example(MendOrder.class);
-            Example.Criteria criteria=example.createCriteria();
+            Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, type)//补人工
                     .andEqualTo(MendOrder.WORKER_TYPE_ID, workerTypeId);
-            if(!CommonUtil.isEmpty(state)){
+            if (!CommonUtil.isEmpty(state)) {
                 criteria.andEqualTo(MendOrder.STATE, state);
             }
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
@@ -497,15 +494,15 @@ public class MendOrderService {
                 return mendOrderInfoDTO;
             } else {
                 MendOrder mendOrder = mendOrderList.get(0);
-                BeanUtils.beanToBean(mendOrder,mendOrderInfoDTO);
-                if("0".equals(type)||"2".equals(type)||"4".equals(type)){
+                BeanUtils.beanToBean(mendOrder, mendOrderInfoDTO);
+                if ("0".equals(type) || "2".equals(type) || "4".equals(type)) {
                     List<MendMateriel> mendMateriels = mendMaterialMapper.byMendOrderId(mendOrder.getId());
                     for (MendMateriel v : mendMateriels) {
                         v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
                         mendOrderInfoDTO.setTotalAmount(mendOrderInfoDTO.getTotalAmount() + v.getTotalPrice());
                     }
                     mendOrderInfoDTO.setMendMateriels(mendMateriels);
-                }else {
+                } else {
                     List<MendWorker> mendWorkerList = mendWorkerMapper.byMendOrderId(mendOrder.getId());
                     for (MendWorker v : mendWorkerList) {
                         v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
@@ -520,6 +517,7 @@ public class MendOrderService {
             return mendOrderInfoDTO;
         }
     }
+
     /**
      * 管家
      * 提交补人工
@@ -527,7 +525,7 @@ public class MendOrderService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveMendWorker(String userToken, String houseId, String workerGoodsArr, String workerTypeId, String changeOrderId) {
         try {
-            if(StringUtil.isEmpty(changeOrderId)){
+            if (StringUtil.isEmpty(changeOrderId)) {
                 return ServerResponse.createByErrorMessage("未传变更单id");
             }
             Object object = constructionService.getMember(userToken);
@@ -535,8 +533,8 @@ public class MendOrderService {
                 return (ServerResponse) object;
             }
             Member steward = (Member) object;
-            ServerResponse serverResponse=mendChecking(houseId,workerTypeId,1);
-            if(!serverResponse.isSuccess()){
+            ServerResponse serverResponse = mendChecking(houseId, workerTypeId, 1);
+            if (!serverResponse.isSuccess()) {
                 return ServerResponse.createByErrorMessage(serverResponse.getResultMsg());
             }
 
@@ -576,12 +574,12 @@ public class MendOrderService {
             }
 
             if (this.addMendWorker(workerGoodsArr, mendOrder, workerTypeId)) {
-                HouseFlow houseFlow =houseFlowMapper.getHouseFlowByHidAndWty(houseId,3);
+                HouseFlow houseFlow = houseFlowMapper.getHouseFlowByHidAndWty(houseId, 3);
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 WorkerType workType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
-                String url= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"changeArtificial?userToken="+userToken+"&cityId="+house.getCityId()+"&title=人工变更&houseId="+houseId+"&houseFlowId="+houseFlow.getId()+"&roleType=2";
-                configMessageService.addConfigMessage(null, "gj",houseFlow.getWorkerId(), "0", "补人工", String.format
-                        (DjConstants.PushMessage.DGJ_B_001, house.getHouseName(),workType.getName()), url);
+                String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "changeArtificial?userToken=" + userToken + "&cityId=" + house.getCityId() + "&title=人工变更&houseId=" + houseId + "&houseFlowId=" + houseFlow.getId() + "&roleType=2";
+                configMessageService.addConfigMessage(null, "gj", houseFlow.getWorkerId(), "0", "补人工", String.format
+                        (DjConstants.PushMessage.DGJ_B_001, house.getHouseName(), workType.getName()), url);
                 return ServerResponse.createBySuccessMessage("保存成功");
             } else {
                 return ServerResponse.createByErrorMessage("添加明细失败");
@@ -736,8 +734,8 @@ public class MendOrderService {
                 return (ServerResponse) object;
             }
             Member worker = (Member) object;
-            ServerResponse serverResponse=mendChecking(houseId,worker.getWorkerTypeId(),2);
-            if(!serverResponse.isSuccess()){
+            ServerResponse serverResponse = mendChecking(houseId, worker.getWorkerTypeId(), 2);
+            if (!serverResponse.isSuccess()) {
                 return ServerResponse.createByErrorMessage(serverResponse.getResultMsg());
             }
             Example example = new Example(MendOrder.class);
@@ -763,7 +761,7 @@ public class MendOrderService {
                 mendOrder.setType(2);//退材料
                 if (worker.getWorkerType() == 3) {//管家退服务
                     mendOrder.setOrderName("退服务");
-                }else {
+                } else {
                     mendOrder.setOrderName("退材料");
                 }
                 mendOrder.setState(0);//生成中
@@ -784,12 +782,7 @@ public class MendOrderService {
 //                    }
 //                }
             }
-
-            if (this.addMendMateriel(productArr, mendOrder)) {
-                return ServerResponse.createBySuccessMessage("保存成功");
-            } else {
-                return ServerResponse.createByErrorMessage("添加明细失败");
-            }
+            return this.addMendMateriel(productArr, mendOrder);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("保存失败");
@@ -906,7 +899,7 @@ public class MendOrderService {
                 mendOrder.setType(0);//补材料
                 if (worker.getWorkerType() == 3) {//管家退服务
                     mendOrder.setOrderName("补服务");
-                }else {
+                } else {
                     mendOrder.setOrderName("补材料");
                 }
                 mendOrder.setState(0);//生成中
@@ -916,12 +909,11 @@ public class MendOrderService {
                 }
                 mendOrderMapper.insert(mendOrder);
             }
-
-            if (this.addMendMateriel(productArr, mendOrder)) {
-                return ServerResponse.createBySuccess("保存成功",mendOrder.getId());
-            } else {
-                return ServerResponse.createByErrorMessage("添加明细失败");
+            ServerResponse serverResponse = this.addMendMateriel(productArr, mendOrder);
+            if (!serverResponse.isSuccess()) {
+                return serverResponse;
             }
+            return ServerResponse.createBySuccess("保存成功", mendOrder.getId());
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("保存失败");
@@ -931,7 +923,7 @@ public class MendOrderService {
     /**
      * 保存mendMateriel
      */
-    private boolean addMendMateriel(String productArr, MendOrder mendOrder) {
+    private ServerResponse addMendMateriel(String productArr, MendOrder mendOrder) {
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                     .getRequest();
@@ -942,27 +934,36 @@ public class MendOrderService {
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
                 String productId = obj.getString("productId");
-                MendMateriel mendMateriel = saveMendMaterial(mendOrder,house,productId,obj.getString("num"));
+                if (mendOrder.getType() == 2 || mendOrder.getType() == 4) {
+                    Product product = forMasterAPI.getProduct(house.getCityId(), productId);
+                    if (product != null) {
+                        Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
+                        if (goods != null && goods.getSales() == 1) {
+                            return ServerResponse.createByErrorMessage(product.getName() + "不可退");
+                        }
+                    }
+                }
+                MendMateriel mendMateriel = saveMendMaterial(mendOrder, house, productId, obj.getString("num"));
                 mendOrder.setTotalAmount(mendOrder.getTotalAmount() + mendMateriel.getTotalPrice());//修改总价
             }
             mendOrder.setModifyDate(new Date());
             mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-            return true;
+            return ServerResponse.createBySuccessMessage("保存成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return ServerResponse.createByErrorMessage("操作失败");
         }
     }
 
-    public MendMateriel saveMendMaterial(MendOrder mendOrder,House house,String productId,String shopCount){
+    public MendMateriel saveMendMaterial(MendOrder mendOrder, House house, String productId, String shopCount) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                 .getRequest();
         request.setAttribute(Constants.CITY_ID, house.getCityId());
         MendMateriel mendMateriel = new MendMateriel();//补退材料明细
         double num = Double.parseDouble(shopCount);
-        Warehouse warehouse=warehouseMapper.getByProductId(productId,house.getId());
+        Warehouse warehouse = warehouseMapper.getByProductId(productId, house.getId());
         Product product = forMasterAPI.getProduct(house.getCityId(), productId);
-        if(warehouse!=null){
+        if (warehouse != null) {
             mendMateriel.setProductSn(warehouse.getProductSn());
             mendMateriel.setProductName(warehouse.getProductName());
             mendMateriel.setPrice(warehouse.getPrice());
@@ -972,7 +973,7 @@ public class MendOrderService {
             mendMateriel.setProductType(warehouse.getProductType());//0：材料；1：服务
             mendMateriel.setCategoryId(warehouse.getCategoryId());
             mendMateriel.setImage(warehouse.getImage());
-        }else{
+        } else {
             mendMateriel.setProductSn(product.getProductSn());
             mendMateriel.setProductName(product.getName());
             mendMateriel.setPrice(product.getPrice());
@@ -984,15 +985,15 @@ public class MendOrderService {
             mendMateriel.setUnitName(unitName);
             mendMateriel.setProductType(forMasterAPI.getGoods(house.getCityId(), product.getGoodsId()).getType());//0：材料；1：服务
         }
-        ServerResponse serverResponse=unitAPI.getUnitById(request,product.getConvertUnit());
+        ServerResponse serverResponse = unitAPI.getUnitById(request, product.getConvertUnit());
         Unit unit;
-        if(serverResponse.getResultObj() instanceof JSONObject){
-            unit= JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
-        }else{
-            unit=(Unit)serverResponse.getResultObj();
+        if (serverResponse.getResultObj() instanceof JSONObject) {
+            unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
+        } else {
+            unit = (Unit) serverResponse.getResultObj();
         }
-        if(unit.getType()==1){
-            num=Math.ceil(num);
+        if (unit.getType() == 1) {
+            num = Math.ceil(num);
         }
         mendMateriel.setMendOrderId(mendOrder.getId());
         mendMateriel.setProductId(productId);
@@ -1000,6 +1001,7 @@ public class MendOrderService {
         mendMaterialMapper.insertSelective(mendMateriel);
         return mendMateriel;
     }
+
     /**
      * 生成审核流程
      */
@@ -1022,63 +1024,63 @@ public class MendOrderService {
         }
     }
 
-    public ServerResponse mendChecking(String houseId,String workerTypeId,Integer type){
+    public ServerResponse mendChecking(String houseId, String workerTypeId, Integer type) {
 
-        if((type == 1 || type == 3)&&!CommonUtil.isEmpty(workerTypeId)){
-            boolean isCheck=false;
+        if ((type == 1 || type == 3) && !CommonUtil.isEmpty(workerTypeId)) {
+            boolean isCheck = false;
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
             if (houseFlowApplyList.size() > 0) {
                 for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
-                    if(houseFlowApply.getApplyType()==2){
-                        isCheck=true;
+                    if (houseFlowApply.getApplyType() == 2) {
+                        isCheck = true;
                         break;
                     }
                 }
-                if(isCheck) {
+                if (isCheck) {
                     return ServerResponse.createByErrorMessage("该工种已发起整体完工申请，不能发起补/退人工申请");
                 }
             }
-            HouseFlow houseFlow=houseFlowMapper.getByWorkerTypeId(houseId,workerTypeId);
-            if(houseFlow.getWorkSteta()==2){
+            HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseId, workerTypeId);
+            if (houseFlow.getWorkSteta() == 2) {
                 return ServerResponse.createByErrorMessage("该工种已整体完工，不能发起补/退人工申请");
             }
         }
         String typeName;
         switch (type) {
             case 0:
-                typeName ="补材料";
+                typeName = "补材料";
                 break;
             case 1:
-                typeName ="补人工";
+                typeName = "补人工";
                 break;
             case 2:
-                typeName ="退材料";
+                typeName = "退材料";
                 break;
             case 3:
-                typeName ="退人工";
+                typeName = "退人工";
                 break;
             case 4:
-                typeName ="业主退材料";
+                typeName = "业主退材料";
                 break;
             default:
-                typeName ="要货";
+                typeName = "要货";
                 break;
         }
         Example example = new Example(MendOrder.class);
-        if(CommonUtil.isEmpty(workerTypeId)){
+        if (CommonUtil.isEmpty(workerTypeId)) {
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, type)
                     .andEqualTo(MendOrder.STATE, 1);
-        }else{
+        } else {
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, type)
                     .andEqualTo(MendOrder.WORKER_TYPE_ID, workerTypeId)
                     .andEqualTo(MendOrder.STATE, 1);
         }
 
         List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
-        if(mendOrderList.size()>0){
-            return ServerResponse.createByErrorMessage("该工种有未处理完的"+typeName);
+        if (mendOrderList.size() > 0) {
+            return ServerResponse.createByErrorMessage("该工种有未处理完的" + typeName);
         }
-        if(!CommonUtil.isEmpty(workerTypeId) && type==0) {
+        if (!CommonUtil.isEmpty(workerTypeId) && type == 0) {
             example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.WORKER_TYPE_ID, workerTypeId)
                     .andCondition(" apply_status in(1,4) ");

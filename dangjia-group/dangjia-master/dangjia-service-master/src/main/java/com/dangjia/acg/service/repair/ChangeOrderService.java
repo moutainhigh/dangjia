@@ -239,6 +239,9 @@ public class ChangeOrderService {
                     houseWorkerOrder.setDeductPrice(new BigDecimal(0));
                 }
                 BigDecimal alsoMoney = new BigDecimal(houseWorkerOrder.getWorkPrice().doubleValue()-houseWorkerOrder.getHaveMoney().doubleValue()+houseWorkerOrder.getRepairPrice().doubleValue()-houseWorkerOrder.getRetentionMoney().doubleValue()-houseWorkerOrder.getDeductPrice().doubleValue());
+                if(alsoMoney.doubleValue()<0){
+                    alsoMoney=new BigDecimal(0);
+                }
                 alsoMoney =alsoMoney.setScale(2,BigDecimal.ROUND_HALF_UP);
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
                 if (houseFlowApplyList.size() > 0) {
