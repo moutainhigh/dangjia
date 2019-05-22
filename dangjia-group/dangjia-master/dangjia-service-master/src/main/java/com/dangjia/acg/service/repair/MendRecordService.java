@@ -325,8 +325,15 @@ public class MendRecordService {
                 }
             } else {
                 Example example = new Example(MendOrder.class);
+                //补退人工按工种区分
+                if (roleType == 3&&(type==1||type==3)) {//工匠
+                    example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, type).andEqualTo(MendOrder.WORKER_TYPE_ID, worker.getWorkerTypeId())
+                            .andNotEqualTo(MendOrder.STATE, 0);
+                } else {
                     example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, type)
                             .andNotEqualTo(MendOrder.STATE, 0);
+                }
+
                 example.orderBy(MendOrder.CREATE_DATE).desc();
                 List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
                 for (MendOrder mendOrder : mendOrderList) {
