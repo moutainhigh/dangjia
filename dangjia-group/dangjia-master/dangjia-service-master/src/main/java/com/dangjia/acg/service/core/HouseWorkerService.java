@@ -541,7 +541,7 @@ public class HouseWorkerService {
                 houseFlow.setPause(1);//0:正常；1暂停；
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
 
-                configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "工匠申请停工",
+                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠申请停工",
                         String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "5");
                 return ServerResponse.createBySuccessMessage("工匠申请停工（" + workerType.getName() + "）操作成功");
 
