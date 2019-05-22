@@ -13,8 +13,10 @@ import com.dangjia.acg.dto.actuary.GoodsDTO;
 import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.dto.repair.BudgetMaterialDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
+import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
+import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -56,6 +58,8 @@ public class FillMaterielService {
     @Autowired
     private GetForBudgetAPI getForBudgetAPI;
 
+    @Autowired
+    private IGoodsMapper goodsMapper;
     /**
      * 管家审核验收申请
      * 材料审查
@@ -161,6 +165,15 @@ public class FillMaterielService {
                 Warehouse warehouse = JSON.parseObject(JSON.toJSONString(warehouseStr), Warehouse.class);
                 if (warehouse == null) continue;
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
+                Product product=iProductMapper.selectByPrimaryKey(warehouse.getProductId());
+                warehouseDTO.setMaket(1);
+                if(product.getMaket()==0||product.getType()==0) {
+                    warehouseDTO.setMaket(0);
+                }
+                Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+                if (goods != null) {
+                    warehouseDTO.setSales(goods.getSales());
+                }
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
                 warehouseDTO.setAskCount(warehouse.getAskCount());
