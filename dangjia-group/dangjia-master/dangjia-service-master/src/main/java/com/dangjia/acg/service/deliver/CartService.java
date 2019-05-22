@@ -229,6 +229,10 @@ public class CartService {
                 warehouseDTO.setImage(address + product.get(Product.IMAGE));
                 if (warehouseList.size() > 0) {
                     Warehouse warehouse = warehouseList.get(0);
+                    Goods goods = forMasterAPI.getGoods(cityId, String.valueOf(product.get(Product.GOODS_ID)));
+                    if (goods != null) {
+                        warehouseDTO.setSales(goods.getSales());
+                    }
                     warehouseDTO.setUnitName(warehouse.getUnitName());
                     warehouseDTO.setImage(address + warehouse.getImage());
                     warehouseDTO.setShopCount(warehouse.getShopCount());
