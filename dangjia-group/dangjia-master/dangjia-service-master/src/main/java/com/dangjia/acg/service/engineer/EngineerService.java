@@ -219,7 +219,6 @@ public class EngineerService {
      * 指定工匠验证
      *
      * @param memberId 用户登录信息
-     * @return
      */
     private ServerResponse setGrabVerification(String memberId, String houseFlowId) {
         try {
@@ -232,6 +231,10 @@ public class EngineerService {
                 return ServerResponse.createByErrorMessage("找不到该工匠");
             }
             if (member.getWorkerType() != null && member.getWorkerType() != 3) {
+                Integer visitState = houseMapper.selectByPrimaryKey(hf.getHouseId()).getVisitState();
+                if (visitState == null || visitState != 1) {
+                    return ServerResponse.createByErrorMessage("该房子不在装修中，无法指派工匠");
+                }
                 HouseFlow supervisorHf = houseFlowMapper.getHouseFlowByHidAndWty(hf.getHouseId(), 3);//查询大管家的
                 if (supervisorHf == null || supervisorHf.getWorkSteta() == 0) {
                     //大管家未开工，不允许指定工匠
@@ -413,7 +416,7 @@ public class EngineerService {
                 if (houseWorker != null && CommonUtil.isEmpty(workerId)) {
                     workerId = houseWorker.getWorkerId();
                 }
-                map.put("houseWorkerId", houseWorker.getId());
+                map.put("houseWorkerId", houseWorker != null ? houseWorker.getId() : "");
             } else if (houseFlow.getWorkType() == 4) {//已支付
                 HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 6);
                 if (houseWorker != null) {
@@ -759,10 +762,6 @@ public class EngineerService {
 
     /**
      * 获取工地交底事项
-     *
-     * @param type
-     * @param pageDTO
-     * @return
      */
     public ServerResponse getSureList(Integer type, Integer state, String search, PageDTO pageDTO) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
@@ -772,7 +771,7 @@ public class EngineerService {
             criteria.andEqualTo(WorkerDisclosure.STATE, state);
         }
         criteria.andEqualTo(WorkerDisclosure.TYPE, type);
-        if (search != null && search != "") {
+        if (CommonUtil.isEmpty(search)) {
             criteria.andLike(WorkerDisclosure.NAME, "%" + search + "%");
         }
         example.orderBy(WorkerDisclosure.MODIFY_DATE).desc();
@@ -801,13 +800,13 @@ public class EngineerService {
     public ServerResponse addSure(String name, String details, String img, Integer state, Integer type) {
         try {
             WorkerDisclosure workerDisclosure = new WorkerDisclosure();
-            if (name != "" && name != null) {
+            if (CommonUtil.isEmpty(name)) {
                 workerDisclosure.setName(name);
             }
-            if (details != "" && details != null) {
+            if (CommonUtil.isEmpty(details)) {
                 workerDisclosure.setDetails(details);
             }
-            if (img != "" && img != null) {
+            if (CommonUtil.isEmpty(img)) {
                 workerDisclosure.setImg(img);
             }
             if (state != null) {
@@ -825,11 +824,11 @@ public class EngineerService {
     public ServerResponse updateSure(String name, String details, String img, Integer state, String id) {
         try {
             WorkerDisclosure workerDisclosure = iWorkerDisclosureMapper.selectByPrimaryKey(id);
-            if (name != null && name != "") {
+            if (CommonUtil.isEmpty(name)) {
                 workerDisclosure.setName(name);
                 workerDisclosure.setModifyDate(new Date());
             }
-            if (details != null && details != "") {
+            if (CommonUtil.isEmpty(details)) {
                 workerDisclosure.setDetails(details);
                 workerDisclosure.setModifyDate(new Date());
             }
@@ -872,7 +871,7 @@ public class EngineerService {
         if (type != null) {
             example.createCriteria().andEqualTo(WorkerEveryday.TYPE, type);
         }
-        if (search != null && search != "") {
+        if (CommonUtil.isEmpty(search)) {
             example.createCriteria().andLike(WorkerEveryday.NAME, "%" + search + "%");
         }
         example.orderBy(WorkerEveryday.TYPE).orderBy(WorkerEveryday.MODIFY_DATE).desc();
@@ -884,7 +883,7 @@ public class EngineerService {
     public ServerResponse updateItems(String name, Integer type, Integer state, String id) {
         try {
             WorkerEveryday workerEveryday = iWorkerEverydayMapper.selectByPrimaryKey(id);
-            if (name != null && name != "") {
+            if (CommonUtil.isEmpty(name)) {
                 workerEveryday.setName(name);
                 workerEveryday.setModifyDate(new Date());
             }
