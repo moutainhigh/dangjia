@@ -54,10 +54,11 @@ public class WebSplitDeliverService {
                 }
             }
             List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(applyState, searchKey, beginDate, endDate);
-            Example example = new Example(SplitDeliver.class);
+
             //根据供应商id统计已处理未处理的数量
             for (WebSplitDeliverItemDTO webSplitDeliverItemDTOList : webSplitDeliverItemDTOLists) {
                 //已处理数量
+                Example example = new Example(SplitDeliver.class);
                 example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID,webSplitDeliverItemDTOList.getSupplierId())
                         .andEqualTo(SplitDeliver.DATA_STATUS,0)
                         .andCondition("apply_state in(1,2)");
