@@ -71,7 +71,8 @@
         SELECT
         b.id AS splitDeliverId,
         a.id AS orderSplitId,
-        a.number,a.apply_status AS applyState,
+        a.number,
+        b.apply_state AS applyState,
         a.create_date AS createDate,
         b.supplier_id AS supplierId,
         a.house_id AS houseId,

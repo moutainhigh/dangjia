@@ -79,6 +79,7 @@ public class EngineerService {
     private IWorkerEverydayMapper iWorkerEverydayMapper;
     @Autowired
     private IWorkerDisclosureMapper iWorkerDisclosureMapper;
+
     /**
      * 已支付换工匠
      */
@@ -179,7 +180,7 @@ public class EngineerService {
     public ServerResponse setLockWorker(String houseFlowId, String workerId) {
         try {
             ServerResponse serverResponse = setGrabVerification(workerId, houseFlowId);
-            if (serverResponse.getResultCode() != EventStatus.SUCCESS.getCode()) {
+            if (!serverResponse.isSuccess()) {
                 return serverResponse;
             }
             Member worker = memberMapper.selectByPrimaryKey(workerId);
@@ -223,8 +224,20 @@ public class EngineerService {
     private ServerResponse setGrabVerification(String memberId, String houseFlowId) {
         try {
             Member member = memberMapper.selectByPrimaryKey(memberId);
-
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+            if (hf == null) {
+                return ServerResponse.createByErrorMessage("找不到该工序");
+            }
+            if (member == null) {
+                return ServerResponse.createByErrorMessage("找不到该工匠");
+            }
+            if (member.getWorkerType() != null && member.getWorkerType() != 3) {
+                HouseFlow supervisorHf = houseFlowMapper.getHouseFlowByHidAndWty(hf.getHouseId(), 3);//查询大管家的
+                if (supervisorHf == null || supervisorHf.getWorkSteta() == 0) {
+                    //大管家未开工，不允许指定工匠
+                    return ServerResponse.createByErrorMessage("大管家未开工，不能指定其他工匠");
+                }
+            }
             if (member.getCheckType() == 0) {
                 //审核中的人不能抢单
                 return ServerResponse.createByErrorMessage("该工匠正在审核中！");
@@ -276,9 +289,7 @@ public class EngineerService {
                 }
 
             }
-
-            // 抢单详情
-            return ServerResponse.createBySuccess("通过验证", "ok");
+            return ServerResponse.createBySuccessMessage("通过验证");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("验证出错！");
@@ -447,8 +458,8 @@ public class EngineerService {
             if (houseWorkerOrderList.size() == 0) {
                 map.put("havaMoney", 0);
             } else {
-                BigDecimal havaMoney=houseWorkerOrderList.get(0).getRepairTotalPrice().subtract(houseWorkerOrderList.get(0).getRepairPrice());
-                havaMoney= houseWorkerOrderList.get(0).getHaveMoney().add(havaMoney);
+                BigDecimal havaMoney = houseWorkerOrderList.get(0).getRepairTotalPrice().subtract(houseWorkerOrderList.get(0).getRepairPrice());
+                havaMoney = houseWorkerOrderList.get(0).getHaveMoney().add(havaMoney);
                 map.put("workPrice", houseWorkerOrderList.get(0).getWorkPrice().add(houseWorkerOrderList.get(0).getRepairTotalPrice()));
                 map.put("havaMoney", havaMoney);
             }
@@ -558,37 +569,37 @@ public class EngineerService {
                     map.put("supName", supervisor.getName());
                     map.put("supMobile", supervisor.getMobile());
                 }
-                HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart1(house.getId(),new Date());//查询今日开工记录
-                map.put("todayStartPause", todayStart==null ?"0":"1"); //0否,1是
+                HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart1(house.getId(), new Date());//查询今日开工记录
+                map.put("todayStartPause", todayStart == null ? "0" : "1"); //0否,1是
 
-                Example example=new Example(HouseFlow.class);
-                example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,house.getId()).andEqualTo(HouseFlow.SUPERVISOR_START,1);
+                Example example = new Example(HouseFlow.class);
+                example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.SUPERVISOR_START, 1);
                 List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
-                map.put("createDate", houseFlows.size()==0 ? "":houseFlows.get(0).getReleaseTime());
+                map.put("createDate", houseFlows.size() == 0 ? "" : houseFlows.get(0).getReleaseTime());
 
-                Example example1=new Example(HouseFlowApply.class);
-                example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID,house.getId()).andEqualTo(HouseFlowApply.MEMBER_CHECK,1).andEqualTo(HouseFlowApply.APPLY_TYPE,3);
+                Example example1 = new Example(HouseFlowApply.class);
+                example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId()).andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.APPLY_TYPE, 3);
                 List<HouseFlowApply> houseFlowss = houseFlowApplyMapper.selectByExample(example1);
-                int suspendDay=0;//停工天数
+                int suspendDay = 0;//停工天数
                 for (HouseFlowApply flowss : houseFlowss) {
-                    suspendDay+=flowss.getSuspendDay();
+                    suspendDay += flowss.getSuspendDay();
                 }
                 Date date;
-                if (house.getVisitState()!=3){
-                    date=new Date();
-                }else {
-                    date=house.getModifyDate();
+                if (house.getVisitState() != 3) {
+                    date = new Date();
+                } else {
+                    date = house.getModifyDate();
                 }
-                int startDay=0;
-                if(houseFlows.size()!=0) {
-                     startDay = DateUtil.daysofTwo(houseFlows.get(0).getReleaseTime(), date);
+                int startDay = 0;
+                if (houseFlows.size() != 0) {
+                    startDay = DateUtil.daysofTwo(houseFlows.get(0).getReleaseTime(), date);
                 }
                 map.put("startDay", 0);
-                if(suspendDay<startDay) {
+                if (suspendDay < startDay) {
                     map.put("startDay", (startDay - suspendDay));
                 }
                 int buildDay = houseMapper.getBuildDay(house.getId());
-                map.put("buildDay",buildDay);
+                map.put("buildDay", buildDay);
                 mapList.add(map);
             }
         }
@@ -599,10 +610,10 @@ public class EngineerService {
     /**
      * 工匠列表
      */
-    public ServerResponse artisanList(String name, String workerTypeId, String type,String checkType, PageDTO pageDTO) {
+    public ServerResponse artisanList(String name, String workerTypeId, String type, String checkType, PageDTO pageDTO) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Member> memberList = memberMapper.artisanList(name, workerTypeId, type,checkType);
+            List<Member> memberList = memberMapper.artisanList(name, workerTypeId, type, checkType);
             PageInfo pageResult = new PageInfo(memberList);
             List<ArtisanDTO> artisanDTOS = new ArrayList<>();
             for (Member member : memberList) {
@@ -748,78 +759,81 @@ public class EngineerService {
 
     /**
      * 获取工地交底事项
+     *
      * @param type
      * @param pageDTO
      * @return
      */
-    public ServerResponse getSureList(Integer type,Integer state,String search,PageDTO pageDTO) {
+    public ServerResponse getSureList(Integer type, Integer state, String search, PageDTO pageDTO) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        Example example=new Example(WorkerDisclosure.class);
-        Example.Criteria criteria= example.createCriteria();
-        if(state!=null){
-            criteria.andEqualTo(WorkerDisclosure.STATE,state);
+        Example example = new Example(WorkerDisclosure.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (state != null) {
+            criteria.andEqualTo(WorkerDisclosure.STATE, state);
         }
-        criteria.andEqualTo(WorkerDisclosure.TYPE,type);
-        if(search!=null && search!=""){
-            criteria.andLike(WorkerDisclosure.NAME,"%"+search+"%");
+        criteria.andEqualTo(WorkerDisclosure.TYPE, type);
+        if (search != null && search != "") {
+            criteria.andLike(WorkerDisclosure.NAME, "%" + search + "%");
         }
         example.orderBy(WorkerDisclosure.MODIFY_DATE).desc();
         List<WorkerDisclosure> workerDisclosures = iWorkerDisclosureMapper.selectByExample(example);
         PageInfo pageResult = new PageInfo(workerDisclosures);
-        if(type==0){
-        List<Object> list=new ArrayList<>();
-        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-        for (WorkerDisclosure d:workerDisclosures){
-            Map<String,Object> map=new HashMap<>();
-            map.put("id",d.getId());
-            map.put("name",d.getName());
-            map.put("desc",d.getDetails());
-            map.put("img",d.getImg());
-            map.put("imgUrl",imageAddress + d.getImg());
-            map.put("status",d.getState());
-            map.put("createDate",d.getCreateDate());
-            map.put("modifyDate",d.getModifyDate());
-            list.add(map);
+        if (type == 0) {
+            List<Object> list = new ArrayList<>();
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            for (WorkerDisclosure d : workerDisclosures) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", d.getId());
+                map.put("name", d.getName());
+                map.put("desc", d.getDetails());
+                map.put("img", d.getImg());
+                map.put("imgUrl", imageAddress + d.getImg());
+                map.put("status", d.getState());
+                map.put("createDate", d.getCreateDate());
+                map.put("modifyDate", d.getModifyDate());
+                list.add(map);
+            }
+            pageResult.setList(list);
         }
-        pageResult.setList(list);}
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
-    public ServerResponse addSure(String name, String details, String img,Integer state,Integer type){
-        try{
-            WorkerDisclosure workerDisclosure=new WorkerDisclosure();
-            if(name!="" && name!=null){
+
+    public ServerResponse addSure(String name, String details, String img, Integer state, Integer type) {
+        try {
+            WorkerDisclosure workerDisclosure = new WorkerDisclosure();
+            if (name != "" && name != null) {
                 workerDisclosure.setName(name);
             }
-            if(details!="" && details!=null){
+            if (details != "" && details != null) {
                 workerDisclosure.setDetails(details);
             }
-            if(img!="" && img!=null){
+            if (img != "" && img != null) {
                 workerDisclosure.setImg(img);
             }
-            if(state!=null){
+            if (state != null) {
                 workerDisclosure.setState(state);
             }
             workerDisclosure.setType(type);
             iWorkerDisclosureMapper.insert(workerDisclosure);
             return ServerResponse.createBySuccessMessage("添加成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("添加失败");
         }
     }
 
-    public ServerResponse updateSure(String name, String details, String img,Integer state,String id){
-        try{
+    public ServerResponse updateSure(String name, String details, String img, Integer state, String id) {
+        try {
             WorkerDisclosure workerDisclosure = iWorkerDisclosureMapper.selectByPrimaryKey(id);
-            if(name!=null && name!="" ){
+            if (name != null && name != "") {
                 workerDisclosure.setName(name);
                 workerDisclosure.setModifyDate(new Date());
             }
-            if(details!=null && details!=""){
+            if (details != null && details != "") {
                 workerDisclosure.setDetails(details);
                 workerDisclosure.setModifyDate(new Date());
             }
-            if(state!=null){
+            if (state != null) {
                 workerDisclosure.setState(state);
                 workerDisclosure.setModifyDate(new Date());
             }
@@ -827,39 +841,39 @@ public class EngineerService {
             workerDisclosure.setModifyDate(new Date());
             iWorkerDisclosureMapper.updateByPrimaryKeySelective(workerDisclosure);
             return ServerResponse.createBySuccessMessage("修改成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("修改失败");
         }
     }
 
-    public ServerResponse addItems(String name, Integer type, Integer state){
-        try{
-            WorkerEveryday workerEveryday =new WorkerEveryday();
+    public ServerResponse addItems(String name, Integer type, Integer state) {
+        try {
+            WorkerEveryday workerEveryday = new WorkerEveryday();
             workerEveryday.setName(name);
             workerEveryday.setType(type);
-            if(state!=null){
+            if (state != null) {
                 workerEveryday.setState(state);
             }
             iWorkerEverydayMapper.insert(workerEveryday);
             return ServerResponse.createBySuccessMessage("添加成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("添加失败");
         }
     }
 
-    public ServerResponse getItemsList(Integer type, Integer state,String search, PageDTO pageDTO){
+    public ServerResponse getItemsList(Integer type, Integer state, String search, PageDTO pageDTO) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        Example example=new Example(WorkerEveryday.class);
-        if(state!=null){
-            example.createCriteria().andEqualTo(WorkerEveryday.STATE,state);
+        Example example = new Example(WorkerEveryday.class);
+        if (state != null) {
+            example.createCriteria().andEqualTo(WorkerEveryday.STATE, state);
         }
-        if(type!=null){
-            example.createCriteria().andEqualTo(WorkerEveryday.TYPE,type);
+        if (type != null) {
+            example.createCriteria().andEqualTo(WorkerEveryday.TYPE, type);
         }
-        if(search!=null && search!=""){
-            example.createCriteria().andLike(WorkerEveryday.NAME,"%"+search+"%");
+        if (search != null && search != "") {
+            example.createCriteria().andLike(WorkerEveryday.NAME, "%" + search + "%");
         }
         example.orderBy(WorkerEveryday.TYPE).orderBy(WorkerEveryday.MODIFY_DATE).desc();
         List<WorkerEveryday> workerEverydays = iWorkerEverydayMapper.selectByExample(example);
@@ -867,24 +881,24 @@ public class EngineerService {
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
-    public ServerResponse updateItems(String name, Integer type, Integer state, String id){
-        try{
+    public ServerResponse updateItems(String name, Integer type, Integer state, String id) {
+        try {
             WorkerEveryday workerEveryday = iWorkerEverydayMapper.selectByPrimaryKey(id);
-            if(name!=null && name!=""){
+            if (name != null && name != "") {
                 workerEveryday.setName(name);
                 workerEveryday.setModifyDate(new Date());
             }
-            if(type!=null ){
+            if (type != null) {
                 workerEveryday.setType(type);
                 workerEveryday.setModifyDate(new Date());
             }
-            if(state!=null){
+            if (state != null) {
                 workerEveryday.setState(state);
                 workerEveryday.setModifyDate(new Date());
             }
             iWorkerEverydayMapper.updateByPrimaryKeySelective(workerEveryday);
             return ServerResponse.createBySuccessMessage("修改成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("修改失败");
         }

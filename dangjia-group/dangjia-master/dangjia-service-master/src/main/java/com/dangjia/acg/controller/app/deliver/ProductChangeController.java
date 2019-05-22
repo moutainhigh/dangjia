@@ -65,16 +65,16 @@ public class ProductChangeController implements ProductChangeAPI {
     }
 
     /**
-     * 设置商品更换数
+     * 确定
      * @param request
-     * @param id
-     * @param destSurCount
+     * @param changeItemList
+     * @param orderId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse setDestSurCount(HttpServletRequest request, String id, Double destSurCount, String orderId) {
-        return productChangeService.setDestSurCount(request, id, destSurCount, orderId);
+    public ServerResponse productSure(HttpServletRequest request, String changeItemList, String orderId) {
+        return productChangeService.productSure(request, changeItemList, orderId);
     }
 
 
