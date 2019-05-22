@@ -58,11 +58,15 @@ public class WebSplitDeliverService {
             //根据供应商id统计已处理未处理的数量
             for (WebSplitDeliverItemDTO webSplitDeliverItemDTOList : webSplitDeliverItemDTOLists) {
                 //已处理数量
-                example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID,webSplitDeliverItemDTOList.getSupplierId()).andCondition("apply_state in(1,2,3)");
+                example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID,webSplitDeliverItemDTOList.getSupplierId())
+                        .andEqualTo(SplitDeliver.DATA_STATUS,0)
+                        .andCondition("apply_state in(1,2)");
                 webSplitDeliverItemDTOList.setSent(iSplitDeliverMapper.selectCountByExample(example));
                 //待处理数量
                 example = new Example(SplitDeliver.class);
-                example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID,webSplitDeliverItemDTOList.getSupplierId()).andEqualTo(SplitDeliver.APPLY_STATE,0);
+                example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID,webSplitDeliverItemDTOList.getSupplierId())
+                        .andEqualTo(SplitDeliver.APPLY_STATE,0)
+                        .andEqualTo(SplitDeliver.DATA_STATUS,0);
                 webSplitDeliverItemDTOList.setWait(iSplitDeliverMapper.selectCountByExample(example));
             }
             PageInfo pageResult = new PageInfo(webSplitDeliverItemDTOLists);

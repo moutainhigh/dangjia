@@ -23,6 +23,7 @@ import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
+import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.core.*;
@@ -33,6 +34,7 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.other.WorkDeposit;
+import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.house.HouseService;
@@ -100,6 +102,8 @@ public class HouseWorkerService {
 
     @Autowired
     private HouseService houseService;
+    @Autowired
+    private IChangeOrderMapper changeOrderMapper;
 
     @Autowired
     private MessageAPI messageAPI;
@@ -434,11 +438,11 @@ public class HouseWorkerService {
                     || supervisorHF.getCheckMoney().compareTo(new BigDecimal(0)) == 0) {
                 this.calculateSup(supervisorHF);
             }
-            /*提交申请进行控制*/
-//            List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
-//            if (changeOrderList.size() > 0) {
-//                return ServerResponse.createByErrorMessage("该工种（" + workerType.getName() + "）有未处理变更单,通知管家处理");
-//            }
+            /*提交整体完工申请检测是否存在待处理的变跟单进行控制*/
+            List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
+            if (applyType == 2&&changeOrderList.size() > 0) {
+                return ServerResponse.createByErrorMessage("该工种（" + workerType.getName() + "）有未处理变更单,通知管家处理");
+            }
             //包括所有申请 和 巡查
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(houseFlowId, applyType, workerId, new Date());
             if (applyType != 6 && applyType != 7 && houseFlowApplyList.size() > 0) {
@@ -548,7 +552,7 @@ public class HouseWorkerService {
                 houseFlow.setPause(1);//0:正常；1暂停；
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
 
-                configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "工匠申请停工",
+                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠申请停工",
                         String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "5");
                 return ServerResponse.createBySuccessMessage("工匠申请停工（" + workerType.getName() + "）操作成功");
 

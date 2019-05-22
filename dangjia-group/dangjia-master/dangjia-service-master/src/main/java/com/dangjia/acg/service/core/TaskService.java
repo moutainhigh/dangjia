@@ -197,17 +197,19 @@ public class TaskService {
         List<MendDeliver> mendDeliverList = mendDeliverMapper.selectByExample(example);
 
         for (MendDeliver mendDeliver : mendDeliverList) {
+            String productType="0";
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendDeliver.getMendOrderId());
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
             task.setName("退材料待审核处理");
             if (workerType.getType() == 3) {
+                productType="1";
                 task.setName("退服务待审核处理");
             }
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/buchailiao.png");
             String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                    String.format(DjConstants.YZPageAddress.TUIPRODUCTEXAMINE, userToken, house.getCityId(), task.getName()) + "&mendDeliverId=" + mendDeliver.getId()+ "&houseId=" + mendOrder.getHouseId();
+                    String.format(DjConstants.YZPageAddress.TUIPRODUCTEXAMINE, userToken, house.getCityId(), task.getName()) + "&mendDeliverId=" + mendDeliver.getId()+ "&productType=" + productType + "&houseId=" + mendOrder.getHouseId();
             task.setHtmlUrl(url);
             task.setType(4);
             task.setTaskId(mendDeliver.getId());
@@ -246,16 +248,18 @@ public class TaskService {
         List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
          String DESIGNLIST = "refundItemDetail?userToken=%s&cityId=%s&title=%s";//设计图
         for (MendOrder mendOrder : mendOrderList) {
+            String productType="0";
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
             task.setName(workerType.getName() + "补材料审核");
             if (workerType.getType() == 3) {
                 task.setName(workerType.getName() + "补服务审核");
+                productType="1";
             }
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/buchailiao.png");
             String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                    String.format(DESIGNLIST,userToken, house.getCityId(), task.getName()) + "&type=0&mendOrderId=" + mendOrder.getId() + "&roleType=1&state=" + mendOrder.getState();
+                    String.format(DESIGNLIST,userToken, house.getCityId(), task.getName()) + "&type=0&mendOrderId=" + mendOrder.getId() + "&productType=" + productType + "&roleType=1&state=" + mendOrder.getState();
             task.setHtmlUrl(url);
             task.setType(3);
             task.setTaskId(mendOrder.getId());

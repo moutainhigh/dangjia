@@ -127,7 +127,7 @@ public class ChangeOrderService {
             if (changeOrder.getState() == 2){
                 List<MendOrder> mendOrderList = mendOrderMapper.getByChangeOrderId(changeOrder.getId());
                 if (mendOrderList.size() == 0){
-                    changeOrder.setState(3);
+                    changeOrder.setState(0);
                     changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
                 }
             }
@@ -177,10 +177,23 @@ public class ChangeOrderService {
             return ServerResponse.createByErrorMessage("该工种有未处理变更单,通知管家处理");
         }
 
-//        List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
-//        if (houseFlowApplyList.size() > 0) {
-//            return ServerResponse.createByErrorMessage("该工种有未处理的阶段/整体完工申请");
-//        }
+        boolean isCheck=false;
+        List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
+        if (houseFlowApplyList.size() > 0) {
+            for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
+                if(houseFlowApply.getApplyType()==2){
+                    isCheck=true;
+                    break;
+                }
+            }
+            if(isCheck) {
+                return ServerResponse.createByErrorMessage("该工种已发起整体完工申请，不能发起补/退人工申请");
+            }
+        }
+        HouseFlow houseFlow=houseFlowMapper.getByWorkerTypeId(houseId,workerTypeId);
+        if(houseFlow.getWorkSteta()==2){
+            return ServerResponse.createByErrorMessage("该工种已整体完工，不能发起补/退人工申请");
+        }
 
         changeOrder.setMemberId(member.getId());
         changeOrder.setType(type);
@@ -208,14 +221,13 @@ public class ChangeOrderService {
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);
         HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, workerTypeId);
         if (houseWorkerOrder != null) {
-            BigDecimal remain = houseWorkerOrder.getWorkPrice().subtract(houseWorkerOrder.getHaveMoney());//剩下的
-            remain =remain.setScale(2,BigDecimal.ROUND_HALF_UP);
             if (type == 1) {
                 List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseId,workerTypeId);
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
                 if (changeOrderList.size() > 0&&houseFlowApplyList.size() > 0) {
                     HouseFlowApply houseFlowApply=houseFlowApplyList.get(0);
-                    remain=houseFlowApply.getOtherMoney();//剩下的钱
+                    BigDecimal remain=houseFlowApply.getOtherMoney();//剩下的钱
+                    remain =remain.setScale(2,BigDecimal.ROUND_HALF_UP);
                     if(remain.doubleValue()<0){//负数冲正
                         remain=new BigDecimal(0);
                     }
@@ -223,13 +235,18 @@ public class ChangeOrderService {
                 }
             }
             if (type == 2) {
+                if(houseWorkerOrder.getDeductPrice()==null){
+                    houseWorkerOrder.setDeductPrice(new BigDecimal(0));
+                }
+                BigDecimal alsoMoney = new BigDecimal(houseWorkerOrder.getWorkPrice().doubleValue()-houseWorkerOrder.getHaveMoney().doubleValue()+houseWorkerOrder.getRepairPrice().doubleValue()-houseWorkerOrder.getRetentionMoney().doubleValue()-houseWorkerOrder.getDeductPrice().doubleValue());
+                alsoMoney =alsoMoney.setScale(2,BigDecimal.ROUND_HALF_UP);
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
                 if (houseFlowApplyList.size() > 0) {
-                    return ServerResponse.createByErrorMessage("当前" + workerType.getName() + "阶段完工正在申请中，可退人工金额上限为"+remain+"元，确定申请退人工吗？");
+                    return ServerResponse.createByErrorMessage("当前" + workerType.getName() + "阶段完工正在申请中，可退人工金额上限为"+alsoMoney+"元，确定申请退人工吗？");
                 }
                 HouseFlow houseFlow=houseFlowMapper.getByWorkerTypeId(houseId, workerTypeId);
                 if (houseFlow.getWorkSteta()==1) {
-                    return ServerResponse.createByErrorMessage("当前" + workerType.getName() + "已阶段完工，可退人工金额上限为"+remain+"元，确定申请退人工吗？");
+                    return ServerResponse.createByErrorMessage("当前" + workerType.getName() + "已阶段完工，可退人工金额上限为"+alsoMoney+"元，确定申请退人工吗？");
 
                 }
             }

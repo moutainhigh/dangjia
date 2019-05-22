@@ -49,7 +49,7 @@ public class Clue extends BaseEntity {
     @Column(name = "stage")
     @Desc(value = "阶段 0:新线索 1：继续跟进 2:已放弃 3:黑名单")
     @ApiModelProperty("阶段 0:新线索 1：继续跟进 2:已放弃 3:黑名单")
-    private int stage;
+    private Integer stage;
 
     @Column(name = "cus_service")
     @Desc(value = "客服ID")

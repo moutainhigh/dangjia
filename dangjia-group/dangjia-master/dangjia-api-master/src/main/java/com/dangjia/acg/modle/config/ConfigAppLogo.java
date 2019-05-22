@@ -32,7 +32,7 @@ public class ConfigAppLogo extends BaseEntity {
     @Column(name = "is_switch")
     @Desc(value = "开关（0:开启，1:关闭）")
     @ApiModelProperty("开关（0:开启，1:关闭）")
-    private boolean isSwitch;
+    private Boolean isSwitch;
 
     @Column(name = "data")
     @Desc(value = "动作内容（暂时保留，冗余字段）")
