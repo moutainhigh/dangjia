@@ -191,7 +191,7 @@ public class ChangeOrderService {
             }
         }
         HouseFlow houseFlow=houseFlowMapper.getByWorkerTypeId(houseId,workerTypeId);
-        if(houseFlow.getWorkSteta()==2){
+        if(houseFlow!=null&&houseFlow.getWorkSteta()==2){
             return ServerResponse.createByErrorMessage("该工种已整体完工，不能发起补/退人工申请");
         }
 
