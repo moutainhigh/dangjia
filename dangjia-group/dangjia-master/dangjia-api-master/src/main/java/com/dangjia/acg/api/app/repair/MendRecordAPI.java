@@ -29,13 +29,16 @@ public interface MendRecordAPI {
 
     @PostMapping(value = "app/repair/mendRecord/recordList")
     @ApiOperation(value = "记录列表", notes = "记录列表")
-    ServerResponse recordList(@RequestParam("houseId") String houseId,
+    ServerResponse recordList(@RequestParam("userToken") String userToken,
+                              @RequestParam("roleType")int roleType,
+                              @RequestParam("houseId") String houseId,
                               @RequestParam("type") Integer type);
 
     @PostMapping(value = "app/repair/mendRecord/mendList")
     @ApiOperation(value = "要补退记录", notes = "要补退记录")
-    ServerResponse mendList(@RequestParam("userToken") String userToken,@RequestParam("houseId") String houseId
-            ,@RequestParam("roleType") int roleType);
+    ServerResponse mendList(@RequestParam("userToken") String userToken,
+                            @RequestParam("houseId") String houseId,
+                            @RequestParam("roleType") int roleType);
 
     @PostMapping(value = "app/repair/mendRecord/backOrder")
     @ApiOperation(value = "撤回补货要货订单", notes = "撤回补货要货订单")

@@ -411,9 +411,9 @@ public class ActuaryOperationService {
             Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());//当前 商品
             goodsDTO.setProductId(product.getId());
             goodsDTO.setGoodsId(goods.getId());
-            goodsDTO.setMaket(0);
-            if(product.getMaket()==1||product.getType()==1) {
-                goodsDTO.setMaket(1);
+            goodsDTO.setMaket(1);
+            if(product.getMaket()==0||product.getType()==0) {
+                goodsDTO.setMaket(0);
             }
             goodsDTO.setImage(getImage(product.getImage()));//图一张
             String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();

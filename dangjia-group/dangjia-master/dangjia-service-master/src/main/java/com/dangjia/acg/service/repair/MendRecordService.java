@@ -300,13 +300,23 @@ public class MendRecordService {
      * 记录列表
      * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货
      */
-    public ServerResponse recordList(String houseId, Integer type) {
+    public ServerResponse recordList(String userToken,int roleType,String houseId, Integer type) {
         try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             List<Map<String, Object>> returnMap = new ArrayList<>();
 
             if (type == 5) {
                 Example example = new Example(OrderSplit.class);
-                example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andNotEqualTo(OrderSplit.APPLY_STATUS, 0);
+                if (roleType == 3) {//工匠
+                    example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId()).andNotEqualTo(OrderSplit.APPLY_STATUS, 0);
+                } else {
+                    example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andNotEqualTo(OrderSplit.APPLY_STATUS, 0);
+                }
+
                 example.orderBy(OrderSplit.CREATE_DATE).desc();
                 List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
                 for (OrderSplit orderSplit : orderSplitList) {
@@ -320,8 +330,14 @@ public class MendRecordService {
                 }
             } else {
                 Example example = new Example(MendOrder.class);
-                example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, type)
-                        .andNotEqualTo(MendOrder.STATE, 0);
+
+                if (roleType == 3) {//工匠
+                    example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, type).andEqualTo(MendOrder.WORKER_TYPE_ID, worker.getWorkerTypeId())
+                            .andNotEqualTo(MendOrder.STATE, 0);
+                } else {
+                    example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, type)
+                            .andNotEqualTo(MendOrder.STATE, 0);
+                }
                 example.orderBy(MendOrder.CREATE_DATE).desc();
                 List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
                 for (MendOrder mendOrder : mendOrderList) {
@@ -388,8 +404,14 @@ public class MendRecordService {
                 returnMap.add(map);
             }
             Example example = new Example(MendOrder.class);
-            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 2)
-                    .andNotEqualTo(MendOrder.STATE, 0);
+            if (roleType == 3) {//工匠
+                example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 2)
+                        .andEqualTo(MendOrder.WORKER_TYPE_ID,  worker.getWorkerTypeId())
+                        .andNotEqualTo(MendOrder.STATE, 0);
+            } else {
+                example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 2)
+                        .andNotEqualTo(MendOrder.STATE, 0);
+            }
             mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() > 0) {
                 Map<String, Object> map = new HashMap<>();
@@ -417,8 +439,14 @@ public class MendRecordService {
             }
 
             example = new Example(MendOrder.class);
-            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 4)
-                    .andNotEqualTo(MendOrder.STATE, 0);
+            if (roleType == 3) {//工匠
+                example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 4)
+                        .andEqualTo(MendOrder.WORKER_TYPE_ID,  worker.getWorkerTypeId())
+                        .andNotEqualTo(MendOrder.STATE, 0);
+            } else {
+                example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 4)
+                        .andNotEqualTo(MendOrder.STATE, 0);
+            }
             mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() > 0) {
                 Map<String, Object> map = new HashMap<>();
@@ -432,7 +460,15 @@ public class MendRecordService {
 
             /*要货单记录*/
             example = new Example(OrderSplit.class);
-            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andGreaterThan(OrderSplit.APPLY_STATUS, 0);
+            if (roleType == 3) {//工匠
+                example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId)
+                        .andEqualTo(OrderSplit.WORKER_TYPE_ID,  worker.getWorkerTypeId())
+                        .andGreaterThan(OrderSplit.APPLY_STATUS, 0);
+            } else {
+                example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId)
+                        .andGreaterThan(OrderSplit.APPLY_STATUS, 0);
+
+            }
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             if (orderSplitList.size() > 0) {
                 Map<String, Object> map = new HashMap<>();
