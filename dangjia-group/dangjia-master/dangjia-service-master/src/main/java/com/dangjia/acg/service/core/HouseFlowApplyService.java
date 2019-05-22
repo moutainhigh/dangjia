@@ -666,18 +666,25 @@ public class HouseFlowApplyService {
             }else{
                 star = evaluate.getStar();//几星？
             }
+            //评分扣钱
+            BigDecimal deductPrice = new BigDecimal(0);
             //管家钱
             BigDecimal applyMoney;
             if(star == 5){
                 applyMoney = hfa.getApplyMoney();
             }else if(star == 3 || star == 4){
                 applyMoney = hfa.getApplyMoney().multiply(new BigDecimal(0.9));
+                deductPrice= hfa.getApplyMoney().subtract(applyMoney);
             }else{
                 applyMoney = hfa.getApplyMoney().multiply(new BigDecimal(0.8));
+                deductPrice= hfa.getApplyMoney().subtract(applyMoney);
             }
 
             //计算大管家整体完工金额
-            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());  //处理工人评分扣钱
+            if(hwo.getDeductPrice() == null){
+                hwo.setDeductPrice(new BigDecimal(0.0));
+            }
             //处理worker表中大管家
             Member worker = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
             BigDecimal surplusMoney = worker.getSurplusMoney().add(applyMoney);
@@ -725,6 +732,7 @@ public class HouseFlowApplyService {
             if(applyMoney.doubleValue()>0){//大于0
                 worker.setSurplusMoney(surplusMoney);
             }
+            hwo.setDeductPrice(hwo.getDeductPrice().add(deductPrice));
             hwo.setHaveMoney(hwo.getHaveMoney().add(applyMoney));//已经得到的钱
             houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
 
