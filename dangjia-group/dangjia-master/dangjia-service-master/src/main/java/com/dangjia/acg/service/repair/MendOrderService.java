@@ -13,6 +13,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
@@ -25,6 +26,7 @@ import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplit;
@@ -60,6 +62,8 @@ import java.util.List;
 public class MendOrderService {
 
 
+    @Autowired
+    private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
     private IWarehouseMapper warehouseMapper;
     @Autowired
@@ -1020,33 +1024,21 @@ public class MendOrderService {
 
     public ServerResponse mendChecking(String houseId,String workerTypeId,Integer type){
 
-//        if((type == 3)&&!CommonUtil.isEmpty(workerTypeId)){
-//            String msg;
-//            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
-//            if (houseFlowApplyList.size() > 0) {
-//                switch (houseFlowApplyList.get(0).getApplyType()) {
-//                    case 0:
-//                        msg ="每日完工申请";
-//                        break;
-//                    case 1:
-//                        msg ="阶段完工申请";
-//                        break;
-//                    case 2:
-//                        msg ="整体完工申请";
-//                        break;
-//                    case 3:
-//                        msg ="停工申请";
-//                        break;
-//                    case 4:
-//                        msg ="每日开工申请";
-//                        break;
-//                    default:
-//                        msg ="巡查申请";
-//                        break;
-//                }
-//                return ServerResponse.createByErrorMessage("该工种有未处理的"+msg);
-//            }
-//        }
+        if((type == 1 || type == 3)&&!CommonUtil.isEmpty(workerTypeId)){
+            boolean isCheck=false;
+            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
+            if (houseFlowApplyList.size() > 0) {
+                for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
+                    if(houseFlowApply.getApplyType()==2){
+                        isCheck=true;
+                        break;
+                    }
+                }
+                if(isCheck) {
+                    return ServerResponse.createByErrorMessage("该工种已发起整体完工申请，不能发起补/退人工");
+                }
+            }
+        }
         String typeName;
         switch (type) {
             case 0:
