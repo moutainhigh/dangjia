@@ -31,7 +31,7 @@ public class ConfigAdvert extends BaseEntity {
     @Column(name = "is_show")
     @Desc(value = "展示方式 0: 展示 1：不展示 2: 定时展示")
     @ApiModelProperty("展示方式 0: 展示 1：不展示 2: 定时展示")
-    private int isShow;
+    private Integer isShow;
 
     @Column(name = "name")
     @Desc(value = "广告名称")
