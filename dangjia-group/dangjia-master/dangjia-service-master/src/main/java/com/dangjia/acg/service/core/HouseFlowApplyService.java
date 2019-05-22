@@ -668,7 +668,7 @@ public class HouseFlowApplyService {
             }
             //管家钱
             BigDecimal applyMoney;
-            if(star == 0 || star == 5){
+            if(star == 5){
                 applyMoney = hfa.getApplyMoney();
             }else if(star == 3 || star == 4){
                 applyMoney = hfa.getApplyMoney().multiply(new BigDecimal(0.9));

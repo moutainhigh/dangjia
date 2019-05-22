@@ -381,7 +381,11 @@ public class EvaluateService {
             evaluate.setMemberId(house.getMemberId());
             evaluate.setHouseId(houseFlowApply.getHouseId());
             evaluate.setButlerId("");
-            evaluate.setStar(star);//管家
+            if(star == 0){
+                evaluate.setStar(1);//0星为5星
+            }else{
+                evaluate.setStar(star);
+            }
             evaluate.setHouseFlowApplyId(houseFlowApplyId);
             evaluate.setHouseFlowId(houseFlowApply.getHouseFlowId());
             evaluate.setWorkerId(worker.getId());
@@ -438,7 +442,11 @@ public class EvaluateService {
                 evaluate.setMemberId(house.getMemberId());
                 evaluate.setHouseId(houseFlowApply.getHouseId());
                 evaluate.setButlerId(supervisor.getId());
-                evaluate.setStar(wStar);//工人
+                if(wStar == 0){
+                    evaluate.setStar(1);//0星为5星
+                }else{
+                    evaluate.setStar(wStar);//工人
+                }
                 evaluate.setHouseFlowApplyId(houseFlowApplyId);
                 evaluate.setHouseFlowId(houseFlowApply.getHouseFlowId());
                 evaluate.setWorkerId(worker.getId());
@@ -460,7 +468,11 @@ public class EvaluateService {
                 evaluate.setContent(sContent);
                 evaluate.setMemberId(house.getMemberId());
                 evaluate.setHouseId(houseFlowApply.getHouseId());
-                evaluate.setStar(sStar);//管家
+                if(wStar == 0){
+                    evaluate.setStar(1);//0星为5星
+                }else{
+                    evaluate.setStar(sStar);//管家
+                }
                 evaluate.setHouseFlowApplyId(houseFlowApplyId);
                 evaluate.setHouseFlowId(houseFlowApply.getHouseFlowId());
                 evaluate.setWorkerId(supervisor.getId());
