@@ -127,7 +127,7 @@ public class ChangeOrderService {
             if (changeOrder.getState() == 2){
                 List<MendOrder> mendOrderList = mendOrderMapper.getByChangeOrderId(changeOrder.getId());
                 if (mendOrderList.size() == 0){
-                    changeOrder.setState(3);
+                    changeOrder.setState(0);
                     changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
                 }
             }
