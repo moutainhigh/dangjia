@@ -725,7 +725,7 @@ public class HouseFlowApplyService {
             if(applyMoney.doubleValue()>0){//大于0
                 worker.setSurplusMoney(surplusMoney);
             }
-            hwo.setHaveMoney(hwo.getWorkPrice());//已经得到的钱
+            hwo.setHaveMoney(hwo.getHaveMoney().add(applyMoney));//已经得到的钱
             houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
 
             //成交量加1
