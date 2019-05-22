@@ -25,11 +25,10 @@ public class WarehouseDTO {
     private String image;
     private Double repairCount;
     private String productId;
-
     private int askTime; //要货次数
     private int repTime; //补次数
     private int backTime; //退次数
-
     private String brandSeriesName;//品牌系列名
     private int changeType; //商品是否更换
+    private Integer sales;//退货性质0：可退；1不可退
 }
