@@ -70,9 +70,6 @@ public class WebSplitDeliverService {
                 webSplitDeliverItemDTOList.setWait(iSplitDeliverMapper.selectCountByExample(example));
             }
             PageInfo pageResult = new PageInfo(webSplitDeliverItemDTOLists);
-            for (WebSplitDeliverItemDTO webSplitDeliverItemDTOList : webSplitDeliverItemDTOLists) {
-                System.out.println(webSplitDeliverItemDTOList);
-            }
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
