@@ -592,12 +592,12 @@ public class HouseService {
 
         try {
             //开始建群
-            Group group = new Group();
-            group.setHouseId(house.getId());
-            group.setUserId(house.getMemberId());
+//            Group group = new Group();
+//            group.setHouseId(house.getId());
+//            group.setUserId(house.getMemberId());
 //            String members = "";//创建群前，配置的成员userid组，多个以逗号分隔，不包含业主的userid组
 //            String prefixs = "";//创建群前，配置的成员userid组的前缀，多个以逗号分隔，不包含业主的前缀组
-            groupInfoService.addGroup(request, group, members, prefixs);
+//            groupInfoService.addGroup(request, group, members, prefixs);
 
             //通知业主确认开工
             configMessageService.addConfigMessage(request, "zx", house.getMemberId(), "0", "装修提醒",

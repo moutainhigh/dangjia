@@ -1,19 +1,24 @@
 package com.dangjia.acg.service.clue;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.common.util.excel.ImportExcel;
+import com.dangjia.acg.dto.other.ClueDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.clue.ClueTalkMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
+import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.user.UserRoleMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.clue.ClueTalk;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberLabel;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
+import com.dangjia.acg.modle.user.UserRoleKey;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -40,6 +47,10 @@ public class ClueService {
     private IMemberMapper iMemberMapper;
     @Autowired
     private ICustomerMapper iCustomerMapper;
+    @Autowired
+    private IMemberLabelMapper iMemberLabelMapper;
+    @Autowired
+    private UserRoleMapper userRoleMapper;
 
     /**
      * 获取所有线索
@@ -64,7 +75,7 @@ public class ClueService {
     /**
      * 查询线索list
      */
-    public ServerResponse getClueList(Integer stage, String values,String memberId,String beginDate,String endDate, Integer pageNum, Integer pageSize) {
+    public ServerResponse getClueList(Integer stage, String values,String memberId,String childId,String beginDate,String endDate, Integer pageNum, Integer pageSize) {
         try {
             Example example = new Example(Clue.class);
             Example.Criteria criteria = example.createCriteria();
@@ -74,7 +85,6 @@ public class ClueService {
             } else {
                 criteria.andCondition(" stage IN (0,1) ");
             }
-            //criteria.andCondition(" stage IN (0,1) ");
             if (!CommonUtil.isEmpty(values)) {
                 criteria.andCondition(" CONCAT(owername,phone,wechat,address) like CONCAT('%','" + values + "','%')");
             }
@@ -88,10 +98,34 @@ public class ClueService {
             if(memberId!=null && memberId!=""){
                 criteria.andEqualTo(Clue.CUS_SERVICE,memberId);
             }
+            if(childId!=null && childId!=""){
+                criteria.andEqualTo(Clue.LABEL_ID,childId);
+            }
             example.orderBy(Clue.MODIFY_DATE).desc();
             PageHelper.startPage(pageNum, pageSize);
             List<Clue> clues = clueMapper.selectByExample(example);
+            List<ClueDTO> clueDTOList=new ArrayList<>();
+            for (Clue c:clues){
+                ClueDTO clueDTO=new ClueDTO();
+                BeanUtils.beanToBean(c,clueDTO);
+                if(c.getLabelId()!=null){
+                    String[] split = c.getLabelId().split(",");
+                    StringBuffer sb=new StringBuffer();
+                    String ids[][]=new String[split.length][2];
+                    for (int i=0;i<split.length;i++) {
+                        MemberLabel memberLabel = iMemberLabelMapper.selectByPrimaryKey(split[i]);
+                        sb.append(memberLabel.getParentName() + "-" + memberLabel.getName()+",");
+                        ids[i][0]=memberLabel.getParentId();
+                        ids[i][1]=memberLabel.getId();
+                    }
+                    sb.delete(sb.lastIndexOf(","),sb.length());
+                    clueDTO.setLabelName(sb.toString());
+                    clueDTO.setLabelIds(ids);
+                }
+                clueDTOList.add(clueDTO);
+            }
             PageInfo pageResult = new PageInfo(clues);
+            pageResult.setList(clueDTOList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
@@ -125,11 +159,28 @@ public class ClueService {
 
     }
 
-    public ServerResponse updateCus(String cusService, String id) {
+    public ServerResponse updateCus(String cusService,String phone,String chat, String userId,String childId,String id) {
         try {
-            Clue clue = new Clue();
-            clue.setId(id);
-            clue.setCusService(cusService);
+            Clue clue = clueMapper.selectByPrimaryKey(id);
+            if(cusService!=null && cusService!=""){
+                Example example=new Example(UserRoleKey.class);
+                example.createCriteria().andEqualTo(UserRoleKey.USER_ID,userId);
+                List<UserRoleKey> userRoleKeys = userRoleMapper.selectByExample(example);
+                if("668854901553829215229".equals(userRoleKeys.get(0).getRoleId())){
+                    clue.setCusService(cusService);
+                }else {
+                    return ServerResponse.createByErrorMessage("您暂无权限变更");
+                }
+            }
+            if(phone!=null && phone!="" && Validator.isMobileNo(phone)){
+                clue.setPhone(phone);
+            }
+            if(chat!=null && chat!=""){
+                clue.setWechat(chat);
+            }
+            if(childId!=null && childId!=""){
+                clue.setLabelId(childId);
+            }
             clueMapper.updateByPrimaryKeySelective(clue);
             return ServerResponse.createBySuccessMessage("更新成功");
         } catch (Exception e) {
@@ -177,15 +228,12 @@ public class ClueService {
      */
     public ServerResponse giveUp(String id, int type) {
         try {
-            Clue clue = new Clue();
-            clue.setId(id);
+            Clue clue =clueMapper.selectByPrimaryKey(id);
             if (type == 2) {
                 clue.setStage(2);
                 clue.setCusService("");
-            } else if (type == 3) {
-                clue.setStage(3);
             } else {
-                clue.setStage(1);
+                clue.setStage(3);
             }
             clueMapper.updateByPrimaryKeySelective(clue);
             return ServerResponse.createBySuccessMessage("操作成功");
