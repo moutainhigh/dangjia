@@ -51,10 +51,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * author: Ronalcheng
@@ -136,29 +133,26 @@ public class EvaluateService {
         }
         example.orderBy(Evaluate.MODIFY_DATE).desc();
         List<Evaluate> list = evaluateMapper.selectByExample(example);
-        List<Map> listMap = (List<Map>) BeanUtils.listToMap(list);
-        for (int i = 0; i < listMap.size(); i++) {
-            Map map=listMap.get(i);
-            String memberId = (String)map.get(Evaluate.MEMBER_ID);
-            if(!CommonUtil.isEmpty(map.get(Evaluate.BUTLER_ID))){
-                memberId = (String)map.get(Evaluate.BUTLER_ID);
+        List<Map> listMap =new ArrayList<>();
+        for (Evaluate evaluate1 : list) {
+            Map map= BeanUtils.beanToMap(evaluate1);
+            String memberId;
+            if(evaluate1.getState()==3){
+                memberId=evaluate1.getButlerId();
+            }else{
+                memberId=evaluate1.getMemberId();
             }
             Member member=memberMapper.selectByPrimaryKey(memberId);
             member.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             map.put(Member.HEAD,member.getHead());
             map.put("memberName",member.getNickName());
-
-            if(!CommonUtil.isEmpty(map.get(Evaluate.STATE))){
-                Integer state=(Integer)map.get(Evaluate.STATE);
-                if(state==1){
-                    map.put("memberName","业主 "+member.getNickName());
-                }
-                if(state==3){
-                    map.put("memberName","大管家 "+member.getNickName());
-                }
+            if(evaluate1.getState()==1){
+                map.put("memberName","业主 "+member.getNickName());
             }
-            listMap.remove(i);
-            listMap.add(i,map);
+            if(evaluate1.getState()==3){
+                map.put("memberName","大管家 "+member.getNickName());
+            }
+            listMap.add(map);
         }
         return ServerResponse.createBySuccess("ok",listMap);
     }
