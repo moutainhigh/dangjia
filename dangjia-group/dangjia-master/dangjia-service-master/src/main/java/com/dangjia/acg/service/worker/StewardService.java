@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -14,7 +13,10 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.CourseDTO;
 import com.dangjia.acg.dto.worker.WorkerDetailDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
-import com.dangjia.acg.mapper.core.*;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
+import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
+import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.matter.IWorkerDisclosureHouseFlowMapper;
@@ -28,10 +30,9 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
 import com.dangjia.acg.modle.matter.WorkerDisclosureHouseFlow;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.config.ConfigMessageService;
-import com.dangjia.acg.service.core.HouseWorkerSupService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -83,15 +84,18 @@ public class StewardService {
     @Autowired
     private ConfigMessageService configMessageService;
     @Autowired
-    private HouseWorkerSupService houseWorkerSupService;
+    private CraftsmanConstructionService constructionService;
 
     /**
      * 管家巡查扫验证二维码
      */
     public ServerResponse scanCode(String userToken, String code, String latitude, String longitude) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member steward = accessToken.getMember();//管家
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member steward = (Member) object;
             String[] str = code.split("=");
             String houseFlowId = str[1];
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);//工匠houseFlow
@@ -253,6 +257,12 @@ public class StewardService {
                 workerDisclosure.setDetails(content);
                 wdList.add(workerDisclosure);
             }
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            for (WorkerDisclosure w:wdList){
+                if(w.getImg()!=null) {
+                    w.setImg(imageAddress + w.getImg());
+                }
+            }
             return ServerResponse.createBySuccess("查询成功", wdList);
         } catch (Exception e) {
             e.printStackTrace();
@@ -285,8 +295,11 @@ public class StewardService {
      */
     public ServerResponse tellCode(String userToken, String code) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = accessToken.getMember();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             String[] str = code.split("=");
             String houseFlowId = str[1];
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);//查询houseFlow
@@ -347,7 +360,7 @@ public class StewardService {
                     String.format(DjConstants.GJPageAddress.JFREGULATIONS, userToken, houseFlow.getCityId(), "选择奖罚条例"));//奖罚页面
             if (houseFlow.getWorkType() == 4 && houseFlow.getWorkSteta() == 3) {//待交底
                 Example example = new Example(WorkerDisclosure.class);
-                example.createCriteria().andEqualTo("state", 1);
+                example.createCriteria().andEqualTo("state", 1).andEqualTo("type",0);
                 List<WorkerDisclosure> wdList = workerDisclosureMapper.selectByExample(example);
                 courseDTO.setWorkerDisclosureList(wdList);
                 courseDTO.setApplyType(0);//没有申请

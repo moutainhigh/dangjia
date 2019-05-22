@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 
 /**
  * author: ysl
@@ -25,7 +24,7 @@ public interface WebSplitDeliverAPI {
      * 所有供应商发货订单
      */
     @PostMapping("web/finance/splitDeliver/getAllSplitDeliver")
-    @ApiOperation(value = "所有供应商发货订单", notes = "所有供应商发货订单")
+    @ApiOperation(value = "所有供应商", notes = "所有供应商")
     ServerResponse getAllSplitDeliver(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("pageDTO") PageDTO pageDTO,
                                       @RequestParam("applyState") Integer applyState,
@@ -40,5 +39,19 @@ public interface WebSplitDeliverAPI {
     @ApiOperation(value = "修改供应商发货单信息", notes = "修改供应商发货单信息")
     ServerResponse setSplitDeliver(@RequestParam("request") HttpServletRequest request,
                                    @RequestParam("withdrawDeposit") SplitDeliver splitDeliver);
+
+
+    @PostMapping("web/finance/splitDeliver/getOrderSplitList")
+    @ApiOperation(value = "根据供应商Id查看要货单列表", notes = "根据供应商Id查看要货单列表")
+    ServerResponse getOrderSplitList(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("supplierId") String supplierId);
+
+    /**
+     * 收货列表
+     * shipState  0待发货,1已发待收货,2已收货,3取消,4部分收
+     */
+    @PostMapping("web/finance/splitDeliver/splitDeliverList")
+    @ApiOperation(value = "供应商查看货单详情", notes = "供应商查看货单详情")
+    ServerResponse splitDeliverList(@RequestParam("splitDeliverId") String splitDeliverId);
 
 }

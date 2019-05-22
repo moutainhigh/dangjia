@@ -149,8 +149,8 @@ public class WebEngineerController implements WebEngineerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse artisanList(String name, String workerTypeId, String type, PageDTO pageDTO) {
-        return engineerService.artisanList(name, workerTypeId, type, pageDTO);
+    public ServerResponse artisanList(String name, String workerTypeId, String type,String checkType ,PageDTO pageDTO) {
+        return engineerService.artisanList(name, workerTypeId, type, checkType ,pageDTO);
     }
 
     @Override
@@ -169,5 +169,41 @@ public class WebEngineerController implements WebEngineerAPI {
     @ApiMethod
     public ServerResponse freeze(String memberId, boolean type) {
         return engineerService.freeze(memberId, type);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getSureList(Integer type,Integer state,String search,PageDTO pageDTO) {
+        return engineerService.getSureList(type,state,search,pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addSure(String name, String details, String img,Integer state,Integer type) {
+        return engineerService.addSure(name,details,img,state,type);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse updateSure(String name, String details, String img,Integer state,String id) {
+        return engineerService.updateSure(name,details,img,state,id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getItemsList( Integer type, Integer state, String search,PageDTO pageDTO) {
+        return engineerService.getItemsList(type,state,search,pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addItems(String name, Integer type, Integer state) {
+        return engineerService.addItems(name,type,state);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse updateItems(String name, Integer type, Integer state, String id) {
+        return engineerService.updateItems(name,type,state,id);
     }
 }

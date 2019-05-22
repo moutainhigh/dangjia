@@ -1,4 +1,4 @@
-package com.dangjia.acg.coche;
+package com.dangjia.acg.util;
 
 
 import java.util.ArrayList;
@@ -52,6 +52,25 @@ public class HouseUtil {
 		setMapDatas(dataMap, dataList, nameBs);
 		return dataMap;
 	}
+
+	private static void setMapDatas(Map<String, Object> dataMap, List<Map<String, Object>> dataList, String[] nameBs) {
+		int rank = (Integer) dataMap.get("rank");
+		int total = (Integer) dataMap.get("total");
+		for (int i = 0; i < nameBs.length; i++) {
+			Map<String, Object> map = new HashMap<>();
+			map.put("name", nameBs[i]);
+			map.put("begin", i < rank);
+			String describe = "";
+			if (rank != total && i + 1 == rank) {
+				describe = (String) dataMap.get("nameB");
+			}
+			map.put("describe", describe);
+			dataList.add(map);
+		}
+		dataMap.put("dataList", dataList);
+	}
+
+
 	/**
 	 * 获取设计进度节点
 	 * 发送设计图业主
@@ -166,23 +185,4 @@ public class HouseUtil {
 		setMapDatas(dataMap, dataList, nameBs);
 		return dataMap;
 	}
-	private static void setMapDatas(Map<String, Object> dataMap, List<Map<String, Object>> dataList, String[] nameBs) {
-		int rank = (Integer) dataMap.get("rank");
-		int total = (Integer) dataMap.get("total");
-		for (int i = 0; i < nameBs.length; i++) {
-			Map<String, Object> map = new HashMap<>();
-			map.put("name", nameBs[i]);
-			map.put("begin", i < rank);
-			String describe = "";
-			if (rank != total && i + 1 == rank) {
-				describe = (String) dataMap.get("nameB");
-			}
-			map.put("describe", describe);
-			dataList.add(map);
-		}
-		dataMap.put("dataList", dataList);
-	}
-
-
-
 }

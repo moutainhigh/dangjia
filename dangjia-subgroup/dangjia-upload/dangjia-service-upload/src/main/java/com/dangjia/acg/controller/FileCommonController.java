@@ -38,7 +38,8 @@ public class FileCommonController implements FileCommonAPI {
       multipartFiles=new MultipartFile[allimg.size()];
       multipartFiles=allimg.toArray(multipartFiles);
     }
-   return  fileCommonService.saveFileList(multipartFiles,address);
+    String name=request.getParameter("name");
+   return  fileCommonService.saveFileList(multipartFiles,address,name);
   }
 
   @Override

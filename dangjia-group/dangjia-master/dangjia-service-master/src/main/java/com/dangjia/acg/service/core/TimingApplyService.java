@@ -41,9 +41,9 @@ public class TimingApplyService {
         List<HouseFlowApply> houseFlowApplyList =  houseFlowApplyMapper.couponApply(new Date());
         for (HouseFlowApply houseFlowApply : houseFlowApplyList){
             if(houseFlowApply.getWorkerType() == 3){
-                evaluateService.saveEvaluateSupervisor(houseFlowApply.getId(),"",5);
+                evaluateService.saveEvaluateSupervisor(houseFlowApply.getId(),"",5,true);
             }else {
-                evaluateService.saveEvaluate(houseFlowApply.getId(),"",5,"",5);
+                evaluateService.saveEvaluate(houseFlowApply.getId(),"",5,"",5,true);
             }
         }
     }

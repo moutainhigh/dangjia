@@ -26,6 +26,6 @@ public class GoodsDTO {
     private int productType;//0:材料；1：服务
     private List<String> imageList;//长图片 多图组合
     private List<BrandDTO> brandDTOList;//品牌系列
-
-    private List<AttributeDTO> attrList;//属性
+    private Integer maket;//是否上架  0:未上架；1已上架
+    private List<AttributeDTO> attrList;//品牌，系列，价格属性,
 }

@@ -1,13 +1,19 @@
 package com.dangjia.acg.service.basics;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.product.MasterProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.BaseException;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.ProductDTO;
+import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.GroupLink;
 import com.dangjia.acg.modle.basics.Label;
@@ -18,10 +24,12 @@ import com.dangjia.acg.modle.brand.Unit;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
@@ -55,9 +63,14 @@ public class ProductService {
     private IGoodsMapper goodsMapper;
     @Autowired
     private TechnologyService technologyService;
-
     @Autowired
     private IGroupLinkMapper iGroupLinkMapper;
+    @Autowired
+    private IBudgetMaterialMapper iBudgetMaterialMapper;
+    @Autowired
+    private ProductService productService;
+    @Autowired
+    private MasterProductAPI masterProductAPI;
 
     private static Logger LOG = LoggerFactory.getLogger(ProductService.class);
 
@@ -390,6 +403,14 @@ public class ProductService {
                     product.setId(productId);
                     product.setModifyDate(new Date());
                     iProductMapper.updateByPrimaryKey(product);
+                    productService.updateProductName(product.getName(),product.getName(),null,null,null,productId);
+                    Example example=new Example(Product.class);
+                    example.createCriteria().andEqualTo(Product.ID,productId);
+                    List<Product> list = iProductMapper.selectByExample(example);
+                    //更新master库相关商品名称
+                    if(list.size()>0||null!=list) {
+                        masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, null);
+                    }
                 }
 
                 LOG.info("insertProduct productId:" + product.getId());
@@ -497,22 +518,30 @@ public class ProductService {
      * @param id
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateProductById(String id,String name) {
         try {
+            Product product1 = iProductMapper.selectByPrimaryKey(id);
             Product product = new Product();
             product.setId(id);
             product.setName(name);
             iProductMapper.updateByPrimaryKeySelective(product);
-
-            Example example=new Example(GroupLink.class);
-            example.createCriteria().andEqualTo("productId",id);
-            GroupLink oldLabel =new GroupLink();
-            oldLabel.setProductName(name);
-            iGroupLinkMapper.updateByExampleSelective(oldLabel,example);
+            productService.updateProductName(product1.getName(),name,null,null,null,id);
+            Example example=new Example(Product.class);
+            example.createCriteria().andEqualTo(Product.ID,id);
+            List<Product> list = iProductMapper.selectByExample(example);
+            //更新master库相关商品名称
+            if(list.size()>0||null!=list) {
+                masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, null);
+            }
+//            example=new Example(GroupLink.class);
+//            example.createCriteria().andEqualTo("productId",id);
+//            GroupLink oldLabel =new GroupLink();
+//            oldLabel.setProductName(name);
+//            iGroupLinkMapper.updateByExampleSelective(oldLabel,example);
             return ServerResponse.createBySuccessMessage("更新成功");
         } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("更新成功");
+            throw new BaseException(ServerCode.WRONG_PARAM, "更新成功");
         }
     }
     /**
@@ -541,7 +570,6 @@ public class ProductService {
         }
         try {
             pt.setLabelId(labelId);
-            iProductMapper.updateByPrimaryKeySelective(pt);
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -631,5 +659,28 @@ public class ProductService {
         List<Product>  productList = iProductMapper.queryProductData(name,categoryId,productType,productId);
         PageInfo pageResult = new PageInfo(productList);
         return pageResult;
+    }
+
+
+
+    /**
+     * 修改product名称全局更新商品
+     * @param brandSeriesId
+     * @param brandId
+     * @param goodsId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse updateProductName( String oldName,String newName,String brandSeriesId,String brandId,String goodsId,String id){
+        try {
+            //更新商品名称
+            iProductMapper.updateProductById(oldName,newName,brandSeriesId,brandId,goodsId,id);
+            //更新相关联商品名称
+            iGroupLinkMapper.updateGroupLinkById(brandSeriesId,brandId,goodsId,id);
+            iBudgetMaterialMapper.updateBudgetMaterialById(brandSeriesId,brandId,goodsId,id);
+        } catch (Exception e) {
+            throw new BaseException(ServerCode.WRONG_PARAM,"修改失败");
+        }
+        return ServerResponse.createBySuccessMessage("修改成功");
     }
 }

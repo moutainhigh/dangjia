@@ -20,5 +20,4 @@ public interface IOrderSplitMapper extends Mapper<OrderSplit> {
     List<String> getOrderProduct(@Param("houseId") String houseId, @Param("productType") String productType,@Param("workerTypeId") String workerTypeId, @Param("memberId") String memberId);
     List<String> getOrderCategory(@Param("houseId") String houseId,@Param("productType") String productType, @Param("workerTypeId") String workerTypeId, @Param("memberId") String memberId);
 
-
 }

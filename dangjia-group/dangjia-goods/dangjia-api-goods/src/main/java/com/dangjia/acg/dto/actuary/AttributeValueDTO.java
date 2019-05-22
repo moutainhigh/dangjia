@@ -2,8 +2,6 @@ package com.dangjia.acg.dto.actuary;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-
 /**
  * author: Ronalcheng
  * Date: 2018/11/19 0019

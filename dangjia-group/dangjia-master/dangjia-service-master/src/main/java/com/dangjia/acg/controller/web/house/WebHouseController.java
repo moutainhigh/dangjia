@@ -8,7 +8,6 @@ import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,8 +25,8 @@ public class WebHouseController implements WebHouseAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getList(HttpServletRequest request, PageDTO pageDTO,Integer visitState,String startDate,String endDate, String searchKey,String orderBy, String memberId) {
-        return houseService.getList(pageDTO,visitState,startDate,endDate, searchKey,orderBy, memberId);
+    public ServerResponse getList(HttpServletRequest request, PageDTO pageDTO, Integer visitState, String startDate, String endDate, String searchKey, String orderBy, String memberId) {
+        return houseService.getList(pageDTO, visitState, startDate, endDate, searchKey, orderBy, memberId);
     }
 
     @Override
@@ -51,7 +50,7 @@ public class WebHouseController implements WebHouseAPI {
     @Override
     @ApiMethod
     public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO, String workerTypeId) {
-        return houseService.queryConstructionRecord(houseId, pageDTO.getPageNum(), pageDTO.getPageSize(), workerTypeId);
+        return houseService.queryConstructionRecord(houseId, pageDTO, workerTypeId);
     }
 
     @Override
@@ -62,8 +61,8 @@ public class WebHouseController implements WebHouseAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getHistoryWorker(String houseId,String workerTypeId,String workId,PageDTO pageDTO) {
-        return houseService.getHistoryWorker(houseId,workerTypeId,workId, pageDTO);
+    public ServerResponse getHistoryWorker(String houseId, String workerTypeId, String workId, PageDTO pageDTO) {
+        return houseService.getHistoryWorker(houseId, workerTypeId, workId, pageDTO);
     }
 
 

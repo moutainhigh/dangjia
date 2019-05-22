@@ -2,19 +2,11 @@ package com.dangjia.acg.service.member;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.member.MemberCustomerDTO;
 import com.dangjia.acg.dto.member.MemberLabelDTO;
-import com.dangjia.acg.mapper.member.ICustomerMapper;
-import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
-import com.dangjia.acg.modle.member.Customer;
-import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberLabel;
-import com.dangjia.acg.service.core.WorkerTypeService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  *

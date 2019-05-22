@@ -20,6 +20,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         category_id as categoryId,
         image,
 	    create_date as createDate,
+	    supplier_id as supplierId,
+	    supplier_telephone as supplierTelephone,
+	    supplier_name as supplierName,
 		modify_date as modifyDate
 	</sql>
 
@@ -81,6 +84,31 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         mend_order_id = #{mendOrderId} and product_id=#{productId}
         LIMIT 1
     </select>
+
+    <!--更新商品名称-->
+    <update id="updateMendMaterialById">
+        UPDATE dj_repair_mend_materiel p1
+        SET p1.product_name =
+        <foreach collection="lists" item="item" index="index"
+                 separator=" " open="case id" close="end">
+            when id then #{item.name}
+        </foreach>
+        ,p1.unit_name=
+        <foreach collection="lists" item="item" index="index"
+                 separator=" " open="case id" close="end">
+            when id then #{item.unitName}
+        </foreach>
+        ,p1.image=
+        <foreach collection="lists" item="item" index="index"
+                 separator=" " open="case id" close="end">
+            when id then #{item.image}
+        </foreach>
+        where product_id in
+        <foreach collection="lists" index="index" item="item"
+                 separator="," open="(" close=")">
+            #{item.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
 
 </mapper>
 

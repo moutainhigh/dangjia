@@ -1,9 +1,6 @@
 package com.dangjia.acg.service.worker;
 
-import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -25,7 +22,6 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.BankCard;
 import com.dangjia.acg.modle.worker.WithdrawDeposit;
@@ -51,8 +47,6 @@ public class WorkerService {
     private IMemberMapper memberMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
-    @Autowired
-    private RedisClient redisClient;
     @Autowired
     private IWithdrawDepositMapper withdrawDepositMapper;
     @Autowired
@@ -97,7 +91,7 @@ public class WorkerService {
             if (worker.getWorkerType() == 3) {//大管家
                 List<HouseWorker> listHouseWorker = houseWorkerMapper.paidListByHouseId(houseId);
                 for (HouseWorker houseWorker : listHouseWorker) {
-                    Map<String, Object> map = new HashMap<String, Object>();
+                    Map<String, Object> map = new HashMap<>();
                     Member worker2 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
                     if (worker2 == null) {
                         continue;

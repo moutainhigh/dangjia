@@ -35,8 +35,8 @@ public class ActuaryOperationController implements ActuaryOperationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse selectProduct(HttpServletRequest request, String goodsId, String brandId, String brandSeriesId, String attributeIdArr, String budgetMaterialId) {
-        return actuaryOperationService.selectProduct(goodsId, brandId, brandSeriesId, attributeIdArr, budgetMaterialId);
+    public ServerResponse selectProduct(HttpServletRequest request, String goodsId, String selectVal,String attributeIdArr, String budgetMaterialId) {
+        return actuaryOperationService.selectProduct(goodsId,  selectVal,  attributeIdArr, budgetMaterialId);
     }
 
     @Override

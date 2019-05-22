@@ -1,15 +1,21 @@
 package com.dangjia.acg.mapper.deliver;
 
+import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.modle.deliver.Cart;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 /**
- * author: qyx
- * Date: 2019/04/15 0009
- * Time: 13:59
+ * author: wk
+ * Date: 2019/05/15 0009
+ * Time: 15:24
  */
 @Repository
 public interface ICartMapper extends Mapper<Cart> {
+
+    /*更新商品名称和各项信息*/
+    void updateCartById(@Param("lists") JSONArray lists, @Param("brandSeriesId") String brandSeriesId, @Param("brandId") String brandId,
+                        @Param("goodsId") String goodsId, @Param("id") String id);
 
 }

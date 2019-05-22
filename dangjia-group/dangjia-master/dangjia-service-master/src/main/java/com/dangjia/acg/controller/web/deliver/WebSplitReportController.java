@@ -69,4 +69,15 @@ public class WebSplitReportController implements WebSplitReportAPI {
         return splitDeliverReportService.getSplitReportGoodsOrderItems(pageDTO,houseId);
     }
 
+    /**
+     * 指定供应商所有发货的房子
+     * @param supplierId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getSplitReportHouse(String supplierId) {
+        return splitDeliverReportService.getSplitReportHouse(supplierId);
+    }
+
 }

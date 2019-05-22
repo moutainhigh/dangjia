@@ -84,9 +84,21 @@ public class HouseWorkerOrder extends BaseEntity {
 	private BigDecimal workPrice;//paymoney
 
 	@Column(name = "repair_price")
-	@Desc(value = "补人工钱")
-	@ApiModelProperty("补人工钱")
+	@Desc(value = "阶段/整体补人工钱")
+	@ApiModelProperty("阶段/整体补人工钱")
 	private BigDecimal repairPrice;//repairprice
+
+
+	@Column(name = "repair_total_price")
+	@Desc(value = "补人总工钱")
+	@ApiModelProperty("补人总工钱")
+	private BigDecimal repairTotalPrice;
+
+
+	@Column(name = "deduct_price")
+	@Desc(value = "订单评分扣除的工钱")
+	@ApiModelProperty("订单评分扣除的工钱")
+	private BigDecimal deductPrice;
 
 	@Column(name = "have_money")
 	@Desc(value = "订单已经拿到的钱")
@@ -113,6 +125,7 @@ public class HouseWorkerOrder extends BaseEntity {
 			this.retentionMoney = new BigDecimal(0);//retentionmoney
 			this.afterChange = new BigDecimal(0);//afterchange
 			this.repairPrice = new BigDecimal(0);//repairprice
+			this.repairTotalPrice = new BigDecimal(0);
 			this.haveMoney = new BigDecimal(0);//havemaoney
 			this.everyMoney = new BigDecimal(0);//everydaypaymaoney
 			this.checkMoney = new BigDecimal(0);

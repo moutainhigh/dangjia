@@ -141,6 +141,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and to_days(create_date) = to_days(#{time})
     </select>
 
+    <select id="getTodayStart1" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        select
+        <include refid="all_columns" />
+        from dj_core_house_flow_apply
+        where 1=1
+        and house_id = #{houseId}
+        and apply_type = 4
+        and to_days(create_date) = to_days(#{time})
+        LIMIT 1
+    </select>
+
     <!--查询待审核的申请(不算每日完工) -->
     <select id="checkHouseFlowApply" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select <include refid="all_columns" />

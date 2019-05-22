@@ -38,7 +38,7 @@ public class ConfigApp extends BaseEntity {
     @Column(name = "version_code")
     @Desc(value = "版本号Code")
     @ApiModelProperty("版本号Code")
-    private int versionCode;
+    private Integer versionCode;
 
     @Column(name = "detail")
     @Desc(value = "版本描述")

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.deliver.IProductChangeMapper">
+
+	<sql id="all_columns">
+		id,
+		house_id as houseId,
+		order_id as orderId,
+		member_id as memberId,
+		category_id as categoryId,
+		src_product_id as srcProductId,
+		src_product_sn as srcProductSn,
+		src_product_name as srcProductName,
+		src_price as srcPrice,
+		src_sur_count as srcSurCount,
+		src_unit_name as srcUnitName,
+		src_image as srcImage,
+		dest_product_id as destProductId,
+		dest_product_sn as destProductSn,
+		dest_product_name as destProductName,
+		dest_price as destPrice,
+		dest_sur_count as destSurCount,
+		dest_unit_name as destUnitName,
+		dest_image as destImage,
+		difference_price as differencePrice,
+		type,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
+    <!-- 根据houseId查询商品换货对象 -->
+	<select id="queryByHouseId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.deliver.ProductChange">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_deliver_product_change
+		where 1=1
+		<if test="houseId!=null and houseId!=''">
+			and house_id=#{houseId}
+		</if>
+		<if test="type!=null and type!=''">
+			and type=#{type}
+		</if>
+		ORDER BY create_date desc
+	</select>
+    <!--查询根据房子id和原商品id查询仓库商品是否有更换-->
+    <select id="queryProductChangeExist"  resultType="java.lang.Integer">
+        SELECT COUNT(id) FROM dj_deliver_product_change
+        where 1=1
+        <if test="houseId!=null and houseId!=''">
+            and house_id=#{houseId}
+        </if>
+        <if test="srcProductId!=null and srcProductId!=''">
+            and src_product_id=#{srcProductId}
+        </if>
+        <if test="type!=null and type!=''">
+            and type=#{type}
+        </if>
+        LIMIT 1
+    </select>
+	<!--更新换货前商品名称-->
+	<update id="updateProductNameById">
+		UPDATE dj_deliver_product_change p1
+		SET p1.src_product_name =
+		<foreach collection="lists" item="item" index="index"
+				 separator=" " open="case src_product_id" close="end">
+			when #{item.id} then #{item.name}
+		</foreach>
+		,p1.src_image=
+		<foreach collection="lists" item="item" index="index"
+				 separator=" " open="case src_product_id" close="end">
+			when #{item.id} then #{item.image}
+		</foreach>
+		where src_product_id in
+		<foreach collection="lists" index="index" item="item"
+				 separator="," open="(" close=")">
+			#{item.id,jdbcType=BIGINT}
+		</foreach>
+	</update>
+    <!--更新换货后商品名-->
+	<update id="updateProductNameById2">
+		UPDATE dj_deliver_product_change p1
+		SET p1.dest_product_name =
+		<foreach collection="lists" item="item" index="index"
+				 separator=" " open="case dest_product_id" close="end">
+			when #{item.id} then #{item.name}
+		</foreach>
+		,p1.dest_image=
+		<foreach collection="lists" item="item" index="index"
+				 separator=" " open="case dest_product_id" close="end">
+			when #{item.id} then #{item.image}
+		</foreach>
+		where dest_product_id in
+		<foreach collection="lists" index="index" item="item"
+				 separator="," open="(" close=")">
+			#{item.id,jdbcType=BIGINT}
+		</foreach>
+	</update>
+
+</mapper>

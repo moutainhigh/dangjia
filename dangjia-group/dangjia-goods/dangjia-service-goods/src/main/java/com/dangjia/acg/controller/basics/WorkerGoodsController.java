@@ -37,7 +37,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
     @ApiMethod
     public ServerResponse<PageInfo> getWorkerGoodses(HttpServletRequest request, PageDTO pageDTO, String workerTypeId, String searchKey, String showGoods) {
         try {
-            return workerGoodsService.getWorkerGoodses(pageDTO.getPageNum(), pageDTO.getPageSize(), workerTypeId, searchKey,showGoods);
+            return workerGoodsService.getWorkerGoodses(pageDTO, workerTypeId, searchKey,showGoods);
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("查询工价商品失败");
         }
@@ -56,6 +56,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
         try {
             return workerGoodsService.setWorkerGoods(workerGoods, technologyJsonList,deleteTechnologyIds);
         } catch (Exception e) {
+            e.printStackTrace();
             return ServerResponse.createByErrorMessage("新增或更新工价商品失败");
         }
     }

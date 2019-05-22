@@ -93,6 +93,10 @@ public class WebOrderService {
                     if (webOrderDTO.getType() == 5) {
                         webOrderDTO.setTypeText("验房分销");
                     }
+                    // 换货单
+                    if (webOrderDTO.getType() == 6) {
+                        webOrderDTO.setTypeText("换货补差价");
+                    }
                 }
                 ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(webOrderDTO.getOrderId());
                 if (activityRedPackRecord != null) {
@@ -119,7 +123,7 @@ public class WebOrderService {
         List<OrderItemByDTO> orderItemList= iBusinessOrderMapper.getOrderItem(businessNumber);
         PageInfo pageResult = new PageInfo(orderItemList);
         ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(businessNumber);
-        String red = null;
+        String red;
         if(activityRedPackRecord!=null) {
             ActivityRedPack activityRedPack = iActivityRedPackMapper.selectByPrimaryKey(activityRedPackRecord.getRedPackId());
             ActivityRedPackRule activityRedPackRule = activityRedPackRuleMapper.selectByPrimaryKey(activityRedPackRecord.getRedPackRuleId());
@@ -134,17 +138,12 @@ public class WebOrderService {
         }else {
             red="无";
         }
-
         for (OrderItemByDTO orderItemByDTO : orderItemList) {
             orderItemByDTO.setImage(imageAddress+orderItemByDTO.getImage());
             orderItemByDTO.setRed(red);
         }
         pageResult.setList(orderItemList);
-        if(orderItemList!=null){
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        }else {
-            return ServerResponse.createByErrorMessage("无数据");
-        }
+        return ServerResponse.createBySuccess("查询成功", pageResult);
 
     }
 

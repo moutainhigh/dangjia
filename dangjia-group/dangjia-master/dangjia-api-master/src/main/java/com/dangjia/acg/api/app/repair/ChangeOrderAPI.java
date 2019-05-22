@@ -40,4 +40,12 @@ public interface ChangeOrderAPI {
                                 @RequestParam("contentA") String contentA,
                                 @RequestParam("contentB") String contentB,
                                 @RequestParam("workerTypeId") String workerTypeId);
+
+
+    @PostMapping(value = "app/repair/changeOrder/checkHouseFlowApply")
+    @ApiOperation(value = "申请退人工或业主验收检测", notes = "申请退人工或业主验收检测")
+    ServerResponse checkHouseFlowApply(@RequestParam("userToken") String userToken,
+                                @RequestParam("houseId") String houseId,
+                                @RequestParam("type") Integer type,
+                                @RequestParam("workerTypeId") String workerTypeId);
 }

@@ -120,6 +120,30 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			product_name LIKE CONCAT('%',#{name},'%')
 		</if>
 	</select>
+	<!--更新商品名称-->
+	<update id="updateWareHouseById" parameterType="java.lang.String">
+		UPDATE dj_house_warehouse p1
+		SET p1.product_name =
+		<foreach collection="lists" item="item" index="index"
+				 separator=" " open="case id" close="end">
+			when id then #{item.name}
+		</foreach>
+		,p1.unit_name=
+		<foreach collection="lists" item="item" index="index"
+				 separator=" " open="case id" close="end">
+			when id then #{item.unitName}
+		</foreach>
+		,p1.image=
+		<foreach collection="lists" item="item" index="index"
+				 separator=" " open="case id" close="end">
+			when id then #{item.image}
+		</foreach>
+		where product_id in
+		<foreach collection="lists" index="index" item="item"
+				 separator="," open="(" close=")">
+			#{item.id,jdbcType=BIGINT}
+		</foreach>
+	</update>
 
 </mapper>
 

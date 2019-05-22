@@ -19,6 +19,14 @@ import javax.servlet.http.HttpServletRequest;
 @Api(value = "提供精算数据接口", description = "提供精算数据接口")
 public interface ActuaryAPI {
 
+    @PostMapping("/data/actuary/getActuaryBudgetOk")
+    @ApiOperation(value = "返回精算列表", notes = "返回精算列表")
+    ServerResponse getActuaryBudgetOk(
+            @RequestParam("request") HttpServletRequest request,
+            @RequestParam("pageDTO") PageDTO pageDTO,
+            @RequestParam("name") String name,
+            @RequestParam("budgetOk") String budgetOk
+    );
     @PostMapping("/data/actuary/getActuaryWaitPay")
     @ApiOperation(value = "返回待业主支付精算列表", notes = "返回待业主支付精算列表")
     ServerResponse getActuaryWaitPay(

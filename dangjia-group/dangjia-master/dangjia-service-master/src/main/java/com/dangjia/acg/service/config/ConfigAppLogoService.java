@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -48,7 +47,7 @@ public class ConfigAppLogoService {
         if(!CommonUtil.isEmpty(configAppLogo.getAppType())) {
             criteria.andEqualTo("appType", configAppLogo.getAppType());
         }
-        criteria.andEqualTo("isSwitch",false);
+        criteria.andEqualTo("isSwitch",true);
         List<ConfigAppLogo> list = configAppLogoMapper.selectByExample(example);
         if(list.size()>0){
             return ServerResponse.createBySuccess("ok",list.get(0).getType());
@@ -75,12 +74,14 @@ public class ConfigAppLogoService {
      */
     public ServerResponse editConfigAppLogo(HttpServletRequest request, ConfigAppLogo configAppLogo) {
         ConfigAppLogo configAppLogoAll=new ConfigAppLogo();
+        Boolean isSwitch = Boolean.parseBoolean(request.getParameter("isSwitch"));
         Example example = new Example(ConfigAppLogo.class);
         Example.Criteria criteria=example.createCriteria();
-        criteria.andEqualTo("isSwitch",true);
+        criteria.andEqualTo("isSwitch",true).andEqualTo("appType",configAppLogo.getAppType());
         configAppLogoAll.setId(null);
-        configAppLogoAll.setModifyDate(new Date());
-        configAppLogoMapper.updateByExampleSelective(configAppLogoAll,criteria);
+        configAppLogoAll.setIsSwitch(false);
+        configAppLogo.setIsSwitch(isSwitch);
+        configAppLogoMapper.updateByExampleSelective(configAppLogoAll,example);
         if(this.configAppLogoMapper.updateByPrimaryKeySelective(configAppLogo)>0){
             return ServerResponse.createBySuccessMessage("ok");
         }else{
@@ -94,6 +95,16 @@ public class ConfigAppLogoService {
      */
     public ServerResponse addConfigAppLogo(HttpServletRequest request,ConfigAppLogo configAppLogo) {
         //查看该权限是否有子节点，如果有，先删除子节点
+        configAppLogo.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
+        ConfigAppLogo configAppLogoAll=new ConfigAppLogo();
+        Example example = new Example(ConfigAppLogo.class);
+        Example.Criteria criteria=example.createCriteria();
+        criteria.andEqualTo("isSwitch",true).andEqualTo("appType",configAppLogo.getAppType());
+        configAppLogoAll.setId(null);
+        configAppLogoAll.setIsSwitch(false);
+        configAppLogoMapper.updateByExampleSelective(configAppLogoAll,example);
+        Boolean isSwitch = Boolean.parseBoolean(request.getParameter("isSwitch"));
+        configAppLogo.setIsSwitch(isSwitch);
         if(this.configAppLogoMapper.insertSelective(configAppLogo)>0){
             return ServerResponse.createBySuccessMessage("ok");
         }else{

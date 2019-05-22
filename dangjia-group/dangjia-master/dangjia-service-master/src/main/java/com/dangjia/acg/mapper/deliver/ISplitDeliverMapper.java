@@ -25,5 +25,12 @@ public interface ISplitDeliverMapper extends Mapper<SplitDeliver> {
                                                         @Param("searchKey") String searchKey,
                                                         @Param("beginDate") String beginDate,
                                                         @Param("endDate") String endDate);
-    String getSupplierGoodsId( @Param("houseId") String houseId, @Param("productSn") String productSn);
+    List<String> getSupplierGoodsId( @Param("houseId") String houseId, @Param("productSn") String productSn);
+
+    /*根据供应商id查询要货列表*/
+    List<WebSplitDeliverItemDTO> getOrderSplitList(@Param("supplierId") String supplierId);
+
+    /*供应商查看货单详情*/
+    List<WebSplitDeliverItemDTO> splitDeliverList(@Param("splitDeliverId") String splitDeliverId);
+
 }

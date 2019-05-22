@@ -7,7 +7,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.basics.UnitService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,7 +34,7 @@ public class UnitController implements UnitAPI {
     @Override
     @ApiMethod
     public ServerResponse<PageInfo> getAllUnit(HttpServletRequest request, PageDTO pageDTO) {
-        return unitService.getAllUnit(pageDTO.getPageNum(), pageDTO.getPageSize());
+        return unitService.getAllUnit(pageDTO);
     }
 
     /**
@@ -65,8 +64,8 @@ public class UnitController implements UnitAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse selectunitById(HttpServletRequest request, String unitId) {
-        return unitService.selectById(unitId);
+    public ServerResponse getUnitById(HttpServletRequest request, String unitId) {
+        return unitService.getUnitById(unitId);
     }
 
     /**

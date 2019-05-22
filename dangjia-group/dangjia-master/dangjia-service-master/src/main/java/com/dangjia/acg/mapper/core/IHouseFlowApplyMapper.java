@@ -28,6 +28,7 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
     Long getCountValidPatrolByHouseId(@Param("houseId") String houseId,@Param("workerId") String workerId);
     Long countPatrol(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId);
     HouseFlowApply getTodayStart(@Param("houseId") String houseId, @Param("workerId") String workerId, @Param("time")Date time);
+    HouseFlowApply getTodayStart1(@Param("houseId") String houseId, @Param("time")Date time);
     HouseFlowApply checkHouseFlowApply(@Param("houseFlowId") String houseFlowId,@Param("workerId") String workerId);
     List<HouseFlowApply> getSupervisorCheckList(@Param("houseId") String houseId);
     List<HouseFlowApply> getTodayPatrol(@Param("houseId") String houseId,@Param("time")Date time);

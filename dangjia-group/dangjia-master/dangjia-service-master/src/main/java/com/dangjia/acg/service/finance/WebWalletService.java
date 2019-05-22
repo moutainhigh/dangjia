@@ -1,7 +1,5 @@
 package com.dangjia.acg.service.finance;
 
-import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.finance.WebWorkerDetailDTO;
@@ -9,9 +7,9 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -35,58 +33,73 @@ public class WebWalletService {
     private IWorkerDetailMapper iWorkerDetailMapper;
     @Autowired
     private IHouseMapper iHouseMapper;
-
     @Autowired
-    private RedisClient redisClient;
+    private CraftsmanConstructionService constructionService;
+
     /**
      * --         0每日完工  1阶段完工，
      * --         2整体完工  3巡查, 4验收,
      * --         8补人工, 9退人工, 10奖 11罚
+     *
      * @param houseId
      * @param userToken
      * @return
      */
-    public ServerResponse getHouseWallet(String houseId,  String  userToken){
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        Member member=accessToken.getMember();
+    public ServerResponse getHouseWallet(String houseId, String userToken) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
         List<WebWorkerDetailDTO> workerDetailDTOList = iWorkerDetailMapper.getHouseWallet(houseId, member.getId(), String.valueOf(member.getWorkerType()));
         for (int i = 0; i < workerDetailDTOList.size(); i++) {
-            WebWorkerDetailDTO webWorkerDetailDTO=workerDetailDTOList.get(i);
-            webWorkerDetailDTO=calculateIntegralMoney(houseId,webWorkerDetailDTO);
+            WebWorkerDetailDTO webWorkerDetailDTO = workerDetailDTOList.get(i);
+            webWorkerDetailDTO = calculateIntegralMoney(houseId, webWorkerDetailDTO);
             workerDetailDTOList.remove(i);
-            workerDetailDTOList.add(i,webWorkerDetailDTO);
+            workerDetailDTOList.add(i, webWorkerDetailDTO);
         }
         return ServerResponse.createBySuccess("查询成功", workerDetailDTOList);
     }
-    public WebWorkerDetailDTO calculateIntegralMoney(String houseId,WebWorkerDetailDTO webWorkerDetailDTO){
+
+    public WebWorkerDetailDTO calculateIntegralMoney(String houseId, WebWorkerDetailDTO webWorkerDetailDTO) {
 //     * --         0每日完工  1阶段完工，
-//     * --         2整体完工  3巡查, 4验收,
-        int star=webWorkerDetailDTO.getStar();
+//     * --         2整体完工  3巡查, 4验收,5整体竣工
+        int star = webWorkerDetailDTO.getStar();
 
         webWorkerDetailDTO.setHaveMoney(webWorkerDetailDTO.getMoney());
         BigDecimal supervisorMoney = webWorkerDetailDTO.getMoney();
-        if(webWorkerDetailDTO.getState()==4){
-            if(star == 0 || star == 5){
+        if (webWorkerDetailDTO.getState() == 4) {
+            if (star == 5) {
                 supervisorMoney = webWorkerDetailDTO.getMoney();//大管家的验收收入
-            }else if(star == 3 || star == 4){
-                supervisorMoney =webWorkerDetailDTO.getMoney().multiply(new BigDecimal(0.8));
-            }else{
+            } else if (star == 3 || star == 4) {
+                supervisorMoney = webWorkerDetailDTO.getMoney().multiply(new BigDecimal(0.8));
+            } else {
                 supervisorMoney = new BigDecimal(0);//为0元
             }
         }
-        if(webWorkerDetailDTO.getState()==1 || webWorkerDetailDTO.getState()==2){
+        if (webWorkerDetailDTO.getState() == 5) {
+            if(star == 5){
+                supervisorMoney = webWorkerDetailDTO.getMoney();//大管家的验收收入
+            }else if(star == 3 || star == 4){
+                supervisorMoney = webWorkerDetailDTO.getMoney().multiply(new BigDecimal(0.9));
+            }else{
+                supervisorMoney = webWorkerDetailDTO.getMoney().multiply(new BigDecimal(0.8));
+            }
+        }
+        if (webWorkerDetailDTO.getState() == 1 || webWorkerDetailDTO.getState() == 2) {
             //工人钱
-            if(star >= 4){
+            if (star >= 4) {
                 supervisorMoney = webWorkerDetailDTO.getMoney();
-            }else if(star > 2){
+            } else if (star > 2) {
                 supervisorMoney = webWorkerDetailDTO.getMoney().multiply(new BigDecimal(0.97));
-            }else if(star <= 2){
+            } else {
                 supervisorMoney = webWorkerDetailDTO.getMoney().multiply(new BigDecimal(0.95));
             }
         }
         webWorkerDetailDTO.setMoney(supervisorMoney);
         return webWorkerDetailDTO;
     }
+
     /**
      * 所有用户（工人和业主）流水
      */
@@ -146,11 +159,11 @@ public class WebWalletService {
 //                return ServerResponse.createByErrorMessage("工匠余额不足");
 //            }
             if (workerDetail.getState() == 3) {//减钱
-                haveMoney =worker.getHaveMoney().subtract(workerDetail.getMoney());
+                haveMoney = worker.getHaveMoney().subtract(workerDetail.getMoney());
                 surplusMoney = worker.getSurplusMoney().subtract(workerDetail.getMoney());
             }
             if (workerDetail.getState() == 2) {//加钱
-                haveMoney =worker.getHaveMoney().add(workerDetail.getMoney());
+                haveMoney = worker.getHaveMoney().add(workerDetail.getMoney());
                 surplusMoney = worker.getSurplusMoney().add(workerDetail.getMoney());
             }
             worker.setHaveMoney(haveMoney);
@@ -161,13 +174,9 @@ public class WebWalletService {
             WorkerDetail newWorkerDetail = new WorkerDetail();
             newWorkerDetail.setName(workerDetail.getName());
             newWorkerDetail.setWorkerId(workerDetail.getWorkerId());
-            if (worker != null)
-                newWorkerDetail.setWorkerName(worker.getName());
-
+            newWorkerDetail.setWorkerName(worker.getName());
             if (workerDetail.getHouseId() != null)
                 newWorkerDetail.setHouseId(workerDetail.getHouseId());
-
-
             newWorkerDetail.setMoney(workerDetail.getMoney());
             newWorkerDetail.setState(workerDetail.getState());//进钱  0工钱收入,1提现,2自定义增加金额,3自定义减少金额,4退材料退款,5剩余材料退款,6退人工退款
             newWorkerDetail.setDefinedName(workerDetail.getDefinedName());

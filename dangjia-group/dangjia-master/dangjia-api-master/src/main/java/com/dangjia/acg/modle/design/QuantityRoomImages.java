@@ -46,10 +46,22 @@ public class QuantityRoomImages extends BaseEntity {
     @ApiModelProperty("图片地址")
     private String image;
 
+    @Column(name = "sort")
+    @Desc(value = "优先顺序")
+    @ApiModelProperty("优先顺序")
+    private Integer sort;
+
 
     //所有图片字段加入域名和端口，形成全路径
     public void initPath(String imageAddress) {
         this.image = CommonUtil.isEmpty(this.image) ? null : imageAddress + this.image;
+    }
+
+    public String getBaseImage(String imageAddress) {
+        if (image == null) {
+            return null;
+        }
+        return this.image.replace(imageAddress, "");
     }
 
 }

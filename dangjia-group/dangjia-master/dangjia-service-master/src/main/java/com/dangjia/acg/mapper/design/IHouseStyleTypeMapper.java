@@ -17,4 +17,6 @@ import java.util.List;
 public interface IHouseStyleTypeMapper extends Mapper<HouseStyleType> {
 
     HouseStyleType getStyleByName(@Param("name") String name);
+
+    List<String> getStyleNames(@Param("houseId") String houseId);
 }

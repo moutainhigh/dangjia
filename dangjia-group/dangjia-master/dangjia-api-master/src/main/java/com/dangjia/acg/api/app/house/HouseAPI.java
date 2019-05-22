@@ -109,6 +109,11 @@ public interface HouseAPI {
     ServerResponse queryConstructionRecord(@RequestParam("houseId") String houseId,
                                            @RequestParam("pageDTO") PageDTO pageDTO);
 
+    @PostMapping("app/house/house/queryConstructionRecordAll")
+    @ApiOperation(value = "施工记录(new 包含要补退记录)", notes = "施工记录(new 包含要补退记录)")
+    ServerResponse queryConstructionRecordAll(@RequestParam("houseId") String houseId,
+                                           @RequestParam("pageDTO") PageDTO pageDTO);
+
     @PostMapping("app/house/house/getHouseFlowApply")
     @ApiOperation(value = "获取施工记录详情", notes = "获取施工记录详情")
     ServerResponse getHouseFlowApply(@RequestParam("houseFlowApplyId") String houseFlowApplyId);

@@ -2,12 +2,9 @@ package com.dangjia.acg.controller.actuary;
 
 import com.dangjia.acg.api.actuary.ActuarialTemplateAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
-import com.dangjia.acg.common.exception.BaseException;
-import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.actuary.ActuarialTemplateService;
-import com.dangjia.acg.service.basics.TechnologyService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;

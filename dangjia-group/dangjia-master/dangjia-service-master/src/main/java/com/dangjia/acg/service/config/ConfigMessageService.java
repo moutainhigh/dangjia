@@ -50,6 +50,7 @@ public class ConfigMessageService {
      */
     public ServerResponse queryConfigMessages(HttpServletRequest request, PageDTO pageDTO, ConfigMessage configMessage) {
         Example example = new Example(ConfigMessage.class);
+        example.createCriteria().andNotEqualTo(ConfigMessage.NAME,"");
         example.orderBy("createDate").desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<ConfigMessage> list = configMessageMapper.selectByExample(example);

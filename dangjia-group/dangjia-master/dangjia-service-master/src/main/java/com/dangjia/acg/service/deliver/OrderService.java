@@ -1,8 +1,6 @@
 package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
@@ -16,12 +14,7 @@ import com.dangjia.acg.dto.deliver.ItemDTO;
 import com.dangjia.acg.dto.deliver.OrderDTO;
 import com.dangjia.acg.dto.deliver.OrderItemDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
-import com.dangjia.acg.mapper.deliver.IOrderItemMapper;
-import com.dangjia.acg.mapper.deliver.IOrderMapper;
-import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
-import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
-import com.dangjia.acg.mapper.design.IDesignImageTypeMapper;
-import com.dangjia.acg.mapper.design.IHouseDesignImageMapper;
+import com.dangjia.acg.mapper.deliver.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
@@ -30,12 +23,7 @@ import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.WorkerType;
-import com.dangjia.acg.modle.deliver.Order;
-import com.dangjia.acg.modle.deliver.OrderItem;
-import com.dangjia.acg.modle.deliver.OrderSplit;
-import com.dangjia.acg.modle.deliver.OrderSplitItem;
-import com.dangjia.acg.modle.design.DesignImageType;
-import com.dangjia.acg.modle.design.HouseDesignImage;
+import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.house.WarehouseDetail;
@@ -43,6 +31,7 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.repair.MendOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -84,19 +73,21 @@ public class OrderService {
     @Autowired
     private IBusinessOrderMapper businessOrderMapper;
     @Autowired
-    private IHouseDesignImageMapper houseDesignImageMapper;
-    @Autowired
-    private IDesignImageTypeMapper designImageTypeMapper;
+    private CraftsmanConstructionService constructionService;
     @Autowired
     private ConfigMessageService configMessageService;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
 
     @Autowired
+    private ISplitDeliverMapper splitDeliverMapper;
+    @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired
     private MendOrderService mendOrderService;
 
+    @Autowired
+    private ICartMapper cartMapper;
     /**
      * 订单详情
      */
@@ -110,50 +101,56 @@ public class OrderService {
             orderItemDTO.setTotalAmount(order.getTotalAmount());
 
             List<ItemDTO> itemDTOList = new ArrayList<>();
-            if(order.getWorkerTypeId().equals("1")){//设计
-                ItemDTO itemDTO = new ItemDTO();
-                itemDTO.setName(house.getStyle());
-                itemDTO.setImage(address + "icon/shejiF.png");
-                itemDTO.setPrice("¥" + String.format("%.2f",order.getStylePrice().doubleValue())+"/㎡");
-                itemDTO.setShopCount(house.getSquare().doubleValue());
-                itemDTO.setProductType(3);
-                itemDTOList.add(itemDTO);
-
-                List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.byNumber(order.getHouseId(),order.getBusinessOrderNumber());
-                for (HouseDesignImage houseDesignImage : houseDesignImageList){
-                    DesignImageType designImageType = designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId());
-                    itemDTO = new ItemDTO();
-                    itemDTO.setName(designImageType.getName());  //设计图名字
-                    itemDTO.setImage(address + houseDesignImage.getImageurl());
-                    itemDTO.setPrice("¥" + String.format("%.2f",designImageType.getPrice().doubleValue()));
-                    itemDTO.setShopCount(1.0);
+            switch (order.getWorkerTypeId()) {
+                case "1": {//设计
+                    ItemDTO itemDTO = new ItemDTO();
+                    itemDTO.setName(house.getStyle());
+                    itemDTO.setImage(address + "icon/shejiF.png");
+                    itemDTO.setPrice("¥" + String.format("%.2f", order.getStylePrice().doubleValue()) + "/㎡");
+                    itemDTO.setShopCount(house.getSquare().doubleValue());
                     itemDTO.setProductType(3);
                     itemDTOList.add(itemDTO);
+                    //TODO 设计师升级服务暂时取消
+//                List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.byNumber(order.getHouseId(),order.getBusinessOrderNumber());
+//                for (HouseDesignImage houseDesignImage : houseDesignImageList){
+//                    DesignImageType designImageType = designImageTypeMapper.selectByPrimaryKey(houseDesignImage.getDesignImageTypeId());
+//                    itemDTO = new ItemDTO();
+//                    itemDTO.setName(designImageType.getName());  //设计图名字
+//                    itemDTO.setImage(address + houseDesignImage.getImageurl());
+//                    itemDTO.setPrice("¥" + String.format("%.2f",designImageType.getPrice().doubleValue()));
+//                    itemDTO.setShopCount(1.0);
+//                    itemDTO.setProductType(3);
+//                    itemDTOList.add(itemDTO);
+//                }
+                    break;
                 }
-            }else if (order.getWorkerTypeId().equals("2")){
-                ItemDTO itemDTO = new ItemDTO();
-                itemDTO.setName("当家精算");
-                itemDTO.setImage(address + "icon/jingsuanF.png");
-                itemDTO.setPrice("¥" + String.format("%.2f",order.getBudgetCost().doubleValue())+"/㎡");
-                itemDTO.setShopCount(house.getSquare().doubleValue());
-                itemDTO.setProductType(3);
-                itemDTOList.add(itemDTO);
-            }else {
-                List<OrderItem> orderItemList = orderItemMapper.byOrderIdList(orderId);
-                for(OrderItem orderItem : orderItemList){
+                case "2": {
                     ItemDTO itemDTO = new ItemDTO();
-                    itemDTO.setImage(address + orderItem.getImage());
-                    itemDTO.setPrice("¥" + String.format("%.2f",orderItem.getPrice()));
-                    itemDTO.setShopCount(orderItem.getShopCount());
-                    if (order.getType() == 1){//人工
-                        itemDTO.setName(orderItem.getWorkerGoodsName());
-                        itemDTO.setProductType(2);//人工
-                    }else if(order.getType() == 2){//材料
-                        itemDTO.setName(orderItem.getProductName());
-                        itemDTO.setProductType(orderItem.getProductType());
-                    }
+                    itemDTO.setName("当家精算");
+                    itemDTO.setImage(address + "icon/jingsuanF.png");
+                    itemDTO.setPrice("¥" + String.format("%.2f", order.getBudgetCost().doubleValue()) + "/㎡");
+                    itemDTO.setShopCount(house.getSquare().doubleValue());
+                    itemDTO.setProductType(3);
                     itemDTOList.add(itemDTO);
+                    break;
                 }
+                default:
+                    List<OrderItem> orderItemList = orderItemMapper.byOrderIdList(orderId);
+                    for (OrderItem orderItem : orderItemList) {
+                        ItemDTO itemDTO = new ItemDTO();
+                        itemDTO.setImage(address + orderItem.getImage());
+                        itemDTO.setPrice("¥" + String.format("%.2f", orderItem.getPrice()));
+                        itemDTO.setShopCount(orderItem.getShopCount());
+                        if (order.getType() == 1) {//人工
+                            itemDTO.setName(orderItem.getWorkerGoodsName());
+                            itemDTO.setProductType(2);//人工
+                        } else if (order.getType() == 2) {//材料
+                            itemDTO.setName(orderItem.getProductName());
+                            itemDTO.setProductType(orderItem.getProductType());
+                        }
+                        itemDTOList.add(itemDTO);
+                    }
+                    break;
             }
 
             orderItemDTO.setItemDTOList(itemDTOList);
@@ -194,9 +191,11 @@ public class OrderService {
      */
     public ServerResponse businessOrderList(String userToken){
         try{
-            AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-            Member member = accessToken.getMember();
-
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
             List<BusinessOrder> businessOrderList = businessOrderMapper.byMemberId(member.getId());
             List<BusinessOrderDTO> businessOrderDTOS = new ArrayList<>();
             for (BusinessOrder businessOrder : businessOrderList){
@@ -375,9 +374,17 @@ public class OrderService {
             Example example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 4)
                     .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
-            List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
-            if(orderSplitList.size()>0){
+            int orderSplitnum= orderSplitMapper.selectCountByExample(example);
+            if(orderSplitnum>0){
                 return ServerResponse.createByErrorMessage("存在业主未处理的补货单，无法提交要货！");
+            }
+
+            example = new Example(SplitDeliver.class);
+            example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId)
+                    .andEqualTo(SplitDeliver.SHIPPING_STATE, 1).andCondition(" DATE_SUB(CURDATE(), INTERVAL 7 DAY) > date(send_time) ");
+            int list=splitDeliverMapper.selectCountByExample(example);
+            if(list>0){
+                return ServerResponse.createByErrorMessage("存在供应商发货后7天还未签收,无法提交要货！");
             }
             ServerResponse serverResponse=mendOrderService.mendChecking(houseId,worker.getWorkerTypeId(),0);
             if(!serverResponse.isSuccess()){
@@ -386,7 +393,7 @@ public class OrderService {
             example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
                     .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
-            orderSplitList = orderSplitMapper.selectByExample(example);
+            List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             OrderSplit orderSplit;
             House house = houseMapper.selectByPrimaryKey(houseId);
             if (orderSplitList.size() > 0){
@@ -414,20 +421,20 @@ public class OrderService {
                 orderSplitMapper.insert(orderSplit);
             }
 
-            JSONArray arr = JSONArray.parseArray(productArr);
+            //获取要货购物车数据
+            example = new Example(Cart.class);
+            example.createCriteria()
+                    .andEqualTo(Cart.HOUSE_ID,houseId)
+                    .andEqualTo(Cart.WORKER_TYPE_ID,worker.getWorkerTypeId())
+                    .andEqualTo(Cart.MEMBER_ID,worker.getId());
+            List<Cart> cartList=cartMapper.selectByExample(example);
             List productList=new ArrayList();
-            Map mapczai=new HashMap();
-            for(int i=0; i<arr.size(); i++) {
-                JSONObject obj = arr.getJSONObject(i);
-                Double num = Double.parseDouble(obj.getString("num"));
-                String productId = obj.getString("productId");
+            for (Cart aCartList : cartList) {
+                Double num = aCartList.getShopCount();
+                String productId = aCartList.getProductId();
                 Warehouse warehouse = warehouseMapper.getByProductId(productId, houseId);//定位到仓库id
-
-                //判断如果该商品已经插入，则不再进行第二次插入，防止数据重复展示
-                if(mapczai.get(orderSplit.getId()+"-"+productId+"-"+houseId)!=null){
-                    continue;
-                }
-                if(warehouse!=null) {
+                Product product = forMasterAPI.getProduct(house.getCityId(), productId);
+                if (warehouse != null) {
                     OrderSplitItem orderSplitItem = new OrderSplitItem();
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
                     orderSplitItem.setWarehouseId(warehouse.getId());//仓库子项id
@@ -446,9 +453,8 @@ public class OrderService {
                     orderSplitItem.setImage(warehouse.getImage());//货品图片
                     orderSplitItem.setHouseId(houseId);
                     orderSplitItemMapper.insert(orderSplitItem);
-                }else{
-                    Product product=forMasterAPI.getProduct(house.getCityId(), productId);
-                    Goods goods=forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
+                } else {
+                    Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
                     OrderSplitItem orderSplitItem = new OrderSplitItem();
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
                     orderSplitItem.setProductId(product.getId());
@@ -459,7 +465,7 @@ public class OrderService {
                     orderSplitItem.setCost(product.getCost());
                     orderSplitItem.setShopCount(0d);
                     orderSplitItem.setNum(num);
-                    orderSplitItem.setUnitName(product.getUnitName());
+                    orderSplitItem.setUnitName(forMasterAPI.getUnitName(house.getCityId(),product.getConvertUnit()));
                     orderSplitItem.setTotalPrice(product.getPrice() * num);//单项总价 销售价
                     orderSplitItem.setProductType(goods.getType());
                     orderSplitItem.setCategoryId(product.getCategoryId());
@@ -467,33 +473,39 @@ public class OrderService {
                     orderSplitItem.setHouseId(houseId);
                     orderSplitItemMapper.insert(orderSplitItem);
                 }
-                mapczai.put(orderSplit.getId()+"-"+productId+"-"+houseId,"1");
+                Double numObj = 0D;
                 //计算补货数量
-                if(warehouse!=null) {
+                if (warehouse != null) {
                     //仓库剩余数
-                    Double surCount = warehouse.getShopCount() - warehouse.getAskCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack());
+                    Double surCount = warehouse.getShopCount() - warehouse.getAskCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack());
                     //多出的数
                     Double overflowCount = (num - surCount);
                     if (overflowCount > 0) {
+                        numObj = overflowCount;
                         Map map = new HashMap();
                         map.put("num", overflowCount);
                         map.put("productId", productId);
                         productList.add(map);
-                    }else {
+                    } else {
                         //如果剩余数为负数
                         if (surCount < 0) {
+                            numObj = num;
                             Map map = new HashMap();
                             map.put("num", num);
                             map.put("productId", productId);
                             productList.add(map);
                         }
                     }
-                }else{
+                } else {
+                    numObj = num;
                     Map map = new HashMap();
                     map.put("num", num);
                     map.put("productId", productId);
                     productList.add(map);
                 }
+//                if (numObj > 0 && (product.getType() == 0 || product.getMaket() == 0)) {
+//                    return ServerResponse.createByErrorMessage("商品（" + product.getName() + "）已下架，无法要货！");
+//                }
             }
 
             //补货材料列表

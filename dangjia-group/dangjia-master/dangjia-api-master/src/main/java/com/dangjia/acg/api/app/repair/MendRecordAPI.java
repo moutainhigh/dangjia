@@ -18,16 +18,29 @@ public interface MendRecordAPI {
 
     @PostMapping(value = "app/repair/mendRecord/mendOrderDetail")
     @ApiOperation(value = "补退明细", notes = "补退明细")
-    ServerResponse mendOrderDetail(@RequestParam("mendOrderId") String mendOrderId,
+    ServerResponse mendOrderDetail(@RequestParam("userToken") String userToken,
+                                   @RequestParam("mendOrderId") String mendOrderId,
                                    @RequestParam("type") Integer type);
+
+    @PostMapping(value = "app/repair/mendRecord/mendDeliverDetail")
+    @ApiOperation(value = "供应商退明细", notes = "供应商退明细")
+    ServerResponse mendDeliverDetail(@RequestParam("userToken") String userToken,
+                                   @RequestParam("mendDeliverId") String mendDeliverId);
 
     @PostMapping(value = "app/repair/mendRecord/recordList")
     @ApiOperation(value = "记录列表", notes = "记录列表")
-    ServerResponse recordList(@RequestParam("houseId") String houseId,
+    ServerResponse recordList(@RequestParam("userToken") String userToken,
+                              @RequestParam("roleType")int roleType,
+                              @RequestParam("houseId") String houseId,
                               @RequestParam("type") Integer type);
 
     @PostMapping(value = "app/repair/mendRecord/mendList")
     @ApiOperation(value = "要补退记录", notes = "要补退记录")
-    ServerResponse mendList(@RequestParam("userToken") String userToken,@RequestParam("houseId") String houseId
-            ,@RequestParam("roleType") int roleType);
+    ServerResponse mendList(@RequestParam("userToken") String userToken,
+                            @RequestParam("houseId") String houseId,
+                            @RequestParam("roleType") int roleType);
+
+    @PostMapping(value = "app/repair/mendRecord/backOrder")
+    @ApiOperation(value = "撤回补货要货订单", notes = "撤回补货要货订单")
+    ServerResponse backOrder(@RequestParam("mendOrderId") String mendOrderId,@RequestParam("type") Integer type);
 }

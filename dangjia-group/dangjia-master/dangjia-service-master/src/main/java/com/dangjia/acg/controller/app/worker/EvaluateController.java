@@ -58,13 +58,13 @@ public class EvaluateController implements EvaluateAPI {
     @Override
     @ApiMethod
     public ServerResponse saveEvaluateSupervisor(String userToken, String houseFlowApplyId,String content,int star){
-        return evaluateService.saveEvaluateSupervisor(houseFlowApplyId,content,star);
+        return evaluateService.saveEvaluateSupervisor(houseFlowApplyId,content,star,false);
     }
 
     @Override
     @ApiMethod
     public ServerResponse saveEvaluate(String userToken,String houseFlowApplyId,String wContent,int wStar
             ,String sContent, int sStar){
-        return evaluateService.saveEvaluate(houseFlowApplyId,wContent,wStar,sContent,sStar);
+        return evaluateService.saveEvaluate(houseFlowApplyId,wContent,wStar,sContent,sStar,false);
     }
 }

@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.matter;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -33,9 +34,9 @@ public class RenovationManualService {
      * @param manual
      * @return
      */
-    public ServerResponse queryRenovationManual(Integer pageNum, Integer pageSize,RenovationManual manual){
+    public ServerResponse queryRenovationManual(PageDTO pageDTO, RenovationManual manual){
         try{
-            PageHelper.startPage(pageNum, pageSize);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Example example=new Example(RenovationManual.class);
             Example.Criteria criteria=example.createCriteria();
             if(!CommonUtil.isEmpty(manual.getWorkerTypeId())) {

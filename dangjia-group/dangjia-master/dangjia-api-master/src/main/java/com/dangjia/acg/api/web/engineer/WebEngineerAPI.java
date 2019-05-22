@@ -83,7 +83,7 @@ public interface WebEngineerAPI {
     @ApiOperation(value = "工匠列表", notes = "工匠列表")
     ServerResponse artisanList(@RequestParam("name") String name,
                                @RequestParam("workerTypeId") String workerTypeId,
-                               @RequestParam("type") String type,
+                               @RequestParam("type") String type, @RequestParam("checkType") String checkType ,
                                @RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping(value = "web/engineer/getWareHouse")
@@ -98,4 +98,36 @@ public interface WebEngineerAPI {
     @PostMapping(value = "web/engineer/freeze")
     @ApiOperation(value = "冻结账户", notes = "冻结账户")
     ServerResponse freeze(@RequestParam("memberId") String  memberId,@RequestParam("type") boolean type);
+
+    @PostMapping(value = "web/engineer/getSureList")
+    @ApiOperation(value = "获取工地交底/帮助事项", notes = "获取工地交底/帮助事项")
+    ServerResponse getSureList(@RequestParam("type") Integer type, @RequestParam("state") Integer state,
+                               @RequestParam("search") String search,@RequestParam("pageDTO") PageDTO pageDTO);
+
+    @PostMapping(value = "web/engineer/addSure")
+    @ApiOperation(value = "添加工地交底/帮助事项", notes = "添加工地交底/帮助事项")
+    ServerResponse addSure(@RequestParam("name") String name,@RequestParam("details") String details,
+                           @RequestParam("img") String img, @RequestParam("state") Integer state,
+                           @RequestParam("type") Integer type);
+
+    @PostMapping(value = "web/engineer/updateSure")
+    @ApiOperation(value = "修改工地交底/帮助事项", notes = "修改工地交底/帮助事项")
+    ServerResponse updateSure(@RequestParam("name") String name,@RequestParam("details") String details,
+                           @RequestParam("img") String img, @RequestParam("state") Integer state,
+                              @RequestParam("id") String id);
+
+    @PostMapping(value = "web/engineer/getItemsList")
+    @ApiOperation(value = "查询开工完工事项", notes = "查询开工完工事项")
+    ServerResponse getItemsList(@RequestParam("type") Integer type,@RequestParam("state") Integer state,
+                                @RequestParam("search") String search,@RequestParam("pageDTO") PageDTO pageDTO);
+
+    @PostMapping(value = "web/engineer/addItems")
+    @ApiOperation(value = "添加开工完工事项", notes = "添加开工完工事项")
+    ServerResponse addItems(@RequestParam("name") String name, @RequestParam("type") Integer type,
+                            @RequestParam("state") Integer state);
+
+    @PostMapping(value = "web/engineer/updateItems")
+    @ApiOperation(value = "修改开工完工事项", notes = "修改开工完工事项")
+    ServerResponse updateItems(@RequestParam("name") String name, @RequestParam("type") Integer type,
+                               @RequestParam("state") Integer state,@RequestParam("id") String id);
 }

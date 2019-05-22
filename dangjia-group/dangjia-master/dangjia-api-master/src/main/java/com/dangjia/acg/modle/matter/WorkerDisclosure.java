@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +19,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_matter_worker_disclosure")
 @ApiModel(description = "交底事项")
+@FieldNameConstants(prefix = "")
 public class WorkerDisclosure extends BaseEntity {
 
 	@Column(name = "name")
@@ -34,6 +36,16 @@ public class WorkerDisclosure extends BaseEntity {
 	@Desc(value = "事项内容")
 	@ApiModelProperty("事项内容")
 	private String details; //
+
+	@Column(name = "img")
+	@Desc(value = "图片")
+	@ApiModelProperty("图片")
+	private String img; //
+
+	@Column(name = "type")
+	@Desc(value = "0:交底 1帮助")
+	@ApiModelProperty("0:交底 1帮助")
+	private Integer type; //
 	
 }
 

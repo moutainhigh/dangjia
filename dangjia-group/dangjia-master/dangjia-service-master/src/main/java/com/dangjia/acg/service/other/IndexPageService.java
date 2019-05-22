@@ -12,12 +12,12 @@ import com.dangjia.acg.dto.other.HouseDetailsDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderMapper;
-import com.dangjia.acg.mapper.design.IHouseDesignImageMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.house.House;
+import org.apache.http.util.TextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -38,8 +38,6 @@ import java.util.Map;
 public class IndexPageService {
     @Autowired
     private IHouseMapper houseMapper;
-    @Autowired
-    private IHouseDesignImageMapper houseDesignImageMapper;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
@@ -64,7 +62,7 @@ public class IndexPageService {
             houseDetailsDTO.setCityId(house.getCityId());
             houseDetailsDTO.setHouseId(house.getId());
             houseDetailsDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + house.getImage());
-            houseDetailsDTO.setHouseName(house.getResidential() + "***" + house.getNumber() + "房");
+            houseDetailsDTO.setHouseName(house.getResidential() + "**"+"栋"+(TextUtils.isEmpty(house.getUnit()) ? "" : house.getUnit() + "单元") + house.getNumber() + "房");
             String[] liangArr = {};
             if (house.getLiangDian() != null) {
                 liangArr = house.getLiangDian().split(",");
@@ -99,7 +97,7 @@ public class IndexPageService {
             }
             Order order = orderMapper.getWorkerOrder(houseId, "2");
             if (order != null) {
-                mapReady.put("typeB", "¥" + (order == null ? 0 : String.format("%.2f", order.getTotalAmount().doubleValue())));
+                mapReady.put("typeB", "¥" + (order.getTotalAmount() == null ? 0 : String.format("%.2f", order.getTotalAmount().doubleValue())));
                 totalPrice = totalPrice.add(order.getTotalAmount());
             } else {
                 mapReady.put("typeB", "¥" + 0);

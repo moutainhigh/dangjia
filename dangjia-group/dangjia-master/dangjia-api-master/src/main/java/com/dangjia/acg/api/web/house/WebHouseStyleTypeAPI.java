@@ -37,8 +37,8 @@ public interface WebHouseStyleTypeAPI {
                                @RequestParam("name") String name,
                                @RequestParam("price") String price);
 
-    @PostMapping("web/houseStyle/deleteStyle")
-    @ApiOperation(value = "删除设计风格", notes = "删除设计风格")
-    ServerResponse deleteStyle(@RequestParam("request") HttpServletRequest request,
-                               @RequestParam("id") String id);
+    @PostMapping("web/houseStyle/getStyleNames")
+    @ApiOperation(value = "获取图片名称列表", notes = "获取图片名称列表")
+    ServerResponse getStyleNames(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("houseId") String houseId);
 }

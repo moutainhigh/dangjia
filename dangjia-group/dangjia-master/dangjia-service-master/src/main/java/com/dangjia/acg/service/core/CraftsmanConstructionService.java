@@ -1,7 +1,6 @@
 package com.dangjia.acg.service.core;
 
 import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.coche.HouseUtil;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -22,6 +21,7 @@ import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
+import com.dangjia.acg.util.HouseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -119,6 +119,7 @@ public class CraftsmanConstructionService {
         bean.setWorkerType(2);//0:大管家；1：工匠；2：设计师；3：精算师
         bean.setHouseFlowId(hf.getId());
         bean.setDecorationType(house.getDecorationType());
+        bean.setDesignerOk(house.getDesignerOk());
         setMoney(bean, hw);
         Member houseMember = memberMapper.selectByPrimaryKey(house.getMemberId());//业主
         if (houseMember != null) {
@@ -132,7 +133,7 @@ public class CraftsmanConstructionService {
         List<ConstructionByWorkerIdBean.ButtonListBean> buttonList = new ArrayList<>();
         if (house.getDecorationType() != 2 && house.getDesignerOk() == 1) {
             buttonList.add(getButton("去量房", 2));
-        }else{
+        } else {
             switch (house.getDesignerOk()) {
                 case 1://1已支付-设计师待量房
                 case 9://9量房图发给业主
@@ -189,7 +190,7 @@ public class CraftsmanConstructionService {
             bean.setUserId(houseMember.getId());//
         }
         setMenus(bean, house, hf);
-        Map<String, Object> dataMap = HouseUtil.getBudgetDatas(house.getBudgetOk());
+        Map<String, Object> dataMap =  HouseUtil.getBudgetDatas(house.getBudgetOk());
         bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         return ServerResponse.createBySuccess("获取施工列表成功！", bean);
     }
@@ -614,14 +615,25 @@ public class CraftsmanConstructionService {
             bean.setAlreadyMoney(new BigDecimal(0));//已得钱
             bean.setAlsoMoney(new BigDecimal(0));//还可得钱
         } else {
-            BigDecimal alsoMoney = (hwo.getWorkPrice() == null ? new BigDecimal(0) :
-                    hwo.getWorkPrice()).subtract(hwo.getHaveMoney() == null ? new BigDecimal(0) : hwo.getHaveMoney());//还可得钱
-
-            //已得到的钱+滞留金的钱=已得总钱
-            BigDecimal alreadyMoney = (hwo.getHaveMoney() == null ? new BigDecimal(0) :
-                    hwo.getHaveMoney()).add(hwo.getRetentionMoney() == null ? new BigDecimal(0) : hwo.getRetentionMoney());//已得钱
-            bean.setAlreadyMoney(alreadyMoney);//已得钱
+            BigDecimal workPrice =hwo.getWorkPrice() == null ? new BigDecimal(0) : hwo.getWorkPrice();//总共钱
+            BigDecimal haveMoney =hwo.getHaveMoney() == null ? new BigDecimal(0) : hwo.getHaveMoney();//已得到的钱
+            BigDecimal repairPrice =hwo.getRepairPrice() == null ? new BigDecimal(0) : hwo.getRepairPrice();//当前阶段补人工钱
+            BigDecimal repairTotalPrice =hwo.getRepairTotalPrice() == null ? new BigDecimal(0) : hwo.getRepairTotalPrice();//补人工总钱
+            BigDecimal retentionMoney =hwo.getRetentionMoney() == null ? new BigDecimal(0) : hwo.getRetentionMoney();//滞留金
+            BigDecimal deductPrice =hwo.getDeductPrice() == null ? new BigDecimal(0) : hwo.getDeductPrice();//评价积分扣除的钱
+            //总共钱-已得到的钱+补人工钱-滞留金-评价扣的钱=还可得钱
+            BigDecimal alsoMoney = new BigDecimal(workPrice.doubleValue()-haveMoney.doubleValue()+repairPrice.doubleValue()-retentionMoney.doubleValue()-deductPrice.doubleValue());
+            if(alsoMoney.doubleValue()<0){
+                alsoMoney=new BigDecimal(0);
+            }
             bean.setAlsoMoney(alsoMoney);//还可得钱
+
+            //已得到的钱+滞留金的钱+（补人工总钱-当前阶段补人工钱）=已得总钱
+            BigDecimal alreadyMoney = new BigDecimal(haveMoney.doubleValue()+retentionMoney.doubleValue()+(repairTotalPrice.doubleValue()-repairPrice.doubleValue()));
+            bean.setAlreadyMoney(alreadyMoney);//已得钱
+
+
+
         }
     }
 

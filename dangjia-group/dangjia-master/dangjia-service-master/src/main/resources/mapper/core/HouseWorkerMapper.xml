@@ -57,6 +57,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             worker_type_id = #{workerTypeId}
         and
             house_id = #{houseId}
+        GROUP BY is_select desc limit 1
     </select>
 
     <!-- 根据工人id查询未完工任务-->

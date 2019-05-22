@@ -1,6 +1,8 @@
 package com.dangjia.acg.common.constants;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 公共应用常量类
@@ -118,6 +120,8 @@ public class DjConstants {
         public final static String CONSTUCTIONRECORD = "constuctionRecord?userToken=%s&cityId=%s&title=%s";//施工记录
         public final static String YZREGISTERPROTOCOL = "yzRegisterProtocol?userToken=%s&cityId=%s&title=%s";//注册协议
 
+        public final static String TUIPRODUCTEXAMINE = "tuiProductExamine?userToken=%s&cityId=%s&title=%s";//大管家确认退货审核
+
     }
 
     /**
@@ -136,7 +140,42 @@ public class DjConstants {
         public final static Integer ZHENGTI_WANGONG_SUCCESS = 102;// 整体完工审核
         public final static Integer NO_PASS = 666;// 整体完工
     }
+    /**
+     * ApplyType 任务进程-申请类型
+     */
+    public static class RecordType {
+        public final static Integer MEIRI_WANGGONG = 0;//0每日完工申请
+        public final static Integer JIEDUAN_WANGONG = 1;// 1阶段完工申请
+        public final static Integer ZHENGTI_WANGONG = 2;// 2整体完工申请
+        public final static Integer TINGGONG = 3;// 3停工申请
+        public final static Integer MEIRI_KAIGONG = 4;// 4：每日开工
+        public final static Integer YOUXIAO_XUNCHA = 5;// 5有效巡查
+        public final static Integer JJ_TINGGONG = 6;// 6同意停工
+        public final static Integer TY_TINGGONG = 7;// 7拒绝停工
+        public final static Integer BURENGONG = 8;// 8补人工
+        public final static Integer TUIRENGONG = 9;// 9退人工
+        public final static Integer BUCAILIAO = 10;// 10补材料
+        public final static Integer TUICAILIAO = 11;// 11退材料
+        public final static Integer YZ_TUICAILIAO = 12;// 12业主退材料
 
+        public final static Map getRecordTypeMap(){
+            Map<Integer, String> applyTypeMap = new HashMap<>();
+            applyTypeMap.put(DjConstants.RecordType.MEIRI_WANGGONG, "每日完工申请");
+            applyTypeMap.put(DjConstants.RecordType.JIEDUAN_WANGONG, "阶段完工申请");
+            applyTypeMap.put(DjConstants.RecordType.ZHENGTI_WANGONG, "整体完工申请");
+            applyTypeMap.put(DjConstants.RecordType.TINGGONG, "停工申请");
+            applyTypeMap.put(DjConstants.RecordType.MEIRI_KAIGONG, "每日开工");
+            applyTypeMap.put(DjConstants.RecordType.YOUXIAO_XUNCHA, "巡查");
+            applyTypeMap.put(DjConstants.RecordType.JJ_TINGGONG, "同意停工");
+            applyTypeMap.put(DjConstants.RecordType.TY_TINGGONG, "拒绝停工");
+            applyTypeMap.put(DjConstants.RecordType.BURENGONG, "补人工");
+            applyTypeMap.put(DjConstants.RecordType.TUIRENGONG, "退人工");
+            applyTypeMap.put(DjConstants.RecordType.BUCAILIAO, "补材料");
+            applyTypeMap.put(DjConstants.RecordType.TUICAILIAO, "退材料");
+            applyTypeMap.put(DjConstants.RecordType.YZ_TUICAILIAO, "业主退材料");
+            return applyTypeMap;
+        }
+    }
 
     /**
      * Type 工序类型 人工1 材料2 服务3
@@ -182,7 +221,7 @@ public class DjConstants {
         public final static String CRAFTSMAN_PAYMENT = "工匠您好！业主已支付【%s】工匠费用，请及时查看";
         public final static String STEWARD_CRAFTSMAN_FINISHED = "业主，您好！【%s】大管家已经与工匠完成开工交底，【%s】工序施工正式开始";
         public final static String CRAFTSMAN_NOT_START = "工匠您好！【%s】今日未开工，请在12点前开工，如有不便需要请假请申请停工。";
-        public final static String STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE = "大管家您好！【%s】有工匠申请停工，请查看";
+        public final static String STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE = "业主您好！【%s】有工匠申请停工，请查看";
         public final static String CRAFTSMAN_NEW_REPLACE = "业主您好！经多方协调，当家装修已为您更换了新的工匠，立即查看";
         public final static String STEWARD_APPLY_FINISHED = "大管家您好！【%s】【%s】申请阶段/整体完工，请审核！";
         public final static String STEWARD_APPLY_FINISHED_NOT_PASS = "工匠您好！您申请的【%s】阶段/整体完工未通过大管家的审核，请及时整改！";
@@ -206,7 +245,7 @@ public class DjConstants {
         public final static String CRAFTSMAN_TWO_REPLACE = "工匠您好！经多方协调，【%s】已将您更换，请重新抢单，再接再厉！";
         public final static String OWNER_TWO_FINISHED = "业主您好！【%s】【%s】阶段/整体完工已通过大管家的审核，请查看并对工匠和大管家分别评分，谢谢！";
 
-        public final static String STEWARD_SHENGHECHAOSHI = "大管家您好！【%s】【%s】阶段/整体完工申请，审核超时，将从您的账户中扣除100,将延后一天等待审核！";
+        public final static String STEWARD_SHENGHECHAOSHI = "大管家您好！【%s】【%s】阶段/整体完工申请，审核倒计时结束，自动扣钱100元，每超出一天再多扣100元！";
 
 
         public final static String ACTUARIAL_COMPLETION = "业主您好！您的美宅【%s】精算已完成，请等待大管家抢单。";

@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 import org.apache.commons.lang.StringUtils;
 
 import javax.persistence.Column;
@@ -18,6 +19,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_config_message")
 @ApiModel(description = "推送消息历史表")
+@FieldNameConstants(prefix = "")
 public class ConfigMessage extends BaseEntity {
 
     @Column(name = "name")

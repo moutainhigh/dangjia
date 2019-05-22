@@ -13,6 +13,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.WorkIntegralDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
@@ -34,13 +35,13 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
 import com.dangjia.acg.service.core.HouseWorkerSupService;
+import com.dangjia.acg.service.house.HouseService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,10 +52,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * author: Ronalcheng
@@ -101,6 +99,10 @@ public class EvaluateService {
 
     @Autowired
     private IWorkerDetailMapper iWorkerDetailMapper;
+    @Autowired
+    private HouseService houseService;
+
+
     /**
      * 获取积分记录
      * @param userToken
@@ -132,29 +134,26 @@ public class EvaluateService {
         }
         example.orderBy(Evaluate.MODIFY_DATE).desc();
         List<Evaluate> list = evaluateMapper.selectByExample(example);
-        List<Map> listMap = (List<Map>) BeanUtils.listToMap(list);
-        for (int i = 0; i < listMap.size(); i++) {
-            Map map=listMap.get(i);
-            String memberId = (String)map.get(Evaluate.MEMBER_ID);
-            if(!CommonUtil.isEmpty(map.get(Evaluate.BUTLER_ID))){
-                memberId = (String)map.get(Evaluate.BUTLER_ID);
+        List<Map> listMap =new ArrayList<>();
+        for (Evaluate evaluate1 : list) {
+            Map map= BeanUtils.beanToMap(evaluate1);
+            String memberId;
+            if(evaluate1.getState()==3){
+                memberId=evaluate1.getButlerId();
+            }else{
+                memberId=evaluate1.getMemberId();
             }
             Member member=memberMapper.selectByPrimaryKey(memberId);
             member.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             map.put(Member.HEAD,member.getHead());
             map.put("memberName",member.getNickName());
-
-            if(!CommonUtil.isEmpty(map.get(Evaluate.STATE))){
-                Integer state=(Integer)map.get(Evaluate.STATE);
-                if(state==1){
-                    map.put("memberName","业主 "+member.getNickName());
-                }
-                if(state==3){
-                    map.put("memberName","大管家 "+member.getNickName());
-                }
+            if(evaluate1.getState()==1){
+                map.put("memberName","业主 "+member.getNickName());
             }
-            listMap.remove(i);
-            listMap.add(i,map);
+            if(evaluate1.getState()==3){
+                map.put("memberName","大管家 "+member.getNickName());
+            }
+            listMap.add(map);
         }
         return ServerResponse.createBySuccess("ok",listMap);
     }
@@ -212,34 +211,34 @@ public class EvaluateService {
         //每超时一天扣除一次余额，每扣除一次  结束时间将延后一天，继续等待管家审核
         if(houseFlowApply.getStartDate().getTime()<=new Date().getTime()){
 
-//            House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-//            Member member = memberMapper.getSupervisor(houseFlowApply.getHouseId());//houseId获得大管家
-//            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
-//            BigDecimal money=new BigDecimal(100);
-//            BigDecimal surplusMoney = member.getSurplusMoney().subtract(money);
-//            BigDecimal haveMoney = member.getHaveMoney().subtract(money);
-//            WorkerDetail workerDetail = new WorkerDetail();
-//            workerDetail.setName("阶段/整体完工申请，审核超时，工钱扣除");
-//            workerDetail.setWorkerId(member.getId());
-//            workerDetail.setWorkerName(member.getName());
-//            workerDetail.setHouseId(houseFlowApply.getHouseId());
-//            workerDetail.setMoney(money);
-//            workerDetail.setWalletMoney(surplusMoney);
-//            workerDetail.setHaveMoney(haveMoney);
-//            workerDetail.setState(3);
-//            iWorkerDetailMapper.insert(workerDetail);
-//
-//
-//            member.setSurplusMoney(surplusMoney);
-//            member.setHaveMoney(haveMoney);
-//            memberMapper.updateByPrimaryKeySelective(member);
+            House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+            Member member = memberMapper.getSupervisor(houseFlowApply.getHouseId());//houseId获得大管家
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
+            BigDecimal money=new BigDecimal(100);
+            BigDecimal surplusMoney = member.getSurplusMoney().subtract(money);
+            BigDecimal haveMoney = member.getHaveMoney().subtract(money);
+            WorkerDetail workerDetail = new WorkerDetail();
+            workerDetail.setName("阶段/整体完工申请，审核超时，工钱扣除");
+            workerDetail.setWorkerId(member.getId());
+            workerDetail.setWorkerName(member.getName());
+            workerDetail.setHouseId(houseFlowApply.getHouseId());
+            workerDetail.setMoney(money);
+            workerDetail.setWalletMoney(surplusMoney);
+            workerDetail.setHaveMoney(haveMoney);
+            workerDetail.setState(3);
+            iWorkerDetailMapper.insert(workerDetail);
+
+
+            member.setSurplusMoney(surplusMoney);
+            member.setHaveMoney(haveMoney);
+            memberMapper.updateByPrimaryKeySelective(member);
 
             //当前时间延后一天等待审核
             houseFlowApply.setStartDate(DateUtil.addDateDays(new Date(),1));
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
 
-//            configMessageService.addConfigMessage(null,"gj",member.getId(),"0","阶段/整体审核超时扣钱提醒",String.format(DjConstants.PushMessage.STEWARD_SHENGHECHAOSHI,house.getHouseName(),workerType.getName()) ,"0");
+            configMessageService.addConfigMessage(null,"gj",member.getId(),"0","阶段/整体审核超时扣钱提醒",String.format(DjConstants.PushMessage.STEWARD_SHENGHECHAOSHI,house.getHouseName(),workerType.getName()) ,"0");
 
         }
 
@@ -344,6 +343,7 @@ public class EvaluateService {
                 hfa.setPayState(0);//是否付款
                 hfa.setApplyDec("业主您好，我是大管家，我已验收了" + worker.getName() + (houseFlowApply.getApplyType() == 1?"的阶段完工":"的整体完工"));//描述
                 houseFlowApplyMapper.insert(hfa);
+                houseService.insertConstructionRecord(hfa);
             }
             if(houseFlowApply.getApplyType() == 1){
                 //阶段审核
@@ -368,11 +368,11 @@ public class EvaluateService {
      * 业主评价管家完工 最后完工
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveEvaluateSupervisor(String houseFlowApplyId,String content,int star){
+    public ServerResponse saveEvaluateSupervisor(String houseFlowApplyId,String content,int star,boolean isAuto){
         try{
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            if(houseFlowApply.getMemberCheck() == 1){
+            if(houseFlowApply.getMemberCheck() == 1||houseFlowApply.getMemberCheck() == 3){
                 return ServerResponse.createByErrorMessage("重复审核");
             }
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
@@ -381,7 +381,11 @@ public class EvaluateService {
             evaluate.setMemberId(house.getMemberId());
             evaluate.setHouseId(houseFlowApply.getHouseId());
             evaluate.setButlerId("");
-            evaluate.setStar(star);//管家
+            if(star == 0){
+                evaluate.setStar(1);//0星为5星
+            }else{
+                evaluate.setStar(star);
+            }
             evaluate.setHouseFlowApplyId(houseFlowApplyId);
             evaluate.setHouseFlowId(houseFlowApply.getHouseFlowId());
             evaluate.setWorkerId(worker.getId());
@@ -396,9 +400,16 @@ public class EvaluateService {
             updateFavorable(worker.getId());
 
             //业主审核管家
-            houseFlowApplyService.checkSupervisor(houseFlowApplyId);
+            houseFlowApplyService.checkSupervisor(houseFlowApplyId,isAuto);
 
             configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","业主评价",String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE,house.getHouseName()) ,"6");
+
+            //短信通知业务本门
+            Map<String,String> temp_para=new HashMap();
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
+            temp_para.put("house_name",house.getHouseName());
+            temp_para.put("worker_name",workerType.getName());
+            JsmsUtil.sendSMS("15675101794","164425",temp_para);
             return ServerResponse.createBySuccessMessage("操作成功");
         }catch (Exception e){
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -412,18 +423,12 @@ public class EvaluateService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveEvaluate(String houseFlowApplyId,String wContent,int wStar
-            ,String sContent, int sStar){
+            ,String sContent, int sStar,boolean isAuto){
         try{
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            if(houseFlowApply.getMemberCheck() == 1){
+            if(houseFlowApply.getMemberCheck() == 1||houseFlowApply.getMemberCheck() == 3){
                 return ServerResponse.createByErrorMessage("重复审核");
-            }
-            if(houseFlowApply.getApplyType()!= 0) {
-                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseFlowApply.getHouseId(), houseFlowApply.getWorkerTypeId());
-                if (changeOrderList.size() > 0) {
-                    return ServerResponse.createByErrorMessage("该工种有未处理人工变更单！");
-                }
             }
             //在worker中根据评论星数修改工人的积分
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
@@ -437,7 +442,11 @@ public class EvaluateService {
                 evaluate.setMemberId(house.getMemberId());
                 evaluate.setHouseId(houseFlowApply.getHouseId());
                 evaluate.setButlerId(supervisor.getId());
-                evaluate.setStar(wStar);//工人
+                if(wStar == 0){
+                    evaluate.setStar(1);//0星为5星
+                }else{
+                    evaluate.setStar(wStar);//工人
+                }
                 evaluate.setHouseFlowApplyId(houseFlowApplyId);
                 evaluate.setHouseFlowId(houseFlowApply.getHouseFlowId());
                 evaluate.setWorkerId(worker.getId());
@@ -459,7 +468,11 @@ public class EvaluateService {
                 evaluate.setContent(sContent);
                 evaluate.setMemberId(house.getMemberId());
                 evaluate.setHouseId(houseFlowApply.getHouseId());
-                evaluate.setStar(sStar);//管家
+                if(wStar == 0){
+                    evaluate.setStar(1);//0星为5星
+                }else{
+                    evaluate.setStar(sStar);//管家
+                }
                 evaluate.setHouseFlowApplyId(houseFlowApplyId);
                 evaluate.setHouseFlowId(houseFlowApply.getHouseFlowId());
                 evaluate.setWorkerId(supervisor.getId());
@@ -481,7 +494,7 @@ public class EvaluateService {
             updateFavorable(supervisor.getId());
 
             //业主审核
-            ServerResponse serverResponse=houseFlowApplyService.checkWorker(houseFlowApplyId);
+            ServerResponse serverResponse=houseFlowApplyService.checkWorker(houseFlowApplyId,isAuto);
             if(serverResponse.getResultCode()!= EventStatus.SUCCESS.getCode()){
 
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();

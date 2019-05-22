@@ -64,7 +64,7 @@ public class ClueService {
     /**
      * 查询线索list
      */
-    public ServerResponse getClueList(Integer stage, String values, Integer pageNum, Integer pageSize) {
+    public ServerResponse getClueList(Integer stage, String values,String memberId,String beginDate,String endDate, Integer pageNum, Integer pageSize) {
         try {
             Example example = new Example(Clue.class);
             Example.Criteria criteria = example.createCriteria();
@@ -77,6 +77,16 @@ public class ClueService {
             //criteria.andCondition(" stage IN (0,1) ");
             if (!CommonUtil.isEmpty(values)) {
                 criteria.andCondition(" CONCAT(owername,phone,wechat,address) like CONCAT('%','" + values + "','%')");
+            }
+            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
+                if(beginDate.equals(endDate)){
+                    beginDate=beginDate+" "+"00:00:00";
+                    endDate=endDate+" "+"23:59:59";
+                }
+                criteria.andBetween(Clue.CREATE_DATE,beginDate,endDate);
+            }
+            if(memberId!=null && memberId!=""){
+                criteria.andEqualTo(Clue.CUS_SERVICE,memberId);
             }
             example.orderBy(Clue.MODIFY_DATE).desc();
             PageHelper.startPage(pageNum, pageSize);

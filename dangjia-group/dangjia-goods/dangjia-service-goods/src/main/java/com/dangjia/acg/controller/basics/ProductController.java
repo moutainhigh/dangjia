@@ -1,5 +1,6 @@
 package com.dangjia.acg.controller.basics;
 
+
 import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
@@ -222,6 +223,25 @@ public class ProductController implements ProductAPI {
 		PageInfo  productList = productService.queryProductData( pageNum,  pageSize,name, categoryId,productType,productId);
 		return productList;
 	}
+//
+//	/**
+//	 * 修改货品（全局更新）
+//	 * @param request
+//	 * @param id
+//	 * @param categoryId
+//	 * @param brandSeriesId
+//	 * @param brandId
+//	 * @param name
+//	 * @param unitId
+//	 * @param unitName
+//	 * @return
+//	 */
+//	@Override
+//	@ApiMethod
+//	public ServerResponse updateProductByProductId(HttpServletRequest request, String id, String categoryId, String brandSeriesId,
+//												   String brandId, String name, String unitId, String unitName) {
+//		return productService.updateProductByProductId(id,categoryId,brandSeriesId,brandId,name,unitId,unitName);
+//	}
 
 	/**
 	 * 根据系列和属性查询切换货品

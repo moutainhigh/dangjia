@@ -18,6 +18,10 @@ public interface WebOrderSplitAPI {
     @ApiOperation(value = "供应商发货", notes = "供应商发货")
     ServerResponse sentSplitDeliver(@RequestParam("splitDeliverId") String splitDeliverId);
 
+    @PostMapping("web/deliver/orderSplit/rejectionSplitDeliver")
+    @ApiOperation(value = "收货拒收", notes = "收货拒收")
+    ServerResponse rejectionSplitDeliver(@RequestParam("splitDeliverId") String splitDeliverId);
+
     @PostMapping("web/deliver/orderSplit/splitDeliverDetail")
     @ApiOperation(value = "发货单明细", notes = "发货单明细")
     ServerResponse splitDeliverDetail(@RequestParam("splitDeliverId") String splitDeliverId);

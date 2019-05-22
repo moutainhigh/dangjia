@@ -32,5 +32,4 @@ public class GoodsCategory extends BaseEntity {
 
 	@Column(name = "image")
     private String image;//图片
-
 }

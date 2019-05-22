@@ -1,14 +1,18 @@
 package com.dangjia.acg.service.basics;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.app.repair.MasterMendWorkerAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.TechnologyDTO;
 import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
+import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
 import com.dangjia.acg.modle.basics.Technology;
@@ -22,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.security.x509.OtherName;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
@@ -49,13 +53,16 @@ public class WorkerGoodsService {
     private WorkerTypeAPI workerTypeAPI;
     @Autowired
     private TechnologyService technologyService;
+    @Autowired
+    private IBudgetWorkerMapper iBudgetWorkerMapper;
+    @Autowired
+    private MasterMendWorkerAPI masterMendWorkerAPI;
 
 
     private static Logger LOG = LoggerFactory.getLogger(WorkerGoodsService.class);
 
-    public ServerResponse<PageInfo> getWorkerGoodses(Integer pageNum, Integer pageSize, String workerTypeId, String searchKey, String showGoods) {
-
-        PageHelper.startPage(pageNum, pageSize);
+    public ServerResponse<PageInfo> getWorkerGoodses(PageDTO pageDTO, String workerTypeId, String searchKey, String showGoods) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<WorkerGoods> productList = iWorkerGoodsMapper.selectList(StringUtils.isBlank(workerTypeId) ? null : workerTypeId,
                 StringUtils.isBlank(searchKey) ? null : searchKey, StringUtils.isBlank(showGoods) ? null : showGoods);
 
@@ -76,27 +83,28 @@ public class WorkerGoodsService {
     }
 
 
-    public WorkerGoodsDTO getWorkerGoodsDTO(String workerGoodsSn,String workerTypeId,String shopCount){
-        Example example=new Example(WorkerGoods.class);
+    public WorkerGoodsDTO getWorkerGoodsDTO(String workerGoodsSn, String workerTypeId, String shopCount) {
+        Example example = new Example(WorkerGoods.class);
         example.createCriteria()
-                .andEqualTo(WorkerGoods.DATA_STATUS,'0')
-                .andEqualTo(WorkerGoods.SHOW_GOODS,1)
-                .andEqualTo(WorkerGoods.WORKER_GOODS_SN,workerGoodsSn)
-                .andEqualTo(WorkerGoods.WORKER_TYPE_ID,workerTypeId)
+                .andEqualTo(WorkerGoods.DATA_STATUS, '0')
+                .andEqualTo(WorkerGoods.SHOW_GOODS, 1)
+                .andEqualTo(WorkerGoods.WORKER_GOODS_SN, workerGoodsSn)
+                .andEqualTo(WorkerGoods.WORKER_TYPE_ID, workerTypeId)
         ;
-        List<WorkerGoods> workerGoods=iWorkerGoodsMapper.selectByExample(example);
-        WorkerGoodsDTO workerGoodsDTO=new WorkerGoodsDTO();
-        if(workerGoods!=null&&workerGoods.size()>0){
-            workerGoodsDTO=assembleWorkerGoodsResult(workerGoods.get(0));
+        List<WorkerGoods> workerGoods = iWorkerGoodsMapper.selectByExample(example);
+        WorkerGoodsDTO workerGoodsDTO = new WorkerGoodsDTO();
+        if (workerGoods != null && workerGoods.size() > 0) {
+            workerGoodsDTO = assembleWorkerGoodsResult(workerGoods.get(0));
             workerGoodsDTO.setShopCount(shopCount);
-        }else{
+        } else {
             workerGoodsDTO.setWorkerGoodsSn(workerGoodsSn);
             workerGoodsDTO.setWorkerTypeId(workerTypeId);
-            workerGoodsDTO.setMsg("找不到该人工商品（"+workerGoodsSn+"）,请检查是否创建或者停用！");
+            workerGoodsDTO.setMsg("找不到该人工商品（" + workerGoodsSn + "）,请检查是否创建或者停用！");
         }
         return workerGoodsDTO;
     }
-    public String getImageAddress(String address,String image){
+
+    public String getImageAddress(String address, String image) {
         String imgStr = "";
         if (!CommonUtil.isEmpty(image)) {
             String[] imgArr = image.split(",");
@@ -110,6 +118,7 @@ public class WorkerGoodsService {
         }
         return imgStr;
     }
+
     private WorkerGoodsDTO assembleWorkerGoodsResult(WorkerGoods workerGoods) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
@@ -117,9 +126,9 @@ public class WorkerGoodsService {
             workerGoodsResult.setId(workerGoods.getId());
             workerGoodsResult.setName(workerGoods.getName());
             workerGoodsResult.setWorkerGoodsSn(workerGoods.getWorkerGoodsSn());
-            workerGoodsResult.setImage(getImageAddress(address,workerGoods.getImage()));
+            workerGoodsResult.setImage(getImageAddress(address, workerGoods.getImage()));
             workerGoodsResult.setImageUrl(workerGoods.getImage());
-            workerGoodsResult.setWorkerDec(getImageAddress(address,workerGoods.getWorkerDec()));
+            workerGoodsResult.setWorkerDec(getImageAddress(address, workerGoods.getWorkerDec()));
             workerGoodsResult.setWorkerDecUrl(workerGoods.getWorkerDec());
             workerGoodsResult.setUnitId(workerGoods.getUnitId());
             workerGoodsResult.setUnitName(workerGoods.getUnitName());
@@ -152,7 +161,7 @@ public class WorkerGoodsService {
                 technologyResult.setName(technology.getName());
                 technologyResult.setWorkerTypeId(technology.getWorkerTypeId());
                 technologyResult.setContent(technology.getContent());
-                technologyResult.setImage(getImageAddress(address,technology.getImage()));
+                technologyResult.setImage(getImageAddress(address, technology.getImage()));
                 technologyResult.setImageUrl(technology.getImage());
                 technologyResult.setSampleImage(technology.getSampleImage());
                 technologyResult.setSampleImageUrl(address + technology.getSampleImage());
@@ -259,7 +268,8 @@ public class WorkerGoodsService {
 //    }
 
 
-    public ServerResponse<String> setWorkerGoods(WorkerGoods workerGoods, String technologyJsonList, String deleteTechnologyIds) {
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse<String> setWorkerGoods(WorkerGoods workerGoods, String technologyJsonList, String deleteTechnologyIds){
 
         LOG.info("insertTechnologyList workerGoods:" + workerGoods + "  technologyJsonList:" + technologyJsonList);
         List<WorkerGoods> workerGoodsList = iWorkerGoodsMapper.selectByName(workerGoods.getName(), workerGoods.getWorkerTypeId());
@@ -298,8 +308,17 @@ public class WorkerGoodsService {
 
             if (StringUtils.isNotBlank(workerGoods.getId()) && workerG != null) {
                 workerGoods.setModifyDate(new Date());
-                if (iWorkerGoodsMapper.updateByPrimaryKeySelective(workerGoods) < 0)
+                if (iWorkerGoodsMapper.updateByPrimaryKeySelective(workerGoods) < 0) {
                     return ServerResponse.createByErrorMessage("更新工价商品失败");
+                }else{
+                    //相关联表也更新
+                    iBudgetWorkerMapper.updateBudgetMaterialById(workerGoods.getId());
+                    Example example=new Example(WorkerGoods.class);
+                    example.createCriteria().andEqualTo(WorkerGoods.ID,workerGoods.getId());
+                    List<WorkerGoods> list = iWorkerGoodsMapper.selectByExample(example);
+                    System.out.println(list);
+                    masterMendWorkerAPI.updateMendWorker(JSON.toJSONString(list));
+                }
             } else {
                 workerGoods.setCreateDate(new Date());
                 workerGoods.setModifyDate(new Date());
@@ -307,11 +326,13 @@ public class WorkerGoodsService {
                     return ServerResponse.createByErrorMessage("新增工价商品失败");
             }
 
-            String[] deleteTechnologyIdArr = deleteTechnologyIds.split(",");
-            for (int i = 0; i < deleteTechnologyIdArr.length; i++) {
-                if (iTechnologyMapper.selectByPrimaryKey(deleteTechnologyIdArr[i]) != null) {
-                    if (iTechnologyMapper.deleteByPrimaryKey(deleteTechnologyIdArr[i]) < 0)
-                        return ServerResponse.createByErrorMessage("删除id：" + deleteTechnologyIdArr[i] + "失败");
+            if(null!=deleteTechnologyIds&&""!=deleteTechnologyIds) {
+                String[] deleteTechnologyIdArr = deleteTechnologyIds.split(",");
+                for (int i = 0; i < deleteTechnologyIdArr.length; i++) {
+                    if (iTechnologyMapper.selectByPrimaryKey(deleteTechnologyIdArr[i]) != null) {
+                        if (iTechnologyMapper.deleteByPrimaryKey(deleteTechnologyIdArr[i]) < 0)
+                            return ServerResponse.createByErrorMessage("删除id：" + deleteTechnologyIdArr[i] + "失败");
+                    }
                 }
             }
 

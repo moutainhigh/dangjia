@@ -36,7 +36,13 @@ public class ActuaryService {
      */
     public ServerResponse getActuaryAll(HttpServletRequest request, PageDTO pageDTO, String name, String budgetOk) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<HouseListDTO> houseList = houseMapper.getActuaryAll(budgetOk,name);
+        String dataStatus="0";//正常数据
+        if(Integer.parseInt(budgetOk)<0){
+            //当类型小于0时，则查询移除的数据
+            dataStatus="1";
+            budgetOk="";
+        }
+        List<HouseListDTO> houseList = houseMapper.getActuaryAll(budgetOk,name,dataStatus);
         PageInfo pageResult = new PageInfo(houseList);
         return ServerResponse.createBySuccess("查询成功",pageResult);
     }

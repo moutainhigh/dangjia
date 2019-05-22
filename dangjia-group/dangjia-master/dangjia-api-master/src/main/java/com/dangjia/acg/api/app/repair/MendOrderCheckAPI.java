@@ -25,5 +25,15 @@ public interface MendOrderCheckAPI {
     ServerResponse checkMendOrder(@RequestParam("userToken") String userToken,
                                   @RequestParam("mendOrderId") String mendOrderId,
                                   @RequestParam("roleType") String roleType,
-                                  @RequestParam("state") Integer state);
+                                  @RequestParam("state") Integer state,
+                                  @RequestParam("productArr") String productArr
+    );
+
+    @PostMapping(value = "app/repair/mendOrderCheck/confirmMendOrder")
+    @ApiOperation(value = "大管家确认退货单", notes = "大管家确认退货单")
+    ServerResponse confirmMendOrder(@RequestParam("userToken") String userToken,
+                                    @RequestParam("mendOrderId") String mendOrderId,
+                                    @RequestParam("mendDeliverId") String mendDeliverId,
+                                    @RequestParam("productArr") String productArr
+    );
 }

@@ -234,4 +234,12 @@
             w.worker_type_id =#{workerTypeId}
         </if>
     </select>
+
+
+    <!--更新单位-->
+    <update id="updateWorkerGoodsByUnitId" parameterType="java.lang.String">
+        update dj_basics_worker_goods
+        set unit_name=#{unitName}
+        where unit_id=#{unitId}
+    </update>
 </mapper>

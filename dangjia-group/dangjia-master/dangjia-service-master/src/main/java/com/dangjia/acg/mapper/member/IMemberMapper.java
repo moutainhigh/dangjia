@@ -17,7 +17,7 @@ import java.util.Map;
 @Repository
 public interface IMemberMapper extends Mapper<Member> {
 
-    List<Member> artisanList(@Param("name") String name,@Param("workerTypeId")String workerTypeId ,@Param("type") String type);
+    List<Member> artisanList(@Param("name") String name,@Param("workerTypeId")String workerTypeId ,@Param("type") String type,@Param("checkType")String checkType);
 
     /**通过评价表的houseId获得大管家*/
     Member getSupervisor(@Param("houseId") String houseId);
@@ -33,7 +33,11 @@ public interface IMemberMapper extends Mapper<Member> {
      */
     List<Member> getMemberListByName(@Param("searchKey") String searchKey,
                                       @Param("stage") Integer stage, @Param("userRole") String userRole,
-                                      @Param("childsLabelIdArr")String[] childsLabelIdArr,@Param("orderBy") String orderBy);
+                                      @Param("childsLabelIdArr")String[] childsLabelIdArr,@Param("orderBy") String orderBy,
+                                     @Param("type") String type,
+                                     @Param("userId") String userId,
+                                     @Param("beginDate") String beginDate,
+                                     @Param("endDate") String endDate);
 
     List<Map<String,Object>> getMemberList();
 //    //查询所有业主关联客服的所有数据

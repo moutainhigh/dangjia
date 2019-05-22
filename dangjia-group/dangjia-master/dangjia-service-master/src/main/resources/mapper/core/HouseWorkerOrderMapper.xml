@@ -16,11 +16,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         total_price as totalPrice,
         material_price as materialPrice,
         retention_money as retentionMoney,
+        deduct_price as deductPrice,
         safe_price as safePrice,
         after_change as afterChange,
         check_money as checkMoney,
         business_order_number as businessOrderNumber,
         repair_price as repairPrice,
+        repair_total_price  as repairTotalPrice,
         create_date as createDate,
         modify_date as modifyDate
     </sql>

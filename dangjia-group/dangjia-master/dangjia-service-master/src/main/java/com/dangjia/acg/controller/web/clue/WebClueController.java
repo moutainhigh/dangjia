@@ -4,13 +4,10 @@ import com.dangjia.acg.api.web.clue.WebClueAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.clue.ClueService;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,8 +36,8 @@ public class WebClueController implements WebClueAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getClueList (Integer stage,String values, PageDTO pageDTO){
-        return clueService.getClueList(stage,values,pageDTO.getPageNum(),pageDTO.getPageSize());
+    public ServerResponse getClueList (Integer stage,String values,String memberId,String beginDate,String endDate, PageDTO pageDTO){
+        return clueService.getClueList(stage,values,memberId,beginDate,endDate,pageDTO.getPageNum(),pageDTO.getPageSize());
     }
 
     @Override

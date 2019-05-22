@@ -76,6 +76,31 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             s.create_date DESC
 	</select>
 
+    <!--指定供应商所有发货的房子-->
+    <select id="getSplitReportHouse" resultType="com.dangjia.acg.dto.deliver.SplitReportSupplierDTO">
+        SELECT
+            sd.ship_name shipName,
+            sd.supplier_id supplierId,
+            sd.supplier_name supplierName,
+            sd.supplier_telephone supplierTelephone,
+            si.house_id houseId,
+            sd.id,
+            sd.ship_address,
+            sum(si.sup_cost * si.num)  totalPrice,
+            sum(
+                    (si.price * si.num) - (si.sup_cost * si.num)
+            )  totalProfit
+            FROM
+            `dj_deliver_order_split_item` si
+            INNER JOIN dj_deliver_split_deliver sd
+            ON si.split_deliver_id = sd.id
+            AND sd.supplier_id IS NOT NULL
+            WHERE  sd.supplier_id= #{supplierId}
+            GROUP BY
+            sd.supplier_id,
+            si.house_id
+    </select>
+
 
     <!--要货订单明细-->
     <select id="getSplitReportDeliverOrderItems" resultType="com.dangjia.acg.dto.deliver.SplitReportDeliverOrderItemDTO">
@@ -156,5 +181,29 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             si.house_id
 	</select>
    <!--********************查看统计 结束**********************-->
+    <!--更新商品名称-->
+    <update id="updateOrderSplitItemById" parameterType="java.lang.String">
+        UPDATE dj_deliver_order_split_item p1
+        SET p1.product_name =
+        <foreach collection="lists" item="item" index="index"
+                 separator=" " open="case id" close="end">
+            when id then #{item.name}
+        </foreach>
+        ,p1.unit_name=
+        <foreach collection="lists" item="item" index="index"
+                 separator=" " open="case id" close="end">
+            when id then #{item.unitName}
+        </foreach>
+        ,p1.image=
+        <foreach collection="lists" item="item" index="index"
+                 separator=" " open="case id" close="end">
+            when id then #{item.image}
+        </foreach>
+        where product_id in
+        <foreach collection="lists" index="index" item="item"
+                 separator="," open="(" close=")">
+            #{item.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
 </mapper>
 

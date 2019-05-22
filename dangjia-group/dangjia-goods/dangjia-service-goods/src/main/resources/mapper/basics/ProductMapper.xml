@@ -571,7 +571,12 @@
             INNER JOIN dj_basics_brand b ON b.id = p.brand_id
             INNER JOIN dj_basics_brand_series bs ON bs.id = p.brand_series_id
         </if>
-        WHERE p.type = 1
+        WHERE   p.data_status = 0
+
+        <!--<if test="productId==null or productId==''">-->
+            <!--AND p.type = 1-->
+        <!--</if>-->
+
         <if test="productType!=null and productType!=''">
             AND g.type =#{productType}
         </if>
@@ -651,5 +656,30 @@
         AND brand_id = 'PP027'
         AND brand_series_id = 'XL0093'
     </select>
+    <!--更新货品名称-->
+    <update id="updateProductById" parameterType="java.lang.String">
+        UPDATE `dj_basics_product` p
+        SET p.`name` = REPLACE (p.`name`,#{oldName},#{newName})
+        WHERE 1=1
+        <if test="null!=brandSeriesId and ''!=brandSeriesId">
+            or p.brand_series_id = #{brandSeriesId};
+        </if>
+        <if test="null!=brandId and ''!=brandId">
+            or p.brand_id=#{brandId}
+        </if>
+        <if test="null!=goodsId and ''!=goodsId">
+            or p.goods_id=#{goodsId}
+        </if>
+        <if test="null!=id and ''!=id">
+            or p.id=#{id}
+        </if>
+    </update>
+    
+    <!--更新货品单位-->
+    <update id="updateProductByUnitId" parameterType="java.lang.String">
+        update dj_basics_product
+        set unit_name=#{unitName}
+        where unit_id=#{unitId}
+    </update>
 
 </mapper>

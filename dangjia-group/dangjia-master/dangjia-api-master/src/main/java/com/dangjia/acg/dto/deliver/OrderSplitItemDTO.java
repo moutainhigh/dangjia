@@ -19,7 +19,8 @@ public class OrderSplitItemDTO {
 
     private String brandSeriesName;//品牌系列
     private String image;
+    private Double askCount;//要货数量
     private String shopCount;//购买总数
-    private String receive;//收货数量
+    private Double receive;//收货数量
 
 }

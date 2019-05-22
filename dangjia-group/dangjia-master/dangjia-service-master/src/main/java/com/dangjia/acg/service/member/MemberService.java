@@ -30,6 +30,7 @@ import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.activity.RedPackPayService;
 import com.dangjia.acg.service.clue.ClueService;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.RKIDCardUtil;
 import com.dangjia.acg.util.TokenUtil;
 import com.github.pagehelper.PageHelper;
@@ -88,6 +89,8 @@ public class MemberService {
     private ClueService clueService;
     @Autowired
     private IHouseDistributionMapper iHouseDistributionMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
     /****
      * 注入配置
      */
@@ -594,7 +597,7 @@ public class MemberService {
     /**
      * 业主列表
      */
-    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy) {
+    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy,String type, String userId,String beginDate,String endDate) {
         try {
             List<String> childsLabelIdList = new ArrayList<>();
             if (StringUtils.isNotBlank(parentId)) {
@@ -608,7 +611,13 @@ public class MemberService {
             String[] childsLabelIdArr = new String[childsLabelIdList.size()];
             childsLabelIdList.toArray(childsLabelIdArr);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Member> list = memberMapper.getMemberListByName(searchKey, stage, userRole, childsLabelIdArr, orderBy);
+            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
+                if(beginDate.equals(endDate)){
+                    beginDate=beginDate+" "+"00:00:00";
+                    endDate=endDate+" "+"23:59:59";
+                }
+            }
+            List<Member> list = memberMapper.getMemberListByName(searchKey, stage, userRole, childsLabelIdArr, orderBy,type,userId,beginDate,endDate);
             PageInfo pageResult = new PageInfo(list);
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
             for (Member member : list) {
@@ -634,12 +643,7 @@ public class MemberService {
                 }
 
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
-                //判断是否有装修记录
-                Date date = houseMapper.getHouseDateByMemberId(member.getId());
-                if (date != null) {
-                    mcDTO.setOrderDate(date);
-                }
-
+                mcDTO.setOrderDate(member.getModifyDate());
                 mcDTO.setMemberId(member.getId());
                 mcDTO.setMemberName(member.getName());
                 mcDTO.setMemberNickName(member.getNickName());
@@ -729,8 +733,11 @@ public class MemberService {
      * @return
      */
     public ServerResponse getMyInvitation(String userToken) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        Member member = accessToken.getMember();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
         Example example = new Example(Member.class);
         example.createCriteria().andEqualTo(Member.OTHERS_INVITATION_CODE, member.getInvitationCode());
         Map memberMap = BeanUtils.beanToMap(member);

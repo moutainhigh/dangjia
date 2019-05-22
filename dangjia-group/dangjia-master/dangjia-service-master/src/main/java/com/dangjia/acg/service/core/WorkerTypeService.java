@@ -26,17 +26,20 @@ public class WorkerTypeService {
     private IWorkerTypeMapper workerTypeMapper;
 
     public ServerResponse unfinishedFlow(String houseId) {
-        try{
+        try {
             List<WorkerType> workerTypeList = workerTypeMapper.unfinishedFlow(houseId);
-            return ServerResponse.createBySuccess("查询成功",workerTypeList);
-        }catch (Exception e){
+            if(workerTypeList.size()==0){
+                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相关记录");
+            }
+            return ServerResponse.createBySuccess("查询成功", workerTypeList);
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
 
     public WorkerType queryWorkerType(String workerTypeId) {
-       return workerTypeMapper.selectByPrimaryKey(workerTypeId);
+        return workerTypeMapper.selectByPrimaryKey(workerTypeId);
     }
 
     /**
@@ -52,6 +55,8 @@ public class WorkerTypeService {
             criteria.andCondition("type not in (2,7) ");
         } else if (type != null && type == 1) {
             criteria.andCondition("type not in (1,2,7)");
+        } else if (type != null && type == 2) {
+            criteria.andCondition("type not in (7)");
         }
         criteria.andNotEqualTo(WorkerType.STATE, 2);
         example.orderBy(WorkerType.SORT).asc();

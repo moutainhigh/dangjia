@@ -13,6 +13,7 @@
         <!-- 添加附加的appender,最多只能添加一个 -->
         <appender-ref ref="FILE"/>
     </appender>
+
     <logger name="com.dangjia.acg" level="DEBUG"/>
     <logger name="java.sql" level="debug" />
     <logger name="org.mybatis" level="debug" />

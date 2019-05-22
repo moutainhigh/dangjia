@@ -60,7 +60,7 @@ public class FileCommonService {
    * @param files
    * @return
    */
-  public ServerResponse saveFileList(MultipartFile[] files,String filePath) {
+  public ServerResponse saveFileList(MultipartFile[] files,String filePath,String name) {
     List<Map<String, Object>> list = new ArrayList<>();
     try {
       if(CommonUtil.isEmpty(filePath)){
@@ -72,7 +72,7 @@ public class FileCommonService {
         Map<String, Object> paramMap = new HashedMap();
         String webAddress = filePath+ DateUtil.convert(new Date(), DateUtil.FORMAT1);
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_PATH, String.class) +webAddress+"/";
-        String fileName = System.currentTimeMillis() + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+        String fileName = (int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis() + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
         fileName = new String(fileName.getBytes(), "UTF-8");
         File path = new File(address);
         if (!path.exists()) {
@@ -86,6 +86,7 @@ public class FileCommonService {
         paramMap.put("address", webAddress+"/"+fileName);
         paramMap.put("url", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+webAddress+"/"+fileName);
         paramMap.put("fileName", fileName);
+        paramMap.put("name", name);
 
         if(active!=null&&(active.equals("pre"))) {
           //新增上传记录，记录上传文件

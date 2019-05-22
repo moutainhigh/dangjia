@@ -82,6 +82,5 @@
 		)
 		ORDER BY create_date desc
 	</select>
-
 </mapper>
 

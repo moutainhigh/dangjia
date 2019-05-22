@@ -62,6 +62,11 @@
             and
             w.worker_type_id = #{workerTypeId}
         </if>
+        <if test="checkType!=null and checkType!=''">
+            and
+            w.check_type = #{checkType}
+        </if>
+
         and
         w.worker_type_id is not null
         <if test="type==null or type==''">
@@ -152,16 +157,35 @@
         w.remarks,
         w.create_date AS createDate,
         w.data_status AS dataStatus,
-        w.modify_date AS modifyDate,
         mc.stage,
         mc.label_id_arr,
         mc.remind_record_id,
-        mcr.remind_time
+        mcr.remind_time,
+        h.create_date AS modifyDate
         FROM dj_member w
         INNER JOIN dj_member_info mi on mi.member_id = w.id and mi.policy_id=#{userRole}
+        <if test="userId==null or userId==''">
         LEFT JOIN dj_member_customer mc on mc.member_id = w.id
         LEFT JOIN dj_member_customer_record mcr on mc.remind_record_id = mcr.id
-        WHERE w.data_status = 0
+        </if>
+
+        <if test="userId!=null and userId!=''">
+            INNER JOIN dj_member_customer mc on mc.member_id = w.id and  mc.user_id=#{userId}
+            LEFT JOIN dj_member_customer_record mcr on mc.remind_record_id = mcr.id
+        </if>
+
+        <if test="type=='bb'">
+            INNER
+            JOIN dj_house	h ON h.member_id = w.id  and h.data_status =0 and h.visit_state =1
+            WHERE w.data_status = 0
+        </if>
+
+        <if test="type!='bb'">
+            LEFT
+            JOIN dj_house	h ON h.member_id = w.id  and h.data_status =0 and h.visit_state =1
+            WHERE w.data_status = 0
+        </if>
+
         <if test="searchKey!=null and searchKey!=''">
             AND (w.nick_name LIKE CONCAT('%',#{searchKey},'%')
             or w.mobile LIKE CONCAT('%',#{searchKey},'%'))
@@ -182,6 +206,12 @@
             <foreach collection="childsLabelIdArr" item="lableId" index="index">
                 and FIND_IN_SET(#{lableId},mc.label_id_arr)
             </foreach>
+        </if>
+        <if test="type=='bb' and beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+            and h.create_date between #{beginDate} and #{endDate}
+        </if>
+        <if test="type=='cc' and beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+            and w.create_date between #{beginDate} and #{endDate}
         </if>
         ORDER by mcr.remind_time desc,w.create_date
         <if test="orderBy!=null and orderBy!=''and orderBy=='desc'">
