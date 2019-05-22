@@ -629,7 +629,7 @@ public class CraftsmanConstructionService {
             bean.setAlsoMoney(alsoMoney);//还可得钱
 
             //已得到的钱+滞留金的钱+（补人工总钱-当前阶段补人工钱）=已得总钱
-            BigDecimal alreadyMoney = new BigDecimal(haveMoney.doubleValue()+retentionMoney.doubleValue()+(repairTotalPrice.doubleValue()-repairPrice.doubleValue()-deductPrice.doubleValue()));
+            BigDecimal alreadyMoney = new BigDecimal(haveMoney.doubleValue()+retentionMoney.doubleValue()+(repairTotalPrice.doubleValue()-repairPrice.doubleValue()));
             bean.setAlreadyMoney(alreadyMoney);//已得钱
 
 
