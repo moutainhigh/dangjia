@@ -494,6 +494,7 @@ public class MendOrderCheckService {
                 }
                 BigDecimal workPrice=(houseWorkerOrder.getWorkPrice().subtract(refund));//减掉工钱
                 houseWorkerOrder.setWorkPrice(workPrice);//剩余工钱
+
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(houseWorkerOrder);
 
                 List<MendWorker> mendWorkerList = mendWorkerMapper.byMendOrderId(mendOrder.getId());

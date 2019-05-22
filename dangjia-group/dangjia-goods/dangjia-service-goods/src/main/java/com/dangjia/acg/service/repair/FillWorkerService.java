@@ -78,7 +78,7 @@ public class FillWorkerService {
                     budgetWorkerDTO.setWorkerGoodsSn(budgetWorker.getWorkerGoodsSn());
                     budgetWorkerDTO.setName(budgetWorker.getName());
                     budgetWorkerDTO.setPrice(budgetWorker.getPrice());
-                    budgetWorkerDTO.setShopCount(budgetWorker.getShopCount());
+                    budgetWorkerDTO.setShopCount(budgetWorker.getShopCount()-budgetWorker.getBackCount()+budgetWorker.getRepairCount());
                     budgetWorkerDTO.setUnitName(budgetWorker.getUnitName());
                     budgetWorkerDTO.setImage(address + workerGoods.getImage());
                     budgetWorkerDTOList.add(budgetWorkerDTO);
