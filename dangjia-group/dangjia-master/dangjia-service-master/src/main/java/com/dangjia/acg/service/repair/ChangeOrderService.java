@@ -214,6 +214,7 @@ public class ChangeOrderService {
                 if (changeOrderList.size() > 0&&houseFlowApplyList.size() > 0) {
                     HouseFlowApply houseFlowApply=houseFlowApplyList.get(0);
                     BigDecimal remain=houseFlowApply.getOtherMoney();//剩下的钱
+                    remain =remain.setScale(2,BigDecimal.ROUND_HALF_UP);
                     if(remain.doubleValue()<0){//负数冲正
                         remain=new BigDecimal(0);
                     }
@@ -225,7 +226,7 @@ public class ChangeOrderService {
                     houseWorkerOrder.setDeductPrice(new BigDecimal(0));
                 }
                 BigDecimal alsoMoney = new BigDecimal(houseWorkerOrder.getWorkPrice().doubleValue()-houseWorkerOrder.getHaveMoney().doubleValue()+houseWorkerOrder.getRepairPrice().doubleValue()-houseWorkerOrder.getRetentionMoney().doubleValue()-houseWorkerOrder.getDeductPrice().doubleValue());
-
+                alsoMoney =alsoMoney.setScale(2,BigDecimal.ROUND_HALF_UP);
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
                 if (houseFlowApplyList.size() > 0) {
                     return ServerResponse.createByErrorMessage("当前" + workerType.getName() + "阶段完工正在申请中，可退人工金额上限为"+alsoMoney+"元，确定申请退人工吗？");
