@@ -503,6 +503,9 @@ public class OrderSplitService {
                 deliverHouseDTOList.add(deliverHouseDTO);
             }
             pageResult.setList(deliverHouseDTOList);
+            for (DeliverHouseDTO deliverHouseDTO : deliverHouseDTOList) {
+                System.out.println(deliverHouseDTO);
+            }
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();

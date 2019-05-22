@@ -77,7 +77,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
     <!--指定供应商所有发货的房子-->
-    <select id="getSplitReportHouse" resultType="com.dangjia.acg.dto.deliver.SplitReportDeliverOrderDTO">
+    <select id="getSplitReportHouse" resultType="com.dangjia.acg.dto.deliver.SplitReportSupplierDTO">
         SELECT
             sd.ship_name shipName,
             sd.supplier_id supplierId,

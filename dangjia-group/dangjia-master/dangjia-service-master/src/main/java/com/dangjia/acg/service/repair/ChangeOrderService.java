@@ -127,7 +127,7 @@ public class ChangeOrderService {
             if (changeOrder.getState() == 2){
                 List<MendOrder> mendOrderList = mendOrderMapper.getByChangeOrderId(changeOrder.getId());
                 if (mendOrderList.size() == 0){
-                    changeOrder.setState(3);
+                    changeOrder.setState(0);
                     changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
                 }
             }
@@ -177,10 +177,23 @@ public class ChangeOrderService {
             return ServerResponse.createByErrorMessage("该工种有未处理变更单,通知管家处理");
         }
 
-//        List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
-//        if (houseFlowApplyList.size() > 0) {
-//            return ServerResponse.createByErrorMessage("该工种有未处理的阶段/整体完工申请");
-//        }
+        boolean isCheck=false;
+        List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
+        if (houseFlowApplyList.size() > 0) {
+            for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
+                if(houseFlowApply.getApplyType()==2){
+                    isCheck=true;
+                    break;
+                }
+            }
+            if(isCheck) {
+                return ServerResponse.createByErrorMessage("该工种已发起整体完工申请，不能发起补/退人工申请");
+            }
+        }
+        HouseFlow houseFlow=houseFlowMapper.getByWorkerTypeId(houseId,workerTypeId);
+        if(houseFlow.getWorkSteta()==2){
+            return ServerResponse.createByErrorMessage("该工种已整体完工，不能发起补/退人工申请");
+        }
 
         changeOrder.setMemberId(member.getId());
         changeOrder.setType(type);

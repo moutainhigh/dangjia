@@ -79,8 +79,8 @@ public class ConfigAppLogoService {
         Example.Criteria criteria=example.createCriteria();
         criteria.andEqualTo("isSwitch",true).andEqualTo("appType",configAppLogo.getAppType());
         configAppLogoAll.setId(null);
-        configAppLogoAll.setSwitch(false);
-        configAppLogo.setSwitch(isSwitch);
+        configAppLogoAll.setIsSwitch(false);
+        configAppLogo.setIsSwitch(isSwitch);
         configAppLogoMapper.updateByExampleSelective(configAppLogoAll,example);
         if(this.configAppLogoMapper.updateByPrimaryKeySelective(configAppLogo)>0){
             return ServerResponse.createBySuccessMessage("ok");
@@ -101,10 +101,10 @@ public class ConfigAppLogoService {
         Example.Criteria criteria=example.createCriteria();
         criteria.andEqualTo("isSwitch",true).andEqualTo("appType",configAppLogo.getAppType());
         configAppLogoAll.setId(null);
-        configAppLogoAll.setSwitch(false);
+        configAppLogoAll.setIsSwitch(false);
         configAppLogoMapper.updateByExampleSelective(configAppLogoAll,example);
         Boolean isSwitch = Boolean.parseBoolean(request.getParameter("isSwitch"));
-        configAppLogo.setSwitch(isSwitch);
+        configAppLogo.setIsSwitch(isSwitch);
         if(this.configAppLogoMapper.insertSelective(configAppLogo)>0){
             return ServerResponse.createBySuccessMessage("ok");
         }else{
