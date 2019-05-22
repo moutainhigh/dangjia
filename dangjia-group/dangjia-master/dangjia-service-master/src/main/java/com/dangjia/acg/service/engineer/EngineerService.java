@@ -227,12 +227,15 @@ public class EngineerService {
             if (hf == null) {
                 return ServerResponse.createByErrorMessage("找不到该工序");
             }
+            House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
+            if (house == null) {
+                return ServerResponse.createByErrorMessage("找不到该房子");
+            }
             if (member == null) {
                 return ServerResponse.createByErrorMessage("找不到该工匠");
             }
             if (member.getWorkerType() != null && member.getWorkerType() != 3) {
-                Integer visitState = houseMapper.selectByPrimaryKey(hf.getHouseId()).getVisitState();
-                if (visitState == null || visitState != 1) {
+                if (house.getVisitState() != 1) {
                     return ServerResponse.createByErrorMessage("该房子不在装修中，无法指派工匠");
                 }
                 HouseFlow supervisorHf = houseFlowMapper.getHouseFlowByHidAndWty(hf.getHouseId(), 3);//查询大管家的
@@ -260,7 +263,6 @@ public class EngineerService {
             if (member.getCheckType() == 5) {
                 return ServerResponse.createByErrorMessage("该工匠未提交资料审核,请通知工匠完善资料并提交审核！");
             }
-            House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
             if (house.getVisitState() == 2) {
                 return ServerResponse.createByErrorMessage("该房已休眠");
             }
