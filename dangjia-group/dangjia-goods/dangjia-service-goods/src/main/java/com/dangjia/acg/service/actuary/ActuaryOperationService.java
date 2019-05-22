@@ -333,8 +333,12 @@ public class ActuaryOperationService {
                 String budgetMaterialId=null;
                 if(type != 5) {
                     BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(gId);
-                    product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());//当前 货品
-                    budgetMaterialId=budgetMaterial.getId();
+                    if(budgetMaterial!=null) {
+                        product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());//当前 货品
+                        budgetMaterialId = budgetMaterial.getId();
+                    }else{
+                        product = productMapper.selectByPrimaryKey(gId);//当前 货品
+                    }
                 }else{
                     product = productMapper.selectByPrimaryKey(gId);//当前 货品
                 }
@@ -407,7 +411,10 @@ public class ActuaryOperationService {
             Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());//当前 商品
             goodsDTO.setProductId(product.getId());
             goodsDTO.setGoodsId(goods.getId());
-            goodsDTO.setMaket(product.getMaket());
+            goodsDTO.setMaket(1);
+            if(product.getMaket()==0||product.getType()==0) {
+                goodsDTO.setMaket(0);
+            }
             goodsDTO.setImage(getImage(product.getImage()));//图一张
             String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
             goodsDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);

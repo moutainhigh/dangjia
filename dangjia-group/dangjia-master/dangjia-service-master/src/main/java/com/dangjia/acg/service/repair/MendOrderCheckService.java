@@ -95,6 +95,8 @@ public class MendOrderCheckService {
     private OrderSplitService orderSplitService;
     @Autowired
     private IOrderSplitItemMapper orderSplitItemMapper;
+    @Autowired
+    private MendOrderService mendOrderService;
 
     /**
      * 根据mendOrderId查询审核情况
@@ -421,6 +423,7 @@ public class MendOrderCheckService {
             }
             Member operator = (Member) object;
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
+            House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
             MendDeliver mendDeliver = mendDeliverMapper.selectByPrimaryKey(mendDeliverId);
             if(mendDeliver==null){
                 return ServerResponse.createBySuccessMessage("提交失败，请联系平台部！");
@@ -438,8 +441,14 @@ public class MendOrderCheckService {
                 for (int i = 0; i < arr.size(); i++) {
                     JSONObject obj = arr.getJSONObject(i);
                     String id = obj.getString("id");
+                    String productId = obj.getString("productId");
                     String shopCount = obj.getString("shopCount");
-                    MendMateriel mendMateriel = mendMaterialMapper.selectByPrimaryKey(id);
+                    MendMateriel mendMateriel;
+                    if(!CommonUtil.isEmpty(id)){
+                         mendMateriel = mendMaterialMapper.selectByPrimaryKey(id);
+                    }else{
+                         mendMateriel = mendOrderService.saveMendMaterial(mendOrder,house,productId,shopCount);
+                    }
                     mendMateriel.setActualCount(Double.parseDouble(shopCount));//实际退货数
                     mendMateriel.setActualPrice(mendMateriel.getActualCount() * mendMateriel.getPrice());
                     actualTotalAmount=actualTotalAmount+mendMateriel.getActualPrice();
@@ -485,6 +494,7 @@ public class MendOrderCheckService {
                 }
                 BigDecimal workPrice=(houseWorkerOrder.getWorkPrice().subtract(refund));//减掉工钱
                 houseWorkerOrder.setWorkPrice(workPrice);//剩余工钱
+
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(houseWorkerOrder);
 
                 List<MendWorker> mendWorkerList = mendWorkerMapper.byMendOrderId(mendOrder.getId());
@@ -559,40 +569,45 @@ public class MendOrderCheckService {
             }
             if(mendOrder.getType() == 2 ){//工匠退剩余材料管家退服务
                 MendDeliver mendDeliver = mendDeliverMapper.selectByPrimaryKey(mendOrder.getBusinessOrderNumber());
+                BigDecimal totalAmount=new BigDecimal(0);
                 /*审核通过修改仓库数量,记录流水*/
                 Example example =new Example(MendMateriel.class);
                 example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID,mendOrder.getId())
                         .andEqualTo(MendMateriel.REPAIR_MEND_DELIVER_ID,mendOrder.getBusinessOrderNumber());
                 List<MendMateriel> mendMaterielList = mendMaterialMapper.selectByExample(example);
                 for (MendMateriel mendMateriel : mendMaterielList){
-                    Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(), mendOrder.getHouseId());
-                    warehouse.setBackCount(warehouse.getBackCount() + mendMateriel.getActualCount());//更新退数量
-                    warehouse.setBackTime(warehouse.getBackTime() + 1);//更新退次数
-                    warehouse.setWorkBack(warehouse.getWorkBack()==null?mendMateriel.getActualCount():(warehouse.getWorkBack() + mendMateriel.getActualCount())); //收货数量+工匠退数量
-                    warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                    if(mendMateriel.getActualCount()!=null&&mendMateriel.getActualCount()>0) {
+                        Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(), mendOrder.getHouseId());
+                        warehouse.setBackCount(warehouse.getBackCount() + mendMateriel.getActualCount());//更新退数量
+                        warehouse.setBackTime(warehouse.getBackTime() + 1);//更新退次数
+                        warehouse.setWorkBack(warehouse.getWorkBack() == null ? mendMateriel.getActualCount() : (warehouse.getWorkBack() + mendMateriel.getActualCount())); //收货数量+工匠退数量
+                        warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                        totalAmount=totalAmount.add(new BigDecimal(mendMateriel.getActualPrice()));
+                    }
                 }
 
+                if(totalAmount.doubleValue()>0) {
+                    /*退钱给业主*/
+                    Member member = memberMapper.selectByPrimaryKey(houseMapper.selectByPrimaryKey(mendOrder.getHouseId()).getMemberId());
+                    BigDecimal haveMoney = member.getHaveMoney().add(totalAmount);
+                    BigDecimal surplusMoney = member.getSurplusMoney().add(totalAmount);
+                    //记录流水
+                    WorkerDetail workerDetail = new WorkerDetail();
+                    workerDetail.setName("工匠退材料退款");
+                    workerDetail.setWorkerId(member.getId());
+                    workerDetail.setWorkerName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
+                    workerDetail.setHouseId(mendOrder.getHouseId());
+                    workerDetail.setMoney(totalAmount);
+                    workerDetail.setApplyMoney(totalAmount);
+                    workerDetail.setWalletMoney(surplusMoney);
+                    workerDetail.setState(5);//进钱//工匠退 登记剩余
+                    workerDetailMapper.insert(workerDetail);
 
-                /*退钱给业主*/
-                Member member = memberMapper.selectByPrimaryKey(houseMapper.selectByPrimaryKey(mendOrder.getHouseId()).getMemberId());
-                BigDecimal haveMoney = member.getHaveMoney().add(new BigDecimal(mendDeliver.getTotalAmount()));
-                BigDecimal surplusMoney = member.getSurplusMoney().add(new BigDecimal(mendDeliver.getTotalAmount()));
-                //记录流水
-                WorkerDetail workerDetail = new WorkerDetail();
-                workerDetail.setName("工匠退材料退款");
-                workerDetail.setWorkerId(member.getId());
-                workerDetail.setWorkerName(CommonUtil.isEmpty(member.getName()) ?member.getNickName() : member.getName());
-                workerDetail.setHouseId(mendOrder.getHouseId());
-                workerDetail.setMoney(new BigDecimal(mendDeliver.getTotalAmount()));
-                workerDetail.setApplyMoney(new BigDecimal(mendDeliver.getTotalAmount()));
-                workerDetail.setWalletMoney(surplusMoney);
-                workerDetail.setState(5);//进钱//工匠退 登记剩余
-                workerDetailMapper.insert(workerDetail);
+                    member.setHaveMoney(haveMoney);
+                    member.setSurplusMoney(surplusMoney);
+                    memberMapper.updateByPrimaryKeySelective(member);
 
-                member.setHaveMoney(haveMoney);
-                member.setSurplusMoney(surplusMoney);
-                memberMapper.updateByPrimaryKeySelective(member);
-
+                }
                 mendDeliver.setShippingState(3);
                 mendDeliver.setModifyDate(new Date());
                 mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);

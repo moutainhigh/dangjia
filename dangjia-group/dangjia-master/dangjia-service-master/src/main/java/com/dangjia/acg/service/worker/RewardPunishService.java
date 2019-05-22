@@ -310,8 +310,7 @@ public class RewardPunishService {
                 }
 
                 //罚
-            }
-            if (rewardPunishRecord.getType() == 1) {
+            } else if (rewardPunishRecord.getType() == 1) {
                 workIntegral.setBriefed("处罚，积分扣除");
                 workerDetail.setName("处罚，资金扣除");
                 if (rewardPunishCondition.getType() == 1) {
@@ -336,34 +335,6 @@ public class RewardPunishService {
                 }
             }
             memberMapper.updateByPrimaryKeySelective(member);
-        }
-    }
-
-    /**
-     * 修改奖罚记录
-     *
-     * @param userToken
-     * @param rewardPunishRecord
-     * @return
-     */
-    public ServerResponse updateRewardPunishRecord(String userToken, String userId, RewardPunishRecord rewardPunishRecord) {
-        try {
-            if (!CommonUtil.isEmpty(userToken)) {
-                Object object = constructionService.getMember(userToken);
-                if (object instanceof ServerResponse) {
-                    return (ServerResponse) object;
-                }
-                Member member = (Member) object;
-                rewardPunishRecord.setOperatorId(member.getId());
-            }
-            if (!CommonUtil.isEmpty(userId)) {
-                rewardPunishRecord.setOperatorId(userId);
-            }
-            rewardPunishRecordMapper.updateByPrimaryKeySelective(rewardPunishRecord);
-            return ServerResponse.createBySuccessMessage("修改奖罚记录成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("修改奖罚记录失败");
         }
     }
 
