@@ -91,19 +91,19 @@ public class JsmsUtil {
 	 * @return
 	 */
 	public static String sendSMS(String phone, String mid, Map params) {
-//		try {
-//			SMSClient client = new SMSClient(masterSecret, appkey);
-//			SMSPayload payload = SMSPayload.newBuilder()
-//				.setMobileNumber(phone)
-//				.setTempId(Integer.parseInt(mid))
-//				.setTempPara(params)
-//				.build();
-//			SendSMSResult res = client.sendTemplateSMS(payload);
-//			String result =res.toString();
-//			return result;
-//		} catch (Exception e) {
-//			e.printStackTrace(System.out);
-//		}
+		try {
+			SMSClient client = new SMSClient(masterSecret, appkey);
+			SMSPayload payload = SMSPayload.newBuilder()
+				.setMobileNumber(phone)
+				.setTempId(Integer.parseInt(mid))
+				.setTempPara(params)
+				.build();
+			SendSMSResult res = client.sendTemplateSMS(payload);
+			String result =res.toString();
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace(System.out);
+		}
 		return "";
 	}
 

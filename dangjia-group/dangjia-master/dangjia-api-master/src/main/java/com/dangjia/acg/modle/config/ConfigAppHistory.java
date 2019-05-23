@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,6 +18,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_config_app_history")
 @ApiModel(description = "APP版本更新配置表")
+@FieldNameConstants(prefix = "")
 public class ConfigAppHistory extends BaseEntity {
 
     @Column(name = "app_id")
