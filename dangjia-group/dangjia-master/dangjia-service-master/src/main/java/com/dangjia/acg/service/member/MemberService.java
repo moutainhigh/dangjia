@@ -871,7 +871,7 @@ public class MemberService {
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
-        if (user.getCheckType() ==4) {
+        if (checkType!=4&&checkType!=2&&user.getCheckType() ==4) {
             //冻结的帐户不能修改资料信息
             return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
         }
