@@ -24,7 +24,7 @@ public class TaskController implements TaskAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getTaskList(String userToken,String userRole){
+    public ServerResponse getTaskList(String userToken,Integer userRole){
         return taskService.getTaskList(userToken, userRole);
     }
 }
