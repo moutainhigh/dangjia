@@ -87,6 +87,8 @@ public class JsmsUtil {
 		String result =sendSMS(phone,mid,temp_para);
 		return result;
 	}
+
+	
 	/**
 	 * 发送短信
 	 * @param phone 接收手机号
