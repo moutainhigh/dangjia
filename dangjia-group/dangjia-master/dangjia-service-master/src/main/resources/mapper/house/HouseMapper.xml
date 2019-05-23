@@ -59,6 +59,9 @@
         <if test="dataStatus!=null and dataStatus!=''">
             AND house.data_status=#{dataStatus}
         </if>
+        <if test="dataStatus == 1">
+            AND house.visit_state=1
+        </if>
         <if test="designerType == 0">
             AND house.designer_ok =4
         </if>
@@ -388,7 +391,7 @@
         h.modify_date as modifyDate
         FROM
         dj_house h
-        INNER JOIN dj_core_house_flow f ON h.id=f.house_id and f.worker_type=3
+        INNER JOIN dj_core_house_flow f ON h.id=f.house_id and f.worker_type=3 and f.work_type > 1
         INNER JOIN dj_member m ON h.member_id = m.id
         WHERE
         h.data_status =0

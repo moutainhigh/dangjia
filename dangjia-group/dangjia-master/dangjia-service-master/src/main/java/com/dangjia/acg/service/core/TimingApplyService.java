@@ -26,12 +26,12 @@ public class TimingApplyService {
      * 管家自动审核
      */
     public void supCouponApply(){
-        List<HouseFlowApply> houseFlowApplyList =  houseFlowApplyMapper.supCouponApply(new Date());
-        for (HouseFlowApply houseFlowApply : houseFlowApplyList){
+//        List<HouseFlowApply> houseFlowApplyList =  houseFlowApplyMapper.supCouponApply(new Date());
+//        for (HouseFlowApply houseFlowApply : houseFlowApplyList){
             //取消自动审核，改为超时扣钱
 //            evaluateService.checkOk(houseFlowApply.getId(),"",5);
-            evaluateService.supervisorOvertime(houseFlowApply);
-        }
+//            evaluateService.supervisorOvertime(houseFlowApply);
+//        }
     }
 
     /**

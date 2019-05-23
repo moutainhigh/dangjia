@@ -91,7 +91,7 @@ public class WalletService {
                 return ServerResponse.createByErrorMessage("用户不存在");
             }
             worker = memberMapper.selectByPrimaryKey(worker.getId());
-            if (worker.getIsJob()) {
+            if (worker.getCheckType() ==4) {
                 //冻结的帐户不能提现
                 return ServerResponse.createByErrorMessage("账户冻结，无法提现");
             }
