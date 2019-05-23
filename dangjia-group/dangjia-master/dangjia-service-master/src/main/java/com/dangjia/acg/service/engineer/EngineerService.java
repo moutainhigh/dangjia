@@ -1,7 +1,6 @@
 package com.dangjia.acg.service.engineer;
 
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -267,7 +266,7 @@ public class EngineerService {
                 //被禁用的帐户不能抢单
                 return ServerResponse.createByErrorMessage("该工匠已经被禁用！");
             }
-            if (member.getIsJob()) {
+            if (member.getCheckType() == 4) {
                 //冻结的帐户不能抢单
                 return ServerResponse.createByErrorMessage("该工匠已冻结");
             }

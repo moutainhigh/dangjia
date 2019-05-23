@@ -434,6 +434,16 @@ public class OrderService {
                 String productId = aCartList.getProductId();
                 Warehouse warehouse = warehouseMapper.getByProductId(productId, houseId);//定位到仓库id
                 Product product = forMasterAPI.getProduct(house.getCityId(), productId);
+
+                example = new Example(OrderSplitItem.class);
+                example.createCriteria()
+                        .andEqualTo(OrderSplitItem.PRODUCT_ID,productId)
+                        .andEqualTo(OrderSplitItem.ORDER_SPLIT_ID,orderSplit.getId());
+                List<OrderSplitItem> orderSplitItems=orderSplitItemMapper.selectByExample(example);
+                if(orderSplitItems.size()>0){
+                    //存在记录则跳过，防止重复数据的产生
+                    continue;
+                }
                 if (warehouse != null) {
                     OrderSplitItem orderSplitItem = new OrderSplitItem();
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
