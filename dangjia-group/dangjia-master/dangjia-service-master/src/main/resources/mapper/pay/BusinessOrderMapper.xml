@@ -43,7 +43,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			a.id AS id,
 			a.number AS orderId,
 			CONCAT( c.residential, c.building, '栋', c.unit, '单元', c.number, '号' ) AS houseName,
-			a.member_id AS memberId,
+			c.member_id AS memberId,
 			d.mobile AS mobile,
 			a.pay_order_number AS payOrderNumber,
 			a.total_price AS totalAmount,
@@ -58,7 +58,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			dj_pay_business_order AS a
 			LEFT JOIN dj_pay_pay_order AS b ON b.number = a.pay_order_number
 			INNER JOIN dj_house AS c ON a.house_id = c.id
-			INNER JOIN dj_member AS d ON d.id = a.member_id
+			INNER JOIN dj_member AS d ON  d.id = c.member_id
 		WHERE
 			a.data_status = 0
 			<if test="state != -1">

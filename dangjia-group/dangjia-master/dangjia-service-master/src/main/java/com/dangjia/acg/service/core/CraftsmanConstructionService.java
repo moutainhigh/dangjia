@@ -623,8 +623,10 @@ public class CraftsmanConstructionService {
             BigDecimal deductPrice =hwo.getDeductPrice() == null ? new BigDecimal(0) : hwo.getDeductPrice();//评价积分扣除的钱
             //总共钱-已得到的钱+补人工钱-滞留金-评价扣的钱=还可得钱
             BigDecimal alsoMoney = new BigDecimal(workPrice.doubleValue()-haveMoney.doubleValue()+repairPrice.doubleValue()-retentionMoney.doubleValue()-deductPrice.doubleValue());
+            if(alsoMoney.doubleValue()<0){
+                alsoMoney=new BigDecimal(0);
+            }
             bean.setAlsoMoney(alsoMoney);//还可得钱
-
 
             //已得到的钱+滞留金的钱+（补人工总钱-当前阶段补人工钱）=已得总钱
             BigDecimal alreadyMoney = new BigDecimal(haveMoney.doubleValue()+retentionMoney.doubleValue()+(repairTotalPrice.doubleValue()-repairPrice.doubleValue()));

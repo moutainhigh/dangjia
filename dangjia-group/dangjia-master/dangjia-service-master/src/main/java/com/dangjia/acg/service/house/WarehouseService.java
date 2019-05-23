@@ -16,6 +16,8 @@ import com.dangjia.acg.mapper.deliver.IProductChangeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
+import com.dangjia.acg.modle.basics.Goods;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.github.pagehelper.PageHelper;
@@ -61,7 +63,7 @@ public class WarehouseService {
      * 查询仓库材料
      * type 0材料 1服务 2所有
      */
-    public ServerResponse warehouseList(String  userToken,Integer pageNum, Integer pageSize, String houseId, String categoryId, String name, String type) {
+    public ServerResponse warehouseList(String userToken, Integer pageNum, Integer pageSize, String houseId, String categoryId, String name, String type) {
         try {
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
@@ -69,35 +71,42 @@ public class WarehouseService {
             House house = houseMapper.selectByPrimaryKey(houseId);
 
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            Example example=new Example(Warehouse.class);
-            Example.Criteria criteria=example.createCriteria();
-            criteria.andEqualTo(Warehouse.HOUSE_ID,houseId);
+            Example example = new Example(Warehouse.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
 
-            if(!CommonUtil.isEmpty(type)){
-                criteria.andEqualTo(Warehouse.PRODUCT_TYPE,type);
+            if (!CommonUtil.isEmpty(type)) {
+                criteria.andEqualTo(Warehouse.PRODUCT_TYPE, type);
             }
-            if(!CommonUtil.isEmpty(categoryId)){
-                criteria.andEqualTo(Warehouse.CATEGORY_ID,categoryId);
+            if (!CommonUtil.isEmpty(categoryId)) {
+                criteria.andEqualTo(Warehouse.CATEGORY_ID, categoryId);
             }
-            if(!CommonUtil.isEmpty(name)){
-                criteria.andLike(Warehouse.PRODUCT_NAME,"%"+name+"%");
+            if (!CommonUtil.isEmpty(name)) {
+                criteria.andLike(Warehouse.PRODUCT_NAME, "%" + name + "%");
             }
             PageHelper.startPage(pageNum, pageSize);
-            List<Warehouse> warehouseList=warehouseMapper.selectByExample(example);
+            List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
             LOG.info(" warehouseList size:" + warehouseList.size());
             PageInfo pageResult = new PageInfo(warehouseList);
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
             for (Warehouse warehouse : warehouseList) {
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
-                BeanUtils.beanToBean(warehouse,warehouseDTO);
+                BeanUtils.beanToBean(warehouse, warehouseDTO);
                 warehouseDTO.setImage(address + warehouse.getImage());
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                 warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
-                warehouseDTO.setBackCount((warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack()));
-                warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack()) - warehouse.getAskCount());//剩余数量 所有买的数量 - 业主退货 - 要的
+                warehouseDTO.setBackCount((warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
+                warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());//剩余数量 所有买的数量 - 业主退货 - 要的
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                 warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
                 warehouseDTO.setRepairCount(warehouse.getRepairCount());
+                Product product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
+                if (product != null) {
+                    Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
+                    if (goods != null) {
+                        warehouseDTO.setSales(goods.getSales());
+                    }
+                }
                 warehouseDTOS.add(warehouseDTO);
             }
             pageResult.setList(warehouseDTOS);
@@ -112,7 +121,7 @@ public class WarehouseService {
      * 查询仓库材料（已购买）
      * type 0材料 1服务 2人工
      */
-    public ServerResponse warehouseGmList(HttpServletRequest request,String  userToken, String houseId, String name, String type) {
+    public ServerResponse warehouseGmList(HttpServletRequest request, String userToken, String houseId, String name, String type) {
         try {
             if (StringUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("houseId不能为空");
@@ -120,12 +129,12 @@ public class WarehouseService {
             House house = houseMapper.selectByPrimaryKey(houseId);
             String cityId = request.getParameter(Constants.CITY_ID);
             Map<String, Map> maps = new HashMap<>();
-            Map map=new HashMap();
+            Map map = new HashMap();
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            if(!CommonUtil.isEmpty(type)&&"2".equals(type)){
-                List<BudgetItemDTO> budgetItemDTOS= actuaryOpeAPI.getHouseWorkerInfo(cityId,"3",houseId,address);
-                map.put("goodsItemDTOList",budgetItemDTOS);
-            }else {
+            if (!CommonUtil.isEmpty(type) && "2".equals(type)) {
+                List<BudgetItemDTO> budgetItemDTOS = actuaryOpeAPI.getHouseWorkerInfo(cityId, "3", houseId, address);
+                map.put("goodsItemDTOList", budgetItemDTOS);
+            } else {
                 Example example = new Example(Warehouse.class);
                 Example.Criteria criteria = example.createCriteria();
                 criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
@@ -163,9 +172,9 @@ public class WarehouseService {
                         budgetItemDTO.put("rowImage", address + goodsCategory.getImage());
                         budgetItemDTO.put("rowName", goodsCategory.getName());
                         budgetItemDTO.put("rowPrice", rowPrice);
-                    }else{
-                        rowPrice=(BigDecimal)budgetItemDTO.get("rowPrice");
-                        warehouseDTOS=(List<WarehouseDTO>)budgetItemDTO.get("goodsItems");
+                    } else {
+                        rowPrice = (BigDecimal) budgetItemDTO.get("rowPrice");
+                        warehouseDTOS = (List<WarehouseDTO>) budgetItemDTO.get("goodsItems");
                     }
                     for (Warehouse warehouse : warehouseList) {
                         if (!categoryId.equals(warehouse.getCategoryId())) continue;
@@ -173,13 +182,13 @@ public class WarehouseService {
                         BeanUtils.beanToBean(warehouse, warehouseDTO);
                         warehouseDTO.setImage(address + warehouse.getImage());
                         warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
-                        warehouseDTO.setBackCount((warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack()));
+                        warehouseDTO.setBackCount((warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
                         warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
-                        warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack()) - warehouse.getAskCount());
+                        warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
                         warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
-                        warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(cityId,warehouse.getProductId()));
+                        warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(cityId, warehouse.getProductId()));
                         // type为空时查询 是否更换
-                        if(CommonUtil.isEmpty(type)) {
+                        if (CommonUtil.isEmpty(type)) {
                             if (productChangeMapper.queryProductChangeExist(warehouse.getHouseId(), warehouse.getProductId(), "0") > 0) {
                                 warehouseDTO.setChangeType(1);
                             }
@@ -197,9 +206,9 @@ public class WarehouseService {
                 }
                 map.put("goodsItemDTOList", budgetItemDTOList);
             }
-            Double workerPrice=actuaryOpeAPI.getHouseWorkerPrice(cityId,"3",houseId);
-            Double caiPrice=warehouseMapper.getHouseGoodsPrice(houseId,name);
-            Double totalPrice=workerPrice+caiPrice;
+            Double workerPrice = actuaryOpeAPI.getHouseWorkerPrice(cityId, "3", houseId);
+            Double caiPrice = warehouseMapper.getHouseGoodsPrice(houseId, name);
+            Double totalPrice = workerPrice + caiPrice;
             map.put("workerPrice", workerPrice);
             map.put("caiPrice", caiPrice);
             map.put("totalPrice", totalPrice);

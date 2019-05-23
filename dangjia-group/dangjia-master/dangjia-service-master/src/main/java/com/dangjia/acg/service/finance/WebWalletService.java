@@ -63,18 +63,27 @@ public class WebWalletService {
 
     public WebWorkerDetailDTO calculateIntegralMoney(String houseId, WebWorkerDetailDTO webWorkerDetailDTO) {
 //     * --         0每日完工  1阶段完工，
-//     * --         2整体完工  3巡查, 4验收,
+//     * --         2整体完工  3巡查, 4验收,5整体竣工
         int star = webWorkerDetailDTO.getStar();
 
         webWorkerDetailDTO.setHaveMoney(webWorkerDetailDTO.getMoney());
         BigDecimal supervisorMoney = webWorkerDetailDTO.getMoney();
         if (webWorkerDetailDTO.getState() == 4) {
-            if (star == 0 || star == 5) {
+            if (star == 5) {
                 supervisorMoney = webWorkerDetailDTO.getMoney();//大管家的验收收入
             } else if (star == 3 || star == 4) {
                 supervisorMoney = webWorkerDetailDTO.getMoney().multiply(new BigDecimal(0.8));
             } else {
                 supervisorMoney = new BigDecimal(0);//为0元
+            }
+        }
+        if (webWorkerDetailDTO.getState() == 5) {
+            if(star == 5){
+                supervisorMoney = webWorkerDetailDTO.getMoney();//大管家的验收收入
+            }else if(star == 3 || star == 4){
+                supervisorMoney = webWorkerDetailDTO.getMoney().multiply(new BigDecimal(0.9));
+            }else{
+                supervisorMoney = webWorkerDetailDTO.getMoney().multiply(new BigDecimal(0.8));
             }
         }
         if (webWorkerDetailDTO.getState() == 1 || webWorkerDetailDTO.getState() == 2) {

@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.api.basics.UnitAPI;
@@ -43,6 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -331,6 +333,72 @@ public class ProductChangeService {
             return ServerResponse.createByErrorMessage("操作失败");
         }
         return ServerResponse.createBySuccessMessage("操作成功");
+    }
+
+    /**
+     * 确定
+     * @param request
+     * @param changeItemList
+     * @param orderId
+     * @return
+     */
+    public ServerResponse productSure(HttpServletRequest request, String changeItemList, String orderId){
+        try {
+            // 查询订单表
+            ProductChangeOrder order = productChangeOrderMapper.selectByPrimaryKey(orderId);
+            // 房子信息
+            House house = houseMapper.selectByPrimaryKey(order.getHouseId());
+            request.setAttribute(Constants.CITY_ID, house.getCityId());
+            if (StringUtil.isNotEmpty(changeItemList)) {
+                JSONArray itemObjArr = JSON.parseArray(changeItemList);
+                BigDecimal differencePrice = BigDecimal.ZERO;
+                for (int i = 0; i < itemObjArr.size(); i++) {
+                    JSONObject productObj = itemObjArr.getJSONObject(i);
+                    String id = productObj.getString("id");
+                    Double destSurCount = productObj.getDouble("destSurCount");
+                    ProductChange productChange = productChangeMapper.selectByPrimaryKey(id);
+                    // 剩余数
+                    BigDecimal srcCount = BigDecimal.valueOf(productChange.getSrcSurCount());
+                    // 更换数
+                    BigDecimal destCount = BigDecimal.valueOf(destSurCount);
+                    if(destCount.compareTo(srcCount) == 1){
+                        return ServerResponse.createByErrorMessage("不能大于商品剩余数");
+                    }
+                    Unit unit;
+                    Product product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
+                    ServerResponse serverResponse=unitAPI.getUnitById(request,product.getConvertUnit());
+                    if(serverResponse.getResultObj() instanceof JSONObject){
+                        unit= JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
+                    }else{
+                        unit=(Unit)serverResponse.getResultObj();
+                    }
+                    if(unit.getType()==1){
+                        destSurCount=Math.ceil(destSurCount);
+                    }
+                    productChange.setDestSurCount(destSurCount);
+                    // 差额单价
+                    BigDecimal price = BigDecimal.valueOf(MathUtil.sub(productChange .getDestPrice(), productChange.getSrcPrice()));
+                    // 差价= 更换数*差额单价
+                    BigDecimal differPrice = price.multiply(BigDecimal.valueOf(destSurCount));
+                    productChange.setDifferencePrice(differPrice);
+                    productChange.setModifyDate(new Date());
+                    productChange.setOrderId(orderId);
+                    // 修改商品更换表
+                    productChangeMapper.updateByPrimaryKey(productChange);
+                    // 累加总差价
+                    differencePrice.add(differPrice);
+                }
+                // 计算总价差额
+                order.setDifferencePrice(differencePrice);
+                order.setModifyDate(new Date());
+                productChangeOrderMapper.updateByPrimaryKey(order);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+        return ServerResponse.createBySuccessMessage("操作成功");
+
     }
 
     /**

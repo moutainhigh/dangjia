@@ -666,18 +666,25 @@ public class HouseFlowApplyService {
             }else{
                 star = evaluate.getStar();//几星？
             }
+            //评分扣钱
+            BigDecimal deductPrice = new BigDecimal(0);
             //管家钱
             BigDecimal applyMoney;
-            if(star == 0 || star == 5){
+            if(star == 5){
                 applyMoney = hfa.getApplyMoney();
             }else if(star == 3 || star == 4){
                 applyMoney = hfa.getApplyMoney().multiply(new BigDecimal(0.9));
+                deductPrice= hfa.getApplyMoney().subtract(applyMoney);
             }else{
                 applyMoney = hfa.getApplyMoney().multiply(new BigDecimal(0.8));
+                deductPrice= hfa.getApplyMoney().subtract(applyMoney);
             }
 
             //计算大管家整体完工金额
-            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());  //处理工人评分扣钱
+            if(hwo.getDeductPrice() == null){
+                hwo.setDeductPrice(new BigDecimal(0.0));
+            }
             //处理worker表中大管家
             Member worker = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
             BigDecimal surplusMoney = worker.getSurplusMoney().add(applyMoney);
@@ -725,7 +732,37 @@ public class HouseFlowApplyService {
             if(applyMoney.doubleValue()>0){//大于0
                 worker.setSurplusMoney(surplusMoney);
             }
-            hwo.setHaveMoney(hwo.getWorkPrice());//已经得到的钱
+            hwo.setDeductPrice(hwo.getDeductPrice().add(deductPrice));
+            hwo.setHaveMoney(hwo.getHaveMoney().add(applyMoney));//已经得到的钱
+
+
+
+            //巡查次数结算
+            Example example=new Example(HouseFlow.class);
+            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,hfa.getHouseId())
+                    .andCondition(" patrol >0  and work_type =4 ");
+            List<HouseFlow> houseFlows=houseFlowMapper.selectByExample(example);
+            Integer patrol=0;
+            if(houseFlows.size()>0){
+                for (HouseFlow houseFlow : houseFlows) {
+                    patrol=patrol+houseFlow.getPatrol();
+                }
+            }
+            if(hwo.getCheckMoney() == null){//大管家每次巡查得到的钱 累计 赋初始值为0
+                hwo.setCheckMoney(new BigDecimal(0.0));
+            }
+            BigDecimal patrolMoney=hwo.getWorkPrice().multiply(new BigDecimal(0.2));
+            patrolMoney=patrolMoney.subtract(hwo.getCheckMoney());
+            if(patrolMoney.doubleValue()>0) {
+                if (patrol == 0) {
+                    hwo.setHaveMoney(hwo.getHaveMoney().add(patrolMoney));
+                    worker.setSurplusMoney(worker.getSurplusMoney().add(patrolMoney));
+                    worker.setHaveMoney(worker.getHaveMoney().add(patrolMoney));
+                }
+                if (patrol > 0) {
+                    hwo.setDeductPrice(hwo.getDeductPrice().add(patrolMoney));
+                }
+            }
             houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
 
             //成交量加1
