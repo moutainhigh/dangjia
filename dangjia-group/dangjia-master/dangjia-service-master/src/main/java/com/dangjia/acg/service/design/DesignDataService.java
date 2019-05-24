@@ -8,11 +8,13 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.house.DesignDTO;
+import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
+import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
@@ -24,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +59,8 @@ public class DesignDataService {
     private IMemberMapper memberMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private IHouseWorkerMapper houseWorkerMapper;
 
 
     /**
@@ -88,16 +93,16 @@ public class DesignDataService {
      */
     public ServerResponse getDesign(String userToken, String houseId) {
         Object object = constructionService.getMember(userToken);
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
+        Member worker = null;
+        if (object instanceof Member) {
+            worker = (Member) object;
         }
-        Member worker = (Member) object;
         House house = houseMapper.selectByPrimaryKey(houseId);
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
         }
         Map<String, Object> map = new HashMap<>();//返回体
-        if (house.getDesignerOk() != 3 && worker.getId().equals(house.getMemberId())) {//是业主而且没有设计完工将走审核逻辑
+        if (worker != null && house.getDesignerOk() != 3 && worker.getId().equals(house.getMemberId())) {//是业主而且没有设计完工将走审核逻辑
             if (house.getDesignerOk() != 5 && house.getDesignerOk() != 2) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相关记录");
             }
@@ -141,7 +146,11 @@ public class DesignDataService {
             }
             map.put("data", quantityRoomImages);
             map.put("verification", 0);
-            map.put("historyRecord", (worker.getWorkerType() != null && worker.getWorkerType() == 1) ? 1 : 0);//是否暂时历史记录
+            if (worker == null) {
+                map.put("historyRecord", 0);//是否暂时历史记录
+            } else {
+                map.put("historyRecord", (worker.getWorkerType() != null && worker.getWorkerType() == 1) ? 1 : 0);//是否暂时历史记录
+            }
             return ServerResponse.createBySuccess("查询成功", map);
         }
     }
@@ -259,6 +268,15 @@ public class DesignDataService {
         List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, searchKey, dataStatus);
         PageInfo pageResult = new PageInfo(designDTOList);
         for (DesignDTO designDTO : designDTOList) {
+            HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(designDTO.getHouseId(), 1);
+            if (houseWorker != null) {
+                Member workerSup = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
+                if (workerSup != null) {
+                    designDTO.setOperatorName(workerSup.getName());//大管家名字
+                    designDTO.setOperatorMobile(workerSup.getMobile());
+                    designDTO.setOperatorId(workerSup.getId());
+                }
+            }
             ServerResponse serverResponse = getPlaneMap(designDTO.getHouseId());
             if (!serverResponse.isSuccess()) {
                 serverResponse = getConstructionPlans(designDTO.getHouseId());

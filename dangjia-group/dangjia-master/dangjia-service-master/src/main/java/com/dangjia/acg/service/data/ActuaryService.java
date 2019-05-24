@@ -4,8 +4,11 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.house.HouseListDTO;
+import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
+import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.github.pagehelper.PageHelper;
@@ -29,6 +32,11 @@ public class ActuaryService {
     private IHouseMapper houseMapper;
     @Autowired
     private IMemberMapper userMapper;
+    @Autowired
+    private IHouseWorkerMapper houseWorkerMapper;
+    @Autowired
+    private IMemberMapper memberMapper;
+
     /**
      * 查询房子精算数据
      *
@@ -36,15 +44,27 @@ public class ActuaryService {
      */
     public ServerResponse getActuaryAll(HttpServletRequest request, PageDTO pageDTO, String name, String budgetOk) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        String dataStatus="0";//正常数据
-        if(Integer.parseInt(budgetOk)<0){
+        String dataStatus = "0";//正常数据
+        if (Integer.parseInt(budgetOk) < 0) {
             //当类型小于0时，则查询移除的数据
-            dataStatus="1";
-            budgetOk="";
+            dataStatus = "1";
+            budgetOk = "";
         }
-        List<HouseListDTO> houseList = houseMapper.getActuaryAll(budgetOk,name,dataStatus);
+        List<HouseListDTO> houseList = houseMapper.getActuaryAll(budgetOk, name, dataStatus);
         PageInfo pageResult = new PageInfo(houseList);
-        return ServerResponse.createBySuccess("查询成功",pageResult);
+        for (HouseListDTO houseListDTO : houseList) {
+            HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(houseListDTO.getHouseId(), 1);
+            if (houseWorker != null) {
+                Member workerSup = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
+                if (workerSup != null) {
+                    houseListDTO.setOperatorName(workerSup.getName());//大管家名字
+                    houseListDTO.setOperatorMobile(workerSup.getMobile());
+                    houseListDTO.setOperatorId(workerSup.getId());
+                }
+            }
+        }
+        pageResult.setList(houseList);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
     /**
@@ -101,7 +121,7 @@ public class ActuaryService {
         for (House house : houseList) {
             Map<String, Object> map = new HashMap<String, Object>();
             Member user = userMapper.selectByPrimaryKey(house.getMemberId());
-            if(user == null) continue;
+            if (user == null) continue;
             map.put("houseName", house.getHouseName());
             map.put("customSort", house.getCustomSort());
             map.put("name", user.getNickName());

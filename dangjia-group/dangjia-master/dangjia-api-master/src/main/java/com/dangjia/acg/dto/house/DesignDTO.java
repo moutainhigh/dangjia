@@ -22,4 +22,8 @@ public class DesignDTO {
     private String image;// 平面图
     private String imageUrl;// 平面图URL
     private Integer decorationType;//haveimagestate
+    private String operatorId;// 操作人ID
+    private String operatorName;// 操作人名字
+    private String operatorMobile;// 操作人电话
+
 }
