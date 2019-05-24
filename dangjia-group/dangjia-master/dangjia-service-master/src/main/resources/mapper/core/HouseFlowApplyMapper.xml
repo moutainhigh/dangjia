@@ -231,7 +231,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from dj_core_house_flow_apply
         where
             to_days(create_date) = to_days(#{time})
-        and house_flow_id = #{houseFlowId}
+        <if test="houseFlowId!=null and houseFlowId!=''">
+            and house_flow_id = #{houseFlowId}
+        </if>
+
         and apply_type =#{applyType}
         and worker_id = #{workerId}
         and supervisor_check !=2
