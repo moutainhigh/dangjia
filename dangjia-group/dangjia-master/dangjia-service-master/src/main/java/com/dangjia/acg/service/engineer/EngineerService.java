@@ -581,6 +581,7 @@ public class EngineerService {
                 map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工
                 Member supervisor = memberMapper.getSupervisor(house.getId());
                 if (supervisor != null) {
+                    map.put("supId", supervisor.getId());
                     map.put("supName", supervisor.getName());
                     map.put("supMobile", supervisor.getMobile());
                 }
