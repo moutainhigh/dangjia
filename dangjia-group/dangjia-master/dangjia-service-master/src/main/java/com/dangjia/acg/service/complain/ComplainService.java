@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.complain;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -47,6 +48,7 @@ import com.dangjia.acg.service.core.HouseWorkerSupService;
 import com.dangjia.acg.service.deliver.SplitDeliverService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.gson.JsonArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import springfox.documentation.spring.web.json.Json;
@@ -454,15 +456,14 @@ public class ComplainService {
                         }
                         break;
                     case 5://提前结束装修
-                        JSONObject jsStr = JSONObject.parseObject(operateName);
-                        //所有施工工序工人ID
-                        Set<String> workerIds = jsStr.keySet();
-                        for(String workerId:workerIds){
-                            System.out.println("施工工序工人ID"+workerId);
+                        JSONArray brandSeriesLists = JSONArray.parseArray(operateName);
+                        for(int i=0;i<brandSeriesLists.size();i++){
+                            JSONObject jsonObject = brandSeriesLists.getJSONObject(i);
+                           // 施工工序工人ID
+                            Object id = jsonObject.get("id");
                             //获取退多少钱
-                            String string = jsStr.getString(workerId);
-                            System.out.println("退多少钱"+string);
-                            Example example1= new Example(HouseWorkerOrder.class);
+                            Object backMoney = jsonObject.get("backMoney");
+                            /*Example example1= new Example(HouseWorkerOrder.class);
                             example1.createCriteria()
                                     .andEqualTo(HouseWorkerOrder.HOUSE_ID,complain.getHouseId())
                                     .andEqualTo(HouseWorkerOrder.WORKER_ID,workerId);
@@ -474,7 +475,7 @@ public class ComplainService {
                             //工匠还可得
                             BigDecimal subtract1 = subtract.subtract(b);
                             BigDecimal add = houseWorkerOrderList.get(0).getHaveMoney().add(subtract1);
-                            houseWorkerOrderList.get(0).setHaveMoney(add);
+                            houseWorkerOrderList.get(0).setHaveMoney(add);*/
                             //申请表加记录
                             //流水表加记录
 
@@ -616,8 +617,8 @@ public class ComplainService {
         criteria.andGreaterThanOrEqualTo(HouseFlow.WORKER_TYPE,3);
         criteria.andCondition(" work_steta not IN(0,2)");
         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
-        Example example1=new Example(HouseWorkerOrder.class);
         for(HouseFlow houseFlow:houseFlows){
+            Example example1=new Example(HouseWorkerOrder.class);
             WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             example1.createCriteria()
                     .andEqualTo(HouseWorkerOrder.WORKER_ID,houseFlow.getWorkerId())
@@ -634,5 +635,16 @@ public class ComplainService {
             comPlainStopDTOList.add(comPlainStopDTO);
         }
         return comPlainStopDTOList;
+    }
+    public ServerResponse UpdateAdminStop(String jsonStr, String content, String houseId) {
+        JSONArray brandSeriesLists = JSONArray.parseArray(jsonStr);
+        for (int i = 0; i < brandSeriesLists.size(); i++) {
+            JSONObject jsonObject = brandSeriesLists.getJSONObject(i);
+            // 施工工序工人ID
+            Object id = jsonObject.get("id");
+            //获取退多少钱
+            Object backMoney = jsonObject.get("backMoney");
+        }
+        return ServerResponse.createBySuccessMessage("ok");
     }
 }
