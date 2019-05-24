@@ -18,5 +18,5 @@ public interface TaskAPI {
 
     @PostMapping("app/core/task/getTaskList")
     @ApiOperation(value = "任务列表", notes = "任务列表")
-    ServerResponse getTaskList(@RequestParam("userToken")String userToken,@RequestParam("userRole")String userRole);
+    ServerResponse getTaskList(@RequestParam("userToken")String userToken,@RequestParam("userRole")Integer userRole);
 }

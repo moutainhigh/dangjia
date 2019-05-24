@@ -1155,8 +1155,8 @@ public class HouseService {
                 String[] imageArr = mendOrder.getImageArr().split(",");
                 if (imageArr.length > 0) {
                     List<String> imageList = new ArrayList<>();
-                    for (int i = 0; i < imageArr.length; i++) {
-                        imageList.add(address + imageArr[i]);
+                    for (String anImageArr : imageArr) {
+                        imageList.add(address + anImageArr);
                     }
                     map.put("imgArr", imageList);
                 }

@@ -42,9 +42,13 @@ public interface WebSplitDeliverAPI {
 
 
     @PostMapping("web/finance/splitDeliver/getOrderSplitList")
-    @ApiOperation(value = "根据供应商Id查看要货单列表", notes = "根据供应商Id查看要货单列表")
+    @ApiOperation(value = "根据供应商Id查看要货单列表/模糊查询要货单列表", notes = "根据供应商Id查看要货单列表/模糊查询要货单列表")
     ServerResponse getOrderSplitList(@RequestParam("request") HttpServletRequest request,
-                                      @RequestParam("supplierId") String supplierId);
+                                     @RequestParam("pageDTO") PageDTO pageDTO,
+                                     @RequestParam("supplierId") String supplierId,
+                                     @RequestParam("searchKey")String searchKey,
+                                     @RequestParam("beginDate") String beginDate,
+                                     @RequestParam("endDate") String endDate);
 
     /**
      * 收货列表

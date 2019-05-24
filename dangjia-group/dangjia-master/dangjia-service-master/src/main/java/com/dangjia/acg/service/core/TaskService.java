@@ -68,10 +68,14 @@ public class TaskService {
 
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
+
     /**
      * 任务列表
      */
-    public ServerResponse getTaskList(String userToken, String userRole) {
+    public ServerResponse getTaskList(String userToken, Integer userRole) {
+        if (userRole == null) {
+            userRole = 1;
+        }
         ButtonDTO buttonDTO = new ButtonDTO();
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
@@ -81,7 +85,7 @@ public class TaskService {
         Member member = (Member) object;
         List<House> houseList = new ArrayList<>();
         //该城市该用户所有房产
-        if (!CommonUtil.isEmpty(userRole) && "1".equals(userRole)) {
+        if (userRole == 1) {
             Example example = new Example(House.class);
             example.createCriteria()
                     .andEqualTo(House.MEMBER_ID, member.getId())
@@ -99,7 +103,7 @@ public class TaskService {
                 //}
             }
         }
-        if (!CommonUtil.isEmpty(userRole) && "2".equals(userRole)) {
+        if (userRole == 2) {
             //该工匠所选择的工地
             Example example = new Example(HouseWorker.class);
             example.createCriteria()
@@ -116,7 +120,7 @@ public class TaskService {
         }
         String houseId = null;
         //大管家
-        if (!CommonUtil.isEmpty(userRole) && "2".equals(userRole) && member.getWorkerType() == 3) {
+        if (userRole == 2 && member.getWorkerType() == 3) {
             if (houseList.size() > 0) {
                 buttonDTO.setState(2);
                 for (House house : houseList) {
@@ -132,7 +136,7 @@ public class TaskService {
             }
         }
         //业主待处理任务
-        if (!CommonUtil.isEmpty(userRole) && "1".equals(userRole)) {
+        if (userRole == 1) {
             if (houseList.size() > 1) {
                 buttonDTO.setState(2);
                 for (House house : houseList) {
@@ -197,19 +201,19 @@ public class TaskService {
         List<MendDeliver> mendDeliverList = mendDeliverMapper.selectByExample(example);
 
         for (MendDeliver mendDeliver : mendDeliverList) {
-            String productType="0";
+            String productType = "0";
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendDeliver.getMendOrderId());
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
             task.setName("退材料待审核处理");
             if (workerType.getType() == 3) {
-                productType="1";
+                productType = "1";
                 task.setName("退服务待审核处理");
             }
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/buchailiao.png");
             String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                    String.format(DjConstants.YZPageAddress.TUIPRODUCTEXAMINE, userToken, house.getCityId(), task.getName()) + "&mendDeliverId=" + mendDeliver.getId()+ "&productType=" + productType + "&houseId=" + mendOrder.getHouseId();
+                    String.format(DjConstants.YZPageAddress.TUIPRODUCTEXAMINE, userToken, house.getCityId(), task.getName()) + "&mendDeliverId=" + mendDeliver.getId() + "&productType=" + productType + "&houseId=" + mendOrder.getHouseId();
             task.setHtmlUrl(url);
             task.setType(4);
             task.setTaskId(mendDeliver.getId());
@@ -246,20 +250,20 @@ public class TaskService {
         example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
                 .andEqualTo(MendOrder.STATE, 1);//补材料审核状态全通过
         List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
-         String DESIGNLIST = "refundItemDetail?userToken=%s&cityId=%s&title=%s";//设计图
+        String DESIGNLIST = "refundItemDetail?userToken=%s&cityId=%s&title=%s";//设计图
         for (MendOrder mendOrder : mendOrderList) {
-            String productType="0";
+            String productType = "0";
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
             Task task = new Task();
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
             task.setName(workerType.getName() + "补材料审核");
             if (workerType.getType() == 3) {
                 task.setName(workerType.getName() + "补服务审核");
-                productType="1";
+                productType = "1";
             }
             task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/buchailiao.png");
             String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                    String.format(DESIGNLIST,userToken, house.getCityId(), task.getName()) + "&type=0&mendOrderId=" + mendOrder.getId() + "&productType=" + productType + "&roleType=1&state=" + mendOrder.getState();
+                    String.format(DESIGNLIST, userToken, house.getCityId(), task.getName()) + "&type=0&mendOrderId=" + mendOrder.getId() + "&productType=" + productType + "&roleType=1&state=" + mendOrder.getState();
             task.setHtmlUrl(url);
             task.setType(3);
             task.setTaskId(mendOrder.getId());
@@ -272,14 +276,14 @@ public class TaskService {
         mendOrderList = mendOrderMapper.selectByExample(example);
         for (MendOrder mendOrder : mendOrderList) {
             ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
-            if( changeOrder.getState()==2) {//大管家已经同意
+            if (changeOrder.getState() == 2) {//大管家已经同意
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
                 Task task = new Task();
                 task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), "yyyy-MM-dd HH:mm"));
                 task.setName(workerType.getName() + "补人工审核");
                 task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/burengong.png");
                 String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                        String.format(DESIGNLIST,userToken, house.getCityId(), task.getName()) + "&type=0&mendOrderId=" + mendOrder.getId() + "&roleType=1&state=" + mendOrder.getState();
+                        String.format(DESIGNLIST, userToken, house.getCityId(), task.getName()) + "&type=0&mendOrderId=" + mendOrder.getId() + "&roleType=1&state=" + mendOrder.getState();
                 task.setHtmlUrl(url);
                 task.setType(3);
                 task.setTaskId(mendOrder.getId());

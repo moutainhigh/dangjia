@@ -39,8 +39,8 @@ public class WebSplitDeliverController implements WebSplitDeliverAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getOrderSplitList(HttpServletRequest request, String supplierId) {
-        return webSplitDeliverService.getOrderSplitList(supplierId);
+    public ServerResponse getOrderSplitList(HttpServletRequest request, PageDTO pageDTO, String supplierId, String searchKey,String beginDate,String endDate) {
+        return webSplitDeliverService.getOrderSplitList(pageDTO,supplierId,searchKey,beginDate,endDate);
     }
 
     @Override

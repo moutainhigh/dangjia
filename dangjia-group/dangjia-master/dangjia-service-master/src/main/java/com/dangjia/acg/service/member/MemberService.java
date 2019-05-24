@@ -349,7 +349,7 @@ public class MemberService {
         }
         user.setId(accessToken.getMember().getId());
         Member member = memberMapper.selectByPrimaryKey(user.getId());
-        if (member.getIsJob()) {
+        if (member.getCheckType() == 4) {
             //冻结的帐户不能修改资料信息
             return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
         }
@@ -415,7 +415,7 @@ public class MemberService {
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
-        if (user.getIsJob()) {
+        if (user.getCheckType() == 4) {
             //冻结的帐户不能修改资料信息
             return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
         }
@@ -471,7 +471,7 @@ public class MemberService {
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
-        if (user.getIsJob()) {
+        if (user.getCheckType() ==4) {
             //冻结的帐户不能修改资料信息
             return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
         }
@@ -551,7 +551,7 @@ public class MemberService {
         if (user == null) {
             return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "电话号码未注册！");
         } else {
-            if (user.getIsJob()) {
+            if (user.getCheckType() ==4) {
                 //冻结的帐户不能修改资料信息
                 return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
             }
@@ -714,7 +714,7 @@ public class MemberService {
                 srcMember.setMobile(member.getMobile());
             if (StringUtils.isNotBlank(member.getRemarks()))
                 srcMember.setRemarks(member.getRemarks());
-            if (srcMember.getIsJob()) {
+            if (srcMember.getCheckType() ==4) {
                 //冻结的帐户不能修改资料信息
                 return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
             }
@@ -834,7 +834,7 @@ public class MemberService {
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
-        if (user.getIsJob()) {
+        if (user.getCheckType() ==4) {
             //冻结的帐户不能修改资料信息
             return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
         }
@@ -871,7 +871,7 @@ public class MemberService {
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
-        if (user.getIsJob()) {
+        if (checkType!=4&&checkType!=2&&user.getCheckType() ==4) {
             //冻结的帐户不能修改资料信息
             return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
         }
