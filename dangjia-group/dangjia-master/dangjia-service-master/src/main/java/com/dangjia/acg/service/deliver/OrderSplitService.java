@@ -236,11 +236,16 @@ public class OrderSplitService {
     public ServerResponse splitDeliverList(String supplierId, int shipState) {
         Example example = new Example(SplitDeliver.class);
         if(shipState==2){
-            example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId).andCondition(" shipping_state in(2,4) ");
+            example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId)
+                    .andCondition(" shipping_state in(2,4) ").andCondition(" APPLY_STATE is not null");
+            example.orderBy(SplitDeliver.APPLY_STATE).asc();
         }else {
             example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId).andEqualTo(SplitDeliver.SHIPPING_STATE, shipState);
         }
         List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
+        for (SplitDeliver splitDeliver : splitDeliverList) {
+            System.out.println(splitDeliver);
+        }
         return ServerResponse.createBySuccess("查询成功", splitDeliverList);
     }
 
