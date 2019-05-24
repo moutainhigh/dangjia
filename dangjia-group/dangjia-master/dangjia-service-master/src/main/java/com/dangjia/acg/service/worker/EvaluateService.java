@@ -585,7 +585,23 @@ public class EvaluateService {
 
         memberMapper.updateByPrimaryKeySelective(worker);
     }
-
+    /**扣除指定用户的积分*/
+    public void updateMemberIntegral(String workerId,String houseId,BigDecimal score,String desc){
+        Member worker = memberMapper.selectByPrimaryKey(workerId);
+        WorkIntegral workIntegral=new WorkIntegral();
+        BigDecimal evaluationScore = worker.getEvaluationScore().subtract(score);
+        worker.setEvaluationScore(evaluationScore);//减积分
+        workIntegral.setIntegral(score);
+        workIntegral.setWorkerId(worker.getId());
+        workIntegral.setMemberId(workerId);
+        workIntegral.setButlerId(workerId);
+        workIntegral.setStar(0);
+        workIntegral.setStatus(0);
+        workIntegral.setHouseId(houseId);
+        workIntegral.setBriefed(desc);
+        workIntegralMapper.insert(workIntegral);
+        memberMapper.updateByPrimaryKeySelective(worker);
+    }
     /**用于在工人被评价之后修改好评率*/
     private void updateFavorable(String workerId){
         Member worker = memberMapper.selectByPrimaryKey(workerId);

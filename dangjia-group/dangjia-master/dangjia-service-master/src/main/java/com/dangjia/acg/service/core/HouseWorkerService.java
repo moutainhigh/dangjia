@@ -37,6 +37,7 @@ import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.house.HouseService;
+import com.dangjia.acg.service.worker.EvaluateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -97,7 +98,8 @@ public class HouseWorkerService {
     private HouseFlowApplyService houseFlowApplyService;
     @Autowired
     private IMenuConfigurationMapper iMenuConfigurationMapper;
-
+    @Autowired
+    private EvaluateService evaluateService;
     @Autowired
     private HouseService houseService;
     @Autowired
@@ -565,15 +567,19 @@ public class HouseWorkerService {
                 Date end = new Date(today.getTime() + 24 * 60 * 60 * 1000 * suspendDay);
                 hfa.setStartDate(today);
                 hfa.setEndDate(end);
-                hfa.setMemberCheck(0);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
+                hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
                 hfa.setPayState(1);//标记为新停工申请
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
                 houseFlow.setPause(1);//0:正常；1暂停；
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
-
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠申请停工",
-                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "5");
+                //工匠申请停工不用审核，申请停工超过2天的，第3天起每天扣除1积分
+                int score=suspendDay-2;
+                if(score>0){
+                    evaluateService.updateMemberIntegral(workerId,houseFlow.getHouseId(),new BigDecimal(score),"申请停工超过2天，积分扣除");
+                }
+//                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠申请停工",
+//                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "5");
                 return ServerResponse.createBySuccessMessage("工匠申请停工（" + workerType.getName() + "）操作成功");
 
             } else if (applyType == 4) {
