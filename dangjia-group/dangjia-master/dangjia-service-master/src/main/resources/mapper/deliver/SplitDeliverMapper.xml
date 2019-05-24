@@ -85,6 +85,13 @@
         AND b.apply_state IS NOT NULL
         AND b.apply_state != 3
         AND supplier_id=#{supplierId}
+        <if test="searchKey!=null and searchKey!=''">
+            AND ( b.ship_address like CONCAT('%',#{searchKey},'%')
+            OR a.number like CONCAT('%',#{searchKey},'%'))
+        </if>
+        <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+            and a.create_date between #{beginDate} and #{endDate}
+        </if>
         ORDER BY a.create_date DESC
     </select>
 

@@ -78,16 +78,28 @@ public class WebSplitDeliverService {
         }
     }
 
+
     /**
-     *
-     * 根据供应商id查询要货单列表
+     * 根据供应商id查询要货单列表/模糊查询要货单列表
+     * @param pageDTO
      * @param supplierId
+     * @param searchKey
+     * @param beginDate
+     * @param endDate
      * @return
      */
-    public ServerResponse getOrderSplitList(String supplierId){
+    public ServerResponse getOrderSplitList(PageDTO pageDTO,String supplierId,String searchKey,String beginDate,String endDate){
         try {
-            List<WebSplitDeliverItemDTO> orderSplitList = iSplitDeliverMapper.getOrderSplitList(supplierId);
-            return ServerResponse.createBySuccess("查询成功",orderSplitList);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
+                if(beginDate.equals(endDate)){
+                    beginDate=beginDate+" "+"00:00:00";
+                    endDate=endDate+" "+"23:59:59";
+                }
+            }
+            List<WebSplitDeliverItemDTO> orderSplitList = iSplitDeliverMapper.getOrderSplitList(supplierId,searchKey,beginDate,endDate);
+            PageInfo pageResult=new PageInfo(orderSplitList);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
