@@ -47,8 +47,8 @@ public class ConfigApp extends BaseEntity {
 
 
     @Column(name = "is_forced")
-    @Desc(value = "是否强制（0：是；1：否）")
-    @ApiModelProperty("是否强制（0：是；1：否）")
+    @Desc(value = "是否强制（0：否；1：是）")
+    @ApiModelProperty("是否强制（0：否；1：是）")
     private Boolean isForced;
 
     @Column(name = "url")

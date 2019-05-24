@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.complain;
 
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.EventStatus;
@@ -7,6 +8,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.complain.ComPlainStopDTO;
 import com.dangjia.acg.dto.complain.ComplainDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
@@ -14,6 +16,7 @@ import com.dangjia.acg.dto.worker.RewardPunishRecordDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
+import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
@@ -28,6 +31,7 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
@@ -45,11 +49,11 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import springfox.documentation.spring.web.json.Json;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 @Service
@@ -90,6 +94,8 @@ public class ComplainService {
     private IWorkerDetailMapper iWorkerDetailMapper;
     @Autowired
     private HouseWorkerSupService houseWorkerSupService;
+    @Autowired
+    private IHouseWorkerOrderMapper iHouseWorkerOrderMapper;
     /**
      * 添加申诉
      *
@@ -447,6 +453,33 @@ public class ComplainService {
                             return response;
                         }
                         break;
+                    case 5://提前结束装修
+                        JSONObject jsStr = JSONObject.parseObject(operateName);
+                        //所有施工工序工人ID
+                        Set<String> workerIds = jsStr.keySet();
+                        for(String workerId:workerIds){
+                            System.out.println("施工工序工人ID"+workerId);
+                            //获取退多少钱
+                            String string = jsStr.getString(workerId);
+                            System.out.println("退多少钱"+string);
+                            Example example1= new Example(HouseWorkerOrder.class);
+                            example1.createCriteria()
+                                    .andEqualTo(HouseWorkerOrder.HOUSE_ID,complain.getHouseId())
+                                    .andEqualTo(HouseWorkerOrder.WORKER_ID,workerId);
+                            List<HouseWorkerOrder> houseWorkerOrderList = iHouseWorkerOrderMapper.selectByExample(example1);
+                            BigDecimal haveMoney = houseWorkerOrderList.get(0).getHaveMoney();
+                            BigDecimal workPrice = houseWorkerOrderList.get(0).getWorkPrice();
+                            BigDecimal subtract = workPrice.subtract(haveMoney);
+                            BigDecimal b=new BigDecimal(string);
+                            //工匠还可得
+                            BigDecimal subtract1 = subtract.subtract(b);
+                            BigDecimal add = houseWorkerOrderList.get(0).getHaveMoney().add(subtract1);
+                            houseWorkerOrderList.get(0).setHaveMoney(add);
+                            //申请表加记录
+                            //流水表加记录
+
+                        }
+                        break;
                 }
         }else{
             if (complain.getComplainType() != null&&complain.getComplainType()==2){
@@ -535,8 +568,71 @@ public class ComplainService {
                 splitDeliverDTO.setSplitDeliverItemDTOList(splitDeliverItemDTOList);//明细
                 complain.setData(splitDeliverDTO);
             }
+            if(complain.getComplainType() == 5){
+                Object date = getDate(complain.getHouseId());
+                complain.setData(date);
+            }
         }
         ServerResponse serverResponse = ServerResponse.createBySuccess("查询成功", complain);
         return serverResponse;
+    }
+
+    public ServerResponse userStop(String houseId, String memberId,String content){
+        try {
+            Complain complain = new Complain();
+            complain.setHouseId(houseId);
+            complain.setMemberId(memberId);
+            complain.setComplainType(5);
+            complain.setContent(content);
+            complain.setStatus(0);
+            Member member = memberMapper.selectByPrimaryKey(memberId);
+            complain.setUserNickName(member.getNickName());
+            complain.setUserName(member.getName());
+            complain.setUserMobile(member.getMobile());
+            complainMapper.insert(complain);
+            return ServerResponse.createBySuccessMessage("申请成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("申请失败");
+        }
+    }
+    public ServerResponse adminStop(String houseId){
+        ComplainDTO complain=new ComplainDTO();
+        Object date = getDate(houseId);
+        House house = houseMapper.selectByPrimaryKey(houseId);
+        Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+        complain.setHouseName(house.getHouseName());
+        complain.setMemberName(member.getName());
+        complain.setMemberMobile(member.getMobile());
+        complain.setData(date);
+        return ServerResponse.createBySuccess("成功",complain);
+    }
+
+    public Object getDate(String houseId){
+        List<ComPlainStopDTO> comPlainStopDTOList=new ArrayList<>();
+        Example example=new Example(HouseFlow.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo(HouseFlow.HOUSE_ID,houseId);
+        criteria.andGreaterThanOrEqualTo(HouseFlow.WORKER_TYPE,3);
+        criteria.andCondition(" work_steta not IN(0,2)");
+        List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+        Example example1=new Example(HouseWorkerOrder.class);
+        for(HouseFlow houseFlow:houseFlows){
+            WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+            example1.createCriteria()
+                    .andEqualTo(HouseWorkerOrder.WORKER_ID,houseFlow.getWorkerId())
+                    .andEqualTo(HouseWorkerOrder.HOUSE_ID,houseFlow.getHouseId());
+            List<HouseWorkerOrder> houseWorkerOrderList = iHouseWorkerOrderMapper.selectByExample(example1);
+            BigDecimal haveMoney = houseWorkerOrderList.get(0).getHaveMoney();
+            BigDecimal workPrice = houseWorkerOrderList.get(0).getWorkPrice();
+            BigDecimal subtract = workPrice.subtract(haveMoney);
+            String workerId = houseWorkerOrderList.get(0).getWorkerId();
+            ComPlainStopDTO comPlainStopDTO=new ComPlainStopDTO();
+            comPlainStopDTO.setHavaMoney(subtract);
+            comPlainStopDTO.setWorkerTypeId(workerId);
+            comPlainStopDTO.setWorkerTypeName(workerType.getName());
+            comPlainStopDTOList.add(comPlainStopDTO);
+        }
+        return comPlainStopDTOList;
     }
 }

@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 申诉返回体
@@ -31,4 +32,5 @@ public class ComplainDTO {
     protected Date modifyDate;// 修改日期
     private Object data;//公用产生体
     private String content;//描述
+    private String workerId;//描述
 }
