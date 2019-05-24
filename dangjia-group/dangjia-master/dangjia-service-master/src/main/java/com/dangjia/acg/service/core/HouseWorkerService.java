@@ -38,6 +38,7 @@ import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.house.HouseService;
+import com.dangjia.acg.service.worker.EvaluateService;
 import com.dangjia.acg.service.member.GroupInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -99,7 +100,8 @@ public class HouseWorkerService {
     private HouseFlowApplyService houseFlowApplyService;
     @Autowired
     private IMenuConfigurationMapper iMenuConfigurationMapper;
-
+    @Autowired
+    private EvaluateService evaluateService;
     @Autowired
     private HouseService houseService;
     @Autowired
@@ -430,6 +432,37 @@ public class HouseWorkerService {
                     return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）待交底请勿发起停工申请");
                 }
             }
+            if (applyType == 0) {
+                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(houseFlowId, 4, workerId, new Date());
+                if (houseFlowApplyList.size()>0){
+                    HouseFlowApply houseFlowApply=houseFlowApplyList.get(0);
+                    if(new Date().getTime()>=DateUtil.addDateHours(houseFlowApply.getCreateDate(),3).getTime()){
+                        return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）开工后3小时才能申请完工！");
+                    }
+                }else{
+                    return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）未开工，无法申请完工！");
+                }
+            }
+            if (applyType == 4) {
+                if(houseFlow.getWorkSteta()==2){
+                    return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已经整体完工，无法开工");
+                }
+                //今日开工记录
+                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(null, 4, workerId, new Date());
+                for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
+                    Example example=new Example(HouseFlowApply.class);
+                    example.createCriteria().andCondition("   apply_type in (0,1,2) ")
+                            .andEqualTo(HouseFlowApply.WORKER_ID,workerId)
+                            .andNotEqualTo(HouseFlowApply.SUPERVISOR_CHECK,2)
+                            .andEqualTo(HouseFlowApply.HOUSE_FLOW_ID,houseFlowApply.getHouseFlowId());
+                    List<HouseFlowApply> houseFlowApplyList1 =  houseFlowApplyMapper.selectByExample(example);
+                    if(houseFlowApplyList1.size()==0){
+                        House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());//工序
+                        return ServerResponse.createByErrorMessage("工地["+house.getHouseName()+"]今日还未完工，无法开工");
+                    }
+                }
+
+            }
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());//查询房子
             HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);//大管家的hf
             //****针对老工地管家兼容巡查拿钱和验收拿钱***//
@@ -545,27 +578,34 @@ public class HouseWorkerService {
                 Date end = new Date(today.getTime() + 24 * 60 * 60 * 1000 * suspendDay);
                 hfa.setStartDate(today);
                 hfa.setEndDate(end);
-                hfa.setMemberCheck(0);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
+                hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
                 hfa.setPayState(1);//标记为新停工申请
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
                 houseFlow.setPause(1);//0:正常；1暂停；
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
-
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠申请停工",
-                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "5");
+                //工匠申请停工不用审核，申请停工超过2天的，第3天起每天扣除1积分
+                int score=suspendDay-2;
+                if(score>0){
+                    evaluateService.updateMemberIntegral(workerId,houseFlow.getHouseId(),new BigDecimal(score),"申请停工超过2天，积分扣除");
+                }
+//                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠申请停工",
+//                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "5");
                 return ServerResponse.createBySuccessMessage("工匠申请停工（" + workerType.getName() + "）操作成功");
 
             } else if (applyType == 4) {
-                if (active != null && active.equals("pre")) {
-                    String s2 = DateUtil.getDateString2(new Date().getTime()) + " 12:00:00";//当天12点
-                    Date lateDate = DateUtil.toDate(s2);
-                    Date newDate2 = new Date();//当前时间
-                    long downTime = newDate2.getTime() - lateDate.getTime();//对比12点
-                    if (downTime > 0) {
-                        return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
-                    }
-                }
+                //申请类型0每日完工申请，4：每日开工
+                //五月二周任务取消12点限制
+//                if (active != null && active.equals("pre")) {
+//                    String s2 = DateUtil.getDateString2(new Date().getTime()) + " 12:00:00";//当天12点
+//                    Date lateDate = DateUtil.toDate(s2);
+//                    Date newDate2 = new Date();//当前时间
+//                    long downTime = newDate2.getTime() - lateDate.getTime();//对比12点
+//                    if (downTime > 0) {
+//                        return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
+//                    }
+//                }
+
                 hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经开工了");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过

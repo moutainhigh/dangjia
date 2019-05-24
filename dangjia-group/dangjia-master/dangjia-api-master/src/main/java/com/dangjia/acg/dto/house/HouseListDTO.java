@@ -44,6 +44,9 @@ public class HouseListDTO {
     private String cityId; //城市ID
     private String villageId;//小区Id
     private String modelingLayoutId;//户型Id
+    private String operatorId;// 操作人ID
+    private String operatorName;// 操作人名字
+    private String operatorMobile;// 操作人电话
 
 
     public String getHouseName() {

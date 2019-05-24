@@ -73,6 +73,9 @@ public interface HouseDesignImageAPI {
      * @return_param image string 平面图
      * @return_param imageUrl string 平面图URL
      * @return_param decorationType int 装修类型0表示没有开始，1远程设计，2自带设计，3共享装修
+     * @return_param operatorId string 操作人ID
+     * @return_param operatorName string 操作人名字
+     * @return_param operatorMobile string 操作人电话
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 2
      * @Author: Ruking 18075121944
