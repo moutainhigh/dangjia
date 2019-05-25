@@ -27,6 +27,7 @@ import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.core.*;
+import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -38,6 +39,7 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.worker.EvaluateService;
+import com.dangjia.acg.service.member.GroupInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -112,6 +114,9 @@ public class HouseWorkerService {
     @Autowired
     private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private GroupInfoService groupInfoService;
+
     /**
      * 根据工人id查询所有房子任务
      */
@@ -161,7 +166,7 @@ public class HouseWorkerService {
     /**
      * 抢单
      */
-    public ServerResponse setWorkerGrab(String userToken, String cityId, String houseFlowId) {
+    public ServerResponse setWorkerGrab(HttpServletRequest request,String userToken, String cityId, String houseFlowId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -204,6 +209,12 @@ public class HouseWorkerService {
             }
             //通知业主大管家抢单成功
             if (worker.getWorkerType() == 3) {//大管家
+                //开始建群
+                Group group = new Group();
+                group.setHouseId(house.getId());
+                group.setUserId(house.getMemberId());
+                groupInfoService.addGroup(request, group, worker.getId(), "大管家");
+
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家抢单提醒",
                         String.format(DjConstants.PushMessage.STEWARD_RUSH_TO_PURCHASE, house.getHouseName()), "");
             }

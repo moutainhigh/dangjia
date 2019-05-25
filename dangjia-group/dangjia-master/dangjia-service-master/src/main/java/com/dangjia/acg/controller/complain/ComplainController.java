@@ -46,4 +46,22 @@ public class ComplainController implements ComplainAPI {
     public ServerResponse getComplain(HttpServletRequest request, String complainId) {
         return complainService.getComplain(complainId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse userStop(String houseId, String memberId,String content) {
+        return complainService.userStop(houseId,memberId,content);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse adminStop(String houseId) {
+        return complainService.adminStop(houseId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse UpdateAdminStop(String jsonStr, String content, String houseId) {
+        return complainService.UpdateAdminStop(jsonStr,content,houseId);
+    }
 }
