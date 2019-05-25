@@ -24,7 +24,8 @@ public interface HouseWorkerAPI {
 
     @PostMapping("app/core/houseWorker/setWorkerGrab")
     @ApiOperation(value = "工匠抢单", notes = "工匠抢单")
-    ServerResponse setWorkerGrab(@RequestParam("userToken") String userToken,
+    ServerResponse setWorkerGrab(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("userToken") String userToken,
                                  @RequestParam("cityId") String cityId,
                                  @RequestParam("houseFlowId") String houseFlowId);
 

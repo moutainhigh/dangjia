@@ -341,23 +341,23 @@ public class TaskService {
             taskList.add(task);
         }
 
-        //审核申请停工任务
-        example = new Example(HouseFlowApply.class);
-        example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                .andEqualTo(HouseFlowApply.MEMBER_CHECK, 0).andEqualTo(HouseFlowApply.PAY_STATE, 1);
-        houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
-        for (HouseFlowApply hfa : houseFlowApplyList) {
-            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
-            Task task = new Task();
-            task.setDate(DateUtil.dateToString(hfa.getModifyDate(), "yyyy-MM-dd HH:mm"));
-            task.setName(workerType.getName() + "停工申请待审核");
-            task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/chaichu.png");
-            task.setHtmlUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.TingGong + "&houseFlowApplyId=%s",
-                    userToken, house.getCityId(), "业主审核停工", hfa.getId()));
-            task.setType(3);
-            task.setTaskId("");
-            taskList.add(task);
-        }
+//        //审核申请停工任务
+//        example = new Example(HouseFlowApply.class);
+//        example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
+//                .andEqualTo(HouseFlowApply.MEMBER_CHECK, 0).andEqualTo(HouseFlowApply.PAY_STATE, 1);
+//        houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
+//        for (HouseFlowApply hfa : houseFlowApplyList) {
+//            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
+//            Task task = new Task();
+//            task.setDate(DateUtil.dateToString(hfa.getModifyDate(), "yyyy-MM-dd HH:mm"));
+//            task.setName(workerType.getName() + "停工申请待审核");
+//            task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/chaichu.png");
+//            task.setHtmlUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.TingGong + "&houseFlowApplyId=%s",
+//                    userToken, house.getCityId(), "业主审核停工", hfa.getId()));
+//            task.setType(3);
+//            task.setTaskId("");
+//            taskList.add(task);
+//        }
 
         return taskList;
     }

@@ -37,6 +37,7 @@ public interface WebClueAPI {
     ServerResponse getClueList(@RequestParam("stage") Integer stage,
                                @RequestParam("values") String values,
                                @RequestParam("memberId") String memberId,
+                               @RequestParam("childId") String childId,
                                @RequestParam("beginDate") String beginDate,
                                @RequestParam("endDate") String endDate,
                                @RequestParam("pageDTO") PageDTO pageDTO);
@@ -52,8 +53,13 @@ public interface WebClueAPI {
      * 修改客服
      */
     @PostMapping("web/clue/updateCus")
-    @ApiOperation(value = "根据id修改客服", notes = "根据id修改客服")
-    ServerResponse updateCus(@RequestParam("cusService") String cusService, @RequestParam("id") String id);
+    @ApiOperation(value = "根据id修改信息", notes = "根据id修改信息")
+    ServerResponse updateCus(@RequestParam("cusService") String cusService,
+                             @RequestParam("phone") String phone,
+                             @RequestParam("chat") String chat,
+                             @RequestParam("userId") String userId,
+                             @RequestParam("childId") String childId,
+                             @RequestParam("id") String id);
 
     /**
      * xls导入线索
@@ -79,4 +85,5 @@ public interface WebClueAPI {
     @PostMapping("web/clue/sendUser")
     @ApiOperation(value = "转客户", notes = "转客户")
     ServerResponse sendUser(@RequestParam("member") Member member, @RequestParam("phone") String phone);
+
 }

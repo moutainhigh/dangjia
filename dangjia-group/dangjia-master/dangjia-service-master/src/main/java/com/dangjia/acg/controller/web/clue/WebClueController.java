@@ -36,8 +36,8 @@ public class WebClueController implements WebClueAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getClueList (Integer stage,String values,String memberId,String beginDate,String endDate, PageDTO pageDTO){
-        return clueService.getClueList(stage,values,memberId,beginDate,endDate,pageDTO.getPageNum(),pageDTO.getPageSize());
+    public ServerResponse getClueList (Integer stage,String values,String memberId,String childId,String beginDate,String endDate, PageDTO pageDTO){
+        return clueService.getClueList(stage,values,memberId,childId,beginDate,endDate,pageDTO.getPageNum(),pageDTO.getPageSize());
     }
 
     @Override
@@ -48,8 +48,8 @@ public class WebClueController implements WebClueAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse updateCus(String cusService, String id) {
-        return clueService.updateCus(cusService,id);
+    public ServerResponse updateCus(String cusService,String phone,String chat,String userId,String childId, String id) {
+        return clueService.updateCus(cusService,phone,chat,userId,childId,id);
     }
 
     @Override

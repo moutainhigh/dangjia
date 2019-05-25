@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.pay;
 
 import com.alibaba.fastjson.JSONObject;
+import com.ctc.wstx.util.StringUtil;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetMaterialAPI;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
@@ -633,7 +634,10 @@ public class PaymentService {
 
             }
             /*支付完成后将工人拉入激光群组内，方便交流*/
-            addGroupMember(request, houseFlow.getHouseId(), houseFlow.getWorkerId());
+            //售中客服，设计师，精算师无需进群
+            if(!("1".equals(houseFlow.getWorkerTypeId())||"2".equals(houseFlow.getWorkerTypeId()))) {
+                addGroupMember(request, houseFlow.getHouseId(), houseFlow.getWorkerId());
+            }
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();

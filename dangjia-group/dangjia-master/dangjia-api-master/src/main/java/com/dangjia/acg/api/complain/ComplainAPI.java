@@ -52,4 +52,19 @@ public interface ComplainAPI {
     ServerResponse getComplain(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("complainId") String complainId);
 
+    @PostMapping("/complain/userStop")
+    @ApiOperation(value = "业主提前停止装修", notes = "业主提前停止装修")
+    ServerResponse userStop(@RequestParam("houseId") String houseId,
+                            @RequestParam("memberId") String memberId,
+                            @RequestParam("content") String content);
+
+    @PostMapping("/complain/adminStop")
+    @ApiOperation(value = "中台提前停止装修页面", notes = "中台提前停止装修页面")
+    ServerResponse adminStop(@RequestParam("houseId") String houseId);
+
+    @PostMapping("/complain/UpdateAdminStop")
+    @ApiOperation(value = "中台提前停止装修提交", notes = "中台提前停止装修提交")
+    ServerResponse UpdateAdminStop(@RequestParam("jsonStr") String jsonStr,
+                                   @RequestParam("content") String content,
+                                   @RequestParam("houseId") String houseId);
 }
