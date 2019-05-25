@@ -20,10 +20,10 @@ public interface HouseWorkerSupAPI {
     @ApiOperation(value = "材料列表", notes = "材料列表")
     ServerResponse surplusList(@RequestParam("userToken")String userToken,@RequestParam("houseFlowApplyId")String houseFlowApplyId);
 
-    @PostMapping("app/core/houseWorkerSup/auditApply")
-    @ApiOperation(value = "审核停工", notes = "审核停工")
-    ServerResponse auditApply(@RequestParam("houseFlowApplyId")String houseFlowApplyId,
-                              @RequestParam("memberCheck")Integer memberCheck);
+//    @PostMapping("app/core/houseWorkerSup/auditApply")
+//    @ApiOperation(value = "审核停工", notes = "审核停工")
+//    ServerResponse auditApply(@RequestParam("houseFlowApplyId")String houseFlowApplyId,
+//                              @RequestParam("memberCheck")Integer memberCheck);
 
     @PostMapping("app/core/houseWorkerSup/tingGongPage")
     @ApiOperation(value = "停工申请内容", notes = "停工申请内容")

@@ -37,8 +37,8 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setWorkerGrab(String userToken, String cityId, String houseFlowId) {
-        return houseWorkerService.setWorkerGrab(userToken, cityId, houseFlowId);
+    public ServerResponse setWorkerGrab(HttpServletRequest request,String userToken, String cityId, String houseFlowId) {
+        return houseWorkerService.setWorkerGrab(request,userToken, cityId, houseFlowId);
     }
 
     /**
