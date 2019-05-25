@@ -220,6 +220,7 @@ public class House extends BaseEntity {
 
     public House(boolean isIni) {
         if (isIni) {
+            this.id = (int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis();
             this.type = 1;//0默认，1用户点击了开始装修，2代表老用户,默认生成 为0
             this.visitState = 0;//默认
             this.showHouse = 0;// 是否展示 0展示，1不展示,默认生成 为0
@@ -231,6 +232,7 @@ public class House extends BaseEntity {
             this.money = new BigDecimal(0);
             this.isSelect = 1;//默认选中
             this.pause = 0;
+            this.dataStatus=0;
         }
     }
 
