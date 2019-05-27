@@ -1099,13 +1099,13 @@ public class HouseService {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         example.orderBy(HouseConstructionRecord.CREATE_DATE).desc();
         List<HouseConstructionRecord> hfaList = houseConstructionRecordMapper.selectByExample(example);
+        if(hfaList.size()<=0){
+            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相施工记录");
+        }
         PageInfo pageResult = new PageInfo(hfaList);
         List<Map<String, Object>> listMap = new ArrayList<>();
         for (HouseConstructionRecord houseConstructionRecord : hfaList) {
             listMap.add(getHouseConstructionRecordMap(houseConstructionRecord, address));
-        }
-        if (listMap == null) {
-            return ServerResponse.createByErrorMessage("系统出错,查询施工记录失败");
         }
         pageResult.setList(listMap);
         return ServerResponse.createBySuccess("查询施工记录成功", pageResult);
