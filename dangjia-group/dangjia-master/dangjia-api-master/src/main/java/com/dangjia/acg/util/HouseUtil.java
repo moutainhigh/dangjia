@@ -33,7 +33,7 @@ public class HouseUtil {
             case 1:
                 if (house.getDecorationType() == 2 && house.getDesignerOk() != 3) {
                     dataMap.put("rank", 3);
-                    dataMap.put("nameB", "带上传设计设计图");
+                    dataMap.put("nameB", "待上传设计设计图");
                 } else {
                     dataMap.put("rank", 3);
                     dataMap.put("nameB", "精算中");
