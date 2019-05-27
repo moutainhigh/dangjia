@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.deliver;
 
+import com.dangjia.acg.dto.deliver.SupplierDeliverDTO;
 import com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import org.apache.ibatis.annotations.Param;
@@ -35,5 +36,12 @@ public interface ISplitDeliverMapper extends Mapper<SplitDeliver> {
 
     /*供应商查看货单详情*/
     List<WebSplitDeliverItemDTO> splitDeliverList(@Param("splitDeliverId") String splitDeliverId);
+
+    /*供应商查看货单列表*/
+    List<SupplierDeliverDTO> mendDeliverList(@Param("supplierId") String supplierId,
+                                             @Param("shipAddress")String shipAddress,
+                                             @Param("beginDate") String beginDate,
+                                             @Param("endDate") String endDate,
+                                             @Param("applyState") int applyState);
 
 }

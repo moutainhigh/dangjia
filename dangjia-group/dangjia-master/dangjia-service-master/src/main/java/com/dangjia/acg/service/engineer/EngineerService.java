@@ -475,6 +475,7 @@ public class EngineerService {
             } else {
                 BigDecimal havaMoney = houseWorkerOrderList.get(0).getRepairTotalPrice().subtract(houseWorkerOrderList.get(0).getRepairPrice());
                 havaMoney = houseWorkerOrderList.get(0).getHaveMoney().add(havaMoney);
+                havaMoney = houseWorkerOrderList.get(0).getRetentionMoney().add(havaMoney);
                 map.put("workPrice", houseWorkerOrderList.get(0).getWorkPrice().add(houseWorkerOrderList.get(0).getRepairTotalPrice()));
                 map.put("havaMoney", havaMoney);
             }

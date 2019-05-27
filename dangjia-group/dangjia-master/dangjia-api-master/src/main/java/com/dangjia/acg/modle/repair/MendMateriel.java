@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * 实体类 -补退材料表
@@ -107,6 +108,8 @@ public class MendMateriel extends BaseEntity {
 	@ApiModelProperty("实际总价")
 	private Double actualPrice;//
 
+	@Transient
+	private String brandName;
 
 	public void initPath(String address){
 		this.image = StringUtils.isEmpty(this.image)?null:address+this.image;

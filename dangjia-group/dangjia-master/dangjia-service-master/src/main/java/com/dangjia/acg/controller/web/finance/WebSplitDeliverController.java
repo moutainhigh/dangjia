@@ -49,4 +49,10 @@ public class WebSplitDeliverController implements WebSplitDeliverAPI {
         return webSplitDeliverService.splitDeliverList(splitDeliverId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse mendDeliverList(String supplierId,String shipAddress, String beginDate, String endDate,int applyState) {
+        return webSplitDeliverService.mendDeliverList(supplierId,shipAddress,beginDate,endDate,applyState);
+    }
+
 }
