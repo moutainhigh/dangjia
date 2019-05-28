@@ -337,10 +337,13 @@ public class HouseService {
                 } else if (houseFlow.getWorkType() == 3) {
                     nodeDTO.setRank(3);
                     nodeDTO.setNameB("待支付");
-                } else if (houseFlow.getWorkSteta() == 2) {
+                } else if (houseFlow.getWorkSteta() == 2||houseFlow.getWorkSteta() == 6) {
                     nodeDTO.setRank(5);
-                    nodeDTO.setNameB("整体完工");
-                } else if (houseFlow.getWorkType() == 4) {
+                    if(houseFlow.getWorkSteta() == 2){
+                        nodeDTO.setNameB("整体完工");}
+                   else{
+                       nodeDTO.setNameB("提前结束装修");}
+                }else if (houseFlow.getWorkType() == 4) {
                     nodeDTO.setRank(4);
                     nodeDTO.setNameB("监工中");
                 }
@@ -371,17 +374,23 @@ public class HouseService {
                         nodeDTO.setNameB("施工中");
                     } else {
                         if (houseFlow.getWorkerType() == 4) {//拆除
-                            if (houseFlow.getWorkSteta() == 2) {
+                            if (houseFlow.getWorkSteta() == 2 ||houseFlow.getWorkSteta() == 6) {
                                 nodeDTO.setRank(6);
-                                nodeDTO.setNameB("整体完工");
+                                if(houseFlow.getWorkSteta() == 2){
+                                    nodeDTO.setNameB("整体完工");}
+                                else {
+                                    nodeDTO.setNameB("提前结束装修");}
                             }
                         } else {
                             if (houseFlow.getWorkSteta() == 1) {
                                 nodeDTO.setRank(6);
                                 nodeDTO.setNameB("阶段完工");
-                            } else if (houseFlow.getWorkSteta() == 2) {
+                            } else if (houseFlow.getWorkSteta() == 2|| houseFlow.getWorkSteta() == 6) {
                                 nodeDTO.setRank(7);
-                                nodeDTO.setNameB("整体完工");
+                                if(houseFlow.getWorkSteta() == 2){
+                                    nodeDTO.setNameB("整体完工");}
+                                else {
+                                    nodeDTO.setNameB("提前结束装修");}
                             }
                         }
                     }
@@ -1099,13 +1108,13 @@ public class HouseService {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         example.orderBy(HouseConstructionRecord.CREATE_DATE).desc();
         List<HouseConstructionRecord> hfaList = houseConstructionRecordMapper.selectByExample(example);
+        if(hfaList.size()<=0){
+            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相施工记录");
+        }
         PageInfo pageResult = new PageInfo(hfaList);
         List<Map<String, Object>> listMap = new ArrayList<>();
         for (HouseConstructionRecord houseConstructionRecord : hfaList) {
             listMap.add(getHouseConstructionRecordMap(houseConstructionRecord, address));
-        }
-        if (listMap == null) {
-            return ServerResponse.createByErrorMessage("系统出错,查询施工记录失败");
         }
         pageResult.setList(listMap);
         return ServerResponse.createBySuccess("查询施工记录成功", pageResult);

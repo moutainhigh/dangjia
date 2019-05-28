@@ -51,6 +51,7 @@ import com.github.pagehelper.PageInfo;
 import com.google.gson.JsonArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import springfox.documentation.spring.web.json.Json;
 import tk.mybatis.mapper.entity.Example;
 
@@ -459,27 +460,18 @@ public class ComplainService {
                         JSONArray brandSeriesLists = JSONArray.parseArray(operateName);
                         for(int i=0;i<brandSeriesLists.size();i++){
                             JSONObject jsonObject = brandSeriesLists.getJSONObject(i);
-                           // 施工工序工人ID
-                            Object id = jsonObject.get("id");
+                           // 施工工人ID
+                            Object workerId = jsonObject.get("id");
                             //获取退多少钱
                             Object backMoney = jsonObject.get("backMoney");
-                            /*Example example1= new Example(HouseWorkerOrder.class);
-                            example1.createCriteria()
-                                    .andEqualTo(HouseWorkerOrder.HOUSE_ID,complain.getHouseId())
-                                    .andEqualTo(HouseWorkerOrder.WORKER_ID,workerId);
-                            List<HouseWorkerOrder> houseWorkerOrderList = iHouseWorkerOrderMapper.selectByExample(example1);
-                            BigDecimal haveMoney = houseWorkerOrderList.get(0).getHaveMoney();
-                            BigDecimal workPrice = houseWorkerOrderList.get(0).getWorkPrice();
-                            BigDecimal subtract = workPrice.subtract(haveMoney);
-                            BigDecimal b=new BigDecimal(string);
-                            //工匠还可得
-                            BigDecimal subtract1 = subtract.subtract(b);
-                            BigDecimal add = houseWorkerOrderList.get(0).getHaveMoney().add(subtract1);
-                            houseWorkerOrderList.get(0).setHaveMoney(add);*/
-                            //申请表加记录
-                            //流水表加记录
-
+                            //可还得工钱
+                            Object haveMoney = jsonObject.get("haveMoney");
+                            commitStopBuild(workerId,backMoney,haveMoney,complain.getHouseId(),"业主提前结束装修，原因为"+complain.getContent());
                         }
+                        House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
+                        house.setModifyDate(new Date());
+                        house.setVisitState(4);
+                        houseMapper.updateByPrimaryKeySelective(house);
                         break;
                 }
         }else{
@@ -615,7 +607,7 @@ public class ComplainService {
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo(HouseFlow.HOUSE_ID,houseId);
         criteria.andGreaterThanOrEqualTo(HouseFlow.WORKER_TYPE,3);
-        criteria.andCondition(" work_steta not IN(0,2)");
+        criteria.andCondition(" work_steta not IN(0,2,6)");
         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
         for(HouseFlow houseFlow:houseFlows){
             Example example1=new Example(HouseWorkerOrder.class);
@@ -629,22 +621,115 @@ public class ComplainService {
             BigDecimal subtract = workPrice.subtract(haveMoney);
             String workerId = houseWorkerOrderList.get(0).getWorkerId();
             ComPlainStopDTO comPlainStopDTO=new ComPlainStopDTO();
-            comPlainStopDTO.setHavaMoney(subtract);
-            comPlainStopDTO.setWorkerTypeId(workerId);
+            comPlainStopDTO.setHaveMoney(subtract);
+            comPlainStopDTO.setWorkerId(workerId);
+            comPlainStopDTO.setWorkerTypeId(houseFlow.getWorkerTypeId());
             comPlainStopDTO.setWorkerTypeName(workerType.getName());
             comPlainStopDTOList.add(comPlainStopDTO);
         }
         return comPlainStopDTOList;
     }
-    public ServerResponse UpdateAdminStop(String jsonStr, String content, String houseId) {
+    public ServerResponse updateAdminStop(String jsonStr, String content, String houseId) {
         JSONArray brandSeriesLists = JSONArray.parseArray(jsonStr);
-        for (int i = 0; i < brandSeriesLists.size(); i++) {
+        for(int i=0;i<brandSeriesLists.size();i++){
             JSONObject jsonObject = brandSeriesLists.getJSONObject(i);
-            // 施工工序工人ID
-            Object id = jsonObject.get("id");
+            // 施工工人ID
+            Object workerId = jsonObject.get("id");
             //获取退多少钱
             Object backMoney = jsonObject.get("backMoney");
+            //可还得工钱
+            Object haveMoney = jsonObject.get("haveMoney");
+            commitStopBuild(workerId,backMoney,haveMoney,houseId,"中台提前结束装修，原因为"+content);
         }
+        //讲房子状态改为提前竣工
+        House house = houseMapper.selectByPrimaryKey(houseId);
+        house.setModifyDate(new Date());
+        house.setVisitState(4);
+        houseMapper.updateByPrimaryKeySelective(house);
         return ServerResponse.createBySuccessMessage("ok");
+    }
+
+
+    @Transactional(rollbackFor = Exception.class)
+    public void commitStopBuild(Object workerId ,Object backMoney,Object haveMoney,String houseId,String content){
+        try {
+            Example example1= new Example(HouseWorkerOrder.class);
+            example1.createCriteria()
+                    .andEqualTo(HouseWorkerOrder.HOUSE_ID,houseId)
+                    .andEqualTo(HouseWorkerOrder.WORKER_ID,workerId);
+            List<HouseWorkerOrder> houseWorkerOrderList = iHouseWorkerOrderMapper.selectByExample(example1);
+            //退钱了工匠还可得
+            BigDecimal subtract1 = new BigDecimal(haveMoney.toString()).subtract(new BigDecimal(backMoney.toString()));
+            BigDecimal add = houseWorkerOrderList.get(0).getHaveMoney().add(subtract1);
+            houseWorkerOrderList.get(0).setHaveMoney(add);
+            Example example2=new Example(HouseFlow.class);
+            example2.createCriteria()
+                    .andEqualTo(HouseFlow.HOUSE_ID,houseId)
+                    .andEqualTo(HouseFlow.WORKER_ID,workerId);
+            List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example2);
+            //设置当前工序为提前竣工
+            houseFlows.get(0).setWorkSteta(6);
+            houseFlowMapper.updateByPrimaryKeySelective(houseFlows.get(0));
+            //申请表加记录
+           /* WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(workerTypeId);
+            HouseFlowApply houseFlowApply1=new HouseFlowApply();
+            houseFlowApply1.setApplyDec("业主您好,我是"+workerType.getName()+",您的房子已经提前结束装修了");
+            houseFlowApply1.setApplyType(8);
+            houseFlowApply1.setHouseFlowId(houseFlows.get(0).getId());
+            houseFlowApply1.setHouseId(houseId);
+            houseFlowApply1.setMemberCheck(3);
+            houseFlowApply1.setSupervisorCheck(1);
+            houseFlowApply1.setWorkerTypeId(workerTypeId.toString());
+            houseFlowApply1.setWorkerType(workerType.getType());
+            houseFlowApply1.setWorkerId(workerId.toString());
+            houseFlowApply1.setSuspendDay(0);
+            houseFlowApply1.setApplyMoney(subtract1);
+            houseFlowApply1.setPayState(1);
+            houseFlowApply1.setOtherMoney(new BigDecimal(0));
+            houseFlowApply1.setSupervisorMoney(new BigDecimal(0));
+            houseFlowApplyMapper.insert(houseFlowApply1);*/
+            //工匠加流水记录
+            Member member1 = memberMapper.selectByPrimaryKey(workerId);
+            WorkerDetail workerDetail=new WorkerDetail();
+            workerDetail.setName(content);
+            workerDetail.setWorkerId(workerId.toString());
+            workerDetail.setWorkerName(member1.getName());
+            workerDetail.setHouseId(houseId);
+            workerDetail.setMoney(subtract1);
+            workerDetail.setState(0);
+            workerDetail.setHaveMoney(houseWorkerOrderList.get(0).getHaveMoney());
+            workerDetail.setHouseWorkerOrderId(houseWorkerOrderList.get(0).getId());
+            workerDetail.setApplyMoney(subtract1);
+            workerDetail.setWalletMoney(member1.getHaveMoney());
+            iWorkerDetailMapper.insert(workerDetail);
+            //工匠钱包更新
+            member1.setWorkerPrice(member1.getWorkerPrice().add(subtract1));
+            member1.setHaveMoney(member1.getHaveMoney().add(subtract1));
+            member1.setSurplusMoney(member1.getSurplusMoney().add(subtract1));
+            member1.setModifyDate(new Date());
+            memberMapper.updateByPrimaryKeySelective(member1);
+            //业主钱包更新
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+            member.setHaveMoney(member.getHaveMoney().add(new BigDecimal(backMoney.toString())));
+            member.setSurplusMoney(member.getSurplusMoney().add(new BigDecimal(backMoney.toString())));
+            member.setModifyDate(new Date());
+            memberMapper.updateByPrimaryKeySelective(member);
+            //业主加流水记录
+            WorkerDetail workerDetail1=new WorkerDetail();
+            workerDetail1.setName(content);
+            workerDetail1.setWorkerId(member.getId());
+            workerDetail1.setWorkerName(member.getName());
+            workerDetail1.setHouseId(houseId);
+            workerDetail1.setMoney(new BigDecimal(backMoney.toString()));
+            workerDetail1.setState(0);
+            workerDetail1.setHaveMoney(new BigDecimal(0));
+            workerDetail1.setHouseWorkerOrderId(houseWorkerOrderList.get(0).getId());
+            workerDetail1.setApplyMoney(new BigDecimal(backMoney.toString()));
+            workerDetail1.setWalletMoney(member.getHaveMoney());
+            iWorkerDetailMapper.insert(workerDetail1);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

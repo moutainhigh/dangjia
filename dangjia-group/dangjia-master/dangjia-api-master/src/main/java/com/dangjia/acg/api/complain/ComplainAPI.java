@@ -64,7 +64,7 @@ public interface ComplainAPI {
 
     @PostMapping("/complain/UpdateAdminStop")
     @ApiOperation(value = "中台提前停止装修提交", notes = "中台提前停止装修提交")
-    ServerResponse UpdateAdminStop(@RequestParam("jsonStr") String jsonStr,
+    ServerResponse updateAdminStop(@RequestParam("jsonStr") String jsonStr,
                                    @RequestParam("content") String content,
                                    @RequestParam("houseId") String houseId);
 }
