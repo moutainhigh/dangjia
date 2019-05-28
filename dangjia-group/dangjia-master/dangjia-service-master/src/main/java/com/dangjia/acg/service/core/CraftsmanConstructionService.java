@@ -293,8 +293,12 @@ public class CraftsmanConstructionService {
                 } else if (hfl.getWorkSteta() == 5) {
                     wfr.setButtonTitle("收尾施工中");
                     wfr.setState(5);
-                } else if (hfl.getWorkSteta() == 2) {
-                    wfr.setButtonTitle("已整体完工");
+                } else if (hfl.getWorkSteta() == 2 || hfl.getWorkSteta() == 6) {
+                    if(hfl.getWorkSteta() == 2) {
+                        wfr.setButtonTitle("已整体完工");
+                    }else {
+                        wfr.setButtonTitle("提前竣工");
+                    }
                     wfr.setState(6);
                 }
                 if (houseFlowApp != null && houseFlowApp.getApplyType() == 3) {
@@ -316,6 +320,12 @@ public class CraftsmanConstructionService {
         }
         //查询是否全部整体完工
         List<HouseFlow> checkFinishList = houseFlowMapper.checkAllFinish(hf.getHouseId(), hf.getId());
+        for(HouseFlow h:checkFinishList){
+            if(h.getWorkSteta()==6){
+                checkFinishList.clear();
+                break;
+            }
+        }
         //查询是否今天已经上传过巡查
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayPatrol(hf.getHouseId(), new Date());
         if (hf.getSupervisorStart() == 0) {//已开工之后都是巡查工地；1：巡查工地2：申请业主验收；3:确认开工
@@ -452,8 +462,12 @@ public class CraftsmanConstructionService {
         } else if (hf.getWorkSteta() == 1) {
             promptList.add("您已阶段完工");
         }
-        if (hf.getWorkSteta() == 2) {
-            promptList.add("您已整体完工");
+        if (hf.getWorkSteta() == 2 || hf.getWorkSteta() == 6) {
+            if(hf.getWorkSteta() == 2) {
+                promptList.add("您已整体完工");
+            }else {
+                promptList.add("该房子已提前结束装修,您的工钱已自动入账！");
+            }
             bean.setIfBackOut(2);
             if (getApiVersion(request)) {
                 String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +

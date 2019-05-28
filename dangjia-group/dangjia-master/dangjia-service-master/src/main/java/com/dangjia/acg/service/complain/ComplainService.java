@@ -471,6 +471,7 @@ public class ComplainService {
                         House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
                         house.setModifyDate(new Date());
                         house.setVisitState(4);
+                        house.setHaveComplete(1);
                         houseMapper.updateByPrimaryKeySelective(house);
                         break;
                 }
@@ -583,6 +584,10 @@ public class ComplainService {
             complain.setUserName(member.getName());
             complain.setUserMobile(member.getMobile());
             complainMapper.insert(complain);
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            house.setVisitState(5);
+            house.setModifyDate(new Date());
+            houseMapper.updateByPrimaryKeySelective(house);
             return ServerResponse.createBySuccessMessage("申请成功");
         }catch (Exception e){
             e.printStackTrace();
@@ -645,6 +650,7 @@ public class ComplainService {
         House house = houseMapper.selectByPrimaryKey(houseId);
         house.setModifyDate(new Date());
         house.setVisitState(4);
+        house.setHaveComplete(1);
         houseMapper.updateByPrimaryKeySelective(house);
         return ServerResponse.createBySuccessMessage("ok");
     }
