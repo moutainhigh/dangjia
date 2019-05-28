@@ -391,7 +391,7 @@ public class HouseFlowApplyService {
 
         //钱包处理大管家的工钱
         Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
-        WorkerType workerType=workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
+        WorkerType workerType=workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
         //管家押金处理
         HouseFlowApply houseFlowApply = new HouseFlowApply();
         houseFlowApply.setWorkerType(3);
@@ -516,7 +516,7 @@ public class HouseFlowApplyService {
     private void workerMoney(HouseWorkerOrder hwo,HouseFlowApply hfa){
         try{
             Member worker = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
-            WorkerType workerType=workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
+            WorkerType workerType=workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
             if(hfa.getApplyType() == 1||hfa.getApplyType() == 2){//整体/阶段完工申请
                 if(hwo.getRepairPrice().compareTo(new BigDecimal(0)) > 0){
                     /*有补的人工钱加入工人流水*/
@@ -650,7 +650,10 @@ public class HouseFlowApplyService {
     public ServerResponse checkSupervisor(String houseFlowApplyId,boolean isAuto){
         try{
             HouseFlowApply hfa = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
-
+            if(hfa.getMemberCheck()==1 || hfa.getMemberCheck()==3){
+                return ServerResponse.createBySuccessMessage("操作成功");
+            }
+            WorkerType workerType=workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
             if(isAuto){
                 hfa.setMemberCheck(3);//自动通过
             }else{
@@ -695,7 +698,7 @@ public class HouseFlowApplyService {
             BigDecimal surplusMoney = worker.getSurplusMoney().add(applyMoney);
             //记录流水
             WorkerDetail workerDetail = new WorkerDetail();
-            workerDetail.setName("项目完工收入");
+            workerDetail.setName(workerType.getName()+"项目完工收入");
             workerDetail.setWorkerId(worker.getId());
             workerDetail.setWorkerName(worker.getName());
             workerDetail.setHouseId(hwo.getHouseId());
