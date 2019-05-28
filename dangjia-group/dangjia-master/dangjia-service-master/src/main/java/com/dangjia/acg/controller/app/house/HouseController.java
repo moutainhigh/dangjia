@@ -209,8 +209,8 @@ public class HouseController implements HouseAPI {
     @ApiMethod
     public ServerResponse getReferenceBudget(String cityId, String villageId, Double square, Integer houseType) {
         if (square != null && !"".equals(square)) {
-            Double minSquare = square - 50;
-            Double maxSquare = square + 50;
+            Double minSquare = square - 15;
+            Double maxSquare = square + 15;
             return houseService.getReferenceBudget(cityId, villageId, minSquare, maxSquare, houseType);
         } else {
             return ServerResponse.createByErrorMessage("请输入正确的面积");
