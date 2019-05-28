@@ -63,4 +63,9 @@ public interface HouseFlowScheduleAPI {
     @PostMapping("app/core/schedule/makeCalendar")
     @ApiOperation(value = "生成工程日历", notes = "生成工程日历")
     ServerResponse  makeCalendar(@RequestParam("houseId") String houseId);
+
+
+    @PostMapping("app/core/schedule/viewCalendar")
+    @ApiOperation(value = "查看日历", notes = "查看日历")
+    ServerResponse viewCalendar(@RequestParam("houseId") String houseId,@RequestParam("day") Date day);
 }
