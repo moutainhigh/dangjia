@@ -117,7 +117,7 @@ public class House extends BaseEntity {
     @Column(name = "visit_state")
     @Desc(value = "0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中")
     @ApiModelProperty("0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中")
-    private Integer visitState;//0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修
+    private Integer visitState;//0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
     /**
      * 发送设计图业主
      * 设计状态:
