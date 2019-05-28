@@ -4,6 +4,7 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowApplyDTO;
 import com.dangjia.acg.mapper.core.*;
@@ -212,7 +213,6 @@ public class HouseFlowApplyService {
                         }
                     }
                 }
-
             }else if(hfa.getApplyType() == 1){//阶段完工
 //                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(hfa.getHouseId(),hfa.getWorkerTypeId());
 //                if (changeOrderList.size() > 0){
@@ -248,6 +248,12 @@ public class HouseFlowApplyService {
                         houseFlowMapper.updateByPrimaryKeySelective(houseFlowList);
                     }
                 }
+                Map<String,String> temp_para=new HashMap();
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
+                House house = houseMapper.selectByPrimaryKey(hfa.getHouseId());
+                temp_para.put("house_name",house.getHouseName());
+                temp_para.put("worker_name",workerType.getName()+"阶段完工");
+                JsmsUtil.sendSMS("15675101794","164425",temp_para);
             }else if(hfa.getApplyType() == 0){ //每日完工,处理钱
                 //算每日积分
                 updateDayIntegral(hfa);
