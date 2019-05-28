@@ -56,11 +56,11 @@ public interface HouseFlowScheduleAPI {
                                        @RequestParam("advance") Integer advance);
 
     /**
-     * 生产工程日历
+     * 生成工程日历
      * @param houseId 房子ID
      * @return
      */
     @PostMapping("app/core/schedule/makeCalendar")
-    @ApiOperation(value = "生产工程日历", notes = "生产工程日历")
+    @ApiOperation(value = "生成工程日历", notes = "生成工程日历")
     ServerResponse  makeCalendar(@RequestParam("houseId") String houseId);
 }
