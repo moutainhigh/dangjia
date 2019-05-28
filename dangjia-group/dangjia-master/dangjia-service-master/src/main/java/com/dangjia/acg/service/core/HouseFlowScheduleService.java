@@ -37,8 +37,6 @@ public class HouseFlowScheduleService {
     @Autowired
     private ConfigUtil configUtil;
 
-//    {date:'2019-05-01',type:1}
-//    type: 1,正常;2,特殊;3,其他;4,正常+特殊;5,其他+特殊
 
     /**
      * 工程日历工序列表
@@ -58,7 +56,7 @@ public class HouseFlowScheduleService {
             map.put(HouseFlow.START_DATE,houseFlow.getStartDate());
             map.put(HouseFlow.END_DATE,houseFlow.getEndDate());
             if(houseFlow.getStartDate()!=null){
-                int num = DateUtil.daysofTwo(houseFlow.getStartDate(), houseFlow.getEndDate());//逾期工期天数
+                int num = 1 + DateUtil.daysofTwo(houseFlow.getStartDate(), houseFlow.getEndDate());//逾期工期天数
                 map.put("num",num);
                 numall=numall+num;
             }
@@ -120,6 +118,61 @@ public class HouseFlowScheduleService {
         return ServerResponse.createBySuccessMessage("生成成功");
     }
 
+    /**
+     * 查看日历
+     * @param houseId 房子ID
+     * @param day 指定哪天
+     * @return   {date:'2019-05-01',type:1}
+     *   type: 1,正常;2,特殊;3,其他;4,正常+特殊;5,其他+特殊
+     */
+    public ServerResponse viewCalendar(String houseId,Date day){
+        if(day==null){
+            day=new Date();
+        }
+        Calendar c = Calendar.getInstance();
+        c.setTime(day);
+        int year = c.get(Calendar.YEAR);
+        int modth = c.get(Calendar.MONTH);
+        List<String> list=DateUtil.dayReportAll(year,modth);
+        List<HouseFlow> houseFlowList=houseFlowMapper.getForCheckMoney(houseId);
+        List<Map> mapList=new ArrayList<>();
+        for (String o : list) {
+            Date od = DateUtil.toDate(o);
+            Map map =new HashMap();
+            map.put("type",0);
+            List<String> plans=new ArrayList<>();//计划记录
+            List<String> actuals=new ArrayList<>();//实际记录
+            for (HouseFlow houseFlow : houseFlowList) {
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+                if(houseFlow.getStartDate()!=null&&houseFlow.getEndDate()!=null) {
+                    String s = DateUtil.dateToString(houseFlow.getStartDate(), null);
+                    String e = DateUtil.dateToString(houseFlow.getEndDate(), null);
+                    if(s.equals(o)){
+                        plans.add("当前为"+workerType.getName()+"进场日期");
+                        continue;
+                    }
+                    if(e.equals(o)){
+                        if(houseFlow.getWorkerType()==4) {
+                            plans.add("当前为"+workerType.getName()+"整体完工日期");
+                        }else{
+                            plans.add("当前为"+workerType.getName()+"阶段完工日期");
+                        }
+                        continue;
+                    }
+                    if(houseFlow.getStartDate().getTime()>od.getTime()&&houseFlow.getEndDate().getTime()<od.getTime()){
+                        plans.add("当前为"+workerType.getName()+"正常施工日期");
+                        continue;
+                    }
+                }
+            }
+
+            map.put("date",o);
+            map.put("plans",plans);
+            map.put("actuals",actuals);
+            mapList.add(map);
+        }
+        return ServerResponse.createBySuccess("查询成功",mapList);
+    }
 }
 
 
