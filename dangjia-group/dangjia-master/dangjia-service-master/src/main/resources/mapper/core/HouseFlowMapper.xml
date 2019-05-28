@@ -17,6 +17,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             work_steta as workSteta,
             grab_number as grabNumber,
             refuse_number as refuseNumber,
+            end_date as endDate,
+            start_date as startDate,
             grab_lock as grabLock,
             nominator,
             work_price as workPrice,
