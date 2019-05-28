@@ -49,8 +49,8 @@ public class HouseFlowApply extends BaseEntity {
 	private String houseId;//houseid
 
 	@Column(name = "apply_type")
-	@Desc(value = "0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查")
-	@ApiModelProperty("0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查")
+	@Desc(value = "0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查,8提前结束装修")
+	@ApiModelProperty("0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查,8提前结束装修")
 	private Integer applyType;//applytype
 
 	@Column(name = "suspend_day")

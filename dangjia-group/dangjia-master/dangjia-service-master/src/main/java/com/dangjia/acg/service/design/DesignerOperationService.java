@@ -50,8 +50,6 @@ public class DesignerOperationService {
     private ConfigMessageService configMessageService;
     @Autowired
     private IHouseMapper houseMapper;
-    //    @Autowired
-//    private IHouseDesignImageMapper houseDesignImageMapper;//房子关联设计图
     @Autowired
     private CraftsmanConstructionService constructionService;
     @Autowired
@@ -111,7 +109,6 @@ public class DesignerOperationService {
      * 发送平面图给业主
      *
      * @param house 房子
-     * @return
      */
     private ServerResponse sendPlan(House house) {
         if (!designDataService.getPlaneMap(house.getId()).isSuccess()) {
@@ -130,7 +127,6 @@ public class DesignerOperationService {
      * 发送施工图给业主
      *
      * @param house 房子
-     * @return
      */
     private ServerResponse constructionPlans(House house) {
         if (!designDataService.getConstructionPlans(house.getId()).isSuccess()) {
@@ -341,8 +337,10 @@ public class DesignerOperationService {
                 }
                 break;
             case 2:
-                if (house.getDesignerOk() != 7 && house.getDesignerOk() != 8) {
-                    return ServerResponse.createByErrorMessage("该阶段无法上传施工图");
+                if (house.getDecorationType() != 2) {//自带设计不需要判断
+                    if (house.getDesignerOk() != 7 && house.getDesignerOk() != 8) {
+                        return ServerResponse.createByErrorMessage("该阶段无法上传施工图");
+                    }
                 }
                 break;
         }
@@ -408,6 +406,11 @@ public class DesignerOperationService {
                         for (QuantityRoomImages images : quantityRoomImagesList) {
                             quantityRoomImagesMapper.insert(images);
                         }
+                        if (house.getDecorationType() == 2) {//自带设计直接上传施工图
+                            house.setDesignerOk(3);
+                            houseMapper.updateByPrimaryKeySelective(house);
+                        }
+
                     } else {
                         return ServerResponse.createByErrorMessage("请传入图片");
                     }
@@ -425,22 +428,6 @@ public class DesignerOperationService {
      */
     public ServerResponse upgradeDesign(String userToken, String houseId, String designImageTypeId, int selected) {
         //TODO 设计师升级服务暂时取消
-//        try {
-//            if (selected == 0) {//新增
-//                HouseDesignImage houseDesignImage = new HouseDesignImage();
-//                houseDesignImage.setHouseId(houseId);
-//                houseDesignImage.setDesignImageTypeId(designImageTypeId);
-//                houseDesignImage.setSell(1);
-//                houseDesignImageMapper.insert(houseDesignImage);
-//            } else {//删除
-//                Example example = new Example(HouseDesignImage.class);
-//                example.createCriteria().andEqualTo("houseId", houseId).andEqualTo("designImageTypeId", designImageTypeId);
-//                houseDesignImageMapper.deleteByExample(example);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
         return ServerResponse.createByErrorMessage("操作失败");
-//        }
-//        return ServerResponse.createBySuccessMessage("操作成功");
     }
 }

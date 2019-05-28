@@ -149,7 +149,11 @@ public class DesignDataService {
             if (worker == null) {
                 map.put("historyRecord", 0);//是否暂时历史记录
             } else {
-                map.put("historyRecord", (worker.getWorkerType() != null && worker.getWorkerType() == 1) ? 1 : 0);//是否暂时历史记录
+                if (house.getDecorationType() == 2) {
+                    map.put("historyRecord", (worker.getWorkerType() != null && worker.getWorkerType() == 2) ? 1 : 0);//是否暂时历史记录
+                } else {
+                    map.put("historyRecord", (worker.getWorkerType() != null && worker.getWorkerType() == 1) ? 1 : 0);//是否暂时历史记录
+                }
             }
             return ServerResponse.createBySuccess("查询成功", map);
         }

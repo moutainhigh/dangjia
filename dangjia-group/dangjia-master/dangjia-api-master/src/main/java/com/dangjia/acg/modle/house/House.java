@@ -115,8 +115,8 @@ public class House extends BaseEntity {
     private Integer taskNumber;//tasknumber
 
     @Column(name = "visit_state")
-    @Desc(value = "0待确认开工,1装修中,2休眠中,3已完工")
-    @ApiModelProperty("0待确认开工,1装修中,2休眠中,3已完工")
+    @Desc(value = "0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修")
+    @ApiModelProperty("0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修")
     private Integer visitState;//1开工，2有意向，3无装修需求，4恶意操作，默认为0
     /**
      * 发送设计图业主
