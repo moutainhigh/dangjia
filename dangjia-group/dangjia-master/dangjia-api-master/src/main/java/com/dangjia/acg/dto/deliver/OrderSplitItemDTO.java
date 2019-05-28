@@ -8,7 +8,7 @@ import lombok.Data;
  * Time: 19:32
  */
 @Data
-public class OrderSplitItemDTO {
+public class   OrderSplitItemDTO {
     private String productName;//名字
     private Double num;//本次发货数量
     private Double cost;// 成本价
@@ -18,6 +18,7 @@ public class OrderSplitItemDTO {
     private String brandName;//品牌名
 
     private String brandSeriesName;//品牌系列
+
     private String image;
     private Double askCount;//要货数量
     private String shopCount;//购买总数

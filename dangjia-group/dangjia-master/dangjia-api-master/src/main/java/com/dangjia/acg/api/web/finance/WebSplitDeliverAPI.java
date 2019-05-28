@@ -55,7 +55,21 @@ public interface WebSplitDeliverAPI {
      * shipState  0待发货,1已发待收货,2已收货,3取消,4部分收
      */
     @PostMapping("web/finance/splitDeliver/splitDeliverList")
-    @ApiOperation(value = "供应商查看货单详情", notes = "供应商查看货单详情")
+    @ApiOperation(value = "供应商查看要货单列表", notes = "供应商查看货单列表")
     ServerResponse splitDeliverList(@RequestParam("splitDeliverId") String splitDeliverId);
+
+
+    /**
+     * 根据供应商id查看货单
+     * @param supplierId
+     * @return
+     */
+    @PostMapping("web/finance/splitDeliver/mendDeliverList")
+    @ApiOperation(value = "供应商查看货单列表", notes = "供应商查看货单列表")
+    ServerResponse mendDeliverList(@RequestParam("supplierId") String supplierId,
+                                   @RequestParam("shipAddress")String shipAddress,
+                                   @RequestParam("beginDate") String beginDate,
+                                   @RequestParam("endDate") String endDate,
+                                   @RequestParam("applyState") int applyState);
 
 }

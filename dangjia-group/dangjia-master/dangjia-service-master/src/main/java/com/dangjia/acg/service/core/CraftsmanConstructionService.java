@@ -128,7 +128,7 @@ public class CraftsmanConstructionService {
             bean.setUserId(houseMember.getId());//
         }
         setMenus(bean, house, hf);
-        Map<String, Object> dataMap = HouseUtil.getDesignDatas(house.getDecorationType(),house.getDesignerOk());
+        Map<String, Object> dataMap = HouseUtil.getDesignDatas(house);
         bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         List<ConstructionByWorkerIdBean.ButtonListBean> buttonList = new ArrayList<>();
         if (house.getDecorationType() != 2 && house.getDesignerOk() == 1) {
@@ -190,8 +190,13 @@ public class CraftsmanConstructionService {
             bean.setUserId(houseMember.getId());//
         }
         setMenus(bean, house, hf);
-        Map<String, Object> dataMap =  HouseUtil.getBudgetDatas(house.getBudgetOk());
+        Map<String, Object> dataMap = HouseUtil.getBudgetDatas(house);
         bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
+        List<ConstructionByWorkerIdBean.ButtonListBean> buttonList = new ArrayList<>();
+        if (house.getDecorationType() == 2 && house.getDesignerOk() != 3) {
+            buttonList.add(getButton("上传设计", 4));
+        }
+        bean.setButtonList(buttonList);
         return ServerResponse.createBySuccess("获取施工列表成功！", bean);
     }
 
@@ -615,23 +620,22 @@ public class CraftsmanConstructionService {
             bean.setAlreadyMoney(new BigDecimal(0));//已得钱
             bean.setAlsoMoney(new BigDecimal(0));//还可得钱
         } else {
-            BigDecimal workPrice =hwo.getWorkPrice() == null ? new BigDecimal(0) : hwo.getWorkPrice();//总共钱
-            BigDecimal haveMoney =hwo.getHaveMoney() == null ? new BigDecimal(0) : hwo.getHaveMoney();//已得到的钱
-            BigDecimal repairPrice =hwo.getRepairPrice() == null ? new BigDecimal(0) : hwo.getRepairPrice();//当前阶段补人工钱
-            BigDecimal repairTotalPrice =hwo.getRepairTotalPrice() == null ? new BigDecimal(0) : hwo.getRepairTotalPrice();//补人工总钱
-            BigDecimal retentionMoney =hwo.getRetentionMoney() == null ? new BigDecimal(0) : hwo.getRetentionMoney();//滞留金
-            BigDecimal deductPrice =hwo.getDeductPrice() == null ? new BigDecimal(0) : hwo.getDeductPrice();//评价积分扣除的钱
+            BigDecimal workPrice = hwo.getWorkPrice() == null ? new BigDecimal(0) : hwo.getWorkPrice();//总共钱
+            BigDecimal haveMoney = hwo.getHaveMoney() == null ? new BigDecimal(0) : hwo.getHaveMoney();//已得到的钱
+            BigDecimal repairPrice = hwo.getRepairPrice() == null ? new BigDecimal(0) : hwo.getRepairPrice();//当前阶段补人工钱
+            BigDecimal repairTotalPrice = hwo.getRepairTotalPrice() == null ? new BigDecimal(0) : hwo.getRepairTotalPrice();//补人工总钱
+            BigDecimal retentionMoney = hwo.getRetentionMoney() == null ? new BigDecimal(0) : hwo.getRetentionMoney();//滞留金
+            BigDecimal deductPrice = hwo.getDeductPrice() == null ? new BigDecimal(0) : hwo.getDeductPrice();//评价积分扣除的钱
             //总共钱-已得到的钱+补人工钱-滞留金-评价扣的钱=还可得钱
-            BigDecimal alsoMoney = new BigDecimal(workPrice.doubleValue()-haveMoney.doubleValue()+repairPrice.doubleValue()-retentionMoney.doubleValue()-deductPrice.doubleValue());
-            if(alsoMoney.doubleValue()<0){
-                alsoMoney=new BigDecimal(0);
+            BigDecimal alsoMoney = new BigDecimal(workPrice.doubleValue() - haveMoney.doubleValue() + repairPrice.doubleValue() - retentionMoney.doubleValue() - deductPrice.doubleValue());
+            if (alsoMoney.doubleValue() < 0) {
+                alsoMoney = new BigDecimal(0);
             }
             bean.setAlsoMoney(alsoMoney);//还可得钱
 
             //已得到的钱+滞留金的钱+（补人工总钱-当前阶段补人工钱）=已得总钱
-            BigDecimal alreadyMoney = new BigDecimal(haveMoney.doubleValue()+retentionMoney.doubleValue()+(repairTotalPrice.doubleValue()-repairPrice.doubleValue()));
+            BigDecimal alreadyMoney = new BigDecimal(haveMoney.doubleValue() + retentionMoney.doubleValue() + (repairTotalPrice.doubleValue() - repairPrice.doubleValue()));
             bean.setAlreadyMoney(alreadyMoney);//已得钱
-
 
 
         }

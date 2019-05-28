@@ -25,7 +25,7 @@ public class WebSplitDeliverItemDTO {
     private Date modifyDate;//收货时间
     private Date createDate;// 创建日期
     private String houseId;//房子Id
-    private int shipState;//供应商发货状态
-    private int sent; //已处理数
-    private int wait; //待处理数
+    private Integer shipState;//供应商发货状态
+    private Integer sent; //已处理数
+    private Integer wait; //待处理数
 }
