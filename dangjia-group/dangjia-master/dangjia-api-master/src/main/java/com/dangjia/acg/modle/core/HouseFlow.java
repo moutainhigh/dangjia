@@ -56,6 +56,16 @@ public class HouseFlow extends BaseEntity {
 	@ApiModelProperty("抢单锁·0可抢，1指定工人")
 	private Integer grabLock;
 
+    @Column(name = "start_date")
+    @Desc(value = "开始时间")
+    @ApiModelProperty("管家排期的开工开始时间")
+    private Date startDate;
+
+    @Column(name = "end_date")
+    @Desc(value = "结束时间")
+    @ApiModelProperty("管家排期的阶段结束/整体（仅拆除）结束时间")
+    private Date endDate;
+
     @Column(name = "nominator")
     @Desc(value = "指定的工人id")
     @ApiModelProperty("指定的工人id")
