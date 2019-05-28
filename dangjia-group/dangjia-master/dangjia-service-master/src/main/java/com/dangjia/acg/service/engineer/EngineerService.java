@@ -473,9 +473,11 @@ public class EngineerService {
             if (houseWorkerOrderList.size() == 0) {
                 map.put("havaMoney", 0);
             } else {
+                BigDecimal retentionMoney = houseWorkerOrderList.get(0).getRetentionMoney();
+                if(retentionMoney==null){retentionMoney=new BigDecimal(0);}
                 BigDecimal havaMoney = houseWorkerOrderList.get(0).getRepairTotalPrice().subtract(houseWorkerOrderList.get(0).getRepairPrice());
                 havaMoney = houseWorkerOrderList.get(0).getHaveMoney().add(havaMoney);
-                havaMoney = houseWorkerOrderList.get(0).getRetentionMoney().add(havaMoney);
+                havaMoney = retentionMoney.add(havaMoney);
                 map.put("workPrice", houseWorkerOrderList.get(0).getWorkPrice().add(houseWorkerOrderList.get(0).getRepairTotalPrice()));
                 map.put("havaMoney", havaMoney);
             }
