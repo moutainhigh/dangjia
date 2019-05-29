@@ -130,7 +130,8 @@
         total_amount AS totalAmount,
         apply_money AS applyMoney,
         apply_state AS applyState,
-        ship_address AS shipAddress
+        ship_address AS shipAddress,
+        supplier_id AS supplierId
         FROM
         dj_deliver_split_deliver
         WHERE
@@ -138,10 +139,7 @@
         and apply_state IS not NULL
         AND supplier_id=#{supplierId}
         <if test="applyState == 0">
-            and apply_state IN (0,1)
-        </if>
-        <if test="applyState == 2">
-            and apply_state =2
+            and apply_state =0
         </if>
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
             and modify_date between #{beginDate} and #{endDate}
@@ -151,6 +149,28 @@
         </if>
         ORDER BY
         create_date DESC
+    </select>
+
+    <select id="selectClsd" resultType="com.dangjia.acg.modle.deliver.SplitDeliver">
+        SELECT
+        id,
+        number AS number,
+        create_date AS createDate,
+        total_amount AS totalAmount,
+        apply_money AS applyMoney,
+        apply_state AS applyState,
+        ship_address AS shipAddress,
+        supplier_id AS supplierId
+        FROM
+        dj_deliver_split_deliver
+        WHERE
+        id=#{id}
+        <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+            and modify_date between #{beginDate} and #{endDate}
+        </if>
+        <if test="shipAddress!=null and shipAddress!=''">
+            and ship_address like CONCAT('%',#{shipAddress},'%')
+        </if>
     </select>
 
 

@@ -89,7 +89,7 @@ public interface GroupInfoAPI {
     @RequestMapping(value = "/group/cfg/online", method = RequestMethod.POST)
     @ApiOperation(value = "获取群组客服成员配置表", notes = "获取群组客服成员配置表")
     ServerResponse getOnlineService(@RequestParam("request") HttpServletRequest request,
-                                    @RequestParam("userToken") String userToken);
+                                    @RequestParam("type") Integer type);
 
     /**
      * 群组客服成员配置表设置为管理员/取消管理员

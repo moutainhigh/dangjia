@@ -297,8 +297,12 @@ public class CraftsmanConstructionService {
         }
         //查询是否全部整体完工
         List<HouseFlow> checkFinishList = houseFlowMapper.checkAllFinish(hf.getHouseId(), hf.getId());
-        for (HouseFlow h : checkFinishList) {
-            if (h.getWorkSteta() == 6) {
+        //查询是否提前结束装修
+        Example example=new Example(HouseFlow.class);
+        example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,hf.getHouseId()).andGreaterThanOrEqualTo(HouseFlow.WORKER_TYPE,3);
+        List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+        for(HouseFlow h:houseFlows){
+            if(h.getWorkSteta()==6){
                 checkFinishList.clear();
                 break;
             }

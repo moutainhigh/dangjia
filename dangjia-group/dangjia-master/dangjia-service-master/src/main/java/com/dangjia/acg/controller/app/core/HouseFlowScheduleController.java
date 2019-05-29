@@ -48,19 +48,6 @@ public class HouseFlowScheduleController implements HouseFlowScheduleAPI {
         return houseFlowScheduleService.setHouseFlowSchedule(houseFlowId,startDate,endDate);
     }
 
-    /**
-     * 延长或提前工序的工期
-     * @param houseFlowId 工序ID
-     * @param extend 延长天数 两者只能其一
-     * @param advance 提前天数 两者只能其一
-     * @return
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse updateFlowSchedule(String  houseFlowId, Integer extend,Integer advance){
-
-        return houseFlowScheduleService.updateFlowSchedule(houseFlowId,extend,advance);
-    }
 
     /**
      * 生产工程日历

@@ -282,9 +282,9 @@ public class GroupInfoService {
      *
      * @return
      */
-    public ServerResponse getOnlineService(HttpServletRequest request, String userToken) {
+    public ServerResponse getOnlineService(HttpServletRequest request, Integer type) {
         Example example = new Example(MainUser.class);
-        example.createCriteria().andEqualTo(MainUser.IS_RECEIVE, true);
+        example.createCriteria().andEqualTo(MainUser.IS_RECEIVE,type);
         example.orderBy(GroupUserConfig.CREATE_DATE).desc();
         List<MainUser> list = userMapper.selectByExample(example);
         if (list != null && list.size() > 0) {
@@ -292,7 +292,20 @@ public class GroupInfoService {
             Map map = new HashMap();
             map.put("targetId", user.getId());
             map.put("targetAppKey", "49957e786a91f9c55b223d58");
-            map.put("text", "业主您好！我是您的当家客服！");
+            String text=null;
+            if(type==1){
+                text="业主您好！我是您的售前客服！";
+            }
+            if(type==2){
+                text="业主您好！我是您的售中客服！";
+            }
+            if(type==3){
+                text="业主您好！我是您的材料顾问！";
+            }
+            if(type==4){
+                text="业主您好！我是您的工程顾问！";
+            }
+            map.put("text", text);
             return ServerResponse.createBySuccess("ok", map);
         } else {
             return ServerResponse.createByErrorMessage("暂无在线客服，如有疑问请致电400-168-1231 ");
