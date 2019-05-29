@@ -88,6 +88,12 @@ public class House extends BaseEntity {
     @ApiModelProperty("装修风格,存字符")
     private String style;
 
+
+    @Column(name = "schedule")
+    @Desc(value = "大管家排期")
+    @ApiModelProperty("大管家排期 0=未排期  1=已排期")
+    private String schedule;
+
     @Column(name = "type")
     @Desc(value = "默认0，1用户点击了开始装修，2代表老用户,3用户自己撤回")    //迁移数据时设置老用户
     @ApiModelProperty("默认0，1用户点击了开始装修，2代表老用户,3用户自己撤回")
@@ -109,9 +115,9 @@ public class House extends BaseEntity {
     private Integer taskNumber;//tasknumber
 
     @Column(name = "visit_state")
-    @Desc(value = "0待确认开工,1装修中,2休眠中,3已完工")
-    @ApiModelProperty("0待确认开工,1装修中,2休眠中,3已完工")
-    private Integer visitState;//1开工，2有意向，3无装修需求，4恶意操作，默认为0
+    @Desc(value = "0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中")
+    @ApiModelProperty("0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中")
+    private Integer visitState;//0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
     /**
      * 发送设计图业主
      * 设计状态:

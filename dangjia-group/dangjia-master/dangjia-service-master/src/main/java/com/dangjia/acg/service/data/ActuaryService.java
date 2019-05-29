@@ -57,9 +57,9 @@ public class ActuaryService {
             if (houseWorker != null) {
                 Member workerSup = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
                 if (workerSup != null) {
+                    houseListDTO.setOperatorId(workerSup.getId());
                     houseListDTO.setOperatorName(workerSup.getName());//大管家名字
                     houseListDTO.setOperatorMobile(workerSup.getMobile());
-                    houseListDTO.setOperatorId(workerSup.getId());
                 }
             }
         }

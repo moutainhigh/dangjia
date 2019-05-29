@@ -54,6 +54,11 @@ public class ChangeOrder extends BaseEntity {
     @ApiModelProperty("类型")
     private Integer type;
 
+    @Column(name = "schedule_day")
+    @Desc(value = "延长/提前多少天：补-延长工期/退-提前工期")
+    @ApiModelProperty("延长/提前多少天")
+    private Integer scheduleDay;//
+
     @Column(name = "content_a")
     @Desc(value = "描叙")
     @ApiModelProperty("描叙")

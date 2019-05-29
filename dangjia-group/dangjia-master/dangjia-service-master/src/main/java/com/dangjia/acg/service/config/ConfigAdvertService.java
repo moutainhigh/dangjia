@@ -3,7 +3,7 @@ package com.dangjia.acg.service.config;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -65,7 +65,7 @@ public class ConfigAdvertService {
         criteria.andEqualTo(ConfigAdvert.DATA_STATUS, 0);
         List<ConfigAdvert> list = configAdvertMapper.selectByExample(example);
         if (list.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                     , "查无数据");
         }
         List<Map> listMap = new ArrayList<>();

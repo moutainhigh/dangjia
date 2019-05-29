@@ -61,7 +61,7 @@ public class ComplainController implements ComplainAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse UpdateAdminStop(String jsonStr, String content, String houseId) {
-        return complainService.UpdateAdminStop(jsonStr,content,houseId);
+    public ServerResponse updateAdminStop(String jsonStr, String content, String houseId) {
+        return complainService.updateAdminStop(jsonStr,content,houseId);
     }
 }

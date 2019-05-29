@@ -2,7 +2,7 @@ package com.dangjia.acg.service.member;
 
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
-import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -51,7 +51,7 @@ public class LoanService {
     public ServerResponse addLoan(String userToken, String name, String bankName) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            return ServerResponse.createbyUserTokenError();
         }
         Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
         if (user == null) {
@@ -83,7 +83,7 @@ public class LoanService {
             if (state == -1) state = null;
             List<LoanDTO> loanDTOS = loanMapper.getLoanList(state, searchKey);
             if (loanDTOS.size() <= 0) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");
             }
             PageInfo pageResult = new PageInfo(loanDTOS);
@@ -110,7 +110,7 @@ public class LoanService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<LoanDTO> loanDTOS = loanFlowMapper.getLoanFlow(loanId);
             if (loanDTOS.size() <= 0) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");
             }
             PageInfo pageResult = new PageInfo(loanDTOS);

@@ -11,11 +11,12 @@ import com.dangjia.acg.common.enums.IBaseEnum;
  */
 public enum ServerCode implements IBaseEnum {
 
-  SUCCESS(1000, "success"),
+  SUCCESS(1000, "SUCCESS"),
   ERROR(1001, "ERROR"),
   SYM_TOKEN_ERROR(1002, "系统token失效"),
-  USER_TOKEN_ERROR(1003, "userToken失效"),
+  USER_TOKEN_ERROR(1003, "无效的token,请重新登录或注册"),
   NO_DATA(1004, "查无数据"),
+  NEED_TO_PAY(1009, "需要支付"),
 
   /***/
   WRONG_URL(-1, "URL错误"),

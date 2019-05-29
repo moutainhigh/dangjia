@@ -310,12 +310,13 @@
         h.work_deposit_id as workDepositId,
         h.create_date AS createDate,
         h.modify_date AS modifyDate,
-        h.number as number
+        h.number as number,
+        ( CASE WHEN (h.decoration_type = 2 AND h.designer_ok != 3) THEN 1 ELSE 0 END ) AS showUpdata
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
         WHERE
-         h.designer_ok=3
+        (h.decoration_type = 2 or (h.decoration_type != 2 and h.designer_ok =3))
         <if test="dataStatus!=null and dataStatus!=''">
             AND h.data_status=#{dataStatus}
         </if>
@@ -381,11 +382,14 @@
         h.is_select as isSelect,
         (
         case
-        when (f.supervisor_start = 1 or f.supervisor_start = 0)  and h.visit_state !=2 and h.visit_state !=3  and h.pause=0 then f.supervisor_start
-        when h.visit_state = 3  then 3
+        when (f.supervisor_start = 1 or f.supervisor_start = 0) and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and
+        h.pause=0 then f.supervisor_start
+        when h.visit_state = 3 then 3
+        when h.visit_state = 4 then 4
+        when h.visit_state = 5 then 5
         when (h.visit_state = 2 or h.pause=1) then 2
-       end
-        )  as visitState,
+        end
+        ) as visitState,
         h.data_status as dataStatus,
         h.create_date as createDate,
         h.modify_date as modifyDate
@@ -396,9 +400,9 @@
         WHERE
         h.data_status =0
         <if test="visitState==0 || visitState==1">
-            and f.supervisor_start = #{visitState}  and h.visit_state !=2 and h.visit_state !=3  and h.pause=0
+            and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.pause=0
         </if>
-        <if test="visitState==2 || visitState==3">
+        <if test="visitState>=2">
             and h.visit_state = #{visitState}
         </if>
 
