@@ -1,7 +1,6 @@
 package com.dangjia.acg.common.response;
 
 
-import com.dangjia.acg.common.enums.ServerCode.
 import com.dangjia.acg.common.exception.ServerCode;
 import lombok.Data;
 
