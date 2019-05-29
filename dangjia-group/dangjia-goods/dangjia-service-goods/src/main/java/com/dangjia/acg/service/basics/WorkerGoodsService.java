@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.repair.MasterMendWorkerAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -67,7 +67,7 @@ public class WorkerGoodsService {
                 StringUtils.isBlank(searchKey) ? null : searchKey, StringUtils.isBlank(showGoods) ? null : showGoods);
 
         if (productList == null || productList.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "暂无工价商品");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无工价商品");
         }
         List<WorkerGoodsDTO> workerGoodsResults = new ArrayList<>();
 

@@ -6,7 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
-import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -307,7 +307,7 @@ public class DesignerOperationService {
     private ServerResponse setQuantityRoom(String userToken, String houseId, String userId, String imageString, int type) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null && CommonUtil.isEmpty(userId)) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), EventStatus.USER_TOKEN_ERROR.getDesc());
+            return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), ServerCode.USER_TOKEN_ERROR.getDesc());
         }
         if (CommonUtil.isEmpty(imageString)) {
             return ServerResponse.createByErrorMessage("请上传图片");
