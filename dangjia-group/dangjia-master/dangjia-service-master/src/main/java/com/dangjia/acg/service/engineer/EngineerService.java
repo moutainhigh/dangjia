@@ -581,7 +581,7 @@ public class EngineerService {
                 map.put("memberName", member.getNickName() == null ? member.getName() : member.getNickName());
                 map.put("mobile", member.getMobile());
                 map.put("pause", house.getPause());
-                map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工
+                map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工 4提前结束装修 5提前结束装修申请中
                 Member supervisor = memberMapper.getSupervisor(house.getId());
                 if (supervisor != null) {
                     map.put("supName", supervisor.getName());

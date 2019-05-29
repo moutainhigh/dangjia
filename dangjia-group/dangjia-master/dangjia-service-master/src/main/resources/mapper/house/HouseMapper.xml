@@ -382,9 +382,11 @@
         h.is_select as isSelect,
         (
         case
-        when (f.supervisor_start = 1 or f.supervisor_start = 0) and h.visit_state !=2 and h.visit_state !=3 and
+        when (f.supervisor_start = 1 or f.supervisor_start = 0) and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and
         h.pause=0 then f.supervisor_start
         when h.visit_state = 3 then 3
+        when h.visit_state = 4 then 4
+        when h.visit_state = 5 then 5
         when (h.visit_state = 2 or h.pause=1) then 2
         end
         ) as visitState,
@@ -400,7 +402,7 @@
         <if test="visitState==0 || visitState==1">
             and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.pause=0
         </if>
-        <if test="visitState==2 || visitState==3">
+        <if test="visitState>=2">
             and h.visit_state = #{visitState}
         </if>
 
