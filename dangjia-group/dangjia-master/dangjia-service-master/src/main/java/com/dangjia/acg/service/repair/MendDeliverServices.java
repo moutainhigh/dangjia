@@ -79,7 +79,7 @@ public class MendDeliverServices {
             double sumprice=0D;
             MendDeliverDTO mendDeliverDTO=new MendDeliverDTO();
             for (MendMateriel mendMateriel : mendMateriels) {
-                sumprice+=mendMateriel.getTotalPrice();
+                sumprice+=mendMateriel.getActualPrice();
                 mendMateriel.setBrandName(forMasterAPI.brandName(house.getCityId(),mendMateriel.getProductId()));
             }
             mendDeliverDTO.setMendDeliverId(mendDeliver.getId());

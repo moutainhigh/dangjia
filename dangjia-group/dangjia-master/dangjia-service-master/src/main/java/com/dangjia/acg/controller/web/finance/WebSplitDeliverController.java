@@ -39,8 +39,8 @@ public class WebSplitDeliverController implements WebSplitDeliverAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getOrderSplitList(HttpServletRequest request, PageDTO pageDTO, String supplierId, String searchKey,String beginDate,String endDate) {
-        return webSplitDeliverService.getOrderSplitList(pageDTO,supplierId,searchKey,beginDate,endDate);
+    public ServerResponse getOrderSplitList(HttpServletRequest request, PageDTO pageDTO, String supplierId, String searchKey, String beginDate, String endDate) {
+        return webSplitDeliverService.getOrderSplitList(pageDTO, supplierId, searchKey, beginDate, endDate);
     }
 
     @Override
@@ -51,8 +51,33 @@ public class WebSplitDeliverController implements WebSplitDeliverAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse mendDeliverList(String supplierId,String shipAddress, String beginDate, String endDate,int applyState) {
-        return webSplitDeliverService.mendDeliverList(supplierId,shipAddress,beginDate,endDate,applyState);
+    public ServerResponse mendDeliverList(String supplierId, String shipAddress, String beginDate, String endDate, Integer applyState) {
+        return webSplitDeliverService.mendDeliverList(supplierId, shipAddress, beginDate, endDate, applyState);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse Settlemen(String image, String merge, String supplierId) {
+        return webSplitDeliverService.Settlemen(image, merge, supplierId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse ClsdMendDeliverList(String shipAddress, String beginDate, String endDate, String supplierId) {
+        return webSplitDeliverService.ClsdMendDeliverList(shipAddress, beginDate, endDate, supplierId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse selectReceipt(String id) {
+        return webSplitDeliverService.selectReceipt(id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse mendDeliverDetail(String id) {
+        return webSplitDeliverService.mendDeliverDetail(id);
     }
 
 }
+
