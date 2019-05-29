@@ -162,8 +162,8 @@ public class HouseFlowScheduleService {
         List<Map> mapList=new ArrayList<>();
         for (String o : list) {
             Map map =new HashMap();
-            List<String> plans=new ArrayList<>();//计划记录
-            List<String> actuals=new ArrayList<>();//实际记录
+            List plans=new ArrayList<>();//计划记录
+            List actuals=new ArrayList<>();//实际记录
             int type=getPlans(o,houseFlowList,plans,actuals);
             map.put("type",type);
             map.put("date",o);
@@ -174,7 +174,7 @@ public class HouseFlowScheduleService {
         return ServerResponse.createBySuccess("查询成功",mapList);
     }
 //    type: 1,正常;2,特殊;3,其他;4,正常+特殊;5,其他+特殊
-    public int getPlans(String o , List<HouseFlow> houseFlowList,List<String> plans,List<String> actuals){
+    public int getPlans(String o , List<HouseFlow> houseFlowList,List<Map> plans,List<Map> actuals){
         int type=0;
         Date od = DateUtil.toDate(o);
         for (HouseFlow houseFlow : houseFlowList) {
@@ -190,19 +190,28 @@ public class HouseFlowScheduleService {
                 String s = DateUtil.dateToString(houseFlow.getStartDate(), null);
                 String e = DateUtil.dateToString(houseFlow.getEndDate(), null);
                 if(s.equals(o)){
-                    plans.add("当前为"+workerType.getName()+"进场日期");
+                    Map map =new HashMap<>();
+                    map.put("info","当前为"+workerType.getName()+"进场日期");
+                    map.put("date",houseFlow.getCreateDate());
+                    plans.add(map);
                     mr=1;
                 }
                 if(e.equals(o)){
                     mr=1;
+                    Map map =new HashMap<>();
                     if(houseFlow.getWorkerType()==4) {
-                        plans.add("当前为"+workerType.getName()+"整体完工日期");
+                        map.put("info","当前为"+workerType.getName()+"整体完工日期");
                     }else{
-                        plans.add("当前为"+workerType.getName()+"阶段完工日期");
+                        map.put("info","当前为"+workerType.getName()+"阶段完工日期");
                     }
+                    map.put("date",houseFlow.getCreateDate());
+                    plans.add(map);
                 }
                 if(houseFlow.getStartDate().getTime()>od.getTime()&&houseFlow.getEndDate().getTime()<od.getTime()){
-                    plans.add("当前为"+workerType.getName()+"正常施工日期");
+                    Map map =new HashMap<>();
+                    map.put("date",houseFlow.getCreateDate());
+                    map.put("info","当前为"+workerType.getName()+"正常施工日期");
+                    plans.add(map);
                     mr=1;
                 }
             }
@@ -233,7 +242,10 @@ public class HouseFlowScheduleService {
                                 type = 1;
                             }
                         }
-                        actuals.add(workerType.getName()+"今日完工，完成节点:"+jieDian);
+                        Map map =new HashMap<>();
+                        map.put("date",houseFlow.getCreateDate());
+                        map.put("info",workerType.getName()+"今日完工，完成节点:"+jieDian);
+                        actuals.add(map);
                     }
                     //1阶段完工申请
                     if(houseFlowApply.getApplyType()==1){
@@ -246,7 +258,10 @@ public class HouseFlowScheduleService {
                                 type = 1;
                             }
                         }
-                        actuals.add(workerType.getName()+"已阶段完工，完成节点:"+jieDian);
+                        Map map =new HashMap<>();
+                        map.put("date",houseFlow.getCreateDate());
+                        map.put("info",workerType.getName()+"已阶段完工，完成节点:"+jieDian);
+                        actuals.add(map);
                     }
                     //2整体完工申请
                     if(houseFlowApply.getApplyType()==2){
@@ -259,7 +274,10 @@ public class HouseFlowScheduleService {
                                 type = 1;
                             }
                         }
-                        actuals.add(workerType.getName()+"已整体完工，完成节点:"+jieDian);
+                        Map map =new HashMap<>();
+                        map.put("date",houseFlow.getCreateDate());
+                        map.put("info",workerType.getName()+"已整体完工，完成节点:"+jieDian);
+                        actuals.add(map);
                     }
                     //3停工申请
                     if(houseFlowApply.getApplyType()==3){
@@ -274,7 +292,10 @@ public class HouseFlowScheduleService {
                         }
 
                         int numall = 1 + DateUtil.daysofTwo(houseFlowApply.getStartDate(), houseFlowApply.getEndDate());//请假天数
-                        actuals.add(workerType.getName()+"申请"+numall+"天停工，工期延期"+numall+"天"+ (CommonUtil.isEmpty(houseFlowApply.getApplyDec())?"":",理由："+houseFlowApply.getApplyDec()));
+                        Map map =new HashMap<>();
+                        map.put("date",houseFlow.getCreateDate());
+                        map.put("info",workerType.getName()+"申请"+numall+"天停工，工期延期"+numall+"天"+ (CommonUtil.isEmpty(houseFlowApply.getApplyDec())?"":",理由："+houseFlowApply.getApplyDec()));
+                        actuals.add(map);
                     }
                     //4每日开工申请
                     if(houseFlowApply.getApplyType()==4){
@@ -287,7 +308,10 @@ public class HouseFlowScheduleService {
                                 type = 1;
                             }
                         }
-                        actuals.add(workerType.getName()+"今日开工");
+                        Map map =new HashMap<>();
+                        map.put("date",houseFlow.getCreateDate());
+                        map.put("info",workerType.getName()+"今日开工");
+                        actuals.add(map);
                     }
 
                     if(mr==1&&type!=1&&type!=4&&type!=5){
@@ -314,11 +338,14 @@ public class HouseFlowScheduleService {
                                 type=2;
                             }
                         }
+                        Map map =new HashMap<>();
+                        map.put("date",houseFlow.getCreateDate());
                         if(changeOrder.getScheduleDay()!=null&&changeOrder.getScheduleDay()>0) {
-                            actuals.add(workerType.getName()+"补人工成功，工期延期" + changeOrder.getScheduleDay() + "天");
+                            map.put("info",workerType.getName()+"补人工成功，工期延期" + changeOrder.getScheduleDay() + "天");
                         }else{
-                            actuals.add(workerType.getName()+"补人工成功，工期延期");
+                            map.put("info",workerType.getName()+"补人工成功，工期延期");
                         }
+                        actuals.add(map);
                     }
                     //退人工
                     if(changeOrder.getType()==2){
@@ -331,11 +358,14 @@ public class HouseFlowScheduleService {
                                 type=2;
                             }
                         }
+                        Map map =new HashMap<>();
+                        map.put("date",houseFlow.getCreateDate());
                         if(changeOrder.getScheduleDay()!=null&&changeOrder.getScheduleDay()>0) {
-                            actuals.add("业主退人工成功，工期提前" + changeOrder.getScheduleDay() + "天");
+                            map.put("info","业主退人工成功，工期提前" + changeOrder.getScheduleDay() + "天");
                         }else{
-                            actuals.add("业主退人工成功，工期提前");
+                            map.put("info","业主退人工成功，工期提前");
                         }
+                        actuals.add(map);
                     }
                 }
             }
