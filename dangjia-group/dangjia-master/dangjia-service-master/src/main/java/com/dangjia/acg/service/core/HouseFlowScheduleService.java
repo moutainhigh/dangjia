@@ -74,7 +74,7 @@ public class HouseFlowScheduleService {
                     startDate= houseFlow.getStartDate();
                 }
                 if(endDate==null||endDate.getTime()<houseFlow.getEndDate().getTime()){
-                    startDate= houseFlow.getEndDate();
+                    endDate= houseFlow.getEndDate();
                 }
                 int num = 1 + DateUtil.daysofTwo(houseFlow.getStartDate(), houseFlow.getEndDate());//逾期工期天数
                 map.put("num",num);
@@ -160,12 +160,24 @@ public class HouseFlowScheduleService {
         int modth = c.get(Calendar.MONTH)+1;
         List<String> list=DateUtil.dayReportAll(year,modth);
         List<HouseFlow> houseFlowList=houseFlowMapper.getForCheckMoney(houseId);
+
+        Example example=new Example(HouseFlowApply.class);
+        example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID,houseId)
+                .andEqualTo(HouseFlowApply.MEMBER_CHECK,1)
+                .andCondition(" apply_type in (0,1,2,3,4) ");
+        List<HouseFlowApply>  houseFlowApplies=houseFlowApplyMapper.selectByExample(example);
+
+        example=new Example(ChangeOrder.class);
+        example.createCriteria().andEqualTo(ChangeOrder.HOUSE_ID,houseId)
+                .andCondition("  state not in (4,6) ");
+        List<ChangeOrder>  changeOrders=changeOrderMapper.selectByExample(example);
+
         List<Map> mapList=new ArrayList<>();
         for (String o : list) {
             Map map =new HashMap();
             List plans=new ArrayList<>();//计划记录
             List actuals=new ArrayList<>();//实际记录
-            int type=getPlans(o,houseFlowList,plans,actuals);
+            int type=getPlans(o,houseFlowList,plans,actuals,houseFlowApplies,changeOrders);
             map.put("type",type);
             map.put("date",o);
             map.put("plans",plans);
@@ -180,7 +192,7 @@ public class HouseFlowScheduleService {
                     startDate= houseFlow.getStartDate();
                 }
                 if(endDate==null||endDate.getTime()<houseFlow.getEndDate().getTime()){
-                    startDate= houseFlow.getEndDate();
+                    endDate= houseFlow.getEndDate();
                 }
             }
         }
@@ -193,17 +205,11 @@ public class HouseFlowScheduleService {
         return ServerResponse.createBySuccess("查询成功",mapObj);
     }
 //    type: 1,正常;2,特殊;3,其他;4,正常+特殊;5,其他+特殊
-    public int getPlans(String o , List<HouseFlow> houseFlowList,List<Map> plans,List<Map> actuals){
+    public int getPlans(String o , List<HouseFlow> houseFlowList,List<Map> plans,List<Map> actuals,List<HouseFlowApply>  houseFlowApplies, List<ChangeOrder>  changeOrders){
         int type=0;
         Date od = DateUtil.toDate(o);
         for (HouseFlow houseFlow : houseFlowList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
-            Example example=new Example(HouseFlowApply.class);
-            example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID,houseFlow.getId())
-                    .andEqualTo(HouseFlowApply.MEMBER_CHECK,1)
-                    .andCondition(" apply_type in (0,1,2,3,4) ")
-                    .andEqualTo(HouseFlowApply.WORKER_TYPE,houseFlow.getWorkerType());
-            List<HouseFlowApply>  houseFlowApplies=houseFlowApplyMapper.selectByExample(example);
             if(houseFlow.getStartDate()!=null&&houseFlow.getEndDate()!=null) {
                 String s = DateUtil.dateToString(houseFlow.getStartDate(), null);
                 String e = DateUtil.dateToString(houseFlow.getEndDate(), null);
@@ -234,10 +240,14 @@ public class HouseFlowScheduleService {
                     plans.add(map);
                 }
             }
+
             for (HouseFlowApply houseFlowApply : houseFlowApplies) {
+                if(!houseFlowApply.getHouseFlowId().equals(houseFlow.getId())){
+                    continue;
+                }
                 String jieDian="";
                 if(houseFlowApply.getApplyType()<=2){
-                    example = new Example(HouseFlowApplyImage.class);
+                    Example example = new Example(HouseFlowApplyImage.class);
                     example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApply.getId());
                     List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
                     List<String> imageName = new ArrayList<String>();
@@ -294,12 +304,10 @@ public class HouseFlowScheduleService {
 
                 }
             }
-            example=new Example(ChangeOrder.class);
-            example.createCriteria().andEqualTo(ChangeOrder.HOUSE_ID,houseFlow.getHouseId())
-                    .andEqualTo(ChangeOrder.WORKER_TYPE_ID,houseFlow.getWorkerTypeId())
-                    .andCondition("  state not in (4,6) ");
-            List<ChangeOrder>  changeOrders=changeOrderMapper.selectByExample(example);
             for (ChangeOrder changeOrder : changeOrders) {
+                if(!changeOrder.getWorkerTypeId().equals(houseFlow.getWorkerTypeId())){
+                    continue;
+                }
                 String sc = DateUtil.dateToString(changeOrder.getCreateDate(), null);
                 if(o.equals(sc)){
                     //补人工
