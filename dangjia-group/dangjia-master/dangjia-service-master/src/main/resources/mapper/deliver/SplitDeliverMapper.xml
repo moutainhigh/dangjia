@@ -47,8 +47,7 @@
             or ship_name like CONCAT('%',#{searchKey},'%')
             or supplier_name like CONCAT('%',#{searchKey},'%'))
         </if>
-        GROUP BY
-        supplier_id
+
         ORDER BY
         create_date DESC
     </select>
