@@ -3,7 +3,7 @@ package com.dangjia.acg.service.member;
 
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
-import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.member.IMemberAuthMapper;
@@ -54,13 +54,13 @@ public class MemberAuthService {
                 .andEqualTo(MemberAuth.DATA_STATUS, 0);
         List<MemberAuth> memberAuthList = memberAuthMapper.selectByExample(example);
         if (memberAuthList == null || memberAuthList.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                     , "没有绑定账号");
         }
         MemberAuth memberAuth = memberAuthList.get(0);
         Member user = memberMapper.selectByPrimaryKey(memberAuth.getMemberId());
         if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                     , "没有绑定账号");
         } else {
             return memberService.getUser(user, userRole + "");
@@ -144,7 +144,7 @@ public class MemberAuthService {
         }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            return ServerResponse.createbyUserTokenError();
         }
         Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
         if (user == null) {
@@ -182,7 +182,7 @@ public class MemberAuthService {
         }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            return ServerResponse.createbyUserTokenError();
         }
         Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
         if (user == null) {
@@ -222,7 +222,7 @@ public class MemberAuthService {
         }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            return ServerResponse.createbyUserTokenError();
         }
         Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
         if (user == null) {

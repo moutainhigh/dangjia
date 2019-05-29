@@ -7,7 +7,6 @@ import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -495,12 +494,10 @@ public class EvaluateService {
 
             //业主审核
             ServerResponse serverResponse=houseFlowApplyService.checkWorker(houseFlowApplyId,isAuto);
-            if(serverResponse.getResultCode()!= EventStatus.SUCCESS.getCode()){
-
+            if(!serverResponse.isSuccess()){
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return serverResponse;
             }
-
             configMessageService.addConfigMessage(null,"gj",worker.getId(),"0","业主评价",String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE,house.getHouseName()) ,"6");
             configMessageService.addConfigMessage(null,"gj",supervisor.getId(),"0","业主评价",String.format(DjConstants.PushMessage.STEWARD_EVALUATE,house.getHouseName()) ,"6");
 

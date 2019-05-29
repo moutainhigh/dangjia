@@ -8,8 +8,8 @@ import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.exception.BaseException;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -33,7 +33,6 @@ import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
-import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.matter.RenovationManualMember;
@@ -298,7 +297,7 @@ public class HouseService {
         } else if (houseList.size() == 1) {
             houseId = houseList.get(0).getId();
         } else {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "暂无房产");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无房产");
         }
 
         House house = iHouseMapper.selectByPrimaryKey(houseId);
@@ -753,7 +752,7 @@ public class HouseService {
             }
             List<HouseListDTO> houseList = iHouseMapper.getHouseList(memberId, visitState, startDate, endDate, orderBy, searchKey);
             if (houseList.size() <= 0) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");
             }
             PageInfo pageResult = new PageInfo(houseList);
@@ -900,10 +899,10 @@ public class HouseService {
                             srlist.add(convertHouse(house, accessToken));
                         }
                     } else {
-                        return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "查无数据");
+                        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
                     }
                 } else {
-                    return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "查无数据");
+                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
                 }
             }
             pageResult.setList(srlist);
@@ -1144,7 +1143,7 @@ public class HouseService {
         example.orderBy(HouseConstructionRecord.CREATE_DATE).desc();
         List<HouseConstructionRecord> hfaList = houseConstructionRecordMapper.selectByExample(example);
         if(hfaList.size()<=0){
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相施工记录");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相施工记录");
         }
         PageInfo pageResult = new PageInfo(hfaList);
         List<Map<String, Object>> listMap = new ArrayList<>();
@@ -1389,7 +1388,7 @@ public class HouseService {
                 request.setAttribute(Constants.CITY_ID, house.getCityId());
                 return budgetWorkerAPI.gatEstimateBudgetByHId(request, house.getId());
             }
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "暂无所需报价");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无所需报价");
         } catch (Exception e) {
             e.printStackTrace();
             LOG.error("系统出错，查询参考报价失败", e);

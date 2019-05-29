@@ -1,7 +1,7 @@
 package com.dangjia.acg.service.menu;
 
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -119,7 +119,7 @@ public class MenuConfigurationService {
             example.orderBy(MenuConfiguration.SORT).asc();
             List<MenuConfiguration> menuConfigurations = iMenuConfigurationMapper.selectByExample(example);
             if (menuConfigurations.size() <= 0) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");
             }
             PageInfo pageResult = new PageInfo(menuConfigurations);

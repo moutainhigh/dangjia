@@ -3,7 +3,7 @@ package com.dangjia.acg.service.worker;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.DjConstants;
-import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -374,7 +374,7 @@ public class RewardPunishService {
                 pageResult.setList(recordDTOS);
                 return ServerResponse.createBySuccess("ok", pageResult);
             } else {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), EventStatus.NO_DATA.getDesc());
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -396,7 +396,7 @@ public class RewardPunishService {
             if (recordList != null && recordList.size() > 0) {
                 return ServerResponse.createBySuccess("ok", recordList.get(0));
             } else {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), EventStatus.NO_DATA.getDesc());
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
 
         } catch (Exception e) {

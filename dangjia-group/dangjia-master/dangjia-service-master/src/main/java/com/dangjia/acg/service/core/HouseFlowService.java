@@ -6,7 +6,6 @@ import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -225,7 +224,7 @@ public class HouseFlowService {
                     grabList.add(allgrabBean);
                 }
             if (grabList.size() <= 0)
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), EventStatus.NO_DATA.getDesc());
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             return ServerResponse.createBySuccess("查询成功", grabList);
         } catch (Exception e) {
             e.printStackTrace();
@@ -424,7 +423,7 @@ public class HouseFlowService {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             if (accessToken == null) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+                return ServerResponse.createbyUserTokenError();
             }
             Member member = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
             if (member == null) {
@@ -522,7 +521,7 @@ public class HouseFlowService {
                 return serverResponse;
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             if (accessToken == null) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+                return ServerResponse.createbyUserTokenError();
             }
             Member member = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
             if (member == null) {
