@@ -1,7 +1,7 @@
 package com.dangjia.acg.service.config;
 
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -105,7 +105,7 @@ public class ConfigAppService {
             configApp.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             return ServerResponse.createBySuccess("ok", configApp);
         } else {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "暂无更新版本");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无更新版本");
         }
 
     }

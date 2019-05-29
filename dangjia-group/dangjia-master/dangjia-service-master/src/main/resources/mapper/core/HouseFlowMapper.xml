@@ -153,7 +153,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and worker_type &gt; 3
         order by sort asc
     </select>
+    <select id="getHouseScheduleFlow" resultType="com.dangjia.acg.dto.core.HouseFlowDTO">
+        select
+            f.id,
+            f.city_id as cityId,
+            f.house_id as houseId,
+            f.sort,
+            f.state,
+            f.worker_type_id as workerTypeId,
+            wt.`name`  as workerTypeName,
+            f.worker_type as workerType,
+            f.work_type as workType,
+            f.total_price as totalPrice,
+            f.work_steta as workSteta,
+            f.end_date as endDate,
+            f.start_date as startDate,
+            f.work_price as workPrice,
+            f.worker_id as workerId,
+            f.data_status as dataStatus,
+            f.create_date as createDate,
+            f.modify_date as modifyDate
+            FROM
+                dj_core_house_flow f
+            INNER JOIN dj_core_worker_type wt on wt.id=f.worker_type_id
+            WHERE
+                f.house_id =#{houseId}
+            AND f.state = 0
+            AND f.worker_type > 3
+            ORDER BY
+                f.sort ASC
 
+    </select>
     <!--根据当前工序查下一工序-->
     <select id="getNextHouseFlow" resultType="com.dangjia.acg.modle.core.HouseFlow">
         select

@@ -8,8 +8,8 @@ import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.exception.BaseException;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -33,7 +33,6 @@ import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
-import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.matter.RenovationManualMember;
@@ -184,15 +183,15 @@ public class HouseService {
             example1.createCriteria().andEqualTo(HouseFlow.WORKER_TYPE,3)
                     .andEqualTo(HouseFlow.HOUSE_ID,house.getId()).andEqualTo(HouseFlow.SUPERVISOR_START,1);
             List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example1);
-            boolean type=false;
-            if(houseFlows.size()>0){
-                type=true;
+            boolean type = false;
+            if (houseFlows.size() > 0) {
+                type = true;
             }
             Map<String, String> map = new HashMap<>();
             map.put("houseId", house.getId());
             map.put("houseName", house.getHouseName());
             map.put("task", this.getTask(house.getId()) + "");
-            if(type) {
+            if (type) {
                 if (house.getVisitState() == 4) {
                     map.put("btName", "提前结束装修");
                     map.put("onclick", "0");//不可点击
@@ -299,7 +298,7 @@ public class HouseService {
         } else if (houseList.size() == 1) {
             houseId = houseList.get(0).getId();
         } else {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "暂无房产");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无房产");
         }
 
         House house = iHouseMapper.selectByPrimaryKey(houseId);
@@ -320,15 +319,15 @@ public class HouseService {
         houseResult.setState("00000");
         houseResult.setHouseName(house.getHouseName());
         Integer visitState = house.getVisitState();
-        if(visitState==0){
+        if (visitState == 0) {
             houseResult.setBuildStage("待确认开工");
-        }else if(visitState==1){
+        } else if (visitState == 1) {
             houseResult.setBuildStage("装修中");
-        }else if (visitState==2){
+        } else if (visitState == 2) {
             houseResult.setBuildStage("休眠中");
-        }else if (visitState==3){
+        } else if (visitState == 3) {
             houseResult.setBuildStage("已竣工");
-        }else {
+        } else {
             houseResult.setBuildStage("提前结束装修");
         }
         /*展示各种进度*/
@@ -373,13 +372,14 @@ public class HouseService {
                 } else if (houseFlow.getWorkType() == 3) {
                     nodeDTO.setRank(3);
                     nodeDTO.setNameB("待支付");
-                } else if (houseFlow.getWorkSteta() == 2||houseFlow.getWorkSteta() == 6) {
+                } else if (houseFlow.getWorkSteta() == 2 || houseFlow.getWorkSteta() == 6) {
                     nodeDTO.setRank(5);
-                    if(houseFlow.getWorkSteta() == 2){
-                        nodeDTO.setNameB("整体完工");}
-                   else{
-                       nodeDTO.setNameB("提前结束装修");}
-                }else if (houseFlow.getWorkType() == 4) {
+                    if (houseFlow.getWorkSteta() == 2) {
+                        nodeDTO.setNameB("整体完工");
+                    } else {
+                        nodeDTO.setNameB("提前结束装修");
+                    }
+                } else if (houseFlow.getWorkType() == 4) {
                     nodeDTO.setRank(4);
                     nodeDTO.setNameB("监工中");
                 }
@@ -410,23 +410,25 @@ public class HouseService {
                         nodeDTO.setNameB("施工中");
                     } else {
                         if (houseFlow.getWorkerType() == 4) {//拆除
-                            if (houseFlow.getWorkSteta() == 2 ||houseFlow.getWorkSteta() == 6) {
+                            if (houseFlow.getWorkSteta() == 2 || houseFlow.getWorkSteta() == 6) {
                                 nodeDTO.setRank(6);
-                                if(houseFlow.getWorkSteta() == 2){
-                                    nodeDTO.setNameB("整体完工");}
-                                else {
-                                    nodeDTO.setNameB("提前结束装修");}
+                                if (houseFlow.getWorkSteta() == 2) {
+                                    nodeDTO.setNameB("整体完工");
+                                } else {
+                                    nodeDTO.setNameB("提前结束装修");
+                                }
                             }
                         } else {
                             if (houseFlow.getWorkSteta() == 1) {
                                 nodeDTO.setRank(6);
                                 nodeDTO.setNameB("阶段完工");
-                            } else if (houseFlow.getWorkSteta() == 2|| houseFlow.getWorkSteta() == 6) {
+                            } else if (houseFlow.getWorkSteta() == 2 || houseFlow.getWorkSteta() == 6) {
                                 nodeDTO.setRank(7);
-                                if(houseFlow.getWorkSteta() == 2){
-                                    nodeDTO.setNameB("整体完工");}
-                                else {
-                                    nodeDTO.setNameB("提前结束装修");}
+                                if (houseFlow.getWorkSteta() == 2) {
+                                    nodeDTO.setNameB("整体完工");
+                                } else {
+                                    nodeDTO.setNameB("提前结束装修");
+                                }
                             }
                         }
                     }
@@ -754,7 +756,7 @@ public class HouseService {
             }
             List<HouseListDTO> houseList = iHouseMapper.getHouseList(memberId, visitState, startDate, endDate, orderBy, searchKey);
             if (houseList.size() <= 0) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");
             }
             PageInfo pageResult = new PageInfo(houseList);
@@ -796,21 +798,35 @@ public class HouseService {
                 return ServerResponse.createBySuccessMessage("精算已审核通过");
             }
             if (budgetOk == 3) {//精算审核通过，调用此方法查询所有验收节点并保存
+                //订单拿钱更新
                 HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, "2");
-                hwo.setHaveMoney(hwo.getWorkPrice());
-                houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
-                //处理精算工钱
-                WorkerDetail workerDetail = new WorkerDetail();
-                workerDetail.setName("精算通过");
-                workerDetail.setWorkerId(hwo.getWorkerId());
-                workerDetail.setWorkerName(memberMapper.selectByPrimaryKey(hwo.getWorkerId()).getName());
-                workerDetail.setHouseId(hwo.getHouseId());
-                workerDetail.setMoney(hwo.getWorkPrice());
-                workerDetail.setState(0);//进工钱
-                workerDetail.setHaveMoney(hwo.getHaveMoney());
-                workerDetail.setHouseWorkerOrderId(hwo.getId());
-                workerDetail.setApplyMoney(hwo.getWorkPrice());
-                workerDetailMapper.insert(workerDetail);
+                if (hwo != null) {
+                    hwo.setHaveMoney(hwo.getWorkPrice());
+                    houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
+                    //用户入账
+                    Member member = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
+                    if (member != null) {
+                        BigDecimal haveMoney = member.getHaveMoney().add(hwo.getWorkPrice());
+                        BigDecimal surplusMoney = member.getSurplusMoney().add(hwo.getWorkPrice());
+                        member.setHaveMoney(haveMoney);//添加已获总钱
+                        member.setSurplusMoney(surplusMoney);//添加余额
+                        memberMapper.updateByPrimaryKeySelective(member);
+                        //添加流水
+                        //处理精算工钱
+                        WorkerDetail workerDetail = new WorkerDetail();
+                        workerDetail.setName("精算通过");
+                        workerDetail.setWorkerId(hwo.getWorkerId());
+                        workerDetail.setWorkerName(memberMapper.selectByPrimaryKey(hwo.getWorkerId()).getName());
+                        workerDetail.setHouseId(hwo.getHouseId());
+                        workerDetail.setMoney(hwo.getWorkPrice());
+                        workerDetail.setState(0);//进工钱
+                        workerDetail.setHaveMoney(hwo.getHaveMoney());
+                        workerDetail.setWalletMoney(surplusMoney);//更新后的余额
+                        workerDetail.setHouseWorkerOrderId(hwo.getId());
+                        workerDetail.setApplyMoney(hwo.getWorkPrice());
+                        workerDetailMapper.insert(workerDetail);
+                    }
+                }
                 //通知大管家抢单
                 HouseFlow houseFlow = houseFlowMapper.getHouseFlowByHidAndWty(houseId, 3);
                 houseFlow.setWorkType(2);//待抢单
@@ -901,10 +917,10 @@ public class HouseService {
                             srlist.add(convertHouse(house, accessToken));
                         }
                     } else {
-                        return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "查无数据");
+                        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
                     }
                 } else {
-                    return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "查无数据");
+                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
                 }
             }
             pageResult.setList(srlist);
@@ -1144,8 +1160,8 @@ public class HouseService {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         example.orderBy(HouseConstructionRecord.CREATE_DATE).desc();
         List<HouseConstructionRecord> hfaList = houseConstructionRecordMapper.selectByExample(example);
-        if(hfaList.size()<=0){
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相施工记录");
+        if (hfaList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相施工记录");
         }
         PageInfo pageResult = new PageInfo(hfaList);
         List<Map<String, Object>> listMap = new ArrayList<>();
@@ -1390,7 +1406,7 @@ public class HouseService {
                 request.setAttribute(Constants.CITY_ID, house.getCityId());
                 return budgetWorkerAPI.gatEstimateBudgetByHId(request, house.getId());
             }
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "暂无所需报价");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无所需报价");
         } catch (Exception e) {
             e.printStackTrace();
             LOG.error("系统出错，查询参考报价失败", e);
