@@ -74,4 +74,18 @@ public class HouseFlowScheduleController implements HouseFlowScheduleAPI {
         return houseFlowScheduleService.makeCalendar(houseId);
     }
 
+
+    /**
+     * 查看日历
+     * @param houseId 房子ID
+     * @param day 指定哪天
+     * @return   {date:'2019-05-01',type:1}
+     *   type: 1,正常;2,特殊;3,其他;4,正常+特殊;5,其他+特殊
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse viewCalendar(String houseId,Date day){
+        return houseFlowScheduleService.viewCalendar(houseId,day);
+    }
+
 }
