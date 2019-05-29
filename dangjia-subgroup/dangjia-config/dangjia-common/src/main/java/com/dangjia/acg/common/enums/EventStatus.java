@@ -8,7 +8,9 @@ public enum EventStatus implements IBaseEnum {
     ERROR(1001, "ERROR"),
     SYM_TOKEN_ERROR(1002, "系统token失效"),
     USER_TOKEN_ERROR(1003, "userToken失效"),
-    NO_DATA(1004, "查无数据");
+    NO_DATA(1004, "查无数据"),
+    NEED_TO_PAY(1009, "需要支付");
+
     public static EventStatus getInstance(int code) {
         for (EventStatus entity : EventStatus.values()) {
             if (entity.getCode() == code) {
@@ -17,7 +19,8 @@ public enum EventStatus implements IBaseEnum {
         }
         return null;
     }
-    EventStatus(int code,String desc){
+
+    EventStatus(int code, String desc) {
         this.code = code;
         this.desc = desc;
     }
@@ -25,7 +28,6 @@ public enum EventStatus implements IBaseEnum {
     private int code;
 
     private String desc;
-
 
 
     @Override
