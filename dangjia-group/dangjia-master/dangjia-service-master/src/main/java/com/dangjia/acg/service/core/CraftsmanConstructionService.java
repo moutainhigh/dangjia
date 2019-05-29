@@ -320,12 +320,17 @@ public class CraftsmanConstructionService {
         }
         //查询是否全部整体完工
         List<HouseFlow> checkFinishList = houseFlowMapper.checkAllFinish(hf.getHouseId(), hf.getId());
-        for(HouseFlow h:checkFinishList){
+        //查询是否提前结束装修
+        Example example=new Example(HouseFlow.class);
+        example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,hf.getHouseId()).andGreaterThanOrEqualTo(HouseFlow.WORKER_TYPE,3);
+        List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+        for(HouseFlow h:houseFlows){
             if(h.getWorkSteta()==6){
                 checkFinishList.clear();
                 break;
             }
         }
+        System.out.println(checkFinishList.size());
         //查询是否今天已经上传过巡查
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayPatrol(hf.getHouseId(), new Date());
         if (hf.getSupervisorStart() == 0) {//已开工之后都是巡查工地；1：巡查工地2：申请业主验收；3:确认开工

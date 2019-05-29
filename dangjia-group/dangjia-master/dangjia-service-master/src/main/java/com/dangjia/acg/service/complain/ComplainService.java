@@ -468,6 +468,18 @@ public class ComplainService {
                             Object haveMoney = jsonObject.get("haveMoney");
                             commitStopBuild(workerId,backMoney,haveMoney,complain.getHouseId(),"业主提前结束装修，原因为"+complain.getContent());
                         }
+                        if(brandSeriesLists.size()==1){
+                            //说明只有大管家进场了
+                            Example example1=new Example(HouseFlow.class);
+                            example1.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,complain.getHouseId()).andGreaterThan(HouseFlow.SORT,3);
+                            example1.orderBy(HouseFlow.SORT).asc();
+                            List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example1);
+                            if(houseFlows.size()>0){
+                                houseFlows.get(0).setWorkType(1);//把下一个工种弄成未发布
+                                houseFlows.get(0).setReleaseTime(new Date());
+                                houseFlowMapper.updateByPrimaryKeySelective(houseFlows.get(0));
+                            }
+                        }
                         House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
                         house.setModifyDate(new Date());
                         house.setVisitState(4);
@@ -646,6 +658,18 @@ public class ComplainService {
             Object haveMoney = jsonObject.get("haveMoney");
             commitStopBuild(workerId,backMoney,haveMoney,houseId,"中台提前结束装修，原因为"+content);
         }
+        if(brandSeriesLists.size()==1){
+            //说明只有大管家进场了
+            Example example1=new Example(HouseFlow.class);
+            example1.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,houseId).andGreaterThan(HouseFlow.SORT,3);
+            example1.orderBy(HouseFlow.SORT).asc();
+            List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example1);
+            if(houseFlows.size()>0){
+                houseFlows.get(0).setWorkType(1);//把下一个工种弄成未发布
+                houseFlows.get(0).setReleaseTime(new Date());
+                houseFlowMapper.updateByPrimaryKeySelective(houseFlows.get(0));
+            }
+        }
         //讲房子状态改为提前竣工
         House house = houseMapper.selectByPrimaryKey(houseId);
         house.setModifyDate(new Date());
@@ -667,7 +691,10 @@ public class ComplainService {
             //退钱了工匠还可得
             BigDecimal subtract1 = new BigDecimal(haveMoney.toString()).subtract(new BigDecimal(backMoney.toString()));
             BigDecimal add = houseWorkerOrderList.get(0).getHaveMoney().add(subtract1);
+            BigDecimal subtract = houseWorkerOrderList.get(0).getWorkPrice().subtract(new BigDecimal(backMoney.toString()));
             houseWorkerOrderList.get(0).setHaveMoney(add);
+            houseWorkerOrderList.get(0).setWorkPrice(subtract);
+            iHouseWorkerOrderMapper.updateByPrimaryKeySelective(houseWorkerOrderList.get(0));
             Example example2=new Example(HouseFlow.class);
             example2.createCriteria()
                     .andEqualTo(HouseFlow.HOUSE_ID,houseId)
@@ -675,6 +702,7 @@ public class ComplainService {
             List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example2);
             //设置当前工序为提前竣工
             houseFlows.get(0).setWorkSteta(6);
+            houseFlows.get(0).setWorkPrice(subtract);
             houseFlowMapper.updateByPrimaryKeySelective(houseFlows.get(0));
             //申请表加记录
            /* WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(workerTypeId);
