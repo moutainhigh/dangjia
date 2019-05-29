@@ -38,6 +38,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.core.HouseFlowScheduleService;
 import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,7 +63,8 @@ import java.util.List;
 @Service
 public class MendOrderService {
 
-
+    @Autowired
+    private HouseFlowScheduleService houseFlowScheduleService;
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
@@ -249,7 +251,7 @@ public class MendOrderService {
     /**
      * 确认退人工
      */
-    public ServerResponse confirmBackMendWorker(String houseId, String workerTypeId) {
+    public ServerResponse confirmBackMendWorker(String houseId, String workerTypeId,Integer dateNum) {
         try {
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 3)
@@ -267,6 +269,7 @@ public class MendOrderService {
 
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
                 houseService.insertConstructionRecordAll(mendOrder, changeOrder);
+                changeOrder.setScheduleDay(dateNum);
                 changeOrder.setState(2);//通过->工匠业主审核
                 changeOrderMapper.updateByPrimaryKey(changeOrder);
 //                House house = houseMapper.selectByPrimaryKey(houseId);
@@ -274,6 +277,7 @@ public class MendOrderService {
 //                        (DjConstants.PushMessage.CRAFTSMAN_T_WORK, house.getHouseName()), "");
 
 
+                houseFlowScheduleService.updateFlowSchedule(houseId,workerTypeId,null,changeOrder.getScheduleDay());
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 String urlyz = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + houseId + "&roleType=1";
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "退人工变更", String.format
@@ -409,7 +413,7 @@ public class MendOrderService {
      * 管家
      * 确认补人工
      */
-    public ServerResponse confirmMendWorker(String houseId, String workerTypeId) {
+    public ServerResponse confirmMendWorker(String houseId, String workerTypeId,Integer dateNum) {
         try {
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 1)
@@ -425,9 +429,11 @@ public class MendOrderService {
                 mendOrder.setState(1);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
+                changeOrder.setScheduleDay(dateNum);
                 houseService.insertConstructionRecordAll(mendOrder, changeOrder);
                 changeOrder.setState(2);//通过->工匠业主审核
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+                houseFlowScheduleService.updateFlowSchedule(houseId,workerTypeId,changeOrder.getScheduleDay(),null);
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
 //                String urlyz= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+houseId+"&roleType=1";

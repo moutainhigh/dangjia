@@ -226,16 +226,16 @@ public class MainUserService {
      * @param id
      * @return
      */
-    public ServerResponse setReceiveUser(String id) {
+    public ServerResponse setReceiveUser(String id,Integer type) {
         try {
-            MainUser oldMainUser = userMapper.getUserByReceive();
+            MainUser oldMainUser = userMapper.getUserByReceive(type);
             if (oldMainUser != null) { //把之前的 坐席用户 改为 非坐席
-                oldMainUser.setIsReceive(false);
+                oldMainUser.setIsReceive(0);
                 userMapper.updateByPrimaryKeySelective(oldMainUser);
             }
 
             MainUser newMainUser = userMapper.selectByPrimaryKey(id);
-            newMainUser.setIsReceive(true);
+            newMainUser.setIsReceive(type);
             userMapper.updateByPrimaryKeySelective(newMainUser);
             return ServerResponse.createBySuccessMessage("ok");
         } catch (Exception e) {

@@ -58,7 +58,8 @@ public interface MainUserAPI {
     @RequestMapping(value = "/user/setReceiveUser", method = RequestMethod.POST)
     @ApiOperation(value = "指定某个用户为坐席", notes = "指定某个用户为坐席")
     ServerResponse setReceiveUser(@RequestParam("request") HttpServletRequest request,
-                                  @RequestParam("id") String id);
+                                  @RequestParam("id") String id,
+                                  @RequestParam("type") Integer type);
 
     /**
      * 设置用户[更新]
