@@ -180,10 +180,32 @@ public class HouseService {
         List<House> houseList = iHouseMapper.selectByExample(example);
         List<Map<String, String>> mapList = new ArrayList<>();
         for (House house : houseList) {
+            Example example1=new Example(HouseFlow.class);
+            example1.createCriteria().andEqualTo(HouseFlow.WORKER_TYPE,3).andEqualTo(HouseFlow.HOUSE_ID,house.getId());
+            List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example1);
+            boolean type=false;
+            if(houseFlows.size()>0){
+                type=true;
+            }
             Map<String, String> map = new HashMap<>();
             map.put("houseId", house.getId());
             map.put("houseName", house.getHouseName());
             map.put("task", this.getTask(house.getId()) + "");
+            if(type) {
+                if (house.getVisitState() == 4) {
+                    map.put("btName", "提前结束装修");
+                    map.put("onclick", "0");//不可点击
+                } else if (house.getVisitState() == 5) {
+                    map.put("btName", "审核中");
+                    map.put("onclick", "0");
+                } else if (house.getVisitState() == 3) {
+                    map.put("btName", "已竣工");
+                    map.put("onclick", "0");
+                } else {
+                    map.put("btName", "申请结束装修");
+                    map.put("onclick", "1");
+                }
+            }
             mapList.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", mapList);
@@ -295,6 +317,19 @@ public class HouseService {
         }
         houseResult.setTask(task);
         houseResult.setState("00000");
+        houseResult.setHouseName(house.getHouseName());
+        Integer visitState = house.getVisitState();
+        if(visitState==0){
+            houseResult.setBuildStage("待确认开工");
+        }else if(visitState==1){
+            houseResult.setBuildStage("装修中");
+        }else if (visitState==2){
+            houseResult.setBuildStage("休眠中");
+        }else if (visitState==3){
+            houseResult.setBuildStage("已竣工");
+        }else {
+            houseResult.setBuildStage("提前结束装修");
+        }
         /*展示各种进度*/
         List<HouseFlow> houseFlowList = houseFlowMapper.getAllFlowByHouseId(houseId);
         List<NodeDTO> courseList = new ArrayList<>();

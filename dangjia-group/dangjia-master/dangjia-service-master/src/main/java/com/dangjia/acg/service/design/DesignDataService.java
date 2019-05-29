@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,10 +42,6 @@ import java.util.Map;
 public class DesignDataService {
     @Autowired
     private IHouseMapper houseMapper;
-    //    @Autowired
-//    private IDesignImageTypeMapper designImageTypeMapper;
-//    @Autowired
-//    private IHouseDesignImageMapper houseDesignImageMapper;//房子关联设计图
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
@@ -131,15 +126,17 @@ public class DesignDataService {
             }
         } else {
             List<QuantityRoomImages> quantityRoomImages = new ArrayList<>();
-//            ServerResponse serverResponse = getPlaneMap(houseId);
-//            if (serverResponse.isSuccess()) {
-//                QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
-//                quantityRoomImages.addAll(quantityRoomDTO.getImages());
-//            }
             ServerResponse serverResponse = getConstructionPlans(houseId);
             if (serverResponse.isSuccess()) {
                 QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
                 quantityRoomImages.addAll(quantityRoomDTO.getImages());
+            }
+            if (quantityRoomImages.size() <= 0) {
+                serverResponse = getPlaneMap(houseId);
+                if (serverResponse.isSuccess()) {
+                    QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+                    quantityRoomImages.addAll(quantityRoomDTO.getImages());
+                }
             }
             if (quantityRoomImages.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相关记录");
