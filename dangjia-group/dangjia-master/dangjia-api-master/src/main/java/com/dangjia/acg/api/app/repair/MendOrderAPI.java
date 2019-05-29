@@ -30,7 +30,9 @@ public interface MendOrderAPI {
     @PostMapping(value = "app/repair/mendOrder/confirmBackMendWorker")
     @ApiOperation(value = "确认退人工", notes = "确认退人工")
     ServerResponse confirmBackMendWorker(@RequestParam("houseId") String houseId,
-                                         @RequestParam("workerTypeId") String workerTypeId);
+                                         @RequestParam("workerTypeId") String workerTypeId,
+                                         @RequestParam("dateNum") Integer dateNum
+    );
 
     @PostMapping(value = "app/repair/mendOrder/backMendWorkerList")
     @ApiOperation(value = "退人工单明细", notes = "退人工单明细")
@@ -48,7 +50,8 @@ public interface MendOrderAPI {
     @PostMapping(value = "app/repair/mendOrder/confirmMendWorker")
     @ApiOperation(value = "确认补人工", notes = "确认补人工")
     ServerResponse confirmMendWorker(@RequestParam("houseId") String houseId,
-                                     @RequestParam("workerTypeId") String workerTypeId);
+                                     @RequestParam("workerTypeId") String workerTypeId,
+                                     @RequestParam("dateNum") Integer dateNum);
 
     @PostMapping(value = "app/repair/mendOrder/getMendWorkerList")
     @ApiOperation(value = "补退订单表单明细", notes = "补人工单明细")

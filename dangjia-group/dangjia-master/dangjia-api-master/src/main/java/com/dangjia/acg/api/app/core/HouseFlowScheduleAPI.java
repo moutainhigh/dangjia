@@ -43,19 +43,6 @@ public interface HouseFlowScheduleAPI {
                                           @RequestParam("endDate") Date endDate);
 
     /**
-     * 延长或提前工序的工期
-     * @param houseFlowId 工序ID
-     * @param extend 延长天数 两者只能其一
-     * @param advance 提前天数 两者只能其一
-     * @return
-     */
-    @PostMapping("app/core/schedule/updateFlowSchedule")
-    @ApiOperation(value = "延长或提前工序的工期", notes = "延长或提前工序的工期")
-    ServerResponse  updateFlowSchedule(@RequestParam("houseFlowId") String  houseFlowId,
-                                       @RequestParam("extend") Integer extend,
-                                       @RequestParam("advance") Integer advance);
-
-    /**
      * 生成工程日历
      * @param houseId 房子ID
      * @return

@@ -49,8 +49,8 @@ public class MendOrderController implements MendOrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse confirmBackMendWorker(String houseId,String workerTypeId){
-        return mendOrderService.confirmBackMendWorker(houseId,workerTypeId);
+    public ServerResponse confirmBackMendWorker(String houseId,String workerTypeId,Integer dateNum){
+        return mendOrderService.confirmBackMendWorker(houseId,workerTypeId,dateNum);
     }
     /**
      * 已添加退人工单明细
@@ -73,8 +73,8 @@ public class MendOrderController implements MendOrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse confirmMendWorker(String houseId,String workerTypeId){
-        return mendOrderService.confirmMendWorker(houseId,workerTypeId);
+    public ServerResponse confirmMendWorker(String houseId,String workerTypeId,Integer dateNum){
+        return mendOrderService.confirmMendWorker(houseId,workerTypeId,dateNum);
     }
     /**
      * 已添加补人工单明细

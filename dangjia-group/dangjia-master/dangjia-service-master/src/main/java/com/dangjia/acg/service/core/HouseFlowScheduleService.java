@@ -110,13 +110,14 @@ public class HouseFlowScheduleService {
 
     /**
      * 延长或提前工序的工期
-     * @param houseFlowId 工序ID
+     * @param houseId 房子ID
+     * @param workerTypeId 工序ID
      * @param extend 延长天数 两者只能其一
      * @param advance 提前天数 两者只能其一
      * @return
      */
-    public ServerResponse updateFlowSchedule(String  houseFlowId, Integer extend,Integer advance){
-        HouseFlow  houseFlow=houseFlowMapper.selectByPrimaryKey(houseFlowId);
+    public ServerResponse updateFlowSchedule(String houseId,String workerTypeId, Integer extend,Integer advance){
+        HouseFlow  houseFlow=houseFlowMapper.getByWorkerTypeId(houseId,workerTypeId);
         if(houseFlow.getEndDate()!=null){
             if (extend != null && extend > 0) {
                 houseFlow.setEndDate(DateUtil.addDateDays(houseFlow.getEndDate(), extend));
