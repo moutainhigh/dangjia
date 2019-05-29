@@ -170,7 +170,7 @@ public class CraftsmanConstructionService {
         Map<String, Object> dataMap = HouseUtil.getBudgetDatas(house);
         bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         List<ButtonListBean> buttonList = new ArrayList<>();
-        if (house.getDecorationType() == 2 && house.getDesignerOk() != 3) {
+        if (house.getBudgetOk() == 1 && house.getDecorationType() == 2 && house.getDesignerOk() != 3) {
             buttonList.add(Utils.getButton("上传设计", 4));
         }
         bean.setButtonList(buttonList);
@@ -319,7 +319,7 @@ public class CraftsmanConstructionService {
                 promptList.add("该房子已竣工!");
                 String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                         "takeMoneyDetailed?title=拿钱明细&houseId=" + house.getId() +
-                        "&houseFlowId=" + hf.getId() +"&houseName=" + house.getHouseName();
+                        "&houseFlowId=" + hf.getId() + "&houseName=" + house.getHouseName();
                 buttonList.add(Utils.getButton("查看拿钱明细", url, 0));
             } else {
                 HouseFlowApply houseFlowApp = houseFlowApplyMapper.checkSupervisorApply(hf.getId(), worker.getId());//查询大管家是否有验收申请
