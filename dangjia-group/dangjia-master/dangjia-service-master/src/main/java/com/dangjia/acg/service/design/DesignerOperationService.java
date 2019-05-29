@@ -6,7 +6,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
-import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -34,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -190,6 +190,7 @@ public class DesignerOperationService {
                         configMessageService.addConfigMessage(null, "gj", hwo.getWorkerId(), "0", "平面图已通过", String.format(DjConstants.PushMessage.PLANE_OK, house.getHouseName()), "");
                     }
                 } else if (type == 0) {//不通过
+                    //TODO 次数判断
                     house.setDesignerOk(6);
                     if (hwo != null) {
                         configMessageService.addConfigMessage(null, "gj", hwo.getWorkerId(), "0", "平面图未通过", String.format(DjConstants.PushMessage.PLANE_ERROR, house.getHouseName()), "");
@@ -201,22 +202,33 @@ public class DesignerOperationService {
                 if (type == 1) {//通过
                     house.setDesignerOk(3);
                     if (hwo != null) {
+                        //订单拿钱更新
                         hwo.setHaveMoney(hwo.getWorkPrice());
                         houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
-                        //处理设计师工钱
-                        WorkerDetail workerDetail = new WorkerDetail();
-                        workerDetail.setName("设计费");
-                        workerDetail.setWorkerId(hwo.getWorkerId());
-                        workerDetail.setWorkerName(memberMapper.selectByPrimaryKey(hwo.getWorkerId()).getName());
-                        workerDetail.setHouseId(hwo.getHouseId());
-                        workerDetail.setMoney(hwo.getWorkPrice());
-                        workerDetail.setState(0);//进工钱
-                        workerDetail.setHaveMoney(hwo.getHaveMoney());
-                        workerDetail.setHouseWorkerOrderId(hwo.getId());
-                        workerDetail.setApplyMoney(hwo.getWorkPrice());
-                        workerDetailMapper.insert(workerDetail);
+                        //用户入账
+                        Member member = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
+                        if (member != null) {
+                            BigDecimal haveMoney = member.getHaveMoney().add(hwo.getWorkPrice());
+                            BigDecimal surplusMoney = member.getSurplusMoney().add(hwo.getWorkPrice());
+                            member.setHaveMoney(haveMoney);//添加已获总钱
+                            member.setSurplusMoney(surplusMoney);//添加余额
+                            memberMapper.updateByPrimaryKeySelective(member);
+                            //添加流水
+                            //处理设计师工钱
+                            WorkerDetail workerDetail = new WorkerDetail();
+                            workerDetail.setName("设计费");
+                            workerDetail.setWorkerId(hwo.getWorkerId());
+                            workerDetail.setWorkerName(memberMapper.selectByPrimaryKey(hwo.getWorkerId()).getName());
+                            workerDetail.setHouseId(hwo.getHouseId());
+                            workerDetail.setMoney(hwo.getWorkPrice());
+                            workerDetail.setState(0);//进工钱
+                            workerDetail.setWalletMoney(surplusMoney);//更新后的余额
+                            workerDetail.setHaveMoney(hwo.getHaveMoney());
+                            workerDetail.setHouseWorkerOrderId(hwo.getId());
+                            workerDetail.setApplyMoney(hwo.getWorkPrice());
+                            workerDetailMapper.insert(workerDetail);
+                        }
                     }
-                    //TODO 设计师钱没有进入账户余额
                     WorkerType workerType = workerTypeMapper.selectByPrimaryKey("2");
                     Example example = new Example(HouseFlow.class);
                     example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerType.getId());
@@ -241,6 +253,7 @@ public class DesignerOperationService {
                         configMessageService.addConfigMessage(null, "gj", hwo.getWorkerId(), "0", "施工图已通过", String.format(DjConstants.PushMessage.CONSTRUCTION_OK, house.getHouseName()), "");
                     }
                 } else if (type == 0) {//不通过
+                    //TODO 次数判断
                     house.setDesignerOk(8);
                     if (hwo != null) {
                         configMessageService.addConfigMessage(null, "gj", hwo.getWorkerId(), "0", "施工图未通过", String.format(DjConstants.PushMessage.CONSTRUCTION_ERROR, house.getHouseName()), "");
@@ -307,7 +320,7 @@ public class DesignerOperationService {
     private ServerResponse setQuantityRoom(String userToken, String houseId, String userId, String imageString, int type) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null && CommonUtil.isEmpty(userId)) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), ServerCode.USER_TOKEN_ERROR.getDesc());
+            return ServerResponse.createbyUserTokenError();
         }
         if (CommonUtil.isEmpty(imageString)) {
             return ServerResponse.createByErrorMessage("请上传图片");

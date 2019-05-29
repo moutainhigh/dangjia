@@ -144,7 +144,7 @@ public class MemberAuthService {
         }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            return ServerResponse.createbyUserTokenError();
         }
         Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
         if (user == null) {
@@ -182,7 +182,7 @@ public class MemberAuthService {
         }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            return ServerResponse.createbyUserTokenError();
         }
         Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
         if (user == null) {
@@ -222,7 +222,7 @@ public class MemberAuthService {
         }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            return ServerResponse.createbyUserTokenError();
         }
         Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
         if (user == null) {

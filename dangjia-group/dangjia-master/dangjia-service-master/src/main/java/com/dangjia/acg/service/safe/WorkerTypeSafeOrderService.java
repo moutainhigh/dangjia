@@ -2,7 +2,6 @@ package com.dangjia.acg.service.safe;
 
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
-import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -55,7 +54,7 @@ public class WorkerTypeSafeOrderService {
     public ServerResponse changeSafeType(String userToken, String houseFlowId, String workerTypeSafeId, int selected){
         AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
         if(accessToken == null){//无效的token
-            return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(),"无效的token,请重新登录或注册!");
+            return ServerResponse.createbyUserTokenError();
         }
         try{
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);

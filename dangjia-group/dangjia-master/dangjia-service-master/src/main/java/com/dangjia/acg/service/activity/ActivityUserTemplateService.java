@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.activity;
 
-import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -128,9 +127,9 @@ public class ActivityUserTemplateService {
                         redPackRuleIds.add(rule.getId());
                     }
                     //开始发送红包
-                    if(redPackRuleIds!=null&&redPackRuleIds.size()>0) {
+                    if(redPackRuleIds.size() > 0) {
                         ServerResponse serverResponse= redPackService.sendMemberPadPackBatch(members, red.getId(), StringUtils.join(redPackRuleIds, ","));
-                        if(serverResponse.getResultCode()!= ServerCode.SUCCESS.getCode()){
+                        if(!serverResponse.isSuccess()){
                             return serverResponse;
                         }
                     }
