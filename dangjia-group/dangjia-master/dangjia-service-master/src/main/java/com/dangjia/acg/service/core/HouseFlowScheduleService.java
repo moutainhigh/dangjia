@@ -156,7 +156,7 @@ public class HouseFlowScheduleService {
         Calendar c = Calendar.getInstance();
         c.setTime(day);
         int year = c.get(Calendar.YEAR);
-        int modth = c.get(Calendar.MONTH);
+        int modth = c.get(Calendar.MONTH)+1;
         List<String> list=DateUtil.dayReportAll(year,modth);
         List<HouseFlow> houseFlowList=houseFlowMapper.getForCheckMoney(houseId);
         List<Map> mapList=new ArrayList<>();
