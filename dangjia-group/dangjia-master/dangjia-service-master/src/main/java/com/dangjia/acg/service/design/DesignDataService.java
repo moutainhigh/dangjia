@@ -106,6 +106,7 @@ public class DesignDataService {
                 if (!serverResponse.isSuccess()) {
                     return serverResponse;
                 }
+                //TODO 添加提示
                 QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
                 designDTO.setData(quantityRoomDTO.getImages());
             } else {
@@ -113,6 +114,7 @@ public class DesignDataService {
                 if (!serverResponse.isSuccess()) {
                     return serverResponse;
                 }
+                //TODO 添加提示
                 QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
                 designDTO.setData(quantityRoomDTO.getImages());
             }
@@ -139,9 +141,12 @@ public class DesignDataService {
             designDTO.setData(quantityRoomImages);
             int historyRecord = (worker != null
                     && worker.getWorkerType() != null
-                    &&((house.getDecorationType() == 2 && worker.getWorkerType() == 2)
-                    ||(house.getDecorationType() != 2 && worker.getWorkerType() == 1))) ? 1 : 0;
+                    && ((house.getDecorationType() == 2 && worker.getWorkerType() == 2)
+                    || (house.getDecorationType() != 2 && worker.getWorkerType() == 1))) ? 1 : 0;
             designDTO.setHistoryRecord(historyRecord);
+            if (worker != null && worker.getId().equals(house.getMemberId())) {
+                //TODO 添加完成后修改设计图
+            }
         }
         return ServerResponse.createBySuccess("查询成功", designDTO);
     }
