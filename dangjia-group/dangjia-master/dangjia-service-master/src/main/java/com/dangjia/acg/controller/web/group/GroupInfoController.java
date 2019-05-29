@@ -79,8 +79,8 @@ public class GroupInfoController implements GroupInfoAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getOnlineService(HttpServletRequest request,String userToken) {
-        return groupInfoService.getOnlineService(request,userToken);
+    public ServerResponse getOnlineService(HttpServletRequest request,Integer type) {
+        return groupInfoService.getOnlineService(request,type);
     }
 
     /**
