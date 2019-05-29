@@ -173,10 +173,12 @@ public class HouseFlowScheduleService {
         }
         return ServerResponse.createBySuccess("查询成功",mapList);
     }
+//    type: 1,正常;2,特殊;3,其他;4,正常+特殊;5,其他+特殊
     public int getPlans(String o , List<HouseFlow> houseFlowList,List<String> plans,List<String> actuals){
         int type=0;
         Date od = DateUtil.toDate(o);
         for (HouseFlow houseFlow : houseFlowList) {
+            int mr=0;
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             Example example=new Example(HouseFlowApply.class);
             example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID,houseFlow.getId())
@@ -189,8 +191,10 @@ public class HouseFlowScheduleService {
                 String e = DateUtil.dateToString(houseFlow.getEndDate(), null);
                 if(s.equals(o)){
                     plans.add("当前为"+workerType.getName()+"进场日期");
+                    mr=1;
                 }
                 if(e.equals(o)){
+                    mr=1;
                     if(houseFlow.getWorkerType()==4) {
                         plans.add("当前为"+workerType.getName()+"整体完工日期");
                     }else{
@@ -199,6 +203,7 @@ public class HouseFlowScheduleService {
                 }
                 if(houseFlow.getStartDate().getTime()>od.getTime()&&houseFlow.getEndDate().getTime()<od.getTime()){
                     plans.add("当前为"+workerType.getName()+"正常施工日期");
+                    mr=1;
                 }
             }
             for (HouseFlowApply houseFlowApply : houseFlowApplies) {
@@ -219,24 +224,74 @@ public class HouseFlowScheduleService {
                 if(o.equals(sc)){
                     //0每日完工申请
                     if(houseFlowApply.getApplyType()==0){
+                        if(type!=4&&type!=5) {
+                            if (mr == 1 && type == 2) {
+                                type = 4;
+                            } else if (mr == 1 && type == 3) {
+                                type = 5;
+                            } else if (mr == 1) {
+                                type = 1;
+                            }
+                        }
                         actuals.add(workerType.getName()+"今日完工，完成节点:"+jieDian);
                     }
                     //1阶段完工申请
                     if(houseFlowApply.getApplyType()==1){
+                        if(type!=4&&type!=5) {
+                            if (mr == 1 && type == 2) {
+                                type = 4;
+                            } else if (mr == 1 && type == 3) {
+                                type = 5;
+                            } else if (mr == 1) {
+                                type = 1;
+                            }
+                        }
                         actuals.add(workerType.getName()+"已阶段完工，完成节点:"+jieDian);
                     }
                     //2整体完工申请
                     if(houseFlowApply.getApplyType()==2){
+                        if(type!=4&&type!=5) {
+                            if (mr == 1 && type == 2) {
+                                type = 4;
+                            } else if (mr == 1 && type == 3) {
+                                type = 5;
+                            } else if (mr == 1) {
+                                type = 1;
+                            }
+                        }
                         actuals.add(workerType.getName()+"已整体完工，完成节点:"+jieDian);
                     }
                     //3停工申请
                     if(houseFlowApply.getApplyType()==3){
+                        if(type!=4&&type!=5) {
+                            if(type==1){
+                                type=4;
+                            }else if(type==3){
+                                type=5;
+                            }else {
+                                type=2;
+                            }
+                        }
+
                         int numall = 1 + DateUtil.daysofTwo(houseFlowApply.getStartDate(), houseFlowApply.getEndDate());//请假天数
                         actuals.add(workerType.getName()+"申请"+numall+"天停工，工期延期"+numall+"天"+ (CommonUtil.isEmpty(houseFlowApply.getApplyDec())?"":",理由："+houseFlowApply.getApplyDec()));
                     }
                     //4每日开工申请
                     if(houseFlowApply.getApplyType()==4){
+                        if(type!=4&&type!=5) {
+                            if (mr == 1 && type == 2) {
+                                type = 4;
+                            } else if (mr == 1 && type == 3) {
+                                type = 5;
+                            } else if (mr == 1) {
+                                type = 1;
+                            }
+                        }
                         actuals.add(workerType.getName()+"今日开工");
+                    }
+
+                    if(mr==1&&type!=1&&type!=4&&type!=5){
+                        type=3;
                     }
                 }
             }
@@ -250,6 +305,15 @@ public class HouseFlowScheduleService {
                 if(o.equals(sc)){
                     //补人工
                     if(changeOrder.getType()==1){
+                        if(type!=4&&type!=5) {
+                            if(type==1){
+                                type=4;
+                            }else if(type==3){
+                                type=5;
+                            }else {
+                                type=2;
+                            }
+                        }
                         if(changeOrder.getScheduleDay()!=null&&changeOrder.getScheduleDay()>0) {
                             actuals.add(workerType.getName()+"补人工成功，工期延期" + changeOrder.getScheduleDay() + "天");
                         }else{
@@ -258,6 +322,15 @@ public class HouseFlowScheduleService {
                     }
                     //退人工
                     if(changeOrder.getType()==2){
+                        if(type!=4&&type!=5) {
+                            if(type==1){
+                                type=4;
+                            }else if(type==3){
+                                type=5;
+                            }else {
+                                type=2;
+                            }
+                        }
                         if(changeOrder.getScheduleDay()!=null&&changeOrder.getScheduleDay()>0) {
                             actuals.add("业主退人工成功，工期提前" + changeOrder.getScheduleDay() + "天");
                         }else{
