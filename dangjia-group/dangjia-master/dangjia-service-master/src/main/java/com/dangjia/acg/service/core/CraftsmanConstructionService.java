@@ -666,11 +666,11 @@ public class CraftsmanConstructionService {
     public Object getMember(String userToken) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), ServerCode.USER_TOKEN_ERROR.getDesc());
+            return ServerResponse.createbyUserTokenError();
         }
         Member worker = accessToken.getMember();
         if (worker == null) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), ServerCode.USER_TOKEN_ERROR.getDesc());
+            return ServerResponse.createbyUserTokenError();
         }
         return worker;
     }

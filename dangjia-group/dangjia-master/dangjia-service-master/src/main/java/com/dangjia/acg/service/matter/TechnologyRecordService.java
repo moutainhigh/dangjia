@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.matter.TechnologyRecordDTO;
 import com.dangjia.acg.dto.matter.WorkNodeDTO;
@@ -131,7 +130,7 @@ public class TechnologyRecordService {
         House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
         if (house.getPause() != null) {
             if (house.getPause() == 1) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.ERROR.getCode(), "该房子已暂停施工,请勿提交申请！");
+                return ServerResponse.createByErrorMessage("该房子已暂停施工,请勿提交申请！");
             }
         }
 
@@ -252,7 +251,7 @@ public class TechnologyRecordService {
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             if (house.getPause() != null) {
                 if (house.getPause() == 1) {
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.ERROR.getCode(), "该房子已暂停施工,请勿提交申请！");
+                    return ServerResponse.createByErrorMessage("该房子已暂停施工,请勿提交申请！");
                 }
             }
 

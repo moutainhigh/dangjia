@@ -280,7 +280,7 @@ public class HouseWorkerService {
             String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             worker = memberMapper.selectByPrimaryKey(worker.getId());
             if (worker == null) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), ServerCode.USER_TOKEN_ERROR.getDesc());
+                return ServerResponse.createbyUserTokenError();
             }
             HomePageBean homePageBean = new HomePageBean();
             homePageBean.setWorkerId(worker.getId());
@@ -344,7 +344,7 @@ public class HouseWorkerService {
             return ServerResponse.createBySuccess("获取我的界面成功！", homePageBean);
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorCodeMessage(ServerCode.ERROR.getCode(), "获取我的界面信息失败！");
+            return ServerResponse.createByErrorMessage("获取我的界面信息失败！");
         }
     }
 
@@ -394,12 +394,12 @@ public class HouseWorkerService {
             if (house != null) {
                 if (hf.getPause() == 1) {
                     WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.ERROR.getCode(), "该工序（" + workerType.getName() + "）已暂停施工,请勿提交申请！");
+                    return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已暂停施工,请勿提交申请！");
                 }
                 if (house.getPause() != null) {
 
                     if (house.getPause() == 1) {
-                        return ServerResponse.createByErrorCodeMessage(ServerCode.ERROR.getCode(), "该房子已暂停施工,请勿提交申请！");
+                        return ServerResponse.createByErrorMessage("该房子已暂停施工,请勿提交申请！");
                     }
                 }
             }
@@ -479,14 +479,14 @@ public class HouseWorkerService {
             //包括所有申请 和 巡查
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(houseFlowId, applyType, workerId, new Date());
             if (applyType != 6 && applyType != 7 && houseFlowApplyList.size() > 0) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.ERROR.getCode(), "您今日已提交过此申请,请勿重复提交！");
+                return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
             }
 
             /*待审核申请*/
             if (applyType < 4) {
                 List<HouseFlowApply> hfaList = houseFlowApplyMapper.checkPendingApply(houseFlowId, workerId);
                 if (hfaList.size() > 0) {
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.ERROR.getCode(), "您有待审核的申请,请联系管家业主审核后再提交");
+                    return ServerResponse.createByErrorMessage("您有待审核的申请,请联系管家业主审核后再提交");
                 }
             }
 
