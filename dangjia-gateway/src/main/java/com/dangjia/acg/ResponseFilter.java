@@ -2,7 +2,6 @@ package com.dangjia.acg;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
-import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.http.JsonResponse;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -42,7 +41,6 @@ public class ResponseFilter extends SendResponseFilter {
     @Override
     public Object run() {
         RequestContext context = RequestContext.getCurrentContext();
-
         System.out.printf("状态"+context.getResponse().getStatus());
         if(context.getResponse().getStatus() == HttpStatus.OK.value()) {
             System.out.printf("" + context.getResponse().getHeader("Content-Type"));
@@ -50,14 +48,13 @@ public class ResponseFilter extends SendResponseFilter {
             System.out.printf("" + context.getRequest().getHeader("Content-Type"));
             InputStream inputStream = context.getResponseDataStream();
             try {
-
-
                 Object obj = JSON.parseObject(inputStream, Object.class, Feature.AutoCloseSource);
-                JsonResponse jsonResponse =null;
+                JsonResponse jsonResponse;
                 if(obj!=null) {
                     jsonResponse = new JsonResponse(ServerCode.SUCCESS.getCode(), obj);
                 }else{
-                    ServerResponse serverResponse= ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(),EventStatus.NO_DATA.getDesc());
+                    ServerResponse serverResponse= ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
+                            ,ServerCode.NO_DATA.getDesc());
                     jsonResponse = new JsonResponse(ServerCode.NO_DATA.getCode(), serverResponse);
                 }
                 byte b[] = SerializeUtils.serialize(jsonResponse);
@@ -67,9 +64,7 @@ public class ResponseFilter extends SendResponseFilter {
                 e.printStackTrace();
             }
         }
-        //  }
-
-        InputStream obj =  context.getResponseDataStream();
+        context.getResponseDataStream();
         super.run();
         return null;
     }

@@ -3,7 +3,6 @@ package com.dangjia.acg.service.member;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -83,7 +82,7 @@ public class WalletService {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             if (accessToken == null) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+                return ServerResponse.createbyUserTokenError();
             }
             Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
 
@@ -156,7 +155,7 @@ public class WalletService {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             if (accessToken == null) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+                return ServerResponse.createbyUserTokenError();
             }
             Member member = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
             if (member == null) {
@@ -219,7 +218,7 @@ public class WalletService {
             example.createCriteria().andEqualTo(WorkerBankCard.WORKER_ID, member.getId()).andEqualTo(WorkerBankCard.DATA_STATUS,0);
             List<WorkerBankCard> workerBankCardList = workerBankCardMapper.selectByExample(example);
             if (workerBankCardList.size() == 0) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "请绑定银行卡");
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "请绑定银行卡");
             }
             WithdrawDTO withdrawDTO = new WithdrawDTO();
             String mobile = member.getMobile();//号码

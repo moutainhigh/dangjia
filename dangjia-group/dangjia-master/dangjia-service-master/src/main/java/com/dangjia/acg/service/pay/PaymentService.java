@@ -8,7 +8,7 @@ import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.JsmsUtil;
@@ -232,7 +232,7 @@ public class PaymentService {
     public ServerResponse setPaySuccess(String userToken, String businessOrderNumber) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "请重新登录或注册!");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "请重新登录或注册!");
         }
         Map<String, Object> returnMap = new HashMap<String, Object>();
 
@@ -856,7 +856,7 @@ public class PaymentService {
             group.setHouseId(houseId);
             //获取房子群组
             ServerResponse groups = groupInfoService.getGroups(request, pageDTO, group);
-            if (groups.getResultCode() == EventStatus.SUCCESS.getCode()) {
+            if (groups.getResultCode() == ServerCode.SUCCESS.getCode()) {
                 PageInfo pageInfo = (PageInfo) groups.getResultObj();
                 List<GroupDTO> listdto = pageInfo.getList();
                 if (listdto != null && listdto.size() > 0) {
@@ -1073,7 +1073,7 @@ public class PaymentService {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             if (accessToken == null) {//无效的token
-                return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册!");
+                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册!");
             }
 
             if (type != 4) {

@@ -4,7 +4,7 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -80,7 +80,7 @@ public class CraftsmanConstructionService {
         }
         Member worker = (Member) object;
         if (worker.getWorkerType() == null) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "请上传资料");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "请上传资料");
         }
         object = getHouseWorker(bean, worker.getId());
         if (object instanceof ServerResponse) {
@@ -89,11 +89,11 @@ public class CraftsmanConstructionService {
         HouseWorker hw = (HouseWorker) object;
         House house = houseMapper.selectByPrimaryKey(hw.getHouseId());//查询房产信息
         if (house == null) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "房产信息不存在");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "房产信息不存在");
         }
         HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hw.getHouseId(), hw.getWorkerTypeId());//查询自己的任务状态
         if (hf == null) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "没有查到该任务");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "没有查到该任务");
         }
         bean.setHouseId(house.getId());
         bean.setHouseName(house.getHouseName());
@@ -666,11 +666,11 @@ public class CraftsmanConstructionService {
     public Object getMember(String userToken) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), EventStatus.USER_TOKEN_ERROR.getDesc());
+            return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), ServerCode.USER_TOKEN_ERROR.getDesc());
         }
         Member worker = accessToken.getMember();
         if (worker == null) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), EventStatus.USER_TOKEN_ERROR.getDesc());
+            return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), ServerCode.USER_TOKEN_ERROR.getDesc());
         }
         return worker;
     }
@@ -702,7 +702,7 @@ public class CraftsmanConstructionService {
             example.orderBy(HouseWorker.MODIFY_DATE).desc();
             List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);//查询选中
             if (houseWorkerList == null || houseWorkerList.size() <= 0) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "您暂无施工中的记录,快去接单吧！");
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "您暂无施工中的记录,快去接单吧！");
             }
             int count = 0;
             for (HouseWorker houseWorker : houseWorkerList) {//循环所有订单任务

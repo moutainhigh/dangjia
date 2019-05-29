@@ -1,7 +1,8 @@
 package com.dangjia.acg.common.response;
 
 
-import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.enums.ServerCode.
+import com.dangjia.acg.common.exception.ServerCode;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -23,34 +24,34 @@ public class ServerResponse<T> implements Serializable {
 
     //使之不在json序列化结果当中
     public boolean isSuccess() {
-        return this.resultCode == EventStatus.SUCCESS.getCode();
+        return this.resultCode == ServerCode.SUCCESS.getCode();
     }
 
     public static <T> ServerResponse<T> createBySuccess() {
         ServerResponse<T> dataResponse = new ServerResponse<>();
-        dataResponse.setResultCode(EventStatus.SUCCESS.getCode());
-        dataResponse.setResultMsg(EventStatus.SUCCESS.getDesc());
+        dataResponse.setResultCode(ServerCode.SUCCESS.getCode());
+        dataResponse.setResultMsg(ServerCode.SUCCESS.getDesc());
         return dataResponse;
     }
 
     public static <T> ServerResponse<T> createBySuccessMessage(String resultMsg) {
         ServerResponse<T> dataResponse = new ServerResponse<>();
-        dataResponse.setResultCode(EventStatus.SUCCESS.getCode());
+        dataResponse.setResultCode(ServerCode.SUCCESS.getCode());
         dataResponse.setResultMsg(resultMsg);
         return dataResponse;
     }
 
     public static <T> ServerResponse<T> createBySuccess(T resultObj) {
         ServerResponse<T> dataResponse = new ServerResponse<>();
-        dataResponse.setResultCode(EventStatus.SUCCESS.getCode());
-        dataResponse.setResultMsg(EventStatus.SUCCESS.getDesc());
+        dataResponse.setResultCode(ServerCode.SUCCESS.getCode());
+        dataResponse.setResultMsg(ServerCode.SUCCESS.getDesc());
         dataResponse.setResultObj(resultObj);
         return dataResponse;
     }
 
     public static <T> ServerResponse<T> createBySuccess(String resultMsg, T resultObj) {
         ServerResponse<T> dataResponse = new ServerResponse<>();
-        dataResponse.setResultCode(EventStatus.SUCCESS.getCode());
+        dataResponse.setResultCode(ServerCode.SUCCESS.getCode());
         dataResponse.setResultMsg(resultMsg);
         dataResponse.setResultObj(resultObj);
         return dataResponse;
@@ -59,15 +60,15 @@ public class ServerResponse<T> implements Serializable {
     //------错误--------//
     public static <T> ServerResponse<T> createByError() {
         ServerResponse<T> dataResponse = new ServerResponse<>();
-        dataResponse.setResultCode(EventStatus.ERROR.getCode());
-        dataResponse.setResultMsg(EventStatus.ERROR.getDesc());
+        dataResponse.setResultCode(ServerCode.ERROR.getCode());
+        dataResponse.setResultMsg(ServerCode.ERROR.getDesc());
         return dataResponse;
     }
 
 
     public static <T> ServerResponse<T> createByErrorMessage(String errorMessage) {
         ServerResponse<T> dataResponse = new ServerResponse<>();
-        dataResponse.setResultCode(EventStatus.ERROR.getCode());
+        dataResponse.setResultCode(ServerCode.ERROR.getCode());
         dataResponse.setResultMsg(errorMessage);
         return dataResponse;
     }
@@ -81,9 +82,16 @@ public class ServerResponse<T> implements Serializable {
 
     public static <T> ServerResponse<T> createByErrorNeedToPay(T resultObj) {
         ServerResponse<T> dataResponse = new ServerResponse<>();
-        dataResponse.setResultCode(EventStatus.NEED_TO_PAY.getCode());
-        dataResponse.setResultMsg(EventStatus.NEED_TO_PAY.getDesc());
+        dataResponse.setResultCode(ServerCode.NEED_TO_PAY.getCode());
+        dataResponse.setResultMsg(ServerCode.NEED_TO_PAY.getDesc());
         dataResponse.setResultObj(resultObj);
+        return dataResponse;
+    }
+
+    public static <T> ServerResponse<T> createbyUserTokenError() {
+        ServerResponse<T> dataResponse = new ServerResponse<>();
+        dataResponse.setResultCode(ServerCode.USER_TOKEN_ERROR.getCode());
+        dataResponse.setResultMsg(ServerCode.USER_TOKEN_ERROR.getDesc());
         return dataResponse;
     }
 

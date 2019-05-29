@@ -7,7 +7,7 @@ import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -495,7 +495,7 @@ public class EvaluateService {
 
             //业主审核
             ServerResponse serverResponse=houseFlowApplyService.checkWorker(houseFlowApplyId,isAuto);
-            if(serverResponse.getResultCode()!= EventStatus.SUCCESS.getCode()){
+            if(serverResponse.getResultCode()!= ServerCode.SUCCESS.getCode()){
 
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return serverResponse;
