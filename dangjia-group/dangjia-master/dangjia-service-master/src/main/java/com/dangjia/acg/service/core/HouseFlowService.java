@@ -389,6 +389,7 @@ public class HouseFlowService {
                 if (hf.getPause() == 1) {
                     return ServerResponse.createByErrorMessage("该房子已暂停施工！");
                 }
+                //持单数
                 long num = houseWorkerMapper.grabControl(member.getId());//查询未完工工地
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
                 if (member.getWorkerType() != 7 && num >= wt.getMethods()) {
