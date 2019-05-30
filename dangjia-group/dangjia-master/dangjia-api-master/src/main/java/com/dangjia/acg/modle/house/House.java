@@ -219,6 +219,15 @@ public class House extends BaseEntity {
     @ApiModelProperty("结算比例ID")
     private String workDepositId;
 
+    @Column(name = "plane_frequency")
+    @Desc(value = "平面图打回次数")
+    @ApiModelProperty("平面图打回次数")
+    private Integer planeFrequency;
+
+    @Column(name = "construction_frequency")
+    @Desc(value = "施工图打回次数")
+    @ApiModelProperty("施工图打回次数")
+    private Integer constructionFrequency;
 
     public House() {
 

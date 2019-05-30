@@ -114,7 +114,11 @@ public class DesignerOperationService {
         if (!designDataService.getPlaneMap(house.getId()).isSuccess()) {
             return ServerResponse.createByErrorMessage("请上传平面图");
         }
-        house.setDesignerOk(5);//平面图发给业主
+        if (house.getDecorationType() == 2) {//自带设计直接上传施工图
+            house.setDesignerOk(7);
+        } else {
+            house.setDesignerOk(5);//平面图发给业主
+        }
         houseMapper.updateByPrimaryKeySelective(house);
         //app推送给业主
         configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计图上传提醒",
@@ -132,11 +136,16 @@ public class DesignerOperationService {
         if (!designDataService.getConstructionPlans(house.getId()).isSuccess()) {
             return ServerResponse.createByErrorMessage("请上传平面图");
         }
-        house.setDesignerOk(2);//施工图(其它图)发给业主
+        if (house.getDecorationType() == 2) {//自带设计直接上传施工图
+            house.setDesignerOk(3);
+        } else {
+            house.setDesignerOk(2);//施工图(其它图)发给业主
+        }
         houseMapper.updateByPrimaryKeySelective(house);
         //app推送给业主
         configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计图上传提醒",
                 String.format(DjConstants.PushMessage.CONSTRUCTION_UPLOADING, house.getHouseName()), "");
+
         return ServerResponse.createBySuccessMessage("发送成功");
     }
 
@@ -419,11 +428,6 @@ public class DesignerOperationService {
                         for (QuantityRoomImages images : quantityRoomImagesList) {
                             quantityRoomImagesMapper.insert(images);
                         }
-                        if (house.getDecorationType() == 2) {//自带设计直接上传施工图
-                            house.setDesignerOk(3);
-                            houseMapper.updateByPrimaryKeySelective(house);
-                        }
-
                     } else {
                         return ServerResponse.createByErrorMessage("请传入图片");
                     }
