@@ -3,7 +3,6 @@ package com.dangjia.acg.service.core;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.ButtonDTO;
@@ -12,6 +11,7 @@ import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseExpendMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
@@ -21,6 +21,7 @@ import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseExpend;
 import com.dangjia.acg.modle.member.Member;
@@ -68,6 +69,8 @@ public class TaskService {
 
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
+    @Autowired
+    private IDesignBusinessOrderMapper designBusinessOrderMapper;
 
     /**
      * 任务列表
@@ -291,7 +294,25 @@ public class TaskService {
             }
         }
         //设计审核任务
-        if (house.getDesignerOk() == 5 || house.getDesignerOk() == 2) {
+
+        boolean isDesigner = false;
+        if (house.getDesignerOk() == 3) {
+            Example example1 = new Example(DesignBusinessOrder.class);
+            example1.createCriteria()
+                    .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
+                    .andEqualTo(DesignBusinessOrder.HOUSE_ID, house.getId())
+                    .andEqualTo(DesignBusinessOrder.STATUS, 1)
+                    .andNotEqualTo(DesignBusinessOrder.OPERATION_STATE, 2)
+                    .andEqualTo(DesignBusinessOrder.TYPE, 4);
+            List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example1);
+            if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
+                DesignBusinessOrder order = designBusinessOrders.get(0);
+                if (order.getOperationState() == 1) {
+                    isDesigner = true;
+                }
+            }
+        }
+        if (isDesigner || house.getDesignerOk() == 5 || house.getDesignerOk() == 2) {
             Task task = new Task();
             task.setDate(DateUtil.dateToString(house.getModifyDate(), "yyyy-MM-dd HH:mm"));
             task.setName(house.getDesignerOk() == 5 ? "平面图审核" : "施工图审核");
