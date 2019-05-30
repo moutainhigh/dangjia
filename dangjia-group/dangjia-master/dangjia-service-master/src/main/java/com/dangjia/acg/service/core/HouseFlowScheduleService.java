@@ -360,9 +360,10 @@ public class HouseFlowScheduleService {
                 Integer actualType=(Integer) actual.get("type");
                 if(actualType==3&&type==1){
                     type=4;
-                }
-                if(actualType==3&&type==3){
+                }else if(actualType==3&&type==3){
                     type=5;
+                }else{
+                    type=2;
                 }
             }
 
