@@ -1177,7 +1177,7 @@ public class HouseService {
     private Map<String, Object> getHouseConstructionRecordMap(HouseConstructionRecord hfa, String address) {
 
         // 0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，
-        // 4：每日开工,5巡查,6同意停工,7拒绝停工,
+        // 4：每日开工,5有效巡查,6无人巡查,7追加巡查,
         // 8补人工,9退人工,10补材料,11退材料,12业主退材料
         Map<Integer, String> applyTypeMap = DjConstants.RecordType.getRecordTypeMap();
 
@@ -1508,10 +1508,11 @@ public class HouseService {
                 houseConstructionRecord.setContent(houseFlowApply.getApplyDec());
                 houseConstructionRecord.setWorkerId(houseFlowApply.getWorkerId());
                 houseConstructionRecord.setWorkerType(houseFlowApply.getWorkerType());
-                if (houseFlowApply.getApplyType() == 6 || houseFlowApply.getApplyType() == 7) {
-                    houseConstructionRecord.setApplyType(5);
-                } else {
-                    houseConstructionRecord.setApplyType(houseFlowApply.getApplyType());
+                houseConstructionRecord.setApplyType(houseFlowApply.getApplyType());
+                if (houseFlowApply.getApplyType() == 5 || houseFlowApply.getApplyType() == 6 || houseFlowApply.getApplyType() == 7) {
+                    HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);//大管家的hf
+                    houseConstructionRecord.setWorkerId(supervisorHF.getWorkerId());
+                    houseConstructionRecord.setWorkerType(supervisorHF.getWorkerType());
                 }
                 houseConstructionRecord.setSourceType(0);
             }
