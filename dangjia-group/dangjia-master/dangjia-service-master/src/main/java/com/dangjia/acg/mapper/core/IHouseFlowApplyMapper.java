@@ -45,4 +45,8 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
     List<HouseFlowApply> queryHfaByHouseId(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId);
     /**查询工序记录*/
     List<HouseFlowApply> queryFlowRecord(@Param("houseFlowId")String houseFlowId);
+
+    /**查询排期申请记录*/
+    List<HouseFlowApply> getHouseScheduleFlowApply(@Param("houseId")String houseId,@Param("month")String month);
+
 }
