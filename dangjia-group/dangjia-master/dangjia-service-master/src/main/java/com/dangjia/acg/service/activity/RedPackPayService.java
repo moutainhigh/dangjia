@@ -11,9 +11,11 @@ import com.dangjia.acg.dto.activity.ActivityDTO;
 import com.dangjia.acg.dto.activity.ActivityRedPackDTO;
 import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
 import com.dangjia.acg.dto.activity.RedPageResult;
-import com.dangjia.acg.mapper.activity.*;
+import com.dangjia.acg.mapper.activity.IActivityMapper;
+import com.dangjia.acg.mapper.activity.IActivityRedPackMapper;
+import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
+import com.dangjia.acg.mapper.activity.IActivityRedPackRuleMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.modle.activity.Activity;
 import com.dangjia.acg.modle.activity.ActivityRedPack;
@@ -52,20 +54,15 @@ public class RedPackPayService {
     @Autowired
     private IActivityMapper activityMapper;
     @Autowired
-    private IActivityDiscountMapper activityDiscountMapper;
-    @Autowired
     private IActivityRedPackMapper activityRedPackMapper;
     @Autowired
     private IActivityRedPackRecordMapper activityRedPackRecordMapper;
     @Autowired
     private IActivityRedPackRuleMapper activityRedPackRuleMapper;
     @Autowired
-    private IMemberMapper memberMapper;
-    @Autowired
     private IBusinessOrderMapper businessOrderMapper;
     @Autowired
     private BudgetMaterialAPI budgetMaterialAPI;
-
     @Autowired
     private BudgetWorkerAPI budgetWorkerAPI;
     @Autowired
@@ -99,7 +96,7 @@ public class RedPackPayService {
                             redPackRuleIds.add(rule.getId());
                         }
                         //开始发送红包
-                        if(redPackRuleIds!=null&&redPackRuleIds.size()>0) {
+                        if(redPackRuleIds.size() > 0) {
                             redPackService.sendMemberPadPackBatch(phones, red.getId(), StringUtils.join(redPackRuleIds, ","));
                         }
                     }
