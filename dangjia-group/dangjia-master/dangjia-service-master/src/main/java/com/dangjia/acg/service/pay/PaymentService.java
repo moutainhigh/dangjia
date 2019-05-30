@@ -57,6 +57,7 @@ import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.deliver.ProductChangeService;
+import com.dangjia.acg.service.design.HouseDesignPayService;
 import com.dangjia.acg.service.member.GroupInfoService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
 import com.github.pagehelper.PageInfo;
@@ -149,9 +150,10 @@ public class PaymentService {
     private MendOrderCheckService mendOrderCheckService;
     @Autowired
     private ProductChangeService productChangeService;
-
     @Autowired
     private IProductChangeOrderMapper productChangeOrderMapper;
+    @Autowired
+    private HouseDesignPayService houseDesignPayService;
 
     /**
      * 服务器回调
@@ -199,6 +201,8 @@ public class PaymentService {
                 request.setAttribute(Constants.CITY_ID, house.getCityId());
                 //待付款 提前付材料
                 productChangeService.orderBackFun(request, businessOrder.getTaskId());
+            } else if (businessOrder.getType() == 7) {
+                houseDesignPayService.setPaySuccess(businessOrder);
             }
             HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
             houseExpend.setTolMoney(houseExpend.getTolMoney() + businessOrder.getTotalPrice().doubleValue());//总金额
@@ -280,8 +284,9 @@ public class PaymentService {
                 request.setAttribute(Constants.CITY_ID, house.getCityId());
                 //待付款 提前付材料
                 productChangeService.orderBackFun(request, businessOrder.getTaskId());
+            } else if (businessOrder.getType() == 7) {
+                houseDesignPayService.setPaySuccess(businessOrder);
             }
-
             HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
             houseExpend.setTolMoney(houseExpend.getTolMoney() + businessOrder.getTotalPrice().doubleValue());//总金额
             houseExpend.setPayMoney(houseExpend.getPayMoney() + businessOrder.getPayPrice().doubleValue());//总支付
