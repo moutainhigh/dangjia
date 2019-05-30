@@ -73,7 +73,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and
             worker_type > 2
         and
-            work_steta != 2
+            work_steta not in(1,2)
     </select>
 
     <!-- 查询当天是否抢单-->
