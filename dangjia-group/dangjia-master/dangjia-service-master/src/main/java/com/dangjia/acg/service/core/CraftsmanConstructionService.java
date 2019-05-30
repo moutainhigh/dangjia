@@ -548,22 +548,22 @@ public class CraftsmanConstructionService {
             example.orderBy(MenuConfiguration.SORT).asc();
             List<MenuConfiguration> menuConfigurations2 = iMenuConfigurationMapper.selectByExample(example);
             for (MenuConfiguration configuration : menuConfigurations2) {
-                int roleType;
+                int profession;
                 switch (bean.getWorkerType()) {//0:大管家；1：工匠；2：设计师；3：精算师
                     case 0:
-                        roleType = 2;//0:设计师；1：精算师；2：大管家；3：工匠
+                        profession = 2;//0:设计师；1：精算师；2：大管家；3：工匠
                         break;
                     case 1:
-                        roleType = 3;//0:设计师；1：精算师；2：大管家；3：工匠
+                        profession = 3;//0:设计师；1：精算师；2：大管家；3：工匠
                         break;
                     case 2:
-                        roleType = 0;//0:设计师；1：精算师；2：大管家；3：工匠
+                        profession = 0;//0:设计师；1：精算师；2：大管家；3：工匠
                         break;
                     default:
-                        roleType = 1;//0:设计师；1：精算师；2：大管家；3：工匠
+                        profession = 1;//0:设计师；1：精算师；2：大管家；3：工匠
                         break;
                 }
-                configuration.initPath(imageAddress, webAddress, house.getId(), hf.getId(), roleType);
+                configuration.initPath(imageAddress, webAddress, house.getId(), hf.getId(), profession);
                 ConstructionByWorkerIdBean.BigListBean.ListMapBean mapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
                 mapBean.setName(configuration.getName());
                 mapBean.setUrl(configuration.getUrl());
