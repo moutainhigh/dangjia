@@ -149,9 +149,9 @@ public class DjConstants {
         public final static Integer ZHENGTI_WANGONG = 2;// 2整体完工申请
         public final static Integer TINGGONG = 3;// 3停工申请
         public final static Integer MEIRI_KAIGONG = 4;// 4：每日开工
-        public final static Integer YOUXIAO_XUNCHA = 5;// 5有效巡查
-        public final static Integer JJ_TINGGONG = 6;// 6同意停工
-        public final static Integer TY_TINGGONG = 7;// 7拒绝停工
+        public final static Integer YOUXIAO_XUNCHA = 5;// 有效巡查
+        public final static Integer JJ_TINGGONG = 6;// 无人巡查
+        public final static Integer TY_TINGGONG = 7;// 追加巡查
         public final static Integer BURENGONG = 8;// 8补人工
         public final static Integer TUIRENGONG = 9;// 9退人工
         public final static Integer BUCAILIAO = 10;// 10补材料
@@ -165,9 +165,9 @@ public class DjConstants {
             applyTypeMap.put(DjConstants.RecordType.ZHENGTI_WANGONG, "整体完工申请");
             applyTypeMap.put(DjConstants.RecordType.TINGGONG, "停工申请");
             applyTypeMap.put(DjConstants.RecordType.MEIRI_KAIGONG, "每日开工");
-            applyTypeMap.put(DjConstants.RecordType.YOUXIAO_XUNCHA, "巡查");
-            applyTypeMap.put(DjConstants.RecordType.JJ_TINGGONG, "同意停工");
-            applyTypeMap.put(DjConstants.RecordType.TY_TINGGONG, "拒绝停工");
+            applyTypeMap.put(DjConstants.RecordType.YOUXIAO_XUNCHA, "有效巡查");
+            applyTypeMap.put(DjConstants.RecordType.JJ_TINGGONG, "无人巡查");
+            applyTypeMap.put(DjConstants.RecordType.TY_TINGGONG, "追加巡查");
             applyTypeMap.put(DjConstants.RecordType.BURENGONG, "补人工");
             applyTypeMap.put(DjConstants.RecordType.TUIRENGONG, "退人工");
             applyTypeMap.put(DjConstants.RecordType.BUCAILIAO, "补材料");
