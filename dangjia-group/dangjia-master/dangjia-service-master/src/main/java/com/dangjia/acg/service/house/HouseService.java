@@ -327,7 +327,9 @@ public class HouseService {
             houseResult.setBuildStage("休眠中");
         } else if (visitState == 3) {
             houseResult.setBuildStage("已竣工");
-        } else {
+        } else if (visitState == 5){
+            houseResult.setBuildStage("提前结束装修审核中");
+        }else {
             houseResult.setBuildStage("提前结束装修");
         }
         /*展示各种进度*/
