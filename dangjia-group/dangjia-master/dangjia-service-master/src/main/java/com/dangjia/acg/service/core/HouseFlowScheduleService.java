@@ -14,11 +14,9 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
-import com.dangjia.acg.modle.core.HouseFlowApplyImage;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.repair.ChangeOrder;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -164,13 +162,9 @@ public class HouseFlowScheduleService {
         List<String> list=DateUtil.dayReportAll(year,modth);
         List<HouseFlowDTO> houseFlowList=houseFlowMapper.getHouseScheduleFlow(houseId);
 
-        Example example=new Example(HouseFlowApply.class);
-        example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID,houseId)
-                .andEqualTo(HouseFlowApply.MEMBER_CHECK,1)
-                .andCondition(" (apply_type = 0 or apply_type = 1 or apply_type = 2 or apply_type = 3 or  apply_type = 4) ");
-        List<HouseFlowApply>  houseFlowApplies=houseFlowApplyMapper.selectByExample(example);
+        List<HouseFlowApply>  houseFlowApplies=houseFlowApplyMapper.getHouseScheduleFlowApply(houseId,DateUtil.dateToString(day,DateUtil.FORMAT2));
 
-        example=new Example(ChangeOrder.class);
+        Example example=new Example(ChangeOrder.class);
         example.createCriteria().andEqualTo(ChangeOrder.HOUSE_ID,houseId)
                 .andCondition("  (state = 4 or  state = 6) ");
         List<ChangeOrder>  changeOrders=changeOrderMapper.selectByExample(example);
@@ -247,26 +241,13 @@ public class HouseFlowScheduleService {
                 if(!houseFlowApply.getHouseFlowId().equals(houseFlow.getId())){
                     continue;
                 }
-                String jieDian="";
-                if(houseFlowApply.getApplyType()<=2){
-                    Example example = new Example(HouseFlowApplyImage.class);
-                    example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApply.getId());
-                    List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
-                    List<String> imageName = new ArrayList<String>();
-                    for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList){
-                        if(houseFlowApplyImage.getImageType()>1) {
-                            imageName.add(houseFlowApplyImage.getImageTypeName());
-                        }
-                    }
-                    jieDian= StringUtils.join(imageName,",");
-                }
                 String sc = DateUtil.dateToString(houseFlowApply.getCreateDate(), null);
                 if(o.equals(sc)){
                     //0每日完工申请
                     if(houseFlowApply.getApplyType()==0){
                         Map map =new HashMap<>();
                         map.put("date",DateUtil.dateToString(houseFlowApply.getCreateDate(),DateUtil.FORMAT2));
-                        map.put("info",houseFlow.getWorkerTypeName()+"今日完工，完成节点:"+jieDian);
+                        map.put("info",houseFlow.getWorkerTypeName()+"今日完工，完成节点:"+houseFlowApply.getApplyDec());
                         map.put("type",1);
                         actuals.add(map);
                     }
@@ -274,7 +255,7 @@ public class HouseFlowScheduleService {
                     if(houseFlowApply.getApplyType()==1){
                         Map map =new HashMap<>();
                         map.put("date",DateUtil.dateToString(houseFlowApply.getCreateDate(),DateUtil.FORMAT2));
-                        map.put("info",houseFlow.getWorkerTypeName()+"已阶段完工，完成节点:"+jieDian);
+                        map.put("info",houseFlow.getWorkerTypeName()+"已阶段完工，完成节点:"+houseFlowApply.getApplyDec());
                         map.put("type",2);
                         actuals.add(map);
                     }
@@ -282,7 +263,7 @@ public class HouseFlowScheduleService {
                     if(houseFlowApply.getApplyType()==2){
                         Map map =new HashMap<>();
                         map.put("date",DateUtil.dateToString(houseFlowApply.getCreateDate(),DateUtil.FORMAT2));
-                        map.put("info",houseFlow.getWorkerTypeName()+"已整体完工，完成节点:"+jieDian);
+                        map.put("info",houseFlow.getWorkerTypeName()+"已整体完工，完成节点:"+houseFlowApply.getApplyDec());
                         map.put("type",2);
                         actuals.add(map);
                     }
@@ -360,9 +341,10 @@ public class HouseFlowScheduleService {
                 Integer actualType=(Integer) actual.get("type");
                 if(actualType==3&&type==1){
                     type=4;
-                }
-                if(actualType==3&&type==3){
+                }else if(actualType==3&&type==3){
                     type=5;
+                }else{
+                    type=2;
                 }
             }
 
