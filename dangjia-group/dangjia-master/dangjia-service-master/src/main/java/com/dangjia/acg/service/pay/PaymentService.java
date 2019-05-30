@@ -95,10 +95,6 @@ public class PaymentService {
     private IHouseMapper houseMapper;
     @Autowired
     private IHouseStyleTypeMapper houseStyleTypeMapper;
-    //    @Autowired
-//    private IHouseDesignImageMapper houseDesignImageMapper;
-//    @Autowired
-//    private IDesignImageTypeMapper designImageTypeMapper;
     @Autowired
     private IWorkerTypeSafeMapper workerTypeSafeMapper;
     @Autowired
@@ -164,7 +160,6 @@ public class PaymentService {
     public ServerResponse setServersSuccess(String payOrderId) {
         try {
             PayOrder payOrder = payOrderMapper.selectByPrimaryKey(payOrderId);
-
             if (payOrder.getState() == 2) {
                 return ServerResponse.createBySuccessMessage("支付成功");
             }
@@ -205,7 +200,6 @@ public class PaymentService {
                 //待付款 提前付材料
                 productChangeService.orderBackFun(request, businessOrder.getTaskId());
             }
-
             HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
             houseExpend.setTolMoney(houseExpend.getTolMoney() + businessOrder.getTotalPrice().doubleValue());//总金额
             houseExpend.setPayMoney(houseExpend.getPayMoney() + businessOrder.getPayPrice().doubleValue());//总支付
@@ -215,7 +209,6 @@ public class PaymentService {
             List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
             houseExpend.setMaterialKind(warehouseList.size());//材料种类
             houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
-
             return ServerResponse.createBySuccessMessage("支付成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -233,8 +226,7 @@ public class PaymentService {
         if (accessToken == null) {//无效的token
             return ServerResponse.createbyUserTokenError();
         }
-        Map<String, Object> returnMap = new HashMap<String, Object>();
-
+        Map<String, Object> returnMap = new HashMap<>();
         try {
             Example examplePayOrder = new Example(PayOrder.class);
             examplePayOrder.createCriteria().andEqualTo(PayOrder.BUSINESS_ORDER_NUMBER, businessOrderNumber);
@@ -249,7 +241,6 @@ public class PaymentService {
                 returnMap.put("price", payOrder.getPrice());
                 return ServerResponse.createBySuccess("支付成功", returnMap);
             }
-
             Example example = new Example(BusinessOrder.class);
             example.createCriteria().andEqualTo(BusinessOrder.NUMBER, businessOrderNumber);
             List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
@@ -278,7 +269,6 @@ public class PaymentService {
                 houseDistribution.setNumber(businessOrderNumber);//业务订单号
                 houseDistribution.setState(1);//已支付
                 iHouseDistributionMapper.updateByPrimaryKeySelective(houseDistribution);
-
                 returnMap.put("name", "当家装修担保平台");
                 returnMap.put("businessOrderNumber", businessOrderNumber);
                 returnMap.put("price", houseDistribution.getPrice());
@@ -301,7 +291,6 @@ public class PaymentService {
             List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
             houseExpend.setMaterialKind(warehouseList.size());//材料种类
             houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
-
             returnMap.put("name", "当家装修担保平台");
             returnMap.put("businessOrderNumber", businessOrderNumber);
             returnMap.put("price", businessOrder.getPayPrice());
@@ -380,7 +369,6 @@ public class PaymentService {
                     orderItem.setCategoryId(mendMateriel.getCategoryId());
                     orderItem.setImage(mendMateriel.getImage());
                     orderItemMapper.insert(orderItem);
-
                     example = new Example(Warehouse.class);
                     example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, businessOrder.getHouseId()).andEqualTo(Warehouse.PRODUCT_ID, mendMateriel.getProductId());
                     int sum = warehouseMapper.selectCountByExample(example);
@@ -423,14 +411,11 @@ public class PaymentService {
             } else if (mendOrder.getType() == 1) {//补人工
                 houseExpend.setWorkerMoney(houseExpend.getWorkerMoney() + businessOrder.getTotalPrice().doubleValue());//人工
                 houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
-
                 mendOrder.setState(4);//业主已支付补人工
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
                 changeOrder.setState(4);//已支付
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
-
                 HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(mendOrder.getHouseId(), mendOrder.getWorkerTypeId());
                 HouseWorkerOrder houseWorkerOrdernew = new HouseWorkerOrder();
                 houseWorkerOrdernew.setId(houseWorkerOrder.getId());
@@ -444,16 +429,13 @@ public class PaymentService {
                 BigDecimal repairTotalPrice = houseWorkerOrdernew.getRepairTotalPrice().add(houseWorkerOrdernew.getRepairPrice());
                 houseWorkerOrdernew.setRepairTotalPrice(repairTotalPrice);
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(houseWorkerOrdernew);
-
                 Example example = new Example(MendWorker.class);
                 example.createCriteria().andEqualTo(MendWorker.MEND_ORDER_ID, mendOrder.getId());
                 List<MendWorker> mendWorkerList = mendWorkerMapper.selectByExample(example);
-
                 Order order = new Order();
                 order.setHouseId(businessOrder.getHouseId());
                 order.setBusinessOrderNumber(businessOrder.getNumber());//业务订单号
                 order.setTotalAmount(businessOrder.getTotalPrice());// 订单总额(补人工总钱)
-
                 example = new Example(MendOrder.class);
                 example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, businessOrder.getHouseId()).andEqualTo(MendOrder.TYPE, 1)
                         .andEqualTo(MendOrder.STATE, 4);
@@ -462,7 +444,6 @@ public class PaymentService {
                 order.setPayment(payState);// 支付方式
                 order.setType(1);//人工
                 orderMapper.insert(order);
-
                 for (MendWorker mendWorker : mendWorkerList) {
                     OrderItem orderItem = new OrderItem();
                     orderItem.setOrderId(order.getId());
@@ -782,7 +763,7 @@ public class PaymentService {
                 orderItem.setProductNickName(budgetMaterial.getProductNickName());//货品昵称
                 orderItem.setPrice(budgetMaterial.getPrice());//销售价
                 orderItem.setCost(budgetMaterial.getCost());//成本价
-                orderItem.setShopCount(budgetMaterial.getConvertCount().doubleValue());//购买总数
+                orderItem.setShopCount(budgetMaterial.getConvertCount());//购买总数
                 orderItem.setUnitName(budgetMaterial.getUnitName());//单位
                 orderItem.setTotalPrice(budgetMaterial.getTotalPrice());//总价
                 orderItem.setProductType(budgetMaterial.getProductType());//0：材料；1：服务
@@ -809,13 +790,13 @@ public class PaymentService {
                 } else {//增加一条
                     Warehouse warehouse = new Warehouse();
                     warehouse.setHouseId(houseId);
-                    warehouse.setShopCount(budgetMaterial.getConvertCount().doubleValue());
+                    warehouse.setShopCount(budgetMaterial.getConvertCount());
                     if (type == 1) {
-                        warehouse.setRobCount(budgetMaterial.getConvertCount().doubleValue());//抢单任务进来总数
+                        warehouse.setRobCount(budgetMaterial.getConvertCount());//抢单任务进来总数
                         warehouse.setStayCount(0.0);
                     } else {
                         warehouse.setRobCount(0.0);
-                        warehouse.setStayCount(budgetMaterial.getConvertCount().doubleValue());
+                        warehouse.setStayCount(budgetMaterial.getConvertCount());
                     }
                     warehouse.setRepairCount(0.0);
                     warehouse.setAskCount(0.0);//已要数量

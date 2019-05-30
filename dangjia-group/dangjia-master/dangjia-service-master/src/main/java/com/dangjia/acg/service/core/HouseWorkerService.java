@@ -406,7 +406,7 @@ public class HouseWorkerService {
                 }
             }
         }
-        if (applyType == 5) {   //大管家有人巡查放工序id 其它巡查放管家自己工序id
+        if (applyType == 5 || applyType == 6 ||applyType == 7) {   //大管家巡查放工序id
             HouseFlow hf2 = houseFlowMapper.selectByPrimaryKey(houseFlowId2);
             return this.setHouseFlowApply(applyType, houseFlowId2, hf2.getWorkerId(), suspendDay, applyDec,
                     imageList);
@@ -619,7 +619,7 @@ public class HouseWorkerService {
                 houseService.insertConstructionRecord(hfa);
                 return ServerResponse.createBySuccessMessage("操作成功");
             } else if (applyType == 5) {//有人巡
-                hfa.setApplyDec("业主您好,我是" + workerType.getName() + ",大管家已经巡查了");//描述
+                hfa.setApplyDec("业主您好，我已巡查了" + workerType.getName() + "，工地在正常施工，现场情况如下");//描述
                 //描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
@@ -683,13 +683,13 @@ public class HouseWorkerService {
                 }
 
             } else if (applyType == 6) {//无人巡查
-                hfa.setApplyDec("业主您好，我是您的大管家，我已经巡查了工地，现场情况如下");//描述
+                hfa.setApplyDec("业主您好，我已巡查了" + workerType.getName() + "工地暂时无人，现场情况如下");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
             } else if (applyType == 7) {//追加巡查
-                hfa.setApplyDec("业主您好，我是您的大管家，我已经巡查了工地，现场情况如下");//描述
+                hfa.setApplyDec("业主您好，我已追加巡查" + workerType.getName() + "的工地，现场情况如下");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 houseFlowApplyMapper.insert(hfa);

@@ -357,9 +357,12 @@ public interface HouseDesignImageAPI {
      * @description 获取设计图
      * @method POST
      * @url app/design/getDesign
-     * @return_param verification int 0：不显示审核按钮，1：显示审核按钮
+     * @return_param message String 头部提示信息
      * @return_param historyRecord int 是否暂时历史记录0：不显示,1：显示
-     * @return_param button string 确认平面图
+     * @return_param buttonList List 按钮
+     * @return_param buttonList-buttonType int 0：跳转URL，1：需要修改设计，2：确认，3：申请额外修改设计，4：申请后需要修改设计，5：申请后确认
+     * @return_param buttonList-buttonTypeName string 显示名称
+     * @return_param buttonList-url string buttonType==0是的跳转路由
      * @return_param data List 图片集合
      * @return_param data-id string id
      * @return_param data-modifyDate string 修改时间

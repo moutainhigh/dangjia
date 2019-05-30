@@ -30,7 +30,7 @@ public class HouseFlowDTO extends BaseEntity {
     private Integer workerType;//workertype
 
     @ApiModelProperty("工种类型名称")
-    private Integer workerTypeName;//workertype
+    private String workerTypeName;
 
 	@ApiModelProperty("抢单的工人Id")
 	private String workerId;//workerid
