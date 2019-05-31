@@ -484,10 +484,13 @@
         house.visit_state AS visitState,
         member.nick_name AS nickName,
         member.NAME AS NAME,
-        member.mobile AS mobile
+        member.mobile AS mobile,
+        house.create_date AS createDate,
+        f.modify_date AS modifyDate
         FROM
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
+        LEFT JOIN dj_core_house_flow_apply f ON f.house_id=house.id and f.`apply_type` = '2' AND f.`worker_type` = '3'
         WHERE 1=1
         <if test="visitState!=null and visitState!=''">
             AND house.visit_state=#{visitState}
