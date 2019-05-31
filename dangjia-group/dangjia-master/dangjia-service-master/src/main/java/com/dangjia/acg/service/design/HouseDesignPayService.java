@@ -172,7 +172,7 @@ public class HouseDesignPayService {
             businessOrder.setTaskId(order.getId());//保存任务ID
             businessOrderMapper.insert(businessOrder);
         }
-        designPayDTO.setBusinessOrderNumber(businessOrder.getId());
+        designPayDTO.setBusinessOrderNumber(businessOrder.getNumber());
         //编辑返回报文
         switch (order.getType()) {
             case 1:
