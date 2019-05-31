@@ -784,7 +784,7 @@ public class EngineerService {
             criteria.andEqualTo(WorkerDisclosure.STATE, state);
         }
         criteria.andEqualTo(WorkerDisclosure.TYPE, type);
-        if (CommonUtil.isEmpty(search)) {
+        if (!CommonUtil.isEmpty(search)) {
             criteria.andLike(WorkerDisclosure.NAME, "%" + search + "%");
         }
         example.orderBy(WorkerDisclosure.MODIFY_DATE).desc();
@@ -813,13 +813,13 @@ public class EngineerService {
     public ServerResponse addSure(String name, String details, String img, Integer state, Integer type) {
         try {
             WorkerDisclosure workerDisclosure = new WorkerDisclosure();
-            if (CommonUtil.isEmpty(name)) {
+            if (!CommonUtil.isEmpty(name)) {
                 workerDisclosure.setName(name);
             }
-            if (CommonUtil.isEmpty(details)) {
+            if (!CommonUtil.isEmpty(details)) {
                 workerDisclosure.setDetails(details);
             }
-            if (CommonUtil.isEmpty(img)) {
+            if (!CommonUtil.isEmpty(img)) {
                 workerDisclosure.setImg(img);
             }
             if (state != null) {
