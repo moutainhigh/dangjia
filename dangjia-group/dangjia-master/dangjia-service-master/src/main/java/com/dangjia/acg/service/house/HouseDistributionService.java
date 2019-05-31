@@ -73,6 +73,7 @@ public class HouseDistributionService {
         houseDistribution.setPhone(accessToken.getMember().getMobile());
         houseDistribution.setCity(iCityMapper.selectByPrimaryKey(cityId).getName());
         houseDistribution.setPrice(DjConstants.distribution.PRICE.doubleValue());
+        houseDistribution.setOpenid(accessToken.getMemberId());
         houseDistribution.setSex("0");
         houseDistribution.setState(0);
         houseDistribution.setType(1);
