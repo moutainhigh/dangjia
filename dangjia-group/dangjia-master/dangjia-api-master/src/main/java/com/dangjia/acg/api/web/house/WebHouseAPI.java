@@ -72,4 +72,10 @@ public interface WebHouseAPI {
                                     @RequestParam("workerTypeId") String workerTypeId,
                                     @RequestParam("workId") String workId,
                                     @RequestParam("pageDTO") PageDTO pageDTO);
+
+    @PostMapping("web/house/getHouseProfitList")
+    @ApiOperation(value = "房子装修列表（利润统计）", notes = "房子装修列表（利润统计）")
+    ServerResponse getHouseProfitList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                      @RequestParam("visitState") String visitState,
+                                      @RequestParam("searchKey") String searchKey);
 }
