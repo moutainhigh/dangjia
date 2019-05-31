@@ -786,7 +786,7 @@ public class EngineerService {
             criteria.andEqualTo(WorkerDisclosure.STATE, state);
         }
         criteria.andEqualTo(WorkerDisclosure.TYPE, type);
-        if (CommonUtil.isEmpty(search)) {
+        if (!CommonUtil.isEmpty(search)) {
             criteria.andLike(WorkerDisclosure.NAME, "%" + search + "%");
         }
         example.orderBy(WorkerDisclosure.MODIFY_DATE).desc();
@@ -812,23 +812,9 @@ public class EngineerService {
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
-    public ServerResponse addSure(String name, String details, String img, Integer state, Integer type) {
+    public ServerResponse addSure(WorkerDisclosure workerDisclosure) {
         try {
-            WorkerDisclosure workerDisclosure = new WorkerDisclosure();
-            if (CommonUtil.isEmpty(name)) {
-                workerDisclosure.setName(name);
-            }
-            if (CommonUtil.isEmpty(details)) {
-                workerDisclosure.setDetails(details);
-            }
-            if (CommonUtil.isEmpty(img)) {
-                workerDisclosure.setImg(img);
-            }
-            if (state != null) {
-                workerDisclosure.setState(state);
-            }
-            workerDisclosure.setType(type);
-            iWorkerDisclosureMapper.insert(workerDisclosure);
+            iWorkerDisclosureMapper.insertSelective(workerDisclosure);
             return ServerResponse.createBySuccessMessage("添加成功");
         } catch (Exception e) {
             e.printStackTrace();
