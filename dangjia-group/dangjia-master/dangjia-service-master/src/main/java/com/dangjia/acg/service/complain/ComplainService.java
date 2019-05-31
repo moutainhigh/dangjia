@@ -44,6 +44,7 @@ import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseWorkerSupService;
 import com.dangjia.acg.service.deliver.SplitDeliverService;
 import com.github.pagehelper.PageHelper;
@@ -99,6 +100,9 @@ public class ComplainService {
     private HouseWorkerSupService houseWorkerSupService;
     @Autowired
     private IHouseWorkerOrderMapper iHouseWorkerOrderMapper;
+
+    @Autowired
+    private CraftsmanConstructionService constructionService;
     /**
      * 添加申诉
      *
@@ -583,20 +587,28 @@ public class ComplainService {
         return serverResponse;
     }
 
-    public ServerResponse userStop(String houseId, String memberId,String content){
+    public ServerResponse userStop(String houseId, String userToken,String content){
         try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            if (!member.getId().equals(house.getMemberId())) {
+                return ServerResponse.createByErrorMessage("您无权操作此房产");
+            }
             Complain complain = new Complain();
             complain.setHouseId(houseId);
-            complain.setMemberId(memberId);
+            complain.setMemberId(member.getId());
             complain.setComplainType(5);
             complain.setContent(content);
             complain.setStatus(0);
-            Member member = memberMapper.selectByPrimaryKey(memberId);
+//            Member member = memberMapper.selectByPrimaryKey(memberId);
             complain.setUserNickName(member.getNickName());
             complain.setUserName(member.getName());
             complain.setUserMobile(member.getMobile());
             complainMapper.insert(complain);
-            House house = houseMapper.selectByPrimaryKey(houseId);
             house.setVisitState(5);
             house.setModifyDate(new Date());
             houseMapper.updateByPrimaryKeySelective(house);

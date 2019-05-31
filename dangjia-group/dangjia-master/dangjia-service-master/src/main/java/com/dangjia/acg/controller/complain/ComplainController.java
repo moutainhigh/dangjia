@@ -49,8 +49,8 @@ public class ComplainController implements ComplainAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse userStop(String houseId, String memberId,String content) {
-        return complainService.userStop(houseId,memberId,content);
+    public ServerResponse userStop(String houseId, String userToken,String content) {
+        return complainService.userStop(houseId,userToken,content);
     }
 
     @Override
