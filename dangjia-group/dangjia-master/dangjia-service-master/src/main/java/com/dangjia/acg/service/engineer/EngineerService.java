@@ -537,7 +537,7 @@ public class EngineerService {
                 map.put("supMobile", supervisor.getMobile());
             }
             map.put("createDate", houseFlow.getCreateDate());
-            map.put("workSteta", houseFlow.getWorkSteta()); //施工状态，0未开始 ，1阶段完工通过，2整体完工通过，3待交底，4施工中
+            map.put("workSteta",house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
             mapList.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", mapList);
