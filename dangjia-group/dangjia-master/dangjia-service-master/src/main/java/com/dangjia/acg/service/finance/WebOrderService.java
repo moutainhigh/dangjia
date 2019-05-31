@@ -96,6 +96,9 @@ public class WebOrderService {
                     // 换货单
                     if (webOrderDTO.getType() == 6) {
                         webOrderDTO.setTypeText("换货补差价");
+                    } // 换货单
+                    if (webOrderDTO.getType() == 7) {
+                        webOrderDTO.setTypeText("设计/精算改图");
                     }
                 }
                 ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(webOrderDTO.getOrderId());

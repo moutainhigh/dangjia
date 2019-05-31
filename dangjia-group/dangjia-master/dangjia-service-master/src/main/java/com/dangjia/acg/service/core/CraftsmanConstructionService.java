@@ -194,8 +194,10 @@ public class CraftsmanConstructionService {
         Map<String, Object> dataMap = HouseUtil.getBudgetDatas(house);
         bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         List<ButtonListBean> buttonList = new ArrayList<>();
-        if (house.getBudgetOk() == 1 && house.getDecorationType() == 2) {
-            if (house.getDesignerOk() == 3) {
+        if (house.getDecorationType() == 2) {
+            if (house.getBudgetOk() == 1) {
+                buttonList.add(Utils.getButton("上传设计图", 4));
+            } else if (house.getDesignerOk() == 3) {
                 //3设计图完成后有需要改设计的
                 Example example = new Example(DesignBusinessOrder.class);
                 Example.Criteria criteria = example.createCriteria()
@@ -211,8 +213,6 @@ public class CraftsmanConstructionService {
                         buttonList.add(Utils.getButton("上传设计图", 4));
                     }
                 }
-            } else {
-                buttonList.add(Utils.getButton("上传设计图", 4));
             }
         }
         bean.setButtonList(buttonList);

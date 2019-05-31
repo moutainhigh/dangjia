@@ -384,7 +384,6 @@ public class HouseDesignPayService {
         if (!worker.getId().equals(house.getMemberId())) {
             return ServerResponse.createByErrorMessage("您无权操作此房产");
         }
-
         Example examples = new Example(HouseFlow.class);
         examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.WORKER_TYPE, "1");
         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(examples);
