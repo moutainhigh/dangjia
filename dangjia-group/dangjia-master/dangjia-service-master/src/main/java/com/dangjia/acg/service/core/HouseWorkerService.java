@@ -438,7 +438,7 @@ public class HouseWorkerService {
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(houseFlowId, 4, workerId, new Date());
                 if (houseFlowApplyList.size()>0){
                     HouseFlowApply houseFlowApply=houseFlowApplyList.get(0);
-                    if(new Date().getTime()>=DateUtil.addDateHours(houseFlowApply.getCreateDate(),3).getTime()){
+                    if(new Date().getTime() < DateUtil.addDateHours(houseFlowApply.getCreateDate(),3).getTime()){
                         return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）开工后3小时才能申请完工！");
                     }
                 }else{

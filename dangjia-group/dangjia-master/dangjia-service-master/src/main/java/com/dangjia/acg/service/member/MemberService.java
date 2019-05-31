@@ -294,7 +294,10 @@ public class MemberService {
             user.setIsCrowned(0);
             user.setHead("qrcode/logo.png");
             memberMapper.insertSelective(user);
-            clueService.sendUser(user, user.getMobile());
+//            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
+            if(userRole==1) {
+                clueService.sendUser(user, user.getMobile());
+            }
             updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             AccessToken accessToken = TokenUtil.generateAccessToken(user);
@@ -306,13 +309,14 @@ public class MemberService {
             }
             redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
             redisClient.deleteCache(Constants.SMS_CODE + phone);
-
-            try {
-                //检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
-                redPackPayService.checkUpActivity(request, user.getMobile(), "1");
-                configMessageService.addConfigMessage(request, "zx", user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
-            } catch (Exception e) {
-                logger.error("注册送优惠券活动异常-zhuce：原因：" + e.getMessage(), e);
+            if(userRole==1) {
+                try {
+                    //检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
+                    redPackPayService.checkUpActivity(request, user.getMobile(), "1");
+                    configMessageService.addConfigMessage(request, "zx", user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
+                } catch (Exception e) {
+                    logger.error("注册送优惠券活动异常-zhuce：原因：" + e.getMessage(), e);
+                }
             }
             return ServerResponse.createBySuccess("注册成功", accessToken);
         }

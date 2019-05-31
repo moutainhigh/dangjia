@@ -166,9 +166,15 @@ public class ClueService {
                 Example example=new Example(UserRoleKey.class);
                 example.createCriteria().andEqualTo(UserRoleKey.USER_ID,userId);
                 List<UserRoleKey> userRoleKeys = userRoleMapper.selectByExample(example);
-                if("668854901553829215229".equals(userRoleKeys.get(0).getRoleId())){
-                    clue.setCusService(cusService);
-                }else {
+                boolean flage=false;
+                for(UserRoleKey u:userRoleKeys) {
+                    if ("668854901553829215229".equals(u.getRoleId())) {
+                        clue.setCusService(cusService);
+                        flage=true;
+                        break;
+                    }
+                }
+                if(!flage){
                     return ServerResponse.createByErrorMessage("您暂无权限变更");
                 }
             }
@@ -202,6 +208,7 @@ public class ClueService {
             for (Clue c : clueList) {
                 if (Validator.isMobileNo(c.getPhone())) {
                     c.setCusService(userId);
+                    c.setStage(0);
                     Clue clue1 = clueMapper.getByPhone(c.getPhone());
                     Member member = iMemberMapper.getByPhone(c.getPhone());
                     //表示从来没有过线索和注册过

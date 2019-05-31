@@ -302,10 +302,10 @@ public class HouseDesignPayService {
         designBusinessOrderMapper.updateByPrimaryKeySelective(designBusinessOrder);
         if (designBusinessOrder.getType() == 3) {
             HouseWorkerOrder hwo2 = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(house.getId(), "2");
-            setMoney(hwo2, house, designBusinessOrder, "精算费");
+            setMoney(hwo2, house, designBusinessOrder, "改精算费");
         } else {
             HouseWorkerOrder hwo2 = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(house.getId(), "1");
-            setMoney(hwo2, house, designBusinessOrder, "设计费");
+            setMoney(hwo2, house, designBusinessOrder, "改设计费");
         }
     }
 
@@ -384,7 +384,6 @@ public class HouseDesignPayService {
         if (!worker.getId().equals(house.getMemberId())) {
             return ServerResponse.createByErrorMessage("您无权操作此房产");
         }
-
         Example examples = new Example(HouseFlow.class);
         examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.WORKER_TYPE, "1");
         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(examples);

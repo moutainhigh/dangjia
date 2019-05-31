@@ -192,18 +192,24 @@ public class HouseService {
             map.put("houseName", house.getHouseName());
             map.put("task", this.getTask(house.getId()) + "");
             if (type) {
-                if (house.getVisitState() == 4) {
-                    map.put("btName", "提前结束装修");
-                    map.put("onclick", "0");//不可点击
-                } else if (house.getVisitState() == 5) {
-                    map.put("btName", "审核中");
-                    map.put("onclick", "0");
-                } else if (house.getVisitState() == 3) {
-                    map.put("btName", "已竣工");
-                    map.put("onclick", "0");
-                } else {
-                    map.put("btName", "申请结束装修");
-                    map.put("onclick", "1");
+                String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
+                switch (house.getVisitState()){
+                    case 1:
+                        map.put("btName", "申请结束装修");
+                        map.put("onclick", webAddress + "ownerEnd?title=填写原因&houseId=" + house.getId());
+                        break;
+                    case 2:
+                        map.put("btName", "休眠中");
+                        break;
+                    case 3:
+                        map.put("btName", "已竣工");
+                        break;
+                    case 4:
+                        map.put("btName", "提前结束装修");
+                        break;
+                    case 5:
+                        map.put("btName", "审核中");
+                        break;
                 }
             }
             mapList.add(map);

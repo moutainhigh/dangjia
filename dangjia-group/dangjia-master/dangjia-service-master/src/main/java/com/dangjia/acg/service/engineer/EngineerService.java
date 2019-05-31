@@ -537,7 +537,7 @@ public class EngineerService {
                 map.put("supMobile", supervisor.getMobile());
             }
             map.put("createDate", houseFlow.getCreateDate());
-            map.put("workSteta", houseFlow.getWorkSteta()); //施工状态，0未开始 ，1阶段完工通过，2整体完工通过，3待交底，4施工中
+            map.put("workSteta",house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
             mapList.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", mapList);
@@ -793,7 +793,7 @@ public class EngineerService {
             criteria.andEqualTo(WorkerDisclosure.STATE, state);
         }
         criteria.andEqualTo(WorkerDisclosure.TYPE, type);
-        if (CommonUtil.isEmpty(search)) {
+        if (!CommonUtil.isEmpty(search)) {
             criteria.andLike(WorkerDisclosure.NAME, "%" + search + "%");
         }
         example.orderBy(WorkerDisclosure.MODIFY_DATE).desc();
@@ -819,23 +819,9 @@ public class EngineerService {
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
-    public ServerResponse addSure(String name, String details, String img, Integer state, Integer type) {
+    public ServerResponse addSure(WorkerDisclosure workerDisclosure) {
         try {
-            WorkerDisclosure workerDisclosure = new WorkerDisclosure();
-            if (CommonUtil.isEmpty(name)) {
-                workerDisclosure.setName(name);
-            }
-            if (CommonUtil.isEmpty(details)) {
-                workerDisclosure.setDetails(details);
-            }
-            if (CommonUtil.isEmpty(img)) {
-                workerDisclosure.setImg(img);
-            }
-            if (state != null) {
-                workerDisclosure.setState(state);
-            }
-            workerDisclosure.setType(type);
-            iWorkerDisclosureMapper.insert(workerDisclosure);
+            iWorkerDisclosureMapper.insertSelective(workerDisclosure);
             return ServerResponse.createBySuccessMessage("添加成功");
         } catch (Exception e) {
             e.printStackTrace();
