@@ -11,11 +11,13 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.ButtonListBean;
 import com.dangjia.acg.dto.core.ConstructionByWorkerIdBean;
 import com.dangjia.acg.mapper.core.*;
+import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.IWorkerEverydayMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.modle.core.*;
+import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -65,6 +67,8 @@ public class CraftsmanConstructionService {
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private IWorkerEverydayMapper workerEverydayMapper;
+    @Autowired
+    private IDesignBusinessOrderMapper designBusinessOrderMapper;
 
     /**
      * 获取施工页面
@@ -146,6 +150,26 @@ public class CraftsmanConstructionService {
                 case 8://8施工图片审核不通过（NG，可编辑施工图）
                     buttonList.add(Utils.getButton("修改施工图", 4));
                     break;
+                case 3://3设计图完成后有需要改设计的
+                    Example example = new Example(DesignBusinessOrder.class);
+                    Example.Criteria criteria = example.createCriteria()
+                            .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
+                            .andEqualTo(DesignBusinessOrder.HOUSE_ID, house.getId())
+                            .andEqualTo(DesignBusinessOrder.STATUS, 1)
+                            .andNotEqualTo(DesignBusinessOrder.OPERATION_STATE, 2);
+                    if (house.getDecorationType() != 2) {
+                        criteria.andEqualTo(DesignBusinessOrder.TYPE, 4);
+                    } else {
+                        criteria.andEqualTo(DesignBusinessOrder.TYPE, 3);
+                    }
+                    List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
+                    if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
+                        DesignBusinessOrder order = designBusinessOrders.get(0);
+                        if (order.getOperationState() == 0) {
+                            buttonList.add(Utils.getButton("上传设计图", 4));
+                        }
+                    }
+                    break;
             }
         }
         bean.setButtonList(buttonList);
@@ -170,8 +194,26 @@ public class CraftsmanConstructionService {
         Map<String, Object> dataMap = HouseUtil.getBudgetDatas(house);
         bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         List<ButtonListBean> buttonList = new ArrayList<>();
-        if (house.getBudgetOk() == 1 && house.getDecorationType() == 2 && house.getDesignerOk() != 3) {
-            buttonList.add(Utils.getButton("上传设计", 4));
+        if (house.getBudgetOk() == 1 && house.getDecorationType() == 2) {
+            if (house.getDesignerOk() == 3) {
+                //3设计图完成后有需要改设计的
+                Example example = new Example(DesignBusinessOrder.class);
+                Example.Criteria criteria = example.createCriteria()
+                        .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
+                        .andEqualTo(DesignBusinessOrder.HOUSE_ID, house.getId())
+                        .andEqualTo(DesignBusinessOrder.STATUS, 1)
+                        .andNotEqualTo(DesignBusinessOrder.OPERATION_STATE, 2);
+                criteria.andEqualTo(DesignBusinessOrder.TYPE, 3);
+                List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
+                if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
+                    DesignBusinessOrder order = designBusinessOrders.get(0);
+                    if (order.getOperationState() == 0) {
+                        buttonList.add(Utils.getButton("上传设计图", 4));
+                    }
+                }
+            } else {
+                buttonList.add(Utils.getButton("上传设计图", 4));
+            }
         }
         bean.setButtonList(buttonList);
         return ServerResponse.createBySuccess("获取施工列表成功！", bean);
@@ -298,11 +340,11 @@ public class CraftsmanConstructionService {
         //查询是否全部整体完工
         List<HouseFlow> checkFinishList = houseFlowMapper.checkAllFinish(hf.getHouseId(), hf.getId());
         //查询是否提前结束装修
-        Example example=new Example(HouseFlow.class);
-        example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,hf.getHouseId()).andGreaterThanOrEqualTo(HouseFlow.WORKER_TYPE,3);
+        Example example = new Example(HouseFlow.class);
+        example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, hf.getHouseId()).andGreaterThanOrEqualTo(HouseFlow.WORKER_TYPE, 3);
         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
-        for(HouseFlow h:houseFlows){
-            if(h.getWorkSteta()==6){
+        for (HouseFlow h : houseFlows) {
+            if (h.getWorkSteta() == 6) {
                 checkFinishList.clear();
                 break;
             }
