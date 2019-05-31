@@ -650,9 +650,16 @@ public class EngineerService {
                 artisanDTO.setInviteNum(member.getInviteNum());
                 artisanDTO.setCheckType(member.getCheckType());
                 artisanDTO.setEvaluationScore(member.getEvaluationScore());
-                Example example = new Example(HouseWorker.class);
-                example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId());
-                artisanDTO.setVolume(houseWorkerMapper.selectCountByExample(example));//接单量
+                Example example = new Example(HouseFlow.class);
+                example.createCriteria().andCondition(HouseFlow.WORKER_ID,member.getId()).andCondition(" work_steta not in(0,3)");
+                List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+                List<HouseWorker> houseWorkers=new ArrayList<>();
+                for (HouseFlow houseFlow : houseFlows) {
+                    example = new Example(HouseWorker.class);
+                    example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId());
+                    houseWorkers = houseWorkerMapper.selectByExample(example);
+                }
+                artisanDTO.setVolume(houseWorkers.size());//接单量
                 artisanDTO.setRealNameState(member.getRealNameState());
                 artisanDTO.setRealNameDescribe(member.getRealNameDescribe());
                 artisanDTO.setCheckDescribe(member.getCheckDescribe());

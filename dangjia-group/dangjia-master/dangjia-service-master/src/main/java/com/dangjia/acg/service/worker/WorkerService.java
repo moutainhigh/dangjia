@@ -7,10 +7,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
-import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
-import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
-import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IBankCardMapper;
@@ -68,6 +65,8 @@ public class WorkerService {
 
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
 
     /**
      * 查询通讯录
@@ -164,16 +163,23 @@ public class WorkerService {
             return (ServerResponse) object;
         }
         Member worker = (Member) object;
-        Example example = new Example(HouseWorkerOrder.class);
-        example.createCriteria()
-                .andEqualTo(HouseWorkerOrder.WORKER_ID, worker.getId());
-        example.orderBy(HouseFlow.CREATE_DATE).desc();
-        List<HouseWorkerOrder> hwList = houseWorkerOrderMapper.selectByExample(example);
+        Example example=new Example(HouseFlow.class);
+        example.createCriteria().andEqualTo(HouseFlow.WORKER_ID,worker.getId())
+                .andCondition(" work_steta not in(0,3)");
+        List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+        List<HouseWorkerOrder> hwList=new ArrayList<>();
+        for (HouseFlow houseFlow : houseFlows) {
+            example = new Example(HouseWorkerOrder.class);
+            example.createCriteria()
+                    .andEqualTo(HouseWorkerOrder.WORKER_ID, worker.getId()).andEqualTo(HouseWorkerOrder.HOUSE_ID,houseFlow.getHouseId());
+            example.orderBy(HouseFlow.CREATE_DATE).desc();
+            hwList = houseWorkerOrderMapper.selectByExample(example);
+        }
         PageInfo pageResult = new PageInfo(hwList);
         List<Map> hwMapList = new ArrayList<>();
         for (HouseWorkerOrder hw : hwList) {
             Map hwMap = BeanUtils.beanToMap(hw);
-            House house = houseMapper.selectByPrimaryKey(hw.getHouseId());
+            House house= houseMapper.selectByPrimaryKey(hw.getHouseId());
             if (house != null) {
                 Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
                 if (member != null) {
@@ -373,9 +379,16 @@ public class WorkerService {
                 return (ServerResponse) object;
             }
             Member worker = (Member) object;
-            Example example = new Example(HouseWorker.class);
-            example.createCriteria().andEqualTo("workerId", worker.getId());
-            List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);
+            Example example = new Example(HouseFlow.class);
+            example.createCriteria().andEqualTo(HouseFlow.WORKER_ID,worker.getId()).andCondition(" work_steta not in(0,3)");
+            List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+            List<HouseWorker> hwList=new ArrayList<>();
+            for (HouseFlow houseFlow : houseFlows) {
+                example = new Example(HouseWorker.class);
+                example.createCriteria().andEqualTo("workerId", worker.getId())
+                        .andEqualTo(HouseWorker.HOUSE_ID,houseFlow.getHouseId());
+                hwList = houseWorkerMapper.selectByExample(example);
+            }
             return ServerResponse.createBySuccess("获取接单记录成功", hwList);
         } catch (Exception e) {
             e.printStackTrace();
