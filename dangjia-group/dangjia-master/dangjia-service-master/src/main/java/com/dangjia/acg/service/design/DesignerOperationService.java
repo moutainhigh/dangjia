@@ -126,23 +126,19 @@ public class DesignerOperationService {
                     }
                 }
             }
-            return ServerResponse.createByErrorMessage("设计进度还未达到发送要求");
         } else if (house.getDecorationType() == 2) {//自带设计流程
             if (house.getDesignerOk() == 1 || house.getDesignerOk() == 6 ||
                     house.getDesignerOk() == 7 || house.getDesignerOk() == 8) {
                 return constructionPlans(house);
-            } else {
-                return ServerResponse.createByErrorMessage("设计进度还未达到发送要求");
             }
         } else {
             if (house.getDesignerOk() == 9 || house.getDesignerOk() == 6) {
                 return sendPlan(house);
             } else if (house.getDesignerOk() == 7 || house.getDesignerOk() == 8) {
                 return constructionPlans(house);
-            } else {
-                return ServerResponse.createByErrorMessage("设计进度还未达到发送要求");
             }
         }
+        return ServerResponse.createByErrorMessage("设计进度还未达到发送要求");
     }
 
     /**
@@ -181,7 +177,6 @@ public class DesignerOperationService {
         //app推送给业主
         configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计图上传提醒",
                 String.format(DjConstants.PushMessage.CONSTRUCTION_UPLOADING, house.getHouseName()), "");
-
         return ServerResponse.createBySuccessMessage("发送成功");
     }
 
