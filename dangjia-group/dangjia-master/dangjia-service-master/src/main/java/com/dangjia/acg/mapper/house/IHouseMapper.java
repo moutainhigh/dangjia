@@ -3,6 +3,7 @@ package com.dangjia.acg.mapper.house;
 import com.dangjia.acg.dto.house.DesignDTO;
 import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.dto.house.HouseListDTO;
+import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
 import com.dangjia.acg.modle.house.House;
 import org.apache.ibatis.annotations.Param;
@@ -53,4 +54,10 @@ public interface IHouseMapper extends Mapper<House> {
     List<RepairMendDTO> getRepairMend(@Param("houseId") String houseId,@Param("productId") String productId);
 
     int getBuildDay(@Param("houseId") String houseId);
+
+
+
+    List<DesignDTO>  getHouseProfitList(@Param("visitState") String visitState,@Param("searchKey") String searchKey);
+    List<HouseProfitSummaryDTO>  getHouseProfitSummary(@Param("houseId") String houseId);
+
 }

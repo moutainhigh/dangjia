@@ -1,6 +1,9 @@
 package com.dangjia.acg.dto.house;
 
+import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * author: Ronalcheng
@@ -25,5 +28,8 @@ public class DesignDTO {
     private String operatorId;// 操作人ID
     private String operatorName;// 操作人名字
     private String operatorMobile;// 操作人电话
+
+    private Double profit;// 总利润
+    private List<HouseProfitSummaryDTO> profitSummarys;// 利润集合
 
 }
