@@ -195,7 +195,7 @@ public class CraftsmanConstructionService {
         bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         List<ButtonListBean> buttonList = new ArrayList<>();
         if (house.getDecorationType() == 2) {
-            if (house.getBudgetOk() == 1) {
+            if (house.getBudgetOk() == 1 && house.getDesignerOk() != 3) {
                 buttonList.add(Utils.getButton("上传设计图", 4));
             } else if (house.getDesignerOk() == 3) {
                 //3设计图完成后有需要改设计的
