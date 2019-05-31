@@ -166,9 +166,15 @@ public class ClueService {
                 Example example=new Example(UserRoleKey.class);
                 example.createCriteria().andEqualTo(UserRoleKey.USER_ID,userId);
                 List<UserRoleKey> userRoleKeys = userRoleMapper.selectByExample(example);
-                if("668854901553829215229".equals(userRoleKeys.get(0).getRoleId())){
-                    clue.setCusService(cusService);
-                }else {
+                boolean flage=false;
+                for(UserRoleKey u:userRoleKeys) {
+                    if ("668854901553829215229".equals(u.getRoleId())) {
+                        clue.setCusService(cusService);
+                        flage=true;
+                        break;
+                    }
+                }
+                if(!flage){
                     return ServerResponse.createByErrorMessage("您暂无权限变更");
                 }
             }
