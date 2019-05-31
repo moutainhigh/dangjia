@@ -28,7 +28,7 @@ public class DesignDTO {
     private String operatorId;// 操作人ID
     private String operatorName;// 操作人名字
     private String operatorMobile;// 操作人电话
-
+    private Integer visitState;//0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
     private Double profit;// 总利润
     private List<HouseProfitSummaryDTO> profitSummarys;// 利润集合
 

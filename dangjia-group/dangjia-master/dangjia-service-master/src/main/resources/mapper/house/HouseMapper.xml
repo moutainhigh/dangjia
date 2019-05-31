@@ -473,6 +473,7 @@
         house.unit AS unit,
         house.decoration_type AS decorationType,
         house.number AS number,
+        house.visit_state AS visitState,
         member.nick_name AS nickName,
         member.NAME AS NAME,
         member.mobile AS mobile
