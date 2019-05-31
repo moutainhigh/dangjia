@@ -202,6 +202,7 @@ public class ClueService {
             for (Clue c : clueList) {
                 if (Validator.isMobileNo(c.getPhone())) {
                     c.setCusService(userId);
+                    c.setStage(0);
                     Clue clue1 = clueMapper.getByPhone(c.getPhone());
                     Member member = iMemberMapper.getByPhone(c.getPhone());
                     //表示从来没有过线索和注册过
