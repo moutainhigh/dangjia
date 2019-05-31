@@ -133,6 +133,11 @@ public class CraftsmanConstructionService {
         Map<String, Object> dataMap = HouseUtil.getDesignDatas(house);
         bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         List<ButtonListBean> buttonList = new ArrayList<>();
+        if (house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getDesignerOk() != 3) {
+            String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
+            String data = "&houseId=" + house.getId() + "&houseFlowId=" + hf.getId();
+            buttonList.add(Utils.getButton("提前结束", webAddress + "construction?title=填写原因" + data, 0));
+        }
         if (house.getDecorationType() != 2 && house.getDesignerOk() == 1) {
             buttonList.add(Utils.getButton("去量房", 2));
         } else {
@@ -194,6 +199,11 @@ public class CraftsmanConstructionService {
         Map<String, Object> dataMap = HouseUtil.getBudgetDatas(house);
         bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         List<ButtonListBean> buttonList = new ArrayList<>();
+        if (house.getBudgetOk() != 0 && house.getBudgetOk() != 5 && house.getBudgetOk() != 3) {
+            String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
+            String data = "&houseId=" + house.getId() + "&houseFlowId=" + hf.getId();
+            buttonList.add(Utils.getButton("提前结束", webAddress + "construction?title=填写原因" + data, 0));
+        }
         if (house.getDecorationType() == 2) {
             if (house.getBudgetOk() == 1 && house.getDesignerOk() != 3) {
                 buttonList.add(Utils.getButton("上传设计图", 4));
