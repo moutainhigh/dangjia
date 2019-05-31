@@ -1,9 +1,11 @@
 package com.dangjia.acg.service.design;
 
 import com.dangjia.acg.common.constants.DjConstants;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.design.DesignPayDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
@@ -59,6 +61,8 @@ public class HouseDesignPayService {
     private IMemberMapper memberMapper;
     @Autowired
     private IWorkerDetailMapper workerDetailMapper;
+    @Autowired
+    private ConfigUtil configUtil;
 
     /**
      * 判断次数后确认是否需要支付
@@ -203,13 +207,20 @@ public class HouseDesignPayService {
                 }
                 break;
         }
+        String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
         if (order.getType() == 3) {
             designPayDTO.setButName("《精算服务须知》");
-            designPayDTO.setButUrl("");//TODO  URL
+            designPayDTO.setButUrl(webAddress + "paymentAgreement?title=精算服务须知&protocolTpye=2");
+            // protocolTpye==1 精算商品定义
+            // protocolTpye=2 精算修改费用明细
+            // protocolTpye=3 设计改图费用
+            // protocolTpye=4 9.9设计商品定义
+            // protocolTpye=5 18.8设计商品定义
+            // protocolTpye=6 28.8设计商品定义
             designPayDTO.setMoneyMessage("精算费用:¥" + order.getSumMoney().setScale(2, BigDecimal.ROUND_HALF_UP));
         } else {
             designPayDTO.setButName("《设计服务须知》");
-            designPayDTO.setButUrl("");//TODO  URL
+            designPayDTO.setButUrl(webAddress + "paymentAgreement?title=设计服务须知&protocolTpye=3");
             designPayDTO.setMoneyMessage("设计改图费用:¥" + order.getSumMoney().setScale(2, BigDecimal.ROUND_HALF_UP));
         }
         return ServerResponse.createByErrorNeedToPay(designPayDTO);
