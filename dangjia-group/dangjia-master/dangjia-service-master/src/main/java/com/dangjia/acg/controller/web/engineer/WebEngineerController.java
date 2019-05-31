@@ -4,6 +4,7 @@ import com.dangjia.acg.api.web.engineer.WebEngineerAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.matter.WorkerDisclosure;
 import com.dangjia.acg.service.engineer.EngineerService;
 import com.dangjia.acg.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -179,8 +180,8 @@ public class WebEngineerController implements WebEngineerAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addSure(String name, String details, String img,Integer state,Integer type) {
-        return engineerService.addSure(name,details,img,state,type);
+    public ServerResponse addSure(WorkerDisclosure workerDisclosure) {
+        return engineerService.addSure(workerDisclosure);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.dangjia.acg.api.web.engineer;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.matter.WorkerDisclosure;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -106,9 +107,7 @@ public interface WebEngineerAPI {
 
     @PostMapping(value = "web/engineer/addSure")
     @ApiOperation(value = "添加工地交底/帮助事项", notes = "添加工地交底/帮助事项")
-    ServerResponse addSure(@RequestParam("name") String name,@RequestParam("details") String details,
-                           @RequestParam("img") String img, @RequestParam("state") Integer state,
-                           @RequestParam("type") Integer type);
+    ServerResponse addSure(@RequestParam("workerDisclosure") WorkerDisclosure workerDisclosure);
 
     @PostMapping(value = "web/engineer/updateSure")
     @ApiOperation(value = "修改工地交底/帮助事项", notes = "修改工地交底/帮助事项")

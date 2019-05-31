@@ -13,12 +13,14 @@ import com.dangjia.acg.dto.member.DetailDTO;
 import com.dangjia.acg.dto.member.WalletDTO;
 import com.dangjia.acg.dto.member.WithdrawDTO;
 import com.dangjia.acg.mapper.config.ISmsMapper;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IBankCardMapper;
 import com.dangjia.acg.mapper.worker.*;
 import com.dangjia.acg.modle.config.Sms;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -72,6 +74,8 @@ public class WalletService {
     private ISmsMapper smsMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
+    @Autowired
+    private IHouseFlowMapper iHouseFlowMapper;
 
 
     /**
@@ -351,9 +355,18 @@ public class WalletService {
             walletDTO.setRetentionMoney(member.getRetentionMoney() == null ? new BigDecimal(0) : member.getRetentionMoney());//滞留金
             walletDTO.setOutAll(out == null ? 0 : out);//总支出
             walletDTO.setIncome(income == null ? 0 : income);//总收入
-            Example example = new Example(HouseWorker.class);
-            example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId());
-            List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
+            Example example= new Example(HouseFlow.class);
+            example.createCriteria()
+                    .andEqualTo(HouseFlow.WORKER_ID,member.getId())
+                    .andCondition(" work_steta not in(0,3)");
+            List<HouseFlow> houseFlows = iHouseFlowMapper.selectByExample(example);
+            example = new Example(HouseWorker.class);
+            List<HouseWorker> houseWorkerList = new ArrayList<>();
+            for (HouseFlow houseFlow : houseFlows) {
+                example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId())
+                        .andEqualTo(HouseWorker.HOUSE_ID,houseFlow.getHouseId());
+                houseWorkerList = houseWorkerMapper.selectByExample(example);
+            }
             walletDTO.setHouseOrder(houseWorkerList.size());//接单量
 //            walletDTO.setHouseOrder(member.getVolume().intValue());//接单量
 
