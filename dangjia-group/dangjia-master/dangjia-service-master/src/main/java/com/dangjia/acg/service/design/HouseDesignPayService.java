@@ -302,10 +302,10 @@ public class HouseDesignPayService {
         designBusinessOrderMapper.updateByPrimaryKeySelective(designBusinessOrder);
         if (designBusinessOrder.getType() == 3) {
             HouseWorkerOrder hwo2 = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(house.getId(), "2");
-            setMoney(hwo2, house, designBusinessOrder, "精算费");
+            setMoney(hwo2, house, designBusinessOrder, "改精算费");
         } else {
             HouseWorkerOrder hwo2 = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(house.getId(), "1");
-            setMoney(hwo2, house, designBusinessOrder, "设计费");
+            setMoney(hwo2, house, designBusinessOrder, "改设计费");
         }
     }
 
