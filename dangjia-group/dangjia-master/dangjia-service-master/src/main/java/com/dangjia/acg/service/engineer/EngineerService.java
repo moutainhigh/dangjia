@@ -651,12 +651,13 @@ public class EngineerService {
                 artisanDTO.setCheckType(member.getCheckType());
                 artisanDTO.setEvaluationScore(member.getEvaluationScore());
                 Example example = new Example(HouseFlow.class);
-                example.createCriteria().andCondition(HouseFlow.WORKER_ID,member.getId()).andCondition(" work_steta not in(0,3)");
+                example.createCriteria().andEqualTo(HouseFlow.WORKER_ID,member.getId()).andCondition(" work_steta not in(0,3)");
                 List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
                 List<HouseWorker> houseWorkers=new ArrayList<>();
                 for (HouseFlow houseFlow : houseFlows) {
                     example = new Example(HouseWorker.class);
-                    example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId());
+                    example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId())
+                            .andEqualTo(HouseWorker.HOUSE_ID,houseFlow.getHouseId());
                     houseWorkers = houseWorkerMapper.selectByExample(example);
                 }
                 artisanDTO.setVolume(houseWorkers.size());//接单量

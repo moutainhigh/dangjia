@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 
 /**
  * Created with IntelliJ IDEA.
@@ -39,5 +40,8 @@ public class Receipt extends BaseEntity {
     @ApiModelProperty("供应商id")
     private String supplierId;
 
-
+    @Column(name = "total_amount")
+    @Desc(value = "该订单总价")
+    @ApiModelProperty("该订单总价")
+    private double totalAmount;
 }

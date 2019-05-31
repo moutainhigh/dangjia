@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -232,6 +233,8 @@ public class WebSplitDeliverService {
         try {
             if(StringUtils.isNotEmpty(merge)){
                 JSONArray itemObjArr = JSON.parseArray(merge);
+                double splitDeliverPrice=0d;
+                double mendDeliverPrice=0d;
                 for (int i = 0; i < itemObjArr.size(); i++) {
                     JSONObject jsonObject = itemObjArr.getJSONObject(i);
                     String id=jsonObject.getString("id");
@@ -242,12 +245,14 @@ public class WebSplitDeliverService {
                         splitDeliver.setId(id);
                         splitDeliver.setApplyState(2);
                         this.setSplitDeliver(splitDeliver);
+                        splitDeliverPrice+=iSplitDeliverMapper.selectByPrimaryKey(id).getTotalAmount();
                     }else if(deliverType==2){
                         //退货单结算通过
                         MendDeliver mendDeliver=new MendDeliver();
                         mendDeliver.setId(id);
                         mendDeliver.setApplyState(2);
                         iMendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
+                        mendDeliverPrice+=iMendDeliverMapper.selectByPrimaryKey(id).getTotalAmount();
                     }
                 }
                 //添加回执
@@ -256,6 +261,7 @@ public class WebSplitDeliverService {
                 receipt.setMerge(merge);
                 receipt.setCreateDate(new Date());
                 receipt.setSupplierId(supplierId);
+                receipt.setTotalAmount(splitDeliverPrice-mendDeliverPrice);
                 iReceiptMapper.insert(receipt);
             }
             return ServerResponse.createBySuccess("结算成功");
