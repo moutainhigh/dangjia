@@ -55,7 +55,7 @@ public interface ComplainAPI {
     @PostMapping("/complain/userStop")
     @ApiOperation(value = "业主提前停止装修", notes = "业主提前停止装修")
     ServerResponse userStop(@RequestParam("houseId") String houseId,
-                            @RequestParam("memberId") String memberId,
+                            @RequestParam("userToken") String userToken,
                             @RequestParam("content") String content);
 
     @PostMapping("/complain/adminStop")
