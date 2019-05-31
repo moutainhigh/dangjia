@@ -3,6 +3,7 @@ package com.dangjia.acg.dto.house;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,6 +32,8 @@ public class DesignDTO {
     private String operatorMobile;// 操作人电话
     private Integer visitState;//0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
     private Double profit;// 总利润
+    protected Date createDate;// 下单时间
+    protected Date modifyDate;// 竣工时间
     private List<HouseProfitSummaryDTO> profitSummarys;// 利润集合
 
 }
