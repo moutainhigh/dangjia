@@ -468,11 +468,11 @@
         SELECT
         house.id AS houseId,
         CONCAT(
-        h.residential,
-        IFNULL(h.building, '*'),
+        house.residential,
+        IFNULL(house.building, '*'),
         '栋',
-        IFNULL(CONCAT(h.unit, '单元'),'' ),
-        IFNULL(h.number, '*'),
+        IFNULL(CONCAT(house.unit, '单元'),'' ),
+        IFNULL(house.number, '*'),
         '号'
         ) houseName,
         house.designer_ok AS designerOk,
