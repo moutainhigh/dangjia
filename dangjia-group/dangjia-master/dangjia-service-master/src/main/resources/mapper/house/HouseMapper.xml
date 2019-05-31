@@ -467,6 +467,14 @@
     <select id="getHouseProfitList" resultType="com.dangjia.acg.dto.house.DesignDTO">
         SELECT
         house.id AS houseId,
+        CONCAT(
+        h.residential,
+        IFNULL(h.building, '*'),
+        '栋',
+        IFNULL(CONCAT(h.unit, '单元'),'' ),
+        IFNULL(h.number, '*'),
+        '号'
+        ) houseName,
         house.designer_ok AS designerOk,
         house.residential AS residential,
         house.building AS building,
