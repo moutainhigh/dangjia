@@ -136,7 +136,7 @@ public class CraftsmanConstructionService {
         if (house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getDesignerOk() != 3) {
             String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             String data = "&houseId=" + house.getId() + "&houseFlowId=" + hf.getId();
-            buttonList.add(Utils.getButton("提前结束", webAddress + "ownerEnd?title=填写原因" + data, 0));
+            buttonList.add(Utils.getButton("提前结束", webAddress + "construction?title=填写原因" + data, 0));
         }
         if (house.getDecorationType() != 2 && house.getDesignerOk() == 1) {
             buttonList.add(Utils.getButton("去量房", 2));
@@ -202,7 +202,7 @@ public class CraftsmanConstructionService {
         if (house.getBudgetOk() != 0 && house.getBudgetOk() != 5 && house.getBudgetOk() != 3) {
             String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             String data = "&houseId=" + house.getId() + "&houseFlowId=" + hf.getId();
-            buttonList.add(Utils.getButton("提前结束", webAddress + "ownerEnd?title=填写原因" + data, 0));
+            buttonList.add(Utils.getButton("提前结束", webAddress + "construction?title=填写原因" + data, 0));
         }
         if (house.getDecorationType() == 2) {
             if (house.getBudgetOk() == 1 && house.getDesignerOk() != 3) {
