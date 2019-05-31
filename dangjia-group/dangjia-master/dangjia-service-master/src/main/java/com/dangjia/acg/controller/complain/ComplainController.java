@@ -64,4 +64,10 @@ public class ComplainController implements ComplainAPI {
     public ServerResponse updateAdminStop(String jsonStr, String content, String houseId) {
         return complainService.updateAdminStop(jsonStr,content,houseId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse commitStop(String backMoney, String content, String userToken, String houseId) {
+        return complainService.commitStop(backMoney,content,userToken,houseId);
+    }
 }

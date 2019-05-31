@@ -664,7 +664,7 @@ public class ComplainService {
             commitStopBuild(map.get("workerId"),
                     new BigDecimal((Double) map.get("backMoney")),
                     new BigDecimal((Double) map.get("haveMoney")), houseId,
-                    "业主提前结束装修，原因为" + content);
+                    "中台提前结束装修，原因为" + content);
         }
 
 
@@ -808,5 +808,25 @@ public class ComplainService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    public ServerResponse commitStop(String backMoney, String content, String userToken, String houseId){
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        System.out.println(member.getId());
+        Example example1=new Example(HouseWorkerOrder.class);
+        example1.createCriteria().andEqualTo(HouseWorkerOrder.HOUSE_ID,houseId).andEqualTo(HouseWorkerOrder.WORKER_ID,member.getId());
+        List<HouseWorkerOrder> houseWorkerOrderList = iHouseWorkerOrderMapper.selectByExample(example1);
+        if(houseWorkerOrderList.size()==0){
+           return ServerResponse.createByErrorMessage("暂无工匠");
+        }
+        BigDecimal subtract = houseWorkerOrderList.get(0).getWorkPrice().subtract(houseWorkerOrderList.get(0).getHaveMoney());
+        if(Double.parseDouble(backMoney)>subtract.doubleValue() ||Double.parseDouble(backMoney)<=0){
+            return ServerResponse.createByErrorMessage("退款金额有误，请重新输入!");
+        }
+        commitStopBuild(member.getId(),new BigDecimal(backMoney),subtract,houseId,content);
+        return ServerResponse.createBySuccessMessage("ok!");
     }
 }

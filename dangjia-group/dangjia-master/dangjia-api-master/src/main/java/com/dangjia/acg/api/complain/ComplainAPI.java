@@ -67,4 +67,11 @@ public interface ComplainAPI {
     ServerResponse updateAdminStop(@RequestParam("jsonStr") String jsonStr,
                                    @RequestParam("content") String content,
                                    @RequestParam("houseId") String houseId);
+
+    @PostMapping("/complain/commitStop")
+    @ApiOperation(value = "精算设计提前结束", notes = "精算设计提前结束")
+    ServerResponse commitStop(@RequestParam("backMoney") String backMoney,
+                              @RequestParam("content") String content,
+                              @RequestParam("userToken") String userToken,
+                              @RequestParam("houseId") String houseId);
 }
