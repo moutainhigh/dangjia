@@ -28,6 +28,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.BankCard;
 import com.dangjia.acg.modle.worker.*;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.engineer.EngineerService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -76,6 +77,8 @@ public class WalletService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private IHouseFlowMapper iHouseFlowMapper;
+    @Autowired
+    private EngineerService engineerService;
 
 
     /**
@@ -355,20 +358,11 @@ public class WalletService {
             walletDTO.setRetentionMoney(member.getRetentionMoney() == null ? new BigDecimal(0) : member.getRetentionMoney());//滞留金
             walletDTO.setOutAll(out == null ? 0 : out);//总支出
             walletDTO.setIncome(income == null ? 0 : income);//总收入
-            Example example= new Example(HouseFlow.class);
-            example.createCriteria()
-                    .andEqualTo(HouseFlow.WORKER_ID,member.getId())
-                    .andCondition(" work_steta not in(0,3)");
-            List<HouseFlow> houseFlows = iHouseFlowMapper.selectByExample(example);
-            example = new Example(HouseWorker.class);
-            List<HouseWorker> houseWorkerList = new ArrayList<>();
-            for (HouseFlow houseFlow : houseFlows) {
-                example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId())
-                        .andEqualTo(HouseWorker.HOUSE_ID,houseFlow.getHouseId());
-                houseWorkerList = houseWorkerMapper.selectByExample(example);
-            }
-            walletDTO.setHouseOrder(houseWorkerList.size());//接单量
+//            Example example = new Example(HouseWorker.class);
+//            List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
+//            walletDTO.setHouseOrder(houseWorkerList.size());//接单量
 //            walletDTO.setHouseOrder(member.getVolume().intValue());//接单量
+            walletDTO.setHouseOrder(engineerService.alternative(member.getId(),member.getWorkerType()));
 
             return ServerResponse.createBySuccess("获取成功", walletDTO);
         } catch (Exception e) {
