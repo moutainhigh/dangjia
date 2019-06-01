@@ -433,7 +433,7 @@ public class MendOrderService {
                 houseService.insertConstructionRecordAll(mendOrder, changeOrder);
                 changeOrder.setState(2);//通过->工匠业主审核
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
-                houseFlowScheduleService.updateFlowSchedule(houseId,changeOrder.getWorkerTypeId(),changeOrder.getScheduleDay(),null);
+//                houseFlowScheduleService.updateFlowSchedule(houseId,changeOrder.getWorkerTypeId(),changeOrder.getScheduleDay(),null);
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
 //                String urlyz= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+houseId+"&roleType=1";
