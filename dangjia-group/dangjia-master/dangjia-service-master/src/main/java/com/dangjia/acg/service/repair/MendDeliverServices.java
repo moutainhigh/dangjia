@@ -30,8 +30,6 @@ import java.util.List;
 public class MendDeliverServices {
 
     @Autowired
-    private IMendDeliverMapper iMendDeliverMapper;
-    @Autowired
     private IHouseMapper iHouseMapper;
     @Autowired
     private IMendMaterialMapper iMendMaterialMapper;
@@ -41,6 +39,8 @@ public class MendDeliverServices {
     private ConfigUtil configUtil;
     @Autowired
     private ForMasterAPI forMasterAPI;
+    @Autowired
+    private IMendDeliverMapper iMendDeliverMapper;
 
     /**
      * 根据供应商Id查询对应供应商的退货单列表
@@ -68,33 +68,35 @@ public class MendDeliverServices {
      */
     public ServerResponse mendDeliverDetail(String mendDeliverId){
         try {
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            SplitDeliverDetailDTO detailDTO = new SplitDeliverDetailDTO();
             MendDeliver mendDeliver = iMendDeliverMapper.selectByPrimaryKey(mendDeliverId);
-            House house = iHouseMapper.selectByPrimaryKey(mendDeliver.getHouseId());
-            Member member = iMemberMapper.selectByPrimaryKey(house.getMemberId());
-            Example example=new Example(MendMateriel.class);
-            example.createCriteria().andEqualTo(MendMateriel.REPAIR_MEND_DELIVER_ID,mendDeliver.getId());
-            List<MendMateriel> mendMateriels = iMendMaterialMapper.selectByExample(example);
-            double sumprice=0D;
-            MendDeliverDTO mendDeliverDTO=new MendDeliverDTO();
-            for (MendMateriel mendMateriel : mendMateriels) {
-                sumprice+=mendMateriel.getActualPrice();
-                mendMateriel.setBrandName(forMasterAPI.brandName(house.getCityId(),mendMateriel.getProductId()));
+            if(null!=mendDeliver) {
+                House house = iHouseMapper.selectByPrimaryKey(mendDeliver.getHouseId());
+                Member member = iMemberMapper.selectByPrimaryKey(house.getMemberId());
+                Example example = new Example(MendMateriel.class);
+                example.createCriteria().andEqualTo(MendMateriel.REPAIR_MEND_DELIVER_ID, mendDeliver.getId());
+                List<MendMateriel> mendMateriels = iMendMaterialMapper.selectByExample(example);
+                double sumprice = 0D;
+                MendDeliverDTO mendDeliverDTO = new MendDeliverDTO();
+                for (MendMateriel mendMateriel : mendMateriels) {
+                    sumprice += mendMateriel.getActualPrice();
+                    mendMateriel.setBrandName(forMasterAPI.brandName(house.getCityId(), mendMateriel.getProductId()));
+                }
+                mendDeliverDTO.setMendDeliverId(mendDeliver.getId());
+                mendDeliverDTO.setNumber(mendDeliver.getNumber());
+                mendDeliverDTO.setHouseId(mendDeliver.getHouseId());
+                mendDeliverDTO.setHouseName(house.getHouseName());
+                mendDeliverDTO.setMemberId(house.getMemberId());
+                mendDeliverDTO.setMemberMobile(member.getMobile());
+                mendDeliverDTO.setApplicantName(mendDeliver.getShipName());
+                mendDeliverDTO.setApplicantMobile(mendDeliver.getShipMobile());
+                mendDeliverDTO.setMemberName(member.getName());
+                mendDeliverDTO.setList(mendMateriels);
+                mendDeliverDTO.setCount(mendMateriels.size());
+                mendDeliverDTO.setSumprice(sumprice);
+                return ServerResponse.createBySuccess("查询成功",mendDeliverDTO);
+            }else{
+                return ServerResponse.createBySuccess("无此数据");
             }
-            mendDeliverDTO.setMendDeliverId(mendDeliver.getId());
-            mendDeliverDTO.setNumber(mendDeliver.getNumber());
-            mendDeliverDTO.setHouseId(mendDeliver.getHouseId());
-            mendDeliverDTO.setHouseName(house.getHouseName());
-            mendDeliverDTO.setMemberId(house.getMemberId());
-            mendDeliverDTO.setMemberMobile(member.getMobile());
-            mendDeliverDTO.setApplicantName(mendDeliver.getShipName());
-            mendDeliverDTO.setApplicantMobile(mendDeliver.getShipMobile());
-            mendDeliverDTO.setMemberName(member.getName());
-            mendDeliverDTO.setList(mendMateriels);
-            mendDeliverDTO.setCount(mendMateriels.size());
-            mendDeliverDTO.setSumprice(sumprice);
-            return ServerResponse.createBySuccess("查询成功",mendDeliverDTO);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

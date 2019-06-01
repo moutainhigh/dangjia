@@ -365,7 +365,6 @@ public class WebSplitDeliverService {
     public ServerResponse mendDeliverDetail(String id){
         try {
             List<MendMateriel> mendMateriels = iMendDeliverMapper.mendDeliverDetail(id);
-            System.out.println(mendMateriels);
             return  ServerResponse.createBySuccess("查询成功",mendMateriels);
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("查询失败");
