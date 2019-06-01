@@ -123,7 +123,7 @@ public class HouseFlowScheduleService {
             if (advance != null && advance > 0) {
                 houseFlow.setEndDate(DateUtil.delDateDays(houseFlow.getEndDate(), advance));
             }
-            if (houseFlow.getStartDate().getTime() < houseFlow.getEndDate().getTime()) {
+            if (houseFlow.getStartDate().getTime() > houseFlow.getEndDate().getTime()) {
                 houseFlow.setEndDate(houseFlow.getStartDate());
             }
         }
