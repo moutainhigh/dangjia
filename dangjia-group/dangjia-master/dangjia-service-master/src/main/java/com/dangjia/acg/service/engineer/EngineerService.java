@@ -837,17 +837,14 @@ public class EngineerService {
     public ServerResponse updateSure(String name, String details, String img, Integer state, String id) {
         try {
             WorkerDisclosure workerDisclosure = iWorkerDisclosureMapper.selectByPrimaryKey(id);
-            if (CommonUtil.isEmpty(name)) {
+            if (!CommonUtil.isEmpty(name)) {
                 workerDisclosure.setName(name);
-                workerDisclosure.setModifyDate(new Date());
             }
-            if (CommonUtil.isEmpty(details)) {
-                workerDisclosure.setDetails(details);
+            if (!CommonUtil.isEmpty(details)) {
                 workerDisclosure.setModifyDate(new Date());
             }
             if (state != null) {
                 workerDisclosure.setState(state);
-                workerDisclosure.setModifyDate(new Date());
             }
             workerDisclosure.setImg(img);
             workerDisclosure.setModifyDate(new Date());
