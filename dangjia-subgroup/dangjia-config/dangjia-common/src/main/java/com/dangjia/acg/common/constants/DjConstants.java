@@ -17,6 +17,8 @@ public class DjConstants {
         public final static String SERVICEMANAGE = "serviceManage?userToken=%s&cityId=%s&title=%s";// 服务管理
         public final static String ADDARTIFICIAL = "addArtificial?userToken=%s&cityId=%s&title=%s";// 补人工
         public final static String CHANGEARTIFICIAL = "changeArtificial?userToken=%s&cityId=%s&title=%s";// 人工变更
+        public final static String BTPEOPLE = "btPeople?userToken=%s&cityId=%s&title=%s";// 补退人工变更
+        public final static String REFUNDITEMDETAIL = "refundItemDetail?userToken=%s&cityId=%s&title=%s";// 退人工审核
         public final static String MATERIALCONSUMPTION = "materialConsumption?userToken=%s&cityId=%s&title=%s";// 材料用量
         public final static String HPMANAGE = "hpManage?userToken=%s&cityId=%s&title=%s";//货品管理
         public final static String MYINVITECODE = "myInviteCode?userToken=%s&cityId=%s&title=%s";//我的邀请码

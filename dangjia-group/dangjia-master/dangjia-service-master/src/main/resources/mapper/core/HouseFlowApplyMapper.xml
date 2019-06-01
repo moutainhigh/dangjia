@@ -167,7 +167,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="getSupervisorCheckList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select <include refid="all_columns" />
         from dj_core_house_flow_apply
-        where (apply_type=1 or apply_type=2 or apply_type=3)
+        where (apply_type=1 or apply_type=2)
         and house_id = #{houseId}
         and supervisor_check = 0
     </select>
