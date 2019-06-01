@@ -440,7 +440,7 @@ public class ComplainService {
                         if (house == null) {
                             return ServerResponse.createByErrorMessage("没有查询到相关房子");
                         }
-                        if (house.getVisitState() != 1) {
+                        if (house.getVisitState() != 1 && house.getVisitState() != 5) {
                             return ServerResponse.createByErrorMessage("该房子没有在装修，无法结束装修");
                         }
                         house.setModifyDate(new Date());
@@ -577,7 +577,7 @@ public class ComplainService {
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
         }
-        if (house.getVisitState() != 1) {
+        if (house.getVisitState() != 1 && house.getVisitState() != 5) {
             return ServerResponse.createByErrorMessage("该房子没有在装修，无法结束装修");
         }
         if (!member.getId().equals(house.getMemberId())) {
@@ -692,7 +692,7 @@ public class ComplainService {
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
         }
-        if (house.getVisitState() != 1) {
+        if (house.getVisitState() != 1 && house.getVisitState() != 5) {
             return ServerResponse.createByErrorMessage("该房子没有在装修，无法结束装修");
         }
         JSONArray brandSeriesLists = JSONArray.parseArray(jsonStr);
@@ -734,7 +734,7 @@ public class ComplainService {
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
         }
-        if (house.getVisitState() != 1) {
+        if (house.getVisitState() != 1 && house.getVisitState() != 5) {
             return ServerResponse.createByErrorMessage("该房子没有在装修，无法结束装修");
         }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
