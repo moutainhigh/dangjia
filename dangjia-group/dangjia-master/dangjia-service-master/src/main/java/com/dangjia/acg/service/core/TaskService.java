@@ -198,7 +198,6 @@ public class TaskService {
             return taskList;
         }
         if (worker.getWorkerType() > 3) {
-//            refundItemDetail?title=退人工记录详情&type=3&mendOrderId=519275291558705230782&roleType=3&state=1&houseId=2c911c24638b02a9016390bc408902c2&userToken=9e42449d-6d21-4d81-a69b-ff39815feb4a&apiVersion=132&cityId=402881882ba8753a012ba93101120116&applicationId=com.app.djartisan&userRole=2&version=1.3.2&versionCode=132
             //退人工任务
             Example example = new Example(ChangeOrder.class);
             example.createCriteria().andEqualTo(ChangeOrder.HOUSE_ID, houseId)
