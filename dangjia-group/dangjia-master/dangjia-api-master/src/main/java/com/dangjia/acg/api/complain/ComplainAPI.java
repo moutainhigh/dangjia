@@ -73,5 +73,7 @@ public interface ComplainAPI {
     ServerResponse commitStop(@RequestParam("backMoney") String backMoney,
                               @RequestParam("content") String content,
                               @RequestParam("userToken") String userToken,
+                              @RequestParam("userId") String userId,
                               @RequestParam("houseId") String houseId);
 }
+
