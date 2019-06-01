@@ -230,10 +230,12 @@ public class PayService {
 
     private PayOrder getPayOrder(String payState,String businessOrderNumber){
         PayOrder payOrder = new PayOrder();
-
         Example example = new Example(BusinessOrder.class);
-        example.createCriteria().andEqualTo("number", businessOrderNumber).andEqualTo("state", 1);
+        example.createCriteria().andEqualTo(BusinessOrder.NUMBER, businessOrderNumber).andEqualTo(BusinessOrder.STATE, 1);
         List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
+        if(businessOrderList==null||businessOrderList.size()<=0){
+            throw new BaseException(ServerCode.ERROR, "未找到订单");
+        }
         BusinessOrder businessOrder = businessOrderList.get(0);
         payOrder.setBusinessOrderNumber(businessOrderNumber);
         //payOrder.setBusinessOrderType(businessOrder.getType());  此字段弃用

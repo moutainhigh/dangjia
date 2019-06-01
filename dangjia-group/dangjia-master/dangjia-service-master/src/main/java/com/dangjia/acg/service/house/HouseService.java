@@ -19,6 +19,7 @@ import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.core.NodeDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.house.*;
+import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
@@ -1567,6 +1568,40 @@ public class HouseService {
             }
         } catch (BaseException e) {
             LOG.error("施工记录保存异常：" + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 房子装修列表（利润统计）
+     */
+    public ServerResponse getHouseProfitList(PageDTO pageDTO, String visitState,  String searchKey) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(visitState, searchKey);
+            if (houseList.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
+                        , "查无数据");
+            }
+            PageInfo pageResult = new PageInfo(houseList);
+            for (DesignDTO houseListDTO : houseList) {
+                Double profit=0d;
+                List<HouseProfitSummaryDTO> list=iHouseMapper.getHouseProfitSummary(houseListDTO.getHouseId());
+                houseListDTO.setProfitSummarys(list);
+                for (HouseProfitSummaryDTO houseProfitSummaryDTO : list) {
+                    if("0".equals(houseProfitSummaryDTO.getPlus())){
+                        profit=profit+houseProfitSummaryDTO.getMoney();
+                    }
+                    if("1".equals(houseProfitSummaryDTO.getPlus())){
+                        profit=profit-houseProfitSummaryDTO.getMoney();
+                    }
+                }
+                houseListDTO.setProfit(profit);
+            }
+            pageResult.setList(houseList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
         }
     }
 }

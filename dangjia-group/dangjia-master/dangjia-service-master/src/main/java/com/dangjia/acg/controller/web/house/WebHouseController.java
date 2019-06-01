@@ -65,5 +65,9 @@ public class WebHouseController implements WebHouseAPI {
         return houseService.getHistoryWorker(houseId, workerTypeId, workId, pageDTO);
     }
 
-
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseProfitList(PageDTO pageDTO, String visitState,  String searchKey){
+        return houseService.getHouseProfitList(pageDTO, visitState, searchKey);
+    }
 }
