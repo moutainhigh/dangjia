@@ -163,18 +163,7 @@ public class WorkerService {
             return (ServerResponse) object;
         }
         Member worker = (Member) object;
-        Example example=new Example(HouseFlow.class);
-        example.createCriteria().andEqualTo(HouseFlow.WORKER_ID,worker.getId())
-                .andCondition(" work_steta not in(0,3)");
-        List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
-        List<HouseWorkerOrder> hwList=new ArrayList<>();
-        for (HouseFlow houseFlow : houseFlows) {
-            example = new Example(HouseWorkerOrder.class);
-            example.createCriteria()
-                    .andEqualTo(HouseWorkerOrder.WORKER_ID, worker.getId()).andEqualTo(HouseWorkerOrder.HOUSE_ID,houseFlow.getHouseId());
-            example.orderBy(HouseFlow.CREATE_DATE).desc();
-            hwList = houseWorkerOrderMapper.selectByExample(example);
-        }
+        List<HouseWorkerOrder> hwList = getHouseId(worker.getId(), worker.getWorkerType());
         PageInfo pageResult = new PageInfo(hwList);
         List<Map> hwMapList = new ArrayList<>();
         for (HouseWorkerOrder hw : hwList) {
@@ -379,21 +368,50 @@ public class WorkerService {
                 return (ServerResponse) object;
             }
             Member worker = (Member) object;
-            Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseFlow.WORKER_ID,worker.getId()).andCondition(" work_steta not in(0,3)");
-            List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+            List<HouseWorkerOrder> houseId = getHouseId(worker.getId(), worker.getWorkerType());
             List<HouseWorker> hwList=new ArrayList<>();
-            for (HouseFlow houseFlow : houseFlows) {
-                example = new Example(HouseWorker.class);
+            for (HouseWorkerOrder houseWorkerOrder : houseId) {
+                Example example = new Example(HouseWorker.class);
                 example.createCriteria().andEqualTo("workerId", worker.getId())
-                        .andEqualTo(HouseWorker.HOUSE_ID,houseFlow.getHouseId());
-                hwList = houseWorkerMapper.selectByExample(example);
+                        .andEqualTo(HouseWorker.HOUSE_ID,houseWorkerOrder.getHouseId());
+                hwList.addAll(houseWorkerMapper.selectByExample(example));
             }
             return ServerResponse.createBySuccess("获取接单记录成功", hwList);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("获取接单记录失败");
         }
+    }
+
+
+    /**
+     * 获取我的任务的房子
+     * @param WorkerId
+     * @param WorkerType
+     * @return
+     */
+    public List<HouseWorkerOrder> getHouseId(String WorkerId,int WorkerType) {
+        Example example=new Example(HouseFlow.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo(HouseFlow.WORKER_ID,WorkerId);
+        if(WorkerType==1 || WorkerType==2){
+
+        }else if(WorkerType==3){
+            criteria.andEqualTo(HouseFlow.SUPERVISOR_START,1);
+        }else{
+            criteria.andCondition(" work_steta not in(0,3)");
+        }
+        //获取我的任务的房子Id
+        List<HouseFlow> houseId = houseFlowMapper.selectByExample(example);
+        List<HouseWorkerOrder> hwList = new ArrayList<>();
+        for (HouseFlow houseFlow : houseId) {
+            Example example1 = new Example(HouseWorkerOrder.class);
+            example1.createCriteria().andEqualTo(HouseWorkerOrder.WORKER_ID, WorkerId)
+                    .andEqualTo(HouseWorkerOrder.HOUSE_ID,houseFlow.getHouseId());
+            example1.orderBy(HouseFlow.CREATE_DATE).desc();
+            hwList.addAll(houseWorkerOrderMapper.selectByExample(example1));
+        }
+        return  hwList;
     }
 
 }

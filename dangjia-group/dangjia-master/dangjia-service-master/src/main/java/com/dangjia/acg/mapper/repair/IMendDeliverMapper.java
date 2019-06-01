@@ -1,8 +1,6 @@
 package com.dangjia.acg.mapper.repair;
 
 import com.dangjia.acg.dto.deliver.SupplierDeliverDTO;
-import com.dangjia.acg.dto.repair.MendDeliverDTO;
-import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import org.apache.ibatis.annotations.Param;
