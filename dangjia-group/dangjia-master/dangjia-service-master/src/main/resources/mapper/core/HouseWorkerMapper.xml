@@ -153,6 +153,7 @@
     <select id="getMyHouseFlowList" resultType="com.dangjia.acg.dto.house.MyHouseFlowDTO">
         SELECT
         hf.id AS houseFlowId,
+        hw.id AS houseWorkerId,
         h.id AS houseId,
         h.member_id AS memberId,
         hw.worker_type_id AS workerTypeId,

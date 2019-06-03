@@ -13,6 +13,7 @@ import java.util.Date;
  */
 @Data
 public class MyHouseFlowDTO {
+    private String houseWorkerId;//任务id
     private String houseFlowId;//任务id
     private String houseId;//houseId
     private String memberId;//用户ID
