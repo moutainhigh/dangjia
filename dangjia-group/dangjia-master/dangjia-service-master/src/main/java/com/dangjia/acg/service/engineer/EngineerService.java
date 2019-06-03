@@ -841,7 +841,7 @@ public class EngineerService {
                 workerDisclosure.setName(name);
             }
             if (!CommonUtil.isEmpty(details)) {
-                workerDisclosure.setModifyDate(new Date());
+                workerDisclosure.setDetails(details);
             }
             if (state != null) {
                 workerDisclosure.setState(state);
