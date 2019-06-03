@@ -815,6 +815,7 @@ public class EngineerService {
 
     public ServerResponse addSure(WorkerDisclosure workerDisclosure) {
         try {
+            workerDisclosure.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
             iWorkerDisclosureMapper.insertSelective(workerDisclosure);
             return ServerResponse.createBySuccessMessage("添加成功");
         } catch (Exception e) {
