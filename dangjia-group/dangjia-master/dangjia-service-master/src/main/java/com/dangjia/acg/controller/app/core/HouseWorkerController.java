@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.app.core;
 
 import com.dangjia.acg.api.app.core.HouseWorkerAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseWorkerService;
@@ -108,11 +109,18 @@ public class HouseWorkerController implements HouseWorkerAPI {
 
     /**
      * 查询工地列表
+     * TODO 1.4.0后删除此接口
      */
     @Override
     @ApiMethod
     public ServerResponse getHouseFlowList(String userToken) {
         return houseWorkerService.getHouseFlowList(userToken);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getMyHouseFlowList(PageDTO pageDTO, String userToken) {
+        return houseWorkerService.getMyHouseFlowList(pageDTO, userToken);
     }
 
     /**

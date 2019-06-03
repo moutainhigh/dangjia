@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.app.core;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -64,9 +65,48 @@ public interface HouseWorkerAPI {
     ServerResponse getAdvanceInAdvance(@RequestParam("userToken") String userToken,
                                        @RequestParam("houseFlowId") String houseFlowId);
 
+    /**
+     * TODO 1.4.0后删除此接口
+     *
+     * @return
+     */
     @PostMapping("app/core/houseWorker/getHouseFlowList")
     @ApiOperation(value = "查询工地列表", notes = "查询工地列表")
     ServerResponse getHouseFlowList(@RequestParam("userToken") String userToken);
+
+    /**
+     * showdoc
+     *
+     * @param pageNum   必选 int 页码
+     * @param pageSize  必选 int 记录数
+     * @param userToken 必选/可选 string userToken
+     * @return {"res": 1000,"msg": {"resultCode": 1000, "resultMsg": "ok", "resultObj": { "pageNum": 0,"pageSize": 10,"size": 1,"startRow": 1,"endRow": 1,"total": 1, "pages": 1,"list": [{返回参数说明}],"prePage": 0, "nextPage": 1,"isFirstPage": false,"isLastPage": false,"hasPreviousPage": false,"hasNextPage": true,"navigatePages": 8,"navigatepageNums": [1],"navigateFirstPage": 1,"navigateLastPage": 1}}}
+     * @catalog 当家接口文档/房产任务模块
+     * @title 查询我的工地列表
+     * @description 查询我的工地列表
+     * @method POST
+     * @url master/app/core/houseWorker/getMyHouseFlowList
+     * @return_param houseFlowId string 任务id
+     * @return_param houseId string houseId
+     * @return_param memberId string 用户ID
+     * @return_param workerTypeId string 工种ID
+     * @return_param price string 价格
+     * @return_param houseName string 地址
+     * @return_param releaseTime Date 发布时间
+     * @return_param square string 面积
+     * @return_param memberName string 业主姓名
+     * @return_param isItNormal string 正常施工
+     * @return_param houseIsStart string 有没有今日开工记录
+     * @return_param taskNumber int 任务数量
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 2
+     * @Author: Ruking 18075121944
+     * @Date: 2019/6/3 5:59 PM
+     */
+    @PostMapping("app/core/houseWorker/getMyHouseFlowList")
+    @ApiOperation(value = "查询我的工地列表", notes = "查询我的工地列表")
+    ServerResponse getMyHouseFlowList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                      @RequestParam("userToken") String userToken);
 
     @PostMapping("app/core/houseWorker/setSwitchHouseFlow")
     @ApiOperation(value = "切换工地", notes = "切换工地")

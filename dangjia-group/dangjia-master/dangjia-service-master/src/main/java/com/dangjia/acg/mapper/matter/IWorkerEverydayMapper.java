@@ -7,12 +7,13 @@ import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
 
-/**开工事项
+/**
+ * 开工事项
  * zmj
  */
 @Repository
 public interface IWorkerEverydayMapper extends Mapper<WorkerEveryday> {
-    List<WorkerEveryday> getWorkerEverydayList(@Param("type")int type);
+    List<WorkerEveryday> getWorkerEverydayList(@Param("type") int type);
 
 }
 

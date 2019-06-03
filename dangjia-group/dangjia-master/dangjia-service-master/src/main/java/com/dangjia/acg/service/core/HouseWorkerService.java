@@ -11,12 +11,14 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HomePageBean;
 import com.dangjia.acg.dto.house.HouseChatDTO;
+import com.dangjia.acg.dto.house.MyHouseFlowDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
@@ -40,6 +42,8 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.member.GroupInfoService;
 import com.dangjia.acg.service.worker.EvaluateService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -52,7 +56,10 @@ import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * author: Ronalcheng
@@ -876,6 +883,7 @@ public class HouseWorkerService {
 
     /**
      * 根据工匠id查询施工列表
+     * TODO 1.4.0后删除此接口
      */
     public ServerResponse getHouseFlowList(String userToken) {
         try {
@@ -884,55 +892,82 @@ public class HouseWorkerService {
                 return (ServerResponse) object;
             }
             Member worker = (Member) object;
-            List<HouseWorker> listHouseWorker = houseWorkerMapper.getAllHouseWorker(worker.getId());
-            List<Map<String, Object>> listMap = new ArrayList<>();//返回通讯录list
-            if (listHouseWorker != null) {
-                for (HouseWorker houseWorker : listHouseWorker) {
-                    HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
-                    if (houseFlow == null || (worker.getWorkerType() != null && worker.getWorkerType() != 3 && houseFlow.getWorkType() == 2))
-                        continue;
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("houseFlowId", houseFlow.getId());//任务id
-                    House house = houseMapper.selectByPrimaryKey(houseWorker.getHouseId());//查询房产信息.
-                    if (house == null) continue;
-                    Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                    if (member == null) continue;
-                    //房产信息
-                    map.put("price", "¥0.00");//价格
-                    HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
-                    if(houseWorkerOrder!=null){
-                        if(houseWorkerOrder.getWorkPrice()==null){houseWorkerOrder.setWorkPrice(new BigDecimal(0));}
-                        if(houseWorkerOrder.getRepairPrice()==null){houseWorkerOrder.setRepairPrice(new BigDecimal(0));}
-                        BigDecimal remain = houseWorkerOrder.getWorkPrice().add(houseWorkerOrder.getRepairPrice());
-                        map.put("price", "¥" + (String.format("%.2f", remain.doubleValue())));//价格
+            List<MyHouseFlowDTO> listHouseWorker = houseWorkerMapper.getMyHouseFlowList(worker.getId(), worker.getWorkerType());
+            if (listHouseWorker == null || listHouseWorker.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            for (MyHouseFlowDTO myHouseFlowDTO : listHouseWorker) {
+                HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(myHouseFlowDTO.getHouseId(), myHouseFlowDTO.getWorkerTypeId());
+                if (houseWorkerOrder != null) {
+                    if (houseWorkerOrder.getRepairPrice() == null) {
+                        houseWorkerOrder.setRepairPrice(new BigDecimal(0));
                     }
-                    map.put("houseName", house.getHouseName());//地址
-                    map.put("releaseTime", houseFlow.getReleaseTime() == null ? "" : houseFlow.getReleaseTime().getTime());//发布时间
-                    map.put("square", (house.getSquare() == null ? "0" : house.getSquare()) + "m²");//面积
-                    map.put("memberName", member.getName());//业主姓名
-                    if (houseFlow.getPause() == 0) {//正常施工
-                        map.put("isItNormal", "正常施工");
-                    } else {
-                        map.put("isItNormal", "暂停施工");//暂停施工
+                    if (houseWorkerOrder.getWorkPrice() == null) {
+                        houseWorkerOrder.setWorkPrice(new BigDecimal(0));
                     }
-                    List<HouseFlowApply> todayStartList = houseFlowApplyMapper.getTodayStartByHouseId(house.getId(), new Date());//查询今日开工记录
-                    if (todayStartList == null || todayStartList.size() == 0) {//没有今日开工记录
-                        map.put("houseIsStart", "今日未开工");//是否正常施工
-                    } else {
-                        map.put("houseIsStart", "今日已开工");//是否正常施工
-                    }
-                    List<HouseFlowApply> supervisorCheckList = houseFlowApplyMapper.getSupervisorCheckList(house.getId());//查询所有待大管家审核
-                    map.put("taskNumber", supervisorCheckList.size());//任务数量
-                    listMap.add(map);
+                    BigDecimal remain = houseWorkerOrder.getWorkPrice().add(houseWorkerOrder.getRepairPrice());
+                    myHouseFlowDTO.setPrice("¥" + (String.format("%.2f", remain.doubleValue())));
+                }
+                Member member = memberMapper.selectByPrimaryKey(myHouseFlowDTO.getMemberId());
+                if (member != null) {
+                    myHouseFlowDTO.setMemberName(member.getNickName());
+                }
+                List<HouseFlowApply> supervisorCheckList = houseFlowApplyMapper.getSupervisorCheckList(myHouseFlowDTO.getHouseId());//查询所有待大管家审核
+                myHouseFlowDTO.setTaskNumber(supervisorCheckList == null ? 0 : supervisorCheckList.size());//任务数量
+                List<HouseFlowApply> todayStartList = houseFlowApplyMapper.getTodayStartByHouseId(myHouseFlowDTO.getHouseId(), new Date());//查询今日开工记录
+                if (todayStartList == null || todayStartList.size() == 0) {//没有今日开工记录
+                    myHouseFlowDTO.setHouseIsStart("今日未开工");//是否正常施工
+                } else {
+                    myHouseFlowDTO.setHouseIsStart("今日已开工");//是否正常施工
                 }
             }
-            if (listMap.size() <= 0)
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            return ServerResponse.createBySuccess("获取施工列表成功", listMap);
+            return ServerResponse.createBySuccess("获取施工列表成功", listHouseWorker);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错，获取施工列表失败！");
         }
+    }
+
+    public ServerResponse getMyHouseFlowList(PageDTO pageDTO, String userToken) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member worker = (Member) object;
+        List<MyHouseFlowDTO> listHouseWorker = houseWorkerMapper.getMyHouseFlowList(worker.getId(), worker.getWorkerType());
+        if (listHouseWorker == null || listHouseWorker.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        PageInfo pageResult = new PageInfo(listHouseWorker);
+        for (MyHouseFlowDTO myHouseFlowDTO : listHouseWorker) {
+            Member member = memberMapper.selectByPrimaryKey(myHouseFlowDTO.getMemberId());
+            if (member != null) {
+                myHouseFlowDTO.setMemberName(member.getNickName());
+            }
+            HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(myHouseFlowDTO.getHouseId(), myHouseFlowDTO.getWorkerTypeId());
+            if (houseWorkerOrder != null) {
+                if (houseWorkerOrder.getWorkPrice() == null) {
+                    houseWorkerOrder.setWorkPrice(new BigDecimal(0));
+                }
+                if (houseWorkerOrder.getRepairPrice() == null) {
+                    houseWorkerOrder.setRepairPrice(new BigDecimal(0));
+                }
+                BigDecimal remain = houseWorkerOrder.getWorkPrice().add(houseWorkerOrder.getRepairPrice());
+                myHouseFlowDTO.setPrice("¥" + (String.format("%.2f", remain.doubleValue())));
+            }
+
+            List<HouseFlowApply> todayStartList = houseFlowApplyMapper.getTodayStartByHouseId(myHouseFlowDTO.getHouseId(), new Date());//查询今日开工记录
+            if (todayStartList == null || todayStartList.size() == 0) {//没有今日开工记录
+                myHouseFlowDTO.setHouseIsStart("今日未开工");//是否正常施工
+            } else {
+                myHouseFlowDTO.setHouseIsStart("今日已开工");//是否正常施工
+            }
+            List<HouseFlowApply> supervisorCheckList = houseFlowApplyMapper.getSupervisorCheckList(myHouseFlowDTO.getHouseId());//查询所有待大管家审核
+            myHouseFlowDTO.setTaskNumber(supervisorCheckList == null ? 0 : supervisorCheckList.size());//任务数量
+        }
+        pageResult.setList(listHouseWorker);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
     /**
@@ -945,10 +980,11 @@ public class HouseWorkerService {
                 return (ServerResponse) object;
             }
             Member worker = (Member) object;
-            List<HouseWorker> listHouseWorker = houseWorkerMapper.getAllHouseWorker(worker.getId());
-            for (HouseWorker houseWorker : listHouseWorker) {
-                HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
-                if (houseFlow != null && houseFlow.getId().equals(houseFlowId)) {//选中的任务isSelect改为1
+            List<MyHouseFlowDTO> listHouseWorker = houseWorkerMapper.getMyHouseFlowList(worker.getId(), worker.getWorkerType());
+            for (MyHouseFlowDTO myHouseFlowDTO : listHouseWorker) {
+                HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(myHouseFlowDTO.getHouseId(), myHouseFlowDTO.getWorkerTypeId());
+                HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(myHouseFlowDTO.getHouseId(), houseFlow.getWorkerType());
+                if (houseFlow.getId().equals(houseFlowId)) {//选中的任务isSelect改为1
                     houseWorker.setIsSelect(1);
                     houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 } else {//其他改为0
