@@ -7,8 +7,9 @@ import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
 
-/**申请的图片
- *zmj
+/**
+ * 申请的图片
+ * zmj
  */
 @Repository
 public interface IHouseFlowApplyImageMapper extends Mapper<HouseFlowApplyImage> {

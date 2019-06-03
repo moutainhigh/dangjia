@@ -10,24 +10,24 @@ import tk.mybatis.mapper.common.Mapper;
 import java.util.List;
 
 @Repository
-public interface IMendDeliverMapper extends Mapper<MendDeliver>{
+public interface IMendDeliverMapper extends Mapper<MendDeliver> {
 
     /*供应商查看货单列表*/
     List<SupplierDeliverDTO> mendDeliverList(@Param("supplierId") String supplierId,
-                                             @Param("shipAddress")String shipAddress,
+                                             @Param("shipAddress") String shipAddress,
                                              @Param("beginDate") String beginDate,
                                              @Param("endDate") String endDate,
                                              @Param("applyState") int applyState);
 
     /*合併結算已结算*/
     MendDeliver selectClsd(@Param("id") String id,
-                            @Param("shipAddress")String shipAddress,
-                            @Param("beginDate") String beginDate,
-                            @Param("endDate") String endDate);
-
+                           @Param("shipAddress") String shipAddress,
+                           @Param("beginDate") String beginDate,
+                           @Param("endDate") String endDate);
 
     /**
      * 退货单查看详情
+     *
      * @param id
      * @return
      */

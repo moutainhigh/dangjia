@@ -89,13 +89,15 @@ public class WebSplitDeliverService {
                 example = new Example(SplitDeliver.class);
                 example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID,webSplitDeliverItemDTOList.getSupplierId())
                         .andEqualTo(SplitDeliver.APPLY_STATE,0)
-                        .andEqualTo(SplitDeliver.DATA_STATUS,0);
+                        .andEqualTo(SplitDeliver.DATA_STATUS,0)
+                        .andCondition(" shipping_state IN (2,4)");
                 int wait=iSplitDeliverMapper.selectCountByExample(example);
                 //退货待处理数量
                 example=new Example(MendDeliver.class);
                 example.createCriteria().andEqualTo(MendDeliver.DATA_STATUS,0)
                         .andEqualTo(MendDeliver.APPLY_STATE,0)
-                        .andEqualTo(MendDeliver.SUPPLIER_ID,webSplitDeliverItemDTOList.getSupplierId());
+                        .andEqualTo(MendDeliver.SUPPLIER_ID,webSplitDeliverItemDTOList.getSupplierId())
+                        .andCondition(" shipping_state=1");
                 wait+=iMendDeliverMapper.selectCountByExample(example);
                 webSplitDeliverItemDTOList.setWait(wait);
             }
@@ -251,6 +253,7 @@ public class WebSplitDeliverService {
                         MendDeliver mendDeliver=new MendDeliver();
                         mendDeliver.setId(id);
                         mendDeliver.setApplyState(2);
+                        mendDeliver.setShippingState(2);
                         iMendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
                         mendDeliverPrice+=iMendDeliverMapper.selectByPrimaryKey(id).getTotalAmount();
                     }

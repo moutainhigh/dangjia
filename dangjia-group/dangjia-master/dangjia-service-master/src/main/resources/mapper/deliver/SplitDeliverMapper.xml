@@ -137,6 +137,7 @@
         WHERE
         data_status = 0
         and apply_state IS not NULL
+        AND shipping_state IN (2,4)
         AND supplier_id=#{supplierId}
         <if test="applyState == 0">
             and apply_state =0
