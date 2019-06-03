@@ -253,6 +253,7 @@ public class WebSplitDeliverService {
                         MendDeliver mendDeliver=new MendDeliver();
                         mendDeliver.setId(id);
                         mendDeliver.setApplyState(2);
+                        mendDeliver.setShippingState(2);
                         iMendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
                         mendDeliverPrice+=iMendDeliverMapper.selectByPrimaryKey(id).getTotalAmount();
                     }
