@@ -29,11 +29,39 @@ public interface HouseAPI {
 
     /**
      * 房产列表
+     * TODO 1.4.0后删除此接口
      */
     @PostMapping("app/house/house/getHouseList")
     @ApiOperation(value = "房产列表", notes = "房产列表")
     ServerResponse getHouseList(@RequestParam("userToken") String userToken,
                                 @RequestParam("cityId") String cityId);
+
+    /**
+     * showdoc
+     *
+     * @param pageNum   必选 int 页码
+     * @param pageSize  必选 int 记录数
+     * @param userToken 必选 string userToken
+     * @return {"res": 1000,"msg": {"resultCode": 1000, "resultMsg": "ok", "resultObj": { "pageNum": 0,"pageSize": 10,"size": 1,"startRow": 1,"endRow": 1,"total": 1, "pages": 1,"list": [{返回参数说明}],"prePage": 0, "nextPage": 1,"isFirstPage": false,"isLastPage": false,"hasPreviousPage": false,"hasNextPage": true,"navigatePages": 8,"navigatepageNums": [1],"navigateFirstPage": 1,"navigateLastPage": 1}}}
+     * @catalog  当家接口文档/房产任务模块
+     * @title 获取我的房产列表
+     * @description 获取我的房产列表
+     * @method POST
+     * @url master/app/house/getMyHouseList
+     * @return_param houseId string houseId
+     * @return_param houseName string houseName
+     * @return_param task int 任务数
+     * @return_param btName string 按钮提示名
+     * @return_param onclick string 按钮点击跳转的URL（为null则不需要跳转）
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 1
+     * @Author: Ruking 18075121944
+     * @Date: 2019/6/3 3:42 PM
+     */
+    @PostMapping("app/house/getMyHouseList")
+    @ApiOperation(value = "获取我的房产列表", notes = "获取我的房产列表")
+    ServerResponse getMyHouseList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                  @RequestParam("userToken") String userToken);
 
     /**
      * 我的房产
@@ -112,7 +140,7 @@ public interface HouseAPI {
     @PostMapping("app/house/house/queryConstructionRecordAll")
     @ApiOperation(value = "施工记录(new 包含要补退记录)", notes = "施工记录(new 包含要补退记录)")
     ServerResponse queryConstructionRecordAll(@RequestParam("houseId") String houseId,
-                                           @RequestParam("pageDTO") PageDTO pageDTO);
+                                              @RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping("app/house/house/getHouseFlowApply")
     @ApiOperation(value = "获取施工记录详情", notes = "获取施工记录详情")

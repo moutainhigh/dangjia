@@ -33,11 +33,18 @@ public class HouseController implements HouseAPI {
 
     /**
      * 房产列表
+     * TODO 1.4.0后删除此接口
      */
     @Override
     @ApiMethod
     public ServerResponse getHouseList(String userToken, String cityId) {
         return houseService.getHouseList(userToken, cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getMyHouseList(PageDTO pageDTO, String userToken) {
+        return houseService.getMyHouseList(pageDTO, userToken);
     }
 
     /**
@@ -146,27 +153,27 @@ public class HouseController implements HouseAPI {
      * @param houseId 房子ID @Instance: 835240771552816792532
      * @param pageDTO 分页内容
      * @return 施工记录列表 @see swagger:房产接口-> 施工记录
-     *
      */
     @Override
     @ApiMethod
     public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO) {
 //        return  houseService.queryConstructionRecord(houseId, pageDTO, null);
-        return  houseService.queryConstructionRecordAll(houseId, pageDTO);
+        return houseService.queryConstructionRecordAll(houseId, pageDTO);
     }
+
     /**
      * 施工记录
      *
      * @param houseId 房子ID @Instance: 835240771552816792532
      * @param pageDTO 分页内容
      * @return 施工记录列表 @see swagger:房产接口-> 施工记录
-     *
      */
     @Override
     @ApiMethod
     public ServerResponse queryConstructionRecordAll(String houseId, PageDTO pageDTO) {
-        return  houseService.queryConstructionRecordAll(houseId, pageDTO);
+        return houseService.queryConstructionRecordAll(houseId, pageDTO);
     }
+
     @Override
     @ApiMethod
     public ServerResponse getHouseFlowApply(String houseFlowApplyId) {
@@ -216,10 +223,11 @@ public class HouseController implements HouseAPI {
             return ServerResponse.createByErrorMessage("请输入正确的面积");
         }
     }
+
     @Override
     @ApiMethod
-    public ServerResponse updateByHouseId(String building,String unit,String number,String houseId,String villageId,String cityId,String modelingLayoutId) {
-       return  houseService.updateByHouseId(building,unit,number,houseId,villageId,cityId,modelingLayoutId);
+    public ServerResponse updateByHouseId(String building, String unit, String number, String houseId, String villageId, String cityId, String modelingLayoutId) {
+        return houseService.updateByHouseId(building, unit, number, houseId, villageId, cityId, modelingLayoutId);
     }
 
 }
