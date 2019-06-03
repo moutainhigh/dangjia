@@ -272,7 +272,7 @@ public class HouseFlowScheduleService {
                         int numall = 1 + DateUtil.daysofTwo(houseFlowApply.getStartDate(), houseFlowApply.getEndDate());//请假天数
                         Map map =new HashMap<>();
                         map.put("date",DateUtil.dateToString(houseFlowApply.getCreateDate(),DateUtil.FORMAT2));
-                        map.put("info",houseFlow.getWorkerTypeName()+"申请"+numall+"天停工，工期延期"+numall+"天"+ (CommonUtil.isEmpty(houseFlowApply.getApplyDec())?"":",理由："+houseFlowApply.getApplyDec()));
+                        map.put("info",houseFlow.getWorkerTypeName()+"申请"+numall+"天停工"+ (CommonUtil.isEmpty(houseFlowApply.getApplyDec())?"":",理由："+houseFlowApply.getApplyDec()));
                         map.put("type",3);
                         actuals.add(map);
                     }
