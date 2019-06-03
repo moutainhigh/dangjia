@@ -454,7 +454,6 @@ public class HouseWorkerService {
                 for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
                     Example example=new Example(HouseFlowApply.class);
                     example.createCriteria().andCondition("   apply_type in (0,1,2) ")
-                            .andEqualTo(HouseFlowApply.WORKER_ID,workerId)
                             .andNotEqualTo(HouseFlowApply.SUPERVISOR_CHECK,2)
                             .andEqualTo(HouseFlowApply.HOUSE_FLOW_ID,houseFlowApply.getHouseFlowId());
                     List<HouseFlowApply> houseFlowApplyList1 =  houseFlowApplyMapper.selectByExample(example);
