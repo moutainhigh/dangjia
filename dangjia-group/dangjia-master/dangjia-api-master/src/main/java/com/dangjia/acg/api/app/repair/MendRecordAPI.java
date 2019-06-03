@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface MendRecordAPI {
 
     @PostMapping(value = "app/repair/mendRecord/mendOrderDetail")
-    @ApiOperation(value = "补退明细", notes = "补退明细")
+    @ApiOperation(value = "审/要/补/退明细", notes = "审/要/补/退明细")
     ServerResponse mendOrderDetail(@RequestParam("userToken") String userToken,
                                    @RequestParam("mendOrderId") String mendOrderId,
                                    @RequestParam("type") Integer type);
