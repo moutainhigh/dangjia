@@ -56,6 +56,7 @@ import com.dangjia.acg.modle.repair.MendWorker;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.HouseFlowScheduleService;
 import com.dangjia.acg.service.deliver.ProductChangeService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
 import com.dangjia.acg.service.member.GroupInfoService;
@@ -142,6 +143,8 @@ public class PaymentService {
     private IHouseDistributionMapper iHouseDistributionMapper;
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
+    @Autowired
+    private HouseFlowScheduleService houseFlowScheduleService;
     @Autowired
     private IOrderSplitMapper orderSplitMapper;
     @Autowired
@@ -421,6 +424,8 @@ public class PaymentService {
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
                 changeOrder.setState(4);//已支付
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+                houseFlowScheduleService.updateFlowSchedule(changeOrder.getHouseId(),changeOrder.getWorkerTypeId(),changeOrder.getScheduleDay(),null);
+
                 HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(mendOrder.getHouseId(), mendOrder.getWorkerTypeId());
                 HouseWorkerOrder houseWorkerOrdernew = new HouseWorkerOrder();
                 houseWorkerOrdernew.setId(houseWorkerOrder.getId());

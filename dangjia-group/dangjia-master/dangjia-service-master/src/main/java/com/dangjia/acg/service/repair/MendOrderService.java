@@ -277,7 +277,7 @@ public class MendOrderService {
 //                        (DjConstants.PushMessage.CRAFTSMAN_T_WORK, house.getHouseName()), "");
 
 
-                houseFlowScheduleService.updateFlowSchedule(houseId,workerTypeId,null,changeOrder.getScheduleDay());
+                houseFlowScheduleService.updateFlowSchedule(houseId,changeOrder.getWorkerTypeId(),null,changeOrder.getScheduleDay());
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 String urlyz = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + houseId + "&roleType=1";
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "退人工变更", String.format
@@ -433,7 +433,7 @@ public class MendOrderService {
                 houseService.insertConstructionRecordAll(mendOrder, changeOrder);
                 changeOrder.setState(2);//通过->工匠业主审核
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
-                houseFlowScheduleService.updateFlowSchedule(houseId,workerTypeId,changeOrder.getScheduleDay(),null);
+//                houseFlowScheduleService.updateFlowSchedule(houseId,changeOrder.getWorkerTypeId(),changeOrder.getScheduleDay(),null);
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
 //                String urlyz= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+houseId+"&roleType=1";
@@ -447,7 +447,7 @@ public class MendOrderService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
+            return ServerResponse.createByErrorMessage("操作失败");
         }
     }
 

@@ -21,9 +21,9 @@ public class ComplainController implements ComplainAPI {
     //添加申诉
     @Override
     @ApiMethod
-    public ServerResponse addComplain(HttpServletRequest request, String userToken,  String memberId,Integer complainType, String businessId,
-                                      String houseId,String files) {
-        return complainService.addComplain(userToken,  memberId, complainType, businessId, houseId, files);
+    public ServerResponse addComplain(HttpServletRequest request, String userToken, String memberId, Integer complainType, String businessId,
+                                      String houseId, String files) {
+        return complainService.addComplain(userToken, memberId, complainType, businessId, houseId, files);
     }
 
     //查询申诉
@@ -37,8 +37,8 @@ public class ComplainController implements ComplainAPI {
     @Override
     @ApiMethod
     public ServerResponse updataComplain(HttpServletRequest request, String userId, String complainId, Integer state, String description,
-                                         String files,String operateId,String operateName) {
-        return complainService.updataComplain(userId, complainId, state, description, files,operateId,operateName);
+                                         String files, String operateId, String operateName) {
+        return complainService.updataComplain(userId, complainId, state, description, files, operateId, operateName);
     }
 
     @Override
@@ -49,8 +49,8 @@ public class ComplainController implements ComplainAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse userStop(String houseId, String userToken,String content) {
-        return complainService.userStop(houseId,userToken,content);
+    public ServerResponse userStop(String houseId, String userToken, String content) {
+        return complainService.userStop(houseId, userToken, content);
     }
 
     @Override
@@ -62,12 +62,13 @@ public class ComplainController implements ComplainAPI {
     @Override
     @ApiMethod
     public ServerResponse updateAdminStop(String jsonStr, String content, String houseId) {
-        return complainService.updateAdminStop(jsonStr,content,houseId);
+        return complainService.updateAdminStop(jsonStr, content, houseId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse commitStop(String backMoney, String content, String userToken, String houseId) {
-        return complainService.commitStop(backMoney,content,userToken,houseId);
+    public ServerResponse commitStop(String backMoney, String content, String userToken, String userId, String houseId) {
+        return complainService.commitStop(backMoney, content, userToken, userId, houseId);
     }
 }
+

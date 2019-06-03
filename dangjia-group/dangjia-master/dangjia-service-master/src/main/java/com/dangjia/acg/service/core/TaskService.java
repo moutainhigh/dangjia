@@ -123,7 +123,7 @@ public class TaskService {
         }
         String houseId = null;
         //大管家
-        if (userRole == 2 && member.getWorkerType() == 3) {
+        if (userRole == 2 || userRole == 3) {
             if (houseList.size() > 0) {
                 buttonDTO.setState(2);
                 for (House house : houseList) {
