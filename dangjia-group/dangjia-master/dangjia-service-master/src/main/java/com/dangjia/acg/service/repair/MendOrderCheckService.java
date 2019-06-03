@@ -456,7 +456,7 @@ public class MendOrderCheckService {
                 }
             }
             mendDeliver.setTotalAmount(actualTotalAmount);//累计退货总价
-            mendDeliver.setShippingState(2);
+            mendDeliver.setShippingState(1);
             mendDeliver.setOperatorId(operator.getId());
             mendDeliver.setBackTime(new Date());
             mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
@@ -608,7 +608,7 @@ public class MendOrderCheckService {
                     memberMapper.updateByPrimaryKeySelective(member);
 
                 }
-                mendDeliver.setShippingState(3);
+                mendDeliver.setShippingState(1);
                 mendDeliver.setModifyDate(new Date());
                 mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
 
