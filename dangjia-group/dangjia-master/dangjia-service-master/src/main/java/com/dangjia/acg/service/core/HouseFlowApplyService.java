@@ -153,6 +153,7 @@ public class HouseFlowApplyService {
             }else{
                 hfa.setMemberCheck(1);
             }
+            hfa.setSupervisorCheck(1);
             hfa.setPayState(1);
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
 
