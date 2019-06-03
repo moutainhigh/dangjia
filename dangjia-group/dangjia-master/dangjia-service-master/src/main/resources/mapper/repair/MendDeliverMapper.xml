@@ -19,6 +19,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             WHERE
             data_status = 0
             and apply_state IS not NULL
+            AND shipping_state=1
             AND supplier_id=#{supplierId}
             <if test="applyState == 0">
                     and apply_state =0
