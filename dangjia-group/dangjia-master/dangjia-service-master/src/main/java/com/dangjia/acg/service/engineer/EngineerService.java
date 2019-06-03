@@ -881,7 +881,7 @@ public class EngineerService {
         if (type != null) {
             example.createCriteria().andEqualTo(WorkerEveryday.TYPE, type);
         }
-        if (CommonUtil.isEmpty(search)) {
+        if (!CommonUtil.isEmpty(search)) {
             example.createCriteria().andLike(WorkerEveryday.NAME, "%" + search + "%");
         }
         example.orderBy(WorkerEveryday.TYPE).orderBy(WorkerEveryday.MODIFY_DATE).desc();
@@ -893,18 +893,17 @@ public class EngineerService {
     public ServerResponse updateItems(String name, Integer type, Integer state, String id) {
         try {
             WorkerEveryday workerEveryday = iWorkerEverydayMapper.selectByPrimaryKey(id);
-            if (CommonUtil.isEmpty(name)) {
+            if (!CommonUtil.isEmpty(name)) {
                 workerEveryday.setName(name);
-                workerEveryday.setModifyDate(new Date());
             }
             if (type != null) {
                 workerEveryday.setType(type);
-                workerEveryday.setModifyDate(new Date());
             }
             if (state != null) {
                 workerEveryday.setState(state);
-                workerEveryday.setModifyDate(new Date());
             }
+
+            workerEveryday.setModifyDate(new Date());
             iWorkerEverydayMapper.updateByPrimaryKeySelective(workerEveryday);
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
