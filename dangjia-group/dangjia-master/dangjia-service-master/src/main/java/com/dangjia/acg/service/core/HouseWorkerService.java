@@ -586,8 +586,6 @@ public class HouseWorkerService {
                 houseFlow.setPause(1);//0:正常；1暂停；
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
                 //工匠申请停工不用审核，申请停工超过2天的，第3天起每天扣除1积分
-
-                houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(),houseFlow.getWorkerTypeId(),suspendDay,null);
                 int score=suspendDay-2;
                 if(score>0){
                     evaluateService.updateMemberIntegral(workerId,houseFlow.getHouseId(),new BigDecimal(score),"申请停工超过2天，积分扣除");
