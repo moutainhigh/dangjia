@@ -868,7 +868,7 @@ public class ComplainService {
         WorkerDetail workerDetail1 = new WorkerDetail();
         workerDetail1.setName(content);
         workerDetail1.setWorkerId(member.getId());
-        workerDetail1.setWorkerName(member.getName());
+        workerDetail1.setWorkerName(member.getNickName());
         workerDetail1.setHouseId(houseId);
         workerDetail1.setMoney(backMoney);
         workerDetail1.setState(0);
