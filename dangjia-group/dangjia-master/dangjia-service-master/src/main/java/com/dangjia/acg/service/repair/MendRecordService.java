@@ -7,6 +7,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDetail;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
+import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -14,6 +15,7 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.*;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.house.House;
@@ -67,6 +69,8 @@ public class MendRecordService {
     @Autowired
     private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     /**
@@ -394,12 +398,21 @@ public class MendRecordService {
                 } else {
                     example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 ");
                 }
+                example.orderBy(HouseFlowApply.CREATE_DATE).desc();
                 List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
-
                 for (HouseFlowApply houseFlowApply : houseFlowApplies) {
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
                     Map<String, Object> map = new HashMap<>();
                     map.put("mendOrderId", houseFlowApply.getId());
-                    map.put("number", "");
+                    if(houseFlowApply.getApplyType()==0){
+                        map.put("number", workerType.getName()+"每日完工审核");
+                    }
+                    if(houseFlowApply.getApplyType()==1){
+                        map.put("number", workerType.getName()+"阶段完工审核");
+                    }
+                    if(houseFlowApply.getApplyType()==2){
+                        map.put("number", workerType.getName()+"整体完工审核");
+                    }
                     map.put("state", houseFlowApply.getApplyType());
                     map.put("createDate", houseFlowApply.getCreateDate());
                     map.put("type", type);
