@@ -220,7 +220,8 @@ public class HouseService {
             example1.createCriteria()
 //                    .andEqualTo(HouseFlow.WORKER_TYPE, 3)
                     .andEqualTo(HouseFlow.HOUSE_ID, house.getId())
-                    .andEqualTo(HouseFlow.SUPERVISOR_START, 1);
+//                    .andEqualTo(HouseFlow.SUPERVISOR_START, 1)
+            ;
             List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example1);
             boolean type = false;
             if (houseFlows.size() > 0) {
@@ -234,7 +235,6 @@ public class HouseService {
                 String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
                 switch (house.getVisitState()) {
                     case 1:
-                    case 0:
                         map.put("btName", "申请结束装修");
                         map.put("onclick", webAddress + "ownerEnd?title=填写原因&houseId=" + house.getId());
                         break;
@@ -829,6 +829,9 @@ public class HouseService {
             House house = iHouseMapper.selectByPrimaryKey(houseId);
             if (house == null) {
                 return ServerResponse.createByErrorMessage("修改房子精算状态失败");
+            }
+            if (house.getVisitState() != 1) {
+                return ServerResponse.createByErrorMessage("该房子不在装修中");
             }
             if (house.getDecorationType() == 2 && house.getDesignerOk() != 3 && budgetOk == -1) {
                 return ServerResponse.createByErrorMessage("请先上传设计图！");
