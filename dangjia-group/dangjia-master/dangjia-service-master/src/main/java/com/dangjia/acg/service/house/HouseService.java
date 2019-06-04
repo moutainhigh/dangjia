@@ -169,6 +169,7 @@ public class HouseService {
 
     /**
      * 房产列表
+     * TODO 1.4.0后删除此接口
      */
     public ServerResponse getHouseList(String userToken, String cityId) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
@@ -180,21 +181,56 @@ public class HouseService {
         List<House> houseList = iHouseMapper.selectByExample(example);
         List<Map<String, String>> mapList = new ArrayList<>();
         for (House house : houseList) {
-            Example example1=new Example(HouseFlow.class);
-            example1.createCriteria().andEqualTo(HouseFlow.WORKER_TYPE,3)
-                    .andEqualTo(HouseFlow.HOUSE_ID,house.getId()).andEqualTo(HouseFlow.SUPERVISOR_START,1);
+            Map<String, String> map = new HashMap<>();
+            map.put("houseId", house.getId());
+            map.put("houseName", house.getHouseName());
+            map.put("task", this.getTask(house.getId()) + "");
+            mapList.add(map);
+        }
+        return ServerResponse.createBySuccess("查询成功", mapList);
+    }
+
+    /**
+     * 获取我的房产
+     *
+     * @param pageDTO
+     * @param userToken
+     * @return
+     */
+    public ServerResponse getMyHouseList(PageDTO pageDTO, String userToken) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member worker = (Member) object;
+        Example example = new Example(House.class);
+        example.createCriteria()
+                .andEqualTo(House.MEMBER_ID, worker.getId())
+                .andNotEqualTo(House.VISIT_STATE, 0).andNotEqualTo(House.VISIT_STATE, 2)
+                .andEqualTo(House.DATA_STATUS, 0);
+        List<House> houseList = iHouseMapper.selectByExample(example);
+        if (houseList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无房产");
+        }
+        PageInfo pageResult = new PageInfo(houseList);
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        for (House house : houseList) {
+            Example example1 = new Example(HouseFlow.class);
+            example1.createCriteria().andEqualTo(HouseFlow.WORKER_TYPE, 3)
+                    .andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.SUPERVISOR_START, 1);
             List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example1);
             boolean type = false;
             if (houseFlows.size() > 0) {
                 type = true;
             }
-            Map<String, String> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>();
             map.put("houseId", house.getId());
             map.put("houseName", house.getHouseName());
-            map.put("task", this.getTask(house.getId()) + "");
+            map.put("task", this.getTask(house.getId()));
             if (type) {
                 String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
-                switch (house.getVisitState()){
+                switch (house.getVisitState()) {
                     case 1:
                         map.put("btName", "申请结束装修");
                         map.put("onclick", webAddress + "ownerEnd?title=填写原因&houseId=" + house.getId());
@@ -215,7 +251,8 @@ public class HouseService {
             }
             mapList.add(map);
         }
-        return ServerResponse.createBySuccess("查询成功", mapList);
+        pageResult.setList(mapList);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
     /**
@@ -334,9 +371,9 @@ public class HouseService {
             houseResult.setBuildStage("休眠中");
         } else if (visitState == 3) {
             houseResult.setBuildStage("已竣工");
-        } else if (visitState == 5){
+        } else if (visitState == 5) {
             houseResult.setBuildStage("提前结束装修审核中");
-        }else {
+        } else {
             houseResult.setBuildStage("提前结束装修");
         }
         /*展示各种进度*/
@@ -1574,7 +1611,7 @@ public class HouseService {
     /**
      * 房子装修列表（利润统计）
      */
-    public ServerResponse getHouseProfitList(PageDTO pageDTO, String visitState,  String searchKey) {
+    public ServerResponse getHouseProfitList(PageDTO pageDTO, String visitState, String searchKey) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(visitState, searchKey);
@@ -1584,15 +1621,15 @@ public class HouseService {
             }
             PageInfo pageResult = new PageInfo(houseList);
             for (DesignDTO houseListDTO : houseList) {
-                Double profit=0d;
-                List<HouseProfitSummaryDTO> list=iHouseMapper.getHouseProfitSummary(houseListDTO.getHouseId());
+                Double profit = 0d;
+                List<HouseProfitSummaryDTO> list = iHouseMapper.getHouseProfitSummary(houseListDTO.getHouseId());
                 houseListDTO.setProfitSummarys(list);
                 for (HouseProfitSummaryDTO houseProfitSummaryDTO : list) {
-                    if("0".equals(houseProfitSummaryDTO.getPlus())){
-                        profit=profit+houseProfitSummaryDTO.getMoney();
+                    if ("0".equals(houseProfitSummaryDTO.getPlus())) {
+                        profit = profit + houseProfitSummaryDTO.getMoney();
                     }
-                    if("1".equals(houseProfitSummaryDTO.getPlus())){
-                        profit=profit-houseProfitSummaryDTO.getMoney();
+                    if ("1".equals(houseProfitSummaryDTO.getPlus())) {
+                        profit = profit - houseProfitSummaryDTO.getMoney();
                     }
                 }
                 houseListDTO.setProfit(profit);

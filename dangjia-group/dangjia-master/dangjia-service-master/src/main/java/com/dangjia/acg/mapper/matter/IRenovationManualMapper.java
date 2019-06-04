@@ -6,7 +6,8 @@ import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
 
-/**装修指南
+/**
+ * 装修指南
  * zmj
  */
 @Repository
