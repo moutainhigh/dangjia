@@ -217,8 +217,10 @@ public class HouseService {
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (House house : houseList) {
             Example example1 = new Example(HouseFlow.class);
-            example1.createCriteria().andEqualTo(HouseFlow.WORKER_TYPE, 3)
-                    .andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.SUPERVISOR_START, 1);
+            example1.createCriteria()
+//                    .andEqualTo(HouseFlow.WORKER_TYPE, 3)
+                    .andEqualTo(HouseFlow.HOUSE_ID, house.getId())
+                    .andEqualTo(HouseFlow.SUPERVISOR_START, 1);
             List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example1);
             boolean type = false;
             if (houseFlows.size() > 0) {
