@@ -110,7 +110,6 @@ public class DesignDataService {
         }
         DesignListDTO designDTO = new DesignListDTO();
         if (worker != null && house.getDesignerOk() != 3 && worker.getId().equals(house.getMemberId())) {//是业主而且没有设计完工将走审核逻辑
-
             if (house.getDesignerOk() != 5 && house.getDesignerOk() != 2) {
                 if (house.getVisitState() == 1) {
                     designDTO.setHistoryRecord(0);

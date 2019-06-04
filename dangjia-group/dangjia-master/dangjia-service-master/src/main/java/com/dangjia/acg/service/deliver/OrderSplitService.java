@@ -132,6 +132,7 @@ public class OrderSplitService {
     public ServerResponse sentSplitDeliver(String splitDeliverId) {
         try {
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+            System.out.println(splitDeliver);
             if(splitDeliver.getShippingState()==6){
                 return ServerResponse.createBySuccessMessage("材料员已撤回！");
             }

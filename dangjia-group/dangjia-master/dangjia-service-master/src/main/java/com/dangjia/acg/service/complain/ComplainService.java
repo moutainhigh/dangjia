@@ -478,6 +478,11 @@ public class ComplainService {
                 HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(complain.getBusinessId());
                 houseFlowApply.setMemberCheck(0);
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
+            } else if (state == 1 && complain.getComplainType() != null && complain.getComplainType() == 5) {
+                House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
+                house.setModifyDate(new Date());
+                house.setVisitState(1);
+                houseMapper.updateByPrimaryKeySelective(house);
             }
         }
         complainMapper.updateByPrimaryKeySelective(complain);
