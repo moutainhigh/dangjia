@@ -204,7 +204,31 @@ public class EvaluateService {
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }
+    //工匠今日未开工，将扣除100
+    public void absenteeismOvertime(HouseFlow houseFlow){
+        House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+        Member member = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+        BigDecimal money=new BigDecimal(100);
+        BigDecimal surplusMoney = member.getSurplusMoney().subtract(money);
+        BigDecimal haveMoney = member.getHaveMoney().subtract(money);
+        WorkerDetail workerDetail = new WorkerDetail();
+        workerDetail.setName(workerType.getName()+"旷工扣钱");
+        workerDetail.setWorkerId(member.getId());
+        workerDetail.setWorkerName(member.getName());
+        workerDetail.setHouseId(houseFlow.getHouseId());
+        workerDetail.setMoney(money);
+        workerDetail.setWalletMoney(surplusMoney);
+        workerDetail.setHaveMoney(haveMoney);
+        workerDetail.setState(3);
+        iWorkerDetailMapper.insert(workerDetail);
 
+        member.setSurplusMoney(surplusMoney);
+        member.setHaveMoney(haveMoney);
+        memberMapper.updateByPrimaryKeySelective(member);
+        configMessageService.addConfigMessage(null,"gj",member.getId(),"0",workerType.getName()+"旷工扣钱",String.format(DjConstants.PushMessage.CRAFTSMAN_ABSENTEEISM,house.getHouseName()) ,"0");
+
+    }
 //    管家审核通过工匠完工申请，工匠扣钱
     public void supervisorOvertime(HouseFlowApply houseFlowApply){
         //每超时一天扣除一次余额，每扣除一次  结束时间将延后一天，继续等待管家审核
@@ -243,6 +267,8 @@ public class EvaluateService {
 
 
     }
+
+
     /**
      * 管家审核通过工匠完工申请
      * 1.31 增加 剩余材料登记
