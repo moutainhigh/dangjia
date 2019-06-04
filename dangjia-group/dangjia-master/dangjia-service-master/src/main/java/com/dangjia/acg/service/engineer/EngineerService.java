@@ -234,15 +234,14 @@ public class EngineerService {
                 return ServerResponse.createByErrorMessage("找不到该工匠");
             }
             //0待确认开工,1装修中,2休眠中,3已完工
-            if ((hf.getSupervisorStart() == 1 || hf.getSupervisorStart() == 0)
-                    && house.getVisitState() != 2
-                    && house.getVisitState() != 3
-                    && house.getPause() == 0) {
-                house.setVisitState(hf.getSupervisorStart());
-            } else if (house.getVisitState() == 3) {
-                house.setVisitState(3);
-            } else if (house.getVisitState() == 2 || house.getPause() == 1) {
-                house.setVisitState(2);
+            if (hf.getWorkerType()==3&&hf.getSupervisorStart()==0) {
+                return ServerResponse.createByErrorMessage("该房大管家未开工");
+            }
+            if (house.getVisitState() == 3) {
+                return ServerResponse.createByErrorMessage("该房已完工");
+            }
+            if (house.getPause() == 1) {
+                return ServerResponse.createByErrorMessage("该房已休眠");
             }
             if (member.getWorkerType() != null && member.getWorkerType() != 3) {
                 if (house.getVisitState() != 1) {
@@ -272,9 +271,6 @@ public class EngineerService {
             }
             if (member.getCheckType() == 5) {
                 return ServerResponse.createByErrorMessage("该工匠未提交资料审核,请通知工匠完善资料并提交审核！");
-            }
-            if (house.getVisitState() == 2) {
-                return ServerResponse.createByErrorMessage("该房已休眠");
             }
             Example example = new Example(RewardPunishRecord.class);
             example.createCriteria().andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId()).andEqualTo(RewardPunishRecord.STATE, "0");
