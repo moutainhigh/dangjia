@@ -105,8 +105,12 @@ public class DesignDataService {
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
         }
+        if (house.getVisitState() == 4) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "已经提前结束装修");
+        }
         DesignListDTO designDTO = new DesignListDTO();
         if (worker != null && house.getDesignerOk() != 3 && worker.getId().equals(house.getMemberId())) {//是业主而且没有设计完工将走审核逻辑
+
             if (house.getDesignerOk() != 5 && house.getDesignerOk() != 2) {
                 if (house.getVisitState() == 1) {
                     designDTO.setHistoryRecord(0);
