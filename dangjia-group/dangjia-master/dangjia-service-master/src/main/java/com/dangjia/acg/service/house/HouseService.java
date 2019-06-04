@@ -245,7 +245,7 @@ public class HouseService {
                         map.put("btName", "已竣工");
                         break;
                     case 4:
-                        map.put("btName", "提前结束装修");
+                        map.put("btName", "已结束装修");
                         break;
                     case 5:
                         map.put("btName", "审核中");
