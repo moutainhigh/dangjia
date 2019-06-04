@@ -457,10 +457,10 @@ public class HouseWorkerService {
                     return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已经整体完工，无法开工");
                 }
                 //今日开工记录
-                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(null, 4, workerId, new Date());
+                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(null, applyType, workerId, new Date());
                 for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
                     Example example = new Example(HouseFlowApply.class);
-                    example.createCriteria().andCondition("   apply_type in (0,1,2) ")
+                    example.createCriteria().andCondition("   apply_type in (0,1,2)  and   to_days(create_date) = to_days('"+DateUtil.getDateString(new Date().getTime())+"') ")
                             .andNotEqualTo(HouseFlowApply.SUPERVISOR_CHECK, 2)
                             .andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowApply.getHouseFlowId());
                     List<HouseFlowApply> houseFlowApplyList1 = houseFlowApplyMapper.selectByExample(example);

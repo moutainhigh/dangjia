@@ -92,6 +92,9 @@ public class DesignerOperationService {
         if (house == null) {
             return ServerResponse.createByErrorMessage("未找到该房子");
         }
+        if (house.getVisitState() != 0 && house.getVisitState() != 1) {
+            return ServerResponse.createByErrorMessage("该房子不在装修中");
+        }
         if (house.getDesignerOk() == 3) {
             Example example = new Example(DesignBusinessOrder.class);
             Example.Criteria criteria = example.createCriteria()
@@ -206,6 +209,9 @@ public class DesignerOperationService {
         House house = houseMapper.selectByPrimaryKey(houseId);
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
+        }
+        if (house.getVisitState() != 0 && house.getVisitState() != 1) {
+            return ServerResponse.createByErrorMessage("该房子不在装修中");
         }
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
@@ -352,16 +358,19 @@ public class DesignerOperationService {
      * @return ServerResponse
      */
     private ServerResponse setQuantityRoom(String userToken, String houseId, String userId, String imageString, int type) {
+        House house = houseMapper.selectByPrimaryKey(houseId);
+        if (house == null) {
+            return ServerResponse.createByErrorMessage("没有查询到相关房子");
+        }
+        if (house.getVisitState() != 0 && house.getVisitState() != 1) {
+            return ServerResponse.createByErrorMessage("该房子不在装修中");
+        }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null && CommonUtil.isEmpty(userId)) {
             return ServerResponse.createbyUserTokenError();
         }
         if (CommonUtil.isEmpty(imageString)) {
             return ServerResponse.createByErrorMessage("请上传图片");
-        }
-        House house = houseMapper.selectByPrimaryKey(houseId);
-        if (house == null) {
-            return ServerResponse.createByErrorMessage("没有查询到相关房子");
         }
         switch (type) {
             case 0:
