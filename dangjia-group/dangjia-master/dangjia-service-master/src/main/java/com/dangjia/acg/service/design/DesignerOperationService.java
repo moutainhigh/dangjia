@@ -92,7 +92,7 @@ public class DesignerOperationService {
         if (house == null) {
             return ServerResponse.createByErrorMessage("未找到该房子");
         }
-        if (house.getVisitState() != 0 && house.getVisitState() != 1) {
+        if (house.getVisitState() != 1) {
             return ServerResponse.createByErrorMessage("该房子不在装修中");
         }
         if (house.getDesignerOk() == 3) {
@@ -210,7 +210,7 @@ public class DesignerOperationService {
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
         }
-        if (house.getVisitState() != 0 && house.getVisitState() != 1) {
+        if (house.getVisitState() != 1) {
             return ServerResponse.createByErrorMessage("该房子不在装修中");
         }
         Object object = constructionService.getMember(userToken);
@@ -362,7 +362,7 @@ public class DesignerOperationService {
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
         }
-        if (house.getVisitState() != 0 && house.getVisitState() != 1) {
+        if (house.getVisitState() != 1) {
             return ServerResponse.createByErrorMessage("该房子不在装修中");
         }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
