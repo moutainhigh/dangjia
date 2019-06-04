@@ -311,7 +311,7 @@
         h.create_date AS createDate,
         h.modify_date AS modifyDate,
         h.number as number,
-        ( CASE WHEN (h.decoration_type = 2 AND h.designer_ok != 3) THEN 1 ELSE 0 END ) AS showUpdata
+        h.designer_ok as designerOk
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
@@ -382,7 +382,8 @@
         h.is_select as isSelect,
         (
         case
-        when (f.supervisor_start = 1 or f.supervisor_start = 0) and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and
+        when (f.supervisor_start = 1 or f.supervisor_start = 0) and h.visit_state !=2 and h.visit_state !=3 and
+        h.visit_state !=4 and h.visit_state !=5 and
         h.pause=0 then f.supervisor_start
         when h.visit_state = 3 then 3
         when h.visit_state = 4 then 4
@@ -400,7 +401,8 @@
         WHERE
         h.data_status =0
         <if test="visitState==0 || visitState==1">
-            and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and h.pause=0
+            and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and
+            h.visit_state !=5 and h.pause=0
         </if>
         <if test="visitState>=2">
             and h.visit_state = #{visitState}

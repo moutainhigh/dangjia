@@ -109,27 +109,6 @@ public class HouseFlowService {
     }
 
     /**
-     * 抢单列表根据积分设置排队时间
-     *
-     * @param evaluationScore 积分
-     * @return 等待时间
-     */
-    private Date getCountDownTime(BigDecimal evaluationScore) {
-        Calendar now = Calendar.getInstance();
-        if (Double.parseDouble(evaluationScore.toString()) < 70) {//积分小于70分，加20分钟
-            now.add(Calendar.MINUTE, 20);//当前时间加20分钟
-        } else if (Double.parseDouble(evaluationScore.toString()) >= 70 && Double.parseDouble(evaluationScore.toString()) < 80) {
-            now.add(Calendar.MINUTE, 10);//当前时间加10分钟
-        } else if (Double.parseDouble(evaluationScore.toString()) >= 80 && Double.parseDouble(evaluationScore.toString()) < 90) {
-            now.add(Calendar.MINUTE, 5);//当前时间加5分钟
-        } else {
-            now.add(Calendar.MINUTE, 1);//当前时间加1分钟
-        }
-        String dateStr = DateUtil.getDateString(now.getTimeInMillis());
-        return DateUtil.toDate(dateStr);
-    }
-
-    /**
      * 抢单列表
      */
     public ServerResponse getGrabList(String userToken, String cityId) {
@@ -167,7 +146,7 @@ public class HouseFlowService {
                     if (house == null) continue;
                     AllgrabBean allgrabBean = new AllgrabBean();
                     example = new Example(HouseFlowCountDownTime.class);
-                    example.createCriteria().andEqualTo("workerId", member.getId()).andEqualTo("houseFlowId", houseFlow.getId());
+                    example.createCriteria().andEqualTo(HouseFlowCountDownTime.WORKER_ID, member.getId()).andEqualTo(HouseFlowCountDownTime.HOUSE_FLOW_ID, houseFlow.getId());
                     List<HouseFlowCountDownTime> houseFlowDownTimeList = houseFlowCountDownTimeMapper.selectByExample(example);
                     HouseFlowCountDownTime houseFlowCountDownTime = new HouseFlowCountDownTime();
                     if (houseFlowDownTimeList != null && houseFlowDownTimeList.size() > 0) {
@@ -539,31 +518,8 @@ public class HouseFlowService {
                     member.setEvaluationScore(new BigDecimal(60));
                     memberMapper.updateByPrimaryKeySelective(member);
                 }
-                if (Double.parseDouble(member.getEvaluationScore().toString()) < 70) {//积分小于70分，加20分钟
-                    Calendar now = Calendar.getInstance();
-                    now.add(Calendar.MINUTE, 20);//当前时间加20分钟
-                    String dateStr = DateUtil.getDateString(now.getTimeInMillis());
-                    Date date = DateUtil.toDate(dateStr);
-                    h.setCountDownTime(date);//可抢单时间
-                } else if (Double.parseDouble(member.getEvaluationScore().toString()) >= 70 && Double.parseDouble(member.getEvaluationScore().toString()) < 80) {
-                    Calendar now = Calendar.getInstance();
-                    now.add(Calendar.MINUTE, 10);//当前时间加10分钟
-                    String dateStr = DateUtil.getDateString(now.getTimeInMillis());
-                    Date date = DateUtil.toDate(dateStr);
-                    h.setCountDownTime(date);//可抢单时间
-                } else if (Double.parseDouble(member.getEvaluationScore().toString()) >= 80 && Double.parseDouble(member.getEvaluationScore().toString()) < 90) {
-                    Calendar now = Calendar.getInstance();
-                    now.add(Calendar.MINUTE, 5);//当前时间加5分钟
-                    String dateStr = DateUtil.getDateString(now.getTimeInMillis());
-                    Date date = DateUtil.toDate(dateStr);
-                    h.setCountDownTime(date);//可抢单时间
-                } else {
-                    Calendar now = Calendar.getInstance();
-                    now.add(Calendar.MINUTE, 1);//当前时间加1分钟
-                    String dateStr = DateUtil.getDateString(now.getTimeInMillis());
-                    Date date = DateUtil.toDate(dateStr);
-                    h.setCountDownTime(date);//可抢单时间
-                }
+                Date date = getCountDownTime(member.getEvaluationScore());
+                h.setCountDownTime(date);//可抢单时间
                 houseFlowCountDownTimeMapper.updateByPrimaryKeySelective(h);
             }
             return ServerResponse.createBySuccessMessage("拒单成功！");
@@ -571,6 +527,27 @@ public class HouseFlowService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错，拒单失败！");
         }
+    }
+
+    /**
+     * 抢单列表根据积分设置排队时间
+     *
+     * @param evaluationScore 积分
+     * @return 等待时间
+     */
+    private Date getCountDownTime(BigDecimal evaluationScore) {
+        Calendar now = Calendar.getInstance();
+        if (Double.parseDouble(evaluationScore.toString()) < 70) {//积分小于70分，加20分钟
+            now.add(Calendar.MINUTE, 20);//当前时间加20分钟
+        } else if (Double.parseDouble(evaluationScore.toString()) >= 70 && Double.parseDouble(evaluationScore.toString()) < 80) {
+            now.add(Calendar.MINUTE, 10);//当前时间加10分钟
+        } else if (Double.parseDouble(evaluationScore.toString()) >= 80 && Double.parseDouble(evaluationScore.toString()) < 90) {
+            now.add(Calendar.MINUTE, 5);//当前时间加5分钟
+        } else {
+            now.add(Calendar.MINUTE, 1);//当前时间加1分钟
+        }
+        String dateStr = DateUtil.getDateString(now.getTimeInMillis());
+        return DateUtil.toDate(dateStr);
     }
 
     /**
