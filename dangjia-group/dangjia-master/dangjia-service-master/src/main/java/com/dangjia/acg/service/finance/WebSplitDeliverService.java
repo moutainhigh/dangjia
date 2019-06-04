@@ -9,9 +9,11 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.deliver.SupplierDeliverDTO;
 import com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO;
 import com.dangjia.acg.dto.receipt.ReceiptDTO;
+import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.receipt.IReceiptMapper;
 import com.dangjia.acg.mapper.repair.IMendDeliverMapper;
+import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.receipt.Receipt;
 import com.dangjia.acg.modle.repair.MendDeliver;
@@ -40,6 +42,8 @@ public class WebSplitDeliverService {
     private IMendDeliverMapper iMendDeliverMapper;
     @Autowired
     private IReceiptMapper iReceiptMapper;
+    @Autowired
+    private IOrderSplitItemMapper iOrderSplitItemMapper;
 
     /**
      * 所有供应商
@@ -210,6 +214,16 @@ public class WebSplitDeliverService {
             List<SupplierDeliverDTO> supplierDeliverDTOS = iSplitDeliverMapper.mendDeliverList(supplierId, shipAddress, beginDate, endDate,applyState);
             for (SupplierDeliverDTO supplierDeliverDTO : supplierDeliverDTOS) {
                 supplierDeliverDTO.setDeliverType(1);
+                Example example=new Example(OrderSplitItem.class);
+                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID,supplierDeliverDTO.getId());
+                List<OrderSplitItem> orderSplitItems = iOrderSplitItemMapper.selectByExample(example);
+                Double totalAmount=0d;
+                Double applyMoney=0d;
+                for (OrderSplitItem orderSplitItem : orderSplitItems) {
+                    totalAmount+=orderSplitItem.getTotalPrice();
+                    applyMoney+=orderSplitItem.getSupCost()*orderSplitItem.getReceive();
+                }
+                supplierDeliverDTO.setTotalAmount(totalAmount);
             }
             List<SupplierDeliverDTO> supplierDeliverDTOS1 = iMendDeliverMapper.mendDeliverList(supplierId, shipAddress, beginDate, endDate,applyState);
             for (SupplierDeliverDTO supplierDeliverDTO : supplierDeliverDTOS1) {
