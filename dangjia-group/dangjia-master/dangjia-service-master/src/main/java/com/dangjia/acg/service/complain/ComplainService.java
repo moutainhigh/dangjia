@@ -833,10 +833,12 @@ public class ComplainService {
                 .andEqualTo(HouseFlow.HOUSE_ID, houseId)
                 .andEqualTo(HouseFlow.WORKER_ID, workerId);
         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example2);
-        //设置当前工序为提前竣工
-        houseFlows.get(0).setWorkSteta(6);
-        houseFlows.get(0).setWorkPrice(subtract);
-        houseFlowMapper.updateByPrimaryKeySelective(houseFlows.get(0));
+        if (houseFlows.size() > 0) {
+            //设置当前工序为提前竣工
+            houseFlows.get(0).setWorkSteta(6);
+            houseFlows.get(0).setWorkPrice(subtract);
+            houseFlowMapper.updateByPrimaryKeySelective(houseFlows.get(0));
+        }
         //工匠加流水记录
         Member member1 = memberMapper.selectByPrimaryKey(workerId);
         WorkerDetail workerDetail = new WorkerDetail();
