@@ -538,7 +538,7 @@ public class CraftsmanConstructionService {
                         bean.setIfBackOut(2);
                     } else if (flowAppList != null && flowAppList.size() > 0) {//已提交今日完工
                         promptList.add("今日已完工");
-                        bean.setIfBackOut(2);
+//                        bean.setIfBackOut(2);
                     } else {
                         buttonList.add(Utils.getButton("今日完工", 3));
                         List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(2);//事项类型  1 开工事项 2 完工事项
