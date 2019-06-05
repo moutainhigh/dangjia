@@ -313,7 +313,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         FROM
             `dj_core_house_flow_apply` f
         LEFT JOIN `dj_matter_technology_record`  fi ON fi.house_flow_apply_id = f.id
-        AND fi.image_type > 1
+        AND fi.state = 1
         WHERE
             f.member_check = 1
         AND f.house_id = #{houseId}
