@@ -161,6 +161,7 @@ public class HouseFlow extends BaseEntity {
             this.grabNumber = 0;
             this.workSteta = 0;//0未开始
             this.pause = 0;
+            this.patrol = 0;
             this.materialPrice = new BigDecimal(0.0);//材料钱
             this.workPrice = new BigDecimal(0.0);//工钱总数
             this.totalPrice = new BigDecimal(0.0);// 工钱加材料
