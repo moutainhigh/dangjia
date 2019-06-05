@@ -69,13 +69,12 @@ public class WorkerGoodsService {
         if (productList == null || productList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无工价商品");
         }
+        PageInfo pageResult = new PageInfo(productList);
         List<WorkerGoodsDTO> workerGoodsResults = new ArrayList<>();
-
         for (WorkerGoods workerGoods : productList) {
             WorkerGoodsDTO workerGoodsResult = assembleWorkerGoodsResult(workerGoods);
             workerGoodsResults.add(workerGoodsResult);
         }
-        PageInfo pageResult = new PageInfo(productList);
         pageResult.setList(workerGoodsResults);
         return ServerResponse.createBySuccess("获取工价商品列表成功", pageResult);
 

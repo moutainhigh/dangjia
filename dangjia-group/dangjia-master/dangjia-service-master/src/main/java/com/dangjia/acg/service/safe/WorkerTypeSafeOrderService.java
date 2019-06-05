@@ -1,21 +1,18 @@
 package com.dangjia.acg.service.safe;
 
-import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
-import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,28 +37,25 @@ public class WorkerTypeSafeOrderService {
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
-    private RedisClient redisClient;
+    private CraftsmanConstructionService constructionService;
     @Autowired
     private IHouseMapper houseMapper;
-    @Autowired
-    private ConfigUtil configUtil;
-    @Autowired
-    private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
 
     /**
      * 切换保险
      */
-    public ServerResponse changeSafeType(String userToken, String houseFlowId, String workerTypeSafeId, int selected){
-        AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-        if(accessToken == null){//无效的token
-            return ServerResponse.createbyUserTokenError();
+    public ServerResponse changeSafeType(String userToken, String houseFlowId, String workerTypeSafeId, int selected) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
-        try{
+        try {
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(WorkerTypeSafeOrder.class);
-            example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseFlow.getHouseId()).andEqualTo(WorkerTypeSafeOrder.WORKER_TYPE_ID,houseFlow.getWorkerTypeId());
+            example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseFlow.getHouseId())
+                    .andEqualTo(WorkerTypeSafeOrder.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
             workerTypeSafeOrderMapper.deleteByExample(example);
-            if(selected == 0){//未勾选
+            if (selected == 0) {//未勾选
                 WorkerTypeSafe workerTypeSafe = workerTypeSafeMapper.selectByPrimaryKey(workerTypeSafeId);
                 House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
                 //生成工种保险服务订单
@@ -74,48 +68,48 @@ public class WorkerTypeSafeOrderService {
                 workerTypeSafeOrder.setState(0);  //未支付
                 workerTypeSafeOrderMapper.insert(workerTypeSafeOrder);
             }
-        }catch (Exception e){
-            e.printStackTrace();
+        } catch (Exception e) {
             return ServerResponse.createByErrorMessage("操作失败");
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
     /**
-     *我的质保卡
+     * 我的质保卡
      */
-    public ServerResponse queryMySafeTypeOrder(String userToken, String houseId, PageDTO pageDTO){
-        AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+    public ServerResponse queryMySafeTypeOrder(String userToken, String houseId, PageDTO pageDTO) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(WorkerTypeSafeOrder.class);
         example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId);
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<WorkerTypeSafeOrder> list=workerTypeSafeOrderMapper.selectByExample(example);
-        List<Map> listMap=new ArrayList<>();
+        List<WorkerTypeSafeOrder> list = workerTypeSafeOrderMapper.selectByExample(example);
+        if (list == null || list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+        }
         PageInfo pageResult = new PageInfo(list);
-        for (WorkerTypeSafeOrder wtso:list) {
+        List<Map> listMap = new ArrayList<>();
+        for (WorkerTypeSafeOrder wtso : list) {
             Map map = BeanUtils.beanToMap(wtso);
             WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());//获得类型算出时间
-            map.put("workerTypeSafe",wts);
+            map.put("workerTypeSafe", wts);
             listMap.add(map);
         }
         pageResult.setList(listMap);
-        return ServerResponse.createBySuccess("ok",pageResult);
+        return ServerResponse.createBySuccess("获取质保卡成功", pageResult);
     }
 
     /*
      *我的质保卡明细
      */
-    public ServerResponse getMySafeTypeOrderDetail(String id){
-        WorkerTypeSafeOrder wtso=workerTypeSafeOrderMapper.selectByPrimaryKey(id);
-        Map map = BeanUtils.beanToMap(wtso);
-       /* WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());//获得类型算出时间
-        map.put("workerTypeSafe",wts);
-        List<HouseFlowApplyImage> imglist=houseFlowApplyImageMapper.getHouseFlowApplyImageList(wtso.getWorkerTypeId(), String.valueOf(wtso.getWorkerType()), wtso.getHouseId(), wtso.getHouseFlowId(), "0");
-        for (HouseFlowApplyImage msg:imglist) {
-            msg.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+    public ServerResponse getMySafeTypeOrderDetail(String id) {
+        WorkerTypeSafeOrder workerTypeSafeOrder = workerTypeSafeOrderMapper.selectByPrimaryKey(id);
+        if (workerTypeSafeOrder == null) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
         }
-        map.put("imglist",imglist);*/
-        return ServerResponse.createBySuccess("ok",map);
+        return ServerResponse.createBySuccess("查询成功", workerTypeSafeOrder);
     }
 
 }
