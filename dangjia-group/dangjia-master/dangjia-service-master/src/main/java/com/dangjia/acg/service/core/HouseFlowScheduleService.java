@@ -263,6 +263,9 @@ public class HouseFlowScheduleService {
                             map.put("info", houseFlow.getWorkerTypeName() + "已阶段完工，完成节点:" + houseFlowApply.getApplyDec());
                         }else{
                             map.put("info", houseFlow.getWorkerTypeName() + "已阶段完工" );
+                            if(houseFlowApply.getWorkerType()==3){
+                                map.put("info", "大管家验收"+houseFlow.getWorkerTypeName() + "的阶段完工" );
+                            }
                         }
                         map.put("type",2);
                         actuals.add(map);
@@ -275,6 +278,10 @@ public class HouseFlowScheduleService {
                             map.put("info", houseFlow.getWorkerTypeName() + "已整体完工，完成节点:" + houseFlowApply.getApplyDec());
                         }else{
                             map.put("info", houseFlow.getWorkerTypeName() + "已整体完工" );
+                            if(houseFlowApply.getWorkerType()==3){
+                                map.put("info", "大管家验收"+houseFlow.getWorkerTypeName() + "的整体完工" );
+                            }
+
                         }
                         map.put("type",2);
                         actuals.add(map);
@@ -357,7 +364,7 @@ public class HouseFlowScheduleService {
                 if (actualType == 3 && type == 3) {
                     type = 5; break;
                 }
-                if (type != 2 && type != 4 && type != 5) {
+                if (actualType == 3 && type != 2 && type != 4 && type != 5) {
                     type = 2;
                 }
             }
