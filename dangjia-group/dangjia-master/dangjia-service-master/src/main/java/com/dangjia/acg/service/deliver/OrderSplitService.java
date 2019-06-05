@@ -238,10 +238,14 @@ public class OrderSplitService {
         Example example = new Example(SplitDeliver.class);
         if(shipState==2){
             example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId)
-                    .andCondition(" shipping_state in(2,4) ");
+                    .andCondition(" shipping_state in(2,4) ").andCondition(" APPLY_STATE is not null");
+            example.orderBy(SplitDeliver.CREATE_DATE).desc();
             example.orderBy(SplitDeliver.APPLY_STATE).asc();
         }else {
-            example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId).andEqualTo(SplitDeliver.SHIPPING_STATE, shipState);
+            example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId)
+                    .andEqualTo(SplitDeliver.SHIPPING_STATE, shipState);
+            example.orderBy(SplitDeliver.CREATE_DATE).desc();
+            example.orderBy(SplitDeliver.APPLY_STATE).asc();
         }
         List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
         for (SplitDeliver splitDeliver : splitDeliverList) {

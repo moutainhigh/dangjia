@@ -283,7 +283,7 @@ public class CraftsmanConstructionService {
                 wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
                 wfr.setWorkerPhone(worker2 == null ? "" : worker2.getMobile());//工人手机
                 wfr.setPatrolSecond("巡查次数" + houseFlowApplyMapper.countPatrol(house.getId(), worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
-                wfr.setPatrolStandard("巡查标准" + (hfl.getPatrol() == null ? 0 : hfl.getPatrol()));//巡查标准
+                wfr.setPatrolStandard("巡查标准" + hfl.getPatrol());//巡查标准
                 HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker2 == null ? "" : worker2.getId(), new Date());//查询今日开工记录
                 if (todayStart == null) {//没有今日开工记录
                     wfr.setIsStart(0);//今日是否开工0:否；1：是；
@@ -433,12 +433,12 @@ public class CraftsmanConstructionService {
                 HouseFlowApply hfa = houseFlowApplies.get(0);
                 switch (hfa.getMemberCheck()) {
                     case 0://0未审核
-                        bean.setIfBackOut(0);//0可放弃；1：申请停工；2：已停工 3 审核中
+                        bean.setIfBackOut(3);//0可放弃；1：申请停工；2：已停工 3 审核中
                         break;
                     case 1://1审核通过
                         Date date = new Date();
                         if (hfa.getStartDate() != null && date.getTime() < hfa.getStartDate().getTime()) {
-                            bean.setIfBackOut(0);//0可放弃；1：申请停工；2：已停工 3 审核中
+                            bean.setIfBackOut(3);//0可放弃；1：申请停工；2：已停工 3 审核中
                         } else if (hfa.getEndDate() != null && date.getTime() > hfa.getEndDate().getTime()) {
                             bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
                         } else {
@@ -538,7 +538,7 @@ public class CraftsmanConstructionService {
                         bean.setIfBackOut(2);
                     } else if (flowAppList != null && flowAppList.size() > 0) {//已提交今日完工
                         promptList.add("今日已完工");
-//                        bean.setIfBackOut(2);
+                        bean.setIfBackOut(2);
                     } else {
                         buttonList.add(Utils.getButton("今日完工", 3));
                         List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(2);//事项类型  1 开工事项 2 完工事项

@@ -110,8 +110,9 @@ public class DesignDataService {
         }
         DesignListDTO designDTO = new DesignListDTO();
         if (worker != null && house.getDesignerOk() != 3 && worker.getId().equals(house.getMemberId())) {//是业主而且没有设计完工将走审核逻辑
+
             if (house.getDesignerOk() != 5 && house.getDesignerOk() != 2) {
-                if (house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getDecorationType() != 2 && house.getVisitState() == 1) {
+                if (house.getVisitState() == 1) {
                     designDTO.setHistoryRecord(0);
                     String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
                     designDTO.addButton(Utils.getButton("申请提前结束", webAddress + "ownerEnd?title=填写原因&houseId=" + houseId, 0));

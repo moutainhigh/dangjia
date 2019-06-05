@@ -248,7 +248,6 @@ public class DjConstants {
         public final static String OWNER_TWO_FINISHED = "业主您好！【%s】【%s】阶段/整体完工已通过大管家的审核，请查看并对工匠和大管家分别评分，谢谢！";
 
         public final static String STEWARD_SHENGHECHAOSHI = "大管家您好！【%s】【%s】阶段/整体完工申请，审核倒计时结束，自动扣钱100元，每超出一天再多扣100元！";
-        public final static String CRAFTSMAN_ABSENTEEISM = "工匠您好！系统检测到您的工地【%s】今日未开工，将扣除您100元，请知晓！";
 
 
         public final static String ACTUARIAL_COMPLETION = "业主您好！您的美宅【%s】精算已完成，请等待大管家抢单。";

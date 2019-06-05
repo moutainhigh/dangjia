@@ -217,11 +217,8 @@ public class HouseService {
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (House house : houseList) {
             Example example1 = new Example(HouseFlow.class);
-            example1.createCriteria()
-//                    .andEqualTo(HouseFlow.WORKER_TYPE, 3)
-                    .andEqualTo(HouseFlow.HOUSE_ID, house.getId())
-//                    .andEqualTo(HouseFlow.SUPERVISOR_START, 1)
-            ;
+            example1.createCriteria().andEqualTo(HouseFlow.WORKER_TYPE, 3)
+                    .andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.SUPERVISOR_START, 1);
             List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example1);
             boolean type = false;
             if (houseFlows.size() > 0) {
@@ -245,7 +242,7 @@ public class HouseService {
                         map.put("btName", "已竣工");
                         break;
                     case 4:
-                        map.put("btName", "已结束装修");
+                        map.put("btName", "提前结束装修");
                         break;
                     case 5:
                         map.put("btName", "审核中");
@@ -829,9 +826,6 @@ public class HouseService {
             House house = iHouseMapper.selectByPrimaryKey(houseId);
             if (house == null) {
                 return ServerResponse.createByErrorMessage("修改房子精算状态失败");
-            }
-            if (house.getVisitState() != 1) {
-                return ServerResponse.createByErrorMessage("该房子不在装修中");
             }
             if (house.getDecorationType() == 2 && house.getDesignerOk() != 3 && budgetOk == -1) {
                 return ServerResponse.createByErrorMessage("请先上传设计图！");

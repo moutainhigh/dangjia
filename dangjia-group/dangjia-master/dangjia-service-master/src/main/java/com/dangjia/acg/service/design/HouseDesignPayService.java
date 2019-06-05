@@ -235,9 +235,6 @@ public class HouseDesignPayService {
         if (house == null) {
             throw new BaseException(ServerCode.ERROR, "没有查询到相关房子");
         }
-        if (designBusinessOrder.getStatus() == 1) {
-            throw new BaseException(ServerCode.ERROR, "请勿重复支付");
-        }
         designBusinessOrder.setStatus(1);
         Example examples = new Example(HouseFlow.class);
         examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId())
