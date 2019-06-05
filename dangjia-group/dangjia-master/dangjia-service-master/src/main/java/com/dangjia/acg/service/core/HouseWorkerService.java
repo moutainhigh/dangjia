@@ -718,6 +718,7 @@ public class HouseWorkerService {
                         Technology technology = forMasterAPI.byTechnologyId(house.getCityId(), imageTypeId);
                         TechnologyRecord technologyRecord = new TechnologyRecord();
                         technologyRecord.setHouseId(house.getId());
+                        technologyRecord.setHouseFlowApplyId(hfa.getId());
                         technologyRecord.setTechnologyId(technology.getId());
                         technologyRecord.setName(imageTypeName);//工艺节点名
                         technologyRecord.setMaterialOrWorker(technology.getMaterialOrWorker());

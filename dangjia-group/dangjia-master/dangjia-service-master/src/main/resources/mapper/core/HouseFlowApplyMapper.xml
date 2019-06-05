@@ -307,12 +307,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 WHEN f.apply_type = 3 THEN
                     f.apply_dec
                 ELSE
-                    GROUP_CONCAT(fi.image_type_name)
+                    GROUP_CONCAT(fi.name)
                 END
             ) AS  applyDec
         FROM
             `dj_core_house_flow_apply` f
-        LEFT JOIN dj_core_house_flow_apply_image fi ON fi.house_flow_apply_id = f.id
+        LEFT JOIN `dj_matter_technology_record`  fi ON fi.house_flow_apply_id = f.id
         AND fi.image_type > 1
         WHERE
             f.member_check = 1

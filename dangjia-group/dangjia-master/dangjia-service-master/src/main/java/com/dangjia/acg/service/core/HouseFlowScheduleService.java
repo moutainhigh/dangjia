@@ -228,7 +228,7 @@ public class HouseFlowScheduleService {
                     map.put("date",DateUtil.dateToString(houseFlow.getCreateDate(),DateUtil.FORMAT2));
                     plans.add(map);
                 }
-                if(houseFlow.getStartDate().getTime()>od.getTime()&&houseFlow.getEndDate().getTime()<od.getTime()){
+                if(houseFlow.getStartDate().getTime()<od.getTime()&&houseFlow.getEndDate().getTime()>od.getTime()){
                     Map map =new HashMap<>();
                     map.put("date",DateUtil.dateToString(houseFlow.getCreateDate(),DateUtil.FORMAT2));
                     map.put("info","当前为"+houseFlow.getWorkerTypeName()+"正常施工日期");
@@ -247,7 +247,11 @@ public class HouseFlowScheduleService {
                     if(houseFlowApply.getApplyType()==0){
                         Map map =new HashMap<>();
                         map.put("date",DateUtil.dateToString(houseFlowApply.getCreateDate(),DateUtil.FORMAT2));
-                        map.put("info",houseFlow.getWorkerTypeName()+"今日完工，完成节点:"+houseFlowApply.getApplyDec());
+                        if(!CommonUtil.isEmpty(houseFlowApply.getApplyDec())) {
+                            map.put("info", houseFlow.getWorkerTypeName() + "今日完工，完成节点:" + houseFlowApply.getApplyDec());
+                        }else{
+                            map.put("info", houseFlow.getWorkerTypeName() + "今日完工" );
+                        }
                         map.put("type",1);
                         actuals.add(map);
                     }
@@ -255,7 +259,11 @@ public class HouseFlowScheduleService {
                     if(houseFlowApply.getApplyType()==1){
                         Map map =new HashMap<>();
                         map.put("date",DateUtil.dateToString(houseFlowApply.getCreateDate(),DateUtil.FORMAT2));
-                        map.put("info",houseFlow.getWorkerTypeName()+"已阶段完工，完成节点:"+houseFlowApply.getApplyDec());
+                        if(!CommonUtil.isEmpty(houseFlowApply.getApplyDec())) {
+                            map.put("info", houseFlow.getWorkerTypeName() + "已阶段完工，完成节点:" + houseFlowApply.getApplyDec());
+                        }else{
+                            map.put("info", houseFlow.getWorkerTypeName() + "已阶段完工" );
+                        }
                         map.put("type",2);
                         actuals.add(map);
                     }
@@ -263,7 +271,11 @@ public class HouseFlowScheduleService {
                     if(houseFlowApply.getApplyType()==2){
                         Map map =new HashMap<>();
                         map.put("date",DateUtil.dateToString(houseFlowApply.getCreateDate(),DateUtil.FORMAT2));
-                        map.put("info",houseFlow.getWorkerTypeName()+"已整体完工，完成节点:"+houseFlowApply.getApplyDec());
+                        if(!CommonUtil.isEmpty(houseFlowApply.getApplyDec())) {
+                            map.put("info", houseFlow.getWorkerTypeName() + "已整体完工，完成节点:" + houseFlowApply.getApplyDec());
+                        }else{
+                            map.put("info", houseFlow.getWorkerTypeName() + "已整体完工" );
+                        }
                         map.put("type",2);
                         actuals.add(map);
                     }
@@ -338,16 +350,17 @@ public class HouseFlowScheduleService {
                 }
             }
             for (Map actual : actuals) {
-                Integer actualType=(Integer) actual.get("type");
-                if(actualType==3&&type==1){
-                    type=4;
-                }else if(actualType==3&&type==3){
-                    type=5;
-                }else{
-                    type=2;
+                Integer actualType = (Integer) actual.get("type");
+                if (actualType == 3 && type == 1) {
+                    type = 4; break;
+                }
+                if (actualType == 3 && type == 3) {
+                    type = 5; break;
+                }
+                if (type != 2 && type != 4 && type != 5) {
+                    type = 2;
                 }
             }
-
         }
         return type;
     }
