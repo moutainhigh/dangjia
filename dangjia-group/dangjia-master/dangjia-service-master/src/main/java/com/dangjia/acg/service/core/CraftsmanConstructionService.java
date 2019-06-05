@@ -283,7 +283,7 @@ public class CraftsmanConstructionService {
                 wfr.setWorkerId(worker2 == null ? "" : worker2.getId());//工人id
                 wfr.setWorkerPhone(worker2 == null ? "" : worker2.getMobile());//工人手机
                 wfr.setPatrolSecond("巡查次数" + houseFlowApplyMapper.countPatrol(house.getId(), worker2 == null ? "0" : worker2.getWorkerTypeId()));//工序巡查次数
-                wfr.setPatrolStandard("巡查标准" + hfl.getPatrol());//巡查标准
+                wfr.setPatrolStandard("巡查标准" + (hfl.getPatrol() == null ? 0 : hfl.getPatrol()));//巡查标准
                 HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker2 == null ? "" : worker2.getId(), new Date());//查询今日开工记录
                 if (todayStart == null) {//没有今日开工记录
                     wfr.setIsStart(0);//今日是否开工0:否；1：是；
