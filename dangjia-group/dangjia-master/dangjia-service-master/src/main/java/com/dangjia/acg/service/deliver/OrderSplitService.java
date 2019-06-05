@@ -242,7 +242,8 @@ public class OrderSplitService {
             example.orderBy(SplitDeliver.CREATE_DATE).desc();
             example.orderBy(SplitDeliver.APPLY_STATE).asc();
         }else {
-            example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId).andEqualTo(SplitDeliver.SHIPPING_STATE, shipState);
+            example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId)
+                    .andEqualTo(SplitDeliver.SHIPPING_STATE, shipState);
             example.orderBy(SplitDeliver.CREATE_DATE).desc();
             example.orderBy(SplitDeliver.APPLY_STATE).asc();
         }
