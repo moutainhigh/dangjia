@@ -298,6 +298,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         SELECT
             f.id,
             f.house_flow_id houseFlowId,
+            f.worker_type workerType,
             f.apply_type applyType,
             f.create_date createDate,
             f.start_date startDate,

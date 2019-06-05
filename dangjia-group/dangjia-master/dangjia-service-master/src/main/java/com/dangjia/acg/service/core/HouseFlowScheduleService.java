@@ -211,7 +211,7 @@ public class HouseFlowScheduleService {
                 String e = DateUtil.dateToString(houseFlow.getEndDate(), null);
                 if(s.equals(o)){
                     Map map =new HashMap<>();
-                    map.put("info","当前为"+houseFlow.getWorkerTypeName()+"进场日期");
+                    map.put("info","当前为"+houseFlow.getWorkerTypeName()+"开工日期");
                     map.put("date",DateUtil.dateToString(houseFlow.getCreateDate(),DateUtil.FORMAT2));
                     map.put("type",1);
                     plans.add(map);
