@@ -362,6 +362,9 @@ public class HouseFlowScheduleService {
                 }
             }
         }
+        if(DateUtil.toDate(DateUtil.getDateString2(new Date().getTime())).getTime() <= od.getTime()){
+            type=0;
+        }
         return type;
     }
 }
