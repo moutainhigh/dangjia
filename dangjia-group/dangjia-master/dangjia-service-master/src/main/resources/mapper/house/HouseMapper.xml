@@ -508,12 +508,6 @@
         <if test="visitState==null or visitState==''">
             house.visit_state in (1,3,4)
         </if>
-        <if test="visitState!=null and visitState!=''">
-            AND house.visit_state=#{visitState}
-        </if>
-        <if test="visitState==null or visitState==''">
-            AND house.visit_state in (1,3)
-        </if>
         <if test="searchKey!=null and searchKey!=''">
             AND (CONCAT(
             house.residential,
