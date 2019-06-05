@@ -311,7 +311,7 @@
         h.create_date AS createDate,
         h.modify_date AS modifyDate,
         h.number as number,
-        h.designer_ok as designerOk
+        ( CASE WHEN (h.decoration_type = 2 AND h.designer_ok != 3) THEN 1 ELSE 0 END ) AS showUpdata
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
@@ -382,8 +382,7 @@
         h.is_select as isSelect,
         (
         case
-        when (f.supervisor_start = 1 or f.supervisor_start = 0) and h.visit_state !=2 and h.visit_state !=3 and
-        h.visit_state !=4 and h.visit_state !=5 and
+        when (f.supervisor_start = 1 or f.supervisor_start = 0) and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and
         h.pause=0 then f.supervisor_start
         when h.visit_state = 3 then 3
         when h.visit_state = 4 then 4
@@ -401,8 +400,7 @@
         WHERE
         h.data_status =0
         <if test="visitState==0 || visitState==1">
-            and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and
-            h.visit_state !=5 and h.pause=0
+            and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and h.pause=0
         </if>
         <if test="visitState>=2">
             and h.visit_state = #{visitState}
@@ -488,27 +486,17 @@
         member.NAME AS NAME,
         member.mobile AS mobile,
         house.create_date AS createDate,
-        (
-        SELECT
-        f.modify_date
-        FROM
-        dj_core_house_flow_apply f
-        INNER JOIN dj_core_house_flow hf ON hf.id = f.house_flow_id
-        WHERE
-        f.member_check = 1
-        AND f.`apply_type` = '2'
-        AND hf.`worker_type` = '3'
-        AND f.house_id = house.id
-        ) AS modifyDate
+        f.modify_date AS modifyDate
         FROM
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
-        WHERE
+        LEFT JOIN dj_core_house_flow_apply f ON f.house_id=house.id and f.`apply_type` = '2' AND f.`worker_type` = '3'
+        WHERE 1=1
         <if test="visitState!=null and visitState!=''">
-             house.visit_state=#{visitState}
+            AND house.visit_state=#{visitState}
         </if>
         <if test="visitState==null or visitState==''">
-             house.visit_state in (1,3,4)
+            AND house.visit_state in (1,3)
         </if>
         <if test="searchKey!=null and searchKey!=''">
             AND (CONCAT(

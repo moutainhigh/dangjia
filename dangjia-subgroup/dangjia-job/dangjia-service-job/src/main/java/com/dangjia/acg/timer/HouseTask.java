@@ -1,11 +1,15 @@
 package com.dangjia.acg.timer;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.core.HouseFlowApplyAPI;
 import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.config.ConfigMessageAPI;
 import com.dangjia.acg.api.data.TechnologyRecordAPI;
 import com.dangjia.acg.common.constants.DjConstants;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.activity.Activity;
 import com.dangjia.acg.modle.config.ConfigMessage;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.house.House;
@@ -40,16 +44,7 @@ public class HouseTask {
   private Logger log = LoggerFactory.getLogger(HouseTask.class);
   private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-  /**
-   * 检测是否旷工
-   * 每天凌晨(23点55分)执行一次
-   */
-  @Scheduled(cron = "0 55 23 * * ?") //每天23点55触发
-  public void absenteeism() {
-    log.info(format.format(new Date()) + "开始执行旷工检测任务...");
-    houseFlowApplyAPI.absenteeism();
-    log.info(format.format(new Date()) + "结束执行旷工检测任务...");
-  }
+
   /**
    * 定时审核完工申请
    */

@@ -25,10 +25,6 @@ public interface HouseFlowApplyAPI {
     @ApiOperation(value = "自动审核到时业主未审核申请", notes = "自动审核到时业主未审核申请")
     void couponApply();
 
-    @PostMapping("app/core/houseFlowApply/absenteeism")
-    @ApiOperation(value = "自动检测今日旷工的人工，并扣钱", notes = "自动检测今日旷工的人工，并扣钱")
-    void absenteeism();
-
     @PostMapping("app/core/houseFlowApply/houseRecord")
     @ApiOperation(value = "工匠端工地记录", notes = "工匠端工地记录")
     ServerResponse houseRecord(@RequestParam("userToken") String userToken,

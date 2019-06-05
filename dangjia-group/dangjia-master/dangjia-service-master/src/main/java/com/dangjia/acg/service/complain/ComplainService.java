@@ -478,11 +478,6 @@ public class ComplainService {
                 HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(complain.getBusinessId());
                 houseFlowApply.setMemberCheck(0);
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-            } else if (state == 1 && complain.getComplainType() != null && complain.getComplainType() == 5) {
-                House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
-                house.setModifyDate(new Date());
-                house.setVisitState(1);
-                houseMapper.updateByPrimaryKeySelective(house);
             }
         }
         complainMapper.updateByPrimaryKeySelective(complain);
@@ -582,10 +577,7 @@ public class ComplainService {
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
         }
-        if (house.getVisitState() == 5) {
-            return ServerResponse.createByErrorMessage("提前结束审核中，请勿重复提交");
-        }
-        if (house.getVisitState() != 1) {
+        if (house.getVisitState() != 1 && house.getVisitState() != 5) {
             return ServerResponse.createByErrorMessage("该房子没有在装修，无法结束装修");
         }
         if (!member.getId().equals(house.getMemberId())) {
