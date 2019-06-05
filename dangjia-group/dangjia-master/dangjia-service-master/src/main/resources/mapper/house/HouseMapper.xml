@@ -488,17 +488,27 @@
         member.NAME AS NAME,
         member.mobile AS mobile,
         house.create_date AS createDate,
-        f.modify_date AS modifyDate
+        (
+        SELECT
+        f.modify_date
+        FROM
+        dj_core_house_flow_apply f
+        INNER JOIN dj_core_house_flow hf ON hf.id = f.house_flow_id
+        WHERE
+        f.member_check = 1
+        AND f.`apply_type` = '2'
+        AND hf.`worker_type` = '3'
+        AND f.house_id = house.id
+        ) AS modifyDate
         FROM
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
-        LEFT JOIN dj_core_house_flow_apply f ON f.house_id=house.id and f.`apply_type` = '2' AND f.`worker_type` = '3'
-        WHERE 1=1
+        WHERE
         <if test="visitState!=null and visitState!=''">
             AND house.visit_state=#{visitState}
         </if>
         <if test="visitState==null or visitState==''">
-            AND house.visit_state in (1,3)
+            AND house.visit_state in (1,3,4)
         </if>
         <if test="searchKey!=null and searchKey!=''">
             AND (CONCAT(
