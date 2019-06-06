@@ -23,6 +23,6 @@ public class CourseDTO {
     private int workSteta;//工程状态: 0未开始 ，1阶段完工通过，2整体完工通过，3待交底，4施工中，5收尾施工
     private String houseName;//房产地址
     private WorkerDetailDTO workerDetailDTO;
-
+    private int ifBackOut = 1;//0可放弃；1：申请停工；2：已停工 3 审核中
     private List<WorkerDisclosure> workerDisclosureList;//交底事项
 }
