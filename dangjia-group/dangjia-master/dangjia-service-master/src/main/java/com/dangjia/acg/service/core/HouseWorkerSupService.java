@@ -3,6 +3,7 @@ package com.dangjia.acg.service.core;
 import com.dangjia.acg.api.repair.MendMaterielAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -109,11 +110,24 @@ public class HouseWorkerSupService {
                     .andCondition(" member_check in (1,3) ").andEqualTo(HouseFlowApply.PAY_STATE, 1);
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
             if (houseFlowApplyList.size() > 0) {
-//                HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
-//                if(houseFlowApply.getStartDate().before(new Date()) && houseFlowApply.getEndDate().after(new Date())){
-                return ServerResponse.createByErrorMessage("工序处于停工期间!");
-//                }
+                HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
+                if(houseFlowApply.getEndDate().getTime()>new Date().getTime()){
+                    return ServerResponse.createByErrorMessage("工序处于停工期间!");
+                }
             }
+            if (houseFlow.getPause() == 1) {
+                return ServerResponse.createByErrorMessage("工序已暂停施工,请勿重复申请");
+            }
+            if (houseFlow.getWorkSteta() == 3) {
+                return ServerResponse.createByErrorMessage("工序待交底请勿发起停工申请");
+            }
+            Date start = DateUtil.toDate(startDate);
+            HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(houseFlow.getHouseId(), worker.getId(), new Date());//查询今日开工记录
+            if (todayStart != null &&  DateUtil.daysofTwo(new Date(), start)==0) {
+                return ServerResponse.createByErrorMessage("工序今日已开工，请勿选择今日时间！");
+            }
+            Date end =  DateUtil.toDate(endDate);
+
 
             HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
             hfa.setHouseFlowId(houseFlowId);//工序id
@@ -129,11 +143,8 @@ public class HouseWorkerSupService {
             hfa.setMemberCheck(0);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
             hfa.setPayState(1);//标记为新停工申请
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date start = sdf.parse(startDate);
-            Date end = sdf.parse(endDate);
-            long day = (end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000) + 1;
-            hfa.setSuspendDay((int) day);//申请停工天数 计算
+
+            hfa.setSuspendDay(DateUtil.daysofTwo(start, end));//申请停工天数 计算
             hfa.setStartDate(start);
             hfa.setEndDate(end);
             houseFlowApplyMapper.insert(hfa);
