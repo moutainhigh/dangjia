@@ -142,8 +142,8 @@ public class HouseWorkerSupService {
             hfa.setOtherMoney(new BigDecimal(0));
             hfa.setMemberCheck(0);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
             hfa.setPayState(1);//标记为新停工申请
-
-
+            hfa.setMemberCheck(1);//默认业主审核状态通过
+            hfa.setSupervisorCheck(1);//默认大管家审核状态通过
             hfa.setSuspendDay(DateUtil.daysofTwo(start, end));//申请停工天数 计算
             hfa.setStartDate(start);
             hfa.setEndDate(end);
