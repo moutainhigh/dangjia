@@ -501,12 +501,12 @@
         FROM
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
-        WHERE
+        WHERE house.data_status=0
         <if test="visitState!=null and visitState!=''">
-            house.visit_state=#{visitState}
+            AND house.visit_state=#{visitState}
         </if>
         <if test="visitState==null or visitState==''">
-            house.visit_state in (1,3,4)
+            AND house.visit_state in (1,3,4)
         </if>
         <if test="searchKey!=null and searchKey!=''">
             AND (CONCAT(

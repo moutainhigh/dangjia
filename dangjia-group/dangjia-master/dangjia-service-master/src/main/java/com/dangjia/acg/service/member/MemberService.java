@@ -181,6 +181,9 @@ public class MemberService {
     }
 
     ServerResponse getUser(Member user, String userRole) {
+        if("1".equals(userRole)) {
+            clueService.sendUser(user, user.getMobile());
+        }
         updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
         userRole = "role" + userRole + ":" + user.getId();
         String token = redisClient.getCache(userRole, String.class);
@@ -196,9 +199,7 @@ public class MemberService {
                 accessToken.setWorkerTypeName(wt.getName());
             }
         }
-        if("1".equals(userRole)) {
-            clueService.sendUser(user, user.getMobile());
-        }
+
         redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
         redisClient.put(userRole, accessToken.getUserToken());
         groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);

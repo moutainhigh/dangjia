@@ -258,7 +258,7 @@ public class ClueService {
         try {
             Clue clue = clueMapper.getByPhone(phone);
             //表示线索表存在线索
-            if (clue != null) {
+            if (clue != null&&clue.getStage()!=4) {
                 //有沟通记录
                 List<ClueTalk> clueTalkList = clueTalkMapper.getTalkByClueId(clue.getId());
                 if (clueTalkList.size() != 0) {
