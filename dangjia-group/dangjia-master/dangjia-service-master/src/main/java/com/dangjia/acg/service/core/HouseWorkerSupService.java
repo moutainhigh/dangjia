@@ -14,6 +14,7 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.house.HouseService;
+import com.dangjia.acg.service.worker.EvaluateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -50,6 +51,8 @@ public class HouseWorkerSupService {
     @Autowired
     private HouseService houseService;
 
+    @Autowired
+    private EvaluateService evaluateService;
     /**
      * 管家审核验收申请h
      * 材料审查
@@ -131,9 +134,9 @@ public class HouseWorkerSupService {
 
             HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
             hfa.setHouseFlowId(houseFlowId);//工序id
-            hfa.setWorkerId(worker.getId());//工人id
-            hfa.setWorkerTypeId(worker.getWorkerTypeId());//工种id
-            hfa.setWorkerType(worker.getWorkerType());//工种类型
+            hfa.setWorkerId(houseFlow.getWorkerId());//工人id
+            hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
+            hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
             hfa.setHouseId(houseFlow.getHouseId());//房子id
             hfa.setApplyType(3);//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
             hfa.setApplyDec(applyDec);//描述
@@ -149,6 +152,16 @@ public class HouseWorkerSupService {
             hfa.setEndDate(end);
             houseFlowApplyMapper.insert(hfa);
 //            houseService.insertConstructionRecord(hfa);
+            houseFlow.setPause(1);//0:正常；1暂停；
+            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
+            //大管家停工，不扣除工人积分
+            if(worker.getWorkerType()>3) {
+                //工匠申请停工不用审核，申请停工超过2天的，第3天起每天扣除1积分
+                int score = hfa.getSuspendDay() - 2;
+                if (score > 0) {
+                    evaluateService.updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(score), "申请停工超过2天，积分扣除");
+                }
+            }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
