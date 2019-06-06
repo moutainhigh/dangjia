@@ -125,7 +125,7 @@ public class HouseWorkerSupService {
                 return ServerResponse.createByErrorMessage("工序待交底请勿发起停工申请");
             }
             Date start = DateUtil.toDate(startDate);
-            HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(houseFlow.getHouseId(), worker.getId(), new Date());//查询今日开工记录
+            HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(houseFlow.getHouseId(), houseFlow.getWorkerId(), new Date());//查询今日开工记录
             if (todayStart != null &&  DateUtil.daysofTwo(new Date(), start)==0) {
                 return ServerResponse.createByErrorMessage("工序今日已开工，请勿选择今日时间！");
             }
