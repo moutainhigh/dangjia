@@ -196,6 +196,9 @@ public class MemberService {
                 accessToken.setWorkerTypeName(wt.getName());
             }
         }
+        if("1".equals(userRole)) {
+            clueService.sendUser(user, user.getMobile());
+        }
         redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
         redisClient.put(userRole, accessToken.getUserToken());
         groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
