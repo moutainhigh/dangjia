@@ -485,7 +485,7 @@
         member.nick_name AS nickName,
         member.NAME AS NAME,
         member.mobile AS mobile,
-        house.create_date AS createDate,
+        house.construction_date AS createDate,
         (
         SELECT
         f.modify_date
