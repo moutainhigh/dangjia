@@ -776,6 +776,8 @@ public class ComplainService {
         house.setModifyDate(new Date());
         house.setVisitState(4);
         house.setHaveComplete(1);
+        house.setDesignerOk(3);
+        house.setBudgetOk(3);
         houseMapper.updateByPrimaryKeySelective(house);
         return ServerResponse.createBySuccessMessage("操作成功");
     }
