@@ -190,32 +190,26 @@ public class OrderService {
      * 业务订单列表
      */
     public ServerResponse businessOrderList(String userToken){
-        try{
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member member = (Member) object;
-            List<BusinessOrder> businessOrderList = businessOrderMapper.byMemberId(member.getId());
-            List<BusinessOrderDTO> businessOrderDTOS = new ArrayList<>();
-            for (BusinessOrder businessOrder : businessOrderList){
-                House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
-                BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
-                businessOrderDTO.setBusinessOrderId(businessOrder.getId());
-                businessOrderDTO.setHouseName(house.getHouseName());
-                businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
-                businessOrderDTO.setNumber(businessOrder.getNumber());
-                List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(),house.getStyle());
-                businessOrderDTO.setOrderDTOList(orderDTOList);
-                businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
-                businessOrderDTOS.add(businessOrderDTO);
-            }
-
-            return ServerResponse.createBySuccess("查询成功",businessOrderDTOS);
-        }catch (Exception e){
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
+        Member member = (Member) object;
+        List<BusinessOrder> businessOrderList = businessOrderMapper.byMemberId(member.getId());
+        List<BusinessOrderDTO> businessOrderDTOS = new ArrayList<>();
+        for (BusinessOrder businessOrder : businessOrderList) {
+            BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
+            House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+            businessOrderDTO.setHouseName(house == null ? "" : house.getHouseName());
+            List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house == null ? "" : house.getStyle());
+            businessOrderDTO.setOrderDTOList(orderDTOList);
+            businessOrderDTO.setBusinessOrderId(businessOrder.getId());
+            businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
+            businessOrderDTO.setNumber(businessOrder.getNumber());
+            businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
+            businessOrderDTOS.add(businessOrderDTO);
+        }
+        return ServerResponse.createBySuccess("查询成功", businessOrderDTOS);
     }
     /*订单流水*/
     private List<OrderDTO> orderDTOList(String businessOrderNumber,String style){
