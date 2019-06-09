@@ -74,20 +74,22 @@ public class TimingApplyService {
 
 
             //申请停工超过2天的，第3天起每天扣除1积分
-            example = new Example(HouseFlowApply.class);
-            example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlow.getId())
-                    .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                    .andCondition(" member_check in (1,3) ")
-                    .andCondition(" to_days(end_date) <= to_days('"+ DateUtil.getDateString(new Date().getTime())+"') ");
-            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
-            if (houseFlowApplyList.size() > 0) {
-                HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
-                Date start = houseFlowApply.getStartDate();
-                Date end = new Date();
-                int suspendDay=DateUtil.daysofTwo(start, end);
-                if(suspendDay>2){
-                    evaluateService.updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(1), "申请停工超过2天，积分扣除");
+            if(houseFlow.getPause()==1) {
+                example = new Example(HouseFlowApply.class);
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlow.getId())
+                        .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
+                        .andCondition(" member_check in (1,3) ")
+                        .andCondition(" to_days(end_date) <= to_days('" + DateUtil.getDateString(new Date().getTime()) + "') ");
+                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
+                if (houseFlowApplyList.size() > 0) {
+                    HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
+                    Date start = houseFlowApply.getStartDate();
+                    Date end = new Date();
+                    int suspendDay = DateUtil.daysofTwo(start, end);
+                    if (suspendDay > 2) {
+                        evaluateService.updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(1), "申请停工超过2天，积分扣除");
 
+                    }
                 }
             }
         }
