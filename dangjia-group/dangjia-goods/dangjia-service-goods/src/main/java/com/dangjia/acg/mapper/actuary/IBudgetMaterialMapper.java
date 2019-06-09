@@ -32,8 +32,7 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 	/**查询精算内商品*/
 	List<BudgetMaterial> repairBudgetMaterial(@Param("workerTypeId")String workerTypeId,@Param("houseId")String houseId,
 											  @Param("categoryId")String categoryId,@Param("productName")String productName,@Param("productType")String productType);
-	/**修改业主取消的精算去自购*/
-	int updateSelf(@Param("houseFlowId") String houseFlowId);
+
 	/**支付时工种服务总价*/
 	Double getBudgetSerPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	Double nonPaymentSer(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
@@ -42,7 +41,6 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 	/**未付款材料总价*/
 	Double nonPaymentCai(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 
-	int updateCai(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	/**支付时工种材料总价*/
 	Double getBudgetCaiPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	/**支付时工种未选择材料总价*/

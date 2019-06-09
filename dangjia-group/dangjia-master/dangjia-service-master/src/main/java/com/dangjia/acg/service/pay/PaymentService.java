@@ -258,50 +258,14 @@ public class PaymentService {
                 return ServerResponse.createByErrorMessage("业务订单不存在");
             }
             BusinessOrder businessOrder = businessOrderList.get(0);
-            businessOrder.setPayOrderNumber(payOrder.getNumber());
-            businessOrder.setState(3);//已支付
-            businessOrderMapper.updateByPrimaryKeySelective(businessOrder);
-            payOrder.setState(2);//已支付
-            payOrderMapper.updateByPrimaryKeySelective(payOrder);
-            String payState = payOrder.getPayState();
 
-            if (businessOrder.getType() == 1) {
-                //工序支付
-                this.payWorkerType(businessOrderNumber, businessOrder.getTaskId(), payState);
-            } else if (businessOrder.getType() == 2) {
-                //处理补货补人工
-                this.mendOrder(businessOrder, payState);
-            } else if (businessOrder.getType() == 4) {//待付款 支付时业主包括取消的
-                //待付款 提前付材料
-                this.awaitPay(businessOrder, payState);
-            } else if (businessOrder.getType() == 5) {//验房分销
+            if (businessOrder.getType() == 5) {//验房分销
                 HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
-                houseDistribution.setNumber(businessOrderNumber);//业务订单号
-                houseDistribution.setState(1);//已支付
-                iHouseDistributionMapper.updateByPrimaryKeySelective(houseDistribution);
-
                 returnMap.put("name", "当家装修担保平台");
                 returnMap.put("businessOrderNumber", businessOrderNumber);
                 returnMap.put("price", houseDistribution.getPrice());
                 return ServerResponse.createBySuccess("支付成功", returnMap);
-            }else if (businessOrder.getType() == 6) {//待付款 更换结算
-                HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-                        .getRequest();
-                House house= houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
-                request.setAttribute(Constants.CITY_ID, house.getCityId());
-                //待付款 提前付材料
-                productChangeService.orderBackFun(request,businessOrder.getTaskId());
             }
-
-            HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
-            houseExpend.setTolMoney(houseExpend.getTolMoney() + businessOrder.getTotalPrice().doubleValue());//总金额
-            houseExpend.setPayMoney(houseExpend.getPayMoney() + businessOrder.getPayPrice().doubleValue());//总支付
-            houseExpend.setDisMoney(houseExpend.getDisMoney() + businessOrder.getDiscountsPrice().doubleValue());//总优惠
-            example = new Example(Warehouse.class);
-            example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, businessOrder.getHouseId());
-            List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
-            houseExpend.setMaterialKind(warehouseList.size());//材料种类
-            houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
 
             returnMap.put("name", "当家装修担保平台");
             returnMap.put("businessOrderNumber", businessOrderNumber);
@@ -309,7 +273,6 @@ public class PaymentService {
             return ServerResponse.createBySuccess("支付成功", returnMap);
         } catch (Exception e) {
             e.printStackTrace();
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             returnMap.put("name", "当家装修担保平台");
             returnMap.put("businessOrderNumber", businessOrderNumber);
             returnMap.put("price", 0);
@@ -1703,10 +1666,6 @@ public class PaymentService {
                 //待付款只付材料费
                 HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(taskId);
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
-                /*
-                 * 在这里取消的材料都改成未付款
-                 */
-//                forMasterAPI.updateCai(houseId,houseFlow.getWorkerTypeId(), house.getCityId());
                 Double caiPrice = forMasterAPI.getBudgetCaiPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算材料钱
                 Double serPrice = forMasterAPI.getBudgetSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算服务钱
 

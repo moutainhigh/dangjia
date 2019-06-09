@@ -141,17 +141,7 @@
 		ORDER BY create_date,house_id,product_sn desc
 	</select>
 
-	<!--业主取消的又改为待付款-->
-	<update id="updateSelf" parameterType="java.lang.String">
-		update
-		    dj_actuary_budget_material bm
-		set
-		    bm.delete_state = 0
-		where
-		    bm.house_flow_id = #{houseFlowId}
-		and bm.delete_state = 2
-		and bm.steta = 1
-	</update>
+
 
 	<!--未付款工种服务总价-->
 	<select id="nonPaymentSer" resultType="java.lang.Double">
@@ -208,18 +198,6 @@
 	    and bm.steta = 1
 	    and bm.product_type = 0
 	</select>
-	<!--业主取消的又改为待付款-->
-	<update id="updateCai" parameterType="java.lang.String">
-		update
-		    dj_actuary_budget_material bm
-		set
-		    bm.delete_state = 0
-		where
-		     bm.house_id = #{houseId}
-		and bm.worker_type_id = #{workerTypeId}
-		and bm.delete_state = 2
-		and bm.steta = 1
-	</update>
 
 	<!--支付时工种材料总价-->
 	<select id="getBudgetCaiPrice" resultType="java.lang.Double">

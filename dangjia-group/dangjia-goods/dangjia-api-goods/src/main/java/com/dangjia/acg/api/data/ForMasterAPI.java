@@ -102,11 +102,6 @@ public interface ForMasterAPI {
                          @RequestParam("workerTypeId") String workerTypeId,
                          @RequestParam("cityId") String cityId);
 
-    @PostMapping("/data/forMaster/updateCai")
-    @ApiOperation(value = "取消材料精算改未付款", notes = "取消材料精算改未付款")
-    int updateCai(@RequestParam("houseId") String houseId,
-                  @RequestParam("workerTypeId") String workerTypeId,
-                  @RequestParam("cityId") String cityId);
 
     @PostMapping("/data/forMaster/getNotCaiPrice")
     @ApiOperation(value = "支付时工种未选择材料总价", notes = "支付时工种未选择材料总价")
