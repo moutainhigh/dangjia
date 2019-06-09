@@ -1195,6 +1195,8 @@ public class HouseService {
                     map.put("workerName", member.getName() + "(待支付)");//工人名称
                 } else if (houseWorker.getWorkType() == 6) {
                     map.put("workerName", member.getName());//工人名称
+                } else if (houseWorker.getWorkType() == 7) {
+                    map.put("workerName", member.getName() + "(已放弃)");//工人名称
                 } else {
                     map.put("workerName", member.getName() + "(已更换)");//2被换人,4已开工被换人,7抢单后放弃
                 }
