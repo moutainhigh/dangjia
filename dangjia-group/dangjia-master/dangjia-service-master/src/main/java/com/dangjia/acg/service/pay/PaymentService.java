@@ -257,9 +257,6 @@ public class PaymentService {
             BusinessOrder businessOrder = businessOrderList.get(0);
             if (businessOrder.getType() == 5) {//验房分销
                 HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
-                houseDistribution.setNumber(businessOrderNumber);//业务订单号
-                houseDistribution.setState(1);//已支付
-                iHouseDistributionMapper.updateByPrimaryKeySelective(houseDistribution);
                 returnMap.put("name", "当家装修担保平台");
                 returnMap.put("businessOrderNumber", businessOrderNumber);
                 returnMap.put("price", houseDistribution.getPrice());

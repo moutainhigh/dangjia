@@ -20,8 +20,6 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IBankCardMapper;
 import com.dangjia.acg.mapper.worker.*;
 import com.dangjia.acg.modle.config.Sms;
-import com.dangjia.acg.modle.core.HouseFlow;
-import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
@@ -168,7 +166,7 @@ public class WalletService {
             if (member == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
             }
-            if (member.getIsJob()) {
+            if (member.getCheckType() == 4) {
                 //冻结的帐户不能修改资料信息
                 return ServerResponse.createByErrorMessage("账户冻结，无法提现");
             }
