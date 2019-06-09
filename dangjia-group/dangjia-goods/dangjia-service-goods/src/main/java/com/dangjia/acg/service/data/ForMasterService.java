@@ -134,8 +134,6 @@ public class ForMasterService {
                     budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
                 }
             }
-            //业主取消的材料又改为待付款
-            budgetMaterialMapper.updateSelf(houseFlowId);
             return budgetMaterialList;
         }catch (Exception e){
             e.printStackTrace();
@@ -192,9 +190,6 @@ public class ForMasterService {
         return budgetMaterialMapper.nonPaymentCai(houseId,workerTypeId);
     }
 
-    public int updateCai(String houseId,String workerTypeId){
-        return budgetMaterialMapper.updateCai(houseId,workerTypeId);
-    }
 
     /**
      * 支付时工种服务总价

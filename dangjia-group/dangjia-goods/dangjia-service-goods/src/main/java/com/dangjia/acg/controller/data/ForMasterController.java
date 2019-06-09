@@ -123,11 +123,6 @@ public class ForMasterController implements ForMasterAPI {
     }
     @Override
     @ApiMethod
-    public int updateCai(String houseId,String workerTypeId,String cityId){
-        return forMasterService.updateCai(houseId,workerTypeId);
-    }
-    @Override
-    @ApiMethod
     public Double getBudgetSerPrice(String houseId,String workerTypeId,String cityId){
         return forMasterService.getBudgetSerPrice(houseId,workerTypeId);
     }
