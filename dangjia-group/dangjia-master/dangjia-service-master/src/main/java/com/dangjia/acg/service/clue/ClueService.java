@@ -174,7 +174,7 @@ public class ClueService {
     public ServerResponse updateCus(String cusService, String phone, String chat, String userId, String childId, String id) {
         try {
             Clue clue = clueMapper.selectByPrimaryKey(id);
-            if (cusService != null && cusService != "") {
+            if (!CommonUtil.isEmpty(cusService)) {
                 Example example = new Example(UserRoleKey.class);
                 example.createCriteria().andEqualTo(UserRoleKey.USER_ID, userId);
                 List<UserRoleKey> userRoleKeys = userRoleMapper.selectByExample(example);
@@ -270,7 +270,7 @@ public class ClueService {
         try {
             Clue clue = clueMapper.getByPhone(phone);
             //表示线索表存在线索
-            if (clue != null&&clue.getStage()!=4) {
+            if (clue != null && clue.getStage() != 4) {
                 //有沟通记录
                 List<ClueTalk> clueTalkList = clueTalkMapper.getTalkByClueId(clue.getId());
                 if (clueTalkList.size() != 0) {
