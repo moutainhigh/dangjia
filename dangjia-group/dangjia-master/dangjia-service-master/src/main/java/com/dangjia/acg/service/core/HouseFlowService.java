@@ -99,9 +99,8 @@ public class HouseFlowService {
      */
     private boolean isHouseWorker(List<HouseWorker> hwList, HouseFlow hf) {
         for (HouseWorker houseWorker : hwList) {
-            HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
-            if (houseFlow == null) continue;
-            if (hf.getId().equals(houseFlow.getId())) {
+            if (houseWorker.getHouseId().equals(hf.getHouseId())
+                    && houseWorker.getWorkerTypeId().equals(hf.getWorkerTypeId())) {
                 return true;
             }
         }
@@ -130,12 +129,12 @@ public class HouseFlowService {
             example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 2).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
                     .andEqualTo(HouseFlow.CITY_ID, cityId).andNotEqualTo(HouseFlow.STATE, 2);
             List<HouseFlow> hfList = houseFlowMapper.selectByExample(example);
-
-            example = new Example(HouseWorker.class);
-            example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId());
-            List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的所有已抢单
             if (hfList != null)
                 for (HouseFlow houseFlow : hfList) {
+                    example = new Example(HouseWorker.class);
+                    example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId())
+                            .andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId());
+                    List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的所有已抢单
                     if (isHouseWorker(hwList, houseFlow)) {
                         continue;
                     }
