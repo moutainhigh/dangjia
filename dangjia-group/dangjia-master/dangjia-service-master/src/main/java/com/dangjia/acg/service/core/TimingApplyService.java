@@ -1,12 +1,15 @@
 package com.dangjia.acg.service.core;
 
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.service.matter.TechnologyRecordService;
 import com.dangjia.acg.service.worker.EvaluateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
@@ -21,6 +24,8 @@ import java.util.List;
 public class TimingApplyService {
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private EvaluateService evaluateService;
 
@@ -46,6 +51,24 @@ public class TimingApplyService {
         for (HouseFlow houseFlow : houseFlows){
             //今日是否开工超时扣旷工钱
             evaluateService.absenteeismOvertime(houseFlow);
+        }
+
+        //停工完结，状态变回
+        Example example =new Example(HouseFlow.class);
+        example.createCriteria().andEqualTo(HouseFlow.PAUSE,1);
+        List<HouseFlow> houseFlowList=houseFlowMapper.selectByExample(example);
+        for (HouseFlow houseFlow : houseFlowList) {
+            Example  example1 =new Example(HouseFlowApply.class);
+            example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID,houseFlow.getId())
+                    .andEqualTo(HouseFlowApply.APPLY_TYPE,3)
+                    .andEqualTo(HouseFlowApply.MEMBER_CHECK,1)
+                    .andCondition(" to_days(end_date) > to_days('"+ DateUtil.getDateString(new Date().getTime())+"') ");
+            List list=houseFlowApplyMapper.selectByExample(example1);
+            if(list.size()==0){
+                houseFlow.setPause(0);
+                houseFlow.setModifyDate(new Date());
+                houseFlowMapper.updateByPrimaryKey(houseFlow);
+            }
         }
     }
     /**
