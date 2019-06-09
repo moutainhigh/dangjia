@@ -322,7 +322,7 @@ public class HouseFlowService {
                 //被禁用的帐户不能抢单
                 return ServerResponse.createByErrorMessage("您的帐户已经被禁用！");
             }
-            if (member.getIsJob()) {
+            if (member.getCheckType() == 4) {
                 //冻结的帐户不能抢单
                 return ServerResponse.createByErrorMessage("您的帐户已冻结");
             }
