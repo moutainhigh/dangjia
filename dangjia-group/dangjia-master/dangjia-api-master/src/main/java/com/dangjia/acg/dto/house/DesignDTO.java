@@ -34,6 +34,7 @@ public class DesignDTO {
     private Double profit;// 总利润
     protected Date createDate;// 下单时间
     protected Date modifyDate;// 竣工时间
+    protected Date constructionDate;// 修改日期
     private List<HouseProfitSummaryDTO> profitSummarys;// 利润集合
 
 }
