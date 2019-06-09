@@ -200,7 +200,11 @@ public class OrderService {
         for (BusinessOrder businessOrder : businessOrderList) {
             BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
             House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
-            businessOrderDTO.setHouseName(house == null ? "" : house.getHouseName());
+            if (businessOrder.getType() == 5) {
+                businessOrderDTO.setHouseName("验房分销");
+            } else {
+                businessOrderDTO.setHouseName(house == null ? "" : house.getHouseName());
+            }
             List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house == null ? "" : house.getStyle());
             businessOrderDTO.setOrderDTOList(orderDTOList);
             businessOrderDTO.setBusinessOrderId(businessOrder.getId());
