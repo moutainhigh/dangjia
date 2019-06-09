@@ -155,7 +155,7 @@ public class HouseFlowService {
             example = new Example(HouseWorker.class);
             example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId());
             List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的所有已抢单
-            if (hfList != null)
+            if (hfList != null) {
                 for (HouseFlow houseFlow : hfList) {
                     if (isHouseWorker(hwList, houseFlow)) {
                         continue;
@@ -216,13 +216,13 @@ public class HouseFlowService {
                         }
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
                     }
-
                     allgrabBean.setReleaseTime("时间 " + (houseFlow.getReleaseTime() == null ? "" :
                             DateUtil.getDateString(houseFlow.getReleaseTime().getTime())));//发布时间
                     long countDownTime = houseFlowCountDownTime.getCountDownTime().getTime() - new Date().getTime();//获取倒计时
                     allgrabBean.setCountDownTime(countDownTime);//可接单时间
                     grabList.add(allgrabBean);
                 }
+            }
             if (grabList.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             return ServerResponse.createBySuccess("查询成功", grabList);
