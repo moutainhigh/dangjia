@@ -169,6 +169,7 @@ public class ComplainService {
             //将申请进程更新为申述中。。
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(complain.getBusinessId());
             houseFlowApply.setMemberCheck(4);
+            houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
         }
         return ServerResponse.createBySuccessMessage("提交成功");
@@ -391,6 +392,7 @@ public class ComplainService {
                         HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(complain.getBusinessId());
                         houseFlowApply.setMemberCheck(2);
                         houseFlowApply.setSupervisorCheck(2);
+                        houseFlowApply.setModifyDate(new Date());
                         houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
                         //不通过停工申请
                         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowId());
@@ -479,6 +481,7 @@ public class ComplainService {
                 //将申请进程打回待审核。。
                 HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(complain.getBusinessId());
                 houseFlowApply.setMemberCheck(0);
+                houseFlowApply.setModifyDate(new Date());
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
             }
         }

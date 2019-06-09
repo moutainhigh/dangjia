@@ -681,7 +681,7 @@ public class HouseService {
             return ServerResponse.createByErrorMessage("操作失败");
         }
         house.setVisitState(1);//开工成单
-        //house.setModifyDate(new Date());
+        house.setConstructionDate(new Date());
         iHouseMapper.updateByPrimaryKeySelective(house);
         try {
             //开始建群

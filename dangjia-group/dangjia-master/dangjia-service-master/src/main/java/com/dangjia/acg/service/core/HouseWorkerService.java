@@ -384,6 +384,7 @@ public class HouseWorkerService {
             if (applyType == 4) {
                 for (HouseFlowApply hfa : houseFlowApplyList) {
                     hfa.setMemberCheck(2);//不通过不通过
+                    hfa.setModifyDate(new Date());
                     houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
                 }
             } else {

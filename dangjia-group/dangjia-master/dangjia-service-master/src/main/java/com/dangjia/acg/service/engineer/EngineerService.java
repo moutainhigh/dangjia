@@ -589,7 +589,7 @@ public class EngineerService {
                 Example example = new Example(HouseFlow.class);
                 example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.SUPERVISOR_START, 1);
                 List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
-                map.put("createDate", houseFlows.size() == 0 ? "" : houseFlows.get(0).getReleaseTime());
+                map.put("createDate", house.getConstructionDate());
 
                 Example example1 = new Example(HouseFlowApply.class);
                 example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId()).andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.APPLY_TYPE, 3);

@@ -12,6 +12,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * 实体类 - 房间
@@ -229,6 +230,10 @@ public class House extends BaseEntity {
     @ApiModelProperty("施工图打回次数")
     private Integer constructionFrequency;
 
+    @Column(name = "construction_date")
+    @Desc(value = "开工时间")
+    @ApiModelProperty("开工时间")
+    protected Date constructionDate;// 修改日期
     public House() {
 
     }

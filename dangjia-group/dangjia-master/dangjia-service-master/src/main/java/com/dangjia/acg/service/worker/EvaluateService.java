@@ -165,6 +165,7 @@ public class EvaluateService {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             houseFlowApply.setApplyDec(content);
             houseFlowApply.setSupervisorCheck(2);
+            houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
             /*
@@ -234,6 +235,7 @@ public class EvaluateService {
 
             //当前时间延后一天等待审核
             houseFlowApply.setStartDate(DateUtil.addDateDays(new Date(),1));
+            houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
 
@@ -341,6 +343,7 @@ public class EvaluateService {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DAY_OF_YEAR, 7);//业主倒计时
             houseFlowApply.setEndDate(calendar.getTime());
+            houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
             /*
              * 大管家每次审核拿钱 新算法 2018.08.03

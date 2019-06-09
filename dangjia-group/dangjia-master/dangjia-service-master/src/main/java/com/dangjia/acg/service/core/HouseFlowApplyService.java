@@ -155,6 +155,7 @@ public class HouseFlowApplyService {
             }
             hfa.setSupervisorCheck(1);
             hfa.setPayState(1);
+            hfa.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
 
             //工匠订单
@@ -301,6 +302,7 @@ public class HouseFlowApplyService {
                 memberMapper.updateByPrimaryKeySelective(worker);
 
             }
+            hfa.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
 
             return ServerResponse.createBySuccessMessage("操作成功");
@@ -667,6 +669,7 @@ public class HouseFlowApplyService {
             }else{
                 hfa.setMemberCheck(1);//通过
             }
+            hfa.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
 
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(hfa.getHouseFlowId());

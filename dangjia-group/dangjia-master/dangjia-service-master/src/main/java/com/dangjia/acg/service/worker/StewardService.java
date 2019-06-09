@@ -219,11 +219,13 @@ public class StewardService {
             if (state == 1) {
                 houseFlowApply.setMemberCheck(1);
                 houseFlowApply.setSupervisorCheck(1);
+                houseFlowApply.setModifyDate(new Date());
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
             } else {
                 houseFlowApply.setMemberCheck(2);
                 houseFlowApply.setSupervisorCheck(2);
+                houseFlowApply.setModifyDate(new Date());
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
                 //不通过停工申请

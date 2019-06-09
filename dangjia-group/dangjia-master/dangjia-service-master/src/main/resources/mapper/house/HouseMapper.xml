@@ -38,6 +38,7 @@
         visit_state as visitState,
         data_status as dataStatus,
         create_date as createDate,
+        construction_date as constructionDate,
         modify_date as modifyDate
     </sql>
     <select id="getDesignList" resultType="com.dangjia.acg.dto.house.DesignDTO">
@@ -143,6 +144,7 @@
         house.number,
         house.data_status as dataStatus,
         house.create_date as createDate,
+        house.construction_date as constructionDate,
         house.modify_date as modifyDate,
         (SELECT COUNT(*) from dj_deliver_order_split where apply_status = 1 and house_id = house.id) as waitCount,
         (SELECT COUNT(*) from dj_deliver_order_split where apply_status = 2 and house_id = house.id) as sendCount
@@ -239,6 +241,7 @@
         h.work_deposit_id as workDepositId,
         h.create_date AS createDate,
         h.modify_date AS modifyDate,
+        h.construction_date as constructionDate,
         h.city_id as cityId,
         h.modeling_layout_id as modelingLayoutId,
         h.village_id as villageId,
@@ -310,6 +313,7 @@
         h.work_deposit_id as workDepositId,
         h.create_date AS createDate,
         h.modify_date AS modifyDate,
+        h.construction_date as constructionDate,
         h.number as number,
         ( CASE WHEN (h.decoration_type = 2 AND h.designer_ok != 3) THEN 1 ELSE 0 END ) AS showUpdata
         FROM
@@ -379,6 +383,7 @@
         h.drawings,
         h.work_deposit_id as workDepositId,
         h.custom_sort as customSort,
+        h.construction_date as constructionDate,
         h.is_select as isSelect,
         (
         case
@@ -392,6 +397,7 @@
         ) as visitState,
         h.data_status as dataStatus,
         h.create_date as createDate,
+        h.construction_date as constructionDate,
         h.modify_date as modifyDate
         FROM
         dj_house h
@@ -485,7 +491,7 @@
         member.nick_name AS nickName,
         member.NAME AS NAME,
         member.mobile AS mobile,
-        house.create_date AS createDate,
+        house.construction_date AS createDate,
         (
         SELECT
         f.modify_date
