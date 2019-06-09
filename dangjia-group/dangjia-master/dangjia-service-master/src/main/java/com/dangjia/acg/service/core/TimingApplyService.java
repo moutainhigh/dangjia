@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -53,21 +54,43 @@ public class TimingApplyService {
             evaluateService.absenteeismOvertime(houseFlow);
         }
 
-        //停工完结，状态变回
+
         Example example =new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.PAUSE,1);
         List<HouseFlow> houseFlowList=houseFlowMapper.selectByExample(example);
         for (HouseFlow houseFlow : houseFlowList) {
+            //停工完结，状态变回
             Example  example1 =new Example(HouseFlowApply.class);
             example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID,houseFlow.getId())
                     .andEqualTo(HouseFlowApply.APPLY_TYPE,3)
-                    .andEqualTo(HouseFlowApply.MEMBER_CHECK,1)
+                    .andCondition(" member_check in (1,3) ")
                     .andCondition(" to_days(end_date) > to_days('"+ DateUtil.getDateString(new Date().getTime())+"') ");
             List list=houseFlowApplyMapper.selectByExample(example1);
             if(list.size()==0){
                 houseFlow.setPause(0);
                 houseFlow.setModifyDate(new Date());
                 houseFlowMapper.updateByPrimaryKey(houseFlow);
+            }
+
+
+            //申请停工超过2天的，第3天起每天扣除1积分
+            if(houseFlow.getPause()==1) {
+                example = new Example(HouseFlowApply.class);
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlow.getId())
+                        .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
+                        .andCondition(" member_check in (1,3) ")
+                        .andCondition(" to_days(end_date) <= to_days('" + DateUtil.getDateString(new Date().getTime()) + "') ");
+                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
+                if (houseFlowApplyList.size() > 0) {
+                    HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
+                    Date start = houseFlowApply.getStartDate();
+                    Date end = new Date();
+                    int suspendDay = DateUtil.daysofTwo(start, end);
+                    if (suspendDay > 2) {
+                        evaluateService.updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(1), "申请停工超过2天，积分扣除");
+
+                    }
+                }
             }
         }
     }
