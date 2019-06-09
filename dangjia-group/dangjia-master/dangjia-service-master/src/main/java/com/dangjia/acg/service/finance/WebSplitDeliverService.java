@@ -351,6 +351,19 @@ public class WebSplitDeliverService {
                 receiptDTO.setCreateDate(receipt.getCreateDate());
                 receiptDTO.setId(receipt.getId());
                 list.add(receiptDTO);
+                //对list进行排序 根据时间降序排序
+                Collections.sort(list, new Comparator<ReceiptDTO>() {
+                    @Override
+                    public int compare(ReceiptDTO r1, ReceiptDTO r2) {
+                        int flag = r1.getCreateDate().compareTo(r2.getCreateDate());
+                        if(flag == -1){
+                            flag = 1;
+                        }else if(flag == 1){
+                            flag = -1;
+                        }
+                        return flag;
+                    }
+                });
             }
             return ServerResponse.createBySuccess("查询成功",list);
         } catch (Exception e) {
