@@ -161,7 +161,7 @@
         mc.label_id_arr,
         mc.remind_record_id,
         mcr.remind_time,
-        h.create_date AS modifyDate
+        h.construction_date AS modifyDate
         FROM dj_member w
         INNER JOIN dj_member_info mi on mi.member_id = w.id and mi.policy_id=#{userRole}
         <if test="userId==null or userId==''">
