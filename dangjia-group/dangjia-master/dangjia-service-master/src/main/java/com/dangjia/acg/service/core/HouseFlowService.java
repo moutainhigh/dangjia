@@ -560,6 +560,9 @@ public class HouseFlowService {
         try {
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);//查询大管家houseFlow
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+            if("0".equals(house.getSchedule())){
+                return ServerResponse.createByErrorMessage("您还没有制作工程日历！");
+            }
             house.setModifyDate(new Date());
             houseMapper.updateByPrimaryKeySelective(house);
             houseFlow.setSupervisorStart(1);//大管家进度改为已开工
