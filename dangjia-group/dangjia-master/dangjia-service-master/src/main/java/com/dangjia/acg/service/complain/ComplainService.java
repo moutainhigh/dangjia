@@ -879,7 +879,7 @@ public class ComplainService {
         workerDetail1.setWorkerName(member.getNickName());
         workerDetail1.setHouseId(houseId);
         workerDetail1.setMoney(backMoney);
-        workerDetail1.setState(0);
+        workerDetail1.setState(9);
         workerDetail1.setHaveMoney(new BigDecimal(0));
         workerDetail1.setHouseWorkerOrderId(houseWorkerOrderList.get(0).getId());
         workerDetail1.setApplyMoney(backMoney);
