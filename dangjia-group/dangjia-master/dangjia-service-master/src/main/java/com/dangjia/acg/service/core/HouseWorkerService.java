@@ -984,12 +984,15 @@ public class HouseWorkerService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
+            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Member worker = (Member) object;
-            List<MyHouseFlowDTO> listHouseWorker = houseWorkerMapper.getMyHouseFlowList(worker.getId(), worker.getWorkerType());
-            for (MyHouseFlowDTO myHouseFlowDTO : listHouseWorker) {
-                HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(myHouseFlowDTO.getHouseWorkerId());
-                if (houseWorker == null) continue;
-                if (myHouseFlowDTO.getHouseFlowId().equals(houseFlowId)) {//选中的任务isSelect改为1
+            Example example = new Example(HouseWorker.class);
+            example.createCriteria().andCondition("  work_type IN ( 1, 6 ) ")
+                    .andEqualTo(HouseWorker.WORKER_ID, worker.getId())
+                    .andEqualTo(HouseWorker.WORKER_TYPE, worker.getWorkerType());
+            List<HouseWorker> listHouseWorker=houseWorkerMapper.selectByExample(example);
+            for (HouseWorker houseWorker : listHouseWorker) {
+                if (houseWorker.getHouseId().equals(houseFlow.getHouseId())) {//选中的任务isSelect改为1
                     houseWorker.setIsSelect(1);
                     houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 } else {//其他改为0

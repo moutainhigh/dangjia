@@ -148,7 +148,7 @@ public class TaskService {
                         buttonDTO.setHouseType(house.getHouseType());
                         buttonDTO.setDrawings(house.getDrawings());
                     }
-                    if (house.getIsSelect() == 1 && house.getVisitState() == 1) {//当前选中且开工
+                    if (house.getIsSelect() == 1) {//当前选中且开工
                         houseId = house.getId();
                     }
                 }
