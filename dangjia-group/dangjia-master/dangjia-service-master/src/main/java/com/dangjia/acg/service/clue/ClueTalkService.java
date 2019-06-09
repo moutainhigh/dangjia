@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.clue;
 
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.clue.ClueTalkMapper;
@@ -12,8 +13,6 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -25,8 +24,6 @@ public class ClueTalkService {
     private UserMapper userMapper;
     @Autowired
     private ClueMapper clueMapper;
-    @Autowired
-    private ClueService clueService;
     /**
      * 通过线索ID获取沟通记录
      */
@@ -41,14 +38,17 @@ public class ClueTalkService {
             }
             PageHelper.startPage(pageNum, pageSize);
             List<ClueTalk> clueTalks=clueTalkMapper.getTalkByClueId(clueId);
-            List<ClueTalk> clueTalkList=new ArrayList<ClueTalk>();
+            if (clueTalks == null || clueTalks.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
+                        , ServerCode.NO_DATA.getDesc());
+            }
+            PageInfo pageResult = new PageInfo(clueTalks);
             for(ClueTalk c:clueTalks){
                 MainUser mainUser=userMapper.getNameById(c.getUserId());
                 String name=mainUser.getUsername();
                 c.setUserId(name);
-                clueTalkList.add(c);
             }
-            PageInfo pageResult = new PageInfo(clueTalks);
+            pageResult.setList(clueTalks);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
@@ -78,3 +78,4 @@ public class ClueTalkService {
         }
     }
 }
+
