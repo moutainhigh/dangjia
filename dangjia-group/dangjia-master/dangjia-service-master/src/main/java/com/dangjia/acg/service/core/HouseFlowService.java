@@ -26,12 +26,14 @@ import com.dangjia.acg.modle.core.HouseFlowCountDownTime;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.design.HouseStyleType;
+import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.member.GroupInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +90,8 @@ public class HouseFlowService {
     @Autowired
     private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private GroupInfoService groupInfoService;
     private static Logger LOG = LoggerFactory.getLogger(HouseFlowService.class);
 
     /**
@@ -556,8 +560,14 @@ public class HouseFlowService {
      * @param houseFlowId 房子ID
      * @return 是否成功
      */
-    public ServerResponse setConfirmStart(String userToken, String houseFlowId) {
+    public ServerResponse setConfirmStart(HttpServletRequest request,String userToken, String houseFlowId) {
         try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
+
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);//查询大管家houseFlow
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             if("0".equals(house.getSchedule())){
@@ -566,6 +576,7 @@ public class HouseFlowService {
             house.setModifyDate(new Date());
             houseMapper.updateByPrimaryKeySelective(house);
             houseFlow.setSupervisorStart(1);//大管家进度改为已开工
+            houseFlow.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
             HouseFlow nextHF = houseFlowMapper.getNextHouseFlow(houseFlow.getHouseId());//根据当前工序查下一工序
             if (nextHF != null) {
@@ -577,6 +588,11 @@ public class HouseFlowService {
             }
             configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家开工", DjConstants.PushMessage.STEWARD_CONSTRUCTION, "");
 
+            //开始建群
+            Group group = new Group();
+            group.setHouseId(house.getId());
+            group.setUserId(house.getMemberId());
+            groupInfoService.addGroup(request, group, worker.getId(), "大管家");
             return ServerResponse.createBySuccessMessage("确认开工成功");
         } catch (Exception e) {
             e.printStackTrace();
