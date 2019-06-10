@@ -334,9 +334,11 @@ public class MendRecordService {
                 map.put("createDate", evaluate.getCreateDate());
                 map.put("content", evaluate.getContent());
             }
+            if (houseFlowApply.getSupervisorCheck() == 0) {
+                map.put("info", "未审核");
+            }
             if (houseFlowApply.getSupervisorCheck() == 1) {
                 map.put("info", "审核通过");
-
             }
             if (houseFlowApply.getSupervisorCheck() == 2) {
                 map.put("info", "拒绝通过");
@@ -359,6 +361,9 @@ public class MendRecordService {
             if(evaluate!=null) {
                 map.put("createDate", evaluate.getCreateDate());
                 map.put("content", evaluate.getContent());
+            }
+            if (houseFlowApply.getMemberCheck() == 0) {
+                map.put("info", "未审核");
             }
             if(houseFlowApply.getMemberCheck()==1){
                 map.put("info","审核通过");
@@ -587,9 +592,9 @@ public class MendRecordService {
 
             /*审核记录*/
             if (roleType == 3) {//工匠
-                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 ").andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 and apply_type!=0  ").andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
             } else {
-                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 ");
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 and apply_type!=0  ");
             }
             List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
             if (houseFlowApplies.size() > 0) {
