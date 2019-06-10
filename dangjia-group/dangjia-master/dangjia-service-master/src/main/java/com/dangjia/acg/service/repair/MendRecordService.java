@@ -329,17 +329,20 @@ public class MendRecordService {
         if(houseFlowApply.getSupervisorCheck() > 0){
             map.put("createDate", houseFlowApply.getCreateDate());//默认赋值
             map.put("type", "1");
-            //查工匠被管家的评价
-            Evaluate evaluate = evaluateMapper.getForCountMoneySup(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), houseFlowApply.getWorkerId());
-            if(evaluate!=null) {
-                map.put("createDate", evaluate.getCreateDate());
-                map.put("content", evaluate.getContent());
-            }
+
             if (houseFlowApply.getSupervisorCheck() == 1) {
                 map.put("info", "审核通过");
+                //查工匠被管家的评价
+                Evaluate evaluate = evaluateMapper.getForCountMoneySup(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), houseFlowApply.getWorkerId());
+                if(evaluate!=null) {
+                    map.put("createDate", evaluate.getCreateDate());
+                    map.put("content", evaluate.getContent());
+                }
             }
             if (houseFlowApply.getSupervisorCheck() == 2) {
                 map.put("info", "拒绝通过");
+                map.put("createDate", houseFlowApply.getModifyDate());
+                map.put("content", houseFlowApply.getApplyDec());
             }
         }
 
@@ -355,17 +358,20 @@ public class MendRecordService {
         if(houseFlowApply.getMemberCheck() > 0){
             map.put("createDate",houseFlowApply.getCreateDate());
             map.put("type","1");
-            //查工匠被管家的评价
-            Evaluate evaluate = evaluateMapper.getForCountMoney(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), houseFlowApply.getWorkerId());
-            if(evaluate!=null) {
-                map.put("createDate", evaluate.getCreateDate());
-                map.put("content", evaluate.getContent());
-            }
+
             if(houseFlowApply.getMemberCheck()==1){
+                //查工匠被管家的评价
+                Evaluate evaluate = evaluateMapper.getForCountMoney(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), houseFlowApply.getWorkerId());
+                if(evaluate!=null) {
+                    map.put("createDate", evaluate.getCreateDate());
+                    map.put("content", evaluate.getContent());
+                }
                 map.put("info","审核通过");
             }
             if(houseFlowApply.getMemberCheck()==2){
                 map.put("info","拒绝通过");
+                map.put("createDate", houseFlowApply.getModifyDate());
+                map.put("content", houseFlowApply.getApplyDec());
             }
             if(houseFlowApply.getMemberCheck()==3){
                 map.put("info","自动审核通过");
