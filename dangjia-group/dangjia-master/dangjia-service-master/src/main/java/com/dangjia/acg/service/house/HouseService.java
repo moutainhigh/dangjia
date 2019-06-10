@@ -224,8 +224,10 @@ public class HouseService {
             String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             switch (house.getVisitState()) {
                 case 1:
-                    map.put("btName", "申请结束装修");
-                    map.put("onclick", webAddress + "ownerEnd?title=填写原因&houseId=" + house.getId());
+                    if (house.getDesignerOk() != 0 && house.getDesignerOk() != 4) {
+                        map.put("btName", "申请结束装修");
+                        map.put("onclick", webAddress + "ownerEnd?title=填写原因&houseId=" + house.getId());
+                    }
                     break;
                 case 2:
                     map.put("btName", "休眠中");
