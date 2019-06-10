@@ -38,6 +38,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -207,11 +208,16 @@ public class OrderService {
                 businessOrderDTO.setHouseName(house == null ? "" : house.getHouseName());
             }
             List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house == null ? "" : house.getStyle());
+             BigDecimal payPrice=new BigDecimal(0);
+            for (OrderDTO orderDTO : orderDTOList) {
+                payPrice=payPrice.add(orderDTO.getTotalAmount());
+            }
+            businessOrderDTO.setPayPrice(payPrice);
             businessOrderDTO.setOrderDTOList(orderDTOList);
             businessOrderDTO.setBusinessOrderId(businessOrder.getId());
             businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
             businessOrderDTO.setNumber(businessOrder.getNumber());
-            businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
+
             businessOrderDTOS.add(businessOrderDTO);
         }
         return ServerResponse.createBySuccess("查询成功", businessOrderDTOS);
