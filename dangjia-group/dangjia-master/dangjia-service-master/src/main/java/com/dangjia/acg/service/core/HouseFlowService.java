@@ -122,7 +122,7 @@ public class HouseFlowService {
             }
             Member member = (Member) object;
             //工匠没有实名认证不应该展示数据
-            if(member.getRealNameState()!=3){
+            if (member.getRealNameState() != 3) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
@@ -564,7 +564,7 @@ public class HouseFlowService {
      * @param houseFlowId 房子ID
      * @return 是否成功
      */
-    public ServerResponse setConfirmStart(HttpServletRequest request,String userToken, String houseFlowId) {
+    public ServerResponse setConfirmStart(HttpServletRequest request, String userToken, String houseFlowId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -574,7 +574,7 @@ public class HouseFlowService {
 
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);//查询大管家houseFlow
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
-            if("0".equals(house.getSchedule())){
+            if ("0".equals(house.getSchedule())) {
                 return ServerResponse.createByErrorMessage("您还没有制作工程日历！");
             }
             house.setModifyDate(new Date());
