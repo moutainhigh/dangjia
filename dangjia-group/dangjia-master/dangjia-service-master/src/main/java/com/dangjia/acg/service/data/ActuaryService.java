@@ -7,7 +7,6 @@ import com.dangjia.acg.dto.house.HouseListDTO;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
@@ -53,7 +52,7 @@ public class ActuaryService {
         List<HouseListDTO> houseList = houseMapper.getActuaryAll(budgetOk, name, dataStatus);
         PageInfo pageResult = new PageInfo(houseList);
         for (HouseListDTO houseListDTO : houseList) {
-            HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(houseListDTO.getHouseId(), 1);
+            HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(houseListDTO.getHouseId(), 2);
             if (houseWorker != null) {
                 Member workerSup = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
                 if (workerSup != null) {
