@@ -485,6 +485,13 @@ public class ComplainService {
                 houseFlowApply.setModifyDate(new Date());
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
             }
+            if (complain.getComplainType() != null && complain.getComplainType() == 5) {
+                House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
+                house.setVisitState(1);
+                house.setModifyDate(new Date());
+                houseMapper.updateByPrimaryKeySelective(house);
+            }
+
         }
         complainMapper.updateByPrimaryKeySelective(complain);
         return ServerResponse.createBySuccessMessage("提交成功");
@@ -746,19 +753,8 @@ public class ComplainService {
         if (house.getVisitState() != 1 && house.getVisitState() != 5) {
             return ServerResponse.createByErrorMessage("该房子没有在装修，无法结束装修");
         }
-        if (house.getDesignerOk()==0||house.getDesignerOk()==4) {
-            return ServerResponse.createByErrorMessage("该房子设计未开始或未支付");
-        }
-        if (house.getDesignerOk()==3&&house.getBudgetOk() >0 && house.getBudgetOk() <5) {
-            return ServerResponse.createByErrorMessage("该房子精算未开始或已结束");
-        }
 
 
-//        designer_ok
-//        设计状态,0未确定设计师,4设计待抢单,1已支付-设计师待量房,9量房图发给业主,5平面图发给业主,6平面图审核不通过,7通过平面图待发施工图," +
-//        "2已发给业主施工图,8施工图片审核不通过,3施工图(全部图)审核通过"
-//        budget_ok
-//        精算状态:-1已精算没有发给业主,默认0未开始,1已开始精算,2已发给业主,3审核通过,4审核不通过,5业主待支付
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null && CommonUtil.isEmpty(userId)) {
             return ServerResponse.createbyUserTokenError();
