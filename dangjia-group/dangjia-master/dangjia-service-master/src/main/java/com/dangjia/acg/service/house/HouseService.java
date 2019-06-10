@@ -224,7 +224,8 @@ public class HouseService {
             String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             switch (house.getVisitState()) {
                 case 1:
-                    if (house.getDesignerOk() != 0 && house.getDesignerOk() != 4) {
+                    if ((house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getDesignerOk() != 3)
+                            || (house.getDesignerOk() == 3 && house.getBudgetOk() != 0 && house.getBudgetOk() != 5)) {
                         map.put("btName", "申请结束装修");
                         map.put("onclick", webAddress + "ownerEnd?title=填写原因&houseId=" + house.getId());
                     }
