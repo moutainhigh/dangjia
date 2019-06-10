@@ -617,7 +617,7 @@
         `dj_deliver_split_deliver`
         WHERE
         `house_id` = #{houseId}
-        AND `apply_state` = 2
+        AND `apply_state` = 2 AND `data_status` = 0
         )
         UNION ALL
         (
@@ -632,7 +632,7 @@
         `dj_repair_mend_deliver`
         WHERE
         `house_id` = #{houseId}
-        AND `apply_state` = 2
+        AND `apply_state` = 2 AND `data_status` = 0
         )
         ) a
         ORDER BY
