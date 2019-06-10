@@ -233,7 +233,12 @@ public class House extends BaseEntity {
     @Column(name = "construction_date")
     @Desc(value = "开工时间")
     @ApiModelProperty("开工时间")
-    protected Date constructionDate;// 修改日期
+    protected Date constructionDate;
+
+    @Column(name = "completed_date")
+    @Desc(value = "竣工时间")
+    @ApiModelProperty("竣工时间")
+    protected Date completedDate;
     public House() {
 
     }
