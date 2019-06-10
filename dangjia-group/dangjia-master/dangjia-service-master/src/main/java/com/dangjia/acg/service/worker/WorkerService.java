@@ -219,6 +219,7 @@ public class WorkerService {
                         }
                     }
                 }
+                hwMap.put("visitState",house.getVisitState());
                 hwMap.put("suspendDay", suspendDay == null ? 0 : suspendDay);//暂停天数
                 hwMap.put("everyEndDay", everyEndDay == null ? 0 : everyEndDay);//每日完工申请天数
                 hwMap.put("totalDay", totalDay);//总开工数
