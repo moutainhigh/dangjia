@@ -43,7 +43,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
-import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -122,16 +121,13 @@ public class HouseFlowService {
             }
             Member member = (Member) object;
             //工匠没有实名认证不应该展示数据
-            if (member.getRealNameState() != 3) {
+            if (CommonUtil.isEmpty(member.getWorkerTypeId()) || member.getCheckType() != 2 || member.getRealNameState() != 3) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             request.setAttribute(Constants.CITY_ID, cityId);
             List<AllgrabBean> grabList = new ArrayList<>();//返回的任务list
-            String workerTypeId = "4";
-            if (StringUtil.isNotEmpty(member.getWorkerTypeId())) {
-                workerTypeId = member.getWorkerTypeId();
-            }
+            String workerTypeId = member.getWorkerTypeId();
             /*待抢单*/
             Example example = new Example(HouseFlow.class);
             example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 2).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
