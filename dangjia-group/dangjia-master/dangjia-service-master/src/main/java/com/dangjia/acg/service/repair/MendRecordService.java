@@ -587,9 +587,9 @@ public class MendRecordService {
 
             /*审核记录*/
             if (roleType == 3) {//工匠
-                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 ").andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 and apply_type!=0  ").andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
             } else {
-                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 ");
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 and apply_type!=0  ");
             }
             List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
             if (houseFlowApplies.size() > 0) {
