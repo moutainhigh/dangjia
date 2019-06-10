@@ -469,9 +469,11 @@ public class EngineerService {
             if (houseWorkerOrderList.size() == 0) {
                 map.put("havaMoney", 0);
             } else {
+                BigDecimal retentionMoney = houseWorkerOrderList.get(0).getRetentionMoney();
+                if(retentionMoney==null){retentionMoney=new BigDecimal(0);}
                 BigDecimal havaMoney = houseWorkerOrderList.get(0).getRepairTotalPrice().subtract(houseWorkerOrderList.get(0).getRepairPrice());
                 havaMoney = houseWorkerOrderList.get(0).getHaveMoney().add(havaMoney);
-                havaMoney = houseWorkerOrderList.get(0).getRetentionMoney().add(havaMoney);
+                havaMoney = retentionMoney.add(havaMoney);
                 map.put("workPrice", houseWorkerOrderList.get(0).getWorkPrice().add(houseWorkerOrderList.get(0).getRepairTotalPrice()));
                 map.put("havaMoney", havaMoney);
             }
@@ -531,7 +533,7 @@ public class EngineerService {
                 map.put("supMobile", supervisor.getMobile());
             }
             map.put("createDate", houseFlow.getCreateDate());
-            map.put("workSteta", houseFlow.getWorkSteta()); //施工状态，0未开始 ，1阶段完工通过，2整体完工通过，3待交底，4施工中
+            map.put("workSteta",house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
             mapList.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", mapList);
@@ -575,7 +577,7 @@ public class EngineerService {
                 map.put("memberName", member.getNickName() == null ? member.getName() : member.getNickName());
                 map.put("mobile", member.getMobile());
                 map.put("pause", house.getPause());
-                map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工
+                map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工 4提前结束装修 5提前结束装修申请中
                 Member supervisor = memberMapper.getSupervisor(house.getId());
                 if (supervisor != null) {
                     map.put("supName", supervisor.getName());
@@ -587,7 +589,7 @@ public class EngineerService {
                 Example example = new Example(HouseFlow.class);
                 example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.SUPERVISOR_START, 1);
                 List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
-                map.put("createDate", houseFlows.size() == 0 ? "" : houseFlows.get(0).getReleaseTime());
+                map.put("createDate", house.getConstructionDate());
 
                 Example example1 = new Example(HouseFlowApply.class);
                 example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId()).andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.APPLY_TYPE, 3);
@@ -644,9 +646,10 @@ public class EngineerService {
                 artisanDTO.setInviteNum(member.getInviteNum());
                 artisanDTO.setCheckType(member.getCheckType());
                 artisanDTO.setEvaluationScore(member.getEvaluationScore());
-                Example example = new Example(HouseWorker.class);
-                example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId());
-                artisanDTO.setVolume(houseWorkerMapper.selectCountByExample(example));//接单量
+//                Example example = new Example(HouseWorker.class);
+//                example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId());
+//                artisanDTO.setVolume(houseWorkerMapper.selectByExample(example).size());//接单量
+                artisanDTO.setVolume(alternative(member.getId(),member.getWorkerType()));//接单量
                 artisanDTO.setRealNameState(member.getRealNameState());
                 artisanDTO.setRealNameDescribe(member.getRealNameDescribe());
                 artisanDTO.setCheckDescribe(member.getCheckDescribe());
@@ -806,23 +809,10 @@ public class EngineerService {
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
-    public ServerResponse addSure(String name, String details, String img, Integer state, Integer type) {
+    public ServerResponse addSure(WorkerDisclosure workerDisclosure) {
         try {
-            WorkerDisclosure workerDisclosure = new WorkerDisclosure();
-            if (!CommonUtil.isEmpty(name)) {
-                workerDisclosure.setName(name);
-            }
-            if (!CommonUtil.isEmpty(details)) {
-                workerDisclosure.setDetails(details);
-            }
-            if (!CommonUtil.isEmpty(img)) {
-                workerDisclosure.setImg(img);
-            }
-            if (state != null) {
-                workerDisclosure.setState(state);
-            }
-            workerDisclosure.setType(type);
-            iWorkerDisclosureMapper.insert(workerDisclosure);
+            workerDisclosure.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
+            iWorkerDisclosureMapper.insertSelective(workerDisclosure);
             return ServerResponse.createBySuccessMessage("添加成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -835,12 +825,15 @@ public class EngineerService {
             WorkerDisclosure workerDisclosure = iWorkerDisclosureMapper.selectByPrimaryKey(id);
             if (!CommonUtil.isEmpty(name)) {
                 workerDisclosure.setName(name);
+                workerDisclosure.setModifyDate(new Date());
             }
             if (!CommonUtil.isEmpty(details)) {
                 workerDisclosure.setDetails(details);
+                workerDisclosure.setModifyDate(new Date());
             }
             if (state != null) {
                 workerDisclosure.setState(state);
+                workerDisclosure.setModifyDate(new Date());
             }
             workerDisclosure.setImg(img);
             workerDisclosure.setModifyDate(new Date());
@@ -877,7 +870,7 @@ public class EngineerService {
         if (type != null) {
             example.createCriteria().andEqualTo(WorkerEveryday.TYPE, type);
         }
-        if (!CommonUtil.isEmpty(search)) {
+        if (CommonUtil.isEmpty(search)) {
             example.createCriteria().andLike(WorkerEveryday.NAME, "%" + search + "%");
         }
         example.orderBy(WorkerEveryday.TYPE).orderBy(WorkerEveryday.MODIFY_DATE).desc();
@@ -889,22 +882,43 @@ public class EngineerService {
     public ServerResponse updateItems(String name, Integer type, Integer state, String id) {
         try {
             WorkerEveryday workerEveryday = iWorkerEverydayMapper.selectByPrimaryKey(id);
-            if (!CommonUtil.isEmpty(name)) {
+            if (CommonUtil.isEmpty(name)) {
                 workerEveryday.setName(name);
+                workerEveryday.setModifyDate(new Date());
             }
             if (type != null) {
                 workerEveryday.setType(type);
+                workerEveryday.setModifyDate(new Date());
             }
             if (state != null) {
                 workerEveryday.setState(state);
+                workerEveryday.setModifyDate(new Date());
             }
-
-            workerEveryday.setModifyDate(new Date());
             iWorkerEverydayMapper.updateByPrimaryKeySelective(workerEveryday);
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("修改失败");
         }
+    }
+
+
+    /**
+     * 接单数
+     * @param WorkerId
+     * @return
+     */
+    public int alternative(String WorkerId,int WorkerType) {
+        Example example=new Example(HouseFlow.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo(HouseFlow.WORKER_ID,WorkerId);
+        if(WorkerType==1 || WorkerType==2){
+
+        }else if(WorkerType==3){
+            criteria.andEqualTo(HouseFlow.SUPERVISOR_START,1);
+        }else{
+            criteria.andCondition(" work_steta not in(0,3)");
+        }
+        return  houseFlowMapper.selectCountByExample(example);
     }
 }

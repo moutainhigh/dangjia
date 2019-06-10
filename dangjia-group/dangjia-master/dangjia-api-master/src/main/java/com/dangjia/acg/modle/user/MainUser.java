@@ -55,9 +55,9 @@ public class MainUser extends BaseEntity {
 	private Boolean isJob;
 
 	@Column(name = "is_receive")
-	@Desc(value = "是否坐席（0：不是坐席；1，是坐席）")
-	@ApiModelProperty("是否坐席（0：不是坐席；1，是坐席）")
-	private Boolean isReceive;
+	@Desc(value = "是否坐席（0：不是坐席；1，售前客服坐席 2，售中客服坐席 3，材料顾问坐席4，工程顾问坐席）")
+	@ApiModelProperty("是否坐席（0：不是坐席；1，售前客服坐席 2，售中客服坐席 3，材料顾问坐席4，工程顾问坐席）")
+	private Integer isReceive;
 
 	@Column(name = "department")
 	@Desc(value = "部门")

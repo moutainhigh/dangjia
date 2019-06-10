@@ -7,10 +7,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
-import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
-import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
-import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IBankCardMapper;
@@ -68,6 +65,8 @@ public class WorkerService {
 
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
 
     /**
      * 查询通讯录
@@ -164,16 +163,12 @@ public class WorkerService {
             return (ServerResponse) object;
         }
         Member worker = (Member) object;
-        Example example = new Example(HouseWorkerOrder.class);
-        example.createCriteria()
-                .andEqualTo(HouseWorkerOrder.WORKER_ID, worker.getId());
-        example.orderBy(HouseFlow.CREATE_DATE).desc();
-        List<HouseWorkerOrder> hwList = houseWorkerOrderMapper.selectByExample(example);
+        List<HouseWorkerOrder> hwList = getHouseId(worker.getId(), worker.getWorkerType());
         PageInfo pageResult = new PageInfo(hwList);
         List<Map> hwMapList = new ArrayList<>();
         for (HouseWorkerOrder hw : hwList) {
             Map hwMap = BeanUtils.beanToMap(hw);
-            House house = houseMapper.selectByPrimaryKey(hw.getHouseId());
+            House house= houseMapper.selectByPrimaryKey(hw.getHouseId());
             if (house != null) {
                 Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
                 if (member != null) {
@@ -373,14 +368,50 @@ public class WorkerService {
                 return (ServerResponse) object;
             }
             Member worker = (Member) object;
-            Example example = new Example(HouseWorker.class);
-            example.createCriteria().andEqualTo("workerId", worker.getId());
-            List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);
+            List<HouseWorkerOrder> houseId = getHouseId(worker.getId(), worker.getWorkerType());
+            List<HouseWorker> hwList=new ArrayList<>();
+            for (HouseWorkerOrder houseWorkerOrder : houseId) {
+                Example example = new Example(HouseWorker.class);
+                example.createCriteria().andEqualTo("workerId", worker.getId())
+                        .andEqualTo(HouseWorker.HOUSE_ID,houseWorkerOrder.getHouseId());
+                hwList.addAll(houseWorkerMapper.selectByExample(example));
+            }
             return ServerResponse.createBySuccess("获取接单记录成功", hwList);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("获取接单记录失败");
         }
+    }
+
+
+    /**
+     * 获取我的任务的房子
+     * @param WorkerId
+     * @param WorkerType
+     * @return
+     */
+    public List<HouseWorkerOrder> getHouseId(String WorkerId,int WorkerType) {
+        Example example=new Example(HouseFlow.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo(HouseFlow.WORKER_ID,WorkerId);
+        if(WorkerType==1 || WorkerType==2){
+
+        }else if(WorkerType==3){
+            criteria.andEqualTo(HouseFlow.SUPERVISOR_START,1);
+        }else{
+            criteria.andCondition(" work_steta not in(0,3)");
+        }
+        //获取我的任务的房子Id
+        List<HouseFlow> houseId = houseFlowMapper.selectByExample(example);
+        List<HouseWorkerOrder> hwList = new ArrayList<>();
+        for (HouseFlow houseFlow : houseId) {
+            Example example1 = new Example(HouseWorkerOrder.class);
+            example1.createCriteria().andEqualTo(HouseWorkerOrder.WORKER_ID, WorkerId)
+                    .andEqualTo(HouseWorkerOrder.HOUSE_ID,houseFlow.getHouseId());
+            example1.orderBy(HouseFlow.CREATE_DATE).desc();
+            hwList.addAll(houseWorkerOrderMapper.selectByExample(example1));
+        }
+        return  hwList;
     }
 
 }

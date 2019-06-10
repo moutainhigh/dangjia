@@ -29,12 +29,6 @@ public class GatewayApplication {
 		return new ErrorFilter();
 	}
 	@Bean
-	MultipartConfigElement multipartConfigElement() {
-		MultipartConfigFactory factory = new MultipartConfigFactory();
-		factory.setLocation("/data/dangjia/temporary/");
-		return factory.createMultipartConfig();
-	}
-	@Bean
 	public EmbeddedServletContainerCustomizer containerCustomizer(){
 		return new EmbeddedServletContainerCustomizer(){
 			@Override
@@ -49,5 +43,11 @@ public class GatewayApplication {
 	}
 	public static void main(String[] args) {
 		SpringApplication.run(GatewayApplication.class, args);
+	}
+	@Bean
+	MultipartConfigElement multipartConfigElement() {
+		MultipartConfigFactory factory = new MultipartConfigFactory();
+		factory.setLocation("d:/dangjia/temporary/");
+		return factory.createMultipartConfig();
 	}
 }

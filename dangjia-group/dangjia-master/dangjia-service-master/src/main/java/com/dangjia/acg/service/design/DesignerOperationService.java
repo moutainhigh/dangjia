@@ -6,12 +6,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
-import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -21,6 +21,7 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
@@ -34,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,8 +52,8 @@ public class DesignerOperationService {
     private ConfigMessageService configMessageService;
     @Autowired
     private IHouseMapper houseMapper;
-    //    @Autowired
-//    private IHouseDesignImageMapper houseDesignImageMapper;//房子关联设计图
+    @Autowired
+    private HouseDesignPayService houseDesignPayService;
     @Autowired
     private CraftsmanConstructionService constructionService;
     @Autowired
@@ -74,6 +76,8 @@ public class DesignerOperationService {
     private IMemberMapper memberMapper;
     @Autowired
     private IWorkerDetailMapper workerDetailMapper;
+    @Autowired
+    private IDesignBusinessOrderMapper designBusinessOrderMapper;
 
     /**
      * 设计师将设计图或施工图发送给业主
@@ -88,30 +92,62 @@ public class DesignerOperationService {
         if (house == null) {
             return ServerResponse.createByErrorMessage("未找到该房子");
         }
-        if (house.getDecorationType() == 2) {//自带设计流程
-            if (house.getDesignerOk() == 1 || house.getDesignerOk() == 6) {
-                return sendPlan(house);
-            } else if (house.getDesignerOk() == 7 || house.getDesignerOk() == 8) {
-                return constructionPlans(house);
+        if (house.getVisitState() != 1) {
+            return ServerResponse.createByErrorMessage("该房子不在装修中");
+        }
+        if (house.getDesignerOk() == 3) {
+            Example example = new Example(DesignBusinessOrder.class);
+            Example.Criteria criteria = example.createCriteria()
+                    .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
+                    .andEqualTo(DesignBusinessOrder.HOUSE_ID, house.getId())
+                    .andEqualTo(DesignBusinessOrder.STATUS, 1)
+                    .andNotEqualTo(DesignBusinessOrder.OPERATION_STATE, 2);
+            if (house.getDecorationType() != 2) {
+                criteria.andEqualTo(DesignBusinessOrder.TYPE, 4);
+                List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
+                if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
+                    DesignBusinessOrder order = designBusinessOrders.get(0);
+                    if (order.getOperationState() == 0) {
+                        order.setOperationState(1);
+                        designBusinessOrderMapper.updateByPrimaryKeySelective(order);
+                        configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计图上传提醒",
+                                String.format("业主您好！您的美宅【%s】设计图已经上传，请确认。", house.getHouseName()), "");
+                        return ServerResponse.createBySuccessMessage("发送成功");
+                    }
+                }
             } else {
-                return ServerResponse.createByErrorMessage("设计进度还未达到发送要求");
+                criteria.andEqualTo(DesignBusinessOrder.TYPE, 3);
+                List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
+                if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
+                    DesignBusinessOrder order = designBusinessOrders.get(0);
+                    if (order.getOperationState() == 0) {
+                        order.setOperationState(2);
+                        designBusinessOrderMapper.updateByPrimaryKeySelective(order);
+                        configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计图上传提醒",
+                                String.format("业主您好！您的美宅【%s】设计图已经上传。", house.getHouseName()), "");
+                        return ServerResponse.createBySuccessMessage("发送成功");
+                    }
+                }
+            }
+        } else if (house.getDecorationType() == 2) {//自带设计流程
+            if (house.getDesignerOk() == 1 || house.getDesignerOk() == 6 ||
+                    house.getDesignerOk() == 7 || house.getDesignerOk() == 8) {
+                return constructionPlans(house);
             }
         } else {
             if (house.getDesignerOk() == 9 || house.getDesignerOk() == 6) {
                 return sendPlan(house);
             } else if (house.getDesignerOk() == 7 || house.getDesignerOk() == 8) {
                 return constructionPlans(house);
-            } else {
-                return ServerResponse.createByErrorMessage("设计进度还未达到发送要求");
             }
         }
+        return ServerResponse.createByErrorMessage("设计进度还未达到发送要求");
     }
 
     /**
      * 发送平面图给业主
      *
      * @param house 房子
-     * @return
      */
     private ServerResponse sendPlan(House house) {
         if (!designDataService.getPlaneMap(house.getId()).isSuccess()) {
@@ -130,13 +166,16 @@ public class DesignerOperationService {
      * 发送施工图给业主
      *
      * @param house 房子
-     * @return
      */
     private ServerResponse constructionPlans(House house) {
         if (!designDataService.getConstructionPlans(house.getId()).isSuccess()) {
-            return ServerResponse.createByErrorMessage("请上传平面图");
+            return ServerResponse.createByErrorMessage(house.getDecorationType() == 2 ? "请上传设计图" : "请上传施工图");
         }
-        house.setDesignerOk(2);//施工图(其它图)发给业主
+        if (house.getDecorationType() == 2) {//自带设计直接上传施工图
+            house.setDesignerOk(3);
+        } else {
+            house.setDesignerOk(2);//施工图(其它图)发给业主
+        }
         houseMapper.updateByPrimaryKeySelective(house);
         //app推送给业主
         configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计图上传提醒",
@@ -171,6 +210,9 @@ public class DesignerOperationService {
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
         }
+        if (house.getVisitState() != 1) {
+            return ServerResponse.createByErrorMessage("该房子不在装修中");
+        }
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -193,34 +235,43 @@ public class DesignerOperationService {
                     if (hwo != null) {
                         configMessageService.addConfigMessage(null, "gj", hwo.getWorkerId(), "0", "平面图已通过", String.format(DjConstants.PushMessage.PLANE_OK, house.getHouseName()), "");
                     }
+                    houseMapper.updateByPrimaryKeySelective(house);
+                    return ServerResponse.createBySuccessMessage("操作成功");
                 } else if (type == 0) {//不通过
-                    house.setDesignerOk(6);
-                    if (hwo != null) {
-                        configMessageService.addConfigMessage(null, "gj", hwo.getWorkerId(), "0", "平面图未通过", String.format(DjConstants.PushMessage.PLANE_ERROR, house.getHouseName()), "");
-                    }
+                    return houseDesignPayService.checkPass(house, hwo, worker, 1);
                 }
-                houseMapper.updateByPrimaryKeySelective(house);
-                return ServerResponse.createBySuccessMessage("操作成功");
+                return ServerResponse.createByErrorMessage("请选择是否通过");
             case 2://审核施工图
                 if (type == 1) {//通过
                     house.setDesignerOk(3);
                     if (hwo != null) {
+                        //订单拿钱更新
                         hwo.setHaveMoney(hwo.getWorkPrice());
                         houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
-                        //处理设计师工钱
-                        WorkerDetail workerDetail = new WorkerDetail();
-                        workerDetail.setName("设计费");
-                        workerDetail.setWorkerId(hwo.getWorkerId());
-                        workerDetail.setWorkerName(memberMapper.selectByPrimaryKey(hwo.getWorkerId()).getName());
-                        workerDetail.setHouseId(hwo.getHouseId());
-                        workerDetail.setMoney(hwo.getWorkPrice());
-                        workerDetail.setState(0);//进工钱
-                        workerDetail.setHaveMoney(hwo.getHaveMoney());
-                        workerDetail.setHouseWorkerOrderId(hwo.getId());
-                        workerDetail.setApplyMoney(hwo.getWorkPrice());
-                        workerDetailMapper.insert(workerDetail);
+                        //用户入账
+                        Member member = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
+                        if (member != null) {
+                            BigDecimal haveMoney = member.getHaveMoney().add(hwo.getWorkPrice());
+                            BigDecimal surplusMoney = member.getSurplusMoney().add(hwo.getWorkPrice());
+                            member.setHaveMoney(haveMoney);//添加已获总钱
+                            member.setSurplusMoney(surplusMoney);//添加余额
+                            memberMapper.updateByPrimaryKeySelective(member);
+                            //添加流水
+                            //处理设计师工钱
+                            WorkerDetail workerDetail = new WorkerDetail();
+                            workerDetail.setName("设计费");
+                            workerDetail.setWorkerId(hwo.getWorkerId());
+                            workerDetail.setWorkerName(memberMapper.selectByPrimaryKey(hwo.getWorkerId()).getName());
+                            workerDetail.setHouseId(hwo.getHouseId());
+                            workerDetail.setMoney(hwo.getWorkPrice());
+                            workerDetail.setState(0);//进工钱
+                            workerDetail.setWalletMoney(surplusMoney);//更新后的余额
+                            workerDetail.setHaveMoney(hwo.getHaveMoney());
+                            workerDetail.setHouseWorkerOrderId(hwo.getId());
+                            workerDetail.setApplyMoney(hwo.getWorkPrice());
+                            workerDetailMapper.insert(workerDetail);
+                        }
                     }
-                    //TODO 设计师钱没有进入账户余额
                     WorkerType workerType = workerTypeMapper.selectByPrimaryKey("2");
                     Example example = new Example(HouseFlow.class);
                     example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerType.getId());
@@ -244,14 +295,12 @@ public class DesignerOperationService {
                     if (hwo != null) {
                         configMessageService.addConfigMessage(null, "gj", hwo.getWorkerId(), "0", "施工图已通过", String.format(DjConstants.PushMessage.CONSTRUCTION_OK, house.getHouseName()), "");
                     }
+                    houseMapper.updateByPrimaryKeySelective(house);
+                    return ServerResponse.createBySuccessMessage("操作成功");
                 } else if (type == 0) {//不通过
-                    house.setDesignerOk(8);
-                    if (hwo != null) {
-                        configMessageService.addConfigMessage(null, "gj", hwo.getWorkerId(), "0", "施工图未通过", String.format(DjConstants.PushMessage.CONSTRUCTION_ERROR, house.getHouseName()), "");
-                    }
+                    return houseDesignPayService.checkPass(house, hwo, worker, 2);
                 }
-                houseMapper.updateByPrimaryKeySelective(house);
-                return ServerResponse.createBySuccessMessage("操作成功");
+                return ServerResponse.createByErrorMessage("请选择是否通过");
             default:
                 return ServerResponse.createByErrorMessage("该房子暂未到需要审核这个环节");
         }
@@ -309,16 +358,19 @@ public class DesignerOperationService {
      * @return ServerResponse
      */
     private ServerResponse setQuantityRoom(String userToken, String houseId, String userId, String imageString, int type) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null && CommonUtil.isEmpty(userId)) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), EventStatus.USER_TOKEN_ERROR.getDesc());
-        }
-        if (CommonUtil.isEmpty(imageString)) {
-            return ServerResponse.createByErrorMessage("请上传图片");
-        }
         House house = houseMapper.selectByPrimaryKey(houseId);
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
+        }
+        if (house.getVisitState() != 1) {
+            return ServerResponse.createByErrorMessage("该房子不在装修中");
+        }
+        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+        if (accessToken == null && CommonUtil.isEmpty(userId)) {
+            return ServerResponse.createbyUserTokenError();
+        }
+        if (CommonUtil.isEmpty(imageString)) {
+            return ServerResponse.createByErrorMessage("请上传图片");
         }
         switch (type) {
             case 0:
@@ -341,8 +393,10 @@ public class DesignerOperationService {
                 }
                 break;
             case 2:
-                if (house.getDesignerOk() != 7 && house.getDesignerOk() != 8) {
-                    return ServerResponse.createByErrorMessage("该阶段无法上传施工图");
+                if (house.getDecorationType() != 2) {//自带设计不需要判断
+                    if (house.getDesignerOk() != 7 && house.getDesignerOk() != 8) {
+                        return ServerResponse.createByErrorMessage("该阶段无法上传施工图");
+                    }
                 }
                 break;
         }
@@ -425,22 +479,6 @@ public class DesignerOperationService {
      */
     public ServerResponse upgradeDesign(String userToken, String houseId, String designImageTypeId, int selected) {
         //TODO 设计师升级服务暂时取消
-//        try {
-//            if (selected == 0) {//新增
-//                HouseDesignImage houseDesignImage = new HouseDesignImage();
-//                houseDesignImage.setHouseId(houseId);
-//                houseDesignImage.setDesignImageTypeId(designImageTypeId);
-//                houseDesignImage.setSell(1);
-//                houseDesignImageMapper.insert(houseDesignImage);
-//            } else {//删除
-//                Example example = new Example(HouseDesignImage.class);
-//                example.createCriteria().andEqualTo("houseId", houseId).andEqualTo("designImageTypeId", designImageTypeId);
-//                houseDesignImageMapper.deleteByExample(example);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
         return ServerResponse.createByErrorMessage("操作失败");
-//        }
-//        return ServerResponse.createBySuccessMessage("操作成功");
     }
 }

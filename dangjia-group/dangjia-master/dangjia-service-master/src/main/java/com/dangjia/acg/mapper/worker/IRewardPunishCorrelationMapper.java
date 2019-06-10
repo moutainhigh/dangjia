@@ -9,6 +9,6 @@ import tk.mybatis.mapper.common.Mapper;
 import java.util.List;
 
 @Repository
-public interface IRewardPunishCorrelationMapper extends Mapper<RewardPunishCorrelation>{
-    List<RewardPunishCorrelationDTO> queryCorrelation(@Param("name")String name, @Param("state")Integer state);
+public interface IRewardPunishCorrelationMapper extends Mapper<RewardPunishCorrelation> {
+    List<RewardPunishCorrelationDTO> queryCorrelation(@Param("name") String name, @Param("state") Integer state);
 }

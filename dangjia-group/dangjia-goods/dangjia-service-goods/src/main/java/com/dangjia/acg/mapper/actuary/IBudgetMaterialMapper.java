@@ -32,7 +32,6 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 	/**查询精算内商品*/
 	List<BudgetMaterial> repairBudgetMaterial(@Param("workerTypeId")String workerTypeId,@Param("houseId")String houseId,
 											  @Param("categoryId")String categoryId,@Param("productName")String productName,@Param("productType")String productType);
-
 	/**支付时工种服务总价*/
 	Double getBudgetSerPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	Double nonPaymentSer(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);

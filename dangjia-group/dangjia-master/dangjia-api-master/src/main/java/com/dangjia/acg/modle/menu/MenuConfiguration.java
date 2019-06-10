@@ -106,7 +106,7 @@ public class MenuConfiguration extends BaseEntity {
     }
 
     //所有图片字段加入域名和端口，形成全路径
-    public void initPath(String imageAddress, String webAddress, String houseId, String houseFlowId, Integer roleType) {
+    public void initPath(String imageAddress, String webAddress, String houseId, String houseFlowId, Integer profession) {
         StringBuilder data = new StringBuilder();
         if (!CommonUtil.isEmpty(houseId)) {
             data.append("&houseId=").append(houseId);
@@ -114,8 +114,8 @@ public class MenuConfiguration extends BaseEntity {
         if (!CommonUtil.isEmpty(houseFlowId)) {
             data.append("&houseFlowId=").append(houseFlowId);
         }
-        if (!CommonUtil.isEmpty(roleType)) {
-            data.append("&roleType=").append(roleType);
+        if (!CommonUtil.isEmpty(profession)) {
+            data.append("&profession=").append(profession);
         }
         this.image = CommonUtil.isEmpty(this.image) ? null : imageAddress + this.image;
         this.url = CommonUtil.isEmpty(this.url) ? null : webAddress + this.url + "?title=" + name + data.toString();

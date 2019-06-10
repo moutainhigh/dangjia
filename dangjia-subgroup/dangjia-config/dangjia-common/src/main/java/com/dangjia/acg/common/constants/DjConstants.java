@@ -17,6 +17,8 @@ public class DjConstants {
         public final static String SERVICEMANAGE = "serviceManage?userToken=%s&cityId=%s&title=%s";// 服务管理
         public final static String ADDARTIFICIAL = "addArtificial?userToken=%s&cityId=%s&title=%s";// 补人工
         public final static String CHANGEARTIFICIAL = "changeArtificial?userToken=%s&cityId=%s&title=%s";// 人工变更
+        public final static String BTPEOPLE = "btPeople?userToken=%s&cityId=%s&title=%s";// 补退人工变更
+        public final static String REFUNDITEMDETAIL = "refundItemDetail?userToken=%s&cityId=%s&title=%s";// 退人工审核
         public final static String MATERIALCONSUMPTION = "materialConsumption?userToken=%s&cityId=%s&title=%s";// 材料用量
         public final static String HPMANAGE = "hpManage?userToken=%s&cityId=%s&title=%s";//货品管理
         public final static String MYINVITECODE = "myInviteCode?userToken=%s&cityId=%s&title=%s";//我的邀请码
@@ -149,9 +151,9 @@ public class DjConstants {
         public final static Integer ZHENGTI_WANGONG = 2;// 2整体完工申请
         public final static Integer TINGGONG = 3;// 3停工申请
         public final static Integer MEIRI_KAIGONG = 4;// 4：每日开工
-        public final static Integer YOUXIAO_XUNCHA = 5;// 5有效巡查
-        public final static Integer JJ_TINGGONG = 6;// 6同意停工
-        public final static Integer TY_TINGGONG = 7;// 7拒绝停工
+        public final static Integer YOUXIAO_XUNCHA = 5;// 有效巡查
+        public final static Integer JJ_TINGGONG = 6;// 无人巡查
+        public final static Integer TY_TINGGONG = 7;// 追加巡查
         public final static Integer BURENGONG = 8;// 8补人工
         public final static Integer TUIRENGONG = 9;// 9退人工
         public final static Integer BUCAILIAO = 10;// 10补材料
@@ -165,9 +167,9 @@ public class DjConstants {
             applyTypeMap.put(DjConstants.RecordType.ZHENGTI_WANGONG, "整体完工申请");
             applyTypeMap.put(DjConstants.RecordType.TINGGONG, "停工申请");
             applyTypeMap.put(DjConstants.RecordType.MEIRI_KAIGONG, "每日开工");
-            applyTypeMap.put(DjConstants.RecordType.YOUXIAO_XUNCHA, "巡查");
-            applyTypeMap.put(DjConstants.RecordType.JJ_TINGGONG, "同意停工");
-            applyTypeMap.put(DjConstants.RecordType.TY_TINGGONG, "拒绝停工");
+            applyTypeMap.put(DjConstants.RecordType.YOUXIAO_XUNCHA, "有效巡查");
+            applyTypeMap.put(DjConstants.RecordType.JJ_TINGGONG, "无人巡查");
+            applyTypeMap.put(DjConstants.RecordType.TY_TINGGONG, "追加巡查");
             applyTypeMap.put(DjConstants.RecordType.BURENGONG, "补人工");
             applyTypeMap.put(DjConstants.RecordType.TUIRENGONG, "退人工");
             applyTypeMap.put(DjConstants.RecordType.BUCAILIAO, "补材料");
@@ -220,7 +222,7 @@ public class DjConstants {
         public final static String CRAFTSMAN_ABANDON = "业主您好！您的美宅【%s】【%s】已放弃，请等待新工匠抢单。";
         public final static String CRAFTSMAN_PAYMENT = "工匠您好！业主已支付【%s】工匠费用，请及时查看";
         public final static String STEWARD_CRAFTSMAN_FINISHED = "业主，您好！【%s】大管家已经与工匠完成开工交底，【%s】工序施工正式开始";
-        public final static String CRAFTSMAN_NOT_START = "工匠您好！【%s】今日未开工，请在12点前开工，如有不便需要请假请申请停工。";
+        public final static String CRAFTSMAN_NOT_START = "工匠您好！【%s】今日未开工，如有不便需要请假请申请停工。";
         public final static String STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE = "业主您好！【%s】有工匠申请停工，请查看";
         public final static String CRAFTSMAN_NEW_REPLACE = "业主您好！经多方协调，当家装修已为您更换了新的工匠，立即查看";
         public final static String STEWARD_APPLY_FINISHED = "大管家您好！【%s】【%s】申请阶段/整体完工，请审核！";
@@ -246,6 +248,7 @@ public class DjConstants {
         public final static String OWNER_TWO_FINISHED = "业主您好！【%s】【%s】阶段/整体完工已通过大管家的审核，请查看并对工匠和大管家分别评分，谢谢！";
 
         public final static String STEWARD_SHENGHECHAOSHI = "大管家您好！【%s】【%s】阶段/整体完工申请，审核倒计时结束，自动扣钱100元，每超出一天再多扣100元！";
+        public final static String CRAFTSMAN_ABSENTEEISM = "工匠您好！系统检测到您的工地【%s】今日未开工，将扣除您100元，请知晓！";
 
 
         public final static String ACTUARIAL_COMPLETION = "业主您好！您的美宅【%s】精算已完成，请等待大管家抢单。";

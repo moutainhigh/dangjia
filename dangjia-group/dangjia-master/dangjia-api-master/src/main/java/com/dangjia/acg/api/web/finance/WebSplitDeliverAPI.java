@@ -42,16 +42,71 @@ public interface WebSplitDeliverAPI {
 
 
     @PostMapping("web/finance/splitDeliver/getOrderSplitList")
-    @ApiOperation(value = "根据供应商Id查看要货单列表", notes = "根据供应商Id查看要货单列表")
+    @ApiOperation(value = "根据供应商Id查看要货单列表/模糊查询要货单列表", notes = "根据供应商Id查看要货单列表/模糊查询要货单列表")
     ServerResponse getOrderSplitList(@RequestParam("request") HttpServletRequest request,
-                                      @RequestParam("supplierId") String supplierId);
+                                     @RequestParam("pageDTO") PageDTO pageDTO,
+                                     @RequestParam("supplierId") String supplierId,
+                                     @RequestParam("searchKey")String searchKey,
+                                     @RequestParam("beginDate") String beginDate,
+                                     @RequestParam("endDate") String endDate);
 
     /**
      * 收货列表
      * shipState  0待发货,1已发待收货,2已收货,3取消,4部分收
      */
     @PostMapping("web/finance/splitDeliver/splitDeliverList")
-    @ApiOperation(value = "供应商查看货单详情", notes = "供应商查看货单详情")
+    @ApiOperation(value = "供应商查看要货单列表", notes = "供应商查看货单列表")
     ServerResponse splitDeliverList(@RequestParam("splitDeliverId") String splitDeliverId);
 
+
+    /**
+     * 根据供应商id查看货单列表
+     * @param supplierId
+     * @return
+     */
+    @PostMapping("web/finance/splitDeliver/mendDeliverList")
+    @ApiOperation(value = "供应商查看货单列表", notes = "供应商查看货单列表")
+    ServerResponse mendDeliverList(@RequestParam("supplierId") String supplierId,
+                                   @RequestParam("shipAddress")String shipAddress,
+                                   @RequestParam("beginDate") String beginDate,
+                                   @RequestParam("endDate") String endDate,
+                                   @RequestParam("applyState") Integer applyState);
+
+    /**
+     * 根据供应商id查看货单列表
+     * @return
+     */
+    @PostMapping("web/finance/splitDeliver/Settlemen")
+    @ApiOperation(value = "结算", notes = "结算")
+    ServerResponse Settlemen(@RequestParam("image") String image,
+                             @RequestParam("merge") String merge,
+                             @RequestParam("supplierId") String supplierId);
+
+    /**
+     * 根据供应商id查看货单列表
+     * @return
+     */
+    @PostMapping("web/finance/splitDeliver/ClsdMendDeliverList")
+    @ApiOperation(value = "已结算货单列表", notes = "已结算货单列表")
+    ServerResponse ClsdMendDeliverList(@RequestParam("shipAddress")String shipAddress,
+                                       @RequestParam("beginDate") String beginDate,
+                                       @RequestParam("endDate") String endDate,
+                                       @RequestParam("supplierId") String supplierId);
+
+    /**
+     * 查看回执
+     * @return
+     */
+    @PostMapping("web/finance/splitDeliver/selectReceipt")
+    @ApiOperation(value = "查看回执", notes = "查看回执")
+    ServerResponse selectReceipt(@RequestParam("id") String id);
+
+
+    /**
+     * 退货单查看详情
+     * @return
+     */
+    @PostMapping("web/finance/splitDeliver/mendDeliverDetail")
+    @ApiOperation(value = "退货单查看详情", notes = "退货单查看详情")
+    ServerResponse mendDeliverDetail(@RequestParam("id") String id);
 }

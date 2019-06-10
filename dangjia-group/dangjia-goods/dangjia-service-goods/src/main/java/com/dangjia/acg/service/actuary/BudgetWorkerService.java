@@ -663,7 +663,7 @@ public class BudgetWorkerService {
             House house = houseAPI.getHouseById(houseId);
             List<HouseFlow> hflist = houseFlowAPI.getWorkerFlow(house.getId());
             RlistResult rlistResult;
-            budgetResult.setBudgetDec(house.getCityName() + "/" + house.getResidential() + "/" + house.getSquare() + "m²");
+            budgetResult.setBudgetDec(house.getCityName() + "/" + house.getResidential() + "/" + house.getBuildSquare() + "m²");
             List<BudgetListResult> biglist = new ArrayList<>();//人工list
             List<BudgetListResult> cailist = new ArrayList<>();//材料list
 

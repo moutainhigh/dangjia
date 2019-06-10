@@ -29,7 +29,7 @@ public interface HouseDesignImageAPI {
      * @title 设计师将设计图或施工图发送给业主
      * @description 设计师将设计图或施工图发送给业主
      * @method POST
-     * @url web/design/sendPictures
+     * @url master/web/design/sendPictures
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 1
      * @Author: Ruking 18075121944
@@ -40,12 +40,6 @@ public interface HouseDesignImageAPI {
     ServerResponse sendPictures(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("houseId") String houseId);
 
-//    @PostMapping("web/design/uploadPictures")
-//    @ApiOperation(value = "上传图片", notes = "上传图片")
-//    ServerResponse uploadPictures(@RequestParam("request") HttpServletRequest request,
-//                                  @RequestParam("houseId") String houseId,
-//                                  @RequestParam("designImageTypeId") String designImageTypeId,
-//                                  @RequestParam("imageurl") String imageurl);
 
     /**
      * showdoc
@@ -59,7 +53,7 @@ public interface HouseDesignImageAPI {
      * @title 设计任务列表
      * @description 设计任务列表
      * @method POST
-     * @url web/design/getList
+     * @url master/web/design/getList
      * @return_param designerOk int 设计状态,0未确定设计师,4设计待抢单,1已支付-设计师待量房,9量房图发给业主,5平面图发给业主,6平面图审核不通过,7通过平面图待发施工图,2已发给业主施工图,8施工图片审核不通过,3施工图(全部图)审核通过
      * @return_param houseId string houseId
      * @return_param residential string 小区名
@@ -73,6 +67,9 @@ public interface HouseDesignImageAPI {
      * @return_param image string 平面图
      * @return_param imageUrl string 平面图URL
      * @return_param decorationType int 装修类型0表示没有开始，1远程设计，2自带设计，3共享装修
+     * @return_param operatorId string 操作人ID
+     * @return_param operatorName string 操作人名字
+     * @return_param operatorMobile string 操作人电话
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 2
      * @Author: Ruking 18075121944
@@ -85,14 +82,6 @@ public interface HouseDesignImageAPI {
                                  @RequestParam("designerType") int designerType,
                                  @RequestParam("searchKey") String searchKey);
 
-//    @PostMapping("web/design/getImagesList")
-//    @ApiOperation(value = "设计图列表", notes = "设计图列表")
-//    ServerResponse getImagesList(@RequestParam("request") HttpServletRequest request,
-//                                 @RequestParam("houseId") String houseId);
-//
-//    @PostMapping("app/design/houseDesignImage/designImageList")
-//    @ApiOperation(value = "查看施工图", notes = "查看施工图")
-//    ServerResponse designImageList(@RequestParam("houseId") String houseId);
 
     /**
      * showdoc
@@ -100,12 +89,18 @@ public interface HouseDesignImageAPI {
      * @param userToken 必选 string userToken
      * @param houseId   必选 string houseId
      * @param type      必选 int 0:不通过,1:通过
-     * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
+     * @return {"res":1000,"msg":{"resultCode":1000,"resultObj":{resultCode=1009时，返回参数说明},"resultMsg":"成功"} }
      * @catalog 当家接口文档/设计模块
      * @title 业主审核平面图或施工图
      * @description 业主审核平面图或施工图
      * @method POST
-     * @url app/design/houseDesignImage/checkPass
+     * @url master/app/design/houseDesignImage/checkPass
+     * @return_param message string 头部提示信息
+     * @return_param butName string 协议名称
+     * @return_param butUrl string 协议地址
+     * @return_param moneyMessage string 金额描叙
+     * @return_param businessOrderNumber string 订单ID
+     * @return_param type int 支付任务type
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 3
      * @Author: Ruking 18075121944
@@ -117,10 +112,6 @@ public interface HouseDesignImageAPI {
                              @RequestParam("houseId") String houseId,
                              @RequestParam("type") int type);
 
-//    @PostMapping("app/design/houseDesignImage/checkDesign")
-//    @ApiOperation(value = "设计详情", notes = "设计详情")
-//    ServerResponse checkDesign(@RequestParam("userToken") String userToken,
-//                               @RequestParam("houseId") String houseId);
 
     /**
      * showdoc
@@ -131,7 +122,7 @@ public interface HouseDesignImageAPI {
      * @title 房子作废
      * @description 房子作废
      * @method POST
-     * @url web/house/invalid
+     * @url master/web/house/invalid
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 4
      * @Author: Ruking 18075121944
@@ -160,7 +151,7 @@ public interface HouseDesignImageAPI {
      * @title 添加平面图
      * @description 添加平面图
      * @method POST
-     * @url app/design/setPlaneMap
+     * @url master/app/design/setPlaneMap
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 5
      * @Author: Ruking 18075121944
@@ -186,7 +177,7 @@ public interface HouseDesignImageAPI {
      * @title 添加施工图
      * @description 添加施工图
      * @method POST
-     * @url app/design/setConstructionPlans
+     * @url master/app/design/setConstructionPlans
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 6
      * @Author: Ruking 18075121944
@@ -212,7 +203,7 @@ public interface HouseDesignImageAPI {
      * @title 添加量房
      * @description 添加量房
      * @method POST
-     * @url app/design/setQuantityRoom
+     * @url master/app/design/setQuantityRoom
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 7
      * @Author: Ruking 18075121944
@@ -235,7 +226,7 @@ public interface HouseDesignImageAPI {
      * @title 查询量房
      * @description 查询量房
      * @method POST
-     * @url app/design/getQuantityRoom
+     * @url master/app/design/getQuantityRoom
      * @return_param id int id
      * @return_param modifyDate string 修改时间
      * @return_param createDate string 创建时间
@@ -274,7 +265,7 @@ public interface HouseDesignImageAPI {
      * @title 获取平面图
      * @description 获取平面图
      * @method POST
-     * @url app/design/getPlaneMap
+     * @url master/app/design/getPlaneMap
      * @return_param id int id
      * @return_param modifyDate string 修改时间
      * @return_param createDate string 创建时间
@@ -313,7 +304,7 @@ public interface HouseDesignImageAPI {
      * @title 获取施工图
      * @description 获取施工图
      * @method POST
-     * @url app/design/getConstructionPlans
+     * @url master/app/design/getConstructionPlans
      * @return_param id int id
      * @return_param modifyDate string 修改时间
      * @return_param createDate string 创建时间
@@ -353,10 +344,13 @@ public interface HouseDesignImageAPI {
      * @title 获取设计图
      * @description 获取设计图
      * @method POST
-     * @url app/design/getDesign
-     * @return_param verification int 0：不显示审核按钮，1：显示审核按钮
+     * @url master/app/design/getDesign
+     * @return_param message String 头部提示信息
      * @return_param historyRecord int 是否暂时历史记录0：不显示,1：显示
-     * @return_param button string 确认平面图
+     * @return_param buttonList List 按钮
+     * @return_param buttonList-buttonType int 0：跳转URL，1：需要修改设计，2：确认，3：申请额外修改设计，4：申请后需要修改设计，5：申请后确认
+     * @return_param buttonList-buttonTypeName string 显示名称
+     * @return_param buttonList-url string buttonType==0是的跳转路由
      * @return_param data List 图片集合
      * @return_param data-id string id
      * @return_param data-modifyDate string 修改时间
@@ -389,7 +383,7 @@ public interface HouseDesignImageAPI {
      * @title 获取历史记录
      * @description 获取历史记录
      * @method POST
-     * @url app/design/getOdlQuantityRoomList
+     * @url master/app/design/getOdlQuantityRoomList
      * @return_param id int id
      * @return_param modifyDate string 修改时间
      * @return_param createDate string 创建时间
@@ -421,7 +415,7 @@ public interface HouseDesignImageAPI {
      * @title 通过ID获取对应的信息
      * @description 通过ID获取对应的信息
      * @method POST
-     * @url app/design/getIdQuantityRoom
+     * @url master/app/design/getIdQuantityRoom
      * @return_param id int id
      * @return_param modifyDate string 修改时间
      * @return_param createDate string 创建时间

@@ -1,6 +1,6 @@
 package com.dangjia.acg.service.core;
 
-import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
@@ -29,7 +29,7 @@ public class WorkerTypeService {
         try {
             List<WorkerType> workerTypeList = workerTypeMapper.unfinishedFlow(houseId);
             if(workerTypeList.size()==0){
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相关记录");
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相关记录");
             }
             return ServerResponse.createBySuccess("查询成功", workerTypeList);
         } catch (Exception e) {
@@ -62,7 +62,7 @@ public class WorkerTypeService {
         example.orderBy(WorkerType.SORT).asc();
         List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
         if (workerTypeList == null || workerTypeList.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                     , "查无数据");
         }
         List<Map> maps = (List<Map>) BeanUtils.listToMap(workerTypeList);
@@ -81,7 +81,7 @@ public class WorkerTypeService {
     public ServerResponse getWorkerType(String workerTypeId) {
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);
         if (workerType == null) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                     , "查无工种");
         }
         Map map = BeanUtils.beanToMap(workerType);

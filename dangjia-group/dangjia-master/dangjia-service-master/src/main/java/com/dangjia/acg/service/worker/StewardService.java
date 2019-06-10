@@ -219,11 +219,13 @@ public class StewardService {
             if (state == 1) {
                 houseFlowApply.setMemberCheck(1);
                 houseFlowApply.setSupervisorCheck(1);
+                houseFlowApply.setModifyDate(new Date());
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
             } else {
                 houseFlowApply.setMemberCheck(2);
                 houseFlowApply.setSupervisorCheck(2);
+                houseFlowApply.setModifyDate(new Date());
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
                 //不通过停工申请
@@ -371,6 +373,49 @@ public class StewardService {
                     courseDTO.setHouseFlowApplyId(hfa.getId());
                 } else {
                     courseDTO.setApplyType(0);//没有申请
+                }
+            }
+            if (houseFlow.getWorkType() !=4) {//如果是已抢单待支付。则提醒业主支付
+                courseDTO.setIfBackOut(0);//0可放弃；1：申请停工；2：已停工 3 审核中
+            } else if (houseFlow.getPause() == 1) {//已暂停  停工有两种情况需要处理
+                courseDTO.setIfBackOut(2);
+            } else {
+                List<HouseFlowApply> allAppList = houseFlowApplyMapper.getTodayHouseFlowApply(houseFlow.getId(), 2, houseFlow.getWorkerId(), new Date());//查询今天是否已提交整体完工
+                List<HouseFlowApply> stageAppList = houseFlowApplyMapper.getTodayHouseFlowApply(houseFlow.getId(), 1, houseFlow.getWorkerId(), new Date());//查询今天是否已提交阶段完工
+                if (allAppList.size() > 0) {
+                    courseDTO.setIfBackOut(2);
+                } else if (stageAppList.size() > 0) {
+                    courseDTO.setIfBackOut(2);
+                }else {
+                    Example example = new Example(HouseFlowApply.class);
+                    example.createCriteria()
+                            .andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlow.getId())
+                            .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
+                            .andEqualTo(HouseFlowApply.PAY_STATE, 1);
+                    List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
+                    if (houseFlowApplies != null && houseFlowApplies.size() > 0) {
+                        HouseFlowApply hfa = houseFlowApplies.get(0);
+                        switch (hfa.getMemberCheck()) {
+                            case 0://0未审核
+                                courseDTO.setIfBackOut(4);//0可放弃；1：申请停工；2：已停工 3 审核中
+                                break;
+                            case 1://1审核通过
+                                Date date = new Date();
+                                if (hfa.getStartDate() != null && date.getTime() < hfa.getStartDate().getTime()) {
+                                    courseDTO.setIfBackOut(4);//0可放弃；1：申请停工；2：已停工 3 审核中
+                                } else if (hfa.getEndDate() != null && date.getTime() > hfa.getEndDate().getTime()) {
+                                    courseDTO.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
+                                } else {
+                                    courseDTO.setIfBackOut(2);//0可放弃；1：申请停工；2：已停工 3 审核中
+                                }
+                                break;
+                            default://2审核不通过
+                                courseDTO.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
+                                break;
+                        }
+                    } else {
+                        courseDTO.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
+                    }
                 }
             }
 

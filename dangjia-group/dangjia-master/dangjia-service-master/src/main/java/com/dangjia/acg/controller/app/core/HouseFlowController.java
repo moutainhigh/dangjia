@@ -5,10 +5,10 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.service.core.HouseFlowService;
-import com.dangjia.acg.service.matter.TechnologyRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -21,8 +21,6 @@ public class HouseFlowController implements HouseFlowAPI {
 
     @Autowired
     private HouseFlowService houseFlowService;
-    @Autowired
-    private TechnologyRecordService technologyRecordService;
 
     /**
      * 抢单列表
@@ -84,8 +82,8 @@ public class HouseFlowController implements HouseFlowAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setConfirmStart(String userToken, String houseFlowId) {
-        return houseFlowService.setConfirmStart(userToken, houseFlowId);
+    public ServerResponse setConfirmStart(HttpServletRequest request,String userToken, String houseFlowId) {
+        return houseFlowService.setConfirmStart(request,userToken, houseFlowId);
     }
 
     /**

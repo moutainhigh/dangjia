@@ -1155,7 +1155,7 @@ public class DateUtil implements AutoCloseable, Serializable {
     }
 
     /**
-     * 根据月份获取当前月份日期
+     * 根据月份获取当前月份日期(周)
      *
      * @param year
      * @param modth
@@ -1184,7 +1184,34 @@ public class DateUtil implements AutoCloseable, Serializable {
         date.add(paramMap);
         return date;
     }
+    /**
+     * 根据月份获取当前月份日期
+     *
+     * @param year
+     * @param modth
+     * @return
+     */
+    public static List<String> dayReportAll(Integer year, Integer modth) {
+        String str = "";
+        Date d1 = null;
+        try {
+            d1 = new SimpleDateFormat("yyyy-MM").parse(year + "-" + modth);
+        } catch (Exception e) {
 
+        }
+        List<String> date = new ArrayList<>();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(d1);
+        int dayNumOfMonth = DateUtil.getDaysByYearMonth(year, modth);
+        cal.set(Calendar.DAY_OF_MONTH, 1);// 从一号开始
+        for (int i = 0; i < dayNumOfMonth; i++, cal.add(Calendar.DATE, 1)) {
+            Date d = cal.getTime();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            str = simpleDateFormat.format(d);
+            date.add(str);
+        }
+        return date;
+    }
     /**
      * 获取当天开始时间戳
      *
@@ -1286,9 +1313,11 @@ public class DateUtil implements AutoCloseable, Serializable {
     }
 
     public static void main(String[] args) {
-        String time = "0,0,0,0";
-        System.out.println(time.split(",")[0]);
-        System.out.println(time.split(",")[1]);
+        List list=dayReportAll(2019,5);
+        for (Object o : list) {
+            System.out.println(o);
+        }
+
     }
 
 }

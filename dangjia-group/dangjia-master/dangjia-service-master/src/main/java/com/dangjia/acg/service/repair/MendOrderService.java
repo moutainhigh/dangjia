@@ -38,6 +38,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.core.HouseFlowScheduleService;
 import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,7 +63,8 @@ import java.util.List;
 @Service
 public class MendOrderService {
 
-
+    @Autowired
+    private HouseFlowScheduleService houseFlowScheduleService;
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
@@ -149,9 +151,17 @@ public class MendOrderService {
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0) {
                 return ServerResponse.createBySuccessMessage("没有退货单");
-            } else if (mendOrderList.size() > 1) {
-                return ServerResponse.createByErrorMessage("生成多个退货单,异常联系平台部");
+//            } else if (mendOrderList.size() > 1) {
+//                return ServerResponse.createByErrorMessage("生成多个退货单,异常联系平台部");
             } else {
+                //将其他多余的单取消
+                if (mendOrderList.size() > 1) {
+                    for (int i = 1; i < mendOrderList.size(); i++) {
+                        MendOrder mendOrder = mendOrderList.get(i);
+                        mendOrder.setState(5);
+                        mendOrderMapper.updateByPrimaryKey(mendOrder);
+                    }
+                }
                 MendOrder mendOrder = mendOrderList.get(0);
                 mendOrder.setState(1);//平台审核
                 mendOrder.setModifyDate(new Date());//更新时间
@@ -178,9 +188,17 @@ public class MendOrderService {
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0) {
                 return ServerResponse.createBySuccessMessage("未生成退货单");
-            } else if (mendOrderList.size() > 1) {
-                return ServerResponse.createByErrorMessage("生成多个退货单,异常联系平台部");
+//            } else if (mendOrderList.size() > 1) {
+//                return ServerResponse.createByErrorMessage("生成多个退货单,异常联系平台部");
             } else {
+                //将其他多余的单取消
+                if (mendOrderList.size() > 1) {
+                    for (int i = 1; i < mendOrderList.size(); i++) {
+                        MendOrder mendOrder = mendOrderList.get(i);
+                        mendOrder.setState(5);
+                        mendOrderMapper.updateByPrimaryKey(mendOrder);
+                    }
+                }
                 List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderList.get(0).getId());
                 for (MendMateriel mendMateriel : mendMaterielList) {
                     mendMateriel.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
@@ -249,7 +267,7 @@ public class MendOrderService {
     /**
      * 确认退人工
      */
-    public ServerResponse confirmBackMendWorker(String houseId, String workerTypeId) {
+    public ServerResponse confirmBackMendWorker(String houseId, String workerTypeId,Integer dateNum) {
         try {
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 3)
@@ -258,15 +276,24 @@ public class MendOrderService {
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0) {
                 return ServerResponse.createBySuccessMessage("没有生成中退人工单");
-            } else if (mendOrderList.size() > 1) {
-                return ServerResponse.createByErrorMessage("生成多个未提交退人工单,异常联系平台部");
+//            } else if (mendOrderList.size() > 1) {
+//                return ServerResponse.createByErrorMessage("生成多个未提交退人工单,异常联系平台部");
             } else {
+                //将其他多余的单取消
+                if (mendOrderList.size() > 1) {
+                    for (int i = 1; i < mendOrderList.size(); i++) {
+                        MendOrder mendOrder = mendOrderList.get(i);
+                        mendOrder.setState(5);
+                        mendOrderMapper.updateByPrimaryKey(mendOrder);
+                    }
+                }
                 MendOrder mendOrder = mendOrderList.get(0);
                 mendOrder.setState(1);
                 mendOrderMapper.updateByPrimaryKey(mendOrder);
 
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
                 houseService.insertConstructionRecordAll(mendOrder, changeOrder);
+                changeOrder.setScheduleDay(dateNum);
                 changeOrder.setState(2);//通过->工匠业主审核
                 changeOrderMapper.updateByPrimaryKey(changeOrder);
 //                House house = houseMapper.selectByPrimaryKey(houseId);
@@ -274,6 +301,7 @@ public class MendOrderService {
 //                        (DjConstants.PushMessage.CRAFTSMAN_T_WORK, house.getHouseName()), "");
 
 
+                houseFlowScheduleService.updateFlowSchedule(houseId,changeOrder.getWorkerTypeId(),null,changeOrder.getScheduleDay());
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 String urlyz = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + houseId + "&roleType=1";
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "退人工变更", String.format
@@ -302,9 +330,17 @@ public class MendOrderService {
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0) {
                 return ServerResponse.createBySuccessMessage("没有生成中退人工单");
-            } else if (mendOrderList.size() > 1) {
-                return ServerResponse.createByErrorMessage("生成多个未提交退人工单,异常联系平台部");
+//            } else if (mendOrderList.size() > 1) {
+//                return ServerResponse.createByErrorMessage("生成多个未提交退人工单,异常联系平台部");
             } else {
+                //将其他多余的单取消
+                if (mendOrderList.size() > 1) {
+                    for (int i = 1; i < mendOrderList.size(); i++) {
+                        MendOrder mendOrder = mendOrderList.get(i);
+                        mendOrder.setState(5);
+                        mendOrderMapper.updateByPrimaryKey(mendOrder);
+                    }
+                }
                 MendOrder mendOrder = mendOrderList.get(0);
                 /*限制金额不能退多了*/
                 HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, mendOrder.getWorkerTypeId());
@@ -409,7 +445,7 @@ public class MendOrderService {
      * 管家
      * 确认补人工
      */
-    public ServerResponse confirmMendWorker(String houseId, String workerTypeId) {
+    public ServerResponse confirmMendWorker(String houseId, String workerTypeId,Integer dateNum) {
         try {
             Example example = new Example(MendOrder.class);
             example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 1)
@@ -418,16 +454,26 @@ public class MendOrderService {
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0) {
                 return ServerResponse.createBySuccessMessage("没有生成中补人工单");
-            } else if (mendOrderList.size() > 1) {
-                return ServerResponse.createByErrorMessage("生成多个未提交补人工单,异常联系平台部");
+//            } else if (mendOrderList.size() > 1) {
+//                return ServerResponse.createByErrorMessage("生成多个未提交补人工单,异常联系平台部");
             } else {
+                //将其他多余的单取消
+                if (mendOrderList.size() > 1) {
+                    for (int i = 1; i < mendOrderList.size(); i++) {
+                        MendOrder mendOrder = mendOrderList.get(i);
+                        mendOrder.setState(5);
+                        mendOrderMapper.updateByPrimaryKey(mendOrder);
+                    }
+                }
                 MendOrder mendOrder = mendOrderList.get(0);
                 mendOrder.setState(1);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
+                changeOrder.setScheduleDay(dateNum);
                 houseService.insertConstructionRecordAll(mendOrder, changeOrder);
                 changeOrder.setState(2);//通过->工匠业主审核
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+//                houseFlowScheduleService.updateFlowSchedule(houseId,changeOrder.getWorkerTypeId(),changeOrder.getScheduleDay(),null);
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
 //                String urlyz= configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"refundList?title=要补退记录&houseId="+houseId+"&roleType=1";
@@ -441,7 +487,7 @@ public class MendOrderService {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
+            return ServerResponse.createByErrorMessage("操作失败");
         }
     }
 
@@ -457,9 +503,17 @@ public class MendOrderService {
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0) {
                 return ServerResponse.createBySuccessMessage("没有生成中补人工单");
-            } else if (mendOrderList.size() > 1) {
-                return ServerResponse.createByErrorMessage("生成多个未提交补人工单,异常联系平台部");
+//            } else if (mendOrderList.size() > 1) {
+//                return ServerResponse.createByErrorMessage("生成多个未提交补人工单,异常联系平台部");
             } else {
+                //将其他多余的单取消
+                if (mendOrderList.size() > 1) {
+                    for (int i = 1; i < mendOrderList.size(); i++) {
+                        MendOrder mendOrder = mendOrderList.get(i);
+                        mendOrder.setState(5);
+                        mendOrderMapper.updateByPrimaryKey(mendOrder);
+                    }
+                }
                 MendOrder mendOrder = mendOrderList.get(0);
                 List<MendWorker> mendWorkerList = mendWorkerMapper.byMendOrderId(mendOrder.getId());
                 for (MendWorker v : mendWorkerList) {
@@ -649,9 +703,17 @@ public class MendOrderService {
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0) {
                 return ServerResponse.createBySuccessMessage("没有生成中退货单");
-            } else if (mendOrderList.size() > 1) {
-                return ServerResponse.createByErrorMessage("生成多个未提交退货单,异常联系平台部");
+//            } else if (mendOrderList.size() > 1) {
+//                return ServerResponse.createByErrorMessage("生成多个未提交退货单,异常联系平台部");
             } else {
+                //将其他多余的单取消
+                if (mendOrderList.size() > 1) {
+                    for (int i = 1; i < mendOrderList.size(); i++) {
+                        MendOrder mendOrder = mendOrderList.get(i);
+                        mendOrder.setState(5);
+                        mendOrderMapper.updateByPrimaryKey(mendOrder);
+                    }
+                }
                 MendOrder mendOrder = mendOrderList.get(0);
                 mendOrder.setImageArr(imageArr);//照片
                 mendOrder.setState(1);//处理中
@@ -707,9 +769,17 @@ public class MendOrderService {
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0) {
                 return ServerResponse.createBySuccessMessage("没有生成中退货单");
-            } else if (mendOrderList.size() > 1) {
-                return ServerResponse.createByErrorMessage("生成多个未提交退货单,异常联系平台部");
+//            } else if (mendOrderList.size() > 1) {
+//                return ServerResponse.createByErrorMessage("生成多个未提交退货单,异常联系平台部");
             } else {
+                //将其他多余的单取消
+                if (mendOrderList.size() > 1) {
+                    for (int i = 1; i < mendOrderList.size(); i++) {
+                        MendOrder mendOrder = mendOrderList.get(i);
+                        mendOrder.setState(5);
+                        mendOrderMapper.updateByPrimaryKey(mendOrder);
+                    }
+                }
                 List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderList.get(0).getId());
                 for (MendMateriel mendMateriel : mendMaterielList) {
                     mendMateriel.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
@@ -807,9 +877,17 @@ public class MendOrderService {
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0) {
                 return ServerResponse.createBySuccessMessage("没有生成中补货单");
-            } else if (mendOrderList.size() > 1) {
-                return ServerResponse.createByErrorMessage("生成多个未提交补货单,异常联系平台部");
+//            } else if (mendOrderList.size() > 1) {
+//                return ServerResponse.createByErrorMessage("生成多个未提交补货单,异常联系平台部");
             } else {
+                //将其他多余的单取消
+                if (mendOrderList.size() > 1) {
+                    for (int i = 1; i < mendOrderList.size(); i++) {
+                        MendOrder mendOrder = mendOrderList.get(i);
+                        mendOrder.setState(5);
+                        mendOrderMapper.updateByPrimaryKey(mendOrder);
+                    }
+                }
                 MendOrder mendOrder = mendOrderList.get(0);
                 mendOrder.setState(1);//处理中
                 mendOrder.setModifyDate(new Date());
@@ -848,9 +926,17 @@ public class MendOrderService {
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() == 0) {
                 return ServerResponse.createBySuccessMessage("没有生成中补货单");
-            } else if (mendOrderList.size() > 1) {
-                return ServerResponse.createByErrorMessage("生成多个未提交补货单,异常联系平台部");
+//            } else if (mendOrderList.size() > 1) {
+//                return ServerResponse.createByErrorMessage("生成多个未提交补货单,异常联系平台部");
             } else {
+                //将其他多余的单取消
+                if (mendOrderList.size() > 1) {
+                    for (int i = 1; i < mendOrderList.size(); i++) {
+                        MendOrder mendOrder = mendOrderList.get(i);
+                        mendOrder.setState(5);
+                        mendOrderMapper.updateByPrimaryKey(mendOrder);
+                    }
+                }
                 List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderList.get(0).getId());
                 for (MendMateriel v : mendMaterielList) {
                     v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));

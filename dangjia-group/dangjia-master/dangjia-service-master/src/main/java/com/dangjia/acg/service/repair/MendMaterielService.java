@@ -21,8 +21,6 @@ import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,9 +52,6 @@ public class MendMaterielService {
     private ForMasterAPI forMasterAPI;
     @Autowired
     private ISplitDeliverMapper splitDeliverMapper;
-    @Autowired
-    private static Logger LOG = LoggerFactory.getLogger(MendMaterielService.class);
-
 
     /**
      * 要货退货 查询补材料
@@ -193,10 +188,8 @@ public class MendMaterielService {
 
     public List<MendOrderDTO> getMendOrderDTOList(List<MendOrder> mendOrderList) {
 
-        LOG.info("mendOrderList:" + mendOrderList.size() + "  " + mendOrderList);
         List<MendOrderDTO> mendOrderDTOS = new ArrayList<MendOrderDTO>();
         for (MendOrder mendOrder : mendOrderList) {
-            LOG.info("mendOrder :" + mendOrder);
             MendOrderDTO mendOrderDTO = new MendOrderDTO();
             mendOrderDTO.setMendOrderId(mendOrder.getId());
             mendOrderDTO.setNumber(mendOrder.getNumber());

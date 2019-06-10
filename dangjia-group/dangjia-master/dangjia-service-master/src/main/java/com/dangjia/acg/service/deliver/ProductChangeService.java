@@ -25,6 +25,7 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.deliver.ProductChange;
@@ -119,6 +120,10 @@ public class ProductChangeService {
             if(flag) {
                 srcProduct = JSON.parseObject(JSON.toJSONString(srcResponse.getResultObj()), Product.class);
                 destProduct = JSON.parseObject(JSON.toJSONString(destResponse.getResultObj()), Product.class);
+                Goods goods=forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), destProduct.getGoodsId());
+                if(goods!=null){
+                    productType=goods.getType();
+                }
                 // 查询转换单位
                 ServerResponse srcUnitResponse= unitAPI.getUnitById(request, srcProduct.getConvertUnit());
                 ServerResponse destUnitResponse= unitAPI.getUnitById(request, destProduct.getConvertUnit());
@@ -575,6 +580,7 @@ public class ProductChangeService {
                     }
                     // 处理新商品------begin
                     if (null == wareHouse) {
+                        Goods goods=forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), destProduct.getGoodsId());
                         // 新商品没有则添加
                         Warehouse newWareHouse = new Warehouse();
                         newWareHouse.setHouseId(houseId);
@@ -592,7 +598,7 @@ public class ProductChangeService {
                         newWareHouse.setCost(destProduct.getCost());
                         // 取商品转换单位
                         newWareHouse.setUnitName(destUnit.getName());
-                        newWareHouse.setProductType(0);
+                        newWareHouse.setProductType(goods.getType());
                         newWareHouse.setCategoryId(destProduct.getCategoryId());
                         newWareHouse.setImage(destProduct.getImage());
                         newWareHouse.setPayTime(0);

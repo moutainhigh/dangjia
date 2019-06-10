@@ -18,12 +18,12 @@ public interface ISurplusWareDivertMapper extends Mapper<SurplusWareDivert> {
 
 
     //获取某个临时仓库 的所有剩余材料 的某个 材料
-    List<SurplusWareDivert> getAllSurplusWareDivertListBySIdAndPid(@Param("surplusWareHouseId")String surplusWareHouseId,@Param("productId")String productId);
+    List<SurplusWareDivert> getAllSurplusWareDivertListBySIdAndPid(@Param("surplusWareHouseId") String surplusWareHouseId, @Param("productId") String productId);
 
     //获取某个商品的 最近的挪货记录
-    SurplusWareDivert getDivertBySIdAndPidSortDate(@Param("productId")String productId);
+    SurplusWareDivert getDivertBySIdAndPidSortDate(@Param("productId") String productId);
 
     //获取某个临时仓库的 最近的挪货记录
-    SurplusWareDivert getDivertBySIdAndWareHouseIdSortDate(@Param("surplusWareHouseId")String surplusWareHouseId);
+    SurplusWareDivert getDivertBySIdAndWareHouseIdSortDate(@Param("surplusWareHouseId") String surplusWareHouseId);
 }
 

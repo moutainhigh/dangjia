@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.app.core;
 
 import com.dangjia.acg.api.app.core.HouseWorkerAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseWorkerService;
@@ -37,8 +38,8 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setWorkerGrab(String userToken, String cityId, String houseFlowId) {
-        return houseWorkerService.setWorkerGrab(userToken, cityId, houseFlowId);
+    public ServerResponse setWorkerGrab(HttpServletRequest request, String userToken, String cityId, String houseFlowId) {
+        return houseWorkerService.setWorkerGrab(request, userToken, cityId, houseFlowId);
     }
 
     /**
@@ -94,12 +95,7 @@ public class HouseWorkerController implements HouseWorkerAPI {
     @ApiMethod
     public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId, Integer suspendDay,
                                             String applyDec, String imageList, String houseFlowId2) {
-        try {
-            return houseWorkerService.setHouseFlowApply(userToken, applyType, houseFlowId, suspendDay, applyDec, imageList, houseFlowId2);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("提交审核失败,图片数组转换失败");
-        }
+        return houseWorkerService.setHouseFlowApply(userToken, applyType, houseFlowId, suspendDay, applyDec, imageList, houseFlowId2);
     }
 
     /**
@@ -113,11 +109,18 @@ public class HouseWorkerController implements HouseWorkerAPI {
 
     /**
      * 查询工地列表
+     * TODO 1.4.0后删除此接口
      */
     @Override
     @ApiMethod
     public ServerResponse getHouseFlowList(String userToken) {
         return houseWorkerService.getHouseFlowList(userToken);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getMyHouseFlowList(PageDTO pageDTO, String userToken) {
+        return houseWorkerService.getMyHouseFlowList(pageDTO, userToken);
     }
 
     /**

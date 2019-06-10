@@ -12,9 +12,11 @@ public interface ClueTalkMapper extends Mapper<ClueTalk> {
 
     /**
      * 通过线索ID获取所有谈话记录
+     *
      * @param clueId
      * @return
      */
     List<ClueTalk> getTalkByClueId(String clueId);
+
     Date getMaxDate(String clueID);
 }

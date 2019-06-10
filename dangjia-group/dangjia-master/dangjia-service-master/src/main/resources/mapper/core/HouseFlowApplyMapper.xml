@@ -167,7 +167,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="getSupervisorCheckList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select <include refid="all_columns" />
         from dj_core_house_flow_apply
-        where (apply_type=1 or apply_type=2 or apply_type=3)
+        where (apply_type=1 or apply_type=2)
         and house_id = #{houseId}
         and supervisor_check = 0
     </select>
@@ -231,7 +231,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from dj_core_house_flow_apply
         where
             to_days(create_date) = to_days(#{time})
-        and house_flow_id = #{houseFlowId}
+        <if test="houseFlowId!=null and houseFlowId!=''">
+            and house_flow_id = #{houseFlowId}
+        </if>
+
         and apply_type =#{applyType}
         and worker_id = #{workerId}
         and supervisor_check !=2
@@ -291,5 +294,42 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ORDER BY create_date DESC
     </select>
 
+    <select id="getHouseScheduleFlowApply" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        SELECT
+            f.id,
+            f.house_flow_id houseFlowId,
+            f.worker_type workerType,
+            f.apply_type applyType,
+            f.create_date createDate,
+            f.start_date startDate,
+            f.end_date endDate,
+            (
+                CASE
+                WHEN f.apply_type = 3 THEN
+                    f.apply_dec
+                ELSE
+                    GROUP_CONCAT(fi.name)
+                END
+            ) AS  applyDec
+        FROM
+            `dj_core_house_flow_apply` f
+        LEFT JOIN `dj_matter_technology_record`  fi ON fi.house_flow_apply_id = f.id
+        AND fi.state = 1
+        WHERE
+            f.member_check = 1
+        AND f.house_id = #{houseId}
+        AND (
+            f.apply_type = 0
+            OR f.apply_type = 1
+            OR f.apply_type = 2
+            OR f.apply_type = 3
+            OR f.apply_type = 4
+        )
+        AND date_format(f.create_date, '%Y-%m') = date_format(#{month},'%Y-%m'
+        )
+        GROUP BY
+            f.id
+        ORDER BY f.create_date DESC
+    </select>
 </mapper>
 

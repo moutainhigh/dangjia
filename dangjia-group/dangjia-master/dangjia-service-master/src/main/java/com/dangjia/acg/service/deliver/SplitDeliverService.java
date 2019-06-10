@@ -90,6 +90,12 @@ public class SplitDeliverService {
                 /*统计收货数量*/
                 Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), splitDeliver.getHouseId());
                 warehouse.setReceive(warehouse.getReceive() + receive);
+                //部分收货则未收货的商品数量要退回到业主仓库中
+                //未收货的数量
+                Double noReceive =orderSplitItem.getNum()-receive;
+                if(noReceive>0) {
+                    warehouse.setAskCount(warehouse.getAskCount() - noReceive);
+                }
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
                 splitDeliver.setApplyMoney(splitDeliver.getApplyMoney() + (orderSplitItem.getSupCost()*orderSplitItem.getReceive()));
             }
@@ -203,6 +209,7 @@ public class SplitDeliverService {
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             List<SplitDeliverItemDTO> splitDeliverItemDTOList = new ArrayList<>();
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+            double sumprice=0d;
             for (OrderSplitItem orderSplitItem : orderSplitItemList) {
                 if(orderSplitItem.getReceive()==null){
                     orderSplitItem.setReceive(0D);
@@ -212,8 +219,10 @@ public class SplitDeliverService {
                 splitDeliverItemDTO.setProductName(orderSplitItem.getProductName());
                 if(splitDeliver.getShippingState()==2||splitDeliver.getShippingState()==4||splitDeliver.getShippingState()==5){
                     splitDeliverItemDTO.setTotalPrice(orderSplitItem.getPrice()*orderSplitItem.getReceive());
+                    sumprice+=orderSplitItem.getPrice()*orderSplitItem.getReceive();
                 }else{
                     splitDeliverItemDTO.setTotalPrice(orderSplitItem.getPrice()*orderSplitItem.getNum());
+                    sumprice+=orderSplitItem.getPrice()*orderSplitItem.getNum();
                 }
                 splitDeliverItemDTO.setShopCount(orderSplitItem.getShopCount());
                 splitDeliverItemDTO.setNum(orderSplitItem.getNum());
@@ -227,6 +236,7 @@ public class SplitDeliverService {
                 splitDeliverItemDTO.setAskCount(orderSplitItem.getAskCount());
                 splitDeliverItemDTOList.add(splitDeliverItemDTO);
             }
+            splitDeliverDTO.setTotalAmount(sumprice);//金额总计
             splitDeliverDTO.setSplitDeliverItemDTOList(splitDeliverItemDTOList);//明细
             return ServerResponse.createBySuccess("查询成功", splitDeliverDTO);
         } catch (Exception e) {

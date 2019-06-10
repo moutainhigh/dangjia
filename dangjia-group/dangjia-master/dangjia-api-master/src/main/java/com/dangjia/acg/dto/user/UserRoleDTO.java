@@ -25,7 +25,7 @@ public class UserRoleDTO {
 
 	private Boolean isJob;
 
-	private Boolean isReceive;
+	private Integer isReceive;
 
 	private String roleNames;
 

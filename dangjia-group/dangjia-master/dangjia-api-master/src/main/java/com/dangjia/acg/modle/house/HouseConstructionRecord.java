@@ -54,7 +54,7 @@ public class HouseConstructionRecord extends BaseEntity {
 
 
 	@Column(name = "apply_type")
-	@Desc(value = "进度状态；0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6同意停工,7拒绝停工,8补人工,9退人工,10补材料,11退材料,12业主退材料")
+	@Desc(value = "进度状态；0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查,8补人工,9退人工,10补材料,11退材料,12业主退材料")
 	@ApiModelProperty("进度状态")
 	private Integer applyType;
 

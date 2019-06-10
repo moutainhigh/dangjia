@@ -5,7 +5,7 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -143,7 +143,7 @@ public class MemberService {
         }
         if (CommonUtil.isEmpty(mobile)) {
             mobile = "4001681231";
-//			return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(),EventStatus.NO_DATA.getDesc());
+//			return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
         }
         return ServerResponse.createBySuccess("OK", mobile);
     }
@@ -154,7 +154,7 @@ public class MemberService {
     public ServerResponse getMemberInfo(String userToken) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            return ServerResponse.createbyUserTokenError();
         } else {
             Member user = memberMapper.selectByPrimaryKey(accessToken.getMemberId());
             if (user == null) {
@@ -181,6 +181,9 @@ public class MemberService {
     }
 
     ServerResponse getUser(Member user, String userRole) {
+        if("1".equals(userRole)) {
+            clueService.sendUser(user, user.getMobile());
+        }
         updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
         userRole = "role" + userRole + ":" + user.getId();
         String token = redisClient.getCache(userRole, String.class);
@@ -196,6 +199,7 @@ public class MemberService {
                 accessToken.setWorkerTypeName(wt.getName());
             }
         }
+
         redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
         redisClient.put(userRole, accessToken.getUserToken());
         groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
@@ -294,7 +298,10 @@ public class MemberService {
             user.setIsCrowned(0);
             user.setHead("qrcode/logo.png");
             memberMapper.insertSelective(user);
-            clueService.sendUser(user, user.getMobile());
+//            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
+            if(userRole==1) {
+                clueService.sendUser(user, user.getMobile());
+            }
             updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             AccessToken accessToken = TokenUtil.generateAccessToken(user);
@@ -306,13 +313,14 @@ public class MemberService {
             }
             redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
             redisClient.deleteCache(Constants.SMS_CODE + phone);
-
-            try {
-                //检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
-                redPackPayService.checkUpActivity(request, user.getMobile(), "1");
-                configMessageService.addConfigMessage(request, "zx", user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
-            } catch (Exception e) {
-                logger.error("注册送优惠券活动异常-zhuce：原因：" + e.getMessage(), e);
+            if(userRole==1) {
+                try {
+                    //检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
+                    redPackPayService.checkUpActivity(request, user.getMobile(), "1");
+                    configMessageService.addConfigMessage(request, "zx", user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
+                } catch (Exception e) {
+                    logger.error("注册送优惠券活动异常-zhuce：原因：" + e.getMessage(), e);
+                }
             }
             return ServerResponse.createBySuccess("注册成功", accessToken);
         }
@@ -345,7 +353,7 @@ public class MemberService {
                 .getRequest();
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            return ServerResponse.createbyUserTokenError();
         }
         user.setId(accessToken.getMember().getId());
         Member member = memberMapper.selectByPrimaryKey(user.getId());
@@ -409,7 +417,7 @@ public class MemberService {
     public ServerResponse certification(String userToken, String name, String idcaoda, String idcaodb, String idcaodall, String idnumber) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            return ServerResponse.createbyUserTokenError();
         }
         Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
         if (user == null) {
@@ -465,7 +473,7 @@ public class MemberService {
     public ServerResponse certificationWorkerType(String userToken, String workerTypeId) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            return ServerResponse.createbyUserTokenError();
         }
         Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
         if (user == null) {
@@ -527,7 +535,7 @@ public class MemberService {
         user.setSmscode(smscode);
         user = memberMapper.getUser(user);
         if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "验证码错误！");
+            return ServerResponse.createByErrorMessage("验证码错误！");
         } else {
             String token = TokenUtil.getRandom();
             redisClient.put(Constants.TEMP_TOKEN + phone, token);
@@ -543,13 +551,13 @@ public class MemberService {
      */
     public ServerResponse updateForgotPassword(String phone, String password, String token) {
         if (CommonUtil.isEmpty(token)) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "身份认证错误,无认证参数！");
+            return ServerResponse.createByErrorMessage("身份认证错误,无认证参数！");
         }
         Member user = new Member();
         user.setMobile(phone);
         user = memberMapper.getUser(user);
         if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "电话号码未注册！");
+            return ServerResponse.createByErrorMessage( "电话号码未注册！");
         } else {
             if (user.getCheckType() ==4) {
                 //冻结的帐户不能修改资料信息
@@ -557,7 +565,7 @@ public class MemberService {
             }
             String mytoken = redisClient.getCache(Constants.TEMP_TOKEN + phone, String.class);
             if (!token.equals(mytoken)) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.ERROR.getCode(), "身份认证错误，身份不匹配！");
+                return ServerResponse.createByErrorMessage("身份认证错误，身份不匹配！");
             }
             //认证通过，清除token认证
             redisClient.deleteCache(Constants.TEMP_TOKEN + phone);
@@ -577,7 +585,7 @@ public class MemberService {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
 
         if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            return ServerResponse.createbyUserTokenError();
         } else {
             boolean flag;
             try {
@@ -587,7 +595,7 @@ public class MemberService {
                 return ServerResponse.createByErrorMessage("系统错误");
             }//验证是否失效
             if (flag) {//失效
-                return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "token已失效,请重新登录！");
+                return ServerResponse.createbyUserTokenError();
             } else {
                 return ServerResponse.createBySuccessMessage("有效！");
             }
@@ -774,12 +782,12 @@ public class MemberService {
                     criteria.andEqualTo(Member.REAL_NAME_STATE, realNameState);
                     break;
                 default:
-                    return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                             , "查无数据");
             }
             List<Member> members = memberMapper.selectByExample(example);
             if (members.size() <= 0) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");
             }
             PageInfo pageResult = new PageInfo(members);
@@ -807,7 +815,7 @@ public class MemberService {
         }
         Member member = memberMapper.selectByPrimaryKey(userId);
         if (member == null || member.getRealNameState() == 0) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode()
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                     , "查无数据");
         }
         member.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
@@ -937,7 +945,7 @@ public class MemberService {
     public ServerResponse getMembers(String userToken, String memberId, String phone) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
-            return ServerResponse.createByErrorCodeMessage(EventStatus.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+            return ServerResponse.createbyUserTokenError();
         }
         Member member = null;
         if (!CommonUtil.isEmpty(memberId)) {
@@ -948,7 +956,7 @@ public class MemberService {
             member = memberMapper.getUser(user);
         }
         if (member == null) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "查无该用户");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无该用户");
         }
         member.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
         List<Map<String, Object>> datas = new ArrayList<>();
@@ -989,7 +997,7 @@ public class MemberService {
         }
 
         if (datas.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "查无该用户");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无该用户");
         }
         return ServerResponse.createBySuccess("查询成功", datas);
     }

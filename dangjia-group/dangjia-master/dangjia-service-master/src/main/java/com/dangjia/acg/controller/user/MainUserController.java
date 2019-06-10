@@ -106,8 +106,8 @@ public class MainUserController implements MainUserAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setReceiveUser(HttpServletRequest request, String id) {
-        return userService.setReceiveUser(id);
+    public ServerResponse setReceiveUser(HttpServletRequest request, String id,Integer type) {
+        return userService.setReceiveUser(id,type);
     }
 
     /**

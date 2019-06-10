@@ -38,6 +38,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,11 +89,12 @@ public class OrderService {
 
     @Autowired
     private ICartMapper cartMapper;
+
     /**
      * 订单详情
      */
-    public ServerResponse orderDetail(String orderId){
-        try{
+    public ServerResponse orderDetail(String orderId) {
+        try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             Order order = orderMapper.selectByPrimaryKey(orderId);
             House house = houseMapper.selectByPrimaryKey(order.getHouseId());
@@ -155,7 +157,7 @@ public class OrderService {
 
             orderItemDTO.setItemDTOList(itemDTOList);
             return ServerResponse.createBySuccess("查询成功", orderItemDTO);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -164,15 +166,15 @@ public class OrderService {
     /**
      * 订单详情
      */
-    public ServerResponse orderList(String businessOrderId){
-        try{
+    public ServerResponse orderList(String businessOrderId) {
+        try {
             BusinessOrder businessOrder = businessOrderMapper.selectByPrimaryKey(businessOrderId);
             House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
             BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
             businessOrderDTO.setHouseName(house.getHouseName());
             businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
             businessOrderDTO.setNumber(businessOrder.getNumber());
-            List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(),house.getStyle());
+            List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house.getStyle());
             businessOrderDTO.setOrderDTOList(orderDTOList);
             businessOrderDTO.setTotalPrice(businessOrder.getTotalPrice());
             businessOrderDTO.setDiscountsPrice(businessOrder.getDiscountsPrice());
@@ -180,7 +182,7 @@ public class OrderService {
             businessOrderDTO.setCarriage(0.0);//运费
 
             return ServerResponse.createBySuccess("查询成功", businessOrderDTO);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -189,7 +191,7 @@ public class OrderService {
     /**
      * 业务订单列表
      */
-    public ServerResponse businessOrderList(String userToken){
+    public ServerResponse businessOrderList(String userToken) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -206,46 +208,52 @@ public class OrderService {
                 businessOrderDTO.setHouseName(house == null ? "" : house.getHouseName());
             }
             List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house == null ? "" : house.getStyle());
+             BigDecimal payPrice=new BigDecimal(0);
+            for (OrderDTO orderDTO : orderDTOList) {
+                payPrice=payPrice.add(orderDTO.getTotalAmount());
+            }
+            businessOrderDTO.setPayPrice(payPrice);
             businessOrderDTO.setOrderDTOList(orderDTOList);
             businessOrderDTO.setBusinessOrderId(businessOrder.getId());
             businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
             businessOrderDTO.setNumber(businessOrder.getNumber());
-            businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
+
             businessOrderDTOS.add(businessOrderDTO);
         }
         return ServerResponse.createBySuccess("查询成功", businessOrderDTOS);
     }
+
     /*订单流水*/
-    private List<OrderDTO> orderDTOList(String businessOrderNumber,String style){
+    private List<OrderDTO> orderDTOList(String businessOrderNumber, String style) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         List<OrderDTO> orderDTOList = new ArrayList<>();
         List<Order> orderList = orderMapper.byBusinessOrderNumber(businessOrderNumber);
-        for (Order order : orderList){
+        for (Order order : orderList) {
             OrderDTO orderDTO = new OrderDTO();
             orderDTO.setOrderId(order.getId());
             orderDTO.setTotalAmount(order.getTotalAmount());
             orderDTO.setWorkerTypeName(order.getWorkerTypeName());
-            if (StringUtil.isEmpty(order.getWorkerTypeId())){
-                if(order.getType() == 2){//材料
+            if (StringUtil.isEmpty(order.getWorkerTypeId())) {
+                if (order.getType() == 2) {//材料
                     orderDTO.setImage(address + "icon/bucailiao.png");
                     orderDTO.setName("补材料商品");
-                }else {
+                } else {
                     orderDTO.setImage(address + "icon/burengong.png");
                     orderDTO.setName("人工商品");
                 }
-            }else if(order.getWorkerTypeId().equals("1")){//设计
+            } else if (order.getWorkerTypeId().equals("1")) {//设计
                 orderDTO.setName(style);
                 orderDTO.setImage(address + "icon/shejiF.png");
-            }else if (order.getWorkerTypeId().equals("2")){
+            } else if (order.getWorkerTypeId().equals("2")) {
                 orderDTO.setName("当家精算");
                 orderDTO.setImage(address + "icon/jingsuanF.png");
-            }else {
+            } else {
                 List<OrderItem> orderItemList = orderItemMapper.byOrderIdList(order.getId());
-                if(orderItemList.size() > 0){
-                    if (order.getType() == 1){//人工
+                if (orderItemList.size() > 0) {
+                    if (order.getType() == 1) {//人工
                         orderDTO.setImage(address + "icon/Arengong.png");
                         orderDTO.setName("人工类商品");
-                    }else if(order.getType() == 2){//材料
+                    } else if (order.getType() == 2) {//材料
                         orderDTO.setImage(address + "icon/Acailiao.png");
                         orderDTO.setName("材料类商品");
                     }
@@ -261,31 +269,39 @@ public class OrderService {
      * 工匠要工序材料
      * 提交到后台材料员审核
      */
-    public ServerResponse confirmOrderSplit(String userToken,String houseId){
-        try{
-            AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+    public ServerResponse confirmOrderSplit(String userToken, String houseId) {
+        try {
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
 
             Example example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
-                    .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
+                    .andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
-            if (orderSplitList.size() == 0){
+            if (orderSplitList.size() == 0) {
                 return ServerResponse.createByErrorMessage("没有生成要货单");
-            }else if (orderSplitList.size() > 1){
-                return ServerResponse.createByErrorMessage("生成多个未提交要货单,异常联系平台部");
-            }else {
+//            } else if (orderSplitList.size() > 1) {
+////                return ServerResponse.createByErrorMessage("生成多个未提交要货单,异常联系平台部");
+            } else {
+                //将其他多余的单取消
+                if (orderSplitList.size() > 1) {
+                    for (int i = 1; i < orderSplitList.size(); i++) {
+                        OrderSplit orderSplit = orderSplitList.get(i);
+                        orderSplit.setApplyStatus(5);
+                        orderSplitMapper.updateByPrimaryKey(orderSplit);
+                    }
+                }
                 OrderSplit orderSplit = orderSplitList.get(0);
                 //如果存在补货单，则告知业主补货支付
-                if(!CommonUtil.isEmpty(orderSplit.getMendNumber())){
+                if (!CommonUtil.isEmpty(orderSplit.getMendNumber())) {
                     orderSplit.setApplyStatus(4);
                     orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
-                    return mendOrderService.confirmMendMaterial(userToken,houseId);
+                    return mendOrderService.confirmMendMaterial(userToken, houseId);
                 }
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
-                for (OrderSplitItem orderSplitItem : orderSplitItemList){
+                for (OrderSplitItem orderSplitItem : orderSplitItemList) {
                     Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), orderSplit.getHouseId());
                     warehouse.setAskCount(warehouse.getAskCount() + orderSplitItem.getNum());//更新仓库已要总数
                     warehouse.setAskTime(warehouse.getAskTime() + 1);//更新该货品被要次数
@@ -302,17 +318,17 @@ public class OrderService {
                 warehouseDetailMapper.insert(warehouseDetail);
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
-                if(worker.getWorkerType() == 3){
-                    configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","大管家要服务",
-                            String.format(DjConstants.PushMessage.STEWARD_Y_SERVER,house.getHouseName()) ,"");
-                }else {
-                    configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","工匠要材料",String.format
-                            (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL,house.getHouseName()) ,"");
+                if (worker.getWorkerType() == 3) {
+                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家要服务",
+                            String.format(DjConstants.PushMessage.STEWARD_Y_SERVER, house.getHouseName()), "");
+                } else {
+                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠要材料", String.format
+                            (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL, house.getHouseName()), "");
                 }
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("失败");
         }
@@ -322,11 +338,11 @@ public class OrderService {
     /**
      * 返回已添加要货单明细
      */
-    public ServerResponse getOrderItemList(String userToken,String houseId){
-        try{
-            AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+    public ServerResponse getOrderItemList(String userToken, String houseId) {
+        try {
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
-            Map<String,Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>();
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
             map.put("times", workerType.getSafeState());//要货次数
             Example example = new Example(OrderSplit.class);
@@ -336,24 +352,32 @@ public class OrderService {
 
             example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
-            .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
+                    .andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
-            if (orderSplitList.size() == 0){
+            if (orderSplitList.size() == 0) {
                 return ServerResponse.createBySuccessMessage("没有生成中要货单");
-            }else if (orderSplitList.size() > 1){
-                return ServerResponse.createByErrorMessage("生成多个未提交要货单,异常联系平台部");
-            }else {
+//            } else if (orderSplitList.size() > 1) {
+//                return ServerResponse.createByErrorMessage("生成多个未提交要货单,异常联系平台部");
+            } else {
+                //将其他多余的单取消
+                if (orderSplitList.size() > 1) {
+                    for (int i = 1; i < orderSplitList.size(); i++) {
+                        OrderSplit orderSplit = orderSplitList.get(i);
+                        orderSplit.setApplyStatus(5);
+                        orderSplitMapper.updateByPrimaryKey(orderSplit);
+                    }
+                }
                 OrderSplit orderSplit = orderSplitList.get(0);
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
-                for (OrderSplitItem v : orderSplitItemList){
+                for (OrderSplitItem v : orderSplitItemList) {
                     v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
                 }
-                map.put("orderSplitItemList",orderSplitItemList);
+                map.put("orderSplitItemList", orderSplitItemList);
                 return ServerResponse.createBySuccess("查询成功", map);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -364,37 +388,37 @@ public class OrderService {
      * 工匠要工序材料
      * 提交到要货
      */
-    public ServerResponse saveOrderSplit(String productArr, String houseId, String userToken){
-        try{
-            AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+    public ServerResponse saveOrderSplit(String productArr, String houseId, String userToken) {
+        try {
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
 
             Example example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 4)
-                    .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
-            int orderSplitnum= orderSplitMapper.selectCountByExample(example);
-            if(orderSplitnum>0){
+                    .andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
+            int orderSplitnum = orderSplitMapper.selectCountByExample(example);
+            if (orderSplitnum > 0) {
                 return ServerResponse.createByErrorMessage("存在业主未处理的补货单，无法提交要货！");
             }
 
             example = new Example(SplitDeliver.class);
             example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, houseId)
                     .andEqualTo(SplitDeliver.SHIPPING_STATE, 1).andCondition(" DATE_SUB(CURDATE(), INTERVAL 7 DAY) > date(send_time) ");
-            int list=splitDeliverMapper.selectCountByExample(example);
-            if(list>0){
+            int list = splitDeliverMapper.selectCountByExample(example);
+            if (list > 0) {
                 return ServerResponse.createByErrorMessage("存在供应商发货后7天还未签收,无法提交要货！");
             }
-            ServerResponse serverResponse=mendOrderService.mendChecking(houseId,worker.getWorkerTypeId(),0);
-            if(!serverResponse.isSuccess()){
+            ServerResponse serverResponse = mendOrderService.mendChecking(houseId, worker.getWorkerTypeId(), 0);
+            if (!serverResponse.isSuccess()) {
                 return ServerResponse.createByErrorMessage(serverResponse.getResultMsg());
             }
             example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
-                    .andEqualTo(OrderSplit.WORKER_TYPE_ID,worker.getWorkerTypeId());
+                    .andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             OrderSplit orderSplit;
             House house = houseMapper.selectByPrimaryKey(houseId);
-            if (orderSplitList.size() > 0){
+            if (orderSplitList.size() > 0) {
                 orderSplit = orderSplitList.get(0);
                 /*删除之前子项*/
                 example = new Example(OrderSplitItem.class);
@@ -406,7 +430,7 @@ public class OrderService {
                 orderSplit.setSupervisorTel(worker.getMobile());
                 orderSplit.setWorkerTypeId(worker.getWorkerTypeId());
                 orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
-            }else {
+            } else {
                 example = new Example(OrderSplit.class);
                 orderSplit = new OrderSplit();
                 orderSplit.setNumber("DJ" + 200000 + orderSplitMapper.selectCountByExample(example));//要货单号
@@ -422,11 +446,11 @@ public class OrderService {
             //获取要货购物车数据
             example = new Example(Cart.class);
             example.createCriteria()
-                    .andEqualTo(Cart.HOUSE_ID,houseId)
-                    .andEqualTo(Cart.WORKER_TYPE_ID,worker.getWorkerTypeId())
-                    .andEqualTo(Cart.MEMBER_ID,worker.getId());
-            List<Cart> cartList=cartMapper.selectByExample(example);
-            List productList=new ArrayList();
+                    .andEqualTo(Cart.HOUSE_ID, houseId)
+                    .andEqualTo(Cart.WORKER_TYPE_ID, worker.getWorkerTypeId())
+                    .andEqualTo(Cart.MEMBER_ID, worker.getId());
+            List<Cart> cartList = cartMapper.selectByExample(example);
+            List productList = new ArrayList();
             for (Cart aCartList : cartList) {
                 Double num = aCartList.getShopCount();
                 String productId = aCartList.getProductId();
@@ -435,10 +459,10 @@ public class OrderService {
 
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria()
-                        .andEqualTo(OrderSplitItem.PRODUCT_ID,productId)
-                        .andEqualTo(OrderSplitItem.ORDER_SPLIT_ID,orderSplit.getId());
-                List<OrderSplitItem> orderSplitItems=orderSplitItemMapper.selectByExample(example);
-                if(orderSplitItems.size()>0){
+                        .andEqualTo(OrderSplitItem.PRODUCT_ID, productId)
+                        .andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
+                List<OrderSplitItem> orderSplitItems = orderSplitItemMapper.selectByExample(example);
+                if (orderSplitItems.size() > 0) {
                     //存在记录则跳过，防止重复数据的产生
                     continue;
                 }
@@ -473,7 +497,7 @@ public class OrderService {
                     orderSplitItem.setCost(product.getCost());
                     orderSplitItem.setShopCount(0d);
                     orderSplitItem.setNum(num);
-                    orderSplitItem.setUnitName(forMasterAPI.getUnitName(house.getCityId(),product.getConvertUnit()));
+                    orderSplitItem.setUnitName(forMasterAPI.getUnitName(house.getCityId(), product.getConvertUnit()));
                     orderSplitItem.setTotalPrice(product.getPrice() * num);//单项总价 销售价
                     orderSplitItem.setProductType(goods.getType());
                     orderSplitItem.setCategoryId(product.getCategoryId());
@@ -517,9 +541,9 @@ public class OrderService {
             }
 
             //补货材料列表
-            String mendMaterialArr=JSON.toJSONString(productList);
-            if(!CommonUtil.isEmpty(mendMaterialArr)&&productList.size()>0){
-                serverResponse= mendOrderService.saveMendMaterial( userToken, houseId, mendMaterialArr);
+            String mendMaterialArr = JSON.toJSONString(productList);
+            if (!CommonUtil.isEmpty(mendMaterialArr) && productList.size() > 0) {
+                serverResponse = mendOrderService.saveMendMaterial(userToken, houseId, mendMaterialArr);
                 if (serverResponse.isSuccess()) {
                     if (serverResponse.getResultObj() != null) {
                         //保存补货ID
@@ -529,7 +553,7 @@ public class OrderService {
                 }
             }
             return ServerResponse.createBySuccessMessage("提交成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("提交失败");
         }

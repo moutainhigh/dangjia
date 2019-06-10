@@ -12,6 +12,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * 实体类 - 房间
@@ -88,6 +89,12 @@ public class House extends BaseEntity {
     @ApiModelProperty("装修风格,存字符")
     private String style;
 
+
+    @Column(name = "schedule")
+    @Desc(value = "大管家排期")
+    @ApiModelProperty("大管家排期 0=未排期  1=已排期")
+    private String schedule;
+
     @Column(name = "type")
     @Desc(value = "默认0，1用户点击了开始装修，2代表老用户,3用户自己撤回")    //迁移数据时设置老用户
     @ApiModelProperty("默认0，1用户点击了开始装修，2代表老用户,3用户自己撤回")
@@ -109,9 +116,9 @@ public class House extends BaseEntity {
     private Integer taskNumber;//tasknumber
 
     @Column(name = "visit_state")
-    @Desc(value = "0待确认开工,1装修中,2休眠中,3已完工")
-    @ApiModelProperty("0待确认开工,1装修中,2休眠中,3已完工")
-    private Integer visitState;//1开工，2有意向，3无装修需求，4恶意操作，默认为0
+    @Desc(value = "0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中")
+    @ApiModelProperty("0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中")
+    private Integer visitState;//0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
     /**
      * 发送设计图业主
      * 设计状态:
@@ -213,16 +220,34 @@ public class House extends BaseEntity {
     @ApiModelProperty("结算比例ID")
     private String workDepositId;
 
+    @Column(name = "plane_frequency")
+    @Desc(value = "平面图打回次数")
+    @ApiModelProperty("平面图打回次数")
+    private Integer planeFrequency;
 
+    @Column(name = "construction_frequency")
+    @Desc(value = "施工图打回次数")
+    @ApiModelProperty("施工图打回次数")
+    private Integer constructionFrequency;
+
+    @Column(name = "construction_date")
+    @Desc(value = "开工时间")
+    @ApiModelProperty("开工时间")
+    protected Date constructionDate;
+
+    @Column(name = "completed_date")
+    @Desc(value = "竣工时间")
+    @ApiModelProperty("竣工时间")
+    protected Date completedDate;
     public House() {
 
     }
 
     public House(boolean isIni) {
         if (isIni) {
-            this.id = (int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis();
             this.type = 1;//0默认，1用户点击了开始装修，2代表老用户,默认生成 为0
             this.visitState = 0;//默认
+            this.schedule = "0";//默认
             this.showHouse = 0;// 是否展示 0展示，1不展示,默认生成 为0
             this.taskNumber = 0;// 未处理任务数,默认生成为0
             this.designerOk = 0;// 设计师操作 ,0未确定设计师,1已确定设计师,2已发给业主,3审核通过,默认生成 为0
@@ -232,7 +257,6 @@ public class House extends BaseEntity {
             this.money = new BigDecimal(0);
             this.isSelect = 1;//默认选中
             this.pause = 0;
-            this.dataStatus=0;
         }
     }
 

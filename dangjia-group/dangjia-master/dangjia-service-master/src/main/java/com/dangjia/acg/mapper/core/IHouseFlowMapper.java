@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.core;
 
+import com.dangjia.acg.dto.core.HouseFlowDTO;
 import com.dangjia.acg.modle.core.HouseFlow;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -35,6 +36,10 @@ public interface IHouseFlowMapper extends Mapper<HouseFlow> {
      * 找出启用工种给大管家算审核钱
      */
     List<HouseFlow> getForCheckMoney(@Param("houseId") String houseId);
+
+
+    List<HouseFlowDTO> getHouseScheduleFlow(@Param("houseId") String houseId);
+
 
     /**
      * 查下个未开工的工种

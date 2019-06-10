@@ -80,7 +80,7 @@
         <result column="modify_date" jdbcType="TIMESTAMP" property="modifyDate"/>
         <result column="is_del" jdbcType="BIT" property="isDel"/>
         <result column="is_job" jdbcType="BIT" property="isJob"/>
-        <result column="is_receive" jdbcType="BIT" property="isReceive"/>
+        <result column="is_receive" jdbcType="INTEGER" property="isReceive"/>
         <collection property="userRoles" ofType="com.dangjia.acg.modle.user.UserRoleKey">
             <result column="user_id" property="userId"/>
             <result column="role_id" property="roleId"/>
@@ -117,7 +117,7 @@
         <include refid="Base_Column_List"/>
         from dj_user
         WHERE
-        is_receive=1
+        is_receive=#{type}
     </select>
 
     <!--=Start findUserByMobile 根据手机号获取用户数据 -->

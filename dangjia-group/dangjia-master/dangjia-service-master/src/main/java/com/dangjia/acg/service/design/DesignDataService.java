@@ -1,33 +1,40 @@
 package com.dangjia.acg.service.design;
 
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.design.DesignListDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.house.DesignDTO;
+import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
+import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
+import com.dangjia.acg.mapper.design.IPayConfigurationMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
+import com.dangjia.acg.modle.core.HouseWorker;
+import com.dangjia.acg.modle.design.DesignBusinessOrder;
+import com.dangjia.acg.modle.design.PayConfiguration;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ruking.Cheng
@@ -40,10 +47,6 @@ import java.util.Map;
 public class DesignDataService {
     @Autowired
     private IHouseMapper houseMapper;
-    //    @Autowired
-//    private IDesignImageTypeMapper designImageTypeMapper;
-//    @Autowired
-//    private IHouseDesignImageMapper houseDesignImageMapper;//房子关联设计图
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
@@ -56,6 +59,12 @@ public class DesignDataService {
     private IMemberMapper memberMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private IHouseWorkerMapper houseWorkerMapper;
+    @Autowired
+    private IPayConfigurationMapper payConfigurationMapper;
+    @Autowired
+    private IDesignBusinessOrderMapper designBusinessOrderMapper;
 
 
     /**
@@ -88,62 +97,116 @@ public class DesignDataService {
      */
     public ServerResponse getDesign(String userToken, String houseId) {
         Object object = constructionService.getMember(userToken);
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
+        Member worker = null;
+        if (object instanceof Member) {
+            worker = (Member) object;
         }
-        Member worker = (Member) object;
         House house = houseMapper.selectByPrimaryKey(houseId);
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
         }
-        Map<String, Object> map = new HashMap<>();//返回体
-        if (house.getDesignerOk() != 3 && worker.getId().equals(house.getMemberId())) {//是业主而且没有设计完工将走审核逻辑
+        if (house.getVisitState() == 4) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "已经提前结束装修");
+        }
+        DesignListDTO designDTO = new DesignListDTO();
+        if (worker != null && house.getDesignerOk() != 3 && worker.getId().equals(house.getMemberId())) {//是业主而且没有设计完工将走审核逻辑
+
             if (house.getDesignerOk() != 5 && house.getDesignerOk() != 2) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相关记录");
+                if (house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getVisitState() == 1) {
+                    designDTO.setHistoryRecord(0);
+                    String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
+                    designDTO.addButton(Utils.getButton("申请提前结束", webAddress + "ownerEnd?title=填写原因&houseId=" + houseId, 0));
+                    return ServerResponse.createBySuccess("设计师还在设计中", designDTO);
+                } else {
+                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "设计师还在设计中");
+                }
             }
+            Example example = new Example(PayConfiguration.class);
+            Example.Criteria criteria = example.createCriteria()
+                    .andEqualTo(PayConfiguration.DATA_STATUS, 0);
+            designDTO.addButton(Utils.getButton("需要修改设计", 1));
+            String message;
             if (house.getDesignerOk() == 5) {
                 ServerResponse serverResponse = getPlaneMap(houseId);
                 if (!serverResponse.isSuccess()) {
                     return serverResponse;
                 }
+                criteria.andEqualTo(PayConfiguration.TYPE, 1);
+                message = "温馨提示:您需要修改平面图次数超过%s次后将需要支付改图费,金额为%s元/次的费用。";
                 QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
-                map.put("data", quantityRoomDTO.getImages());
-                map.put("verification", 1);
-                map.put("historyRecord", 0);//是否暂时历史记录
-                map.put("button", "确认平面图");
-                return ServerResponse.createBySuccess("查询成功", map);
+                designDTO.setData(quantityRoomDTO.getImages());
+                designDTO.addButton(Utils.getButton("确认平面图", 2));
             } else {
                 ServerResponse serverResponse = getConstructionPlans(houseId);
                 if (!serverResponse.isSuccess()) {
                     return serverResponse;
                 }
+                criteria.andEqualTo(PayConfiguration.TYPE, 2);
+                message = "温馨提示:您需要修改施工图次数超过%s次后将需要支付改图费,金额为%s元/次的费用。";
                 QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
-                map.put("data", quantityRoomDTO.getImages());
-                map.put("verification", 1);
-                map.put("button", "确认施工图");
-                map.put("historyRecord", 0);//是否暂时历史记录
-                return ServerResponse.createBySuccess("查询成功", map);
+                designDTO.setData(quantityRoomDTO.getImages());
+                designDTO.addButton(Utils.getButton("确认施工图", 2));
             }
+            List<PayConfiguration> payConfigurations = payConfigurationMapper.selectByExample(example);
+            if (payConfigurations != null && payConfigurations.size() > 0) {
+                PayConfiguration payConfiguration = payConfigurations.get(0);
+                designDTO.setMessage(String.format(message,
+                        payConfiguration.getFrequency() + "",
+                        payConfiguration.getSumMoney().setScale(2, BigDecimal.ROUND_HALF_UP) + ""));
+            }
+            designDTO.setHistoryRecord(0);
         } else {
             List<QuantityRoomImages> quantityRoomImages = new ArrayList<>();
-//            ServerResponse serverResponse = getPlaneMap(houseId);
-//            if (serverResponse.isSuccess()) {
-//                QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
-//                quantityRoomImages.addAll(quantityRoomDTO.getImages());
-//            }
             ServerResponse serverResponse = getConstructionPlans(houseId);
             if (serverResponse.isSuccess()) {
                 QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
                 quantityRoomImages.addAll(quantityRoomDTO.getImages());
             }
             if (quantityRoomImages.size() <= 0) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相关记录");
+                serverResponse = getPlaneMap(houseId);
+                if (serverResponse.isSuccess()) {
+                    QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+                    quantityRoomImages.addAll(quantityRoomDTO.getImages());
+                }
             }
-            map.put("data", quantityRoomImages);
-            map.put("verification", 0);
-            map.put("historyRecord", (worker.getWorkerType() != null && worker.getWorkerType() == 1) ? 1 : 0);//是否暂时历史记录
-            return ServerResponse.createBySuccess("查询成功", map);
+            if (quantityRoomImages.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相关记录");
+            }
+            designDTO.setData(quantityRoomImages);
+            int historyRecord = (worker != null
+                    && worker.getWorkerType() != null
+                    && ((house.getDecorationType() == 2 && worker.getWorkerType() == 2)
+                    || (house.getDecorationType() != 2 && worker.getWorkerType() == 1))) ? 1 : 0;
+            designDTO.setHistoryRecord(historyRecord);
+            if (worker != null && worker.getId().equals(house.getMemberId())) {
+                Example example = new Example(DesignBusinessOrder.class);
+                Example.Criteria criteria = example.createCriteria()
+                        .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
+                        .andEqualTo(DesignBusinessOrder.HOUSE_ID, house.getId())
+                        .andEqualTo(DesignBusinessOrder.STATUS, 1)
+                        .andNotEqualTo(DesignBusinessOrder.OPERATION_STATE, 2);
+                if (house.getDecorationType() != 2) {
+                    criteria.andEqualTo(DesignBusinessOrder.TYPE, 4);
+                    List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
+                    if (designBusinessOrders == null || designBusinessOrders.size() <= 0) {
+                        designDTO.addButton(Utils.getButton("申请额外修改设计", 3));
+                    }
+                } else {
+                    criteria.andEqualTo(DesignBusinessOrder.TYPE, 3);
+                    List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
+                    if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
+                        DesignBusinessOrder order = designBusinessOrders.get(0);
+                        if (order.getOperationState() == 1) {
+                            designDTO.addButton(Utils.getButton("需要修改设计", 4));
+                            designDTO.addButton(Utils.getButton("确认设计", 5));
+                        }
+                    } else {
+                        designDTO.addButton(Utils.getButton("申请额外修改设计", 3));
+                    }
+                }
+            }
         }
+        return ServerResponse.createBySuccess("查询成功", designDTO);
     }
 
     /**
@@ -158,7 +221,7 @@ public class DesignDataService {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<QuantityRoomDTO> quantityRoomDTOS = quantityRoomMapper.getQuantityRoomList(houseId, type);
         if (quantityRoomDTOS == null || quantityRoomDTOS.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相关记录");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相关记录");
         }
         PageInfo pageResult = new PageInfo(quantityRoomDTOS);
         for (QuantityRoomDTO quantityRoomDTO : quantityRoomDTOS) {
@@ -216,7 +279,7 @@ public class DesignDataService {
 
     private ServerResponse getQuantityRoom(QuantityRoomDTO quantityRoomDTO) {
         if (quantityRoomDTO == null) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相关信息");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相关信息");
         }
         quantityRoomDTO.setUserType(-1);
         getUserName(quantityRoomDTO);
@@ -227,7 +290,7 @@ public class DesignDataService {
         example.orderBy(QuantityRoomImages.SORT).asc();
         List<QuantityRoomImages> quantityRoomImages = quantityRoomImagesMapper.selectByExample(example);
         if (quantityRoomImages == null || quantityRoomImages.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "无相关图片");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相关图片");
         }
         String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         for (QuantityRoomImages quantityRoomImage : quantityRoomImages) {
@@ -259,6 +322,15 @@ public class DesignDataService {
         List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, searchKey, dataStatus);
         PageInfo pageResult = new PageInfo(designDTOList);
         for (DesignDTO designDTO : designDTOList) {
+            HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(designDTO.getHouseId(), 1);
+            if (houseWorker != null) {
+                Member workerSup = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
+                if (workerSup != null) {
+                    designDTO.setOperatorName(workerSup.getName());//大管家名字
+                    designDTO.setOperatorMobile(workerSup.getMobile());
+                    designDTO.setOperatorId(workerSup.getId());
+                }
+            }
             ServerResponse serverResponse = getPlaneMap(designDTO.getHouseId());
             if (!serverResponse.isSuccess()) {
                 serverResponse = getConstructionPlans(designDTO.getHouseId());

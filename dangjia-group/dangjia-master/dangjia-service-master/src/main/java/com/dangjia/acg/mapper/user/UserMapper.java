@@ -41,7 +41,7 @@ public interface UserMapper  extends Mapper<MainUser> {
 	 * 查询当前坐席的用户
 	 * @return
 	 */
-	MainUser getUserByReceive();
+	MainUser getUserByReceive(@Param("type") Integer type);
 
 	/**
 	 * 查询用户及对应的角色

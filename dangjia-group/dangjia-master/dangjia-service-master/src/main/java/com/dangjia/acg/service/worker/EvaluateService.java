@@ -7,7 +7,6 @@ import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -166,6 +165,7 @@ public class EvaluateService {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             houseFlowApply.setApplyDec(content);
             houseFlowApply.setSupervisorCheck(2);
+            houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
             /*
@@ -235,6 +235,7 @@ public class EvaluateService {
 
             //当前时间延后一天等待审核
             houseFlowApply.setStartDate(DateUtil.addDateDays(new Date(),1));
+            houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
 
@@ -242,6 +243,31 @@ public class EvaluateService {
 
         }
 
+
+    }
+    //工匠今日未开工，将扣除100
+    public void absenteeismOvertime(HouseFlow houseFlow){
+        House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+        Member member = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+        BigDecimal money=new BigDecimal(100);
+        BigDecimal surplusMoney = member.getSurplusMoney().subtract(money);
+        BigDecimal haveMoney = member.getHaveMoney().subtract(money);
+        WorkerDetail workerDetail = new WorkerDetail();
+        workerDetail.setName(workerType.getName()+"旷工扣钱");
+        workerDetail.setWorkerId(member.getId());
+        workerDetail.setWorkerName(member.getName());
+        workerDetail.setHouseId(houseFlow.getHouseId());
+        workerDetail.setMoney(money);
+        workerDetail.setWalletMoney(surplusMoney);
+        workerDetail.setHaveMoney(haveMoney);
+        workerDetail.setState(3);
+        iWorkerDetailMapper.insert(workerDetail);
+
+        member.setSurplusMoney(surplusMoney);
+        member.setHaveMoney(haveMoney);
+        memberMapper.updateByPrimaryKeySelective(member);
+        configMessageService.addConfigMessage(null,"gj",member.getId(),"0",workerType.getName()+"旷工扣钱",String.format(DjConstants.PushMessage.CRAFTSMAN_ABSENTEEISM,house.getHouseName()) ,"0");
 
     }
     /**
@@ -317,6 +343,7 @@ public class EvaluateService {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DAY_OF_YEAR, 7);//业主倒计时
             houseFlowApply.setEndDate(calendar.getTime());
+            houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
             /*
              * 大管家每次审核拿钱 新算法 2018.08.03
@@ -495,12 +522,10 @@ public class EvaluateService {
 
             //业主审核
             ServerResponse serverResponse=houseFlowApplyService.checkWorker(houseFlowApplyId,isAuto);
-            if(serverResponse.getResultCode()!= EventStatus.SUCCESS.getCode()){
-
+            if(!serverResponse.isSuccess()){
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return serverResponse;
             }
-
             configMessageService.addConfigMessage(null,"gj",worker.getId(),"0","业主评价",String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE,house.getHouseName()) ,"6");
             configMessageService.addConfigMessage(null,"gj",supervisor.getId(),"0","业主评价",String.format(DjConstants.PushMessage.STEWARD_EVALUATE,house.getHouseName()) ,"6");
 
@@ -585,7 +610,23 @@ public class EvaluateService {
 
         memberMapper.updateByPrimaryKeySelective(worker);
     }
-
+    /**扣除指定用户的积分*/
+    public void updateMemberIntegral(String workerId,String houseId,BigDecimal score,String desc){
+        Member worker = memberMapper.selectByPrimaryKey(workerId);
+        WorkIntegral workIntegral=new WorkIntegral();
+        BigDecimal evaluationScore = worker.getEvaluationScore().subtract(score);
+        worker.setEvaluationScore(evaluationScore);//减积分
+        workIntegral.setIntegral(score);
+        workIntegral.setWorkerId(worker.getId());
+        workIntegral.setMemberId(workerId);
+        workIntegral.setButlerId(workerId);
+        workIntegral.setStar(0);
+        workIntegral.setStatus(0);
+        workIntegral.setHouseId(houseId);
+        workIntegral.setBriefed(desc);
+        workIntegralMapper.insert(workIntegral);
+        memberMapper.updateByPrimaryKeySelective(worker);
+    }
     /**用于在工人被评价之后修改好评率*/
     private void updateFavorable(String workerId){
         Member worker = memberMapper.selectByPrimaryKey(workerId);

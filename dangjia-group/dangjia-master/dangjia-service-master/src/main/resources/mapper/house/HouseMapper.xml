@@ -38,6 +38,7 @@
         visit_state as visitState,
         data_status as dataStatus,
         create_date as createDate,
+        construction_date as constructionDate,
         modify_date as modifyDate
     </sql>
     <select id="getDesignList" resultType="com.dangjia.acg.dto.house.DesignDTO">
@@ -143,6 +144,7 @@
         house.number,
         house.data_status as dataStatus,
         house.create_date as createDate,
+        house.construction_date as constructionDate,
         house.modify_date as modifyDate,
         (SELECT COUNT(*) from dj_deliver_order_split where apply_status = 1 and house_id = house.id) as waitCount,
         (SELECT COUNT(*) from dj_deliver_order_split where apply_status = 2 and house_id = house.id) as sendCount
@@ -239,6 +241,7 @@
         h.work_deposit_id as workDepositId,
         h.create_date AS createDate,
         h.modify_date AS modifyDate,
+        h.construction_date as constructionDate,
         h.city_id as cityId,
         h.modeling_layout_id as modelingLayoutId,
         h.village_id as villageId,
@@ -310,12 +313,14 @@
         h.work_deposit_id as workDepositId,
         h.create_date AS createDate,
         h.modify_date AS modifyDate,
-        h.number as number
+        h.construction_date as constructionDate,
+        h.number as number,
+        ( CASE WHEN (h.decoration_type = 2 AND h.designer_ok != 3) THEN 1 ELSE 0 END ) AS showUpdata
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
         WHERE
-         h.designer_ok=3
+        (h.decoration_type = 2 or (h.decoration_type != 2 and h.designer_ok =3))
         <if test="dataStatus!=null and dataStatus!=''">
             AND h.data_status=#{dataStatus}
         </if>
@@ -378,14 +383,19 @@
         h.drawings,
         h.work_deposit_id as workDepositId,
         h.custom_sort as customSort,
+        h.construction_date as constructionDate,
+        h.completed_date as completedDate,
         h.is_select as isSelect,
         (
         case
-        when (f.supervisor_start = 1 or f.supervisor_start = 0)  and h.visit_state !=2 and h.visit_state !=3  and h.pause=0 then f.supervisor_start
-        when h.visit_state = 3  then 3
+        when (f.supervisor_start = 1 or f.supervisor_start = 0) and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and
+        h.pause=0 then f.supervisor_start
+        when h.visit_state = 3 then 3
+        when h.visit_state = 4 then 4
+        when h.visit_state = 5 then 5
         when (h.visit_state = 2 or h.pause=1) then 2
-       end
-        )  as visitState,
+        end
+        ) as visitState,
         h.data_status as dataStatus,
         h.create_date as createDate,
         h.modify_date as modifyDate
@@ -396,9 +406,9 @@
         WHERE
         h.data_status =0
         <if test="visitState==0 || visitState==1">
-            and f.supervisor_start = #{visitState}  and h.visit_state !=2 and h.visit_state !=3  and h.pause=0
+            and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and h.pause=0
         </if>
-        <if test="visitState==2 || visitState==3">
+        <if test="visitState>=2">
             and h.visit_state = #{visitState}
         </if>
 
@@ -457,6 +467,165 @@
             ORDER BY
                 create_date DESC
             ) a;
+    </select>
+
+
+    <select id="getHouseProfitList" resultType="com.dangjia.acg.dto.house.DesignDTO">
+        SELECT
+        house.id AS houseId,
+        CONCAT(
+        house.residential,
+        IFNULL(house.building, '*'),
+        '栋',
+        IFNULL(CONCAT(house.unit, '单元'),'' ),
+        IFNULL(house.number, '*'),
+        '号'
+        ) houseName,
+        house.designer_ok AS designerOk,
+        house.residential AS residential,
+        house.building AS building,
+        house.unit AS unit,
+        house.decoration_type AS decorationType,
+        house.number AS number,
+        house.visit_state AS visitState,
+        member.nick_name AS nickName,
+        member.NAME AS NAME,
+        member.mobile AS mobile,
+        house.construction_date AS createDate,
+        house.completed_date AS modifyDate
+        FROM
+        dj_house house
+        INNER JOIN dj_member member ON member.id = house.member_id
+        WHERE house.data_status=0
+        <if test="visitState!=null and visitState!=''">
+            AND house.visit_state=#{visitState}
+        </if>
+        <if test="visitState==null or visitState==''">
+            AND house.visit_state in (1,3,4)
+        </if>
+        <if test="searchKey!=null and searchKey!=''">
+            AND (CONCAT(
+            house.residential,
+            IFNULL(house.building, '*'),
+            '栋',
+            IFNULL(CONCAT(house.unit, '单元'),'' ),
+            IFNULL(house.number, '*'),
+            '号'
+            ) like CONCAT('%',#{searchKey},'%')
+            OR member.mobile like CONCAT('%',#{searchKey},'%')
+            OR member.name like CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        ORDER BY house.create_date DESC
+    </select>
+
+    <select id="getHouseProfitSummary" resultType="com.dangjia.acg.dto.repair.HouseProfitSummaryDTO">
+        SELECT
+            number,
+            info,
+            type,
+            money,
+            plus,
+            date
+        FROM
+        (
+            (
+            SELECT
+            o.business_order_number number,
+            CONCAT(w.`name`, '抢单') info,
+            CONCAT('o', o.worker_type) type,
+            o.total_price money,
+            '0' plus,
+            o.`create_date` date
+            FROM
+            `dj_core_house_worker_order` o
+            INNER JOIN dj_core_worker_type w ON o.worker_type_id = w.id
+            WHERE
+            o.`house_id` = #{houseId}
+            AND o.pay_state = 1
+            )
+        UNION ALL
+        (
+            SELECT
+            number,
+            order_name info,
+            CONCAT('m', type) type,
+            IFNULL(
+            actual_total_amount,
+            total_amount
+            ) money,
+            (
+            CASE
+            WHEN type = 0 THEN
+            0
+            WHEN type = 1 THEN
+            0
+            ELSE
+            1
+            END
+            ) AS plus,
+            `create_date` date
+            FROM
+            `dj_repair_mend_order`
+            WHERE
+            `house_id` = #{houseId}
+            AND state = 4
+            )
+        UNION ALL
+        (
+        SELECT
+        '-' number,
+        NAME info,
+        CONCAT('d', state) type,
+        money,
+        (
+        CASE
+        WHEN state = 3 THEN
+        0
+        ELSE
+        1
+        END
+        ) AS plus,
+        `create_date` date
+        FROM
+        `dj_worker_worker_detail`
+        WHERE
+        `house_id` = #{houseId}
+        AND money != 0
+        )
+        UNION ALL
+        (
+        SELECT
+        number,
+        CONCAT('供应商发货结算') info,
+        CONCAT('f0') type,
+        apply_money money,
+        '1' plus,
+        `create_date` date
+        FROM
+        `dj_deliver_split_deliver`
+        WHERE
+        `house_id` = #{houseId}
+        AND `apply_state` = 2 AND `data_status` = 0
+        )
+        UNION ALL
+        (
+        SELECT
+        number,
+        CONCAT('供应商退货结算') info,
+        CONCAT('f1') type,
+        apply_money money,
+        '0' plus,
+        `create_date` date
+        FROM
+        `dj_repair_mend_deliver`
+        WHERE
+        `house_id` = #{houseId}
+        AND `apply_state` = 2 AND `data_status` = 0
+        )
+        ) a
+        ORDER BY
+        a.date DESC
     </select>
 </mapper>
 

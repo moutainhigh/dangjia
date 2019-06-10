@@ -41,9 +41,14 @@ public class HouseListDTO {
     private String workDepositId;
     private Date createDate;// 创建日期
     private Date modifyDate;// 修改日期
+    private Date constructionDate;// 开工日期
     private String cityId; //城市ID
     private String villageId;//小区Id
     private String modelingLayoutId;//户型Id
+    private String operatorId;// 操作人ID
+    private String operatorName;// 操作人名字
+    private String operatorMobile;// 操作人电话
+    private Integer showUpdata;//是否显示上传图片按钮，0否，1是
 
 
     public String getHouseName() {

@@ -30,44 +30,17 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
         return designerOperationService.sendPictures(houseId);
     }
 
-//    @Overrideerride
-//    @ApiMethod
-//    public ServerResponse uploadPictures(HttpServletRequest request, String houseId, String designImageTypeId, String imageurl) {
-//        return designDataService.uploadPictures(houseId, designImageTypeId, imageurl);
-//    }
-
     @Override
     @ApiMethod
     public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey) {
         return designDataService.getDesignList(pageDTO, designerType, searchKey);
     }
 
-//    @Override
-//    @ApiMethod
-//    public ServerResponse getImagesList(HttpServletRequest request, String houseId) {
-//        return designDataService.getImagesList(houseId);
-//    }
-
-//    /**
-//     * 查看施工图
-//     */
-//    @Override
-//    @ApiMethod
-//    public ServerResponse designImageList(String houseId) {
-//        return designDataService.designImageList(houseId);
-//    }
-
     @Override
     @ApiMethod
     public ServerResponse checkPass(String userToken, String houseId, int type) {
         return designerOperationService.checkPass(userToken, houseId, type);
     }
-
-//    @Override
-//    @ApiMethod
-//    public ServerResponse checkDesign(String userToken, String houseId) {
-//        return designDataService.checkDesign(userToken, houseId);
-//    }
 
     @Override
     @ApiMethod

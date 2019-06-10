@@ -6,18 +6,24 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDetail;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
+import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.*;
+import com.dangjia.acg.mapper.worker.IEvaluateMapper;
+import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
+import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,6 +71,13 @@ public class MendRecordService {
     @Autowired
     private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private IWorkerTypeMapper workerTypeMapper;
+    @Autowired
+    private IHouseFlowApplyMapper houseFlowApplyMapper;
+
+    @Autowired
+    private IEvaluateMapper evaluateMapper;
     /**
      * 要补退明细
      * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货
@@ -124,7 +137,7 @@ public class MendRecordService {
 
     /**
      * 要补退明细
-     * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货
+     * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货, 6 审核进程
      */
     public ServerResponse mendOrderDetail(String userToken, String mendOrderId, Integer type) {
         try {
@@ -139,7 +152,21 @@ public class MendRecordService {
             MendOrderDetail mendOrderDetail = new MendOrderDetail();
             mendOrderDetail.setIsShow(0);
             mendOrderDetail.setIsAuditor(0);
-            if (type == 5) {
+
+            if (type == 6) {
+                HouseFlowApply houseFlowApply=houseFlowApplyMapper.selectByPrimaryKey(mendOrderId);
+                Member member = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
+                mendOrderDetail.setHouseId(houseFlowApply.getHouseId());
+                mendOrderDetail.setApplicantId(houseFlowApply.getWorkerId());
+                mendOrderDetail.setApplicantName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
+                mendOrderDetail.setApplicantMobile(member.getMobile());
+                mendOrderDetail.setNumber(houseFlowApply.getId());
+                mendOrderDetail.setType(6);
+                mendOrderDetail.setState(houseFlowApply.getApplyType());
+                mendOrderDetail.setCreateDate(houseFlowApply.getCreateDate());
+                mendOrderDetail.setMapList(getFlowInfo(houseFlowApply));
+
+            } else if (type == 5) {
                 OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
                 if (worker != null &&worker.getWorkerTypeId()!=null&& worker.getWorkerTypeId().equals(orderSplit.getWorkerTypeId())) {
                     mendOrderDetail.setIsShow(1);
@@ -281,6 +308,75 @@ public class MendRecordService {
         }
     }
 
+    private List getFlowInfo(HouseFlowApply houseFlowApply){
+        List<Map<String, Object>> mapList = new ArrayList<>();
+
+        //工匠
+        Map<String, Object> map = new HashMap<>();
+        map.put("roleType","工匠");
+        map.put("createDate",houseFlowApply.getCreateDate());
+        map.put("info",houseFlowApply.getApplyDec());
+        map.put("type","1");//1=达到  0=未达到
+        mapList.add(map);
+
+        //管家 0未审核，1审核通过，2审核不通过
+        map = new HashMap<>();
+        map.put("roleType", "管家");
+        if (houseFlowApply.getSupervisorCheck() == 0) {
+            map.put("type", "0");
+        }
+        if(houseFlowApply.getSupervisorCheck() > 0){
+            map.put("createDate", houseFlowApply.getCreateDate());//默认赋值
+            map.put("type", "1");
+            //查工匠被管家的评价
+            Evaluate evaluate = evaluateMapper.getForCountMoneySup(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), houseFlowApply.getWorkerId());
+            if(evaluate!=null) {
+                map.put("createDate", evaluate.getCreateDate());
+                map.put("content", evaluate.getContent());
+            }
+            if (houseFlowApply.getSupervisorCheck() == 1) {
+                map.put("info", "审核通过");
+
+            }
+            if (houseFlowApply.getSupervisorCheck() == 2) {
+                map.put("info", "拒绝通过");
+            }
+        }
+
+        mapList.add(map);
+
+        //业主 ,0未审核，1审核通过，2审核不通过，3自动审核，4申述中
+        map = new HashMap<>();
+        map.put("roleType","业主");
+        if(houseFlowApply.getMemberCheck()==0){
+            map.put("type","0");
+        }
+        if(houseFlowApply.getSupervisorCheck() > 0){
+            map.put("createDate",houseFlowApply.getCreateDate());
+            map.put("type","1");
+            //查工匠被管家的评价
+            Evaluate evaluate = evaluateMapper.getForCountMoney(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), houseFlowApply.getWorkerId());
+            if(evaluate!=null) {
+                map.put("createDate", evaluate.getCreateDate());
+                map.put("content", evaluate.getContent());
+            }
+            if(houseFlowApply.getMemberCheck()==1){
+                map.put("info","审核通过");
+            }
+            if(houseFlowApply.getMemberCheck()==2){
+                map.put("info","拒绝通过");
+            }
+            if(houseFlowApply.getMemberCheck()==3){
+                map.put("info","自动审核通过");
+            }
+            if(houseFlowApply.getMemberCheck()==4){
+                map.put("info","申述中");
+            }
+        }
+
+        mapList.add(map);
+        return mapList;
+    }
     private void setMendOrder(MendOrderDetail mendOrderDetail) {
         if (!CommonUtil.isEmpty(mendOrderDetail.getHouseId())) {
             House house = houseMapper.selectByPrimaryKey(mendOrderDetail.getHouseId());
@@ -309,7 +405,36 @@ public class MendRecordService {
             Member worker = (Member) object;
             List<Map<String, Object>> returnMap = new ArrayList<>();
 
-            if (type == 5) {
+            if (type == 6) {
+                Example example = new Example(HouseFlowApply.class);
+
+                /*审核记录*/
+                if (roleType == 3) {//工匠
+                    example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 ").andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
+                } else {
+                    example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 ");
+                }
+                example.orderBy(HouseFlowApply.CREATE_DATE).desc();
+                List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
+                for (HouseFlowApply houseFlowApply : houseFlowApplies) {
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("mendOrderId", houseFlowApply.getId());
+                    if(houseFlowApply.getApplyType()==0){
+                        map.put("number", workerType.getName()+"每日完工审核");
+                    }
+                    if(houseFlowApply.getApplyType()==1){
+                        map.put("number", workerType.getName()+"阶段完工审核");
+                    }
+                    if(houseFlowApply.getApplyType()==2){
+                        map.put("number", workerType.getName()+"整体完工审核");
+                    }
+                    map.put("state", houseFlowApply.getApplyType());
+                    map.put("createDate", houseFlowApply.getCreateDate());
+                    map.put("type", type);
+                    returnMap.add(map);
+                }
+            } else  if (type == 5) {
                 Example example = new Example(OrderSplit.class);
                 example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andNotEqualTo(OrderSplit.APPLY_STATUS, 0);
                 example.orderBy(OrderSplit.CREATE_DATE).desc();
@@ -323,7 +448,7 @@ public class MendRecordService {
                     map.put("type", type);
                     returnMap.add(map);
                 }
-            } else {
+            } else  {
                 Example example = new Example(MendOrder.class);
                 //补退人工按工种区分
                 if (roleType == 3&&(type==1||type==3)) {//工匠
@@ -458,6 +583,24 @@ public class MendRecordService {
                 returnMap.add(map);
             }
 
+            example = new Example(HouseFlowApply.class);
+
+            /*审核记录*/
+            if (roleType == 3) {//工匠
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 ").andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
+            } else {
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 ");
+            }
+            List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
+            if (houseFlowApplies.size() > 0) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("houseId", houseId);
+                map.put("type", 6);
+                map.put("image", address + "iconWork/zero.png");
+                map.put("name", "审核记录");
+                map.put("size", "共" + houseFlowApplies.size() + "条");
+                returnMap.add(map);
+            }
             return ServerResponse.createBySuccess("查询成功", returnMap);
         } catch (Exception e) {
             e.printStackTrace();

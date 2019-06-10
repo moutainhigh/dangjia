@@ -1,7 +1,9 @@
 package com.dangjia.acg.modle.matter;
 
+import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
@@ -21,6 +23,11 @@ public class TechnologyRecord extends BaseEntity {
 
     @Column(name = "house_id")
     private String houseId;
+
+    @Column(name = "house_flow_apply_id")
+    @Desc(value = "进程申请表id")
+    @ApiModelProperty("进程申请表id")
+    private String houseFlowApplyId;
 
     @Column(name = "technology_id")
     private String technologyId;//工艺id

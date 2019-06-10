@@ -1,16 +1,12 @@
 package com.dangjia.acg.common.util;
 
-import cn.jsms.api.SendSMSResult;
-import cn.jsms.api.common.SMSClient;
-import cn.jsms.api.common.model.SMSPayload;
-
 import java.util.HashMap;
 import java.util.Map;
 
 public class JsmsUtil {
 
 	private static final String appkey = "0989b0db447914c7bcb17a46";
-	private static final String masterSecret = "fb15cefa3f693c0d6a45fe51";
+ 	private static final String masterSecret = "fb15cefa3f693c0d6a45fe51";
 
 	private static final String SEND_CUSTOMER_SERVICE="157646"; //客服确定开工
 	private static final String SEND_CONSTRUCTION_PLANS ="157647";//设计师上传施工图
@@ -44,8 +40,8 @@ public class JsmsUtil {
 		return result;
 	}
 	/**
-	 *  发给供应商下单了
-	 */
+     *  发给供应商下单了
+     */
 	public static String sendSupplier(String phone,String address) {
 		Map<String,String> temp_para=new HashMap();
 		temp_para.put("order_address",address);
@@ -53,9 +49,9 @@ public class JsmsUtil {
 		return result;
 	}
 	/**
-	 *  注册通过审核
-	 *
-	 */
+     *  注册通过审核
+     *
+     */
 	public static String registerApproved(String phone,String name,String workerTypeName) {
 		Map<String,String> temp_para=new HashMap();
 		temp_para.put("name",name);
@@ -87,8 +83,6 @@ public class JsmsUtil {
 		String result =sendSMS(phone,mid,temp_para);
 		return result;
 	}
-
-	
 	/**
 	 * 发送短信
 	 * @param phone 接收手机号
@@ -97,19 +91,19 @@ public class JsmsUtil {
 	 * @return
 	 */
 	public static String sendSMS(String phone, String mid, Map params) {
-		try {
-			SMSClient client = new SMSClient(masterSecret, appkey);
-			SMSPayload payload = SMSPayload.newBuilder()
-					.setMobileNumber(phone)
-					.setTempId(Integer.parseInt(mid))
-					.setTempPara(params)
-					.build();
-			SendSMSResult res = client.sendTemplateSMS(payload);
-			String result =res.toString();
-			return result;
-		} catch (Exception e) {
-			e.printStackTrace(System.out);
-		}
+//		try {
+//			SMSClient client = new SMSClient(masterSecret, appkey);
+//			SMSPayload payload = SMSPayload.newBuilder()
+//				.setMobileNumber(phone)
+//				.setTempId(Integer.parseInt(mid))
+//				.setTempPara(params)
+//				.build();
+//			SendSMSResult res = client.sendTemplateSMS(payload);
+//			String result =res.toString();
+//			return result;
+//		} catch (Exception e) {
+//			e.printStackTrace(System.out);
+//		}
 		return "";
 	}
 

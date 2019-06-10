@@ -32,7 +32,11 @@ public class HouseFlowApplyController implements HouseFlowApplyAPI {
     public void couponApply(){
         timingApplyService.couponApply();
     }
-
+    @Override
+    @ApiMethod
+    public void absenteeism(){
+        timingApplyService.absenteeism();
+    }
     /**
      * 工匠端工地记录
      */

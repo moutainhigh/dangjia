@@ -3,7 +3,6 @@ package com.dangjia.acg.service.member;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.EventStatus;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -14,19 +13,20 @@ import com.dangjia.acg.dto.member.DetailDTO;
 import com.dangjia.acg.dto.member.WalletDTO;
 import com.dangjia.acg.dto.member.WithdrawDTO;
 import com.dangjia.acg.mapper.config.ISmsMapper;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IBankCardMapper;
 import com.dangjia.acg.mapper.worker.*;
 import com.dangjia.acg.modle.config.Sms;
-import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.BankCard;
 import com.dangjia.acg.modle.worker.*;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.engineer.EngineerService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -73,6 +73,10 @@ public class WalletService {
     private ISmsMapper smsMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
+    @Autowired
+    private IHouseFlowMapper iHouseFlowMapper;
+    @Autowired
+    private EngineerService engineerService;
 
 
     /**
@@ -83,7 +87,7 @@ public class WalletService {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             if (accessToken == null) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+                return ServerResponse.createbyUserTokenError();
             }
             Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
 
@@ -156,13 +160,13 @@ public class WalletService {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             if (accessToken == null) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_TOKEN_ERROR.getCode(), "无效的token,请重新登录或注册！");
+                return ServerResponse.createbyUserTokenError();
             }
             Member member = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
             if (member == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
             }
-            if (member.getIsJob()) {
+            if (member.getCheckType() == 4) {
                 //冻结的帐户不能修改资料信息
                 return ServerResponse.createByErrorMessage("账户冻结，无法提现");
             }
@@ -219,7 +223,7 @@ public class WalletService {
             example.createCriteria().andEqualTo(WorkerBankCard.WORKER_ID, member.getId()).andEqualTo(WorkerBankCard.DATA_STATUS,0);
             List<WorkerBankCard> workerBankCardList = workerBankCardMapper.selectByExample(example);
             if (workerBankCardList.size() == 0) {
-                return ServerResponse.createByErrorCodeMessage(EventStatus.NO_DATA.getCode(), "请绑定银行卡");
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "请绑定银行卡");
             }
             WithdrawDTO withdrawDTO = new WithdrawDTO();
             String mobile = member.getMobile();//号码
@@ -295,7 +299,7 @@ public class WalletService {
             Member member = (Member) object;
             PageInfo pageResult;
             List<WorkerDetail> outDetailList;
-            List<DetailDTO> detailDTOList = new ArrayList<DetailDTO>();
+            List<DetailDTO> detailDTOList = new ArrayList<>();
             if (type == 0) {//总支出
                 outDetailList = workerDetailMapper.outDetail(member.getId());
                 pageResult = new PageInfo(outDetailList);
@@ -352,11 +356,11 @@ public class WalletService {
             walletDTO.setRetentionMoney(member.getRetentionMoney() == null ? new BigDecimal(0) : member.getRetentionMoney());//滞留金
             walletDTO.setOutAll(out == null ? 0 : out);//总支出
             walletDTO.setIncome(income == null ? 0 : income);//总收入
-            Example example = new Example(HouseWorker.class);
-            example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId());
-            List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
-            walletDTO.setHouseOrder(houseWorkerList.size());//接单量
+//            Example example = new Example(HouseWorker.class);
+//            List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
+//            walletDTO.setHouseOrder(houseWorkerList.size());//接单量
 //            walletDTO.setHouseOrder(member.getVolume().intValue());//接单量
+            walletDTO.setHouseOrder(engineerService.alternative(member.getId(),member.getWorkerType()));
 
             return ServerResponse.createBySuccess("获取成功", walletDTO);
         } catch (Exception e) {

@@ -11,7 +11,10 @@ import java.util.List;
 @Repository
 public interface ClueMapper extends Mapper<Clue> {
     List<Clue> getByStage(int stage);
+
     Clue getByPhone(String phone);
+
     List<Clue> getAll();
+
     List<Clue> getAllByCondition(String values);
 }

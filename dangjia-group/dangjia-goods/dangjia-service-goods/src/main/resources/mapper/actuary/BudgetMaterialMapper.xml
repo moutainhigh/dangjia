@@ -142,7 +142,6 @@
 	</select>
 
 
-
 	<!--未付款工种服务总价-->
 	<select id="nonPaymentSer" resultType="java.lang.Double">
 		select
