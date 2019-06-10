@@ -341,6 +341,7 @@ public class MendRecordService {
             }
             if (houseFlowApply.getSupervisorCheck() == 2) {
                 map.put("info", "拒绝通过");
+                map.put("type", "0");
                 map.put("createDate", houseFlowApply.getModifyDate());
                 map.put("content", houseFlowApply.getApplyDec());
             }
@@ -370,6 +371,7 @@ public class MendRecordService {
             }
             if(houseFlowApply.getMemberCheck()==2){
                 map.put("info","拒绝通过");
+                map.put("type", "0");
                 map.put("createDate", houseFlowApply.getModifyDate());
                 map.put("content", houseFlowApply.getApplyDec());
             }
