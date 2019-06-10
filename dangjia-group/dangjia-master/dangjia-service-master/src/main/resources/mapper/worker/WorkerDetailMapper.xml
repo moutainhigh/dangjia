@@ -173,7 +173,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             a.star
         FROM
             (
-        <if test="workerType!=null and workerType!='' and workerType=='3'">
+        <if test="workerType == 3">
 
 
                 (
