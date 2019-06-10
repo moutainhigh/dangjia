@@ -96,6 +96,9 @@ public class WebWalletService {
                 supervisorMoney = webWorkerDetailDTO.getMoney().multiply(new BigDecimal(0.95));
             }
         }
+        if (webWorkerDetailDTO.getState() == 6) {
+            supervisorMoney = webWorkerDetailDTO.getMoney();//大管家的提前结束退款收入
+        }
         webWorkerDetailDTO.setMoney(supervisorMoney);
         return webWorkerDetailDTO;
     }

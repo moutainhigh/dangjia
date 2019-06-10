@@ -1251,8 +1251,10 @@ public class HouseService {
                 imgArr[i] = address + string;
             }
             map.put("imgArr", imgArr);
-            map.put("startDate", houseFlowApply.getStartDate());
-            map.put("endDate", houseFlowApply.getEndDate());
+            if(houseFlowApply!=null) {
+                map.put("startDate", houseFlowApply.getStartDate());
+                map.put("endDate", houseFlowApply.getEndDate());
+            }
         }
         if (hfa.getSourceType() == 1) {
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(hfa.getSourceId());
@@ -1556,6 +1558,9 @@ public class HouseService {
                 houseConstructionRecord.setWorkerId(houseFlowApply.getWorkerId());
                 houseConstructionRecord.setWorkerType(houseFlowApply.getWorkerType());
                 houseConstructionRecord.setApplyType(houseFlowApply.getApplyType());
+                if (houseFlowApply.getApplyType() == 8){
+                    houseConstructionRecord.setApplyType(13);
+                }
                 if (houseFlowApply.getApplyType() == 5 || houseFlowApply.getApplyType() == 6 || houseFlowApply.getApplyType() == 7) {
                     HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);//大管家的hf
                     houseConstructionRecord.setWorkerId(supervisorHF.getWorkerId());
