@@ -179,6 +179,8 @@
             AND hw.work_type !=2
         </if>
         AND hw.work_type IN ( 1, 6 )
+        AND h.visit_state != 3
+        AND h.visit_state != 4
         ORDER BY
         hw.modify_date DESC
     </select>
