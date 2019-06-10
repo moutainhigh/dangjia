@@ -121,6 +121,10 @@ public class HouseFlowService {
                 return (ServerResponse) object;
             }
             Member member = (Member) object;
+            //工匠没有实名认证不应该展示数据
+            if(member.getRealNameState()!=3){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             request.setAttribute(Constants.CITY_ID, cityId);
             List<AllgrabBean> grabList = new ArrayList<>();//返回的任务list

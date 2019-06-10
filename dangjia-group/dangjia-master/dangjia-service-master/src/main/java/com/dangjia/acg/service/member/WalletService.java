@@ -299,7 +299,7 @@ public class WalletService {
             Member member = (Member) object;
             PageInfo pageResult;
             List<WorkerDetail> outDetailList;
-            List<DetailDTO> detailDTOList = new ArrayList<DetailDTO>();
+            List<DetailDTO> detailDTOList = new ArrayList<>();
             if (type == 0) {//总支出
                 outDetailList = workerDetailMapper.outDetail(member.getId());
                 pageResult = new PageInfo(outDetailList);
