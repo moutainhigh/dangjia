@@ -334,9 +334,11 @@ public class MendRecordService {
                 map.put("createDate", evaluate.getCreateDate());
                 map.put("content", evaluate.getContent());
             }
+            if (houseFlowApply.getSupervisorCheck() == 0) {
+                map.put("info", "未审核");
+            }
             if (houseFlowApply.getSupervisorCheck() == 1) {
                 map.put("info", "审核通过");
-
             }
             if (houseFlowApply.getSupervisorCheck() == 2) {
                 map.put("info", "拒绝通过");
@@ -359,6 +361,9 @@ public class MendRecordService {
             if(evaluate!=null) {
                 map.put("createDate", evaluate.getCreateDate());
                 map.put("content", evaluate.getContent());
+            }
+            if (houseFlowApply.getMemberCheck() == 0) {
+                map.put("info", "未审核");
             }
             if(houseFlowApply.getMemberCheck()==1){
                 map.put("info","审核通过");
