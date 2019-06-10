@@ -30,6 +30,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 AND oi.product_type =#{productType}
                 AND o.payment > 0
                 AND o.type = 2
+            UNION ALL
+                SELECT
+                c.dest_product_id product_id
+                FROM
+                `dj_deliver_order` o
+                INNER JOIN dj_deliver_order_item oi ON o.id = oi.order_id
+                INNER JOIN dj_deliver_product_change c ON c.house_id = oi.house_id and c.src_product_id=oi.product_id
+                WHERE
+                o.house_id = #{houseId}
+                <if test="workerTypeId!=null and workerTypeId!=''">
+                    AND o.worker_type_id =#{workerTypeId}
+                </if>
+                AND oi.product_type =#{productType}
+                AND c.type = 1
                 <if test="memberId!=null and memberId!=''">
                     UNION ALL
                         SELECT
