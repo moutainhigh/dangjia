@@ -324,6 +324,7 @@ public class MendRecordService {
         map.put("roleType", "管家");
         if (houseFlowApply.getSupervisorCheck() == 0) {
             map.put("type", "0");
+            map.put("info", "未审核");
         }
         if(houseFlowApply.getSupervisorCheck() > 0){
             map.put("createDate", houseFlowApply.getCreateDate());//默认赋值
@@ -333,9 +334,6 @@ public class MendRecordService {
             if(evaluate!=null) {
                 map.put("createDate", evaluate.getCreateDate());
                 map.put("content", evaluate.getContent());
-            }
-            if (houseFlowApply.getSupervisorCheck() == 0) {
-                map.put("info", "未审核");
             }
             if (houseFlowApply.getSupervisorCheck() == 1) {
                 map.put("info", "审核通过");
@@ -352,8 +350,9 @@ public class MendRecordService {
         map.put("roleType","业主");
         if(houseFlowApply.getMemberCheck()==0){
             map.put("type","0");
+            map.put("info", "未审核");
         }
-        if(houseFlowApply.getSupervisorCheck() > 0){
+        if(houseFlowApply.getMemberCheck() > 0){
             map.put("createDate",houseFlowApply.getCreateDate());
             map.put("type","1");
             //查工匠被管家的评价
@@ -361,9 +360,6 @@ public class MendRecordService {
             if(evaluate!=null) {
                 map.put("createDate", evaluate.getCreateDate());
                 map.put("content", evaluate.getContent());
-            }
-            if (houseFlowApply.getMemberCheck() == 0) {
-                map.put("info", "未审核");
             }
             if(houseFlowApply.getMemberCheck()==1){
                 map.put("info","审核通过");
