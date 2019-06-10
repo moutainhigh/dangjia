@@ -8,6 +8,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -43,7 +44,8 @@ public interface HouseFlowAPI {
 
     @PostMapping("app/core/houseFlow/setConfirmStart")
     @ApiOperation(value = "确认开工", notes = "确认开工")
-    ServerResponse setConfirmStart(@RequestParam("userToken") String userToken,
+    ServerResponse setConfirmStart(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("userToken") String userToken,
                                    @RequestParam("houseFlowId") String houseFlowId);
 
     @PostMapping("app/core/houseFlow/getWorkerFlow")

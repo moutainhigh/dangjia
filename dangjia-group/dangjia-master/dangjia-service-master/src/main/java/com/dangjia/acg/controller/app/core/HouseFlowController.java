@@ -8,6 +8,7 @@ import com.dangjia.acg.service.core.HouseFlowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -81,8 +82,8 @@ public class HouseFlowController implements HouseFlowAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setConfirmStart(String userToken, String houseFlowId) {
-        return houseFlowService.setConfirmStart(userToken, houseFlowId);
+    public ServerResponse setConfirmStart(HttpServletRequest request,String userToken, String houseFlowId) {
+        return houseFlowService.setConfirmStart(request,userToken, houseFlowId);
     }
 
     /**

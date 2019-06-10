@@ -29,7 +29,6 @@ import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.core.*;
-import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -40,7 +39,6 @@ import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.house.HouseService;
-import com.dangjia.acg.service.member.GroupInfoService;
 import com.dangjia.acg.service.worker.EvaluateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -122,9 +120,6 @@ public class HouseWorkerService {
     private String active;
     @Autowired
     private CraftsmanConstructionService constructionService;
-
-    @Autowired
-    private GroupInfoService groupInfoService;
 
     /**
      * 根据工人id查询所有房子任务
@@ -218,11 +213,6 @@ public class HouseWorkerService {
             }
             //通知业主大管家抢单成功
             if (worker.getWorkerType() == 3) {//大管家
-                //开始建群
-                Group group = new Group();
-                group.setHouseId(house.getId());
-                group.setUserId(house.getMemberId());
-                groupInfoService.addGroup(request, group, worker.getId(), "大管家");
 
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家抢单提醒",
                         String.format(DjConstants.PushMessage.STEWARD_RUSH_TO_PURCHASE, house.getHouseName()), "");
@@ -984,12 +974,15 @@ public class HouseWorkerService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
+            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Member worker = (Member) object;
-            List<MyHouseFlowDTO> listHouseWorker = houseWorkerMapper.getMyHouseFlowList(worker.getId(), worker.getWorkerType());
-            for (MyHouseFlowDTO myHouseFlowDTO : listHouseWorker) {
-                HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(myHouseFlowDTO.getHouseWorkerId());
-                if (houseWorker == null) continue;
-                if (myHouseFlowDTO.getHouseFlowId().equals(houseFlowId)) {//选中的任务isSelect改为1
+            Example example = new Example(HouseWorker.class);
+            example.createCriteria().andCondition("  work_type IN ( 1, 6 ) ")
+                    .andEqualTo(HouseWorker.WORKER_ID, worker.getId())
+                    .andEqualTo(HouseWorker.WORKER_TYPE, worker.getWorkerType());
+            List<HouseWorker> listHouseWorker=houseWorkerMapper.selectByExample(example);
+            for (HouseWorker houseWorker : listHouseWorker) {
+                if (houseWorker.getHouseId().equals(houseFlow.getHouseId())) {//选中的任务isSelect改为1
                     houseWorker.setIsSelect(1);
                     houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 } else {//其他改为0
