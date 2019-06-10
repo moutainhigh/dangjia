@@ -580,6 +580,7 @@ public class ProductChangeService {
                     }
                     // 处理新商品------begin
                     if (null == wareHouse) {
+                        Goods goods=forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), destProduct.getGoodsId());
                         // 新商品没有则添加
                         Warehouse newWareHouse = new Warehouse();
                         newWareHouse.setHouseId(houseId);
@@ -597,7 +598,7 @@ public class ProductChangeService {
                         newWareHouse.setCost(destProduct.getCost());
                         // 取商品转换单位
                         newWareHouse.setUnitName(destUnit.getName());
-                        newWareHouse.setProductType(0);
+                        newWareHouse.setProductType(goods.getType());
                         newWareHouse.setCategoryId(destProduct.getCategoryId());
                         newWareHouse.setImage(destProduct.getImage());
                         newWareHouse.setPayTime(0);
