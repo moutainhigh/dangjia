@@ -207,7 +207,8 @@ public class HouseService {
         Example example = new Example(House.class);
         example.createCriteria()
                 .andEqualTo(House.MEMBER_ID, worker.getId())
-                .andNotEqualTo(House.VISIT_STATE, 0).andNotEqualTo(House.VISIT_STATE, 2)
+                .andNotEqualTo(House.VISIT_STATE, 0)
+                .andNotEqualTo(House.VISIT_STATE, 2)
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
         if (houseList.size() <= 0) {
@@ -315,7 +316,8 @@ public class HouseService {
         Example example = new Example(House.class);
         example.createCriteria()
                 .andEqualTo(House.MEMBER_ID, member.getId())
-                .andNotEqualTo(House.VISIT_STATE, 0).andNotEqualTo(House.VISIT_STATE, 2)
+                .andNotEqualTo(House.VISIT_STATE, 0)
+                .andNotEqualTo(House.VISIT_STATE, 2)
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
         String houseId = null;
@@ -823,7 +825,7 @@ public class HouseService {
             if (house == null) {
                 return ServerResponse.createByErrorMessage("修改房子精算状态失败");
             }
-            if (house.getDecorationType() == 2 && house.getDesignerOk() != 3 && budgetOk == -1) {
+            if (house.getDecorationType() == 2 && house.getDesignerOk() != 3 && budgetOk == 2) {
                 return ServerResponse.createByErrorMessage("请先上传设计图！");
             }
             WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
