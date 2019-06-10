@@ -249,26 +249,27 @@ public class EvaluateService {
     public void absenteeismOvertime(HouseFlow houseFlow){
         House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
         Member member = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
-        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
-        BigDecimal money=new BigDecimal(100);
-        BigDecimal surplusMoney = member.getSurplusMoney().subtract(money);
-        BigDecimal haveMoney = member.getHaveMoney().subtract(money);
-        WorkerDetail workerDetail = new WorkerDetail();
-        workerDetail.setName(workerType.getName()+"旷工扣钱");
-        workerDetail.setWorkerId(member.getId());
-        workerDetail.setWorkerName(member.getName());
-        workerDetail.setHouseId(houseFlow.getHouseId());
-        workerDetail.setMoney(money);
-        workerDetail.setWalletMoney(surplusMoney);
-        workerDetail.setHaveMoney(haveMoney);
-        workerDetail.setState(3);
-        iWorkerDetailMapper.insert(workerDetail);
+        if(member!=null) {
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+            BigDecimal money = new BigDecimal(100);
+            BigDecimal surplusMoney = member.getSurplusMoney().subtract(money);
+            BigDecimal haveMoney = member.getHaveMoney().subtract(money);
+            WorkerDetail workerDetail = new WorkerDetail();
+            workerDetail.setName(workerType.getName() + "旷工扣钱");
+            workerDetail.setWorkerId(member.getId());
+            workerDetail.setWorkerName(member.getName());
+            workerDetail.setHouseId(houseFlow.getHouseId());
+            workerDetail.setMoney(money);
+            workerDetail.setWalletMoney(surplusMoney);
+            workerDetail.setHaveMoney(haveMoney);
+            workerDetail.setState(3);
+            iWorkerDetailMapper.insert(workerDetail);
 
-        member.setSurplusMoney(surplusMoney);
-        member.setHaveMoney(haveMoney);
-        memberMapper.updateByPrimaryKeySelective(member);
-        configMessageService.addConfigMessage(null,"gj",member.getId(),"0",workerType.getName()+"旷工扣钱",String.format(DjConstants.PushMessage.CRAFTSMAN_ABSENTEEISM,house.getHouseName()) ,"0");
-
+            member.setSurplusMoney(surplusMoney);
+            member.setHaveMoney(haveMoney);
+            memberMapper.updateByPrimaryKeySelective(member);
+            configMessageService.addConfigMessage(null, "gj", member.getId(), "0", workerType.getName() + "旷工扣钱", String.format(DjConstants.PushMessage.CRAFTSMAN_ABSENTEEISM, house.getHouseName()), "0");
+        }
     }
     /**
      * 管家审核通过工匠完工申请
