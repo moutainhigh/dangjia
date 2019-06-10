@@ -157,14 +157,33 @@ public class WorkerService {
      * @return
      */
     public ServerResponse getHouseWorkerList(String userToken, PageDTO pageDTO) {
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
         Member worker = (Member) object;
-        List<HouseWorkerOrder> hwList = getHouseId(worker.getId(), worker.getWorkerType());
-        PageInfo pageResult = new PageInfo(hwList);
+        Example example=new Example(HouseFlow.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo(HouseFlow.WORKER_ID,worker.getId());
+        if(worker.getWorkerType()==1 || worker.getWorkerType()==2){
+
+        }else if(worker.getWorkerType()==3){
+            criteria.andEqualTo(HouseFlow.SUPERVISOR_START,1);
+        }else{
+            criteria.andCondition(" work_steta not in(0,3)");
+        }
+        //获取我的任务的房子Id
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<HouseFlow> houseId = houseFlowMapper.selectByExample(example);
+        PageInfo pageResult = new PageInfo(houseId);
+        List<HouseWorkerOrder> hwList = new ArrayList<>();
+        for (HouseFlow houseFlow : houseId) {
+            Example example1 = new Example(HouseWorkerOrder.class);
+            example1.createCriteria().andEqualTo(HouseWorkerOrder.WORKER_ID, worker.getId())
+                    .andEqualTo(HouseWorkerOrder.HOUSE_ID,houseFlow.getHouseId());
+            example1.orderBy(HouseFlow.CREATE_DATE).desc();
+            hwList.addAll(houseWorkerOrderMapper.selectByExample(example1));
+        }
         List<Map> hwMapList = new ArrayList<>();
         for (HouseWorkerOrder hw : hwList) {
             Map hwMap = BeanUtils.beanToMap(hw);
