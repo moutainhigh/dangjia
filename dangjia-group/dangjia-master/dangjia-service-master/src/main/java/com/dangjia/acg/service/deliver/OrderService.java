@@ -38,6 +38,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -207,11 +208,16 @@ public class OrderService {
                 businessOrderDTO.setHouseName(house == null ? "" : house.getHouseName());
             }
             List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house == null ? "" : house.getStyle());
+             BigDecimal payPrice=new BigDecimal(0);
+            for (OrderDTO orderDTO : orderDTOList) {
+                payPrice=payPrice.add(orderDTO.getTotalAmount());
+            }
+            businessOrderDTO.setPayPrice(payPrice);
             businessOrderDTO.setOrderDTOList(orderDTOList);
             businessOrderDTO.setBusinessOrderId(businessOrder.getId());
             businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
             businessOrderDTO.setNumber(businessOrder.getNumber());
-            businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
+
             businessOrderDTOS.add(businessOrderDTO);
         }
         return ServerResponse.createBySuccess("查询成功", businessOrderDTOS);
@@ -274,9 +280,17 @@ public class OrderService {
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             if (orderSplitList.size() == 0) {
                 return ServerResponse.createByErrorMessage("没有生成要货单");
-            } else if (orderSplitList.size() > 1) {
-                return ServerResponse.createByErrorMessage("生成多个未提交要货单,异常联系平台部");
+//            } else if (orderSplitList.size() > 1) {
+////                return ServerResponse.createByErrorMessage("生成多个未提交要货单,异常联系平台部");
             } else {
+                //将其他多余的单取消
+                if (orderSplitList.size() > 1) {
+                    for (int i = 1; i < orderSplitList.size(); i++) {
+                        OrderSplit orderSplit = orderSplitList.get(i);
+                        orderSplit.setApplyStatus(5);
+                        orderSplitMapper.updateByPrimaryKey(orderSplit);
+                    }
+                }
                 OrderSplit orderSplit = orderSplitList.get(0);
                 //如果存在补货单，则告知业主补货支付
                 if (!CommonUtil.isEmpty(orderSplit.getMendNumber())) {
@@ -342,9 +356,17 @@ public class OrderService {
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             if (orderSplitList.size() == 0) {
                 return ServerResponse.createBySuccessMessage("没有生成中要货单");
-            } else if (orderSplitList.size() > 1) {
-                return ServerResponse.createByErrorMessage("生成多个未提交要货单,异常联系平台部");
+//            } else if (orderSplitList.size() > 1) {
+//                return ServerResponse.createByErrorMessage("生成多个未提交要货单,异常联系平台部");
             } else {
+                //将其他多余的单取消
+                if (orderSplitList.size() > 1) {
+                    for (int i = 1; i < orderSplitList.size(); i++) {
+                        OrderSplit orderSplit = orderSplitList.get(i);
+                        orderSplit.setApplyStatus(5);
+                        orderSplitMapper.updateByPrimaryKey(orderSplit);
+                    }
+                }
                 OrderSplit orderSplit = orderSplitList.get(0);
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());

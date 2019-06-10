@@ -216,38 +216,28 @@ public class HouseService {
         PageInfo pageResult = new PageInfo(houseList);
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (House house : houseList) {
-            Example example1 = new Example(HouseFlow.class);
-            example1.createCriteria().andEqualTo(HouseFlow.WORKER_TYPE, 3)
-                    .andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.SUPERVISOR_START, 1);
-            List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example1);
-            boolean type = false;
-            if (houseFlows.size() > 0) {
-                type = true;
-            }
             Map<String, Object> map = new HashMap<>();
             map.put("houseId", house.getId());
             map.put("houseName", house.getHouseName());
             map.put("task", this.getTask(house.getId()));
-            if (type) {
-                String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
-                switch (house.getVisitState()) {
-                    case 1:
-                        map.put("btName", "申请结束装修");
-                        map.put("onclick", webAddress + "ownerEnd?title=填写原因&houseId=" + house.getId());
-                        break;
-                    case 2:
-                        map.put("btName", "休眠中");
-                        break;
-                    case 3:
-                        map.put("btName", "已竣工");
-                        break;
-                    case 4:
-                        map.put("btName", "提前结束装修");
-                        break;
-                    case 5:
-                        map.put("btName", "审核中");
-                        break;
-                }
+            String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
+            switch (house.getVisitState()) {
+                case 1:
+                    map.put("btName", "申请结束装修");
+                    map.put("onclick", webAddress + "ownerEnd?title=填写原因&houseId=" + house.getId());
+                    break;
+                case 2:
+                    map.put("btName", "休眠中");
+                    break;
+                case 3:
+                    map.put("btName", "已竣工");
+                    break;
+                case 4:
+                    map.put("btName", "提前结束装修");
+                    break;
+                case 5:
+                    map.put("btName", "审核中");
+                    break;
             }
             mapList.add(map);
         }
@@ -362,19 +352,25 @@ public class HouseService {
         houseResult.setTask(task);
         houseResult.setState("00000");
         houseResult.setHouseName(house.getHouseName());
-        Integer visitState = house.getVisitState();
-        if (visitState == 0) {
-            houseResult.setBuildStage("待确认开工");
-        } else if (visitState == 1) {
-            houseResult.setBuildStage("装修中");
-        } else if (visitState == 2) {
-            houseResult.setBuildStage("休眠中");
-        } else if (visitState == 3) {
-            houseResult.setBuildStage("已竣工");
-        } else if (visitState == 5) {
-            houseResult.setBuildStage("提前结束装修审核中");
-        } else {
-            houseResult.setBuildStage("提前结束装修");
+        switch (house.getVisitState()) {
+            case 0:
+                houseResult.setBuildStage("待确认开工");
+                break;
+            case 1:
+                houseResult.setBuildStage("装修中");
+                break;
+            case 2:
+                houseResult.setBuildStage("休眠中");
+                break;
+            case 3:
+                houseResult.setBuildStage("已竣工");
+                break;
+            case 5:
+                houseResult.setBuildStage("提前结束装修审核中");
+                break;
+            default:
+                houseResult.setBuildStage("提前结束装修");
+                break;
         }
         /*展示各种进度*/
         List<HouseFlow> houseFlowList = houseFlowMapper.getAllFlowByHouseId(houseId);

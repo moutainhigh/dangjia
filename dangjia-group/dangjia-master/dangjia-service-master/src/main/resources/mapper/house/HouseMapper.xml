@@ -384,6 +384,7 @@
         h.work_deposit_id as workDepositId,
         h.custom_sort as customSort,
         h.construction_date as constructionDate,
+        h.completed_date as completedDate,
         h.is_select as isSelect,
         (
         case
@@ -397,7 +398,6 @@
         ) as visitState,
         h.data_status as dataStatus,
         h.create_date as createDate,
-        h.construction_date as constructionDate,
         h.modify_date as modifyDate
         FROM
         dj_house h
@@ -492,18 +492,7 @@
         member.NAME AS NAME,
         member.mobile AS mobile,
         house.construction_date AS createDate,
-        (
-        SELECT
-        f.modify_date
-        FROM
-        dj_core_house_flow_apply f
-        INNER JOIN dj_core_house_flow hf ON hf.id = f.house_flow_id
-        WHERE
-        f.member_check = 1
-        AND f.`apply_type` = '2'
-        AND hf.`worker_type` = '3'
-        AND f.house_id = house.id
-        ) AS modifyDate
+        house.completed_date AS modifyDate
         FROM
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id

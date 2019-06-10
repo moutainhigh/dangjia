@@ -446,6 +446,7 @@ public class ComplainService {
                             return ServerResponse.createByErrorMessage("该房子没有在装修，无法结束装修");
                         }
                         house.setModifyDate(new Date());
+                        house.setCompletedDate(new Date());
                         house.setVisitState(4);
                         house.setHaveComplete(1);
                         house.setDesignerOk(3);
@@ -723,6 +724,7 @@ public class ComplainService {
             }
         }
         house.setModifyDate(new Date());
+        house.setCompletedDate(new Date());
         house.setVisitState(4);
         house.setHaveComplete(1);
         house.setDesignerOk(3);
@@ -781,6 +783,7 @@ public class ComplainService {
         }
         commitStopBuild(hwo2.getWorkerId(), new BigDecimal(backMoney), subtract, houseId, content);
         house.setModifyDate(new Date());
+        house.setCompletedDate(new Date());
         house.setVisitState(4);
         house.setHaveComplete(1);
         house.setDesignerOk(3);

@@ -745,6 +745,7 @@ public class HouseFlowApplyService {
             House house = houseMapper.selectByPrimaryKey(hfa.getHouseId());
             house.setHaveComplete(1);//房子已完成
             house.setVisitState(3);//新状态 已完工
+            house.setCompletedDate(new Date());
             houseMapper.updateByPrimaryKeySelective(house);
 
             //处理工钱
