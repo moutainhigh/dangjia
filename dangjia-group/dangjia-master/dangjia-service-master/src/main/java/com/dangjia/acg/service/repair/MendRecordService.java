@@ -311,11 +311,12 @@ public class MendRecordService {
     private List getFlowInfo(HouseFlowApply houseFlowApply){
         List<Map<String, Object>> mapList = new ArrayList<>();
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
+        String info ="我是" + workerType.getName() + ",我已申请了"+ (houseFlowApply.getApplyType() == 1?"阶段完工":"整体完工");
         //工匠
         Map<String, Object> map = new HashMap<>();
         map.put("roleType","工匠");
         map.put("createDate",houseFlowApply.getCreateDate());
-        map.put("info","我是" + workerType.getName() + ",我已申请了"+ (houseFlowApply.getApplyType() == 1?"阶段完工":"整体完工"));//描述
+        map.put("info",info);//描述
         map.put("type","1");//1=达到  0=未达到
         mapList.add(map);
 
@@ -343,7 +344,9 @@ public class MendRecordService {
                 map.put("info", "拒绝通过");
                 map.put("type", "0");
                 map.put("createDate", houseFlowApply.getModifyDate());
-                map.put("content", houseFlowApply.getApplyDec());
+                if(!info.equals(houseFlowApply.getApplyDec())) {
+                    map.put("content", houseFlowApply.getApplyDec());
+                }
             }
         }
 
@@ -373,7 +376,9 @@ public class MendRecordService {
                 map.put("info","拒绝通过");
                 map.put("type", "0");
                 map.put("createDate", houseFlowApply.getModifyDate());
-                map.put("content", houseFlowApply.getApplyDec());
+                if(!info.equals(houseFlowApply.getApplyDec())) {
+                    map.put("content", houseFlowApply.getApplyDec());
+                }
             }
             if(houseFlowApply.getMemberCheck()==3){
                 map.put("info","自动审核通过");
