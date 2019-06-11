@@ -75,7 +75,6 @@ public class TimingApplyService {
                     int suspendDay = DateUtil.daysofTwo(start, end);
                     if (suspendDay > 2) {
                         evaluateService.updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(1), "申请停工超过2天，积分扣除");
-
                     }
                 }
             }
