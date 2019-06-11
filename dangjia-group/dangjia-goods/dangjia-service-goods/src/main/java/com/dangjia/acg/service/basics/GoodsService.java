@@ -12,12 +12,9 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.*;
-import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.Goods;
-import com.dangjia.acg.modle.basics.GroupLink;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Brand;
@@ -64,10 +61,6 @@ public class GoodsService {
     private ProductService productService;
     @Autowired
     private MasterProductAPI masterProductAPI;
-    @Autowired
-    private IGroupLinkMapper iGroupLinkMapper;
-    @Autowired
-    private IBudgetMaterialMapper iBudgetMaterialMapper;
 
 
     /**
@@ -250,7 +243,7 @@ public class GoodsService {
             example.createCriteria().andEqualTo(Product.GOODS_ID,id);
             List<Product> list = iProductMapper.selectByExample(example);
             //更新master库相关商品名称
-            if(list.size()>0||null!=list) {
+            if(list.size()>0) {
                 masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, id);
             }
             if (buy != 2) //非自购goods ，有品牌

@@ -42,8 +42,6 @@ public class UnitService {
     @Autowired
     private MasterProductAPI masterProductAPI;
     @Autowired
-    private ProductService productService;
-    @Autowired
     private IBudgetMaterialMapper iBudgetMaterialMapper;
     @Autowired
     private IWorkerGoodsMapper iWorkerGoodsMapper;
@@ -54,10 +52,10 @@ public class UnitService {
     public ServerResponse<PageInfo> getAllUnit(PageDTO pageDTO) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+            List<Map<String, Object>> mapList = new ArrayList<>();
             List<Unit> unitList = iUnitMapper.getUnit();
             for (Unit unit : unitList) {
-                Map<String, Object> map = new HashMap<String, Object>();
+                Map<String, Object> map = new HashMap<>();
                 String dateStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(unit.getCreateDate());
                 map.put("id", unit.getId());
                 map.put("creatDate", dateStr);
@@ -65,8 +63,7 @@ public class UnitService {
                 List<Unit> linkUnitList = new ArrayList<>();
                 if (unit.getLinkUnitIdArr() != null) {
                     String[] linkUnitIdArr = unit.getLinkUnitIdArr().split(",");
-                    for (int i = 0; i < linkUnitIdArr.length; i++) {
-                        String linkUnitId = linkUnitIdArr[i];
+                    for (String linkUnitId : linkUnitIdArr) {
                         Unit linkUnit = iUnitMapper.selectByPrimaryKey(linkUnitId);
                         linkUnitList.add(linkUnit);
                     }
@@ -138,7 +135,7 @@ public class UnitService {
             Example example=new Example(Product.class);
             example.createCriteria().andEqualTo(Product.UNIT_ID,unitId);
             List<Product> products = iProductMapper.selectByExample(example);
-            if(products.size()>0||null!=products) {
+            if(products.size()>0) {
                 iBudgetMaterialMapper.updateBudgetMaterialByUnitName(unitName, products);
                 masterProductAPI.updateProductByProductId(JSON.toJSONString(products), null, null, null, null);
             }

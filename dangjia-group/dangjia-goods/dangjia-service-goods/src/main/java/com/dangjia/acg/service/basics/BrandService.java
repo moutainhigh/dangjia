@@ -235,24 +235,24 @@ public class BrandService {
                 String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                 List<Map<String, Object>> mapList2 = new ArrayList<>();
                 for (BrandSeries bs : mapList) {
-                    String imgStr = "";
-                    String imgUrlStr = "";
+                    StringBuilder imgStr = new StringBuilder();
+                    StringBuilder imgUrlStr = new StringBuilder();
                     if (!CommonUtil.isEmpty(bs.getImage())) {
                         String[] imgArr = bs.getImage().split(",");
                         for (int i = 0; i < imgArr.length; i++) {
                             if (i == imgArr.length - 1) {
-                                imgStr += address + imgArr[i];
-                                imgUrlStr += imgArr[i];
+                                imgStr.append(address).append(imgArr[i]);
+                                imgUrlStr.append(imgArr[i]);
                             } else {
-                                imgStr += address + imgArr[i] + ",";
-                                imgUrlStr += imgArr[i] + ",";
+                                imgStr.append(address).append(imgArr[i]).append(",");
+                                imgUrlStr.append(imgArr[i]).append(",");
                             }
                         }
                     }
-                    bs.setImage(imgStr);
+                    bs.setImage(imgStr.toString());
                     Map<String, Object> mapSeries = BeanUtils.beanToMap(bs);
 //					mapSeries.put("imageUrl",imageUrl);
-                    mapSeries.put("imageUrl", imgUrlStr);
+                    mapSeries.put("imageUrl", imgUrlStr.toString());
                     mapList2.add(mapSeries);
                 }
                 Map<String, Object> map = new HashMap<String, Object>();

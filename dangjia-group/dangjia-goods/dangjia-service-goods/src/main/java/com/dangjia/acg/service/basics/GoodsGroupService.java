@@ -97,7 +97,7 @@ public class GoodsGroupService {
             gMap.put("createDate", goodsGroup.getCreateDate().getTime());
             gMap.put("modifyDate", goodsGroup.getModifyDate().getTime());
             List<GroupLink> listGlink = iGoodsGroupMapper.queryGroupLinkByGid(goodsGroupId);
-            List<Map<String, Object>> glList = new ArrayList<Map<String, Object>>();
+            List<Map<String, Object>> glList = new ArrayList<>();
             for (GroupLink groupLink : listGlink) {
                 Map<String, Object> obj = new HashMap<>();
                 obj.put("glId", groupLink.getId());
@@ -240,18 +240,18 @@ public class GoodsGroupService {
                     if (p.getImage() == null)
                         continue;
                     String[] imgArr = p.getImage().split(",");
-                    String imgStr = "";
+                    StringBuilder imgStr = new StringBuilder();
                     String imgUrlStr = "";
                     for (int i = 0; i < imgArr.length; i++) {
                         if (i == imgArr.length - 1) {
-                            imgStr += address + imgArr[i];
+                            imgStr.append(address).append(imgArr[i]);
                             imgUrlStr += imgArr[i];
                         } else {
-                            imgStr += address + imgArr[i] + ",";
+                            imgStr.append(address).append(imgArr[i]).append(",");
                             imgUrlStr += imgArr[i] + ",";
                         }
                     }
-                    p.setImage(imgStr);
+                    p.setImage(imgStr.toString());
                     Map<String, Object> map = BeanUtils.beanToMap(p);
                     map.put("imageUrl", imgUrlStr);
                     if (!StringUtils.isNotBlank(p.getLabelId())) {
@@ -332,8 +332,7 @@ public class GoodsGroupService {
             String[] addProductIdsArr = {};
             if (StringUtils.isNotBlank(addProductIds)) {
                 addProductIdsArr = addProductIds.split(",");
-                for (int i = 0; i < addProductIdsArr.length; i++) {
-                    String productId = addProductIdsArr[i];
+                for (String productId : addProductIdsArr) {
                     Product product = iProductMapper.selectByPrimaryKey(productId);//根据商品id查询商品对象
                     if (product == null)
                         return ServerResponse.createByErrorMessage("该货品不存在");

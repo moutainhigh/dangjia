@@ -85,20 +85,20 @@ public class ProductService {
                     continue;
                 }
                 String[] imgArr = p.getImage().split(",");
-                String imgStr = "";
-                String imgUrlStr = "";
+                StringBuilder imgStr = new StringBuilder();
+                StringBuilder imgUrlStr = new StringBuilder();
                 for (int i = 0; i < imgArr.length; i++) {
                     if (i == imgArr.length - 1) {
-                        imgStr += address + imgArr[i];
-                        imgUrlStr += imgArr[i];
+                        imgStr.append(address).append(imgArr[i]);
+                        imgUrlStr.append(imgArr[i]);
                     } else {
-                        imgStr += address + imgArr[i] + ",";
-                        imgUrlStr += imgArr[i] + ",";
+                        imgStr.append(address).append(imgArr[i]).append(",");
+                        imgUrlStr.append(imgArr[i]).append(",");
                     }
                 }
-                p.setImage(imgStr);
+                p.setImage(imgStr.toString());
                 Map<String, Object> map = BeanUtils.beanToMap(p);
-                map.put("imageUrl", imgUrlStr);
+                map.put("imageUrl", imgUrlStr.toString());
                 if (!StringUtils.isNotBlank(p.getLabelId())) {
                     map.put("labelId", "");
                     map.put("labelName", "");
@@ -328,19 +328,18 @@ public class ProductService {
                 product.setProductSn(productSn);//商品编号
                 String[] imgArr = obj.getString("image").split(",");
 //                String[] technologyIds = obj.getString("technologyIds").split(",");//工艺节点
-                String imgStr = "";
-
+                StringBuilder imgStr = new StringBuilder();
                 for (int j = 0; j < imgArr.length; j++) {
                     String img = imgArr[j];
                     if (j == imgArr.length - 1) {
-                        imgStr += img;
+                        imgStr.append(img);
                     } else {
-                        imgStr += img + ",";
+                        imgStr.append(img).append(",");
                     }
                 }
-                if (!StringUtils.isNotBlank(imgStr))
+                if (!StringUtils.isNotBlank(imgStr.toString()))
                     return ServerResponse.createByErrorMessage("商品图片不能为空");
-                product.setImage(imgStr);//图片地址
+                product.setImage(imgStr.toString());//图片地址
                 product.setUnitId(obj.getString("unitId"));//单位
 //                product.setLabelId(obj.getString("labelId"));//标签
                 product.setUnitName(obj.getString("unitName"));//单位
@@ -406,7 +405,7 @@ public class ProductService {
                     example.createCriteria().andEqualTo(Product.ID, productId);
                     List<Product> list = iProductMapper.selectByExample(example);
                     //更新master库相关商品名称
-                    if (list.size() > 0 || null != list) {
+                    if (list.size() > 0) {
                         masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, null);
                     }
                 }
@@ -417,10 +416,10 @@ public class ProductService {
                     return ServerResponse.createByErrorMessage(ret);
 
                 String[] deleteTechnologyIdArr = obj.getString("deleteTechnologyIds").split(",");//选中的属性id字符串
-                for (int j = 0; j < deleteTechnologyIdArr.length; j++) {
-                    if (iTechnologyMapper.selectByPrimaryKey(deleteTechnologyIdArr[j]) != null) {
-                        if (iTechnologyMapper.deleteByPrimaryKey(deleteTechnologyIdArr[j]) < 0)
-                            return ServerResponse.createByErrorMessage("删除id：" + deleteTechnologyIdArr[j] + "失败");
+                for (String aDeleteTechnologyIdArr : deleteTechnologyIdArr) {
+                    if (iTechnologyMapper.selectByPrimaryKey(aDeleteTechnologyIdArr) != null) {
+                        if (iTechnologyMapper.deleteByPrimaryKey(aDeleteTechnologyIdArr) < 0)
+                            return ServerResponse.createByErrorMessage("删除id：" + aDeleteTechnologyIdArr + "失败");
                     }
                 }
 //                iTechnologyMapper.deleteWokerTechnologyByWgId(product.getId());
@@ -530,7 +529,7 @@ public class ProductService {
             example.createCriteria().andEqualTo(Product.ID, id);
             List<Product> list = iProductMapper.selectByExample(example);
             //更新master库相关商品名称
-            if (list.size() > 0 || null != list) {
+            if (list.size() > 0) {
                 masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, null);
             }
 //            example=new Example(GroupLink.class);

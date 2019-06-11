@@ -153,16 +153,16 @@ public class AttributeService {
     public ServerResponse queryAttributeValue(String id) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         try {
-            Map<String, Object> gaMap = new HashMap<String, Object>();
+            Map<String, Object> gaMap = new HashMap<>();
             Attribute goodsAttribute = iAttributeMapper.queryById(id);
             if (goodsAttribute != null) {
                 gaMap.put("id", goodsAttribute.getId());
                 gaMap.put("name", goodsAttribute.getName());
                 gaMap.put("type", goodsAttribute.getType());
                 List<AttributeValue> avList = iAttributeValueMapper.queryByAttributeId(goodsAttribute.getId());
-                List<Map<String, Object>> avListMap = new ArrayList<Map<String, Object>>();
+                List<Map<String, Object>> avListMap = new ArrayList<>();
                 for (AttributeValue av : avList) {
-                    Map<String, Object> avMap = new HashMap<String, Object>();
+                    Map<String, Object> avMap = new HashMap<>();
                     avMap.put("avId", av.getId());
                     avMap.put("avName", av.getName());
                     avMap.put("image", address + av.getImage());
@@ -369,14 +369,14 @@ public class AttributeService {
                 List<Product> productList = iProductMapper.queryByGoodsId(gs.getId());
                 for (Product product : productList) {
                     String[] valueIdArr = product.getValueNameArr().split(",");
-                    for (int i = 0; i < valueIdArr.length; i++) {
-                        if (Arrays.asList(valueIdArr).contains(valueIdArr[i]))
+                    for (String aValueIdArr : valueIdArr) {
+                        if (Arrays.asList(valueIdArr).contains(aValueIdArr))
                             return ServerResponse.createByErrorMessage("删除失败，该属性选项名已被其他商品使用");
                     }
 
                     String[] attributeIdArr = product.getAttributeIdArr().split(",");
-                    for (int i = 0; i < attributeIdArr.length; i++) {
-                        Attribute ae = iAttributeMapper.queryById(attributeIdArr[i]);
+                    for (String anAttributeIdArr : attributeIdArr) {
+                        Attribute ae = iAttributeMapper.queryById(anAttributeIdArr);
                         if (srcAttribute.getName().equals(ae.getName()))
                             return ServerResponse.createByErrorMessage("删除失败，该属性选项名已被其他商品使用");
                     }
