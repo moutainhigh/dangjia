@@ -242,16 +242,10 @@ public class TechnologyService {
     }
 
     //根据工种查询所有工艺说明
-    public ServerResponse queryTechnology(Integer pageNum, Integer pageSize, String workerTypeId, String name, Integer materialOrWorker) {
+    public ServerResponse queryTechnology(PageDTO pageDTO, String workerTypeId, String name, Integer materialOrWorker) {
         try {
-            if (pageNum == null) {
-                pageNum = 1;
-            }
-            if (pageSize == null) {
-                pageSize = 10;
-            }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            PageHelper.startPage(pageNum, pageSize);
             List<Technology> tList = iTechnologyMapper.query(workerTypeId, name, materialOrWorker);
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (Technology t : tList) {

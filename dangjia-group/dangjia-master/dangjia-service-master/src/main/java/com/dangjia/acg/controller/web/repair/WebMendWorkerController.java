@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.web.repair;
 
 import com.dangjia.acg.api.web.repair.WebMendWorkerAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.repair.MendWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +24,8 @@ public class WebMendWorkerController implements WebMendWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse workerBackState(String houseId, Integer pageNum, Integer pageSize, String beginDate, String endDate, String likeAddress) {
-        return mendWorkerService.workerBackState(houseId, pageNum, pageSize, beginDate, endDate, likeAddress);
+    public ServerResponse workerBackState(String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+        return mendWorkerService.workerBackState(houseId, pageDTO, beginDate, endDate, likeAddress);
     }
 
     @Override
@@ -35,7 +36,7 @@ public class WebMendWorkerController implements WebMendWorkerAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse workerOrderState(String houseId, Integer pageNum, Integer pageSize, String beginDate, String endDate, String likeAddress) {
-        return mendWorkerService.workerOrderState(houseId, pageNum, pageSize, beginDate, endDate, likeAddress);
+    public ServerResponse workerOrderState(String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+        return mendWorkerService.workerOrderState(houseId, pageDTO, beginDate, endDate, likeAddress);
     }
 }

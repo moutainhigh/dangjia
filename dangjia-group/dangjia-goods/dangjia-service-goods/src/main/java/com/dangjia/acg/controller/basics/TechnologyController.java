@@ -12,109 +12,118 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * 
-   * @类 名： TechnologyController
-   * @功能描述： TODO
-   * @作者信息： zmj
-   * @创建时间： 2018-9-10上午9:25:10
+ * @类 名： TechnologyController
+ * @功能描述： TODO
+ * @作者信息： zmj
+ * @创建时间： 2018-9-10上午9:25:10
  */
 @RestController
 public class TechnologyController implements TechnologyAPI {
     /**
-     *service
+     * service
      */
     @Autowired
     private TechnologyService technologyService;
 
     /**
      * 新增工艺说明
+     *
+     * @throws
      * @Title: insertTechnology
      * @Description: TODO
      * @param: @param name
      * @param: @param content
-     * @param: @return   
-     * @return: JsonResult   
-     * @throws
+     * @param: @return
+     * @return: JsonResult
      */
     @Override
     @ApiMethod
-    public ServerResponse insertTechnology(HttpServletRequest request, String name, String content, String workerTypeId, Integer type, String image, Integer materialOrWorker){
-        return technologyService.insertTechnology(name,content,workerTypeId,type,image,materialOrWorker);
+    public ServerResponse insertTechnology(HttpServletRequest request, String name, String content, String workerTypeId, Integer type, String image, Integer materialOrWorker) {
+        return technologyService.insertTechnology(name, content, workerTypeId, type, image, materialOrWorker);
     }
+
     /**
-    * 修改工艺说明
-    * @Title: updateTechnology
-    * @Description: TODO
-    * @param: @param id
-    * @param: @param name
-    * @param: @param content
-    * @param: @return   
-    * @return: JsonResult   
-    * @throws
-    */
+     * 修改工艺说明
+     *
+     * @throws
+     * @Title: updateTechnology
+     * @Description: TODO
+     * @param: @param id
+     * @param: @param name
+     * @param: @param content
+     * @param: @return
+     * @return: JsonResult
+     */
     @Override
     @ApiMethod
-    public ServerResponse updateTechnology(HttpServletRequest request,String id,String name,String content,Integer type,String image){
-        return technologyService.updateTechnology(id,name,content,type,image);
+    public ServerResponse updateTechnology(HttpServletRequest request, String id, String name, String content, Integer type, String image) {
+        return technologyService.updateTechnology(id, name, content, type, image);
     }
+
     /**
      * 删除工艺说明
+     *
+     * @throws
      * @Title: deleteTechnology
      * @Description: TODO
      * @param: @param id
-     * @param: @return   
-     * @return: JsonResult   
-     * @throws
+     * @param: @return
+     * @return: JsonResult
      */
     @Override
     @ApiMethod
-    public ServerResponse deleteTechnology(HttpServletRequest request,String id){
+    public ServerResponse deleteTechnology(HttpServletRequest request, String id) {
         return technologyService.deleteTechnology(id);
     }
+
     /**
      * 查询所有工艺说明
+     *
+     * @throws
      * @Title: queryTechnology
      * @Description: TODO
      * @param: @param name
      * @param: @param content
-     * @param: @return   
-     * @return: JsonResult   
-     * @throws
+     * @param: @return
+     * @return: JsonResult
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> queryTechnology(HttpServletRequest request,PageDTO pageDTO, String workerTypeId,String name,Integer materialOrWorker){
-        return technologyService.queryTechnology(pageDTO.getPageNum(),pageDTO.getPageSize(),workerTypeId,name,materialOrWorker);
+    public ServerResponse<PageInfo> queryTechnology(HttpServletRequest request, PageDTO pageDTO, String workerTypeId, String name, Integer materialOrWorker) {
+        return technologyService.queryTechnology(pageDTO, workerTypeId, name, materialOrWorker);
     }
-   /**
-    * 新增人工商品关联工艺
-    * @Title: insertWokerTechnology
-    * @Description: TODO
-    * @param: @param worker_goods_id
-    * @param: @param tIdArr
-    * @param: @return   
-    * @return: JsonResult   
-    * @throws
-    */
-   @Override
-   @ApiMethod
-    public ServerResponse insertWokerTechnology(HttpServletRequest request,String workerGoodsId,String tIdArr){
-        return technologyService.insertWokerTechnology(workerGoodsId,tIdArr);
+
+    /**
+     * 新增人工商品关联工艺
+     *
+     * @throws
+     * @Title: insertWokerTechnology
+     * @Description: TODO
+     * @param: @param worker_goods_id
+     * @param: @param tIdArr
+     * @param: @return
+     * @return: JsonResult
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse insertWokerTechnology(HttpServletRequest request, String workerGoodsId, String tIdArr) {
+        return technologyService.insertWokerTechnology(workerGoodsId, tIdArr);
     }
-    
-   /**
-    * 根据商品id查询人工商品关联工艺实体
-    * @Title: queryTechnologyByWgId
-    * @Description: TODO
-    * @param: @param worker_goods_id
-    * @param: @return   
-    * @return: JsonResult   
-    * @throws
-    */
-   @Override
-   @ApiMethod
-    public ServerResponse queryTechnologyByWgId(HttpServletRequest request,String workerGoodsId){
+
+    /**
+     * 根据商品id查询人工商品关联工艺实体
+     *
+     * @throws
+     * @Title: queryTechnologyByWgId
+     * @Description: TODO
+     * @param: @param worker_goods_id
+     * @param: @return
+     * @return: JsonResult
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryTechnologyByWgId(HttpServletRequest request, String workerGoodsId) {
         return technologyService.queryTechnologyByWgId(workerGoodsId);
     }
-    
+
 }

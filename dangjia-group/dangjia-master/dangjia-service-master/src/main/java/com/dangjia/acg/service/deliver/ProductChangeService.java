@@ -10,6 +10,7 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.MathUtil;
@@ -87,17 +88,18 @@ public class ProductChangeService {
 
     /**
      * 添加更换商品
+     *
      * @param request
      * @param userToken
      * @param houseId
      * @param srcProductId
      * @param destProductId
      * @param srcSurCount
-     * @param productType 0:材料 1：服务
+     * @param productType   0:材料 1：服务
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse insertProductChange(HttpServletRequest request, String userToken, String houseId, String srcProductId, String destProductId, Double srcSurCount, Integer productType){
+    public ServerResponse insertProductChange(HttpServletRequest request, String userToken, String houseId, String srcProductId, String destProductId, Double srcSurCount, Integer productType) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -112,23 +114,23 @@ public class ProductChangeService {
             ServerResponse srcResponse = productAPI.getProductById(request, srcProductId);
             // 更换后的商品
             ServerResponse destResponse = productAPI.getProductById(request, destProductId);
-            boolean flag = (srcResponse!=null&&srcResponse.getResultObj()!=null && destResponse!=null&&destResponse.getResultObj()!=null);
+            boolean flag = (srcResponse != null && srcResponse.getResultObj() != null && destResponse != null && destResponse.getResultObj() != null);
             Product srcProduct = null;
             Product destProduct = null;
             Unit srcUnit = null;
             Unit destUnit = null;
-            if(flag) {
+            if (flag) {
                 srcProduct = JSON.parseObject(JSON.toJSONString(srcResponse.getResultObj()), Product.class);
                 destProduct = JSON.parseObject(JSON.toJSONString(destResponse.getResultObj()), Product.class);
-                Goods goods=forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), destProduct.getGoodsId());
-                if(goods!=null){
-                    productType=goods.getType();
+                Goods goods = forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), destProduct.getGoodsId());
+                if (goods != null) {
+                    productType = goods.getType();
                 }
                 // 查询转换单位
-                ServerResponse srcUnitResponse= unitAPI.getUnitById(request, srcProduct.getConvertUnit());
-                ServerResponse destUnitResponse= unitAPI.getUnitById(request, destProduct.getConvertUnit());
-                boolean flagB = (srcUnitResponse!=null&&srcUnitResponse.getResultObj()!=null && destUnitResponse!=null&&destUnitResponse.getResultObj()!=null);
-                if(flagB){
+                ServerResponse srcUnitResponse = unitAPI.getUnitById(request, srcProduct.getConvertUnit());
+                ServerResponse destUnitResponse = unitAPI.getUnitById(request, destProduct.getConvertUnit());
+                boolean flagB = (srcUnitResponse != null && srcUnitResponse.getResultObj() != null && destUnitResponse != null && destUnitResponse.getResultObj() != null);
+                if (flagB) {
                     srcUnit = JSON.parseObject(JSON.toJSONString(srcUnitResponse.getResultObj()), Unit.class);
                     destUnit = JSON.parseObject(JSON.toJSONString(destUnitResponse.getResultObj()), Unit.class);
                 }
@@ -141,7 +143,7 @@ public class ProductChangeService {
                     .andEqualTo(ProductChange.SRC_PRODUCT_ID, srcProductId)
                     .andEqualTo(ProductChange.TYPE, 0);
             List<ProductChange> list = productChangeMapper.selectByExample(example);
-            if(!CommonUtil.isEmpty(list)) {
+            if (!CommonUtil.isEmpty(list)) {
                 ProductChange change = list.get(0);
                 change.setDestProductId(destProduct.getId());
                 change.setDestProductSn(destProduct.getProductSn());
@@ -153,14 +155,14 @@ public class ProductChangeService {
                 // 类型 0 材料 1 服务
                 change.setProductType(productType);
                 // 差额单价
-                BigDecimal price = BigDecimal.valueOf(MathUtil.sub(change .getDestPrice(), change.getSrcPrice()));
+                BigDecimal price = BigDecimal.valueOf(MathUtil.sub(change.getDestPrice(), change.getSrcPrice()));
                 // 差价= 更换数*差额单价
                 BigDecimal differPrice = price.multiply(BigDecimal.valueOf(srcSurCount));
                 // 差价默认为可以更换数量的最大值
                 change.setDifferencePrice(differPrice);
                 change.setModifyDate(new Date());
                 productChangeMapper.updateByPrimaryKey(change);
-            }else {
+            } else {
                 ProductChange productChange = new ProductChange();
                 productChange.setMemberId(operator.getId());
                 productChange.setHouseId(houseId);
@@ -188,14 +190,14 @@ public class ProductChangeService {
                 // 类型 0 材料 1 服务
                 productChange.setProductType(productType);
                 // 差额单价
-                BigDecimal price = BigDecimal.valueOf(MathUtil.sub(productChange .getDestPrice(), productChange.getSrcPrice()));
+                BigDecimal price = BigDecimal.valueOf(MathUtil.sub(productChange.getDestPrice(), productChange.getSrcPrice()));
                 // 差价= 更换数*差额单价
                 BigDecimal differPrice = price.multiply(BigDecimal.valueOf(srcSurCount));
                 // 差价默认为可以更换数量的最大值
                 productChange.setDifferencePrice(differPrice);
                 productChangeMapper.insert(productChange);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
@@ -204,12 +206,13 @@ public class ProductChangeService {
 
     /**
      * 根据houseId查询商品更换列表
+     *
      * @param request
      * @param userToken
      * @param houseId
      * @return
      */
-    public ServerResponse queryChangeByHouseId(HttpServletRequest request, String userToken, String houseId){
+    public ServerResponse queryChangeByHouseId(HttpServletRequest request, String userToken, String houseId) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -217,20 +220,21 @@ public class ProductChangeService {
         Member operator = (Member) object;
         Example example = new Example(ProductChange.class);
         example.createCriteria()
-                .andEqualTo(ProductChange.HOUSE_ID,houseId)
-                .andEqualTo(ProductChange.MEMBER_ID,operator.getId())
-                .andEqualTo(ProductChange.TYPE,0);
+                .andEqualTo(ProductChange.HOUSE_ID, houseId)
+                .andEqualTo(ProductChange.MEMBER_ID, operator.getId())
+                .andEqualTo(ProductChange.TYPE, 0);
         List<ProductChange> list = productChangeMapper.selectByExample(example);
-        return ServerResponse.createBySuccess("操作成功",list);
+        return ServerResponse.createBySuccess("操作成功", list);
     }
 
     /**
      * 申请换货
+     *
      * @param request
      * @param houseId
      * @return
      */
-    public ServerResponse applyProductChange(HttpServletRequest request,String houseId) {
+    public ServerResponse applyProductChange(HttpServletRequest request, String houseId) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<ProductChangeDTO> list = new ArrayList<>();
@@ -238,7 +242,7 @@ public class ProductChangeService {
             ProductChangeOrder order = insertProductChangeOrder(houseId);
             // 查询商品换货列表
             List<ProductChange> changeList = productChangeMapper.queryByHouseId(houseId, "0");
-            for(ProductChange change : changeList){
+            for (ProductChange change : changeList) {
                 ProductChangeDTO productChangeDTO = new ProductChangeDTO();
                 productChangeDTO.setId(change.getId());
                 productChangeDTO.setHouseId(change.getHouseId());
@@ -265,7 +269,7 @@ public class ProductChangeService {
                 productChangeDTO.setModifyDate(change.getModifyDate());
                 list.add(productChangeDTO);
             }
-            if(null != order){
+            if (null != order) {
                 productChangeOrderDTO.setId(order.getId());
                 productChangeOrderDTO.setNumber(order.getNumber());
                 productChangeOrderDTO.setDifferencePrice(order.getDifferencePrice());
@@ -275,7 +279,7 @@ public class ProductChangeService {
             }
             productChangeOrderDTO.setProductChangeDTOList(list);
             return ServerResponse.createBySuccess("操作成功", productChangeOrderDTO);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
@@ -283,13 +287,14 @@ public class ProductChangeService {
 
     /**
      * 设置商品更换数
+     *
      * @param request
      * @param id
      * @param destSurCount
      * @param orderId
      * @return
      */
-    public ServerResponse setDestSurCount(HttpServletRequest request, String id, Double destSurCount, String orderId){
+    public ServerResponse setDestSurCount(HttpServletRequest request, String id, Double destSurCount, String orderId) {
         try {
 
             ProductChange productChange = productChangeMapper.selectByPrimaryKey(id);
@@ -297,28 +302,28 @@ public class ProductChangeService {
             ProductChangeOrder order = productChangeOrderMapper.selectByPrimaryKey(orderId);
             House house = houseMapper.selectByPrimaryKey(productChange.getHouseId());
             request.setAttribute(Constants.CITY_ID, house.getCityId());
-            if(null != productChange){
+            if (null != productChange) {
                 // 剩余数
                 BigDecimal srcCount = BigDecimal.valueOf(productChange.getSrcSurCount());
                 // 更换数
                 BigDecimal destCount = BigDecimal.valueOf(destSurCount);
-                if(destCount.compareTo(srcCount) == 1){
+                if (destCount.compareTo(srcCount) == 1) {
                     return ServerResponse.createByErrorMessage("不能大于商品剩余数");
                 }
                 Unit unit;
                 Product product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
-                ServerResponse serverResponse=unitAPI.getUnitById(request,product.getConvertUnit());
-                if(serverResponse.getResultObj() instanceof JSONObject){
-                    unit= JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
-                }else{
-                    unit=(Unit)serverResponse.getResultObj();
+                ServerResponse serverResponse = unitAPI.getUnitById(request, product.getConvertUnit());
+                if (serverResponse.getResultObj() instanceof JSONObject) {
+                    unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
+                } else {
+                    unit = (Unit) serverResponse.getResultObj();
                 }
-                if(unit.getType()==1){
-                    destSurCount=Math.ceil(destSurCount);
+                if (unit.getType() == 1) {
+                    destSurCount = Math.ceil(destSurCount);
                 }
                 productChange.setDestSurCount(destSurCount);
                 // 差额单价
-                BigDecimal price = BigDecimal.valueOf(MathUtil.sub(productChange .getDestPrice(), productChange.getSrcPrice()));
+                BigDecimal price = BigDecimal.valueOf(MathUtil.sub(productChange.getDestPrice(), productChange.getSrcPrice()));
                 // 差价= 更换数*差额单价
                 BigDecimal differPrice = price.multiply(BigDecimal.valueOf(destSurCount));
                 productChange.setDifferencePrice(differPrice);
@@ -333,7 +338,7 @@ public class ProductChangeService {
                 productChangeOrderMapper.updateByPrimaryKey(order);
 
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
@@ -342,12 +347,13 @@ public class ProductChangeService {
 
     /**
      * 确定
+     *
      * @param request
      * @param changeItemList
      * @param orderId
      * @return
      */
-    public ServerResponse productSure(HttpServletRequest request, String changeItemList, String orderId){
+    public ServerResponse productSure(HttpServletRequest request, String changeItemList, String orderId) {
         try {
             // 查询订单表
             ProductChangeOrder order = productChangeOrderMapper.selectByPrimaryKey(orderId);
@@ -366,23 +372,23 @@ public class ProductChangeService {
                     BigDecimal srcCount = BigDecimal.valueOf(productChange.getSrcSurCount());
                     // 更换数
                     BigDecimal destCount = BigDecimal.valueOf(destSurCount);
-                    if(destCount.compareTo(srcCount) == 1){
+                    if (destCount.compareTo(srcCount) == 1) {
                         return ServerResponse.createByErrorMessage("不能大于商品剩余数");
                     }
                     Unit unit;
                     Product product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
-                    ServerResponse serverResponse=unitAPI.getUnitById(request,product.getConvertUnit());
-                    if(serverResponse.getResultObj() instanceof JSONObject){
-                        unit= JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
-                    }else{
-                        unit=(Unit)serverResponse.getResultObj();
+                    ServerResponse serverResponse = unitAPI.getUnitById(request, product.getConvertUnit());
+                    if (serverResponse.getResultObj() instanceof JSONObject) {
+                        unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
+                    } else {
+                        unit = (Unit) serverResponse.getResultObj();
                     }
-                    if(unit.getType()==1){
-                        destSurCount=Math.ceil(destSurCount);
+                    if (unit.getType() == 1) {
+                        destSurCount = Math.ceil(destSurCount);
                     }
                     productChange.setDestSurCount(destSurCount);
                     // 差额单价
-                    BigDecimal price = BigDecimal.valueOf(MathUtil.sub(productChange .getDestPrice(), productChange.getSrcPrice()));
+                    BigDecimal price = BigDecimal.valueOf(MathUtil.sub(productChange.getDestPrice(), productChange.getSrcPrice()));
                     // 差价= 更换数*差额单价
                     BigDecimal differPrice = price.multiply(BigDecimal.valueOf(destSurCount));
                     productChange.setDifferencePrice(differPrice);
@@ -398,7 +404,7 @@ public class ProductChangeService {
                 order.setModifyDate(new Date());
                 productChangeOrderMapper.updateByPrimaryKey(order);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
@@ -408,10 +414,11 @@ public class ProductChangeService {
 
     /**
      * 添加更换商品订单
+     *
      * @param houseId
      * @return
      */
-    public ProductChangeOrder insertProductChangeOrder(String houseId){
+    public ProductChangeOrder insertProductChangeOrder(String houseId) {
         ProductChangeOrder order = null;
         try {
             // 查询db中是否有该房子的换货订单
@@ -420,30 +427,30 @@ public class ProductChangeService {
             int count = productChangeMapper.queryProductChangeExist(houseId, null, "0");
             // 计算总价差额
             BigDecimal differPrice = calcDifferPrice(houseId);
-            if(null != list && list.size() > 0){
+            if (null != list && list.size() > 0) {
                 order = list.get(0);
                 order.setDifferencePrice(differPrice);
                 order.setModifyDate(new Date());
                 productChangeOrderMapper.updateByPrimaryKey(order);
-            } else if(count > 0){
+            } else if (count > 0) {
                 order = new ProductChangeOrder();
                 order.setHouseId(houseId);
                 // 默认未支付
                 order.setType(0);
-                order.setNumber(System.currentTimeMillis()+"-"+generateWord());
+                order.setNumber(System.currentTimeMillis() + "-" + generateWord());
                 order.setDifferencePrice(differPrice);
                 productChangeOrderMapper.insert(order);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return order;
     }
 
     private String generateWord() {
-        String[] beforeShuffle = new String[] {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+        String[] beforeShuffle = new String[]{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
                 "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
-                "W", "X", "Y", "Z" };
+                "W", "X", "Y", "Z"};
         List<String> list = Arrays.asList(beforeShuffle);
         Collections.shuffle(list);
         StringBuilder sb = new StringBuilder();
@@ -457,39 +464,41 @@ public class ProductChangeService {
 
     /**
      * 根据houseId查询更换商品订单
+     *
      * @param houseId
      * @return
      */
-    public ServerResponse queryOrderByHouseId(String houseId){
+    public ServerResponse queryOrderByHouseId(String houseId) {
         Example example = new Example(ProductChangeOrder.class);
         example.createCriteria()
-                .andEqualTo(ProductChangeOrder.HOUSE_ID,houseId);
+                .andEqualTo(ProductChangeOrder.HOUSE_ID, houseId);
         List<ProductChangeOrder> list = productChangeOrderMapper.selectByExample(example);
-        return ServerResponse.createBySuccess("操作成功",list);
+        return ServerResponse.createBySuccess("操作成功", list);
     }
 
     /**
      * 补退差价回调
+     *
      * @param request
      * @param id
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse orderBackFun(HttpServletRequest request, String id){
+    public ServerResponse orderBackFun(HttpServletRequest request, String id) {
         String msg = "";
         try {
             // 查询
             ProductChangeOrder order = productChangeOrderMapper.selectByPrimaryKey(id);
-            if(order!=null){
+            if (order != null) {
                 String houseId = order.getHouseId();
                 // 计算总价差额
                 BigDecimal totalDifferPrice = calcDifferPrice(houseId);
                 // 判断总价差额是否小于等于0
-                if(totalDifferPrice.compareTo(BigDecimal.ZERO) == -1 || totalDifferPrice.compareTo(BigDecimal.ZERO) == 0){
+                if (totalDifferPrice.compareTo(BigDecimal.ZERO) == -1 || totalDifferPrice.compareTo(BigDecimal.ZERO) == 0) {
                     // 0未支付 1已支付 2已退款
                     order.setType(2);
                     // 总价差额不等于 0 时，退钱到业主钱包
-                    if(totalDifferPrice.compareTo(BigDecimal.ZERO) != 0) {
+                    if (totalDifferPrice.compareTo(BigDecimal.ZERO) != 0) {
                         // 取绝对值 -12 = 12
                         BigDecimal toDifferPrice = BigDecimal.valueOf(Math.abs(totalDifferPrice.doubleValue()));
                         /*退钱给业主*/
@@ -513,17 +522,17 @@ public class ProductChangeService {
                         memberMapper.updateByPrimaryKeySelective(member);
                         msg = "您已成功更换商品，系统将在24小时内退差价进您的钱包。";
                     }
-                }else {
+                } else {
                     order.setType(1);
                 }
                 order.setDifferencePrice(totalDifferPrice);
                 productChangeOrderMapper.updateByPrimaryKey(order);
                 // 更换已购买商品，没有新增，有则修改
-                if(!changeGmProduct(request, houseId, order.getId())){
+                if (!changeGmProduct(request, houseId, order.getId())) {
                     return ServerResponse.createByErrorMessage("不能大于商品剩余数");
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             throw new BaseException(ServerCode.DATA_SAVE_FAIL, "修改失败");
         }
@@ -532,17 +541,17 @@ public class ProductChangeService {
 
     /**
      * 计算总价差额
-     * @param houseId
      *
+     * @param houseId
      * @return
      */
-    private BigDecimal calcDifferPrice(String houseId){
+    private BigDecimal calcDifferPrice(String houseId) {
         // 查询商品换货列表
         List<ProductChange> changeList = productChangeMapper.queryByHouseId(houseId, "0");
         BigDecimal differencePrice = BigDecimal.ZERO;
-        if(null != changeList && changeList.size() > 0 ){
+        if (null != changeList && changeList.size() > 0) {
             // 计算总价差额
-            for (ProductChange change : changeList){
+            for (ProductChange change : changeList) {
                 differencePrice = differencePrice.add(change.getDifferencePrice());
             }
         }
@@ -551,19 +560,20 @@ public class ProductChangeService {
 
     /**
      * 更换已购买商品
+     *
      * @param request
      * @param houseId
      */
-    private boolean changeGmProduct(HttpServletRequest request, String houseId, String orderId){
+    private boolean changeGmProduct(HttpServletRequest request, String houseId, String orderId) {
         // 查询
         List<ProductChange> list = productChangeMapper.queryByHouseId(houseId, "0");
         Product destProduct = null;
         Unit destUnit = null;
-        if(null != list && list.size() > 0){
+        if (null != list && list.size() > 0) {
             int num = 0;
-            for (ProductChange change : list){
+            for (ProductChange change : list) {
                 // 更换数大于0的商品，才做处理
-                if(change.getDestSurCount().compareTo(0.0) == 1) {
+                if (change.getDestSurCount().compareTo(0.0) == 1) {
                     // 原商品仓库
                     Warehouse oldWareHouse = warehouseMapper.getByProductId(change.getSrcProductId(), houseId);
                     // 新商品仓库
@@ -572,15 +582,15 @@ public class ProductChangeService {
                     ServerResponse destResponse = productAPI.getProductById(request, change.getDestProductId());
                     if (destResponse != null && destResponse.getResultObj() != null) {
                         destProduct = JSON.parseObject(JSON.toJSONString(destResponse.getResultObj()), Product.class);
-                        ServerResponse destUnitResponse= unitAPI.getUnitById(request, destProduct.getConvertUnit());
-                        boolean flagB = destUnitResponse!=null&&destUnitResponse.getResultObj()!=null;
-                        if(flagB){
+                        ServerResponse destUnitResponse = unitAPI.getUnitById(request, destProduct.getConvertUnit());
+                        boolean flagB = destUnitResponse != null && destUnitResponse.getResultObj() != null;
+                        if (flagB) {
                             destUnit = JSON.parseObject(JSON.toJSONString(destUnitResponse.getResultObj()), Unit.class);
                         }
                     }
                     // 处理新商品------begin
                     if (null == wareHouse) {
-                        Goods goods=forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), destProduct.getGoodsId());
+                        Goods goods = forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), destProduct.getGoodsId());
                         // 新商品没有则添加
                         Warehouse newWareHouse = new Warehouse();
                         newWareHouse.setHouseId(houseId);
@@ -627,14 +637,14 @@ public class ProductChangeService {
                     // 处理新商品------end
                     change.setType(1);
                     productChangeMapper.updateByPrimaryKey(change);
-                }else {
+                } else {
                     // 为0的，则删除
                     productChangeMapper.deleteByPrimaryKey(change.getId());
                     num += 1;
                 }
             }
             // 如果存在一个或多个更换数为 0 的商品，则不生成订单
-            if(num == list.size()){
+            if (num == list.size()) {
                 productChangeOrderMapper.deleteByPrimaryKey(orderId);
             }
         }
@@ -645,26 +655,19 @@ public class ProductChangeService {
      * 查询业主退货列表
      * materialOrderState
      */
-    public ServerResponse changeOrderState(String houseId, Integer pageNum, Integer pageSize, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse changeOrderState(String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
         try {
-            if (pageNum == null) {
-                pageNum = 1;
-            }
-            if (pageSize == null) {
-                pageSize = 10;
-            }
-            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
-                if(beginDate.equals(endDate)){
-                    beginDate=beginDate+" "+"00:00:00";
-                    endDate=endDate+" "+"23:59:59";
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
+                if (beginDate.equals(endDate)) {
+                    beginDate = beginDate + " " + "00:00:00";
+                    endDate = endDate + " " + "23:59:59";
                 }
             }
-            PageHelper.startPage(pageNum, pageSize);
             List<ProductChangeOrder> productChangeOrderList = productChangeOrderMapper.queryOrderByStateAndLikeAddress(houseId, beginDate, endDate, likeAddress);
             PageInfo pageResult = new PageInfo(productChangeOrderList);
             List<ProductOrderDTO> productOrderDTOList = getProductOrderDTOList(productChangeOrderList);
             pageResult.setList(productOrderDTOList);
-
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
@@ -674,10 +677,11 @@ public class ProductChangeService {
 
     /**
      * 处理dto
+     *
      * @param productChangeOrderList
      * @return
      */
-    private List<ProductOrderDTO> getProductOrderDTOList(List<ProductChangeOrder> productChangeOrderList){
+    private List<ProductOrderDTO> getProductOrderDTOList(List<ProductChangeOrder> productChangeOrderList) {
         List<ProductOrderDTO> productOrderDTOS = new ArrayList<ProductOrderDTO>();
         for (ProductChangeOrder order : productChangeOrderList) {
             ProductOrderDTO orderDTO = new ProductOrderDTO();
@@ -727,10 +731,10 @@ public class ProductChangeService {
         for (ProductChange change : productChangeList) {
             // 合计退差价
             totalDifferPrice = totalDifferPrice.add(change.getDifferencePrice());
-                // 处理itemDTo
-                ProductChangeItemDTO itemDTO = getItemDTO(change, address, 0);
-                itemDTOList.add(itemDTO);
-                productOrderDTO.setProductChangeItemDTOList(itemDTOList);
+            // 处理itemDTo
+            ProductChangeItemDTO itemDTO = getItemDTO(change, address, 0);
+            itemDTOList.add(itemDTO);
+            productOrderDTO.setProductChangeItemDTOList(itemDTOList);
         }
         productOrderDTO.setTotalDifferPrice(totalDifferPrice);
         return ServerResponse.createBySuccess("查询成功", productOrderDTO);
@@ -775,15 +779,15 @@ public class ProductChangeService {
     }
 
 
-
     /**
      * 转换ITEMDTO
+     *
      * @param change
      * @return
      */
-    private ProductChangeItemDTO getItemDTO(ProductChange change, String address, int temp){
+    private ProductChangeItemDTO getItemDTO(ProductChange change, String address, int temp) {
         ProductChangeItemDTO itemDTO = new ProductChangeItemDTO();
-        if(temp == 0) {
+        if (temp == 0) {
             // src
             itemDTO.setSrcImage(address + change.getSrcImage());
             itemDTO.setSrcProductId(change.getSrcProductId());
@@ -800,19 +804,19 @@ public class ProductChangeService {
             itemDTO.setDestProductName(change.getDestProductName());
             itemDTO.setDestPrice(change.getDestPrice());
             itemDTO.setDestUnitName(change.getDestUnitName());
-            double  destDifferPrice = MathUtil.sub(change.getDestPrice(), change.getSrcPrice());
-            itemDTO.setDestDifferPrice((destDifferPrice > 0 ? "+" + destDifferPrice : destDifferPrice) +"元/"+change.getDestUnitName());
+            double destDifferPrice = MathUtil.sub(change.getDestPrice(), change.getSrcPrice());
+            itemDTO.setDestDifferPrice((destDifferPrice > 0 ? "+" + destDifferPrice : destDifferPrice) + "元/" + change.getDestUnitName());
             itemDTO.setDestBeforeCount(0.0);
             itemDTO.setDestAfterCount(change.getDestSurCount());
             itemDTO.setDestTotalMoney(change.getDifferencePrice());
-        }else if(temp == 1){
+        } else if (temp == 1) {
             // 支付单换货详情
             itemDTO.setImage(address + change.getDestImage());
             itemDTO.setProductSn(change.getDestProductSn());
             itemDTO.setProductName(change.getDestProductName());
             itemDTO.setPrice(BigDecimal.valueOf(change.getDestPrice()));
             itemDTO.setUnitName(change.getDestUnitName());
-            double  destDifferPrice = MathUtil.sub(change.getDestPrice(), change.getSrcPrice());
+            double destDifferPrice = MathUtil.sub(change.getDestPrice(), change.getSrcPrice());
             itemDTO.setDifferPrice(BigDecimal.valueOf(destDifferPrice));
             itemDTO.setShopCount(change.getDestSurCount());
             itemDTO.setTotalPrice(change.getDifferencePrice());

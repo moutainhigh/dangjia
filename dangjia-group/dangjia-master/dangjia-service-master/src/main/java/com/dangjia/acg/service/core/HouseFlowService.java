@@ -608,9 +608,9 @@ public class HouseFlowService {
         example.createCriteria().andEqualTo("houseId", houseId).andEqualTo("state", 0).andGreaterThan("workerType", 2);
         example.orderBy(HouseFlow.SORT).desc();
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
-        List<Map<String, String>> mapList = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> mapList = new ArrayList<>();
         for (HouseFlow hf : houseFlowList) {
-            Map<String, String> map = new HashMap<String, String>();
+            Map<String, String> map = new HashMap<>();
             map.put("workerTypeId", hf.getWorkerTypeId());
             map.put("name", workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId()).getName());
             mapList.add(map);

@@ -24,9 +24,10 @@ public class MendMaterielController implements MendMaterielAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse surplusList(String workerTypeId,String houseId){
-        return fillMaterielService.surplusList(workerTypeId,houseId);
+    public ServerResponse surplusList(String workerTypeId, String houseId) {
+        return fillMaterielService.surplusList(workerTypeId, houseId);
     }
+
     /**
      * 要退查询仓库
      * 结合 精算记录+补记录
@@ -34,19 +35,19 @@ public class MendMaterielController implements MendMaterielAPI {
     @Override
     @ApiMethod
     public ServerResponse askAndQuit(String userToken, String houseId, String categoryId, String name) {
-        return fillMaterielService.askAndQuit(userToken,houseId,categoryId,name);
+        return fillMaterielService.askAndQuit(userToken, houseId, categoryId, name);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse selectProduct(HttpServletRequest request,String goodsId,String selectVal,String attributeIdArr){
-        return fillMaterielService.selectProduct(goodsId,selectVal,attributeIdArr);
+    public ServerResponse selectProduct(HttpServletRequest request, String goodsId, String selectVal, String attributeIdArr) {
+        return fillMaterielService.selectProduct(goodsId, selectVal, attributeIdArr);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse repairLibraryMaterial(String userToken,HttpServletRequest request, String categoryId,String name,PageDTO pageDTO){
-        return fillMaterielService.repairLibraryMaterial(userToken,categoryId,name,pageDTO.getPageNum(),pageDTO.getPageSize());
+    public ServerResponse repairLibraryMaterial(String userToken, HttpServletRequest request, String categoryId, String name, PageDTO pageDTO) {
+        return fillMaterielService.repairLibraryMaterial(userToken, categoryId, name, pageDTO);
     }
 
     /**
@@ -54,7 +55,7 @@ public class MendMaterielController implements MendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse workerTypeBudget(String userToken, String houseId, String categoryId, String name, PageDTO pageDTO){
-        return fillMaterielService.workerTypeBudget(userToken,houseId,categoryId,name,pageDTO.getPageNum(),pageDTO.getPageSize());
+    public ServerResponse workerTypeBudget(String userToken, String houseId, String categoryId, String name, PageDTO pageDTO) {
+        return fillMaterielService.workerTypeBudget(userToken, houseId, categoryId, name, pageDTO);
     }
 }

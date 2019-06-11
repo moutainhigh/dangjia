@@ -2,6 +2,7 @@ package com.dangjia.acg.service.config;
 
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -45,7 +46,8 @@ public class ConfigAppService {
      * @param configApp
      * @return
      */
-    public ServerResponse getConfigApps(HttpServletRequest request, ConfigApp configApp) {
+    public ServerResponse getConfigApps(HttpServletRequest request, PageDTO pageDTO, ConfigApp configApp) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(ConfigApp.class);
         Example.Criteria criteria = example.createCriteria();
         if (!CommonUtil.isEmpty(configApp.getAppType())) {
@@ -56,9 +58,6 @@ public class ConfigAppService {
         }
         criteria.andEqualTo(ConfigApp.DATA_STATUS, 0);
         example.orderBy(ConfigApp.CREATE_DATE).desc();
-        Integer pageNum = Integer.parseInt(request.getParameter("pageNum"));
-        Integer pageSize = Integer.parseInt(request.getParameter("pageSize"));
-        PageHelper.startPage(pageNum, pageSize);
         List<ConfigApp> list = configAppMapper.selectByExample(example);
         List listh = new ArrayList();
         PageInfo pageResult = new PageInfo(list);
