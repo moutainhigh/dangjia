@@ -229,7 +229,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                         '6' apply_type,
                         '提前结束装修' NAME,
                         a.create_date,
-                        a.apply_money
+                        a.apply_money,
                         0 star
                     FROM
                        `dj_core_house_flow_apply` a
