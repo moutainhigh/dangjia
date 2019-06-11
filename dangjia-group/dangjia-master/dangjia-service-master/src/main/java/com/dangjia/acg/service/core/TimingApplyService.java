@@ -48,12 +48,11 @@ public class TimingApplyService {
      * 旷工自动扣钱100
      */
     public void absenteeism(){
-        List<HouseFlow> houseFlows=technologyRecordService.unfinishedFlow(null);
-        for (HouseFlow houseFlow : houseFlows){
-            //今日是否开工超时扣旷工钱
-            evaluateService.absenteeismOvertime(houseFlow);
-        }
-
+//        List<HouseFlow> houseFlows=technologyRecordService.unfinishedFlow(null);
+//        for (HouseFlow houseFlow : houseFlows){
+//            //今日是否开工超时扣旷工钱
+//            evaluateService.absenteeismOvertime(houseFlow);
+//        }
 
         Example example =new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.PAUSE,1);
@@ -65,7 +64,9 @@ public class TimingApplyService {
                 example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlow.getId())
                         .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
                         .andCondition(" member_check in (1,3) ")
-                        .andCondition(" to_days(end_date) <= to_days('" + DateUtil.getDateString(new Date().getTime()) + "') ");
+                        .andCondition("  to_days(start_date) <= to_days('" + DateUtil.getDateString(new Date().getTime()) + "') AND to_days(end_date) >= to_days('" + DateUtil.getDateString(new Date().getTime()) + "') ");
+
+
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
                 if (houseFlowApplyList.size() > 0) {
                     HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
@@ -94,6 +95,7 @@ public class TimingApplyService {
             }
         }
     }
+
     /**
      * 查询到时业主未审核申请
      */
