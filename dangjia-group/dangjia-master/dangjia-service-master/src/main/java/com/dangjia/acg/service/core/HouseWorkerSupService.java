@@ -3,6 +3,7 @@ package com.dangjia.acg.service.core;
 import com.dangjia.acg.api.repair.MendMaterielAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
@@ -13,8 +14,6 @@ import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.service.house.HouseService;
-import com.dangjia.acg.service.worker.EvaluateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -48,11 +47,7 @@ public class HouseWorkerSupService {
     private ConfigUtil configUtil;
     @Autowired
     private MendMaterielAPI mendMaterielAPI;
-    @Autowired
-    private HouseService houseService;
 
-    @Autowired
-    private EvaluateService evaluateService;
     /**
      * 管家审核验收申请h
      * 材料审查
@@ -101,20 +96,24 @@ public class HouseWorkerSupService {
      */
     public ServerResponse applyShutdown(String userToken, String houseFlowId, String applyDec, String startDate, String endDate) {
         try {
+            if (CommonUtil.isEmpty(startDate)) {
+                return ServerResponse.createByErrorMessage("请选择开始时间");
+            }
+            if (CommonUtil.isEmpty(endDate)) {
+                return ServerResponse.createByErrorMessage("请选择结束时间");
+            }
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member worker = (Member) object;
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
-
             Example example = new Example(HouseFlowApply.class);
             example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
                     .andCondition(" member_check in (1,3) ").andEqualTo(HouseFlowApply.PAY_STATE, 1);
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
             if (houseFlowApplyList.size() > 0) {
                 HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
-                if(houseFlowApply.getEndDate().getTime()>new Date().getTime()){
+                if (houseFlowApply.getEndDate().getTime() > new Date().getTime()) {
                     return ServerResponse.createByErrorMessage("工序处于停工期间!");
                 }
             }
@@ -124,14 +123,13 @@ public class HouseWorkerSupService {
             if (houseFlow.getWorkSteta() == 3) {
                 return ServerResponse.createByErrorMessage("工序待交底请勿发起停工申请");
             }
-            Date start = DateUtil.toDate(startDate);
+            String format = "yyyy-MM-dd";
+            Date start = DateUtil.convert(startDate, format);
             HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(houseFlow.getHouseId(), houseFlow.getWorkerId(), new Date());//查询今日开工记录
-            if (todayStart != null &&  DateUtil.daysofTwo(new Date(), start)==0) {
+            if (todayStart != null && DateUtil.daysofTwo(new Date(), start) == 0) {
                 return ServerResponse.createByErrorMessage("工序今日已开工，请勿选择今日时间！");
             }
-            Date end =  DateUtil.toDate(endDate);
-
-
+            Date end = DateUtil.convert(endDate, format);
             HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
             hfa.setHouseFlowId(houseFlowId);//工序id
             hfa.setWorkerId(houseFlow.getWorkerId());//工人id
