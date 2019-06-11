@@ -209,7 +209,7 @@ public class WorkerService {
                     if (houseFlowApplies.size() > 0) {
                         newDate = houseFlowApplies.get(0).getModifyDate();
                     }
-                    long num = DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
+                    long num = 1+ DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
                     if (suspendDay == null) {
                         totalDay = num;//总开工天数
                     } else {

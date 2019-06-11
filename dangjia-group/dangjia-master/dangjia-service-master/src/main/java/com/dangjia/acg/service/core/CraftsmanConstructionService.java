@@ -475,7 +475,7 @@ public class CraftsmanConstructionService {
         if (earliestTime != null) {
             Date EarliestDay = earliestTime.getCreateDate();//最早开工时间
             Date newDate = new Date();
-            totalDay = DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
+            totalDay = 1+ DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
             if (suspendDay != null) {
                 totalDay = totalDay - suspendDay;
                 if (totalDay <= 0) totalDay = 0;
