@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.app.core;
 
 import com.dangjia.acg.api.app.core.HouseFlowApplyAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
 import com.dangjia.acg.service.core.TimingApplyService;
@@ -23,44 +24,46 @@ public class HouseFlowApplyController implements HouseFlowApplyAPI {
 
     @Override
     @ApiMethod
-    public void supCouponApply(){
+    public void supCouponApply() {
         timingApplyService.supCouponApply();
     }
 
     @Override
     @ApiMethod
-    public void couponApply(){
+    public void couponApply() {
         timingApplyService.couponApply();
     }
+
     @Override
     @ApiMethod
-    public void absenteeism(){
+    public void absenteeism() {
         timingApplyService.absenteeism();
     }
+
     /**
      * 工匠端工地记录
      */
     @Override
     @ApiMethod
-    public ServerResponse houseRecord(String userToken, String houseId, Integer pageNum, Integer pageSize){
-        return houseFlowApplyService.houseRecord(userToken,houseId,pageNum,pageSize);
+    public ServerResponse houseRecord(String userToken, String houseId, PageDTO pageDTO) {
+        return houseFlowApplyService.houseRecord(userToken, houseId, pageDTO);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse checkWorker(String userToken, String houseFlowApplyId){
-        return houseFlowApplyService.checkWorker(houseFlowApplyId,false);
+    public ServerResponse checkWorker(String userToken, String houseFlowApplyId) {
+        return houseFlowApplyService.checkWorker(houseFlowApplyId, false);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse checkDetail(String userToken, String houseFlowApplyId){
+    public ServerResponse checkDetail(String userToken, String houseFlowApplyId) {
         return houseFlowApplyService.checkDetail(houseFlowApplyId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse stewardCheckDetail(String userToken,String houseFlowApplyId){
+    public ServerResponse stewardCheckDetail(String userToken, String houseFlowApplyId) {
         return houseFlowApplyService.stewardCheckDetail(houseFlowApplyId);
     }
 }

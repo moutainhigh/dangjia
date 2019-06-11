@@ -21,8 +21,8 @@ public class WarehouseController implements WarehouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse warehouseList( String  userToken, PageDTO pageDTO, String houseId, String categoryId, String name, String type){
-        return warehouseService.warehouseList(userToken,pageDTO.getPageNum(),pageDTO.getPageSize(),houseId,categoryId,name,type);
+    public ServerResponse warehouseList(String userToken, PageDTO pageDTO, String houseId, String categoryId, String name, String type) {
+        return warehouseService.warehouseList(userToken, pageDTO, houseId, categoryId, name, type);
     }
 
     /**
@@ -30,7 +30,7 @@ public class WarehouseController implements WarehouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse warehouseGmList(HttpServletRequest request,String  userToken,String houseId, String name, String type){
-        return warehouseService.warehouseGmList(request,userToken,houseId,name,type);
+    public ServerResponse warehouseGmList(HttpServletRequest request, String userToken, String houseId, String name, String type) {
+        return warehouseService.warehouseGmList(request, userToken, houseId, name, type);
     }
 }

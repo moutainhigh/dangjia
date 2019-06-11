@@ -6,6 +6,7 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.dto.user.PermissionVO;
@@ -65,11 +66,8 @@ public class MainUserController implements MainUserAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getUsers(HttpServletRequest request, Integer pageNum, Integer pageSize, UserSearchDTO userSearch) {
-        logger.debug("分页查询用户列表！搜索条件：userSearch：" + userSearch + ",pageNum:" + pageNum
-                + ",每页记录数量pageSize:" + pageSize);
-        ServerResponse pdr = userService.getUsers(userSearch, pageNum, pageSize);
-        return pdr;
+    public ServerResponse getUsers(HttpServletRequest request, PageDTO pageDTO, UserSearchDTO userSearch) {
+        return userService.getUsers(userSearch, pageDTO);
     }
 
     /**
@@ -106,8 +104,8 @@ public class MainUserController implements MainUserAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setReceiveUser(HttpServletRequest request, String id,Integer type) {
-        return userService.setReceiveUser(id,type);
+    public ServerResponse setReceiveUser(HttpServletRequest request, String id, Integer type) {
+        return userService.setReceiveUser(id, type);
     }
 
     /**
@@ -189,7 +187,7 @@ public class MainUserController implements MainUserAPI {
     @ApiMethod
     public ServerResponse delUser(HttpServletRequest request, String id) {
         logger.debug("删除用户！id:" + id);
-        ServerResponse msg = null;
+        ServerResponse msg;
         try {
             if (null == id) {
                 logger.debug("删除用户，结果=请求参数有误，请您稍后再试");
@@ -223,7 +221,7 @@ public class MainUserController implements MainUserAPI {
     @ApiMethod
     public ServerResponse recoverUser(HttpServletRequest request, String id) {
         logger.debug("恢复用户！id:" + id);
-        ServerResponse msg = null;
+        ServerResponse msg;
         try {
             String userID = request.getParameter(Constants.USERID);
             MainUser existUser = redisClient.getCache(Constants.USER_KEY + userID, MainUser.class);
@@ -288,7 +286,7 @@ public class MainUserController implements MainUserAPI {
     public ServerResponse login(HttpServletRequest request,
                                 UserDTO user, boolean rememberMe) {
         logger.debug("用户登录，请求参数=member:" + user + "，是否记住我：" + rememberMe);
-        ServerResponse msg = null;
+        ServerResponse msg;
         if (null == user) {
             return ServerResponse.createByErrorMessage("请求参数有误，请您稍后再试");
         }

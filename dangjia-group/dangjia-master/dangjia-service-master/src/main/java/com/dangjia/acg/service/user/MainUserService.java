@@ -2,6 +2,7 @@ package com.dangjia.acg.service.user;
 
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
@@ -47,7 +48,7 @@ public class MainUserService {
     @Autowired
     private RedisClient redisClient;
 
-    public ServerResponse getUsers(UserSearchDTO userSearch, int pageNum, int pageSize) {
+    public ServerResponse getUsers(UserSearchDTO userSearch, PageDTO pageDTO) {
         // 时间处理
         if (null != userSearch) {
             if (StringUtils.isNotEmpty(userSearch.getInsertTimeStart())
@@ -68,7 +69,7 @@ public class MainUserService {
                 }
             }
         }
-        PageHelper.startPage(pageNum, pageSize);
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<UserRoleDTO> urList = userMapper.getUsers(userSearch);
         // 获取分页查询后的数据
         PageInfo pageInfo = new PageInfo(urList);
@@ -226,7 +227,7 @@ public class MainUserService {
      * @param id
      * @return
      */
-    public ServerResponse setReceiveUser(String id,Integer type) {
+    public ServerResponse setReceiveUser(String id, Integer type) {
         try {
             MainUser oldMainUser = userMapper.getUserByReceive(type);
             if (oldMainUser != null) { //把之前的 坐席用户 改为 非坐席

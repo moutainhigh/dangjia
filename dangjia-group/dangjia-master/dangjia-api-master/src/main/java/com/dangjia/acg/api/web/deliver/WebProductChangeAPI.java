@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.web.deliver;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,11 +19,10 @@ public interface WebProductChangeAPI {
     @PostMapping(value = "web/deliver/productChange/queryChangeOrderState")
     @ApiOperation(value = "查询换货单列表", notes = "查询换货单列表")
     ServerResponse queryChangeOrderState(@RequestParam("houseId") String houseId,
-                                      @RequestParam("pageNum") Integer pageNum,
-                                      @RequestParam("pageSize") Integer pageSize,
-                                      @RequestParam("beginDate") String beginDate,
-                                      @RequestParam("endDate") String endDate,
-                                      @RequestParam("likeAddress") String likeAddress);
+                                         @RequestParam("pageDTO") PageDTO pageDTO,
+                                         @RequestParam("beginDate") String beginDate,
+                                         @RequestParam("endDate") String endDate,
+                                         @RequestParam("likeAddress") String likeAddress);
 
     @PostMapping("web/deliver/productChange/queryChangeDetail")
     @ApiOperation(value = "换货详情", notes = "换货详情")

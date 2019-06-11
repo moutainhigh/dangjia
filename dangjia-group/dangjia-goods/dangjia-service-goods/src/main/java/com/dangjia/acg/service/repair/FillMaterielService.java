@@ -6,6 +6,7 @@ import com.dangjia.acg.api.data.GetForBudgetAPI;
 import com.dangjia.acg.api.data.TechnologyRecordAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.GoodsDTO;
@@ -59,6 +60,7 @@ public class FillMaterielService {
 
     @Autowired
     private IGoodsMapper goodsMapper;
+
     /**
      * 管家审核验收申请
      * 材料审查
@@ -164,9 +166,9 @@ public class FillMaterielService {
                 Warehouse warehouse = JSON.parseObject(JSON.toJSONString(warehouseStr), Warehouse.class);
                 if (warehouse == null) continue;
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
-                Product product=iProductMapper.selectByPrimaryKey(warehouse.getProductId());
+                Product product = iProductMapper.selectByPrimaryKey(warehouse.getProductId());
                 warehouseDTO.setMaket(1);
-                if(product.getMaket()==0||product.getType()==0) {
+                if (product.getMaket() == 0 || product.getType() == 0) {
                     warehouseDTO.setMaket(0);
                 }
                 Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
@@ -204,7 +206,7 @@ public class FillMaterielService {
     /**
      * 选择货品
      */
-    public ServerResponse selectProduct(String goodsId, String selectVal,  String attributeIdArr) {
+    public ServerResponse selectProduct(String goodsId, String selectVal, String attributeIdArr) {
         return actuaryOperationService.selectProduct(goodsId, selectVal, attributeIdArr, "");
     }
 
@@ -213,8 +215,9 @@ public class FillMaterielService {
      * 工匠补货查询商品库普通材料
      * 是大管家就查询商品库服务材料
      */
-    public ServerResponse repairLibraryMaterial(String userToken, String categoryId, String name, Integer pageNum, Integer pageSize) {
+    public ServerResponse repairLibraryMaterial(String userToken, String categoryId, String name, PageDTO pageDTO) {
         try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             if (accessToken == null) {
                 return ServerResponse.createbyUserTokenError();
@@ -228,7 +231,6 @@ public class FillMaterielService {
             if (worker.getWorkerType() == 3) {//大管家
                 productType = "1";
             }
-            PageHelper.startPage(pageNum, pageSize);
             List<Product> productList = iProductMapper.queryProductData(name, categoryId, productType, null);
             PageInfo pageResult = new PageInfo(productList);
             if (productList.size() > 0) {
@@ -251,7 +253,7 @@ public class FillMaterielService {
     /**
      * 工匠补查询精算内货品
      */
-    public ServerResponse workerTypeBudget(String userToken, String houseId, String categoryId, String name, Integer pageNum, Integer pageSize) {
+    public ServerResponse workerTypeBudget(String userToken, String houseId, String categoryId, String name, PageDTO pageDTO) {
         try {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             if (accessToken == null) {
@@ -261,8 +263,8 @@ public class FillMaterielService {
             if (worker == null) {
                 return ServerResponse.createbyUserTokenError();
             }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            PageHelper.startPage(pageNum, pageSize);
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name, "0");
             PageInfo pageResult = new PageInfo(budgetMaterialList);
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
@@ -304,10 +306,10 @@ public class FillMaterielService {
      * 查询工序材料
      */
     public ServerResponse repairBudgetMaterial(String workerTypeId, String categoryId, String houseId, String productName, String productType,
-                                               Integer pageNum, Integer pageSize) {
+                                               PageDTO pageDTO) {
         try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            PageHelper.startPage(pageNum, pageSize);
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(workerTypeId, houseId, categoryId, productName, productType);
             PageInfo pageResult = new PageInfo(budgetMaterialList);
             List<BudgetMaterialDTO> budgetMaterialDTOS = new ArrayList<>();

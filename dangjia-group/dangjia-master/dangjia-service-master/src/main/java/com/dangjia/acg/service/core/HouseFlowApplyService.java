@@ -2,6 +2,7 @@ package com.dangjia.acg.service.core;
 
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
@@ -11,7 +12,6 @@ import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
@@ -73,25 +73,15 @@ public class HouseFlowApplyService {
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
-    private HouseWorkerSupService houseWorkerSupService;
-    @Autowired
-    private IChangeOrderMapper changeOrderMapper;
-    @Autowired
     private ITechnologyRecordMapper technologyRecordMapper;
-
 
 
     /**
      * 工匠端工地记录
      */
-    public ServerResponse houseRecord(String userToken, String houseId, Integer pageNum, Integer pageSize){
-        try{
-            if(pageNum==null){
-                pageNum=1;
-            }
-            if(pageSize==null){
-                pageSize=10;
-            }
+    public ServerResponse houseRecord(String userToken, String houseId, PageDTO pageDTO) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Map<Integer, String> applyTypeMap = new HashMap<>();
             applyTypeMap.put(DjConstants.ApplyType.MEIRI_WANGGONG, "每日完工");
             applyTypeMap.put(DjConstants.ApplyType.JIEDUAN_WANGONG, "阶段完工");
@@ -102,13 +92,12 @@ public class HouseFlowApplyService {
             applyTypeMap.put(DjConstants.ApplyType.WUREN_XUNCHA, "巡查");
             applyTypeMap.put(DjConstants.ApplyType.ZUIJIA_XUNCHA, "巡查");
 
-            List<HouseFlowApplyDTO> houseFlowApplyDTOList = new ArrayList<HouseFlowApplyDTO>();
+            List<HouseFlowApplyDTO> houseFlowApplyDTOList = new ArrayList<>();
             HouseWorker gjhouseWorker = houseWorkerMapper.getHwByHidAndWtype(houseId, 3);
             Member worker2 = memberMapper.selectByPrimaryKey(gjhouseWorker.getWorkerId());//根据工匠id查询工匠信息详情
-            PageHelper.startPage(pageNum, pageSize);
             List<HouseWorker> listHouseWorker = houseWorkerMapper.paidListByHouseId(houseId);
-            for(HouseWorker houseWorker : listHouseWorker){
-                Member member=memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
+            for (HouseWorker houseWorker : listHouseWorker) {
+                Member member = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
                 HouseFlowApplyDTO houseFlowApplyDTO = new HouseFlowApplyDTO();
                 houseFlowApplyDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(houseWorker.getWorkerTypeId()).getName());
                 houseFlowApplyDTO.setNameA(member.getName());
@@ -116,14 +105,14 @@ public class HouseFlowApplyService {
                 houseFlowApplyDTO.setWorkerId(houseWorker.getWorkerId());
                 houseFlowApplyDTO.setManagerId(member.getId());
                 Example example = new Example(HouseFlowApply.class);
-                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID,houseId).andEqualTo(HouseFlowApply.WORKER_ID,member.getId());
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andEqualTo(HouseFlowApply.WORKER_ID, member.getId());
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
-                List<Map> mapList=new ArrayList<>();
-                for(HouseFlowApply hfa : houseFlowApplyList){
-                    Map map=new HashMap();
-                    map.put(HouseFlowApply.CREATE_DATE,hfa.getCreateDate());
-                    map.put(Member.NAME,worker2.getName());
-                    map.put(HouseFlowApply.APPLY_TYPE+"Name",applyTypeMap.get(hfa.getApplyType()));
+                List<Map> mapList = new ArrayList<>();
+                for (HouseFlowApply hfa : houseFlowApplyList) {
+                    Map map = new HashMap();
+                    map.put(HouseFlowApply.CREATE_DATE, hfa.getCreateDate());
+                    map.put(Member.NAME, worker2.getName());
+                    map.put(HouseFlowApply.APPLY_TYPE + "Name", applyTypeMap.get(hfa.getApplyType()));
                     mapList.add(map);
                 }
                 houseFlowApplyDTO.setList(mapList);
@@ -131,7 +120,7 @@ public class HouseFlowApplyService {
             }
             PageInfo pageResult = new PageInfo(houseFlowApplyDTOList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -141,16 +130,16 @@ public class HouseFlowApplyService {
      * 业主审核工匠
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse checkWorker(String houseFlowApplyId,boolean isAuto){
+    public ServerResponse checkWorker(String houseFlowApplyId, boolean isAuto) {
         try {
             //HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             HouseFlowApply hfa = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
-            if(hfa.getMemberCheck() == 1||hfa.getMemberCheck() == 3){
+            if (hfa.getMemberCheck() == 1 || hfa.getMemberCheck() == 3) {
                 return ServerResponse.createByErrorMessage("重复审核");
             }
-            if(isAuto){
+            if (isAuto) {
                 hfa.setMemberCheck(3);
-            }else{
+            } else {
                 hfa.setMemberCheck(1);
             }
             hfa.setSupervisorCheck(1);
@@ -165,9 +154,9 @@ public class HouseFlowApplyService {
             /*
             节点审核通过
              */
-            technologyRecordMapper.passTecRecord(hwo.getHouseId(),hwo.getWorkerTypeId());
+            technologyRecordMapper.passTecRecord(hwo.getHouseId(), hwo.getWorkerTypeId());
 
-            if(hfa.getApplyType() == 2){//整体完工
+            if (hfa.getApplyType() == 2) {//整体完工
                 /**验证未处理补人工订单*/
 //                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(hfa.getHouseId(),hfa.getWorkerTypeId());
 //                if (changeOrderList.size() > 0){
@@ -175,20 +164,20 @@ public class HouseFlowApplyService {
 //                }
 
                 //修改进程
-                HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(),hwo.getWorkerTypeId());
-                if(houseFlow.getWorkSteta()==2){
+                HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(), hwo.getWorkerTypeId());
+                if (houseFlow.getWorkSteta() == 2) {
                     return ServerResponse.createBySuccessMessage("操作成功");
                 }
 
                 houseFlow.setWorkSteta(2);
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                 //处理工人拿钱
-                workerMoney(hwo,hfa);
+                workerMoney(hwo, hfa);
                 //大管家拿钱
                 stewardMoney(hfa);
                 //设置保险时间
                 WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByWorkerTypeId(hwo.getWorkerTypeId(), hwo.getHouseId());
-                if(wtso != null){
+                if (wtso != null) {
                     WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());//获得类型算出时间
                     int month = (wts.getMonth()); //获取保险时长(月)
                     Calendar cal = Calendar.getInstance();
@@ -216,24 +205,24 @@ public class HouseFlowApplyService {
 //                    }
 //                }
 
-            }else if(hfa.getApplyType() == 1){//阶段完工
+            } else if (hfa.getApplyType() == 1) {//阶段完工
 //                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(hfa.getHouseId(),hfa.getWorkerTypeId());
 //                if (changeOrderList.size() > 0){
 //                    return ServerResponse.createByErrorMessage("该工种有未处理人工变更单,通知管家处理");
 //                }
 
                 //修改进程
-                HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(),hwo.getWorkerTypeId());
-                if(hf.getWorkSteta()==1){
+                HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(), hwo.getWorkerTypeId());
+                if (hf.getWorkSteta() == 1) {
                     return ServerResponse.createBySuccessMessage("操作成功");
                 }
                 hf.setWorkSteta(1);
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
 
                 //处理押金
-                deposit(hwo,hfa);
+                deposit(hwo, hfa);
                 //处理工人拿钱
-                workerMoney(hwo,hfa);
+                workerMoney(hwo, hfa);
                 //大管家拿钱
                 stewardMoney(hfa);
 
@@ -251,17 +240,17 @@ public class HouseFlowApplyService {
 //                        houseFlowMapper.updateByPrimaryKeySelective(houseFlowList);
 //                    }
 //                }
-                Map<String,String> temp_para=new HashMap();
+                Map<String, String> temp_para = new HashMap();
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
                 House house = houseMapper.selectByPrimaryKey(hfa.getHouseId());
-                temp_para.put("house_name",house.getHouseName());
-                temp_para.put("worker_name",workerType.getName()+"阶段完工");
-                JsmsUtil.sendSMS("15675101794","164425",temp_para);
-            }else if(hfa.getApplyType() == 0){ //每日完工,处理钱
+                temp_para.put("house_name", house.getHouseName());
+                temp_para.put("worker_name", workerType.getName() + "阶段完工");
+                JsmsUtil.sendSMS("15675101794", "164425", temp_para);
+            } else if (hfa.getApplyType() == 0) { //每日完工,处理钱
                 //算每日积分
                 updateDayIntegral(hfa);
 
-                if(hwo.getHaveMoney() == null){//已获工钱
+                if (hwo.getHaveMoney() == null) {//已获工钱
                     hwo.setHaveMoney(new BigDecimal(0.0));
                 }
                 hwo.setHaveMoney(hwo.getHaveMoney().add(hfa.getApplyMoney()));
@@ -271,7 +260,7 @@ public class HouseFlowApplyService {
                 //记录流水
                 Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
                 BigDecimal surplusMoney = worker.getSurplusMoney().add(hfa.getApplyMoney());
-                if(hfa.getApplyMoney().doubleValue()>0) {
+                if (hfa.getApplyMoney().doubleValue() > 0) {
                     WorkerDetail workerDetail = new WorkerDetail();
                     workerDetail.setName("每日完工");
                     workerDetail.setWorkerId(hwo.getWorkerId());
@@ -287,18 +276,18 @@ public class HouseFlowApplyService {
                 }
 
                 //处理工钱
-                if(worker.getHaveMoney() == null){//工人已获取
+                if (worker.getHaveMoney() == null) {//工人已获取
                     worker.setHaveMoney(new BigDecimal(0.0));
                 }
                 worker.setHaveMoney(worker.getHaveMoney().add(hfa.getApplyMoney()));
 
-                if(worker.getSurplusMoney() == null){//可取余额 赋初始值为0
+                if (worker.getSurplusMoney() == null) {//可取余额 赋初始值为0
                     worker.setSurplusMoney(new BigDecimal(0.0));
                 }
-                if(worker.getRetentionMoney() == null){
+                if (worker.getRetentionMoney() == null) {
                     worker.setRetentionMoney(new BigDecimal(0.0));
                 }
-                if(hfa.getApplyMoney().doubleValue()>0){//大于0
+                if (hfa.getApplyMoney().doubleValue() > 0) {//大于0
                     worker.setSurplusMoney(surplusMoney);
                 }
                 memberMapper.updateByPrimaryKeySelective(worker);
@@ -308,43 +297,45 @@ public class HouseFlowApplyService {
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
 
             return ServerResponse.createBySuccessMessage("操作成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ServerResponse.createByErrorMessage("审核失败");
         }
     }
 
-    /**每日完工计分*/
-    private void updateDayIntegral(HouseFlowApply houseFlowApply){
-        try{
+    /**
+     * 每日完工计分
+     */
+    private void updateDayIntegral(HouseFlowApply houseFlowApply) {
+        try {
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             BigDecimal score = new BigDecimal("0.05");
-            if(worker.getEvaluationScore().compareTo(new BigDecimal("70"))==-1){
+            if (worker.getEvaluationScore().compareTo(new BigDecimal("70")) == -1) {
 
                 score = score.multiply(new BigDecimal("1.6"));
-            }else if((worker.getEvaluationScore().compareTo(new BigDecimal("70"))==1||
-                    worker.getEvaluationScore().compareTo(new BigDecimal("70"))==0)&&
-                    worker.getEvaluationScore().compareTo(new BigDecimal("80"))==-1){
+            } else if ((worker.getEvaluationScore().compareTo(new BigDecimal("70")) == 1 ||
+                    worker.getEvaluationScore().compareTo(new BigDecimal("70")) == 0) &&
+                    worker.getEvaluationScore().compareTo(new BigDecimal("80")) == -1) {
 
                 score = score.multiply(new BigDecimal("0.8"));
-            }else if( worker.getEvaluationScore().compareTo(new BigDecimal("80")) >= 0 &&
-                    worker.getEvaluationScore().compareTo(new BigDecimal("90"))==-1){
+            } else if (worker.getEvaluationScore().compareTo(new BigDecimal("80")) >= 0 &&
+                    worker.getEvaluationScore().compareTo(new BigDecimal("90")) == -1) {
 
                 score = score.multiply(new BigDecimal("0.4"));
-            }else if( worker.getEvaluationScore().compareTo(new BigDecimal("90")) >= 0){
+            } else if (worker.getEvaluationScore().compareTo(new BigDecimal("90")) >= 0) {
 
                 score = score.multiply(new BigDecimal("0.2"));
             }
 
-            if(worker.getEvaluationScore()==null){
+            if (worker.getEvaluationScore() == null) {
                 worker.setEvaluationScore(new BigDecimal("60.0"));
             }
             worker.setEvaluationScore(worker.getEvaluationScore().add(score));
             memberMapper.updateByPrimaryKeySelective(worker);
 
-            if(score.compareTo(new BigDecimal("0")) == 1){
-                WorkIntegral workIntegral=new WorkIntegral();
+            if (score.compareTo(new BigDecimal("0")) == 1) {
+                WorkIntegral workIntegral = new WorkIntegral();
                 workIntegral.setWorkerId(worker.getId());
                 workIntegral.setHouseId(houseFlowApply.getHouseId());
                 workIntegral.setStatus(0);
@@ -352,16 +343,16 @@ public class HouseFlowApplyService {
                 workIntegral.setBriefed("每日完工");
                 workIntegralMapper.insert(workIntegral);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     /**
-     *  普通工匠的阶段完工、整体完工审核通过后
-     *  大管家拿相应验收收入
+     * 普通工匠的阶段完工、整体完工审核通过后
+     * 大管家拿相应验收收入
      **/
-    public void stewardMoney(HouseFlowApply hfa){
+    public void stewardMoney(HouseFlowApply hfa) {
         //这是工匠的houseFlowId
         String houseFlowId = hfa.getHouseFlowId();
 
@@ -371,27 +362,27 @@ public class HouseFlowApplyService {
         Evaluate evaluate = evaluateMapper.getForCountMoney(houseFlowId, hfa.getApplyType(), hwo.getWorkerId());
 
         int star;
-        if(evaluate == null){
+        if (evaluate == null) {
             star = 0;
-        }else{
+        } else {
             star = evaluate.getStar();//几星？
         }
         /*****兼容老工地该字段没有初始值*****/
-        if(hfa.getSupervisorMoney() == null){
+        if (hfa.getSupervisorMoney() == null) {
             hfa.setSupervisorMoney(new BigDecimal(0));
         }
-        if(hwo.getDeductPrice() == null){
+        if (hwo.getDeductPrice() == null) {
             hwo.setDeductPrice(new BigDecimal(0));
         }
         //评分扣钱
         BigDecimal deductPrice = new BigDecimal(0);
         BigDecimal supervisorMoney;
-        if(star == 0 || star == 5){
+        if (star == 0 || star == 5) {
             supervisorMoney = hfa.getSupervisorMoney();//大管家的验收收入
-        }else if(star == 3 || star == 4){
+        } else if (star == 3 || star == 4) {
             supervisorMoney = hfa.getSupervisorMoney().multiply(new BigDecimal(0.8));
             deductPrice = hfa.getSupervisorMoney().subtract(supervisorMoney);
-        }else{
+        } else {
             supervisorMoney = new BigDecimal(0);//为0元
             deductPrice = hfa.getSupervisorMoney();
         }
@@ -403,18 +394,18 @@ public class HouseFlowApplyService {
 
         //钱包处理大管家的工钱
         Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
-        WorkerType workerType=workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
         //管家押金处理
         HouseFlowApply houseFlowApply = new HouseFlowApply();
         houseFlowApply.setWorkerType(3);
         houseFlowApply.setWorkerId(worker.getId());
         houseFlowApply.setWorkerTypeId(worker.getWorkerTypeId());
         houseFlowApply.setHouseId(hwo.getHouseId());
-        deposit(hwo,houseFlowApply);
+        deposit(hwo, houseFlowApply);
 
         BigDecimal surplusMoney = worker.getSurplusMoney().add(supervisorMoney);
         //记录流水
-        if(supervisorMoney.doubleValue()>0) {
+        if (supervisorMoney.doubleValue() > 0) {
             WorkerDetail workerDetail = new WorkerDetail();
             if (hfa.getApplyType() == 2) {//整体完工申请
                 workerDetail.setName("整体(" + workerType.getName() + ")验收收入");
@@ -434,42 +425,44 @@ public class HouseFlowApplyService {
             workerDetailMapper.insert(workerDetail);
         }
         //处理工钱
-        if(worker.getHaveMoney() == null){//工人已获取
+        if (worker.getHaveMoney() == null) {//工人已获取
             worker.setHaveMoney(new BigDecimal(0.0));
         }
         worker.setHaveMoney(worker.getHaveMoney().add(supervisorMoney));
 
-        if(worker.getSurplusMoney() == null){//可取余额 赋初始值为0
+        if (worker.getSurplusMoney() == null) {//可取余额 赋初始值为0
             worker.setSurplusMoney(new BigDecimal(0.0));
         }
-        if(supervisorMoney.doubleValue()>0){//大于0
+        if (supervisorMoney.doubleValue() > 0) {//大于0
             worker.setSurplusMoney(surplusMoney);
         }
         memberMapper.updateByPrimaryKeySelective(worker);
     }
 
-    /**处理工人押金*/
-    public void deposit(HouseWorkerOrder hwo,HouseFlowApply hfa){
-        if(hfa.getWorkerType() >= 3 && hfa.getWorkerType() != 4){//精算，设计，拆除除外
+    /**
+     * 处理工人押金
+     */
+    public void deposit(HouseWorkerOrder hwo, HouseFlowApply hfa) {
+        if (hfa.getWorkerType() >= 3 && hfa.getWorkerType() != 4) {//精算，设计，拆除除外
             Member worker = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
             /*
              * 工匠积分70分以下每单滞留金无上限,70以上含80以下2000元
              * 80含以上90以下1500元,90分含以上500元
              */
-            if(worker.getEvaluationScore().doubleValue()>=70 && worker.getEvaluationScore().doubleValue()<80){
+            if (worker.getEvaluationScore().doubleValue() >= 70 && worker.getEvaluationScore().doubleValue() < 80) {
                 worker.setDeposit(new BigDecimal(2000));//设置滞留金2000元
-            }else if(worker.getEvaluationScore().doubleValue()>=80 && worker.getEvaluationScore().doubleValue()<90){
+            } else if (worker.getEvaluationScore().doubleValue() >= 80 && worker.getEvaluationScore().doubleValue() < 90) {
                 worker.setDeposit(new BigDecimal(1500));//设置滞留金上限1500元
-            }else if(worker.getEvaluationScore().doubleValue()>=90){
+            } else if (worker.getEvaluationScore().doubleValue() >= 90) {
                 worker.setDeposit(new BigDecimal(500));//设置滞留金上限500元
-            }else{
+            } else {
                 worker.setDeposit(new BigDecimal(99999));//重新设置无上限
             }
             //实际滞留金减上限
             BigDecimal bd = worker.getRetentionMoney().subtract(worker.getDeposit());
-            if(bd.doubleValue()>0){
+            if (bd.doubleValue() > 0) {
                 //记录流水
-                BigDecimal surplusMoney=worker.getSurplusMoney().add(bd);
+                BigDecimal surplusMoney = worker.getSurplusMoney().add(bd);
                 WorkerDetail workerDetail = new WorkerDetail();
                 workerDetail.setName("涨积分退滞留金");
                 workerDetail.setWorkerId(worker.getId());
@@ -486,20 +479,20 @@ public class HouseFlowApplyService {
             }
             //BigDecimal deposit = workDepositService.getWorkDepositByList().getDeposit();//获取押金比例 5%
             BigDecimal deposit = new BigDecimal(0.05);
-            if(worker.getRetentionMoney() == null){
+            if (worker.getRetentionMoney() == null) {
                 worker.setRetentionMoney(new BigDecimal(0.0));
             }
             //申请的钱为空时将不考虑滞留金转入
-            if(hfa!=null&&hfa.getApplyMoney() != null&&worker.getRetentionMoney().doubleValue() < worker.getDeposit().doubleValue()){//押金没收够并且没有算过押金
+            if (hfa != null && hfa.getApplyMoney() != null && worker.getRetentionMoney().doubleValue() < worker.getDeposit().doubleValue()) {//押金没收够并且没有算过押金
                 //算订单的5%
                 BigDecimal mid = hwo.getWorkPrice().multiply(deposit);
-                if(!(worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == -1 ||
-                        worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == 0)){
+                if (!(worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == -1 ||
+                        worker.getRetentionMoney().add(mid).compareTo(worker.getDeposit()) == 0)) {
                     mid = worker.getDeposit().subtract(worker.getRetentionMoney());//只收这么多了
                 }
 
-                BigDecimal retentionMoney=worker.getRetentionMoney().add(mid);
-                BigDecimal haveMoney=worker.getHaveMoney().add(mid);
+                BigDecimal retentionMoney = worker.getRetentionMoney().add(mid);
+                BigDecimal haveMoney = worker.getHaveMoney().add(mid);
                 worker.setHaveMoney(haveMoney);
                 worker.setRetentionMoney(retentionMoney);
                 //记录流水
@@ -519,20 +512,22 @@ public class HouseFlowApplyService {
                 hwo.setRetentionMoney(mid);
 
                 //处理阶段申请的钱，将减去滞留金的钱，存入账户余额
-                BigDecimal applyMoney=  hfa.getApplyMoney().subtract(mid);
+                BigDecimal applyMoney = hfa.getApplyMoney().subtract(mid);
                 hfa.setApplyMoney(applyMoney);
             }
             memberMapper.updateByPrimaryKeySelective(worker);
         }
     }
 
-    /**工人拿钱*/
-    private void workerMoney(HouseWorkerOrder hwo,HouseFlowApply hfa){
-        try{
+    /**
+     * 工人拿钱
+     */
+    private void workerMoney(HouseWorkerOrder hwo, HouseFlowApply hfa) {
+        try {
             Member worker = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
-            WorkerType workerType=workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
-            if(hfa.getApplyType() == 1||hfa.getApplyType() == 2){//整体/阶段完工申请
-                if(hwo.getRepairPrice().compareTo(new BigDecimal(0)) > 0){
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
+            if (hfa.getApplyType() == 1 || hfa.getApplyType() == 2) {//整体/阶段完工申请
+                if (hwo.getRepairPrice().compareTo(new BigDecimal(0)) > 0) {
                     /*有补的人工钱加入工人流水*/
                     BigDecimal surplusMoney = worker.getSurplusMoney().add(hwo.getRepairPrice());
                     BigDecimal workerPrice = worker.getWorkerPrice().add(hwo.getRepairPrice());
@@ -541,7 +536,7 @@ public class HouseFlowApplyService {
                     worker.setHaveMoney(haveMoney);//可取 + 滞留金 + 补人工
                     worker.setSurplusMoney(surplusMoney);//可取钱
 
-                    if(hwo.getRepairPrice().doubleValue()>0) {
+                    if (hwo.getRepairPrice().doubleValue() > 0) {
                         WorkerDetail workerDetail = new WorkerDetail();
                         if (hfa.getApplyType() == 2) {//整体完工申请
                             workerDetail.setName(workerType.getName() + "整体完工补人工钱");
@@ -563,14 +558,14 @@ public class HouseFlowApplyService {
                 }
             }
             //处理工人得到的钱
-            if(hwo.getHaveMoney() == null){
+            if (hwo.getHaveMoney() == null) {
                 hwo.setHaveMoney(new BigDecimal(0.0));
             }
             //处理工人评分扣钱
-            if(hwo.getDeductPrice() == null){
+            if (hwo.getDeductPrice() == null) {
                 hwo.setDeductPrice(new BigDecimal(0.0));
             }
-            HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(),hwo.getWorkerTypeId());
+            HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(), hwo.getWorkerTypeId());
 
             //查工匠被管家的评价
             Evaluate e1 = evaluateMapper.getForCountMoneySup(hf.getId(), hfa.getApplyType(), hwo.getWorkerId());
@@ -578,30 +573,30 @@ public class HouseFlowApplyService {
             Evaluate e2 = evaluateMapper.getForCountMoney(hf.getId(), hfa.getApplyType(), hwo.getWorkerId());
             int star1;
             int star2;
-            if(e1 == null){
+            if (e1 == null) {
                 star1 = 5;
-            }else{
+            } else {
                 star1 = e1.getStar();//几星？
             }
-            if(e2 == null){
+            if (e2 == null) {
                 star2 = 5;
-            }else{
+            } else {
                 star2 = e2.getStar();//几星？
             }
-            Double star = (double) ((star1 + star2)/2);
+            Double star = (double) ((star1 + star2) / 2);
             //工人钱
             BigDecimal applymoney = new BigDecimal(0);
             //评分扣钱
             BigDecimal deductPrice = new BigDecimal(0);
 
-            if(star >= 4){
+            if (star >= 4) {
                 applymoney = hfa.getApplyMoney();
-            }else if(star > 2){
+            } else if (star > 2) {
                 applymoney = hfa.getApplyMoney().multiply(new BigDecimal(0.97));
-                deductPrice= hfa.getApplyMoney().subtract(applymoney);
-            }else if(star <= 2){
+                deductPrice = hfa.getApplyMoney().subtract(applymoney);
+            } else {
                 applymoney = hfa.getApplyMoney().multiply(new BigDecimal(0.95));
-                deductPrice= hfa.getApplyMoney().subtract(applymoney);
+                deductPrice = hfa.getApplyMoney().subtract(applymoney);
             }
             //整体完工前均能发起，阶段完工发起的，阶段完工时拿钱（还可拿钱立即体现增加金额），
             // 阶段完工后整体完工前发起的，整体完工时拿钱（还可拿钱立即体现增加金额）
@@ -613,7 +608,7 @@ public class HouseFlowApplyService {
             BigDecimal haveMoney = worker.getHaveMoney().add(applymoney);
             BigDecimal surplusMoney = worker.getSurplusMoney().add(applymoney);
             //记录流水
-            if(applymoney.doubleValue()>0) {
+            if (applymoney.doubleValue() > 0) {
                 WorkerDetail workerDetail = new WorkerDetail();
                 if (hfa.getApplyType() == 2) {//整体完工申请
                     workerDetail.setName(workerType.getName() + "整体完工");
@@ -634,47 +629,46 @@ public class HouseFlowApplyService {
             }
 
 
-            if(worker.getHaveMoney() == null){//工人已获取
+            if (worker.getHaveMoney() == null) {//工人已获取
                 worker.setHaveMoney(new BigDecimal(0.0));
             }
-            if(worker.getSurplusMoney() == null){//可取余额 赋初始值为0
+            if (worker.getSurplusMoney() == null) {//可取余额 赋初始值为0
                 worker.setSurplusMoney(new BigDecimal(0.0));
             }
 
             worker.setHaveMoney(haveMoney);
 
-            if(applymoney.doubleValue()>0){//大于0
+            if (applymoney.doubleValue() > 0) {//大于0
                 worker.setSurplusMoney(surplusMoney);
             }
 
             //成交量加1
-            if(hfa.getApplyType() == 2){
-                if(worker.getVolume() == null){
+            if (hfa.getApplyType() == 2) {
+                if (worker.getVolume() == null) {
                     worker.setVolume(new BigDecimal(0.0));
                 }
                 worker.setVolume(worker.getVolume().add(new BigDecimal(1)));
             }
             memberMapper.updateByPrimaryKeySelective(worker);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
 
-
     /**
      * 业主审核大管家完工申请
      */
-    public ServerResponse checkSupervisor(String houseFlowApplyId,boolean isAuto){
-        try{
+    public ServerResponse checkSupervisor(String houseFlowApplyId, boolean isAuto) {
+        try {
             HouseFlowApply hfa = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
-            if(hfa.getMemberCheck()==1 || hfa.getMemberCheck()==3){
+            if (hfa.getMemberCheck() == 1 || hfa.getMemberCheck() == 3) {
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
-            WorkerType workerType=workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
-            if(isAuto){
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
+            if (isAuto) {
                 hfa.setMemberCheck(3);//自动通过
-            }else{
+            } else {
                 hfa.setMemberCheck(1);//通过
             }
             hfa.setModifyDate(new Date());
@@ -688,28 +682,28 @@ public class HouseFlowApplyService {
             //查工匠被业主的评价
             Evaluate evaluate = evaluateMapper.getForCountMoney(hfa.getHouseFlowId(), hfa.getApplyType(), hfa.getWorkerId());
             int star;
-            if(evaluate == null){
+            if (evaluate == null) {
                 star = 0;
-            }else{
+            } else {
                 star = evaluate.getStar();//几星？
             }
             //评分扣钱
             BigDecimal deductPrice = new BigDecimal(0);
             //管家钱
             BigDecimal applyMoney;
-            if(star == 5){
+            if (star == 5) {
                 applyMoney = hfa.getApplyMoney();
-            }else if(star == 3 || star == 4){
+            } else if (star == 3 || star == 4) {
                 applyMoney = hfa.getApplyMoney().multiply(new BigDecimal(0.9));
-                deductPrice= hfa.getApplyMoney().subtract(applyMoney);
-            }else{
+                deductPrice = hfa.getApplyMoney().subtract(applyMoney);
+            } else {
                 applyMoney = hfa.getApplyMoney().multiply(new BigDecimal(0.8));
-                deductPrice= hfa.getApplyMoney().subtract(applyMoney);
+                deductPrice = hfa.getApplyMoney().subtract(applyMoney);
             }
 
             //计算大管家整体完工金额
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());  //处理工人评分扣钱
-            if(hwo.getDeductPrice() == null){
+            if (hwo.getDeductPrice() == null) {
                 hwo.setDeductPrice(new BigDecimal(0.0));
             }
             //处理worker表中大管家
@@ -717,7 +711,7 @@ public class HouseFlowApplyService {
             BigDecimal surplusMoney = worker.getSurplusMoney().add(applyMoney);
             //记录流水
             WorkerDetail workerDetail = new WorkerDetail();
-            workerDetail.setName(workerType.getName()+"项目完工收入");
+            workerDetail.setName(workerType.getName() + "项目完工收入");
             workerDetail.setWorkerId(worker.getId());
             workerDetail.setWorkerName(worker.getName());
             workerDetail.setHouseId(hwo.getHouseId());
@@ -749,39 +743,38 @@ public class HouseFlowApplyService {
             houseMapper.updateByPrimaryKeySelective(house);
 
             //处理工钱
-            if(worker.getHaveMoney() == null){//工人已获取
+            if (worker.getHaveMoney() == null) {//工人已获取
                 worker.setHaveMoney(new BigDecimal(0.0));
             }
             worker.setHaveMoney(worker.getHaveMoney().add(applyMoney));
 
-            if(worker.getSurplusMoney() == null){//可取余额 赋初始值为0
+            if (worker.getSurplusMoney() == null) {//可取余额 赋初始值为0
                 worker.setSurplusMoney(new BigDecimal(0.0));
             }
-            if(applyMoney.doubleValue()>0){//大于0
+            if (applyMoney.doubleValue() > 0) {//大于0
                 worker.setSurplusMoney(surplusMoney);
             }
             hwo.setDeductPrice(hwo.getDeductPrice().add(deductPrice));
             hwo.setHaveMoney(hwo.getHaveMoney().add(applyMoney));//已经得到的钱
 
 
-
             //巡查次数结算
-            Example example=new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,hfa.getHouseId())
+            Example example = new Example(HouseFlow.class);
+            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, hfa.getHouseId())
                     .andCondition(" patrol >0  and work_type =4 ");
-            List<HouseFlow> houseFlows=houseFlowMapper.selectByExample(example);
-            Integer patrol=0;
-            if(houseFlows.size()>0){
+            List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+            Integer patrol = 0;
+            if (houseFlows.size() > 0) {
                 for (HouseFlow houseFlow : houseFlows) {
-                    patrol=patrol+houseFlow.getPatrol();
+                    patrol = patrol + houseFlow.getPatrol();
                 }
             }
-            if(hwo.getCheckMoney() == null){//大管家每次巡查得到的钱 累计 赋初始值为0
+            if (hwo.getCheckMoney() == null) {//大管家每次巡查得到的钱 累计 赋初始值为0
                 hwo.setCheckMoney(new BigDecimal(0.0));
             }
-            BigDecimal patrolMoney=hwo.getWorkPrice().multiply(new BigDecimal(0.2));
-            patrolMoney=patrolMoney.subtract(hwo.getCheckMoney());
-            if(patrolMoney.doubleValue()>0) {
+            BigDecimal patrolMoney = hwo.getWorkPrice().multiply(new BigDecimal(0.2));
+            patrolMoney = patrolMoney.subtract(hwo.getCheckMoney());
+            if (patrolMoney.doubleValue() > 0) {
                 if (patrol == 0) {
                     hwo.setHaveMoney(hwo.getHaveMoney().add(patrolMoney));
                     worker.setSurplusMoney(worker.getSurplusMoney().add(patrolMoney));
@@ -794,14 +787,14 @@ public class HouseFlowApplyService {
             houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
 
             //成交量加1
-            if(worker.getVolume()==null){
+            if (worker.getVolume() == null) {
                 worker.setVolume(new BigDecimal(0.0));
             }
             worker.setVolume(worker.getVolume().add(new BigDecimal(1)));
             memberMapper.updateByPrimaryKeySelective(worker);
 
             return ServerResponse.createBySuccessMessage("操作成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
@@ -812,18 +805,18 @@ public class HouseFlowApplyService {
      * 验收详情
      * 1.30 1.31 共用
      */
-    public ServerResponse checkDetail(String houseFlowApplyId){
-        try{
+    public ServerResponse checkDetail(String houseFlowApplyId) {
+        try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             HouseFlowApplyDTO houseFlowApplyDTO = new HouseFlowApplyDTO();
             houseFlowApplyDTO.setHouseId(houseFlowApply.getHouseId());
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
-            String local=configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            if (houseFlowApply.getWorkerType() == 3){//是管家发起的
+            String local = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            if (houseFlowApply.getWorkerType() == 3) {//是管家发起的
                 houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
                 houseFlowApplyDTO.setApplyType(3);//管家提交的整体完工申请
                 houseFlowApplyDTO.setWorkerTypeId(houseFlowApply.getWorkerTypeId());
-                houseFlowApplyDTO.setHeadA(local+worker.getHead());
+                houseFlowApplyDTO.setHeadA(local + worker.getHead());
                 houseFlowApplyDTO.setNameA(worker.getName());
                 houseFlowApplyDTO.setMobileA(worker.getMobile());
                 houseFlowApplyDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId()).getName());
@@ -831,14 +824,14 @@ public class HouseFlowApplyService {
                 example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
                 List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
                 List<String> imageList = new ArrayList<String>();
-                for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList){
-                    imageList.add(local+houseFlowApplyImage.getImageUrl());
+                for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList) {
+                    imageList.add(local + houseFlowApplyImage.getImageUrl());
                 }
-                if(houseFlowApply.getEndDate() != null){
+                if (houseFlowApply.getEndDate() != null) {
                     houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate().getTime() - new Date().getTime()); //业主自动审核时间
                 }
                 houseFlowApplyDTO.setImageList(imageList);
-                houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(),"yyyy-MM-dd HH:mm"));
+                houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));
                 return ServerResponse.createBySuccess("查询管家整体申请成功", houseFlowApplyDTO);
             }
 
@@ -852,28 +845,28 @@ public class HouseFlowApplyService {
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
             houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());
             houseFlowApplyDTO.setWorkerTypeId(houseFlowApply.getWorkerTypeId());
-            houseFlowApplyDTO.setHeadA(local+worker.getHead());
+            houseFlowApplyDTO.setHeadA(local + worker.getHead());
             houseFlowApplyDTO.setNameA(worker.getName());
             houseFlowApplyDTO.setMobileA(worker.getMobile());
             houseFlowApplyDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId()).getName());
-            houseFlowApplyDTO.setHeadB(local+steward.getHead());
+            houseFlowApplyDTO.setHeadB(local + steward.getHead());
             houseFlowApplyDTO.setNameB(steward.getName());
             houseFlowApplyDTO.setMobileB(steward.getMobile());
-            if(houseFlowApply.getEndDate() != null){
+            if (houseFlowApply.getEndDate() != null) {
                 houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate().getTime() - new Date().getTime()); //业主自动审核时间
             }
             Example example = new Example(HouseFlowApplyImage.class);
             example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
             List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
             List<String> imageList = new ArrayList<>();
-            for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList){
-                imageList.add(local+houseFlowApplyImage.getImageUrl());
+            for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList) {
+                imageList.add(local + houseFlowApplyImage.getImageUrl());
             }
             houseFlowApplyDTO.setImageList(imageList);
-            houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(),"yyyy-MM-dd HH:mm"));
+            houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));
             return ServerResponse.createBySuccess("查询成功", houseFlowApplyDTO);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -882,8 +875,8 @@ public class HouseFlowApplyService {
     /**
      * 管家端验收详情
      */
-    public ServerResponse stewardCheckDetail(String houseFlowApplyId){
-        try{
+    public ServerResponse stewardCheckDetail(String houseFlowApplyId) {
+        try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             HouseFlowApplyDTO houseFlowApplyDTO = new HouseFlowApplyDTO();
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
@@ -895,18 +888,18 @@ public class HouseFlowApplyService {
             example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
             List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
             List<String> imageList = new ArrayList<>();
-            for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList){
-                imageList.add(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class)+houseFlowApplyImage.getImageUrl());
+            for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList) {
+                imageList.add(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + houseFlowApplyImage.getImageUrl());
             }
             houseFlowApplyDTO.setImageList(imageList);
-            houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(),"yyyy-MM-dd HH:mm"));
-            if(houseFlowApply.getStartDate() != null){
+            houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));
+            if (houseFlowApply.getStartDate() != null) {
                 houseFlowApplyDTO.setStartDate(houseFlowApply.getStartDate().getTime() - new Date().getTime()); //自动审核时间
             }
 
 
             return ServerResponse.createBySuccess("查询成功", houseFlowApplyDTO);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }

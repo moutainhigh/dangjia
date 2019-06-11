@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.web.deliver;
 
 import com.dangjia.acg.api.web.deliver.WebProductChangeAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.deliver.ProductChangeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,8 @@ public class WebProductChangeController implements WebProductChangeAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryChangeOrderState(String houseId, Integer pageNum, Integer pageSize, String beginDate, String endDate, String likeAddress) {
-        return productChangeService.changeOrderState(houseId, pageNum, pageSize, beginDate, endDate, likeAddress);
+    public ServerResponse queryChangeOrderState(String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+        return productChangeService.changeOrderState(houseId, pageDTO, beginDate, endDate, likeAddress);
     }
 
     @Override

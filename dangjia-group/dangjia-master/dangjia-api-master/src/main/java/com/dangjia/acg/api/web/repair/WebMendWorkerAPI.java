@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.web.repair;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,8 +20,7 @@ public interface WebMendWorkerAPI {
     @PostMapping(value = "web/repair/webMendWorker/workerBackState")
     @ApiOperation(value = "查询退人工列表", notes = "查询退人工列表")
     ServerResponse workerBackState(@RequestParam("houseId") String houseId,
-                                   @RequestParam("pageNum") Integer pageNum,
-                                   @RequestParam("pageSize") Integer pageSize,
+                                   @RequestParam("pageDTO") PageDTO pageDTO,
                                    @RequestParam("beginDate") String beginDate,
                                    @RequestParam("endDate") String endDate,
                                    @RequestParam("likeAddress") String likeAddress);
@@ -32,8 +32,7 @@ public interface WebMendWorkerAPI {
     @PostMapping(value = "web/repair/webMendWorker/workerOrderState")
     @ApiOperation(value = "补人工单列表", notes = "补人工单列表")
     ServerResponse workerOrderState(@RequestParam("houseId") String houseId,
-                                    @RequestParam("pageNum") Integer pageNum,
-                                    @RequestParam("pageSize") Integer pageSize,
+                                    @RequestParam("pageDTO") PageDTO pageDTO,
                                     @RequestParam("beginDate") String beginDate,
                                     @RequestParam("endDate") String endDate,
                                     @RequestParam("likeAddress") String likeAddress);

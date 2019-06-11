@@ -143,25 +143,25 @@ public class RewardPunishService {
      *
      * @return
      */
-    public ServerResponse queryCorrelation(Integer pageNum, Integer pageSize, String name, Integer type) {
+    public ServerResponse queryCorrelation(PageDTO pageDTO, String name, Integer type) {
         try {
-            PageHelper.startPage(pageNum, pageSize);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<RewardPunishCorrelationDTO> correlationList = rewardPunishCorrelationMapper.queryCorrelation(name, type);
             PageInfo pageResult = new PageInfo(correlationList);
             List<Map<String, Object>> listMap = new ArrayList<>();
             for (RewardPunishCorrelationDTO correlation : correlationList) {
                 Map<String, Object> correlationMap = BeanUtils.beanToMap(correlation);
-                String conditionArr = "";
+                StringBuilder conditionArr = new StringBuilder();
                 List<RewardPunishCondition> conditionList = correlation.getConditionList();
                 for (int i = 0; i < conditionList.size(); i++) {
                     RewardPunishCondition condition = conditionList.get(i);
                     if (conditionList.size() - 1 == i) {
-                        conditionArr += condition.getName();
+                        conditionArr.append(condition.getName());
                     } else {
-                        conditionArr += condition.getName() + ",";
+                        conditionArr.append(condition.getName()).append(",");
                     }
                 }
-                correlationMap.put("conditionArr", conditionArr);
+                correlationMap.put("conditionArr", conditionArr.toString());
                 listMap.add(correlationMap);
             }
             pageResult.setList(listMap);

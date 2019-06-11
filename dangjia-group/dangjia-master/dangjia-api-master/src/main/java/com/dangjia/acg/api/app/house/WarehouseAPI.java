@@ -17,7 +17,7 @@ public interface WarehouseAPI {
 
     @PostMapping("app/house/warehouse/warehouseList")
     @ApiOperation(value = "我购买的材料", notes = "我购买的材料")
-    ServerResponse warehouseList(@RequestParam("userToken") String  userToken,
+    ServerResponse warehouseList(@RequestParam("userToken") String userToken,
                                  @RequestParam("pageDTO") PageDTO pageDTO,
                                  @RequestParam("houseId") String houseId,
                                  @RequestParam("categoryId") String categoryId,
@@ -27,8 +27,8 @@ public interface WarehouseAPI {
     @PostMapping("app/house/warehouse/warehouseGmList")
     @ApiOperation(value = "我购买的材料", notes = "我购买的材料")
     ServerResponse warehouseGmList(@RequestParam("request") HttpServletRequest request,
-                                   @RequestParam("userToken") String  userToken,
-                                 @RequestParam("houseId") String houseId,
-                                 @RequestParam("name") String name,
-                                 @RequestParam("type") String type);
+                                   @RequestParam("userToken") String userToken,
+                                   @RequestParam("houseId") String houseId,
+                                   @RequestParam("name") String name,
+                                   @RequestParam("type") String type);
 }
