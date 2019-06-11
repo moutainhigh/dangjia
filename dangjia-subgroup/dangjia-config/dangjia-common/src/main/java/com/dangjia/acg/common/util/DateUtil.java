@@ -170,7 +170,7 @@ public class DateUtil implements AutoCloseable, Serializable {
      * @return Date
      */
     public static Date toDate(String dateStr) {
-        String format = null;
+        String format;
         switch (dateStr.length()) {
             case 7:
                 format = "yyyy-MM";
@@ -179,7 +179,7 @@ public class DateUtil implements AutoCloseable, Serializable {
                 format = "yyMMdd";
                 break;
             case 8:
-                format = "yyyyMMdd";
+                format = dateStr.indexOf("-") > 0 ? "yyyy-MM-dd" : "yyyyMMdd";
                 break;
             case 10:
                 format = dateStr.indexOf("-") > 0 ? "yyyy-MM-dd" : "yyyyMMddHH";
