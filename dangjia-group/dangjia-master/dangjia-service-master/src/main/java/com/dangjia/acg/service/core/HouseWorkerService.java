@@ -584,15 +584,15 @@ public class HouseWorkerService {
                 houseFlow.setPause(1);//0:正常；1暂停；
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
                 //大管家停工，不扣除工人积分
-                if(worker.getWorkerType()>3) {
-                    //工匠申请停工不用审核，申请停工超过2天的，第3天起每天扣除1积分
-                    int score = suspendDay - 2;
-                    if (score > 0) {
-                        evaluateService.updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(score), "申请停工超过2天，积分扣除");
-                    }
-                }
-//                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠申请停工",
-//                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "5");
+//                if(worker.getWorkerType()>3) {
+//                    //工匠申请停工不用审核，申请停工超过2天的，第3天起每天扣除1积分
+//                    int score = suspendDay - 2;
+//                    if (score > 0) {
+//                        evaluateService.updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(score), "申请停工超过2天，积分扣除");
+//                    }
+//                }
+                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠申请停工",
+                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "5");
                 return ServerResponse.createBySuccessMessage("工匠申请停工（" + workerType.getName() + "）操作成功");
 
             } else if (applyType == 4) {
@@ -679,19 +679,30 @@ public class HouseWorkerService {
                     houseService.insertConstructionRecord(hfa);
 //                    return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）巡查成功");
                 }
-
+                //推送消息给业主大管家巡查完成
+                configMessageService.addConfigMessage(null, "zx", house.getMemberId(),
+                        "0", "大管家巡查完成", String.format(DjConstants.PushMessage.DAGUANGJIAXUNCHAWANGCHENG,
+                                house.getHouseName()), "5");
             } else if (applyType == 6) {//无人巡查
                 hfa.setApplyDec("业主您好，我已巡查了" + workerType.getName() + "工地暂时无人，现场情况如下");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
+                //推送消息给业主大管家巡查完成
+                configMessageService.addConfigMessage(null, "zx", house.getMemberId(),
+                        "0", "大管家无人巡查完成", String.format(DjConstants.PushMessage.DAGUANGJIAXUNCHAWANGCHENG,
+                                house.getHouseName()), "5");
             } else if (applyType == 7) {//追加巡查
                 hfa.setApplyDec("业主您好，我已追加巡查" + workerType.getName() + "的工地，现场情况如下");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
+                //推送消息给业主大管家巡查完成
+                configMessageService.addConfigMessage(null, "zx", house.getMemberId(),
+                        "0", "大管家追加巡查完成", String.format(DjConstants.PushMessage.DAGUANGJIAXUNCHAWANGCHENG,
+                                house.getHouseName()), "5");
 
             }
             //保存巡查图片,验收节点图片等信息

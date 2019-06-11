@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.repair;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,7 +26,6 @@ public interface MendWorkerAPI {
                                       @RequestParam("workerTypeId") String workerTypeId,
                                       @RequestParam("houseId") String houseId,
                                       @RequestParam("name") String name,
-                                      @RequestParam("pageNum") Integer pageNum,
-                                      @RequestParam("pageSize") Integer pageSize);
+                                      @RequestParam("pageDTO") PageDTO pageDTO);
 
 }

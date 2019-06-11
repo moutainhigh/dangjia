@@ -269,7 +269,7 @@ public class WorkerGoodsService {
 
 
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse<String> setWorkerGoods(WorkerGoods workerGoods, String technologyJsonList, String deleteTechnologyIds){
+    public ServerResponse<String> setWorkerGoods(WorkerGoods workerGoods, String technologyJsonList, String deleteTechnologyIds) {
 
         LOG.info("insertTechnologyList workerGoods:" + workerGoods + "  technologyJsonList:" + technologyJsonList);
         List<WorkerGoods> workerGoodsList = iWorkerGoodsMapper.selectByName(workerGoods.getName(), workerGoods.getWorkerTypeId());
@@ -310,11 +310,11 @@ public class WorkerGoodsService {
                 workerGoods.setModifyDate(new Date());
                 if (iWorkerGoodsMapper.updateByPrimaryKeySelective(workerGoods) < 0) {
                     return ServerResponse.createByErrorMessage("更新工价商品失败");
-                }else{
+                } else {
                     //相关联表也更新
                     iBudgetWorkerMapper.updateBudgetMaterialById(workerGoods.getId());
-                    Example example=new Example(WorkerGoods.class);
-                    example.createCriteria().andEqualTo(WorkerGoods.ID,workerGoods.getId());
+                    Example example = new Example(WorkerGoods.class);
+                    example.createCriteria().andEqualTo(WorkerGoods.ID, workerGoods.getId());
                     List<WorkerGoods> list = iWorkerGoodsMapper.selectByExample(example);
                     System.out.println(list);
                     masterMendWorkerAPI.updateMendWorker(JSON.toJSONString(list));
@@ -326,12 +326,12 @@ public class WorkerGoodsService {
                     return ServerResponse.createByErrorMessage("新增工价商品失败");
             }
 
-            if(null!=deleteTechnologyIds&&""!=deleteTechnologyIds) {
+            if (!CommonUtil.isEmpty(deleteTechnologyIds)) {
                 String[] deleteTechnologyIdArr = deleteTechnologyIds.split(",");
-                for (int i = 0; i < deleteTechnologyIdArr.length; i++) {
-                    if (iTechnologyMapper.selectByPrimaryKey(deleteTechnologyIdArr[i]) != null) {
-                        if (iTechnologyMapper.deleteByPrimaryKey(deleteTechnologyIdArr[i]) < 0)
-                            return ServerResponse.createByErrorMessage("删除id：" + deleteTechnologyIdArr[i] + "失败");
+                for (String aDeleteTechnologyIdArr : deleteTechnologyIdArr) {
+                    if (iTechnologyMapper.selectByPrimaryKey(aDeleteTechnologyIdArr) != null) {
+                        if (iTechnologyMapper.deleteByPrimaryKey(aDeleteTechnologyIdArr) < 0)
+                            return ServerResponse.createByErrorMessage("删除id：" + aDeleteTechnologyIdArr + "失败");
                     }
                 }
             }

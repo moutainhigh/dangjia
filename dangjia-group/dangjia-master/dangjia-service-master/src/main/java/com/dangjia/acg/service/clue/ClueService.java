@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.clue;
 
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -56,13 +57,11 @@ public class ClueService {
     /**
      * 获取所有线索
      *
-     * @param pageNum
-     * @param pageSize
      * @return
      */
-    public ServerResponse getAll(Integer pageNum, Integer pageSize) {
+    public ServerResponse getAll(PageDTO pageDTO) {
         try {
-            PageHelper.startPage(pageNum, pageSize);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Clue> clues = clueMapper.getAll();
             if (clues == null || clues.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
@@ -79,8 +78,10 @@ public class ClueService {
     /**
      * 查询线索list
      */
-    public ServerResponse getClueList(Integer stage, String values, String memberId, String childId, String beginDate, String endDate, Integer pageNum, Integer pageSize) {
+    public ServerResponse getClueList(Integer stage, String values, String memberId, String childId, String beginDate,
+                                      String endDate, PageDTO pageDTO) {
         try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Example example = new Example(Clue.class);
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo(Clue.DATA_STATUS, 0);
@@ -106,7 +107,6 @@ public class ClueService {
                 criteria.andEqualTo(Clue.LABEL_ID, childId);
             }
             example.orderBy(Clue.MODIFY_DATE).desc();
-            PageHelper.startPage(pageNum, pageSize);
             List<Clue> clues = clueMapper.selectByExample(example);
             if (clues == null || clues.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
@@ -154,9 +154,9 @@ public class ClueService {
     /**
      * 通过阶段状态查询线索
      */
-    public ServerResponse getByStage(int stage, Integer pageNum, Integer pageSize) {
+    public ServerResponse getByStage(int stage, PageDTO pageDTO) {
         try {
-            PageHelper.startPage(pageNum, pageSize);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Clue> clues = clueMapper.getByStage(stage);
             if (clues == null || clues.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()

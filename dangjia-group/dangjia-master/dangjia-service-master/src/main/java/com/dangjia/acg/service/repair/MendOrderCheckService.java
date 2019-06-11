@@ -203,6 +203,13 @@ public class MendOrderCheckService {
                         mendMateriel.setRepairMendDeliverId(mendDeliver.getId());
                         mendMaterialMapper.updateByPrimaryKeySelective(mendMateriel);
 
+                        WorkerType workType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());//查询工种
+                        //大管家
+                        HouseFlow houseFlow = houseFlowMapper.getHouseFlowByHidAndWty(house.getId(), 3);
+                        //推送消息给业主等待大管家商与供应商一起到现场清点可退材料
+                        configMessageService.addConfigMessage(null, "gj", houseFlow.getWorkerId(),
+                                "0", "工匠退材料", String.format(DjConstants.PushMessage.GONGJIANGTUICAILIAOQINGDIAN,
+                                        house.getHouseName(),workType.getName()), "");
                     }
                 }
                 return ServerResponse.createBySuccessMessage("审核成功");
@@ -358,6 +365,12 @@ public class MendOrderCheckService {
                     if ("2".equals(roleType)) {
                         configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "补人工未通过", String.format
                                 (DjConstants.PushMessage.GJ_B_001, house.getHouseName()), "");
+
+                        String urlyz = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + house.getId() + "&roleType=1";
+                        //业主
+                        configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "补人工未通过", String.format
+                                (DjConstants.PushMessage.YZ_B_001, house.getHouseName(), workType.getName()), urlyz);
+
                     }
                     //工匠审核人工变更（补）未通过
                     if ("3".equals(roleType)) {
@@ -369,7 +382,7 @@ public class MendOrderCheckService {
                         urlyz = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + house.getId() + "&roleType=1";
                         //业主
                         configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "补人工未通过", String.format
-                                (DjConstants.PushMessage.YZ_B_001, house.getHouseName()), urlyz);
+                                (DjConstants.PushMessage.GJ_B_003, house.getHouseName()), urlyz);
                     }
 
                 }
@@ -391,6 +404,12 @@ public class MendOrderCheckService {
                     if ("2".equals(roleType)) {
                         configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "退人工未通过", String.format
                                 (DjConstants.PushMessage.YZ_B_002, house.getHouseName()), "");
+
+                        String urlyz = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + house.getId() + "&roleType=3";
+                        //工匠
+                        configMessageService.addConfigMessage(null, "gj", mendOrder.getApplyMemberId(), "0", "退人工未通过", String.format
+                                (DjConstants.PushMessage.GJ_T_005, house.getHouseName()), urlyz);
+
                     }
                     //工匠审核人工变更（退）未通过
                     if ("3".equals(roleType)) {
@@ -462,6 +481,11 @@ public class MendOrderCheckService {
             mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
             mendOrder.setActualTotalAmount(mendOrder.getActualTotalAmount()+actualTotalAmount);
             mendOrder.setBusinessOrderNumber(mendDeliver.getId());//临时记录供应商退货单号，用于分供应商部分退材料钱
+
+
+            //推送消息告知业主退材料退余款
+            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠退货提醒",
+                    String.format(DjConstants.PushMessage.TUIKWANGCHENG, house.getHouseName()), "");
             //退材料钱至业主钱包（立即）
             return settleMendOrder(mendOrder);
         }catch (Exception e){
@@ -542,7 +566,6 @@ public class MendOrderCheckService {
                 warehouseDetail.setRelationId(mendOrder.getId());
                 warehouseDetail.setRecordType(4);//业主退
                 warehouseDetailMapper.insert(warehouseDetail);
-
                 /*退钱给业主*/
                 Member member = memberMapper.selectByPrimaryKey(houseMapper.selectByPrimaryKey(mendOrder.getHouseId()).getMemberId());
                 BigDecimal haveMoney = member.getHaveMoney().add(new BigDecimal(mendOrder.getTotalAmount()));
@@ -565,6 +588,10 @@ public class MendOrderCheckService {
 
                 mendOrder.setState(4);
                 mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+
+                //推送消息给业主退货退款通知
+                configMessageService.addConfigMessage(null, "zx", member.getId(),
+                        "0", "退货退款通知", String.format(DjConstants.PushMessage.YEZHUTUIHUO), "");
 
             }
             if(mendOrder.getType() == 2 ){//工匠退剩余材料管家退服务

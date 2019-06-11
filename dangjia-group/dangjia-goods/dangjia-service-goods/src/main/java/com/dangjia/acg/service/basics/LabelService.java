@@ -51,10 +51,10 @@ public class LabelService {
                 pageDTO.setPageSize(10);
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+            List<Map<String, Object>> mapList = new ArrayList<>();
             List<Label> labelList = iLabelMapper.getLabel();
             for (Label label : labelList) {
-                Map<String, Object> map = new HashMap<String, Object>();
+                Map<String, Object> map = new HashMap<>();
                 if (!StringUtils.isNotBlank(label.getId())) {
                     map.put("labelId", "");
                     map.put("labelName", "");
@@ -151,7 +151,7 @@ public class LabelService {
     public ServerResponse selectById(String id) {
         try {
             Label label = iLabelMapper.selectByPrimaryKey(id);
-            Map<String, Object> map = new HashMap<String, Object>();
+            Map<String, Object> map = new HashMap<>();
             map.put("id", label.getId());
             map.put("name", label.getName());
             return ServerResponse.createBySuccess("查询成功", map);

@@ -16,64 +16,65 @@ import org.springframework.web.multipart.MultipartFile;
 public class WebClueController implements WebClueAPI {
 
     @Autowired
-   private ClueService clueService;
+    private ClueService clueService;
 
     /**
      * 得到所有
+     *
      * @return
      */
     @Override
     @ApiMethod
     public ServerResponse getAll(PageDTO pageDTO) {
-
-        return clueService.getAll(pageDTO.getPageNum(),pageDTO.getPageSize());
+        return clueService.getAll(pageDTO);
     }
 
     /**
      * 查询线索
+     *
      * @param values
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse getClueList (Integer stage,String values,String memberId,String childId,String beginDate,String endDate, PageDTO pageDTO){
-        return clueService.getClueList(stage,values,memberId,childId,beginDate,endDate,pageDTO.getPageNum(),pageDTO.getPageSize());
+    public ServerResponse getClueList(Integer stage, String values, String memberId, String childId, String beginDate, String endDate, PageDTO pageDTO) {
+        return clueService.getClueList(stage, values, memberId, childId, beginDate, endDate, pageDTO);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getByStage(int stage,PageDTO pageDTO) {
-        return clueService.getByStage(stage,pageDTO.getPageNum(),pageDTO.getPageSize());
+    public ServerResponse getByStage(int stage, PageDTO pageDTO) {
+        return clueService.getByStage(stage, pageDTO);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse updateCus(String cusService,String phone,String chat,String userId,String childId, String id) {
-        return clueService.updateCus(cusService,phone,chat,userId,childId,id);
+    public ServerResponse updateCus(String cusService, String phone, String chat, String userId, String childId, String id) {
+        return clueService.updateCus(cusService, phone, chat, userId, childId, id);
     }
 
     @Override
     @ApiMethod
-    public int addClue( Clue clue) {
+    public int addClue(Clue clue) {
         return clueService.addClue(clue);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse importExcelClue(String userId, MultipartFile file){
-        return clueService.importExcelClue(userId,file);
+    public ServerResponse importExcelClue(String userId, MultipartFile file) {
+        return clueService.importExcelClue(userId, file);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse giveUp(String id,int type) {
-        return clueService.giveUp(id,type);
+    public ServerResponse giveUp(String id, int type) {
+        return clueService.giveUp(id, type);
     }
 
     @Override
     @ApiMethod
-     public ServerResponse sendUser(Member member,String phone){
-            return clueService.sendUser(member,phone);
+    public ServerResponse sendUser(Member member, String phone) {
+        return clueService.sendUser(member, phone);
     }
 
 }

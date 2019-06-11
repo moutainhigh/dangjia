@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.web.deliver;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import io.swagger.annotations.Api;
@@ -50,8 +51,7 @@ public interface WebOrderSplitAPI {
 
     @PostMapping("web/deliver/orderSplit/getHouseList")
     @ApiOperation(value = "材料员看房子列表", notes = "材料员看房子列表")
-    ServerResponse getHouseList(@RequestParam("pageNum") Integer pageNum,
-                                @RequestParam("pageSize") Integer pageSize,
+    ServerResponse getHouseList(@RequestParam("pageDTO") PageDTO pageDTO,
                                 @RequestParam("likeAddress") String likeAddress);
 
     @PostMapping("web/deliver/orderSplit/getOrderSplitList")

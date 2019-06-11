@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.user;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.user.UserDTO;
 import com.dangjia.acg.dto.user.UserSearchDTO;
@@ -24,8 +25,8 @@ public interface MainUserAPI {
 
     @RequestMapping(value = "/user/sysSwitching", method = RequestMethod.POST)
     @ApiOperation(value = "系统来源切换", notes = "系统来源切换")
-    public ServerResponse sysSwitching(@RequestParam("request") HttpServletRequest request,
-                                       @RequestParam("source") Integer source);
+    ServerResponse sysSwitching(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("source") Integer source);
 
     /**
      * 分页查询用户列表
@@ -35,8 +36,7 @@ public interface MainUserAPI {
     @RequestMapping(value = "/user/getUsers", method = RequestMethod.POST)
     @ApiOperation(value = "分页查询用户列表", notes = "分页查询用户列表")
     ServerResponse getUsers(@RequestParam("request") HttpServletRequest request,
-                            @RequestParam("pageNum") Integer pageNum,
-                            @RequestParam("pageSize") Integer pageSize,
+                            @RequestParam("pageDTO") PageDTO pageDTO,
                             @RequestParam("userSearch") UserSearchDTO userSearch);
 
     /**
@@ -132,7 +132,8 @@ public interface MainUserAPI {
 
     @RequestMapping(value = "/user/checkAuth", method = RequestMethod.POST)
     @ApiOperation(value = "檢查指定权限code，当前登录用户是否有权限", notes = "檢查指定权限code，当前登录用户是否有权限\"")
-    ServerResponse checkAuth(@RequestParam("request") HttpServletRequest request,@RequestParam("rcode") String rcode);
+    ServerResponse checkAuth(@RequestParam("request") HttpServletRequest request, @RequestParam("rcode") String rcode);
+
     /**
      * 修改密码之确认手机号
      *

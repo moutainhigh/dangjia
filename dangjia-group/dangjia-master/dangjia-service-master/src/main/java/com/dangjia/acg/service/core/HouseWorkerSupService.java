@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.core;
 
 import com.dangjia.acg.api.repair.MendMaterielAPI;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -9,11 +10,14 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -47,7 +51,10 @@ public class HouseWorkerSupService {
     private ConfigUtil configUtil;
     @Autowired
     private MendMaterielAPI mendMaterielAPI;
-
+    @Autowired
+    private IHouseMapper houseMapper;
+    @Autowired
+    private ConfigMessageService configMessageService;
     /**
      * 管家审核验收申请h
      * 材料审查
@@ -106,7 +113,10 @@ public class HouseWorkerSupService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
+            Member worker = (Member) object;
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+
+            House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());//查询房子
             Example example = new Example(HouseFlowApply.class);
             example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
                     .andCondition(" member_check in (1,3) ").andEqualTo(HouseFlowApply.PAY_STATE, 1);
@@ -148,6 +158,7 @@ public class HouseWorkerSupService {
             hfa.setSuspendDay(DateUtil.daysofTwo(start, end)+1);//申请停工天数 计算
             hfa.setStartDate(start);
             hfa.setEndDate(end);
+            hfa.setOperator(worker.getId());
             houseFlowApplyMapper.insert(hfa);
 //            houseService.insertConstructionRecord(hfa);
             houseFlow.setPause(1);//0:正常；1暂停；
@@ -160,6 +171,9 @@ public class HouseWorkerSupService {
 //                    evaluateService.updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(score), "申请停工超过2天，积分扣除");
 //                }
 //            }
+            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠申请停工",
+                    String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "");
+
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
