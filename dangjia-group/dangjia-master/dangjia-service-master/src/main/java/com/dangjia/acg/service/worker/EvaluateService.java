@@ -617,7 +617,7 @@ public class EvaluateService {
         WorkIntegral workIntegral=new WorkIntegral();
         BigDecimal evaluationScore = worker.getEvaluationScore().subtract(score);
         worker.setEvaluationScore(evaluationScore);//减积分
-        workIntegral.setIntegral(score);
+        workIntegral.setIntegral(new BigDecimal("-"+score.doubleValue()));
         workIntegral.setWorkerId(worker.getId());
         workIntegral.setMemberId(workerId);
         workIntegral.setButlerId(workerId);
