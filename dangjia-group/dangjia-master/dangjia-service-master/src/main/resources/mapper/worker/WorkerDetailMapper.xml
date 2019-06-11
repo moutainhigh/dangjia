@@ -230,7 +230,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                         '提前结束装修' NAME,
                         a.create_date,
                         a.apply_money
-                        IFNULL(avg(e.star), 0) star
+                        0 star
                     FROM
                        `dj_core_house_flow_apply` a
                     WHERE
