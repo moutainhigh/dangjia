@@ -26,6 +26,7 @@ import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
@@ -41,6 +42,7 @@ import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
@@ -101,6 +103,9 @@ public class ComplainService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private IHouseWorkerOrderMapper houseWorkerOrderMapper;
+
+    @Autowired
+    private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
     @Autowired
     private RedisClient redisClient;//缓存
 
@@ -877,6 +882,13 @@ public class ComplainService {
             houseFlows.get(0).setWorkSteta(6);
             houseFlows.get(0).setWorkPrice(subtract);
             houseFlowMapper.updateByPrimaryKeySelective(houseFlows.get(0));
+
+            //删除质保卡
+            WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByWorkerTypeId(houseFlows.get(0).getWorkerTypeId(), houseFlows.get(0).getHouseId());
+            if(wtso!=null){
+                wtso.setDataStatus(1);
+                workerTypeSafeOrderMapper.updateByPrimaryKey(wtso);
+            }
         }
         //工匠加流水记录
         Member member1 = memberMapper.selectByPrimaryKey(workerId);

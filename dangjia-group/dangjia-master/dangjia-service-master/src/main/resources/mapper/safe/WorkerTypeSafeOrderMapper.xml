@@ -30,6 +30,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		worker_type_id = #{workerTypeId}
 		and house_id = #{houseId}
 		and state = 0
+		and data_status=0
 	</select>
 
     <!--查保险-->
@@ -41,6 +42,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             worker_type_id = #{workerTypeId}
         and house_id = #{houseId}
         and state = 1
+		and data_status=0
     </select>
 
 </mapper>
