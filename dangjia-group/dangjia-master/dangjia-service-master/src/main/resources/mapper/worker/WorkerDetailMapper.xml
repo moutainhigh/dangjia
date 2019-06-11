@@ -173,7 +173,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             a.star
         FROM
             (
-        <if test="workerType!=null and workerType!='' and workerType=='3'">
+        <if test="workerType == 3">
 
 
                 (
@@ -224,6 +224,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                     )
                 UNION ALL
         </if>
+                (
+                    SELECT
+                        '6' apply_type,
+                        '提前结束装修' NAME,
+                        a.create_date,
+                        a.apply_money
+                        IFNULL(avg(e.star), 0) star
+                    FROM
+                       `dj_core_house_flow_apply` a
+                    WHERE
+                    a.`house_id` = #{houseId}   AND a.worker_id=#{workerId}
+                        AND a.member_check  in(1,3)
+                        AND a.apply_money > 0
+                        AND a.apply_type = 8
+                        GROUP BY
+                        a.id
+                )
+                UNION ALL
                 (
                     SELECT
                      '5' apply_type,

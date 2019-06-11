@@ -965,7 +965,6 @@ public class PaymentService {
                 } else {
                     businessOrder = businessOrderList.get(0);
                 }
-
                 paymentDTO.setTotalPrice(new BigDecimal(mendOrder.getTotalAmount()));
                 paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
                 paymentDTO.setPayPrice(new BigDecimal(mendOrder.getTotalAmount()));//实付
@@ -987,6 +986,7 @@ public class PaymentService {
                     }
                     actuaryDTO.setType(5);
                 }
+                actuaryDTOList.add(actuaryDTO);
             } else {
                 Example example = new Example(BusinessOrder.class);
                 example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andEqualTo(BusinessOrder.STATE, 1);

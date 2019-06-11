@@ -224,7 +224,8 @@ public class HouseService {
             String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             switch (house.getVisitState()) {
                 case 1:
-                    if (house.getDesignerOk() != 0 && house.getDesignerOk() != 4) {
+                    if ((house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getDesignerOk() != 3)
+                            || (house.getDesignerOk() == 3 && house.getBudgetOk() != 0 && house.getBudgetOk() != 5)) {
                         map.put("btName", "申请结束装修");
                         map.put("onclick", webAddress + "ownerEnd?title=填写原因&houseId=" + house.getId());
                     }
@@ -1250,8 +1251,10 @@ public class HouseService {
                 imgArr[i] = address + string;
             }
             map.put("imgArr", imgArr);
-            map.put("startDate", houseFlowApply.getStartDate());
-            map.put("endDate", houseFlowApply.getEndDate());
+            if(houseFlowApply!=null) {
+                map.put("startDate", houseFlowApply.getStartDate());
+                map.put("endDate", houseFlowApply.getEndDate());
+            }
         }
         if (hfa.getSourceType() == 1) {
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(hfa.getSourceId());
@@ -1555,6 +1558,9 @@ public class HouseService {
                 houseConstructionRecord.setWorkerId(houseFlowApply.getWorkerId());
                 houseConstructionRecord.setWorkerType(houseFlowApply.getWorkerType());
                 houseConstructionRecord.setApplyType(houseFlowApply.getApplyType());
+                if (houseFlowApply.getApplyType() == 8){
+                    houseConstructionRecord.setApplyType(13);
+                }
                 if (houseFlowApply.getApplyType() == 5 || houseFlowApply.getApplyType() == 6 || houseFlowApply.getApplyType() == 7) {
                     HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);//大管家的hf
                     houseConstructionRecord.setWorkerId(supervisorHF.getWorkerId());

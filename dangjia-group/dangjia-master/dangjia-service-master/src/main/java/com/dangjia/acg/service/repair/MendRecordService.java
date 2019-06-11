@@ -310,12 +310,13 @@ public class MendRecordService {
 
     private List getFlowInfo(HouseFlowApply houseFlowApply){
         List<Map<String, Object>> mapList = new ArrayList<>();
-
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
+        String info ="我是" + workerType.getName() + ",我已申请了"+ (houseFlowApply.getApplyType() == 1?"阶段完工":"整体完工");
         //工匠
         Map<String, Object> map = new HashMap<>();
         map.put("roleType","工匠");
         map.put("createDate",houseFlowApply.getCreateDate());
-        map.put("info",houseFlowApply.getApplyDec());
+        map.put("info",info);//描述
         map.put("type","1");//1=达到  0=未达到
         mapList.add(map);
 
@@ -324,22 +325,28 @@ public class MendRecordService {
         map.put("roleType", "管家");
         if (houseFlowApply.getSupervisorCheck() == 0) {
             map.put("type", "0");
+            map.put("info", "未审核");
         }
         if(houseFlowApply.getSupervisorCheck() > 0){
             map.put("createDate", houseFlowApply.getCreateDate());//默认赋值
             map.put("type", "1");
-            //查工匠被管家的评价
-            Evaluate evaluate = evaluateMapper.getForCountMoneySup(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), houseFlowApply.getWorkerId());
-            if(evaluate!=null) {
-                map.put("createDate", evaluate.getCreateDate());
-                map.put("content", evaluate.getContent());
-            }
+
             if (houseFlowApply.getSupervisorCheck() == 1) {
                 map.put("info", "审核通过");
-
+                //查工匠被管家的评价
+                Evaluate evaluate = evaluateMapper.getForCountMoneySup(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), houseFlowApply.getWorkerId());
+                if(evaluate!=null) {
+                    map.put("createDate", evaluate.getCreateDate());
+                    map.put("content", evaluate.getContent());
+                }
             }
             if (houseFlowApply.getSupervisorCheck() == 2) {
                 map.put("info", "拒绝通过");
+                map.put("type", "0");
+                map.put("createDate", houseFlowApply.getModifyDate());
+                if(!info.equals(houseFlowApply.getApplyDec())) {
+                    map.put("content", houseFlowApply.getApplyDec());
+                }
             }
         }
 
@@ -350,21 +357,28 @@ public class MendRecordService {
         map.put("roleType","业主");
         if(houseFlowApply.getMemberCheck()==0){
             map.put("type","0");
+            map.put("info", "未审核");
         }
-        if(houseFlowApply.getSupervisorCheck() > 0){
+        if(houseFlowApply.getMemberCheck() > 0){
             map.put("createDate",houseFlowApply.getCreateDate());
             map.put("type","1");
-            //查工匠被管家的评价
-            Evaluate evaluate = evaluateMapper.getForCountMoney(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), houseFlowApply.getWorkerId());
-            if(evaluate!=null) {
-                map.put("createDate", evaluate.getCreateDate());
-                map.put("content", evaluate.getContent());
-            }
+
             if(houseFlowApply.getMemberCheck()==1){
+                //查工匠被管家的评价
+                Evaluate evaluate = evaluateMapper.getForCountMoney(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), houseFlowApply.getWorkerId());
+                if(evaluate!=null) {
+                    map.put("createDate", evaluate.getCreateDate());
+                    map.put("content", evaluate.getContent());
+                }
                 map.put("info","审核通过");
             }
             if(houseFlowApply.getMemberCheck()==2){
                 map.put("info","拒绝通过");
+                map.put("type", "0");
+                map.put("createDate", houseFlowApply.getModifyDate());
+                if(!info.equals(houseFlowApply.getApplyDec())) {
+                    map.put("content", houseFlowApply.getApplyDec());
+                }
             }
             if(houseFlowApply.getMemberCheck()==3){
                 map.put("info","自动审核通过");
@@ -410,9 +424,9 @@ public class MendRecordService {
 
                 /*审核记录*/
                 if (roleType == 3) {//工匠
-                    example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 ").andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
+                    example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 and apply_type!=0 ").andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
                 } else {
-                    example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 ");
+                    example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 and apply_type!=0 ");
                 }
                 example.orderBy(HouseFlowApply.CREATE_DATE).desc();
                 List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
@@ -587,9 +601,9 @@ public class MendRecordService {
 
             /*审核记录*/
             if (roleType == 3) {//工匠
-                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 ").andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 and apply_type!=0  ").andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
             } else {
-                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 ");
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 and apply_type!=0  ");
             }
             List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
             if (houseFlowApplies.size() > 0) {
