@@ -226,7 +226,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </if>
                 (
                     SELECT
-                        '6' apply_type,
+                        '13' apply_type,
                         '提前结束装修' NAME,
                         a.create_date,
                         a.apply_money,
