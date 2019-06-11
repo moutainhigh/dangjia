@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.web.deliver;
 
 import com.dangjia.acg.api.web.deliver.WebOrderSplitAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.service.deliver.OrderSplitService;
@@ -24,6 +25,7 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     public ServerResponse sentSplitDeliver(String splitDeliverId) {
         return orderSplitService.sentSplitDeliver(splitDeliverId);
     }
+
     /**
      * 供应商发货
      */
@@ -47,14 +49,16 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     public ServerResponse splitDeliverList(String supplierId, int shipState) {
         return orderSplitService.splitDeliverList(supplierId, shipState);
     }
+
     /**
      * 撤回供应商待发货的订单（整单撤回）
      */
     @Override
     @ApiMethod
-    public ServerResponse withdrawSupplier(String orderSplitId){
+    public ServerResponse withdrawSupplier(String orderSplitId) {
         return orderSplitService.withdrawSupplier(orderSplitId);
     }
+
     /**
      * 发送供应商
      * 分发不同供应商
@@ -82,8 +86,8 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getHouseList(Integer pageNum, Integer pageSize, String likeAddress) {
-        return orderSplitService.getHouseList(pageNum, pageSize, likeAddress);
+    public ServerResponse getHouseList(PageDTO pageDTO, String likeAddress) {
+        return orderSplitService.getHouseList(pageDTO, likeAddress);
     }
 
     @Override

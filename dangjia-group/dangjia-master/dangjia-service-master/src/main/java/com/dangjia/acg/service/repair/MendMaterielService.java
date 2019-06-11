@@ -2,6 +2,7 @@ package com.dangjia.acg.service.repair;
 
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -56,7 +57,7 @@ public class MendMaterielService {
     /**
      * 要货退货 查询补材料
      */
-    public List<MendMateriel>  askAndQuit(String workerTypeId, String houseId, String categoryId, String name) {
+    public List<MendMateriel> askAndQuit(String workerTypeId, String houseId, String categoryId, String name) {
         List<MendMateriel> mendMaterielList = mendMaterialMapper.askAndQuit(workerTypeId, houseId, categoryId, name);
         return mendMaterielList;
     }
@@ -66,15 +67,9 @@ public class MendMaterielService {
      * landlordState
      * 0生成中,1平台审核中,2不通过,3通过
      */
-    public ServerResponse landlordState(String houseId, Integer pageNum, Integer pageSize, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse landlordState(String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
         try {
-            if (pageNum == null) {
-                pageNum = 1;
-            }
-            if (pageSize == null) {
-                pageSize = 10;
-            }
-            PageHelper.startPage(pageNum, pageSize);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<MendOrder> mendOrderList = mendOrderMapper.landlordState(houseId);
             List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(houseId, 4, beginDate, endDate, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
@@ -92,15 +87,9 @@ public class MendMaterielService {
      * material_back_state
      * 0生成中,1平台审核中，2平台审核不通过，3审核通过，4管家取消
      */
-    public ServerResponse materialBackState(String houseId, Integer pageNum, Integer pageSize, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse materialBackState(String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
         try {
-            if (pageNum == null) {
-                pageNum = 1;
-            }
-            if (pageSize == null) {
-                pageSize = 10;
-            }
-            PageHelper.startPage(pageNum, pageSize);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<MendOrder> mendOrderList = mendOrderMapper.materialBackState(houseId); 2
             List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(houseId, 2, beginDate, endDate, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
@@ -118,17 +107,17 @@ public class MendMaterielService {
      * 根据mendOrderId查明细
      */
     public ServerResponse mendMaterialList(String mendOrderId) {
-        MendOrder mendOrder= mendOrderMapper.selectByPrimaryKey(mendOrderId);
+        MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
         House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
         List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderId);
-        List<Map> mendMaterielMaps=new ArrayList<>();
+        List<Map> mendMaterielMaps = new ArrayList<>();
         for (MendMateriel mendMateriel : mendMaterielList) {
             mendMateriel.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             Map map = BeanUtils.beanToMap(mendMateriel);
-            Warehouse warehouse=warehouseMapper.getByProductId(mendMateriel.getProductId(),mendOrder.getHouseId());
-            if(warehouse==null){
+            Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(), mendOrder.getHouseId());
+            if (warehouse == null) {
                 map.put(Warehouse.RECEIVE, "0");
-            }else {
+            } else {
                 //工匠退材料新增已收货数量字段
                 if (mendOrder.getType() == 2) {
                     map.put(Warehouse.RECEIVE, warehouse.getReceive() == null ? 0d : warehouse.getReceive());
@@ -136,12 +125,12 @@ public class MendMaterielService {
                 //业主退材料增加未发货数量
                 if (mendOrder.getType() == 4) {
                     //未发货数量=已要 - 已收
-                    map.put(Warehouse.RECEIVE, warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack()) - warehouse.getAskCount());
+                    map.put(Warehouse.RECEIVE, warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
                 }
             }
             List<String> supplierId = splitDeliverMapper.getSupplierGoodsId(mendOrder.getHouseId(), mendMateriel.getProductSn());
-            List<Supplier> suppliers=new ArrayList<>();
-            if (supplierId.size()>0) {
+            List<Supplier> suppliers = new ArrayList<>();
+            if (supplierId.size() > 0) {
                 for (int i = 0; i < supplierId.size(); i++) {
                     Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), supplierId.get(i));
                     suppliers.add(supplier);
@@ -158,21 +147,15 @@ public class MendMaterielService {
      * materialOrderState
      * 0生成中,1平台审核中，2平台审核不通过，3平台审核通过待业主支付,4业主已支付，5业主不同意，6管家取消
      */
-    public ServerResponse materialOrderState(String houseId, Integer pageNum, Integer pageSize, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse materialOrderState(String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
         try {
-            if (pageNum == null) {
-                pageNum = 1;
-            }
-            if (pageSize == null) {
-                pageSize = 10;
-            }
-            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
-                if(beginDate.equals(endDate)){
-                    beginDate=beginDate+" "+"00:00:00";
-                    endDate=endDate+" "+"23:59:59";
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
+                if (beginDate.equals(endDate)) {
+                    beginDate = beginDate + " " + "00:00:00";
+                    endDate = endDate + " " + "23:59:59";
                 }
             }
-            PageHelper.startPage(pageNum, pageSize);
 //            List<MendOrder> mendOrderList = mendOrderMapper.materialOrderState(houseId);
             List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(houseId, 0, beginDate, endDate, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
@@ -206,7 +189,7 @@ public class MendMaterielService {
 
                     Member worker = memberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
                     mendOrderDTO.setApplyMemberId(worker.getId());
-                    mendOrderDTO.setApplyName(CommonUtil.isEmpty(worker.getName())?worker.getNickName():worker.getName());
+                    mendOrderDTO.setApplyName(CommonUtil.isEmpty(worker.getName()) ? worker.getNickName() : worker.getName());
                     mendOrderDTO.setApplyMobile(worker.getMobile());
                     mendOrderDTO.setType(mendOrder.getType());
                     mendOrderDTO.setState(mendOrder.getState());

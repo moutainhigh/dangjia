@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.config;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.config.ConfigApp;
 import io.swagger.annotations.Api;
@@ -33,6 +34,7 @@ public interface ConfigAppAPI {
     @PostMapping("/config/app/list")
     @ApiOperation(value = "获取所有版本应用", notes = "获取所有版本应用")
     ServerResponse getConfigApps(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                  @RequestParam("configApp") ConfigApp configApp);
 
     /**
@@ -56,9 +58,9 @@ public interface ConfigAppAPI {
     @ApiOperation(value = "修改版本应用", notes = "修改版本应用")
     ServerResponse editConfigApp(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("configApp") ConfigApp configApp,
-                                 @RequestParam("isForceds")  String isForceds,
+                                 @RequestParam("isForceds") String isForceds,
                                  @RequestParam("versionCodes") String versionCodes,
-                                 @RequestParam("historyIds")  String historyIds);
+                                 @RequestParam("historyIds") String historyIds);
 
     /**
      * 新增版本应用
@@ -70,7 +72,7 @@ public interface ConfigAppAPI {
     @ApiOperation(value = "新增版本应用", notes = "新增版本应用")
     ServerResponse addConfigApp(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("configApp") ConfigApp configApp,
-                                @RequestParam("isForceds")  String isForceds,
+                                @RequestParam("isForceds") String isForceds,
                                 @RequestParam("versionCodes") String versionCodes,
-                                @RequestParam("historyIds")  String historyIds);
+                                @RequestParam("historyIds") String historyIds);
 }

@@ -6,6 +6,7 @@ import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -63,18 +64,17 @@ public class WarehouseService {
      * 查询仓库材料
      * type 0材料 1服务 2所有
      */
-    public ServerResponse warehouseList(String userToken, Integer pageNum, Integer pageSize, String houseId, String categoryId, String name, String type) {
+    public ServerResponse warehouseList(String userToken, PageDTO pageDTO, String houseId, String categoryId, String name, String type) {
         try {
-            if (StringUtil.isEmpty(houseId)) {
-                return ServerResponse.createByErrorMessage("houseId不能为空");
-            }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             House house = houseMapper.selectByPrimaryKey(houseId);
-
+            if (house == null) {
+                return ServerResponse.createByErrorMessage("未找到该房产");
+            }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             Example example = new Example(Warehouse.class);
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
-
             if (!CommonUtil.isEmpty(type)) {
                 criteria.andEqualTo(Warehouse.PRODUCT_TYPE, type);
             }
@@ -84,7 +84,6 @@ public class WarehouseService {
             if (!CommonUtil.isEmpty(name)) {
                 criteria.andLike(Warehouse.PRODUCT_NAME, "%" + name + "%");
             }
-            PageHelper.startPage(pageNum, pageSize);
             List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
             LOG.info(" warehouseList size:" + warehouseList.size());
             PageInfo pageResult = new PageInfo(warehouseList);

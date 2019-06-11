@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.app.core;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,16 +30,17 @@ public interface HouseFlowApplyAPI {
     @ApiOperation(value = "工匠端工地记录", notes = "工匠端工地记录")
     ServerResponse houseRecord(@RequestParam("userToken") String userToken,
                                @RequestParam("houseId") String houseId,
-                               @RequestParam("pageNum") Integer pageNum,
-                               @RequestParam("pageSize") Integer pageSize);
+                               @RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping("app/core/houseFlowApply/checkWorker")
     @ApiOperation(value = "每日申请直接审核", notes = "每日申请直接审核")
     ServerResponse checkWorker(@RequestParam("userToken") String userToken,
                                @RequestParam("houseFlowApplyId") String houseFlowApplyId);
+
     @PostMapping("app/core/houseFlowApply/absenteeism")
     @ApiOperation(value = "自动检测今日旷工的人工，并扣钱", notes = "自动检测今日旷工的人工，并扣钱")
     void absenteeism();
+
     @PostMapping("app/core/houseFlowApply/checkDetail")
     @ApiOperation(value = "验收详情", notes = "验收详情")
     ServerResponse checkDetail(@RequestParam("userToken") String userToken,

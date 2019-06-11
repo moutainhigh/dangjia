@@ -60,8 +60,9 @@ public interface ProductAPI {
     @PostMapping("/basics/product/updateProduct")
     @ApiOperation(value = "更新货品名称", notes = "更新货品名称")
     ServerResponse updateProductById(@RequestParam("request") HttpServletRequest request,
-                                     @RequestParam("id")  String id,
-                                     @RequestParam("name")  String name);
+                                     @RequestParam("id") String id,
+                                     @RequestParam("name") String name);
+
     @PostMapping("/basics/product/insertProduct")
     @ApiOperation(value = "新增货品", notes = "新增货品")
     ServerResponse insertProduct(@RequestParam("request") HttpServletRequest request,
@@ -123,12 +124,11 @@ public interface ProductAPI {
     @PostMapping("/basics/product/data")
     @ApiOperation(value = "商品库检索查询", notes = "商品库检索查询")
     PageInfo queryProductData(@RequestParam("request") HttpServletRequest request,
-                              @RequestParam("pageNum") Integer pageNum,
-                              @RequestParam("pageSize") Integer pageSize,
-                                   @RequestParam("name") String name,
-                                   @RequestParam("categoryId") String categoryId,
-                                   @RequestParam("productType") String productType,
-                                   @RequestParam("productId") String[] productId);
+                              @RequestParam("pageDTO") PageDTO pageDTO,
+                              @RequestParam("name") String name,
+                              @RequestParam("categoryId") String categoryId,
+                              @RequestParam("productType") String productType,
+                              @RequestParam("productId") String[] productId);
 
 	/*@PostMapping("/basics/product/getSwitchProduct")
 	@ApiOperation(value = "根据系列和属性查询切换货品", notes = "根据系列和属性查询切换货品")

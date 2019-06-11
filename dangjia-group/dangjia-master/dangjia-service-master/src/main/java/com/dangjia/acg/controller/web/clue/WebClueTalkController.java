@@ -10,23 +10,25 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class WebClueTalkController implements WebClueTalkAPI {
-   @Autowired
-   private ClueTalkService clueTalkService;
+    @Autowired
+    private ClueTalkService clueTalkService;
+
     @Override
     @ApiMethod
     public ServerResponse getTalkByClueId(String clueId, PageDTO pageDTO) {
-        return clueTalkService.getTalkByClueId(clueId,pageDTO.getPageNum(),pageDTO.getPageSize());
+        return clueTalkService.getTalkByClueId(clueId, pageDTO);
     }
 
     /**
      * 添加沟通内容
+     *
      * @param clueId
      * @param talkContent
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse addTalk(String clueId,String talkContent,String userId){
-        return clueTalkService.addTalk(clueId,talkContent,userId);
+    public ServerResponse addTalk(String clueId, String talkContent, String userId) {
+        return clueTalkService.addTalk(clueId, talkContent, userId);
     }
 }

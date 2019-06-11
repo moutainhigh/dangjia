@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.repair;
 
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -43,31 +44,25 @@ public class FillWorkerService {
      *             <p>
      *             补人工,退人工共用此接口(精算内)
      */
-    public ServerResponse repairBudgetWorker(int type, String workerTypeId, String houseId, String name, Integer pageNum, Integer pageSize) {
+    public ServerResponse repairBudgetWorker(int type, String workerTypeId, String houseId, String name, PageDTO pageDTO) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         if (StringUtil.isEmpty(workerTypeId)) {
             return ServerResponse.createByErrorMessage("workerTypeId不能为空");
         }
-        if (pageNum == null) {
-            pageNum = 1;
-        }
-        if (pageSize == null) {
-            pageSize = 10;
-        }
-        List<BudgetWorkerDTO> budgetWorkerDTOList = new ArrayList<BudgetWorkerDTO>();
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<BudgetWorkerDTO> budgetWorkerDTOList = new ArrayList<>();
         PageInfo pageResult;
         try {
             if (type == 0) {//精算内
                 Example example = new Example(BudgetWorker.class);
-                Example.Criteria criteria=example.createCriteria();
+                Example.Criteria criteria = example.createCriteria();
                 criteria.andEqualTo(BudgetWorker.WORKER_TYPE_ID, workerTypeId);
                 criteria.andEqualTo(BudgetWorker.HOUSE_ID, houseId);
                 criteria.andNotEqualTo(BudgetWorker.DELETE_STATE, "1");
                 criteria.andCondition(" ( `name` IS NOT NULL OR `name` <> '' ) ");
-                if(!CommonUtil.isEmpty(name)) {
-                    criteria.andLike(BudgetWorker.NAME, "%"+name+"%");
+                if (!CommonUtil.isEmpty(name)) {
+                    criteria.andLike(BudgetWorker.NAME, "%" + name + "%");
                 }
-                PageHelper.startPage(pageNum, pageSize);
                 List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
                 pageResult = new PageInfo(budgetWorkerList);
                 for (BudgetWorker budgetWorker : budgetWorkerList) {
@@ -78,20 +73,20 @@ public class FillWorkerService {
                     budgetWorkerDTO.setWorkerGoodsSn(budgetWorker.getWorkerGoodsSn());
                     budgetWorkerDTO.setName(budgetWorker.getName());
                     budgetWorkerDTO.setPrice(budgetWorker.getPrice());
-                    budgetWorkerDTO.setShopCount(budgetWorker.getShopCount()-budgetWorker.getBackCount()+budgetWorker.getRepairCount());
+                    budgetWorkerDTO.setShopCount(budgetWorker.getShopCount() - budgetWorker.getBackCount() + budgetWorker.getRepairCount());
                     budgetWorkerDTO.setUnitName(budgetWorker.getUnitName());
                     budgetWorkerDTO.setImage(address + workerGoods.getImage());
                     budgetWorkerDTOList.add(budgetWorkerDTO);
                 }
             } else {
                 Example example = new Example(WorkerGoods.class);
-                Example.Criteria criteria=example.createCriteria();
+                Example.Criteria criteria = example.createCriteria();
                 criteria.andEqualTo(WorkerGoods.WORKER_TYPE_ID, workerTypeId);
                 criteria.andEqualTo(WorkerGoods.SHOW_GOODS, 1);
-                if(!CommonUtil.isEmpty(name)) {
+                if (!CommonUtil.isEmpty(name)) {
                     criteria.andLike(WorkerGoods.NAME, "%" + name + "%");
                 }
-                PageHelper.startPage(pageNum, pageSize);
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 List<WorkerGoods> workerGoodsList = workerGoodsMapper.selectByExample(example);
                 pageResult = new PageInfo(workerGoodsList);
                 for (WorkerGoods workerGoods : workerGoodsList) {

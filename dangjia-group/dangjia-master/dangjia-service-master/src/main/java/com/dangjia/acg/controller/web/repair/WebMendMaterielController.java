@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.web.repair;
 
 import com.dangjia.acg.api.web.repair.WebMendMaterielAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.repair.MendMaterielService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +24,8 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse landlordState(String houseId,Integer pageNum, Integer pageSize,String beginDate, String endDate,String likeAddress){
-        return mendMaterielService.landlordState(houseId,pageNum,pageSize,beginDate,endDate,likeAddress);
+    public ServerResponse landlordState(String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+        return mendMaterielService.landlordState(houseId, pageDTO, beginDate, endDate, likeAddress);
     }
 
     /**
@@ -32,8 +33,8 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse materialBackState(String houseId,Integer pageNum, Integer pageSize,String beginDate, String endDate,String likeAddress){
-        return mendMaterielService.materialBackState(houseId,pageNum,pageSize,beginDate,endDate,likeAddress);
+    public ServerResponse materialBackState(String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+        return mendMaterielService.materialBackState(houseId, pageDTO, beginDate, endDate, likeAddress);
     }
 
     /**
@@ -41,7 +42,7 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse mendMaterialList(String mendOrderId){
+    public ServerResponse mendMaterialList(String mendOrderId) {
         return mendMaterielService.mendMaterialList(mendOrderId);
     }
 
@@ -50,7 +51,7 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse materialOrderState(String houseId,Integer pageNum, Integer pageSize,String beginDate, String endDate,String likeAddress){
-        return mendMaterielService.materialOrderState(houseId,pageNum,pageSize,beginDate,endDate,likeAddress);
+    public ServerResponse materialOrderState(String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+        return mendMaterielService.materialOrderState(houseId, pageDTO, beginDate, endDate, likeAddress);
     }
 }

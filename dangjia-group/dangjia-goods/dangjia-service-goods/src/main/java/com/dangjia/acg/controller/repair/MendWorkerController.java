@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.repair;
 
 import com.dangjia.acg.api.repair.MendWorkerAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.repair.FillWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,8 @@ public class MendWorkerController implements MendWorkerAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse repairBudgetWorker(HttpServletRequest request,int type,String workerTypeId, String houseId,String name,
-                                        Integer pageNum, Integer pageSize){
-        return mendWorkerService.repairBudgetWorker(type,workerTypeId,houseId,name,pageNum,pageSize);
+    public ServerResponse repairBudgetWorker(HttpServletRequest request, int type, String workerTypeId, String houseId, String name,
+                                             PageDTO pageDTO) {
+        return mendWorkerService.repairBudgetWorker(type, workerTypeId, houseId, name, pageDTO);
     }
 }
