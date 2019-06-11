@@ -542,6 +542,10 @@ public class PaymentService {
                 orderMapper.insert(order);
                 house.setBudgetOk(1);//房间工种表里标记开始精算
                 houseMapper.updateByPrimaryKeySelective(house);
+                //推送消息给精算师业主已付款
+                configMessageService.addConfigMessage(null, "gj", house.getMemberId(),
+                        "0", "业主支付精算费", String.format(DjConstants.PushMessage.JINGSUANFEIZHIFUWANC,
+                                house.getHouseName()), "");
             } else {//其它工种
                 /*不统计设计精算人工*/
                 HouseExpend houseExpend = houseExpendMapper.getByHouseId(hwo.getHouseId());

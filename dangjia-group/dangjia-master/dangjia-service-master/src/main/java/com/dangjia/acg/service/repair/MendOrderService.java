@@ -427,9 +427,14 @@ public class MendOrderService {
                 WorkerType workType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
                 if (workType.getType() != 3) {
                     House house = houseMapper.selectByPrimaryKey(houseId);
+                    HouseFlow subHouseFlow = houseFlowMapper.getByWorkerTypeId(houseId, "3");
                     String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "changeArtificial?userToken=" + userToken + "&cityId=" + house.getCityId() + "&title=人工变更&houseId=" + houseId + "&houseFlowId=" + houseFlow.getId() + "&roleType=2";
+                    configMessageService.addConfigMessage(null, "gj", subHouseFlow.getWorkerId(), "0", "退人工", String.format
+                            (DjConstants.PushMessage.DGJ_T_002, house.getHouseName()), url);
+
+                    url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "changeArtificial?userToken=" + userToken + "&cityId=" + house.getCityId() + "&title=人工变更&houseId=" + houseId + "&houseFlowId=" + houseFlow.getId() + "&roleType=3";
                     configMessageService.addConfigMessage(null, "gj", houseFlow.getWorkerId(), "0", "退人工", String.format
-                            (DjConstants.PushMessage.DGJ_T_002, house.getHouseName(), workType.getName()), url);
+                            (DjConstants.PushMessage.GJ_T_003, house.getHouseName()), url);
                 }
                 return ServerResponse.createBySuccessMessage("保存成功");
             } else {
@@ -634,6 +639,9 @@ public class MendOrderService {
                 String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "changeArtificial?userToken=" + userToken + "&cityId=" + house.getCityId() + "&title=人工变更&houseId=" + houseId + "&houseFlowId=" + houseFlow.getId() + "&roleType=2";
                 configMessageService.addConfigMessage(null, "gj", houseFlow.getWorkerId(), "0", "补人工", String.format
                         (DjConstants.PushMessage.DGJ_B_001, house.getHouseName(), workType.getName()), url);
+
+                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "补人工", String.format
+                        (DjConstants.PushMessage.YZ_Y_001, house.getHouseName(), workType.getName()), "");
                 return ServerResponse.createBySuccessMessage("保存成功");
             } else {
                 return ServerResponse.createByErrorMessage("添加明细失败");
