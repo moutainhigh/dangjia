@@ -106,6 +106,7 @@ public class HouseWorkerSupService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
+            Member worker = (Member) object;
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(HouseFlowApply.class);
             example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
@@ -148,6 +149,7 @@ public class HouseWorkerSupService {
             hfa.setSuspendDay(DateUtil.daysofTwo(start, end)+1);//申请停工天数 计算
             hfa.setStartDate(start);
             hfa.setEndDate(end);
+            hfa.setOperator(worker.getId());
             houseFlowApplyMapper.insert(hfa);
 //            houseService.insertConstructionRecord(hfa);
             houseFlow.setPause(1);//0:正常；1暂停；

@@ -102,5 +102,9 @@ public class HouseFlowApply extends BaseEntity {
 	@Desc(value = "管家钱")
 	@ApiModelProperty("管家钱")
 	private BigDecimal supervisorMoney;//supervisormoney
-	
+
+	@Column(name = "operator")
+	@Desc(value = "操作人ID")
+	@ApiModelProperty("操作人ID")
+	private String operator;
 }
