@@ -467,7 +467,7 @@ public class StewardService {
             if (earliestTime != null && earliestTime.size() > 0) {
                 Date EarliestDay = earliestTime.get(0).getCreateDate();//最早开工时间
                 Date newDate = new Date();
-                int num = DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
+                int num = 1 + DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
                 if (suspendDay == null) {
                     workerDetailDTO.setTotalDay(num);//总开工天数
                 } else {
