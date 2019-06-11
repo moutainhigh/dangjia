@@ -247,6 +247,7 @@ public class TechnologyService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<Technology> tList = iTechnologyMapper.query(workerTypeId, name, materialOrWorker);
+            PageInfo pageResult = new PageInfo(tList);
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (Technology t : tList) {
                 Map<String, Object> map = new HashMap<>();
@@ -261,26 +262,25 @@ public class TechnologyService {
                 map.put("workerTypeName", workerTypeName);
                 map.put("content", t.getContent());
                 map.put("type", t.getType());
-                String imgStr = "";
-                String imgUrlStr = "";
+                StringBuilder imgStr = new StringBuilder();
+                StringBuilder imgUrlStr = new StringBuilder();
                 if (t.getImage() != null) {
                     String[] imgArr = t.getImage().split(",");
                     for (int i = 0; i < imgArr.length; i++) {
                         if (i == imgArr.length - 1) {
-                            imgStr += address + imgArr[i];
-                            imgUrlStr += imgArr[i];
+                            imgStr.append(address).append(imgArr[i]);
+                            imgUrlStr.append(imgArr[i]);
                         } else {
-                            imgStr += address + imgArr[i] + ",";
-                            imgUrlStr += imgArr[i] + ",";
+                            imgStr.append(address).append(imgArr[i]).append(",");
+                            imgUrlStr.append(imgArr[i]).append(",");
                         }
                     }
                 }
-                map.put("image", imgStr);
-                map.put("imageUrl", imgUrlStr);
+                map.put("image", imgStr.toString());
+                map.put("imageUrl", imgUrlStr.toString());
                 map.put("materialOrWorker", t.getMaterialOrWorker());
                 mapList.add(map);
             }
-            PageInfo pageResult = new PageInfo(tList);
             pageResult.setList(mapList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
@@ -323,22 +323,22 @@ public class TechnologyService {
                 map.put("workerTypeId", t.getWorkerTypeId());
                 map.put("content", t.getContent());
                 map.put("type", t.getType());
-                String imgStr = "";
-                String imgUrlStr = "";
+                StringBuilder imgStr = new StringBuilder();
+                StringBuilder imgUrlStr = new StringBuilder();
                 if (t.getImage() != null) {
                     String[] imgArr = t.getImage().split(",");
                     for (int i = 0; i < imgArr.length; i++) {
                         if (i == imgArr.length - 1) {
-                            imgStr += address + imgArr[i];
-                            imgUrlStr += imgArr[i];
+                            imgStr.append(address).append(imgArr[i]);
+                            imgUrlStr.append(imgArr[i]);
                         } else {
-                            imgStr += address + imgArr[i] + ",";
-                            imgUrlStr += imgArr[i] + ",";
+                            imgStr.append(address).append(imgArr[i]).append(",");
+                            imgUrlStr.append(imgArr[i]).append(",");
                         }
                     }
                 }
-                map.put("image", imgStr);
-                map.put("imageUrl", imgUrlStr);
+                map.put("image", imgStr.toString());
+                map.put("imageUrl", imgUrlStr.toString());
                 map.put("materialOrWorker", t.getMaterialOrWorker());
                 mapList.add(map);
             }

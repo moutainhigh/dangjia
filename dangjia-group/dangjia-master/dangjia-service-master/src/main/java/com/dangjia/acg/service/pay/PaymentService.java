@@ -542,6 +542,10 @@ public class PaymentService {
                 orderMapper.insert(order);
                 house.setBudgetOk(1);//房间工种表里标记开始精算
                 houseMapper.updateByPrimaryKeySelective(house);
+                //推送消息给精算师业主已付款
+                configMessageService.addConfigMessage(null, "gj", house.getMemberId(),
+                        "0", "业主支付精算费", String.format(DjConstants.PushMessage.JINGSUANFEIZHIFUWANC,
+                                house.getHouseName()), "");
             } else {//其它工种
                 /*不统计设计精算人工*/
                 HouseExpend houseExpend = houseExpendMapper.getByHouseId(hwo.getHouseId());
@@ -1180,7 +1184,7 @@ public class PaymentService {
 
                     //查出有没有生成保险订单
                     example = new Example(WorkerTypeSafeOrder.class);
-                    example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId).andEqualTo(WorkerTypeSafeOrder.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
+                    example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId).andEqualTo(WorkerTypeSafeOrder.WORKER_TYPE_ID, houseFlow.getWorkerTypeId()).andEqualTo(WorkerTypeSafeOrder.DATA_STATUS, 0);
                     List<WorkerTypeSafeOrder> wtsoList = workerTypeSafeOrderMapper.selectByExample(example);
                     if (wtsoList.size() == 1) {
                         WorkerTypeSafeOrder workerTypeSafeOrder = wtsoList.get(0);
@@ -1586,7 +1590,7 @@ public class PaymentService {
                     if (wtsList.size() > 0) {
                         //查出有没有生成保险订单
                         example = new Example(WorkerTypeSafeOrder.class);
-                        example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId)
+                        example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId).andEqualTo(WorkerTypeSafeOrder.DATA_STATUS, 0)
                                 .andEqualTo(WorkerTypeSafeOrder.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
                         List<WorkerTypeSafeOrder> wtsoList = workerTypeSafeOrderMapper.selectByExample(example);
                         UpgradeSafeDTO upgradeSafeDTO = new UpgradeSafeDTO();//保险服务

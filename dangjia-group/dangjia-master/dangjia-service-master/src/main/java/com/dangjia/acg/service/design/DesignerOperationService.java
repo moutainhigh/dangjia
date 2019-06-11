@@ -426,6 +426,10 @@ public class DesignerOperationService {
                 }
                 house.setDesignerOk(9);
                 houseMapper.updateByPrimaryKeySelective(house);
+                //推送消息给业主已完成量房
+                configMessageService.addConfigMessage(null, "zx", house.getMemberId(),
+                        "0", "设计师完成量房", String.format(DjConstants.PushMessage.LIANGFANGWANCHENG,
+                                house.getHouseName()), "");
                 break;
             case 1:
                 QuantityRoomImages quantityRoomImages = new QuantityRoomImages();

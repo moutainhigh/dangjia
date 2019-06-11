@@ -14,6 +14,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.core.NodeDTO;
@@ -885,6 +886,11 @@ public class HouseService {
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(),
                         "0", "等待大管家抢单", String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION,
                                 house.getHouseName()), "");
+                //告知工程部精算已通过
+                Map<String,String> temp_para=new HashMap();
+                temp_para.put("house_name",house.getHouseName());
+                JsmsUtil.sendSMS("13574147081","165204",temp_para);
+
                 //在这里算出大管家每次巡查拿的钱 和 每次验收拿的钱 记录到大管家的 houseflow里 houseflow,新增两个字段.
                 List<HouseFlow> houseFlowList = houseFlowMapper.getForCheckMoney(houseId);
                 int check = 0;//累计大管家总巡查次数

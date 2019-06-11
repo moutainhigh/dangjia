@@ -87,7 +87,7 @@ public class WorkerTypeSafeOrderService {
     public ServerResponse queryMySafeTypeOrder(String userToken, String houseId, PageDTO pageDTO){
         AccessToken accessToken = redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
         Example example = new Example(WorkerTypeSafeOrder.class);
-        example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId);
+        example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId).andEqualTo(WorkerTypeSafeOrder.DATA_STATUS, 0);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<WorkerTypeSafeOrder> list=workerTypeSafeOrderMapper.selectByExample(example);
         List<Map> listMap=new ArrayList<>();
