@@ -613,20 +613,20 @@ public class ComplainService {
         house.setModifyDate(new Date());
         houseMapper.updateByPrimaryKeySelective(house);
 
-        //添加一条记录
-        HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
-        hfa.setWorkerId(member.getId());//工人id
-        hfa.setHouseId(houseId);//房子id
-        hfa.setApplyType(9);//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
-        hfa.setApplyMoney(new BigDecimal(0));//申请得钱
-        hfa.setSupervisorMoney(new BigDecimal(0));
-        hfa.setOtherMoney(new BigDecimal(0));
-        hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
-        hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
-        hfa.setPayState(1);//是否付款
-        hfa.setApplyDec(content);//描述
-        houseFlowApplyMapper.insert(hfa);
-        houseService.insertConstructionRecord(hfa);
+//        //添加一条记录
+//        HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
+//        hfa.setWorkerId(member.getId());//工人id
+//        hfa.setHouseId(houseId);//房子id
+//        hfa.setApplyType(9);//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
+//        hfa.setApplyMoney(new BigDecimal(0));//申请得钱
+//        hfa.setSupervisorMoney(new BigDecimal(0));
+//        hfa.setOtherMoney(new BigDecimal(0));
+//        hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
+//        hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
+//        hfa.setPayState(1);//是否付款
+//        hfa.setApplyDec(content);//描述
+//        houseFlowApplyMapper.insert(hfa);
+//        houseService.insertConstructionRecord(hfa);
         return ServerResponse.createBySuccessMessage("申请成功");
     }
 
@@ -928,7 +928,7 @@ public class ComplainService {
         hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
         hfa.setHouseId(houseFlow.getHouseId());//房子id
         hfa.setApplyType(8);//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
-        hfa.setApplyMoney(backMoney);//申请得钱
+        hfa.setApplyMoney(subtract1);//申请得钱
         hfa.setSupervisorMoney(new BigDecimal(0));
         hfa.setOtherMoney(new BigDecimal(0));
         hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
@@ -936,6 +936,8 @@ public class ComplainService {
         hfa.setPayState(1);//是否付款
         hfa.setApplyDec(content);//描述
         houseFlowApplyMapper.insert(hfa);
+        houseService.insertConstructionRecord(hfa);
+
     }
 }
 

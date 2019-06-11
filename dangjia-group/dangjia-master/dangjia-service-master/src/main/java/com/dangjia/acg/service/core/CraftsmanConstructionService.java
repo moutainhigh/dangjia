@@ -370,7 +370,14 @@ public class CraftsmanConstructionService {
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
                 buttonList.add(Utils.getButton("巡查工地", 1));
             } else if (hf.getWorkType() == 4) {//支付之后显示按钮
-                buttonList.add(Utils.getButton("确认开工", 3));
+                if ("0".equals(house.getSchedule())) {
+                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                            "engineeringSchedule?title=工程日历&houseId=" + house.getId() +
+                            "&houseFlowId=" + hf.getId() + "&houseName=" + house.getHouseName();
+                    buttonList.add(Utils.getButton("装修排期", url, 0));
+                }else{
+                    buttonList.add(Utils.getButton("确认开工", 3));
+                }
             }
         } else if (checkFinishList.size() == 0) {//所有工种都整体完工，申请业主验收
             if (house.getHaveComplete() == 1) {
