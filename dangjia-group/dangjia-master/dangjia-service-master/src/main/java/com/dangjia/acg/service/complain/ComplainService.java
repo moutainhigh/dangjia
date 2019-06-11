@@ -936,6 +936,8 @@ public class ComplainService {
         hfa.setPayState(1);//是否付款
         hfa.setApplyDec(content);//描述
         houseFlowApplyMapper.insert(hfa);
+        houseService.insertConstructionRecord(hfa);
+
     }
 }
 
