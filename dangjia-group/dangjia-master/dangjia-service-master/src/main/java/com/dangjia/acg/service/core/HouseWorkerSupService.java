@@ -145,7 +145,7 @@ public class HouseWorkerSupService {
             hfa.setPayState(1);//标记为新停工申请
             hfa.setMemberCheck(1);//默认业主审核状态通过
             hfa.setSupervisorCheck(1);//默认大管家审核状态通过
-            hfa.setSuspendDay(DateUtil.daysofTwo(start, end));//申请停工天数 计算
+            hfa.setSuspendDay(DateUtil.daysofTwo(start, end)+1);//申请停工天数 计算
             hfa.setStartDate(start);
             hfa.setEndDate(end);
             houseFlowApplyMapper.insert(hfa);
