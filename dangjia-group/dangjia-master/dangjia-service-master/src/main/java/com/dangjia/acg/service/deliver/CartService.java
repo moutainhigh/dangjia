@@ -209,7 +209,7 @@ public class CartService {
             }
             String[] productIdArr = productIdList.toArray(new String[productIdList.size()]);
             request.setAttribute(Constants.CITY_ID, cityId);
-            PageInfo pageResult= productAPI.queryProductData(request,pageDTO.getPageNum(),pageDTO.getPageSize(),name,categoryId,productType,productIdArr);
+            PageInfo pageResult= productAPI.queryProductData(request,pageDTO,name,categoryId,productType,productIdArr);
             List<JSONObject> products=pageResult.getList();
             for (JSONObject product : products) {
                 Example example = new Example(Warehouse.class);
