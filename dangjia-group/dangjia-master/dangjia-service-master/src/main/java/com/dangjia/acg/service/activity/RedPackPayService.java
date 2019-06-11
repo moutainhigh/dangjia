@@ -66,8 +66,7 @@ public class RedPackPayService {
 
     @Autowired
     private BudgetWorkerAPI budgetWorkerAPI;
-    @Autowired
-    private BudgetWorkerAPI budgetWorkerAPI;
+
     @Autowired
     private RedisClient redisClient;
     @Autowired

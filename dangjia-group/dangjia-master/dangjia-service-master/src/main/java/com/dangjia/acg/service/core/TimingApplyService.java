@@ -48,11 +48,11 @@ public class TimingApplyService {
      * 旷工自动扣钱100
      */
     public void absenteeism(){
-        List<HouseFlow> houseFlows=technologyRecordService.unfinishedFlow(null);
-        for (HouseFlow houseFlow : houseFlows){
-            //今日是否开工超时扣旷工钱
-            evaluateService.absenteeismOvertime(houseFlow);
-        }
+//        List<HouseFlow> houseFlows=technologyRecordService.unfinishedFlow(null);
+//        for (HouseFlow houseFlow : houseFlows){
+//            //今日是否开工超时扣旷工钱
+//            evaluateService.absenteeismOvertime(houseFlow);
+//        }
 
 
         Example example =new Example(HouseFlow.class);
