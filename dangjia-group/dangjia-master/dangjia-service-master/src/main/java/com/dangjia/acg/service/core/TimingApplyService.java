@@ -59,20 +59,6 @@ public class TimingApplyService {
         example.createCriteria().andEqualTo(HouseFlow.PAUSE,1);
         List<HouseFlow> houseFlowList=houseFlowMapper.selectByExample(example);
         for (HouseFlow houseFlow : houseFlowList) {
-            //停工完结，状态变回
-            Example  example1 =new Example(HouseFlowApply.class);
-            example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID,houseFlow.getId())
-                    .andEqualTo(HouseFlowApply.APPLY_TYPE,3)
-                    .andCondition(" member_check in (1,3) ")
-                    .andCondition(" to_days(end_date) > to_days('"+ DateUtil.getDateString(new Date().getTime())+"') ");
-            List list=houseFlowApplyMapper.selectByExample(example1);
-            if(list.size()==0){
-                houseFlow.setPause(0);
-                houseFlow.setModifyDate(new Date());
-                houseFlowMapper.updateByPrimaryKey(houseFlow);
-            }
-
-
             //申请停工超过2天的，第3天起每天扣除1积分
             if(houseFlow.getPause()==1) {
                 example = new Example(HouseFlowApply.class);
@@ -90,6 +76,20 @@ public class TimingApplyService {
                         evaluateService.updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(1), "申请停工超过2天，积分扣除");
 
                     }
+                }
+            }
+            if(houseFlow.getPause()!=0) {
+                //停工完结，状态变回
+                Example example1 = new Example(HouseFlowApply.class);
+                example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlow.getId())
+                        .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
+                        .andCondition(" member_check in (1,3) ")
+                        .andCondition(" to_days(end_date) > to_days('" + DateUtil.getDateString(new Date().getTime()) + "') ");
+                List list = houseFlowApplyMapper.selectByExample(example1);
+                if (list.size() == 0) {
+                    houseFlow.setPause(0);
+                    houseFlow.setModifyDate(new Date());
+                    houseFlowMapper.updateByPrimaryKey(houseFlow);
                 }
             }
         }

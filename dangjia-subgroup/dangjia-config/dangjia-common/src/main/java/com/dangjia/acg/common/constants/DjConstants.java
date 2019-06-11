@@ -159,6 +159,7 @@ public class DjConstants {
         public final static Integer BUCAILIAO = 10;// 10补材料
         public final static Integer TUICAILIAO = 11;// 11退材料
         public final static Integer YZ_TUICAILIAO = 12;// 12业主退材料
+        public final static Integer TIQIANJIESHU = 13;// 13提前结束装修
 
         public final static Map getRecordTypeMap(){
             Map<Integer, String> applyTypeMap = new HashMap<>();
@@ -175,6 +176,7 @@ public class DjConstants {
             applyTypeMap.put(DjConstants.RecordType.BUCAILIAO, "补材料");
             applyTypeMap.put(DjConstants.RecordType.TUICAILIAO, "退材料");
             applyTypeMap.put(DjConstants.RecordType.YZ_TUICAILIAO, "业主退材料");
+            applyTypeMap.put(DjConstants.RecordType.TIQIANJIESHU, "提前结束装修");
             return applyTypeMap;
         }
     }
