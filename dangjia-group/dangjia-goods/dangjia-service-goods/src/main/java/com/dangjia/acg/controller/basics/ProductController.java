@@ -9,6 +9,7 @@ import com.dangjia.acg.service.basics.GoodsService;
 import com.dangjia.acg.service.basics.ProductService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -229,8 +230,8 @@ public class ProductController implements ProductAPI {
     }
 
     @Override
-    public PageInfo queryProductData(HttpServletRequest request, PageDTO pageDTO, String name, String categoryId, String productType, String[] productId) {
-        PageInfo productList = productService.queryProductData(pageDTO, name, categoryId, productType, productId);
+    public PageInfo queryProductData(HttpServletRequest request, Integer pageNum,Integer pageSize, String name, String categoryId, String productType, String[] productId) {
+        PageInfo productList = productService.queryProductData(pageNum,pageSize, name, categoryId, productType, productId);
         return productList;
     }
 //
