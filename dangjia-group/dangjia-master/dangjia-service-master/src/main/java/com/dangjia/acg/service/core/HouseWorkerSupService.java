@@ -55,6 +55,9 @@ public class HouseWorkerSupService {
     private IHouseMapper houseMapper;
     @Autowired
     private ConfigMessageService configMessageService;
+
+    @Autowired
+    private HouseFlowScheduleService houseFlowScheduleService;
     /**
      * 管家审核验收申请h
      * 材料审查
@@ -115,54 +118,91 @@ public class HouseWorkerSupService {
             }
             Member worker = (Member) object;
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
-
-            House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());//查询房子
-            Example example = new Example(HouseFlowApply.class);
-            example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                    .andCondition(" member_check in (1,3) ").andEqualTo(HouseFlowApply.PAY_STATE, 1);
-            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
-            if (houseFlowApplyList.size() > 0) {
-                HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
-                if (houseFlowApply.getEndDate().getTime() > new Date().getTime()) {
-                    return ServerResponse.createByErrorMessage("工序处于停工期间!");
+            //如果为大管家整体停工， 则功所有工序整体顺延（效果为：对于已完工工序无效果，对于已开工未完工工序相当于请假XX天，对于未开工工序相当于同时推迟开工和阶段完工工序；）
+            if(worker.getWorkerType()==3){
+                String format = "yyyy-MM-dd";
+                Date start = DateUtil.convert(startDate, format);
+                Date end = DateUtil.convert(endDate, format);
+                int suspendDay=DateUtil.daysofTwo(start, end) + 1;
+                Example example = new Example(HouseFlow.class);
+                example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseFlowId).andCondition(" work_steta not in (1,2,6) ");
+                List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
+                for (HouseFlow flow : houseFlowList) {
+                    //计划顺延
+                    houseFlowScheduleService.updateFlowSchedule(flow.getHouseId(), flow.getWorkerTypeId(), suspendDay, null);
                 }
-            }
-            if (houseFlow.getPause() == 1) {
-                return ServerResponse.createByErrorMessage("工序已暂停施工,请勿重复申请");
-            }
-            if (houseFlow.getWorkSteta() == 3) {
-                return ServerResponse.createByErrorMessage("工序待交底请勿发起停工申请");
-            }
-            String format = "yyyy-MM-dd";
-            Date start = DateUtil.convert(startDate, format);
-            HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(houseFlow.getHouseId(), houseFlow.getWorkerId(), new Date());//查询今日开工记录
-            if (todayStart != null && DateUtil.daysofTwo(new Date(), start) == 0) {
-                return ServerResponse.createByErrorMessage("工序今日已开工，请勿选择今日时间！");
-            }
-            Date end = DateUtil.convert(endDate, format);
-            HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
-            hfa.setHouseFlowId(houseFlowId);//工序id
-            hfa.setWorkerId(houseFlow.getWorkerId());//工人id
-            hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
-            hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
-            hfa.setHouseId(houseFlow.getHouseId());//房子id
-            hfa.setApplyType(3);//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
-            hfa.setApplyDec(applyDec);//描述
-            hfa.setApplyMoney(new BigDecimal(0));//申请得钱
-            hfa.setSupervisorMoney(new BigDecimal(0));
-            hfa.setOtherMoney(new BigDecimal(0));
-            hfa.setMemberCheck(0);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
-            hfa.setPayState(1);//标记为新停工申请
-            hfa.setMemberCheck(1);//默认业主审核状态通过
-            hfa.setSupervisorCheck(1);//默认大管家审核状态通过
-            hfa.setSuspendDay(DateUtil.daysofTwo(start, end)+1);//申请停工天数 计算
-            hfa.setStartDate(start);
-            hfa.setEndDate(end);
-            hfa.setOperator(worker.getId());
-            houseFlowApplyMapper.insert(hfa);
+
+                HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
+                hfa.setHouseFlowId(houseFlowId);//工序id
+                hfa.setWorkerId(houseFlow.getWorkerId());//工人id
+                hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
+                hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
+                hfa.setHouseId(houseFlow.getHouseId());//房子id
+                hfa.setApplyType(3);//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
+                hfa.setApplyDec("大管家整体停工");//描述
+                hfa.setApplyMoney(new BigDecimal(0));//申请得钱
+                hfa.setSupervisorMoney(new BigDecimal(0));
+                hfa.setOtherMoney(new BigDecimal(0));
+                hfa.setMemberCheck(0);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
+                hfa.setPayState(1);//标记为新停工申请
+                hfa.setMemberCheck(1);//默认业主审核状态通过
+                hfa.setSupervisorCheck(1);//默认大管家审核状态通过
+                hfa.setSuspendDay(suspendDay);//申请停工天数 计算
+                hfa.setStartDate(start);
+                hfa.setEndDate(end);
+                hfa.setOperator(worker.getId());
+                houseFlowApplyMapper.insert(hfa);
+            }else {
+                House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());//查询房子
+                Example example = new Example(HouseFlowApply.class);
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
+                        .andCondition(" member_check in (1,3) ").andEqualTo(HouseFlowApply.PAY_STATE, 1);
+                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
+                if (houseFlowApplyList.size() > 0) {
+                    HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
+                    if (houseFlowApply.getEndDate().getTime() > new Date().getTime()) {
+                        return ServerResponse.createByErrorMessage("工序处于停工期间!");
+                    }
+                }
+                if (houseFlow.getPause() == 1) {
+                    return ServerResponse.createByErrorMessage("工序已暂停施工,请勿重复申请");
+                }
+                if (houseFlow.getWorkSteta() == 3) {
+                    return ServerResponse.createByErrorMessage("工序待交底请勿发起停工申请");
+                }
+                String format = "yyyy-MM-dd";
+                Date start = DateUtil.convert(startDate, format);
+                HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(houseFlow.getHouseId(), houseFlow.getWorkerId(), new Date());//查询今日开工记录
+                if (todayStart != null && DateUtil.daysofTwo(new Date(), start) == 0) {
+                    return ServerResponse.createByErrorMessage("工序今日已开工，请勿选择今日时间！");
+                }
+                Date end = DateUtil.convert(endDate, format);
+                HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
+                hfa.setHouseFlowId(houseFlowId);//工序id
+                hfa.setWorkerId(houseFlow.getWorkerId());//工人id
+                hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
+                hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
+                hfa.setHouseId(houseFlow.getHouseId());//房子id
+                hfa.setApplyType(3);//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
+                hfa.setApplyDec(applyDec);//描述
+                hfa.setApplyMoney(new BigDecimal(0));//申请得钱
+                hfa.setSupervisorMoney(new BigDecimal(0));
+                hfa.setOtherMoney(new BigDecimal(0));
+                hfa.setMemberCheck(0);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
+                hfa.setPayState(1);//标记为新停工申请
+                hfa.setMemberCheck(1);//默认业主审核状态通过
+                hfa.setSupervisorCheck(1);//默认大管家审核状态通过
+                hfa.setSuspendDay(DateUtil.daysofTwo(start, end) + 1);//申请停工天数 计算
+                hfa.setStartDate(start);
+                hfa.setEndDate(end);
+                hfa.setOperator(worker.getId());
+                houseFlowApplyMapper.insert(hfa);
 //            houseService.insertConstructionRecord(hfa);
-            houseFlow.setPause(1);//0:正常；1暂停；
-            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
+                houseFlow.setPause(1);//0:正常；1暂停；
+                houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
+                //计划顺延
+                houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), hfa.getSuspendDay(), null);
+
 //            //大管家停工，不扣除工人积分
 //            if(worker.getWorkerType()>3) {
 //                //工匠申请停工不用审核，申请停工超过2天的，第3天起每天扣除1积分
@@ -171,9 +211,9 @@ public class HouseWorkerSupService {
 //                    evaluateService.updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(score), "申请停工超过2天，积分扣除");
 //                }
 //            }
-            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠申请停工",
-                    String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "");
-
+                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠申请停工",
+                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "");
+            }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();

@@ -583,6 +583,8 @@ public class HouseWorkerService {
                 houseService.insertConstructionRecord(hfa);
                 houseFlow.setPause(1);//0:正常；1暂停；
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
+                //计划顺延
+                houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(),houseFlow.getWorkerTypeId(),suspendDay,null);
                 //大管家停工，不扣除工人积分
 //                if(worker.getWorkerType()>3) {
 //                    //工匠申请停工不用审核，申请停工超过2天的，第3天起每天扣除1积分

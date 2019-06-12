@@ -246,6 +246,37 @@ public class CraftsmanConstructionService {
         }
         Long allPatrol = houseFlowApplyMapper.countPatrol(house.getId(), null);
         bean.setAllPatrol("总巡查次数:" + (allPatrol == null ? 0 : allPatrol));
+
+        Example example = new Example(HouseFlowApply.class);
+        example.createCriteria()
+                .andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, hf.getId())
+                .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
+                .andEqualTo(HouseFlowApply.PAY_STATE, 1);
+        List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
+        if (houseFlowApplies != null && houseFlowApplies.size() > 0) {
+            HouseFlowApply hfa = houseFlowApplies.get(0);
+            switch (hfa.getMemberCheck()) {
+                case 0://0未审核
+                    bean.setIfBackOut(4);//0可放弃；1：申请停工；2：已停工 3 审核中
+                    break;
+                case 1://1审核通过
+                    Date date = new Date();
+                    if (hfa.getStartDate() != null && date.getTime() < hfa.getStartDate().getTime()) {
+                        bean.setIfBackOut(4);//0可放弃；1：申请停工；2：已停工 3 审核中
+                    } else if (hfa.getEndDate() != null && date.getTime() > hfa.getEndDate().getTime()) {
+                        bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
+                    } else {
+                        bean.setIfBackOut(2);//0可放弃；1：申请停工；2：已停工 3 审核中
+                    }
+                    break;
+                default://2审核不通过
+                    bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
+                    break;
+            }
+        } else {
+            bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
+        }
+
         setMenus(bean, house, hf);
         List<String> promptList = new ArrayList<>();//消息提示list
         List<ButtonListBean> buttonList = new ArrayList<>();
@@ -253,7 +284,7 @@ public class CraftsmanConstructionService {
         boolean houseIsStart = false;
         //当业主支付大管家费用并且确认开工之后之后才出现
         if (hf.getWorkerType() == 3 && hf.getWorkType() == 4 && hf.getSupervisorStart() == 1) {
-            Example example = new Example(HouseFlow.class);
+            example = new Example(HouseFlow.class);
             example.createCriteria()
                     .andEqualTo(HouseFlow.STATE, 0)
                     .andEqualTo(HouseFlow.HOUSE_ID, hw.getHouseId())
@@ -349,10 +380,11 @@ public class CraftsmanConstructionService {
             bean.setIfBackOut(0);
             promptList.add("请联系业主支付您的大管家费用");
         }
+
         //查询是否全部整体完工
         List<HouseFlow> checkFinishList = houseFlowMapper.checkAllFinish(hf.getHouseId(), hf.getId());
         //查询是否提前结束装修
-        Example example = new Example(HouseFlow.class);
+        example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, hf.getHouseId()).andGreaterThanOrEqualTo(HouseFlow.WORKER_TYPE, 3);
         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
         for (HouseFlow h : houseFlows) {
