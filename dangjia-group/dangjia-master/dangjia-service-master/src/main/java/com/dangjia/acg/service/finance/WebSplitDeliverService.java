@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -57,7 +56,6 @@ public class WebSplitDeliverService {
      */
     public ServerResponse getAllSplitDeliver(PageDTO pageDTO, Integer applyState, String searchKey, String beginDate, String endDate) {
         try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (applyState == null) {
                 applyState = -1;
             }
@@ -70,8 +68,9 @@ public class WebSplitDeliverService {
                     endDate=endDate+" "+"23:59:59";
                 }
             }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(applyState, searchKey, beginDate, endDate);
-
+            PageInfo pageResult = new PageInfo(webSplitDeliverItemDTOLists);
             //根据供应商id统计已处理未处理的数量
             for (WebSplitDeliverItemDTO webSplitDeliverItemDTOList : webSplitDeliverItemDTOLists) {
                 //已处理数量
@@ -105,7 +104,7 @@ public class WebSplitDeliverService {
                 wait+=iMendDeliverMapper.selectCountByExample(example);
                 webSplitDeliverItemDTOList.setWait(wait);
             }
-            PageInfo pageResult = new PageInfo(webSplitDeliverItemDTOLists);
+            pageResult.setList(webSplitDeliverItemDTOLists);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
