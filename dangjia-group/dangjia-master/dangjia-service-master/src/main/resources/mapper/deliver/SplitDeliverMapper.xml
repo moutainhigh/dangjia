@@ -13,44 +13,107 @@
 
     <select id="getWebSplitDeliverList" resultType="com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO">
         SELECT
-        id AS splitDeliverId,
-        number AS number,
-        total_amount AS totalAmount,
-        apply_money AS applyMoney,
-        apply_state AS applyState,
-        ship_address AS shipAddress,
-        supplier_id AS supplierId,
-        supplier_telephone AS supMobile,
-        supplier_name AS supName,
-        operator_id AS operatorId,
-        rec_time AS recTime,
-        modify_date AS modifyDate,
-        create_date AS createDate
+        a.shipAddress,
+        a.supplierId,
+        a.supMobile,
+        a.supName,
+        SUM(a.sent) sent,
+        SUM(a.wait) wait
         FROM
-        dj_deliver_split_deliver
+        (
+        (
+        SELECT
+        m.ship_address AS shipAddress,
+        m.supplier_id AS supplierId,
+        m.supplier_telephone AS supMobile,
+        m.supplier_name AS supName,
+        (
+        SELECT
+        COUNT(d.id)
+        FROM
+        dj_repair_mend_deliver d
         WHERE
-        data_status = 0
-        and apply_state IS not NULL
-        and apply_state != 3
-        <if test="applyState!= -2 and applyState!= -1 ">
-            and apply_state = #{applyState}
-        </if>
-        <if test="applyState == -2">
-            and apply_state != 0
-        </if>
+        d.supplier_id = m.supplier_id
+        AND d.apply_state = 1
+        ) sent,
+        (
+        SELECT
+        COUNT(d.id)
+        FROM
+        dj_repair_mend_deliver d
+        WHERE
+        d.supplier_id = m.supplier_id
+        AND d.apply_state = 0
+        ) wait
+        FROM
+        dj_repair_mend_deliver m
+        WHERE
+        m.data_status = 0
+        AND m.apply_state IS NOT NULL
+        AND m.apply_state != 3
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
-            and modify_date between #{beginDate} and #{endDate}
+            and m.modify_date between #{beginDate} and #{endDate}
         </if>
         <if test="searchKey!=null and searchKey!=''">
-            and ( ship_address like CONCAT('%',#{searchKey},'%')
-            or ship_mobile like CONCAT('%',#{searchKey},'%')
-            or ship_name like CONCAT('%',#{searchKey},'%')
-            or supplier_name like CONCAT('%',#{searchKey},'%'))
+            and ( m.ship_address like CONCAT('%',#{searchKey},'%')
+            or m.ship_mobile like CONCAT('%',#{searchKey},'%')
+            or m.ship_name like CONCAT('%',#{searchKey},'%')
+            or m.supplier_name like CONCAT('%',#{searchKey},'%'))
         </if>
         GROUP BY
-        supplier_id
+        m.supplier_id
+        )
+        UNION ALL
+        (
+        SELECT
+        s.ship_address AS shipAddress,
+        s.supplier_id AS supplierId,
+        s.supplier_telephone AS supMobile,
+        s.supplier_name AS supName,
+        (
+        SELECT
+        COUNT(d.id)
+        FROM
+        dj_deliver_split_deliver d
+        WHERE
+        d.supplier_id = s.supplier_id
+        AND (
+        d.apply_state = 1
+        OR d.apply_state = 2
+        )
+        ) sent,
+        (
+        SELECT
+        COUNT(d.id)
+        FROM
+        dj_deliver_split_deliver d
+        WHERE
+        d.supplier_id = s.supplier_id
+        AND d.apply_state = 0
+        ) wait
+        FROM
+        dj_deliver_split_deliver s
+        WHERE
+        s.data_status = 0
+        AND s.apply_state IS NOT NULL
+        AND s.apply_state != 3
+        <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+            and s.modify_date between #{beginDate} and #{endDate}
+        </if>
+        <if test="searchKey!=null and searchKey!=''">
+            and ( s.ship_address like CONCAT('%',#{searchKey},'%')
+            or s.ship_mobile like CONCAT('%',#{searchKey},'%')
+            or s.ship_name like CONCAT('%',#{searchKey},'%')
+            or s.supplier_name like CONCAT('%',#{searchKey},'%'))
+        </if>
+        GROUP BY
+        s.supplier_id
+        )
+        ) a
+        GROUP BY
+        a.supplierId
         ORDER BY
-        create_date DESC
+        a.wait DESC
     </select>
 
     <select id="getSupplierGoodsId" resultType="java.lang.String">
@@ -137,11 +200,9 @@
         WHERE
         data_status = 0
         and apply_state IS not NULL
-        AND shipping_state IN (2,4)
         AND supplier_id=#{supplierId}
-        <if test="applyState == 0">
-            and apply_state =0
-        </if>
+        AND apply_state = #{applyState}
+
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
             and modify_date between #{beginDate} and #{endDate}
         </if>

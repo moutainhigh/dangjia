@@ -24,6 +24,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="applyState == 0">
                     and apply_state =0
             </if>
+            <if test="applyState != 0">
+                AND (apply_state = 1 OR apply_state = 2)
+            </if>
             <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
                 and modify_date between #{beginDate} and #{endDate}
             </if>
