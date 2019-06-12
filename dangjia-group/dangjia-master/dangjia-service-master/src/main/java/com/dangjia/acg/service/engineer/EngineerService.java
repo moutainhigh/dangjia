@@ -908,7 +908,7 @@ public class EngineerService {
      * @param WorkerId
      * @return
      */
-    public int alternative(String WorkerId,int WorkerType) {
+    public int alternative(String WorkerId,Integer WorkerType) {
         Example example=new Example(HouseFlow.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo(HouseFlow.WORKER_ID,WorkerId);
