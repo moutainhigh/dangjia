@@ -124,7 +124,8 @@ public interface ProductAPI {
     @PostMapping("/basics/product/data")
     @ApiOperation(value = "商品库检索查询", notes = "商品库检索查询")
     PageInfo queryProductData(@RequestParam("request") HttpServletRequest request,
-                              @RequestParam("pageDTO") PageDTO pageDTO,
+                              @RequestParam("pageNum") Integer pageNum,
+                              @RequestParam("pageSize") Integer pageSize,
                               @RequestParam("name") String name,
                               @RequestParam("categoryId") String categoryId,
                               @RequestParam("productType") String productType,
