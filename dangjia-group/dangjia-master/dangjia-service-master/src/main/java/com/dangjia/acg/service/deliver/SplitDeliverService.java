@@ -123,6 +123,7 @@ public class SplitDeliverService {
             Member operator = (Member) object;
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
             splitDeliver.setShippingState(2);//收货
+            splitDeliver.setApplyState(0);
             splitDeliver.setOperatorId(operator.getId());
             splitDeliver.setImage(image);//收货图片
             splitDeliver.setRecTime(new Date());

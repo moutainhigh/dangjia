@@ -241,7 +241,7 @@ public class OrderSplitService {
         Example example = new Example(SplitDeliver.class);
         if (shipState == 2) {
             example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId)
-                    .andCondition(" shipping_state in(2,4) ").andCondition(" APPLY_STATE is not null");
+                    .andCondition(" shipping_state in(2,4) ");
             example.orderBy(SplitDeliver.CREATE_DATE).desc();
             example.orderBy(SplitDeliver.APPLY_STATE).asc();
         } else {
