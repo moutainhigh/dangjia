@@ -71,40 +71,6 @@ public class WebSplitDeliverService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(applyState, searchKey, beginDate, endDate);
             PageInfo pageResult = new PageInfo(webSplitDeliverItemDTOLists);
-            //根据供应商id统计已处理未处理的数量
-            for (WebSplitDeliverItemDTO webSplitDeliverItemDTOList : webSplitDeliverItemDTOLists) {
-                //已处理数量
-                Example example = new Example(SplitDeliver.class);
-                example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID,webSplitDeliverItemDTOList.getSupplierId())
-                        .andEqualTo(SplitDeliver.DATA_STATUS,0)
-                        .andCondition("apply_state in(1,2)");
-//                int sent=iSplitDeliverMapper.selectCountByExample(example);
-//                //退货已处理数量
-//                example=new Example(MendDeliver.class);
-//                example.createCriteria().andEqualTo(MendDeliver.DATA_STATUS,0)
-//                        .andEqualTo(MendDeliver.SHIPPING_STATE,2);
-//                sent+=iMendDeliverMapper.selectCountByExample(example);
-                example=new Example(Receipt.class);
-                example.createCriteria().andEqualTo(Receipt.SUPPLIER_ID,webSplitDeliverItemDTOList.getSupplierId());
-                int sent=iReceiptMapper.selectCountByExample(example);
-                webSplitDeliverItemDTOList.setSent(sent);
-                //待处理数量
-                example = new Example(SplitDeliver.class);
-                example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID,webSplitDeliverItemDTOList.getSupplierId())
-                        .andEqualTo(SplitDeliver.APPLY_STATE,0)
-                        .andEqualTo(SplitDeliver.DATA_STATUS,0)
-                        .andCondition(" shipping_state IN (2,4)");
-                int wait=iSplitDeliverMapper.selectCountByExample(example);
-                //退货待处理数量
-                example=new Example(MendDeliver.class);
-                example.createCriteria().andEqualTo(MendDeliver.DATA_STATUS,0)
-                        .andEqualTo(MendDeliver.APPLY_STATE,0)
-                        .andEqualTo(MendDeliver.SUPPLIER_ID,webSplitDeliverItemDTOList.getSupplierId())
-                        .andCondition(" shipping_state=1");
-                wait+=iMendDeliverMapper.selectCountByExample(example);
-                webSplitDeliverItemDTOList.setWait(wait);
-            }
-            pageResult.setList(webSplitDeliverItemDTOLists);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
