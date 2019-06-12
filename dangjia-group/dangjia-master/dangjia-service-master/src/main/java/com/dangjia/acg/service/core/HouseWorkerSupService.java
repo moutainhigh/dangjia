@@ -139,7 +139,7 @@ public class HouseWorkerSupService {
                 hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
                 hfa.setHouseId(houseFlow.getHouseId());//房子id
                 hfa.setApplyType(3);//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
-                hfa.setApplyDec("大管家整体停工");//描述
+                hfa.setApplyDec("大管家整体停工，原因："+applyDec);//描述
                 hfa.setApplyMoney(new BigDecimal(0));//申请得钱
                 hfa.setSupervisorMoney(new BigDecimal(0));
                 hfa.setOtherMoney(new BigDecimal(0));
