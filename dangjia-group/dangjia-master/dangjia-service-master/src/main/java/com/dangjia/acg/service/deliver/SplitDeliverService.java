@@ -78,7 +78,7 @@ public class SplitDeliverService {
             splitDeliver.setShippingState(4);//部分收货
             splitDeliver.setImage(image);//收货图片
             splitDeliver.setRecTime(new Date());
-
+            double applyMoney=0d;
             JSONArray arr = JSONArray.parseArray(splitItemList);
             for (int i = 0; i < arr.size(); i++) {
                 JSONObject obj = arr.getJSONObject(i);
@@ -97,8 +97,9 @@ public class SplitDeliverService {
                     warehouse.setAskCount(warehouse.getAskCount() - noReceive);
                 }
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
-                splitDeliver.setApplyMoney(splitDeliver.getApplyMoney() + (orderSplitItem.getSupCost()*orderSplitItem.getReceive()));
+                applyMoney+=orderSplitItem.getSupCost()*orderSplitItem.getReceive();
             }
+            splitDeliver.setApplyMoney(applyMoney);
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
             //业主
@@ -129,6 +130,7 @@ public class SplitDeliverService {
             splitDeliver.setRecTime(new Date());
             splitDeliver.setModifyDate(new Date());//收货时间
             orderSplitItemMapper.affirmSplitDeliver(splitDeliverId);
+            double applyMoney=0d;
             /*统计收货数量*/
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliverId);
@@ -137,9 +139,10 @@ public class SplitDeliverService {
                 Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), splitDeliver.getHouseId());
                 warehouse.setReceive(warehouse.getReceive() + orderSplitItem.getNum());
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
-                splitDeliver.setApplyMoney(splitDeliver.getApplyMoney() + (orderSplitItem.getSupCost()*orderSplitItem.getReceive()));
-            }
+                applyMoney+=orderSplitItem.getSupCost()*orderSplitItem.getReceive();
 
+            }
+            splitDeliver.setApplyMoney(applyMoney);
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
             //业主
