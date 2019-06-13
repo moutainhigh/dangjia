@@ -458,11 +458,15 @@ public class HouseFlowApplyService {
             } else {
                 worker.setDeposit(new BigDecimal(99999));//重新设置无上限
             }
+            if (worker.getRetentionMoney() == null) {
+                worker.setRetentionMoney(new BigDecimal(0.0));
+            }
             //实际滞留金减上限
             BigDecimal bd = worker.getRetentionMoney().subtract(worker.getDeposit());
             if (bd.doubleValue() > 0) {
                 //记录流水
                 BigDecimal surplusMoney = worker.getSurplusMoney().add(bd);
+                BigDecimal retentionMoney = worker.getRetentionMoney().subtract(bd);
                 WorkerDetail workerDetail = new WorkerDetail();
                 workerDetail.setName("涨积分退滞留金");
                 workerDetail.setWorkerId(worker.getId());
@@ -476,12 +480,11 @@ public class HouseFlowApplyService {
                 workerDetailMapper.insert(workerDetail);
                 worker.setDeposit(worker.getDeposit());//实际1500元
                 worker.setSurplusMoney(surplusMoney);
+                worker.setRetentionMoney(retentionMoney);
             }
             //BigDecimal deposit = workDepositService.getWorkDepositByList().getDeposit();//获取押金比例 5%
             BigDecimal deposit = new BigDecimal(0.05);
-            if (worker.getRetentionMoney() == null) {
-                worker.setRetentionMoney(new BigDecimal(0.0));
-            }
+
             //申请的钱为空时将不考虑滞留金转入
             if (hfa != null && hfa.getApplyMoney() != null && worker.getRetentionMoney().doubleValue() < worker.getDeposit().doubleValue()) {//押金没收够并且没有算过押金
                 //算订单的5%
