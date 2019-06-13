@@ -41,6 +41,44 @@
         construction_date as constructionDate,
         modify_date as modifyDate
     </sql>
+    <sql id="basic_h_columns">
+        h.id,
+        h.building,
+        h.city_name as cityName,
+        h.residential,
+        h.type,
+        h.unit,
+        h.member_id as memberId,
+        h.task_number as taskNumber,
+        h.square,
+        h.number,
+        h.style,
+        h.designer_ok as designerOk,
+        h.budget_ok as budgetOk,
+        h.image,
+        h.decoration_type as decorationType,
+        h.city_id as cityId,
+        h.modeling_layout_id as modelingLayoutId,
+        h.money,
+        h.pause,
+        h.show_house as showHouse,
+        h.village_id as villageId,
+        h.refer_house_id as referHouseId,
+        h.have_complete as haveComplete,
+        h.record_type as recordType,
+        h.build_square as buildSquare,
+        h.again,
+        h.house_type as houseType,
+        h.drawings,
+        h.work_deposit_id as workDepositId,
+        h.custom_sort as customSort,
+        h.is_select as isSelect,
+        h.visit_state as visitState,
+        h.data_status as dataStatus,
+        h.create_date as createDate,
+        h.construction_date as constructionDate,
+        h.modify_date as modifyDate
+    </sql>
     <select id="getDesignList" resultType="com.dangjia.acg.dto.house.DesignDTO">
         SELECT
         house.id AS houseId,
@@ -201,7 +239,42 @@
         and site_display=0
         order by num desc
     </select>
+    <select id="getSameLayoutDistance" resultType="com.dangjia.acg.modle.house.House">
+        SELECT
+        <include refid="basic_h_columns"/>
+        from dj_house h
+        INNER JOIN (SELECT a.house_id,COUNT(a.id) num FROM dj_core_house_flow_apply a GROUP BY a.house_id ) b ON
+        b.house_id=h.id
+        INNER JOIN (
+            SELECT
+                mv.*, (
+                st_distance (
+                point (mv.locationx, mv.locationy),
+                point (#{locationx}	,#{locationy)}
+                ) * 111195 / 1000
+                ) AS juli
+            FROM
+            `dj_house_modeling_village` mv
+            WHERE
+            mv.locationx IS NOT NULL
+        ) v ON v.id = h.village_id
+        where
+        h.data_status=0
+        <if test="cityId!=null and cityId!=''">
+            and h.city_id = #{cityId}
+        </if>
 
+        <if test="minSquare!=null and minSquare!=''">
+            and h.build_square &gt;= #{minSquare}
+        </if>
+        <if test="maxSquare!=null and maxSquare!=''">
+            and h.build_square &lt;= #{maxSquare}
+        </if>
+        and ((h.decoration_type in (1,2) and h.budget_ok=3) or (h.decoration_type=3 and h.visit_state=1))
+        and h.site_display=0
+        ORDER BY
+        v.juli ASC
+    </select>
     <!--参考报价-->
     <select id="getReferenceBudget" resultType="com.dangjia.acg.modle.house.House">
         SELECT

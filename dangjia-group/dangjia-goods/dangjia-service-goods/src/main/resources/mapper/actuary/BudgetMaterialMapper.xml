@@ -45,6 +45,9 @@
 				`dj_actuary_budget_material`
 			WHERE
 				delete_state != 1
+			<if test = "workerTypeId!=null and workerTypeId!=''">
+				AND `worker_type_id` = #{workerTypeId}
+			</if>
 			AND `worker_type_id` = #{workerTypeId}
 			AND `house_id` = #{houseId}
 			GROUP BY
@@ -62,7 +65,9 @@
 					`dj_actuary_budget_worker`
 				WHERE
 					delete_state != 1
-				AND `worker_type_id` = #{workerTypeId}
+				<if test = "workerTypeId!=null and workerTypeId!=''">
+					AND `worker_type_id` = #{workerTypeId}
+				</if>
 				AND `house_id` = #{houseId}
 				GROUP BY
 					houseId,

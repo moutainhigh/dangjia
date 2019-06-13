@@ -40,6 +40,9 @@ public interface IHouseMapper extends Mapper<House> {
     List<House> getSameLayout(@Param("cityId") String cityId, @Param("villageId") String villageId,
                               @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare, @Param("houseType") Integer houseType);
 
+    List<House> getSameLayoutDistance(@Param("cityId") String cityId, @Param("locationx") String locationx, @Param("locationy") String locationy,
+                              @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare);
+
     List<House> getReferenceBudget(@Param("cityId") String cityId, @Param("villageId") String villageId, @Param("houseType") Integer houseType,
                                    @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare);
 
