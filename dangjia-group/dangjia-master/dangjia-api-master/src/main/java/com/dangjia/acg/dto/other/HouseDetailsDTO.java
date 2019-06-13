@@ -16,7 +16,10 @@ public class HouseDetailsDTO {
     private String image;
     private String houseName;
     private String houseId;
+    private String residential;//
     private String cityId;
+    private String cityName;//
+    private BigDecimal square;//
     private BigDecimal totalPrice;//总计
     private List<String> dianList;
     private List<Map<String,Object>> mapList;
