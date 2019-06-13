@@ -202,15 +202,14 @@ public class MendOrderCheckService {
                         mendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
                         mendMateriel.setRepairMendDeliverId(mendDeliver.getId());
                         mendMaterialMapper.updateByPrimaryKeySelective(mendMateriel);
-
-                        WorkerType workType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());//查询工种
-                        //大管家
-                        HouseFlow houseFlow = houseFlowMapper.getHouseFlowByHidAndWty(house.getId(), 3);
-                        //推送消息给业主等待大管家商与供应商一起到现场清点可退材料
-                        configMessageService.addConfigMessage(null, "gj", houseFlow.getWorkerId(),
-                                "0", "工匠退材料", String.format(DjConstants.PushMessage.GONGJIANGTUICAILIAOQINGDIAN,
-                                        house.getHouseName(),workType.getName()), "");
                     }
+                    WorkerType workType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());//查询工种
+                    //大管家
+                    HouseFlow houseFlow = houseFlowMapper.getHouseFlowByHidAndWty(house.getId(), 3);
+                    //推送消息给业主等待大管家商与供应商一起到现场清点可退材料
+                    configMessageService.addConfigMessage(null, "gj", houseFlow.getWorkerId(),
+                            "0", "工匠退材料", String.format(DjConstants.PushMessage.GONGJIANGTUICAILIAOQINGDIAN,
+                                    house.getHouseName(),workType.getName()), "");
                 }
                 return ServerResponse.createBySuccessMessage("审核成功");
             }else{
@@ -474,7 +473,7 @@ public class MendOrderCheckService {
                     mendMaterialMapper.updateByPrimaryKeySelective(mendMateriel);
                 }
             }
-            mendDeliver.setTotalAmount(actualTotalAmount);//累计退货总价
+            mendDeliver.setApplyMoney(actualTotalAmount);//累计退货总价
             mendDeliver.setShippingState(1);
             mendDeliver.setOperatorId(operator.getId());
             mendDeliver.setBackTime(new Date());
