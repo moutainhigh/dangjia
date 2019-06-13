@@ -116,7 +116,7 @@ public class OrderSplitService {
                 return ServerResponse.createByErrorMessage("请勿重复提交申请！");
             }
             srcSplitDeliver.setDeliveryFee(splitDeliver.getDeliveryFee());
-            srcSplitDeliver.setApplyMoney(splitDeliver.getApplyMoney());
+//            srcSplitDeliver.setApplyMoney(splitDeliver.getApplyMoney());
             srcSplitDeliver.setApplyState(0);//供应商申请结算的状态0申请中；1不通过；2通过
             splitDeliverMapper.updateByPrimaryKeySelective(srcSplitDeliver);
             return ServerResponse.createBySuccessMessage("操作成功");
