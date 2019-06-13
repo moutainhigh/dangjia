@@ -447,6 +447,7 @@ public class MendOrderCheckService {
                 return ServerResponse.createBySuccessMessage("提交失败，请联系平台部！");
             }
             Double actualTotalAmount=0D;
+            Double applyMoney=0D;
             if(mendOrder.getActualTotalAmount()==null){
                 mendOrder.setActualTotalAmount(0D);
             }
@@ -467,13 +468,17 @@ public class MendOrderCheckService {
                     }else{
                          mendMateriel = mendOrderService.saveMendMaterial(mendOrder,house,productId,shopCount);
                     }
+
+                    SupplierProduct supplierProduct = forMasterAPI.getSupplierProduct(house.getCityId(), mendDeliver.getSupplierId(), mendMateriel.getProductId());
                     mendMateriel.setActualCount(Double.parseDouble(shopCount));//实际退货数
                     mendMateriel.setActualPrice(mendMateriel.getActualCount() * mendMateriel.getPrice());
                     actualTotalAmount=actualTotalAmount+mendMateriel.getActualPrice();
+                    applyMoney+=mendMateriel.getActualCount() * supplierProduct.getPrice();
                     mendMaterialMapper.updateByPrimaryKeySelective(mendMateriel);
                 }
             }
-            mendDeliver.setApplyMoney(actualTotalAmount);//累计退货总价
+            mendDeliver.setApplyMoney(applyMoney);//累计供应商结算总价
+            mendDeliver.setTotalAmount(actualTotalAmount);//累计退货总价
             mendDeliver.setShippingState(1);
             mendDeliver.setOperatorId(operator.getId());
             mendDeliver.setBackTime(new Date());
