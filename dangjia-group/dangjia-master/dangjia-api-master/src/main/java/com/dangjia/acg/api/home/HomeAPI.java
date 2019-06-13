@@ -181,7 +181,8 @@ public interface HomeAPI {
     /**
      * showdoc
      *
-     * @param id 必选 string 首页模块ID
+     * @param id     必选 string 首页模块ID
+     * @param userId 必选 string 操作人id
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/首页模块
      * @title 删除首页模版
@@ -197,7 +198,8 @@ public interface HomeAPI {
     @ApiOperation(value = "删除首页模版", notes = "删除首页模版")
     ServerResponse delHomeMasterplate(
             @RequestParam("request") HttpServletRequest request,
-            @RequestParam("id") String id);
+            @RequestParam("id") String id,
+            @RequestParam("userId") String userId);
 
     /**
      * showdoc

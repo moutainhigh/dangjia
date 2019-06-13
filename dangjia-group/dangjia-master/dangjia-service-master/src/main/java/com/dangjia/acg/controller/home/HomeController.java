@@ -48,8 +48,8 @@ public class HomeController implements HomeAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse delHomeMasterplate(HttpServletRequest request, String id) {
-        return homeService.delHomeMasterplate(id);
+    public ServerResponse delHomeMasterplate(HttpServletRequest request, String id, String userId) {
+        return homeService.delHomeMasterplate(id, userId);
     }
 
     @Override
