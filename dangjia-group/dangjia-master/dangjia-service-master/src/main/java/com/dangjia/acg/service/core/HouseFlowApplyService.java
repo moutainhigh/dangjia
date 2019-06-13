@@ -463,6 +463,7 @@ public class HouseFlowApplyService {
             if (bd.doubleValue() > 0) {
                 //记录流水
                 BigDecimal surplusMoney = worker.getSurplusMoney().add(bd);
+                BigDecimal retentionMoney = worker.getRetentionMoney().subtract(bd);
                 WorkerDetail workerDetail = new WorkerDetail();
                 workerDetail.setName("涨积分退滞留金");
                 workerDetail.setWorkerId(worker.getId());
@@ -476,6 +477,7 @@ public class HouseFlowApplyService {
                 workerDetailMapper.insert(workerDetail);
                 worker.setDeposit(worker.getDeposit());//实际1500元
                 worker.setSurplusMoney(surplusMoney);
+                worker.setRetentionMoney(retentionMoney);
             }
             //BigDecimal deposit = workDepositService.getWorkDepositByList().getDeposit();//获取押金比例 5%
             BigDecimal deposit = new BigDecimal(0.05);
