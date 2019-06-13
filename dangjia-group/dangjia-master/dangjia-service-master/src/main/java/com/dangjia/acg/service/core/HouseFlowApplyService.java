@@ -484,6 +484,7 @@ public class HouseFlowApplyService {
             }
             //BigDecimal deposit = workDepositService.getWorkDepositByList().getDeposit();//获取押金比例 5%
             BigDecimal deposit = new BigDecimal(0.05);
+
             //申请的钱为空时将不考虑滞留金转入
             if (hfa != null && hfa.getApplyMoney() != null && worker.getRetentionMoney().doubleValue() < worker.getDeposit().doubleValue()) {//押金没收够并且没有算过押金
                 //算订单的5%

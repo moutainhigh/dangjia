@@ -360,7 +360,10 @@ public class WalletService {
 //            List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
 //            walletDTO.setHouseOrder(houseWorkerList.size());//接单量
 //            walletDTO.setHouseOrder(member.getVolume().intValue());//接单量
-            walletDTO.setHouseOrder(engineerService.alternative(member.getId(),member.getWorkerType()));
+            walletDTO.setHouseOrder(0);
+            if(member.getWorkerType()!=null) {
+                walletDTO.setHouseOrder(engineerService.alternative(member.getId(), member.getWorkerType()));
+            }
 
             return ServerResponse.createBySuccess("获取成功", walletDTO);
         } catch (Exception e) {
