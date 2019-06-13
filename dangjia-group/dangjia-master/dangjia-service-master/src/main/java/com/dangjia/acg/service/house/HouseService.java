@@ -225,11 +225,11 @@ public class HouseService {
             String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             switch (house.getVisitState()) {
                 case 1:
-                    if ((house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getDesignerOk() != 3)
-                            || (house.getDesignerOk() == 3 && house.getBudgetOk() != 0 && house.getBudgetOk() != 5)) {
-                        map.put("btName", "申请结束装修");
-                        map.put("onclick", webAddress + "ownerEnd?title=填写原因&houseId=" + house.getId());
-                    }
+//                    if ((house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getDesignerOk() != 3)
+//                            || (house.getDesignerOk() == 3 && house.getBudgetOk() != 0 && house.getBudgetOk() != 5)) {
+                    map.put("btName", "申请结束装修");
+                    map.put("onclick", webAddress + "ownerEnd?title=填写原因&houseId=" + house.getId());
+//                    }
                     break;
                 case 2:
                     map.put("btName", "休眠中");
@@ -887,9 +887,9 @@ public class HouseService {
                         "0", "等待大管家抢单", String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION,
                                 house.getHouseName()), "");
                 //告知工程部精算已通过
-                Map<String,String> temp_para=new HashMap();
-                temp_para.put("house_name",house.getHouseName());
-                JsmsUtil.sendSMS("13574147081","165204",temp_para);
+                Map<String, String> temp_para = new HashMap();
+                temp_para.put("house_name", house.getHouseName());
+                JsmsUtil.sendSMS("13574147081", "165204", temp_para);
 
                 //在这里算出大管家每次巡查拿的钱 和 每次验收拿的钱 记录到大管家的 houseflow里 houseflow,新增两个字段.
                 List<HouseFlow> houseFlowList = houseFlowMapper.getForCheckMoney(houseId);
@@ -1257,7 +1257,7 @@ public class HouseService {
                 imgArr[i] = address + string;
             }
             map.put("imgArr", imgArr);
-            if(houseFlowApply!=null) {
+            if (houseFlowApply != null) {
                 map.put("startDate", houseFlowApply.getStartDate());
                 map.put("endDate", houseFlowApply.getEndDate());
             }
@@ -1564,7 +1564,7 @@ public class HouseService {
                 houseConstructionRecord.setWorkerId(houseFlowApply.getWorkerId());
                 houseConstructionRecord.setWorkerType(houseFlowApply.getWorkerType());
                 houseConstructionRecord.setApplyType(houseFlowApply.getApplyType());
-                if (houseFlowApply.getApplyType() == 8){
+                if (houseFlowApply.getApplyType() == 8) {
                     houseConstructionRecord.setApplyType(13);
                 }
                 if (houseFlowApply.getApplyType() == 5 || houseFlowApply.getApplyType() == 6 || houseFlowApply.getApplyType() == 7) {
