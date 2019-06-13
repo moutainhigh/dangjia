@@ -97,7 +97,8 @@ public class SplitDeliverService {
                     warehouse.setAskCount(warehouse.getAskCount() - noReceive);
                 }
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
-                splitDeliver.setApplyMoney(splitDeliver.getApplyMoney() + (orderSplitItem.getSupCost()*orderSplitItem.getReceive()));
+//                splitDeliver.setApplyMoney(splitDeliver.getApplyMoney() + (orderSplitItem.getSupCost()*orderSplitItem.getReceive()));
+                splitDeliver.setApplyMoney((orderSplitItem.getSupCost()*orderSplitItem.getReceive()));
             }
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
@@ -137,7 +138,8 @@ public class SplitDeliverService {
                 Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), splitDeliver.getHouseId());
                 warehouse.setReceive(warehouse.getReceive() + orderSplitItem.getNum());
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
-                splitDeliver.setApplyMoney(splitDeliver.getApplyMoney() + (orderSplitItem.getSupCost()*orderSplitItem.getReceive()));
+//                splitDeliver.setApplyMoney(splitDeliver.getApplyMoney() + (orderSplitItem.getSupCost()*orderSplitItem.getReceive()));
+                splitDeliver.setApplyMoney((orderSplitItem.getSupCost()*orderSplitItem.getReceive()));
             }
 
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
