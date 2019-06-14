@@ -631,6 +631,9 @@ public class HouseWorkerService {
                 for (HouseFlowApply houseFlowApply : houseFlowList) {
                     if(houseFlowApply.getEndDate().getTime()>end.getTime()){
                         end=houseFlowApply.getEndDate();
+                        //更新实际停工天数
+                        houseFlowApply.setEndDate(DateUtil.delDateDays(start, 1));
+                        houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
                     }
                 }
                 suspendDay=DateUtil.daysofTwo(start, end)+1 ;
