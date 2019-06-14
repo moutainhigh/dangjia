@@ -66,7 +66,6 @@ public class WarehouseService {
      */
     public ServerResponse warehouseList(String userToken, PageDTO pageDTO, String houseId, String categoryId, String name, String type) {
         try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             House house = houseMapper.selectByPrimaryKey(houseId);
             if (house == null) {
                 return ServerResponse.createByErrorMessage("未找到该房产");
@@ -84,6 +83,7 @@ public class WarehouseService {
             if (!CommonUtil.isEmpty(name)) {
                 criteria.andLike(Warehouse.PRODUCT_NAME, "%" + name + "%");
             }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
             LOG.info(" warehouseList size:" + warehouseList.size());
             PageInfo pageResult = new PageInfo(warehouseList);
