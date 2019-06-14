@@ -250,7 +250,7 @@
                 mv.*, (
                 st_distance (
                 point (mv.locationx, mv.locationy),
-                point (#{locationx}	,#{locationy)}
+                point (#{locationx}	,#{locationy}
                 ) * 111195 / 1000
                 ) AS juli
             FROM
