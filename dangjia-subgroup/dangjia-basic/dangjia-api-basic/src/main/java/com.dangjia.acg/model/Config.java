@@ -2,15 +2,17 @@ package com.dangjia.acg.model;
 
 import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
 /**
  * 系统配置实体
  * Created by QiYuXiang on 2017/8/3.
  */
+@Data
 @Entity
 @Table(name = "dj_config")
 public class Config extends BaseEntity {
@@ -20,6 +22,7 @@ public class Config extends BaseEntity {
    */
   @Column(name = "param_key")
   @Desc("参数key")
+  @ApiModelProperty("参数key")
   private String paramKey;
 
   /****
@@ -27,6 +30,7 @@ public class Config extends BaseEntity {
    */
   @Column(name = "param_value")
   @Desc("参数value")
+  @ApiModelProperty("参数value")
   private String paramValue;
 
   /****
@@ -34,6 +38,7 @@ public class Config extends BaseEntity {
    */
   @Column(name = "param_desc")
   @Desc("参数描述")
+  @ApiModelProperty("参数描述")
   private String paramDesc;
 
   /****
@@ -41,6 +46,7 @@ public class Config extends BaseEntity {
    */
   @Column(name = "app_type")
   @Desc("平台类型")
+  @ApiModelProperty("平台类型")
   private Integer appType;
 
   /****
