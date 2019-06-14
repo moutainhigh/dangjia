@@ -24,10 +24,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * author: Ronalcheng
@@ -139,7 +136,7 @@ public class HouseWorkerSupService {
                 hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
                 hfa.setHouseId(houseFlow.getHouseId());//房子id
                 hfa.setApplyType(3);//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
-                hfa.setApplyDec("大管家整体停工，原因："+applyDec);//描述
+                hfa.setApplyDec(applyDec);//描述
                 hfa.setApplyMoney(new BigDecimal(0));//申请得钱
                 hfa.setSupervisorMoney(new BigDecimal(0));
                 hfa.setOtherMoney(new BigDecimal(0));
@@ -221,5 +218,19 @@ public class HouseWorkerSupService {
         }
     }
 
+    /**
+     * 管家停工选择影响顺延的工序列表
+     */
+    public ServerResponse getShutdownWorkerType(String houseId) {
+        Example example = new Example(HouseFlow.class);
+        example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andCondition(" worker_type>3 and  work_steta not in (1,2,6) ");
+        List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
+        List listtype=new ArrayList();
+        for (HouseFlow flow : houseFlowList) {
+            listtype.add(workerTypeMapper.selectByPrimaryKey(flow.getWorkerTypeId()));
+
+        }
+        return ServerResponse.createBySuccess("ok",listtype);
+    }
 
 }
