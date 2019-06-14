@@ -13,7 +13,7 @@ import javax.persistence.Table;
 
 /**
  * @author Ruking.Cheng
- * @descrilbe 首页配置表
+ * @descrilbe 首页模版表
  * @email 495095492@qq.com
  * @tel 18075121944
  * @date on 2019/6/13 10:59 AM
@@ -21,23 +21,22 @@ import javax.persistence.Table;
 @Data
 @Entity
 @FieldNameConstants(prefix = "")
-@Table(name = "dj_home_configuration")
-@ApiModel(description = "首页配置表")
-public class HomeCollocation extends BaseEntity {
-
+@Table(name = "dj_home_template")
+@ApiModel(description = "首页模版表")
+public class HomeTemplate extends BaseEntity {
 
     @Column(name = "user_id")
     @Desc(value = "操作人ID")
     @ApiModelProperty("操作人ID")
     private String userId;
 
-    @Column(name = "masterpiece_ids")
-    @Desc(value = "配置模块ID，以“,“分割")
-    @ApiModelProperty("配置模块ID，以“,“分割")
-    private String masterpieceIds;
+    @Column(name = "name")
+    @Desc(value = "模版名称")
+    @ApiModelProperty("模版名称")
+    private String name;
 
-    @Column(name = "template_id")
-    @Desc(value = "对应的模版ID")
-    @ApiModelProperty("对应的模版ID")
-    private String templateId;
+    @Column(name = "enable")
+    @Desc(value = "是否启用：0:禁用，1:启用")
+    @ApiModelProperty("是否启用：0:禁用，1:启用")
+    private Integer enable;
 }
