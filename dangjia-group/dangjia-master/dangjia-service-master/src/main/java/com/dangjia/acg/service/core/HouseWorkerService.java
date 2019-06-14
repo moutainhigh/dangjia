@@ -598,6 +598,7 @@ public class HouseWorkerService {
                 return ServerResponse.createBySuccessMessage("工匠申请停工（" + workerType.getName() + "）操作成功");
 
             } else if (applyType == 4) {
+                suspendDay=0;
                 //申请类型0每日完工申请，4：每日开工
                 //五月二周任务取消12点限制
 //                if (active != null && active.equals("pre")) {
@@ -614,7 +615,6 @@ public class HouseWorkerService {
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 houseFlow.setPause(0);//0:正常；1暂停；
-                houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发每日开工将暂停状态改为正常
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
 
@@ -638,6 +638,15 @@ public class HouseWorkerService {
                     //计划提前
                     houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), null, suspendDay);
                 }
+
+                suspendDay=0;
+                //若未进场的工序比计划开工日期提早开工，则计划开工日期修改为实际开工日期，（施工天数不变）完工日期随之提早
+                if(houseFlow.getStartDate()!=null&&houseFlow.getStartDate().getTime()>start.getTime()){
+                    suspendDay=DateUtil.daysofTwo(start, houseFlow.getStartDate())+1 ;
+                    houseFlow.setStartDate(DateUtil.delDateDays(houseFlow.getStartDate(), suspendDay));
+                    houseFlow.setEndDate(DateUtil.delDateDays(houseFlow.getEndDate(), suspendDay));
+                }
+                houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发每日开工将暂停状态改为正常
                 return ServerResponse.createBySuccessMessage("操作成功");
             } else if (applyType == 5) {//有人巡
                 hfa.setApplyDec("业主您好，我已巡查了" + workerType.getName() + "，工地在正常施工，现场情况如下");//描述
