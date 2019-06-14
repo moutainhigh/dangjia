@@ -55,8 +55,11 @@
         INNER JOIN dj_member_info mi on mi.member_id = w.id and mi.policy_id='2'
         WHERE w.data_status = 0
         <if test="name!=null and name!=''">
-            and
-            w.name LIKE CONCAT('%',#{name},'%')
+            and(
+              w.name LIKE CONCAT('%',#{name},'%')
+              or
+              w.mobile LIKE CONCAT('%',#{name},'%')
+            )
         </if>
         <if test="workerTypeId!=null and workerTypeId!=''">
             and
