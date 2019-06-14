@@ -227,7 +227,9 @@ public class HouseWorkerSupService {
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         List listtype=new ArrayList();
         for (HouseFlow flow : houseFlowList) {
-            listtype.add(workerTypeMapper.selectByPrimaryKey(flow.getWorkerTypeId()));
+            WorkerType workerType=workerTypeMapper.selectByPrimaryKey(flow.getWorkerTypeId());
+            workerType.setId(flow.getId());
+            listtype.add(workerType);
 
         }
         return ServerResponse.createBySuccess("ok",listtype);
