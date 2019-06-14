@@ -1,5 +1,8 @@
 package com.dangjia.acg.service.house;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -7,6 +10,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.house.TextContentDTO;
 import com.dangjia.acg.mapper.house.IHouseChoiceCaseMapper;
 import com.dangjia.acg.modle.activity.Activity;
 import com.dangjia.acg.modle.house.HouseChoiceCase;
@@ -76,10 +80,36 @@ public class HouseChoiceCaseService {
                 }
                 map.put("address", address);
             }
+            if (!CommonUtil.isEmpty(v.getLabel())) {
+                String[] label = StringUtils.split(v.getLabel(), ",");
+                map.put("label", label);
+            }
             if (!CommonUtil.isEmpty(v.getImage())) {
                 map.put("imageUrl", v.getImage());
                 map.put("image", jdAddress + v.getImage());
             }
+            if (!CommonUtil.isEmpty(v.getTextContent())) {
+                JSONArray itemObjArr = JSON.parseArray(v.getTextContent());
+                for (int i = 0; i < itemObjArr.size(); i++) {
+                    TextContentDTO textContentDTO=new TextContentDTO();
+                    JSONObject jsonObject = itemObjArr.getJSONObject(i);
+                    String[] imageUrl = jsonObject.getString("image").split(",");
+                    textContentDTO.setImageUrl(imageUrl);
+                    String describe=jsonObject.getString("describe");
+                    String headline=jsonObject.getString("headline");
+                    String[] images = jsonObject.getString("image").split(",");
+                    for (int j=0;j<images.length;j++){
+                        images[j]=jdAddress+images[j];
+                    }
+                    textContentDTO.setImage(images);
+                    textContentDTO.setHeadline(headline);
+                    textContentDTO.setDescribe(describe);
+                    List<TextContentDTO> textContentDTOS = new ArrayList<>();
+                    textContentDTOS.add(textContentDTO);
+                    map.put("textContent",textContentDTOS);
+                }
+            }
+
             listmap.add(map);
         }
         pageResult.setList(listmap);
@@ -123,7 +153,7 @@ public class HouseChoiceCaseService {
     }
 
     private ServerResponse setHouseChoiceCase(HttpServletRequest request, int type, HouseChoiceCase houseChoiceCase) {
-        if (!CommonUtil.isEmpty(houseChoiceCase.getTitle())) {
+//        if (!CommonUtil.isEmpty(houseChoiceCase.getTitle())) {
             Example example = new Example(HouseChoiceCase.class);
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo(HouseChoiceCase.TITLE, houseChoiceCase.getTitle());
@@ -134,11 +164,13 @@ public class HouseChoiceCaseService {
             if (list.size() > 0) {
                 return ServerResponse.createByErrorMessage("案例名称不能重复");
             }
-        }
-        if (houseChoiceCase.getIsShow() == 3 && (
-                CommonUtil.isEmpty(houseChoiceCase.getShowTimeStart()) ||
-                        CommonUtil.isEmpty(houseChoiceCase.getShowTimeEnd()))) {
-            return ServerResponse.createByErrorMessage("请选择开始和结束时间");
+//        }
+        if(null!=houseChoiceCase.getIsShow()) {
+            if (houseChoiceCase.getIsShow() == 3 && (
+                    CommonUtil.isEmpty(houseChoiceCase.getShowTimeStart()) ||
+                            CommonUtil.isEmpty(houseChoiceCase.getShowTimeEnd()))) {
+                return ServerResponse.createByErrorMessage("请选择开始和结束时间");
+            }
         }
         if (type == 0) {//新增
             if (this.houseChoiceCaseMapper.insertSelective(houseChoiceCase) <= 0) {

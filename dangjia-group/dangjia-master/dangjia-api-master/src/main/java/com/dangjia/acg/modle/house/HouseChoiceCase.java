@@ -79,6 +79,31 @@ public class HouseChoiceCase extends BaseEntity {
     @ApiModelProperty("展示方式 0: 展示 1：不展示 2: 定时展示")
     private Integer isShow;
 
+    @Column(name = "building_names")
+    @Desc(value = "楼盘名称")
+    @ApiModelProperty("楼盘名称")
+    private String buildingNames;
+
+    @Column(name = "area")
+    @Desc(value = "面积")
+    @ApiModelProperty("面积")
+    private BigDecimal area;
+
+    @Column(name = "style")
+    @Desc(value = "风格")
+    @ApiModelProperty("风格")
+    private String style;
+
+    @Column(name = "cost")
+    @Desc(value = "费用")
+    @ApiModelProperty("费用")
+    private BigDecimal cost;
+
+    @Column(name = "text_content")
+    @Desc(value = "内容")
+    @ApiModelProperty("内容，json串")
+    private String textContent;
+
     //所有图片字段加入域名和端口，形成全路径
     public void initPath(String address) {
         this.image = StringUtils.isEmpty(this.image) ? null : address + this.image;

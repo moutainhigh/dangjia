@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.house;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
@@ -142,6 +143,8 @@ public class HouseService {
     private HouseConstructionRecordMapper houseConstructionRecordMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
+    @Autowired
+    private IHouseChoiceCaseMapper iHouseChoiceCaseMapper;
 
     @Autowired
     private IWorkDepositMapper workDepositMapper;
@@ -1650,6 +1653,38 @@ public class HouseService {
             }
             pageResult.setList(houseList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 获取房屋精选案例详情
+     */
+    public ServerResponse getHouseChoiceCases(String id) {
+        try {
+            HouseChoiceCase houseChoiceCase = iHouseChoiceCaseMapper.selectByPrimaryKey(id);
+            JSONArray itemObjArr = JSON.parseArray(houseChoiceCase.getTextContent());
+            HouseChoiceCaseDTO houseChoiceCaseDTO=new HouseChoiceCaseDTO();
+            for (int i = 0; i < itemObjArr.size(); i++) {
+                JSONObject jsonObject = itemObjArr.getJSONObject(i);
+                String headline=jsonObject.getString("headline");
+                String [] image=jsonObject.getString("image").split(",");
+                String [] imageUrl=jsonObject.getString("imageUrl").split(",");
+                String describe=jsonObject.getString("describe");
+                TextContentDTO textContentDTO=new TextContentDTO();
+                textContentDTO.setHeadline(headline);
+                textContentDTO.setDescribe(describe);
+                textContentDTO.setImage(image);
+                textContentDTO.setImageUrl(imageUrl);
+                houseChoiceCaseDTO.getTextContentDTO().add(textContentDTO);
+            }
+            houseChoiceCaseDTO.setBuildingNames(houseChoiceCase.getBuildingNames());
+            houseChoiceCaseDTO.setArea(houseChoiceCase.getArea());
+            houseChoiceCaseDTO.setCost(houseChoiceCase.getCost());
+            houseChoiceCaseDTO.setStyle(houseChoiceCase.getStyle());
+            return ServerResponse.createBySuccess("查询成功",houseChoiceCaseDTO);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
