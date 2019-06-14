@@ -114,9 +114,19 @@ public class HouseWorkerSupService {
                 return (ServerResponse) object;
             }
             Member worker = (Member) object;
-            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+
             //如果为大管家整体停工， 则功所有工序整体顺延（效果为：对于已完工工序无效果，对于已开工未完工工序相当于请假XX天，对于未开工工序相当于同时推迟开工和阶段完工工序；）
+            //5查看装修排期时，计划有工序开始或结束的日期有特殊标记
+            //6已经停工的工序，若大管家再操作“整体停工”，不能简单累加两次停工天数，而是比对两次停工的日期，修改停工天数
+            //7已经停工的工序，若工匠提前复工，则复工日期以及之后的停工全部取消，原来被停工推后了的计划完工日期往前推，推的天数等于被取消的停工天数
+            //8若未进场的工序比计划开工日期提早开工，则计划开工日期修改为实际开工日期，（施工天数不变）完工日期随之提早
+            //9若未进场的工序比计划开工日期提早开工的工序比计划开工日期推迟开工，则计划不变
             if(worker.getWorkerType()==3){
+                String[] houseFlowIds = houseFlowId.split(",");
+                if(houseFlowIds.length>0){
+
+                }
+                HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
                 String format = "yyyy-MM-dd";
                 Date start = DateUtil.convert(startDate, format);
                 Date end = DateUtil.convert(endDate, format);
@@ -150,6 +160,7 @@ public class HouseWorkerSupService {
                 hfa.setOperator(worker.getId());
                 houseFlowApplyMapper.insert(hfa);
             }else {
+                HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
                 House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());//查询房子
                 Example example = new Example(HouseFlowApply.class);
                 example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
