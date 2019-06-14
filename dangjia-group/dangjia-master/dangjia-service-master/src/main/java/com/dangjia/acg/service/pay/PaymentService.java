@@ -384,14 +384,15 @@ public class PaymentService {
                 changeOrder.setState(4);//已支付
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
 
+
+                //若工序发生补人工，则所有未完工工序顺延XX天
                 Example example = new Example(HouseFlow.class);
                 example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, changeOrder.getHouseId())
                         .andGreaterThan(HouseFlow.WORKER_TYPE, 3)
-                        .andEqualTo(HouseFlow.WORK_STETA,0);
+                        .andCondition(" work_steta not in (1,2,6)  ");
                 List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
                 for (HouseFlow houseFlow : houseFlowList) {
                     if(houseFlow.getStartDate()!=null) {
-                        houseFlow.setStartDate(DateUtil.addDateDays(houseFlow.getStartDate(), changeOrder.getScheduleDay()));
                         houseFlow.setEndDate(DateUtil.addDateDays(houseFlow.getEndDate(), changeOrder.getScheduleDay()));
                         houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                     }
