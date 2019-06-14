@@ -41,4 +41,13 @@ public class HouseWorkerSupController implements HouseWorkerSupAPI {
     public ServerResponse applyShutdown(String userToken, String houseFlowId, String applyDec, String startDate, String endDate){
         return houseWorkerSupService.applyShutdown(userToken,houseFlowId,applyDec,startDate,endDate);
     }
+
+    /**
+     * 管家停工选择影响顺延的工序列表
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getShutdownWorkerType(String houseId){
+        return houseWorkerSupService.getShutdownWorkerType(houseId);
+    }
 }
