@@ -90,6 +90,7 @@ public class HouseChoiceCaseService {
             }
             if (!CommonUtil.isEmpty(v.getTextContent())) {
                 JSONArray itemObjArr = JSON.parseArray(v.getTextContent());
+                List<TextContentDTO> textContentDTOS=new ArrayList<>();
                 for (int i = 0; i < itemObjArr.size(); i++) {
                     TextContentDTO textContentDTO=new TextContentDTO();
                     JSONObject jsonObject = itemObjArr.getJSONObject(i);
@@ -104,10 +105,9 @@ public class HouseChoiceCaseService {
                     textContentDTO.setImage(images);
                     textContentDTO.setHeadline(headline);
                     textContentDTO.setDescribe(describe);
-                    List<TextContentDTO> textContentDTOS = new ArrayList<>();
                     textContentDTOS.add(textContentDTO);
-                    map.put("textContent",textContentDTOS);
                 }
+                map.put("textContent",textContentDTOS);
             }
 
             listmap.add(map);
