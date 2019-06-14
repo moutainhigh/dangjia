@@ -70,8 +70,8 @@ public class HouseDistribution extends BaseEntity {
 	private String head;//
 
 	@Column(name = "state")
-	@Desc(value = "是否支付1已支付0未支付")
-	@ApiModelProperty("是否支付1已支付0未支付")
+	@Desc(value = "是否支付1已支付0未支付2预约")
+	@ApiModelProperty("是否支付1已支付0未支付2预约")
 	private Integer state;//
 
 	@Column(name = "price")
@@ -80,8 +80,8 @@ public class HouseDistribution extends BaseEntity {
 	private Double price;//
 
 	@Column(name = "type")
-	@Desc(value = "1验房活动 2..")
-	@ApiModelProperty("1验房活动 2..")
+	@Desc(value = "1验房活动 2.验房预约")
+	@ApiModelProperty("1验房活动 2.验房预约")
 	private Integer type;//
 
 	@Column(name = "superior_id")
