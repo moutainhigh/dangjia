@@ -6,6 +6,7 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IWebsiteVisitMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
@@ -76,6 +77,7 @@ public class HouseDistributionService {
         String userToken = request.getParameter(Constants.USER_TOKEY);
         String cityId = request.getParameter(Constants.CITY_ID);
         if(CommonUtil.isEmpty(userToken)){
+            String modifyDate = request.getParameter(HouseDistribution.MODIFY_DATE);
             houseDistribution.setId(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
             houseDistribution.setHead("");
             houseDistribution.setCity(iCityMapper.selectByPrimaryKey(cityId).getName());
@@ -83,6 +85,10 @@ public class HouseDistributionService {
             houseDistribution.setSex("0");
             houseDistribution.setState(2);
             houseDistribution.setType(2);
+            if(houseDistribution.getModifyDate()==null&&!CommonUtil.isEmpty(modifyDate)){
+                houseDistribution.setModifyDate(DateUtil.toDate(modifyDate));
+
+            }
         }else {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             houseDistribution.setId(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
