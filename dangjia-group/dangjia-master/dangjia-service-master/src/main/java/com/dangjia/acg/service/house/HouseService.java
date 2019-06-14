@@ -1664,6 +1664,7 @@ public class HouseService {
      */
     public ServerResponse getHouseChoiceCases(String id) {
         try {
+            String jdAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             HouseChoiceCase houseChoiceCase = iHouseChoiceCaseMapper.selectByPrimaryKey(id);
             JSONArray itemObjArr = JSON.parseArray(houseChoiceCase.getTextContent());
             HouseChoiceCaseDTO houseChoiceCaseDTO=new HouseChoiceCaseDTO();
@@ -1671,13 +1672,15 @@ public class HouseService {
                 JSONObject jsonObject = itemObjArr.getJSONObject(i);
                 String headline=jsonObject.getString("headline");
                 String [] image=jsonObject.getString("image").split(",");
-                String [] imageUrl=jsonObject.getString("imageUrl").split(",");
+                for (int j = 0; j < image.length; j++) {
+                    image[j]=jdAddress+image[j];
+
+                }
                 String describe=jsonObject.getString("describe");
                 TextContentDTO textContentDTO=new TextContentDTO();
                 textContentDTO.setHeadline(headline);
                 textContentDTO.setDescribe(describe);
                 textContentDTO.setImage(image);
-                textContentDTO.setImageUrl(imageUrl);
                 houseChoiceCaseDTO.getTextContentDTO().add(textContentDTO);
             }
             houseChoiceCaseDTO.setBuildingNames(houseChoiceCase.getBuildingNames());
