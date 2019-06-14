@@ -222,12 +222,14 @@ public class HouseWorkerSupService {
      * 管家停工选择影响顺延的工序列表
      */
     public ServerResponse getShutdownWorkerType(String houseId) {
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Example example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andCondition(" worker_type>3 and  work_steta not in (1,2,6) ");
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         List listtype=new ArrayList();
         for (HouseFlow flow : houseFlowList) {
             WorkerType workerType=workerTypeMapper.selectByPrimaryKey(flow.getWorkerTypeId());
+            workerType.setImage(address+workerType.getImage());
             workerType.setId(flow.getId());
             listtype.add(workerType);
 
