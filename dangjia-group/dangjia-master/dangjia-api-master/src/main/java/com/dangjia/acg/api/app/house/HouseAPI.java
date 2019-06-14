@@ -185,4 +185,15 @@ public interface HouseAPI {
                                    @RequestParam("modelingLayoutId") String modelingLayoutId,       //户型Id
                                    @RequestParam("villageId") String villageId);                    //小区Id
 
+
+    /**
+     * 获取房屋精选案例详情
+     * @param id
+     * @return
+     */
+    @PostMapping("app/house/house/getHouseChoiceCases")
+    @ApiOperation(value = "获取房屋精选案例详情", notes = "获取房屋精选案例详情")
+    ServerResponse getHouseChoiceCases(@RequestParam("id") String id);
+
+
 }

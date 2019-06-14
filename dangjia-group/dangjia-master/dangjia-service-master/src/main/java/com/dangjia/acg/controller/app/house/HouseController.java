@@ -230,4 +230,10 @@ public class HouseController implements HouseAPI {
         return houseService.updateByHouseId(building, unit, number, houseId, villageId, cityId, modelingLayoutId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseChoiceCases(String id) {
+        return houseService.getHouseChoiceCases(id);
+    }
+
 }
