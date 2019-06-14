@@ -114,9 +114,14 @@ public class HouseWorkerSupService {
                 return (ServerResponse) object;
             }
             Member worker = (Member) object;
-            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+
             //如果为大管家整体停工， 则功所有工序整体顺延（效果为：对于已完工工序无效果，对于已开工未完工工序相当于请假XX天，对于未开工工序相当于同时推迟开工和阶段完工工序；）
             if(worker.getWorkerType()==3){
+                String[] houseFlowIds = houseFlowId.split(",");
+                if(houseFlowIds.length>0){
+
+                }
+                HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
                 String format = "yyyy-MM-dd";
                 Date start = DateUtil.convert(startDate, format);
                 Date end = DateUtil.convert(endDate, format);
@@ -150,6 +155,7 @@ public class HouseWorkerSupService {
                 hfa.setOperator(worker.getId());
                 houseFlowApplyMapper.insert(hfa);
             }else {
+                HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
                 House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());//查询房子
                 Example example = new Example(HouseFlowApply.class);
                 example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
@@ -222,12 +228,14 @@ public class HouseWorkerSupService {
      * 管家停工选择影响顺延的工序列表
      */
     public ServerResponse getShutdownWorkerType(String houseId) {
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Example example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andCondition(" worker_type>3 and  work_steta not in (1,2,6) ");
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         List listtype=new ArrayList();
         for (HouseFlow flow : houseFlowList) {
             WorkerType workerType=workerTypeMapper.selectByPrimaryKey(flow.getWorkerTypeId());
+            workerType.setImage(address+workerType.getImage());
             workerType.setId(flow.getId());
             listtype.add(workerType);
 
