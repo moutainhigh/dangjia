@@ -246,17 +246,17 @@
         INNER JOIN (SELECT a.house_id,COUNT(a.id) num FROM dj_core_house_flow_apply a GROUP BY a.house_id ) b ON
         b.house_id=h.id
         INNER JOIN (
-            SELECT
-                mv.*, (
-                st_distance (
-                point (mv.locationx, mv.locationy),
-                point (#{locationx}	,#{locationy}
-                ) * 111195 / 1000
-                ) AS juli
-            FROM
-            `dj_house_modeling_village` mv
-            WHERE
-            mv.locationx IS NOT NULL
+                SELECT
+                    mv.*, (
+                        st_distance (
+                            point (mv.locationx, mv.locationy),
+                            point (#{locationx}	,#{locationy})
+                        ) * 111195 / 1000
+                    ) AS juli
+                FROM
+                `dj_house_modeling_village` mv
+                WHERE
+                mv.locationx IS NOT NULL
         ) v ON v.id = h.village_id
         where
         h.data_status=0
