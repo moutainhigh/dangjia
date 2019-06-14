@@ -17,41 +17,49 @@ public class HomeController implements HomeAPI {
     private HomeService homeService;
 
     @Override
+    @ApiMethod
     public ServerResponse addHomeTemplate(HttpServletRequest request, String userId, String name) {
         return homeService.addHomeTemplate(userId, name);
     }
 
     @Override
+    @ApiMethod
     public ServerResponse getHomeTemplateList(HttpServletRequest request, PageDTO pageDTO) {
         return homeService.getHomeTemplateList(pageDTO);
     }
 
     @Override
+    @ApiMethod
     public ServerResponse upDataHomeTemplate(HttpServletRequest request, String userId, String name, String templateId) {
         return homeService.upDataHomeTemplate(userId, name, templateId);
     }
 
     @Override
+    @ApiMethod
     public ServerResponse setHomeTemplateEnable(HttpServletRequest request, String userId, String templateId) {
         return homeService.setHomeTemplateEnable(userId, templateId);
     }
 
     @Override
+    @ApiMethod
     public ServerResponse delHomeTemplate(HttpServletRequest request, String userId, String templateId) {
         return homeService.delHomeTemplate(userId, templateId);
     }
 
     @Override
+    @ApiMethod
     public ServerResponse getAppHomeCollocation(HttpServletRequest request, String templateId) {
         return homeService.getAppHomeCollocation(templateId);
     }
 
     @Override
+    @ApiMethod
     public ServerResponse setAppHomeCollocation(HttpServletRequest request, String templateId, String userId, String masterpieceIds) {
         return homeService.setAppHomeCollocation(templateId, userId, masterpieceIds);
     }
 
     @Override
+    @ApiMethod
     public ServerResponse getAppHomeCollocationHistory(HttpServletRequest request, String templateId, PageDTO pageDTO) {
         return homeService.getAppHomeCollocationHistory(templateId, pageDTO);
     }
