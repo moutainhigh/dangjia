@@ -10,6 +10,7 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
@@ -36,10 +37,7 @@ import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
-import com.dangjia.acg.modle.core.HouseFlow;
-import com.dangjia.acg.modle.core.HouseWorker;
-import com.dangjia.acg.modle.core.HouseWorkerOrder;
-import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.group.Group;
@@ -385,7 +383,21 @@ public class PaymentService {
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
                 changeOrder.setState(4);//已支付
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
-                houseFlowScheduleService.updateFlowSchedule(changeOrder.getHouseId(),changeOrder.getWorkerTypeId(),changeOrder.getScheduleDay(),null);
+
+
+                //若工序发生补人工，则所有未完工工序顺延XX天
+                Example example = new Example(HouseFlow.class);
+                example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, changeOrder.getHouseId())
+                        .andGreaterThan(HouseFlow.WORKER_TYPE, 3)
+                        .andCondition(" work_steta not in (1,2,6)  ");
+                List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
+                for (HouseFlow houseFlow : houseFlowList) {
+                    if(houseFlow.getStartDate()!=null) {
+                        houseFlow.setEndDate(DateUtil.addDateDays(houseFlow.getEndDate(), changeOrder.getScheduleDay()));
+                        houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+                    }
+                }
+//                houseFlowScheduleService.updateFlowSchedule(changeOrder.getHouseId(),changeOrder.getWorkerTypeId(),changeOrder.getScheduleDay(),null);
 
                 HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(mendOrder.getHouseId(), mendOrder.getWorkerTypeId());
                 HouseWorkerOrder houseWorkerOrdernew = new HouseWorkerOrder();
@@ -400,13 +412,16 @@ public class PaymentService {
                 BigDecimal repairTotalPrice = houseWorkerOrdernew.getRepairTotalPrice().add(houseWorkerOrdernew.getRepairPrice());
                 houseWorkerOrdernew.setRepairTotalPrice(repairTotalPrice);
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(houseWorkerOrdernew);
-                Example example = new Example(MendWorker.class);
+
+                example = new Example(MendWorker.class);
                 example.createCriteria().andEqualTo(MendWorker.MEND_ORDER_ID, mendOrder.getId());
                 List<MendWorker> mendWorkerList = mendWorkerMapper.selectByExample(example);
+
                 Order order = new Order();
                 order.setHouseId(businessOrder.getHouseId());
                 order.setBusinessOrderNumber(businessOrder.getNumber());//业务订单号
                 order.setTotalAmount(businessOrder.getTotalPrice());// 订单总额(补人工总钱)
+
                 example = new Example(MendOrder.class);
                 example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, businessOrder.getHouseId()).andEqualTo(MendOrder.TYPE, 1)
                         .andEqualTo(MendOrder.STATE, 4);
