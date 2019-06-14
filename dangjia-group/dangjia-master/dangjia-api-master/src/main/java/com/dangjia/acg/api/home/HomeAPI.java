@@ -256,8 +256,8 @@ public interface HomeAPI {
      * @param pageSize 必选 int 记录数
      * @return {"res": 1000,"msg": {"resultCode": 1000, "resultMsg": "ok", "resultObj": { "pageNum": 0,"pageSize": 10,"size": 1,"startRow": 1,"endRow": 1,"total": 1, "pages": 1,"list": [{返回参数说明}],"prePage": 0, "nextPage": 1,"isFirstPage": false,"isLastPage": false,"hasPreviousPage": false,"hasNextPage": true,"navigatePages": 8,"navigatepageNums": [1],"navigateFirstPage": 1,"navigateLastPage": 1}}}
      * @catalog 当家接口文档/首页模块
-     * @title 获取所以首页模板
-     * @description 获取所以首页模板
+     * @title 获取所以首页模块
+     * @description 获取所以首页模块
      * @method POST
      * @url master/home/getHomeMasterplateList
      * @return_param id string id
@@ -277,7 +277,7 @@ public interface HomeAPI {
      * @Date: 2019/6/13 3:11 PM
      */
     @PostMapping("home/getHomeMasterplateList")
-    @ApiOperation(value = "获取所以首页模板", notes = "获取所以首页模板")
+    @ApiOperation(value = "获取所以首页模块", notes = "获取所以首页模块")
     ServerResponse getHomeMasterplateList(
             @RequestParam("request") HttpServletRequest request,
             @RequestParam("pageDTO") PageDTO pageDTO);
@@ -291,8 +291,8 @@ public interface HomeAPI {
      * @param userId 必选 string 操作人id
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/首页模块
-     * @title 添加首页模版
-     * @description 添加首页模版
+     * @title 添加首页模块
+     * @description 添加首页模块
      * @method POST
      * @url master/home/addHomeMasterplate
      * @remark 更多返回错误代码请看首页的错误代码描述
@@ -301,7 +301,7 @@ public interface HomeAPI {
      * @Date: 2019/6/13 3:13 PM
      */
     @PostMapping("home/addHomeMasterplate")
-    @ApiOperation(value = "添加首页模版", notes = "添加首页模版")
+    @ApiOperation(value = "添加首页模块", notes = "添加首页模块")
     ServerResponse addHomeMasterplate(
             @RequestParam("request") HttpServletRequest request,
             @RequestParam("name") String name,
@@ -316,8 +316,8 @@ public interface HomeAPI {
      * @param userId 必选 string 操作人id
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/首页模块
-     * @title 删除首页模版
-     * @description 删除首页模版
+     * @title 删除首页模块
+     * @description 删除首页模块
      * @method POST
      * @url master/home/delHomeMasterplate
      * @remark 更多返回错误代码请看首页的错误代码描述
@@ -326,7 +326,7 @@ public interface HomeAPI {
      * @Date: 2019/6/13 3:16 PM
      */
     @PostMapping("home/delHomeMasterplate")
-    @ApiOperation(value = "删除首页模版", notes = "删除首页模版")
+    @ApiOperation(value = "删除首页模块", notes = "删除首页模块")
     ServerResponse delHomeMasterplate(
             @RequestParam("request") HttpServletRequest request,
             @RequestParam("id") String id,
@@ -342,8 +342,8 @@ public interface HomeAPI {
      * @param userId 必选 string 操作人id
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/首页模块
-     * @title 修改首页模版
-     * @description 修改首页模版
+     * @title 修改首页模块
+     * @description 修改首页模块
      * @method POST
      * @url master/home/upDataHomeMasterplate
      * @remark 更多返回错误代码请看首页的错误代码描述
@@ -352,7 +352,7 @@ public interface HomeAPI {
      * @Date: 2019/6/13 3:17 PM
      */
     @PostMapping("home/upDataHomeMasterplate")
-    @ApiOperation(value = "修改首页模版", notes = "修改首页模版")
+    @ApiOperation(value = "修改首页模块", notes = "修改首页模块")
     ServerResponse upDataHomeMasterplate(
             @RequestParam("request") HttpServletRequest request,
             @RequestParam("id") String id,
