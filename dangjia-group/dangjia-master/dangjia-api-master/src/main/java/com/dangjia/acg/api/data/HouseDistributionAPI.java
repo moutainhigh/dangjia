@@ -3,6 +3,7 @@ package com.dangjia.acg.api.data;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.house.HouseDistribution;
+import com.dangjia.acg.modle.house.WebsiteVisit;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -42,4 +43,15 @@ public interface HouseDistributionAPI {
     @ApiOperation(value = "新增验房分销", notes = "新增验房分销")
     ServerResponse addHouseDistribution(@RequestParam("request") HttpServletRequest request,
                                         @RequestParam("houseDistribution") HouseDistribution houseDistribution);
+
+
+    /**
+     * 新增路由访问数据
+     *
+     * @param websiteVisit
+     * @return
+     */
+    @PostMapping("/data/website/visit")
+    @ApiOperation(value = "新增路由访问数据", notes = "新增路由访问数据")
+    ServerResponse addWebsiteVisit(@RequestParam("request") HttpServletRequest request, @RequestParam("websiteVisit") WebsiteVisit websiteVisit);
 }
