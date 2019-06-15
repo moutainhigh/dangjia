@@ -41,42 +41,55 @@ public class HouseDistributionService {
     private ICityMapper iCityMapper;
     @Autowired
     private IWebsiteVisitMapper websiteVisitMapper;
+
     /**
      * 获取所有验房分销
+     *
      * @param houseDistribution
      * @return
      */
-    public ServerResponse getHouseDistribution(HttpServletRequest request, PageDTO pageDTO, HouseDistribution houseDistribution) {
+    public ServerResponse getHouseDistribution(HttpServletRequest request, PageDTO pageDTO,
+                                               HouseDistribution houseDistribution,
+                                               String startDate, String endDate) {
         String userToken = request.getParameter(Constants.USER_TOKEY);
         Example example = new Example(HouseDistribution.class);
-        Example.Criteria criteria=example.createCriteria();
-        if(!CommonUtil.isEmpty(houseDistribution.getNickname())) {
+        Example.Criteria criteria = example.createCriteria();
+        if (!CommonUtil.isEmpty(houseDistribution.getNickname())) {
             criteria.andLike(HouseDistribution.NICKNAME, "%" + houseDistribution.getNickname() + "%");
         }
-        if(!CommonUtil.isEmpty(houseDistribution.getType())) {
+        if (!CommonUtil.isEmpty(houseDistribution.getType())) {
             criteria.andEqualTo(HouseDistribution.TYPE, houseDistribution.getType());
         }
-        if(!CommonUtil.isEmpty(userToken)) {
+        if (!CommonUtil.isEmpty(userToken)) {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            criteria.andEqualTo(HouseDistribution.PHONE, accessToken.getPhone());
+            if (accessToken != null)
+                criteria.andEqualTo(HouseDistribution.PHONE, accessToken.getPhone());
+        }
+        if (!CommonUtil.isEmpty(startDate) && !CommonUtil.isEmpty(endDate)) {
+            if (startDate.equals(endDate)) {
+                startDate = startDate + " " + "00:00:00";
+                endDate = endDate + " " + "23:59:59";
+            }
+            criteria.andBetween(HouseDistribution.CREATE_DATE, startDate, endDate);
         }
         example.orderBy(HouseDistribution.CREATE_DATE).desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<HouseDistribution> list = iHouseDistributionMapper.selectByExample(example);
         PageInfo pageResult = new PageInfo(list);
-        return ServerResponse.createBySuccess("ok",pageResult);
+        return ServerResponse.createBySuccess("ok", pageResult);
     }
-   
+
     /**
      * 新增
+     *
      * @param houseDistribution
      * @return
      */
-    public ServerResponse addHouseDistribution(HttpServletRequest request,HouseDistribution houseDistribution) {
+    public ServerResponse addHouseDistribution(HttpServletRequest request, HouseDistribution houseDistribution) {
 
         String userToken = request.getParameter(Constants.USER_TOKEY);
         String cityId = request.getParameter(Constants.CITY_ID);
-        if(CommonUtil.isEmpty(userToken)){
+        if (CommonUtil.isEmpty(userToken)) {
             String modifyDate = request.getParameter(HouseDistribution.MODIFY_DATE);
             houseDistribution.setId(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
             houseDistribution.setHead("");
@@ -85,11 +98,11 @@ public class HouseDistributionService {
             houseDistribution.setSex("0");
             houseDistribution.setState(2);
             houseDistribution.setType(2);
-            if(houseDistribution.getModifyDate()==null&&!CommonUtil.isEmpty(modifyDate)){
+            if (houseDistribution.getModifyDate() == null && !CommonUtil.isEmpty(modifyDate)) {
                 houseDistribution.setModifyDate(DateUtil.toDate(modifyDate));
 
             }
-        }else {
+        } else {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             houseDistribution.setId(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
             houseDistribution.setHead(accessToken.getMember().getHead());
@@ -102,15 +115,16 @@ public class HouseDistributionService {
             houseDistribution.setState(0);
             houseDistribution.setType(1);
         }
-        if(this.iHouseDistributionMapper.insertSelective(houseDistribution)>0){
-            return ServerResponse.createBySuccess("ok",houseDistribution.getId());
-        }else{
+        if (this.iHouseDistributionMapper.insertSelective(houseDistribution) > 0) {
+            return ServerResponse.createBySuccess("ok", houseDistribution.getId());
+        } else {
             return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");
         }
     }
 
     /**
      * 新增或更新访问量
+     *
      * @param websiteVisit
      * @return
      */
@@ -120,12 +134,13 @@ public class HouseDistributionService {
         websiteVisit.setCount(1);
         websiteVisit.setCreateDate(new Date());
         websiteVisit.setModifyDate(new Date());
-        if(this.websiteVisitMapper.insertSelective(websiteVisit)>0){
-            return ServerResponse.createBySuccess("ok",websiteVisit.getId());
-        }else{
+        if (this.websiteVisitMapper.insertSelective(websiteVisit) > 0) {
+            return ServerResponse.createBySuccess("ok", websiteVisit.getId());
+        } else {
             return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");
         }
     }
+
     public static String getIPAddress(HttpServletRequest request) {
         String ip = null;
 
