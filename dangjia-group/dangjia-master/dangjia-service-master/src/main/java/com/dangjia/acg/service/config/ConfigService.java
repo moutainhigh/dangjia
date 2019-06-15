@@ -25,15 +25,37 @@ public class ConfigService {
     public ServerResponse editDistance(double distance,double radius) throws RuntimeException{
         try {
             Example example=new Example(Config.class);
-            example.createCriteria().andEqualTo(Config.ID,8);
-            Config config=new Config();
-            config.setParamValue(distance+"");
-            iConfigMapper.updateByExampleSelective(config,example);
+            example.createCriteria().andCondition("param_key ='CONSTRUCTION_SITE_DISTANCE'");
+            List<Config> configs = iConfigMapper.selectByExample(example);
+            Config config = new Config();
+            if(configs.size()>0) {
+                example = new Example(Config.class);
+                example.createCriteria().andCondition("param_key ='CONSTRUCTION_SITE_DISTANCE'");
+                config.setParamValue(distance + "");
+                iConfigMapper.updateByExampleSelective(config, example);
+            }else{
+                example = new Example(Config.class);
+                config.setParamKey("CONSTRUCTION_SITE_DISTANCE");
+                config.setParamValue(distance+"");
+                config.setParamDesc("施工现场距离");
+                iConfigMapper.insert(config);
+            }
             example=new Example(Config.class);
-            example.createCriteria().andEqualTo(Config.ID,9);
-            config=new Config();
-            config.setParamValue(radius+"");
-            iConfigMapper.updateByExampleSelective(config,example);
+            example.createCriteria().andCondition("param_key ='EXPAND_THE_RADIUS'");
+            List<Config> configs1 = iConfigMapper.selectByExample(example);
+            if(configs1.size()>0) {
+                example.createCriteria().andCondition("param_key ='EXPAND_THE_RADIUS'");
+                config = new Config();
+                config.setParamValue(radius + "");
+                iConfigMapper.updateByExampleSelective(config, example);
+            }else{
+                example = new Example(Config.class);
+                config=new Config();
+                config.setParamKey("EXPAND_THE_RADIUS");
+                config.setParamValue(radius+"");
+                config.setParamDesc("不满足条件的扩大半径");
+                iConfigMapper.insert(config);
+            }
             return ServerResponse.createBySuccessMessage("配置成功");
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("配置失败");
@@ -44,7 +66,7 @@ public class ConfigService {
     public ServerResponse selectDistance() {
         try {
             Example example=new Example(Config.class);
-            example.createCriteria().andCondition(" ID IN(8,9)");
+            example.createCriteria().andCondition(" param_key IN('CONSTRUCTION_SITE_DISTANCE','EXPAND_THE_RADIUS')");
             List<Config> configs = iConfigMapper.selectByExample(example);
             return ServerResponse.createBySuccess("查询成功",configs);
         } catch (Exception e) {
