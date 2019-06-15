@@ -297,7 +297,7 @@ public class HouseFlowScheduleService {
                         int numall = 1 + DateUtil.daysofTwo(houseFlowApply.getStartDate(), houseFlowApply.getEndDate());//请假天数
                         Map map =new HashMap<>();
                         map.put("date",DateUtil.dateToString(houseFlowApply.getCreateDate(),DateUtil.FORMAT2));
-                        if(houseFlowApply.getWorkerId().equals(houseFlowApply.getOperator())){
+                        if(CommonUtil.isEmpty(houseFlowApply.getOperator()) || houseFlowApply.getWorkerId().equals(houseFlowApply.getOperator())){
                             map.put("info",houseFlow.getWorkerTypeName()+"申请"+numall+"天停工"+ (CommonUtil.isEmpty(houseFlowApply.getApplyDec())?"":",理由："+houseFlowApply.getApplyDec()));
                         }else{
                             map.put("info","大管家申请"+houseFlow.getWorkerTypeName()+"停工"+numall+"天"+ (CommonUtil.isEmpty(houseFlowApply.getApplyDec())?"":",理由："+houseFlowApply.getApplyDec()));
