@@ -823,28 +823,28 @@ public class EngineerService {
     }
 
     public ServerResponse updateSure(String name, String details, String img, Integer state, String id) {
-        try {
-            WorkerDisclosure workerDisclosure = iWorkerDisclosureMapper.selectByPrimaryKey(id);
-            if (!CommonUtil.isEmpty(name)) {
-                workerDisclosure.setName(name);
-                workerDisclosure.setModifyDate(new Date());
-            }
-            if (!CommonUtil.isEmpty(details)) {
-                workerDisclosure.setDetails(details);
-                workerDisclosure.setModifyDate(new Date());
-            }
-            if (state != null) {
-                workerDisclosure.setState(state);
-                workerDisclosure.setModifyDate(new Date());
-            }
-            workerDisclosure.setImg(img);
-            workerDisclosure.setModifyDate(new Date());
-            iWorkerDisclosureMapper.updateByPrimaryKeySelective(workerDisclosure);
-            return ServerResponse.createBySuccessMessage("修改成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("修改失败");
+        WorkerDisclosure workerDisclosure = iWorkerDisclosureMapper.selectByPrimaryKey(id);
+        if (workerDisclosure == null) {
+            return ServerResponse.createByErrorMessage("该交底事项不存在");
         }
+        if (CommonUtil.isEmpty(name) && CommonUtil.isEmpty(details) && CommonUtil.isEmpty(img) && state == null) {
+            return ServerResponse.createByErrorMessage("请输入需要修改的属性");
+        }
+        if (!CommonUtil.isEmpty(name)) {
+            workerDisclosure.setName(name);
+        }
+        if (!CommonUtil.isEmpty(details)) {
+            workerDisclosure.setDetails(details);
+        }
+        if (!CommonUtil.isEmpty(img)) {
+            workerDisclosure.setImg(img);
+        }
+        if (state != null) {
+            workerDisclosure.setState(state);
+        }
+        workerDisclosure.setModifyDate(new Date());
+        iWorkerDisclosureMapper.updateByPrimaryKeySelective(workerDisclosure);
+        return ServerResponse.createBySuccessMessage("修改成功");
     }
 
     public ServerResponse addItems(String name, Integer type, Integer state) {
@@ -882,26 +882,25 @@ public class EngineerService {
     }
 
     public ServerResponse updateItems(String name, Integer type, Integer state, String id) {
-        try {
-            WorkerEveryday workerEveryday = iWorkerEverydayMapper.selectByPrimaryKey(id);
-            if (CommonUtil.isEmpty(name)) {
-                workerEveryday.setName(name);
-                workerEveryday.setModifyDate(new Date());
-            }
-            if (type != null) {
-                workerEveryday.setType(type);
-                workerEveryday.setModifyDate(new Date());
-            }
-            if (state != null) {
-                workerEveryday.setState(state);
-                workerEveryday.setModifyDate(new Date());
-            }
-            iWorkerEverydayMapper.updateByPrimaryKeySelective(workerEveryday);
-            return ServerResponse.createBySuccessMessage("修改成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("修改失败");
+        WorkerEveryday workerEveryday = iWorkerEverydayMapper.selectByPrimaryKey(id);
+        if (workerEveryday == null) {
+            return ServerResponse.createByErrorMessage("该日常事项不存在");
         }
+        if (CommonUtil.isEmpty(name) && type == null && state == null) {
+            return ServerResponse.createByErrorMessage("请输入需要修改的属性");
+        }
+        if (!CommonUtil.isEmpty(name)) {
+            workerEveryday.setName(name);
+        }
+        if (type != null) {
+            workerEveryday.setType(type);
+        }
+        if (state != null) {
+            workerEveryday.setState(state);
+        }
+        workerEveryday.setModifyDate(new Date());
+        iWorkerEverydayMapper.updateByPrimaryKeySelective(workerEveryday);
+        return ServerResponse.createBySuccessMessage("修改成功");
     }
 
 
