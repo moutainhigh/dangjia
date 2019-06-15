@@ -5,6 +5,7 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.house.HouseDistribution;
+import com.dangjia.acg.modle.house.WebsiteVisit;
 import com.dangjia.acg.service.house.HouseDistributionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +25,7 @@ public class HouseDistributionController implements HouseDistributionAPI {
 
     /**
      * 获取所有验房分销
+     *
      * @param houseDistribution
      * @return
      */
@@ -33,14 +35,22 @@ public class HouseDistributionController implements HouseDistributionAPI {
                                                String startDate, String endDate) {
         return houseDistributionService.getHouseDistribution(request, pageDTO, houseDistribution, startDate, endDate);
     }
+
     /**
      * 新增
+     *
      * @param houseDistribution
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse addHouseDistribution(HttpServletRequest request,HouseDistribution houseDistribution){
-        return houseDistributionService.addHouseDistribution(request,houseDistribution);
+    public ServerResponse addHouseDistribution(HttpServletRequest request, HouseDistribution houseDistribution) {
+        return houseDistributionService.addHouseDistribution(request, houseDistribution);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addWebsiteVisit(HttpServletRequest request, WebsiteVisit websiteVisit) {
+        return houseDistributionService.addWebsiteVisit(request, websiteVisit);
     }
 }
