@@ -25,27 +25,32 @@ public class HouseDistributionController implements HouseDistributionAPI {
 
     /**
      * 获取所有验房分销
+     *
      * @param houseDistribution
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse getHouseDistribution(HttpServletRequest request, PageDTO pageDTO, HouseDistribution houseDistribution){
-        return houseDistributionService.getHouseDistribution(request,pageDTO,houseDistribution);
+    public ServerResponse getHouseDistribution(HttpServletRequest request, PageDTO pageDTO, HouseDistribution houseDistribution,
+                                               String startDate, String endDate) {
+        return houseDistributionService.getHouseDistribution(request, pageDTO, houseDistribution, startDate, endDate);
     }
+
     /**
      * 新增
+     *
      * @param houseDistribution
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse addHouseDistribution(HttpServletRequest request,HouseDistribution houseDistribution){
-        return houseDistributionService.addHouseDistribution(request,houseDistribution);
+    public ServerResponse addHouseDistribution(HttpServletRequest request, HouseDistribution houseDistribution) {
+        return houseDistributionService.addHouseDistribution(request, houseDistribution);
     }
+
     @Override
     @ApiMethod
-    public ServerResponse addWebsiteVisit(HttpServletRequest request, WebsiteVisit websiteVisit){
-        return houseDistributionService.addWebsiteVisit(request,websiteVisit);
+    public ServerResponse addWebsiteVisit(HttpServletRequest request, WebsiteVisit websiteVisit) {
+        return houseDistributionService.addWebsiteVisit(request, websiteVisit);
     }
 }
