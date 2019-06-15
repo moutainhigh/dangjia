@@ -30,7 +30,9 @@ public interface HouseDistributionAPI {
     @ApiOperation(value = "获取所有验房分销", notes = "获取所有验房分销")
     ServerResponse getHouseDistribution(@RequestParam("request") HttpServletRequest request,
                                         @RequestParam("pageDTO") PageDTO pageDTO,
-                                        @RequestParam("houseDistribution") HouseDistribution houseDistribution);
+                                        @RequestParam("houseDistribution") HouseDistribution houseDistribution,
+                                        @RequestParam("startDate") String startDate,
+                                        @RequestParam("endDate") String endDate);
 
     /**
      * 新增

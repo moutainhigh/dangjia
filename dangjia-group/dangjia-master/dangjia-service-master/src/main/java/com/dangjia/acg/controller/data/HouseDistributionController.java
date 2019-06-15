@@ -29,8 +29,9 @@ public class HouseDistributionController implements HouseDistributionAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getHouseDistribution(HttpServletRequest request, PageDTO pageDTO, HouseDistribution houseDistribution){
-        return houseDistributionService.getHouseDistribution(request,pageDTO,houseDistribution);
+    public ServerResponse getHouseDistribution(HttpServletRequest request, PageDTO pageDTO, HouseDistribution houseDistribution,
+                                               String startDate, String endDate) {
+        return houseDistributionService.getHouseDistribution(request, pageDTO, houseDistribution, startDate, endDate);
     }
     /**
      * 新增

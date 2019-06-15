@@ -36,27 +36,44 @@ public class HouseDistributionService {
     private ICityMapper iCityMapper;
     /**
      * 获取所有验房分销
+     *
      * @param houseDistribution
      * @return
      */
-    public ServerResponse getHouseDistribution(HttpServletRequest request, PageDTO pageDTO, HouseDistribution houseDistribution) {
+    public ServerResponse getHouseDistribution(HttpServletRequest request, PageDTO pageDTO,
+                                               HouseDistribution houseDistribution,
+                                               String startDate, String endDate) {
         String userToken = request.getParameter(Constants.USER_TOKEY);
         Example example = new Example(HouseDistribution.class);
-        Example.Criteria criteria=example.createCriteria();
-        if(!CommonUtil.isEmpty(houseDistribution.getNickname())) {
+        Example.Criteria criteria = example.createCriteria();
+        if (!CommonUtil.isEmpty(houseDistribution.getNickname())) {
             criteria.andLike(HouseDistribution.NICKNAME, "%" + houseDistribution.getNickname() + "%");
         }
-        if(!CommonUtil.isEmpty(userToken)) {
+        if (!CommonUtil.isEmpty(houseDistribution.getType())) {
+            criteria.andEqualTo(HouseDistribution.TYPE, houseDistribution.getType());
+        }
+        if (!CommonUtil.isEmpty(houseDistribution.getState())) {
+            criteria.andEqualTo(HouseDistribution.STATE, houseDistribution.getState());
+        }
+        if (!CommonUtil.isEmpty(userToken)) {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            criteria.andEqualTo(HouseDistribution.PHONE, accessToken.getPhone());
+            if (accessToken != null)
+                criteria.andEqualTo(HouseDistribution.PHONE, accessToken.getPhone());
+        }
+        if (!CommonUtil.isEmpty(startDate) && !CommonUtil.isEmpty(endDate)) {
+            if (startDate.equals(endDate)) {
+                startDate = startDate + " " + "00:00:00";
+                endDate = endDate + " " + "23:59:59";
+            }
+            criteria.andBetween(HouseDistribution.CREATE_DATE, startDate, endDate);
         }
         example.orderBy(HouseDistribution.CREATE_DATE).desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<HouseDistribution> list = iHouseDistributionMapper.selectByExample(example);
         PageInfo pageResult = new PageInfo(list);
-        return ServerResponse.createBySuccess("ok",pageResult);
+        return ServerResponse.createBySuccess("ok", pageResult);
     }
-   
+
     /**
      * 新增
      * @param houseDistribution
