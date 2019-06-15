@@ -60,6 +60,9 @@ public class HouseDistributionService {
         if (!CommonUtil.isEmpty(houseDistribution.getType())) {
             criteria.andEqualTo(HouseDistribution.TYPE, houseDistribution.getType());
         }
+        if (!CommonUtil.isEmpty(houseDistribution.getState())) {
+            criteria.andEqualTo(HouseDistribution.STATE, houseDistribution.getState());
+        }
         if (!CommonUtil.isEmpty(userToken)) {
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             if (accessToken != null)
