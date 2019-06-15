@@ -234,7 +234,7 @@ public class EngineerService {
                 return ServerResponse.createByErrorMessage("找不到该工匠");
             }
             //0待确认开工,1装修中,2休眠中,3已完工
-            if (hf.getWorkerType()==3&&hf.getSupervisorStart()==0) {
+            if (hf.getWorkerType() == 3 && hf.getSupervisorStart() == 0) {
                 return ServerResponse.createByErrorMessage("该房大管家未开工");
             }
             if (house.getVisitState() == 3) {
@@ -439,7 +439,7 @@ public class EngineerService {
             map.put("pause", houseFlow.getPause());//施工状态0正常,1暂停
             map.put("totalPrice", houseFlow.getTotalPrice());//总钱 工钱+材料
             map.put("materialPrice", houseFlow.getMaterialPrice());//材料钱
-            map.put("workPrice", houseFlow.getWorkPrice());//工钱
+            map.put("workPrice", houseFlow.getWorkPrice().setScale(2, BigDecimal.ROUND_HALF_UP));//工钱
             map.put("patrol", houseFlow.getPatrol());//巡查次数
             map.put("workerId", houseFlow.getWorkerId());//工人ID
             if (houseFlow.getWorkerType() == 1) {//设计
@@ -470,12 +470,14 @@ public class EngineerService {
                 map.put("havaMoney", 0);
             } else {
                 BigDecimal retentionMoney = houseWorkerOrderList.get(0).getRetentionMoney();
-                if(retentionMoney==null){retentionMoney=new BigDecimal(0);}
+                if (retentionMoney == null) {
+                    retentionMoney = new BigDecimal(0);
+                }
                 BigDecimal havaMoney = houseWorkerOrderList.get(0).getRepairTotalPrice().subtract(houseWorkerOrderList.get(0).getRepairPrice());
                 havaMoney = houseWorkerOrderList.get(0).getHaveMoney().add(havaMoney);
                 havaMoney = retentionMoney.add(havaMoney);
-                map.put("workPrice", houseWorkerOrderList.get(0).getWorkPrice().add(houseWorkerOrderList.get(0).getRepairTotalPrice()));
-                map.put("havaMoney", havaMoney);
+                map.put("workPrice", houseWorkerOrderList.get(0).getWorkPrice().add(houseWorkerOrderList.get(0).getRepairTotalPrice()).setScale(2, BigDecimal.ROUND_HALF_UP));
+                map.put("havaMoney", havaMoney.setScale(2, BigDecimal.ROUND_HALF_UP));
             }
             mapList.add(map);
         }
@@ -533,7 +535,7 @@ public class EngineerService {
                 map.put("supMobile", supervisor.getMobile());
             }
             map.put("createDate", houseFlow.getCreateDate());
-            map.put("workSteta",house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
+            map.put("workSteta", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
             mapList.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", mapList);
@@ -649,7 +651,7 @@ public class EngineerService {
 //                Example example = new Example(HouseWorker.class);
 //                example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId());
 //                artisanDTO.setVolume(houseWorkerMapper.selectByExample(example).size());//接单量
-                artisanDTO.setVolume(alternative(member.getId(),member.getWorkerType()));//接单量
+                artisanDTO.setVolume(alternative(member.getId(), member.getWorkerType()));//接单量
                 artisanDTO.setRealNameState(member.getRealNameState());
                 artisanDTO.setRealNameDescribe(member.getRealNameDescribe());
                 artisanDTO.setCheckDescribe(member.getCheckDescribe());
@@ -811,7 +813,7 @@ public class EngineerService {
 
     public ServerResponse addSure(WorkerDisclosure workerDisclosure) {
         try {
-            workerDisclosure.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
+            workerDisclosure.setId((int) (Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
             iWorkerDisclosureMapper.insertSelective(workerDisclosure);
             return ServerResponse.createBySuccessMessage("添加成功");
         } catch (Exception e) {
@@ -905,20 +907,19 @@ public class EngineerService {
 
     /**
      * 接单数
-     * @param WorkerId
+     *
+     * @param workerId
      * @return
      */
-    public int alternative(String WorkerId,Integer WorkerType) {
-        Example example=new Example(HouseFlow.class);
+    public int alternative(String workerId, Integer workerType) {
+        Example example = new Example(HouseFlow.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo(HouseFlow.WORKER_ID,WorkerId);
-        if(WorkerType==1 || WorkerType==2){
-            return  houseFlowMapper.selectCountByExample(example);
-        }else if(WorkerType==3){
-            criteria.andEqualTo(HouseFlow.SUPERVISOR_START,1);
-        }else{
+        criteria.andEqualTo(HouseFlow.WORKER_ID, workerId);
+        if (workerType == 3) {
+            criteria.andEqualTo(HouseFlow.SUPERVISOR_START, 1);
+        } else if (workerType != 1 && workerType != 2) {
             criteria.andCondition(" work_steta not in(0,3)");
         }
-        return  houseFlowMapper.selectCountByExample(example);
+        return houseFlowMapper.selectCountByExample(example);
     }
 }
