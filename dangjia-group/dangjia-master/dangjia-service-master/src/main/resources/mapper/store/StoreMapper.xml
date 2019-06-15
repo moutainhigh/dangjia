@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.store.IStoreMapper">
+
+    <sql id="all_columns">
+	      id,
+          create_date AS createDate,
+          modify_date AS modifyDate,
+          data_status AS dataStatus,
+          store_name AS storeName,
+          city_id AS cityId,
+          city_name AS cityName,
+          store_address AS storeAddress,
+          reservation_number AS reservationNumber,
+          latitude,
+          longitude
+	</sql>
+
+    <!--查询门店-->
+    <select id="queryStore" resultType="com.dangjia.acg.modle.store.Store">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_store
+        where 1=1
+        <if test="null!=cityId and ''!=cityId">
+            AND city_id=#{cityId}
+        </if>
+        <if test="null!=storeName and ''!=storeName">
+            AND store_name=#{store_name}
+        </if>
+        ORDER BY create_date DESC
+    </select>
+
+</mapper>

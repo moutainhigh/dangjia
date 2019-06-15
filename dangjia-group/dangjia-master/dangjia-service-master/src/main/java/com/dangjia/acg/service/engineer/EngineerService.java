@@ -913,7 +913,7 @@ public class EngineerService {
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo(HouseFlow.WORKER_ID,WorkerId);
         if(WorkerType==1 || WorkerType==2){
-
+            return  houseFlowMapper.selectCountByExample(example);
         }else if(WorkerType==3){
             criteria.andEqualTo(HouseFlow.SUPERVISOR_START,1);
         }else{
