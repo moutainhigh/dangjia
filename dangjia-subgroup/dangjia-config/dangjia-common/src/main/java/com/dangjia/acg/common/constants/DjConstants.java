@@ -182,6 +182,29 @@ public class DjConstants {
     }
 
     /**
+     * ApplyType 任务进程-申请类型
+     */
+    public static class VisitState {
+//        0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
+        public final static Integer DAIKAIGONG = 0;//0待确认开工
+        public final static Integer ZHAUNGXIUZHONG = 1;// 1装修中
+        public final static Integer XIUMIANZHONG = 2;// 2休眠中
+        public final static Integer WANGONG = 3;// 3已完工
+        public final static Integer TIQIANJIESHU = 4;//4提前结束装修
+        public final static Integer TIQIANSHENHEZHONG = 5;//5提前结束装修申请中
+
+        public final static Map getVisitStateMap(){
+            Map<Integer, String> visitStateMap = new HashMap<>();
+            visitStateMap.put(DjConstants.VisitState.DAIKAIGONG, "待确认开工");
+            visitStateMap.put(DjConstants.VisitState.ZHAUNGXIUZHONG, "装修中");
+            visitStateMap.put(DjConstants.VisitState.XIUMIANZHONG, "休眠中");
+            visitStateMap.put(DjConstants.VisitState.WANGONG, "已完工");
+            visitStateMap.put(DjConstants.VisitState.TIQIANJIESHU, "提前结束装修");
+            visitStateMap.put(DjConstants.VisitState.TIQIANSHENHEZHONG, "提前结束装修申请中");
+            return visitStateMap;
+        }
+    }
+    /**
      * Type 工序类型 人工1 材料2 服务3
      */
     public static class GXType {

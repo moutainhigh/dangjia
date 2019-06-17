@@ -17,5 +17,7 @@ public class HouseResult {
     private String  buildStage;//装修状态
     private int task;//其它房产待处理任务
     private String state;//列表状态
-    private List<NodeDTO> courseList;
+    private List<NodeDTO> courseList;//其他工序节点
+    private List<NodeDTO> designList;//设计节点
+    private List<NodeDTO> actuaryList;//精算节点
 }
