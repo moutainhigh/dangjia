@@ -340,6 +340,7 @@ public class DesignDataService {
                     designDTO.setImageUrl(images.get(0).getImage());
                 }
             }
+            designDTO.setShowUpdata(0);
             if (designDTO.getDecorationType() == 2) {//自带设计流程
                 switch (designDTO.getDesignerOk()) {
                     case 0://0未确定设计师
@@ -400,6 +401,23 @@ public class DesignDataService {
                         break;
                     case 3://施工图(全部图)审核通过（OK，完成）
                         designDTO.setSchedule("完成");
+                        Example example = new Example(DesignBusinessOrder.class);
+                        Example.Criteria criteria = example.createCriteria()
+                                .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
+                                .andEqualTo(DesignBusinessOrder.HOUSE_ID, designDTO.getHouseId())
+                                .andEqualTo(DesignBusinessOrder.STATUS, 1)
+                                .andNotEqualTo(DesignBusinessOrder.OPERATION_STATE, 2);
+                        criteria.andEqualTo(DesignBusinessOrder.TYPE, 4);
+                        List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
+                        if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
+                            DesignBusinessOrder order = designBusinessOrders.get(0);
+                            if (order.getOperationState() == 0) {
+                                designDTO.setSchedule("待上传设计图");
+                                designDTO.setShowUpdata(1);
+                            } else {
+                                designDTO.setSchedule("待审核设计图");
+                            }
+                        }
                         break;
                 }
             }

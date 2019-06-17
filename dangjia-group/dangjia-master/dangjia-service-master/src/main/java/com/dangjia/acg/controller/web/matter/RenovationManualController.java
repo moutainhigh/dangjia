@@ -9,6 +9,8 @@ import com.dangjia.acg.service.matter.RenovationManualService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 @RestController
 public class RenovationManualController implements WebRenovationManualAPI {
 
@@ -17,31 +19,31 @@ public class RenovationManualController implements WebRenovationManualAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryRenovationManual(PageDTO pageDTO, RenovationManual renovationManual) {
-        return renovationManualService.queryRenovationManual(pageDTO, renovationManual);
+    public ServerResponse queryRenovationManual(HttpServletRequest request, PageDTO pageDTO, String workerTypeId, String name) {
+        return renovationManualService.queryRenovationManual(pageDTO, workerTypeId, name);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse addRenovationManual(RenovationManual renovationManual) {
+    public ServerResponse addRenovationManual(HttpServletRequest request, RenovationManual renovationManual) {
         return renovationManualService.addRenovationManual(renovationManual);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse updateRenovationManual(RenovationManual renovationManual) {
+    public ServerResponse updateRenovationManual(HttpServletRequest request, RenovationManual renovationManual) {
         return renovationManualService.updateRenovationManual(renovationManual);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse deleteRenovationManual(String id) {
+    public ServerResponse deleteRenovationManual(HttpServletRequest request, String id) {
         return renovationManualService.deleteRenovationManual(id);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getRenovationManualById(String id) {
+    public ServerResponse getRenovationManualById(HttpServletRequest request, String id) {
         return renovationManualService.getRenovationManualById(id);
     }
 

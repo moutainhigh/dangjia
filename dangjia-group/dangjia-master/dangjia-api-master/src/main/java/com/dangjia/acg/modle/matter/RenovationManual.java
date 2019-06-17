@@ -61,5 +61,8 @@ public class RenovationManual extends BaseEntity {
     @ApiModelProperty("排序序号")
     private Integer orderNumber;//
 
-
+    @Column(name = "image")
+    @Desc(value = "封面图片")
+    @ApiModelProperty("封面图片")
+    private String image;
 }

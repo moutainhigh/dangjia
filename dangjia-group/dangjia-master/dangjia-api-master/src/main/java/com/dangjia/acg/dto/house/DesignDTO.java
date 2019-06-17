@@ -35,6 +35,7 @@ public class DesignDTO {
     protected Date createDate;// 下单时间
     protected Date modifyDate;// 竣工时间
     protected Date constructionDate;// 修改日期
+    private Integer showUpdata;//是否显示上传图片按钮，0否，1是
     private List<HouseProfitSummaryDTO> profitSummarys;// 利润集合
 
 }
