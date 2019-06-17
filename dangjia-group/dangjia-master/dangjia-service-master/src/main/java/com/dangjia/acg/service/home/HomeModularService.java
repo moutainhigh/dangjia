@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.home;
 
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
@@ -92,6 +93,12 @@ public class HomeModularService {
             listMap.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", listMap);
+    }
+
+    public ServerResponse getStrategyList(String userToken, PageDTO pageDTO) {
+
+
+        return null;
     }
 
 }

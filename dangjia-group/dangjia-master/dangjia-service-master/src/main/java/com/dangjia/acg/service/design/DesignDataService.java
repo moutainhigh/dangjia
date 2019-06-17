@@ -118,7 +118,7 @@ public class DesignDataService {
 //                    designDTO.addButton(Utils.getButton("申请提前结束", webAddress + "ownerEnd?title=填写原因&houseId=" + houseId, 0));
 //                    return ServerResponse.createBySuccess("设计师还在设计中", designDTO);
 //                } else {
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "设计师还在设计中");
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "设计师还在设计中");
 //                }
             }
             Example example = new Example(PayConfiguration.class);
@@ -187,22 +187,18 @@ public class DesignDataService {
                         .andNotEqualTo(DesignBusinessOrder.OPERATION_STATE, 2);
                 if (house.getDecorationType() != 2) {
                     criteria.andEqualTo(DesignBusinessOrder.TYPE, 4);
-                    List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
-                    if (designBusinessOrders == null || designBusinessOrders.size() <= 0) {
-                        designDTO.addButton(Utils.getButton("申请额外修改设计", 3));
-                    }
                 } else {
                     criteria.andEqualTo(DesignBusinessOrder.TYPE, 3);
-                    List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
-                    if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
-                        DesignBusinessOrder order = designBusinessOrders.get(0);
-                        if (order.getOperationState() == 1) {
-                            designDTO.addButton(Utils.getButton("需要修改设计", 4));
-                            designDTO.addButton(Utils.getButton("确认设计", 5));
-                        }
-                    } else {
-                        designDTO.addButton(Utils.getButton("申请额外修改设计", 3));
+                }
+                List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
+                if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
+                    DesignBusinessOrder order = designBusinessOrders.get(0);
+                    if (order.getOperationState() == 1) {
+                        designDTO.addButton(Utils.getButton("需要修改设计", 4));
+                        designDTO.addButton(Utils.getButton("确认设计", 5));
                     }
+                } else {
+                    designDTO.addButton(Utils.getButton("申请额外修改设计", 3));
                 }
             }
         }

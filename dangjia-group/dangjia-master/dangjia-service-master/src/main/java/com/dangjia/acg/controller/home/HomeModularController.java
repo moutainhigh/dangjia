@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.home;
 
 import com.dangjia.acg.api.home.HomeModularAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.home.HomeModularService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,5 +20,12 @@ public class HomeModularController implements HomeModularAPI {
     @ApiMethod
     public ServerResponse getBroadcastList(HttpServletRequest request) {
         return homeModularService.getBroadcastList();
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getStrategyList(HttpServletRequest request, String userToken, PageDTO pageDTO) {
+        return homeModularService.getStrategyList(userToken, pageDTO);
+
     }
 }
