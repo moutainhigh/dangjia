@@ -66,7 +66,7 @@ public class RenovationStageService {
         RenovationStage renovationStage = new RenovationStage();
         renovationStage.setName(name);
         renovationStage.setImage(image);
-        renovationStageMapper.insertSelective(renovationStage);
+        renovationStageMapper.insert(renovationStage);
         return ServerResponse.createBySuccessMessage("新增装修指南阶段配置成功");
     }
 

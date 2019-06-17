@@ -13,5 +13,7 @@ import java.util.List;
 @Repository
 public interface IRenovationManualMapper extends Mapper<RenovationManual> {
     List<RenovationManual> getRenovationManualByWorkertyId(String workertyid);
+
+    List<RenovationManual> getStrategyList();
 }
 

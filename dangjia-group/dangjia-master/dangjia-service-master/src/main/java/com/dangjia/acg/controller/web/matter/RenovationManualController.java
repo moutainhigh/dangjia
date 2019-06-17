@@ -4,7 +4,6 @@ import com.dangjia.acg.api.web.matter.WebRenovationManualAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.service.matter.RenovationManualService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,14 +24,16 @@ public class RenovationManualController implements WebRenovationManualAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addRenovationManual(HttpServletRequest request, RenovationManual renovationManual) {
-        return renovationManualService.addRenovationManual(renovationManual);
+    public ServerResponse addRenovationManual(HttpServletRequest request, String name, String workerTypeId, String urlName, String test,
+                                              String url, String types, Integer state, Integer orderNumber, String image) {
+        return renovationManualService.addRenovationManual(name, workerTypeId, urlName, test, url, types, state, orderNumber, image);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse updateRenovationManual(HttpServletRequest request, RenovationManual renovationManual) {
-        return renovationManualService.updateRenovationManual(renovationManual);
+    public ServerResponse updateRenovationManual(HttpServletRequest request, String id, String name, String workerTypeId, String urlName, String test,
+                                                 String url, String types, Integer state, Integer orderNumber, String image) {
+        return renovationManualService.updateRenovationManual(id, name, workerTypeId, urlName, test, url, types, state, orderNumber, image);
     }
 
     @Override
