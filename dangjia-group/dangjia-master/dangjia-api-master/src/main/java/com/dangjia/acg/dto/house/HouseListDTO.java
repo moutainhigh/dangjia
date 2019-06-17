@@ -19,7 +19,8 @@ public class HouseListDTO {
     private String houseName;
     private String customSort;
     private String name;
-    private String budgetOk;
+    private Integer budgetOk;
+    private Integer designerOk;
     private String houseId;
     private String cityName;
     private String address;

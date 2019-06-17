@@ -19,15 +19,14 @@ import javax.persistence.Table;
 @ApiModel(description = "装修指南阶段配置")
 public class RenovationStage extends BaseEntity {
 
-	@Column(name = "name")
-	@Desc(value = "阶段名称")
-	@ApiModelProperty("阶段名称")
-	private String name;
+    @Column(name = "name")
+    @Desc(value = "阶段名称")
+    @ApiModelProperty("阶段名称")
+    private String name;
 
-
-	@Column(name = "image")
-	@Desc(value = "图标")
-	@ApiModelProperty("图标")
-	private String image;
+    @Column(name = "image")
+    @Desc(value = "图标")
+    @ApiModelProperty("图标")
+    private String image;
 
 }
