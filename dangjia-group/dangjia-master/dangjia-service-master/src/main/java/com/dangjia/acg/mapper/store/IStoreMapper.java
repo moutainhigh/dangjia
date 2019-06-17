@@ -24,4 +24,14 @@ public interface IStoreMapper extends Mapper<Store>{
      * @return
      */
     List<Store> queryStore(@Param("cityId") String cityId,@Param("storeName") String storeName);
+
+    /**
+     * 查詢門店(按距离)
+     * @param cityId
+     * @param storeName
+     * @return
+     */
+    List<Store> queryStoreDistance(@Param("cityId") String cityId,@Param("storeName") String storeName);
+
+
 }

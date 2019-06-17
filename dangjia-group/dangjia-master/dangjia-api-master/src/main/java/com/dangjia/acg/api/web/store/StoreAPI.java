@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.web.store;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.store.Store;
 import io.swagger.annotations.Api;
@@ -7,6 +8,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -39,5 +42,27 @@ public interface StoreAPI {
     @ApiOperation(value = "查询门店预约记录", notes = "查询门店预约记录")
     ServerResponse queryStoreSubscribe(@RequestParam("searchKey") String searchKey);
 
+    /**
+     * 门店预约插入
+     * @param storeId 门店ID
+     * @param storeName 门店名称
+     * @param customerName 客户名称
+     * @param customerPhone 客户电话
+     * @param modifyDate 预约时间
+     * @return
+     */
+    @PostMapping("/app/store/subscribe")
+    @ApiOperation(value = "门店预约", notes = "门店预约")
+     ServerResponse storeSubscribe(@RequestParam("storeId") String storeId,
+                                   @RequestParam("storeName") String storeName,
+                                   @RequestParam("customerName") String customerName,
+                                   @RequestParam("customerPhone") String customerPhone,
+                                   @RequestParam("modifyDate") Date modifyDate);
 
+
+    @PostMapping("/app/store/distance")
+    @ApiOperation(value = "查询门店(按距离)", notes = "查询门店(按距离)")
+    ServerResponse queryStoreDistance(@RequestParam("pageDTO") PageDTO pageDTO,
+                                      @RequestParam("cityId") String cityId,
+                                      @RequestParam("storeName") String storeName);
 }

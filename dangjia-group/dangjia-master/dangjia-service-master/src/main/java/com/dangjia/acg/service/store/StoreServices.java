@@ -1,13 +1,17 @@
 package com.dangjia.acg.service.store;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreSubscribeMapper;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreSubscribe;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -101,4 +105,46 @@ public class StoreServices {
         }
     }
 
+    /**
+     * 门店预约插入
+     * @param storeId 门店ID
+     * @param storeName 门店名称
+     * @param customerName 客户名称
+     * @param customerPhone 客户电话
+     * @param modifyDate 预约时间
+     * @return
+     */
+    public ServerResponse storeSubscribe(String storeId, String storeName, String customerName, String customerPhone, Date modifyDate) {
+        try {
+            StoreSubscribe storeSubscribe=new StoreSubscribe();
+            storeSubscribe.setStoreId(storeId);
+            storeSubscribe.setStoreName(storeName);
+            storeSubscribe.setCustomerName(customerName);
+            storeSubscribe.setCustomerPhone(customerPhone);
+            storeSubscribe.setModifyDate(modifyDate);
+            iStoreSubscribeMapper.insert(storeSubscribe);
+            return ServerResponse.createBySuccessMessage("预约成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("预约成功");
+        }
+    }
+
+    /**
+     * 查询门店
+     * @param cityId
+     * @param storeName
+     * @return
+     */
+    public ServerResponse queryStoreDistance(PageDTO pageDTO,String cityId, String storeName) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<Store> stores = iStoreMapper.queryStoreDistance(cityId, storeName);
+            PageInfo pageResult = new PageInfo(stores);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 }

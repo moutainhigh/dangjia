@@ -23,7 +23,7 @@
         SELECT
         <include refid="all_columns"/>
         FROM dj_store
-        where 1=1
+        where data_status =0
         <if test="null!=cityId and ''!=cityId">
             AND city_id=#{cityId}
         </if>
@@ -33,4 +33,41 @@
         ORDER BY create_date DESC
     </select>
 
+
+    <!--查询门店(按距离)-->
+    <select id="queryStoreDistance" resultType="com.dangjia.acg.modle.store.Store">
+        SELECT
+        <include refid="all_columns"/>,
+        ROUND(
+            6378.138 * 2 * ASIN(
+            SQRT(
+                POW(
+                    SIN(
+                        (
+                        28.189381 * PI() / 180 - mv.longitude * PI() / 180
+                        ) / 2
+                        ),
+                        2
+                        ) + COS(28.189381 * PI() / 180) * COS(mv.longitude * PI() / 180) * POW(
+                        SIN(
+                        (
+                        112.841035 * PI() / 180 - mv.latitude * PI() / 180
+                        ) / 2
+                        ),
+                        2
+                    )
+                )
+            ) * 1000
+        ) AS juli
+        FROM dj_store
+        where data_status =0
+        <if test="null!=cityId and ''!=cityId">
+            AND city_id=#{cityId}
+        </if>
+        <if test="null!=storeName and ''!=storeName">
+            AND store_name=#{store_name}
+        </if>
+        ORDER BY
+        juli
+    </select>
 </mapper>
