@@ -185,11 +185,9 @@ public class HouseFlowScheduleService {
             Map map = new HashMap();
             List plans = new ArrayList<>();//计划记录
             List actuals = new ArrayList<>();//实际记录
-            int state=0;
-            int type = getPlans(o, houseFlowList, plans, actuals,state, houseFlowApplies, changeOrders);
+            int type = getPlans(o, houseFlowList, plans, actuals,map, houseFlowApplies, changeOrders);
             map.put("type", type);
             map.put("date", o);
-            map.put("state", state);
             map.put("plans", plans);
             map.put("actuals", actuals);
             mapList.add(map);
@@ -216,8 +214,9 @@ public class HouseFlowScheduleService {
     }
 
     //    type: 1,正常;2,特殊;3,其他;4,正常+特殊;5,其他+特殊
-    public int getPlans(String o, List<HouseFlowDTO> houseFlowList, List<Map> plans, List<Map> actuals, int state,List<HouseFlowApply> houseFlowApplies, List<ChangeOrder> changeOrders) {
+    public int getPlans(String o, List<HouseFlowDTO> houseFlowList, List<Map> plans, List<Map> actuals, Map amap,List<HouseFlowApply> houseFlowApplies, List<ChangeOrder> changeOrders) {
         int type = 0;
+        amap.put("state", 0);
         Date od = DateUtil.toDate(o);
         for (HouseFlowDTO houseFlow : houseFlowList) {
             if (houseFlow.getStartDate() != null && houseFlow.getEndDate() != null) {
@@ -228,7 +227,7 @@ public class HouseFlowScheduleService {
                     map.put("info", "当前为" + houseFlow.getWorkerTypeName() + "开工日期");
                     map.put("date", DateUtil.dateToString(houseFlow.getCreateDate(), DateUtil.FORMAT2));
                     map.put("type", 1);
-                    state=1;
+                    amap.put("state", 1);
                     plans.add(map);
                 }
                 if (e.equals(o)) {
@@ -238,7 +237,7 @@ public class HouseFlowScheduleService {
                     } else {
                         map.put("info", "当前为" + houseFlow.getWorkerTypeName() + "阶段完工日期");
                     }
-                    state=2;
+                    amap.put("state", 2);
                     map.put("type", 2);
                     map.put("date", DateUtil.dateToString(houseFlow.getCreateDate(), DateUtil.FORMAT2));
                     plans.add(map);
