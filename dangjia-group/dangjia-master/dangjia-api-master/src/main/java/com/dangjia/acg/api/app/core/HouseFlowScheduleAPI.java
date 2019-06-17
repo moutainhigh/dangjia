@@ -21,6 +21,7 @@ public interface HouseFlowScheduleAPI {
 
     /**
      * 工程日历工序列表
+     *
      * @param houseId 房子ID
      * @return
      */
@@ -31,28 +32,30 @@ public interface HouseFlowScheduleAPI {
 
     /**
      * 设置指定工序的工期
+     *
      * @param houseFlowId 工序ID
-     * @param startDate 工期开始时间
-     * @param endDate   工期结束时间
+     * @param startDate   工期开始时间
+     * @param endDate     工期结束时间
      * @return
      */
     @PostMapping("app/core/schedule/setHouseFlowSchedule")
     @ApiOperation(value = "设置指定工序的工期", notes = "设置指定工序的工期")
-    ServerResponse   setHouseFlowSchedule(@RequestParam("houseFlowId") String  houseFlowId,
-                                          @RequestParam("startDate") Date startDate,
-                                          @RequestParam("endDate") Date endDate);
+    ServerResponse setHouseFlowSchedule(@RequestParam("houseFlowId") String houseFlowId,
+                                        @RequestParam("startDate") Date startDate,
+                                        @RequestParam("endDate") Date endDate);
 
     /**
      * 生成工程日历
+     *
      * @param houseId 房子ID
      * @return
      */
     @PostMapping("app/core/schedule/makeCalendar")
     @ApiOperation(value = "生成工程日历", notes = "生成工程日历")
-    ServerResponse  makeCalendar(@RequestParam("houseId") String houseId);
+    ServerResponse makeCalendar(@RequestParam("houseId") String houseId);
 
 
     @PostMapping("app/core/schedule/viewCalendar")
     @ApiOperation(value = "查看日历", notes = "查看日历")
-    ServerResponse viewCalendar(@RequestParam("houseId") String houseId,@RequestParam("day") Date day);
+    ServerResponse viewCalendar(@RequestParam("houseId") String houseId, @RequestParam("day") Date day);
 }

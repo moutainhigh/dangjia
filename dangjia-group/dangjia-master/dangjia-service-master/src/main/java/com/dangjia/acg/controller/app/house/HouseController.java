@@ -121,7 +121,10 @@ public class HouseController implements HouseAPI {
         return houseService.queryHouseByCity(userToken, cityId, villageId, minSquare, maxSquare, houseType, pageDTO);
     }
 
-    //装修指南
+    /**
+     * TODO 1.4.0后删除此接口
+     * 装修指南
+     */
     @Override
     @ApiMethod
     public ServerResponse getRenovationManual(String userToken, Integer type) {

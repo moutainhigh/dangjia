@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,6 +18,7 @@ import javax.persistence.Table;
 @Data
 @Entity
 @Table(name = "dj_matter_renovation_manual_member")
+@FieldNameConstants(prefix = "")
 @ApiModel(description = "装修指南业主勾选记录表")
 public class RenovationManualMember extends BaseEntity {
 

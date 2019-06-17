@@ -17,6 +17,7 @@ import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
 import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -77,10 +78,16 @@ public class WebOrderService {
                     if (webOrderDTO.getType() == 2) {//补货补人工
                         MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(webOrderDTO.getTaskId());
                         if (mendOrder != null) {
+                            WorkerType workerType=workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
                             if (mendOrder.getType() == 0) {
-                                webOrderDTO.setTypeText(workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId()).getName() + "补材料");
+                                if(workerType.getType()==3){
+                                    webOrderDTO.setTypeText(workerType.getName() + "补服务");
+                                }else{
+                                    webOrderDTO.setTypeText(workerType.getName() + "补材料");
+                                }
+
                             } else {
-                                webOrderDTO.setTypeText(workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId()).getName() + "补人工");
+                                webOrderDTO.setTypeText(workerType.getName() + "补人工");
                             }
                         }
                     }

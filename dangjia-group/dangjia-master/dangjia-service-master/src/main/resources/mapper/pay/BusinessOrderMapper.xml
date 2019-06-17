@@ -100,12 +100,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	it.worker_goods_name AS goodsName,
 	it.unit_name AS unitName,
 	IFNULL( it.product_type, 2 ) AS type
-    FROM
-	dj_pay_business_order AS p
-	INNER JOIN dj_deliver_order AS o ON p.number = o.business_order_number
+	FROM
+		dj_deliver_order AS o
 	INNER JOIN dj_deliver_order_item AS it ON o.id = it.order_id
     WHERE
-	p.number = #{number}
+		o.business_order_number  = #{number}
+	GROUP BY
+		o.business_order_number,
+		it.product_sn,
+		it.worker_goods_sn
     ORDER BY 	it.product_sn DESC,it.worker_goods_sn DESC
 	</select>
 </mapper>
