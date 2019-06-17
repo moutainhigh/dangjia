@@ -115,6 +115,7 @@ public interface HouseAPI {
                                     @RequestParam("pageDTO") PageDTO pageDTO);
 
     /**
+     * TODO 1.4.0后删除此接口
      * 装修指南
      */
     @PostMapping("app/house/house/getRenovationManual")

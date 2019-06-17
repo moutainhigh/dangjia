@@ -1054,7 +1054,10 @@ public class HouseService {
         return shareDTO;
     }
 
-    //装修指南
+    /**
+     * TODO 1.4.0后删除此接口
+     * 装修指南
+     */
     public ServerResponse getRenovationManual(String userToken, Integer type) {
         try {
             String imgUrl = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
@@ -1667,17 +1670,17 @@ public class HouseService {
             String jdAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             HouseChoiceCase houseChoiceCase = iHouseChoiceCaseMapper.selectByPrimaryKey(id);
             JSONArray itemObjArr = JSON.parseArray(houseChoiceCase.getTextContent());
-            HouseChoiceCaseDTO houseChoiceCaseDTO=new HouseChoiceCaseDTO();
+            HouseChoiceCaseDTO houseChoiceCaseDTO = new HouseChoiceCaseDTO();
             for (int i = 0; i < itemObjArr.size(); i++) {
                 JSONObject jsonObject = itemObjArr.getJSONObject(i);
-                String headline=jsonObject.getString("headline");
-                String [] image=jsonObject.getString("image").split(",");
+                String headline = jsonObject.getString("headline");
+                String[] image = jsonObject.getString("image").split(",");
                 for (int j = 0; j < image.length; j++) {
-                    image[j]=jdAddress+image[j];
+                    image[j] = jdAddress + image[j];
 
                 }
-                String describe=jsonObject.getString("describe");
-                TextContentDTO textContentDTO=new TextContentDTO();
+                String describe = jsonObject.getString("describe");
+                TextContentDTO textContentDTO = new TextContentDTO();
                 textContentDTO.setHeadline(headline);
                 textContentDTO.setDescribe(describe);
                 textContentDTO.setImage(image);
@@ -1687,7 +1690,7 @@ public class HouseService {
             houseChoiceCaseDTO.setArea(houseChoiceCase.getArea());
             houseChoiceCaseDTO.setCost(houseChoiceCase.getCost());
             houseChoiceCaseDTO.setStyle(houseChoiceCase.getStyle());
-            return ServerResponse.createBySuccess("查询成功",houseChoiceCaseDTO);
+            return ServerResponse.createBySuccess("查询成功", houseChoiceCaseDTO);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

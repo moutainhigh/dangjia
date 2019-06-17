@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.home;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -38,4 +39,10 @@ public interface HomeModularAPI {
     @PostMapping("home/getBroadcastList")
     @ApiOperation(value = "首页获取播报", notes = "首页获取播报")
     ServerResponse getBroadcastList(@RequestParam("request") HttpServletRequest request);
+
+    @PostMapping("home/getStrategyList")
+    @ApiOperation(value = "获取攻略列表", notes = "获取攻略列表")
+    ServerResponse getStrategyList(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("userToken") String userToken,
+                                   @RequestParam("pageDTO") PageDTO pageDTO);
 }
