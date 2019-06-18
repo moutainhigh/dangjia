@@ -56,7 +56,7 @@ public class RenovationStageService {
      *
      * @return
      */
-    public ServerResponse addRenovationStage(String name, String image) {
+    public ServerResponse addRenovationStage(String name, String image, String workerTypeId) {
         if (CommonUtil.isEmpty(name)) {
             return ServerResponse.createBySuccessMessage("请输入名称");
         }
@@ -66,6 +66,7 @@ public class RenovationStageService {
         RenovationStage renovationStage = new RenovationStage();
         renovationStage.setName(name);
         renovationStage.setImage(image);
+        renovationStage.setWorkerTypeId(workerTypeId);
         renovationStageMapper.insert(renovationStage);
         return ServerResponse.createBySuccessMessage("新增装修指南阶段配置成功");
     }
@@ -75,7 +76,7 @@ public class RenovationStageService {
      *
      * @return
      */
-    public ServerResponse updateRenovationStage(String id, String name, String image) {
+    public ServerResponse updateRenovationStage(String id, String name, String image, String workerTypeId) {
         if (CommonUtil.isEmpty(name) && CommonUtil.isEmpty(image)) {
             return ServerResponse.createBySuccessMessage("请编辑需要修改的信息");
         }
@@ -88,6 +89,9 @@ public class RenovationStageService {
         }
         if (!CommonUtil.isEmpty(image)) {
             renovationStage.setImage(image);
+        }
+        if (!CommonUtil.isEmpty(workerTypeId)) {
+            renovationStage.setWorkerTypeId(workerTypeId);
         }
         renovationStage.setModifyDate(new Date());
         renovationStageMapper.updateByPrimaryKeySelective(renovationStage);

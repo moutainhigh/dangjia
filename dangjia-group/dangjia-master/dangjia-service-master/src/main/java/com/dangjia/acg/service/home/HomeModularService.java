@@ -8,12 +8,14 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWebsiteVisitMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
 import com.dangjia.acg.mapper.matter.IRenovationStageMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
@@ -21,6 +23,7 @@ import com.dangjia.acg.modle.house.WebsiteVisit;
 import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.matter.RenovationStage;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +60,10 @@ public class HomeModularService {
     private ConfigUtil configUtil;
     @Autowired
     private IWebsiteVisitMapper websiteVisitMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
 
     public ServerResponse getBroadcastList() {
         PageHelper.startPage(1, 20);
@@ -114,9 +121,39 @@ public class HomeModularService {
         return ServerResponse.createBySuccess("查询成功", listMap);
     }
 
-    public ServerResponse getStrategyList(String userToken, PageDTO pageDTO) {//TODO 通过用户查找
+    public ServerResponse getStrategyList(String userToken, PageDTO pageDTO) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<RenovationManual> rmList = renovationManualMapper.getStrategyList();
+        String workerTypeId = null;
+        if (!CommonUtil.isEmpty(userToken)) {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof Member) {
+                Member member = (Member) object;
+                Example example = new Example(House.class);
+                example.createCriteria()
+                        .andEqualTo(House.MEMBER_ID, member.getId())
+                        .andNotEqualTo(House.VISIT_STATE, 0)
+                        .andNotEqualTo(House.VISIT_STATE, 2)
+                        .andEqualTo(House.DATA_STATUS, 0);
+                List<House> houseList = iHouseMapper.selectByExample(example);
+                House house = null;
+                if (houseList.size() > 0) {
+                    for (House house1 : houseList) {
+                        if (house1.getIsSelect() == 1) {//当前选中
+                            house = house1;
+                            break;
+                        }
+                    }
+                    if (house == null) {//有很多房子但是没有isSelect为1的
+                        house = houseList.get(0);
+                    }
+                    List<HouseFlow> houseFlows = houseFlowMapper.unfinishedFlow(house.getId());
+                    if (houseFlows.size() > 0) {
+                        workerTypeId = houseFlows.get(houseFlows.size() - 1).getWorkerTypeId();
+                    }
+                }
+            }
+        }
+        List<RenovationManual> rmList = renovationManualMapper.getStrategyList(workerTypeId);
         if (rmList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
