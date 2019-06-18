@@ -28,6 +28,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
 
     /**
      * 查询工价商品
+     *
      * @param pageDTO
      * @param workerTypeId
      * @param searchKey
@@ -37,7 +38,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
     @ApiMethod
     public ServerResponse<PageInfo> getWorkerGoodses(HttpServletRequest request, PageDTO pageDTO, String workerTypeId, String searchKey, String showGoods) {
         try {
-            return workerGoodsService.getWorkerGoodses(pageDTO, workerTypeId, searchKey,showGoods);
+            return workerGoodsService.getWorkerGoodses(pageDTO, workerTypeId, searchKey, showGoods);
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("查询工价商品失败");
         }
@@ -45,16 +46,17 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
 
     /**
      * 新增或更新工价商品
+     *
      * @param workerGoods
      * @param technologyJsonList
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse<String> setWorkerGoods(HttpServletRequest request,WorkerGoods workerGoods, String technologyJsonList, String deleteTechnologyIds) {
+    public ServerResponse<String> setWorkerGoods(HttpServletRequest request, WorkerGoods workerGoods, String technologyJsonList, String deleteTechnologyIds) {
 //    public ServerResponse<String> setWorkerGoods(HttpServletRequest request,WorkerGoods workerGoods, String technologyListJson) {
         try {
-            return workerGoodsService.setWorkerGoods(workerGoods, technologyJsonList,deleteTechnologyIds);
+            return workerGoodsService.setWorkerGoods(workerGoods, technologyJsonList, deleteTechnologyIds);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("新增或更新工价商品失败");
@@ -63,36 +65,45 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
 
     /**
      * 每工种未删除 或 已支付工钱
+     *
      * @param houseId
      * @param houseFlowId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse getWorkertoCheck(HttpServletRequest request,String houseId,String houseFlowId) {
-            return workerGoodsService.getWorkertoCheck(houseId, houseFlowId);
+    public ServerResponse getWorkertoCheck(HttpServletRequest request, String houseId, String houseFlowId) {
+        return workerGoodsService.getWorkertoCheck(houseId, houseFlowId);
     }
 
     /**
      * 从精算表查工种已支付工钱
+     *
      * @param houseId
      * @param houseFlowId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse getPayedWorker(HttpServletRequest request,String houseId,String houseFlowId) {
+    public ServerResponse getPayedWorker(HttpServletRequest request, String houseId, String houseFlowId) {
         return workerGoodsService.getPayedWorker(houseId, houseFlowId);
     }
 
     /**
      * 删除人工商品
+     *
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse deleteWorkerGoods(HttpServletRequest request,@RequestParam("id")String id){
+    public ServerResponse deleteWorkerGoods(HttpServletRequest request, @RequestParam("id") String id) {
         return workerGoodsService.deleteWorkerGoods(id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getHomeProductList(HttpServletRequest request) {
+        return workerGoodsService.getHomeProductList();
     }
 
 }

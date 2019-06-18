@@ -15,6 +15,7 @@ import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
+import com.dangjia.acg.modle.basics.HomeProductDTO;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -104,19 +105,19 @@ public class WorkerGoodsService {
         return workerGoodsDTO;
     }
 
-    public String getImageAddress(String address, String image) {
-        String imgStr = "";
+    private String getImageAddress(String address, String image) {
+        StringBuilder imgStr = new StringBuilder();
         if (!CommonUtil.isEmpty(image)) {
             String[] imgArr = image.split(",");
             for (int i = 0; i < imgArr.length; i++) {
                 if (i == imgArr.length - 1) {
-                    imgStr += address + imgArr[i];
+                    imgStr.append(address).append(imgArr[i]);
                 } else {
-                    imgStr += address + imgArr[i] + ",";
+                    imgStr.append(address).append(imgArr[i]).append(",");
                 }
             }
         }
-        return imgStr;
+        return imgStr.toString();
     }
 
     private WorkerGoodsDTO assembleWorkerGoodsResult(WorkerGoods workerGoods) {
@@ -422,23 +423,32 @@ public class WorkerGoodsService {
      * @return
      */
     public ServerResponse deleteWorkerGoods(String id) {
-        try {
-            if (true) {
-                return ServerResponse.createByErrorMessage("不能执行删除操作");
-            }
+        return ServerResponse.createByErrorMessage("不能执行删除操作");
+//        try {
+//            int i = iWorkerGoodsMapper.deleteByPrimaryKey(id);
+//            if (i != 0) {
+//                return ServerResponse.createBySuccessMessage("删除成功");
+//            } else {
+//                return ServerResponse.createByErrorMessage("删除失败");
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ServerResponse.createByErrorMessage("删除失败");
+//
+//        }
+    }
 
-            int i = iWorkerGoodsMapper.deleteByPrimaryKey(id);
-            if (i != 0) {
-                return ServerResponse.createBySuccessMessage("删除成功");
-            } else {
-                return ServerResponse.createByErrorMessage("删除失败");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("删除失败");
-
+    public ServerResponse getHomeProductList() {
+        List<HomeProductDTO> homeProductDTOS = iWorkerGoodsMapper.getHomeProductList();
+        if (homeProductDTOS.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        for (HomeProductDTO homeProductDTO : homeProductDTOS) {
+            String imageUrl = homeProductDTO.getImage();
+            homeProductDTO.setImage(CommonUtil.isEmpty(imageUrl) ? null : (imageAddress + imageUrl));
+        }
+        return ServerResponse.createBySuccess("查询成功", homeProductDTOS);
     }
 
 }

@@ -114,7 +114,8 @@
     </select>
 
     <!-- 根据商品编号查询 -->
-    <select id="selectByWorkerGoodsSn" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
+    <select id="selectByWorkerGoodsSn" resultType="com.dangjia.acg.modle.basics.WorkerGoods"
+            parameterType="java.lang.String">
         SELECT
         id,
         name,
@@ -164,7 +165,7 @@
         show_goods as showGoods,
         create_date as createDate,
         modify_date as modifyDate
-        from dj_basics_worker_goods  as w
+        from dj_basics_worker_goods as w
         where w.data_status = 0
         <if test="name!=null and name!=''">
             and
@@ -221,7 +222,7 @@
         w.create_date as createDate,
         w.modify_date as modifyDate
         from dj_actuary_budget_worker abw ,dj_basics_worker_goods w
-        WHERE  abw.worker_goods_id =w.id
+        WHERE abw.worker_goods_id =w.id
         and abw.delete_state!=1
         and abw.steta=1
         and abw.house_id =#{houseId}
@@ -233,6 +234,39 @@
             AND
             w.worker_type_id =#{workerTypeId}
         </if>
+    </select>
+    <select id="getHomeProductList" resultType="com.dangjia.acg.modle.basics.HomeProductDTO">
+            (SELECT
+                id AS id,
+                image AS image,
+                price AS price,
+                unit_name AS unitName,
+                0 AS type,
+                name AS name
+            FROM
+              dj_basics_product
+            WHERE
+                data_status = 0
+                and type = 1
+                and maket = 1
+            ORDER BY
+                rand( )
+                LIMIT 3 )UNION ALL
+            (SELECT
+                id AS id,
+                image AS image,
+                price AS price,
+                unit_name AS unitName,
+                1 AS type,
+                name AS name
+            FROM
+                dj_basics_worker_goods
+            WHERE
+                data_status = 0
+                and show_goods = 1
+            ORDER BY
+                rand( )
+                LIMIT 3)
     </select>
 
 
