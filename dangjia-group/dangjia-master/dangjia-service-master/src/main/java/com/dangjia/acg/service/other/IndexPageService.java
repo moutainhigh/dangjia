@@ -169,6 +169,8 @@ public class IndexPageService {
                 Map<String, Object> map = new HashMap<>();
                 map.put("name", workerType.getName());
                 map.put("image", address + workerType.getImage());
+                map.put("workerType", workerType.getType());
+                map.put("workerTypeId",  workerType.getId());
                 ServerResponse serverResponse = budgetMaterialAPI.getHouseBudgetStageCost(request, houseId, houseFlow.getWorkerTypeId());
                 JSONArray pageInfo = (JSONArray) serverResponse.getResultObj();
                 List<BudgetStageCostDTO> budgetStageCostDTOS = pageInfo.toJavaList(BudgetStageCostDTO.class);
