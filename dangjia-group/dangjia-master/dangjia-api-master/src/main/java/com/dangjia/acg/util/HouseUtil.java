@@ -14,7 +14,7 @@ public class HouseUtil {
 
 
     public static NodeDTO getworkerDatas(House house, HouseFlow houseFlow ) {
-        NodeDTO courseList = new ArrayList<>();
+        NodeDTO courseList = new NodeDTO();
 
         return courseList;
     }
