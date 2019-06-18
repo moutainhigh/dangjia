@@ -53,9 +53,9 @@ public class BrandService {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<Brand> Brandlist = iBrandMapper.getBrands();
+            List<Brand> brandlist = iBrandMapper.getBrands();
             List<Map<String, Object>> list = new ArrayList<>();
-            for (Brand brand : Brandlist) {
+            for (Brand brand : brandlist) {
                 Map<String, Object> obj = new HashMap<>();
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", brand.getId());
@@ -67,29 +67,29 @@ public class BrandService {
                 for (BrandSeries bs : mapList) {
 //					String imageUrl=bs.getImage();
                     String[] imgArr = bs.getImage().split(",");
-                    String imgStr = "";
-                    String imgUrlStr = "";
+                    StringBuilder imgStr = new StringBuilder();
+                    StringBuilder imgUrlStr = new StringBuilder();
                     for (int i = 0; i < imgArr.length; i++) {
                         if (i == imgArr.length - 1) {
-                            imgStr += address + imgArr[i];
-                            imgUrlStr += imgArr[i];
+                            imgStr.append(address).append(imgArr[i]);
+                            imgUrlStr.append(imgArr[i]);
                         } else {
-                            imgStr += address + imgArr[i] + ",";
-                            imgUrlStr += imgArr[i] + ",";
+                            imgStr.append(address).append(imgArr[i]).append(",");
+                            imgUrlStr.append(imgArr[i]).append(",");
                         }
                     }
 //					bs.setImage(address+bs.getImage());
-                    bs.setImage(imgStr);
+                    bs.setImage(imgStr.toString());
                     Map<String, Object> mapSeries = BeanUtils.beanToMap(bs);
 //					mapSeries.put("imageUrl",imageUrl);
-                    mapSeries.put("imageUrl", imgUrlStr);
+                    mapSeries.put("imageUrl", imgUrlStr.toString());
                     mapList2.add(mapSeries);
                 }
                 obj.put("mapList", mapList2);
                 obj.put("brand", map);
                 list.add(obj);
             }
-            PageInfo pageResult = new PageInfo(Brandlist);
+            PageInfo pageResult = new PageInfo(brandlist);
             pageResult.setList(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
@@ -147,7 +147,7 @@ public class BrandService {
             example.createCriteria().andEqualTo(Product.BRAND_ID,id);
             List<Product> list = iProductMapper.selectByExample(example);
             //更新master库相关商品名称
-            if(list.size()>0||null!=list) {
+            if(list.size()>0) {
                 masterProductAPI.updateProductByProductId(JSONArray.toJSONString(list), null, id, null, null);
             }
             JSONArray brandSeriesLists = JSONArray.parseArray(brandSeriesList);
@@ -175,7 +175,7 @@ public class BrandService {
                     productService.updateProductName(brandSeries1.getName(),brandSeriesName,brandSeriesId,null,null,null);
                     example.createCriteria().andEqualTo(Product.BRAND_SERIES_ID,brandSeriesId);
                     List<Product> list1 = iProductMapper.selectByExample(example);
-                    if(list1.size()>0||null!=list1) {
+                    if(list1.size()>0) {
                         masterProductAPI.updateProductByProductId(JSONArray.toJSONString(list1), null, id, null, null);
                     }
                 }
