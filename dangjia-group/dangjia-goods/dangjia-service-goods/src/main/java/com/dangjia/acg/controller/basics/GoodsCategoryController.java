@@ -31,8 +31,7 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
 
     @Override
     public GoodsCategory getGoodsCategory(HttpServletRequest request, String categoryId) {
-        GoodsCategory goodsCategory = goodsCategoryService.getGoodsCategory(categoryId);
-        return goodsCategory;
+        return goodsCategoryService.getGoodsCategory(categoryId);
     }
 
     /**

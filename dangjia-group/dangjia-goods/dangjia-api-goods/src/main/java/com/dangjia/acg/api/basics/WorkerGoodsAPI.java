@@ -59,5 +59,29 @@ public interface WorkerGoodsAPI {
     ServerResponse deleteWorkerGoods(@RequestParam("request") HttpServletRequest request,
                                      @RequestParam("id") String id);
 
+    /**
+     * showdoc
+     *
+     * @param cityId 必选 string 城市ID
+     * @return {"res":1000,"msg":{"resultObj":[{返回参数说明},{返回参数说明}],"resultCode":1000,"resultMsg":"成功"} }
+     * @catalog 当家接口文档/首页模块
+     * @title 首页当家商品模块
+     * @description 首页当家商品模块
+     * @method POST
+     * @url goods/home/getHomeProductList
+     * @return_param id string id
+     * @return_param image string 图片
+     * @return_param price Double 销售价
+     * @return_param unitName string 单位
+     * @return_param type Integer 0:货品，1：人工商品
+     * @return_param name string 名称
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 15
+     * @Author: Ruking 18075121944
+     * @Date: 2019/6/18 5:20 PM
+     */
+    @PostMapping("home/getHomeProductList")
+    @ApiOperation(value = "首页当家商品模块", notes = " 首页当家商品模块")
+    ServerResponse getHomeProductList(@RequestParam("request") HttpServletRequest request);
 
 }

@@ -10,8 +10,6 @@ import com.dangjia.acg.modle.attribute.Attribute;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.Goods;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,12 +30,11 @@ public class GoodsCategoryService {
     private IGoodsMapper iGoodsMapper;
     @Autowired
     private IAttributeMapper attributeMapper;
-    private static Logger LOG = LoggerFactory.getLogger(GoodsCategoryService.class);
 
-    public  GoodsCategory getGoodsCategory(String categoryId){
-        GoodsCategory goodsCategory = iGoodsCategoryMapper.selectByPrimaryKey(categoryId);
-        return goodsCategory;
+    public GoodsCategory getGoodsCategory(String categoryId) {
+        return iGoodsCategoryMapper.selectByPrimaryKey(categoryId);
     }
+
     //新增商品类别
     public ServerResponse insertGoodsCategory(String name, String parentId, String parentTop) {
         try {
@@ -97,10 +94,10 @@ public class GoodsCategoryService {
     //查询商品属性列表 queryGoodsCategory
     public ServerResponse queryGoodsCategory(String parentId) {
         try {
-            List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+            List<Map<String, Object>> mapList = new ArrayList<>();
             List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId(parentId);
             for (GoodsCategory goodsCategory : goodsCategoryList) {
-                Map<String, Object> map = new HashMap<String, Object>();
+                Map<String, Object> map = new HashMap<>();
                 map.put("id", goodsCategory.getId());
                 map.put("name", goodsCategory.getName());
                 mapList.add(map);
