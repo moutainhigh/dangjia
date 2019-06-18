@@ -4,11 +4,13 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.DjConstants;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseResult;
+import com.dangjia.acg.dto.core.NodeDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
@@ -23,6 +25,7 @@ import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -31,12 +34,15 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.design.DesignDataService;
 import com.dangjia.acg.service.member.GroupInfoService;
+import com.dangjia.acg.util.HouseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -127,6 +133,7 @@ public class MyHouseService {
             return (ServerResponse) object;
         }
         Member member = (Member) object;
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         //该城市该用户所有开工房产
         Example example = new Example(House.class);
         example.createCriteria()
@@ -159,6 +166,35 @@ public class MyHouseService {
         houseResult.setBuildStage(applyTypeMap.get(house.getVisitState()));
         /*展示各种进度*/
         List<HouseFlow> houseFlowList = houseFlowMapper.getAllFlowByHouseId(houseId);
+        List<NodeDTO> courseList = new ArrayList<>();
+        for (HouseFlow houseFlow : houseFlowList) {
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+            NodeDTO nodeDTO = HouseUtil.getWorkerDatas( house,  houseFlow,  workerType, address );
+
+            //工人信息
+            Member member1=memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
+            member1.setPassword(null);
+            member1.initPath(address);
+            Map<String, Object> map = new HashMap<>();
+            map.put("memberType", 1);
+            map.put("id", member.getId());
+            map.put("nickName", member.getNickName());
+            map.put("name", member.getNickName());
+            map.put("mobile", member.getMobile());
+            map.put("head", member.getHead());
+            map.put("workerTypeId", member.getWorkerTypeId());
+            map.put("workerName", workerType.getName());
+            nodeDTO.setMember(map);
+
+            if(workerType.getType()==1){
+                houseResult.setDesignList(nodeDTO);
+            }else if(workerType.getType()==2){
+                houseResult.setActuaryList(nodeDTO);
+            }else{
+                courseList.add(nodeDTO);
+            }
+        }
+        houseResult.setCourseList(courseList);
         return ServerResponse.createBySuccess("查询成功");
     }
 
