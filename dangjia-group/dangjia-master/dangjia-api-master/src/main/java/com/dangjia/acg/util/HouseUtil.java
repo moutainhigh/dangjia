@@ -1,6 +1,8 @@
 package com.dangjia.acg.util;
 
 
+import com.dangjia.acg.dto.core.NodeDTO;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.house.House;
 
 import java.util.ArrayList;
@@ -9,6 +11,13 @@ import java.util.List;
 import java.util.Map;
 
 public class HouseUtil {
+
+
+    public static NodeDTO getworkerDatas(House house, HouseFlow houseFlow ) {
+        NodeDTO courseList = new ArrayList<>();
+
+        return courseList;
+    }
 
     /**
      * 。。。。。。。。。。。。。。。。⦧--4

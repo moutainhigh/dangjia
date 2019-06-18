@@ -89,7 +89,7 @@ public class IndexPageService {
                     totalPrice = totalPrice.add(budgetStageCostDTO.getTotalAmount());
                 }
                 house.setMoney(totalPrice);
-                Map map= BeanUtils.beanToMap(houseMap);
+                Map map= BeanUtils.beanToMap(house);
                 map.put("houseName",house.getHouseName());
                 map.put("imageUrl",address + house.getImage());
                 houseMap.add(map);
