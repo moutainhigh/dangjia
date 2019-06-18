@@ -77,9 +77,6 @@ public class RenovationStageService {
      * @return
      */
     public ServerResponse updateRenovationStage(String id, String name, String image, String workerTypeId) {
-        if (CommonUtil.isEmpty(name) && CommonUtil.isEmpty(image)) {
-            return ServerResponse.createBySuccessMessage("请编辑需要修改的信息");
-        }
         RenovationStage renovationStage = renovationStageMapper.selectByPrimaryKey(id);
         if (renovationStage == null) {
             return ServerResponse.createBySuccessMessage("该指南配置不存在");
@@ -90,9 +87,7 @@ public class RenovationStageService {
         if (!CommonUtil.isEmpty(image)) {
             renovationStage.setImage(image);
         }
-        if (!CommonUtil.isEmpty(workerTypeId)) {
-            renovationStage.setWorkerTypeId(workerTypeId);
-        }
+        renovationStage.setWorkerTypeId(workerTypeId);
         renovationStage.setModifyDate(new Date());
         renovationStageMapper.updateByPrimaryKeySelective(renovationStage);
         return ServerResponse.createBySuccessMessage("修改装修指南阶段配置成功");

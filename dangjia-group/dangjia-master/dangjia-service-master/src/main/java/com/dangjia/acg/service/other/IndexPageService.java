@@ -107,6 +107,7 @@ public class IndexPageService {
      */
     public ServerResponse houseDetails(HttpServletRequest request, String houseId) {
         try {
+            String address=configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             BigDecimal totalPrice = new BigDecimal(0);//总计
             House house = houseMapper.selectByPrimaryKey(houseId);
             request.setAttribute(Constants.CITY_ID, house.getCityId());
@@ -116,7 +117,7 @@ public class IndexPageService {
             houseDetailsDTO.setSquare(house.getSquare());
             houseDetailsDTO.setHouseId(house.getId());
             houseDetailsDTO.setResidential(house.getResidential());
-            houseDetailsDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + house.getImage());
+            houseDetailsDTO.setImage(address + house.getImage());
             houseDetailsDTO.setHouseName(house.getHouseName());
             String[] liangArr = {};
             if (house.getLiangDian() != null) {
@@ -167,6 +168,9 @@ public class IndexPageService {
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
                 Map<String, Object> map = new HashMap<>();
                 map.put("name", workerType.getName());
+                map.put("image", address + workerType.getImage());
+                map.put("workerType", workerType.getType());
+                map.put("workerTypeId",  workerType.getId());
                 ServerResponse serverResponse = budgetMaterialAPI.getHouseBudgetStageCost(request, houseId, houseFlow.getWorkerTypeId());
                 JSONArray pageInfo = (JSONArray) serverResponse.getResultObj();
                 List<BudgetStageCostDTO> budgetStageCostDTOS = pageInfo.toJavaList(BudgetStageCostDTO.class);

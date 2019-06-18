@@ -181,7 +181,7 @@ public class MemberService {
     }
 
     ServerResponse getUser(Member user, String userRole) {
-        if("1".equals(userRole)) {
+        if ("1".equals(userRole)) {
             clueService.sendUser(user, user.getMobile());
         }
         updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
@@ -299,7 +299,7 @@ public class MemberService {
             user.setHead("qrcode/logo.png");
             memberMapper.insertSelective(user);
 //            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
-            if(userRole==1) {
+            if (userRole == 1) {
                 clueService.sendUser(user, user.getMobile());
             }
             updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
@@ -313,7 +313,7 @@ public class MemberService {
             }
             redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
             redisClient.deleteCache(Constants.SMS_CODE + phone);
-            if(userRole==1) {
+            if (userRole == 1) {
                 try {
                     //检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
                     redPackPayService.checkUpActivity(request, user.getMobile(), "1");
@@ -479,7 +479,7 @@ public class MemberService {
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
-        if (user.getCheckType() ==4) {
+        if (user.getCheckType() == 4) {
             //冻结的帐户不能修改资料信息
             return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
         }
@@ -557,9 +557,9 @@ public class MemberService {
         user.setMobile(phone);
         user = memberMapper.getUser(user);
         if (user == null) {
-            return ServerResponse.createByErrorMessage( "电话号码未注册！");
+            return ServerResponse.createByErrorMessage("电话号码未注册！");
         } else {
-            if (user.getCheckType() ==4) {
+            if (user.getCheckType() == 4) {
                 //冻结的帐户不能修改资料信息
                 return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
             }
@@ -605,7 +605,7 @@ public class MemberService {
     /**
      * 业主列表
      */
-    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy,String type, String userId,String beginDate,String endDate) {
+    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
         try {
             List<String> childsLabelIdList = new ArrayList<>();
             if (StringUtils.isNotBlank(parentId)) {
@@ -619,13 +619,13 @@ public class MemberService {
             String[] childsLabelIdArr = new String[childsLabelIdList.size()];
             childsLabelIdList.toArray(childsLabelIdArr);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
-                if(beginDate.equals(endDate)){
-                    beginDate=beginDate+" "+"00:00:00";
-                    endDate=endDate+" "+"23:59:59";
+            if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
+                if (beginDate.equals(endDate)) {
+                    beginDate = beginDate + " " + "00:00:00";
+                    endDate = endDate + " " + "23:59:59";
                 }
             }
-            List<Member> list = memberMapper.getMemberListByName(searchKey, stage, userRole, childsLabelIdArr, orderBy,type,userId,beginDate,endDate);
+            List<Member> list = memberMapper.getMemberListByName(searchKey, stage, userRole, childsLabelIdArr, orderBy, type, userId, beginDate, endDate);
             PageInfo pageResult = new PageInfo(list);
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
             for (Member member : list) {
@@ -722,7 +722,7 @@ public class MemberService {
                 srcMember.setMobile(member.getMobile());
             if (StringUtils.isNotBlank(member.getRemarks()))
                 srcMember.setRemarks(member.getRemarks());
-            if (srcMember.getCheckType() ==4) {
+            if (srcMember.getCheckType() == 4) {
                 //冻结的帐户不能修改资料信息
                 return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
             }
@@ -842,7 +842,7 @@ public class MemberService {
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
-        if (user.getCheckType() ==4) {
+        if (user.getCheckType() == 4) {
             //冻结的帐户不能修改资料信息
             return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
         }
@@ -879,7 +879,7 @@ public class MemberService {
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
-        if (checkType!=4&&checkType!=2&&user.getCheckType() ==4) {
+        if (checkType != 4 && checkType != 2 && user.getCheckType() == 4) {
             //冻结的帐户不能修改资料信息
             return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
         }

@@ -1,8 +1,10 @@
 package com.dangjia.acg.util;
 
 
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.core.NodeDTO;
 import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 
 import java.util.ArrayList;
@@ -13,11 +15,240 @@ import java.util.Map;
 public class HouseUtil {
 
 
-    public static NodeDTO getworkerDatas(House house, HouseFlow houseFlow ) {
-        NodeDTO courseList = new NodeDTO();
-
-        return courseList;
+    public static NodeDTO getWorkerDatas(House house, HouseFlow houseFlow,WorkerType workerType,String address ) {
+        NodeDTO nodeDTO = new NodeDTO();
+        String[] nameBs;
+        nodeDTO.setNameA(workerType.getName());
+        nodeDTO.setColor(workerType.getColor());
+        if(!CommonUtil.isEmpty(workerType.getImage())) {
+            nodeDTO.setImage(address + workerType.getImage());
+        }
+        if (workerType.getType() == 1) {//设计
+            if (house.getDecorationType() == 2) {//自带设计流程
+                nameBs= new String[]{"设计抢单", "设计平面图", "设计施工图", "设计完成"};
+                nodeDTO.setTotal(nameBs.length);
+            }else{
+                nameBs = new String[]{"设计抢单", "业主支付", "量房阶段", "设计平面图", "设计施工图", "设计完成"};
+                nodeDTO.setTotal(nameBs.length);
+            }
+            nodeDTO=getDesignDatas(house,nodeDTO);
+        }else if (workerType.getType() == 2) {//精算
+            nameBs = new String[]{"精算抢单", "业主支付", "制作精算", "精算完成"};
+            nodeDTO=getBudgetDatas(house,nodeDTO);
+        }else if (workerType.getType() == 3) {//大管家
+            nameBs = new String[]{"未开始","大管家抢单", "业主支付", "工程排期", "确认开工", "监管工地", "整体竣工"};
+            if (houseFlow.getWorkType() == 1) {
+                nodeDTO.setRank(0);
+                nodeDTO.setNameB("未开始");
+            } else if (houseFlow.getWorkType() == 2) {
+                nodeDTO.setRank(1);
+                nodeDTO.setNameB("待抢单");
+            } else if (houseFlow.getWorkType() == 3) {
+                nodeDTO.setRank(2);
+                nodeDTO.setNameB("待支付");
+            } else if (houseFlow.getSupervisorStart() == 0 && houseFlow.getWorkType() == 4) {
+                nodeDTO.setRank(3);
+                nodeDTO.setNameB("待开工");
+            } else if (houseFlow.getSupervisorStart() == 1 && houseFlow.getWorkType() == 4) {
+                nodeDTO.setRank(4);
+                nodeDTO.setNameB("监工中");
+            } else if (houseFlow.getWorkSteta() == 2 || houseFlow.getWorkSteta() == 6) {
+                if (houseFlow.getWorkSteta() == 2) {
+                    nodeDTO.setNameB("整体完工");
+                } else {
+                    nodeDTO.setNameB("提前结束装修");
+                }
+                nodeDTO.setRank(5);
+            }
+        }else if (workerType.getType() == 4) {//拆除
+            nameBs = new String[]{"未开始","拆除抢单", "业主支付", "施工交底","施工中", "整体完工"};
+        }else{//其他
+            nameBs = new String[]{"未开始",workerType.getName()+"抢单", "业主支付", "施工交底","施工中", "阶段完工", "整体完工"};
+        }
+        if (workerType.getType() >3) {
+            nodeDTO = getWorkerDatas(houseFlow, nodeDTO);
+        }
+        nodeDTO.setTotal(nameBs.length);
+        Map<String, Object> dataMap = new HashMap<>();
+        List<Map<String, Object>> dataList = new ArrayList<>();
+        for (int i = 0; i < nameBs.length; i++) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", nameBs[i]);
+            map.put("begin", i +1);
+            map.put("icon", "");
+            dataList.add(map);
+        }
+        dataMap.put("dataList", dataList);
+        nodeDTO.setProgress(dataMap);
+        return nodeDTO;
     }
+    public static NodeDTO getWorkerDatas(HouseFlow houseFlow,NodeDTO nodeDTO) {
+        if (houseFlow.getWorkType() == 1) {
+            nodeDTO.setRank(0);
+            nodeDTO.setNameB("未发布");
+        } else if (houseFlow.getWorkType() == 2) {
+            nodeDTO.setRank(1);
+            nodeDTO.setNameB("待抢单");
+        } else if (houseFlow.getWorkType() == 3) {
+            nodeDTO.setRank(2);
+            nodeDTO.setNameB("待支付");
+        } else if (houseFlow.getWorkType() == 4) {//已支付
+            if (houseFlow.getWorkSteta() == 3) {
+                nodeDTO.setRank(3);
+                nodeDTO.setNameB("待交底");
+            } else if (houseFlow.getWorkSteta() == 4) {
+                nodeDTO.setRank(4);
+                nodeDTO.setNameB("施工中");
+            } else {
+                if (houseFlow.getWorkSteta() == 1) {
+                    nodeDTO.setRank(5);
+                    nodeDTO.setNameB("阶段完工");
+                }
+                if (houseFlow.getWorkSteta() == 2 || houseFlow.getWorkSteta() == 6) {
+                    if (houseFlow.getWorkerType() == 4) {//拆除
+                        nodeDTO.setRank(5);
+                    }else{
+                        nodeDTO.setRank(6);
+                    }
+                    if (houseFlow.getWorkSteta() == 2) {
+                        nodeDTO.setNameB("整体完工");
+                    } else {
+                        nodeDTO.setNameB("提前结束装修");
+                    }
+                }
+            }
+        }
+        return nodeDTO;
+    }
+
+    public static NodeDTO getBudgetDatas(House house,NodeDTO nodeDTO) {
+        switch (house.getBudgetOk()) {
+            case 0:
+                nodeDTO.setRank(1);
+                nodeDTO.setNameB( "待抢单");
+                break;
+            case 5:
+                nodeDTO.setRank(2);
+                nodeDTO.setNameB( "待业主支付");
+                break;
+            case 1:
+                if (house.getDecorationType() == 2 && house.getDesignerOk() != 3) {
+                    nodeDTO.setRank(3);
+                    nodeDTO.setNameB( "待上传设计设计图");
+                } else {
+                    nodeDTO.setRank(3);
+                    nodeDTO.setNameB( "精算中");
+                }
+                break;
+            case -1:
+                nodeDTO.setRank(3);
+                nodeDTO.setNameB( "未发送精算");
+                break;
+            case 2:
+                nodeDTO.setRank(3);
+                nodeDTO.setNameB( "待审核精算");
+                break;
+            case 4:
+                nodeDTO.setRank(3);
+                nodeDTO.setNameB( "修改精算");
+                break;
+            case 3:
+                nodeDTO.setRank(4);
+                nodeDTO.setNameB( "完成");
+                break;
+        }
+        return nodeDTO;
+    }
+    public static NodeDTO getDesignDatas(House house,NodeDTO nodeDTO) {
+        if (house.getDecorationType() == 2) {//自带设计流程
+            switch (house.getDesignerOk()) {
+                case 0://0未确定设计师
+                    nodeDTO.setRank(1);
+                    nodeDTO.setNameB("待抢单");
+                    break;
+                case 4://4设计待抢单
+                case 1://1已支付-设计师待量房
+                case 9://9量房图发给业主
+                    nodeDTO.setRank(2);
+                    nodeDTO.setNameB("待上传平面图");
+                    break;
+                case 5://5平面图发给业主 （发给了业主）
+                    nodeDTO.setRank(2);
+                    nodeDTO.setNameB("待审核平面图");
+                    break;
+                case 6://6平面图审核不通过（NG，可编辑平面图）
+                    nodeDTO.setRank(2);
+                    nodeDTO.setNameB("待修改平面图");
+                    break;
+                case 7://7通过平面图待发施工图（OK，可编辑施工图）
+                    nodeDTO.setRank(3);
+                    nodeDTO.setNameB("待上传施工图");
+                    break;
+                case 2://2已发给业主施工图 （发给了业主）
+                    nodeDTO.setRank(3);
+                    nodeDTO.setNameB("待审核施工图");
+                    break;
+                case 8://8施工图片审核不通过（NG，可编辑施工图）
+                    nodeDTO.setRank(3);
+                    nodeDTO.setNameB("待修改施工图");
+                    break;
+                case 3://施工图(全部图)审核通过（OK，完成）
+                    nodeDTO.setRank(4);
+                    nodeDTO.setNameB("完成");
+                    break;
+            }
+        } else {
+            switch (house.getDesignerOk()) {
+                case 0://0未确定设计师
+                    nodeDTO.setRank(1);
+                    nodeDTO.setNameB("待抢单");
+                    break;
+                case 4://4设计待抢单
+                    nodeDTO.setRank(2);
+                    nodeDTO.setNameB("待业主支付");
+                    break;
+                case 1://1已支付-设计师待量房
+                    nodeDTO.setRank(3);
+                    nodeDTO.setNameB("待量房");
+                    break;
+                case 9://9量房图发给业主
+                    nodeDTO.setRank(4);
+                    nodeDTO.setNameB("待上传平面图");
+                    break;
+                case 5://5平面图发给业主 （发给了业主）
+                    nodeDTO.setRank(4);
+                    nodeDTO.setNameB("待审核平面图");
+                    break;
+                case 6://6平面图审核不通过（NG，可编辑平面图）
+                    nodeDTO.setRank(4);
+                    nodeDTO.setNameB("待修改平面图");
+                    break;
+                case 7://7通过平面图待发施工图（OK，可编辑施工图）
+                    nodeDTO.setRank(5);
+                    nodeDTO.setNameB("待上传施工图");
+                    break;
+                case 2://2已发给业主施工图 （发给了业主）
+                    nodeDTO.setRank(5);
+                    nodeDTO.setNameB("待审核施工图");
+                    break;
+                case 8://8施工图片审核不通过（NG，可编辑施工图）
+                    nodeDTO.setRank(5);
+                    nodeDTO.setNameB("待修改施工图");
+                    break;
+                case 3://施工图(全部图)审核通过（OK，完成）
+                    nodeDTO.setRank(6);
+                    nodeDTO.setNameB("完成");
+                    break;
+            }
+        }
+        return nodeDTO;
+    }
+
+
+
+
+
+
 
     /**
      * 。。。。。。。。。。。。。。。。⦧--4

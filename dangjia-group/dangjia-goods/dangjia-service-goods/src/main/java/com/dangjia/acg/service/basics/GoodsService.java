@@ -319,12 +319,6 @@ public class GoodsService {
     public ServerResponse queryGoodsListByCategoryLikeName(PageDTO pageDTO, String categoryId, String name, Integer type) {
         try {
             LOG.info("tqueryGoodsListByCategoryLikeName type :" + type);
-            if (pageDTO.getPageNum() == null) {
-                pageDTO.setPageNum(1);
-            }
-            if (pageDTO.getPageSize() == null) {
-                pageDTO.setPageSize(10);
-            }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Goods> goodsList = iGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
@@ -358,7 +352,7 @@ public class GoodsService {
                         Map<String, Object> map = BeanUtils.beanToMap(p);
                         map.put("imageUrl", imgUrlStr.toString());
                         map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
-                        String strNewValueNameArr = "";
+                        StringBuilder strNewValueNameArr = new StringBuilder();
                         if (StringUtils.isNotBlank(p.getValueIdArr())) {
                             String[] newValueNameArr = p.getValueIdArr().split(",");
                             for (int i = 0; i < newValueNameArr.length; i++) {
@@ -366,14 +360,14 @@ public class GoodsService {
                                 if (StringUtils.isNotBlank(valueId)) {
                                     AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
                                     if (i == 0) {
-                                        strNewValueNameArr = attributeValue.getName();
+                                        strNewValueNameArr = new StringBuilder(attributeValue.getName());
                                     } else {
-                                        strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
+                                        strNewValueNameArr.append(",").append(attributeValue.getName());
                                     }
                                 }
                             }
                         }
-                        map.put("newValueNameArr", strNewValueNameArr);
+                        map.put("newValueNameArr", strNewValueNameArr.toString());
                         if (!StringUtils.isNotBlank(p.getLabelId())) {
                             map.put("labelId", "");
                             map.put("labelName", "");
