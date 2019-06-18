@@ -14,6 +14,8 @@ import java.util.List;
  */
 @Data
 public class HouseChoiceCaseDTO {
+    private String title;//案例名称
+    private String image;//标题图片
     private String buildingNames;//楼盘名称
 
     private BigDecimal area;//面积

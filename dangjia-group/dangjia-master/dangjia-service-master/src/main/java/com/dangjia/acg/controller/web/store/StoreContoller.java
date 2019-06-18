@@ -50,8 +50,8 @@ public class StoreContoller implements StoreAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryStoreSubscribe(String searchKey) {
-        return storeServices.queryStoreSubscribe(searchKey);
+    public ServerResponse queryStoreSubscribe(String searchKey, PageDTO pageDTO) {
+        return storeServices.queryStoreSubscribe(searchKey,pageDTO);
     }
     /**
      * 门店预约插入

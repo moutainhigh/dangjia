@@ -28,7 +28,7 @@
             AND city_id=#{cityId}
         </if>
         <if test="null!=storeName and ''!=storeName">
-            AND store_name=#{store_name}
+            AND store_name LIKE CONCAT('%',#{storeName},'%')
         </if>
         ORDER BY create_date DESC
     </select>

@@ -29,11 +29,24 @@ public class IndexPageController implements IndexPageAPI {
         return indexPageService.queryHouseDistance( request, userToken,  cityId,  villageId,  square,  pageDTO);
     }
     /**
-     * 施工现场
+     * 施工现场详情
      */
     @Override
     @ApiMethod
     public ServerResponse houseDetails(HttpServletRequest request, String houseId){
         return indexPageService.houseDetails(request,houseId);
+    }
+
+    /**
+     * 施工现场
+     * @param request
+     * @param latitude
+     * @param longitude
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude) {
+        return indexPageService.jobLocation(request,latitude,longitude);
     }
 }

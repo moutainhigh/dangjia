@@ -37,6 +37,7 @@ import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.complain.ComplainService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.worker.EvaluateService;
@@ -113,6 +114,8 @@ public class HouseWorkerService {
     private IChangeOrderMapper changeOrderMapper;
     @Autowired
     private HouseFlowScheduleService houseFlowScheduleService;
+    @Autowired
+    private ComplainService complainService;
 
     @Autowired
     private MessageAPI messageAPI;
@@ -141,7 +144,7 @@ public class HouseWorkerService {
             }
             houseWorker.setWorkType(2);//被业主换
             houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-
+            complainService.addComplain(userToken,houseWorker.getWorkerId(),5,houseWorkerId,houseWorker.getHouseId(),"");
             HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
             String workerId = houseWorker.getWorkerId();
             houseFlow.setWorkerId("");
