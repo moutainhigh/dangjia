@@ -122,7 +122,6 @@ public class HomeModularService {
     }
 
     public ServerResponse getStrategyList(String userToken, PageDTO pageDTO) {
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         String workerTypeId = null;
         if (!CommonUtil.isEmpty(userToken)) {
             Object object = constructionService.getMember(userToken);
@@ -160,6 +159,7 @@ public class HomeModularService {
                 }
             }
         }
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<RenovationManual> rmList = renovationManualMapper.getStrategyList(workerTypeId);
         if (rmList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
