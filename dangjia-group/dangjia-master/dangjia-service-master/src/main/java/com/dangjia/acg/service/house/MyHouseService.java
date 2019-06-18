@@ -157,6 +157,8 @@ public class MyHouseService {
         houseResult.setTask(task);
         Map<Integer, String> applyTypeMap =DjConstants.VisitState.getVisitStateMap();
         houseResult.setBuildStage(applyTypeMap.get(house.getVisitState()));
+        /*展示各种进度*/
+        List<HouseFlow> houseFlowList = houseFlowMapper.getAllFlowByHouseId(houseId);
         return ServerResponse.createBySuccess("查询成功");
     }
 

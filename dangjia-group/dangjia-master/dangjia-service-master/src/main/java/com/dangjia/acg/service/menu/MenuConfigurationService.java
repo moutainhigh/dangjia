@@ -44,7 +44,6 @@ public class MenuConfigurationService {
         if (CommonUtil.isEmpty(menuConfiguration.getParentId())) {
             menuConfiguration.setParentId(null);
         }
-
         Example example = new Example(MenuConfiguration.class);
         example.createCriteria().andEqualTo(MenuConfiguration.ID, menuConfiguration.getId());
         if (iMenuConfigurationMapper.selectCountByExample(example) <= 0) {
