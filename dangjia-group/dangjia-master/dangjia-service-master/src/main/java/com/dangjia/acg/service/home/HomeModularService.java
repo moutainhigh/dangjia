@@ -148,7 +148,14 @@ public class HomeModularService {
                     }
                     List<HouseFlow> houseFlows = houseFlowMapper.unfinishedFlow(house.getId());
                     if (houseFlows.size() > 0) {
-                        workerTypeId = houseFlows.get(houseFlows.size() - 1).getWorkerTypeId();
+                        example = new Example(RenovationStage.class);
+                        example.createCriteria()
+                                .andEqualTo(RenovationStage.WORKER_TYPE_ID, houseFlows.get(houseFlows.size() - 1).getWorkerTypeId())
+                                .andEqualTo(RenovationStage.DATA_STATUS, 0);
+                        List<RenovationStage> rmList = renovationStageMapper.selectByExample(example);
+                        if (rmList.size() > 0) {
+                            workerTypeId = rmList.get(0).getId();
+                        }
                     }
                 }
             }
