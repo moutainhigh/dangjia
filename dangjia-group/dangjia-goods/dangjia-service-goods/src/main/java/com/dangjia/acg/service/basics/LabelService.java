@@ -44,12 +44,6 @@ public class LabelService {
             if (pageDTO == null) {
                 pageDTO = new PageDTO();
             }
-            if (pageDTO.getPageNum() == null) {
-                pageDTO.setPageNum(1);
-            }
-            if (pageDTO.getPageSize() == null) {
-                pageDTO.setPageSize(10);
-            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Map<String, Object>> mapList = new ArrayList<>();
             List<Label> labelList = iLabelMapper.getLabel();

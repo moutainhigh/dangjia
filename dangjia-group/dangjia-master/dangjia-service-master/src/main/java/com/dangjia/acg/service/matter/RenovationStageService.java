@@ -90,9 +90,7 @@ public class RenovationStageService {
         if (!CommonUtil.isEmpty(image)) {
             renovationStage.setImage(image);
         }
-        if (!CommonUtil.isEmpty(workerTypeId)) {
-            renovationStage.setWorkerTypeId(workerTypeId);
-        }
+        renovationStage.setWorkerTypeId(workerTypeId);
         renovationStage.setModifyDate(new Date());
         renovationStageMapper.updateByPrimaryKeySelective(renovationStage);
         return ServerResponse.createBySuccessMessage("修改装修指南阶段配置成功");

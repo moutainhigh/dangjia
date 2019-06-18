@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.house.SurplusWareHouseDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareDivertMapper;
@@ -63,10 +64,10 @@ public class SurplusWareHouseService {
     public ServerResponse getAllSurplusWareHouse(PageDTO pageDTO, Integer state, String address, String productName, String beginDate, String endDate) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
-                if(beginDate.equals(endDate)){
-                    beginDate=beginDate+" "+"00:00:00";
-                    endDate=endDate+" "+"23:59:59";
+            if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
+                if (beginDate.equals(endDate)) {
+                    beginDate = beginDate + " " + "00:00:00";
+                    endDate = endDate + " " + "23:59:59";
                 }
             }
             List<SurplusWareHouse> list = iSurplusWareHouseMapper.getAllSurplusWareHouse(state, address, productName, beginDate, endDate);
@@ -195,9 +196,9 @@ public class SurplusWareHouseService {
 
                     House house = iHouseMapper.selectByPrimaryKey(srcSurplusWareHouse.getHouseId());
                     Product product;
-                    if(house != null){
+                    if (house != null) {
                         product = forMasterAPI.getProduct(house.getCityId(), productId);
-                    }else {
+                    } else {
                         product = forMasterAPI.getProduct("", productId);
                     }
                     if (product != null) {
