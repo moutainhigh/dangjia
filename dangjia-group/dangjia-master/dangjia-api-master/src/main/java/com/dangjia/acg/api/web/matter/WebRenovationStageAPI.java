@@ -31,6 +31,7 @@ public interface WebRenovationStageAPI {
      * @return_param name string 阶段名称
      * @return_param image string 图标
      * @return_param imageUrl string 图标地址
+     * @return_param workerTypeId string 工序ID
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 1
      * @Author: Ruking 18075121944
@@ -43,8 +44,9 @@ public interface WebRenovationStageAPI {
     /**
      * showdoc
      *
-     * @param name  必选 string 阶段名称
-     * @param image 必选 string 图标
+     * @param name         必选 string 阶段名称
+     * @param image        必选 string 图标
+     * @param workerTypeId 可选 string 工序ID
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/装修攻略
      * @title 新增装修指南阶段配置
@@ -60,14 +62,16 @@ public interface WebRenovationStageAPI {
     @ApiOperation(value = "新增装修指南阶段配置", notes = "新增装修指南阶段配置")
     ServerResponse addRenovationStage(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("name") String name,
-                                      @RequestParam("image") String image);
+                                      @RequestParam("image") String image,
+                                      @RequestParam("workerTypeId") String workerTypeId);
 
     /**
      * showdoc
      *
-     * @param id    必选 string id
-     * @param name  可选 string 阶段名称
-     * @param image 可选 string 图标
+     * @param id           必选 string id
+     * @param name         可选 string 阶段名称
+     * @param image        可选 string 图标
+     * @param workerTypeId 可选 string 工序ID
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/装修攻略
      * @title 修改装修指南阶段配置
@@ -84,7 +88,8 @@ public interface WebRenovationStageAPI {
     ServerResponse updateRenovationStage(@RequestParam("request") HttpServletRequest request,
                                          @RequestParam("id") String id,
                                          @RequestParam("name") String name,
-                                         @RequestParam("image") String image);
+                                         @RequestParam("image") String image,
+                                         @RequestParam("workerTypeId") String workerTypeId);
 
     /**
      * showdoc
