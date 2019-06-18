@@ -327,34 +327,30 @@ public class HouseService {
                 .andNotEqualTo(House.VISIT_STATE, 2)
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
-        String houseId = null;
-        if (houseList.size() > 1) {
-            for (House house : houseList) {
-                if (house.getIsSelect() == 1) {//当前选中
-                    houseId = house.getId();
+        House house = null;
+        if (houseList.size() > 0) {
+            for (House house1 : houseList) {
+                if (house1.getIsSelect() == 1) {//当前选中
+                    house = house1;
                     break;
                 }
             }
-            if (houseId == null) {//有很多房子但是没有isSelect为1的
-                houseId = houseList.get(0).getId();
+            if (house == null) {//有很多房子但是没有isSelect为1的
+                house = houseList.get(0);
             }
-        } else if (houseList.size() == 1) {
-            houseId = houseList.get(0).getId();
         } else {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无房产");
         }
-
-        House house = iHouseMapper.selectByPrimaryKey(houseId);
         //统计几套房
         int again = houseList.size();
         HouseResult houseResult = new HouseResult();
         houseResult.setHouseName(house.getHouseName());
         houseResult.setAgain(again);
-        houseResult.setHouseId(houseId);
+        houseResult.setHouseId(house.getId());
         /*其它房产待处理任务列表状态*/
         int task = 0;
         for (House elseHouse : houseList) {
-            if (!elseHouse.getId().equals(houseId)) {
+            if (!elseHouse.getId().equals(house.getId())) {
                 task += this.getTask(elseHouse.getId());
             }
         }
@@ -382,7 +378,7 @@ public class HouseService {
                 break;
         }
         /*展示各种进度*/
-        List<HouseFlow> houseFlowList = houseFlowMapper.getAllFlowByHouseId(houseId);
+        List<HouseFlow> houseFlowList = houseFlowMapper.getAllFlowByHouseId(house.getId());
         List<NodeDTO> courseList = new ArrayList<>();
         for (HouseFlow houseFlow : houseFlowList) {
             NodeDTO nodeDTO = new NodeDTO();

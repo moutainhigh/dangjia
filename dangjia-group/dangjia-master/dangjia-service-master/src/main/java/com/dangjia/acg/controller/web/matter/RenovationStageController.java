@@ -23,14 +23,14 @@ public class RenovationStageController implements WebRenovationStageAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addRenovationStage(HttpServletRequest request, String name, String image) {
-        return renovationStageService.addRenovationStage(name, image);
+    public ServerResponse addRenovationStage(HttpServletRequest request, String name, String image, String workerTypeId) {
+        return renovationStageService.addRenovationStage(name, image, workerTypeId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse updateRenovationStage(HttpServletRequest request, String id, String name, String image) {
-        return renovationStageService.updateRenovationStage(id, name, image);
+    public ServerResponse updateRenovationStage(HttpServletRequest request, String id, String name, String image, String workerTypeId) {
+        return renovationStageService.updateRenovationStage(id, name, image, workerTypeId);
     }
 
     @Override

@@ -27,8 +27,8 @@ public class RenovationManual extends BaseEntity {
     private String name;
 
     @Column(name = "worker_type_id")
-    @Desc(value = "工种id")
-    @ApiModelProperty("工种id")
+    @Desc(value = "阶段id")
+    @ApiModelProperty("阶段id")
     private String workerTypeId;//workertyid
 
     @Column(name = "url_name")

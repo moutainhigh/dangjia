@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -72,16 +73,32 @@ public class RenovationManualService {
      *
      * @return
      */
-    public ServerResponse addRenovationManual(RenovationManual renovationManual) {
-        try {
-            renovationManual.setId(new RenovationManual().getId());
-            renovationManual.setState(0);
-            renovationManualMapper.insertSelective(renovationManual);
-            return ServerResponse.createBySuccessMessage("新增装修指南成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("新增装修指南失败");
+    public ServerResponse addRenovationManual(String name, String workerTypeId, String urlName, String test,
+                                              String url, String types, Integer state, Integer orderNumber, String image) {
+        if (CommonUtil.isEmpty(name)) {
+            return ServerResponse.createBySuccessMessage("请输入名称");
         }
+        if (CommonUtil.isEmpty(workerTypeId)) {
+            return ServerResponse.createBySuccessMessage("请选择阶段");
+        }
+        if (CommonUtil.isEmpty(test)) {
+            return ServerResponse.createBySuccessMessage("请编辑内容");
+        }
+        if (CommonUtil.isEmpty(image)) {
+            return ServerResponse.createBySuccessMessage("请上传图片");
+        }
+        RenovationManual renovationManual = new RenovationManual();
+        renovationManual.setName(name);
+        renovationManual.setWorkerTypeId(workerTypeId);
+        renovationManual.setUrlName(urlName);
+        renovationManual.setTest(test);
+        renovationManual.setUrl(url);
+        renovationManual.setTypes(types);
+        renovationManual.setState(state);
+        renovationManual.setOrderNumber(orderNumber);
+        renovationManual.setImage(image);
+        renovationManualMapper.insert(renovationManual);
+        return ServerResponse.createBySuccessMessage("新增装修指南成功");
     }
 
     /**
@@ -89,18 +106,42 @@ public class RenovationManualService {
      *
      * @return
      */
-    public ServerResponse updateRenovationManual(RenovationManual renovationManual) {
-        try {
-            if (!CommonUtil.isEmpty(renovationManual.getId())) {
-                renovationManualMapper.updateByPrimaryKeySelective(renovationManual);
-                return ServerResponse.createBySuccessMessage("修改装修指南成功");
-            }else{
-                return ServerResponse.createByErrorMessage("未找到");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("修改装修指南失败");
+    public ServerResponse updateRenovationManual(String id, String name, String workerTypeId, String urlName, String test,
+                                                 String url, String types, Integer state, Integer orderNumber, String image) {
+        RenovationManual renovationManual = renovationManualMapper.selectByPrimaryKey(id);
+        if (renovationManual == null) {
+            return ServerResponse.createBySuccessMessage("该指南不存在");
         }
+        if (!CommonUtil.isEmpty(name)) {
+            renovationManual.setName(name);
+        }
+        if (!CommonUtil.isEmpty(workerTypeId)) {
+            renovationManual.setWorkerTypeId(workerTypeId);
+        }
+        if (!CommonUtil.isEmpty(urlName)) {
+            renovationManual.setUrlName(urlName);
+        }
+        if (!CommonUtil.isEmpty(test)) {
+            renovationManual.setTest(test);
+        }
+        if (!CommonUtil.isEmpty(url)) {
+            renovationManual.setUrl(url);
+        }
+        if (!CommonUtil.isEmpty(types)) {
+            renovationManual.setTypes(types);
+        }
+        if (!CommonUtil.isEmpty(state)) {
+            renovationManual.setState(state);
+        }
+        if (!CommonUtil.isEmpty(orderNumber)) {
+            renovationManual.setOrderNumber(orderNumber);
+        }
+        if (!CommonUtil.isEmpty(image)) {
+            renovationManual.setImage(image);
+        }
+        renovationManual.setModifyDate(new Date());
+        renovationManualMapper.updateByPrimaryKeySelective(renovationManual);
+        return ServerResponse.createBySuccessMessage("修改装修指南成功");
     }
 
     /**
@@ -109,16 +150,14 @@ public class RenovationManualService {
      * @return
      */
     public ServerResponse deleteRenovationManual(String id) {
-        try {
-            RenovationManual renovationManual = new RenovationManual();
-            renovationManual.setId(id);
-            renovationManual.setState(1);
-            renovationManualMapper.deleteByPrimaryKey(renovationManual);
-            return ServerResponse.createBySuccessMessage("删除装修指南成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("删除装修指南失败");
+        RenovationManual renovationManual = renovationManualMapper.selectByPrimaryKey(id);
+        if (renovationManual == null) {
+            return ServerResponse.createBySuccessMessage("该指南不存在");
         }
+        renovationManual.setDataStatus(1);
+        renovationManual.setModifyDate(new Date());
+        renovationManualMapper.updateByPrimaryKeySelective(renovationManual);
+        return ServerResponse.createBySuccessMessage("删除装修指南成功");
     }
 
     /**
@@ -127,12 +166,19 @@ public class RenovationManualService {
      * @return
      */
     public ServerResponse getRenovationManualById(String id) {
-        try {
-            return ServerResponse.createBySuccess("根据id查询装修指南对象成功", renovationManualMapper.selectByPrimaryKey(id));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("根据id查询装修指南对象失败");
+        RenovationManual renovationManual = renovationManualMapper.selectByPrimaryKey(id);
+        if (renovationManual == null) {
+            return ServerResponse.createBySuccessMessage("该指南不存在");
         }
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        Map<String, Object> map = BeanUtils.beanToMap(renovationManual);
+        String imageUrl = renovationManual.getImage();
+        map.put("imageUrl", CommonUtil.isEmpty(imageUrl) ? null : (imageAddress + imageUrl));
+        RenovationStage renovationStage = renovationStageMapper.selectByPrimaryKey(renovationManual.getWorkerTypeId());
+        if (renovationStage != null) {
+            map.put("workerTypeName", renovationStage.getName());
+        }
+        return ServerResponse.createBySuccess("查询成功", map);
     }
 
 }
