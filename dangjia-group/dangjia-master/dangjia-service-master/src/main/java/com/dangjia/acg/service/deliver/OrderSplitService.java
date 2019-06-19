@@ -434,7 +434,7 @@ public class OrderSplitService {
                 boolean isAdd=false;
                 if (!CommonUtil.isEmpty(v.getSplitDeliverId())) {
                     SplitDeliver deliver = splitDeliverMapper.selectByPrimaryKey(v.getSplitDeliverId());
-                    if (deliver.getShippingState() == 0 || deliver.getShippingState() == 6) {
+                    if (deliver.getShippingState() == 6) {
                         isAdd=true;
                     }
                 }else {
