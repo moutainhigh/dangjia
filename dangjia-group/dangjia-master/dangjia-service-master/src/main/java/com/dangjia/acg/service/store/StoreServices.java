@@ -68,7 +68,7 @@ public class StoreServices {
         try {
             store.setCreateDate(null);
             iStoreMapper.updateByPrimaryKeySelective(store);
-            return ServerResponse.createByErrorMessage("编辑成功");
+            return ServerResponse.createBySuccessMessage("编辑成功");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("编辑失败");
@@ -83,7 +83,7 @@ public class StoreServices {
     public ServerResponse delStore(String id) {
         try {
             iStoreMapper.deleteByPrimaryKey(id);
-            return ServerResponse.createByErrorMessage("删除成功");
+            return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("删除失败");
@@ -95,10 +95,12 @@ public class StoreServices {
      * @param searchKey
      * @return
      */
-    public ServerResponse queryStoreSubscribe(String searchKey) {
+    public ServerResponse queryStoreSubscribe(String searchKey, PageDTO pageDTO) {
         try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<StoreSubscribe> storeSubscribes = iStoreSubscribeMapper.queryStoreSubscribe(searchKey);
-            return ServerResponse.createBySuccess("查询成功",storeSubscribes);
+            PageInfo pageResult=new PageInfo(storeSubscribes);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

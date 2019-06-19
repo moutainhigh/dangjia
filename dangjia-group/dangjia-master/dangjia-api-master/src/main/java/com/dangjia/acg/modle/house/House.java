@@ -239,6 +239,12 @@ public class House extends BaseEntity {
     @Desc(value = "竣工时间")
     @ApiModelProperty("竣工时间")
     protected Date completedDate;
+
+    @Column(name = "optional_label")
+    @Desc(value = "选配标签")
+    @ApiModelProperty("选配标签")
+    protected String optionalLabel;
+
     public House() {
 
     }

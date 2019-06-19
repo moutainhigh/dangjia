@@ -11,11 +11,13 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
 import com.dangjia.acg.dto.other.HouseDetailsDTO;
+import com.dangjia.acg.mapper.config.IConfigMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
+import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.Order;
@@ -55,6 +57,8 @@ public class IndexPageService {
     private BudgetMaterialAPI budgetMaterialAPI;
     @Autowired
     private IModelingVillageMapper modelingVillageMapper;
+    @Autowired
+    private IConfigMapper iConfigMapper;
 
     /**
      * 根据城市，小区，最小最大面积查询房子
@@ -103,7 +107,7 @@ public class IndexPageService {
     }
 
     /**
-     * 施工现场
+     * 施工现场详情
      */
     public ServerResponse houseDetails(HttpServletRequest request, String houseId) {
         try {
@@ -189,5 +193,41 @@ public class IndexPageService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
         }
+    }
+
+
+    /**
+     * 施工现场
+     * @param request
+     * @param latitude
+     * @param longitude
+     * @return
+     */
+    public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude) {
+        Example example=new Example(Config.class);
+        example.createCriteria().andCondition(" param_key IN('CONSTRUCTION_SITE_DISTANCE','EXPAND_THE_RADIUS')");
+        List<Config> configs = iConfigMapper.selectByExample(example);
+        Double distance=0d;
+        Double addDistance=0d;
+        for (Config config : configs) {
+            if(config.getParamKey().equals("CONSTRUCTION_SITE_DISTANCE")){
+                distance=Double.parseDouble(config.getParamValue());
+            }else {
+                addDistance=Double.parseDouble(config.getParamValue());
+            }
+        }
+        if(null!=latitude||null!=longitude){
+            return ServerResponse.createBySuccess("查询成功",jobLocationUtil(latitude,  longitude, distance, addDistance));
+        }else {
+            //用户未获取实时坐标就以长沙市政府位置坐标为标准
+            return ServerResponse.createBySuccess("查询成功",jobLocationUtil("28.228259",  "112.938904", distance, addDistance));
+        }
+    }
+
+    public List<House> jobLocationUtil(String latitude, String longitude,Double distance,Double addDistance){
+        while (modelingVillageMapper.jobLocationCount( latitude, longitude, distance)<6) {
+            distance=distance+addDistance;
+        }
+        return modelingVillageMapper.jobLocation(latitude, longitude, distance);
     }
 }
