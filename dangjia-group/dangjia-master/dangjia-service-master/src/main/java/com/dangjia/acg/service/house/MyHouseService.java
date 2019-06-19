@@ -172,19 +172,21 @@ public class MyHouseService {
             NodeDTO nodeDTO = HouseUtil.getWorkerDatas( house,  houseFlow,  workerType, address );
 
             //工人信息
-            Member member1=memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
-            member1.setPassword(null);
-            member1.initPath(address);
-            Map<String, Object> map = new HashMap<>();
-            map.put("memberType", 1);
-            map.put("id", member.getId());
-            map.put("nickName", member.getNickName());
-            map.put("name", member.getNickName());
-            map.put("mobile", member.getMobile());
-            map.put("head", member.getHead());
-            map.put("workerTypeId", member.getWorkerTypeId());
-            map.put("workerName", workerType.getName());
-            nodeDTO.setMember(map);
+            if(!CommonUtil.isEmpty(houseFlow.getWorkerId())) {
+                Member member1 = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
+                member1.setPassword(null);
+                member1.initPath(address);
+                Map<String, Object> map = new HashMap<>();
+                map.put("memberType", 1);
+                map.put("id", member.getId());
+                map.put("nickName", member.getNickName());
+                map.put("name", member.getNickName());
+                map.put("mobile", member.getMobile());
+                map.put("head", member.getHead());
+                map.put("workerTypeId", member.getWorkerTypeId());
+                map.put("workerName", workerType.getName());
+                nodeDTO.setMember(map);
+            }
 
             if(workerType.getType()==1){
                 houseResult.setDesignList(nodeDTO);
