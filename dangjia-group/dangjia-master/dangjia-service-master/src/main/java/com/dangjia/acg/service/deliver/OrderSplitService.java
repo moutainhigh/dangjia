@@ -263,48 +263,17 @@ public class OrderSplitService {
      */
     public ServerResponse withdrawSupplier(String orderSplitId) {
         try {
-            OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(orderSplitId);
             //将发货单设置为撤回状态
-            Example example1 = new Example(SplitDeliver.class);
-            example1.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId())
-                    .andEqualTo(SplitDeliver.SHIPPING_STATE, 0).andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplitId);
-            List list = splitDeliverMapper.selectByExample(example1);
-            if (list.size() == 0) {
+            SplitDeliver splitDeliver=splitDeliverMapper.selectByPrimaryKey(orderSplitId);
+            if (splitDeliver.getShippingState()==1) {
                 return ServerResponse.createBySuccessMessage("供应商已发货！");
             }
-            SplitDeliver deliver = new SplitDeliver();
-            deliver.setShippingState(6);
-            splitDeliverMapper.updateByExampleSelective(deliver, example1);
-
-            Example example = new Example(OrderSplitItem.class);
-            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplitId);
-            example.orderBy(OrderSplitItem.CATEGORY_ID).desc();
-            List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
-            List<Map> mapList = new ArrayList<>();
-            for (OrderSplitItem v : orderSplitItemList) {
-                boolean isAdd = false;
-                if (!CommonUtil.isEmpty(v.getSplitDeliverId())) {
-                    deliver = splitDeliverMapper.selectByPrimaryKey(v.getSplitDeliverId());
-                    if (deliver.getShippingState() == 0 || deliver.getShippingState() == 6) {
-                        isAdd = true;
-                    }
-                } else {
-                    isAdd = true;
-                }
-                if (isAdd) {
-                    v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-                    Map map = BeanUtils.beanToMap(v);
-                    List<String> supplierId = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductSn());
-                    if (supplierId.size() > 0) {
-                        map.put(SplitDeliver.SUPPLIER_ID, supplierId.get(0));
-                    }
-                    mapList.add(map);
-                }
-            }
-            return ServerResponse.createBySuccess("查询成功", mapList);
+            splitDeliver.setShippingState(6);
+            splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
+            return ServerResponse.createBySuccessMessage("撤回成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("操作失败");
+            return ServerResponse.createByErrorMessage("撤回失败");
         }
     }
 
@@ -462,14 +431,24 @@ public class OrderSplitService {
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             List<Map> mapList = new ArrayList<>();
             for (OrderSplitItem v : orderSplitItemList) {
-
-                v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-                Map map = BeanUtils.beanToMap(v);
-                List<String> supplierId = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductSn());
-                if (supplierId.size() > 0) {
-                    map.put(SplitDeliver.SUPPLIER_ID, supplierId.get(0));
+                boolean isAdd=false;
+                if (!CommonUtil.isEmpty(v.getSplitDeliverId())) {
+                    SplitDeliver deliver = splitDeliverMapper.selectByPrimaryKey(v.getSplitDeliverId());
+                    if (deliver.getShippingState() == 0 || deliver.getShippingState() == 6) {
+                        isAdd=true;
+                    }
+                }else {
+                    isAdd=true;
                 }
-                mapList.add(map);
+                if(isAdd) {
+                    v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                    Map map = BeanUtils.beanToMap(v);
+                    List<String> supplierId = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductSn());
+                    if (supplierId.size() > 0) {
+                        map.put(SplitDeliver.SUPPLIER_ID, supplierId.get(0));
+                    }
+                    mapList.add(map);
+                }
             }
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
