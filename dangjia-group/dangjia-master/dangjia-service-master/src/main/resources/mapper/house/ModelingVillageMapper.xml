@@ -183,8 +183,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE
             mv.id=h.village_id
             AND mv.locationx IS NOT NULL
-            AND h.visit_state !=0
-            AND h.site_display =0
+            AND ((h.decoration_type in (1,2) and h.budget_ok=3) OR (h.decoration_type=3 and h.visit_state=1))
+            AND h.site_display=0
             AND mv.locationx IS NOT NULL
             AND ROUND(
                 6378.138 * 2 * ASIN(
@@ -208,7 +208,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                     )
                 ) * 1000
             )&lt;=(#{distance}*1000)
-            ORDER BY juli
+            ORDER BY juli,rand()
     </select>
 </mapper>
 
