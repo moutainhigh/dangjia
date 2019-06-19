@@ -741,10 +741,10 @@ public class ComplainService {
                     new BigDecimal((Double) map.get("haveMoney")), houseId,
                     "中台提前结束装修，原因为" + content);
         }
-        if (brandSeriesLists.size() == 1) {
+        if (brandSeriesLists.size() > 0) {
             //说明只有大管家进场了
             Example example1 = new Example(HouseFlow.class);
-            example1.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andGreaterThan(HouseFlow.SORT, 3);
+            example1.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andGreaterThanOrEqualTo(HouseFlow.WORKER_TYPE, 3);
             example1.orderBy(HouseFlow.SORT).asc();
             List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example1);
             if (houseFlows.size() > 0) {
