@@ -219,7 +219,7 @@ public class IndexPageService {
         if(null!=latitude||null!=longitude){
             return ServerResponse.createBySuccess("查询成功",jobLocationUtil(latitude,  longitude, distance, addDistance));
         }else {
-            //用户未获取实时坐标就以长沙市政府位置坐标为标准
+            //用户未获取实时坐标就以长沙市政府位置坐标(28.228259,112.938904)为标准
             return ServerResponse.createBySuccess("查询成功",jobLocationUtil("28.228259",  "112.938904", distance, addDistance));
         }
     }

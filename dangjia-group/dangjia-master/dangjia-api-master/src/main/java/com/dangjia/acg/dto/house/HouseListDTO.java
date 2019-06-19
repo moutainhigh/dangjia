@@ -50,6 +50,7 @@ public class HouseListDTO {
     private String operatorName;// 操作人名字
     private String operatorMobile;// 操作人电话
     private Integer showUpdata;//是否显示上传图片按钮，0否，1是
+    private String optionalLabel;//选配标签
 
 
     public String getHouseName() {

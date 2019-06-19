@@ -39,7 +39,8 @@
         data_status as dataStatus,
         create_date as createDate,
         construction_date as constructionDate,
-        modify_date as modifyDate
+        modify_date as modifyDate,
+        h.optional_label as optionalLabel
     </sql>
     <sql id="basic_h_columns">
         h.id,
@@ -77,7 +78,8 @@
         h.data_status as dataStatus,
         h.create_date as createDate,
         h.construction_date as constructionDate,
-        h.modify_date as modifyDate
+        h.modify_date as modifyDate,
+        h.optional_label as optionalLabel
     </sql>
     <select id="getDesignList" resultType="com.dangjia.acg.dto.house.DesignDTO">
         SELECT
@@ -389,6 +391,7 @@
         h.modify_date AS modifyDate,
         h.construction_date as constructionDate,
         h.number as number,
+        h.optional_label as optionalLabel,
         ( CASE WHEN (h.decoration_type = 2 AND h.designer_ok != 3) THEN 1 ELSE 0 END ) AS showUpdata
         FROM
         dj_house h
