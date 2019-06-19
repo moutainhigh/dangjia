@@ -80,7 +80,7 @@ public class HomeModularService {
         List<Map<String, Object>> listMap = new ArrayList<>();
         for (HouseFlowApply houseFlowApply : houseFlowApplies) {
             Map<String, Object> map = new HashMap<>();
-            StringBuffer describe = new StringBuffer();
+            StringBuilder describe = new StringBuilder();
             House house = iHouseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             if (house == null) {
                 continue;
@@ -114,7 +114,7 @@ public class HomeModularService {
                     describe.append("今日已巡查");
                     break;
             }
-            map.put("describe", describe);
+            map.put("describe", describe.toString());
             map.put("houseId", houseFlowApply.getHouseId());
             listMap.add(map);
         }
