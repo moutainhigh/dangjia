@@ -141,14 +141,14 @@ public class MyHouseService {
                 member1.initPath(address);
                 Map<String, Object> map = new HashMap<>();
                 map.put("memberType", 1);
-                map.put("id", member.getId());
-                map.put("targetId", member.getId());
+                map.put("id", member1.getId());
+                map.put("targetId", member1.getId());
                 map.put("targetAppKey", "49957e786a91f9c55b223d58");
-                map.put("nickName", member.getNickName());
-                map.put("name", member.getNickName());
-                map.put("mobile", member.getMobile());
-                map.put("head", member.getHead());
-                map.put("workerTypeId", member.getWorkerTypeId());
+                map.put("nickName", member1.getNickName());
+                map.put("name", member1.getNickName());
+                map.put("mobile", member1.getMobile());
+                map.put("head", member1.getHead());
+                map.put("workerTypeId", member1.getWorkerTypeId());
                 map.put("workerName", workerType.getName());
                 nodeDTO.setMember(map);
             }
