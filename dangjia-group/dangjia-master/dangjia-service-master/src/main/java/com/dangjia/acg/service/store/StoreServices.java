@@ -1,9 +1,13 @@
 package com.dangjia.acg.service.store;
 
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreSubscribeMapper;
+import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreSubscribe;
 import com.github.pagehelper.PageHelper;
@@ -11,6 +15,7 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -27,6 +32,8 @@ public class StoreServices {
     private IStoreMapper iStoreMapper;
     @Autowired
     private IStoreSubscribeMapper iStoreSubscribeMapper;
+    @Autowired
+    private RedisClient redisClient;
 
     /**
      * 创建门店
@@ -144,6 +151,32 @@ public class StoreServices {
             List<Store> stores = iStoreMapper.queryStoreDistance(cityId, storeName);
             PageInfo pageResult = new PageInfo(stores);
             return ServerResponse.createBySuccess("查询成功",pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 首页查询门店
+     * @param userToken
+     * @param latitude
+     * @param longitude
+     * @return
+     */
+    public ServerResponse IndexqueryStore(String userToken, String latitude, String longitude) {
+        try {
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            List list=new ArrayList();
+            Member member =null;
+            if(null!=accessToken) {
+                member = accessToken.getMember();
+            }
+            List<Store> stores = iStoreMapper.IndexqueryStore(latitude, longitude);
+            list.add(member);
+            list.add(stores);
+            return ServerResponse.createBySuccess("查询成功",list);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
