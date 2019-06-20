@@ -44,8 +44,8 @@ public class ConfigAdvert extends BaseEntity {
     private String cityId;
 
     @Column(name = "advert_type")
-    @Desc(value = "广告类型（0：启屏广告，1:弹屏广告，2:轮播图广告）")
-    @ApiModelProperty("广告类型（0：启屏广告，1:弹屏广告，2:轮播图广告）")
+    @Desc(value = "广告类型（0：启屏广告，1:弹屏广告，2:轮播图广告，3:新版首页轮播图广告）")
+    @ApiModelProperty("广告类型（0：启屏广告，1:弹屏广告，2:轮播图广告，3:新版首页轮播图广告）")
     private String advertType;
 
     @Column(name = "type")
