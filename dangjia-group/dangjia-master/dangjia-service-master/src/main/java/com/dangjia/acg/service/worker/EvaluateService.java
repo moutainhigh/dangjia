@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
@@ -32,12 +31,12 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
 import com.dangjia.acg.service.core.HouseWorkerSupService;
 import com.dangjia.acg.service.house.HouseService;
@@ -100,68 +99,76 @@ public class EvaluateService {
     private IWorkerDetailMapper iWorkerDetailMapper;
     @Autowired
     private HouseService houseService;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
 
     /**
      * 获取积分记录
+     *
      * @param userToken
      * @return
      */
     public ServerResponse queryWorkIntegral(HttpServletRequest request, PageDTO pageDTO, String userToken) {
-        AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member worker = (Member) object;
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<WorkIntegralDTO> list = workIntegralMapper.queryWorkIntegral(accessToken.getMember().getId());
+        List<WorkIntegralDTO> list = workIntegralMapper.queryWorkIntegral(worker.getId());
         PageInfo pageResult = new PageInfo(list);
-        return ServerResponse.createBySuccess("ok",pageResult);
+        return ServerResponse.createBySuccess("ok", pageResult);
     }
+
     /**
      * 获取评价记录
+     *
      * @param evaluate
      * @return
      */
-    public ServerResponse queryEvaluates(HttpServletRequest request,  String userToken,Evaluate evaluate) {
+    public ServerResponse queryEvaluates(HttpServletRequest request, String userToken, Evaluate evaluate) {
         Example example = new Example(Evaluate.class);
-        Example.Criteria criteria=example.createCriteria();
-        if(!CommonUtil.isEmpty(userToken)){
-            AccessToken accessToken=redisClient.getCache(userToken+ Constants.SESSIONUSERID,AccessToken.class);
-            if(accessToken!=null&&!CommonUtil.isEmpty(accessToken.getMemberId())) {
-                criteria.andEqualTo(Evaluate.WORKER_ID,accessToken.getMemberId());
-            }
+        Example.Criteria criteria = example.createCriteria();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof Member) {
+            Member worker = (Member) object;
+            criteria.andEqualTo(Evaluate.WORKER_ID, worker.getId());
         }
-        if(!CommonUtil.isEmpty(evaluate.getHouseId())){
-            criteria.andEqualTo(Evaluate.HOUSE_ID,evaluate.getHouseId());
+        if (!CommonUtil.isEmpty(evaluate.getHouseId())) {
+            criteria.andEqualTo(Evaluate.HOUSE_ID, evaluate.getHouseId());
         }
         example.orderBy(Evaluate.MODIFY_DATE).desc();
         List<Evaluate> list = evaluateMapper.selectByExample(example);
-        List<Map> listMap =new ArrayList<>();
+        List<Map> listMap = new ArrayList<>();
         for (Evaluate evaluate1 : list) {
-            Map map= BeanUtils.beanToMap(evaluate1);
+            Map map = BeanUtils.beanToMap(evaluate1);
             String memberId;
-            if(evaluate1.getState()==3){
-                memberId=evaluate1.getButlerId();
-            }else{
-                memberId=evaluate1.getMemberId();
+            if (evaluate1.getState() == 3) {
+                memberId = evaluate1.getButlerId();
+            } else {
+                memberId = evaluate1.getMemberId();
             }
-            Member member=memberMapper.selectByPrimaryKey(memberId);
+            Member member = memberMapper.selectByPrimaryKey(memberId);
             member.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-            map.put(Member.HEAD,member.getHead());
-            map.put("memberName",member.getNickName());
-            if(evaluate1.getState()==1){
-                map.put("memberName","业主 "+member.getNickName());
+            map.put(Member.HEAD, member.getHead());
+            map.put("memberName", member.getNickName());
+            if (evaluate1.getState() == 1) {
+                map.put("memberName", "业主 " + member.getNickName());
             }
-            if(evaluate1.getState()==3){
-                map.put("memberName","大管家 "+member.getNickName());
+            if (evaluate1.getState() == 3) {
+                map.put("memberName", "大管家 " + member.getNickName());
             }
             listMap.add(map);
         }
-        return ServerResponse.createBySuccess("ok",listMap);
+        return ServerResponse.createBySuccess("ok", listMap);
     }
 
     /**
      * 管家不通过工匠完工申请
      */
-    public ServerResponse checkNo(String houseFlowApplyId,String content){
-        try{
+    public ServerResponse checkNo(String houseFlowApplyId, String content) {
+        try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             houseFlowApply.setApplyDec(content);
             houseFlowApply.setSupervisorCheck(2);
@@ -171,16 +178,16 @@ public class EvaluateService {
             /*
             验收节点不通过
              */
-            technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(),houseFlowApply.getWorkerTypeId());
+            technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(), houseFlowApply.getWorkerTypeId());
 
             //业主不通过工匠发起阶段/整体完工申请驳回次数超过两次后将扣工人钱
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.noPassList(houseFlowApply.getHouseFlowId());
-            if (houseFlowApplyList.size() > 2){
+            if (houseFlowApplyList.size() > 2) {
 
-                BigDecimal money=new BigDecimal(100);
+                BigDecimal money = new BigDecimal(100);
                 Member member = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
                 WorkerDetail workerDetail = new WorkerDetail();
-                workerDetail.setName("阶段/整体完工第"+houseFlowApplyList.size()+"次驳回,次数超过两次，工钱扣除");
+                workerDetail.setName("阶段/整体完工第" + houseFlowApplyList.size() + "次驳回,次数超过两次，工钱扣除");
                 workerDetail.setWorkerId(member.getId());
                 workerDetail.setWorkerName(member.getName());
                 workerDetail.setHouseId(houseFlowApply.getHouseId());
@@ -197,24 +204,24 @@ public class EvaluateService {
             }
 
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS,house.getHouseName()) ,"5");
+            configMessageService.addConfigMessage(null, "gj", houseFlowApply.getWorkerId(), "0", "完工申请结果", String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS, house.getHouseName()), "5");
 
             return ServerResponse.createBySuccessMessage("操作成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }
 
-//    管家审核通过工匠完工申请，工匠扣钱
-    public void supervisorOvertime(HouseFlowApply houseFlowApply){
+    //    管家审核通过工匠完工申请，工匠扣钱
+    public void supervisorOvertime(HouseFlowApply houseFlowApply) {
         //每超时一天扣除一次余额，每扣除一次  结束时间将延后一天，继续等待管家审核
-        if(houseFlowApply.getStartDate().getTime()<=new Date().getTime()){
+        if (houseFlowApply.getStartDate().getTime() <= new Date().getTime()) {
 
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             Member member = memberMapper.getSupervisor(houseFlowApply.getHouseId());//houseId获得大管家
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
-            BigDecimal money=new BigDecimal(100);
+            BigDecimal money = new BigDecimal(100);
             BigDecimal surplusMoney = member.getSurplusMoney().subtract(money);
             BigDecimal haveMoney = member.getHaveMoney().subtract(money);
             WorkerDetail workerDetail = new WorkerDetail();
@@ -234,22 +241,23 @@ public class EvaluateService {
             memberMapper.updateByPrimaryKeySelective(member);
 
             //当前时间延后一天等待审核
-            houseFlowApply.setStartDate(DateUtil.addDateDays(new Date(),1));
+            houseFlowApply.setStartDate(DateUtil.addDateDays(new Date(), 1));
             houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
 
 
-            configMessageService.addConfigMessage(null,"gj",member.getId(),"0","阶段/整体审核超时扣钱提醒",String.format(DjConstants.PushMessage.STEWARD_SHENGHECHAOSHI,house.getHouseName(),workerType.getName()) ,"0");
+            configMessageService.addConfigMessage(null, "gj", member.getId(), "0", "阶段/整体审核超时扣钱提醒", String.format(DjConstants.PushMessage.STEWARD_SHENGHECHAOSHI, house.getHouseName(), workerType.getName()), "0");
 
         }
 
 
     }
+
     //工匠今日未开工，将扣除100
-    public void absenteeismOvertime(HouseFlow houseFlow){
+    public void absenteeismOvertime(HouseFlow houseFlow) {
         House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
         Member member = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
-        if(member!=null) {
+        if (member != null) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             BigDecimal money = new BigDecimal(100);
             BigDecimal surplusMoney = member.getSurplusMoney().subtract(money);
@@ -271,13 +279,14 @@ public class EvaluateService {
             configMessageService.addConfigMessage(null, "gj", member.getId(), "0", workerType.getName() + "旷工扣钱", String.format(DjConstants.PushMessage.CRAFTSMAN_ABSENTEEISM, house.getHouseName()), "0");
         }
     }
+
     /**
      * 管家审核通过工匠完工申请
      * 1.31 增加 剩余材料登记
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse materialRecord(String houseFlowApplyId,String content,int star, String productArr){
-        try{
+    public ServerResponse materialRecord(String houseFlowApplyId, String content, int star, String productArr) {
+        try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             //登记剩余材料
@@ -298,12 +307,12 @@ public class EvaluateService {
                 materialRecordMapper.insert(materialRecord);
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
-        return checkOk(houseFlowApplyId,content,star);
+        return checkOk(houseFlowApplyId, content, star);
     }
 
     /**
@@ -311,12 +320,12 @@ public class EvaluateService {
      * 1.30
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse checkOk(String houseFlowApplyId,String content,int star){
-        try{
+    public ServerResponse checkOk(String houseFlowApplyId, String content, int star) {
+        try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            if(houseFlowApply.getSupervisorCheck() == 1){//大管家已审核通过过 不要重复
+            if (houseFlowApply.getSupervisorCheck() == 1) {//大管家已审核通过过 不要重复
                 return ServerResponse.createByErrorMessage("重复审核");
             }
             Member supervisor = memberMapper.getSupervisor(houseFlowApply.getHouseId());//houseId获得大管家
@@ -325,9 +334,9 @@ public class EvaluateService {
             evaluate.setMemberId(house.getMemberId());
             evaluate.setHouseId(houseFlowApply.getHouseId());
             evaluate.setButlerId(supervisor.getId());//存管家id
-            if(star == 0){
+            if (star == 0) {
                 evaluate.setStar(5);//0星为5星
-            }else{
+            } else {
                 evaluate.setStar(star);
             }
             evaluate.setHouseFlowApplyId(houseFlowApply.getId());
@@ -349,7 +358,7 @@ public class EvaluateService {
             /*
              * 大管家每次审核拿钱 新算法 2018.08.03
              */
-            if(houseFlowApply.getApplyType() == 1 || houseFlowApply.getApplyType() == 2){
+            if (houseFlowApply.getApplyType() == 1 || houseFlowApply.getApplyType() == 2) {
                 //算管家每次审核该拿的钱数
                 //大管家的hf
                 HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);
@@ -369,11 +378,11 @@ public class EvaluateService {
                 hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
                 hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
                 hfa.setPayState(0);//是否付款
-                hfa.setApplyDec("业主您好，我是大管家，我已验收了" + worker.getName() + (houseFlowApply.getApplyType() == 1?"的阶段完工":"的整体完工"));//描述
+                hfa.setApplyDec("业主您好，我是大管家，我已验收了" + worker.getName() + (houseFlowApply.getApplyType() == 1 ? "的阶段完工" : "的整体完工"));//描述
 //                houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
             }
-            if(houseFlowApply.getApplyType() == 1){
+            if (houseFlowApply.getApplyType() == 1) {
                 //阶段审核
                 HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowId());
                 hf.setPause(1);
@@ -385,7 +394,7 @@ public class EvaluateService {
             //configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","完工申请结果",String.format(DjConstants.PushMessage.OWNER_TWO_FINISHED,house.getHouseName()) ,"");
 
             return ServerResponse.createBySuccessMessage("操作成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
@@ -396,11 +405,11 @@ public class EvaluateService {
      * 业主评价管家完工 最后完工
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveEvaluateSupervisor(String houseFlowApplyId,String content,int star,boolean isAuto){
-        try{
+    public ServerResponse saveEvaluateSupervisor(String houseFlowApplyId, String content, int star, boolean isAuto) {
+        try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            if(houseFlowApply.getMemberCheck() == 1||houseFlowApply.getMemberCheck() == 3){
+            if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
                 return ServerResponse.createByErrorMessage("重复审核");
             }
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
@@ -409,9 +418,9 @@ public class EvaluateService {
             evaluate.setMemberId(house.getMemberId());
             evaluate.setHouseId(houseFlowApply.getHouseId());
             evaluate.setButlerId("");
-            if(star == 0){
+            if (star == 0) {
                 evaluate.setStar(1);//0星为5星
-            }else{
+            } else {
                 evaluate.setStar(star);
             }
             evaluate.setHouseFlowApplyId(houseFlowApplyId);
@@ -428,18 +437,18 @@ public class EvaluateService {
             updateFavorable(worker.getId());
 
             //业主审核管家
-            houseFlowApplyService.checkSupervisor(houseFlowApplyId,isAuto);
+            houseFlowApplyService.checkSupervisor(houseFlowApplyId, isAuto);
 
-            configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","业主评价",String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE,house.getHouseName()) ,"6");
+            configMessageService.addConfigMessage(null, "gj", houseFlowApply.getWorkerId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
 
             //短信通知业务本门
-            Map<String,String> temp_para=new HashMap();
+            Map<String, String> temp_para = new HashMap();
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
-            temp_para.put("house_name",house.getHouseName());
-            temp_para.put("worker_name",workerType.getName());
-            JsmsUtil.sendSMS("15675101794","164425",temp_para);
+            temp_para.put("house_name", house.getHouseName());
+            temp_para.put("worker_name", workerType.getName());
+            JsmsUtil.sendSMS("15675101794", "164425", temp_para);
             return ServerResponse.createBySuccessMessage("操作成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
@@ -450,12 +459,12 @@ public class EvaluateService {
      * 保存业主端对管家对工人评价
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveEvaluate(String houseFlowApplyId,String wContent,int wStar
-            ,String sContent, int sStar,boolean isAuto){
-        try{
+    public ServerResponse saveEvaluate(String houseFlowApplyId, String wContent, int wStar
+            , String sContent, int sStar, boolean isAuto) {
+        try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            if(houseFlowApply.getMemberCheck() == 1||houseFlowApply.getMemberCheck() == 3){
+            if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
                 return ServerResponse.createByErrorMessage("重复审核");
             }
             //在worker中根据评论星数修改工人的积分
@@ -464,15 +473,15 @@ public class EvaluateService {
             Evaluate evaluate;
             //查工匠被业主的评价
             evaluate = evaluateMapper.getForCountMoney(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), worker.getId());
-            if(evaluate == null){
+            if (evaluate == null) {
                 evaluate = new Evaluate();
                 evaluate.setContent(wContent);
                 evaluate.setMemberId(house.getMemberId());
                 evaluate.setHouseId(houseFlowApply.getHouseId());
                 evaluate.setButlerId(supervisor.getId());
-                if(wStar == 0){
+                if (wStar == 0) {
                     evaluate.setStar(1);//0星为5星
-                }else{
+                } else {
                     evaluate.setStar(wStar);//工人
                 }
                 evaluate.setHouseFlowApplyId(houseFlowApplyId);
@@ -482,7 +491,7 @@ public class EvaluateService {
                 evaluate.setState(1);//业主对工人
                 evaluate.setApplyType(houseFlowApply.getApplyType());
                 evaluateMapper.insert(evaluate);
-            }else {
+            } else {
                 evaluate.setContent(wContent);
                 evaluate.setStar(wStar);//工人
                 evaluateMapper.updateByPrimaryKeySelective(evaluate);
@@ -491,14 +500,14 @@ public class EvaluateService {
 
             //查大管家被业主的评价
             evaluate = evaluateMapper.getForCountMoney(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), supervisor.getId());
-            if (evaluate == null){
+            if (evaluate == null) {
                 evaluate = new Evaluate();
                 evaluate.setContent(sContent);
                 evaluate.setMemberId(house.getMemberId());
                 evaluate.setHouseId(houseFlowApply.getHouseId());
-                if(wStar == 0){
+                if (wStar == 0) {
                     evaluate.setStar(1);//0星为5星
-                }else{
+                } else {
                     evaluate.setStar(sStar);//管家
                 }
                 evaluate.setHouseFlowApplyId(houseFlowApplyId);
@@ -508,7 +517,7 @@ public class EvaluateService {
                 evaluate.setState(1);//业主对工人
                 evaluate.setApplyType(houseFlowApply.getApplyType());
                 evaluateMapper.insert(evaluate);
-            }else {
+            } else {
                 evaluate.setContent(sContent);
                 evaluate.setStar(sStar);//管家
                 evaluateMapper.updateByPrimaryKeySelective(evaluate);
@@ -522,81 +531,93 @@ public class EvaluateService {
             updateFavorable(supervisor.getId());
 
             //业主审核
-            ServerResponse serverResponse=houseFlowApplyService.checkWorker(houseFlowApplyId,isAuto);
-            if(!serverResponse.isSuccess()){
+            ServerResponse serverResponse = houseFlowApplyService.checkWorker(houseFlowApplyId, isAuto);
+            if (!serverResponse.isSuccess()) {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return serverResponse;
             }
-            configMessageService.addConfigMessage(null,"gj",worker.getId(),"0","业主评价",String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE,house.getHouseName()) ,"6");
-            configMessageService.addConfigMessage(null,"gj",supervisor.getId(),"0","业主评价",String.format(DjConstants.PushMessage.STEWARD_EVALUATE,house.getHouseName()) ,"6");
+            configMessageService.addConfigMessage(null, "gj", worker.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
+            configMessageService.addConfigMessage(null, "gj", supervisor.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.STEWARD_EVALUATE, house.getHouseName()), "6");
 
             return ServerResponse.createBySuccessMessage("操作成功");
-        }catch (Exception e){
+        } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }
 
-    /**业主对工人评价之后计算积分*/
-    public void updateIntegral(Evaluate evaluate){
+    /**
+     * 业主对工人评价之后计算积分
+     */
+    public void updateIntegral(Evaluate evaluate) {
         Member worker = memberMapper.selectByPrimaryKey(evaluate.getWorkerId());
-        String desc="";
-        if(evaluate.getApplyType()==1){desc="阶段完工";}
-        if(evaluate.getApplyType()==2){desc="整体完工";}
-        if(evaluate.getState()==1){desc=desc+" 业主";}
-        if(evaluate.getState()==2){desc=desc+" 商品";}
-        if(evaluate.getState()==3){desc=desc+" 大管家";}
+        String desc = "";
+        if (evaluate.getApplyType() == 1) {
+            desc = "阶段完工";
+        }
+        if (evaluate.getApplyType() == 2) {
+            desc = "整体完工";
+        }
+        if (evaluate.getState() == 1) {
+            desc = desc + " 业主";
+        }
+        if (evaluate.getState() == 2) {
+            desc = desc + " 商品";
+        }
+        if (evaluate.getState() == 3) {
+            desc = desc + " 大管家";
+        }
 
         BigDecimal evaluationXA = new BigDecimal("1.0");
         BigDecimal score = new BigDecimal(0);
 
         if (worker.getWorkerType() == 3) {//管家加分
-            if(worker.getEvaluationScore().compareTo(new BigDecimal("70"))==-1){
+            if (worker.getEvaluationScore().compareTo(new BigDecimal("70")) == -1) {
                 score = evaluationXA.multiply(new BigDecimal("0.6"));
-            }else if( worker.getEvaluationScore().compareTo(new BigDecimal("70")) >= 0 &&
-                    worker.getEvaluationScore().compareTo(new BigDecimal("80")) == -1){
+            } else if (worker.getEvaluationScore().compareTo(new BigDecimal("70")) >= 0 &&
+                    worker.getEvaluationScore().compareTo(new BigDecimal("80")) == -1) {
                 score = evaluationXA.multiply(new BigDecimal("0.6"));
-            }else if( worker.getEvaluationScore().compareTo(new BigDecimal("80")) >= 0 &&
-                    worker.getEvaluationScore().compareTo(new BigDecimal("90"))==-1){
+            } else if (worker.getEvaluationScore().compareTo(new BigDecimal("80")) >= 0 &&
+                    worker.getEvaluationScore().compareTo(new BigDecimal("90")) == -1) {
                 score = evaluationXA.multiply(new BigDecimal("0.15"));
-            }else if(worker.getEvaluationScore().compareTo(new BigDecimal("90")) >= 0){
+            } else if (worker.getEvaluationScore().compareTo(new BigDecimal("90")) >= 0) {
                 score = evaluationXA.multiply(new BigDecimal("0.07"));
             }
-        }else{
-            if(worker.getEvaluationScore().compareTo(new BigDecimal("70"))==-1){
+        } else {
+            if (worker.getEvaluationScore().compareTo(new BigDecimal("70")) == -1) {
 
                 score = evaluationXA.multiply(new BigDecimal("1.6"));
-            }else if( worker.getEvaluationScore().compareTo(new BigDecimal("70")) >= 0 &&
-                    worker.getEvaluationScore().compareTo(new BigDecimal("80"))==-1){
+            } else if (worker.getEvaluationScore().compareTo(new BigDecimal("70")) >= 0 &&
+                    worker.getEvaluationScore().compareTo(new BigDecimal("80")) == -1) {
 
                 score = evaluationXA.multiply(new BigDecimal("0.8"));
-            }else if((worker.getEvaluationScore().compareTo(new BigDecimal("80"))==1||
-                    worker.getEvaluationScore().compareTo(new BigDecimal("80"))==0)&&
-                    worker.getEvaluationScore().compareTo(new BigDecimal("90"))==-1){
+            } else if ((worker.getEvaluationScore().compareTo(new BigDecimal("80")) == 1 ||
+                    worker.getEvaluationScore().compareTo(new BigDecimal("80")) == 0) &&
+                    worker.getEvaluationScore().compareTo(new BigDecimal("90")) == -1) {
 
                 score = evaluationXA.multiply(new BigDecimal("0.4"));
-            }else if(worker.getEvaluationScore().compareTo(new BigDecimal("90"))==1||
-                    worker.getEvaluationScore().compareTo(new BigDecimal("90"))==0){
+            } else if (worker.getEvaluationScore().compareTo(new BigDecimal("90")) == 1 ||
+                    worker.getEvaluationScore().compareTo(new BigDecimal("90")) == 0) {
 
                 score = evaluationXA.multiply(new BigDecimal("0.2"));
             }
         }
 
-        if(worker.getEvaluationScore() == null){
+        if (worker.getEvaluationScore() == null) {
             worker.setEvaluationScore(new BigDecimal("60.0"));
         }
-        WorkIntegral workIntegral=new WorkIntegral();
+        WorkIntegral workIntegral = new WorkIntegral();
 
-        if(evaluate.getStar()==5){
+        if (evaluate.getStar() == 5) {
             BigDecimal evaluationScore = worker.getEvaluationScore().add(score);
             worker.setEvaluationScore(evaluationScore);
             workIntegral.setIntegral(score);
-        }else if (evaluate.getStar() == 1 || evaluate.getStar() == 2){
+        } else if (evaluate.getStar() == 1 || evaluate.getStar() == 2) {
             BigDecimal evaluationScore = worker.getEvaluationScore().subtract((score.multiply(new BigDecimal(2))));
             worker.setEvaluationScore(evaluationScore);//减双倍
             workIntegral.setIntegral(score.multiply(new BigDecimal(-2)));
-        }else {
+        } else {
             workIntegral.setIntegral(new BigDecimal(0));  //不增不减
         }
         workIntegral.setWorkerId(worker.getId());
@@ -606,18 +627,21 @@ public class EvaluateService {
         workIntegral.setStatus(1);
         workIntegral.setHouseId(evaluate.getHouseId());
 
-        workIntegral.setBriefed(desc+evaluate.getStar()+"星评价");
+        workIntegral.setBriefed(desc + evaluate.getStar() + "星评价");
         workIntegralMapper.insert(workIntegral);
 
         memberMapper.updateByPrimaryKeySelective(worker);
     }
-    /**扣除指定用户的积分*/
-    public void updateMemberIntegral(String workerId,String houseId,BigDecimal score,String desc){
+
+    /**
+     * 扣除指定用户的积分
+     */
+    public void updateMemberIntegral(String workerId, String houseId, BigDecimal score, String desc) {
         Member worker = memberMapper.selectByPrimaryKey(workerId);
-        WorkIntegral workIntegral=new WorkIntegral();
+        WorkIntegral workIntegral = new WorkIntegral();
         BigDecimal evaluationScore = worker.getEvaluationScore().subtract(score);
         worker.setEvaluationScore(evaluationScore);//减积分
-        workIntegral.setIntegral(new BigDecimal("-"+score.doubleValue()));
+        workIntegral.setIntegral(new BigDecimal("-" + score.doubleValue()));
         workIntegral.setWorkerId(worker.getId());
         workIntegral.setMemberId(workerId);
         workIntegral.setButlerId(workerId);
@@ -628,54 +652,59 @@ public class EvaluateService {
         workIntegralMapper.insert(workIntegral);
         memberMapper.updateByPrimaryKeySelective(worker);
     }
-    /**用于在工人被评价之后修改好评率*/
-    private void updateFavorable(String workerId){
+
+    /**
+     * 用于在工人被评价之后修改好评率
+     */
+    private void updateFavorable(String workerId) {
         Member worker = memberMapper.selectByPrimaryKey(workerId);
         Example example = new Example(Evaluate.class);
         example.createCriteria().andEqualTo(Evaluate.WORKER_ID, worker.getId());
         List<Evaluate> evaluateList = evaluateMapper.selectByExample(example);
         int astar = 0;
-        for(Evaluate el : evaluateList){
+        for (Evaluate el : evaluateList) {
             astar += el.getStar();
         }
-        BigDecimal praiseRate = new BigDecimal(astar).divide(new BigDecimal(5*evaluateList.size()),2,BigDecimal.ROUND_HALF_UP);
+        BigDecimal praiseRate = new BigDecimal(astar).divide(new BigDecimal(5 * evaluateList.size()), 2, BigDecimal.ROUND_HALF_UP);
         worker.setPraiseRate(praiseRate);
         memberMapper.updateByPrimaryKeySelective(worker);
     }
 
-    /**皇冠规则*/
-    private void updateCrowned(Member worker){
-        try{
-            if(worker.getEvaluationScore().compareTo(new BigDecimal("90")) >= 0){
+    /**
+     * 皇冠规则
+     */
+    private void updateCrowned(Member worker) {
+        try {
+            if (worker.getEvaluationScore().compareTo(new BigDecimal("90")) >= 0) {
                 Example example = new Example(Evaluate.class);
                 example.createCriteria().andEqualTo(Evaluate.WORKER_ID, worker.getId());
                 List<Evaluate> evaluateList = evaluateMapper.selectByExample(example);
-                if(evaluateList.size() >= 3){
+                if (evaluateList.size() >= 3) {
                     boolean flag = true;
-                    for(int i=0; i<3; i++){
-                        if(evaluateList.get(i).getStar() != 5){
+                    for (int i = 0; i < 3; i++) {
+                        if (evaluateList.get(i).getStar() != 5) {
                             flag = false;
                         }
                     }
-                    if(flag){
+                    if (flag) {
                         worker.setIsCrowned(1);
                         memberMapper.updateByPrimaryKeySelective(worker);
                     }
                 }
-                if(evaluateList.size() > 0){
-                    if(evaluateList.get(0).getStar() < 3){
+                if (evaluateList.size() > 0) {
+                    if (evaluateList.get(0).getStar() < 3) {
                         worker.setIsCrowned(0);
                         memberMapper.updateByPrimaryKeySelective(worker);
                     }
                 }
-                if(evaluateList.size() >= 2){
-                    if((evaluateList.get(0).getStar()==3||evaluateList.get(0).getStar()==4)&&(evaluateList.get(1).getStar()==3||evaluateList.get(1).getStar()==4)){
+                if (evaluateList.size() >= 2) {
+                    if ((evaluateList.get(0).getStar() == 3 || evaluateList.get(0).getStar() == 4) && (evaluateList.get(1).getStar() == 3 || evaluateList.get(1).getStar() == 4)) {
                         worker.setIsCrowned(0);
                         memberMapper.updateByPrimaryKeySelective(worker);
                     }
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
