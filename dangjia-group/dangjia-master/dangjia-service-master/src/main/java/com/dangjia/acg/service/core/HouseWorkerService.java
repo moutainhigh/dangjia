@@ -144,7 +144,7 @@ public class HouseWorkerService {
             }
             houseWorker.setWorkType(2);//被业主换
             houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-            complainService.addComplain(userToken,houseWorker.getWorkerId(),5,houseWorkerId,houseWorker.getHouseId(),"");
+            complainService.addComplain(userToken,houseWorker.getWorkerId(),6,houseWorkerId,houseWorker.getHouseId(),"");
             HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
             String workerId = houseWorker.getWorkerId();
             houseFlow.setWorkerId("");

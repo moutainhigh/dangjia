@@ -115,7 +115,7 @@ public class ComplainService {
      * 添加申诉
      *
      * @param userToken    用户Token
-     * @param complainType 申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.5.业主申请换人
+     * @param complainType 申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.6.业主申请换人
      * @param businessId   对应业务ID
      *                     complain_type==1:对应处罚的rewardPunishRecordId,
      *                     complain_type==2:对应房子任务进程/申请表的houseFlowApplyId,
@@ -213,7 +213,7 @@ public class ComplainService {
                     SplitDeliver response = splitDeliverMapper.selectByPrimaryKey(businessId);
                     userid = response.getSupplierId();
                     break;
-                case 5:// 5:业主要求换人
+                case 6:// 6:业主要求换人
                     House house2 = houseMapper.selectByPrimaryKey(houseId);
                     Member stewardHouse2 = memberMapper.selectByPrimaryKey(house2.getMemberId());
                     userid = stewardHouse2.getId();
