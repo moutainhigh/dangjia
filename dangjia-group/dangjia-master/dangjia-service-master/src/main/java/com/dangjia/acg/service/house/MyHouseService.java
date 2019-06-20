@@ -179,7 +179,7 @@ public class MyHouseService {
                 setMenus(houseResult,house,houseFlow);
             }else{
                 courseList.add(nodeDTO);
-                if(houseResult.getBigList().size()==0
+                if(houseResult.getBigList()==null
                         &&houseFlow.getWorkerType()==3
                         &&houseFlow.getSupervisorStart()==1){
                     setMenus(houseResult,house,houseFlow);
