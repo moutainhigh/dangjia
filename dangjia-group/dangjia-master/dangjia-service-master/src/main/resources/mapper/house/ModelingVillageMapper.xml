@@ -121,37 +121,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
 
-    <!--查询指定距离的施工现场数-->
-    <select id="jobLocationCount" resultType="java.lang.Integer">
-        SELECT
-            count(0)
-        FROM
-            `dj_house_modeling_village` mv
-        WHERE
-            mv.locationx IS NOT NULL
-        AND ROUND(
-            6378.138 * 2 * ASIN(
-                SQRT(
-                    POW(
-                        SIN(
-                            (
-                                #{latitude} * PI() / 180 - mv.locationy * PI() / 180
-                            ) / 2
-                        ),
-                        2
-                    ) + COS(
-                        #{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(
-                        SIN(
-                            (
-                               #{longitude} * PI() / 180 - mv.locationx * PI() / 180
-                            ) / 2
-                        ),
-                        2
-                    )
-                )
-            ) * 1000
-        )&lt;=(#{distance}*1000)
-    </select>
+    <!--&lt;!&ndash;查询指定距离的施工现场数&ndash;&gt;-->
+    <!--<select id="jobLocationCount" resultType="java.lang.Integer">-->
+        <!--SELECT-->
+            <!--count(0)-->
+        <!--FROM-->
+            <!--`dj_house_modeling_village` mv-->
+        <!--WHERE-->
+            <!--mv.locationx IS NOT NULL-->
+        <!--AND ROUND(-->
+            <!--6378.138 * 2 * ASIN(-->
+                <!--SQRT(-->
+                    <!--POW(-->
+                        <!--SIN(-->
+                            <!--(-->
+                                <!--#{latitude} * PI() / 180 - mv.locationy * PI() / 180-->
+                            <!--) / 2-->
+                        <!--),-->
+                        <!--2-->
+                    <!--) + COS(-->
+                        <!--#{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(-->
+                        <!--SIN(-->
+                            <!--(-->
+                               <!--#{longitude} * PI() / 180 - mv.locationx * PI() / 180-->
+                            <!--) / 2-->
+                        <!--),-->
+                        <!--2-->
+                    <!--)-->
+                <!--)-->
+            <!--) * 1000-->
+        <!--)&lt;=(#{distance}*1000)-->
+    <!--</select>-->
 
     <!--查询指定距离的施工现场-->
     <select id="jobLocation" resultType="com.dangjia.acg.modle.house.House">
@@ -186,29 +186,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             AND ((h.decoration_type in (1,2) and h.budget_ok=3) OR (h.decoration_type=3 and h.visit_state=1))
             AND h.site_display=0
             AND mv.locationx IS NOT NULL
-            AND ROUND(
-                6378.138 * 2 * ASIN(
-                    SQRT(
-                        POW(
-                            SIN(
-                                (
-                                    #{latitude} * PI() / 180 - mv.locationy * PI() / 180
-                                ) / 2
-                            ),
-                            2
-                        ) + COS(
-                            #{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(
-                            SIN(
-                                (
-                                    #{longitude} * PI() / 180 - mv.locationx * PI() / 180
-                                ) / 2
-                            ),
-                            2
-                        )
-                    )
-                ) * 1000
-            )&lt;=(#{distance}*1000)
-            ORDER BY juli,rand()
+            ORDER BY juli,rand() limit 6
     </select>
 </mapper>
 
