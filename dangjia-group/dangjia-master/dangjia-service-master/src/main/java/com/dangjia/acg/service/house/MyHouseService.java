@@ -5,6 +5,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.core.NodeDTO;
@@ -121,7 +122,18 @@ public class MyHouseService {
         for (HouseFlow houseFlow : houseFlowList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             NodeDTO nodeDTO = HouseUtil.getWorkerDatas( house,  houseFlow,  workerType, address );
-
+            Map progress=nodeDTO.getProgress();
+            Example example1 = new Example(HouseFlowApply.class);
+            example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId()).andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.APPLY_TYPE, 3);
+            List<HouseFlowApply> houseFlowss = houseFlowApplyMapper.selectByExample(example1);
+            int suspendDay = 0;//停工天数
+            for (HouseFlowApply flowss : houseFlowss) {
+                suspendDay += flowss.getSuspendDay();
+            }
+            int num = 1 + DateUtil.daysofTwo(houseFlow.getStartDate(), houseFlow.getEndDate());//工期天数
+            progress.put("suspendDay",suspendDay);//停工天数
+            progress.put("num",num);//计划施工天数
+            nodeDTO.setProgress(progress);
             //工人信息
             if(!CommonUtil.isEmpty(houseFlow.getWorkerId())) {
                 Member member1 = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
