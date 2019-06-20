@@ -130,6 +130,8 @@ public class MyHouseService {
                 Map<String, Object> map = new HashMap<>();
                 map.put("memberType", 1);
                 map.put("id", member.getId());
+                map.put("targetId", member.getId());
+                map.put("targetAppKey", "49957e786a91f9c55b223d58");
                 map.put("nickName", member.getNickName());
                 map.put("name", member.getNickName());
                 map.put("mobile", member.getMobile());
@@ -149,6 +151,8 @@ public class MyHouseService {
                        MainUser user = list.get(0);
                        Map map = new HashMap();
                        map.put("id", user.getId());
+                       map.put("targetId", user.getId());
+                       map.put("targetAppKey", "49957e786a91f9c55b223d58");
                        map.put("nickName", "装修顾问 "+user.getUsername());
                        map.put("name", user.getUsername());
                        map.put("mobile", user.getMobile());
@@ -162,7 +166,9 @@ public class MyHouseService {
                 setMenus(houseResult,house,houseFlow);
                 houseResult.setActuaryList(nodeDTO);
             }else{
-                if(houseResult.getBigList().size()==0){
+                if(houseResult.getBigList().size()==0
+                        &&houseFlow.getWorkerType()==3
+                        &&houseFlow.getSupervisorStart()==1){
                     setMenus(houseResult,house,houseFlow);
                 }
                 courseList.add(nodeDTO);
