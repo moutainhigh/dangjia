@@ -44,14 +44,14 @@
                 POW(
                     SIN(
                         (
-                        28.189381 * PI() / 180 - mv.longitude * PI() / 180
+                        28.189381 * PI() / 180 - longitude * PI() / 180
                         ) / 2
                         ),
                         2
-                        ) + COS(28.189381 * PI() / 180) * COS(mv.longitude * PI() / 180) * POW(
+                        ) + COS(28.189381 * PI() / 180) * COS(longitude * PI() / 180) * POW(
                         SIN(
                         (
-                        112.841035 * PI() / 180 - mv.latitude * PI() / 180
+                        112.841035 * PI() / 180 - latitude * PI() / 180
                         ) / 2
                         ),
                         2
@@ -69,5 +69,37 @@
         </if>
         ORDER BY
         juli
+    </select>
+
+    <!--首页门店-->
+    <select id="IndexqueryStore" resultType="com.dangjia.acg.modle.store.Store">
+        SELECT
+        <include refid="all_columns"/>,
+        ROUND(
+            6378.138 * 2 * ASIN(
+            SQRT(
+            POW(
+            SIN(
+            (
+            #{latitude} * PI() / 180 - longitude * PI() / 180
+            ) / 2
+            ),
+            2
+            ) + COS(
+            #{latitude} * PI() / 180) * COS(longitude * PI() / 180) * POW(
+            SIN(
+            (
+            #{longitude} * PI() / 180 - latitude * PI() / 180
+            ) / 2
+            ),
+            2
+            )
+            )
+            ) * 1000
+        ) AS juli
+        FROM dj_store
+        where data_status =0
+        ORDER BY
+        juli limit 1
     </select>
 </mapper>

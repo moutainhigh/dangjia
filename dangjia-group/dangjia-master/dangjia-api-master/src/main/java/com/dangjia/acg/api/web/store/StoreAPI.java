@@ -65,4 +65,13 @@ public interface StoreAPI {
     ServerResponse queryStoreDistance(@RequestParam("pageDTO") PageDTO pageDTO,
                                       @RequestParam("cityId") String cityId,
                                       @RequestParam("storeName") String storeName);
+
+
+
+    @PostMapping("/app/store/IndexqueryStore")
+    @ApiOperation(value = "首页查询门店", notes = "首页查询门店")
+    ServerResponse IndexqueryStore(@RequestParam("userToken") String userToken,
+                                   @RequestParam("latitude") String latitude,
+                                   @RequestParam("longitude") String longitude);
+
 }

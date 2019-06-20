@@ -27,6 +27,7 @@
         order_number as orderNumber,
         state,
         types,
+        image,
         data_status as dataStatus,
         create_date as createDate,
         modify_date as modifyDate
