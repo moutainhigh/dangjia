@@ -217,7 +217,6 @@ public class FillMaterielService {
      */
     public ServerResponse repairLibraryMaterial(String userToken, String categoryId, String name, PageDTO pageDTO) {
         try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
             if (accessToken == null) {
                 return ServerResponse.createbyUserTokenError();
@@ -231,6 +230,7 @@ public class FillMaterielService {
             if (worker.getWorkerType() == 3) {//大管家
                 productType = "1";
             }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Product> productList = iProductMapper.queryProductData(name, categoryId, productType, null);
             PageInfo pageResult = new PageInfo(productList);
             if (productList.size() > 0) {
