@@ -15,13 +15,16 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.group.GroupUserConfig;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.util.HouseUtil;
@@ -63,6 +66,9 @@ public class MyHouseService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private IMenuConfigurationMapper iMenuConfigurationMapper;
+
+    @Autowired
+    private UserMapper userMapper;
     protected static final Logger LOG = LoggerFactory.getLogger(MyHouseService.class);
 
 
@@ -134,10 +140,31 @@ public class MyHouseService {
             }
 
             if(workerType.getType()==1){
+                if( house.getDesignerOk()==0){
+                   example = new Example(MainUser.class);
+                   example.createCriteria().andEqualTo(MainUser.IS_RECEIVE,1);
+                   example.orderBy(GroupUserConfig.CREATE_DATE).desc();
+                   List<MainUser> list = userMapper.selectByExample(example);
+                   if (list != null && list.size() > 0) {
+                       MainUser user = list.get(0);
+                       Map map = new HashMap();
+                       map.put("id", user.getId());
+                       map.put("nickName", "装修顾问 "+user.getUsername());
+                       map.put("name", user.getUsername());
+                       map.put("mobile", user.getMobile());
+                       map.put("head", address+"qrcode/logo.png");
+                       nodeDTO.setMember(map);
+                   }
+                }
                 houseResult.setDesignList(nodeDTO);
+                setMenus(houseResult,house,houseFlow);
             }else if(workerType.getType()==2){
+                setMenus(houseResult,house,houseFlow);
                 houseResult.setActuaryList(nodeDTO);
             }else{
+                if(houseResult.getBigList().size()==0){
+                    setMenus(houseResult,house,houseFlow);
+                }
                 courseList.add(nodeDTO);
             }
         }
