@@ -175,15 +175,15 @@ public class MyHouseService {
                 houseResult.setDesignList(nodeDTO);
                 setMenus(houseResult,house,houseFlow);
             }else if(workerType.getType()==2){
-                setMenus(houseResult,house,houseFlow);
                 houseResult.setActuaryList(nodeDTO);
+                setMenus(houseResult,house,houseFlow);
             }else{
+                courseList.add(nodeDTO);
                 if(houseResult.getBigList().size()==0
                         &&houseFlow.getWorkerType()==3
                         &&houseFlow.getSupervisorStart()==1){
                     setMenus(houseResult,house,houseFlow);
                 }
-                courseList.add(nodeDTO);
             }
         }
 
@@ -221,7 +221,14 @@ public class MyHouseService {
             mapBean.setType(configuration.getType());
             bigList.add(mapBean);
         }
-        bean.setBigList(bigList);//添加菜单到返回体中
+        if(hf.getWorkerType()==1){
+            bean.getDesignList().setBigList(bigList);
+        }else if(hf.getWorkerType()==2){
+            bean.getActuaryList().setBigList(bigList);
+        }else{
+            bean.setBigList(bigList);//添加菜单到返回体中
+        }
+
     }
     /**
      * 待处理任务
