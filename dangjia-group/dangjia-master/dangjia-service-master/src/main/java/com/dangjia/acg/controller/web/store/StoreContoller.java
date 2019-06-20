@@ -73,4 +73,10 @@ public class StoreContoller implements StoreAPI {
     public ServerResponse queryStoreDistance(PageDTO pageDTO,String cityId, String storeName) {
         return storeServices.queryStoreDistance( pageDTO,cityId,storeName);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse IndexqueryStore(String userToken, String latitude, String longitude) {
+        return storeServices.IndexqueryStore(userToken,latitude,longitude);
+    }
 }

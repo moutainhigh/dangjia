@@ -11,6 +11,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * Created with IntelliJ IDEA.
@@ -60,6 +61,8 @@ public class Store extends BaseEntity {
     @ApiModelProperty("门店经度")
     private String longitude;
 
+    @Transient
+    private String juli;//门店距离
 
 
 }
