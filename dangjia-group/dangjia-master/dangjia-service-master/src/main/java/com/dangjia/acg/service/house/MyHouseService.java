@@ -13,12 +13,14 @@ import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
@@ -59,6 +61,8 @@ public class MyHouseService {
     private IMendOrderMapper mendOrderMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
+    @Autowired
+    private IMenuConfigurationMapper iMenuConfigurationMapper;
     protected static final Logger LOG = LoggerFactory.getLogger(MyHouseService.class);
 
 
@@ -137,11 +141,43 @@ public class MyHouseService {
                 courseList.add(nodeDTO);
             }
         }
+
         houseResult.setCourseList(courseList);
         return ServerResponse.createBySuccess("查询成功",houseResult);
     }
 
+    /**
+     * 设置菜单
+     */
+    private void setMenus(HouseResult bean, House house, HouseFlow hf) {
+        String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
+        List<HouseResult.ListMapBean> bigList = new ArrayList<>();
+        Example example = new Example(MenuConfiguration.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo(MenuConfiguration.DATA_STATUS, 0);
+        if(hf.getWorkerType()==1){
+            criteria.andEqualTo(MenuConfiguration.MENU_TYPE, 2);
+        }else if(hf.getWorkerType()==2){
+            criteria.andEqualTo(MenuConfiguration.MENU_TYPE, 3);
+        }else{
+            criteria.andEqualTo(MenuConfiguration.MENU_TYPE, 4);
+        }
 
+        example.orderBy(MenuConfiguration.SORT).asc();
+        List<MenuConfiguration> menuConfigurations2 = iMenuConfigurationMapper.selectByExample(example);
+        for (MenuConfiguration configuration : menuConfigurations2) {
+            configuration.initPath(imageAddress, webAddress, house.getId(), hf.getId(), null);
+            HouseResult.ListMapBean mapBean = new HouseResult.ListMapBean();
+            mapBean.setName(configuration.getName());
+            mapBean.setUrl(configuration.getUrl());
+            mapBean.setApiUrl(configuration.getApiUrl());
+            mapBean.setImage(configuration.getImage());
+            mapBean.setType(configuration.getType());
+            bigList.add(mapBean);
+        }
+        bean.setBigList(bigList);//添加菜单到返回体中
+    }
     /**
      * 待处理任务
      */
