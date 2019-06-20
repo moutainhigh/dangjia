@@ -444,12 +444,7 @@ public class OrderService {
             }
 
             //获取要货购物车数据
-            example = new Example(Cart.class);
-            example.createCriteria()
-                    .andEqualTo(Cart.HOUSE_ID, houseId)
-                    .andEqualTo(Cart.WORKER_TYPE_ID, worker.getWorkerTypeId())
-                    .andEqualTo(Cart.MEMBER_ID, worker.getId());
-            List<Cart> cartList = cartMapper.selectByExample(example);
+            List<Cart> cartList = cartMapper.cartList(houseId,worker.getWorkerTypeId(),worker.getId());
             List productList = new ArrayList();
             for (Cart aCartList : cartList) {
                 Double num = aCartList.getShopCount();
@@ -462,12 +457,11 @@ public class OrderService {
                         .andEqualTo(OrderSplitItem.PRODUCT_ID, productId)
                         .andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
                 List<OrderSplitItem> orderSplitItems = orderSplitItemMapper.selectByExample(example);
+                OrderSplitItem orderSplitItem = new OrderSplitItem();
                 if (orderSplitItems.size() > 0) {
-                    //存在记录则跳过，防止重复数据的产生
-                    continue;
+                    orderSplitItem=orderSplitItems.get(0);
                 }
                 if (warehouse != null) {
-                    OrderSplitItem orderSplitItem = new OrderSplitItem();
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
                     orderSplitItem.setWarehouseId(warehouse.getId());//仓库子项id
                     orderSplitItem.setProductId(warehouse.getProductId());
@@ -487,7 +481,6 @@ public class OrderService {
                     orderSplitItemMapper.insert(orderSplitItem);
                 } else {
                     Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
-                    OrderSplitItem orderSplitItem = new OrderSplitItem();
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
                     orderSplitItem.setProductId(product.getId());
                     orderSplitItem.setProductSn(product.getProductSn());

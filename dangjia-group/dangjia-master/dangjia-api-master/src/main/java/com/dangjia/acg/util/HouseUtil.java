@@ -171,26 +171,32 @@ public class HouseUtil {
                 case 9://9量房图发给业主
                     nodeDTO.setRank(2);
                     nodeDTO.setNameB("待上传平面图");
+                    nodeDTO.setNameC("5天内提交,需业主确认");
                     break;
                 case 5://5平面图发给业主 （发给了业主）
                     nodeDTO.setRank(2);
                     nodeDTO.setNameB("待审核平面图");
+                    nodeDTO.setNameC("5天内提交,需业主确认");
                     break;
                 case 6://6平面图审核不通过（NG，可编辑平面图）
                     nodeDTO.setRank(2);
                     nodeDTO.setNameB("待修改平面图");
+                    nodeDTO.setNameC("5天内提交,需业主确认");
                     break;
                 case 7://7通过平面图待发施工图（OK，可编辑施工图）
                     nodeDTO.setRank(3);
                     nodeDTO.setNameB("待上传施工图");
+                    nodeDTO.setNameC("5天内提交,需业主确认");
                     break;
                 case 2://2已发给业主施工图 （发给了业主）
                     nodeDTO.setRank(3);
                     nodeDTO.setNameB("待审核施工图");
+                    nodeDTO.setNameC("5天内提交,需业主确认");
                     break;
                 case 8://8施工图片审核不通过（NG，可编辑施工图）
                     nodeDTO.setRank(3);
                     nodeDTO.setNameB("待修改施工图");
+                    nodeDTO.setNameC("5天内提交,需业主确认");
                     break;
                 case 3://施工图(全部图)审核通过（OK，完成）
                     nodeDTO.setRank(4);
@@ -214,26 +220,32 @@ public class HouseUtil {
                 case 9://9量房图发给业主
                     nodeDTO.setRank(4);
                     nodeDTO.setNameB("待上传平面图");
+                    nodeDTO.setNameC("5天内提交,需业主确认");
                     break;
                 case 5://5平面图发给业主 （发给了业主）
                     nodeDTO.setRank(4);
                     nodeDTO.setNameB("待审核平面图");
+                    nodeDTO.setNameC("5天内提交,需业主确认");
                     break;
                 case 6://6平面图审核不通过（NG，可编辑平面图）
                     nodeDTO.setRank(4);
                     nodeDTO.setNameB("待修改平面图");
+                    nodeDTO.setNameC("5天内提交,需业主确认");
                     break;
                 case 7://7通过平面图待发施工图（OK，可编辑施工图）
                     nodeDTO.setRank(5);
                     nodeDTO.setNameB("待上传施工图");
+                    nodeDTO.setNameC("5天内提交,需业主确认");
                     break;
                 case 2://2已发给业主施工图 （发给了业主）
                     nodeDTO.setRank(5);
                     nodeDTO.setNameB("待审核施工图");
+                    nodeDTO.setNameC("5天内提交,需业主确认");
                     break;
                 case 8://8施工图片审核不通过（NG，可编辑施工图）
                     nodeDTO.setRank(5);
                     nodeDTO.setNameB("待修改施工图");
+                    nodeDTO.setNameC("5天内提交,需业主确认");
                     break;
                 case 3://施工图(全部图)审核通过（OK，完成）
                     nodeDTO.setRank(6);
