@@ -10,14 +10,17 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreSubscribe;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -34,6 +37,8 @@ public class StoreServices {
     private IStoreSubscribeMapper iStoreSubscribeMapper;
     @Autowired
     private RedisClient redisClient;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     /**
      * 创建门店
@@ -167,16 +172,18 @@ public class StoreServices {
      */
     public ServerResponse IndexqueryStore(String userToken, String latitude, String longitude) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            List list=new ArrayList();
-            Member member =null;
-            if(null!=accessToken) {
-                member = accessToken.getMember();
+            Map map=new HashedMap();
+            if(null!=userToken&&userToken.length()>0) {
+                Object object = constructionService.getMember(userToken);
+                if (object instanceof ServerResponse) {
+                    return (ServerResponse) object;
+                }
+                Member member = (Member) object;
+                map.put("member",member);
             }
             List<Store> stores = iStoreMapper.IndexqueryStore(latitude, longitude);
-            list.add(member);
-            list.add(stores);
-            return ServerResponse.createBySuccess("查询成功",list);
+            map.put("stores",stores);
+            return ServerResponse.createBySuccess("查询成功",map);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
