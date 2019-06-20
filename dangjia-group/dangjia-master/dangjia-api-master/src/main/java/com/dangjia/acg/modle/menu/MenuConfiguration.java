@@ -46,7 +46,7 @@ public class MenuConfiguration extends BaseEntity {
     @ApiModelProperty("跳转URL")
     private String url;
 
-    @Column(name = "apiUrl")
+    @Column(name = "api_url")
     @Desc(value = "异步加载接口获取图标状态")
     @ApiModelProperty("异步加载接口获取图标状态")
     private String apiUrl;//统一返回格式：{"image":"图标地址","state":"0无 1有点","num":"点数量"}
