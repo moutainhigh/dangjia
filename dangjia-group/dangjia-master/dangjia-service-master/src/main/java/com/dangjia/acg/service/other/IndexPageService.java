@@ -204,30 +204,36 @@ public class IndexPageService {
      * @return
      */
     public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude) {
-        Example example=new Example(Config.class);
-        example.createCriteria().andCondition(" param_key IN('CONSTRUCTION_SITE_DISTANCE','EXPAND_THE_RADIUS')");
-        List<Config> configs = iConfigMapper.selectByExample(example);
-        Double distance=0d;
-        Double addDistance=0d;
-        for (Config config : configs) {
-            if(config.getParamKey().equals("CONSTRUCTION_SITE_DISTANCE")){
-                distance=Double.parseDouble(config.getParamValue());
-            }else {
-                addDistance=Double.parseDouble(config.getParamValue());
-            }
-        }
-        if(null!=latitude||null!=longitude){
-            return ServerResponse.createBySuccess("查询成功",jobLocationUtil(latitude,  longitude, distance, addDistance));
+//        Example example=new Example(Config.class);
+//        example.createCriteria().andCondition(" param_key IN('CONSTRUCTION_SITE_DISTANCE','EXPAND_THE_RADIUS')");
+//        List<Config> configs = iConfigMapper.selectByExample(example);
+//        Double distance=0d;
+//        Double addDistance=0d;
+//        for (Config config : configs) {
+//            if(config.getParamKey().equals("CONSTRUCTION_SITE_DISTANCE")){
+//                distance=Double.parseDouble(config.getParamValue());
+//            }else {
+//                addDistance=Double.parseDouble(config.getParamValue());
+//            }
+//        }
+//        System.out.println((null!=latitude&&latitude.length()>0)&&(null!=longitude&&longitude.length()>0));
+        if(null!=latitude||longitude!=null){
+            return ServerResponse.createBySuccess("查询成功",jobLocationUtil(latitude,  longitude));
         }else {
             //用户未获取实时坐标就以长沙市政府位置坐标(28.228259,112.938904)为标准
-            return ServerResponse.createBySuccess("查询成功",jobLocationUtil("28.228259",  "112.938904", distance, addDistance));
+            return ServerResponse.createBySuccess("查询成功",jobLocationUtil("28.228259",  "112.938904"));
         }
     }
 
-    public List<House> jobLocationUtil(String latitude, String longitude,Double distance,Double addDistance){
-        while (modelingVillageMapper.jobLocationCount( latitude, longitude, distance)<6) {
-            distance=distance+addDistance;
+    public List<House> jobLocationUtil(String latitude, String longitude){
+//        while (modelingVillageMapper.jobLocationCount( latitude, longitude, distance)<6) {
+//            distance=distance+addDistance;
+//        }
+        String jdAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        List<House> houses = modelingVillageMapper.jobLocation(latitude, longitude);
+        for (House house : houses) {
+            house.setImage(jdAddress+house.getImage());
         }
-        return modelingVillageMapper.jobLocation(latitude, longitude, distance);
+        return houses;
     }
 }
