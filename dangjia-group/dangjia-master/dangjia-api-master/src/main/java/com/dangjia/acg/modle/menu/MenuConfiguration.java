@@ -124,5 +124,6 @@ public class MenuConfiguration extends BaseEntity {
         }
         this.image = CommonUtil.isEmpty(this.image) ? null : imageAddress + this.image;
         this.url = CommonUtil.isEmpty(this.url) ? null : webAddress + this.url + "?title=" + name + data.toString();
+        this.apiUrl = CommonUtil.isEmpty(this.apiUrl) ? null : webAddress + this.apiUrl + "?title=" + name + data.toString();
     }
 }
