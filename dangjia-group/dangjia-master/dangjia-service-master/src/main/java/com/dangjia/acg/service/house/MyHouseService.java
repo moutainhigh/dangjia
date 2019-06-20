@@ -5,6 +5,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.core.NodeDTO;
@@ -121,7 +122,18 @@ public class MyHouseService {
         for (HouseFlow houseFlow : houseFlowList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             NodeDTO nodeDTO = HouseUtil.getWorkerDatas( house,  houseFlow,  workerType, address );
-
+            Map progress=nodeDTO.getProgress();
+            Example example1 = new Example(HouseFlowApply.class);
+            example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId()).andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.APPLY_TYPE, 3);
+            List<HouseFlowApply> houseFlowss = houseFlowApplyMapper.selectByExample(example1);
+            int suspendDay = 0;//停工天数
+            for (HouseFlowApply flowss : houseFlowss) {
+                suspendDay += flowss.getSuspendDay();
+            }
+            int num = 1 + DateUtil.daysofTwo(houseFlow.getStartDate(), houseFlow.getEndDate());//工期天数
+            progress.put("suspendDay",suspendDay);//停工天数
+            progress.put("num",num);//计划施工天数
+            nodeDTO.setProgress(progress);
             //工人信息
             if(!CommonUtil.isEmpty(houseFlow.getWorkerId())) {
                 Member member1 = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
@@ -130,6 +142,8 @@ public class MyHouseService {
                 Map<String, Object> map = new HashMap<>();
                 map.put("memberType", 1);
                 map.put("id", member.getId());
+                map.put("targetId", member.getId());
+                map.put("targetAppKey", "49957e786a91f9c55b223d58");
                 map.put("nickName", member.getNickName());
                 map.put("name", member.getNickName());
                 map.put("mobile", member.getMobile());
@@ -149,6 +163,8 @@ public class MyHouseService {
                        MainUser user = list.get(0);
                        Map map = new HashMap();
                        map.put("id", user.getId());
+                       map.put("targetId", user.getId());
+                       map.put("targetAppKey", "49957e786a91f9c55b223d58");
                        map.put("nickName", "装修顾问 "+user.getUsername());
                        map.put("name", user.getUsername());
                        map.put("mobile", user.getMobile());
@@ -162,7 +178,9 @@ public class MyHouseService {
                 setMenus(houseResult,house,houseFlow);
                 houseResult.setActuaryList(nodeDTO);
             }else{
-                if(houseResult.getBigList().size()==0){
+                if(houseResult.getBigList().size()==0
+                        &&houseFlow.getWorkerType()==3
+                        &&houseFlow.getSupervisorStart()==1){
                     setMenus(houseResult,house,houseFlow);
                 }
                 courseList.add(nodeDTO);
