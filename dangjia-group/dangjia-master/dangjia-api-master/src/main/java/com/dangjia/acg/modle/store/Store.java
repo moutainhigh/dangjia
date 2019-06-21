@@ -62,7 +62,7 @@ public class Store extends BaseEntity {
     private String longitude;
 
     @Transient
-    private String juli;//门店距离
+    private Integer juli;//门店距离
 
 
 }
