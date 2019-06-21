@@ -28,7 +28,7 @@ public interface StoreAPI {
 
     @PostMapping("/web/store/queryStore")
     @ApiOperation(value = "查询门店", notes = "查询门店")
-    ServerResponse queryStore(@RequestParam("cityId") String cityId,@RequestParam("storeName") String storeName);
+    ServerResponse queryStore(@RequestParam("cityId") String cityId,@RequestParam("storeName") String storeName,@RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping("/web/store/updateStore")
     @ApiOperation(value = "编辑门店", notes = "编辑门店")

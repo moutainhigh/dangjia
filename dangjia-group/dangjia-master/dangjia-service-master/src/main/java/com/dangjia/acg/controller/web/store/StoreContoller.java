@@ -32,8 +32,8 @@ public class StoreContoller implements StoreAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryStore(String cityId, String storeName) {
-        return storeServices.queryStore(cityId,storeName);
+    public ServerResponse queryStore(String cityId, String storeName,PageDTO pageDTO) {
+        return storeServices.queryStore(cityId,storeName,pageDTO);
     }
 
     @Override

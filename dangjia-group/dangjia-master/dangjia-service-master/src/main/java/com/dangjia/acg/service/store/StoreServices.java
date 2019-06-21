@@ -39,7 +39,6 @@ public class StoreServices {
 
     /**
      * 创建门店
-     *
      * @param store
      * @return
      */
@@ -55,15 +54,16 @@ public class StoreServices {
 
     /**
      * 查询门店
-     *
      * @param cityId
      * @param storeName
      * @return
      */
-    public ServerResponse queryStore(String cityId, String storeName) {
+    public ServerResponse queryStore(String cityId, String storeName,PageDTO pageDTO) {
         try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Store> stores = iStoreMapper.queryStore(cityId, storeName);
-            return ServerResponse.createBySuccess("查询成功", stores);
+            PageInfo pageResult=new PageInfo(stores);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -72,7 +72,6 @@ public class StoreServices {
 
     /**
      * 编辑门店
-     *
      * @param store
      * @return
      */
@@ -89,13 +88,15 @@ public class StoreServices {
 
     /**
      * 删除门店
-     *
      * @param id
      * @return
      */
     public ServerResponse delStore(String id) {
         try {
-            iStoreMapper.deleteByPrimaryKey(id);
+            Store store=new Store();
+            store.setId(id);
+            store.setDataStatus(1);
+            iStoreMapper.updateByPrimaryKeySelective(store);
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -105,7 +106,6 @@ public class StoreServices {
 
     /**
      * 门店预约查询
-     *
      * @param searchKey
      * @return
      */
@@ -113,8 +113,8 @@ public class StoreServices {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<StoreSubscribe> storeSubscribes = iStoreSubscribeMapper.queryStoreSubscribe(searchKey);
-            PageInfo pageResult = new PageInfo(storeSubscribes);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
+            PageInfo pageResult=new PageInfo(storeSubscribes);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -123,17 +123,16 @@ public class StoreServices {
 
     /**
      * 门店预约插入
-     *
-     * @param storeId       门店ID
-     * @param storeName     门店名称
-     * @param customerName  客户名称
+     * @param storeId 门店ID
+     * @param storeName 门店名称
+     * @param customerName 客户名称
      * @param customerPhone 客户电话
-     * @param modifyDate    预约时间
+     * @param modifyDate 预约时间
      * @return
      */
     public ServerResponse storeSubscribe(String storeId, String storeName, String customerName, String customerPhone, Date modifyDate) {
         try {
-            StoreSubscribe storeSubscribe = new StoreSubscribe();
+            StoreSubscribe storeSubscribe=new StoreSubscribe();
             storeSubscribe.setStoreId(storeId);
             storeSubscribe.setStoreName(storeName);
             storeSubscribe.setCustomerName(customerName);
@@ -149,17 +148,16 @@ public class StoreServices {
 
     /**
      * 查询门店
-     *
      * @param cityId
      * @param storeName
      * @return
      */
-    public ServerResponse queryStoreDistance(PageDTO pageDTO, String cityId, String storeName) {
+    public ServerResponse queryStoreDistance(PageDTO pageDTO,String cityId, String storeName) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Store> stores = iStoreMapper.queryStoreDistance(cityId, storeName);
             PageInfo pageResult = new PageInfo(stores);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -169,23 +167,28 @@ public class StoreServices {
 
     /**
      * 首页查询门店
-     *
      * @param userToken
      * @param latitude
      * @param longitude
      * @return
      */
     public ServerResponse IndexqueryStore(String userToken, String latitude, String longitude) {
-        Map map = new HashedMap();
-        if (null != userToken && userToken.length() > 0) {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof Member) {
+        try {
+            Map map=new HashedMap();
+            if(null!=userToken&&userToken.length()>0) {
+                Object object = constructionService.getMember(userToken);
+                if (object instanceof ServerResponse) {
+                    return (ServerResponse) object;
+                }
                 Member member = (Member) object;
-                map.put("member", member);
+                map.put("member",member);
             }
+            List<Store> stores = iStoreMapper.IndexqueryStore(latitude, longitude);
+            map.put("stores",stores);
+            return ServerResponse.createBySuccess("查询成功",map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
         }
-        List<Store> stores = iStoreMapper.IndexqueryStore(latitude, longitude);
-        map.put("stores", stores);
-        return ServerResponse.createBySuccess("查询成功", map);
     }
 }
