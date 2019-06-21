@@ -4,6 +4,7 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreSubscribeMapper;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -36,7 +37,7 @@ public class StoreServices {
     @Autowired
     private IStoreSubscribeMapper iStoreSubscribeMapper;
     @Autowired
-    private RedisClient redisClient;
+    private IMemberMapper memberMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
 
