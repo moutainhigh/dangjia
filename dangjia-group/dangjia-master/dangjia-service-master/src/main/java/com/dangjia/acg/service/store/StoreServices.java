@@ -44,11 +44,13 @@ public class StoreServices {
      * @return
      */
     public ServerResponse addStore(Store store) {
-        if(null==store){
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        try {
+            iStoreMapper.insert(store);
+            return ServerResponse.createBySuccessMessage("创建成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("创建失败");
         }
-        iStoreMapper.insert(store);
-        return ServerResponse.createBySuccessMessage("创建成功");
     }
 
     /**
@@ -73,12 +75,14 @@ public class StoreServices {
      * @return
      */
     public ServerResponse updateStore(Store store) {
+        try {
             store.setCreateDate(null);
-            if(null==store){
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            }
             iStoreMapper.updateByPrimaryKeySelective(store);
             return ServerResponse.createBySuccessMessage("编辑成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("编辑成功");
+        }
     }
 
     /**
@@ -87,14 +91,15 @@ public class StoreServices {
      * @return
      */
     public ServerResponse delStore(String id) {
-        if(null!=id&&id.length()>0){
+        try {
             Store store=new Store();
             store.setId(id);
             store.setDataStatus(1);
             iStoreMapper.updateByPrimaryKeySelective(store);
             return ServerResponse.createBySuccessMessage("删除成功");
-        }else{
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("删除失败");
         }
     }
 

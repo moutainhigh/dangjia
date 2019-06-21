@@ -43,7 +43,7 @@ public class OptionalLabelServices {
     public ServerResponse queryOptionalLabel(String id){
         if(null!=id||id.length()>0){
             Example example=new Example(OptionalLabel.class);
-            example.createCriteria().andCondition(" DATA_STATUS ! = 1");
+            example.createCriteria().andCondition(" DATA_STATUS !=0");
             return ServerResponse.createBySuccess("查询成功",optionalLabelMapper.selectAll());
         }else{
             return ServerResponse.createBySuccess("查询成功",optionalLabelMapper.selectByPrimaryKey(id));
@@ -56,14 +56,15 @@ public class OptionalLabelServices {
      * @return
      */
     public ServerResponse delOptionalLabel(String id){
-        if(null!=id&&id.length()>0) {
+        try {
             OptionalLabel optionalLabel=new OptionalLabel();
             optionalLabel.setId(id);
             optionalLabel.setDataStatus(1);
             optionalLabelMapper.updateByPrimaryKeySelective(optionalLabel);
             return ServerResponse.createBySuccessMessage("删除成功");
-        }else{
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("删除失败");
         }
     }
 
@@ -73,11 +74,13 @@ public class OptionalLabelServices {
      * @return
      */
     public ServerResponse editOptionalLabel(OptionalLabel optionalLabel){
-        if(null==optionalLabel){
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        try {
+            optionalLabel.setCreateDate(null);
+            optionalLabelMapper.updateByPrimaryKeySelective(optionalLabel);
+            return ServerResponse.createBySuccessMessage("编辑成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("编辑失败");
         }
-        optionalLabel.setCreateDate(null);
-        optionalLabelMapper.updateByPrimaryKeySelective(optionalLabel);
-        return ServerResponse.createBySuccessMessage("编辑成功");
     }
 }
