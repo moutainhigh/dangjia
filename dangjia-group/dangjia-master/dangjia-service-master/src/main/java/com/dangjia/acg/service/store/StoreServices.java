@@ -157,26 +157,15 @@ public class StoreServices {
 
     /**
      * 首页查询门店
-     * @param userToken
      * @param latitude
      * @param longitude
      * @return
      */
-    public ServerResponse IndexqueryStore(String userToken, String latitude, String longitude) {
-            Map map=new HashedMap();
-            if(null!=userToken&&userToken.length()>0) {
-                Object object = constructionService.getMember(userToken);
-                if (object instanceof ServerResponse) {
-                    return (ServerResponse) object;
-                }
-                Member member = (Member) object;
-                map.put("member",member);
-            }
+    public ServerResponse IndexqueryStore(String latitude, String longitude) {
             List<Store> stores = iStoreMapper.IndexqueryStore(latitude, longitude);
-            map.put("stores",stores);
-            if(map.size()<0){
+            if(stores.size()<0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-            return ServerResponse.createBySuccess("查询成功",map);
+            return ServerResponse.createBySuccess("查询成功",stores);
     }
 }

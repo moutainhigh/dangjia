@@ -1,10 +1,12 @@
 package com.dangjia.acg.service.label;
 
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.label.OptionalLabelMapper;
 import com.dangjia.acg.modle.label.OptionalLabel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 
 /**
@@ -39,7 +41,9 @@ public class OptionalLabelServices {
      * @return
      */
     public ServerResponse queryOptionalLabel(String id){
-        if(null!=id||""!=id){
+        if(null!=id||id.length()>0){
+            Example example=new Example(OptionalLabel.class);
+            example.createCriteria().andCondition(" DATA_STATUS ! = 1");
             return ServerResponse.createBySuccess("查询成功",optionalLabelMapper.selectAll());
         }else{
             return ServerResponse.createBySuccess("查询成功",optionalLabelMapper.selectByPrimaryKey(id));
@@ -52,12 +56,14 @@ public class OptionalLabelServices {
      * @return
      */
     public ServerResponse delOptionalLabel(String id){
-        try {
-            optionalLabelMapper.deleteByPrimaryKey(id);
+        if(null!=id&&id.length()>0) {
+            OptionalLabel optionalLabel=new OptionalLabel();
+            optionalLabel.setId(id);
+            optionalLabel.setDataStatus(1);
+            optionalLabelMapper.updateByPrimaryKeySelective(optionalLabel);
             return ServerResponse.createBySuccessMessage("删除成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("删除失败");
+        }else{
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
     }
 
@@ -67,13 +73,11 @@ public class OptionalLabelServices {
      * @return
      */
     public ServerResponse editOptionalLabel(OptionalLabel optionalLabel){
-        try {
-            optionalLabel.setCreateDate(null);
-            optionalLabelMapper.updateByPrimaryKeySelective(optionalLabel);
-            return ServerResponse.createBySuccessMessage("编辑成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("编辑失败");
+        if(null==optionalLabel){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
+        optionalLabel.setCreateDate(null);
+        optionalLabelMapper.updateByPrimaryKeySelective(optionalLabel);
+        return ServerResponse.createBySuccessMessage("编辑成功");
     }
 }

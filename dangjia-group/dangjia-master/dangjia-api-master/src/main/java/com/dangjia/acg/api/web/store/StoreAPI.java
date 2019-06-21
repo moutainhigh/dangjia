@@ -70,8 +70,7 @@ public interface StoreAPI {
 
     @PostMapping("/app/store/IndexqueryStore")
     @ApiOperation(value = "首页查询门店", notes = "首页查询门店")
-    ServerResponse IndexqueryStore(@RequestParam("userToken") String userToken,
-                                   @RequestParam("latitude") String latitude,
+    ServerResponse IndexqueryStore(@RequestParam("latitude") String latitude,
                                    @RequestParam("longitude") String longitude);
 
 }
