@@ -156,6 +156,7 @@ public class MainUserService {
             logger.debug("清除所有用户权限缓存！！！");
         } else {
             // 新增用户
+            user.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
             user.setCreateDate(new Date());
             user.setIsDel(false);
             user.setIsJob(false);
@@ -192,6 +193,7 @@ public class MainUserService {
             return ServerResponse.createByErrorMessage("该用户名已经存在");
         }
         // 新增用户
+        user.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
         user.setCreateDate(new Date());
         user.setIsDel(false);
         user.setIsJob(false);
