@@ -462,10 +462,8 @@ public class MendOrderCheckService {
                     String id = obj.getString("id");
                     String productId = obj.getString("productId");
                     String shopCount = obj.getString("shopCount");
-                    MendMateriel mendMateriel;
-                    if(!CommonUtil.isEmpty(id)){
-                         mendMateriel = mendMaterialMapper.selectByPrimaryKey(id);
-                    }else{
+                    MendMateriel mendMateriel =  mendMaterialMapper.getMendOrderGoods(mendOrder.getId(),productId);
+                    if(mendMateriel==null){
                          mendMateriel = mendOrderService.saveMendMaterial(mendOrder,house,productId,shopCount);
                     }
 

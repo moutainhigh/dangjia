@@ -1028,17 +1028,20 @@ public class MendOrderService {
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
                 String productId = obj.getString("productId");
-                if (mendOrder.getType() == 2 || mendOrder.getType() == 4) {
-                    Product product = forMasterAPI.getProduct(house.getCityId(), productId);
-                    if (product != null) {
-                        Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
-                        if (goods != null && goods.getSales() == 1) {
-                            return ServerResponse.createByErrorMessage(product.getName() + "不可退");
+                MendMateriel mendMateries =  mendMaterialMapper.getMendOrderGoods(mendOrder.getId(),productId);
+                if(mendMateries==null) {
+                    if (mendOrder.getType() == 2 || mendOrder.getType() == 4) {
+                        Product product = forMasterAPI.getProduct(house.getCityId(), productId);
+                        if (product != null) {
+                            Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
+                            if (goods != null && goods.getSales() == 1) {
+                                return ServerResponse.createByErrorMessage(product.getName() + "不可退");
+                            }
                         }
                     }
+                    MendMateriel mendMateriel = saveMendMaterial(mendOrder, house, productId, obj.getString("num"));
+                    mendOrder.setTotalAmount(mendOrder.getTotalAmount() + mendMateriel.getTotalPrice());//修改总价
                 }
-                MendMateriel mendMateriel = saveMendMaterial(mendOrder, house, productId, obj.getString("num"));
-                mendOrder.setTotalAmount(mendOrder.getTotalAmount() + mendMateriel.getTotalPrice());//修改总价
             }
             mendOrder.setModifyDate(new Date());
             mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
