@@ -1019,26 +1019,26 @@ public class MendOrderService {
      */
     private ServerResponse addMendMateriel(String productArr, MendOrder mendOrder) {
         try {
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-                    .getRequest();
             House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
-            request.setAttribute(Constants.CITY_ID, house.getCityId());
             mendOrder.setTotalAmount(0.0);
             JSONArray jsonArray = JSONArray.parseArray(productArr);
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
                 String productId = obj.getString("productId");
-                if (mendOrder.getType() == 2 || mendOrder.getType() == 4) {
-                    Product product = forMasterAPI.getProduct(house.getCityId(), productId);
-                    if (product != null) {
-                        Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
-                        if (goods != null && goods.getSales() == 1) {
-                            return ServerResponse.createByErrorMessage(product.getName() + "不可退");
+                MendMateriel mendMateriels = mendMaterialMapper.getMendOrderGoods(mendOrder.getId(), productId);
+                if (mendMateriels == null) {
+                    if (mendOrder.getType() == 2 || mendOrder.getType() == 4) {
+                        Product product = forMasterAPI.getProduct(house.getCityId(), productId);
+                        if (product != null) {
+                            Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
+                            if (goods != null && goods.getSales() == 1) {
+                                return ServerResponse.createByErrorMessage(product.getName() + "不可退");
+                            }
                         }
                     }
+                    MendMateriel mendMateriel = saveMendMaterial(mendOrder, house, productId, obj.getString("num"));
+                    mendOrder.setTotalAmount(mendOrder.getTotalAmount() + mendMateriel.getTotalPrice());//修改总价
                 }
-                MendMateriel mendMateriel = saveMendMaterial(mendOrder, house, productId, obj.getString("num"));
-                mendOrder.setTotalAmount(mendOrder.getTotalAmount() + mendMateriel.getTotalPrice());//修改总价
             }
             mendOrder.setModifyDate(new Date());
             mendOrderMapper.updateByPrimaryKeySelective(mendOrder);

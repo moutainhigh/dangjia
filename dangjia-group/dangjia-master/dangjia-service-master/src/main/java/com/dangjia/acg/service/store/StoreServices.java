@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.store;
 
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -39,7 +40,6 @@ public class StoreServices {
 
     /**
      * 创建门店
-     *
      * @param store
      * @return
      */
@@ -55,24 +55,22 @@ public class StoreServices {
 
     /**
      * 查询门店
-     *
      * @param cityId
      * @param storeName
      * @return
      */
-    public ServerResponse queryStore(String cityId, String storeName) {
-        try {
+    public ServerResponse queryStore(String cityId, String storeName,PageDTO pageDTO) {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Store> stores = iStoreMapper.queryStore(cityId, storeName);
-            return ServerResponse.createBySuccess("查询成功", stores);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
-        }
+            if(stores.size()<0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            PageInfo pageResult=new PageInfo(stores);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
     }
 
     /**
      * 编辑门店
-     *
      * @param store
      * @return
      */
@@ -83,19 +81,21 @@ public class StoreServices {
             return ServerResponse.createBySuccessMessage("编辑成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("编辑失败");
+            return ServerResponse.createByErrorMessage("编辑成功");
         }
     }
 
     /**
      * 删除门店
-     *
      * @param id
      * @return
      */
     public ServerResponse delStore(String id) {
         try {
-            iStoreMapper.deleteByPrimaryKey(id);
+            Store store=new Store();
+            store.setId(id);
+            store.setDataStatus(1);
+            iStoreMapper.updateByPrimaryKeySelective(store);
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -105,35 +105,31 @@ public class StoreServices {
 
     /**
      * 门店预约查询
-     *
      * @param searchKey
      * @return
      */
     public ServerResponse queryStoreSubscribe(String searchKey, PageDTO pageDTO) {
-        try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<StoreSubscribe> storeSubscribes = iStoreSubscribeMapper.queryStoreSubscribe(searchKey);
-            PageInfo pageResult = new PageInfo(storeSubscribes);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
-        }
+            if(storeSubscribes.size()<0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            PageInfo pageResult=new PageInfo(storeSubscribes);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
     }
 
     /**
      * 门店预约插入
-     *
-     * @param storeId       门店ID
-     * @param storeName     门店名称
-     * @param customerName  客户名称
+     * @param storeId 门店ID
+     * @param storeName 门店名称
+     * @param customerName 客户名称
      * @param customerPhone 客户电话
-     * @param modifyDate    预约时间
+     * @param modifyDate 预约时间
      * @return
      */
     public ServerResponse storeSubscribe(String storeId, String storeName, String customerName, String customerPhone, Date modifyDate) {
         try {
-            StoreSubscribe storeSubscribe = new StoreSubscribe();
+            StoreSubscribe storeSubscribe=new StoreSubscribe();
             storeSubscribe.setStoreId(storeId);
             storeSubscribe.setStoreName(storeName);
             storeSubscribe.setCustomerName(customerName);
@@ -143,49 +139,38 @@ public class StoreServices {
             return ServerResponse.createBySuccessMessage("预约成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("预约成功");
+            return ServerResponse.createByErrorMessage("预约失败");
         }
     }
 
     /**
      * 查询门店
-     *
      * @param cityId
      * @param storeName
      * @return
      */
-    public ServerResponse queryStoreDistance(PageDTO pageDTO, String cityId, String storeName) {
-        try {
+    public ServerResponse queryStoreDistance(PageDTO pageDTO,String cityId, String storeName) {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Store> stores = iStoreMapper.queryStoreDistance(cityId, storeName);
+            if(stores.size()<0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
             PageInfo pageResult = new PageInfo(stores);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
-        }
+            return ServerResponse.createBySuccess("查询成功",pageResult);
     }
 
 
     /**
      * 首页查询门店
-     *
-     * @param userToken
      * @param latitude
      * @param longitude
      * @return
      */
-    public ServerResponse IndexqueryStore(String userToken, String latitude, String longitude) {
-        Map map = new HashedMap();
-        if (null != userToken && userToken.length() > 0) {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof Member) {
-                Member member = (Member) object;
-                map.put("member", member);
+    public ServerResponse IndexqueryStore(String latitude, String longitude) {
+            List<Store> stores = iStoreMapper.IndexqueryStore(latitude, longitude);
+            if(stores.size()<0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-        }
-        List<Store> stores = iStoreMapper.IndexqueryStore(latitude, longitude);
-        map.put("stores", stores);
-        return ServerResponse.createBySuccess("查询成功", map);
+            return ServerResponse.createBySuccess("查询成功",stores);
     }
 }
