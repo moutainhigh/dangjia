@@ -22,7 +22,7 @@ public interface MyHomeAPI {
      */
     @PostMapping("app/home/my")
     @ApiOperation(value = "业主端，我的装修界面", notes = "业主端，我的装修界面")
-    ServerResponse getMyHouse(@RequestParam("userToken") String userToken, @RequestParam("cityId")String cityId) ;
+    ServerResponse getMyHouse(@RequestParam("userToken") String userToken, @RequestParam("cityId")String cityId, @RequestParam("isNew")String isNew) ;
 
 
 }

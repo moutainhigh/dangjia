@@ -79,13 +79,17 @@ public class MyHouseService {
     /**
      * APP我的房产
      */
-    public ServerResponse getMyHouse(String userToken, String cityId) {
+    public ServerResponse getMyHouse(String userToken, String cityId,String isNew) {
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        if(!CommonUtil.isEmpty(isNew)){
+            return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null,address));
+        }
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
         Member member = (Member) object;
-        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+
         //该城市该用户所有开工房产
         Example example = new Example(House.class);
         example.createCriteria()

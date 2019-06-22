@@ -15,8 +15,8 @@ public class MyHomeController implements MyHomeAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getMyHouse(String userToken, String cityId) {
-        return myHouseService.getMyHouse(userToken, cityId);
+    public ServerResponse getMyHouse(String userToken, String cityId,String isNew) {
+        return myHouseService.getMyHouse(userToken, cityId,isNew);
     }
 
 }
