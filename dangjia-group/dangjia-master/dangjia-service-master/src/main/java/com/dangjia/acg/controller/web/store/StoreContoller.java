@@ -76,7 +76,7 @@ public class StoreContoller implements StoreAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse IndexqueryStore(String latitude, String longitude) {
-        return storeServices.IndexqueryStore(latitude,longitude);
+    public ServerResponse IndexqueryStore(String cityId,String latitude, String longitude) {
+        return storeServices.IndexqueryStore(cityId,latitude,longitude);
     }
 }
