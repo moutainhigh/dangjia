@@ -21,4 +21,5 @@ public class ShareDTO {
 	private int showHouse;//是否展示 0展示，1不展示,默认生成 为0
 	private List<String> biaoqian;//房子标签
 	private String url;//跳转h5
+	private Integer visitState;//0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
 }
