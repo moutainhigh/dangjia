@@ -71,6 +71,7 @@ public class HomeModularService {
         //过滤掉提前结束的房子
         example.createCriteria()
                 .andNotEqualTo(HouseFlowApply.APPLY_TYPE, 8)
+                .andNotEqualTo(HouseFlowApply.APPLY_TYPE, 3)
                 .andNotEqualTo(HouseFlowApply.APPLY_TYPE, 9);
         example.orderBy(HouseFlowApply.CREATE_DATE).desc();
         List<HouseFlowApply> houseFlowApplies = iHouseFlowApplyMapper.selectByExample(example);

@@ -40,7 +40,7 @@ public interface IStoreMapper extends Mapper<Store>{
      * @param longitude
      * @return
      */
-    List<Store> IndexqueryStore(@Param("latitude") String latitude, @Param("longitude") String longitude);
+    List<Store> IndexqueryStore(@Param("cityId") String cityId,@Param("latitude") String latitude, @Param("longitude") String longitude);
 
 
 }
