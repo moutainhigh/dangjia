@@ -585,9 +585,11 @@ public class ActuaryOperationService {
                 for (BudgetWorker bw : budgetWorkerList) {
                     WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(bw.getWorkerGoodsId());
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
+                    flowActuaryDTO.setId(workerGoods.getId());
                     flowActuaryDTO.setName(bw.getName());
                     flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + workerGoods.getImage());
                     flowActuaryDTO.setTypeName(typsValue);
+                    flowActuaryDTO.setType(type);
                     flowActuaryDTO.setShopCount(bw.getShopCount());
                     String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO, userToken, cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bw.getId() + "&type=" + type;
                     flowActuaryDTO.setUrl(url);
@@ -602,9 +604,11 @@ public class ActuaryOperationService {
                 List<MendWorker> budgetWorkerList = mendOrderInfoDTO.getMendWorkers();
                 for (MendWorker bw : budgetWorkerList) {
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
+                    flowActuaryDTO.setId(bw.getWorkerGoodsId());
                     flowActuaryDTO.setName(bw.getWorkerGoodsName());
                     flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + bw.getImage());
                     flowActuaryDTO.setTypeName(typsValue);
+                    flowActuaryDTO.setType(type);
                     flowActuaryDTO.setShopCount(bw.getShopCount());
 //                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
 //                            String.format(DjConstants.YZPageAddress.COMMO, userToken, cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + budgetWorker.getId() + "&type=1";
@@ -621,7 +625,9 @@ public class ActuaryOperationService {
                 for (MendMateriel mendMateriel : budgetMaterielList) {
                     Product product = productMapper.selectByPrimaryKey(mendMateriel.getProductId());
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
+                    flowActuaryDTO.setId(product.getId());
                     flowActuaryDTO.setTypeName(typsValue);
+                    flowActuaryDTO.setType(type);
                     flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + mendMateriel.getImage());
 //                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO, userToken,
 ////                            cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + budgetMaterial.getId() + "&type=2";
@@ -663,7 +669,8 @@ public class ActuaryOperationService {
                     Product product = productMapper.selectByPrimaryKey(bm.getProductId());
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
                     flowActuaryDTO.setTypeName(typsValue);
-
+                    flowActuaryDTO.setType(type);
+                    flowActuaryDTO.setId(product.getId());
                     String convertUnitName = bm.getUnitName();
                     if (product != null) {
                         flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
