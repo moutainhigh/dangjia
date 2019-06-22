@@ -10,7 +10,9 @@ import lombok.Data;
 @Data
 public class FlowActuaryDTO {
     private String budgetMaterialId;
+    private String id;
     private String typeName;//人工 材料 服务
+    private int type;//人工 材料 服务
     private String name;//商品名
     private String image;//图片
     private Double shopCount;//购买总数

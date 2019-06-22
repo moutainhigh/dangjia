@@ -22,5 +22,6 @@ public class HouseDetailsDTO {
     private BigDecimal square;//
     private BigDecimal totalPrice;//总计
     private List<String> dianList;
+    private List<String> labelList;
     private List<Map<String,Object>> mapList;
 }

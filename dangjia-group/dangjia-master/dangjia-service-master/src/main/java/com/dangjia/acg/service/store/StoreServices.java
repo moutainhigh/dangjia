@@ -166,9 +166,15 @@ public class StoreServices {
      * @param longitude
      * @return
      */
-    public ServerResponse IndexqueryStore(String latitude, String longitude) {
-            List<Store> stores = iStoreMapper.IndexqueryStore(latitude, longitude);
-            if(stores.size()<0){
+    public ServerResponse IndexqueryStore(String cityId,String latitude, String longitude) {
+            if (latitude == null) {
+                latitude = "28.228259";
+            }
+            if (longitude == null) {
+                longitude = "112.938904";
+            }
+            List<Store> stores = iStoreMapper.IndexqueryStore(cityId,latitude, longitude);
+            if(stores.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             return ServerResponse.createBySuccess("查询成功",stores);

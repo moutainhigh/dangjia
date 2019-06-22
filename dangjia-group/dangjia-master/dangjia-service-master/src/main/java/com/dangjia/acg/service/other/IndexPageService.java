@@ -19,12 +19,14 @@ import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
+import com.dangjia.acg.mapper.label.OptionalLabelMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingVillage;
+import com.dangjia.acg.modle.label.OptionalLabel;
 import com.dangjia.acg.service.design.DesignDataService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -43,6 +45,9 @@ import java.util.*;
  */
 @Service
 public class IndexPageService {
+
+    @Autowired
+    private OptionalLabelMapper optionalLabelMapper;
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
@@ -194,6 +199,22 @@ public class IndexPageService {
             }
             houseDetailsDTO.setMapList(mapList);
             houseDetailsDTO.setTotalPrice(totalPrice);
+            if(!CommonUtil.isEmpty(house.getOptionalLabel())){
+                List<String> fieldValues = new ArrayList<>();
+                String[] optionalLabel=house.getOptionalLabel().split(",");
+                for (String s : optionalLabel) {
+                    fieldValues.add(s);
+                };
+                example = new Example(OptionalLabel.class);
+                example.createCriteria().andIn(OptionalLabel.ID,fieldValues);
+                example.orderBy(HouseFlow.WORKER_TYPE);
+                List<OptionalLabel> optionalLabels=optionalLabelMapper.selectByExample(example);
+                for (int i = 0; i < optionalLabels.size(); i++) {
+                    fieldValues.remove(i);
+                    fieldValues.add(i,optionalLabels.get(i).getLabelName());
+                }
+                houseDetailsDTO.setLabelList(fieldValues);
+            }
             return ServerResponse.createBySuccess("查询成功", houseDetailsDTO);
         } catch (Exception e) {
             e.printStackTrace();

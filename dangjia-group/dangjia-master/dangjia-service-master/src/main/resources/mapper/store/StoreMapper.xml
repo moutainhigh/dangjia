@@ -99,6 +99,7 @@
         ) AS juli
         FROM dj_store
         where data_status =0
+        AND city_id=#{cityId}
         ORDER BY
         juli limit 1
     </select>
