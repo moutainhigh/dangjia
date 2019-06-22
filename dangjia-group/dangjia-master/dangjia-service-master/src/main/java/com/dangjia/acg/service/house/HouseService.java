@@ -1015,6 +1015,7 @@ public class HouseService {
                 money.toString().substring(money.toString().length() - 2) : "00"));//精算总价
         shareDTO.setShowHouse(house.getShowHouse());
         shareDTO.setHouseId(house.getId());
+        shareDTO.setVisitState(house.getVisitState());
         shareDTO.setVillageId(house.getVillageId());//小区id
         shareDTO.setVillageName(house.getResidential());//小区名
         shareDTO.setLayoutId(house.getModelingLayoutId());//户型id
