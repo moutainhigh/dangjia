@@ -184,6 +184,7 @@ public class MyHouseService {
             map.put("head", address+"qrcode/logo.png");
             houseResult.setMember(map);
         }
+        houseResult.setDecorationType(house.getDecorationType());
         houseResult.setProgress(HouseUtil.getWorkerDatas(house,address));
         houseResult.setCourseList(courseList);
         return ServerResponse.createBySuccess("查询成功",houseResult);

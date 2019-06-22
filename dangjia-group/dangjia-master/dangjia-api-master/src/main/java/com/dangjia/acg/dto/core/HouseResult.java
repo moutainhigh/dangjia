@@ -23,6 +23,7 @@ public class HouseResult {
     private NodeDTO actuaryList;//精算节点
     private List<ListMapBean> bigList;//菜单
     private Map member;//客服明细
+    private Integer decorationType;//1远程设计，2自带设计，
     private Map progress;//菜单
 
     @Data
