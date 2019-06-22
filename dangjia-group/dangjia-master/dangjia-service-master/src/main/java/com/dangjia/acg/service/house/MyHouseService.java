@@ -96,7 +96,7 @@ public class MyHouseService {
         List<House> houseList = iHouseMapper.selectByExample(example);
         String houseId = getCurrentHouse(houseList);
         if(CommonUtil.isEmpty(houseId)){
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无房产");
+            return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null,address));
         }
 
         House house = iHouseMapper.selectByPrimaryKey(houseId);
@@ -173,20 +173,16 @@ public class MyHouseService {
                    }
                 }
                 houseResult.setDesignList(nodeDTO);
-                setMenus(houseResult,house,houseFlow);
             }else if(workerType.getType()==2){
                 houseResult.setActuaryList(nodeDTO);
-                setMenus(houseResult,house,houseFlow);
             }else{
                 courseList.add(nodeDTO);
-                if(houseResult.getBigList()==null
-                        &&houseFlow.getWorkerType()==3
-                        &&houseFlow.getSupervisorStart()==1){
-                    setMenus(houseResult,house,houseFlow);
-                }
+            }
+            if(houseFlow.getWorkerType()<=3){
+                setMenus(houseResult,house,houseFlow);
             }
         }
-
+        houseResult.setProgress(HouseUtil.getWorkerDatas(house,address));
         houseResult.setCourseList(courseList);
         return ServerResponse.createBySuccess("查询成功",houseResult);
     }
@@ -221,13 +217,7 @@ public class MyHouseService {
             mapBean.setType(configuration.getType());
             bigList.add(mapBean);
         }
-        if(hf.getWorkerType()==1){
-            bean.getDesignList().setBigList(bigList);
-        }else if(hf.getWorkerType()==2){
-            bean.getActuaryList().setBigList(bigList);
-        }else{
-            bean.setBigList(bigList);//添加菜单到返回体中
-        }
+        bean.setBigList(bigList);//添加菜单到返回体中
 
     }
     /**
