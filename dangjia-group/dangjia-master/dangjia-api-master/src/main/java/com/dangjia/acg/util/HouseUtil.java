@@ -282,7 +282,41 @@ public class HouseUtil {
 
 
 
-
+    public static Map getWorkerDatas(House house,String address ) {
+         Map progress=new HashMap();
+        String[] nameBs;
+        String[] iconsY;
+        Integer[] workerTypes=new Integer[]{1,2,3};
+        for (Integer workerType : workerTypes) {
+            if (workerType == 1) {//设计
+                if (house!=null&&house.getDecorationType() == 2) {//自带设计流程
+                    nameBs= new String[]{"设计抢单", "设计平面图", "设计施工图", "设计完成"};
+                    iconsY= new String[]{"zx_icon_1_2.png", "zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
+                }else{
+                    nameBs = new String[]{"设计抢单", "业主支付", "量房阶段", "设计平面图", "设计施工图", "设计完成"};
+                    iconsY= new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png","zx_icon_3_2.png","zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
+                }
+            }else if (workerType == 2) {//精算
+                nameBs = new String[]{"精算抢单", "业主支付", "制作精算", "精算完成"};
+                iconsY= new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png","zx_icon_4_2.png", "zx_icon_7_2.png"};
+            }else{//其他
+                nameBs = new String[]{"工匠抢单", "支付费用", "正常施工", "阶段完工", "整体完工", "施工完成"};
+                iconsY= new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png","zx_icon_sg_default@2x.png", "zx_icon_ztwg_default@2x.png", "zx_icon_wg_default@2x.png", "zx_icon_7_2.png"};
+            }
+            Map<String, Object> dataMap = new HashMap<>();
+            List<Map<String, Object>> dataList = new ArrayList<>();
+            for (int i = 0; i < nameBs.length; i++) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("name", nameBs[i]);
+                map.put("begin", i +1);
+                map.put("icon",address + "icon/"+iconsY[i]);
+                dataList.add(map);
+            }
+            dataMap.put("dataList", dataList);
+            progress.put("workerType"+workerType,dataMap);
+        }
+        return progress;
+    }
 
 
 

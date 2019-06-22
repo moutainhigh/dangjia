@@ -3,6 +3,7 @@ package com.dangjia.acg.dto.core;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -21,6 +22,7 @@ public class HouseResult {
     private NodeDTO designList;//设计节点
     private NodeDTO actuaryList;//精算节点
     private List<ListMapBean> bigList;//菜单
+    private Map progress;//菜单
 
     @Data
     public static class ListMapBean {

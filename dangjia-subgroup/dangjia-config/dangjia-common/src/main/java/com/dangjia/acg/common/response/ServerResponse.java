@@ -78,7 +78,12 @@ public class ServerResponse<T> implements Serializable {
         dataResponse.setResultMsg(errorMessage);
         return dataResponse;
     }
-
+    public static <T> ServerResponse<T> createByErrorCodeResultObj(int errorCode, T resultObj) {
+        ServerResponse<T> dataResponse = new ServerResponse<>();
+        dataResponse.setResultCode(errorCode);
+        dataResponse.setResultObj(resultObj);
+        return dataResponse;
+    }
     public static <T> ServerResponse<T> createByErrorNeedToPay(T resultObj) {
         ServerResponse<T> dataResponse = new ServerResponse<>();
         dataResponse.setResultCode(ServerCode.NEED_TO_PAY.getCode());

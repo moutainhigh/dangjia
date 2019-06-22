@@ -41,12 +41,12 @@ public class OptionalLabelServices {
      * @return
      */
     public ServerResponse queryOptionalLabel(String id){
-        if(null!=id||id.length()>0){
+        if(null!=id&&""!=id){
+            return ServerResponse.createBySuccess("查询成功",optionalLabelMapper.selectByPrimaryKey(id));
+        }else{
             Example example=new Example(OptionalLabel.class);
             example.createCriteria().andCondition(" DATA_STATUS !=0");
             return ServerResponse.createBySuccess("查询成功",optionalLabelMapper.selectAll());
-        }else{
-            return ServerResponse.createBySuccess("查询成功",optionalLabelMapper.selectByPrimaryKey(id));
         }
     }
 
