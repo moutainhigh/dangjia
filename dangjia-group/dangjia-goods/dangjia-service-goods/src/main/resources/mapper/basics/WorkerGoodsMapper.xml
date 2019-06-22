@@ -236,37 +236,43 @@
         </if>
     </select>
     <select id="getHomeProductList" resultType="com.dangjia.acg.modle.basics.HomeProductDTO">
-            (SELECT
-                id AS id,
-                image AS image,
-                price AS price,
-                unit_name AS unitName,
-                0 AS type,
-                name AS name
+           ( SELECT
+            p.id AS id,
+            p.image AS image,
+            p.price AS price,
+            p.unit_name AS unitName,
+            g.type AS goodsType,
+            0 AS type,
+            p.NAME AS NAME
             FROM
-              dj_basics_product
+                dj_basics_product p
+                INNER JOIN dj_basics_goods g ON g.id = p.goods_id
             WHERE
-                data_status = 0
-                and type = 1
-                and maket = 1
+                p.data_status = 0
+                AND p.type = 1
+                AND p.maket = 1
             ORDER BY
                 rand( )
-                LIMIT 3 )UNION ALL
-            (SELECT
+                LIMIT 3
+            ) UNION ALL
+            (
+            SELECT
                 id AS id,
                 image AS image,
                 price AS price,
                 unit_name AS unitName,
+                NULL AS goodsType,
                 1 AS type,
-                name AS name
+            NAME AS NAME
             FROM
                 dj_basics_worker_goods
             WHERE
                 data_status = 0
-                and show_goods = 1
+                AND show_goods = 1
             ORDER BY
                 rand( )
-                LIMIT 3)
+            LIMIT 3
+            )
     </select>
 
 
