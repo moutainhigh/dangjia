@@ -156,24 +156,6 @@ public class MyHouseService {
             }
 
             if(workerType.getType()==1){
-                if( house.getDesignerOk()==0){
-                   example = new Example(MainUser.class);
-                   example.createCriteria().andEqualTo(MainUser.IS_RECEIVE,1);
-                   example.orderBy(GroupUserConfig.CREATE_DATE).desc();
-                   List<MainUser> list = userMapper.selectByExample(example);
-                   if (list != null && list.size() > 0) {
-                       MainUser user = list.get(0);
-                       Map map = new HashMap();
-                       map.put("id", user.getId());
-                       map.put("targetId", user.getId());
-                       map.put("targetAppKey", "49957e786a91f9c55b223d58");
-                       map.put("nickName", "装修顾问 "+user.getUsername());
-                       map.put("name", user.getUsername());
-                       map.put("mobile", user.getMobile());
-                       map.put("head", address+"qrcode/logo.png");
-                       nodeDTO.setMember(map);
-                   }
-                }
                 houseResult.setDesignList(nodeDTO);
             }else if(workerType.getType()==2){
                 houseResult.setActuaryList(nodeDTO);
@@ -183,6 +165,24 @@ public class MyHouseService {
             if(houseFlow.getWorkerType()<=3){
                 setMenus(houseResult,house,houseFlow);
             }
+        }
+
+        //获取客服明细
+        example = new Example(MainUser.class);
+        example.createCriteria().andEqualTo(MainUser.IS_RECEIVE,1);
+        example.orderBy(GroupUserConfig.CREATE_DATE).desc();
+        List<MainUser> list = userMapper.selectByExample(example);
+        if (list != null && list.size() > 0) {
+            MainUser user = list.get(0);
+            Map map = new HashMap();
+            map.put("id", user.getId());
+            map.put("targetId", user.getId());
+            map.put("targetAppKey", "49957e786a91f9c55b223d58");
+            map.put("nickName", "装修顾问 "+user.getUsername());
+            map.put("name", user.getUsername());
+            map.put("mobile", user.getMobile());
+            map.put("head", address+"qrcode/logo.png");
+            houseResult.setMember(map);
         }
         houseResult.setProgress(HouseUtil.getWorkerDatas(house,address));
         houseResult.setCourseList(courseList);

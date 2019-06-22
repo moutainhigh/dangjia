@@ -22,6 +22,7 @@ public class HouseResult {
     private NodeDTO designList;//设计节点
     private NodeDTO actuaryList;//精算节点
     private List<ListMapBean> bigList;//菜单
+    private Map member;//客服明细
     private Map progress;//菜单
 
     @Data
