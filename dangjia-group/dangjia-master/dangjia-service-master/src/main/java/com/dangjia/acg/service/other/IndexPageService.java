@@ -227,13 +227,14 @@ public class IndexPageService {
         return ServerResponse.createBySuccess("查询成功", houses);
     }
 
-    public String getHouseImage(String id) {
+    private String getHouseImage(String id) {
         ServerResponse serverResponse = designDataService.getConstructionPlans(id);
         if (serverResponse.isSuccess()) {
             QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
             List<QuantityRoomImages> images = quantityRoomDTO.getImages();
             if (images != null && images.size() > 0) {
-                return images.get(0).getImage() + "?x-image-process=image/resize,w_500,h_500/quality,q_80";
+                return images.get(0).getImage();
+//                + "?x-image-process=image/resize,w_500,h_500/quality,q_80";
             }
         }
         return null;
