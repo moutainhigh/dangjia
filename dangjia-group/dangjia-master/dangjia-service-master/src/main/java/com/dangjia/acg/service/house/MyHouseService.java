@@ -94,8 +94,6 @@ public class MyHouseService {
         Example example = new Example(House.class);
         example.createCriteria()
                 .andEqualTo(House.MEMBER_ID, member.getId())
-                .andNotEqualTo(House.VISIT_STATE, 0)
-                .andNotEqualTo(House.VISIT_STATE, 2)
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
         String houseId = getCurrentHouse(houseList);
