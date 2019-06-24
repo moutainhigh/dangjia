@@ -211,7 +211,7 @@ public class HouseService {
         Example example = new Example(House.class);
         example.createCriteria()
                 .andEqualTo(House.MEMBER_ID, worker.getId())
-                .andNotEqualTo(House.VISIT_STATE, 0)
+//                .andNotEqualTo(House.VISIT_STATE, 0)
                 .andNotEqualTo(House.VISIT_STATE, 2)
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
@@ -224,9 +224,12 @@ public class HouseService {
             Map<String, Object> map = new HashMap<>();
             map.put("houseId", house.getId());
             map.put("houseName", house.getHouseName());
+            map.put("visitState", house.getVisitState());
             map.put("task", this.getTask(house.getId()));
             String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             switch (house.getVisitState()) {
+                case 0:
+                    map.put("btName", "待确认开工");
                 case 1:
 //                    if ((house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getDesignerOk() != 3)
 //                            || (house.getDesignerOk() == 3 && house.getBudgetOk() != 0 && house.getBudgetOk() != 5)) {
@@ -772,9 +775,7 @@ public class HouseService {
         }
         City city = iCityMapper.selectByPrimaryKey(cityId);
         House house = new House(true);//新增房产信息
-        if (houseList.size() > 0) {
-            house.setIsSelect(0);
-        }
+        house.setIsSelect(1);
         house.setMemberId(memberId);//用户id
         house.setCityName(city.getName());//城市名
         house.setCityId(cityId);
