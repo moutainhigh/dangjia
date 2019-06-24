@@ -19,7 +19,7 @@ import java.util.Random;
  * 二维码工具类
  *
  */
-public class QRCodeUtil {
+public class  QRCodeUtil {
     private static final String CHARSET = "utf-8";
     private static final String FORMAT = "png";
     // 二维码尺寸

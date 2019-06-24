@@ -73,16 +73,13 @@ public class MyHouseService {
     protected static final Logger LOG = LoggerFactory.getLogger(MyHouseService.class);
 
 
-
-
-
     /**
      * APP我的房产
      */
-    public ServerResponse getMyHouse(String userToken, String cityId,String isNew) {
+    public ServerResponse getMyHouse(String userToken, String cityId, String isNew) {
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-        if(!CommonUtil.isEmpty(isNew)){
-            return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null,address));
+        if (!CommonUtil.isEmpty(isNew)) {
+            return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null, address));
         }
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
@@ -97,8 +94,8 @@ public class MyHouseService {
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
         String houseId = getCurrentHouse(houseList);
-        if(CommonUtil.isEmpty(houseId)){
-            return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null,address));
+        if (CommonUtil.isEmpty(houseId)) {
+            return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null, address));
         }
 
         House house = iHouseMapper.selectByPrimaryKey(houseId);
@@ -116,15 +113,15 @@ public class MyHouseService {
             }
         }
         houseResult.setTask(task);
-        Map<Integer, String> applyTypeMap =DjConstants.VisitState.getVisitStateMap();
+        Map<Integer, String> applyTypeMap = DjConstants.VisitState.getVisitStateMap();
         houseResult.setBuildStage(applyTypeMap.get(house.getVisitState()));
         /*展示各种进度*/
         List<HouseFlow> houseFlowList = houseFlowMapper.getAllFlowByHouseId(houseId);
         List<NodeDTO> courseList = new ArrayList<>();
         for (HouseFlow houseFlow : houseFlowList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
-            NodeDTO nodeDTO = HouseUtil.getWorkerDatas( house,  houseFlow,  workerType, address );
-            Map progress=nodeDTO.getProgress();
+            NodeDTO nodeDTO = HouseUtil.getWorkerDatas(house, houseFlow, workerType, address);
+            Map progress = nodeDTO.getProgress();
             Example example1 = new Example(HouseFlowApply.class);
             example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId()).andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.APPLY_TYPE, 3);
             List<HouseFlowApply> houseFlowss = houseFlowApplyMapper.selectByExample(example1);
@@ -133,11 +130,11 @@ public class MyHouseService {
                 suspendDay += flowss.getSuspendDay();
             }
             int num = 1 + DateUtil.daysofTwo(houseFlow.getStartDate(), houseFlow.getEndDate());//工期天数
-            progress.put("suspendDay",suspendDay);//停工天数
-            progress.put("num",num);//计划施工天数
+            progress.put("suspendDay", suspendDay);//停工天数
+            progress.put("num", num);//计划施工天数
             nodeDTO.setProgress(progress);
             //工人信息
-            if(!CommonUtil.isEmpty(houseFlow.getWorkerId())) {
+            if (!CommonUtil.isEmpty(houseFlow.getWorkerId())) {
                 Member member1 = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
                 member1.setPassword(null);
                 member1.initPath(address);
@@ -147,29 +144,30 @@ public class MyHouseService {
                 map.put("targetId", member1.getId());
                 map.put("targetAppKey", "49957e786a91f9c55b223d58");
                 map.put("nickName", member1.getNickName());
-                map.put("name", member1.getNickName());
+                map.put("name", member1.getName());
                 map.put("mobile", member1.getMobile());
                 map.put("head", member1.getHead());
                 map.put("workerTypeId", member1.getWorkerTypeId());
                 map.put("workerName", workerType.getName());
+                map.put("houseFlowId", houseFlow.getId());
                 nodeDTO.setMember(map);
             }
 
-            if(workerType.getType()==1){
+            if (workerType.getType() == 1) {
                 houseResult.setDesignList(nodeDTO);
-            }else if(workerType.getType()==2){
+            } else if (workerType.getType() == 2) {
                 houseResult.setActuaryList(nodeDTO);
-            }else{
+            } else {
                 courseList.add(nodeDTO);
             }
-            if(houseFlow.getWorkerType()<=3){
-                setMenus(houseResult,house,houseFlow);
+            if (houseFlow.getWorkerType() <= 3) {
+                setMenus(houseResult, house, houseFlow);
             }
         }
 
         //获取客服明细
         example = new Example(MainUser.class);
-        example.createCriteria().andEqualTo(MainUser.IS_RECEIVE,1);
+        example.createCriteria().andEqualTo(MainUser.IS_RECEIVE, 1);
         example.orderBy(GroupUserConfig.CREATE_DATE).desc();
         List<MainUser> list = userMapper.selectByExample(example);
         if (list != null && list.size() > 0) {
@@ -178,17 +176,17 @@ public class MyHouseService {
             map.put("id", user.getId());
             map.put("targetId", user.getId());
             map.put("targetAppKey", "49957e786a91f9c55b223d58");
-            map.put("nickName", "装修顾问 "+user.getUsername());
+            map.put("nickName", "装修顾问 " + user.getUsername());
             map.put("name", user.getUsername());
             map.put("mobile", user.getMobile());
-            map.put("head", address+"qrcode/logo.png");
+            map.put("head", address + "qrcode/logo.png");
             houseResult.setMember(map);
         }
         houseResult.setDecorationType(house.getDecorationType());
         houseResult.setDrawings(house.getDrawings());
-        houseResult.setProgress(HouseUtil.getWorkerDatas(house,address));
+        houseResult.setProgress(HouseUtil.getWorkerDatas(house, address));
         houseResult.setCourseList(courseList);
-        return ServerResponse.createBySuccess("查询成功",houseResult);
+        return ServerResponse.createBySuccess("查询成功", houseResult);
     }
 
     /**
@@ -201,11 +199,11 @@ public class MyHouseService {
         Example example = new Example(MenuConfiguration.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo(MenuConfiguration.DATA_STATUS, 0);
-        if(hf.getWorkerType()==1){
+        if (hf.getWorkerType() == 1) {
             criteria.andEqualTo(MenuConfiguration.MENU_TYPE, 2);
-        }else if(hf.getWorkerType()==2){
+        } else if (hf.getWorkerType() == 2) {
             criteria.andEqualTo(MenuConfiguration.MENU_TYPE, 3);
-        }else{
+        } else {
             criteria.andEqualTo(MenuConfiguration.MENU_TYPE, 4);
         }
 
@@ -224,6 +222,7 @@ public class MyHouseService {
         bean.setBigList(bigList);//添加菜单到返回体中
 
     }
+
     /**
      * 待处理任务
      */
@@ -260,7 +259,8 @@ public class MyHouseService {
         task += houseFlowApplyList.size();
         return task;
     }
-    private String getCurrentHouse(List<House> houseList){
+
+    private String getCurrentHouse(List<House> houseList) {
         String houseId = null;
         if (houseList.size() > 1) {
             for (House house : houseList) {

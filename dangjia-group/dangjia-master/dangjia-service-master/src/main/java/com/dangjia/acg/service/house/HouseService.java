@@ -1526,7 +1526,10 @@ public class HouseService {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Example example = new Example(HouseWorker.class);
-            example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseId).andEqualTo(HouseWorker.WORKER_TYPE_ID, workerTypeId).andNotEqualTo(HouseWorker.WORK_TYPE, 6).andNotEqualTo(HouseWorker.WORK_TYPE, 1);
+            example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseId)
+                    .andEqualTo(HouseWorker.WORKER_TYPE_ID, workerTypeId)
+                    .andNotEqualTo(HouseWorker.WORK_TYPE, 6)
+                    .andNotEqualTo(HouseWorker.WORK_TYPE, 1);
             example.orderBy(HouseWorker.MODIFY_DATE).desc();
             List<HouseWorker> houseWorkers = houseWorkerMapper.selectByExample(example);
             PageInfo pageResult = new PageInfo(houseWorkers);
@@ -1535,7 +1538,8 @@ public class HouseService {
                 HouseWorkDTO houseWorkDTO = new HouseWorkDTO();
                 Member member = memberMapper.selectByPrimaryKey(h.getWorkerId());
                 Example example1 = new Example(WorkerDetail.class);
-                example1.createCriteria().andEqualTo(WorkerDetail.HOUSE_ID, houseId).andEqualTo(WorkerDetail.WORKER_ID, h.getWorkerId());
+                example1.createCriteria().andEqualTo(WorkerDetail.HOUSE_ID, houseId)
+                        .andEqualTo(WorkerDetail.WORKER_ID, h.getWorkerId());
                 List<WorkerDetail> workerDetails = workerDetailMapper.selectByExample(example1);
                 double money = 0;
                 for (WorkerDetail w : workerDetails) {
