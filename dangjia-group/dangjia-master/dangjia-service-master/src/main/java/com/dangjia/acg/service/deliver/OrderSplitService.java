@@ -437,6 +437,8 @@ public class OrderSplitService {
                         warehouseMapper.updateByPrimaryKeySelective(warehouse);
                     }
                 }
+                splitDeliver.setShippingState(3);//取消发货单
+                splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             }
             return ServerResponse.createBySuccessMessage("打回成功");
         } catch (Exception e) {
