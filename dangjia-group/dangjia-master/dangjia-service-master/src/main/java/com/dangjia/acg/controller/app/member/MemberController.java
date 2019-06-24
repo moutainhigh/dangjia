@@ -10,27 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
-
-/**
- * 用户维护
- *
- * @author: QiYuXiang
- * @date: 2018/10/24
- */
 @RestController
 public class MemberController implements MemberAPI {
 
     @Autowired
     private MemberService memberService;
 
-    /**
-     * 获取用户手机号
-     *
-     * @param request
-     * @param id      来源ID
-     * @param idType  1=房屋ID, 2=用户ID
-     * @return
-     */
     @Override
     @ApiMethod
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
@@ -42,146 +27,66 @@ public class MemberController implements MemberAPI {
         return memberService.getSmsCode(phone);
     }
 
-    /**
-     * 获取用户详细资料
-     *
-     * @param userToken token
-     * @return
-     */
     @Override
     @ApiMethod
     public ServerResponse getMemberInfo(String userToken) {
         return memberService.getMemberInfo(userToken);
     }
 
-    /**
-     * 登录 接口
-     *
-     * @param phone    手机号
-     * @param password 密码
-     * @param userRole app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
-     * @return
-     */
     @Override
     @ApiMethod
     public ServerResponse login(String phone, String password, String userRole) {
         return memberService.login(phone, password, userRole);
     }
 
-    /**
-     * 接口注册获取验证码
-     *
-     * @param phone 手机号
-     * @return
-     */
     @Override
     @ApiMethod
     public ServerResponse registerCode(String phone) {
         return memberService.registerCode(phone);
     }
 
-    /**
-     * 校验验证码并保存密码
-     *
-     * @param phone    手机号
-     * @param password 密码
-     * @param smscode  验证码Code
-     * @return
-     */
     @Override
     @ApiMethod
     public ServerResponse checkRegister(HttpServletRequest request, String phone, String password, int smscode, String invitationCode, Integer userRole) {
         return memberService.checkRegister(request, phone, smscode, password, invitationCode, userRole);
     }
 
-    /**
-     * 工匠提交详细资料
-     *
-     * @param user      用户详细信息
-     * @param userToken token
-     * @return
-     */
     @Override
     @ApiMethod
     public ServerResponse updateWokerRegister(Member user, String userToken, String userRole) {
         return memberService.updateWokerRegister(user, userToken, userRole);
     }
 
-    /**
-     * 实名认证提交资料
-     *
-     * @param userToken token
-     * @param name      真实姓名
-     * @param idcaoda   身份证正面
-     * @param idcaodb   身份证反面
-     * @param idcaodall 半身照
-     * @param idnumber  身份证号
-     * @return
-     */
     @Override
     @ApiMethod
     public ServerResponse certification(String userToken, String name, String idcaoda, String idcaodb, String idcaodall, String idnumber) {
         return memberService.certification(userToken, name, idcaoda, idcaodb, idcaodall, idnumber);
     }
 
-    /**
-     * 工种认证提交申请
-     *
-     * @param userToken    token
-     * @param workerTypeId 工种类型的id
-     * @return
-     */
     @Override
     @ApiMethod
     public ServerResponse certificationWorkerType(String userToken, String workerTypeId) {
         return memberService.certificationWorkerType(userToken, workerTypeId);
     }
 
-    /**
-     * 找回密码 获取code
-     *
-     * @param phone 手机号
-     * @return
-     */
     @Override
     @ApiMethod
     public ServerResponse forgotPasswordCode(String phone) {
         return memberService.forgotPasswordCode(phone);
     }
 
-    /**
-     * 找回密码校验验证码
-     *
-     * @param phone   手机号
-     * @param smscode 验证码Code
-     * @return
-     * @throws Exception
-     */
     @Override
     @ApiMethod
-    public ServerResponse checkForgotPasswordCode(String phone, int smscode) throws Exception {
+    public ServerResponse checkForgotPasswordCode(String phone, int smscode) {
         return memberService.checkForgotPasswordCode(phone, smscode);
     }
 
-    /**
-     * 找回密码更新密码
-     *
-     * @param phone    手机号
-     * @param password 密码
-     * @return
-     * @throws Exception
-     */
     @Override
     @ApiMethod
     public ServerResponse updateForgotPassword(String phone, String password, String token) {
         return memberService.updateForgotPassword(phone, password, token);
     }
 
-    /**
-     * 我的邀请码
-     *
-     * @return
-     */
     @Override
     @ApiMethod
     public ServerResponse getMyInvitation(String userToken) {
