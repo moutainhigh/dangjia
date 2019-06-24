@@ -585,6 +585,7 @@ public class ActuaryOperationService {
                 for (BudgetWorker bw : budgetWorkerList) {
                     WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(bw.getWorkerGoodsId());
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
+                    flowActuaryDTO.setBudgetMaterialId(bw.getId());
                     flowActuaryDTO.setId(workerGoods.getId());
                     flowActuaryDTO.setName(bw.getName());
                     flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + workerGoods.getImage());
