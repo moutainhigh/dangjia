@@ -769,13 +769,14 @@ public class HouseService {
             again += houseList.size();
             for (House house : houseList) {
                 if (house.getVisitState() == 0) { //0待确认开工,1装修中,2休眠中,3已完工
+                    //默认切换至未确认开工的房子
+                    setSelectHouse(userToken,cityId,house.getId());
                     return ServerResponse.createByErrorMessage("有房子未确认开工,不能再装");
                 }
             }
         }
         City city = iCityMapper.selectByPrimaryKey(cityId);
         House house = new House(true);//新增房产信息
-        house.setIsSelect(1);
         house.setMemberId(memberId);//用户id
         house.setCityName(city.getName());//城市名
         house.setCityId(cityId);
@@ -788,6 +789,8 @@ public class HouseService {
         HouseExpend houseExpend = new HouseExpend(true);
         houseExpend.setHouseId(house.getId());
         houseExpendMapper.insert(houseExpend);
+        //默认切换至未确认开工的房子
+        setSelectHouse(userToken,cityId,house.getId());
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
