@@ -1684,6 +1684,8 @@ public class HouseService {
                 textContentDTO.setImage(image);
                 houseChoiceCaseDTO.getTextContentDTO().add(textContentDTO);
             }
+            houseChoiceCaseDTO.setImage(jdAddress+houseChoiceCase.getImage());
+            houseChoiceCaseDTO.setTitle(houseChoiceCase.getTitle());
             houseChoiceCaseDTO.setBuildingNames(houseChoiceCase.getBuildingNames());
             houseChoiceCaseDTO.setArea(houseChoiceCase.getArea());
             houseChoiceCaseDTO.setCost(houseChoiceCase.getCost());
