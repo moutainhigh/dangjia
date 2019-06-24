@@ -15,6 +15,7 @@ import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.util.StringUtil;
 
 import java.util.Date;
 import java.util.List;
@@ -167,10 +168,10 @@ public class StoreServices {
      * @return
      */
     public ServerResponse IndexqueryStore(String cityId,String latitude, String longitude) {
-            if (latitude == null) {
+            if (StringUtil.isEmpty(latitude)) {
                 latitude = "28.228259";
             }
-            if (longitude == null) {
+            if (StringUtil.isEmpty(longitude)) {
                 longitude = "112.938904";
             }
             List<Store> stores = iStoreMapper.IndexqueryStore(cityId,latitude, longitude);
