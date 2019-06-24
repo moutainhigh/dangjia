@@ -998,9 +998,9 @@ public class MendOrderService {
                 }
                 mendOrder.setState(0);//生成中
                 mendOrder.setTotalAmount(0.0);
-                if (!this.createMendCheck(mendOrder)) {
-                    return ServerResponse.createByErrorMessage("添加审核流程失败");
-                }
+//                if (!this.createMendCheck(mendOrder)) {
+//                    return ServerResponse.createByErrorMessage("添加审核流程失败");
+//                }
                 mendOrderMapper.insert(mendOrder);
             }
             ServerResponse serverResponse = this.addMendMateriel(productArr, mendOrder);
