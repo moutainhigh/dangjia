@@ -158,23 +158,27 @@ public class HouseUtil {
             case 1:
                 if (house.getDecorationType() == 2 && house.getDesignerOk() != 3) {
                     nodeDTO.setRank(3);
-                    nodeDTO.setNameB( "待上传设计设计图");
+                    nodeDTO.setNameB( "待上传设计图");
                 } else {
                     nodeDTO.setRank(3);
                     nodeDTO.setNameB( "精算中");
+                    nodeDTO.setNameC("5天内提交,需业主确认");
                 }
                 break;
             case -1:
                 nodeDTO.setRank(3);
                 nodeDTO.setNameB( "未发送精算");
+                nodeDTO.setNameC("5天内提交,需业主确认");
                 break;
             case 2:
                 nodeDTO.setRank(3);
                 nodeDTO.setNameB( "待审核精算");
+                nodeDTO.setNameC("5天内提交,需业主确认");
                 break;
             case 4:
                 nodeDTO.setRank(3);
                 nodeDTO.setNameB( "修改精算");
+                nodeDTO.setNameC("5天内提交,需业主确认");
                 break;
             case 3:
                 nodeDTO.setRank(4);

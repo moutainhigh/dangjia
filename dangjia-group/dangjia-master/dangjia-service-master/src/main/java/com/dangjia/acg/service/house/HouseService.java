@@ -211,7 +211,7 @@ public class HouseService {
         Example example = new Example(House.class);
         example.createCriteria()
                 .andEqualTo(House.MEMBER_ID, worker.getId())
-                .andNotEqualTo(House.VISIT_STATE, 0)
+//                .andNotEqualTo(House.VISIT_STATE, 0)
                 .andNotEqualTo(House.VISIT_STATE, 2)
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
@@ -224,9 +224,12 @@ public class HouseService {
             Map<String, Object> map = new HashMap<>();
             map.put("houseId", house.getId());
             map.put("houseName", house.getHouseName());
+            map.put("visitState", house.getVisitState());
             map.put("task", this.getTask(house.getId()));
             String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             switch (house.getVisitState()) {
+                case 0:
+                    map.put("btName", "待确认开工");
                 case 1:
 //                    if ((house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getDesignerOk() != 3)
 //                            || (house.getDesignerOk() == 3 && house.getBudgetOk() != 0 && house.getBudgetOk() != 5)) {
@@ -766,15 +769,14 @@ public class HouseService {
             again += houseList.size();
             for (House house : houseList) {
                 if (house.getVisitState() == 0) { //0待确认开工,1装修中,2休眠中,3已完工
+                    //默认切换至未确认开工的房子
+                    setSelectHouse(userToken,cityId,house.getId());
                     return ServerResponse.createByErrorMessage("有房子未确认开工,不能再装");
                 }
             }
         }
         City city = iCityMapper.selectByPrimaryKey(cityId);
         House house = new House(true);//新增房产信息
-        if (houseList.size() > 0) {
-            house.setIsSelect(0);
-        }
         house.setMemberId(memberId);//用户id
         house.setCityName(city.getName());//城市名
         house.setCityId(cityId);
@@ -787,6 +789,8 @@ public class HouseService {
         HouseExpend houseExpend = new HouseExpend(true);
         houseExpend.setHouseId(house.getId());
         houseExpendMapper.insert(houseExpend);
+        //默认切换至未确认开工的房子
+        setSelectHouse(userToken,cityId,house.getId());
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
