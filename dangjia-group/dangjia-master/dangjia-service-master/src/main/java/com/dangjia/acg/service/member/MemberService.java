@@ -264,22 +264,6 @@ public class MemberService {
             Member user = new Member();
             user.setMobile(phone);
             user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
-            //生成二维码
-//            if(StringUtils.isEmpty(user.getQrcode())){//二维码为空 生成二维码
-//                //根据配置文件设置路径
-//                //图片放项目目录下
-//				String fileName=new Date().getTime()+".png";
-//				String visitRoot=configUtil.getValue(SysConfig.PUBLIC_DANGJIA_PATH, String.class)+configUtil.getValue(SysConfig.PUBLIC_QRCODE_PATH, String.class);
-//				String logoPath = visitRoot+"logo.png";
-//                String encoderContent =  configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"/app/app_invite!workRegister.action?memberid="+user.getId();
-//				try{
-//					QRCodeUtil.encode(encoderContent, logoPath, visitRoot, fileName, true);
-//				}catch (Exception e){
-//					return ServerResponse.createByErrorMessage("二维码生成错误！");
-//				}
-//				String imgurl=configUtil.getValue(SysConfig.PUBLIC_QRCODE_PATH, String.class)+"/"+fileName;
-//				user.setQrcode(imgurl);
-//            }
             user.setPraiseRate(new BigDecimal(1));//好评率
             user.setEvaluationScore(new BigDecimal(60));//积分
             user.setCheckType(5);//未提交资料
@@ -326,7 +310,7 @@ public class MemberService {
         }
     }
 
-    public void updateOrInsertInfo(String memberid, String policyId, String pwd) {
+    private void updateOrInsertInfo(String memberid, String policyId, String pwd) {
         try {
             //检测是否已有指定身份，无则初始化
             Example example = new Example(MemberInfo.class);
@@ -575,30 +559,7 @@ public class MemberService {
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             AccessToken accessToken = TokenUtil.generateAccessToken(user);
             redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
-            return ServerResponse.createBySuccessMessage("设置密码成功，正在跳转");
-        }
-    }
-
-
-    //根据userToken查询token记录并验证是否失效
-    public ServerResponse getAccessTokenByUserToken(String userToken) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createbyUserTokenError();
-        } else {
-            boolean flag;
-            try {
-                flag = TokenUtil.verifyAccessToken(accessToken.getTimestamp());
-            } catch (Exception e) {
-                e.printStackTrace();
-                return ServerResponse.createByErrorMessage("系统错误");
-            }//验证是否失效
-            if (flag) {//失效
-                return ServerResponse.createbyUserTokenError();
-            } else {
-                return ServerResponse.createBySuccessMessage("有效！");
-            }
+            return ServerResponse.createBySuccessMessage("设置密码成功");
         }
     }
 
@@ -995,7 +956,6 @@ public class MemberService {
             map.put("appKey", messageAPI.getAppKey("gj"));
             datas.add(map);
         }
-
         if (datas.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无该用户");
         }
