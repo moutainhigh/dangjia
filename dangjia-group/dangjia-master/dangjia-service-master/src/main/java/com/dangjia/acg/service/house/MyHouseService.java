@@ -185,6 +185,7 @@ public class MyHouseService {
             houseResult.setMember(map);
         }
         houseResult.setDecorationType(house.getDecorationType());
+        houseResult.setDrawings(house.getDrawings());
         houseResult.setProgress(HouseUtil.getWorkerDatas(house,address));
         houseResult.setCourseList(courseList);
         return ServerResponse.createBySuccess("查询成功",houseResult);
