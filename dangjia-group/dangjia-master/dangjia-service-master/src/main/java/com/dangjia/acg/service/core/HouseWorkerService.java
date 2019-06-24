@@ -55,10 +55,7 @@ import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * author: Ronalcheng
@@ -138,13 +135,17 @@ public class HouseWorkerService {
      */
     public ServerResponse setChangeWorker(String userToken, String houseWorkerId) {
         try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
             HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(houseWorkerId);
             if (houseWorker.getWorkType() == 6) {
                 return ServerResponse.createByErrorMessage("已支付不能换人,请联系当家装修");
             }
             houseWorker.setWorkType(2);//被业主换
             houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-            complainService.addComplain(userToken,houseWorker.getWorkerId(),6,houseWorkerId,houseWorker.getHouseId(),"");
+            complainService.addComplain(userToken, houseWorker.getWorkerId(), 6, houseWorkerId, houseWorker.getHouseId(), "");
             HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
             String workerId = houseWorker.getWorkerId();
             houseFlow.setWorkerId("");
@@ -156,7 +157,6 @@ public class HouseWorkerService {
                 House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
                 configMessageService.addConfigMessage(null, "gj", workerId, "0", "业主换人提醒",
                         String.format(DjConstants.PushMessage.STEWARD_REPLACE, house.getHouseName()), "5");
-
                 HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
                 if (houseFlowDgj != null && !CommonUtil.isEmpty(houseFlowDgj.getWorkerId())) {
                     configMessageService.addConfigMessage(null, "gj", houseFlowDgj.getWorkerId(), "0", "业主换人提醒",
@@ -168,6 +168,78 @@ public class HouseWorkerService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("换人失败");
         }
+    }
+
+    public ServerResponse getHouseWorker(String userToken, String houseFlowId) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        if (houseFlow == null) {
+            return ServerResponse.createByErrorMessage("该工序不存在");
+        }
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+        HouseWorker houseWorker = null;
+        if (houseFlow.getWorkType() == 3) {//待支付
+            houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
+        } else if (houseFlow.getWorkType() == 4) {//已支付
+            houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 6);
+        }
+        Map<String, Object> mapData = new HashMap<>();
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        if (houseWorker == null) {
+            mapData.put("houseWorker", null);
+        } else {
+            Member member1 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
+            member1.setPassword(null);
+            member1.initPath(address);
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", member1.getId());
+            map.put("targetId", member1.getId());
+            map.put("targetAppKey", "49957e786a91f9c55b223d58");
+            map.put("nickName", member1.getNickName());
+            map.put("name", member1.getName());
+            map.put("mobile", member1.getMobile());
+            map.put("head", member1.getHead());
+            map.put("workerTypeId", member1.getWorkerTypeId());
+            map.put("workerName", workerType.getName());
+            map.put("houseFlowId", houseFlow.getId());
+            map.put("houseWorkerId", houseWorker.getId());
+            map.put("isSubstitution", houseWorker.getWorkType() == 1 ? 1 : 0);
+            mapData.put("houseWorker", map);
+        }
+        Example example = new Example(HouseWorker.class);
+        example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId())
+                .andEqualTo(HouseWorker.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
+                .andNotEqualTo(HouseWorker.WORK_TYPE, 6)
+                .andNotEqualTo(HouseWorker.WORK_TYPE, 1);
+        example.orderBy(HouseWorker.MODIFY_DATE).desc();
+        List<HouseWorker> houseWorkers = houseWorkerMapper.selectByExample(example);
+        List<Map<String, Object>> historyWorkerList = new ArrayList<>();
+        if (houseWorkers.size() > 0) {
+            for (HouseWorker worker : houseWorkers) {
+                Member member1 = memberMapper.selectByPrimaryKey(worker.getWorkerId());
+                member1.setPassword(null);
+                member1.initPath(address);
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", member1.getId());
+                map.put("targetId", member1.getId());
+                map.put("targetAppKey", "49957e786a91f9c55b223d58");
+                map.put("nickName", member1.getNickName());
+                map.put("name", member1.getName());
+                map.put("mobile", member1.getMobile());
+                map.put("head", member1.getHead());
+                map.put("workerTypeId", member1.getWorkerTypeId());
+                map.put("workerName", workerType.getName());
+                map.put("houseFlowId", houseFlow.getId());
+                map.put("houseWorkerId", worker.getId());
+                map.put("isSubstitution", 0);
+                historyWorkerList.add(map);
+            }
+        }
+        mapData.put("historyWorkerList", historyWorkerList);
+        return ServerResponse.createBySuccess("查询成功", mapData);
     }
 
     /**
@@ -454,7 +526,7 @@ public class HouseWorkerService {
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(null, applyType, workerId, new Date());
                 for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
                     Example example = new Example(HouseFlowApply.class);
-                    example.createCriteria().andCondition("   apply_type in (0,1,2)  and   to_days(create_date) = to_days('"+DateUtil.getDateString(new Date().getTime())+"') ")
+                    example.createCriteria().andCondition("   apply_type in (0,1,2)  and   to_days(create_date) = to_days('" + DateUtil.getDateString(new Date().getTime()) + "') ")
                             .andNotEqualTo(HouseFlowApply.SUPERVISOR_CHECK, 2)
                             .andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowApply.getHouseFlowId());
                     List<HouseFlowApply> houseFlowApplyList1 = houseFlowApplyMapper.selectByExample(example);
@@ -587,7 +659,7 @@ public class HouseWorkerService {
                 houseFlow.setPause(1);//0:正常；1暂停；
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
                 //计划顺延
-                houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(),houseFlow.getWorkerTypeId(),suspendDay,null);
+                houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), suspendDay, null);
                 //大管家停工，不扣除工人积分
 //                if(worker.getWorkerType()>3) {
 //                    //工匠申请停工不用审核，申请停工超过2天的，第3天起每天扣除1积分
@@ -601,7 +673,7 @@ public class HouseWorkerService {
                 return ServerResponse.createBySuccessMessage("工匠申请停工（" + workerType.getName() + "）操作成功");
 
             } else if (applyType == 4) {
-                suspendDay=0;
+                suspendDay = 0;
                 //申请类型0每日完工申请，4：每日开工
                 //五月二周任务取消12点限制
 //                if (active != null && active.equals("pre")) {
@@ -623,32 +695,32 @@ public class HouseWorkerService {
 
                 //已经停工的工序，若工匠提前复工，则复工日期以及之后的停工全部取消，
                 // 原来被停工推后了的计划完工日期往前推，推的天数等于被取消的停工天数
-                Date start =new Date();
+                Date start = new Date();
                 Date end = start;
                 Example example = new Example(HouseFlowApply.class);
                 example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlow.getId())
                         .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                        .andEqualTo(HouseFlowApply.MEMBER_CHECK,1)
-                        .andCondition( " ('"+DateUtil.getDateString(new Date().getTime())+"' BETWEEN start_date and end_date)   ");
+                        .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1)
+                        .andCondition(" ('" + DateUtil.getDateString(new Date().getTime()) + "' BETWEEN start_date and end_date)   ");
                 List<HouseFlowApply> houseFlowList = houseFlowApplyMapper.selectByExample(example);
                 for (HouseFlowApply houseFlowApply : houseFlowList) {
-                    if(houseFlowApply.getEndDate().getTime()>end.getTime()){
-                        end=houseFlowApply.getEndDate();
+                    if (houseFlowApply.getEndDate().getTime() > end.getTime()) {
+                        end = houseFlowApply.getEndDate();
                         //更新实际停工天数
                         houseFlowApply.setEndDate(DateUtil.delDateDays(start, 1));
                         houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
                     }
                 }
-                suspendDay=DateUtil.daysofTwo(start, end)+1 ;
-                if(suspendDay>0) {
+                suspendDay = DateUtil.daysofTwo(start, end) + 1;
+                if (suspendDay > 0) {
                     //计划提前
                     houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), null, suspendDay);
                 }
 
-                suspendDay=0;
+                suspendDay = 0;
                 //若未进场的工序比计划开工日期提早开工，则计划开工日期修改为实际开工日期，（施工天数不变）完工日期随之提早
-                if(houseFlow.getStartDate()!=null&&houseFlow.getStartDate().getTime()>start.getTime()){
-                    suspendDay=DateUtil.daysofTwo(start, houseFlow.getStartDate())+1 ;
+                if (houseFlow.getStartDate() != null && houseFlow.getStartDate().getTime() > start.getTime()) {
+                    suspendDay = DateUtil.daysofTwo(start, houseFlow.getStartDate()) + 1;
                     houseFlow.setStartDate(DateUtil.delDateDays(houseFlow.getStartDate(), suspendDay));
                     houseFlow.setEndDate(DateUtil.delDateDays(houseFlow.getEndDate(), suspendDay));
                 }
@@ -1029,7 +1101,7 @@ public class HouseWorkerService {
             example.createCriteria().andCondition("  work_type IN ( 1, 6 ) ")
                     .andEqualTo(HouseWorker.WORKER_ID, worker.getId())
                     .andEqualTo(HouseWorker.WORKER_TYPE, worker.getWorkerType());
-            List<HouseWorker> listHouseWorker=houseWorkerMapper.selectByExample(example);
+            List<HouseWorker> listHouseWorker = houseWorkerMapper.selectByExample(example);
             for (HouseWorker houseWorker : listHouseWorker) {
                 if (houseWorker.getHouseId().equals(houseFlow.getHouseId())) {//选中的任务isSelect改为1
                     houseWorker.setIsSelect(1);
