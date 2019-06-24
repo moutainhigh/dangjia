@@ -8,7 +8,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		id,
 		create_date as createDate,
 		modify_date as modifyDate,
-		data_status as productId,
+		data_status as dataStatus,
 		house_id as houseId,
 		worker_type_id as workerTypeId,
 		type,
