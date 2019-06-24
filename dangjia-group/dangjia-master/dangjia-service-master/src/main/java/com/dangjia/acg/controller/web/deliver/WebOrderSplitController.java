@@ -74,6 +74,12 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     public ServerResponse cancelOrderSplit(String orderSplitId) {
         return orderSplitService.cancelOrderSplit(orderSplitId);
     }
+    @Override
+    @ApiMethod
+    public ServerResponse cancelSplitDeliver(String splitDeliverId) {
+        return orderSplitService.cancelSplitDeliver(splitDeliverId);
+    }
+
 
     /**
      * 要货单看明细

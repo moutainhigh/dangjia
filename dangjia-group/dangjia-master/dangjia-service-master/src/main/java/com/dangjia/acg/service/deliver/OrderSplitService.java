@@ -419,6 +419,31 @@ public class OrderSplitService {
         }
     }
 
+    /**
+     * 发货单打回
+     */
+    public ServerResponse cancelSplitDeliver(String splitDeliverId) {
+        try {
+            //将发货单设置为撤回状态
+            SplitDeliver splitDeliver=splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+            if (splitDeliver.getShippingState()==6) {
+                Example example = new Example(OrderSplitItem.class);
+                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());
+                List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+                for (OrderSplitItem orderSplitItem : orderSplitItemList) {
+                    Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), splitDeliver.getHouseId());
+                    if (warehouse != null) {
+                        warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());
+                        warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                    }
+                }
+            }
+            return ServerResponse.createBySuccessMessage("打回成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("打回成功");
+        }
+    }
 
     /**
      * 要货单看明细
