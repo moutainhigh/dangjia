@@ -200,7 +200,7 @@ public class CustomerRecordService {
                 customerMapper.updateByPrimaryKey(customer);
                 LOG.info("更新后最近的沟通提醒 成功了");
             }
-        } else if (oldRemindRecordId == null && customer.getRemindRecordId() != null) { //第一次 设置提醒
+        } else if (customer.getRemindRecordId() != null) { //第一次 设置提醒
             customerMapper.updateByPrimaryKey(customer);
             LOG.info("更新后最近的沟通提醒 第一次设置提醒 成功了");
         }

@@ -393,6 +393,24 @@ public class DesignerOperationService {
                 }
                 break;
             case 2:
+                Example example = new Example(DesignBusinessOrder.class);
+                Example.Criteria criteria = example.createCriteria()
+                        .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
+                        .andEqualTo(DesignBusinessOrder.HOUSE_ID, house.getId())
+                        .andEqualTo(DesignBusinessOrder.STATUS, 1)
+                        .andNotEqualTo(DesignBusinessOrder.OPERATION_STATE, 2);
+                if (house.getDecorationType() != 2) {
+                    criteria.andEqualTo(DesignBusinessOrder.TYPE, 4);
+                } else {
+                    criteria.andEqualTo(DesignBusinessOrder.TYPE, 3);
+                }
+                List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
+                if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
+                    DesignBusinessOrder order = designBusinessOrders.get(0);
+                    if (order.getOperationState() == 0) {
+                        break;
+                    }
+                }
                 if (house.getDecorationType() != 2) {//自带设计不需要判断
                     if (house.getDesignerOk() != 7 && house.getDesignerOk() != 8) {
                         return ServerResponse.createByErrorMessage("该阶段无法上传施工图");
