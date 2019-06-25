@@ -22,6 +22,7 @@ public class HouseDetailsDTO {
     private BigDecimal square;//
     private BigDecimal totalPrice;//总计
     private List<String> dianList;
-    private List<String> labelList;
+    private List<String> labelList;//选配标签名称
     private List<Map<String,Object>> mapList;
+    private String optionalLabel;//选配标签id(逗号分隔)
 }

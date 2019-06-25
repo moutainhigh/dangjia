@@ -136,6 +136,7 @@ public class IndexPageService {
             houseDetailsDTO.setResidential(house.getResidential());
             houseDetailsDTO.setImage(getHouseImage(house.getId()));
             houseDetailsDTO.setHouseName(house.getHouseName());
+            houseDetailsDTO.setOptionalLabel(house.getOptionalLabel());
             String[] liangArr = {};
             if (house.getLiangDian() != null) {
                 liangArr = house.getLiangDian().split(",");
@@ -207,7 +208,7 @@ public class IndexPageService {
                 };
                 example = new Example(OptionalLabel.class);
                 example.createCriteria().andIn(OptionalLabel.ID,fieldValues);
-                example.orderBy(HouseFlow.WORKER_TYPE);
+//                example.orderBy(HouseFlow.WORKER_TYPE);
                 List<OptionalLabel> optionalLabels=optionalLabelMapper.selectByExample(example);
                 for (int i = 0; i < optionalLabels.size(); i++) {
                     fieldValues.remove(i);
