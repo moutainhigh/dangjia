@@ -379,7 +379,7 @@ public class EvaluateService {
                 hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
                 hfa.setPayState(0);//是否付款
                 hfa.setApplyDec("业主您好，我是大管家，我已验收了" + worker.getName() + (houseFlowApply.getApplyType() == 1 ? "的阶段完工" : "的整体完工"));//描述
-//                houseFlowApplyMapper.insert(hfa);
+                houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
             }
             if (houseFlowApply.getApplyType() == 1) {
