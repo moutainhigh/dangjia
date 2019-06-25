@@ -12,6 +12,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
+import com.dangjia.acg.dto.label.OptionalLabelDTO;
 import com.dangjia.acg.dto.other.HouseDetailsDTO;
 import com.dangjia.acg.mapper.config.IConfigMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -201,19 +202,33 @@ public class IndexPageService {
             houseDetailsDTO.setMapList(mapList);
             houseDetailsDTO.setTotalPrice(totalPrice);
             if(!CommonUtil.isEmpty(house.getOptionalLabel())){
-                List<String> fieldValues = new ArrayList<>();
+                List<OptionalLabelDTO> fieldValues = new ArrayList<>();
                 String[] optionalLabel=house.getOptionalLabel().split(",");
-                for (String s : optionalLabel) {
-                    fieldValues.add(s);
-                };
-                example = new Example(OptionalLabel.class);
-                example.createCriteria().andIn(OptionalLabel.ID,fieldValues);
-//                example.orderBy(HouseFlow.WORKER_TYPE);
-                List<OptionalLabel> optionalLabels=optionalLabelMapper.selectByExample(example);
-                for (int i = 0; i < optionalLabels.size(); i++) {
-                    fieldValues.remove(i);
-                    fieldValues.add(i,optionalLabels.get(i).getLabelName());
+//                for (String s : optionalLabel) {
+//                    fieldValues.add(s);
+//                };
+                List<OptionalLabel> optionalLabels = optionalLabelMapper.selectAll();
+                for (OptionalLabel label : optionalLabels) {
+                    OptionalLabelDTO optionalLabelDTO=new OptionalLabelDTO();
+                    optionalLabelDTO.setId(label.getId());
+                    optionalLabelDTO.setLabelName(label.getLabelName());
+                    optionalLabelDTO.setStatus("1");
+                    for (String s : optionalLabel) {
+                        if(s.equals(label.getId())) {
+                            optionalLabelDTO.setStatus("0");
+                            break;
+                        }
+                    }
+                    fieldValues.add(optionalLabelDTO);
                 }
+//                example = new Example(OptionalLabel.class);
+//                example.createCriteria().andIn(OptionalLabel.ID,fieldValues);
+////                example.orderBy(HouseFlow.WORKER_TYPE);
+//                List<OptionalLabel> optionalLabels=optionalLabelMapper.selectByExample(example);
+//                for (int i = 0; i < optionalLabels.size(); i++) {
+//                    fieldValues.remove(i);
+//                    fieldValues.add(i,optionalLabels.get(i).getLabelName());
+//                }
                 houseDetailsDTO.setLabelList(fieldValues);
             }
             return ServerResponse.createBySuccess("查询成功", houseDetailsDTO);

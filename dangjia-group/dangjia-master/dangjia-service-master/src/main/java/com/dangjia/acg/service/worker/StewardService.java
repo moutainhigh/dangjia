@@ -420,9 +420,9 @@ public class StewardService {
             }
 
             //查询是否存在申诉。防止重复申诉
-            Member stewardHouse = memberMapper.getSupervisor(houseFlow.getHouseId());
+//            Member stewardHouse = memberMapper.getSupervisor(houseFlow.getHouseId());
             Example example = new Example(Complain.class);
-            example.createCriteria().andEqualTo(Complain.USER_ID, stewardHouse.getId()).andEqualTo(Complain.HOUSE_ID, houseFlow.getHouseId()).andEqualTo(Complain.STATUS, 0);
+            example.createCriteria().andEqualTo(Complain.MEMBER_ID, houseFlow.getWorkerId()).andEqualTo(Complain.HOUSE_ID, houseFlow.getHouseId()).andEqualTo(Complain.STATUS, 0);
             List<Complain> complains = complainMapper.selectByExample(example);
             if (complains.size() > 0) {
                 Map map = BeanUtils.beanToMap(courseDTO);
