@@ -169,16 +169,20 @@ public class OrderService {
     public ServerResponse orderList(String businessOrderId) {
         try {
             BusinessOrder businessOrder = businessOrderMapper.selectByPrimaryKey(businessOrderId);
-            House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+
             BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
-            businessOrderDTO.setHouseName(house.getHouseName());
+            if(!CommonUtil.isEmpty(businessOrder.getHouseId())){
+                House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+                businessOrderDTO.setHouseName(house.getHouseName());
+                List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house.getStyle());
+                businessOrderDTO.setOrderDTOList(orderDTOList);
+            }
             businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
             businessOrderDTO.setNumber(businessOrder.getNumber());
-            List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house.getStyle());
-            businessOrderDTO.setOrderDTOList(orderDTOList);
             businessOrderDTO.setTotalPrice(businessOrder.getTotalPrice());
             businessOrderDTO.setDiscountsPrice(businessOrder.getDiscountsPrice());
             businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
+            businessOrderDTO.setType(businessOrder.getType());
             businessOrderDTO.setCarriage(0.0);//运费
 
             return ServerResponse.createBySuccess("查询成功", businessOrderDTO);
