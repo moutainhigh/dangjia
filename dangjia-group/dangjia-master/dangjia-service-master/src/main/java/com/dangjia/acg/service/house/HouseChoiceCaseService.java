@@ -83,6 +83,9 @@ public class HouseChoiceCaseService {
             if (!CommonUtil.isEmpty(v.getLabel())) {
                 String[] label = StringUtils.split(v.getLabel(), ",");
                 map.put("label", label);
+            }else{
+                String[] label={};
+                map.put("label", label);
             }
             if (!CommonUtil.isEmpty(v.getImage())) {
                 map.put("imageUrl", v.getImage());
