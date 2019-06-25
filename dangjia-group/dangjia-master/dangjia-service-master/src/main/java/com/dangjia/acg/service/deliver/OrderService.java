@@ -15,6 +15,7 @@ import com.dangjia.acg.dto.deliver.OrderDTO;
 import com.dangjia.acg.dto.deliver.OrderItemDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.*;
+import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
@@ -25,6 +26,7 @@ import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.house.WarehouseDetail;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -73,6 +75,8 @@ public class OrderService {
     private IHouseMapper houseMapper;
     @Autowired
     private IBusinessOrderMapper businessOrderMapper;
+    @Autowired
+    private IHouseDistributionMapper iHouseDistributionMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
     @Autowired
@@ -177,6 +181,10 @@ public class OrderService {
                 List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house.getStyle());
                 businessOrderDTO.setOrderDTOList(orderDTOList);
             }
+            if (businessOrder.getType() == 5) {//验房分销
+                HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
+                businessOrderDTO.setHouseName(houseDistribution.getInfo()+"(验房分销)");
+            }
             businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
             businessOrderDTO.setNumber(businessOrder.getNumber());
             businessOrderDTO.setTotalPrice(businessOrder.getTotalPrice());
@@ -206,8 +214,9 @@ public class OrderService {
         for (BusinessOrder businessOrder : businessOrderList) {
             BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
             House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
-            if (businessOrder.getType() == 5) {
-                businessOrderDTO.setHouseName("验房分销");
+            if (businessOrder.getType() == 5) {//验房分销
+                HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
+                businessOrderDTO.setHouseName(houseDistribution.getInfo()+"(验房分销)");
             } else {
                 businessOrderDTO.setHouseName(house == null ? "" : house.getHouseName());
             }
