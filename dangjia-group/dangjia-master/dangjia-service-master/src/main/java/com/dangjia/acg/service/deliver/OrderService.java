@@ -208,11 +208,15 @@ public class OrderService {
                 businessOrderDTO.setHouseName(house == null ? "" : house.getHouseName());
             }
             List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house == null ? "" : house.getStyle());
-             BigDecimal payPrice=new BigDecimal(0);
-            for (OrderDTO orderDTO : orderDTOList) {
-                payPrice=payPrice.add(orderDTO.getTotalAmount());
-            }
-            businessOrderDTO.setPayPrice(payPrice);
+             if(orderDTOList.size()>0) {
+                 BigDecimal payPrice=new BigDecimal(0);
+                 for (OrderDTO orderDTO : orderDTOList) {
+                     payPrice = payPrice.add(orderDTO.getTotalAmount());
+                 }
+                 businessOrderDTO.setPayPrice(payPrice);
+             }else{
+                 businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
+             }
             businessOrderDTO.setOrderDTOList(orderDTOList);
             businessOrderDTO.setBusinessOrderId(businessOrder.getId());
             businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
