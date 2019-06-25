@@ -816,6 +816,8 @@ public class HouseFlowApplyService {
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             String local = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             if (houseFlowApply.getWorkerType() == 3) {//是管家发起的
+                houseFlowApplyDTO.setHouseId(houseFlowApply.getHouseId());
+                houseFlowApplyDTO.setWorkerId(worker.getId());
                 houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
                 houseFlowApplyDTO.setApplyType(3);//管家提交的整体完工申请
                 houseFlowApplyDTO.setWorkerTypeId(houseFlowApply.getWorkerTypeId());
