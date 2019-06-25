@@ -553,8 +553,8 @@ public class CraftsmanConstructionService {
         } else if (hf.getWorkType() == 4) {
             if (hf.getWorkSteta() == 3) {//待交底
                 buttonList.add(Utils.getButton("找大管家交底", 1));
-            } else if (worker.getWorkerType() == 4) {//如果是拆除，只有整体完工
-                setDisplayState(hf, promptList, buttonList, checkFlowApp, true);
+//            } else if (worker.getWorkerType() == 4) {//如果是拆除，只有整体完工
+//                setDisplayState(hf, promptList, buttonList, checkFlowApp, true);
             } else {//已交底
                 bean.setFootMessageTitle("");//每日开工事项
                 bean.setFootMessageDescribe("");//每日开工事项
@@ -593,7 +593,7 @@ public class CraftsmanConstructionService {
                         }
                         bean.setFootMessageTitle("今日完工任务");//每日开工事项
                         bean.setFootMessageDescribe("");//每日开工事项
-                        if (hf.getWorkSteta() == 1) {
+                        if (hf.getWorkSteta() == 1 || worker.getWorkerType() == 4) {
                             setDisplayState(hf, promptList, buttonList, checkFlowApp, true);
                         } else {
                             setDisplayState(hf, promptList, buttonList, checkFlowApp, false);
