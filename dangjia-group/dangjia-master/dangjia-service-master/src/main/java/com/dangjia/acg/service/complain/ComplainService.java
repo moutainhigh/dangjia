@@ -111,11 +111,12 @@ public class ComplainService {
 
     @Autowired
     private HouseService houseService;
+
     /**
      * 添加申诉
      *
      * @param userToken    用户Token
-     * @param complainType 申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.6.业主申请换人
+     * @param complainType 申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.5.提前结束装修，6.业主申请换人
      * @param businessId   对应业务ID
      *                     complain_type==1:对应处罚的rewardPunishRecordId,
      *                     complain_type==2:对应房子任务进程/申请表的houseFlowApplyId,
@@ -131,8 +132,17 @@ public class ComplainService {
         if (CommonUtil.isEmpty(complainType) || CommonUtil.isEmpty(businessId)) {
             return ServerResponse.createByErrorMessage("参数错误");
         }
-        if ((complainType == 2 || complainType == 3) && CommonUtil.isEmpty(houseId)) {
-            return ServerResponse.createByErrorMessage("参数错误");
+        if (complainType != 1 && complainType != 4) {
+            if (CommonUtil.isEmpty(houseId)) {
+                return ServerResponse.createByErrorMessage("参数错误");
+            }
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            if (house == null) {
+                return ServerResponse.createByErrorMessage("没有查询到相关房子");
+            }
+            if (house.getVisitState() != 1) {
+                return ServerResponse.createByErrorMessage("该房子不在装修中无法提交该申请");
+            }
         }
         Example example = new Example(Complain.class);
         example.createCriteria()
@@ -891,7 +901,7 @@ public class ComplainService {
 
             //删除质保卡
             WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByWorkerTypeId(houseFlows.get(0).getWorkerTypeId(), houseFlows.get(0).getHouseId());
-            if(wtso!=null){
+            if (wtso != null) {
                 wtso.setDataStatus(1);
                 workerTypeSafeOrderMapper.updateByPrimaryKey(wtso);
             }
@@ -938,7 +948,7 @@ public class ComplainService {
         iWorkerDetailMapper.insert(workerDetail1);
 
         //添加一条记录
-        HouseFlow houseFlow=houseFlows.get(0);
+        HouseFlow houseFlow = houseFlows.get(0);
         HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
         hfa.setHouseFlowId(houseFlow.getId());//工序id
         hfa.setWorkerId(houseFlow.getWorkerId());//工人id
