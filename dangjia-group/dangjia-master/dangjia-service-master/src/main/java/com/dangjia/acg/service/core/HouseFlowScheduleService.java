@@ -348,9 +348,9 @@ public class HouseFlowScheduleService {
                         Map map = new HashMap<>();
                         map.put("date", DateUtil.dateToString(changeOrder.getCreateDate(), DateUtil.FORMAT2));
                         if (changeOrder.getScheduleDay() != null && changeOrder.getScheduleDay() > 0) {
-                            map.put("info", "业主退人工成功，工期提前" + changeOrder.getScheduleDay() + "天");
+                            map.put("info",  houseFlow.getWorkerTypeName() + "退人工成功，工期提前" + changeOrder.getScheduleDay() + "天");
                         } else {
-                            map.put("info", "业主退人工成功，工期提前");
+                            map.put("info",  houseFlow.getWorkerTypeName() + "退人工成功，工期提前");
                         }
                         map.put("type", 3);
                         actuals.add(map);
