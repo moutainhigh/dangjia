@@ -305,10 +305,11 @@ public class HouseFlowScheduleService {
                         int numall = 1 + DateUtil.daysofTwo(houseFlowApply.getStartDate(), houseFlowApply.getEndDate());//请假天数
                         Map map = new HashMap<>();
                         map.put("date", DateUtil.dateToString(houseFlowApply.getCreateDate(), DateUtil.FORMAT2));
+                        String dayse="("+DateUtil.dateToString(houseFlowApply.getStartDate(), DateUtil.FORMAT2)+"至"+DateUtil.dateToString(houseFlowApply.getEndDate(), DateUtil.FORMAT2)+")";
                         if (CommonUtil.isEmpty(houseFlowApply.getOperator()) || houseFlowApply.getWorkerId().equals(houseFlowApply.getOperator())) {
-                            map.put("info", houseFlow.getWorkerTypeName() + "申请" + numall + "天停工" + (CommonUtil.isEmpty(houseFlowApply.getApplyDec()) ? "" : ",理由：" + houseFlowApply.getApplyDec()));
+                            map.put("info", houseFlow.getWorkerTypeName() + "申请" + numall + "天停工"+ dayse + (CommonUtil.isEmpty(houseFlowApply.getApplyDec()) ? "" : ",理由：" + houseFlowApply.getApplyDec()));
                         } else {
-                            map.put("info", "大管家申请" + houseFlow.getWorkerTypeName() + "停工" + numall + "天" + (CommonUtil.isEmpty(houseFlowApply.getApplyDec()) ? "" : ",理由：" + houseFlowApply.getApplyDec()));
+                            map.put("info", "大管家申请" + houseFlow.getWorkerTypeName() + "停工" + numall + "天" + dayse + (CommonUtil.isEmpty(houseFlowApply.getApplyDec()) ? "" : ",理由：" + houseFlowApply.getApplyDec()));
                         }
                         map.put("type", 3);
                         actuals.add(map);
@@ -347,9 +348,9 @@ public class HouseFlowScheduleService {
                         Map map = new HashMap<>();
                         map.put("date", DateUtil.dateToString(changeOrder.getCreateDate(), DateUtil.FORMAT2));
                         if (changeOrder.getScheduleDay() != null && changeOrder.getScheduleDay() > 0) {
-                            map.put("info", "业主退人工成功，工期提前" + changeOrder.getScheduleDay() + "天");
+                            map.put("info",  houseFlow.getWorkerTypeName() + "退人工成功，工期提前" + changeOrder.getScheduleDay() + "天");
                         } else {
-                            map.put("info", "业主退人工成功，工期提前");
+                            map.put("info",  houseFlow.getWorkerTypeName() + "退人工成功，工期提前");
                         }
                         map.put("type", 3);
                         actuals.add(map);

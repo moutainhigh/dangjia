@@ -711,7 +711,7 @@ public class HouseWorkerService {
                         houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
                     }
                 }
-                suspendDay = DateUtil.daysofTwo(start, end) + 1;
+                suspendDay = DateUtil.daysofTwo(start, end) ;
                 if (suspendDay > 0) {
                     //计划提前
                     houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), null, suspendDay);
@@ -720,7 +720,7 @@ public class HouseWorkerService {
                 suspendDay = 0;
                 //若未进场的工序比计划开工日期提早开工，则计划开工日期修改为实际开工日期，（施工天数不变）完工日期随之提早
                 if (houseFlow.getStartDate() != null && houseFlow.getStartDate().getTime() > start.getTime()) {
-                    suspendDay = DateUtil.daysofTwo(start, houseFlow.getStartDate()) + 1;
+                    suspendDay = DateUtil.daysofTwo(start, houseFlow.getStartDate());
                     houseFlow.setStartDate(DateUtil.delDateDays(houseFlow.getStartDate(), suspendDay));
                     houseFlow.setEndDate(DateUtil.delDateDays(houseFlow.getEndDate(), suspendDay));
                 }

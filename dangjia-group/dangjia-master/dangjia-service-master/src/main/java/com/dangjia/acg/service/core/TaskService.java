@@ -93,6 +93,7 @@ public class TaskService {
             example.createCriteria()
                     .andEqualTo(House.MEMBER_ID, member.getId())
                     .andNotEqualTo(House.VISIT_STATE, 2)
+                    .andNotEqualTo(House.VISIT_STATE, 4)
                     .andEqualTo(House.DATA_STATUS, 0);
             houseList = houseMapper.selectByExample(example);
             for (House house : houseList) {

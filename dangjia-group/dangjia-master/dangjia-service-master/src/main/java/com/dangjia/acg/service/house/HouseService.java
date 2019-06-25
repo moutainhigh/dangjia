@@ -1244,7 +1244,7 @@ public class HouseService {
         map.put("id", hfa.getSourceId());
         Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
         map.put("workerHead", address + member.getHead());//工人头像
-        if (hfa.getWorkerType() != null) {
+        if (member.getWorkerType() != null) {
             map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
         } else {
             map.put("workerTypeName", "业主");//工匠类型
@@ -1394,12 +1394,9 @@ public class HouseService {
         applyTypeMap.put(DjConstants.ApplyType.ZHENGTI_WANGONG, "整体完工申请");
         applyTypeMap.put(DjConstants.ApplyType.TINGGONG, "停工申请");
         applyTypeMap.put(DjConstants.ApplyType.MEIRI_KAIGONG, "每日开工");
-        applyTypeMap.put(DjConstants.ApplyType.YOUXIAO_XUNCHA, "巡查");
-        applyTypeMap.put(DjConstants.ApplyType.WUREN_XUNCHA, "巡查");
-        applyTypeMap.put(DjConstants.ApplyType.ZUIJIA_XUNCHA, "巡查");
-//        applyTypeMap.put(DjConstants.ApplyType.JIEDUAN_WANGONG_SUCCESS, "阶段完工审核");
-//        applyTypeMap.put(DjConstants.ApplyType.ZHENGTI_WANGONG_SUCCESS, "整体完工审核");
-//        applyTypeMap.put(DjConstants.ApplyType.NO_PASS, "审核未通过");
+        applyTypeMap.put(DjConstants.ApplyType.YOUXIAO_XUNCHA, "有人巡查");
+        applyTypeMap.put(DjConstants.ApplyType.WUREN_XUNCHA, "无人巡查");
+        applyTypeMap.put(DjConstants.ApplyType.ZUIJIA_XUNCHA, "追加巡查");
         Map<String, Object> map = new HashMap<>();
         map.put("id", hfa.getId());
         Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
@@ -1430,7 +1427,12 @@ public class HouseService {
             imgArr[i] = address + string;
         }
         map.put("imgArr", imgArr);
-        map.put("applyType", applyTypeMap.get(hfa.getApplyType()));
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(hfa.getHouseFlowId());
+        if(hfa.getWorkerType()==3&&houseFlow!=null&&hfa.getWorkerType()!=houseFlow.getWorkerType()){
+            map.put("applyType","大管家验收("+ workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId())+")的"+ applyTypeMap.get(hfa.getApplyType()));
+        }else {
+            map.put("applyType", applyTypeMap.get(hfa.getApplyType()));
+        }
         map.put("createDate", hfa.getCreateDate().getTime());
         return map;
     }
@@ -1573,7 +1575,7 @@ public class HouseService {
                 houseConstructionRecord.setHouseId(houseFlowApply.getHouseId());
                 houseConstructionRecord.setSourceId(houseFlowApply.getId());
                 houseConstructionRecord.setContent(houseFlowApply.getApplyDec());
-                houseConstructionRecord.setWorkerId(houseFlowApply.getWorkerId());
+                houseConstructionRecord.setWorkerId(houseFlowApply.getOperator());
                 houseConstructionRecord.setWorkerType(houseFlowApply.getWorkerType());
                 houseConstructionRecord.setApplyType(houseFlowApply.getApplyType());
                 if (houseFlowApply.getApplyType() == 8) {

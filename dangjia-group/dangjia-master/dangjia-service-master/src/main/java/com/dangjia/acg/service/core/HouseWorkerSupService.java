@@ -18,6 +18,7 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -53,6 +54,8 @@ public class HouseWorkerSupService {
     @Autowired
     private ConfigMessageService configMessageService;
 
+    @Autowired
+    private HouseService houseService;
     @Autowired
     private HouseFlowScheduleService houseFlowScheduleService;
     /**
@@ -168,8 +171,12 @@ public class HouseWorkerSupService {
                         hfa.setEndDate(end);
                         hfa.setOperator(worker.getId());
                         houseFlowApplyMapper.insert(hfa);
-                        houseFlow.setPause(1);//0:正常；1暂停；
-                        houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
+
+                        if(start.getTime()== DateUtil.toDate(DateUtil.getDateString2(new Date().getTime())).getTime()){
+                            houseFlow.setPause(1);//0:正常；1暂停；
+                            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
+                        }
+                        houseService.insertConstructionRecord(hfa);
                     }
                 }
 
@@ -219,7 +226,7 @@ public class HouseWorkerSupService {
                 hfa.setEndDate(end);
                 hfa.setOperator(worker.getId());
                 houseFlowApplyMapper.insert(hfa);
-//            houseService.insertConstructionRecord(hfa);
+                houseService.insertConstructionRecord(hfa);
                 houseFlow.setPause(1);//0:正常；1暂停；
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
                 //计划顺延
