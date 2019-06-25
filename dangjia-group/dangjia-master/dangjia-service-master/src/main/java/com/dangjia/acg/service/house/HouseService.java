@@ -1429,7 +1429,7 @@ public class HouseService {
         map.put("imgArr", imgArr);
         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(hfa.getHouseFlowId());
         if(hfa.getWorkerType()==3&&houseFlow!=null&&hfa.getWorkerType()!=houseFlow.getWorkerType()){
-            map.put("applyType","大管家验收("+ workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId())+")的"+ applyTypeMap.get(hfa.getApplyType()));
+            map.put("applyType","大管家验收("+ workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId()).getName()+")的"+ applyTypeMap.get(hfa.getApplyType()));
         }else {
             map.put("applyType", applyTypeMap.get(hfa.getApplyType()));
         }
