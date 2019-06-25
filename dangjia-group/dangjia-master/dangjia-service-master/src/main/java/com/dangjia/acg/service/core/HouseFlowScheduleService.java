@@ -305,10 +305,11 @@ public class HouseFlowScheduleService {
                         int numall = 1 + DateUtil.daysofTwo(houseFlowApply.getStartDate(), houseFlowApply.getEndDate());//请假天数
                         Map map = new HashMap<>();
                         map.put("date", DateUtil.dateToString(houseFlowApply.getCreateDate(), DateUtil.FORMAT2));
+                        String dayse="("+DateUtil.dateToString(houseFlowApply.getStartDate(), DateUtil.FORMAT2)+"至"+DateUtil.dateToString(houseFlowApply.getEndDate(), DateUtil.FORMAT2)+")";
                         if (CommonUtil.isEmpty(houseFlowApply.getOperator()) || houseFlowApply.getWorkerId().equals(houseFlowApply.getOperator())) {
-                            map.put("info", houseFlow.getWorkerTypeName() + "申请" + numall + "天停工" + (CommonUtil.isEmpty(houseFlowApply.getApplyDec()) ? "" : ",理由：" + houseFlowApply.getApplyDec()));
+                            map.put("info", houseFlow.getWorkerTypeName() + "申请" + numall + "天停工"+ dayse + (CommonUtil.isEmpty(houseFlowApply.getApplyDec()) ? "" : ",理由：" + houseFlowApply.getApplyDec()));
                         } else {
-                            map.put("info", "大管家申请" + houseFlow.getWorkerTypeName() + "停工" + numall + "天" + (CommonUtil.isEmpty(houseFlowApply.getApplyDec()) ? "" : ",理由：" + houseFlowApply.getApplyDec()));
+                            map.put("info", "大管家申请" + houseFlow.getWorkerTypeName() + "停工" + numall + "天" + dayse + (CommonUtil.isEmpty(houseFlowApply.getApplyDec()) ? "" : ",理由：" + houseFlowApply.getApplyDec()));
                         }
                         map.put("type", 3);
                         actuals.add(map);

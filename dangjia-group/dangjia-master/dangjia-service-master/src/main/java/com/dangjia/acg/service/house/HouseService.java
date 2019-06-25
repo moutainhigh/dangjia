@@ -1244,7 +1244,7 @@ public class HouseService {
         map.put("id", hfa.getSourceId());
         Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
         map.put("workerHead", address + member.getHead());//工人头像
-        if (hfa.getWorkerType() != null) {
+        if (member.getWorkerType() != null) {
             map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
         } else {
             map.put("workerTypeName", "业主");//工匠类型
@@ -1573,7 +1573,7 @@ public class HouseService {
                 houseConstructionRecord.setHouseId(houseFlowApply.getHouseId());
                 houseConstructionRecord.setSourceId(houseFlowApply.getId());
                 houseConstructionRecord.setContent(houseFlowApply.getApplyDec());
-                houseConstructionRecord.setWorkerId(houseFlowApply.getWorkerId());
+                houseConstructionRecord.setWorkerId(houseFlowApply.getOperator());
                 houseConstructionRecord.setWorkerType(houseFlowApply.getWorkerType());
                 houseConstructionRecord.setApplyType(houseFlowApply.getApplyType());
                 if (houseFlowApply.getApplyType() == 8) {
