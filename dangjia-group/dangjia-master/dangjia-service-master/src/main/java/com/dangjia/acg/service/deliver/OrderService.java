@@ -221,7 +221,7 @@ public class OrderService {
             businessOrderDTO.setBusinessOrderId(businessOrder.getId());
             businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
             businessOrderDTO.setNumber(businessOrder.getNumber());
-
+            businessOrderDTO.setType(businessOrder.getType());
             businessOrderDTOS.add(businessOrderDTO);
         }
         return ServerResponse.createBySuccess("查询成功", businessOrderDTOS);
