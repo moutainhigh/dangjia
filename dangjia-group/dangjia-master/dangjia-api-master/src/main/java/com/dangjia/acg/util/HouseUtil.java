@@ -18,7 +18,6 @@ public class HouseUtil {
     public static NodeDTO getWorkerDatas(House house, HouseFlow houseFlow,WorkerType workerType,String address ) {
         NodeDTO nodeDTO = new NodeDTO();
         String[] nameBs;
-        String[] iconsN;
         String[] iconsY;
         nodeDTO.setNameA(workerType.getName());
         nodeDTO.setColor(workerType.getColor());
@@ -28,23 +27,19 @@ public class HouseUtil {
         if (workerType.getType() == 1) {//设计
             if (house.getDecorationType() == 2) {//自带设计流程
                 nameBs= new String[]{"设计抢单", "设计平面图", "设计施工图", "设计完成"};
-                iconsN= new String[]{"zx_icon_1_1.png", "zx_icon_5_1.png", "zx_icon_6_1.png", "zx_icon_7_1.png"};
                 iconsY= new String[]{"zx_icon_1_2.png", "zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
                 nodeDTO.setTotal(nameBs.length);
             }else{
                 nameBs = new String[]{"设计抢单", "业主支付", "量房阶段", "设计平面图", "设计施工图", "设计完成"};
-                iconsN= new String[]{"zx_icon_1_1.png", "zx_icon_2_1.png","zx_icon_3_1.png","zx_icon_5_1.png", "zx_icon_6_1.png", "zx_icon_7_1.png"};
                 iconsY= new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png","zx_icon_3_2.png","zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
                 nodeDTO.setTotal(nameBs.length);
             }
             nodeDTO=getDesignDatas(house,nodeDTO);
         }else if (workerType.getType() == 2) {//精算
             nameBs = new String[]{"精算抢单", "业主支付", "制作精算", "精算完成"};
-            iconsN= new String[]{"zx_icon_1_1.png", "zx_icon_2_1.png","zx_icon_4_1.png", "zx_icon_7_1.png"};
             iconsY= new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png","zx_icon_4_2.png", "zx_icon_7_2.png"};
             nodeDTO=getBudgetDatas(house,nodeDTO);
         }else if (workerType.getType() == 3) {//大管家
-            iconsN=null;
             iconsY=null;
             nameBs = new String[]{"未开始","大管家抢单", "业主支付", "工程排期", "确认开工", "监管工地", "整体竣工"};
             if (houseFlow.getWorkType() == 1) {
@@ -71,11 +66,9 @@ public class HouseUtil {
                 nodeDTO.setRank(5);
             }
         }else if (workerType.getType() == 4) {//拆除
-            iconsN=null;
             iconsY=null;
             nameBs = new String[]{"未开始","拆除抢单", "业主支付", "施工交底","施工中", "整体完工"};
         }else{//其他
-            iconsN=null;
             iconsY=null;
             nameBs = new String[]{"未开始",workerType.getName()+"抢单", "业主支付", "施工交底","施工中", "阶段完工", "整体完工"};
         }
@@ -88,16 +81,11 @@ public class HouseUtil {
         for (int i = 0; i < nameBs.length; i++) {
             Map<String, Object> map = new HashMap<>();
             map.put("name", nameBs[i]);
-            map.put("begin", i +1);
             if(houseFlow.getWorkerType()<3){
-                if(iconsY.length==nameBs.length) {
-                    if (nodeDTO.getRank() <= (i + 1)) {
-                        map.put("icon",address + "icon/"+iconsY[i]);
-                    } else {
-                        map.put("icon",address + "icon/"+iconsN[i]);
-                    }
-                }
-
+                map.put("icon",address + "icon/"+iconsY[i]);
+                map.put("begin", i +1);
+            }else{
+                map.put("begin", i);
             }
 
             dataList.add(map);
