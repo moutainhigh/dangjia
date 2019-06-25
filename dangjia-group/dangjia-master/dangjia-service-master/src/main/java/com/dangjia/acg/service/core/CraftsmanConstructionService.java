@@ -423,7 +423,12 @@ public class CraftsmanConstructionService {
                 if (houseFlowApp == null) {//没有发验收申请
                     buttonList.add(Utils.getButton("申请业主验收", 2));
                 } else {
-                    promptList.add("您已提交业主验收申请，请耐心等待业主审核！");
+                    if (houseFlowApp.getMemberCheck() == 4) {
+                        promptList.add("业主要求整改");
+                    }else {
+                        promptList.add("您已提交业主验收申请，请耐心等待业主审核！");
+                    }
+
                 }
             }
         } else if (houseFlowApplyList.size() != 0) {//今日已提交过有人巡查
@@ -738,7 +743,11 @@ public class CraftsmanConstructionService {
             } else if (checkFlowApp.getSupervisorCheck() == 0) {
                 promptList.add("已申请整体完工,等待大管家审核");
             } else if (checkFlowApp.getSupervisorCheck() == 1) {
-                promptList.add("大管家已审核您的整体完工,待业主审核");
+                if (checkFlowApp.getMemberCheck() == 4) {
+                    promptList.add("业主要求整改");
+                }else {
+                    promptList.add("大管家已审核您的整体完工,待业主审核");
+                }
             }
         } else {//阶段完工申请
             if (checkFlowApp == null) {

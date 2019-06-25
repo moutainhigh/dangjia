@@ -189,7 +189,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from dj_core_house_flow_apply
         where 1=1
         and house_flow_id = #{houseFlowId}
-        and member_check = 0
+        and (member_check = 0 or member_check = 4)
         and worker_id = #{workerId}
         LIMIT 1
     </select>
