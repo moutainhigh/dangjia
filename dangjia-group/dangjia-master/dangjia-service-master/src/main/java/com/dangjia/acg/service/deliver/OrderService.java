@@ -183,7 +183,7 @@ public class OrderService {
             }
             if (businessOrder.getType() == 5) {//验房分销
                 HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
-                businessOrderDTO.setHouseName(houseDistribution.getInfo()+"(验房分销)");
+                businessOrderDTO.setHouseName(houseDistribution.getInfo());
             }
             businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
             businessOrderDTO.setNumber(businessOrder.getNumber());
@@ -216,7 +216,7 @@ public class OrderService {
             House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
             if (businessOrder.getType() == 5) {//验房分销
                 HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
-                businessOrderDTO.setHouseName(houseDistribution.getInfo()+"(验房分销)");
+                businessOrderDTO.setHouseName(houseDistribution.getInfo());
             } else {
                 businessOrderDTO.setHouseName(house == null ? "" : house.getHouseName());
             }
