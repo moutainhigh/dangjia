@@ -214,22 +214,44 @@ public class OrderService {
         for (BusinessOrder businessOrder : businessOrderList) {
             BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
             House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+            String info ="";//1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销, 6换货单,7:设计精算补单
+            switch (businessOrder.getType()) {
+                case 1:
+                    info="(工序订单)";
+                    break;
+                case 2:
+                    info="(补货/补人工单)";
+                    break;
+                case 4:
+                    info="(材料订单)";
+                    break;
+                case 5:
+                    info="(验房分销单)";
+                    break;
+                case 6:
+                    info="(换货单)";
+                    break;
+                case 7:
+                    info="(设计/精算单)";
+                    break;
+            }
             if (businessOrder.getType() == 5) {//验房分销
                 HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
                 businessOrderDTO.setHouseName(houseDistribution.getInfo());
             } else {
                 businessOrderDTO.setHouseName(house == null ? "" : house.getHouseName());
             }
+            businessOrderDTO.setHouseName(businessOrderDTO.getHouseName()+info);
             List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house == null ? "" : house.getStyle());
-             if(orderDTOList.size()>0) {
-                 BigDecimal payPrice=new BigDecimal(0);
-                 for (OrderDTO orderDTO : orderDTOList) {
-                     payPrice = payPrice.add(orderDTO.getTotalAmount());
-                 }
-                 businessOrderDTO.setPayPrice(payPrice);
-             }else{
-                 businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
-             }
+            if(orderDTOList.size()>0) {
+                BigDecimal payPrice=new BigDecimal(0);
+                for (OrderDTO orderDTO : orderDTOList) {
+                    payPrice = payPrice.add(orderDTO.getTotalAmount());
+                }
+                businessOrderDTO.setPayPrice(payPrice);
+            }else{
+                businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
+            }
             businessOrderDTO.setOrderDTOList(orderDTOList);
             businessOrderDTO.setBusinessOrderId(businessOrder.getId());
             businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
