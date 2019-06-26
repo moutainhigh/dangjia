@@ -15,6 +15,7 @@ import com.dangjia.acg.dto.deliver.OrderDTO;
 import com.dangjia.acg.dto.deliver.OrderItemDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.*;
+import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
@@ -25,6 +26,7 @@ import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.house.WarehouseDetail;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -73,6 +75,8 @@ public class OrderService {
     private IHouseMapper houseMapper;
     @Autowired
     private IBusinessOrderMapper businessOrderMapper;
+    @Autowired
+    private IHouseDistributionMapper iHouseDistributionMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
     @Autowired
@@ -169,13 +173,20 @@ public class OrderService {
     public ServerResponse orderList(String businessOrderId) {
         try {
             BusinessOrder businessOrder = businessOrderMapper.selectByPrimaryKey(businessOrderId);
-            House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+
             BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
-            businessOrderDTO.setHouseName(house.getHouseName());
+            if(!CommonUtil.isEmpty(businessOrder.getHouseId())){
+                House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+                businessOrderDTO.setHouseName(house.getHouseName());
+                List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house.getStyle());
+                businessOrderDTO.setOrderDTOList(orderDTOList);
+            }
+            if (businessOrder.getType() == 5) {//验房分销
+                HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
+                businessOrderDTO.setHouseName(houseDistribution.getInfo());
+            }
             businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
             businessOrderDTO.setNumber(businessOrder.getNumber());
-            List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house.getStyle());
-            businessOrderDTO.setOrderDTOList(orderDTOList);
             businessOrderDTO.setTotalPrice(businessOrder.getTotalPrice());
             businessOrderDTO.setDiscountsPrice(businessOrder.getDiscountsPrice());
             businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
@@ -202,22 +213,48 @@ public class OrderService {
         for (BusinessOrder businessOrder : businessOrderList) {
             BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
             House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
-            if (businessOrder.getType() == 5) {
-                businessOrderDTO.setHouseName("验房分销");
+            String info ="";//1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销, 6换货单,7:设计精算补单
+            switch (businessOrder.getType()) {
+                case 1:
+                    info="(工序订单)";
+                    break;
+                case 2:
+                    info="(补货/补人工单)";
+                    break;
+                case 4:
+                    info="(材料订单)";
+                    break;
+                case 5:
+                    info="(验房分销单)";
+                    break;
+                case 6:
+                    info="(换货单)";
+                    break;
+                case 7:
+                    info="(设计/精算单)";
+                    break;
+            }
+            if (businessOrder.getType() == 5) {//验房分销
+                HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
+                businessOrderDTO.setHouseName(houseDistribution.getInfo());
             } else {
                 businessOrderDTO.setHouseName(house == null ? "" : house.getHouseName());
             }
+            businessOrderDTO.setHouseName(businessOrderDTO.getHouseName()+info);
             List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house == null ? "" : house.getStyle());
-             BigDecimal payPrice=new BigDecimal(0);
-            for (OrderDTO orderDTO : orderDTOList) {
-                payPrice=payPrice.add(orderDTO.getTotalAmount());
+            if(orderDTOList.size()>0) {
+                BigDecimal payPrice=new BigDecimal(0);
+                for (OrderDTO orderDTO : orderDTOList) {
+                    payPrice = payPrice.add(orderDTO.getTotalAmount());
+                }
+                businessOrderDTO.setPayPrice(payPrice);
+            }else{
+                businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
             }
-            businessOrderDTO.setPayPrice(payPrice);
             businessOrderDTO.setOrderDTOList(orderDTOList);
             businessOrderDTO.setBusinessOrderId(businessOrder.getId());
             businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
             businessOrderDTO.setNumber(businessOrder.getNumber());
-
             businessOrderDTOS.add(businessOrderDTO);
         }
         return ServerResponse.createBySuccess("查询成功", businessOrderDTOS);

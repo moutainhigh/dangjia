@@ -25,7 +25,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		SELECT
 		<include refid="all_columns"/>
 		FROM dj_pay_business_order
-		where member_id = #{memberId}
+		where member_id = #{memberId} and state != 1
 		ORDER BY create_date desc
 	</select>
 
