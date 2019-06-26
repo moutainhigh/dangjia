@@ -1209,17 +1209,21 @@ public class HouseService {
         pageResult.setList(listMap);
         return ServerResponse.createBySuccess("查询施工记录成功", pageResult);
     }
-
     /**
      * 施工记录
      */
-    public ServerResponse queryConstructionRecordAll(String houseId, PageDTO pageDTO) {
+    public ServerResponse queryConstructionRecordAll(String houseId,String day,  PageDTO pageDTO) {
         // 施工记录的内容需要更改
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Example example = new Example(HouseConstructionRecord.class);
-        example.createCriteria().andEqualTo(HouseConstructionRecord.HOUSE_ID, houseId);
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        Example.Criteria criteria=example.createCriteria();
+        criteria.andEqualTo(HouseConstructionRecord.HOUSE_ID, houseId);
+        if(!CommonUtil.isEmpty(day)){
+            criteria.andCondition(" to_days(create_date) = to_days('" + day + "') ");
+        }
         example.orderBy(HouseConstructionRecord.CREATE_DATE).desc();
+
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<HouseConstructionRecord> hfaList = houseConstructionRecordMapper.selectByExample(example);
         if (hfaList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相施工记录");
