@@ -247,15 +247,19 @@
             FROM
                 dj_basics_product p
                 INNER JOIN dj_basics_goods g ON g.id = p.goods_id
+                INNER JOIN dj_basics_brand_series s ON s.id = p.brand_series_id
             WHERE
                 p.data_status = 0
                 AND p.type = 1
                 AND p.maket = 1
+                AND p.image !='qrcode/moren.png'
+                AND s.image !=''
+                AND s.image is not null
             ORDER BY
                 rand( )
                 LIMIT 3
-            ) UNION ALL
-            (
+                ) UNION ALL
+                (
             SELECT
                 id AS id,
                 image AS image,
@@ -269,10 +273,13 @@
             WHERE
                 data_status = 0
                 AND show_goods = 1
+                AND image !='qrcode/moren.png'
+                AND worker_dec !=''
+                AND worker_dec is not null
             ORDER BY
                 rand( )
-            LIMIT 3
-            )
+                LIMIT 3
+                )
     </select>
 
 
