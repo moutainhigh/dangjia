@@ -273,6 +273,7 @@
             WHERE
                 data_status = 0
                 AND show_goods = 1
+                AND image !='qrcode/moren.png'
                 AND worker_dec !=''
                 AND worker_dec is not null
             ORDER BY
