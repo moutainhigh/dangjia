@@ -519,13 +519,13 @@ public class HouseService {
                 srcHouse.setShowHouse(house.getShowHouse());
                 if (house.getShowHouse() == 1) {
                     HouseChoiceCase houseChoiceCase = new HouseChoiceCase();
-                    houseChoiceCase.setDataStatus(1);
+                    houseChoiceCase.setDataStatus(0);
                     houseChoiceCase.setCityId(srcHouse.getCityId());
                     houseChoiceCase.setHouseId(srcHouse.getId());
                     houseChoiceCase.setImage(srcHouse.getImage());
                     houseChoiceCase.setMoney(srcHouse.getMoney());
                     houseChoiceCase.setTitle(srcHouse.getNoNumberHouseName());
-                    houseChoiceCase.setLabel(StringUtils.replaceAll(srcHouse.getStyle(), "、", "|"));
+                    houseChoiceCase.setLabel(srcHouse.getStyle());
                     houseChoiceCase.setSource("房源来自当家装修精选推荐");
                     houseChoiceCaseService.addHouseChoiceCase(request, houseChoiceCase);
                 } else {
