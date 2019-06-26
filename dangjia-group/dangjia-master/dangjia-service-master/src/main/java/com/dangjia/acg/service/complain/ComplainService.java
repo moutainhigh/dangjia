@@ -316,7 +316,8 @@ public class ComplainService {
      * @param files       附件 以，分割 如：data/f.dow,data/f2.dow
      * @return
      */
-    public ServerResponse updataComplain(String userId, String complainId, Integer state, String description, String files, String operateId, String operateName) {
+    public ServerResponse updataComplain(String userId, String complainId, Integer state, String description,
+                                         String files, String operateId, String operateName) {
         if (CommonUtil.isEmpty(complainId)) {
             return ServerResponse.createByErrorMessage("参数不正确");
         }
@@ -469,6 +470,7 @@ public class ComplainService {
                         if (house.getVisitState() != 1 && house.getVisitState() != 5) {
                             return ServerResponse.createByErrorMessage("该房子没有在装修，无法结束装修");
                         }
+                        setHouseFlowsWorkSteta(house.getId());
                         house.setModifyDate(new Date());
                         house.setCompletedDate(new Date());
                         house.setVisitState(4);
@@ -484,18 +486,6 @@ public class ComplainService {
                                     new BigDecimal((Double) map.get("backMoney")),
                                     new BigDecimal((Double) map.get("haveMoney")), complain.getHouseId(),
                                     "业主提前结束装修，原因为" + complain.getContent());
-                        }
-                        if (brandSeriesLists.size() == 1) {
-                            //说明只有大管家进场了
-                            Example example1 = new Example(HouseFlow.class);
-                            example1.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, complain.getHouseId()).andGreaterThan(HouseFlow.SORT, 3);
-                            example1.orderBy(HouseFlow.SORT).asc();
-                            List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example1);
-                            if (houseFlows.size() > 0) {
-                                houseFlows.get(0).setWorkType(1);//把下一个工种弄成未发布
-                                houseFlows.get(0).setReleaseTime(new Date());
-                                houseFlowMapper.updateByPrimaryKeySelective(houseFlows.get(0));
-                            }
                         }
                         houseMapper.updateByPrimaryKeySelective(house);
                         break;
@@ -757,18 +747,7 @@ public class ComplainService {
                     new BigDecimal((Double) map.get("haveMoney")), houseId,
                     "中台提前结束装修，原因为" + content);
         }
-        if (brandSeriesLists.size() == 1) {
-            //说明只有大管家进场了
-            Example example1 = new Example(HouseFlow.class);
-            example1.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andGreaterThan(HouseFlow.SORT, 3);
-            example1.orderBy(HouseFlow.SORT).asc();
-            List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example1);
-            if (houseFlows.size() > 0) {
-                houseFlows.get(0).setWorkType(1);//把下一个工种弄成未发布
-                houseFlows.get(0).setReleaseTime(new Date());
-                houseFlowMapper.updateByPrimaryKeySelective(houseFlows.get(0));
-            }
-        }
+        setHouseFlowsWorkSteta(house.getId());
         house.setModifyDate(new Date());
         house.setCompletedDate(new Date());
         house.setVisitState(4);
@@ -829,6 +808,7 @@ public class ComplainService {
         if (Double.parseDouble(backMoney) > subtract.doubleValue() || Double.parseDouble(backMoney) <= 0) {
             return ServerResponse.createByErrorMessage("退款金额有误，请重新输入!");
         }
+        setHouseFlowsWorkSteta(house.getId());
         commitStopBuild(hwo2.getWorkerId(), new BigDecimal(backMoney), subtract, houseId, content);
         house.setModifyDate(new Date());
         house.setCompletedDate(new Date());
@@ -873,6 +853,43 @@ public class ComplainService {
         return false;
     }
 
+    private void setHouseFlowsWorkSteta(String houseId) {
+        Example example = new Example(HouseFlow.class);
+        example.createCriteria()
+                .andEqualTo(HouseFlow.HOUSE_ID, houseId)
+                .andEqualTo(HouseFlow.WORK_STETA, 0);
+        List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+        for (HouseFlow houseFlow : houseFlows) {
+            houseFlow.setWorkType(1);//把下一个工种弄成未发布
+            houseFlow.setReleaseTime(new Date());
+            houseFlow.setWorkSteta(6);
+            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+            //删除质保卡
+            WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByWorkerTypeId(houseFlow.getWorkerTypeId(), houseFlow.getHouseId());
+            if (wtso != null) {
+                wtso.setDataStatus(1);
+                workerTypeSafeOrderMapper.updateByPrimaryKey(wtso);
+            }
+            if (!CommonUtil.isEmpty(houseFlow.getWorkerId())) {
+                HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
+                hfa.setHouseFlowId(houseFlow.getId());//工序id
+                hfa.setWorkerId(houseFlow.getWorkerId());//工人id
+                hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
+                hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
+                hfa.setHouseId(houseFlow.getHouseId());//房子id
+                hfa.setApplyType(8);//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
+                hfa.setApplyMoney(new BigDecimal(0));//申请得钱
+                hfa.setSupervisorMoney(new BigDecimal(0));
+                hfa.setOtherMoney(new BigDecimal(0));
+                hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
+                hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
+                hfa.setPayState(1);//是否付款
+                hfa.setApplyDec("提前结束装修");//描述
+                houseFlowApplyMapper.insert(hfa);
+                houseService.insertConstructionRecord(hfa);
+            }
+        }
+    }
 
     @Transactional(rollbackFor = Exception.class)
     public void commitStopBuild(Object workerId, BigDecimal backMoney, BigDecimal haveMoney, String houseId, String content) {
@@ -905,6 +922,24 @@ public class ComplainService {
                 wtso.setDataStatus(1);
                 workerTypeSafeOrderMapper.updateByPrimaryKey(wtso);
             }
+            //添加一条记录
+            HouseFlow houseFlow = houseFlows.get(0);
+            HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
+            hfa.setHouseFlowId(houseFlow.getId());//工序id
+            hfa.setWorkerId(houseFlow.getWorkerId());//工人id
+            hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
+            hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
+            hfa.setHouseId(houseFlow.getHouseId());//房子id
+            hfa.setApplyType(8);//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
+            hfa.setApplyMoney(subtract1);//申请得钱
+            hfa.setSupervisorMoney(new BigDecimal(0));
+            hfa.setOtherMoney(new BigDecimal(0));
+            hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
+            hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
+            hfa.setPayState(1);//是否付款
+            hfa.setApplyDec(content);//描述
+            houseFlowApplyMapper.insert(hfa);
+            houseService.insertConstructionRecord(hfa);
         }
         //工匠加流水记录
         Member member1 = memberMapper.selectByPrimaryKey(workerId);
@@ -946,26 +981,6 @@ public class ComplainService {
         workerDetail1.setApplyMoney(backMoney);
         workerDetail1.setWalletMoney(member.getHaveMoney());
         iWorkerDetailMapper.insert(workerDetail1);
-
-        //添加一条记录
-        HouseFlow houseFlow = houseFlows.get(0);
-        HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
-        hfa.setHouseFlowId(houseFlow.getId());//工序id
-        hfa.setWorkerId(houseFlow.getWorkerId());//工人id
-        hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
-        hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
-        hfa.setHouseId(houseFlow.getHouseId());//房子id
-        hfa.setApplyType(8);//申请类型0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5巡查,6无人巡查
-        hfa.setApplyMoney(subtract1);//申请得钱
-        hfa.setSupervisorMoney(new BigDecimal(0));
-        hfa.setOtherMoney(new BigDecimal(0));
-        hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
-        hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
-        hfa.setPayState(1);//是否付款
-        hfa.setApplyDec(content);//描述
-        houseFlowApplyMapper.insert(hfa);
-        houseService.insertConstructionRecord(hfa);
-
     }
 }
 
