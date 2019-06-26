@@ -935,6 +935,25 @@ public class HouseService {
                 houseFlow.setCheckMoney(new BigDecimal(checkMoney));
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
             }
+            if(budgetOk==2){
+                HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(house.getId(), "2");
+                //添加一条记录
+                HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
+                hfa.setHouseFlowId(houseFlow.getId());//工序id
+                hfa.setWorkerId(houseFlow.getWorkerId());//工人id
+                hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
+                hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
+                hfa.setHouseId(houseFlow.getHouseId());//房子id
+                hfa.setApplyType(16);//申请得钱
+                hfa.setSupervisorMoney(new BigDecimal(0));
+                hfa.setOtherMoney(new BigDecimal(0));
+                hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
+                hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
+                hfa.setPayState(0);//是否付款
+                hfa.setApplyDec("我是精算师，我已经精算完成！ ");//描述
+                houseFlowApplyMapper.insert(hfa);
+                insertConstructionRecord(hfa);
+            }
             house.setBudgetOk(budgetOk);//精算状态:-1已精算没有发给业主,默认0未开始,1已开始精算,2已发给业主,3审核通过,4审核不通过
             iHouseMapper.updateByPrimaryKeySelective(house);
             return ServerResponse.createBySuccessMessage("修改房子精算状态成功");
