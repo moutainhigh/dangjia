@@ -453,17 +453,17 @@ public class StewardService {
             workerDetailDTO.setMobile(worker.getMobile());
             workerDetailDTO.setPraiseRate(worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");//好评率
             workerDetailDTO.setEvaluationScore(worker.getEvaluationScore());//积分
-            Long countOrder = houseWorkerMapper.getCountOrderByWorkerId(worker.getId());
+            Long countOrder = houseWorkerMapper.getCountOrderByWorkerId(houseFlow.getWorkerId());
             workerDetailDTO.setCountOrder(countOrder == null ? 0 : countOrder);//总单数
-            HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(houseFlow.getHouseId(), worker.getId(), new Date());//查询今日开工记录
+            HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(houseFlow.getHouseId(), houseFlow.getWorkerId(), new Date());//查询今日开工记录
             if (todayStart == null) {//没有今日开工记录
                 workerDetailDTO.setIsStart("否");
             } else {
                 workerDetailDTO.setIsStart("是");//今日是否开工；
             }
-            List<HouseFlowApply> earliestTime = houseFlowApplyMapper.getEarliestTimeHouseApply(houseFlow.getHouseId(), worker.getId());//查询最早的每日开工申请
-            Long suspendDay = houseFlowApplyMapper.getSuspendApply(houseFlow.getHouseId(), worker.getId());//根据房子id和工人id查询暂停天数
-            Long everyEndDay = houseFlowApplyMapper.getEveryDayApply(houseFlow.getHouseId(), worker.getId());//根据房子id和工人id查询每日完工申请天数
+            List<HouseFlowApply> earliestTime = houseFlowApplyMapper.getEarliestTimeHouseApply(houseFlow.getHouseId(), houseFlow.getWorkerId());//查询最早的每日开工申请
+            Long suspendDay = houseFlowApplyMapper.getSuspendApply(houseFlow.getHouseId(), houseFlow.getWorkerId());//根据房子id和工人id查询暂停天数
+            Long everyEndDay = houseFlowApplyMapper.getEveryDayApply(houseFlow.getHouseId(), houseFlow.getWorkerId());//根据房子id和工人id查询每日完工申请天数
             if (earliestTime != null && earliestTime.size() > 0) {
                 Date EarliestDay = earliestTime.get(0).getCreateDate();//最早开工时间
                 Date newDate = new Date();
@@ -481,12 +481,10 @@ public class StewardService {
             } else {
                 workerDetailDTO.setTotalDay(0);//总开工天数
             }
-
             workerDetailDTO.setEveryDay(everyEndDay == null ? 0 : everyEndDay);
             workerDetailDTO.setSuspendDay(suspendDay == null ? 0 : suspendDay);//暂停天数
             workerDetailDTO.setPatrol(houseFlow.getPatrol());//巡查标准次数
-            workerDetailDTO.setPatrolled(houseFlowApplyMapper.getCountValidPatrolByHouseId(houseFlow.getHouseId(), worker.getId()));//已巡查
-
+            workerDetailDTO.setPatrolled(houseFlowApplyMapper.getCountValidPatrolByHouseId(houseFlow.getHouseId(), houseFlow.getWorkerId()));//已巡查
             return workerDetailDTO;
         } catch (Exception e) {
             e.printStackTrace();
