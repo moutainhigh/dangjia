@@ -770,7 +770,7 @@ public class HouseService {
             for (House house : houseList) {
                 if (house.getVisitState() == 0) { //0待确认开工,1装修中,2休眠中,3已完工
                     //默认切换至未确认开工的房子
-                    setSelectHouse(userToken,cityId,house.getId());
+                    setSelectHouse(userToken, cityId, house.getId());
                     return ServerResponse.createByErrorMessage("有房子未确认开工,不能再装");
                 }
             }
@@ -790,7 +790,7 @@ public class HouseService {
         houseExpend.setHouseId(house.getId());
         houseExpendMapper.insert(houseExpend);
         //默认切换至未确认开工的房子
-        setSelectHouse(userToken,cityId,house.getId());
+        setSelectHouse(userToken, cityId, house.getId());
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
@@ -1209,24 +1209,27 @@ public class HouseService {
         pageResult.setList(listMap);
         return ServerResponse.createBySuccess("查询施工记录成功", pageResult);
     }
+
     /**
      * 施工记录
      */
-    public ServerResponse queryConstructionRecordAll(String houseId,String day,  PageDTO pageDTO) {
+    public ServerResponse queryConstructionRecordAll(String houseId, String day, String workerType, PageDTO pageDTO) {
         // 施工记录的内容需要更改
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Example example = new Example(HouseConstructionRecord.class);
-        Example.Criteria criteria=example.createCriteria();
+        Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo(HouseConstructionRecord.HOUSE_ID, houseId);
-        if(!CommonUtil.isEmpty(day)){
+        if (!CommonUtil.isEmpty(day)) {
             criteria.andCondition(" to_days(create_date) = to_days('" + day + "') ");
         }
+        if (!CommonUtil.isEmpty(workerType)) {
+            criteria.andEqualTo(HouseConstructionRecord.WORKER_TYPE, workerType);
+        }
         example.orderBy(HouseConstructionRecord.CREATE_DATE).desc();
-
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<HouseConstructionRecord> hfaList = houseConstructionRecordMapper.selectByExample(example);
         if (hfaList.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相施工记录");
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相关施工记录");
         }
         PageInfo pageResult = new PageInfo(hfaList);
         List<Map<String, Object>> listMap = new ArrayList<>();
@@ -1238,12 +1241,10 @@ public class HouseService {
     }
 
     private Map<String, Object> getHouseConstructionRecordMap(HouseConstructionRecord hfa, String address) {
-
         // 0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，
         // 4：每日开工,5有效巡查,6无人巡查,7追加巡查,
         // 8补人工,9退人工,10补材料,11退材料,12业主退材料
         Map<Integer, String> applyTypeMap = DjConstants.RecordType.getRecordTypeMap();
-
         Map<String, Object> map = new HashMap<>();
         map.put("id", hfa.getSourceId());
         Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
@@ -1256,7 +1257,6 @@ public class HouseService {
         map.put("workerName", member.getName());//工人名称
         map.put("content", hfa.getContent());
         map.put("sourceType", hfa.getApplyType());
-
         Example example = new Example(HouseFlowApplyImage.class);
         if (hfa.getSourceType() == 0) {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(hfa.getSourceId());
@@ -1291,6 +1291,24 @@ public class HouseService {
         }
         map.put("applyType", applyTypeMap.get(hfa.getApplyType()));
         map.put("createDate", hfa.getCreateDate());
+        example = new Example(TechnologyRecord.class);
+        example.createCriteria().andEqualTo(TechnologyRecord.HOUSE_FLOW_APPLY_ID, hfa.getSourceId());
+        example.orderBy(TechnologyRecord.CREATE_DATE).desc();
+        //已验收节点
+        List<TechnologyRecord> recordList = technologyRecordMapper.selectByExample(example);
+        List<Map<String, Object>> nodeMap = new ArrayList<>();
+        for (TechnologyRecord technologyRecord : recordList) {
+            Map<String, Object> map1 = new HashMap<>();
+            map1.put("time", technologyRecord.getModifyDate());
+            map1.put("name", technologyRecord.getName());
+            String[] imgArr = technologyRecord.getImage().split(",");
+            for (int i = 0; i < imgArr.length; i++) {
+                imgArr[i] = address + imgArr[i];
+            }
+            map1.put("imgArr", imgArr);
+            nodeMap.add(map1);
+        }
+        map.put("recordList", nodeMap);
         return map;
     }
 
@@ -1432,9 +1450,9 @@ public class HouseService {
         }
         map.put("imgArr", imgArr);
         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(hfa.getHouseFlowId());
-        if(hfa.getWorkerType()==3&&houseFlow!=null&&hfa.getWorkerType()!=houseFlow.getWorkerType()){
-            map.put("applyType","大管家验收("+ workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId()).getName()+")的"+ applyTypeMap.get(hfa.getApplyType()));
-        }else {
+        if (hfa.getWorkerType() == 3 && houseFlow != null && hfa.getWorkerType() != houseFlow.getWorkerType()) {
+            map.put("applyType", "大管家验收(" + workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId()).getName() + ")的" + applyTypeMap.get(hfa.getApplyType()));
+        } else {
             map.put("applyType", applyTypeMap.get(hfa.getApplyType()));
         }
         map.put("createDate", hfa.getCreateDate().getTime());
@@ -1698,7 +1716,7 @@ public class HouseService {
                 textContentDTO.setImage(image);
                 houseChoiceCaseDTO.getTextContentDTO().add(textContentDTO);
             }
-            houseChoiceCaseDTO.setImage(jdAddress+houseChoiceCase.getImage());
+            houseChoiceCaseDTO.setImage(jdAddress + houseChoiceCase.getImage());
             houseChoiceCaseDTO.setTitle(houseChoiceCase.getTitle());
             houseChoiceCaseDTO.setBuildingNames(houseChoiceCase.getBuildingNames());
             houseChoiceCaseDTO.setArea(houseChoiceCase.getArea());
