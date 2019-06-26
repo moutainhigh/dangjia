@@ -159,9 +159,9 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO) {
+    public ServerResponse queryConstructionRecord(String houseId, String day, PageDTO pageDTO) {
 //        return  houseService.queryConstructionRecord(houseId, pageDTO, null);
-        return houseService.queryConstructionRecordAll(houseId, pageDTO);
+        return houseService.queryConstructionRecordAll(houseId,  day, pageDTO);
     }
 
     /**
@@ -173,8 +173,8 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryConstructionRecordAll(String houseId, PageDTO pageDTO) {
-        return houseService.queryConstructionRecordAll(houseId, pageDTO);
+    public ServerResponse queryConstructionRecordAll(String houseId, String day, PageDTO pageDTO) {
+        return houseService.queryConstructionRecordAll(houseId, day, pageDTO);
     }
 
     @Override
