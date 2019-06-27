@@ -8,6 +8,7 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
@@ -19,6 +20,7 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
@@ -31,6 +33,7 @@ import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -52,6 +55,11 @@ public class DesignerOperationService {
     private ConfigMessageService configMessageService;
     @Autowired
     private IHouseMapper houseMapper;
+
+    @Autowired
+    private HouseService houseService;
+    @Autowired
+    private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
     private HouseDesignPayService houseDesignPayService;
     @Autowired
@@ -156,6 +164,27 @@ public class DesignerOperationService {
         house.setDesignerOk(5);//平面图发给业主
         houseMapper.updateByPrimaryKeySelective(house);
         //app推送给业主
+
+        HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(house.getId(), "1");
+        //添加一条记录
+        HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
+        hfa.setHouseFlowId(houseFlow.getId());//工序id
+        hfa.setWorkerId(houseFlow.getWorkerId());//工人id
+        hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
+        hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
+        hfa.setHouseId(houseFlow.getHouseId());//房子id
+        //设计状态,默认0未确定设计师,4有设计抢单待支付,1已支付设计师待发平面图,5平面图发给业主
+        // 6平面图审核不通过,7通过平面图待发施工图,2已发给业主施工图,8施工图片审核不通过,3施工图(全部图)审核通过
+        hfa.setApplyType(14);
+        hfa.setApplyMoney(new BigDecimal(0));//申请得钱
+        hfa.setSupervisorMoney(new BigDecimal(0));
+        hfa.setOtherMoney(new BigDecimal(0));
+        hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
+        hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
+        hfa.setPayState(0);//是否付款
+        hfa.setApplyDec("我是设计师，我已经上传了设计图 ");//描述
+        houseFlowApplyMapper.insert(hfa);
+        houseService.insertConstructionRecord(hfa);
         configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计图上传提醒",
                 String.format(DjConstants.PushMessage.PLANE_UPLOADING, house.getHouseName()), "");
         return ServerResponse.createBySuccessMessage("发送成功");
@@ -178,6 +207,33 @@ public class DesignerOperationService {
         }
         houseMapper.updateByPrimaryKeySelective(house);
         //app推送给业主
+        HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(house.getId(), "1");
+        if(houseFlow==null){
+            houseFlow = houseFlowMapper.getByWorkerTypeId(house.getId(), "2");
+        }
+        //添加一条记录
+        HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
+        hfa.setHouseFlowId(houseFlow.getId());//工序id
+        hfa.setWorkerId(houseFlow.getWorkerId());//工人id
+        hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
+        hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
+        hfa.setHouseId(houseFlow.getHouseId());//房子id
+        //设计状态,默认0未确定设计师,4有设计抢单待支付,1已支付设计师待发平面图,5平面图发给业主
+        // 6平面图审核不通过,7通过平面图待发施工图,2已发给业主施工图,8施工图片审核不通过,3施工图(全部图)审核通过
+        hfa.setApplyType(15);
+        hfa.setApplyMoney(new BigDecimal(0));//申请得钱
+        hfa.setSupervisorMoney(new BigDecimal(0));
+        hfa.setOtherMoney(new BigDecimal(0));
+        hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
+        hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
+        hfa.setPayState(0);//是否付款
+        if(houseFlow.getWorkerType()==1) {
+            hfa.setApplyDec("我是设计师，我已经上传了施工图");//描述
+        }else{
+            hfa.setApplyDec("我是精算师，我已经上传了施工图");//描述
+        }
+        houseFlowApplyMapper.insert(hfa);
+        houseService.insertConstructionRecord(hfa);
         configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计图上传提醒",
                 String.format(DjConstants.PushMessage.CONSTRUCTION_UPLOADING, house.getHouseName()), "");
         return ServerResponse.createBySuccessMessage("发送成功");

@@ -315,6 +315,7 @@ public class HouseService {
 
     /**
      * APP我的房产
+     * TODO 1.4.0后删除此接口
      */
     public ServerResponse getMyHouse(String userToken, String cityId) {
         Object object = constructionService.getMember(userToken);
@@ -934,6 +935,25 @@ public class HouseService {
                 houseFlow.setPatrolMoney(new BigDecimal(patrolMoney));
                 houseFlow.setCheckMoney(new BigDecimal(checkMoney));
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+            }
+            if (budgetOk == 2) {
+                HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(house.getId(), "2");
+                //添加一条记录
+                HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
+                hfa.setHouseFlowId(houseFlow.getId());//工序id
+                hfa.setWorkerId(houseFlow.getWorkerId());//工人id
+                hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
+                hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
+                hfa.setHouseId(houseFlow.getHouseId());//房子id
+                hfa.setApplyType(16);//申请得钱
+                hfa.setSupervisorMoney(new BigDecimal(0));
+                hfa.setOtherMoney(new BigDecimal(0));
+                hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
+                hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
+                hfa.setPayState(0);//是否付款
+                hfa.setApplyDec("我是精算师，我已经精算完成！ ");//描述
+                houseFlowApplyMapper.insert(hfa);
+                insertConstructionRecord(hfa);
             }
             house.setBudgetOk(budgetOk);//精算状态:-1已精算没有发给业主,默认0未开始,1已开始精算,2已发给业主,3审核通过,4审核不通过
             iHouseMapper.updateByPrimaryKeySelective(house);
@@ -1727,6 +1747,105 @@ public class HouseService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+
+
+    public ServerResponse getStageProgress(String houseFlowId) {
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        if (houseFlow == null) {
+            return ServerResponse.createByErrorMessage("该工序不存在");
+        }
+        if (houseFlow.getWorkerType() == 1 || houseFlow.getWorkerType() == 2) {
+            return ServerResponse.createByErrorMessage("该工序不支持查询");
+        }
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+        if (workerType == null) {
+            return ServerResponse.createByErrorMessage("该工序不存在");
+        }
+        House house = iHouseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+        if (house == null) {
+            return ServerResponse.createByErrorMessage("没有查询到相关房子");
+        }
+        Map<String, Object> dataMap = new HashMap<>();
+        //TODO
+        dataMap.put("totalDuration", 0);//总工期/天
+        dataMap.put("downtime", 0);//停工天数/天
+        dataMap.put("advanceTime", 0);//提前完工时间/天
+        String[] titles;
+        int rank = -1;
+        String des = "";
+        if (workerType.getType() == 3) {//管家
+            titles = new String[]{workerType.getName() + "抢单", "支付" + workerType.getName() + "费用", "工程排期", "确认开工", "监管工地"};
+            if (houseFlow.getWorkType() == 2) {
+                rank = 0;
+                des = "待抢单";
+            } else if (houseFlow.getWorkType() == 3) {
+                rank = 1;
+                des = "进行中";
+            } else if (houseFlow.getWorkType() == 4) {
+                if ("0".equals(house.getSchedule())) {
+                    rank = 2;
+                    des = "进行中";
+                } else if (houseFlow.getSupervisorStart() == 0) {
+                    rank = 3;
+                    des = "待开工";
+                } else if (houseFlow.getWorkSteta() == 2) {
+                    rank = 4;
+                    des = "整体完工";
+                } else if (houseFlow.getWorkSteta() == 6) {
+                    rank = 4;
+                    des = "提前结束装修";
+                } else {
+                    rank = 4;
+                    des = "监工中";
+                }
+            }
+        } else {
+            titles = new String[]{workerType.getName() + "抢单", "支付" + workerType.getName() + "费用", "施工交底", "施工中", "验收环节"};
+            if (houseFlow.getWorkType() == 2) {
+                rank = 0;
+                des = "待抢单";
+            } else if (houseFlow.getWorkType() == 3) {
+                rank = 1;
+                des = "进行中";
+            } else if (houseFlow.getWorkType() == 4) {//已支付
+                if (houseFlow.getWorkSteta() == 3) {
+                    rank = 2;
+                    des = "待交底";
+                } else if (houseFlow.getWorkSteta() == 4) {
+                    rank = 3;
+                    des = "施工中";
+                } else if (houseFlow.getWorkerType() != 4
+                        && houseFlow.getWorkSteta() == 1) {
+                    rank = 3;
+                    des = "阶段完工";
+                } else if (houseFlow.getWorkSteta() == 2) {
+                    rank = 4;
+                    des = "整体完工";
+                } else if (houseFlow.getWorkSteta() == 6) {
+                    rank = 4;
+                    des = "提前结束装修";
+                }
+            }
+        }
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        for (int i = 0; i < titles.length; i++) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", titles[i]);
+            if (rank < i) {
+                map.put("state", 0);//0：未选中，1：当前阶段，2，已过阶段
+                map.put("msg", "");
+            } else if (rank == i) {
+                map.put("state", 1);
+                map.put("msg", des);
+            } else {
+                map.put("state", 2);
+                map.put("msg", "已完成");
+            }
+            mapList.add(map);
+        }
+        dataMap.put("stageData", mapList);
+        return ServerResponse.createBySuccess("查询成功", dataMap);
     }
 }
 
