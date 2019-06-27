@@ -80,7 +80,7 @@ public class MyHouseService {
         }
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
+            return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null, address));
         }
         Member member = (Member) object;
 
