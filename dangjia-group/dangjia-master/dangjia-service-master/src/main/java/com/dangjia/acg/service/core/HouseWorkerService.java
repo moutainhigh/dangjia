@@ -572,6 +572,7 @@ public class HouseWorkerService {
             HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
             hfa.setHouseFlowId(houseFlowId);//工序id
             hfa.setWorkerId(houseFlow.getWorkerId());//工人id
+            hfa.setOperator(houseFlow.getWorkerId());//提交人ID
             hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
             hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
             hfa.setHouseId(houseFlow.getHouseId());//房子id
@@ -1139,6 +1140,7 @@ public class HouseWorkerService {
             HouseFlowApply hfa = new HouseFlowApply();
             hfa.setHouseFlowId(houseFlow.getId());
             hfa.setWorkerId(hw.getWorkerId());
+            hfa.setOperator(houseFlow.getWorkerId());
             hfa.setWorkerTypeId(hw.getWorkerTypeId());
             hfa.setWorkerType(hw.getWorkerType());
             hfa.setHouseId(hw.getHouseId());

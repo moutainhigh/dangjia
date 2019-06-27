@@ -368,6 +368,7 @@ public class EvaluateService {
                 HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
                 hfa.setHouseFlowId(houseFlowApply.getHouseFlowId());//工序id
                 hfa.setWorkerId(supervisor.getId());//工人id
+                hfa.setOperator(supervisor.getId());
                 hfa.setWorkerTypeId(supervisor.getWorkerTypeId());//工种id
                 hfa.setWorkerType(supervisor.getWorkerType());//工种类型
                 hfa.setHouseId(houseFlowApply.getHouseId());//房子id
