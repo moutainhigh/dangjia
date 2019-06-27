@@ -274,7 +274,6 @@ public class WebSplitDeliverService {
             Example example = new Example(Receipt.class);
             example.createCriteria().andEqualTo(Receipt.SUPPLIER_ID, supplierId);
             List<Receipt> receipts = iReceiptMapper.selectByExample(example);
-            System.out.println(receipts);
             List<ReceiptDTO> list = new ArrayList();
             for (Receipt receipt : receipts) {
                 List<SupplierDeliverDTO> supplierDeliverDTOList = new ArrayList<>();
@@ -284,13 +283,14 @@ public class WebSplitDeliverService {
                 JSONArray itemObjArr = JSON.parseArray(receipt.getMerge());
                 ReceiptDTO receiptDTO = new ReceiptDTO();
                 for (int i = 0; i < itemObjArr.size(); i++) {
-                    SupplierDeliverDTO supplierDeliverDTO = new SupplierDeliverDTO();
+                    SupplierDeliverDTO supplierDeliverDTO =null;
                     JSONObject jsonObject = itemObjArr.getJSONObject(i);
                     String id = jsonObject.getString("id");
                     int deliverType = jsonObject.getInteger("deliverType");
                     if (deliverType == 1) {
                         SplitDeliver splitDeliver = iSplitDeliverMapper.selectClsd(id, shipAddress, beginDate, endDate);
                         if (null != splitDeliver) {
+                            supplierDeliverDTO=new SupplierDeliverDTO();
                             supplierDeliverDTO.setId(splitDeliver.getId());
                             supplierDeliverDTO.setNumber(splitDeliver.getNumber());
                             supplierDeliverDTO.setShipAddress(splitDeliver.getShipAddress());
@@ -301,6 +301,7 @@ public class WebSplitDeliverService {
                     } else if (deliverType == 2) {
                         MendDeliver mendDeliver = iMendDeliverMapper.selectClsd(id, shipAddress, beginDate, endDate);
                         if (null != mendDeliver) {
+                            supplierDeliverDTO=new SupplierDeliverDTO();
                             supplierDeliverDTO.setId(mendDeliver.getId());
                             supplierDeliverDTO.setNumber(mendDeliver.getNumber());
                             supplierDeliverDTO.setShipAddress(mendDeliver.getShipAddress());
@@ -309,28 +310,32 @@ public class WebSplitDeliverService {
                             md += mendDeliver.getTotalAmount();
                         }
                     }
-                    supplierDeliverDTOList.add(supplierDeliverDTO);
-                }
-                //结算金额
-                amount = sd - md;
-                receiptDTO.setAmount(amount);
-                receiptDTO.setList(supplierDeliverDTOList);
-                receiptDTO.setCreateDate(receipt.getCreateDate());
-                receiptDTO.setId(receipt.getId());
-                list.add(receiptDTO);
-                //对list进行排序 根据时间降序排序
-                Collections.sort(list, new Comparator<ReceiptDTO>() {
-                    @Override
-                    public int compare(ReceiptDTO r1, ReceiptDTO r2) {
-                        int flag = r1.getCreateDate().compareTo(r2.getCreateDate());
-                        if (flag == -1) {
-                            flag = 1;
-                        } else if (flag == 1) {
-                            flag = -1;
-                        }
-                        return flag;
+                    if(null!=supplierDeliverDTO) {
+                        supplierDeliverDTOList.add(supplierDeliverDTO);
                     }
-                });
+                }
+                if (supplierDeliverDTOList.size() > 0) {
+                    //结算金额
+                    amount = sd - md;
+                    receiptDTO.setAmount(amount);
+                    receiptDTO.setList(supplierDeliverDTOList);
+                    receiptDTO.setCreateDate(receipt.getCreateDate());
+                    receiptDTO.setId(receipt.getId());
+                    list.add(receiptDTO);
+                    //对list进行排序 根据时间降序排序
+                    Collections.sort(list, new Comparator<ReceiptDTO>() {
+                        @Override
+                        public int compare(ReceiptDTO r1, ReceiptDTO r2) {
+                            int flag = r1.getCreateDate().compareTo(r2.getCreateDate());
+                            if (flag == -1) {
+                                flag = 1;
+                            } else if (flag == 1) {
+                                flag = -1;
+                            }
+                            return flag;
+                        }
+                    });
+                }
             }
             return ServerResponse.createBySuccess("查询成功", list);
         } catch (Exception e) {

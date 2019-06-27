@@ -49,6 +49,7 @@ public class HouseController implements HouseAPI {
 
     /**
      * 我的房产
+     * TODO 1.4.0后删除此接口
      */
     @Override
     @ApiMethod
@@ -175,6 +176,12 @@ public class HouseController implements HouseAPI {
     @ApiMethod
     public ServerResponse queryConstructionRecordAll(String houseId, String day, String workerType, PageDTO pageDTO) {
         return houseService.queryConstructionRecordAll(houseId, day, workerType, pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getStageProgress(String houseFlowId) {
+        return houseService.getStageProgress(houseFlowId);
     }
 
     @Override

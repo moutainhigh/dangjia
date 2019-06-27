@@ -15,8 +15,10 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.core.HouseFlowDTO;
 import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.core.NodeDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
@@ -315,6 +317,7 @@ public class HouseService {
 
     /**
      * APP我的房产
+     * TODO 1.4.0后删除此接口
      */
     public ServerResponse getMyHouse(String userToken, String cityId) {
         Object object = constructionService.getMember(userToken);
@@ -935,7 +938,7 @@ public class HouseService {
                 houseFlow.setCheckMoney(new BigDecimal(checkMoney));
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
             }
-            if(budgetOk==2){
+            if (budgetOk == 2) {
                 HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(house.getId(), "2");
                 //添加一条记录
                 HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
@@ -1746,6 +1749,162 @@ public class HouseService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+
+
+    public ServerResponse getStageProgress(String houseFlowId) {
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        if (houseFlow == null) {
+            return ServerResponse.createByErrorMessage("该工序不存在");
+        }
+        if (houseFlow.getWorkerType() == 1 || houseFlow.getWorkerType() == 2) {
+            return ServerResponse.createByErrorMessage("该工序不支持查询");
+        }
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+        if (workerType == null) {
+            return ServerResponse.createByErrorMessage("该工序不存在");
+        }
+        House house = iHouseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+        if (house == null) {
+            return ServerResponse.createByErrorMessage("没有查询到相关房子");
+        }
+        Map<String, Object> dataMap = new HashMap<>();
+        String[] titles;
+        int rank = -1;
+        String des = "";
+        if (workerType.getType() == 3) {//管家
+            List<HouseFlowDTO> houseFlowList = houseFlowMapper.getHouseScheduleFlow(houseFlow.getHouseId());
+            Date startDate = null;
+            Date endDate = null;
+            for (HouseFlowDTO houseFlow1 : houseFlowList) {
+                if (houseFlow1.getStartDate() != null) {
+                    if (endDate == null || endDate.getTime() < houseFlow1.getEndDate().getTime()) {
+                        endDate = houseFlow1.getEndDate();
+                    }
+                    if (startDate == null || startDate.getTime() > houseFlow1.getStartDate().getTime()) {
+                        startDate = houseFlow1.getStartDate();
+                    }
+                }
+            }
+            int totalDuration = 0;
+            if (startDate != null) {
+                totalDuration = 1 + DateUtil.daysofTwo(startDate, endDate);//逾期工期天数
+            }
+            dataMap.put("totalDuration", totalDuration);//总工期/天
+            Example example1 = new Example(HouseFlowApply.class);
+            example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId())
+                    .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1)
+                    .andEqualTo(HouseFlowApply.APPLY_TYPE, 3);
+            List<HouseFlowApply> houseFlowss = houseFlowApplyMapper.selectByExample(example1);
+            int downtime = 0;//停工天数
+            for (HouseFlowApply flowss : houseFlowss) {
+                downtime += flowss.getSuspendDay();
+            }
+            dataMap.put("downtime", downtime);//停工天数/天
+            titles = new String[]{workerType.getName() + "抢单", "支付" + workerType.getName() + "费用", "工程排期", "确认开工", "监管工地"};
+            if (houseFlow.getWorkType() == 2) {
+                rank = 0;
+                des = "待抢单";
+            } else if (houseFlow.getWorkType() == 3) {
+                rank = 1;
+                des = "进行中";
+            } else if (houseFlow.getWorkType() == 4) {
+                if ("0".equals(house.getSchedule())) {
+                    rank = 2;
+                    des = "进行中";
+                } else if (houseFlow.getSupervisorStart() == 0) {
+                    rank = 3;
+                    des = "待开工";
+                } else if (houseFlow.getWorkSteta() == 2) {
+                    rank = 4;
+                    des = "整体完工";
+                } else if (houseFlow.getWorkSteta() == 6) {
+                    rank = 4;
+                    des = "提前结束装修";
+                } else {
+                    rank = 4;
+                    des = "监工中";
+                }
+            }
+        } else {
+            Date startDate = houseFlow.getStartDate();
+            Date endDate = houseFlow.getEndDate();
+            int numall = 0;
+            if (startDate != null) {
+                numall = 1 + DateUtil.daysofTwo(startDate, endDate);//逾期工期天数
+            }
+            dataMap.put("totalDuration", numall);//总工期/天
+            Example example1 = new Example(HouseFlowApply.class);
+            example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId())
+                    .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
+                    .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1)
+                    .andEqualTo(HouseFlowApply.APPLY_TYPE, 3);
+            List<HouseFlowApply> houseFlowss = houseFlowApplyMapper.selectByExample(example1);
+            int downtime = 0;//停工天数
+            for (HouseFlowApply flowss : houseFlowss) {
+                downtime += flowss.getSuspendDay();
+            }
+            dataMap.put("downtime", downtime);//停工天数/天
+            example1 = new Example(HouseFlowApply.class);
+            example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId())
+                    .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
+                    .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1)
+                    .andEqualTo(HouseFlowApply.APPLY_TYPE, 2);
+            example1.orderBy(HouseFlowApply.MODIFY_DATE).desc();
+            List<HouseFlowApply> houseFlowss2 = houseFlowApplyMapper.selectByExample(example1);
+            int advanceTime = 0;
+            if (houseFlowss2.size() > 0) {
+                advanceTime = DateUtil.daysofTwo(houseFlowss2.get(0).getModifyDate(), endDate);
+            }
+            if (advanceTime < 0) {
+                advanceTime = 0;
+            }
+            dataMap.put("advanceTime",advanceTime);//提前完工时间/天
+            titles = new String[]{workerType.getName() + "抢单", "支付" + workerType.getName() + "费用", "施工交底", "施工中", "验收环节"};
+            if (houseFlow.getWorkType() == 2) {
+                rank = 0;
+                des = "待抢单";
+            } else if (houseFlow.getWorkType() == 3) {
+                rank = 1;
+                des = "进行中";
+            } else if (houseFlow.getWorkType() == 4) {//已支付
+                if (houseFlow.getWorkSteta() == 3) {
+                    rank = 2;
+                    des = "待交底";
+                } else if (houseFlow.getWorkSteta() == 4) {
+                    rank = 3;
+                    des = "施工中";
+                } else if (houseFlow.getWorkerType() != 4
+                        && houseFlow.getWorkSteta() == 1) {
+                    rank = 3;
+                    des = "阶段完工";
+                } else if (houseFlow.getWorkSteta() == 2) {
+                    rank = 4;
+                    des = "整体完工";
+                } else if (houseFlow.getWorkSteta() == 6) {
+                    rank = 4;
+                    des = "提前结束装修";
+                }
+            }
+        }
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        for (int i = 0; i < titles.length; i++) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", titles[i]);
+            if (rank < i) {
+                map.put("state", 0);//0：未选中，1：当前阶段，2，已过阶段
+                map.put("msg", "");
+            } else if (rank == i) {
+                map.put("state", 1);
+                map.put("msg", des);
+            } else {
+                map.put("state", 2);
+                map.put("msg", "已完成");
+            }
+            mapList.add(map);
+        }
+        dataMap.put("stageData", mapList);
+        return ServerResponse.createBySuccess("查询成功", dataMap);
     }
 }
 

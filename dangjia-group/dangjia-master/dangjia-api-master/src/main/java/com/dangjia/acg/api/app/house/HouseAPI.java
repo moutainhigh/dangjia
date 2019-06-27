@@ -65,6 +65,7 @@ public interface HouseAPI {
 
     /**
      * 我的房产
+     * TODO 1.4.0后删除此接口
      */
     @PostMapping("app/house/house/getMyHouse")
     @ApiOperation(value = "我的房产", notes = "我的房产")
@@ -182,6 +183,32 @@ public interface HouseAPI {
                                               @RequestParam("day") String day,
                                               @RequestParam("workerType") String workerType,
                                               @RequestParam("pageDTO") PageDTO pageDTO);
+
+    /**
+     * showdoc
+     *
+     * @param houseFlowId 必选/可选 string 工序ID
+     * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
+     * @catalog 当家接口文档/房产任务模块
+     * @title 获取房子工序的阶段进度
+     * @description 获取房子工序的阶段进度
+     * @method POST
+     * @url master/app/house/house/getStageProgress
+     * @return_param totalDuration int 总工期/天
+     * @return_param downtime int 停工天数/天
+     * @return_param advanceTime int 提前完工时间/天
+     * @return_param stageData List 工序阶段集合
+     * @return_param stageData_name string 阶段名
+     * @return_param stageData_state int 阶段状态0：未选中，1：当前阶段，2，已过阶段
+     * @return_param stageData_msg string 描述
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 6
+     * @Author: Ruking 18075121944
+     * @Date: 2019/6/27 11:02 AM
+     */
+    @PostMapping("app/house/house/getStageProgress")
+    @ApiOperation(value = "获取房子工序的阶段进度", notes = "获取房子工序的阶段进度")
+    ServerResponse getStageProgress(@RequestParam("houseFlowId") String houseFlowId);
 
     @PostMapping("app/house/house/getHouseFlowApply")
     @ApiOperation(value = "获取施工记录详情", notes = "获取施工记录详情")
