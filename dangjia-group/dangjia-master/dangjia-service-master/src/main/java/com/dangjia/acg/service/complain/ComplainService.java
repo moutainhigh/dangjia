@@ -874,6 +874,7 @@ public class ComplainService {
                 HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
                 hfa.setHouseFlowId(houseFlow.getId());//工序id
                 hfa.setWorkerId(houseFlow.getWorkerId());//工人id
+                hfa.setOperator(houseFlow.getWorkerId());
                 hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
                 hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
                 hfa.setHouseId(houseFlow.getHouseId());//房子id
@@ -927,6 +928,7 @@ public class ComplainService {
             HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
             hfa.setHouseFlowId(houseFlow.getId());//工序id
             hfa.setWorkerId(houseFlow.getWorkerId());//工人id
+            hfa.setOperator(houseFlow.getWorkerId());
             hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
             hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
             hfa.setHouseId(houseFlow.getHouseId());//房子id

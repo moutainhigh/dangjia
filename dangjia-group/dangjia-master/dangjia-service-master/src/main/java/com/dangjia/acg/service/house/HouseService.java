@@ -15,8 +15,10 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.core.HouseFlowDTO;
 import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.core.NodeDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
@@ -942,6 +944,7 @@ public class HouseService {
                 HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
                 hfa.setHouseFlowId(houseFlow.getId());//工序id
                 hfa.setWorkerId(houseFlow.getWorkerId());//工人id
+                hfa.setOperator(houseFlow.getWorkerId());
                 hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
                 hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
                 hfa.setHouseId(houseFlow.getHouseId());//房子id
@@ -1767,14 +1770,38 @@ public class HouseService {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
         }
         Map<String, Object> dataMap = new HashMap<>();
-        //TODO
-        dataMap.put("totalDuration", 0);//总工期/天
-        dataMap.put("downtime", 0);//停工天数/天
-        dataMap.put("advanceTime", 0);//提前完工时间/天
         String[] titles;
         int rank = -1;
         String des = "";
         if (workerType.getType() == 3) {//管家
+            List<HouseFlowDTO> houseFlowList = houseFlowMapper.getHouseScheduleFlow(houseFlow.getHouseId());
+            Date startDate = null;
+            Date endDate = null;
+            for (HouseFlowDTO houseFlow1 : houseFlowList) {
+                if (houseFlow1.getStartDate() != null) {
+                    if (endDate == null || endDate.getTime() < houseFlow1.getEndDate().getTime()) {
+                        endDate = houseFlow1.getEndDate();
+                    }
+                    if (startDate == null || startDate.getTime() > houseFlow1.getStartDate().getTime()) {
+                        startDate = houseFlow1.getStartDate();
+                    }
+                }
+            }
+            int totalDuration = 0;
+            if (startDate != null) {
+                totalDuration = 1 + DateUtil.daysofTwo(startDate, endDate);//逾期工期天数
+            }
+            dataMap.put("totalDuration", totalDuration);//总工期/天
+            Example example1 = new Example(HouseFlowApply.class);
+            example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId())
+                    .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1)
+                    .andEqualTo(HouseFlowApply.APPLY_TYPE, 3);
+            List<HouseFlowApply> houseFlowss = houseFlowApplyMapper.selectByExample(example1);
+            int downtime = 0;//停工天数
+            for (HouseFlowApply flowss : houseFlowss) {
+                downtime += flowss.getSuspendDay();
+            }
+            dataMap.put("downtime", downtime);//停工天数/天
             titles = new String[]{workerType.getName() + "抢单", "支付" + workerType.getName() + "费用", "工程排期", "确认开工", "监管工地"};
             if (houseFlow.getWorkType() == 2) {
                 rank = 0;
@@ -1801,6 +1828,39 @@ public class HouseService {
                 }
             }
         } else {
+            Date startDate = houseFlow.getStartDate();
+            Date endDate = houseFlow.getEndDate();
+            int numall = 0;
+            if (startDate != null) {
+                numall = 1 + DateUtil.daysofTwo(startDate, endDate);//逾期工期天数
+            }
+            dataMap.put("totalDuration", numall);//总工期/天
+            Example example1 = new Example(HouseFlowApply.class);
+            example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId())
+                    .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
+                    .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1)
+                    .andEqualTo(HouseFlowApply.APPLY_TYPE, 3);
+            List<HouseFlowApply> houseFlowss = houseFlowApplyMapper.selectByExample(example1);
+            int downtime = 0;//停工天数
+            for (HouseFlowApply flowss : houseFlowss) {
+                downtime += flowss.getSuspendDay();
+            }
+            dataMap.put("downtime", downtime);//停工天数/天
+            example1 = new Example(HouseFlowApply.class);
+            example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId())
+                    .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
+                    .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1)
+                    .andEqualTo(HouseFlowApply.APPLY_TYPE, 2);
+            example1.orderBy(HouseFlowApply.MODIFY_DATE).desc();
+            List<HouseFlowApply> houseFlowss2 = houseFlowApplyMapper.selectByExample(example1);
+            int advanceTime = 0;
+            if (houseFlowss2.size() > 0) {
+                advanceTime = DateUtil.daysofTwo(houseFlowss2.get(0).getModifyDate(), endDate);
+            }
+            if (advanceTime < 0) {
+                advanceTime = 0;
+            }
+            dataMap.put("advanceTime",advanceTime);//提前完工时间/天
             titles = new String[]{workerType.getName() + "抢单", "支付" + workerType.getName() + "费用", "施工交底", "施工中", "验收环节"};
             if (houseFlow.getWorkType() == 2) {
                 rank = 0;
