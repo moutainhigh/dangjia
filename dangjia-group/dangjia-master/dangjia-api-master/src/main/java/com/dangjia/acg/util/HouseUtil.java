@@ -97,7 +97,7 @@ public class HouseUtil {
     public static NodeDTO getWorkerDatas(HouseFlow houseFlow,NodeDTO nodeDTO) {
         if (houseFlow.getWorkType() == 1) {
             nodeDTO.setRank(0);
-            nodeDTO.setNameB("未发布");
+            nodeDTO.setNameB("未开始");
         } else if (houseFlow.getWorkType() == 2) {
             nodeDTO.setRank(1);
             nodeDTO.setNameB("待抢单");
