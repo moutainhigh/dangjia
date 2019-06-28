@@ -971,7 +971,8 @@ public class HouseService {
     /**
      * 根据城市，小区，最小最大面积查询房子
      */
-    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId, Double minSquare, Double maxSquare, Integer houseType, PageDTO pageDTO) {
+    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId,
+                                           Double minSquare, Double maxSquare, Integer houseType, PageDTO pageDTO) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
