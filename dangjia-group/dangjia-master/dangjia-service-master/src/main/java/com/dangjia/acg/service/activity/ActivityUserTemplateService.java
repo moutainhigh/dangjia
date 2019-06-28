@@ -6,7 +6,6 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.activity.ActivityDTO;
 import com.dangjia.acg.dto.activity.ActivityRedPackDTO;
-import com.dangjia.acg.mapper.activity.IActivityMapper;
 import com.dangjia.acg.mapper.activity.IActivityUserTemplateMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.activity.Activity;
@@ -27,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  * 活动推送目标模板
  * author: qiyuxiang
  * Date: 2018/10/31 0031
@@ -38,112 +36,112 @@ public class ActivityUserTemplateService {
 
     @Autowired
     private IActivityUserTemplateMapper activityUserTemplateMapper;
-
     @Autowired
     private ActivityService activityService;
     @Autowired
-    private IActivityMapper activityMapper;
-    @Autowired
     private IMemberMapper memberMapper;
-
     @Autowired
     private RedPackService redPackService;
+
     /**
      * 获取所有推送模板
+     *
      * @param activityUserTemplate
      * @return
      */
     public ServerResponse queryActivityUserTemplate(HttpServletRequest request, PageDTO pageDTO, ActivityUserTemplate activityUserTemplate) {
         Example example = new Example(ActivityUserTemplate.class);
-        example.createCriteria().andEqualTo(ActivityUserTemplate.DATA_STATUS,0);
+        example.createCriteria().andEqualTo(ActivityUserTemplate.DATA_STATUS, 0);
         example.orderBy(Activity.MODIFY_DATE).desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<ActivityUserTemplate> list = activityUserTemplateMapper.selectByExample(example);
-        List<Map> mapList=new ArrayList<>();
+        List<Map> mapList = new ArrayList<>();
         PageInfo pageResult = new PageInfo(list);
-        for (ActivityUserTemplate activityUserTemplate1:list) {
+        for (ActivityUserTemplate activityUserTemplate1 : list) {
             Map map = BeanUtils.beanToMap(activityUserTemplate1);
             example = new Example(Member.class);
-            if(!CommonUtil.isEmpty(activityUserTemplate1.getMembers())) {
-                Example.Criteria criteria=example.createCriteria();
-                String[] members=StringUtils.split(activityUserTemplate1.getMembers(), ",");
-                for (String memberid:members) {
-                    criteria.orEqualTo(Member.ID,memberid);
+            if (!CommonUtil.isEmpty(activityUserTemplate1.getMembers())) {
+                Example.Criteria criteria = example.createCriteria();
+                String[] members = StringUtils.split(activityUserTemplate1.getMembers(), ",");
+                for (String memberid : members) {
+                    criteria.orEqualTo(Member.ID, memberid);
                 }
             }
             example.orderBy(Activity.MODIFY_DATE).desc();
-            map.put("memberList",memberMapper.selectByExample(example));
+            map.put("memberList", memberMapper.selectByExample(example));
             mapList.add(map);
         }
         pageResult.setList(mapList);
-        return ServerResponse.createBySuccess("ok",pageResult);
+        return ServerResponse.createBySuccess("ok", pageResult);
     }
-
-
 
 
     /**
      * 新增
-     * @param templateId 修改时，模板ID
+     *
+     * @param templateId           修改时，模板ID
      * @param activityUserTemplate
      * @return
      */
-    public ServerResponse addActivityUserTemplate(HttpServletRequest request,String templateId,ActivityUserTemplate activityUserTemplate) {
+    public ServerResponse addActivityUserTemplate(HttpServletRequest request, String templateId, ActivityUserTemplate activityUserTemplate) {
         try {
-            if(!CommonUtil.isEmpty(activityUserTemplate.getMembers())) {
+            if (!CommonUtil.isEmpty(activityUserTemplate.getMembers())) {
                 activityUserTemplate.setNum(StringUtils.split(activityUserTemplate.getMembers(), ",").length);
             }
-            if(CommonUtil.isEmpty(templateId)){
+            if (CommonUtil.isEmpty(templateId)) {
                 this.activityUserTemplateMapper.insertSelective(activityUserTemplate);
                 return ServerResponse.createBySuccessMessage("新增成功");
-            }else{
+            } else {
                 activityUserTemplate.setId(templateId);
                 this.activityUserTemplateMapper.updateByPrimaryKeySelective(activityUserTemplate);
                 return ServerResponse.createBySuccessMessage("修改成功");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败，请您稍后再试");
         }
     }
+
     /**
      * 可用优惠券数据
+     *
      * @param request
-     * @param members 成员组
+     * @param members    成员组
      * @param activityId
      * @return
      */
-    public ServerResponse sendActivityPadPack(HttpServletRequest request,String members,String activityId){
+    public ServerResponse sendActivityPadPack(HttpServletRequest request, String members, String activityId) {
         //检查是否存在有效活动
-        ActivityDTO activity = validActivity(request,activityId);
+        ActivityDTO activity = validActivity(request, activityId);
         //检查优惠券是否有效
-        if(activity!=null&&activity.getDiscounts()!=null&&activity.getDiscounts().size()>0){
-            List<ActivityRedPackDTO> discounts=activity.getDiscounts();
-            for (ActivityRedPackDTO red:discounts) {
+        if (activity != null && activity.getDiscounts() != null && activity.getDiscounts().size() > 0) {
+            List<ActivityRedPackDTO> discounts = activity.getDiscounts();
+            for (ActivityRedPackDTO red : discounts) {
                 //判断优惠券是否过期，或优惠券未关闭
-                if(red.getDeleteState()==0&&red.getEndDate().getTime()>new Date().getTime()){
-                    List<String> redPackRuleIds=new ArrayList<>();
-                    for (ActivityRedPackRule rule:red.getRedPackRule()) {
+                if (red.getDeleteState() == 0 && red.getEndDate().getTime() > new Date().getTime()) {
+                    List<String> redPackRuleIds = new ArrayList<>();
+                    for (ActivityRedPackRule rule : red.getRedPackRule()) {
                         redPackRuleIds.add(rule.getId());
                     }
                     //开始发送红包
-                    if(redPackRuleIds.size() > 0) {
-                        ServerResponse serverResponse= redPackService.sendMemberPadPackBatch(members, red.getId(), StringUtils.join(redPackRuleIds, ","));
-                        if(!serverResponse.isSuccess()){
+                    if (redPackRuleIds.size() > 0) {
+                        ServerResponse serverResponse = redPackService.sendMemberPadPackBatch(members, red.getId(), StringUtils.join(redPackRuleIds, ","));
+                        if (!serverResponse.isSuccess()) {
                             return serverResponse;
                         }
                     }
-                }else{
-                    return ServerResponse.createByErrorMessage("推送失败，请检查优惠券（"+red.getName()+"）是否过期！");
+                } else {
+                    return ServerResponse.createByErrorMessage("推送失败，请检查优惠券（" + red.getName() + "）是否过期！");
                 }
             }
-        }else{
+        } else {
             return ServerResponse.createByErrorMessage("推送失败，请检查活动时间是否有效！");
         }
         return ServerResponse.createBySuccessMessage("推送完成");
     }
-    public ActivityDTO validActivity(HttpServletRequest request,String activityId){
-        ActivityDTO activity=new ActivityDTO();
+
+    public ActivityDTO validActivity(HttpServletRequest request, String activityId) {
+        ActivityDTO activity = new ActivityDTO();
         activity.setId(activityId);
         ServerResponse response = activityService.getActivity(request, activity);
         activity = (ActivityDTO) response.getResultObj();
