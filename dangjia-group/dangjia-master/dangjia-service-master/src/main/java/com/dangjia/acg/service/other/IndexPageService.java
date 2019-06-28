@@ -77,14 +77,18 @@ public class IndexPageService {
             Double minSquare = square - 15;
             Double maxSquare = square + 15;
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            PageInfo pageResult=null;
             List<House> houseList = houseMapper.getSameLayoutDistance(cityId, modelingVillage.getLocationx(), modelingVillage.getLocationy(), minSquare, maxSquare);
-            if(houseList.size()<0){
+            if(houseList.size()<=0){
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 houseList=houseMapper.getSameLayoutDistance(cityId, modelingVillage.getLocationx(), modelingVillage.getLocationy(),null,null);
+                pageResult = new PageInfo(houseList);
                 if(houseList.size()<0){
                     return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
                 }
+            }else{
+                pageResult = new PageInfo(houseList);
             }
-            PageInfo pageResult = new PageInfo(houseList);
             List<Map> houseMap = new ArrayList<>();
             for (House house : houseList) {
                 request.setAttribute(Constants.CITY_ID, house.getCityId());
