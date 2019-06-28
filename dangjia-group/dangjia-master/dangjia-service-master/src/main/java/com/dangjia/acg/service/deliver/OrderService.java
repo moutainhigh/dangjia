@@ -3,7 +3,6 @@ package com.dangjia.acg.service.deliver;
 import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -31,7 +30,6 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.house.WarehouseDetail;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.repair.MendMateriel;
@@ -184,7 +182,7 @@ public class OrderService {
             BusinessOrder businessOrder = businessOrderMapper.selectByPrimaryKey(businessOrderId);
 
             BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
-            if(!CommonUtil.isEmpty(businessOrder.getHouseId())){
+            if (!CommonUtil.isEmpty(businessOrder.getHouseId())) {
                 House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
                 businessOrderDTO.setHouseName(house.getHouseName());
                 List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house.getStyle());
@@ -223,25 +221,25 @@ public class OrderService {
         for (BusinessOrder businessOrder : businessOrderList) {
             BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
             House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
-            String info ="";//1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销, 6换货单,7:设计精算补单
+            String info = "";//1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销, 6换货单,7:设计精算补单
             switch (businessOrder.getType()) {
                 case 1:
-                    info="(工序订单)";
+                    info = "(工序订单)";
                     break;
                 case 2:
-                    info="(补货/补人工单)";
+                    info = "(补货/补人工单)";
                     break;
                 case 4:
-                    info="(材料订单)";
+                    info = "(材料订单)";
                     break;
                 case 5:
-                    info="(验房分销单)";
+                    info = "(验房分销单)";
                     break;
                 case 6:
-                    info="(换货单)";
+                    info = "(换货单)";
                     break;
                 case 7:
-                    info="(设计/精算单)";
+                    info = "(设计/精算单)";
                     break;
             }
             if (businessOrder.getType() == 5) {//验房分销
@@ -250,15 +248,15 @@ public class OrderService {
             } else {
                 businessOrderDTO.setHouseName(house == null ? "" : house.getHouseName());
             }
-            businessOrderDTO.setHouseName(businessOrderDTO.getHouseName()+info);
+            businessOrderDTO.setHouseName(businessOrderDTO.getHouseName() + info);
             List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house == null ? "" : house.getStyle());
-            if(orderDTOList.size()>0) {
-                BigDecimal payPrice=new BigDecimal(0);
+            if (orderDTOList.size() > 0) {
+                BigDecimal payPrice = new BigDecimal(0);
                 for (OrderDTO orderDTO : orderDTOList) {
                     payPrice = payPrice.add(orderDTO.getTotalAmount());
                 }
                 businessOrderDTO.setPayPrice(payPrice);
-            }else{
+            } else {
                 businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
             }
             businessOrderDTO.setOrderDTOList(orderDTOList);
@@ -319,9 +317,11 @@ public class OrderService {
      */
     public ServerResponse confirmOrderSplit(String userToken, String houseId) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
-
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             Example example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
                     .andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
@@ -388,10 +388,16 @@ public class OrderService {
      */
     public ServerResponse getOrderItemList(String userToken, String houseId) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             Map<String, Object> map = new HashMap<>();
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
+            if (workerType == null) {
+                return ServerResponse.createByErrorMessage("未找到该工种身份");
+            }
             map.put("times", workerType.getSafeState());//要货次数
             Example example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
@@ -403,7 +409,7 @@ public class OrderService {
                     .andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             if (orderSplitList.size() == 0) {
-                return ServerResponse.createBySuccessMessage("没有生成中要货单");
+                return ServerResponse.createByErrorMessage("没有生成要货单");
 //            } else if (orderSplitList.size() > 1) {
 //                return ServerResponse.createByErrorMessage("生成多个未提交要货单,异常联系平台部");
             } else {
@@ -438,9 +444,11 @@ public class OrderService {
      */
     public ServerResponse saveOrderSplit(String productArr, String houseId, String userToken) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
-
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
             Example example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 4)
                     .andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
@@ -474,7 +482,7 @@ public class OrderService {
                 orderSplitItemMapper.deleteByExample(example);
 
                 /*删除补货信息*/
-                if(!CommonUtil.isEmpty(orderSplit.getMendNumber())){
+                if (!CommonUtil.isEmpty(orderSplit.getMendNumber())) {
                     mendOrderMapper.deleteByPrimaryKey(orderSplit.getMendNumber());
                     example = new Example(MendMateriel.class);
                     example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, orderSplit.getMendNumber());
@@ -499,7 +507,7 @@ public class OrderService {
             }
 
             //获取要货购物车数据
-            List<Cart> cartList = cartMapper.cartList(houseId,worker.getWorkerTypeId(),worker.getId());
+            List<Cart> cartList = cartMapper.cartList(houseId, worker.getWorkerTypeId(), worker.getId());
             List productList = new ArrayList();
             for (Cart aCartList : cartList) {
                 Double num = aCartList.getShopCount();
@@ -514,7 +522,7 @@ public class OrderService {
                 List<OrderSplitItem> orderSplitItems = orderSplitItemMapper.selectByExample(example);
                 OrderSplitItem orderSplitItem = new OrderSplitItem();
                 if (orderSplitItems.size() > 0) {
-                    orderSplitItem=orderSplitItems.get(0);
+                    orderSplitItem = orderSplitItems.get(0);
                 }
                 if (warehouse != null) {
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
