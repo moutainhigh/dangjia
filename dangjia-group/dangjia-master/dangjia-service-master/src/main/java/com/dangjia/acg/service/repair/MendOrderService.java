@@ -21,6 +21,7 @@ import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.mapper.member.IMemberAuthMapper;
 import com.dangjia.acg.mapper.repair.*;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
@@ -35,6 +36,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAuth;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -108,6 +110,8 @@ public class MendOrderService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private UnitAPI unitAPI;
+    @Autowired
+    private IMemberAuthMapper memberAuthMapper;
 
 
     /**
@@ -257,7 +261,7 @@ public class MendOrderService {
 //                }
                 mendOrderMapper.insert(mendOrder);
             }
-            return this.addMendMateriel(productArr, mendOrder);
+            return this.addMendMateriel(member.getId(),productArr, mendOrder);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("保存失败");
@@ -860,7 +864,7 @@ public class MendOrderService {
 //                    }
 //                }
             }
-            return this.addMendMateriel(productArr, mendOrder);
+            return this.addMendMateriel(worker.getId(),productArr, mendOrder);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("保存失败");
@@ -1003,7 +1007,7 @@ public class MendOrderService {
 //                }
                 mendOrderMapper.insert(mendOrder);
             }
-            ServerResponse serverResponse = this.addMendMateriel(productArr, mendOrder);
+            ServerResponse serverResponse = this.addMendMateriel(worker.getId(),productArr, mendOrder);
             if (!serverResponse.isSuccess()) {
                 return serverResponse;
             }
@@ -1017,7 +1021,7 @@ public class MendOrderService {
     /**
      * 保存mendMateriel
      */
-    private ServerResponse addMendMateriel(String productArr, MendOrder mendOrder) {
+    private ServerResponse addMendMateriel(String memberId,String productArr, MendOrder mendOrder) {
         try {
             House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
             mendOrder.setTotalAmount(0.0);
@@ -1031,8 +1035,12 @@ public class MendOrderService {
                         Product product = forMasterAPI.getProduct(house.getCityId(), productId);
                         if (product != null) {
                             Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
-                            if (goods != null && goods.getSales() == 1) {
-                                return ServerResponse.createByErrorMessage(product.getName() + "不可退");
+                            MemberAuth memberAuth = memberAuthMapper.queryUserRole(memberId);
+                            //判断用户角色是否为业主业主可任意退
+                            if(memberAuth.getUserRole()!=1) {
+                                if (goods != null && goods.getSales() == 1) {
+                                    return ServerResponse.createByErrorMessage(product.getName() + "不可退");
+                                }
                             }
                         }
                     }
