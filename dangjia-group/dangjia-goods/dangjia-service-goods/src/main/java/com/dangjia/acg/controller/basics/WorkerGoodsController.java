@@ -8,7 +8,6 @@ import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.service.basics.WorkerGoodsService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -87,17 +86,6 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
     @ApiMethod
     public ServerResponse getPayedWorker(HttpServletRequest request, String houseId, String houseFlowId) {
         return workerGoodsService.getPayedWorker(houseId, houseFlowId);
-    }
-
-    /**
-     * 删除人工商品
-     *
-     * @return
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse deleteWorkerGoods(HttpServletRequest request, @RequestParam("id") String id) {
-        return workerGoodsService.deleteWorkerGoods(id);
     }
 
     @Override

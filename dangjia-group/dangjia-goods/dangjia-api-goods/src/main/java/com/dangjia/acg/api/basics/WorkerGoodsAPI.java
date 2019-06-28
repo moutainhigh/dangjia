@@ -54,11 +54,6 @@ public interface WorkerGoodsAPI {
                                   @RequestParam("houseId") String houseId,
                                   @RequestParam("houseFlowId") String houseFlowId);
 
-    @PostMapping("/basics/workerGoods/deleteWorkerGoods")
-    @ApiOperation(value = "删除人工商品", notes = " 删除人工商品")
-    ServerResponse deleteWorkerGoods(@RequestParam("request") HttpServletRequest request,
-                                     @RequestParam("id") String id);
-
     /**
      * showdoc
      *

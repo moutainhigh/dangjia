@@ -20,6 +20,7 @@ import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.BrandSeries;
 import com.dangjia.acg.modle.brand.GoodsSeries;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -338,15 +339,7 @@ public class GoodsService {
                         StringBuilder imgStr = new StringBuilder();
                         if (!CommonUtil.isEmpty(p.getImage())) {
                             String[] imgArr = p.getImage().split(",");
-                            for (int i = 0; i < imgArr.length; i++) {
-                                if (i == imgArr.length - 1) {
-                                    imgStr.append(address).append(imgArr[i]);
-                                    imgUrlStr.append(imgArr[i]);
-                                } else {
-                                    imgStr.append(address).append(imgArr[i]).append(",");
-                                    imgUrlStr.append(imgArr[i]).append(",");
-                                }
-                            }
+                            StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                         }
                         p.setImage(imgStr.toString());
                         Map<String, Object> map = BeanUtils.beanToMap(p);

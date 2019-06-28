@@ -134,8 +134,6 @@ public class WorkerGoodsService {
             workerGoodsResult.setUnitId(workerGoods.getUnitId());
             workerGoodsResult.setUnitName(workerGoods.getUnitName());
             workerGoodsResult.setOtherName(workerGoods.getOtherName());
-
-
             String workerTypeName = "";
             ServerResponse response = workerTypeAPI.getWorkerType(workerGoods.getWorkerTypeId());
             if (response.isSuccess()) {
@@ -151,11 +149,7 @@ public class WorkerGoodsService {
             workerGoodsResult.setShowGoods(workerGoods.getShowGoods());
             //将工艺列表返回
             List<TechnologyDTO> technologies = new ArrayList<>();
-//            List<WorkerTechnology> wokerTechnologies = iTechnologyMapper.queryWokerTechnologyByWgId(workerGoods.getId());
-
             List<Technology> technologyList = iTechnologyMapper.queryTechnologyList(workerGoods.getId());
-
-            LOG.info("assembleWorkerGoodsResult technologyList size:" + technologyList.size() + " workerGoods.getId():" + workerGoods.getId());
             for (Technology technology : technologyList) {
                 TechnologyDTO technologyResult = new TechnologyDTO();
                 technologyResult.setId(technology.getId());
@@ -172,14 +166,6 @@ public class WorkerGoodsService {
                 technologyResult.setModifyDate(DateUtils.timedate(String.valueOf(technology.getModifyDate().getTime())));
                 technologies.add(technologyResult);
             }
-//            if (wokerTechnologies != null) {
-//                for (WorkerTechnology workerTechnology : wokerTechnologies) {
-//                    Technology technology = iTechnologyMapper.queryById(workerTechnology.getTechnologyId());
-//                    if (technology != null) {
-//
-//                    }
-//                }
-//            }
             workerGoodsResult.setTechnologies(technologies);
             workerGoodsResult.setCreateDate(DateUtils.timedate(String.valueOf(workerGoods.getCreateDate().getTime())));
             workerGoodsResult.setModifyDate(DateUtils.timedate(String.valueOf(workerGoods.getModifyDate().getTime())));
@@ -190,189 +176,73 @@ public class WorkerGoodsService {
         }
     }
 
-//    public ServerResponse<String> setWorkerGoods(WorkerGoods workerGoods, String technologyIds) {
-//
-//        LOG.info("setWorkerGoods workerGoods" + workerGoods + " technologyIds:" +technologyIds );
-//        List<WorkerGoods> workerGoodsList = iWorkerGoodsMapper.selectByName(workerGoods.getName(), workerGoods.getWorkerTypeId());
-//        List<WorkerGoods> workerGoodsSnList = iWorkerGoodsMapper.selectByWorkerGoodsSn(workerGoods.getWorkerGoodsSn(), workerGoods.getWorkerTypeId());
-//
-//        if (workerGoods != null) {
-//            if (workerGoods.getImage() != null && !"".equals(workerGoods.getImage())) {
-//                String[] imgArr = workerGoods.getImage().split(",");
-//                String imgStr = "";
-//                for (int i = 0; i < imgArr.length; i++) {
-//                    String img = imgArr[i];
-//                    if (i == imgArr.length - 1) {
-//                        imgStr += img;
-//                    } else {
-//                        imgStr += img + ",";
-//                    }
-//                }
-//                workerGoods.setImage(imgStr);
-//            }
-//            if (workerGoods.getWorkerDec() != null && !"".equals(workerGoods.getWorkerDec())) {
-//                String[] imgArr2 = workerGoods.getWorkerDec().split(",");
-//                String imgStr2 = "";
-//                for (int i = 0; i < imgArr2.length; i++) {
-//                    String img = imgArr2[i];
-//                    if (i == imgArr2.length - 1) {
-//                        imgStr2 += img;
-//                    } else {
-//                        imgStr2 += img + ",";
-//                    }
-//                }
-//                workerGoods.setWorkerDec(imgStr2);//商品介绍图片
-//            }
-//            WorkerGoods workerG = iWorkerGoodsMapper.selectByPrimaryKey(workerGoods.getId());
-//            if (StringUtils.isNotBlank(workerGoods.getId()) && workerG != null) {
-//                WorkerGoods srcWorkerGoods = iWorkerGoodsMapper.selectByPrimaryKey(workerGoods.getId());
-//                if(!srcWorkerGoods.getName().equals(workerGoods.getName()))//要修改 商品名称
-//                {
-//                    if (workerGoodsList.size() > 0)
-//                        return ServerResponse.createByErrorMessage("商品名称已存在");
-//                }
-//
-//                if(!srcWorkerGoods.getWorkerGoodsSn().equals(workerGoods.getWorkerGoodsSn()))//要修改 商品标号
-//                {
-//                    if (workerGoodsSnList.size() > 0)
-//                        return ServerResponse.createByErrorMessage("商品编号已存在");
-//                }
-//
-//                workerGoods.setModifyDate(new Date());
-//                int rowCount = iWorkerGoodsMapper.updateByPrimaryKeySelective(workerGoods);
-//                if (rowCount > 0) {
-//                    ServerResponse<String> serverResponse = setTechnologyId(workerGoods.getId(), technologyIds);
-//                    if (serverResponse.isSuccess()) {
-//                        return ServerResponse.createBySuccessMessage("更新工价商品成功");
-//                    }
-//                }
-//                return ServerResponse.createByErrorMessage("更新工价商品失败");
-//            } else {
-//                if (workerGoodsList.size() > 0)
-//                    return ServerResponse.createByErrorMessage("商品名称不能重复");
-//                if (workerGoodsSnList.size() > 0)
-//                    return ServerResponse.createByErrorMessage("商品编号不能重复");
-//
-//                workerGoods.setCreateDate(new Date());
-//                workerGoods.setModifyDate(new Date());
-//                int rowCount = iWorkerGoodsMapper.insert(workerGoods);
-//                if (rowCount > 0) {
-//                    ServerResponse<String> serverResponse = setTechnologyId(workerGoods.getId(), technologyIds);
-//                    if (serverResponse.isSuccess()) {
-//                        return ServerResponse.createBySuccessMessage("新增工价商品成功");
-//                    }
-//                }
-//                return ServerResponse.createByErrorMessage("新增工价商品失败");
-//            }
-//        }
-//        return ServerResponse.createByErrorMessage("新增或更新工价商品参数不正确");
-//    }
-
-
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse<String> setWorkerGoods(WorkerGoods workerGoods, String technologyJsonList, String deleteTechnologyIds) {
-
-        LOG.info("insertTechnologyList workerGoods:" + workerGoods + "  technologyJsonList:" + technologyJsonList);
+        if (workerGoods == null) {
+            return ServerResponse.createByErrorMessage("请传入参数");
+        }
         List<WorkerGoods> workerGoodsList = iWorkerGoodsMapper.selectByName(workerGoods.getName(), workerGoods.getWorkerTypeId());
         List<WorkerGoods> workerGoodsSnList = iWorkerGoodsMapper.selectByWorkerGoodsSn(workerGoods.getWorkerGoodsSn(), workerGoods.getWorkerTypeId());
-
-        if (workerGoods != null) {
-
-            WorkerGoods workerG = iWorkerGoodsMapper.selectByPrimaryKey(workerGoods.getId());
-            if (StringUtils.isNotBlank(workerGoods.getId()) && workerG != null) {
-                WorkerGoods srcWorkerGoods = iWorkerGoodsMapper.selectByPrimaryKey(workerGoods.getId());
-                if (!srcWorkerGoods.getName().equals(workerGoods.getName()))//要修改 商品名称
-                {
-                    if (workerGoodsList.size() > 0)
-                        return ServerResponse.createByErrorMessage("商品名称已存在");
-                }
-                if (!srcWorkerGoods.getWorkerGoodsSn().equals(workerGoods.getWorkerGoodsSn()))//要修改 商品标号
-                {
-                    if (workerGoodsSnList.size() > 0)
-                        return ServerResponse.createByErrorMessage("商品编号已存在");
-                }
-            } else {//新增
+        WorkerGoods workerG = iWorkerGoodsMapper.selectByPrimaryKey(workerGoods.getId());
+        if (StringUtils.isNotBlank(workerGoods.getId()) && workerG != null) {
+            WorkerGoods srcWorkerGoods = iWorkerGoodsMapper.selectByPrimaryKey(workerGoods.getId());
+            if (!srcWorkerGoods.getName().equals(workerGoods.getName()))//要修改 商品名称
+            {
                 if (workerGoodsList.size() > 0)
-                    return ServerResponse.createByErrorMessage("商品名称不能重复");
-                if (workerGoodsSnList.size() > 0)
-                    return ServerResponse.createByErrorMessage("商品编号不能重复");
-
+                    return ServerResponse.createByErrorMessage("商品名称已存在");
             }
+            if (!srcWorkerGoods.getWorkerGoodsSn().equals(workerGoods.getWorkerGoodsSn()))//要修改 商品标号
+            {
+                if (workerGoodsSnList.size() > 0)
+                    return ServerResponse.createByErrorMessage("商品编号已存在");
+            }
+        } else {//新增
+            if (workerGoodsList.size() > 0)
+                return ServerResponse.createByErrorMessage("商品名称不能重复");
+            if (workerGoodsSnList.size() > 0)
+                return ServerResponse.createByErrorMessage("商品编号不能重复");
+
+        }
 
 //            WorkerGoods workerO = iWorkerGoodsMapper.selectByPrimaryKey(workerGoods.getOtherName());
 //            workerGoods.setOtherName(workerGoods.getOtherName());
 //            iWorkerGoodsMapper.updateByPrimaryKey(workerO);
 
-            String ret = technologyService.insertTechnologyList(technologyJsonList, workerGoods.getWorkerTypeId(), 1, workerGoods.getId());
-            if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
-                return ServerResponse.createByErrorMessage(ret);
+        String ret = technologyService.insertTechnologyList(technologyJsonList, workerGoods.getWorkerTypeId(), 1, workerGoods.getId());
+        if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
+            return ServerResponse.createByErrorMessage(ret);
 
-            if (StringUtils.isNotBlank(workerGoods.getId()) && workerG != null) {
-                workerGoods.setModifyDate(new Date());
-                if (iWorkerGoodsMapper.updateByPrimaryKeySelective(workerGoods) < 0) {
-                    return ServerResponse.createByErrorMessage("更新工价商品失败");
-                } else {
-                    //相关联表也更新
-                    iBudgetWorkerMapper.updateBudgetMaterialById(workerGoods.getId());
-                    Example example = new Example(WorkerGoods.class);
-                    example.createCriteria().andEqualTo(WorkerGoods.ID, workerGoods.getId());
-                    List<WorkerGoods> list = iWorkerGoodsMapper.selectByExample(example);
-                    System.out.println(list);
-                    masterMendWorkerAPI.updateMendWorker(JSON.toJSONString(list));
-                }
+        if (StringUtils.isNotBlank(workerGoods.getId()) && workerG != null) {
+            workerGoods.setModifyDate(new Date());
+            if (iWorkerGoodsMapper.updateByPrimaryKeySelective(workerGoods) < 0) {
+                return ServerResponse.createByErrorMessage("更新工价商品失败");
             } else {
-                workerGoods.setCreateDate(new Date());
-                workerGoods.setModifyDate(new Date());
-                if (iWorkerGoodsMapper.insert(workerGoods) < 0)
-                    return ServerResponse.createByErrorMessage("新增工价商品失败");
+                //相关联表也更新
+                iBudgetWorkerMapper.updateBudgetMaterialById(workerGoods.getId());
+                Example example = new Example(WorkerGoods.class);
+                example.createCriteria().andEqualTo(WorkerGoods.ID, workerGoods.getId());
+                List<WorkerGoods> list = iWorkerGoodsMapper.selectByExample(example);
+                System.out.println(list);
+                masterMendWorkerAPI.updateMendWorker(JSON.toJSONString(list));
             }
+        } else {
+            workerGoods.setCreateDate(new Date());
+            workerGoods.setModifyDate(new Date());
+            if (iWorkerGoodsMapper.insert(workerGoods) < 0)
+                return ServerResponse.createByErrorMessage("新增工价商品失败");
+        }
 
-            if (!CommonUtil.isEmpty(deleteTechnologyIds)) {
-                String[] deleteTechnologyIdArr = deleteTechnologyIds.split(",");
-                for (String aDeleteTechnologyIdArr : deleteTechnologyIdArr) {
-                    if (iTechnologyMapper.selectByPrimaryKey(aDeleteTechnologyIdArr) != null) {
-                        if (iTechnologyMapper.deleteByPrimaryKey(aDeleteTechnologyIdArr) < 0)
-                            return ServerResponse.createByErrorMessage("删除id：" + aDeleteTechnologyIdArr + "失败");
-                    }
+        if (!CommonUtil.isEmpty(deleteTechnologyIds)) {
+            String[] deleteTechnologyIdArr = deleteTechnologyIds.split(",");
+            for (String aDeleteTechnologyIdArr : deleteTechnologyIdArr) {
+                if (iTechnologyMapper.selectByPrimaryKey(aDeleteTechnologyIdArr) != null) {
+                    if (iTechnologyMapper.deleteByPrimaryKey(aDeleteTechnologyIdArr) < 0)
+                        return ServerResponse.createByErrorMessage("删除id：" + aDeleteTechnologyIdArr + "失败");
                 }
             }
+        }
 
-            return ServerResponse.createBySuccessMessage("操作工价商品成功");
-        }
-        return ServerResponse.createByErrorMessage("新增或更新工价商品参数不正确");
-    }
-
-    /**
-     * 修改 工艺
-     *
-     * @param workerGoodsId
-     * @param technologyIds
-     * @return
-     */
-    private ServerResponse<String> setTechnologyId(String workerGoodsId, String technologyIds) {
-        if (!StringUtils.isNotBlank(workerGoodsId)) {
-            return ServerResponse.createByErrorMessage("请选择商品");
-        }
-        if (!StringUtils.isNotBlank(technologyIds)) {
-            return ServerResponse.createByErrorMessage("请选择工艺");
-        }
-        try {
-//            iTechnologyMapper.deleteWokerTechnologyByWgId(workerGoodsId);
-//            String[] ids = technologyIds.split(",");
-//            for (String id : ids) {
-//                if (StringUtils.isNotBlank(id)) {
-//                    WorkerTechnology wt = new WorkerTechnology();
-//                    wt.setWorkerGoodsId(workerGoodsId);
-//                    wt.setTechnologyId(id);
-//                    wt.setCreateDate(new Date());
-//                    wt.setModifyDate(new Date());
-//                    iTechnologyMapper.insertWokerTechnology(wt);// 需要将工艺替换
-//                }
-//            }
-            return ServerResponse.createBySuccessMessage("修改商品工艺成功");
-        } catch (Exception e) {
-            return ServerResponse.createByErrorMessage("修改商品工艺时数据库发生错误");
-        }
+        return ServerResponse.createBySuccessMessage("操作工价商品成功");
     }
 
     /**
@@ -414,28 +284,6 @@ public class WorkerGoodsService {
             return ServerResponse.createByErrorMessage("查询未删除或已支付的工钱失败");
 
         }
-    }
-
-    /**
-     * 删除人工商品
-     *
-     * @param id
-     * @return
-     */
-    public ServerResponse deleteWorkerGoods(String id) {
-        return ServerResponse.createByErrorMessage("不能执行删除操作");
-//        try {
-//            int i = iWorkerGoodsMapper.deleteByPrimaryKey(id);
-//            if (i != 0) {
-//                return ServerResponse.createBySuccessMessage("删除成功");
-//            } else {
-//                return ServerResponse.createByErrorMessage("删除失败");
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ServerResponse.createByErrorMessage("删除失败");
-//
-//        }
     }
 
     public ServerResponse getHomeProductList() {

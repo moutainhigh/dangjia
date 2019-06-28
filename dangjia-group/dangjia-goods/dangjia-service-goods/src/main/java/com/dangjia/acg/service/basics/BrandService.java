@@ -17,6 +17,7 @@ import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.BrandSeries;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,23 +66,12 @@ public class BrandService {
                 List<BrandSeries> mapList = iBrandSeriesMapper.queryBrandSeries(brand.getId());
                 List<Map<String, Object>> mapList2 = new ArrayList<>();
                 for (BrandSeries bs : mapList) {
-//					String imageUrl=bs.getImage();
                     String[] imgArr = bs.getImage().split(",");
                     StringBuilder imgStr = new StringBuilder();
                     StringBuilder imgUrlStr = new StringBuilder();
-                    for (int i = 0; i < imgArr.length; i++) {
-                        if (i == imgArr.length - 1) {
-                            imgStr.append(address).append(imgArr[i]);
-                            imgUrlStr.append(imgArr[i]);
-                        } else {
-                            imgStr.append(address).append(imgArr[i]).append(",");
-                            imgUrlStr.append(imgArr[i]).append(",");
-                        }
-                    }
-//					bs.setImage(address+bs.getImage());
+                    StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                     bs.setImage(imgStr.toString());
                     Map<String, Object> mapSeries = BeanUtils.beanToMap(bs);
-//					mapSeries.put("imageUrl",imageUrl);
                     mapSeries.put("imageUrl", imgUrlStr.toString());
                     mapList2.add(mapSeries);
                 }
@@ -102,7 +92,7 @@ public class BrandService {
     public ServerResponse select(String brandId) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            Map<String, Object> obj = new HashMap<String, Object>();
+            Map<String, Object> obj = new HashMap<>();
             Brand brand = iBrandMapper.selectByPrimaryKey(brandId);
             List<BrandSeries> mapList = iBrandSeriesMapper.queryBrandSeries(brand.getId());
             List<Map<String, Object>> mapList2 = new ArrayList<>();
@@ -239,15 +229,7 @@ public class BrandService {
                     StringBuilder imgUrlStr = new StringBuilder();
                     if (!CommonUtil.isEmpty(bs.getImage())) {
                         String[] imgArr = bs.getImage().split(",");
-                        for (int i = 0; i < imgArr.length; i++) {
-                            if (i == imgArr.length - 1) {
-                                imgStr.append(address).append(imgArr[i]);
-                                imgUrlStr.append(imgArr[i]);
-                            } else {
-                                imgStr.append(address).append(imgArr[i]).append(",");
-                                imgUrlStr.append(imgArr[i]).append(",");
-                            }
-                        }
+                        StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                     }
                     bs.setImage(imgStr.toString());
                     Map<String, Object> mapSeries = BeanUtils.beanToMap(bs);

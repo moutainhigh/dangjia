@@ -12,6 +12,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.basics.*;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -121,60 +122,6 @@ public class GoodsGroupService {
     }
 
     /**
-     * 修改货品关联组关系
-     *
-     * @param listOfProductId
-     * @param goodsGroupId
-     * @param state
-     * @param name
-     * @return
-     */
-    public ServerResponse updateGroupLink(String listOfProductId, String goodsGroupId, int state, String name) {
-        return ServerResponse.createByErrorMessage("接口弃用");
-//        try {
-//            GoodsGroup goodsGroup = iGoodsGroupMapper.selectByPrimaryKey(goodsGroupId);
-//
-//            List<GoodsGroup> goodsGroups = iGoodsGroupMapper.selectByName(name);//要修改的name
-//            if (goodsGroups.size() > 1)
-//                return ServerResponse.createByErrorMessage("不能修改，该关联组已存在");
-//
-//            goodsGroup.setState(state);
-//            goodsGroup.setName(name);
-//            goodsGroup.setModifyDate(new Date());
-//            iGoodsGroupMapper.updateByPrimaryKey(goodsGroup);
-//            iGoodsGroupMapper.deleteGroupLink(goodsGroupId);
-//            JSONArray goodsList = JSONArray.parseArray(listOfProductId);
-//            for (int i = 0; i < goodsList.size(); i++) {//循环添加商品关系
-//                JSONObject job = goodsList.getJSONObject(i);
-//                String id = job.getString("productId");//得到值
-//                Product product = iProductMapper.getById(id);//根据商品id查询商品对象
-//                List<GroupLink> listG = iGoodsGroupMapper.queryGroupLinkByGidAndPid(goodsGroupId, id);//根据关联组id和货品id查询关联关系
-//                if ((listG != null && listG.size() > 0) || product == null) {
-//                    continue;
-//                }
-//                GroupLink groupLink = new GroupLink();
-//                groupLink.setGroupId(goodsGroupId);//关联组id
-//                groupLink.setGroupName(name);//关联组名称
-//                groupLink.setProductId(id);//货品id
-//                groupLink.setProductName(product.getName());//货品名称
-//                groupLink.setGoodsId(product.getGoodsId());
-//                groupLink.setGoodsName(iGoodsMapper.selectByPrimaryKey(product.getGoodsId()) == null ? "" : iGoodsMapper.selectByPrimaryKey(product.getGoodsId()).getName());
-//                iGoodsGroupMapper.addGroupLink(groupLink);//新增关联组货品关系
-////                List<GroupLink> groupLinkList = iGoodsGroupMapper.queryGroupLinkByPid(product.getId());
-//                List<GroupLink> groupLinkList = iGoodsGroupMapper.queryGroupLinkByPidAndGid(product.getId(), groupLink.getGoodsId());
-//                LOG.info("groupLinkList size::" + groupLinkList.size() + " productId:" + product.getId() + " goodsId:" + groupLink.getGoodsId());
-//                if (groupLinkList.size() >= 2) {//根据货品查询关联关系，超过两条则都修改为不可切换
-//                    iGoodsGroupMapper.updateGLinkByPid(product.getId(), 1);
-//                }
-//            }
-//            return ServerResponse.createBySuccessMessage("修改成功");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ServerResponse.createByErrorMessage("修改失败");
-//        }
-    }
-
-    /**
      * 查询所有关联组
      *
      * @return
@@ -235,15 +182,7 @@ public class GoodsGroupService {
                     String[] imgArr = p.getImage().split(",");
                     StringBuilder imgStr = new StringBuilder();
                     StringBuilder imgUrlStr = new StringBuilder();
-                    for (int i = 0; i < imgArr.length; i++) {
-                        if (i == imgArr.length - 1) {
-                            imgStr.append(address).append(imgArr[i]);
-                            imgUrlStr.append(imgArr[i]);
-                        } else {
-                            imgStr.append(address).append(imgArr[i]).append(",");
-                            imgUrlStr.append(imgArr[i]).append(",");
-                        }
-                    }
+                    StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                     p.setImage(imgStr.toString());
                     Map<String, Object> map = BeanUtils.beanToMap(p);
                     map.put("imageUrl", imgUrlStr.toString());

@@ -42,15 +42,6 @@ public class GoodsGroupController implements GoodsGroupAPI {
     }
 
     /*
-     * 修改货品关联组关系
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse updateGroupLink(HttpServletRequest request, String listOfProductId, String goodsGroupId, int state, String name) {
-        return goodsGroupService.updateGroupLink(listOfProductId, goodsGroupId, state, name);
-    }
-
-    /*
      * 根据关联组id查询货品关联关系
      */
     @Override

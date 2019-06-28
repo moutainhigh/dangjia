@@ -175,19 +175,6 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
     }
 
     /**
-     * 业主修改精算
-     *
-     * @param listOfGoods
-     * @return
-     */
-    @SuppressWarnings("static-access")
-    @Override
-    @ApiMethod
-    public ServerResponse doModifyBudgets(HttpServletRequest request, String listOfGoods) {
-        return budgetWorkerService.doModifyBudgets(listOfGoods);
-    }
-
-    /**
      * 估价
      *
      * @param houseId
