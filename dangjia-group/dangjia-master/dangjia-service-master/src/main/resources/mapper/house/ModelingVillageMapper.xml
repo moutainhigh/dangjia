@@ -187,7 +187,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             AND h.visit_state !=4
             AND h.site_display=0
             AND mv.locationx IS NOT NULL
-            ORDER BY juli,h.completed_date DESC ,rand() limit 10
+            ORDER BY h.construction_date DESC,juli,rand() limit 10
     </select>
 </mapper>
 
