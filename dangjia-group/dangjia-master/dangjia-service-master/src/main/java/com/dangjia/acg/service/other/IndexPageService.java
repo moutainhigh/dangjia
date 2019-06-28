@@ -138,6 +138,7 @@ public class IndexPageService {
             houseDetailsDTO.setImage(getHouseImage(house.getId()));
             houseDetailsDTO.setHouseName(house.getHouseName());
             houseDetailsDTO.setOptionalLabel(house.getOptionalLabel());
+            houseDetailsDTO.setVisitState(house.getVisitState());
             String[] liangArr = {};
             if (house.getLiangDian() != null) {
                 liangArr = house.getLiangDian().split(",");

@@ -525,7 +525,7 @@ public class HouseService {
                     houseChoiceCase.setDataStatus(0);
                     houseChoiceCase.setCityId(srcHouse.getCityId());
                     houseChoiceCase.setHouseId(srcHouse.getId());
-                    houseChoiceCase.setImage(srcHouse.getImage());
+//                    houseChoiceCase.setImage(srcHouse.getImage());
                     houseChoiceCase.setMoney(srcHouse.getMoney());
                     houseChoiceCase.setTitle(srcHouse.getNoNumberHouseName());
                     houseChoiceCase.setLabel(srcHouse.getStyle());
@@ -971,7 +971,8 @@ public class HouseService {
     /**
      * 根据城市，小区，最小最大面积查询房子
      */
-    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId, Double minSquare, Double maxSquare, Integer houseType, PageDTO pageDTO) {
+    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId,
+                                           Double minSquare, Double maxSquare, Integer houseType, PageDTO pageDTO) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
