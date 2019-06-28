@@ -35,7 +35,6 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.repair.MendMateriel;
-import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.repair.MendOrderService;
@@ -477,7 +476,7 @@ public class OrderService {
                 /*删除补货信息*/
                 if(!CommonUtil.isEmpty(orderSplit.getMendNumber())){
                     mendOrderMapper.deleteByPrimaryKey(orderSplit.getMendNumber());
-                    example = new Example(MendOrder.class);
+                    example = new Example(MendMateriel.class);
                     example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, orderSplit.getMendNumber());
                     mendMaterialMapper.deleteByExample(example);
                 }
