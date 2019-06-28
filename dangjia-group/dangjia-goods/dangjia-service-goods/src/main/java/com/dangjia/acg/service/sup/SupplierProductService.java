@@ -39,7 +39,6 @@ public class SupplierProductService {
         iSupplierProductMapper.deleteByExample(example);
     }
 
-
     /**
      * 查询供应商
      */
@@ -63,37 +62,6 @@ public class SupplierProductService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-
-
-    /**
-     * 根据货品查询相应供应商
-     */
-//    public List<Map<String, Object>> querySupplierProductByPid(String productId) {
-//        try {
-//            List<SupplierProduct> spList = iSupplierProductMapper.querySupplierProduct(productId);
-//            List<Map<String, Object>> mapList = new ArrayList<>();
-//            for (int i = 0; i < spList.size(); i++) {
-//                SupplierProduct supplierProduct = spList.get(i);
-//                Map<String, Object> map = new HashMap<>();
-//                map.put("supplierId", supplierProduct.getSupplierId());//供应商id
-//                Supplier supplier = iSupplierMapper.selectByPrimaryKey(supplierProduct.getSupplierId());
-//                map.put("supplierName", supplier == null ? "" : supplier.getName());//供应商名称
-//                map.put("supplierTel", supplier == null ? "" : supplier.getTelephone());//供应电话
-//                map.put("supplierPrice", supplierProduct.getPrice());//供应价格
-//                if (i == 0) {
-//                    map.put("isDefault", 0);//默认选中最低价0：选中；1：不选中
-//                } else {
-//                    map.put("isDefault", 1);
-//                }
-//                mapList.add(map);
-//            }
-//            return mapList;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
-
 
     /**
      * 根据货品查询相应供应商

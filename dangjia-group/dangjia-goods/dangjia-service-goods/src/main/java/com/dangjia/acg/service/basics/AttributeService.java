@@ -16,7 +16,6 @@ import com.dangjia.acg.modle.attribute.Attribute;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
-import com.dangjia.acg.pojo.attribute.AttributePO;
 import com.dangjia.acg.pojo.attribute.AttributeValuePO;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -53,42 +52,21 @@ public class AttributeService {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         try {
-            List<Attribute> caList = new ArrayList<>();
+            List<Attribute> caList  = iAttributeMapper.queryAttributeByCategoryId(goodsCategoryId, likeAttrName);
             List<Map<String, Object>> rListMap = new ArrayList<>();
-//            if (goodsCategoryId == null || "".equals(goodsCategoryId)) {
-//                caList = iAttributeMapper.query();
-//            } else {
-            LOG.info("queryGoodsAttribute **goodsCategoryId :" + goodsCategoryId);
-            caList = iAttributeMapper.queryAttributeByCategoryId(goodsCategoryId, likeAttrName);
-//            }
+            PageInfo pageResult = new PageInfo(caList);
             for (Attribute ca : caList) {
-                Map<String, Object> caMap = new HashMap<String, Object>();
+                Map<String, Object> caMap = new HashMap<>();
                 caMap.put("id", ca.getId());
                 caMap.put("name", ca.getName());
                 caMap.put("type", ca.getType());
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 caMap.put("createDate", sdf.format(ca.getCreateDate()));
                 caMap.put("modifyDate", sdf.format(ca.getModifyDate()));
-
-                AttributePO attributepo = iAttributeMapper.queryPOById(ca.getId());
-                List<AttributeValuePO> attributeValueList = attributepo.getAttributeValueLists();
-//                LOG.info("attributeCC size:" + attributeValueList.size());
-//                for(int i= 0;i<attributeValueList.size();i++)
-//                    LOG.info("attributeCC size: name" + attributeValueList.get(i).getName());
-//                for (AttributeValuePO attributeValue : attributeValueList) {
-//                    LOG.info(" AttributeValue list:::" +  " name:" + attributeValue.getName());
-//                    LOG.info(" AttributeValue list:::" + attributeValue.getAttribute().getName() + " name:" + attributeValue.getName());
-//                }
-
-//                List<AttributeValue> avList = iAttributeValueMapper.queryByAttributeId(ca.getId());
                 List<AttributeValuePO> avList = iAttributeValueMapper.queryPOByAttributeId(ca.getId());
-                List<Map<String, Object>> avListMap = new ArrayList<Map<String, Object>>();
+                List<Map<String, Object>> avListMap = new ArrayList<>();
                 for (AttributeValuePO av : avList) {
-                    AttributeValuePO sss = iAttributeValueMapper.getPOById(av.getId());
-//                    LOG.info("myGetById :" + " name:" + sss.getName   () + " image:" + sss.getImage());
-//                    LOG.info("myGetById getAttributeId :" + sss.getAttributeId());
-//                    LOG.info("myGetById getName:" + sss.getAttribute().getName() + " id:" + sss.getAttribute().getId());
-                    Map<String, Object> avMap = new HashMap<String, Object>();
+                    Map<String, Object> avMap = new HashMap<>();
                     avMap.put("avId", av.getId());
                     avMap.put("avName", av.getName());
                     avMap.put("image", address + av.getImage());
@@ -98,7 +76,6 @@ public class AttributeService {
                 caMap.put("avListMap", avListMap);
                 rListMap.add(caMap);
             }
-            PageInfo pageResult = new PageInfo(caList);
             pageResult.setList(rListMap);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
@@ -119,6 +96,7 @@ public class AttributeService {
             } else {
                 caList = iAttributeMapper.queryGoodsAttributelikeName(name);
             }
+            PageInfo pageResult = new PageInfo(caList);
             for (Attribute ca : caList) {
                 Map<String, Object> caMap = new HashMap<>();
                 caMap.put("id", ca.getId());
@@ -130,7 +108,7 @@ public class AttributeService {
                 List<AttributeValue> avList = iAttributeValueMapper.queryByAttributeId(ca.getId());
                 List<Map<String, Object>> avListMap = new ArrayList<>();
                 for (AttributeValue av : avList) {
-                    Map<String, Object> avMap = new HashMap();
+                    Map<String, Object> avMap = new HashMap<>();
                     avMap.put("avId", av.getId());
                     avMap.put("avName", av.getName());
                     avMap.put("image", address + av.getImage());
@@ -140,7 +118,6 @@ public class AttributeService {
                 caMap.put("avListMap", avListMap);
                 rListMap.add(caMap);
             }
-            PageInfo pageResult = new PageInfo(caList);
             pageResult.setList(rListMap);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
@@ -181,15 +158,11 @@ public class AttributeService {
     //新增属性及其属性选项
     public ServerResponse insertGoodsAttribute(String goodsCategoryId, String attributeName, Integer type, String jsonStr) {
         try {
-//			List<Attribute> attributeList = iAttributeMapper.queryCategoryAttribute(goodsCategoryId);//弃用
             List<Attribute> attributeList = iAttributeMapper.queryAttributeByCategoryId(goodsCategoryId, null);
-            LOG.info("attributeList size:" + attributeList.size());
             for (Attribute attribute : attributeList) {
-                LOG.info("attributeList:" + attribute.getName() + " == " + attribute.getName());
                 if (attribute.getName().equals(attributeName))
                     return ServerResponse.createByErrorMessage("不能重复添加属性名称");
             }
-
             JSONArray jsonArr = JSONArray.parseArray(jsonStr);
             for (int i = 0; i < jsonArr.size(); i++) {
                 String name = jsonArr.getJSONObject(i).getString("name");
@@ -203,19 +176,11 @@ public class AttributeService {
 
                 }
             }
-
             Attribute attribute = new Attribute();
             attribute.setName(attributeName);
             attribute.setType(type);
             attribute.setCategoryId(goodsCategoryId);
             iAttributeMapper.insert(attribute);
-
-//			//保存商品类别和属性的关联
-//			CategoryAttribute ca = new CategoryAttribute();
-//			ca.setCategoryId(goodsCategoryId);
-//			ca.setAttributeId(attribute.getId());
-//			iAttributeMapper.insertCategoryAttribute(ca);
-
             for (int i = 0; i < jsonArr.size(); i++) {
                 JSONObject obj = jsonArr.getJSONObject(i);
                 AttributeValue attributeValue = new AttributeValue();
@@ -277,39 +242,6 @@ public class AttributeService {
                     }
                 }
             }
-
-            List<Goods> goodsList = iGoodsMapper.queryByCategoryId(srcAttribute.getCategoryId());//根据分类id查询是否有关联商品
-//            if (goodsList.size() > 0)
-//                return ServerResponse.createByErrorMessage("修改失败，该分类属性已被其他商品使用");
-
-
-//				//检查该分类中的所有商品，是否有商品使用 该属性名和属性选项名
-//				for(Goods gs: goodsList)
-//				{
-//					LOG.info("gs name:"+ gs.getName());
-//					//检查属性名已经存在   属性名是否有商品使用
-//					List<Product> productList = iProductMapper.queryByGoodsId(gs.getId());
-//					for(Product product: productList)
-//					{
-//						String[] valueIdArr = product.getValueNameArr().split(",");
-//						for(int i=0;i<valueIdArr.length;i++)
-//						{
-//							Attribute ae = iAttributeMapper.queryById(valueIdArr[i]);
-//							if(Arrays.asList(valueIdArr).contains(ae.getName()))
-//								return ServerResponse.createByErrorMessage("修改失败，该属性选项名已被其他商品使用");
-//						}
-//
-//						String[] attributeIdArr = product.getAttributeIdArr().split(",");
-//						for(int i=0;i<attributeIdArr.length;i++)
-//						{
-//							Attribute ae = iAttributeMapper.queryById(attributeIdArr[i]);
-//							if(Arrays.asList(valueIdArr).contains(jsonName))
-//								return ServerResponse.createByErrorMessage("修改失败，该属性选项名已被其他商品使用");
-//						}
-//
-//					}
-//				}
-
             Attribute goodsAttribute = new Attribute();
             goodsAttribute.setId(attributeId);
             goodsAttribute.setName(attributeName);
@@ -385,7 +317,6 @@ public class AttributeService {
 
             iAttributeMapper.deleteById(goodsAttributeId);//删除商品属性
             iAttributeValueMapper.deleteByAttributeId(goodsAttributeId);//删除属性选项
-//			iAttributeMapper.deleteCategoryAttribute(goodsAttributeId);//删除商品类别和属性的关联  弃用
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -398,18 +329,14 @@ public class AttributeService {
      */
     public ServerResponse deleteByAttributeId(String attributeValueId) {
         try {
-//            AttributeValue srcAttributeValue = iAttributeValueMapper.queryById(attributeValueId);
-//            Attribute srcAe = iAttributeMapper.queryById(srcAttributeValue.getAttributeId());
             AttributeValue srcAttributeValue = iAttributeValueMapper.selectByPrimaryKey(attributeValueId);
             Attribute srcAe = iAttributeMapper.selectByPrimaryKey(srcAttributeValue.getAttributeId());
-            LOG.info("deleteByAttributeId  :" + srcAe);
             List<Goods> goodsList = iGoodsMapper.queryByCategoryId(srcAe.getCategoryId());//根据分类id查询是否有关联商品
             if (goodsList.size() > 0)
                 return ServerResponse.createByErrorMessage("该商品属性有关联商品不能删除");
             List<Product> productLists = iProductMapper.getPListByValueIdArrOrAttrId(null, attributeValueId);
             if (productLists.size() > 0)
                 return ServerResponse.createByErrorMessage("该商品属性有关联商品不能删除");
-
             iAttributeValueMapper.deleteById(attributeValueId);//删除属性选项
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {

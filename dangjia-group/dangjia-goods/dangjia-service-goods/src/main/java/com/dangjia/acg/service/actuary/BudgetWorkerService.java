@@ -201,8 +201,8 @@ public class BudgetWorkerService {
                         budgetMaterial.setShopCount(jobT.getShopCount());
                         Double converCount = (jobT.getShopCount() / pro.getConvertQuality());
                         Unit convertUnit = iUnitMapper.selectByPrimaryKey(pro.getConvertUnit());
-                        if(convertUnit.getType()==1){
-                            converCount=Math.ceil(converCount);
+                        if (convertUnit.getType() == 1) {
+                            converCount = Math.ceil(converCount);
                         }
                         budgetMaterial.setConvertCount(converCount);
 //                        budgetMaterial.setUnitName(pro.getUnitName());
@@ -365,10 +365,10 @@ public class BudgetWorkerService {
                 String goodsGroupId = job.getString("goodsGroupId");//所属关联组
                 Double shopCount = Double.parseDouble(job.getString("shopCount"));//数量
                 if (0 == productType || 1 == productType) {//材料或者服务
-                    Example example1=new Example(BudgetMaterial.class);
-                    example1.createCriteria().andEqualTo(BudgetMaterial.HOUSE_ID,houseId).andEqualTo(BudgetMaterial.PRODUCT_ID,productId).andEqualTo(BudgetMaterial.WORKER_TYPE_ID,workerTypeId);
-                    int num= iBudgetMaterialMapper.selectCountByExample(example1);
-                    if(num>0){
+                    Example example1 = new Example(BudgetMaterial.class);
+                    example1.createCriteria().andEqualTo(BudgetMaterial.HOUSE_ID, houseId).andEqualTo(BudgetMaterial.PRODUCT_ID, productId).andEqualTo(BudgetMaterial.WORKER_TYPE_ID, workerTypeId);
+                    int num = iBudgetMaterialMapper.selectCountByExample(example1);
+                    if (num > 0) {
                         continue;
                     }
                     try {
@@ -400,10 +400,10 @@ public class BudgetWorkerService {
                            /* double a = actuarialQuantity / pro.getConvertQuality();
                             double shopCount = Math.ceil(a);*/
                             budgetMaterial.setShopCount(shopCount);
-                            Double converCount =(shopCount / pro.getConvertQuality());
+                            Double converCount = (shopCount / pro.getConvertQuality());
                             Unit convertUnit = iUnitMapper.selectByPrimaryKey(pro.getConvertUnit());
-                            if(convertUnit.getType()==1){
-                                converCount=Math.ceil(converCount);
+                            if (convertUnit.getType() == 1) {
+                                converCount = Math.ceil(converCount);
                             }
                             budgetMaterial.setConvertCount(converCount);
                             BigDecimal b1 = new BigDecimal(budgetMaterial.getPrice());
@@ -447,10 +447,10 @@ public class BudgetWorkerService {
                     }
                 } else if (2 == productType) {//人工商品
                     try {
-                        Example example1=new Example(BudgetWorker.class);
-                        example1.createCriteria().andEqualTo(BudgetWorker.HOUSE_ID,houseId).andEqualTo(BudgetWorker.WORKER_GOODS_ID,productId).andEqualTo(BudgetWorker.WORKER_TYPE_ID,workerTypeId);
-                        int num= iBudgetWorkerMapper.selectCountByExample(example1);
-                        if(num>0){
+                        Example example1 = new Example(BudgetWorker.class);
+                        example1.createCriteria().andEqualTo(BudgetWorker.HOUSE_ID, houseId).andEqualTo(BudgetWorker.WORKER_GOODS_ID, productId).andEqualTo(BudgetWorker.WORKER_TYPE_ID, workerTypeId);
+                        int num = iBudgetWorkerMapper.selectCountByExample(example1);
+                        if (num > 0) {
                             continue;
                         }
                         BudgetWorker budgetWorker = new BudgetWorker();
@@ -500,73 +500,68 @@ public class BudgetWorkerService {
     }
 
 
-
     /**
      * 生成精算（xls导入）
      */
     public ServerResponse importExcelBudgets(String workerTypeId, MultipartFile file) {
         try {
-            Map map=new HashMap();
-            ImportExcel caiLiao=new ImportExcel(file,0,1);//材料
-            List<ProductDTO> caiLiaoList=caiLiao.getDataList(ProductDTO.class,0);
-            List<ProductDTO> caiLiaos=new ArrayList<>();
+            Map map = new HashMap();
+            ImportExcel caiLiao = new ImportExcel(file, 0, 1);//材料
+            List<ProductDTO> caiLiaoList = caiLiao.getDataList(ProductDTO.class, 0);
+            List<ProductDTO> caiLiaos = new ArrayList<>();
             for (int i = 0; i < caiLiaoList.size(); i++) {
-                ProductDTO productDTO=caiLiaoList.get(i);
-                if(CommonUtil.isEmpty(productDTO.getProductSn())){
+                ProductDTO productDTO = caiLiaoList.get(i);
+                if (CommonUtil.isEmpty(productDTO.getProductSn())) {
                     break;
                 }
-                productDTO=productService.getProductDTO(productDTO.getProductSn(),productDTO.getShopCount());
-                if(CommonUtil.isEmpty(productDTO.getShopCount())){
+                productDTO = productService.getProductDTO(productDTO.getProductSn(), productDTO.getShopCount());
+                if (CommonUtil.isEmpty(productDTO.getShopCount())) {
                     continue;
                 }
                 caiLiaos.add(productDTO);
             }
-            map.put("caiLiaos",caiLiaos);
+            map.put("caiLiaos", caiLiaos);
 
 
-
-
-            ImportExcel fuWu=new ImportExcel(file,0,2);//服务
-            List<ProductDTO> fuWuList=fuWu.getDataList(ProductDTO.class,0);
-            List<ProductDTO> fuWus=new ArrayList<>();
+            ImportExcel fuWu = new ImportExcel(file, 0, 2);//服务
+            List<ProductDTO> fuWuList = fuWu.getDataList(ProductDTO.class, 0);
+            List<ProductDTO> fuWus = new ArrayList<>();
             for (int i = 0; i < fuWuList.size(); i++) {
-                ProductDTO productDTO=fuWuList.get(i);
-                if(CommonUtil.isEmpty(productDTO.getProductSn())){
+                ProductDTO productDTO = fuWuList.get(i);
+                if (CommonUtil.isEmpty(productDTO.getProductSn())) {
                     break;
                 }
-                productDTO=productService.getProductDTO(productDTO.getProductSn(),productDTO.getShopCount());
-                if(CommonUtil.isEmpty(productDTO.getShopCount())){
+                productDTO = productService.getProductDTO(productDTO.getProductSn(), productDTO.getShopCount());
+                if (CommonUtil.isEmpty(productDTO.getShopCount())) {
                     continue;
                 }
                 fuWus.add(productDTO);
             }
-            map.put("fuWus",fuWus);
+            map.put("fuWus", fuWus);
 
 
-
-
-
-            ImportExcel renGong=new ImportExcel(file,0,0);//人工
-            List<WorkerGoodsDTO> workerGoodsDTOList=renGong.getDataList(WorkerGoodsDTO.class,0);
-            List<WorkerGoodsDTO> workerGoodsDTOS=new ArrayList<>();
+            ImportExcel renGong = new ImportExcel(file, 0, 0);//人工
+            List<WorkerGoodsDTO> workerGoodsDTOList = renGong.getDataList(WorkerGoodsDTO.class, 0);
+            List<WorkerGoodsDTO> workerGoodsDTOS = new ArrayList<>();
             for (int i = 0; i < workerGoodsDTOList.size(); i++) {
-                WorkerGoodsDTO workerGoodsDTO=workerGoodsDTOList.get(i);
-                if(CommonUtil.isEmpty(workerGoodsDTO.getWorkerGoodsSn())){
+                WorkerGoodsDTO workerGoodsDTO = workerGoodsDTOList.get(i);
+                if (CommonUtil.isEmpty(workerGoodsDTO.getWorkerGoodsSn())) {
                     break;
                 }
-                workerGoodsDTO=workerGoodsService.getWorkerGoodsDTO(workerGoodsDTO.getWorkerGoodsSn(),workerTypeId,workerGoodsDTO.getShopCount());
-                if(CommonUtil.isEmpty(workerGoodsDTO.getShopCount())){
+                workerGoodsDTO = workerGoodsService.getWorkerGoodsDTO(workerGoodsDTO.getWorkerGoodsSn(), workerTypeId, workerGoodsDTO.getShopCount());
+                if (CommonUtil.isEmpty(workerGoodsDTO.getShopCount())) {
                     continue;
                 }
                 workerGoodsDTOS.add(workerGoodsDTO);
             }
-            map.put("workerGoods",workerGoodsDTOS);
-            return ServerResponse.createBySuccess("生成精算成功",map);
+            map.put("workerGoods", workerGoodsDTOS);
+            return ServerResponse.createBySuccess("生成精算成功", map);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("生成失败");
         }
     }
+
     /**
      * 根据houseId和workerTypeId查询房子人工精算总价
      */
@@ -579,75 +574,6 @@ public class BudgetWorkerService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("生成失败");
         }
-    }
-
-    //业主修改材料精算
-    public ServerResponse doModifyBudgets(String listOfGoods) {
-        return ServerResponse.createByErrorMessage("接口弃用");
-//        try {
-//            JSONArray goodsList = JSONArray.parseArray(listOfGoods);
-//            for (int i = 0; i < goodsList.size(); i++) {
-//                JSONObject job = goodsList.getJSONObject(i);
-//                String id = job.getString("id");//精算id
-//                String goodsId = job.getString("goodsId");//商品id
-//                String productId = job.getString("productId");//货品id
-//                Integer productType = Integer.parseInt(job.getString("productType"));//0:材料；1：服务；2:人工
-//                String groupType = job.getString("groupType");//null：单品；有值：关联组合
-//                String goodsGroupId = job.getString("goodsGroupId");//所属关联组
-//                if (0 == productType || 1 == productType) {//材料或者服务
-//                    try {
-//                        BudgetMaterial budgetMaterial = iBudgetMaterialMapper.selectByPrimaryKey(id);
-//                        Goods goods = iGoodsMapper.queryById(goodsId);
-//                        if (goods == null) {
-//                            continue;
-//                        }
-//                        Product pro = iProductMapper.getById(productId);
-//                        if (pro == null) {
-//                            List<Product> pList = iProductMapper.queryByGoodsId(goods.getId());
-//                            if (pList.size() > 0) {
-//                                pro = pList.get(0);
-//                            }
-//                        }
-//                        if (goods.getBuy() == 0 || goods.getBuy() == 1) {//0：必买；1可选；2自购
-//                            budgetMaterial.setSteta(1);//我们购
-//                        } else {
-//                            budgetMaterial.setSteta(2);//自购
-//                        }
-//                        budgetMaterial.setProductId(pro.getId().toString());
-//                        budgetMaterial.setProductSn(pro.getProductSn());
-//                        budgetMaterial.setGoodsId(goodsId);
-//                        budgetMaterial.setGoodsName(goods.getName());
-//                        budgetMaterial.setProductName(pro.getName());
-//                        budgetMaterial.setPrice(pro.getPrice());
-//                        budgetMaterial.setCost(pro.getCost());
-//                        budgetMaterial.setUnitName(pro.getUnitName());
-//                        budgetMaterial.setModifyDate(new Date());
-//                        budgetMaterial.setProductType(productType);
-//                        budgetMaterial.setGroupType(groupType);
-//                        if (StringUtils.isNoneBlank(goodsGroupId))
-//                            budgetMaterial.setGoodsGroupId(goodsGroupId);
-//                        budgetMaterial.setImage(pro.getImage());//货品图片
-//                        budgetMaterial.setCategoryId(goods.getCategoryId());//商品分类
-//
-//                        /*Double actuarialQuantity = budgetMaterial.getActuarialQuantity();//精算量
-//                        Double convertQuality = pro.getConvertQuality();//换算单位量
-//                        DecimalFormat df = new DecimalFormat("0.00");//设置保留位数
-//                        Double shopCount = Double.parseDouble(df.format(actuarialQuantity / convertQuality));//购买数量
-//                        budgetMaterial.setShopCount(shopCount);*/
-//                        Double totalPrice = budgetMaterial.getShopCount() * pro.getPrice();//购买总价
-//                        budgetMaterial.setTotalPrice(totalPrice);
-//                        iBudgetMaterialMapper.updateByPrimaryKey(budgetMaterial);
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                        return ServerResponse.createByErrorMessage("修改精算失败");
-//                    }
-//                }
-//            }
-//            return ServerResponse.createBySuccessMessage("修改精算成功");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ServerResponse.createByErrorMessage("修改精算失败");
-//        }
     }
 
     /**
@@ -785,7 +711,7 @@ public class BudgetWorkerService {
 
         } catch (Exception e) {
             e.printStackTrace();
-            LOG.error("系统出错，查询估价失败",e);
+            LOG.error("系统出错，查询估价失败", e);
             return ServerResponse.createByErrorMessage("系统出错，查询估价失败");
         }
     }
@@ -831,9 +757,9 @@ public class BudgetWorkerService {
                     if (abw.getShopCount() + abw.getRepairCount() - abw.getBackCount() > 0) {
                         WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
                         List<Technology> tList = iTechnologyMapper.patrolList(wg.getId());
-                        if (tList.size() > 0){
+                        if (tList.size() > 0) {
                             JSONObject jsonObject = new JSONObject();
-                            jsonObject.put("workerGoodsId",  wg.getId());
+                            jsonObject.put("workerGoodsId", wg.getId());
                             jsonObject.put("workerGoodsName", wg.getName());
                             jsonArray.add(jsonObject);
                         }
@@ -845,11 +771,11 @@ public class BudgetWorkerService {
             for (Warehouse warehouse : warehouseList) {//每个商品
                 if (warehouse.getShopCount() - warehouse.getBackCount() > 0) {
                     Product product = iProductMapper.selectByPrimaryKey(warehouse.getProductId());
-                    if(product == null) continue;
+                    if (product == null) continue;
                     List<Technology> tList = iTechnologyMapper.patrolList(product.getId());
-                    if (tList.size() > 0){
+                    if (tList.size() > 0) {
                         JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("workerGoodsId",  product.getId());
+                        jsonObject.put("workerGoodsId", product.getId());
                         jsonObject.put("workerGoodsName", product.getName());
                         jsonArray.add(jsonObject);
                     }
@@ -873,7 +799,7 @@ public class BudgetWorkerService {
             for (BudgetWorker abw : budgetWorkerList) {
                 if (abw.getShopCount() + abw.getRepairCount() - abw.getBackCount() > 0) {
                     List<Technology> tList = iTechnologyMapper.workerPatrolList(abw.getWorkerGoodsId());
-                    if (tList.size() > 0){
+                    if (tList.size() > 0) {
                         JSONObject jsonObject = new JSONObject();
                         jsonObject.put("workerGoodsId", abw.getWorkerGoodsId());
                         jsonObject.put("workerGoodsName", abw.getName());
@@ -891,13 +817,13 @@ public class BudgetWorkerService {
     /**
      * 根据人工商品查询工艺
      */
-    public JSONArray getTecList(int workerType,String workerGoodsId) {
+    public JSONArray getTecList(int workerType, String workerGoodsId) {
         try {
             JSONArray jsonArray = new JSONArray();
             List<Technology> tList;
-            if(workerType == 3){
+            if (workerType == 3) {
                 tList = iTechnologyMapper.patrolList(workerGoodsId);
-            }else {
+            } else {
                 tList = iTechnologyMapper.workerPatrolList(workerGoodsId);
             }
             for (Technology t : tList) {
@@ -913,20 +839,20 @@ public class BudgetWorkerService {
         }
     }
 
-    public boolean workerPatrolList(String workerGoodsId){
+    public boolean workerPatrolList(String workerGoodsId) {
         List<Technology> tList = iTechnologyMapper.workerPatrolList(workerGoodsId);
-        if(tList.size() > 0){
+        if (tList.size() > 0) {
             return true;
-        }else {
+        } else {
             return false;
         }
     }
 
-    public boolean patrolList(String workerGoodsId){
+    public boolean patrolList(String workerGoodsId) {
         List<Technology> tList = iTechnologyMapper.patrolList(workerGoodsId);
-        if(tList.size() > 0){
+        if (tList.size() > 0) {
             return true;
-        }else {
+        } else {
             return false;
         }
     }

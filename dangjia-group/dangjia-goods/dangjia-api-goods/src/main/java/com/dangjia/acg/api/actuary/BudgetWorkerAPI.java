@@ -155,17 +155,6 @@ public interface BudgetWorkerAPI {
                                        @RequestParam("workerTypeId") String workerTypeId);
 
     /**
-     * 业主修改精算
-     *
-     * @param listOfGoods
-     * @return
-     */
-    @PostMapping("/actuary/budgetWorker/doModifyBudgets")
-    @ApiOperation(value = "业主修改精算", notes = "业主修改精算")
-    ServerResponse doModifyBudgets(@RequestParam("request") HttpServletRequest request,
-                                   @RequestParam("listOfGoods") String listOfGoods);
-
-    /**
      * 估价
      *
      * @param houseId

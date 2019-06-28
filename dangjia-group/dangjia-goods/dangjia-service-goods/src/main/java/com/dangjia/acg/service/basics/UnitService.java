@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.basics;
 
-import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.product.MasterProductAPI;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -8,7 +7,6 @@ import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Unit;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -18,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.entity.Example;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -109,10 +106,8 @@ public class UnitService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse update(String unitId, String unitName, String linkUnitIdArr)throws RuntimeException {
         try {
-            LOG.info("linkUnitIdArr :" + linkUnitIdArr);
             if (!StringUtils.isNotBlank(unitName))
                 return ServerResponse.createByErrorMessage("单位名称不能为空");
-
             Unit unit = iUnitMapper.selectByPrimaryKey(unitId);
             if (unit == null)
                 return ServerResponse.createByErrorMessage("不存在此单位,修改失败");
@@ -122,7 +117,6 @@ public class UnitService {
                 if (iUnitMapper.getUnitByName(unitName).size() > 0)
                     return ServerResponse.createByErrorMessage("单位名称已存在");
             }
-//            unit.setId(unitId);
             unit.setName(unitName);
             if (!StringUtils.isNotBlank(linkUnitIdArr))
                 unit.setLinkUnitIdArr(unit.getId());//包括本身  如果为null ，就只关联 自己本身
@@ -130,15 +124,15 @@ public class UnitService {
                 unit.setLinkUnitIdArr(unit.getId() + "," + linkUnitIdArr);//包括本身
             unit.setModifyDate(new Date());
             iUnitMapper.updateByPrimaryKeySelective(unit);
-            iProductMapper.updateProductByUnitId(unitName,unitId);
-            iWorkerGoodsMapper.updateWorkerGoodsByUnitId(unitId,unitName);
-            Example example=new Example(Product.class);
-            example.createCriteria().andEqualTo(Product.UNIT_ID,unitId);
-            List<Product> products = iProductMapper.selectByExample(example);
-            if(products.size()>0) {
-                iBudgetMaterialMapper.updateBudgetMaterialByUnitName(unitName, products);
-                masterProductAPI.updateProductByProductId(JSON.toJSONString(products), null, null, null, null);
-            }
+//            iProductMapper.updateProductByUnitId(unitName,unitId);
+//            iWorkerGoodsMapper.updateWorkerGoodsByUnitId(unitId,unitName);
+//            Example example=new Example(Product.class);
+//            example.createCriteria().andEqualTo(Product.UNIT_ID,unitId);
+//            List<Product> products = iProductMapper.selectByExample(example);
+//            if(products.size()>0) {
+//                iBudgetMaterialMapper.updateBudgetMaterialByUnitName(unitName, products);
+//                masterProductAPI.updateProductByProductId(JSON.toJSONString(products), null, null, null, null);
+//            }
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("修改失败");
@@ -156,15 +150,4 @@ public class UnitService {
         }
     }
 
-    //根据id删除商品单位
-    public ServerResponse deleteById(String unitId) {
-        return ServerResponse.createBySuccessMessage("不能执行删除操作");
-//        try {
-//            iUnitMapper.deleteByPrimaryKey(unitId);
-//            return ServerResponse.createBySuccessMessage("删除成功");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ServerResponse.createByErrorMessage("删除失败");
-//        }
-    }
 }

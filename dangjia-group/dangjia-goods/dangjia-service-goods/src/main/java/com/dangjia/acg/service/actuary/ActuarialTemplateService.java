@@ -61,16 +61,6 @@ public class ActuarialTemplateService {
 
     /**
      * 新增精算模板
-     *
-     * @param userId
-     * @param name
-     * @param styleId
-     * @param styleName
-     * @param applicableArea
-     * @param stateType
-     * @param workerTypeName
-     * @param workerTypeId
-     * @return
      */
     public ServerResponse<String> insertActuarialTemplate(String userId, String name, String styleId, String styleName, String applicableArea,
                                                           Integer stateType, String workerTypeName, Integer workerTypeId) {
@@ -96,14 +86,6 @@ public class ActuarialTemplateService {
 
     /**
      * 修改精算模版 根据精算模版ID修改
-     *
-     * @param id
-     * @param name
-     * @param styleId
-     * @param styleName
-     * @param applicableArea
-     * @param stateType
-     * @return
      */
     public ServerResponse<String> updateActuarialTemplate(String id, String name, String styleId, String styleName, String applicableArea, Integer stateType) {
         try {
@@ -137,9 +119,6 @@ public class ActuarialTemplateService {
 
     /**
      * 删除精算模板
-     *
-     * @param id
-     * @return
      */
     public ServerResponse<String> deleteActuarialTemplate(String id) {
         try {

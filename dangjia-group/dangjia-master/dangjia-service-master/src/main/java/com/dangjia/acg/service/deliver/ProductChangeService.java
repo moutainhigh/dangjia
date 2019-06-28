@@ -37,6 +37,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -50,7 +51,9 @@ import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * author: Yinjianbo
@@ -437,7 +440,7 @@ public class ProductChangeService {
                 order.setHouseId(houseId);
                 // 默认未支付
                 order.setType(0);
-                order.setNumber(System.currentTimeMillis() + "-" + generateWord());
+                order.setNumber(System.currentTimeMillis() + "-" + Utils.generateWord());
                 order.setDifferencePrice(differPrice);
                 productChangeOrderMapper.insert(order);
             }
@@ -445,21 +448,6 @@ public class ProductChangeService {
             e.printStackTrace();
         }
         return order;
-    }
-
-    private String generateWord() {
-        String[] beforeShuffle = new String[]{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
-                "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
-                "W", "X", "Y", "Z"};
-        List<String> list = Arrays.asList(beforeShuffle);
-        Collections.shuffle(list);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < list.size(); i++) {
-            sb.append(list.get(i));
-        }
-        String afterShuffle = sb.toString();
-        String result = afterShuffle.substring(5, 9);
-        return result;
     }
 
     /**

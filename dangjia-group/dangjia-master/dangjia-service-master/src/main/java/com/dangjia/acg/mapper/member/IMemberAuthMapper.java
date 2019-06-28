@@ -10,5 +10,12 @@ import tk.mybatis.mapper.common.Mapper;
 @Repository
 public interface IMemberAuthMapper extends Mapper<MemberAuth> {
 
+    /**
+     * 获取用户app应用角色
+     * @param memberId
+     * @return
+     */
+    MemberAuth queryUserRole(String memberId);
+
 }
 

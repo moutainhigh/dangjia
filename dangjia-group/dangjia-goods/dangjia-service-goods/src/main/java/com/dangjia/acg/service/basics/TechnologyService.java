@@ -16,6 +16,7 @@ import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -266,15 +267,7 @@ public class TechnologyService {
                 StringBuilder imgUrlStr = new StringBuilder();
                 if (t.getImage() != null) {
                     String[] imgArr = t.getImage().split(",");
-                    for (int i = 0; i < imgArr.length; i++) {
-                        if (i == imgArr.length - 1) {
-                            imgStr.append(address).append(imgArr[i]);
-                            imgUrlStr.append(imgArr[i]);
-                        } else {
-                            imgStr.append(address).append(imgArr[i]).append(",");
-                            imgUrlStr.append(imgArr[i]).append(",");
-                        }
-                    }
+                    StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                 }
                 map.put("image", imgStr.toString());
                 map.put("imageUrl", imgUrlStr.toString());
@@ -286,27 +279,6 @@ public class TechnologyService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
-        }
-    }
-
-    //新增人工商品关联工艺
-    public ServerResponse insertWokerTechnology(String workerGoodsId, String tIdArr) {
-        try {
-//            JSONArray arr = JSONArray.parseArray(JSON.toJSONString(tIdArr));
-//            for (int i = 0; i < arr.size(); i++) {
-//                JSONObject obj = arr.getJSONObject(i);
-//                WorkerTechnology wt = new WorkerTechnology();
-//                wt.setWorkerGoodsId(workerGoodsId);
-//                wt.setTechnologyId(obj.getString("technologyId"));
-//                wt.setCreateDate(new Date());
-//                wt.setModifyDate(new Date());
-//                iTechnologyMapper.insertWokerTechnology(wt);
-//            }
-//            return ServerResponse.createBySuccessMessage("新增成功");
-            return ServerResponse.createBySuccessMessage("接口弃用");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("新增失败");
         }
     }
 
@@ -327,15 +299,7 @@ public class TechnologyService {
                 StringBuilder imgUrlStr = new StringBuilder();
                 if (t.getImage() != null) {
                     String[] imgArr = t.getImage().split(",");
-                    for (int i = 0; i < imgArr.length; i++) {
-                        if (i == imgArr.length - 1) {
-                            imgStr.append(address).append(imgArr[i]);
-                            imgUrlStr.append(imgArr[i]);
-                        } else {
-                            imgStr.append(address).append(imgArr[i]).append(",");
-                            imgUrlStr.append(imgArr[i]).append(",");
-                        }
-                    }
+                    StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                 }
                 map.put("image", imgStr.toString());
                 map.put("imageUrl", imgUrlStr.toString());

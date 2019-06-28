@@ -3,6 +3,28 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.member.IMemberAuthMapper">
+    <sql id="all_columns">
+		id,
+        create_date AS createDate,
+        modify_date AS modifyDate,
+        data_status AS dataStatus
+        member_id AS memberId,
+        openid,
+        open_type AS openType,
+        access_token AS accessToken,
+        unionid,
+        uid,
+        name,
+        iconurl,
+        user_role AS userRole
+	</sql>
+
+    <!--查询app应用角色-->
+    <select id="queryUserRole" resultType="com.dangjia.acg.modle.member.MemberAuth">
+        SELECT
+          <include refid="all_columns"/>
+        FROM dj_member_auth
+    </select>
 
 </mapper>
 

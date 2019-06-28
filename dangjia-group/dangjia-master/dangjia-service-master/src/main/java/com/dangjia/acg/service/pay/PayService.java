@@ -14,6 +14,7 @@ import com.dangjia.acg.mapper.pay.IPayOrderMapper;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
+import com.dangjia.acg.util.Utils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -30,7 +31,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -238,10 +241,9 @@ public class PayService {
         }
         BusinessOrder businessOrder = businessOrderList.get(0);
         payOrder.setBusinessOrderNumber(businessOrderNumber);
-        //payOrder.setBusinessOrderType(businessOrder.getType());  此字段弃用
         payOrder.setPrice(businessOrder.getPayPrice());//记录实付
         payOrder.setHouseId(businessOrder.getHouseId());
-        payOrder.setNumber(System.currentTimeMillis()+"-"+generateWord());//生成支付订单号
+        payOrder.setNumber(System.currentTimeMillis()+"-"+ Utils.generateWord());//生成支付订单号
         payOrder.setPayState(payState);//1微信，2支付宝
         payOrder.setState(0);// 0未支付,1已支付
         payOrderMapper.insert(payOrder);
@@ -251,20 +253,5 @@ public class PayService {
         }
 
         return payOrder;
-    }
-
-    private String generateWord() {
-        String[] beforeShuffle = new String[] {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
-                "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
-                "W", "X", "Y", "Z" };
-        List<String> list = Arrays.asList(beforeShuffle);
-        Collections.shuffle(list);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < list.size(); i++) {
-            sb.append(list.get(i));
-        }
-        String afterShuffle = sb.toString();
-        String result = afterShuffle.substring(5, 9);
-        return result;
     }
 }
