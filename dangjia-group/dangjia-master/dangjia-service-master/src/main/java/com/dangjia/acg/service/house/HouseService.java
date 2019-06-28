@@ -525,7 +525,7 @@ public class HouseService {
                     houseChoiceCase.setDataStatus(0);
                     houseChoiceCase.setCityId(srcHouse.getCityId());
                     houseChoiceCase.setHouseId(srcHouse.getId());
-                    houseChoiceCase.setImage(srcHouse.getImage());
+//                    houseChoiceCase.setImage(srcHouse.getImage());
                     houseChoiceCase.setMoney(srcHouse.getMoney());
                     houseChoiceCase.setTitle(srcHouse.getNoNumberHouseName());
                     houseChoiceCase.setLabel(srcHouse.getStyle());

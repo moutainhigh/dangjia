@@ -94,7 +94,7 @@ public class RenovationManualService {
         renovationManual.setTest(test);
         renovationManual.setUrl(url);
         renovationManual.setTypes(types);
-        renovationManual.setState(state);
+        renovationManual.setState(0);
         renovationManual.setOrderNumber(orderNumber);
         renovationManual.setImage(image);
         renovationManualMapper.insert(renovationManual);
