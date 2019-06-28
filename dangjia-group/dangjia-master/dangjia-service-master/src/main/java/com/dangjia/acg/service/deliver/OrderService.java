@@ -21,6 +21,8 @@ import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
+import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
+import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -32,6 +34,8 @@ import com.dangjia.acg.modle.house.WarehouseDetail;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
+import com.dangjia.acg.modle.repair.MendMateriel;
+import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.repair.MendOrderService;
@@ -63,6 +67,12 @@ public class OrderService {
     private IOrderSplitMapper orderSplitMapper;
     @Autowired
     private IOrderSplitItemMapper orderSplitItemMapper;
+
+    @Autowired
+    private IMendOrderMapper mendOrderMapper;
+
+    @Autowired
+    private IMendMaterialMapper mendMaterialMapper;
     @Autowired
     private IWarehouseMapper warehouseMapper;
     @Autowired
@@ -464,6 +474,13 @@ public class OrderService {
                 example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
                 orderSplitItemMapper.deleteByExample(example);
 
+                /*删除补货信息*/
+                if(!CommonUtil.isEmpty(orderSplit.getMendNumber())){
+                    mendOrderMapper.deleteByPrimaryKey(orderSplit.getMendNumber());
+                    example = new Example(MendOrder.class);
+                    example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, orderSplit.getMendNumber());
+                    mendMaterialMapper.deleteByExample(example);
+                }
                 orderSplit.setSupervisorId(worker.getId());
                 orderSplit.setSupervisorName(worker.getName());
                 orderSplit.setSupervisorTel(worker.getMobile());
