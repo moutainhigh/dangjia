@@ -21,6 +21,7 @@ public class HouseDetailsDTO {
     private String cityId;
     private String cityName;//
     private BigDecimal square;//
+    private Integer visitState;//
     private BigDecimal totalPrice;//总计
     private List<String> dianList;
     private List<OptionalLabelDTO> labelList;//选配标签名称
