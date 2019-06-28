@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -27,7 +26,6 @@ import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.worker.WorkerDetail;
@@ -209,7 +207,7 @@ public class DesignerOperationService {
         houseMapper.updateByPrimaryKeySelective(house);
         //app推送给业主
         HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(house.getId(), "1");
-        if(houseFlow==null){
+        if (houseFlow == null) {
             houseFlow = houseFlowMapper.getByWorkerTypeId(house.getId(), "2");
         }
         //添加一条记录
@@ -229,9 +227,9 @@ public class DesignerOperationService {
         hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
         hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
         hfa.setPayState(0);//是否付款
-        if(houseFlow.getWorkerType()==1) {
+        if (houseFlow.getWorkerType() == 1) {
             hfa.setApplyDec("我是设计师，我已经上传了施工图");//描述
-        }else{
+        } else {
             hfa.setApplyDec("我是精算师，我已经上传了施工图");//描述
         }
         houseFlowApplyMapper.insert(hfa);
@@ -423,8 +421,12 @@ public class DesignerOperationService {
         if (house.getVisitState() != 1) {
             return ServerResponse.createByErrorMessage("该房子不在装修中");
         }
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null && CommonUtil.isEmpty(userId)) {
+        Object objectm = constructionService.getMember(userToken);
+        Member member = null;
+        if (objectm instanceof Member) {
+            member = (Member) objectm;
+        }
+        if (member == null && CommonUtil.isEmpty(userId)) {
             return ServerResponse.createbyUserTokenError();
         }
         if (CommonUtil.isEmpty(imageString)) {
@@ -477,8 +479,8 @@ public class DesignerOperationService {
                 break;
         }
         QuantityRoom quantityRoom = new QuantityRoom();
-        if (accessToken != null) {
-            quantityRoom.setMemberId(accessToken.getMemberId());
+        if (member != null) {
+            quantityRoom.setMemberId(member.getId());
         } else {
             quantityRoom.setUserId(userId);
         }

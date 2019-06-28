@@ -1,7 +1,5 @@
 package com.dangjia.acg.service.config;
 
-import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -11,7 +9,8 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.config.IConfigAdvertMapper;
 import com.dangjia.acg.modle.config.ConfigAdvert;
-import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -35,9 +34,8 @@ public class ConfigAdvertService {
 
     @Autowired
     private ConfigUtil configUtil;
-
     @Autowired
-    private RedisClient redisClient;
+    private CraftsmanConstructionService constructionService;
 
     /**
      * 获取所有广告
@@ -49,8 +47,8 @@ public class ConfigAdvertService {
         Example example = new Example(ConfigAdvert.class);
         Example.Criteria criteria = example.createCriteria();
         if (!CommonUtil.isEmpty(configAdvert.getAppType())) {//App端调用
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (accessToken != null) {//登录情况下屏蔽推荐登录的广告
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof Member) {
                 criteria.andNotEqualTo(ConfigAdvert.TYPE, 3);
             }
             criteria.andEqualTo(ConfigAdvert.APP_TYPE, configAdvert.getAppType());

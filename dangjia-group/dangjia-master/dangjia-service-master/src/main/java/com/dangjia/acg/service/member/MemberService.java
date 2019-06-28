@@ -399,11 +399,12 @@ public class MemberService {
      * @return
      */
     public ServerResponse certification(String userToken, String name, String idcaoda, String idcaodb, String idcaodall, String idnumber) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createbyUserTokenError();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
-        Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+        Member user = (Member) object;
+        user = memberMapper.selectByPrimaryKey(user.getId());
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
@@ -443,7 +444,7 @@ public class MemberService {
             user.setIdnumber(idnumber);
         user.setRealNameState(1);
         memberMapper.updateByPrimaryKeySelective(user);
-        updataMember(user, accessToken);
+        updataMember(user, userToken);
         return ServerResponse.createBySuccessMessage("提交资料成功");
     }
 
@@ -455,11 +456,12 @@ public class MemberService {
      * @return
      */
     public ServerResponse certificationWorkerType(String userToken, String workerTypeId) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createbyUserTokenError();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
-        Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+        Member user = (Member) object;
+        user = memberMapper.selectByPrimaryKey(user.getId());
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
@@ -477,7 +479,7 @@ public class MemberService {
         }
         user.setCheckType(0);
         memberMapper.updateByPrimaryKeySelective(user);
-        updataMember(user, accessToken);
+        updataMember(user, userToken);
         return ServerResponse.createBySuccessMessage("提交工种认证成功");
     }
 
@@ -904,9 +906,9 @@ public class MemberService {
      * @return
      */
     public ServerResponse getMembers(String userToken, String memberId, String phone) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createbyUserTokenError();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
         Member member = null;
         if (!CommonUtil.isEmpty(memberId)) {

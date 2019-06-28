@@ -28,7 +28,6 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
@@ -412,14 +411,11 @@ public class HouseFlowService {
      */
     public ServerResponse setGiveUpOrder(String userToken, String houseFlowId) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (accessToken == null) {
-                return ServerResponse.createbyUserTokenError();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
-            Member member = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
-            if (member == null) {
-                return ServerResponse.createByErrorMessage("用户不存在");
-            }
+            Member member = (Member) object;
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(HouseWorker.class);
             example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId()).andEqualTo(HouseWorker.HOUSE_ID, hf.getHouseId());
@@ -510,11 +506,12 @@ public class HouseFlowService {
             ServerResponse serverResponse = setGrabVerification(userToken, cityId, houseFlowId);
             if (!serverResponse.isSuccess())
                 return serverResponse;
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (accessToken == null) {
-                return ServerResponse.createbyUserTokenError();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
-            Member member = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+            Member member = (Member) object;
+            member = memberMapper.selectByPrimaryKey(member.getId());
             if (member == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
             }

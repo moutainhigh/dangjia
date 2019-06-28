@@ -115,7 +115,9 @@ public class ActuaryOperationService {
     /**
      * 更换货品
      */
-    public ServerResponse changeProduct(String productId, String budgetMaterialId, String srcGroupId, String targetGroupId, String houseId, String workerTypeId) {
+    public ServerResponse changeProduct(String productId, String budgetMaterialId,
+                                        String srcGroupId, String targetGroupId,
+                                        String houseId, String workerTypeId) {
         try {
             int count = 0;
             String ret = productId + " " + budgetMaterialId + " " + srcGroupId + " " + targetGroupId + " " + houseId + " " + workerTypeId;
@@ -209,7 +211,7 @@ public class ActuaryOperationService {
 
     /**
      * 选择货品刷新页面
-
+     *
      * @param attributeIdArr 属性值id集合
      */
     public ServerResponse selectProduct(String goodsId, String selectVal, String attributeIdArr, String budgetMaterialId) {
@@ -549,7 +551,7 @@ public class ActuaryOperationService {
                             flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
                             String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                                     String.format(DjConstants.YZPageAddress.COMMODITY, userToken,
-                                    cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + type;
+                                            cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + type;
                             flowActuaryDTO.setUrl(url);
                             flowActuaryDTO.setAttribute(getAttributes(product));//拼接属性品牌
 //                        flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + product.getUnitName());

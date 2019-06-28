@@ -31,7 +31,6 @@ import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.other.WorkDeposit;
@@ -125,8 +124,12 @@ public class HouseWorkerService {
      * 根据工人id查询所有房子任务
      */
     public ServerResponse queryWorkerHouse(String userToken) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        List list = houseWorkerMapper.queryWorkerHouse(accessToken.getMemberId());
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member operator = (Member) object;
+        List list = houseWorkerMapper.queryWorkerHouse(operator.getId());
         return ServerResponse.createBySuccess("ok", list);
     }
 
@@ -712,7 +715,7 @@ public class HouseWorkerService {
                         houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
                     }
                 }
-                suspendDay = DateUtil.daysofTwo(start, end) ;
+                suspendDay = DateUtil.daysofTwo(start, end);
                 if (suspendDay > 0) {
                     //计划提前
                     houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), null, suspendDay);

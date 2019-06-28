@@ -1,7 +1,6 @@
 package com.dangjia.acg.service.member;
 
 import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -21,7 +20,6 @@ import com.dangjia.acg.mapper.other.IBankCardMapper;
 import com.dangjia.acg.mapper.worker.*;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.BankCard;
 import com.dangjia.acg.modle.worker.*;
@@ -85,17 +83,13 @@ public class WalletService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse checkFinish(String userToken, Integer paycode, Double money, String workerBankCardId, Integer roleType) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (accessToken == null) {
-                return ServerResponse.createbyUserTokenError();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
-            Member worker = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
-
-            if (worker == null) {
-                return ServerResponse.createByErrorMessage("用户不存在");
-            }
+            Member worker = (Member) object;
             worker = memberMapper.selectByPrimaryKey(worker.getId());
-            if (worker.getCheckType() ==4) {
+            if (worker.getCheckType() == 4) {
                 //冻结的帐户不能提现
                 return ServerResponse.createByErrorMessage("账户冻结，无法提现");
             }
@@ -158,11 +152,12 @@ public class WalletService {
      */
     public ServerResponse getPaycode(String userToken) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (accessToken == null) {
-                return ServerResponse.createbyUserTokenError();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
-            Member member = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+            Member member = (Member) object;
+            member = memberMapper.selectByPrimaryKey(member.getId());
             if (member == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
             }
@@ -220,7 +215,7 @@ public class WalletService {
             }
             //工匠关联银卡
             example = new Example(WorkerBankCard.class);
-            example.createCriteria().andEqualTo(WorkerBankCard.WORKER_ID, member.getId()).andEqualTo(WorkerBankCard.DATA_STATUS,0);
+            example.createCriteria().andEqualTo(WorkerBankCard.WORKER_ID, member.getId()).andEqualTo(WorkerBankCard.DATA_STATUS, 0);
             List<WorkerBankCard> workerBankCardList = workerBankCardMapper.selectByExample(example);
             if (workerBankCardList.size() == 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "请绑定银行卡");
@@ -361,7 +356,7 @@ public class WalletService {
 //            walletDTO.setHouseOrder(houseWorkerList.size());//接单量
 //            walletDTO.setHouseOrder(member.getVolume().intValue());//接单量
             walletDTO.setHouseOrder(0);
-            if(member.getWorkerType()!=null) {
+            if (member.getWorkerType() != null) {
                 walletDTO.setHouseOrder(engineerService.alternative(member.getId(), member.getWorkerType()));
             }
 

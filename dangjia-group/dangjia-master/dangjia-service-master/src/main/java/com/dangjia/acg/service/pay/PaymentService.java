@@ -37,12 +37,14 @@ import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
-import com.dangjia.acg.modle.core.*;
+import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.HouseWorker;
+import com.dangjia.acg.modle.core.HouseWorkerOrder;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.*;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.pay.BusinessOrder;
@@ -54,7 +56,7 @@ import com.dangjia.acg.modle.repair.MendWorker;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.service.config.ConfigMessageService;
-import com.dangjia.acg.service.core.HouseFlowScheduleService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.deliver.ProductChangeService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
 import com.dangjia.acg.service.member.GroupInfoService;
@@ -142,8 +144,6 @@ public class PaymentService {
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
     @Autowired
-    private HouseFlowScheduleService houseFlowScheduleService;
-    @Autowired
     private IOrderSplitMapper orderSplitMapper;
     @Autowired
     private IOrderSplitItemMapper orderSplitItemMapper;
@@ -155,6 +155,8 @@ public class PaymentService {
     private IProductChangeOrderMapper productChangeOrderMapper;
     @Autowired
     private HouseDesignPayService houseDesignPayService;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     /**
      * 服务器回调
@@ -227,9 +229,9 @@ public class PaymentService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setPaySuccess(String userToken, String businessOrderNumber) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createbyUserTokenError();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
         Map<String, Object> returnMap = new HashMap<>();
         try {
@@ -392,7 +394,7 @@ public class PaymentService {
                         .andCondition(" work_steta not in (1,2,6)  ");
                 List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
                 for (HouseFlow houseFlow : houseFlowList) {
-                    if(houseFlow.getStartDate()!=null) {
+                    if (houseFlow.getStartDate() != null) {
                         houseFlow.setEndDate(DateUtil.addDateDays(houseFlow.getEndDate(), changeOrder.getScheduleDay()));
                         houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                     }
@@ -1040,12 +1042,11 @@ public class PaymentService {
      */
     public ServerResponse getPaymentOrder(String userToken, String houseId, String taskId, int type) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            if (accessToken == null) {//无效的token
-                return ServerResponse.createbyUserTokenError();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
-
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             if (type != 4) {
                 BusinessOrder busOrder = businessOrderMapper.byTaskId(taskId, type);
                 if (busOrder != null) {
@@ -1054,7 +1055,6 @@ public class PaymentService {
                     }
                 }
             }
-
             House house = houseMapper.selectByPrimaryKey(houseId);
             Example example = new Example(BusinessOrder.class);
             example.createCriteria().andEqualTo(BusinessOrder.HOUSE_ID, houseId).andEqualTo(BusinessOrder.STATE, 1);
@@ -1427,7 +1427,10 @@ public class PaymentService {
      */
     public ServerResponse getPaymentPage(String userToken, String houseId, String taskId, int type) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             House house = houseMapper.selectByPrimaryKey(houseId);
             PaymentDTO paymentDTO = new PaymentDTO();
