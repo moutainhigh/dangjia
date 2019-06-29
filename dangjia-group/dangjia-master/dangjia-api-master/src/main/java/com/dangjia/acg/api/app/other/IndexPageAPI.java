@@ -4,6 +4,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,5 +48,6 @@ public interface IndexPageAPI {
     @ApiOperation(value = "施工现场", notes = "施工现场")
     ServerResponse jobLocation(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("latitude") String latitude,
-                               @RequestParam("longitude") String longitude);
+                               @RequestParam("longitude") String longitude,
+                               @RequestParam("limit")Integer limit);
 }
