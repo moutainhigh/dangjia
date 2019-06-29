@@ -587,7 +587,7 @@ public class ActuaryOperationService {
     }
 
     //拼接属性品牌
-    private String getAttributes(Product product) {
+    public String getAttributes(Product product) {
         String attributes = product.getValueNameArr();
         if (attributes == null) {
             attributes = "";

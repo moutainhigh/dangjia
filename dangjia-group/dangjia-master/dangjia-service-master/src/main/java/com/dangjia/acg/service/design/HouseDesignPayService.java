@@ -157,7 +157,7 @@ public class HouseDesignPayService {
         if (businessOrderList != null && businessOrderList.size() > 0) {
             businessOrder = businessOrderList.get(0);
             if (businessOrder.getState() == 3) {
-                return ServerResponse.createByErrorMessage("已经支付改订单");
+                return ServerResponse.createByErrorMessage("已经支付该订单");
             }
         } else {
             businessOrder = new BusinessOrder();
