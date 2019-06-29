@@ -287,14 +287,20 @@ public class CartService {
                 productType="1";
             }
             List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+            Map<String, Object> mapTop = new HashMap<String, Object>();//记录以及添加的顶级分类
             List<String> orderCategory = orderSplitMapper.getOrderCategory(houseId,productType,worker.getWorkerTypeId(),worker.getId());
             for (String categoryId : orderCategory) {
                 GoodsCategory goodsCategory=goodsCategoryAPI.getGoodsCategory(request,categoryId);
+                GoodsCategory goodsCategorytop=goodsCategoryAPI.getGoodsCategory(request,goodsCategory.getParentTop());
+                if(goodsCategorytop!=null){
+                    goodsCategory=goodsCategorytop;
+                }
                 Map<String, Object> map = new HashMap<String, Object>();
-                if(goodsCategory!=null){
+                if(goodsCategory!=null&&mapTop.get(goodsCategory.getId())==null){
                     map.put("id", goodsCategory.getId());
                     map.put("name", goodsCategory.getName());
                     mapList.add(map);
+                    mapTop.put(goodsCategory.getId(),goodsCategory);
                 }
             }
             return ServerResponse.createBySuccess("查询成功", mapList);
