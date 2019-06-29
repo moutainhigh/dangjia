@@ -197,24 +197,26 @@ public class CartService {
                 productType="1";
             }
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
-            Map<String,Warehouse> warehouseMap=new HashMap<>();
-            Example example = new Example(Warehouse.class);
-            Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
-            criteria.andEqualTo(Warehouse.PRODUCT_TYPE, productType);
-            List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
-            String[] productIdArr =new String[warehouseList.size()];
-            for (int i = 0; i < warehouseList.size(); i++) {
-                productIdArr[i]=warehouseList.get(0).getProductId();
-                warehouseMap.put(warehouseList.get(0).getProductId(),warehouseList.get(0));
+            List<String> productIdList;
+            if(worker.getWorkerType() == 3){
+                productIdList = orderSplitMapper.getOrderProduct(houseId,productType,"",worker.getId());
+            }else {
+                productIdList = orderSplitMapper.getOrderProduct(houseId,productType,worker.getWorkerTypeId(),worker.getId());
             }
-            if(warehouseList==null||warehouseList.size()==0){
+
+            if(productIdList==null||productIdList.size()==0){
                 return ServerResponse.createBySuccessMessage("查询成功");
             }
+            String[] productIdArr = productIdList.toArray(new String[productIdList.size()]);
             request.setAttribute(Constants.CITY_ID, cityId);
             PageInfo pageResult= productAPI.queryProductData(request,pageDTO.getPageNum(),pageDTO.getPageSize(),name,categoryId,productType,productIdArr);
             List<JSONObject> products=pageResult.getList();
             for (JSONObject product : products) {
+                Example example = new Example(Warehouse.class);
+                Example.Criteria criteria = example.createCriteria();
+                criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
+                criteria.andEqualTo(Warehouse.PRODUCT_ID, product.get(Product.ID));
+                List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
                 warehouseDTO.setProductId(String.valueOf(product.get(Product.ID)));
                 warehouseDTO.setProductName(String.valueOf(product.get(Product.NAME)));
@@ -225,8 +227,8 @@ public class CartService {
                 warehouseDTO.setPrice(Double.parseDouble(String.valueOf(product.get(Product.PRICE))));
                 warehouseDTO.setProductType(Integer.parseInt(productType));
                 warehouseDTO.setImage(address + product.get(Product.IMAGE));
-                Warehouse warehouse = warehouseMap.get(warehouseDTO.getProductId());
-                if (warehouse!=null) {
+                if (warehouseList.size() > 0) {
+                    Warehouse warehouse = warehouseList.get(0);
                     Goods goods = forMasterAPI.getGoods(cityId, String.valueOf(product.get(Product.GOODS_ID)));
                     if (goods != null) {
                         warehouseDTO.setSales(goods.getSales());
@@ -285,20 +287,15 @@ public class CartService {
                 productType="1";
             }
             List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
-            Example example = new Example(Warehouse.class);
-            Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
-            criteria.andEqualTo(Warehouse.PRODUCT_TYPE, productType);
-            List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
-            for (Warehouse warehouse : warehouseList) {
-                GoodsCategory goodsCategory=goodsCategoryAPI.getGoodsCategory(request,warehouse.getCategoryId());
+            List<String> orderCategory = orderSplitMapper.getOrderCategory(houseId,productType,worker.getWorkerTypeId(),worker.getId());
+            for (String categoryId : orderCategory) {
+                GoodsCategory goodsCategory=goodsCategoryAPI.getGoodsCategory(request,categoryId);
                 Map<String, Object> map = new HashMap<String, Object>();
                 if(goodsCategory!=null){
                     map.put("id", goodsCategory.getId());
                     map.put("name", goodsCategory.getName());
                     mapList.add(map);
                 }
-
             }
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
