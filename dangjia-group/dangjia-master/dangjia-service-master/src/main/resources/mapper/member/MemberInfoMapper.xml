@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.member.IMemberInfoMapper">
+    <sql id="all_columns">
+		id,
+        create_date AS createDate,
+        modify_date AS modifyDate,
+        data_status AS dataStatus,
+        member_id AS memberId,
+        policy_id AS policyId,
+        password,
+        check_status AS checkStatus
+	</sql>
+
+    <!--查询app用户角色-->
+    <select id="queryUserRole" resultType="com.dangjia.acg.modle.member.MemberInfo">
+        SELECT
+          <include refid="all_columns"/>
+        FROM dj_member_info
+        WHERE member_id=#{memberId}
+        AND policy_id=1
+    </select>
+
+
+
+</mapper>
