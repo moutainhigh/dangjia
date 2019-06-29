@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.basics;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.product.MasterProductAPI;
@@ -400,14 +399,14 @@ public class ProductService {
                     product.setId(productId);
                     product.setModifyDate(new Date());
                     iProductMapper.updateByPrimaryKey(product);
-                    productService.updateProductName(product.getName(), product.getName(), null, null, null, productId);
-                    Example example = new Example(Product.class);
-                    example.createCriteria().andEqualTo(Product.ID, productId);
-                    List<Product> list = iProductMapper.selectByExample(example);
-                    //更新master库相关商品名称
-                    if (list.size() > 0) {
-                        masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, null);
-                    }
+//                    productService.updateProductName(product.getName(), product.getName(), null, null, null, productId);
+//                    Example example = new Example(Product.class);
+//                    example.createCriteria().andEqualTo(Product.ID, productId);
+//                    List<Product> list = iProductMapper.selectByExample(example);
+//                    //更新master库相关商品名称
+//                    if (list.size() > 0) {
+//                        masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, null);
+//                    }
                 }
 
                 LOG.info("insertProduct productId:" + product.getId());
@@ -519,19 +518,19 @@ public class ProductService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateProductById(String id, String name) {
         try {
-            Product product1 = iProductMapper.selectByPrimaryKey(id);
+//            Product product1 = iProductMapper.selectByPrimaryKey(id);
             Product product = new Product();
             product.setId(id);
             product.setName(name);
             iProductMapper.updateByPrimaryKeySelective(product);
-            productService.updateProductName(product1.getName(), name, null, null, null, id);
-            Example example = new Example(Product.class);
-            example.createCriteria().andEqualTo(Product.ID, id);
-            List<Product> list = iProductMapper.selectByExample(example);
-            //更新master库相关商品名称
-            if (list.size() > 0) {
-                masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, null);
-            }
+//            productService.updateProductName(product1.getName(), name, null, null, null, id);
+//            Example example = new Example(Product.class);
+//            example.createCriteria().andEqualTo(Product.ID, id);
+//            List<Product> list = iProductMapper.selectByExample(example);
+//            //更新master库相关商品名称
+//            if (list.size() > 0) {
+//                masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, null);
+//            }
 //            example=new Example(GroupLink.class);
 //            example.createCriteria().andEqualTo("productId",id);
 //            GroupLink oldLabel =new GroupLink();
