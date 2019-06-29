@@ -14,7 +14,6 @@ import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.label.OptionalLabelDTO;
 import com.dangjia.acg.dto.other.HouseDetailsDTO;
-import com.dangjia.acg.mapper.config.IConfigMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderMapper;
@@ -63,8 +62,6 @@ public class IndexPageService {
     private BudgetMaterialAPI budgetMaterialAPI;
     @Autowired
     private IModelingVillageMapper modelingVillageMapper;
-    @Autowired
-    private IConfigMapper iConfigMapper;
     @Autowired
     private DesignDataService designDataService;
 

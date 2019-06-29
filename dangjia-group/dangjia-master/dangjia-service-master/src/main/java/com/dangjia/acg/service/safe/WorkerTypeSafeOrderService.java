@@ -39,13 +39,7 @@ public class WorkerTypeSafeOrderService {
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
-    private RedisClient redisClient;
-    @Autowired
     private IHouseMapper houseMapper;
-    @Autowired
-    private ConfigUtil configUtil;
-    @Autowired
-    private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
 
