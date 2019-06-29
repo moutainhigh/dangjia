@@ -27,4 +27,5 @@ public class HouseDetailsDTO {
     private List<OptionalLabelDTO> labelList;//选配标签名称
     private List<Map<String,Object>> mapList;
     private String optionalLabel;//选配标签id(逗号分隔)
+    private String noNumberHouseName;
 }
