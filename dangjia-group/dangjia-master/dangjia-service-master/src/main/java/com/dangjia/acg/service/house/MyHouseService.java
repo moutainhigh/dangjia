@@ -152,6 +152,7 @@ public class MyHouseService {
                 map.put("mobile", member1.getMobile());
                 map.put("head", member1.getHead());
                 map.put("workerTypeId", member1.getWorkerTypeId());
+                map.put("workerType", member1.getWorkerType());
                 map.put("workerName", workerType.getName());
                 map.put("houseFlowId", houseFlow.getId());
                 nodeDTO.setMember(map);
