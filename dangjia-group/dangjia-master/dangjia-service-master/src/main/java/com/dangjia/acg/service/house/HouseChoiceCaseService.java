@@ -70,50 +70,51 @@ public class HouseChoiceCaseService {
         List<Map> listmap = new ArrayList();
         PageInfo pageResult = new PageInfo(list);
         for (HouseChoiceCase v : list) {
-            Map map = BeanUtils.beanToMap(v);
-            if (!CommonUtil.isEmpty(v.getAddress())) {
-                String[] address = StringUtils.split(v.getAddress(), ",");
-                String[] addressUrl = StringUtils.split(v.getAddress(), ",");
-                map.put("addressUrl", addressUrl);
-                for (int i = 0; i < address.length; i++) {
-                    address[i] = jdAddress + address[i];
-                }
-                map.put("address", address);
-            }
-            if (!CommonUtil.isEmpty(v.getLabel())) {
-                String[] label = StringUtils.split(v.getLabel(), ",");
-                map.put("label", label);
-            }else{
-                String[] label={};
-                map.put("label", label);
-            }
-            if (!CommonUtil.isEmpty(v.getImage())) {
-                map.put("imageUrl", v.getImage());
-                map.put("image", jdAddress + v.getImage());
-            }
-            if (!CommonUtil.isEmpty(v.getTextContent())) {
-                JSONArray itemObjArr = JSON.parseArray(v.getTextContent());
-                List<TextContentDTO> textContentDTOS=new ArrayList<>();
-                for (int i = 0; i < itemObjArr.size(); i++) {
-                    TextContentDTO textContentDTO=new TextContentDTO();
-                    JSONObject jsonObject = itemObjArr.getJSONObject(i);
-                    String[] imageUrl = jsonObject.getString("image").split(",");
-                    textContentDTO.setImageUrl(imageUrl);
-                    String describe=jsonObject.getString("describe");
-                    String headline=jsonObject.getString("headline");
-                    String[] images = jsonObject.getString("image").split(",");
-                    for (int j=0;j<images.length;j++){
-                        images[j]=jdAddress+images[j];
+            if(!CommonUtil.isEmpty(v.getTextContent())) {
+                Map map = BeanUtils.beanToMap(v);
+                if (!CommonUtil.isEmpty(v.getAddress())) {
+                    String[] address = StringUtils.split(v.getAddress(), ",");
+                    String[] addressUrl = StringUtils.split(v.getAddress(), ",");
+                    map.put("addressUrl", addressUrl);
+                    for (int i = 0; i < address.length; i++) {
+                        address[i] = jdAddress + address[i];
                     }
-                    textContentDTO.setImage(images);
-                    textContentDTO.setHeadline(headline);
-                    textContentDTO.setDescribe(describe);
-                    textContentDTOS.add(textContentDTO);
+                    map.put("address", address);
                 }
-                map.put("textContent",textContentDTOS);
+                if (!CommonUtil.isEmpty(v.getLabel())) {
+                    String[] label = StringUtils.split(v.getLabel(), ",");
+                    map.put("label", label);
+                } else {
+                    String[] label = {};
+                    map.put("label", label);
+                }
+                if (!CommonUtil.isEmpty(v.getImage())) {
+                    map.put("imageUrl", v.getImage());
+                    map.put("image", jdAddress + v.getImage());
+                }
+                if (!CommonUtil.isEmpty(v.getTextContent())) {
+                    JSONArray itemObjArr = JSON.parseArray(v.getTextContent());
+                    List<TextContentDTO> textContentDTOS = new ArrayList<>();
+                    for (int i = 0; i < itemObjArr.size(); i++) {
+                        TextContentDTO textContentDTO = new TextContentDTO();
+                        JSONObject jsonObject = itemObjArr.getJSONObject(i);
+                        String[] imageUrl = jsonObject.getString("image").split(",");
+                        textContentDTO.setImageUrl(imageUrl);
+                        String describe = jsonObject.getString("describe");
+                        String headline = jsonObject.getString("headline");
+                        String[] images = jsonObject.getString("image").split(",");
+                        for (int j = 0; j < images.length; j++) {
+                            images[j] = jdAddress + images[j];
+                        }
+                        textContentDTO.setImage(images);
+                        textContentDTO.setHeadline(headline);
+                        textContentDTO.setDescribe(describe);
+                        textContentDTOS.add(textContentDTO);
+                    }
+                    map.put("textContent", textContentDTOS);
+                }
+                listmap.add(map);
             }
-
-            listmap.add(map);
         }
         pageResult.setList(listmap);
         return ServerResponse.createBySuccess("ok", pageResult);

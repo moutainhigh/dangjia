@@ -257,10 +257,10 @@ public class IndexPageService {
      * @return
      */
     public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude,Integer limit) {
-        if (latitude == null) {
+        if (!CommonUtil.isEmpty(latitude)) {
             latitude = "28.228259";
         }
-        if (longitude == null) {
+        if (!CommonUtil.isEmpty(longitude)) {
             longitude = "112.938904";
         }
         List<House> houses = modelingVillageMapper.jobLocation(latitude, longitude,limit);
