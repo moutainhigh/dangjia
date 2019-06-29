@@ -358,7 +358,7 @@ public class EngineerService {
             map.put("workerType", worker.getWorkerType());
             map.put("workerTypeName", workerType.getName());
             map.put("mobile", worker.getMobile());
-            map.put("createDate", worker.getCreateDate());
+            map.put("createDate", houseFlow.getCreateDate());
             map.put("workSteta", houseFlow.getWorkSteta());
             map.put("payState", hwo.getPayState());//0未支付，1已经支付
             map.put("retentionMoney", hwo.getRetentionMoney());//此单滞留金

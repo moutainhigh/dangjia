@@ -146,6 +146,7 @@ public class IndexPageService {
             houseDetailsDTO.setHouseName(house.getHouseName());
             houseDetailsDTO.setOptionalLabel(house.getOptionalLabel());
             houseDetailsDTO.setVisitState(house.getVisitState());
+            houseDetailsDTO.setNoNumberHouseName(house.getNoNumberHouseName());
             String[] liangArr = {};
             if (house.getLiangDian() != null) {
                 liangArr = house.getLiangDian().split(",");
