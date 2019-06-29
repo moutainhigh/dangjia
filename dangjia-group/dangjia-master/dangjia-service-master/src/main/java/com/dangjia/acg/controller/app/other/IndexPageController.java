@@ -46,7 +46,7 @@ public class IndexPageController implements IndexPageAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude) {
-        return indexPageService.jobLocation(request,latitude,longitude);
+    public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude,Integer limit) {
+        return indexPageService.jobLocation(request,latitude,longitude,limit);
     }
 }

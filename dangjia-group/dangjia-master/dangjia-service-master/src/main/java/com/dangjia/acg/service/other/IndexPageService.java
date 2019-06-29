@@ -255,14 +255,14 @@ public class IndexPageService {
      * @param longitude
      * @return
      */
-    public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude) {
+    public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude,Integer limit) {
         if (latitude == null) {
             latitude = "28.228259";
         }
         if (longitude == null) {
             longitude = "112.938904";
         }
-        List<House> houses = modelingVillageMapper.jobLocation(latitude, longitude);
+        List<House> houses = modelingVillageMapper.jobLocation(latitude, longitude,limit);
         if (houses.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
