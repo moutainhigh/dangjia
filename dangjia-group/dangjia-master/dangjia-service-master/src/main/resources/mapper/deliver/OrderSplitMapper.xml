@@ -18,49 +18,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         FROM
             (
                 SELECT
-                    oi.product_id
+                  o.product_id
                 FROM
-                    `dj_deliver_order` o
-                INNER JOIN dj_deliver_order_item oi ON o.id = oi.order_id
-                WHERE
-                    o.house_id = #{houseId}
-                <if test="workerTypeId!=null and workerTypeId!=''">
-                    AND o.worker_type_id =#{workerTypeId}
-                </if>
-                AND oi.product_type =#{productType}
-                AND o.payment > 0
-                AND o.type = 2
-            UNION ALL
-                SELECT
-                c.dest_product_id product_id
-                FROM
-                `dj_deliver_order` o
-                INNER JOIN dj_deliver_order_item oi ON o.id = oi.order_id
-                INNER JOIN dj_deliver_product_change c ON c.house_id = oi.house_id and c.src_product_id=oi.product_id
+                `dj_house_warehouse`  o
                 WHERE
                 o.house_id = #{houseId}
-                <if test="workerTypeId!=null and workerTypeId!=''">
-                    AND o.worker_type_id =#{workerTypeId}
-                </if>
-                AND oi.product_type =#{productType}
-                AND c.type = 1
+                AND o.product_type =#{productType}
                 <if test="memberId!=null and memberId!=''">
-                    UNION ALL
-                        SELECT
-                          product_id
-                        FROM
-                          dj_deliver_cart
-                        WHERE
-                            house_id = #{houseId}
-                            AND worker_type_id = #{workerTypeId}
-                            AND product_type =#{productType}
-                            AND member_id = #{memberId}
-                </if>
                 UNION ALL
-                select  dest_product_id as product_id
-                from dj_deliver_product_change pc
-                where  pc.type = 1 and pc.house_id = #{houseId}
-                and pc.product_type = #{productType}
+                    SELECT
+                      product_id
+                    FROM
+                      dj_deliver_cart
+                    WHERE
+                        house_id = #{houseId}
+                        AND worker_type_id = #{workerTypeId}
+                    AND product_type =#{productType}
+                    AND member_id = #{memberId}
+                </if>
             ) s
         GROUP BY
             s.product_id
@@ -71,17 +46,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         s.category_id categoryId
         FROM
         (
-        SELECT
-        oi.category_id
-        FROM
-        `dj_deliver_order` o
-        INNER JOIN dj_deliver_order_item oi ON o.id = oi.order_id
-        WHERE
-        o.house_id = #{houseId}
-        AND oi.product_type =#{productType}
-        AND o.worker_type_id =#{workerTypeId}
-        AND o.payment > 0
-        AND o.type = 2
+            SELECT
+              o.category_id
+            FROM
+              `dj_house_warehouse`  o
+            WHERE
+              o.house_id = #{houseId}
+            AND o.product_type =#{productType}
         <if test="memberId!=null and memberId!=''">
             UNION ALL
             SELECT
@@ -94,11 +65,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             AND product_type =#{productType}
             AND member_id = #{memberId}
         </if>
-          UNION ALL
-            select  dest_product_id as product_id
-            from dj_deliver_product_change pc
-            where  pc.type = 1 and pc.house_id = #{houseId}
-            and pc.product_type = #{productType}
         ) s
         GROUP BY
         s.category_id
