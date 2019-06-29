@@ -68,17 +68,6 @@ public class HouseWorkerSupService {
         return mendMaterielAPI.surplusList(houseFlowApply.getWorkerTypeId(), houseFlowApply.getHouseId());
     }
 
-//    /**
-//     * 审核停工
-//     */
-//    public ServerResponse auditApply(String houseFlowApplyId, Integer memberCheck) {
-//        HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
-//        houseFlowApply.setMemberCheck(memberCheck);
-//        houseFlowApply.setModifyDate(new Date());
-//        houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-//        return ServerResponse.createBySuccessMessage("操作成功");
-//    }
-
     /**
      * 审核停工页面内容
      */

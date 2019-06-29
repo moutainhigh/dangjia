@@ -34,7 +34,6 @@ public class ConfigService {
                 config.setParamValue(distance + "");
                 iConfigMapper.updateByExampleSelective(config, example);
             }else{
-                example = new Example(Config.class);
                 config.setParamKey("CONSTRUCTION_SITE_DISTANCE");
                 config.setParamValue(distance+"");
                 config.setParamDesc("施工现场距离");
@@ -49,7 +48,6 @@ public class ConfigService {
                 config.setParamValue(radius + "");
                 iConfigMapper.updateByExampleSelective(config, example);
             }else{
-                example = new Example(Config.class);
                 config=new Config();
                 config.setParamKey("EXPAND_THE_RADIUS");
                 config.setParamValue(radius+"");
