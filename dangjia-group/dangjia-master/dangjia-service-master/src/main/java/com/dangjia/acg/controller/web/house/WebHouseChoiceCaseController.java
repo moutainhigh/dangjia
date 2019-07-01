@@ -23,16 +23,10 @@ public class WebHouseChoiceCaseController implements HouseChoiceCaseAPI {
     private HouseChoiceCaseService houseChoiceCaseService;
 
 
-    /**
-     * 获取所有房屋精选案例
-     *
-     * @param houseChoiceCase
-     * @return
-     */
     @Override
     @ApiMethod
-    public ServerResponse getHouseChoiceCases(HttpServletRequest request, Integer from, PageDTO pageDTO, HouseChoiceCase houseChoiceCase) {
-        return houseChoiceCaseService.getHouseChoiceCases(request, from, pageDTO, houseChoiceCase);
+    public ServerResponse getHouseChoiceCases(HttpServletRequest request, PageDTO pageDTO, Integer from, String cityId) {
+        return houseChoiceCaseService.getHouseChoiceCases(pageDTO, from, cityId);
     }
 
     /**
