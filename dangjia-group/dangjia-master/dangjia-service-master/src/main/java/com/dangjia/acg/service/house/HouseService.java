@@ -521,8 +521,6 @@ public class HouseService {
      */
     public ServerResponse setHouseInfo(House house) {
         try {
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-                    .getRequest();
             House srcHouse = iHouseMapper.selectByPrimaryKey(house.getId());
             if (srcHouse == null)
                 return ServerResponse.createByErrorMessage("没有该房子");
@@ -541,9 +539,9 @@ public class HouseService {
                     houseChoiceCase.setTitle(srcHouse.getNoNumberHouseName());
                     houseChoiceCase.setLabel(srcHouse.getStyle());
                     houseChoiceCase.setSource("房源来自当家装修精选推荐");
-                    houseChoiceCaseService.addHouseChoiceCase(request, houseChoiceCase);
+                    houseChoiceCaseService.addHouseChoiceCase(houseChoiceCase);
                 } else {
-                    houseChoiceCaseService.delHouseChoiceCase(request, house.getId());
+                    houseChoiceCaseService.delHouseChoiceCase(house.getId());
                 }
             }
             if (house.getVisitState() != -1) {

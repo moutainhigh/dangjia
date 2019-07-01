@@ -38,7 +38,7 @@ public class WebHouseChoiceCaseController implements HouseChoiceCaseAPI {
     @Override
     @ApiMethod
     public ServerResponse delHouseChoiceCase(HttpServletRequest request, String id) {
-        return houseChoiceCaseService.delHouseChoiceCase(request, id);
+        return houseChoiceCaseService.delHouseChoiceCase(id);
     }
 
     /**
@@ -50,7 +50,7 @@ public class WebHouseChoiceCaseController implements HouseChoiceCaseAPI {
     @Override
     @ApiMethod
     public ServerResponse editHouseChoiceCase(HttpServletRequest request, HouseChoiceCase houseChoiceCase) {
-        return houseChoiceCaseService.editHouseChoiceCase(request, houseChoiceCase);
+        return houseChoiceCaseService.editHouseChoiceCase(houseChoiceCase);
     }
 
     /**
@@ -62,6 +62,6 @@ public class WebHouseChoiceCaseController implements HouseChoiceCaseAPI {
     @Override
     @ApiMethod
     public ServerResponse addHouseChoiceCase(HttpServletRequest request, HouseChoiceCase houseChoiceCase) {
-        return houseChoiceCaseService.addHouseChoiceCase(request, houseChoiceCase);
+        return houseChoiceCaseService.addHouseChoiceCase(houseChoiceCase);
     }
 }

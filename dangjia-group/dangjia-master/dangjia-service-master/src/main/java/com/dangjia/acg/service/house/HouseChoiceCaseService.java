@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -123,7 +122,7 @@ public class HouseChoiceCaseService {
      * @param id
      * @return
      */
-    public ServerResponse delHouseChoiceCase(HttpServletRequest request, String id) {
+    public ServerResponse delHouseChoiceCase(String id) {
         Example example = new Example(HouseChoiceCase.class);
         example.createCriteria().andEqualTo(HouseChoiceCase.HOUSE_ID, id);
         if (this.houseChoiceCaseMapper.deleteByExample(example) > 0) {
@@ -139,8 +138,8 @@ public class HouseChoiceCaseService {
      * @param houseChoiceCase
      * @return
      */
-    public ServerResponse editHouseChoiceCase(HttpServletRequest request, HouseChoiceCase houseChoiceCase) {
-        return setHouseChoiceCase(request, 1, houseChoiceCase);
+    public ServerResponse editHouseChoiceCase(HouseChoiceCase houseChoiceCase) {
+        return setHouseChoiceCase(1, houseChoiceCase);
     }
 
     /**
@@ -149,12 +148,11 @@ public class HouseChoiceCaseService {
      * @param houseChoiceCase
      * @return
      */
-    public ServerResponse addHouseChoiceCase(HttpServletRequest request, HouseChoiceCase houseChoiceCase) {
-        return setHouseChoiceCase(request, 0, houseChoiceCase);
+    public ServerResponse addHouseChoiceCase(HouseChoiceCase houseChoiceCase) {
+        return setHouseChoiceCase(0, houseChoiceCase);
     }
 
-    private ServerResponse setHouseChoiceCase(HttpServletRequest request, int type, HouseChoiceCase houseChoiceCase) {
-//        if (!CommonUtil.isEmpty(houseChoiceCase.getTitle())) {
+    private ServerResponse setHouseChoiceCase(int type, HouseChoiceCase houseChoiceCase) {
         Example example = new Example(HouseChoiceCase.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo(HouseChoiceCase.TITLE, houseChoiceCase.getTitle());
@@ -165,7 +163,6 @@ public class HouseChoiceCaseService {
         if (list.size() > 0) {
             return ServerResponse.createByErrorMessage("案例名称不能重复");
         }
-//        }
         if (null != houseChoiceCase.getIsShow()) {
             if (houseChoiceCase.getIsShow() == 3 && (
                     CommonUtil.isEmpty(houseChoiceCase.getShowTimeStart()) ||
@@ -182,7 +179,6 @@ public class HouseChoiceCaseService {
                 return ServerResponse.createByErrorMessage("修改失败，请您稍后再试");
             }
         }
-
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 }
