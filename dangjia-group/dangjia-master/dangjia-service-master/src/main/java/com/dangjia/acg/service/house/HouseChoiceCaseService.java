@@ -55,7 +55,7 @@ public class HouseChoiceCaseService {
             criteria.andEqualTo("cityId", houseChoiceCase.getCityId());
         }
         if (from == null || from == 0) {//App端调用
-            criteria.andCondition(" ( is_show = 0 or ( is_show = 2 and '" + DateUtil.format(new Date()) + "' BETWEEN show_time_start and show_time_end) )");
+            criteria.andCondition(" text_content is not null and ( is_show = 0 or ( is_show = 2 and '" + DateUtil.format(new Date()) + "' BETWEEN show_time_start and show_time_end) )");
         }
         criteria.andEqualTo(HouseChoiceCase.DATA_STATUS, 0);
         //随机排序
@@ -70,7 +70,6 @@ public class HouseChoiceCaseService {
         List<Map> listmap = new ArrayList();
         PageInfo pageResult = new PageInfo(list);
         for (HouseChoiceCase v : list) {
-            if(!CommonUtil.isEmpty(v.getTextContent())) {
                 Map map = BeanUtils.beanToMap(v);
                 if (!CommonUtil.isEmpty(v.getAddress())) {
                     String[] address = StringUtils.split(v.getAddress(), ",");
@@ -114,7 +113,6 @@ public class HouseChoiceCaseService {
                     map.put("textContent", textContentDTOS);
                 }
                 listmap.add(map);
-            }
         }
         pageResult.setList(listmap);
         return ServerResponse.createBySuccess("ok", pageResult);
