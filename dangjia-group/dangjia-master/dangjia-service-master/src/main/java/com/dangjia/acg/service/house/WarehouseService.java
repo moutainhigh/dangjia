@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
-import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -123,10 +122,10 @@ public class WarehouseService {
      */
     public ServerResponse warehouseGmList(HttpServletRequest request, String userToken, String houseId, String name, String type) {
         try {
-            if (StringUtil.isEmpty(houseId)) {
-                return ServerResponse.createByErrorMessage("houseId不能为空");
-            }
             House house = houseMapper.selectByPrimaryKey(houseId);
+            if (house == null) {
+                return ServerResponse.createByErrorMessage("未找到该房产");
+            }
             String cityId = request.getParameter(Constants.CITY_ID);
             Map<String, Map> maps = new HashMap<>();
             Map map = new HashMap();
@@ -181,6 +180,7 @@ public class WarehouseService {
                         WarehouseDTO warehouseDTO = new WarehouseDTO();
                         BeanUtils.beanToBean(warehouse, warehouseDTO);
                         warehouseDTO.setImage(address + warehouse.getImage());
+                        warehouseDTO.setShopCount(warehouse.getShopCount());
                         warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                         warehouseDTO.setBackCount((warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
                         warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));

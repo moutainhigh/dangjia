@@ -40,7 +40,7 @@ public class ClassificationService {
         example.createCriteria()
                 .andEqualTo(GoodsCategory.PARENT_TOP, "1")
                 .andEqualTo(GoodsCategory.DATA_STATUS, 0);
-        example.orderBy(GoodsCategory.CREATE_DATE).desc();
+        example.orderBy(GoodsCategory.SORT).asc();
         List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.selectByExample(example);
         if (goodsCategoryList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());

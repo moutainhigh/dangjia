@@ -41,8 +41,8 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertGoodsCategory(HttpServletRequest request, String name, String parentId, String parentTop) {
-        return goodsCategoryService.insertGoodsCategory(name, parentId, parentTop);
+    public ServerResponse insertGoodsCategory(HttpServletRequest request, String name, String parentId, String parentTop, Integer sort) {
+        return goodsCategoryService.insertGoodsCategory(name, parentId, parentTop, sort);
     }
 
     /**
@@ -52,8 +52,8 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse doModifyGoodsCategory(HttpServletRequest request, String id, String name, String parentId, String parentTop) {
-        return goodsCategoryService.doModifyGoodsCategory(id, name, parentId, parentTop);
+    public ServerResponse doModifyGoodsCategory(HttpServletRequest request, String id, String name, String parentId, String parentTop, Integer sort) {
+        return goodsCategoryService.doModifyGoodsCategory(id, name, parentId, parentTop, sort);
     }
 
     /**
