@@ -36,17 +36,18 @@ public class GoodsCategoryService {
     }
 
     //新增商品类别
-    public ServerResponse insertGoodsCategory(String name, String parentId, String parentTop) {
+    public ServerResponse insertGoodsCategory(String name, String parentId, String parentTop, Integer sort) {
         try {
             List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByName(name);//根据name查询商品对象
             if (goodsCategoryList.size() > 0)
                 return ServerResponse.createByErrorMessage("不能重复添加类别");
-
             GoodsCategory category = new GoodsCategory();
             category.setName(name);
             category.setParentId(parentId);
             category.setParentTop(parentTop);
             category.setImage("");
+            if (sort == null) sort = 99;
+            category.setSort(sort);
             category.setCreateDate(new Date());
             category.setModifyDate(new Date());
             iGoodsCategoryMapper.insert(category);
@@ -58,7 +59,7 @@ public class GoodsCategoryService {
     }
 
     //修改商品类别
-    public ServerResponse doModifyGoodsCategory(String id, String name, String parentId, String parentTop) {
+    public ServerResponse doModifyGoodsCategory(String id, String name, String parentId, String parentTop, Integer sort) {
         try {
             GoodsCategory oldCategory = iGoodsCategoryMapper.selectByPrimaryKey(id);
             if (!oldCategory.getName().equals(name)) { //如果 是修改name
@@ -72,6 +73,9 @@ public class GoodsCategoryService {
             category.setName(name);
             category.setParentId(parentId);
             category.setParentTop(parentTop);
+            if (sort != null) {
+                category.setSort(sort);
+            }
             category.setModifyDate(new Date());
             iGoodsCategoryMapper.updateByPrimaryKeySelective(category);
             return ServerResponse.createBySuccessMessage("修改成功");
@@ -83,20 +87,11 @@ public class GoodsCategoryService {
 
     //查询商品属性列表 queryGoodsCategory
     public ServerResponse queryGoodsCategory(String parentId) {
-        try {
-            List<Map<String, Object>> mapList = new ArrayList<>();
-            List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId(parentId);
-            for (GoodsCategory goodsCategory : goodsCategoryList) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("id", goodsCategory.getId());
-                map.put("name", goodsCategory.getName());
-                mapList.add(map);
-            }
-            return ServerResponse.createBySuccess("查询成功", mapList);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
+        List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId(parentId);
+        if (goodsCategoryList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
+        return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
     }
 
     //删除商品类别

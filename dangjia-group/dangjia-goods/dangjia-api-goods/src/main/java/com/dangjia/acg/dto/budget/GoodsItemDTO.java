@@ -16,4 +16,8 @@ public class GoodsItemDTO {
     private String unitName;//单位
     private Double price;// 销售价
     private String id;  //人工商品workerGoodsId 服务材料 productId
+    private Double shopCount;//购买
+    private Double repairCount;//补退
+    private Double backCount;//退货
+    private Double surCount;//剩余数量
 }

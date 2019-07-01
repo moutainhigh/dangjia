@@ -184,6 +184,10 @@ public class ActuaryOpeService {
                 goodsItemDTO.setPrice(budgetWorker.getPrice());
                 goodsItemDTO.setUnitName(budgetWorker.getUnitName());
                 goodsItemDTO.setId(budgetWorker.getWorkerGoodsId());//人工商品id
+                goodsItemDTO.setShopCount(budgetWorker.getShopCount());
+                goodsItemDTO.setBackCount(budgetWorker.getBackCount());
+                goodsItemDTO.setRepairCount(budgetWorker.getRepairCount());
+                goodsItemDTO.setSurCount(budgetWorker.getShopCount() - budgetWorker.getBackCount() + budgetWorker.getRepairCount());
                 goodsItemDTOList.add(goodsItemDTO);
             }
             budgetItemDTO.setGoodsItemDTOList(goodsItemDTOList);
