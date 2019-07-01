@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -41,25 +42,20 @@ public class HouseChoiceCaseService {
     @Autowired
     private ConfigUtil configUtil;
 
-    /**
-     * 获取所有房屋精选案例
-     *
-     * @param houseChoiceCase
-     * @return
-     */
-    public ServerResponse getHouseChoiceCases(HttpServletRequest request, Integer from, PageDTO pageDTO, HouseChoiceCase houseChoiceCase) {
+    public ServerResponse getHouseChoiceCases(PageDTO pageDTO, Integer from, String cityId) {
         String jdAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Example example = new Example(HouseChoiceCase.class);
         Example.Criteria criteria = example.createCriteria();
-        if (!CommonUtil.isEmpty(houseChoiceCase.getCityId())) {
-            criteria.andEqualTo("cityId", houseChoiceCase.getCityId());
+        if (!CommonUtil.isEmpty(cityId)) {
+            criteria.andEqualTo("cityId", cityId);
         }
-        if (from == null || from == 0) {//App端调用
-            criteria.andCondition(" text_content is not null and ( is_show = 0 or ( is_show = 2 and '" + DateUtil.format(new Date()) + "' BETWEEN show_time_start and show_time_end) )");
+        if (from == null || from != 1) {//非中台查询
+            criteria.andCondition(" text_content is not null and ( is_show = 0 or ( is_show = 2 and '" +
+                    DateUtil.format(new Date()) + "' BETWEEN show_time_start and show_time_end) )");
         }
         criteria.andEqualTo(HouseChoiceCase.DATA_STATUS, 0);
         //随机排序
-        if (request.getParameter("isRand") != null) {
+        if (from == null || from == 0) {
             example.setOrderByClause(" rand() ");
             pageDTO.setPageNum(0);
         } else {
@@ -67,55 +63,58 @@ public class HouseChoiceCaseService {
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<HouseChoiceCase> list = houseChoiceCaseMapper.selectByExample(example);
-        List<Map> listmap = new ArrayList();
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         PageInfo pageResult = new PageInfo(list);
+        List<Map> listmap = new ArrayList<>();
         for (HouseChoiceCase v : list) {
-                Map map = BeanUtils.beanToMap(v);
-                if (!CommonUtil.isEmpty(v.getAddress())) {
-                    String[] address = StringUtils.split(v.getAddress(), ",");
-                    String[] addressUrl = StringUtils.split(v.getAddress(), ",");
-                    map.put("addressUrl", addressUrl);
-                    for (int i = 0; i < address.length; i++) {
-                        address[i] = jdAddress + address[i];
+            Map map = BeanUtils.beanToMap(v);
+            if (!CommonUtil.isEmpty(v.getAddress())) {
+                String[] address = StringUtils.split(v.getAddress(), ",");
+                String[] addressUrl = StringUtils.split(v.getAddress(), ",");
+                map.put("addressUrl", addressUrl);
+                for (int i = 0; i < address.length; i++) {
+                    address[i] = jdAddress + address[i];
+                }
+                map.put("address", address);
+            }
+            String[] label = {};
+            if (!CommonUtil.isEmpty(v.getLabel())) {
+                label = StringUtils.split(v.getLabel(), ",");
+                map.put("label", label);
+            } else {
+                map.put("label", label);
+            }
+            if (!CommonUtil.isEmpty(v.getImage())) {
+                map.put("imageUrl", v.getImage());
+                map.put("image", jdAddress + v.getImage());
+            }
+            if (!CommonUtil.isEmpty(v.getTextContent())) {
+                JSONArray itemObjArr = JSON.parseArray(v.getTextContent());
+                List<TextContentDTO> textContentDTOS = new ArrayList<>();
+                for (int i = 0; i < itemObjArr.size(); i++) {
+                    TextContentDTO textContentDTO = new TextContentDTO();
+                    JSONObject jsonObject = itemObjArr.getJSONObject(i);
+                    String[] imageUrl = jsonObject.getString("image").split(",");
+                    textContentDTO.setImageUrl(imageUrl);
+                    String describe = jsonObject.getString("describe");
+                    String headline = jsonObject.getString("headline");
+                    String[] images = jsonObject.getString("image").split(",");
+                    for (int j = 0; j < images.length; j++) {
+                        images[j] = jdAddress + images[j];
                     }
-                    map.put("address", address);
+                    textContentDTO.setImage(images);
+                    textContentDTO.setHeadline(headline);
+                    textContentDTO.setDescribe(describe);
+                    textContentDTOS.add(textContentDTO);
                 }
-                if (!CommonUtil.isEmpty(v.getLabel())) {
-                    String[] label = StringUtils.split(v.getLabel(), ",");
-                    map.put("label", label);
-                } else {
-                    String[] label = {};
-                    map.put("label", label);
-                }
-                if (!CommonUtil.isEmpty(v.getImage())) {
-                    map.put("imageUrl", v.getImage());
-                    map.put("image", jdAddress + v.getImage());
-                }
-                if (!CommonUtil.isEmpty(v.getTextContent())) {
-                    JSONArray itemObjArr = JSON.parseArray(v.getTextContent());
-                    List<TextContentDTO> textContentDTOS = new ArrayList<>();
-                    for (int i = 0; i < itemObjArr.size(); i++) {
-                        TextContentDTO textContentDTO = new TextContentDTO();
-                        JSONObject jsonObject = itemObjArr.getJSONObject(i);
-                        String[] imageUrl = jsonObject.getString("image").split(",");
-                        textContentDTO.setImageUrl(imageUrl);
-                        String describe = jsonObject.getString("describe");
-                        String headline = jsonObject.getString("headline");
-                        String[] images = jsonObject.getString("image").split(",");
-                        for (int j = 0; j < images.length; j++) {
-                            images[j] = jdAddress + images[j];
-                        }
-                        textContentDTO.setImage(images);
-                        textContentDTO.setHeadline(headline);
-                        textContentDTO.setDescribe(describe);
-                        textContentDTOS.add(textContentDTO);
-                    }
-                    map.put("textContent", textContentDTOS);
-                }
-                listmap.add(map);
+                map.put("textContent", textContentDTOS);
+            }
+            listmap.add(map);
         }
         pageResult.setList(listmap);
-        return ServerResponse.createBySuccess("ok", pageResult);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
     /**
@@ -156,18 +155,18 @@ public class HouseChoiceCaseService {
 
     private ServerResponse setHouseChoiceCase(HttpServletRequest request, int type, HouseChoiceCase houseChoiceCase) {
 //        if (!CommonUtil.isEmpty(houseChoiceCase.getTitle())) {
-            Example example = new Example(HouseChoiceCase.class);
-            Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo(HouseChoiceCase.TITLE, houseChoiceCase.getTitle());
-            if (type == 1) {
-                criteria.andNotEqualTo(HouseChoiceCase.ID, houseChoiceCase.getId());
-            }
-            List list = houseChoiceCaseMapper.selectByExample(example);
-            if (list.size() > 0) {
-                return ServerResponse.createByErrorMessage("案例名称不能重复");
-            }
+        Example example = new Example(HouseChoiceCase.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo(HouseChoiceCase.TITLE, houseChoiceCase.getTitle());
+        if (type == 1) {
+            criteria.andNotEqualTo(HouseChoiceCase.ID, houseChoiceCase.getId());
+        }
+        List list = houseChoiceCaseMapper.selectByExample(example);
+        if (list.size() > 0) {
+            return ServerResponse.createByErrorMessage("案例名称不能重复");
+        }
 //        }
-        if(null!=houseChoiceCase.getIsShow()) {
+        if (null != houseChoiceCase.getIsShow()) {
             if (houseChoiceCase.getIsShow() == 3 && (
                     CommonUtil.isEmpty(houseChoiceCase.getShowTimeStart()) ||
                             CommonUtil.isEmpty(houseChoiceCase.getShowTimeEnd()))) {

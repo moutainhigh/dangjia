@@ -64,6 +64,7 @@ public class TimingApplyService {
                 example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlow.getId())
                         .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
                         .andCondition(" member_check in (1,3) ")
+                        .andCondition(" (operator is null or operator=worker_id) ")
                         .andCondition("  to_days(start_date) <= to_days('" + DateUtil.getDateString(new Date().getTime()) + "') AND to_days(end_date) >= to_days('" + DateUtil.getDateString(new Date().getTime()) + "') ");
 
 

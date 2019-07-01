@@ -484,7 +484,7 @@ public class HouseWorkerService {
         }
         if (applyType == 5 || applyType == 6 || applyType == 7) {   //大管家巡查放工序id
             HouseFlow hf2 = houseFlowMapper.selectByPrimaryKey(houseFlowId2);
-            return this.setHouseFlowApply(applyType, houseFlowId2, hf2.getWorkerId(), suspendDay, applyDec,
+            return this.setHouseFlowApply(applyType, houseFlowId2, hf2 == null ? "" : hf2.getWorkerId(), suspendDay, applyDec,
                     imageList);
         } else {
             return this.setHouseFlowApply(applyType, houseFlowId, worker.getId(), suspendDay, applyDec,
@@ -737,7 +737,8 @@ public class HouseWorkerService {
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 Example example2 = new Example(HouseFlowApply.class);
                 example2.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseFlow.getHouseId())
-                        .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId()).andEqualTo(HouseFlowApply.APPLY_TYPE, 5);
+                        .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker == null ? "" : worker.getWorkerTypeId())
+                        .andEqualTo(HouseFlowApply.APPLY_TYPE, 5);
                 List<HouseFlowApply> hfalist = houseFlowApplyMapper.selectByExample(example2);
                 //工人houseflow
                 if (hfalist.size() < houseFlow.getPatrol()) {//该工种没有巡查够，每次要拿钱
