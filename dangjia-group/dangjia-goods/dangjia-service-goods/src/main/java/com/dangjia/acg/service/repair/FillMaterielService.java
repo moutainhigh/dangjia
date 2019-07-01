@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.repair;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.api.data.GetForBudgetAPI;
 import com.dangjia.acg.api.data.TechnologyRecordAPI;
@@ -132,7 +133,8 @@ public class FillMaterielService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member worker = (Member) object;
+            JSONObject job = (JSONObject)object;
+            Member worker = job.toJavaObject(Member.class);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             //精算的
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name, "0");
@@ -214,7 +216,8 @@ public class FillMaterielService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member worker = (Member) object;
+            JSONObject job = (JSONObject)object;
+            Member worker = job.toJavaObject(Member.class);
             List<GoodsDTO> goodsDTOList = new ArrayList<>();
             String productType = "0";
             if (worker.getWorkerType() == 3) {//大管家
@@ -248,7 +251,8 @@ public class FillMaterielService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member worker = (Member) object;
+            JSONObject job = (JSONObject)object;
+            Member worker = job.toJavaObject(Member.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name, "0");
