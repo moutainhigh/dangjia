@@ -7,7 +7,7 @@
 		id,
         create_date AS createDate,
         modify_date AS modifyDate,
-        data_status AS dataStatus
+        data_status AS dataStatus,
         member_id AS memberId,
         openid,
         open_type AS openType,
@@ -19,12 +19,7 @@
         user_role AS userRole
 	</sql>
 
-    <!--查询app应用角色-->
-    <select id="queryUserRole" resultType="com.dangjia.acg.modle.member.MemberAuth">
-        SELECT
-          <include refid="all_columns"/>
-        FROM dj_member_auth
-    </select>
+
 
 </mapper>
 

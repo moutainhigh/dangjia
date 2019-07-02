@@ -183,10 +183,11 @@ public class WebSplitDeliverService {
                 example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, supplierDeliverDTO.getId());
                 List<OrderSplitItem> orderSplitItems = iOrderSplitItemMapper.selectByExample(example);
                 Double totalAmount = 0d;
-                Double applyMoney = 0d;
+//                Double applyMoney = 0d;
                 for (OrderSplitItem orderSplitItem : orderSplitItems) {
-                    totalAmount += orderSplitItem.getTotalPrice();
-                    applyMoney += orderSplitItem.getSupCost() * orderSplitItem.getReceive();
+//                    totalAmount += orderSplitItem.getTotalPrice();
+                    totalAmount += orderSplitItem.getPrice() * orderSplitItem.getReceive();
+//                    applyMoney += orderSplitItem.getSupCost() * orderSplitItem.getReceive();
                 }
                 supplierDeliverDTO.setTotalAmount(totalAmount);
             }

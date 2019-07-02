@@ -30,5 +30,5 @@ public interface IModelingVillageMapper extends Mapper<ModelingVillage> {
 //    Integer jobLocationCount(@Param("latitude") String latitude,@Param("longitude") String longitude,@Param("distance") Double distance);
 
     /*查询指定距离的施工现场*/
-    List<House> jobLocation(@Param("latitude") String latitude, @Param("longitude") String longitude);
+    List<House> jobLocation(@Param("latitude") String latitude, @Param("longitude") String longitude,@Param("limit") Integer limit);
 }

@@ -77,18 +77,6 @@ public class SupplierProductController implements SupplierProductAPI {
     }
 
     /**
-     * 查询所有供应商
-     *
-     * @param pageDTO
-     * @return
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse<PageInfo> querySupplierList(HttpServletRequest request, PageDTO pageDTO) {
-        return supplierService.querySupplierList(pageDTO);
-    }
-
-    /**
      * 按照名字模糊查询所有供应商
      *
      * @param pageDTO

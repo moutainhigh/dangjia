@@ -115,7 +115,9 @@ public class ActuaryOperationService {
     /**
      * 更换货品
      */
-    public ServerResponse changeProduct(String productId, String budgetMaterialId, String srcGroupId, String targetGroupId, String houseId, String workerTypeId) {
+    public ServerResponse changeProduct(String productId, String budgetMaterialId,
+                                        String srcGroupId, String targetGroupId,
+                                        String houseId, String workerTypeId) {
         try {
             int count = 0;
             String ret = productId + " " + budgetMaterialId + " " + srcGroupId + " " + targetGroupId + " " + houseId + " " + workerTypeId;
@@ -166,7 +168,7 @@ public class ActuaryOperationService {
                             srcBudgetMaterial.setCost(targetProduct.getCost());
                             //这里会更新 为 新product的 换算后的购买数量
 //                            srcBudgetMaterial.setConvertCount(Math.ceil(srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality()));
-                            Double converCount = (srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality());
+                            double converCount = (srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality());
                             Unit convertUnit = iUnitMapper.selectByPrimaryKey(targetProduct.getConvertUnit());
                             if (convertUnit.getType() == 1) {
                                 converCount = Math.ceil(converCount);
@@ -187,7 +189,7 @@ public class ActuaryOperationService {
                 budgetMaterial.setPrice(product.getPrice());
                 budgetMaterial.setCost(product.getCost());
                 //这里会更新 为 新product的 换算后的购买数量
-                Double converCount = (budgetMaterial.getShopCount() / product.getConvertQuality());
+                double converCount = (budgetMaterial.getShopCount() / product.getConvertQuality());
                 Unit convertUnit = iUnitMapper.selectByPrimaryKey(product.getConvertUnit());
                 if (convertUnit.getType() == 1) {
                     converCount = Math.ceil(converCount);
@@ -210,35 +212,12 @@ public class ActuaryOperationService {
     /**
      * 选择货品刷新页面
      *
-     * @param goodsId
-     * @param selectVal
      * @param attributeIdArr 属性值id集合
      */
     public ServerResponse selectProduct(String goodsId, String selectVal, String attributeIdArr, String budgetMaterialId) {
         try {
             if (!StringUtils.isNoneBlank(goodsId))
                 return ServerResponse.createByErrorMessage("goodsId 不能为null");
-//            if (!StringUtils.isNoneBlank(budgetMaterialId))
-//                return ServerResponse.createByErrorMessage("budgetMaterialId 不能为null");
-
-//            String[] valueIdArr = attributeIdArr.split(",");
-//            Example example = new Example(Product.class);
-//            Example.Criteria criteria = example.createCriteria();
-//            if (!CommonUtil.isEmpty(goodsId)) {
-//                criteria.andEqualTo(Product.GOODS_ID, goodsId);
-//            }
-//
-//            if (valueIdArr == null || valueIdArr.length == 0 || CommonUtil.isEmpty(attributeIdArr)) {
-//                criteria.andCondition(" (isnull(value_id_arr) or value_id_arr = '') ");
-//            } else {
-//                for (String val : valueIdArr) {
-//                    if(!CommonUtil.isEmpty(val)) {
-//                        criteria.andCondition("  CONCAT(IFNULL(brand_id,''),',',IFNULL(brand_series_id,''),',',IFNULL(value_id_arr,'')) LIKE '%" + val + "%' ");
-//                    }
-//                }
-//            }
-//            List<Product> products = productMapper.selectByExample(example);
-
             Product product = productMapper.selectByPrimaryKey(selectVal);
             GoodsDTO goodsDTO = goodsDetail(product, budgetMaterialId);
             if (goodsDTO != null) {
@@ -344,18 +323,12 @@ public class ActuaryOperationService {
         return ServerResponse.createByErrorMessage("查询失败,type错误");
     }
 
-    //商品详情
-
     /**
-     * @param product
      * @param budgetMaterialId 传null ：表示不是精算里的商品。 如果是精算里的商品 ，可能有 关联组，关联组id 在 精算表里存的，所以，需要传精算id  ，
      * @return GoodsDTO
      */
     public GoodsDTO goodsDetail(Product product, String budgetMaterialId) {
         try {
-            LOG.info("goodsDetail product:" + product);
-            LOG.info("goodsDetail productId:" + product.getId());
-            LOG.info("goodsDetail budgetMaterialId:" + budgetMaterialId);
             GoodsDTO goodsDTO = new GoodsDTO();//长图  品牌系列图+属性图(多个)
             Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());//当前 商品
             goodsDTO.setProductId(product.getId());
@@ -371,11 +344,10 @@ public class ActuaryOperationService {
             goodsDTO.setUnitName(convertUnitName);//单位
             goodsDTO.setProductType(goods.getType());//材料类型
 
-            List<String> imageList = new ArrayList<String>();//长图片 多图组合
+            List<String> imageList = new ArrayList<>();//长图片 多图组合
             GoodsGroup srcGoodsGroup = null;
             //找到一个groupId 的可以切换的目标关联组
-            List<GroupLink> groupLinkTargetList = new ArrayList<>();//可以切换的其他关联组的 GroupLink的productId
-            Set<String> pIdTargetGroupSet = new HashSet();//目标关联组下的所有productId
+            Set<String> pIdTargetGroupSet = new HashSet<>();//目标关联组下的所有productId
             pIdTargetGroupSet.add(product.getId());
             BudgetMaterial budgetMaterial = null;
             if (budgetMaterialId != null) {
@@ -385,7 +357,6 @@ public class ActuaryOperationService {
                 //有精算的时候，才有可能 有关联组的处理
                 if (StringUtils.isNoneBlank(budgetMaterial.getGoodsGroupId())) {
                     srcGoodsGroup = iGoodsGroupMapper.selectByPrimaryKey(budgetMaterial.getGoodsGroupId());
-                    LOG.info("srcGoodsGroup:" + srcGoodsGroup);
                     goodsDTO.setIsSwitch(1);
                     String[] gGroupIds = srcGoodsGroup.getSwitchArr().split(",");
                     if (StringUtils.isNoneBlank(gGroupIds)) {
@@ -394,16 +365,12 @@ public class ActuaryOperationService {
                             //找到所有可以切换的组 商品
                             List<GroupLink> groupLinkList = iGroupLinkMapper.queryGroupLinkByGidAndGoodsId(gGroupId, product.getGoodsId());
                             for (GroupLink groupLink : groupLinkList) {
-                                if (groupLink.getGoodsId().equals(product.getGoodsId())
-                                        && groupLinkList.size() == groupLinkList.size()) { //可切换性0:可切换；1不可切换
+                                if (groupLink.getGoodsId().equals(product.getGoodsId())) { //可切换性0:可切换；1不可切换
                                     if (groupLink.getProductId().equals(product.getId())) {// 找出当前product 所在关联组id 和 是否能切换
                                         goodsDTO.setSrcGroupId(groupLink.getGroupId());
                                         goodsDTO.setIsSwitch(groupLink.getIsSwitch());
-                                        LOG.info("原关联组为:" + groupLink + " gropuId:" + groupLink.getGroupId());
                                     }
                                     if (groupLink.getIsSwitch() == 0) {//保存可以切换的 product
-                                        if (!pIdTargetGroupSet.contains(groupLink.getProductId()))
-                                            groupLinkTargetList.add(groupLink);//保存 所有可切换的 关联组 下的不同 productId
                                         pIdTargetGroupSet.add(groupLink.getProductId());
                                     }
                                 }
@@ -411,10 +378,7 @@ public class ActuaryOperationService {
                         }
                     }
                 }
-                LOG.info("pIdTargetGroupSet size:" + pIdTargetGroupSet.size() + "  " + pIdTargetGroupSet + "  " + groupLinkTargetList);
             }
-
-
             List<Product> productList = new ArrayList<>();
             if (srcGoodsGroup != null) {//是关联组
                 for (String pId : pIdTargetGroupSet) {
@@ -434,51 +398,11 @@ public class ActuaryOperationService {
             List<AttributeDTO> attrList = getAllAttributes(product, productList, imageList);
             goodsDTO.setAttrList(attrList);
             goodsDTO.setImageList(imageList);
-            LOG.info("goodsDetail goodsDTO:" + goodsDTO);
             return goodsDTO;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
-    }
-
-    //判断该货品是不是该属性
-    private boolean isValue(String valueId, String valueIdArr) {
-        try {
-            String[] valueIdList = valueIdArr.split(",");
-            for (int i = 0; i < valueIdList.length; i++) {
-                if (valueId.equals(valueIdList[i])) {
-                    return true;
-                }
-            }
-            return false;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    // contains
-
-    /**
-     * 检查 strArr 字符数组中，是否包含 value值
-     *
-     * @param value
-     * @param strArr
-     * @return
-     */
-    private boolean isContainsValue(String value, String strArr) {
-        if (CommonUtil.isEmpty(value)) {
-            return true;
-        }
-        String[] arr = strArr.split(",");
-        if (arr != null) {
-            for (String str : arr) {
-                if (value.equals(str))
-                    return true;
-            }
-        }
-        return false;
     }
 
     //取第一张图
@@ -524,7 +448,7 @@ public class ActuaryOperationService {
             FlowDTO flowDTO = new FlowDTO();
             flowDTO.setName(workerTypeName);
             flowDTO.setType(type);
-            List<FlowActuaryDTO> flowActuaryDTOList = new ArrayList<FlowActuaryDTO>();
+            List<FlowActuaryDTO> flowActuaryDTOList = new ArrayList<>();
             String typsValue = mapgx.get(type);
             if (CommonUtil.isEmpty(typsValue)) {
                 return ServerResponse.createByErrorMessage("type参数错误");
@@ -625,14 +549,13 @@ public class ActuaryOperationService {
                         if (product != null) {
                             flowActuaryDTO.setId(product.getId());
                             flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
-                            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMODITY, userToken,
-                                    cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + type;
+                            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                                    String.format(DjConstants.YZPageAddress.COMMODITY, userToken,
+                                            cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + type;
                             flowActuaryDTO.setUrl(url);
                             flowActuaryDTO.setAttribute(getAttributes(product));//拼接属性品牌
 //                        flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + product.getUnitName());
-
                             convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
-
 //                        flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName());
                             flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
                             flowActuaryDTO.setTotalPrice(product.getPrice() * bm.getConvertCount());
@@ -664,7 +587,7 @@ public class ActuaryOperationService {
     }
 
     //拼接属性品牌
-    private String getAttributes(Product product) {
+    public String getAttributes(Product product) {
         String attributes = product.getValueNameArr();
         if (attributes == null) {
             attributes = "";
@@ -679,25 +602,9 @@ public class ActuaryOperationService {
         return attributes.replaceAll(",", " ");
     }
 
-    private String listToStr(String brandId, String brandSeriesId, String valueIdArr) {
-        List list = new ArrayList();
-        if (!CommonUtil.isEmpty(brandId)) {
-            list.add(brandId);
-        }
-        if (!CommonUtil.isEmpty(brandSeriesId)) {
-            list.add(brandSeriesId);
-        }
-        if (!CommonUtil.isEmpty(valueIdArr)) {
-            list.add(valueIdArr);
-        }
-        return StringUtils.join(list, ",");
-    }
-
     //根据品牌系列找属性品牌
     private List<AttributeDTO> getAllAttributes(Product product, List<Product> productList, List<String> imageList) {
-
         List<AttributeDTO> attributeDTOList = new ArrayList<>();
-
         //品牌
         if (productList.size() > 0) {
             AttributeDTO attributeDTO = new AttributeDTO();
@@ -705,16 +612,15 @@ public class ActuaryOperationService {
             attributeDTO.setName("规格");
             List<AttributeValueDTO> attributeValueDTOList = new ArrayList<>();
             for (Product atId : productList) {
-                StringBuffer strbuf = new StringBuffer();
+                StringBuilder strbuf = new StringBuilder();
                 if (!CommonUtil.isEmpty(atId.getBrandId())) {
                     Brand brand = iBrandMapper.selectByPrimaryKey(atId.getBrandId());
-                    strbuf.append(brand.getName() + " ");
+                    strbuf.append(brand.getName()).append(" ");
 
                 }
                 if (!CommonUtil.isEmpty(atId.getBrandSeriesId())) {
                     BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(atId.getBrandSeriesId());
-                    strbuf.append(brandSeries.getName() + " ");
-
+                    strbuf.append(brandSeries.getName()).append(" ");
                     if (atId.getId().equals(product.getId())) {//如果包含该属性
                         if (StringUtils.isNoneBlank(brandSeries.getImage())) {
                             imageList.add(getImage(brandSeries.getImage()));//属性图
@@ -723,7 +629,6 @@ public class ActuaryOperationService {
                 }
                 if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
                     strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
-
                     if (atId.getId().equals(product.getId())) {//如果包含该属性
                         String[] strAtIdArr = atId.getValueIdArr().split(",");
                         if (StringUtils.isNoneBlank(strAtIdArr)) {
@@ -759,13 +664,13 @@ public class ActuaryOperationService {
         //从master获取工序详情
         List<Map<String, String>> mapList = getForBudgetAPI.getFlowList(houseId);
         ActuaryDetailsDTO actuaryDetailsDTO = new ActuaryDetailsDTO();//最外层
-        List<FlowDetailsDTO> flowDetailsDTOList = new ArrayList<FlowDetailsDTO>();
+        List<FlowDetailsDTO> flowDetailsDTOList = new ArrayList<>();
         for (Map<String, String> map : mapList) {
             String name = map.get("name");
             String workerTypeId = map.get("workerTypeId");
             FlowDetailsDTO flowDetailsDTO = new FlowDetailsDTO();
             flowDetailsDTO.setName(name);
-            List<DetailsDTO> detailsDTOList = new ArrayList<DetailsDTO>();//人工材料服务
+            List<DetailsDTO> detailsDTOList = new ArrayList<>();//人工材料服务
             List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getBudgetWorkerList(houseId, workerTypeId);//人工明细
             List<BudgetMaterial> materialCaiList = budgetMaterialMapper.getBudgetCaiList(houseId, workerTypeId);//材料明细
             List<BudgetMaterial> materialSerList = budgetMaterialMapper.getBudgetSerList(houseId, workerTypeId);//服务明细
@@ -775,17 +680,15 @@ public class ActuaryOperationService {
             mapgx.put(DjConstants.GXType.CAILIAO, "材料");
             mapgx.put(DjConstants.GXType.FUWU, "服务");
             for (Map.Entry<Integer, String> entry : mapgx.entrySet()) {
-                Map m = new HashMap();
+                Map<String, Object> m = new HashMap<>();
                 m.put("key", String.valueOf(entry.getKey()));
                 m.put("name", entry.getValue());
-                Integer size = 0;
-                if (DjConstants.GXType.RENGGONG == entry.getKey()) {
+                int size = 0;
+                if (DjConstants.GXType.RENGGONG.equals(entry.getKey())) {
                     size = budgetWorkerList.size();
-                }
-                if (DjConstants.GXType.CAILIAO == entry.getKey()) {
+                } else if (DjConstants.GXType.CAILIAO.equals(entry.getKey())) {
                     size = materialCaiList.size();
-                }
-                if (DjConstants.GXType.FUWU == entry.getKey()) {
+                } else if (DjConstants.GXType.FUWU.equals(entry.getKey())) {
                     size = materialSerList.size();
                 }
                 m.put("size", size);
@@ -802,7 +705,9 @@ public class ActuaryOperationService {
                     detailsDTO.setNameB(name + "阶段" + names);
                     detailsDTO.setNameC(names + "明细");
                     detailsDTO.setType(key);
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.CONFIRMACTUARYDETAIL, userToken, cityId, names + "明细") + "&houseId=" + houseId + "&workerTypeId=" + workerTypeId + "&type=" + key;
+                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                            String.format(DjConstants.YZPageAddress.CONFIRMACTUARYDETAIL, userToken, cityId, names + "明细") +
+                            "&houseId=" + houseId + "&workerTypeId=" + workerTypeId + "&type=" + key;
                     detailsDTO.setUrl(url);
                     detailsDTOList.add(detailsDTO);
                 }
@@ -814,7 +719,6 @@ public class ActuaryOperationService {
         actuaryDetailsDTO.setHouseId(houseId);
         actuaryDetailsDTO.setFlowDetailsDTOList(flowDetailsDTOList);
         actuaryDetailsDTO.setBudgetOk(house.getBudgetOk());
-
         return ServerResponse.createBySuccess("查询成功", actuaryDetailsDTO);
     }
 

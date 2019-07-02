@@ -15,6 +15,7 @@ import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.util.StringTool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,10 +101,10 @@ public class BudgetMaterialService {
             for (Map<String, Object> obj : mapList) {
                 String goodsId = obj.get("goodsId").toString();
                 Goods goods = iGoodsMapper.queryById(goodsId);
-                Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
-                if (unit != null)
-                    obj.put("goodsUnitName", unit.getName());
                 if (goods != null) {
+                    Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
+                    if (unit != null)
+                        obj.put("goodsUnitName", unit.getName());
                     if (!CommonUtil.isEmpty(goods.getName()))
                         obj.put("goodsName", goods.getName());
                 }
@@ -168,40 +169,24 @@ public class BudgetMaterialService {
                         continue;
                     }
                     String[] imgArr = t.getImage().split(",");
-                    String imgStr = "";
-                    String imgUrlStr = "";
-                    for (int i = 0; i < imgArr.length; i++) {
-                        if (i == imgArr.length - 1) {
-                            imgStr += address + imgArr[i];
-                            imgUrlStr += imgArr[i];
-                        } else {
-                            imgStr += address + imgArr[i] + ",";
-                            imgUrlStr += imgArr[i] + ",";
-                        }
-                    }
-                    t.setImage(imgUrlStr);
+                    StringBuilder imgStr = new StringBuilder();
+                    StringBuilder imgUrlStr = new StringBuilder();
+                    StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+                    t.setImage(imgUrlStr.toString());
                     Map<String, Object> map = BeanUtils.beanToMap(t);
-                    map.put("imageUrl", imgStr);
+                    map.put("imageUrl", imgStr.toString());
                     map.put("sampleImageUrl", address + t.getSampleImage());
                     tTechnologymMapList.add(map);
                 }
 
 
                 String[] imgArr = p.getImage().split(",");
-                String imgStr = "";
-                String imgUrlStr = "";
-                for (int i = 0; i < imgArr.length; i++) {
-                    if (i == imgArr.length - 1) {
-                        imgStr += address + imgArr[i];
-                        imgUrlStr += imgArr[i];
-                    } else {
-                        imgStr += address + imgArr[i] + ",";
-                        imgUrlStr += imgArr[i] + ",";
-                    }
-                }
-                p.setImage(imgStr);
+                StringBuilder imgStr = new StringBuilder();
+                StringBuilder imgUrlStr = new StringBuilder();
+                StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+                p.setImage(imgStr.toString());
                 Map<String, Object> map = BeanUtils.beanToMap(p);
-                map.put("imageUrl", imgUrlStr);
+                map.put("imageUrl", imgUrlStr.toString());
                 if (!StringUtils.isNotBlank(p.getLabelId())) {
                     map.put("labelId", "");
                     map.put("labelName", "");
@@ -239,7 +224,6 @@ public class BudgetMaterialService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-
 
 
 }

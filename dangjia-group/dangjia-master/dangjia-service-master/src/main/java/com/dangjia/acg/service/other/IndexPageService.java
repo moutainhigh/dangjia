@@ -14,7 +14,6 @@ import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.label.OptionalLabelDTO;
 import com.dangjia.acg.dto.other.HouseDetailsDTO;
-import com.dangjia.acg.mapper.config.IConfigMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderMapper;
@@ -64,8 +63,6 @@ public class IndexPageService {
     @Autowired
     private IModelingVillageMapper modelingVillageMapper;
     @Autowired
-    private IConfigMapper iConfigMapper;
-    @Autowired
     private DesignDataService designDataService;
 
     /**
@@ -77,8 +74,18 @@ public class IndexPageService {
             Double minSquare = square - 15;
             Double maxSquare = square + 15;
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            PageInfo pageResult=null;
             List<House> houseList = houseMapper.getSameLayoutDistance(cityId, modelingVillage.getLocationx(), modelingVillage.getLocationy(), minSquare, maxSquare);
-            PageInfo pageResult = new PageInfo(houseList);
+            if(houseList.size()<=0){
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+                houseList=houseMapper.getSameLayoutDistance(cityId, modelingVillage.getLocationx(), modelingVillage.getLocationy(),null,null);
+                pageResult = new PageInfo(houseList);
+                if(houseList.size()<0){
+                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+                }
+            }else{
+                pageResult = new PageInfo(houseList);
+            }
             List<Map> houseMap = new ArrayList<>();
             for (House house : houseList) {
                 request.setAttribute(Constants.CITY_ID, house.getCityId());
@@ -113,7 +120,7 @@ public class IndexPageService {
                 houseMap.add(map);
             }
             pageResult.setList(houseMap);
-            return ServerResponse.createBySuccess(null, pageResult);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
@@ -139,6 +146,7 @@ public class IndexPageService {
             houseDetailsDTO.setHouseName(house.getHouseName());
             houseDetailsDTO.setOptionalLabel(house.getOptionalLabel());
             houseDetailsDTO.setVisitState(house.getVisitState());
+            houseDetailsDTO.setNoNumberHouseName(house.getNoNumberHouseName());
             String[] liangArr = {};
             if (house.getLiangDian() != null) {
                 liangArr = house.getLiangDian().split(",");
@@ -248,14 +256,14 @@ public class IndexPageService {
      * @param longitude
      * @return
      */
-    public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude) {
-        if (latitude == null) {
+    public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude,Integer limit) {
+        if (!CommonUtil.isEmpty(latitude)) {
             latitude = "28.228259";
         }
-        if (longitude == null) {
+        if (!CommonUtil.isEmpty(longitude)) {
             longitude = "112.938904";
         }
-        List<House> houses = modelingVillageMapper.jobLocation(latitude, longitude);
+        List<House> houses = modelingVillageMapper.jobLocation(latitude, longitude,limit);
         if (houses.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }

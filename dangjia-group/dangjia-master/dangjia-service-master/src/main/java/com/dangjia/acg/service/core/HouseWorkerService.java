@@ -31,7 +31,6 @@ import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.other.WorkDeposit;
@@ -125,8 +124,12 @@ public class HouseWorkerService {
      * 根据工人id查询所有房子任务
      */
     public ServerResponse queryWorkerHouse(String userToken) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        List list = houseWorkerMapper.queryWorkerHouse(accessToken.getMemberId());
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member operator = (Member) object;
+        List list = houseWorkerMapper.queryWorkerHouse(operator.getId());
         return ServerResponse.createBySuccess("ok", list);
     }
 
@@ -481,7 +484,7 @@ public class HouseWorkerService {
         }
         if (applyType == 5 || applyType == 6 || applyType == 7) {   //大管家巡查放工序id
             HouseFlow hf2 = houseFlowMapper.selectByPrimaryKey(houseFlowId2);
-            return this.setHouseFlowApply(applyType, houseFlowId2, hf2.getWorkerId(), suspendDay, applyDec,
+            return this.setHouseFlowApply(applyType, houseFlowId2, hf2 == null ? "" : hf2.getWorkerId(), suspendDay, applyDec,
                     imageList);
         } else {
             return this.setHouseFlowApply(applyType, houseFlowId, worker.getId(), suspendDay, applyDec,
@@ -712,7 +715,7 @@ public class HouseWorkerService {
                         houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
                     }
                 }
-                suspendDay = DateUtil.daysofTwo(start, end) ;
+                suspendDay = DateUtil.daysofTwo(start, end);
                 if (suspendDay > 0) {
                     //计划提前
                     houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), null, suspendDay);
@@ -734,7 +737,8 @@ public class HouseWorkerService {
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 Example example2 = new Example(HouseFlowApply.class);
                 example2.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseFlow.getHouseId())
-                        .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId()).andEqualTo(HouseFlowApply.APPLY_TYPE, 5);
+                        .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker == null ? "" : worker.getWorkerTypeId())
+                        .andEqualTo(HouseFlowApply.APPLY_TYPE, 5);
                 List<HouseFlowApply> hfalist = houseFlowApplyMapper.selectByExample(example2);
                 //工人houseflow
                 if (hfalist.size() < houseFlow.getPatrol()) {//该工种没有巡查够，每次要拿钱

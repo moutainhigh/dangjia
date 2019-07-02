@@ -174,52 +174,6 @@ public class SupplierService {
     }
 
     /**
-     * 查询所有供应商
-     */
-    public ServerResponse<PageInfo> querySupplierList(PageDTO pageDTO) {
-        return ServerResponse.createByErrorMessage("接口弃用");
-//        try {
-//            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-//            List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();//返回list
-//            List<Supplier> supplierList = iSupplierMapper.query();
-//            for (Supplier supplier : supplierList) {
-//                Map<String, Object> map = new HashMap<String, Object>();
-//                map.put("id", supplier.getId());
-//                map.put("name", supplier.getName());//供应商名称
-//                map.put("address", supplier.getAddress());//地址
-//                map.put("telephone", supplier.getTelephone());//联系电话
-//                map.put("checkPeople", supplier.getCheckPeople());//联系人
-//                map.put("email", supplier.getEmail());//电子邮件
-//                map.put("notice", supplier.getNotice());//发货须知
-//                map.put("supplierLevel", supplier.getSupplierLevel());//供应商级别
-//                map.put("gender", supplier.getGender());//联系人性别 1男 2女
-//                //查找所有的货品 供应商
-//                List<Product> pList = iSupplierMapper.querySupplierProduct(supplier.getId(), "", -1);
-//                LOG.info("querySupplierList size:" + pList.size());
-//                Set goodsSet = new HashSet();
-//                for (Product product : pList) {
-//                    goodsSet.add(product.getGoodsId());
-//                    LOG.info("product name:" + product.getName() + " getGoodsId:" + product.getGoodsId() + " productID:" + product.getId() + " siez:" + goodsSet.size());
-//                }
-//                map.put("countGoods", goodsSet.size());//供应的货品种类
-//                Integer countAttribute = iSupplierMapper.getSupplierProductByProductId(supplier.getId());
-//                map.put("countAttribute", countAttribute == null ? "0" : countAttribute);//供应的商品种类
-//                map.put("countStock", iSupplierMapper.getSupplierProductByStock(supplier.getId()));//库存小于50的
-//                map.put("state", supplier.getState());//供应商状态  1正常供货 2停止供货
-//                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                map.put("createDate", sdf.format(supplier.getCreateDate() == null ? new Date() : supplier.getCreateDate()));
-//                mapList.add(map);
-//            }
-//            PageInfo pageResult = new PageInfo(supplierList);
-//            pageResult.setList(mapList);
-//            return ServerResponse.createBySuccess("查询成功", pageResult);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ServerResponse.createByErrorMessage("查询失败");
-//        }
-    }
-
-    /**
      * 按照名字模糊查询所有供应商
      */
     public ServerResponse<PageInfo> querySupplierListLikeByName(PageDTO pageDTO, String name) {

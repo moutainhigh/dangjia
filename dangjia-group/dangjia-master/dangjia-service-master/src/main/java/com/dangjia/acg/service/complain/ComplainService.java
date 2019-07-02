@@ -2,9 +2,7 @@ package com.dangjia.acg.service.complain;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -40,7 +38,6 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.sup.Supplier;
@@ -103,12 +100,8 @@ public class ComplainService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private IHouseWorkerOrderMapper houseWorkerOrderMapper;
-
     @Autowired
     private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
-    @Autowired
-    private RedisClient redisClient;//缓存
-
     @Autowired
     private HouseService houseService;
 
@@ -771,10 +764,8 @@ public class ComplainService {
         if (house.getVisitState() != 1 && house.getVisitState() != 5) {
             return ServerResponse.createByErrorMessage("该房子没有在装修，无法结束装修");
         }
-
-
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null && CommonUtil.isEmpty(userId)) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse && CommonUtil.isEmpty(userId)) {
             return ServerResponse.createbyUserTokenError();
         }
         HouseWorkerOrder hwo2 = null;

@@ -491,5 +491,11 @@ public interface MemberAPI {
     ServerResponse getMembers(@RequestParam("userToken") String userToken,
                               @RequestParam("memberId") String memberId,
                               @RequestParam("phone") String phone);
+
+
+    @RequestMapping(value = "member/getMember", method = RequestMethod.POST)
+    @ApiOperation(value = "其他项目获取登录信息", notes = "其他项目获取登录信息")
+    Object getMember(@RequestParam("userToken") String userToken);
+
 }
 

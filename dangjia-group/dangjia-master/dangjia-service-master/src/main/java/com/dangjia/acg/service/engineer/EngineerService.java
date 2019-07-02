@@ -358,8 +358,12 @@ public class EngineerService {
             map.put("workerType", worker.getWorkerType());
             map.put("workerTypeName", workerType.getName());
             map.put("mobile", worker.getMobile());
-            map.put("createDate", worker.getCreateDate());
+            map.put("createDate", houseFlow.getCreateDate());
             map.put("workSteta", houseFlow.getWorkSteta());
+            map.put("endTime",null);
+            if(houseFlow.getWorkSteta()==2){
+                map.put("endTime",houseFlow.getModifyDate());
+            }
             map.put("payState", hwo.getPayState());//0未支付，1已经支付
             map.put("retentionMoney", hwo.getRetentionMoney());//此单滞留金
             map.put("afterChange", hwo.getAfterChange());//换人后钱
@@ -369,7 +373,7 @@ public class EngineerService {
             map.put("repairPrice", hwo.getRepairTotalPrice());//补人工钱
             map.put("haveMoney", hwo.getHaveMoney());//已拿钱
             map.put("everyMoney", hwo.getEveryMoney());//每日申请累计钱
-            map.put("checkMoney", hwo.getCheckMoney());//管家巡查累计
+            map.put("checkMoney", houseFlow.getPatrol());//管家巡查累计
             mapList.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", mapList);

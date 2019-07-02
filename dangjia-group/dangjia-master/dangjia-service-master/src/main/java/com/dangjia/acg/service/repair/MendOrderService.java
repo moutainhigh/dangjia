@@ -21,7 +21,7 @@ import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
-import com.dangjia.acg.mapper.member.IMemberAuthMapper;
+import com.dangjia.acg.mapper.member.IMemberInfoMapper;
 import com.dangjia.acg.mapper.repair.*;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
@@ -37,6 +37,7 @@ import com.dangjia.acg.modle.house.SurplusWareHouse;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAuth;
+import com.dangjia.acg.modle.member.MemberInfo;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -111,7 +112,7 @@ public class MendOrderService {
     @Autowired
     private UnitAPI unitAPI;
     @Autowired
-    private IMemberAuthMapper memberAuthMapper;
+    private IMemberInfoMapper memberInfoMapper;
 
 
     /**
@@ -1035,9 +1036,9 @@ public class MendOrderService {
                         Product product = forMasterAPI.getProduct(house.getCityId(), productId);
                         if (product != null) {
                             Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
-                            MemberAuth memberAuth = memberAuthMapper.queryUserRole(memberId);
+                            List<MemberInfo> memberInfos = memberInfoMapper.queryUserRole(memberId);
                             //判断用户角色是否为业主业主可任意退
-                            if(memberAuth.getUserRole()!=1) {
+                            if(memberInfos.size()<=0) {
                                 if (goods != null && goods.getSales() == 1) {
                                     return ServerResponse.createByErrorMessage(product.getName() + "不可退");
                                 }

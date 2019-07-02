@@ -106,10 +106,8 @@ public class UnitService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse update(String unitId, String unitName, String linkUnitIdArr)throws RuntimeException {
         try {
-            LOG.info("linkUnitIdArr :" + linkUnitIdArr);
             if (!StringUtils.isNotBlank(unitName))
                 return ServerResponse.createByErrorMessage("单位名称不能为空");
-
             Unit unit = iUnitMapper.selectByPrimaryKey(unitId);
             if (unit == null)
                 return ServerResponse.createByErrorMessage("不存在此单位,修改失败");
@@ -119,7 +117,6 @@ public class UnitService {
                 if (iUnitMapper.getUnitByName(unitName).size() > 0)
                     return ServerResponse.createByErrorMessage("单位名称已存在");
             }
-//            unit.setId(unitId);
             unit.setName(unitName);
             if (!StringUtils.isNotBlank(linkUnitIdArr))
                 unit.setLinkUnitIdArr(unit.getId());//包括本身  如果为null ，就只关联 自己本身
@@ -153,15 +150,4 @@ public class UnitService {
         }
     }
 
-    //根据id删除商品单位
-    public ServerResponse deleteById(String unitId) {
-        return ServerResponse.createBySuccessMessage("不能执行删除操作");
-//        try {
-//            iUnitMapper.deleteByPrimaryKey(unitId);
-//            return ServerResponse.createBySuccessMessage("删除成功");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ServerResponse.createByErrorMessage("删除失败");
-//        }
-    }
 }

@@ -94,23 +94,6 @@ public class TechnologyController implements TechnologyAPI {
     }
 
     /**
-     * 新增人工商品关联工艺
-     *
-     * @throws
-     * @Title: insertWokerTechnology
-     * @Description: TODO
-     * @param: @param worker_goods_id
-     * @param: @param tIdArr
-     * @param: @return
-     * @return: JsonResult
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse insertWokerTechnology(HttpServletRequest request, String workerGoodsId, String tIdArr) {
-        return technologyService.insertWokerTechnology(workerGoodsId, tIdArr);
-    }
-
-    /**
      * 根据商品id查询人工商品关联工艺实体
      *
      * @throws

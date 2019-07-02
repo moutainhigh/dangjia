@@ -23,16 +23,10 @@ public class WebHouseChoiceCaseController implements HouseChoiceCaseAPI {
     private HouseChoiceCaseService houseChoiceCaseService;
 
 
-    /**
-     * 获取所有房屋精选案例
-     *
-     * @param houseChoiceCase
-     * @return
-     */
     @Override
     @ApiMethod
-    public ServerResponse getHouseChoiceCases(HttpServletRequest request, Integer from, PageDTO pageDTO, HouseChoiceCase houseChoiceCase) {
-        return houseChoiceCaseService.getHouseChoiceCases(request, from, pageDTO, houseChoiceCase);
+    public ServerResponse getHouseChoiceCases(HttpServletRequest request, PageDTO pageDTO, Integer from, String cityId) {
+        return houseChoiceCaseService.getHouseChoiceCases(pageDTO, from, cityId);
     }
 
     /**
@@ -44,7 +38,7 @@ public class WebHouseChoiceCaseController implements HouseChoiceCaseAPI {
     @Override
     @ApiMethod
     public ServerResponse delHouseChoiceCase(HttpServletRequest request, String id) {
-        return houseChoiceCaseService.delHouseChoiceCase(request, id);
+        return houseChoiceCaseService.delHouseChoiceCase(id);
     }
 
     /**
@@ -56,7 +50,7 @@ public class WebHouseChoiceCaseController implements HouseChoiceCaseAPI {
     @Override
     @ApiMethod
     public ServerResponse editHouseChoiceCase(HttpServletRequest request, HouseChoiceCase houseChoiceCase) {
-        return houseChoiceCaseService.editHouseChoiceCase(request, houseChoiceCase);
+        return houseChoiceCaseService.editHouseChoiceCase(houseChoiceCase);
     }
 
     /**
@@ -68,6 +62,6 @@ public class WebHouseChoiceCaseController implements HouseChoiceCaseAPI {
     @Override
     @ApiMethod
     public ServerResponse addHouseChoiceCase(HttpServletRequest request, HouseChoiceCase houseChoiceCase) {
-        return houseChoiceCaseService.addHouseChoiceCase(request, houseChoiceCase);
+        return houseChoiceCaseService.addHouseChoiceCase(houseChoiceCase);
     }
 }

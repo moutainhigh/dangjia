@@ -9,7 +9,6 @@ import com.dangjia.acg.service.basics.GoodsService;
 import com.dangjia.acg.service.basics.ProductService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -234,37 +233,5 @@ public class ProductController implements ProductAPI {
         PageInfo productList = productService.queryProductData(pageNum,pageSize, name, categoryId, productType, productId);
         return productList;
     }
-//
-//	/**
-//	 * 修改货品（全局更新）
-//	 * @param request
-//	 * @param id
-//	 * @param categoryId
-//	 * @param brandSeriesId
-//	 * @param brandId
-//	 * @param name
-//	 * @param unitId
-//	 * @param unitName
-//	 * @return
-//	 */
-//	@Override
-//	@ApiMethod
-//	public ServerResponse updateProductByProductId(HttpServletRequest request, String id, String categoryId, String brandSeriesId,
-//												   String brandId, String name, String unitId, String unitName) {
-//		return productService.updateProductByProductId(id,categoryId,brandSeriesId,brandId,name,unitId,unitName);
-//	}
-
-    /**
-     * 根据系列和属性查询切换货品
-     * @param request
-     * @param brandSeriesId
-     * @param attributeIdArr
-     * @return
-     *//*
-	@Override
-	@ApiMethod
-	public  ServerResponse getSwitchProduct(HttpServletRequest request,String brandSeriesId, String attributeIdArr){
-		return productService.getSwitchProduct(brandSeriesId,attributeIdArr);
-	}*/
 
 }

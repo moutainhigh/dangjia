@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.house;
 
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.model.PageDTO;
@@ -9,10 +8,12 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IWebsiteVisitMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.house.WebsiteVisit;
-import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +33,10 @@ import java.util.List;
 public class HouseDistributionService {
     @Autowired
     private IHouseDistributionMapper iHouseDistributionMapper;
-
     @Autowired
-    private RedisClient redisClient;
-
-
+    private IMemberMapper memberMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
     @Autowired
     private ICityMapper iCityMapper;
     @Autowired
@@ -64,9 +64,11 @@ public class HouseDistributionService {
             criteria.andEqualTo(HouseDistribution.STATE, houseDistribution.getState());
         }
         if (!CommonUtil.isEmpty(userToken)) {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (accessToken != null)
-                criteria.andEqualTo(HouseDistribution.PHONE, accessToken.getPhone());
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof Member) {
+                Member operator = (Member) object;
+                criteria.andEqualTo(HouseDistribution.PHONE, operator.getMobile());
+            }
         }
         if (!CommonUtil.isEmpty(startDate) && !CommonUtil.isEmpty(endDate)) {
             if (startDate.equals(endDate)) {
@@ -89,10 +91,10 @@ public class HouseDistributionService {
      * @return
      */
     public ServerResponse addHouseDistribution(HttpServletRequest request, HouseDistribution houseDistribution) {
-
         String userToken = request.getParameter(Constants.USER_TOKEY);
         String cityId = request.getParameter(Constants.CITY_ID);
-        if (CommonUtil.isEmpty(userToken)) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
             String modifyDate = request.getParameter(HouseDistribution.MODIFY_DATE);
             houseDistribution.setId(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
             houseDistribution.setHead("");
@@ -103,17 +105,17 @@ public class HouseDistributionService {
             houseDistribution.setType(2);
             if (houseDistribution.getModifyDate() == null && !CommonUtil.isEmpty(modifyDate)) {
                 houseDistribution.setModifyDate(DateUtil.toDate(modifyDate));
-
             }
         } else {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            Member user = (Member) object;
+            user = memberMapper.selectByPrimaryKey(user.getId());
             houseDistribution.setId(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
-            houseDistribution.setHead(accessToken.getMember().getHead());
-            houseDistribution.setNickname(accessToken.getMember().getNickName());
-            houseDistribution.setPhone(accessToken.getMember().getMobile());
+            houseDistribution.setHead(user.getHead());
+            houseDistribution.setNickname(user.getNickName());
+            houseDistribution.setPhone(user.getMobile());
             houseDistribution.setCity(iCityMapper.selectByPrimaryKey(cityId).getName());
             houseDistribution.setPrice(DjConstants.distribution.PRICE.doubleValue());
-            houseDistribution.setOpenid(accessToken.getMemberId());
+            houseDistribution.setOpenid(user.getId());
             houseDistribution.setSex("0");
             houseDistribution.setState(0);
             houseDistribution.setType(1);

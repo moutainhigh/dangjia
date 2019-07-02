@@ -1,10 +1,10 @@
 package com.dangjia.acg.service.repair;
 
 import com.alibaba.fastjson.JSON;
-import com.dangjia.acg.api.RedisClient;
+import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.api.data.GetForBudgetAPI;
 import com.dangjia.acg.api.data.TechnologyRecordAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -19,7 +19,6 @@ import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.house.Warehouse;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.service.actuary.ActuaryOperationService;
@@ -50,16 +49,15 @@ public class FillMaterielService {
     @Autowired
     private ActuaryOperationService actuaryOperationService;
     @Autowired
-    private RedisClient redisClient;
-    @Autowired
     private TechnologyRecordAPI technologyRecordAPI;
     @Autowired
     private ForMasterService forMasterService;
     @Autowired
     private GetForBudgetAPI getForBudgetAPI;
-
     @Autowired
     private IGoodsMapper goodsMapper;
+    @Autowired
+    private MemberAPI memberAPI;
 
     /**
      * 管家审核验收申请
@@ -131,16 +129,13 @@ public class FillMaterielService {
      */
     public ServerResponse askAndQuit(String userToken, String houseId, String categoryId, String name) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (accessToken == null) {
-                return ServerResponse.createbyUserTokenError();
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
-            Member worker = accessToken.getMember();
-            if (worker == null) {
-                return ServerResponse.createbyUserTokenError();
-            }
+            JSONObject job = (JSONObject)object;
+            Member worker = job.toJavaObject(Member.class);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-
             //精算的
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name, "0");
             //补材料的
@@ -217,14 +212,12 @@ public class FillMaterielService {
      */
     public ServerResponse repairLibraryMaterial(String userToken, String categoryId, String name, PageDTO pageDTO) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (accessToken == null) {
-                return ServerResponse.createbyUserTokenError();
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
-            Member worker = accessToken.getMember();
-            if (worker == null) {
-                return ServerResponse.createbyUserTokenError();
-            }
+            JSONObject job = (JSONObject)object;
+            Member worker = job.toJavaObject(Member.class);
             List<GoodsDTO> goodsDTOList = new ArrayList<>();
             String productType = "0";
             if (worker.getWorkerType() == 3) {//大管家
@@ -234,8 +227,7 @@ public class FillMaterielService {
             List<Product> productList = iProductMapper.queryProductData(name, categoryId, productType, null);
             PageInfo pageResult = new PageInfo(productList);
             if (productList.size() > 0) {
-                for (int i = 0; i < productList.size(); i++) {
-                    Product product = productList.get(i);
+                for (Product product : productList) {
                     GoodsDTO goodsDTO = actuaryOperationService.goodsDetail(product, null);
                     if (goodsDTO != null) {
                         goodsDTOList.add(goodsDTO);
@@ -255,14 +247,12 @@ public class FillMaterielService {
      */
     public ServerResponse workerTypeBudget(String userToken, String houseId, String categoryId, String name, PageDTO pageDTO) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (accessToken == null) {
-                return ServerResponse.createbyUserTokenError();
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
-            Member worker = accessToken.getMember();
-            if (worker == null) {
-                return ServerResponse.createbyUserTokenError();
-            }
+            JSONObject job = (JSONObject)object;
+            Member worker = job.toJavaObject(Member.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name, "0");

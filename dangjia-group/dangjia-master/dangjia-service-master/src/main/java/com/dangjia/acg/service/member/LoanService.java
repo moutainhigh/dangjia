@@ -1,19 +1,16 @@
 package com.dangjia.acg.service.member;
 
-import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.member.LoanDTO;
-import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.member.LoanFlowMapper;
 import com.dangjia.acg.mapper.member.LoanMapper;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Loan;
 import com.dangjia.acg.modle.member.LoanFlow;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +33,7 @@ public class LoanService {
     @Autowired
     private LoanFlowMapper loanFlowMapper;
     @Autowired
-    private RedisClient redisClient;
-    @Autowired
-    private IMemberMapper memberMapper;
+    private CraftsmanConstructionService constructionService;
 
     /**
      * 添加贷款需求
@@ -49,14 +44,11 @@ public class LoanService {
      * @return ServerResponse
      */
     public ServerResponse addLoan(String userToken, String name, String bankName) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createbyUserTokenError();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
-        Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
-        if (user == null) {
-            return ServerResponse.createByErrorMessage("用户不存在");
-        }
+        Member user = (Member) object;
         if (CommonUtil.isEmpty(name) || CommonUtil.isEmpty(bankName)) {
             return ServerResponse.createByErrorMessage("传入参数错误");
         }

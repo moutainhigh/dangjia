@@ -27,6 +27,11 @@ public class OptionalLabelServices {
      */
     public ServerResponse addOptionalLabel(OptionalLabel optionalLabel){
         try {
+            Example example=new Example(OptionalLabel.class);
+            example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME,optionalLabel.getLabelName());
+            if(optionalLabelMapper.selectByExample(example).size()>0) {
+                return ServerResponse.createByErrorMessage("标签已存在");
+            }
             optionalLabelMapper.insert(optionalLabel);
             return ServerResponse.createBySuccessMessage("添加成功");
         } catch (Exception e) {

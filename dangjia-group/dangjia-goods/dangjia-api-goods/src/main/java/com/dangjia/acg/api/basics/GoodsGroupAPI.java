@@ -88,17 +88,6 @@ public interface GoodsGroupAPI {
                                 @RequestParam("listOfProductId") String listOfProductId);
 
     /*
-     * 修改货品关联组关系
-     */
-    @PostMapping("/basics/goodsGroup/updateGroupLink")
-    @ApiOperation(value = "修改货品关联组关系", notes = "修改货品关联组关系")
-    ServerResponse updateGroupLink(@RequestParam("request") HttpServletRequest request,
-                                   @RequestParam("listOfProductId") String listOfProductId,
-                                   @RequestParam("goodsGroupId") String goodsGroupId,
-                                   @RequestParam("state") int state,
-                                   @RequestParam("name") String name);
-
-    /*
      * 根据关联组id查询货品关联关系
      */
     @PostMapping("/basics/goodsGroup/getGoodsGroupById")

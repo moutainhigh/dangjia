@@ -1,7 +1,9 @@
 package com.dangjia.acg.modle.attribute;
 
+import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
@@ -32,4 +34,9 @@ public class GoodsCategory extends BaseEntity {
 
 	@Column(name = "image")
     private String image;//图片
+
+    @Column(name = "sort")
+    @Desc(value = "顺序")
+    @ApiModelProperty("顺序")
+    private Integer sort;
 }

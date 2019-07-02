@@ -47,12 +47,6 @@ public interface TechnologyAPI {
                                              @RequestParam("name") String name,
                                              @RequestParam("materialOrWorker") Integer materialOrWorker);
 
-    @PostMapping("/basics/technology/insertWokerTechnology")
-    @ApiOperation(value = "新增人工商品关联工艺", notes = "新增人工商品关联工艺")
-    ServerResponse insertWokerTechnology(@RequestParam("request") HttpServletRequest request,
-                                         @RequestParam("workerGoodsId") String workerGoodsId,
-                                         @RequestParam("tIdArr") String tIdArr);
-
     @PostMapping("/basics/technology/queryTechnologyByWgId")
     @ApiOperation(value = "根据商品id查询人工商品关联工艺实体", notes = "根据商品id查询人工商品关联工艺实体")
     ServerResponse queryTechnologyByWgId(@RequestParam("request") HttpServletRequest request,

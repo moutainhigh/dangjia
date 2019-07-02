@@ -71,18 +71,6 @@ public interface SupplierProductAPI {
                                   @RequestParam("state") Integer state);
 
     /**
-     * @throws
-     * @Title: querySupplierList
-     * @Description:查询所有供应商
-     * @param: @return
-     * @return: JsonResult
-     */
-    @PostMapping("/sup/supplierProduct/querySupplierList")
-    @ApiOperation(value = "查询所有供应商", notes = "查询所有供应商")
-    ServerResponse<PageInfo> querySupplierList(@RequestParam("request") HttpServletRequest request,
-                                               @RequestParam("pageDTO") PageDTO pageDTO);
-
-    /**
      * @param request
      * @param pageDTO
      * @param name

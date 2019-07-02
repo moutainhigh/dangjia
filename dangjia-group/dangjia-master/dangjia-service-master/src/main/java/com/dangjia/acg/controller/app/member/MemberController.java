@@ -4,6 +4,7 @@ import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +16,8 @@ public class MemberController implements MemberAPI {
 
     @Autowired
     private MemberService memberService;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     @Override
     @ApiMethod
@@ -97,6 +100,12 @@ public class MemberController implements MemberAPI {
     @ApiMethod
     public ServerResponse getMembers(String userToken, String memberId, String phone) {
         return memberService.getMembers(userToken, memberId, phone);
+    }
+
+    @Override
+    @ApiMethod
+    public Object getMember(String userToken) {
+        return constructionService.getMember(userToken);
     }
 }
 

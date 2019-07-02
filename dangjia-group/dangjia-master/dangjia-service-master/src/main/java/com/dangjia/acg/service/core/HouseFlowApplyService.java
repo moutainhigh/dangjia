@@ -91,7 +91,6 @@ public class HouseFlowApplyService {
             applyTypeMap.put(DjConstants.ApplyType.YOUXIAO_XUNCHA, "巡查");
             applyTypeMap.put(DjConstants.ApplyType.WUREN_XUNCHA, "巡查");
             applyTypeMap.put(DjConstants.ApplyType.ZUIJIA_XUNCHA, "巡查");
-
             List<HouseFlowApplyDTO> houseFlowApplyDTOList = new ArrayList<>();
             HouseWorker gjhouseWorker = houseWorkerMapper.getHwByHidAndWtype(houseId, 3);
             Member worker2 = memberMapper.selectByPrimaryKey(gjhouseWorker.getWorkerId());//根据工匠id查询工匠信息详情

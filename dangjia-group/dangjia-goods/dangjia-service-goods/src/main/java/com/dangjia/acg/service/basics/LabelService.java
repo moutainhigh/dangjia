@@ -121,12 +121,10 @@ public class LabelService {
                 if (label == null)
                     return ServerResponse.createByErrorMessage("标签不存在");
             }
-
             for (int i = 0; i < jsonArr.size(); i++) {
                 JSONObject obj = jsonArr.getJSONObject(i);
                 String productId = obj.getString("productId");//货品id
                 String labelId = obj.getString("labelId");//标签id
-
                 Product product = iProductMapper.selectByPrimaryKey(productId);
                 product.setModifyDate(new Date());
                 product.setLabelId(labelId);

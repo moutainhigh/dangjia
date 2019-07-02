@@ -43,7 +43,6 @@ import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.matter.RenovationManualMember;
 import com.dangjia.acg.modle.matter.RenovationStage;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.City;
@@ -156,10 +155,14 @@ public class HouseService {
      * 切换房产
      */
     public ServerResponse setSelectHouse(String userToken, String cityId, String houseId) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
         Example example = new Example(House.class);
         example.createCriteria()
-                .andEqualTo(House.MEMBER_ID, accessToken.getMember().getId())
+                .andEqualTo(House.MEMBER_ID, member.getId())
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
         for (House house : houseList) {
@@ -178,10 +181,14 @@ public class HouseService {
      * TODO 1.4.0后删除此接口
      */
     public ServerResponse getHouseList(String userToken, String cityId) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
         Example example = new Example(House.class);
         example.createCriteria()
-                .andEqualTo(House.MEMBER_ID, accessToken.getMember().getId())
+                .andEqualTo(House.MEMBER_ID, member.getId())
                 .andNotEqualTo(House.VISIT_STATE, 0).andNotEqualTo(House.VISIT_STATE, 2)
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
@@ -299,10 +306,14 @@ public class HouseService {
      * 我的房子
      */
     public ServerResponse queryMyHouse(String userToken) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
         Example example = new Example(House.class);
         example.createCriteria()
-                .andEqualTo(House.MEMBER_ID, accessToken.getMember().getId())
+                .andEqualTo(House.MEMBER_ID, member.getId())
                 .andNotEqualTo(House.VISIT_STATE, 0).andNotEqualTo(House.VISIT_STATE, 2)
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
@@ -510,8 +521,6 @@ public class HouseService {
      */
     public ServerResponse setHouseInfo(House house) {
         try {
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-                    .getRequest();
             House srcHouse = iHouseMapper.selectByPrimaryKey(house.getId());
             if (srcHouse == null)
                 return ServerResponse.createByErrorMessage("没有该房子");
@@ -530,9 +539,9 @@ public class HouseService {
                     houseChoiceCase.setTitle(srcHouse.getNoNumberHouseName());
                     houseChoiceCase.setLabel(srcHouse.getStyle());
                     houseChoiceCase.setSource("房源来自当家装修精选推荐");
-                    houseChoiceCaseService.addHouseChoiceCase(request, houseChoiceCase);
+                    houseChoiceCaseService.addHouseChoiceCase(houseChoiceCase);
                 } else {
-                    houseChoiceCaseService.delHouseChoiceCase(request, house.getId());
+                    houseChoiceCaseService.delHouseChoiceCase(house.getId());
                 }
             }
             if (house.getVisitState() != -1) {
@@ -725,14 +734,14 @@ public class HouseService {
     }
 
     public ServerResponse revokeHouse(String userToken) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        String memberId = accessToken.getMemberId();
-        if (StringUtils.isEmpty(memberId)) {
-            return ServerResponse.createByErrorMessage("用户id不存在");
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
+        Member member = (Member) object;
         Example example = new Example(House.class);
         example.createCriteria()
-                .andEqualTo(House.MEMBER_ID, memberId)
+                .andEqualTo(House.MEMBER_ID, member.getId())
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
         if (houseList.size() > 0) {
@@ -752,16 +761,15 @@ public class HouseService {
      * APP开始装修
      */
     public ServerResponse setStartHouse(String userToken, String cityId, int houseType, int drawings) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        String memberId = accessToken.getMemberId();
-        if (StringUtils.isEmpty(memberId)) {
-            return ServerResponse.createByErrorMessage("用户id不存在");
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
+        Member member = (Member) object;
         Example example = new Example(House.class);
         example.createCriteria()
-                .andEqualTo(House.MEMBER_ID, memberId)
+                .andEqualTo(House.MEMBER_ID, member.getId())
                 .andEqualTo(House.DATA_STATUS, 0);
-
         //获取结算比例对象
         Example workDepositExample = new Example(WorkDeposit.class);
         workDepositExample.orderBy(WorkDeposit.CREATE_DATE).desc();
@@ -780,7 +788,7 @@ public class HouseService {
         }
         City city = iCityMapper.selectByPrimaryKey(cityId);
         House house = new House(true);//新增房产信息
-        house.setMemberId(memberId);//用户id
+        house.setMemberId(member.getId());//用户id
         house.setCityName(city.getName());//城市名
         house.setCityId(cityId);
         house.setAgain(again);//第几套房产
@@ -975,7 +983,11 @@ public class HouseService {
                                            Double minSquare, Double maxSquare, Integer houseType, PageDTO pageDTO) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            Object object = constructionService.getMember(userToken);
+            Member member = null;
+            if (object instanceof Member) {
+                member = (Member) object;
+            }
             boolean isReferenceBudget = false;
             if (villageId != null && villageId.contains("#")) {
                 isReferenceBudget = true;
@@ -987,7 +999,7 @@ public class HouseService {
             List<ShareDTO> srlist = new ArrayList<>();
             if (houseList.size() > 0) {//根据条件查询所选小区总价最少的房子
                 for (House house : houseList) {
-                    srlist.add(convertHouse(house, accessToken));
+                    srlist.add(convertHouse(house, member));
                 }
             } else {
                 if (isReferenceBudget) {
@@ -995,7 +1007,7 @@ public class HouseService {
                     pageResult = new PageInfo(houseList);
                     if (houseList.size() > 0) {//根据条件查询所选小区总价最少的房子
                         for (House house : houseList) {
-                            srlist.add(convertHouse(house, accessToken));
+                            srlist.add(convertHouse(house, member));
                         }
                     } else {
                         return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
@@ -1012,7 +1024,7 @@ public class HouseService {
         }
     }
 
-    private ShareDTO convertHouse(House house, AccessToken accessToken) {
+    private ShareDTO convertHouse(House house, Member member) {
         ModelingLayout ml = modelingLayoutMapper.selectByPrimaryKey(house.getModelingLayoutId());
         ShareDTO shareDTO = new ShareDTO();
         shareDTO.setType("1");
@@ -1039,7 +1051,7 @@ public class HouseService {
         biaoqians.add((house.getBuildSquare() == null ? "0" : house.getBuildSquare()) + "m²");
         shareDTO.setBiaoqian(biaoqians);//亮点标签
         BigDecimal money = house.getMoney();
-        shareDTO.setPrice("***" + (accessToken != null && money != null && money.toString().length() > 2 ?
+        shareDTO.setPrice("***" + (member != null && money != null && money.toString().length() > 2 ?
                 money.toString().substring(money.toString().length() - 2) : "00"));//精算总价
         shareDTO.setShowHouse(house.getShowHouse());
         shareDTO.setHouseId(house.getId());
@@ -1049,7 +1061,7 @@ public class HouseService {
         shareDTO.setLayoutId(house.getModelingLayoutId());//户型id
         shareDTO.setLayoutleft(ml == null ? "" : ml.getName());//户型名称
         String jobLocationDetail = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                String.format(DjConstants.YZPageAddress.JOBLOCATIONDETAIL, accessToken != null ? accessToken.getUserToken() : "", house.getCityId(), "施工现场") + "&houseId=" + house.getId();
+                String.format(DjConstants.YZPageAddress.JOBLOCATIONDETAIL, "", house.getCityId(), "施工现场") + "&houseId=" + house.getId();
         shareDTO.setUrl(jobLocationDetail);
         shareDTO.setImageNum(0 + "张图片");
         shareDTO.setImage("");//户型图片
@@ -1861,7 +1873,7 @@ public class HouseService {
             if (advanceTime < 0) {
                 advanceTime = 0;
             }
-            dataMap.put("advanceTime",advanceTime);//提前完工时间/天
+            dataMap.put("advanceTime", advanceTime);//提前完工时间/天
             titles = new String[]{workerType.getName() + "抢单", "支付" + workerType.getName() + "费用", "施工交底", "施工中", "验收环节"};
             if (houseFlow.getWorkType() == 2) {
                 rank = 0;
