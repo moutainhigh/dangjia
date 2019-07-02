@@ -16,4 +16,6 @@ public interface IHouseFlowApplyImageMapper extends Mapper<HouseFlowApplyImage> 
     List<HouseFlowApplyImage> getHouseFlowApplyImageList(@Param("workerTypeId") String workerTypeId,
                                                          @Param("workerType") String workerType, @Param("houseId") String houseId,
                                                          @Param("houseFlowId") String houseFlowId, @Param("imageSign") String imageSign);
+
+    String getHouseFlowApplyImage(@Param("houseId") String houseId);
 }

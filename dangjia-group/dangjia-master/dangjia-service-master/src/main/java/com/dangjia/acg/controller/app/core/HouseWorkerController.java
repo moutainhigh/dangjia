@@ -87,21 +87,12 @@ public class HouseWorkerController implements HouseWorkerAPI {
 
     /**
      * 提交审核、停工
-     *
-     * @param userToken
-     * @param applyType
-     * @param houseFlowId
-     * @param suspendDay
-     * @param applyDec
-     * @param imageList
-     * @param houseFlowId2
-     * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId, Integer suspendDay,
+    public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId,
                                             String applyDec, String imageList, String houseFlowId2) {
-        return houseWorkerService.setHouseFlowApply(userToken, applyType, houseFlowId, suspendDay, applyDec, imageList, houseFlowId2);
+        return houseWorkerService.setHouseFlowApply(userToken, applyType, houseFlowId, applyDec, imageList, houseFlowId2);
     }
 
     /**

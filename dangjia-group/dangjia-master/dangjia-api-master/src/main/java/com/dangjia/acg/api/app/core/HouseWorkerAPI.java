@@ -106,7 +106,6 @@ public interface HouseWorkerAPI {
     ServerResponse setHouseFlowApply(@RequestParam("userToken") String userToken,
                                      @RequestParam("applyType") Integer applyType,
                                      @RequestParam("houseFlowId") String houseFlowId,
-                                     @RequestParam("suspendDay") Integer suspendDay,
                                      @RequestParam("applyDec") String applyDec,
                                      @RequestParam("imageList") String imageList,
                                      @RequestParam("houseFlowId2") String houseFlowId2);

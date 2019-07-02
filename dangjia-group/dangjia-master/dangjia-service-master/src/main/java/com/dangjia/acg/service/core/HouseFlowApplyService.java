@@ -145,29 +145,18 @@ public class HouseFlowApplyService {
             hfa.setPayState(1);
             hfa.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
-
             //工匠订单
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());
-
-
             /*
             节点审核通过
              */
             technologyRecordMapper.passTecRecord(hwo.getHouseId(), hwo.getWorkerTypeId());
-
             if (hfa.getApplyType() == 2) {//整体完工
-                /**验证未处理补人工订单*/
-//                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(hfa.getHouseId(),hfa.getWorkerTypeId());
-//                if (changeOrderList.size() > 0){
-//                    return ServerResponse.createByErrorMessage("该工种有未处理人工变更单,通知管家处理");
-//                }
-
                 //修改进程
                 HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(), hwo.getWorkerTypeId());
                 if (houseFlow.getWorkSteta() == 2) {
                     return ServerResponse.createBySuccessMessage("操作成功");
                 }
-
                 houseFlow.setWorkSteta(2);
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                 //处理工人拿钱
@@ -185,31 +174,7 @@ public class HouseFlowApplyService {
                     wtso.setExpirationDate(cal.getTime()); //设置到期时间
                     workerTypeSafeOrderMapper.updateByPrimaryKeySelective(wtso);
                 }
-
-//                if(hfa.getWorkerType() == 4){//是拆除的整体完工通知下个工种开工
-//                    // 查询是否有阶段完工或整体完工的记录，存在则不开放下一工种
-//                    Example example=new Example(HouseFlow.class);
-//                    example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,houseFlow.getHouseId()).andCondition(" work_steta not in (0,1,2) and worker_type >3 ");
-//                    example.orderBy(HouseFlow.SORT).asc();
-//                    int num=houseFlowMapper.selectCountByExample(example);
-//                    if(num==0) {
-//                        //查下工种
-//                        HouseFlow nextHouseFlow = houseFlowMapper.getNextHouseFlow(houseFlow.getHouseId());
-//                        if (nextHouseFlow!=null) {//下个工种还没有开工，让它变成被抢壮态
-//                            nextHouseFlow.setWorkType(2);
-//                            nextHouseFlow.setReleaseTime(new Date());//发布时间
-//                            houseFlowMapper.updateByPrimaryKeySelective(nextHouseFlow);
-//
-//                        }
-//                    }
-//                }
-
             } else if (hfa.getApplyType() == 1) {//阶段完工
-//                List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(hfa.getHouseId(),hfa.getWorkerTypeId());
-//                if (changeOrderList.size() > 0){
-//                    return ServerResponse.createByErrorMessage("该工种有未处理人工变更单,通知管家处理");
-//                }
-
                 //修改进程
                 HouseFlow hf = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(), hwo.getWorkerTypeId());
                 if (hf.getWorkSteta() == 1) {
@@ -217,33 +182,18 @@ public class HouseFlowApplyService {
                 }
                 hf.setWorkSteta(1);
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
-
                 //处理押金
                 deposit(hwo, hfa);
                 //处理工人拿钱
                 workerMoney(hwo, hfa);
                 //大管家拿钱
                 stewardMoney(hfa);
-
-                // 查询是否有阶段完工或整体完工的记录，存在则不开放下一工种
-//                Example example=new Example(HouseFlow.class);
-//                example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,hf.getHouseId()).andCondition(" work_steta NOT IN (0,1,2) and worker_type >3 ");
-//                example.orderBy(HouseFlow.SORT).asc();
-//                int num=houseFlowMapper.selectCountByExample(example);
-//                if(num==0) {
-//                    //查下工种
-//                    HouseFlow houseFlowList = houseFlowMapper.getNextHouseFlow(hf.getHouseId());
-//                    if (houseFlowList!=null) {
-//                        houseFlowList.setWorkType(2);
-//                        houseFlowList.setReleaseTime(new Date());//发布时间
-//                        houseFlowMapper.updateByPrimaryKeySelective(houseFlowList);
-//                    }
-//                }
                 Map<String, String> temp_para = new HashMap();
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
                 House house = houseMapper.selectByPrimaryKey(hfa.getHouseId());
                 temp_para.put("house_name", house.getHouseName());
                 temp_para.put("worker_name", workerType.getName() + "阶段完工");
+                //给售中陶娇发短信
                 JsmsUtil.sendSMS("15675101794", "164425", temp_para);
             } else if (hfa.getApplyType() == 0) { //每日完工,处理钱
                 //算每日积分
