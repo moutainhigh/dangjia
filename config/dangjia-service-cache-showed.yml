@@ -1,7 +1,7 @@
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://139.159.192.14:3306/dangjia_master_test?useUnicode=true
+    url: jdbc:mysql://139.159.192.14:3306/dangjia_master_showed?useUnicode=true
     username: qiyuxiang
     password: Fengjiang123!
     driverClassName: com.mysql.jdbc.Driver
@@ -42,12 +42,12 @@ spring:
 #    password: guest
 #    port: 5672
 server:
-  port: 8004
+  port: 8104
 
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.168.0.83:8888/eureka/    # 指定注册中心的地址
+      defaultZone: http://192.168.0.83:8889/eureka/    # 指定注册中心的地址
   instance:
     preferIpAddress: true
 hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 20000

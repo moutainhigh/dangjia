@@ -3,11 +3,11 @@ spring:
     sampler:
       percentage: 1.0
 server:
-  port: 8001
+  port: 8101
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.168.0.83:8888/eureka/
+      defaultZone: http://192.168.0.83:8889/eureka/
 zuul:
   maxTotalConnections: 20000 #配置路由连接数默认200
   ignored-services: dangjia-service-**                        # 需要忽视的服务(配置后将不会被路由)
