@@ -22,12 +22,11 @@
 
     <select id="getJobAndRoles" resultMap="getJobRoles">
 		select
-		u.id, u.Jobname,
-		u.mobile, u.email, u.insert_uid ,u.create_date ,
-		u.modify_date , u.is_del ,u.is_job,u.is_receive,
-		ur.Job_id ,ur.role_id
+		u.id, u.name,
+		u.department_id, u.operate_id, u.code ,u.create_date ,
+		u.modify_date , u.info ,u.city_name,u.city_id,u.job_id,u.role_id
 		from dj_system_job u
-		LEFT JOIN dj_job_role ur ON
+		LEFT JOIN dj_system_job_role ur ON
 		u.id=ur.Job_id
 		WHERE u.id=#{id}
 	</select>
