@@ -137,12 +137,12 @@ public class WorkerService {
      * @return
      */
     public ServerResponse getWithdrawDeposit(String userToken, PageDTO pageDTO) {
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
         Member worker = (Member) object;
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo("workerId", worker.getId());
         List<WithdrawDeposit> wdList = withdrawDepositMapper.selectByExample(example);
@@ -237,12 +237,12 @@ public class WorkerService {
      * @return
      */
     public ServerResponse getHouseWorkerDetail(String userToken, PageDTO pageDTO, String houseId) {
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
         Member worker = (Member) object;
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(WorkerDetail.class);
         example.createCriteria()
                 .andEqualTo(WorkerDetail.WORKER_ID, worker.getId())

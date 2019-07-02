@@ -435,7 +435,7 @@ public class HouseWorkerService {
 
     /**
      * 提交审核、停工
-     * applyType   0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
+     * applyType   0每日完工申请，1阶段完工申请，2整体完工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
      */
     public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId, Integer suspendDay,
                                             String applyDec, String imageList, String houseFlowId2) {
@@ -445,8 +445,10 @@ public class HouseWorkerService {
         }
         Member worker = (Member) object;
         Example example = new Example(HouseFlowApply.class);
-        example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                .andCondition(" member_check in (1,3)").andEqualTo(HouseFlowApply.PAY_STATE, 1);
+        example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId)
+                .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
+                .andCondition(" member_check in (1,3)")
+                .andEqualTo(HouseFlowApply.PAY_STATE, 1);
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
         if (houseFlowApplyList.size() > 0) {
             if (applyType == 4) {
@@ -462,9 +464,7 @@ public class HouseWorkerService {
                     return ServerResponse.createByErrorMessage("工序(" + workerType.getName() + ")处于停工期间!");
                 }
             }
-
         }
-
         //暂停施工
         if (applyType != 4) {//每日开工不需要验证
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
@@ -475,7 +475,6 @@ public class HouseWorkerService {
                     return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已暂停施工,请勿提交申请！");
                 }
                 if (house.getPause() != null) {
-
                     if (house.getPause() == 1) {
                         return ServerResponse.createByErrorMessage("该房子已暂停施工,请勿提交申请！");
                     }
@@ -484,7 +483,7 @@ public class HouseWorkerService {
         }
         if (applyType == 5 || applyType == 6 || applyType == 7) {   //大管家巡查放工序id
             HouseFlow hf2 = houseFlowMapper.selectByPrimaryKey(houseFlowId2);
-            return this.setHouseFlowApply(applyType, houseFlowId2, hf2 == null ? "" : hf2.getWorkerId(), suspendDay, applyDec,
+            return this.setHouseFlowApply(applyType, hf2 == null ? houseFlowId : houseFlowId2, hf2 == null ? "" : hf2.getWorkerId(), suspendDay, applyDec,
                     imageList);
         } else {
             return this.setHouseFlowApply(applyType, houseFlowId, worker.getId(), suspendDay, applyDec,
@@ -498,8 +497,10 @@ public class HouseWorkerService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setHouseFlowApply(Integer applyType, String houseFlowId, String workerId, Integer suspendDay, String applyDec,
                                             String imageList) {
-
         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);//工序
+        if (houseFlow == null) {
+            return ServerResponse.createByErrorMessage("该工序不存在");
+        }
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
         try {
             if (applyType == 3) {
@@ -558,7 +559,6 @@ public class HouseWorkerService {
             if (applyType != 6 && applyType != 7 && houseFlowApplyList.size() > 0) {
                 return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
             }
-
             /*待审核申请*/
             if (applyType < 4) {
                 List<HouseFlowApply> hfaList = houseFlowApplyMapper.checkPendingApply(houseFlowId, workerId);
@@ -566,12 +566,9 @@ public class HouseWorkerService {
                     return ServerResponse.createByErrorMessage("您有待审核的申请,请联系管家业主审核后再提交");
                 }
             }
-
             Member worker = memberMapper.selectByPrimaryKey(workerId);//查询对应的工人
             WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
-
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
-
             HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
             hfa.setHouseFlowId(houseFlowId);//工序id
             hfa.setWorkerId(houseFlow.getWorkerId());//工人id
@@ -588,7 +585,6 @@ public class HouseWorkerService {
             hfa.setMemberCheck(0);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
             hfa.setSupervisorCheck(0);//大管家审核状态0未审核，1审核通过，2审核不通过
             hfa.setPayState(0);//是否付款
-
             //********************发申请，计算可得钱和积分等*****************//
             BigDecimal workPrice = new BigDecimal(0);
             BigDecimal haveMoney = new BigDecimal(0);
@@ -597,7 +593,6 @@ public class HouseWorkerService {
                 haveMoney = hwo.getHaveMoney();
             }
             BigDecimal limitpay = workPrice.multiply(workDeposit.getLimitPay());//每日完工得到钱的上限
-
             //***每日完工申请***//
             if (applyType == 0) {//每日完工申请
                 if (workDeposit.getEverydayPay().compareTo(limitpay.subtract(haveMoney)) <= 0) {//每日上限减已获 大于等于 100
@@ -609,7 +604,6 @@ public class HouseWorkerService {
                 hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经完工了");//描述
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
-
                 //***阶段完工申请***//
             } else if (applyType == 1) {
                 //算阶段完工所有的钱
@@ -645,58 +639,17 @@ public class HouseWorkerService {
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.DAY_OF_YEAR, 3);//管家倒计时
                 hfa.setStartDate(calendar.getTime());
-
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
                 configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "整体完工申请",
                         String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED, house.getHouseName(), workerType.getName()), "5");
-                //***停工申请***//*
-            } else if (applyType == 3) {
-                Date today = new Date();
-                Date end = new Date(today.getTime() + 24 * 60 * 60 * 1000 * suspendDay);
-                hfa.setStartDate(today);
-                hfa.setEndDate(end);
-                hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
-                hfa.setPayState(1);//标记为新停工申请
-                houseFlowApplyMapper.insert(hfa);
-                houseService.insertConstructionRecord(hfa);
-                houseFlow.setPause(1);//0:正常；1暂停；
-                houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
-                //计划顺延
-                houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), suspendDay, null);
-                //大管家停工，不扣除工人积分
-//                if(worker.getWorkerType()>3) {
-//                    //工匠申请停工不用审核，申请停工超过2天的，第3天起每天扣除1积分
-//                    int score = suspendDay - 2;
-//                    if (score > 0) {
-//                        evaluateService.updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(score), "申请停工超过2天，积分扣除");
-//                    }
-//                }
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠申请停工",
-                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "5");
-                return ServerResponse.createBySuccessMessage("工匠申请停工（" + workerType.getName() + "）操作成功");
-
             } else if (applyType == 4) {
-                suspendDay = 0;
-                //申请类型0每日完工申请，4：每日开工
-                //五月二周任务取消12点限制
-//                if (active != null && active.equals("pre")) {
-//                    String s2 = DateUtil.getDateString2(new Date().getTime()) + " 12:00:00";//当天12点
-//                    Date lateDate = DateUtil.toDate(s2);
-//                    Date newDate2 = new Date();//当前时间
-//                    long downTime = newDate2.getTime() - lateDate.getTime();//对比12点
-//                    if (downTime > 0) {
-//                        return ServerResponse.createByErrorMessage("请在当天12点之前开工,您已超过开工时间！");
-//                    }
-//                }
-
                 hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经开工了");//描述
                 hfa.setMemberCheck(1);//默认业主审核状态通过
                 hfa.setSupervisorCheck(1);//默认大管家审核状态通过
                 houseFlow.setPause(0);//0:正常；1暂停；
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
-
                 //已经停工的工序，若工匠提前复工，则复工日期以及之后的停工全部取消，
                 // 原来被停工推后了的计划完工日期往前推，推的天数等于被取消的停工天数
                 Date start = new Date();
@@ -720,7 +673,6 @@ public class HouseWorkerService {
                     //计划提前
                     houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), null, suspendDay);
                 }
-
                 suspendDay = 0;
                 //若未进场的工序比计划开工日期提早开工，则计划开工日期修改为实际开工日期，（施工天数不变）完工日期随之提早
                 if (houseFlow.getStartDate() != null && houseFlow.getStartDate().getTime() > start.getTime()) {
@@ -754,9 +706,7 @@ public class HouseWorkerService {
                     supervisorHWO.setHaveMoney(supervisorHWO.getHaveMoney().add(supervisorHF.getPatrolMoney()));
                     //累计大管家订单巡查得到的钱
                     supervisorHWO.setCheckMoney(supervisorHWO.getCheckMoney().add(supervisorHF.getPatrolMoney()));
-
                     houseWorkerOrderMapper.updateByPrimaryKeySelective(supervisorHWO);
-
                     //申请中记录大管家钱
                     hfa.setSupervisorMoney(supervisorHF.getPatrolMoney());//本次大管家得到的钱
                     //大管家剩余
@@ -774,8 +724,6 @@ public class HouseWorkerService {
                     supervisor.setHaveMoney(haveMoneys);
                     supervisor.setSurplusMoney(surplusMoneys);
                     memberMapper.updateByPrimaryKeySelective(supervisor);
-
-
                     //记录到管家流水
                     WorkerDetail workerDetail = new WorkerDetail();
                     workerDetail.setName(workerType.getName() + "巡查收入");
@@ -818,7 +766,6 @@ public class HouseWorkerService {
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(),
                         "0", "大管家追加巡查完成", String.format(DjConstants.PushMessage.DAGUANGJIAXUNCHAWANGCHENG,
                                 house.getHouseName()), "5");
-
             }
             //保存巡查图片,验收节点图片等信息
             if (StringUtil.isNotEmpty(imageList)) {
@@ -827,7 +774,6 @@ public class HouseWorkerService {
                     JSONObject imageObj = imageObjArr.getJSONObject(i);
                     int imageType = Integer.parseInt(imageObj.getString("imageType"));
                     String imageUrl = imageObj.getString("imageUrl"); //图片,拼接
-
                     if (imageType == 3) {//节点图
                         String imageTypeId = imageObj.getString("imageTypeId");
                         String imageTypeName = imageObj.getString("imageTypeName");
@@ -873,9 +819,6 @@ public class HouseWorkerService {
                     break;
                 case 2:
                     msg = "整体完工申请成功";
-                    break;
-                case 3:
-                    msg = "停工申请成功";
                     break;
                 case 4:
                     msg = "工作开始啦！";

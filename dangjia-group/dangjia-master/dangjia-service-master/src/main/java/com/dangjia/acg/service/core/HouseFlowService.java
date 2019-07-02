@@ -146,6 +146,9 @@ public class HouseFlowService {
                     }
                     House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
                     if (house == null) continue;
+                    if (house.getVisitState() == 2 || house.getVisitState() == 3 || house.getVisitState() == 4) {
+                        continue;
+                    }
                     AllgrabBean allgrabBean = new AllgrabBean();
                     example = new Example(HouseFlowCountDownTime.class);
                     example.createCriteria().andEqualTo(HouseFlowCountDownTime.WORKER_ID, member.getId()).andEqualTo(HouseFlowCountDownTime.HOUSE_FLOW_ID, houseFlow.getId());
@@ -336,7 +339,12 @@ public class HouseFlowService {
             if (house.getVisitState() == 2) {
                 return ServerResponse.createByErrorMessage("该房已休眠");
             }
-
+            if (house.getVisitState() == 3) {
+                return ServerResponse.createByErrorMessage("该房已停工");
+            }
+            if (house.getVisitState() == 4) {
+                return ServerResponse.createByErrorMessage("该房已提前结束");
+            }
             //通过查看奖罚限制抢单时间限制抢单
             for (RewardPunishRecord record : recordList) {
                 example = new Example(RewardPunishCondition.class);

@@ -269,6 +269,7 @@ public class IndexPageService {
         }
         for (House house : houses) {
             house.setImage(getHouseImage(house.getId()));
+            house.setHouseId(house.getId());
         }
         return ServerResponse.createBySuccess("查询成功", houses);
     }
