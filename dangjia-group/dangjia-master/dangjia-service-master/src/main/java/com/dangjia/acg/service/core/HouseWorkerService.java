@@ -484,7 +484,7 @@ public class HouseWorkerService {
         }
         if (applyType == 5 || applyType == 6 || applyType == 7) {   //大管家巡查放工序id
             HouseFlow hf2 = houseFlowMapper.selectByPrimaryKey(houseFlowId2);
-            return this.setHouseFlowApply(applyType, houseFlowId2, hf2 == null ? "" : hf2.getWorkerId(), suspendDay, applyDec,
+            return this.setHouseFlowApply(applyType, hf2 == null ? houseFlowId : houseFlowId2, hf2 == null ? "" : hf2.getWorkerId(), suspendDay, applyDec,
                     imageList);
         } else {
             return this.setHouseFlowApply(applyType, houseFlowId, worker.getId(), suspendDay, applyDec,
