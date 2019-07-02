@@ -14,6 +14,7 @@ import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.label.OptionalLabelDTO;
 import com.dangjia.acg.dto.other.HouseDetailsDTO;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderMapper;
@@ -64,6 +65,8 @@ public class IndexPageService {
     private IModelingVillageMapper modelingVillageMapper;
     @Autowired
     private DesignDataService designDataService;
+    @Autowired
+    private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
 
     /**
      * 根据城市，小区，最小最大面积查询房子
@@ -257,6 +260,7 @@ public class IndexPageService {
      * @return
      */
     public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude,Integer limit) {
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         if (!CommonUtil.isEmpty(latitude)) {
             latitude = "28.228259";
         }
@@ -268,7 +272,7 @@ public class IndexPageService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         for (House house : houses) {
-            house.setImage(getHouseImage(house.getId()));
+            house.setImage(address+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId()));
             house.setHouseId(house.getId());
         }
         return ServerResponse.createBySuccess("查询成功", houses);

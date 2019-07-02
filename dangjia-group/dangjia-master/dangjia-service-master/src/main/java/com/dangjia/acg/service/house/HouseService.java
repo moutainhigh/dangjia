@@ -146,7 +146,6 @@ public class HouseService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private IHouseChoiceCaseMapper iHouseChoiceCaseMapper;
-
     @Autowired
     private IWorkDepositMapper workDepositMapper;
     protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
@@ -1060,11 +1059,11 @@ public class HouseService {
         shareDTO.setVillageName(house.getResidential());//小区名
         shareDTO.setLayoutId(house.getModelingLayoutId());//户型id
         shareDTO.setLayoutleft(ml == null ? "" : ml.getName());//户型名称
-        String jobLocationDetail = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                String.format(DjConstants.YZPageAddress.JOBLOCATIONDETAIL, "", house.getCityId(), "施工现场") + "&houseId=" + house.getId();
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        String jobLocationDetail = address + String.format(DjConstants.YZPageAddress.JOBLOCATIONDETAIL, "", house.getCityId(), "施工现场") + "&houseId=" + house.getId();
         shareDTO.setUrl(jobLocationDetail);
         shareDTO.setImageNum(0 + "张图片");
-        shareDTO.setImage("");//户型图片
+        shareDTO.setImage(address+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId()));//户型图片
 //        ServerResponse serverResponse = designDataService.getPlaneMap(house.getId());
 //        if (serverResponse.isSuccess()) {
 //            QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
@@ -1085,7 +1084,7 @@ public class HouseService {
             QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
             List<QuantityRoomImages> images = quantityRoomDTO.getImages();
             if (images != null && images.size() > 0) {
-                shareDTO.setImage(images.get(0).getImage() + "?x-image-process=image/resize,w_500,h_500/quality,q_80");
+//                shareDTO.setImage(images.get(0).getImage() + "?x-image-process=image/resize,w_500,h_500/quality,q_80");
                 shareDTO.setImageNum(quantityRoomDTO.getImages().size() + "张图片");
             }
         }
