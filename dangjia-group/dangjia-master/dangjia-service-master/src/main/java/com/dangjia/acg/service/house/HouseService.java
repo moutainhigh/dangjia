@@ -1272,6 +1272,9 @@ public class HouseService {
         for (HouseConstructionRecord houseConstructionRecord : hfaList) {
             listMap.add(getHouseConstructionRecordMap(houseConstructionRecord, address));
         }
+        if(listMap.size()<=0){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+        }
         pageResult.setList(listMap);
         return ServerResponse.createBySuccess("查询施工记录成功", pageResult);
     }
