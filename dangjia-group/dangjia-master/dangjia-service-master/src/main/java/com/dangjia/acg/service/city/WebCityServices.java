@@ -43,6 +43,7 @@ public class WebCityServices {
     }
 
     public ServerResponse updateCity(City city){
+        city.setCreateDate(null);
         cityMapper.updateByPrimaryKeySelective(city);
         return ServerResponse.createBySuccessMessage("修改成功");
     }
