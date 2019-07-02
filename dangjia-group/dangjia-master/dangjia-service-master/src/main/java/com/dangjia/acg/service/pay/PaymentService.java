@@ -1000,8 +1000,7 @@ public class PaymentService {
                 if (datas == null) {
                     return ServerResponse.createByErrorMessage("订单记录不存在");
                 }
-                JSONObject job = (JSONObject)datas.get("purchaseOrder");
-                PurchaseOrder purchaseOrder = job.toJavaObject(PurchaseOrder.class);
+                PurchaseOrder purchaseOrder = (PurchaseOrder) datas.get("purchaseOrder");
                 List<FlowActuaryDTO> flowActuaryDTOList = (List<FlowActuaryDTO>) datas.get("list");
                 House house = houseMapper.selectByPrimaryKey(purchaseOrder.getHouseId());
                 Example example = new Example(BusinessOrder.class);
