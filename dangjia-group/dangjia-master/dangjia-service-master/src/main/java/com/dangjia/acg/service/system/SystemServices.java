@@ -112,7 +112,7 @@ public class SystemServices {
         }
     }
 
-    public ServerResponse getUserAndRoles(String id) {
+    public ServerResponse getJobAndRoles(String id) {
         // 获取用户及他对应的roleIds
         JobRolesVO jobAndRoles = this.jobMapper.getJobAndRoles(id);
         List<Role> list = this.roleMapper.getRoles();

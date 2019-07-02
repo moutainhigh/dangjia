@@ -103,7 +103,12 @@ public class MainUserService {
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, timeout = 30000, rollbackFor = {
             RuntimeException.class, Exception.class})
     public ServerResponse setUser(MainUser user, String roleIds) {
-
+        if (CommonUtil.isEmpty(user.getJobId())) {
+            return ServerResponse.createByErrorMessage("请选择岗位");
+        }
+        if (CommonUtil.isEmpty(user.getDepartmentId())) {
+            return ServerResponse.createByErrorMessage("请选择部门");
+        }
         // 判断用户是否已经存在
         if (!CommonUtil.isEmpty(user.getMobile())) {
             MainUser existUser = this.userMapper.findUserByMobile(user.getMobile());
@@ -186,6 +191,12 @@ public class MainUserService {
         MainUser existUser = this.userMapper.findUserByMobile(user.getMobile());
         if (null != existUser) {
             return ServerResponse.createByErrorMessage("该手机号已经存在");
+        }
+        if (CommonUtil.isEmpty(user.getJobId())) {
+            return ServerResponse.createByErrorMessage("请选择岗位");
+        }
+        if (CommonUtil.isEmpty(user.getDepartmentId())) {
+            return ServerResponse.createByErrorMessage("请选择部门");
         }
         MainUser exist = this.userMapper.findUserByName(user.getUsername());
         if (null != exist) {
