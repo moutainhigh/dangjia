@@ -36,13 +36,11 @@ public class PurchaseOrderController implements PurchaseOrderAPI {
     }
 
     @Override
-    @ApiMethod
     public Map<String,Object> getPurchaseOrder(String purchaseOrderId) {
         return purchaseOrderService.getPurchaseOrder(purchaseOrderId);
     }
 
     @Override
-    @ApiMethod
     public List<BudgetMaterial> payPurchaseOrder(String purchaseOrderId) {
         return purchaseOrderService.payPurchaseOrder(purchaseOrderId);
     }
