@@ -612,6 +612,7 @@ public class ComplainService {
         complain.setUserNickName(member.getNickName());
         complain.setUserName(member.getName());
         complain.setUserMobile(member.getMobile());
+        complain.setUserId(member.getId());
         complainMapper.insert(complain);
         house.setVisitState(5);
         house.setModifyDate(new Date());
