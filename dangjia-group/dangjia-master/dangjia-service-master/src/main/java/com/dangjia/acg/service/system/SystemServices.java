@@ -52,13 +52,18 @@ public class SystemServices {
     private IJobRoleMapper jobRoleMapper;
 
     //查询组织架构
-    public ServerResponse queryDepartment(String parentId) {
+    public ServerResponse queryDepartment(String user_id,String parentId) {
         try {
             Example example=new Example(Department.class);
-            if(CommonUtil.isEmpty(parentId)){
-                example.createCriteria().andCondition(" parent_top is null ");
+            MainUser existUser = redisClient.getCache(Constants.USER_KEY + user_id, MainUser.class);
+            if (null != existUser && CommonUtil.isEmpty(parentId)) {
+                example.createCriteria().andEqualTo(Department.ID, existUser.getDepartmentId());
             }else {
-                example.createCriteria().andEqualTo(Department.PARENT_ID, parentId);
+                if (CommonUtil.isEmpty(parentId)) {
+                    example.createCriteria().andCondition(" parent_top is null ");
+                } else {
+                    example.createCriteria().andEqualTo(Department.PARENT_ID, parentId);
+                }
             }
             List<Department> departments = departmentMapper.selectByExample(example);
             return ServerResponse.createBySuccess("查询成功",departments);
@@ -126,8 +131,11 @@ public class SystemServices {
     }
 
 
-    public ServerResponse setJob(Job job, String roleIds) {
-
+    public ServerResponse setJob(String user_id,Job job, String roleIds) {
+        MainUser existUser = redisClient.getCache(Constants.USER_KEY + user_id, MainUser.class);
+        if (null != existUser) {
+            job.setOperateId(existUser.getId());
+        }
         // 判断用户是否已经存在
         if (!CommonUtil.isEmpty(job.getCode())) {
             Example example=new Example(Job.class);

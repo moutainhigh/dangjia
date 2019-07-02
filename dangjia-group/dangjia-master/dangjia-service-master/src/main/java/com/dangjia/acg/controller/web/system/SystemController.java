@@ -17,8 +17,8 @@ public class SystemController implements SystemAPI {
 	private SystemServices systemServices;
 	@Override
 	@ApiMethod
-	public ServerResponse queryDepartment(String parentId) {
-		return systemServices.queryDepartment(parentId);
+	public ServerResponse queryDepartment(String user_id,String parentId) {
+		return systemServices.queryDepartment(user_id,parentId);
 	}
 
 	@Override
@@ -41,7 +41,7 @@ public class SystemController implements SystemAPI {
 
 	@Override
 	@ApiMethod
-	public ServerResponse setJob(Job job, String roleIds) {
-		return systemServices.setJob(job,roleIds);
+	public ServerResponse setJob(String user_id,Job job, String roleIds) {
+		return systemServices.setJob(user_id,job,roleIds);
 	}
 }
