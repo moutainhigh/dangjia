@@ -55,7 +55,11 @@ public class SystemServices {
     public ServerResponse queryDepartment(String parentId) {
         try {
             Example example=new Example(Department.class);
-            example.createCriteria().andEqualTo(Department.PARENT_ID,parentId);
+            if(CommonUtil.isEmpty(parentId)){
+                example.createCriteria().andCondition(" parent_top is null ");
+            }else {
+                example.createCriteria().andEqualTo(Department.PARENT_ID, parentId);
+            }
             List<Department> departments = departmentMapper.selectByExample(example);
             return ServerResponse.createBySuccess("查询成功",departments);
         } catch (Exception e) {
@@ -77,7 +81,7 @@ public class SystemServices {
             }
             department.setOperateId(existUser.getId());
             department.setModifyDate(new Date());
-            if(!CommonUtil.isEmpty(department.getCityId())){
+            if(departmentMapper.selectByPrimaryKey(department.getId())!=null){
                 departmentMapper.updateByPrimaryKeySelective(department);
                 return ServerResponse.createBySuccessMessage("修改成功");
             }else{
@@ -144,7 +148,7 @@ public class SystemServices {
             }
         }
         String jobId;
-        if (job.getId() != null) {
+        if(jobMapper.selectByPrimaryKey(job.getId())!=null){
             // 更新用户
             job.setModifyDate(new Date());
             if (!CommonUtil.isEmpty(job.getDepartmentId())) {
@@ -171,7 +175,7 @@ public class SystemServices {
             }
 
             jobId=job.getId();
-            this.jobMapper.updateByPrimaryKeySelective(job);
+            this.jobMapper.insertSelective(job);
         }
         // 给用户授角色
         String[] arrays = roleIds.split(",");

@@ -26,7 +26,7 @@
 		u.mobile, u.email, u.insert_uid ,u.create_date ,
 		u.modify_date , u.is_del ,u.is_job,u.is_receive,
 		ur.Job_id ,ur.role_id
-		from dj_job u
+		from dj_system_job u
 		LEFT JOIN dj_job_role ur ON
 		u.id=ur.Job_id
 		WHERE u.id=#{id}
