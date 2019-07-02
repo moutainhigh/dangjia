@@ -498,8 +498,10 @@ public class HouseWorkerService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setHouseFlowApply(Integer applyType, String houseFlowId, String workerId, Integer suspendDay, String applyDec,
                                             String imageList) {
-
         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);//工序
+        if (houseFlow == null) {
+            return ServerResponse.createByErrorMessage("该工序不存在");
+        }
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
         try {
             if (applyType == 3) {
