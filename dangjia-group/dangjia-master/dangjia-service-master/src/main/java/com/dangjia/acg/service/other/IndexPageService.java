@@ -83,7 +83,7 @@ public class IndexPageService {
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 houseList=houseMapper.getSameLayoutDistance(cityId, modelingVillage.getLocationx(), modelingVillage.getLocationy(),null,null,villageId);
                 pageResult = new PageInfo(houseList);
-                if(houseList.size()<0){
+                if(houseList.size()<=0){
                     return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
                 }
             }else{
