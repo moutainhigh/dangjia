@@ -42,6 +42,11 @@ public class HouseFlowApplyImage extends BaseEntity {
 	@ApiModelProperty("图片类型名称 例如：材料照片；进度照片")
 	private String imageTypeName;
 
+	@Column(name = "house_id")
+	@Desc(value = "房子id")
+	@ApiModelProperty("房子id")
+	private String houseId;
+
 	//所有图片字段加入域名和端口，形成全路径
 	public void initPath(String address){
 		this.imageUrl= StringUtils.isEmpty(this.imageUrl)?null:address+this.imageUrl;//二维码

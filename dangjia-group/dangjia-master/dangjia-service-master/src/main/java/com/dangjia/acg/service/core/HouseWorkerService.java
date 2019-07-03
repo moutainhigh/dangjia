@@ -891,6 +891,7 @@ public class HouseWorkerService {
                     for (String anImageArr : imageArr) {
                         HouseFlowApplyImage houseFlowApplyImage = new HouseFlowApplyImage();
                         houseFlowApplyImage.setHouseFlowApplyId(hfa.getId());
+                        houseFlowApplyImage.setHouseId(house.getId());
                         houseFlowApplyImage.setImageUrl(anImageArr);
                         houseFlowApplyImage.setImageType(imageType);//图片类型 0：材料照片；1：进度照片；2:现场照片；3:其他
                         houseFlowApplyImage.setImageTypeName(imageObj.getString("imageTypeName"));//图片类型名称 例如：材料照片；进度照片

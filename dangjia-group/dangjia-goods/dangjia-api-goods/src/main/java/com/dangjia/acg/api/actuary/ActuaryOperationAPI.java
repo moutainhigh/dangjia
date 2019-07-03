@@ -70,7 +70,6 @@ public interface ActuaryOperationAPI {
     @ApiOperation(value = "普通-商品详情", notes = "普通-商品详情")
     ServerResponse getGoodsDetail(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("gId") String gId,
-                                  @RequestParam("cityId") String cityId,
                                   @RequestParam("type") int type);
 
     /**

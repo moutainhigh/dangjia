@@ -257,7 +257,7 @@
                 AND s.image is not null
             ORDER BY
                 rand( )
-                LIMIT 3
+                LIMIT 6
                 ) UNION ALL
                 (
             SELECT
@@ -278,7 +278,7 @@
                 AND worker_dec is not null
             ORDER BY
                 rand( )
-                LIMIT 3
+                LIMIT 6
                 )
     </select>
 
