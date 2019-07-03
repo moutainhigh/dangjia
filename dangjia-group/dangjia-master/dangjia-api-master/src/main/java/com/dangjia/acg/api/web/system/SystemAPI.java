@@ -20,7 +20,7 @@ public interface SystemAPI {
     //查询组织架构
     @PostMapping("/web/system/queryDepartment")
     @ApiOperation(value = "查询组织架构指定节点集合", notes = "查询组织架构指定节点集合")
-     ServerResponse queryDepartment(String parentId) ;
+     ServerResponse queryDepartment(String user_id,String parentId) ;
 
     //修改组织架构信息
     @PostMapping("/web/system/editDepartment")
@@ -40,5 +40,5 @@ public interface SystemAPI {
 
     @PostMapping("/web/system/setJob")
     @ApiOperation(value = "新增/修改岗位", notes = "新增/修改岗位")
-     ServerResponse setJob(Job job, String roleIds);
+     ServerResponse setJob(String user_id,Job job, String roleIds);
 }
