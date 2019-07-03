@@ -251,15 +251,12 @@
         INNER JOIN (
                 SELECT
                     mv.*, (
-                        st_distance (
-                            point (mv.locationx, mv.locationy),
-                            point (#{locationx}	,#{locationy})
-                        ) * 111195 / 1000
+                      11
                     ) AS juli
                 FROM
                 `dj_house_modeling_village` mv
                 WHERE
-                mv.locationx IS NOT NULL
+                mv.locationx IS NOT NULL AND mv.id=#{villageId}
         ) v ON v.id = h.village_id
         where
         h.data_status=0
