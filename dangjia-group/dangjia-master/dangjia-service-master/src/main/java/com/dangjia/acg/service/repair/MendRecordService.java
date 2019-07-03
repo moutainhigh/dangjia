@@ -410,9 +410,9 @@ public class MendRecordService {
 
     /**
      * 记录列表
-     * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货
+     * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货,6，审核记录
      */
-    public ServerResponse recordList(String userToken, int roleType, String houseId, Integer type) {
+    public ServerResponse recordList(String userToken, int roleType, String houseId, String queryId, Integer type) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -422,14 +422,14 @@ public class MendRecordService {
         if (CommonUtil.isEmpty(type)) {
             getHouseFlowApplies(worker, roleType, houseId, 6, returnMap);
             getOrderSplitList(houseId, 5, returnMap);
-            getMendOrderList(worker, roleType, houseId, null, returnMap);
+            getMendOrderList(worker, roleType, houseId, null, queryId, returnMap);
             sortMax(returnMap);
         } else if (type == 6) {
             getHouseFlowApplies(worker, roleType, houseId, type, returnMap);
         } else if (type == 5) {
             getOrderSplitList(houseId, type, returnMap);
         } else {
-            getMendOrderList(worker, roleType, houseId, type, returnMap);
+            getMendOrderList(worker, roleType, houseId, type, queryId, returnMap);
         }
         return ServerResponse.createBySuccess("查询成功", returnMap);
     }
@@ -450,7 +450,8 @@ public class MendRecordService {
         }
     }
 
-    private void getMendOrderList(Member worker, int roleType, String houseId, Integer type, List<Map<String, Object>> returnMap) {
+    private void getMendOrderList(Member worker, int roleType, String houseId, Integer type, String queryId,
+                                  List<Map<String, Object>> returnMap) {
         Example example = new Example(MendOrder.class);
         Example.Criteria criteria;
         //补退人工按工种区分
@@ -477,7 +478,29 @@ public class MendRecordService {
             map.put("totalAmount", "¥" + String.format("%.2f", +mendOrder.getTotalAmount()));
             map.put("createDate", mendOrder.getCreateDate());
             map.put("type", mendOrder.getType());
-            returnMap.add(map);
+            if (!CommonUtil.isEmpty(queryId)) {
+                if (mendOrder.getType() == 1 || mendOrder.getType() == 3) {
+                    example = new Example(MendWorker.class);
+                    example.createCriteria()
+                            .andEqualTo(MendWorker.MEND_ORDER_ID, mendOrder.getId())
+                            .andEqualTo(MendWorker.WORKER_GOODS_ID, queryId);
+                    List<MendWorker> mendWorkerList = mendWorkerMapper.selectByExample(example);
+                    if (mendWorkerList.size() > 0) {
+                        returnMap.add(map);
+                    }
+                } else {
+                    example = new Example(MendMateriel.class);
+                    example.createCriteria()
+                            .andEqualTo(MendMateriel.MEND_ORDER_ID, mendOrder.getId())
+                            .andEqualTo(MendMateriel.PRODUCT_ID, queryId);
+                    List<MendMateriel> mendMaterielList = mendMaterialMapper.selectByExample(example);
+                    if (mendMaterielList.size() > 0) {
+                        returnMap.add(map);
+                    }
+                }
+            } else {
+                returnMap.add(map);
+            }
         }
     }
 
