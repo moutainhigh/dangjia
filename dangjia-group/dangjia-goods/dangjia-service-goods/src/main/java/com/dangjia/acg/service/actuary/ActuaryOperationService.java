@@ -289,7 +289,7 @@ public class ActuaryOperationService {
      * 商品详情
      * gId:  WorkerGoodsId   ProductId
      */
-    public ServerResponse getGoodsDetail(String gId, String cityId, int type) {
+    public ServerResponse getGoodsDetail(String gId, int type) {
         try {
             if (type == 1 || type == 4) {//人工
                 WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
