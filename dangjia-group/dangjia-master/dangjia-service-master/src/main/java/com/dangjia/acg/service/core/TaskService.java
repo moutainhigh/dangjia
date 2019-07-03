@@ -93,7 +93,7 @@ public class TaskService {
             example.createCriteria()
                     .andEqualTo(House.MEMBER_ID, member.getId())
                     .andNotEqualTo(House.VISIT_STATE, 2)
-                    .andNotEqualTo(House.VISIT_STATE, 4)
+                    //.andNotEqualTo(House.VISIT_STATE, 4)
                     .andEqualTo(House.DATA_STATUS, 0);
             houseList = houseMapper.selectByExample(example);
             for (House house : houseList) {
@@ -211,15 +211,15 @@ public class TaskService {
                 example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, changeOrder.getHouseId()).andEqualTo(MendOrder.TYPE, 3)
                         .andEqualTo(MendOrder.CHANGE_ORDER_ID, changeOrder.getId());
                 List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
-                if(mendOrderList.size()>0) {
-                    MendOrder mendOrder=mendOrderList.get(0);
+                if (mendOrderList.size() > 0) {
+                    MendOrder mendOrder = mendOrderList.get(0);
                     WorkerType workerType = workerTypeMapper.selectByPrimaryKey(changeOrder.getWorkerTypeId());
                     Task task = new Task();
                     task.setDate(DateUtil.dateToString(changeOrder.getModifyDate(), DateUtil.FORMAT11));
                     task.setName(workerType.getName() + "退人工");
                     task.setImage(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/burengong.png");
                     String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                            String.format(DjConstants.GJPageAddress.REFUNDITEMDETAIL, userToken, house.getCityId(), task.getName()) + "&type="+mendOrder.getType()+"&mendOrderId=" + mendOrder.getId() + "&roleType=3&state=" + mendOrder.getState();
+                            String.format(DjConstants.GJPageAddress.REFUNDITEMDETAIL, userToken, house.getCityId(), task.getName()) + "&type=" + mendOrder.getType() + "&mendOrderId=" + mendOrder.getId() + "&roleType=3&state=" + mendOrder.getState();
                     task.setHtmlUrl(url);
                     task.setType(2);
                     task.setTaskId("");
