@@ -153,7 +153,6 @@ public class MendRecordService {
             MendOrderDetail mendOrderDetail = new MendOrderDetail();
             mendOrderDetail.setIsShow(0);
             mendOrderDetail.setIsAuditor(0);
-
             if (type == 6) {
                 HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(mendOrderId);
                 Member member = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
@@ -166,7 +165,6 @@ public class MendRecordService {
                 mendOrderDetail.setState(houseFlowApply.getApplyType());
                 mendOrderDetail.setCreateDate(houseFlowApply.getCreateDate());
                 mendOrderDetail.setMapList(getFlowInfo(houseFlowApply));
-
             } else if (type == 5) {
                 OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(mendOrderId);
                 if (worker != null && worker.getWorkerTypeId() != null && worker.getWorkerTypeId().equals(orderSplit.getWorkerTypeId())) {
