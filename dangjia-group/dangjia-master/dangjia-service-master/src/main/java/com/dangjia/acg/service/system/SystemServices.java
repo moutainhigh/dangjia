@@ -61,7 +61,7 @@ public class SystemServices {
                 example.createCriteria().andEqualTo(Department.ID, existUser.getDepartmentId());
             }else {
                 if (CommonUtil.isEmpty(parentId)) {
-                    example.createCriteria().andCondition(" parent_top is null ");
+                    example.createCriteria().andCondition(" (parent_top is null or parent_top ='')  ");
                 } else {
                     example.createCriteria().andEqualTo(Department.PARENT_ID, parentId);
                 }
