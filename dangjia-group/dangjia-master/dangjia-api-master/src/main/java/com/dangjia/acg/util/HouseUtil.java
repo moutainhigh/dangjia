@@ -301,6 +301,7 @@ public class HouseUtil {
                 iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png", "zx_icon_4_2.png", "zx_icon_7_2.png"};
             } else {//其他
                 nameBs = new String[]{"工匠抢单", "支付工匠费", "正常施工", "阶段完工", "整体完工", "施工完成"};
+                nameD = new String[]{"", "", "", "过程中完成施工节点", "需业主确认，完成后暂停施工", "需业主确认，完成全部施工作业"};
                 iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png", "zx_icon_sg_default@2x.png", "zx_icon_ztwg_default@2x.png", "zx_icon_wg_default@2x.png", "zx_icon_7_2.png"};
             }
             Map<String, Object> dataMap = new HashMap<>();
