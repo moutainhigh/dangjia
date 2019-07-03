@@ -378,7 +378,7 @@ public class EngineerService {
                     .andEqualTo(HouseFlowApply.APPLY_TYPE,5)
                     .andEqualTo(HouseFlowApply.HOUSE_ID,hwo.getHouseId());
             map.put("checkMoney", houseFlowApplyMapper.selectCountByExample(example));//巡查次数
-            map.put(" patrol",houseFlow.getPatrol());//巡查标准
+            map.put("patrol",houseFlow.getPatrol());//巡查标准
             mapList.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", mapList);
