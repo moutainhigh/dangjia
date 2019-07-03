@@ -1635,6 +1635,15 @@ public class HouseService {
                 houseConstructionRecord.setHouseId(houseFlowApply.getHouseId());
                 houseConstructionRecord.setSourceId(houseFlowApply.getId());
                 houseConstructionRecord.setContent(houseFlowApply.getApplyDec());
+
+                if (houseFlowApply.getApplyType() == 3) {
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
+                    if (CommonUtil.isEmpty(houseFlowApply.getOperator()) || houseFlowApply.getWorkerId().equals(houseFlowApply.getOperator())) {
+                        houseConstructionRecord.setContent("申请停工" + (CommonUtil.isEmpty(houseFlowApply.getApplyDec()) ? "" : ",理由：" + houseFlowApply.getApplyDec()));
+                    } else {
+                        houseConstructionRecord.setContent("大管家申请" + workerType.getName() + "停工" + (CommonUtil.isEmpty(houseFlowApply.getApplyDec()) ? "" : ",理由：" + houseFlowApply.getApplyDec()));
+                    }
+                }
                 houseConstructionRecord.setWorkerId(houseFlowApply.getOperator());
                 houseConstructionRecord.setWorkerType(houseFlowApply.getWorkerType());
                 houseConstructionRecord.setApplyType(houseFlowApply.getApplyType());

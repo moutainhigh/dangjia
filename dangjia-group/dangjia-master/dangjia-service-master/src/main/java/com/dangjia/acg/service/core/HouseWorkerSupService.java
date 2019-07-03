@@ -141,7 +141,7 @@ public class HouseWorkerSupService {
                         }
 
                         HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
-                        hfa.setHouseFlowId(houseFlowId);//工序id
+                        hfa.setHouseFlowId(flowId);//工序id
                         hfa.setWorkerId(houseFlow.getWorkerId());//工人id
                         hfa.setWorkerTypeId(houseFlow.getWorkerTypeId());//工种id
                         hfa.setWorkerType(houseFlow.getWorkerType());//工种类型
