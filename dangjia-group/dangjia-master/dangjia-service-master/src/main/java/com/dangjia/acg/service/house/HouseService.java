@@ -1640,7 +1640,7 @@ public class HouseService {
 
                 if (houseFlowApply.getApplyType() == 3) {
                     WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
-                    String dayse="("+DateUtil.dateToString(houseFlowApply.getStartDate(), DateUtil.FORMAT2)+"至"+DateUtil.dateToString(houseFlowApply.getEndDate(), DateUtil.FORMAT2)+")";
+                    String dayse="("+DateUtil.dateToString(houseFlowApply.getStartDate(), DateUtil.FORMAT1)+"至"+DateUtil.dateToString(houseFlowApply.getEndDate(), DateUtil.FORMAT1)+")";
                     if (houseFlowApply.getWorkerId()!=null && (CommonUtil.isEmpty(houseFlowApply.getOperator()) || houseFlowApply.getWorkerId().equals(houseFlowApply.getOperator())) ) {
                         houseConstructionRecord.setContent("申请停工"+ houseFlowApply.getSuspendDay() +"天"+ dayse + (CommonUtil.isEmpty(houseFlowApply.getApplyDec()) ? "" : ",理由：" + houseFlowApply.getApplyDec()));
                     } else {
