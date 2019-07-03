@@ -48,7 +48,7 @@ public class MainUserService {
     @Autowired
     private RedisClient redisClient;
 
-    public ServerResponse getUsers(UserSearchDTO userSearch, PageDTO pageDTO) {
+    public ServerResponse getUsers(UserSearchDTO userSearch, PageDTO pageDTO,Integer isJob) {
         // 时间处理
         if (null != userSearch) {
             if (StringUtils.isNotEmpty(userSearch.getInsertTimeStart())
@@ -70,7 +70,7 @@ public class MainUserService {
             }
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<UserRoleDTO> urList = userMapper.getUsers(userSearch);
+        List<UserRoleDTO> urList = userMapper.getUsers(userSearch,isJob);
         // 获取分页查询后的数据
         PageInfo pageInfo = new PageInfo(urList);
         // 将角色名称提取到对应的字段中
