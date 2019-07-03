@@ -704,6 +704,11 @@ public class HouseWorkerService {
                 end = houseFlowApply.getEndDate();
                 //更新实际停工天数
                 houseFlowApply.setEndDate(DateUtil.delDateDays(start, 1));
+                if(houseFlowApply.getStartDate().getTime()<=houseFlowApply.getEndDate().getTime()){
+                    houseFlowApply.setEndDate(houseFlowApply.getStartDate());
+                    houseFlowApply.setSuspendDay(0);
+                    houseFlowApply.setDataStatus(1);
+                }
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
             }
         }
