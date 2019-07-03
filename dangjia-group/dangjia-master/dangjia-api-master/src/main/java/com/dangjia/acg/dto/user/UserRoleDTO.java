@@ -30,8 +30,6 @@ public class UserRoleDTO {
 	private String roleNames;
 
 	private Integer version;
-	private String jobId;
 
-	private String departmentId;
 
 }

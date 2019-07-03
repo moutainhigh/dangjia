@@ -14,14 +14,12 @@
         <result column="is_job" jdbcType="BIT" property="isJob"/>
         <result column="is_receive" jdbcType="BIT" property="isReceive"/>
         <result column="department" jdbcType="VARCHAR" property="department"/>
-        <result column="department_id" jdbcType="VARCHAR" property="departmentId"/>
-        <result column="job_id" jdbcType="VARCHAR" property="jobId"/>
     </resultMap>
     <sql id="Base_Column_List">
 		id, username, mobile, email, password, insert_uid insertUid,
 		create_date createDate,
 		modify_date modifyDate, is_del isDel,
-		is_job isJob,is_receive isReceive, department, department_id departmentId,  job_id jobId
+		is_job isJob,is_receive isReceive, department
 	</sql>
 
     <!--=Start getUsers 分页查询用户列表userSearch -->
