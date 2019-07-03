@@ -38,7 +38,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         AND b.image_type = 2
         AND b.data_status = 0
         AND b.image_url IS NOT NULL
-        AND a.apply_type = 5
+        AND a.apply_type in (1,2,5)
         ORDER BY
         b.create_date DESC
         LIMIT 1
