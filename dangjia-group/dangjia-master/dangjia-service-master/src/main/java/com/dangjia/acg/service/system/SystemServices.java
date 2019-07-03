@@ -21,6 +21,7 @@ import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.user.Role;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -80,9 +81,14 @@ public class SystemServices {
             if (null == existUser) {
                 throw new BaseException(ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN, ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN.getDesc());
             }
+
             if(!CommonUtil.isEmpty(department.getCityId())){
-                City city=cityMapper.selectByPrimaryKey(department.getCityId());
-                department.setCityName(city.getName());
+                String[] cityids=department.getCityId().split(",");
+                for (int i = 0; i < cityids.length; i++) {
+                    City city=cityMapper.selectByPrimaryKey(cityids[i]);
+                    cityids[i]=city.getName();
+                }
+                department.setCityName(StringUtils.join(cityids, ","));
             }
             department.setOperateId(existUser.getId());
             department.setModifyDate(new Date());
