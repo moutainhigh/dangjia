@@ -14,7 +14,6 @@ import java.util.Map;
 
 public class HouseUtil {
 
-
     public static NodeDTO getWorkerDatas(House house, HouseFlow houseFlow, WorkerType workerType, String address) {
         NodeDTO nodeDTO = new NodeDTO();
         String[] nameBs;
@@ -283,10 +282,10 @@ public class HouseUtil {
     public static Map getWorkerDatas(House house, String address) {
         Map progress = new HashMap();
         String[] nameBs;
-        String[] nameD = null;
         String[] iconsY;
         Integer[] workerTypes = new Integer[]{1, 2, 3};
         for (Integer workerType : workerTypes) {
+            String[] nameD = null;
             if (workerType == 1) {//设计
                 if (house != null && house.getDecorationType() == 2) {//自带设计流程
                     nameBs = new String[]{"设计抢单", "设计平面图", "设计施工图", "设计完成"};
