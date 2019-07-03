@@ -112,14 +112,15 @@ public class IndexPageService {
                 house.setMoney(totalPrice);
                 Map map = BeanUtils.beanToMap(house);
                 map.put("houseName", house.getHouseName());
-                serverResponse = designDataService.getConstructionPlans(house.getId());
-                if (serverResponse.isSuccess()) {
-                    QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
-                    List<QuantityRoomImages> images = quantityRoomDTO.getImages();
-                    if (images != null && images.size() > 0) {
-                        map.put("imageUrl", images.get(0).getImage() + "?x-image-process=image/resize,w_500,h_500/quality,q_80");
-                    }
-                }
+                map.put("imageUrl", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId()));
+//                serverResponse = designDataService.getConstructionPlans(house.getId());
+//                if (serverResponse.isSuccess()) {
+//                    QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+//                    List<QuantityRoomImages> images = quantityRoomDTO.getImages();
+//                    if (images != null && images.size() > 0) {
+//                        map.put("imageUrl", images.get(0).getImage() + "?x-image-process=image/resize,w_500,h_500/quality,q_80");
+//                    }
+//                }
                 houseMap.add(map);
             }
             pageResult.setList(houseMap);
