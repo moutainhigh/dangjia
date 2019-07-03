@@ -360,9 +360,9 @@ public class EngineerService {
             map.put("mobile", worker.getMobile());
             map.put("createDate", houseFlow.getCreateDate());
             map.put("workSteta", houseFlow.getWorkSteta());
-            map.put("endTime",null);
+            map.put(" EndTime",null);
             if(houseFlow.getWorkSteta()==2){
-                map.put("endTime",houseFlow.getModifyDate());
+                map.put(" EndTime",houseFlow.getModifyDate());
             }
             map.put("payState", hwo.getPayState());//0未支付，1已经支付
             map.put("retentionMoney", hwo.getRetentionMoney());//此单滞留金
@@ -373,7 +373,12 @@ public class EngineerService {
             map.put("repairPrice", hwo.getRepairTotalPrice());//补人工钱
             map.put("haveMoney", hwo.getHaveMoney());//已拿钱
             map.put("everyMoney", hwo.getEveryMoney());//每日申请累计钱
-            map.put("checkMoney", houseFlow.getPatrol());//管家巡查累计
+            example =new Example(HouseFlowApply.class);
+            example.createCriteria().andEqualTo(HouseFlowApply.WORKER_ID,hwo.getWorkerId())
+                    .andEqualTo(HouseFlowApply.APPLY_TYPE,5)
+                    .andEqualTo(HouseFlowApply.HOUSE_ID,hwo.getHouseId());
+            map.put("checkMoney", houseFlowApplyMapper.selectCountByExample(example));//巡查次数
+            map.put(" patrol",houseFlow.getPatrol());//巡查标准
             mapList.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", mapList);
