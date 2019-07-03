@@ -3,7 +3,7 @@ spring:
     name: dangjia-service-search
   cloud:
     config:
-      uri: http://172.16.30.95:6010
+      uri: http://192.168.0.229:6010
     loadbalancer:
       retry:
         enabled: true
