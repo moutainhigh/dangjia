@@ -28,6 +28,11 @@ public class Job extends BaseEntity {
     @ApiModelProperty("部门ID")
     private String departmentId;
 
+    @Column(name = "department_name")
+    @Desc(value = "部门ID")
+    @ApiModelProperty("部门ID")
+    private String departmentName;
+
     @Column(name = "operate_id")
     @Desc(value = "操作id")
     @ApiModelProperty("操作id")
