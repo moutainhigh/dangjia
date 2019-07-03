@@ -156,16 +156,16 @@ public class SystemServices {
             }
         }
         String jobId;
+        if (!CommonUtil.isEmpty(job.getDepartmentId())) {
+            Department department = departmentMapper.selectByPrimaryKey(job.getDepartmentId());
+            job.setCityId(department.getCityId());
+            job.setCityName(department.getCityName());
+            job.setDepartmentName(department.getName());
+        }
         if(jobMapper.selectByPrimaryKey(job.getId())!=null){
             // 更新用户
             job.setModifyDate(new Date());
-            if (!CommonUtil.isEmpty(job.getDepartmentId())) {
-                Department department = departmentMapper.selectByPrimaryKey(job.getDepartmentId());
-                job.setCityId(department.getCityId());
-                job.setCityName(department.getCityName());
-            }
             this.jobMapper.updateByPrimaryKeySelective(job);
-
             // 删除之前的角色
             Example example=new Example(JobRole.class);
             example.createCriteria().andEqualTo(JobRole.JOB_ID,job.getId());
@@ -176,12 +176,6 @@ public class SystemServices {
             job.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
             job.setCreateDate(new Date());
             job.setModifyDate(new Date());
-            if (!CommonUtil.isEmpty(job.getDepartmentId())) {
-                Department department = departmentMapper.selectByPrimaryKey(job.getDepartmentId());
-                job.setCityId(department.getCityId());
-                job.setCityName(department.getCityName());
-            }
-
             jobId=job.getId();
             this.jobMapper.insertSelective(job);
         }
