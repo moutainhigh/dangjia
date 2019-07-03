@@ -1287,7 +1287,7 @@ public class HouseService {
         map.put("id", hfa.getSourceId());
         Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
         map.put("workerHead", address + member.getHead());//工人头像
-        if (member.getWorkerType() != null) {
+        if (member.getWorkerType()>=1) {
             map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
         } else {
             map.put("workerTypeName", "业主");//工匠类型
@@ -1314,16 +1314,18 @@ public class HouseService {
         }
         if (hfa.getSourceType() == 1) {
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(hfa.getSourceId());
-            map.put("type", mendOrder.getType());
-            map.put("number", mendOrder.getNumber());
-            if (mendOrder.getType() == 2 && StringUtil.isNotEmpty(mendOrder.getImageArr())) {
-                String[] imageArr = mendOrder.getImageArr().split(",");
-                if (imageArr.length > 0) {
-                    List<String> imageList = new ArrayList<>();
-                    for (String anImageArr : imageArr) {
-                        imageList.add(address + anImageArr);
+            if(null!=mendOrder) {
+                map.put("type", mendOrder.getType());
+                map.put("number", mendOrder.getNumber());
+                if (mendOrder.getType() == 2 && StringUtil.isNotEmpty(mendOrder.getImageArr())) {
+                    String[] imageArr = mendOrder.getImageArr().split(",");
+                    if (imageArr.length > 0) {
+                        List<String> imageList = new ArrayList<>();
+                        for (String anImageArr : imageArr) {
+                            imageList.add(address + anImageArr);
+                        }
+                        map.put("imgArr", imageList);
                     }
-                    map.put("imgArr", imageList);
                 }
             }
         }
