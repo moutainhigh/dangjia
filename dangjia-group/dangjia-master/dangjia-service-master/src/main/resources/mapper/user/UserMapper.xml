@@ -41,6 +41,9 @@
         <if test="userSearch.insertTimeEnd!=null and userSearch.insertTimeEnd!=''">
             AND create_date &lt;= #{userSearch.insertTimeEnd}
         </if>
+        <if test="null!=isJob and ''!=isJob">
+            AND is_job=0
+        </if>
         ORDER BY create_date DESC
     </select>
     <!--=End getUsers 分页查询用户列表 -->
