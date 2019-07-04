@@ -12,12 +12,14 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HomePageBean;
 import com.dangjia.acg.dto.house.HouseChatDTO;
 import com.dangjia.acg.dto.house.MyHouseFlowDTO;
+import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
@@ -27,6 +29,7 @@ import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Technology;
+import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
@@ -110,6 +113,8 @@ public class HouseWorkerService {
     private String active;
     @Autowired
     private CraftsmanConstructionService constructionService;
+    @Autowired
+    private IComplainMapper complainMapper;
 
     /**
      * 根据工人id查询所有房子任务
@@ -200,7 +205,17 @@ public class HouseWorkerService {
             map.put("workerName", workerType.getName());
             map.put("houseFlowId", houseFlow.getId());
             map.put("houseWorkerId", houseWorker.getId());
-            map.put("isSubstitution", houseWorker.getWorkType() == 2 ? 0 : 1);
+            Example example = new Example(Complain.class);
+            example.createCriteria().andEqualTo(Complain.MEMBER_ID, houseFlow.getWorkerId())
+                    .andEqualTo(Complain.HOUSE_ID, houseFlow.getHouseId())
+                    .andEqualTo(Complain.STATUS, 0)
+                    .andEqualTo(Complain.COMPLAIN_TYPE,3);
+            List<Complain> complains = complainMapper.selectByExample(example);
+            if (houseWorker.getWorkType() == 6){
+                map.put("isSubstitution", complains.size() > 0 ? 0 : 1);
+            }else {
+                map.put("isSubstitution", 2);
+            }
             mapData.put("houseWorker", map);
         }
         Example example = new Example(HouseWorker.class);
