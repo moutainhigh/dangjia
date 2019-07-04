@@ -1063,7 +1063,12 @@ public class HouseService {
         String jobLocationDetail = address + String.format(DjConstants.YZPageAddress.JOBLOCATIONDETAIL, "", house.getCityId(), "施工现场") + "&houseId=" + house.getId();
         shareDTO.setUrl(jobLocationDetail);
         shareDTO.setImageNum(0 + "张图片");
-        shareDTO.setImage(address+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId()));//户型图片
+        String image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null);
+        if (CommonUtil.isEmpty(image)){
+            shareDTO.setImage(address+image);//户型图片
+        }else{
+            shareDTO.setImage(address+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),0));//户型图片
+        }
 //        ServerResponse serverResponse = designDataService.getPlaneMap(house.getId());
 //        if (serverResponse.isSuccess()) {
 //            QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
@@ -1286,7 +1291,9 @@ public class HouseService {
         Map<String, Object> map = new HashMap<>();
         map.put("id", hfa.getSourceId());
         Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
-        map.put("workerHead", address + member.getHead());//工人头像
+        if(null!=member) {
+            map.put("workerHead", address + member.getHead());//工人头像
+        }
         if (member.getWorkerType()>=1) {
             map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
         } else {
