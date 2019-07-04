@@ -21,6 +21,10 @@ public interface SystemAPI {
     @PostMapping("/web/system/queryDepartment")
     @ApiOperation(value = "查询组织架构指定节点集合", notes = "查询组织架构指定节点集合")
      ServerResponse queryDepartment(String user_id,String parentId) ;
+    //查询组织架构
+    @PostMapping("/web/system/queryDepartmentAll")
+    @ApiOperation(value = "查询所有组织架构", notes = "查询所有组织架构")
+    ServerResponse queryDepartmentAll() ;
 
     //修改组织架构信息
     @PostMapping("/web/system/editDepartment")

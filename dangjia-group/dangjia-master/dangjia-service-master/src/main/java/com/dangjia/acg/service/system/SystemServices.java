@@ -6,6 +6,7 @@ import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.system.JobRolesVO;
 import com.dangjia.acg.mapper.other.ICityMapper;
@@ -26,8 +27,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -73,7 +76,50 @@ public class SystemServices {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-
+    //查询组织架构
+    public ServerResponse queryDepartmentAll() {
+        try {
+            Example example=new Example(Department.class);
+            List<Department> departments = departmentMapper.selectByExample(example);
+            List<Map> departmentMap =new ArrayList<>();
+            if(departments.size()>0){
+                for (Department department : departments) {
+                    Map map = BeanUtils.beanToMap(department);
+                    if(CommonUtil.isEmpty(department.getParentId())){
+                        departmentMap.add(map);
+                    }
+                }
+            }
+            departmentMap=getDepartmentLower(departmentMap,departments);
+            return ServerResponse.createBySuccess("查询成功",departmentMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+    public List<Map> getDepartmentLower(List<Map> departmentMap,List<Department> departments) {
+        try {
+            if(departments.size()>0){
+                for (int i = 0; i < departmentMap.size(); i++) {
+                   Map map= departmentMap.get(i);
+                    List<Map> maps =new ArrayList<>();
+                    for (Department department : departments) {
+                        if(map.get(Department.ID).equals(department.getParentId())){
+                            maps.add(BeanUtils.beanToMap(department));
+                        }
+                    }
+                    if(maps.size()>0) {
+                        maps=getDepartmentLower(maps,departments);
+                        map.put("lower", maps);
+                    }
+                }
+            }
+            return departmentMap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     //修改组织架构信息
     public ServerResponse editDepartment(String user_id,Department department) {
         try {

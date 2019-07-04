@@ -20,7 +20,11 @@ public class SystemController implements SystemAPI {
 	public ServerResponse queryDepartment(String user_id,String parentId) {
 		return systemServices.queryDepartment(user_id,parentId);
 	}
-
+	@Override
+	@ApiMethod
+	public ServerResponse queryDepartmentAll() {
+		return systemServices.queryDepartmentAll();
+	}
 	@Override
 	@ApiMethod
 	public ServerResponse editDepartment(String user_id, Department department) {
