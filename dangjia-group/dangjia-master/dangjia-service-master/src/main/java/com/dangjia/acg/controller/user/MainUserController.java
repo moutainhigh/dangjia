@@ -8,10 +8,13 @@ import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.dto.user.PermissionVO;
 import com.dangjia.acg.dto.user.UserDTO;
 import com.dangjia.acg.dto.user.UserSearchDTO;
+import com.dangjia.acg.mapper.system.IDepartmentMapper;
+import com.dangjia.acg.modle.system.Department;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.member.GroupInfoService;
 import com.dangjia.acg.service.user.MainAuthService;
@@ -45,6 +48,8 @@ public class MainUserController implements MainUserAPI {
     @Autowired
     private RedisClient redisClient;
 
+    @Autowired
+    private IDepartmentMapper departmentMapper;
     /**
      * 系统来源切换
      *
@@ -313,7 +318,10 @@ public class MainUserController implements MainUserAPI {
         try {
             logger.debug("用户登录，用户验证开始！member=" + user.getMobile());
             redisClient.put(Constants.USER_KEY + existUser.getId(), existUser);
-
+            if(!CommonUtil.isEmpty(existUser.getDepartmentId())) {
+                Department department = departmentMapper.selectByPrimaryKey(existUser.getDepartmentId());
+                redisClient.put(Constants.CITY_KEY + existUser.getId(), department.getCityId());
+            }
             groupInfoService.registerJGUsers("gj", new String[]{existUser.getId()}, new String[1]);
             logger.info("用户登录，用户验证通过！member=" + user.getMobile());
             msg = ServerResponse.createBySuccess("用户登录，用户验证通过！member=" + user.getMobile(), existUser.getId());

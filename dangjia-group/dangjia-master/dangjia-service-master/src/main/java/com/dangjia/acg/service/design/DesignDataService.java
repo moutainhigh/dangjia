@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.design;
 
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -32,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +69,8 @@ public class DesignDataService {
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
 
-
+    @Autowired
+    private RedisClient redisClient;//缓存
     /**
      * 获取平面图
      *
@@ -308,14 +312,19 @@ public class DesignDataService {
      * @param designerType 0：未支付和设计师未抢单，1：带量房，2：平面图，3：施工图，4：完工
      * @param searchKey    业主手机号/房子名称
      */
-    public ServerResponse getDesignList(PageDTO pageDTO, int designerType, String searchKey) {
+    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey) {
+        String userID = request.getParameter(Constants.USERID);
+        String cityKey = redisClient.getCache(Constants.CITY_KEY + userID, String.class);
+        if (CommonUtil.isEmpty(cityKey)) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         String dataStatus = "0";//正常数据
         if (designerType < 0) {
             //当类型小于0时，则查询移除的数据
             dataStatus = "1";
         }
-        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, searchKey, dataStatus);
+        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType,cityKey, searchKey, dataStatus);
         PageInfo pageResult = new PageInfo(designDTOList);
         for (DesignDTO designDTO : designDTOList) {
             HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(designDTO.getHouseId(), 1);

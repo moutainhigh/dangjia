@@ -125,6 +125,9 @@
         <if test="designerType == 4">
             AND house.designer_ok =3
         </if>
+        <if test="cityKey!=null and cityKey!=''">
+            AND FIND_IN_SET(house.city_id,#{cityKey})
+        </if>
         <if test="searchKey!=null and searchKey!=''">
             AND (CONCAT(
             house.residential,
