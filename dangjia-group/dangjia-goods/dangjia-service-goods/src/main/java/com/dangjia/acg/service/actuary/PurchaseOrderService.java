@@ -76,7 +76,6 @@ public class PurchaseOrderService {
     }
 
     private FlowActuaryDTO getFlowActuaryDTO(String address,String appAddress,BudgetMaterial bm) {
-        Product product = productMapper.selectByPrimaryKey(bm.getProductId());
         FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
         flowActuaryDTO.setTypeName("材料");
         flowActuaryDTO.setType(2);
@@ -85,7 +84,7 @@ public class PurchaseOrderService {
         flowActuaryDTO.setImage(address + bm.getImage());
         String url = appAddress + String.format(DjConstants.YZPageAddress.COMMODITY, "", "",flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + 2;
         flowActuaryDTO.setUrl(url);
-        flowActuaryDTO.setAttribute(actuaryOperationService.getAttributes(product));//拼接属性品牌
+        flowActuaryDTO.setAttribute(actuaryOperationService.getAttributes(bm.getProductId()));//拼接属性品牌
         flowActuaryDTO.setPrice("¥" + String.format("%.2f", bm.getPrice()) + "/" +  bm.getUnitName());
         flowActuaryDTO.setTotalPrice(bm.getTotalPrice());
         flowActuaryDTO.setShopCount(bm.getShopCount());

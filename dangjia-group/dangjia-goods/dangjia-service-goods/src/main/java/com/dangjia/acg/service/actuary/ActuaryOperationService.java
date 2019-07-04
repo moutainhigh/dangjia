@@ -501,7 +501,7 @@ public class ActuaryOperationService {
 //                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO, userToken,
 ////                            cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + budgetMaterial.getId() + "&type=2";
 ////                    flowActuaryDTO.setUrl(url);
-                    flowActuaryDTO.setAttribute(getAttributes(product));//拼接属性品牌
+                    flowActuaryDTO.setAttribute(getAttributes(mendMateriel.getProductId()));//拼接属性品牌
 
                     Unit convertUnit = iUnitMapper.selectByPrimaryKey(product.getConvertUnit());
                     flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnit.getName());
@@ -548,7 +548,7 @@ public class ActuaryOperationService {
                                     String.format(DjConstants.YZPageAddress.COMMODITY, userToken,
                                             cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + type;
                             flowActuaryDTO.setUrl(url);
-                            flowActuaryDTO.setAttribute(getAttributes(product));//拼接属性品牌
+                            flowActuaryDTO.setAttribute(getAttributes(product.getId()));//拼接属性品牌
 //                        flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + product.getUnitName());
                             convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
 //                        flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName());
@@ -582,17 +582,10 @@ public class ActuaryOperationService {
     }
 
     //拼接属性品牌
-    String getAttributes(Product product) {
-        String attributes = product.getValueNameArr();
-        if (attributes == null) {
-            attributes = "";
-        }
-        BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(product.getBrandSeriesId());
-        if (brandSeries != null) {
-            attributes = attributes + " " + brandSeries.getName();
-        }
+    String getAttributes(String productId) {
+        String  attributes = iBrandSeriesMapper.getAttributesName(productId);
         if (CommonUtil.isEmpty(attributes)) {
-            return "无";
+            return "";
         }
         return attributes.replaceAll(",", " ");
     }
