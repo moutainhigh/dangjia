@@ -146,7 +146,13 @@ public class HomeModularService {
                     if (house == null) {//有很多房子但是没有isSelect为1的
                         house = houseList.get(0);
                     }
-                    List<HouseFlow> houseFlows = houseFlowMapper.unfinishedFlow(house.getId());
+                    example = new Example(HouseFlow.class);
+                    example.createCriteria()
+                            .andEqualTo(HouseFlow.WORK_TYPE, 4)
+                            .andNotEqualTo(HouseFlow.WORK_STETA, 2)
+                            .andEqualTo(HouseFlow.HOUSE_ID, house.getId());
+                    example.orderBy(HouseFlow.SORT).asc();
+                    List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
                     if (houseFlows.size() > 0) {
                         example = new Example(RenovationStage.class);
                         example.createCriteria()

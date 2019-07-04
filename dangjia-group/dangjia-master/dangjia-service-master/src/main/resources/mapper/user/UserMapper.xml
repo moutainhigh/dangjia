@@ -22,11 +22,22 @@
 		is_job isJob,is_receive isReceive, department
 	</sql>
 
+    <sql id="a_Column_List">
+		a.id, a.username, a.mobile, a.email, a.password, a.insert_uid insertUid,
+		a.create_date createDate,
+		a.modify_date modifyDate, a.is_del isDel,
+		a.is_job isJob,a.is_receive isReceive, a.department
+	</sql>
+
     <!--=Start getUsers 分页查询用户列表userSearch -->
     <select id="getUsers" resultType="com.dangjia.acg.dto.user.UserRoleDTO">
         select
-        <include refid="Base_Column_List"/>
-        from dj_user
+        <include refid="a_Column_List"/>
+        from dj_user a
+        INNER JOIN dj_user_user_role b
+        on a.id=b.user_id
+        inner join dj_user_role c
+        on b.role_id=c.id
         where 1=1
         AND is_del=0
         <if test="userSearch.umobile!=null and userSearch.umobile!=''">
@@ -43,8 +54,12 @@
         </if>
         <if test="null!=isJob and ''!=isJob">
             AND is_job=0
+            AND (
+              c.role_name like CONCAT('%','售前客服','%') or
+              c.role_name like CONCAT('%','工程部','%')
+            )
         </if>
-        ORDER BY create_date DESC
+        ORDER BY a.create_date DESC
     </select>
     <!--=End getUsers 分页查询用户列表 -->
 

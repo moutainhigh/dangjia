@@ -587,7 +587,7 @@ public class MendRecordService {
 
     /**
      * 要补退记录
-     * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料
+     * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料5 要货,6，审核记录
      * roleType 1业主 2管家 3工匠
      */
     public ServerResponse mendList(String userToken, String houseId, int roleType) {
@@ -599,20 +599,6 @@ public class MendRecordService {
                 return (ServerResponse) object;
             }
             Member worker = (Member) object;
-//            Example example = new Example(MendOrder.class);
-//            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE,0)
-//            .andNotEqualTo(MendOrder.STATE,0);
-//            List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
-//            if(mendOrderList.size() > 0){
-//                Map<String,Object> map = new HashMap<>();
-//                map.put("houseId", houseId);
-//                map.put("type", 0);
-//                map.put("image", address + "iconWork/zero.png");
-//                map.put("name", "补材料/服务记录");
-//                map.put("size", "共"+mendOrderList.size()+"条");
-//                returnMap.add(map);
-//            }
-
             List<MendOrder> mendOrderList;
             if (roleType == 3) {//工匠
                 mendOrderList = mendOrderMapper.workerMendOrder(houseId, 1, worker.getWorkerTypeId());
@@ -641,7 +627,6 @@ public class MendRecordService {
                 map.put("size", "共" + mendOrderList.size() + "条");
                 returnMap.add(map);
             }
-
             if (roleType == 3) {//工匠
                 mendOrderList = mendOrderMapper.workerMendOrder(houseId, 3, worker.getWorkerTypeId());
             } else {
@@ -656,9 +641,9 @@ public class MendRecordService {
                 map.put("size", "共" + mendOrderList.size() + "条");
                 returnMap.add(map);
             }
-
             example = new Example(MendOrder.class);
-            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 4)
+            example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId)
+                    .andEqualTo(MendOrder.TYPE, 4)
                     .andNotEqualTo(MendOrder.STATE, 0);
             mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() > 0) {
@@ -670,12 +655,10 @@ public class MendRecordService {
                 map.put("size", "共" + mendOrderList.size() + "条");
                 returnMap.add(map);
             }
-
             /*要货单记录*/
             example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId)
                     .andGreaterThan(OrderSplit.APPLY_STATUS, 0);
-
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             if (orderSplitList.size() > 0) {
                 Map<String, Object> map = new HashMap<>();
@@ -686,14 +669,15 @@ public class MendRecordService {
                 map.put("size", "共" + orderSplitList.size() + "条");
                 returnMap.add(map);
             }
-
             example = new Example(HouseFlowApply.class);
-
             /*审核记录*/
             if (roleType == 3) {//工匠
-                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 and apply_type!=0  ").andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId)
+                        .andCondition(" apply_type <3 and apply_type!=0  ")
+                        .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
             } else {
-                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId).andCondition(" apply_type <3 and apply_type!=0  ");
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId)
+                        .andCondition(" apply_type <3 and apply_type!=0  ");
             }
             List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
             if (houseFlowApplies.size() > 0) {
