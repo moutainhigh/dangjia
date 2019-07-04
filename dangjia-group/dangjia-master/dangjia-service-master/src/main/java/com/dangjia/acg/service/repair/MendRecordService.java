@@ -419,13 +419,13 @@ public class MendRecordService {
         List<Map<String, Object>> returnMap = new ArrayList<>();
         if (CommonUtil.isEmpty(type)) {
             getHouseFlowApplies(worker, roleType, houseId, 6, returnMap);
-            getOrderSplitList(houseId, 5, returnMap);
+            getOrderSplitList(houseId, 5, queryId, returnMap);
             getMendOrderList(worker, roleType, houseId, null, queryId, returnMap);
             sortMax(returnMap);
         } else if (type == 6) {
             getHouseFlowApplies(worker, roleType, houseId, type, returnMap);
         } else if (type == 5) {
-            getOrderSplitList(houseId, type, returnMap);
+            getOrderSplitList(houseId, type, queryId, returnMap);
         } else {
             getMendOrderList(worker, roleType, houseId, type, queryId, returnMap);
         }
@@ -502,7 +502,7 @@ public class MendRecordService {
         }
     }
 
-    private void getOrderSplitList(String houseId, Integer type, List<Map<String, Object>> returnMap) {
+    private void getOrderSplitList(String houseId, Integer type, String queryId, List<Map<String, Object>> returnMap) {
         Example example = new Example(OrderSplit.class);
         example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId)
                 .andNotEqualTo(OrderSplit.APPLY_STATUS, 0);
@@ -515,7 +515,18 @@ public class MendRecordService {
             map.put("state", orderSplit.getApplyStatus());
             map.put("createDate", orderSplit.getCreateDate());
             map.put("type", type);
-            returnMap.add(map);
+            if (!CommonUtil.isEmpty(queryId)) {
+                example = new Example(OrderSplitItem.class);
+                example.createCriteria()
+                        .andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId())
+                        .andEqualTo(OrderSplitItem.PRODUCT_ID, queryId);
+                List<OrderSplitItem> orderSplitItems = orderSplitItemMapper.selectByExample(example);
+                if (orderSplitItems.size() > 0) {
+                    returnMap.add(map);
+                }
+            } else {
+                returnMap.add(map);
+            }
         }
     }
 
