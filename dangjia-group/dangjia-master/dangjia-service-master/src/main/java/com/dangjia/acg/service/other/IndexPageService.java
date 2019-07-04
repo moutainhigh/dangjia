@@ -112,7 +112,13 @@ public class IndexPageService {
                 house.setMoney(totalPrice);
                 Map map = BeanUtils.beanToMap(house);
                 map.put("houseName", house.getHouseName());
-                map.put("imageUrl", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId()));
+                String image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null);
+                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+                if (CommonUtil.isEmpty(image)){
+                    house.setImage(address+image);
+                }else{
+                    house.setImage(address+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),0));
+                }
 //                serverResponse = designDataService.getConstructionPlans(house.getId());
 //                if (serverResponse.isSuccess()) {
 //                    QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
@@ -273,7 +279,12 @@ public class IndexPageService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         for (House house : houses) {
-            house.setImage(address+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId()));
+            String image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null);
+            if (CommonUtil.isEmpty(image)){
+                house.setImage(address+image);
+            }else{
+                house.setImage(address+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),0));
+            }
             house.setHouseId(house.getId());
         }
         return ServerResponse.createBySuccess("查询成功", houses);

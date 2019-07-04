@@ -33,7 +33,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         FROM
             dj_core_house_flow_apply_image
         WHERE
+        <if test="null=imageType and ''=imageType">
             image_type = 2
+        </if>
+        <if test="null!=imageType and ''!=imageType">
+            image_type = 0
+        </if>
         AND
             house_id=#{houseId}
         ORDER BY
