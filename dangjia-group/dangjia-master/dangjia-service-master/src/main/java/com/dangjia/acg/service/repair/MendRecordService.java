@@ -419,13 +419,13 @@ public class MendRecordService {
         List<Map<String, Object>> returnMap = new ArrayList<>();
         if (CommonUtil.isEmpty(type)) {
             getHouseFlowApplies(worker, roleType, houseId, 6, returnMap);
-            getOrderSplitList(houseId, 5, returnMap);
+            getOrderSplitList(houseId, 5, queryId, returnMap);
             getMendOrderList(worker, roleType, houseId, null, queryId, returnMap);
             sortMax(returnMap);
         } else if (type == 6) {
             getHouseFlowApplies(worker, roleType, houseId, type, returnMap);
         } else if (type == 5) {
-            getOrderSplitList(houseId, type, returnMap);
+            getOrderSplitList(houseId, type, queryId, returnMap);
         } else {
             getMendOrderList(worker, roleType, houseId, type, queryId, returnMap);
         }
@@ -476,6 +476,24 @@ public class MendRecordService {
             map.put("totalAmount", "¥" + String.format("%.2f", +mendOrder.getTotalAmount()));
             map.put("createDate", mendOrder.getCreateDate());
             map.put("type", mendOrder.getType());
+            switch (mendOrder.getType()) {
+                //0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料
+                case 0:
+                    map.put("name", "补材料记录");
+                    break;
+                case 1:
+                    map.put("name", "补人工记录");
+                    break;
+                case 2:
+                    map.put("name", "退材料记录");
+                    break;
+                case 3:
+                    map.put("name", "退人工记录");
+                    break;
+                case 4:
+                    map.put("name", "业主退材料记录");
+                    break;
+            }
             if (!CommonUtil.isEmpty(queryId)) {
                 if (mendOrder.getType() == 1 || mendOrder.getType() == 3) {
                     example = new Example(MendWorker.class);
@@ -502,7 +520,7 @@ public class MendRecordService {
         }
     }
 
-    private void getOrderSplitList(String houseId, Integer type, List<Map<String, Object>> returnMap) {
+    private void getOrderSplitList(String houseId, Integer type, String queryId, List<Map<String, Object>> returnMap) {
         Example example = new Example(OrderSplit.class);
         example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId)
                 .andNotEqualTo(OrderSplit.APPLY_STATUS, 0);
@@ -512,10 +530,22 @@ public class MendRecordService {
             Map<String, Object> map = new HashMap<>();
             map.put("mendOrderId", orderSplit.getId());
             map.put("number", orderSplit.getNumber());
+            map.put("name", "要货记录");
             map.put("state", orderSplit.getApplyStatus());
             map.put("createDate", orderSplit.getCreateDate());
             map.put("type", type);
-            returnMap.add(map);
+            if (!CommonUtil.isEmpty(queryId)) {
+                example = new Example(OrderSplitItem.class);
+                example.createCriteria()
+                        .andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId())
+                        .andEqualTo(OrderSplitItem.PRODUCT_ID, queryId);
+                List<OrderSplitItem> orderSplitItems = orderSplitItemMapper.selectByExample(example);
+                if (orderSplitItems.size() > 0) {
+                    returnMap.add(map);
+                }
+            } else {
+                returnMap.add(map);
+            }
         }
     }
 
@@ -538,12 +568,15 @@ public class MendRecordService {
             map.put("mendOrderId", houseFlowApply.getId());
             if (houseFlowApply.getApplyType() == 0) {
                 map.put("number", workerType.getName() + "每日完工审核");
+                map.put("name", workerType.getName() + "每日完工审核");
             }
             if (houseFlowApply.getApplyType() == 1) {
                 map.put("number", workerType.getName() + "阶段完工审核");
+                map.put("name", workerType.getName() + "阶段完工审核");
             }
             if (houseFlowApply.getApplyType() == 2) {
                 map.put("number", workerType.getName() + "整体完工审核");
+                map.put("name", workerType.getName() + "整体完工审核");
             }
             map.put("state", houseFlowApply.getApplyType());
             map.put("createDate", houseFlowApply.getCreateDate());
