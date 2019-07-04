@@ -1066,17 +1066,7 @@ public class HouseService {
         String jobLocationDetail = address + String.format(DjConstants.YZPageAddress.JOBLOCATIONDETAIL, "", house.getCityId(), "施工现场") + "&houseId=" + house.getId();
         shareDTO.setUrl(jobLocationDetail);
         shareDTO.setImageNum(0 + "张图片");
-        String image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null);
-        if (!CommonUtil.isEmpty(image)){
-            shareDTO.setImage(address+image);//户型图片
-        }else{
-            image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),0);
-            if (!CommonUtil.isEmpty(image)){
-                shareDTO.setImage(address+image);//户型图片
-            }else {
-                shareDTO.setImage(indexPageService.getHouseImage(house.getId()));//户型图片
-            }
-        }
+        shareDTO.setImage(address+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null));//户型图片
 //        ServerResponse serverResponse = designDataService.getPlaneMap(house.getId());
 //        if (serverResponse.isSuccess()) {
 //            QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();

@@ -112,25 +112,7 @@ public class IndexPageService {
                 house.setMoney(totalPrice);
                 Map map = BeanUtils.beanToMap(house);
                 map.put("houseName", house.getHouseName());
-                String image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null);
-                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-                if (!CommonUtil.isEmpty(image)){
-                   map.put("imageUrl",address+image);
-                }else{
-                    image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),0);
-                    if (!CommonUtil.isEmpty(image)) {
-                        map.put("imageUrl", address + image);
-                    }else {
-                        serverResponse = designDataService.getConstructionPlans(house.getId());
-                        if (serverResponse.isSuccess()) {
-                            QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
-                            List<QuantityRoomImages> images = quantityRoomDTO.getImages();
-                            if (images != null && images.size() > 0) {
-                                map.put("imageUrl", images.get(0).getImage() + "?x-image-process=image/resize,w_500,h_500/quality,q_80");
-                            }
-                        }
-                    }
-                }
+                map.put("imageUrl", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null));
                 houseMap.add(map);
             }
             pageResult.setList(houseMap);
@@ -299,7 +281,7 @@ public class IndexPageService {
         return ServerResponse.createBySuccess("查询成功", houses);
     }
 
-    public String getHouseImage(String id) {
+    private String getHouseImage(String id) {
         ServerResponse serverResponse = designDataService.getConstructionPlans(id);
         if (serverResponse.isSuccess()) {
             QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
