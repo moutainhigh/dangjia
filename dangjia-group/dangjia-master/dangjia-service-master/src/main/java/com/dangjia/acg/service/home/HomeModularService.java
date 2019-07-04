@@ -154,7 +154,8 @@ public class HomeModularService {
                     example.orderBy(HouseFlow.SORT).asc();
                     List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
                     if (houseFlows.size() > 0) {
-                        for (HouseFlow houseFlow : houseFlows) {
+                        for (int i = houseFlows.size() - 1; i >= 0; i--) {
+                            HouseFlow houseFlow = houseFlows.get(i);
                             example = new Example(RenovationStage.class);
                             example.createCriteria()
                                     .andEqualTo(RenovationStage.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
