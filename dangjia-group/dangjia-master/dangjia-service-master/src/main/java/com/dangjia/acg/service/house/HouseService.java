@@ -1064,7 +1064,7 @@ public class HouseService {
         shareDTO.setUrl(jobLocationDetail);
         shareDTO.setImageNum(0 + "张图片");
         String image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null);
-        if (CommonUtil.isEmpty(image)){
+        if (!CommonUtil.isEmpty(image)){
             shareDTO.setImage(address+image);//户型图片
         }else{
             shareDTO.setImage(address+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),0));//户型图片
