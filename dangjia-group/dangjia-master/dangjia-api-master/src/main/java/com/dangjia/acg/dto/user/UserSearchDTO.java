@@ -19,5 +19,6 @@ public class UserSearchDTO {
 
 	private String insertTimeEnd;
 
-
+	private String jobId;
+	private String departmentId;
 }

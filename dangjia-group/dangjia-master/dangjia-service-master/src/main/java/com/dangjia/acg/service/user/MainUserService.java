@@ -9,9 +9,12 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.user.UserRoleDTO;
 import com.dangjia.acg.dto.user.UserRolesVO;
 import com.dangjia.acg.dto.user.UserSearchDTO;
+import com.dangjia.acg.mapper.system.IDepartmentMapper;
+import com.dangjia.acg.mapper.system.IJobMapper;
 import com.dangjia.acg.mapper.user.RoleMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
-import com.dangjia.acg.mapper.user.UserRoleMapper;
+import com.dangjia.acg.modle.system.Department;
+import com.dangjia.acg.modle.system.Job;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.user.Role;
 import com.github.pagehelper.PageHelper;
@@ -38,8 +41,13 @@ public class MainUserService {
     private UserMapper userMapper;
     @Autowired
     private RoleMapper roleMapper;
+//    @Autowired
+//    private UserRoleMapper userRoleMapper;
     @Autowired
-    private UserRoleMapper userRoleMapper;
+    private IDepartmentMapper departmentMapper;
+
+    @Autowired
+    private IJobMapper jobMapper;
 
     /****
      * 注入配置
@@ -75,17 +83,11 @@ public class MainUserService {
         // 将角色名称提取到对应的字段中
         if (null != urList && urList.size() > 0) {
             for (UserRoleDTO ur : urList) {
-                List<Role> roles = roleMapper.getRoleByUserId(ur.getId());
-                if (null != roles && roles.size() > 0) {
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < roles.size(); i++) {
-                        Role r = roles.get(i);
-                        sb.append(r.getRoleName());
-                        if (i != (roles.size() - 1)) {
-                            sb.append("，");
-                        }
-                    }
-                    ur.setRoleNames(sb.toString());
+                if(!CommonUtil.isEmpty(ur.getDepartmentId())) {
+                    Department department = departmentMapper.selectByPrimaryKey(ur.getDepartmentId());
+                    Job job = jobMapper.selectByPrimaryKey(ur.getJobId());
+                    ur.setDepartmentName(department.getName());
+                    ur.setJobName(job.getName());
                 }
             }
         }

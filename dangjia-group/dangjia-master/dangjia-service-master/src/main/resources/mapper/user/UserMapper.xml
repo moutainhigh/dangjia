@@ -33,6 +33,12 @@
         <if test="userSearch.umobile!=null and userSearch.umobile!=''">
             AND mobile =#{userSearch.umobile}
         </if>
+        <if test="userSearch.jobId!=null and userSearch.jobId!=''">
+            AND job_id =#{userSearch.jobId}
+        </if>
+        <if test="userSearch.departmentId!=null and userSearch.departmentId!=''">
+            AND department_id =#{userSearch.departmentId}
+        </if>
         <if test="userSearch.uname!=null and userSearch.uname!=''">
             AND username like CONCAT('%',#{userSearch.uname},'%')
         </if>
