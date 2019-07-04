@@ -123,7 +123,7 @@ public class HomeModularService {
     }
 
     public ServerResponse getStrategyList(String userToken, PageDTO pageDTO) {
-        String workerTypeId = null;
+        List<String> workerTypeIds = null;
         if (!CommonUtil.isEmpty(userToken)) {
             Object object = constructionService.getMember(userToken);
             if (object instanceof Member) {
@@ -154,20 +154,25 @@ public class HomeModularService {
                     example.orderBy(HouseFlow.SORT).asc();
                     List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
                     if (houseFlows.size() > 0) {
-                        example = new Example(RenovationStage.class);
-                        example.createCriteria()
-                                .andEqualTo(RenovationStage.WORKER_TYPE_ID, houseFlows.get(houseFlows.size() - 1).getWorkerTypeId())
-                                .andEqualTo(RenovationStage.DATA_STATUS, 0);
-                        List<RenovationStage> rmList = renovationStageMapper.selectByExample(example);
-                        if (rmList.size() > 0) {
-                            workerTypeId = rmList.get(0).getId();
+                        for (HouseFlow houseFlow : houseFlows) {
+                            example = new Example(RenovationStage.class);
+                            example.createCriteria()
+                                    .andEqualTo(RenovationStage.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
+                                    .andEqualTo(RenovationStage.DATA_STATUS, 0);
+                            List<RenovationStage> rmList = renovationStageMapper.selectByExample(example);
+                            if (rmList.size() > 0) {
+                                if (workerTypeIds == null) {
+                                    workerTypeIds = new ArrayList<>();
+                                }
+                                workerTypeIds.add(rmList.get(0).getId());
+                            }
                         }
                     }
                 }
             }
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<RenovationManual> rmList = renovationManualMapper.getStrategyList(workerTypeId);
+        List<RenovationManual> rmList = renovationManualMapper.getStrategyList(workerTypeIds);
         if (rmList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
