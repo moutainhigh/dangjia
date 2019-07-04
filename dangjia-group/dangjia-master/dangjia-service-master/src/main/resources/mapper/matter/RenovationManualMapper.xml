@@ -52,7 +52,7 @@
         AND data_status = 0
         <if test="workerTypeIds!=null">
             ORDER BY
-            <foreach collection="workerTypeIds" item="item" index="index" separator=",">
+            <foreach collection="workerTypeIds" item="item" index="index">
                 FIELD(c.worker_type_id, #{item}) DESC,
             </foreach>
             num desc
