@@ -417,10 +417,10 @@ public class MendRecordService {
         }
         Member worker = (Member) object;
         List<Map<String, Object>> returnMap = new ArrayList<>();
-        if (CommonUtil.isEmpty(type)) {
+        if (CommonUtil.isEmpty(type) || type == -1) {
             getHouseFlowApplies(worker, roleType, houseId, 6, returnMap);
-            getOrderSplitList(houseId, 5, queryId, returnMap);
-            getMendOrderList(worker, roleType, houseId, null, queryId, returnMap);
+//            getOrderSplitList(houseId, 5, queryId, returnMap);
+            getMendOrderList(worker, roleType, houseId, 2, queryId, returnMap);
             sortMax(returnMap);
         } else if (type == 6) {
             getHouseFlowApplies(worker, roleType, houseId, type, returnMap);
