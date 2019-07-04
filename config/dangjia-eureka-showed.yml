@@ -6,7 +6,7 @@ eureka:
     eviction-interval-timer-in-ms: 3000
     enable-self-preservation: false
   instance:
-    hostname: 192.168.0.83
+    hostname: 192.168.0.48
   client:
     registerWithEureka: false
     fetchRegistry: false
