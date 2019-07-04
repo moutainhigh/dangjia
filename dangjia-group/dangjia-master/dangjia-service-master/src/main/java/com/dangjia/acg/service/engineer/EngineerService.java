@@ -362,7 +362,7 @@ public class EngineerService {
             map.put("workSteta", houseFlow.getWorkSteta());
             map.put("EndTime",null);
             if(houseFlow.getWorkSteta()==2){
-                map.put(" EndTime",houseFlow.getModifyDate());
+                map.put("EndTime",houseFlow.getModifyDate());
             }
             map.put("payState", hwo.getPayState());//0未支付，1已经支付
             map.put("retentionMoney", hwo.getRetentionMoney());//此单滞留金
