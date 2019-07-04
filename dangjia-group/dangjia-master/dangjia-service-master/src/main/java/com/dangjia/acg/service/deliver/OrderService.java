@@ -210,13 +210,13 @@ public class OrderService {
     /**
      * 业务订单列表
      */
-    public ServerResponse businessOrderList(String userToken) {
+    public ServerResponse businessOrderList(String userToken, String queryId) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
         Member member = (Member) object;
-        List<BusinessOrder> businessOrderList = businessOrderMapper.byMemberId(member.getId());
+        List<BusinessOrder> businessOrderList = businessOrderMapper.byMemberId(member.getId(), queryId);
         List<BusinessOrderDTO> businessOrderDTOS = new ArrayList<>();
         for (BusinessOrder businessOrder : businessOrderList) {
             BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
@@ -240,6 +240,9 @@ public class OrderService {
                     break;
                 case 7:
                     info = "(设计/精算单)";
+                    break;
+                case 8:
+                    info = "(未购买单)";
                     break;
             }
             if (businessOrder.getType() == 5) {//验房分销
