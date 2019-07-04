@@ -21,10 +21,10 @@ spring:
     filters: stat,wall,log4j
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
   redis:
-    database: 0
-    host: 192.168.0.83
+    database: 1
+    host: 192.168.0.245
     port: 6379
-    password:
+    password: Fengjiang123!
     pool:
       max-active: -1
       max-wait: -1
