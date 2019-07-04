@@ -476,6 +476,24 @@ public class MendRecordService {
             map.put("totalAmount", "¥" + String.format("%.2f", +mendOrder.getTotalAmount()));
             map.put("createDate", mendOrder.getCreateDate());
             map.put("type", mendOrder.getType());
+            switch (mendOrder.getType()) {
+                //0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料
+                case 0:
+                    map.put("name", "补材料记录");
+                    break;
+                case 1:
+                    map.put("name", "补人工记录");
+                    break;
+                case 2:
+                    map.put("name", "退材料记录");
+                    break;
+                case 3:
+                    map.put("name", "退人工记录");
+                    break;
+                case 4:
+                    map.put("name", "业主退材料记录");
+                    break;
+            }
             if (!CommonUtil.isEmpty(queryId)) {
                 if (mendOrder.getType() == 1 || mendOrder.getType() == 3) {
                     example = new Example(MendWorker.class);
@@ -512,6 +530,7 @@ public class MendRecordService {
             Map<String, Object> map = new HashMap<>();
             map.put("mendOrderId", orderSplit.getId());
             map.put("number", orderSplit.getNumber());
+            map.put("name", "要货记录");
             map.put("state", orderSplit.getApplyStatus());
             map.put("createDate", orderSplit.getCreateDate());
             map.put("type", type);
@@ -549,12 +568,15 @@ public class MendRecordService {
             map.put("mendOrderId", houseFlowApply.getId());
             if (houseFlowApply.getApplyType() == 0) {
                 map.put("number", workerType.getName() + "每日完工审核");
+                map.put("name", workerType.getName() + "每日完工审核");
             }
             if (houseFlowApply.getApplyType() == 1) {
                 map.put("number", workerType.getName() + "阶段完工审核");
+                map.put("name", workerType.getName() + "阶段完工审核");
             }
             if (houseFlowApply.getApplyType() == 2) {
                 map.put("number", workerType.getName() + "整体完工审核");
+                map.put("name", workerType.getName() + "整体完工审核");
             }
             map.put("state", houseFlowApply.getApplyType());
             map.put("createDate", houseFlowApply.getCreateDate());
