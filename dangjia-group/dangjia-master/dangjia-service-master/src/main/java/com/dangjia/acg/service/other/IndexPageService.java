@@ -114,7 +114,7 @@ public class IndexPageService {
                 map.put("houseName", house.getHouseName());
                 String image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null);
                 String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-                if (CommonUtil.isEmpty(image)){
+                if (!CommonUtil.isEmpty(image)){
                     house.setImage(address+image);
                 }else{
                     house.setImage(address+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),0));
@@ -280,7 +280,7 @@ public class IndexPageService {
         }
         for (House house : houses) {
             String image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null);
-            if (CommonUtil.isEmpty(image)){
+            if (!CommonUtil.isEmpty(image)){
                 house.setImage(address+image);
             }else{
                 house.setImage(address+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),0));
