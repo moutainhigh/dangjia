@@ -51,11 +51,10 @@
         state = 0
         AND data_status = 0
         <if test="workerTypeIds!=null">
-            ORDER BY FIELD(c.worker_type_id,
-            <foreach collection="workerTypeIds" item="workerTypeId" index="index" separator=",">
-                #{workerTypeId}
+            ORDER BY
+            <foreach collection="workerTypeIds" item="item" index="index" separator=",">
+                FIELD(c.worker_type_id, #{item}) DESC,
             </foreach>
-            ) DESC,
             num desc
         </if>
         <if test="workerTypeIds ==null or workerTypeIds ==''">
