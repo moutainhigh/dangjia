@@ -173,7 +173,8 @@ public class HomeModularService {
             }
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<RenovationManual> rmList = renovationManualMapper.getStrategyList(workerTypeIds);
+        List<RenovationManual> rmList = renovationManualMapper.getStrategyList(workerTypeIds==null?null
+                :workerTypeIds.toArray(new String[workerTypeIds.size()]));
         if (rmList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
