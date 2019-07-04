@@ -212,13 +212,12 @@ public class PurchaseOrderService {
      */
     private double getTotalPrice(String[] ids) {
         double totalPrice = 0d;
-        for (String id : ids) {
-            BudgetMaterial bm = budgetMaterialMapper.selectByPrimaryKey(id);
+        Example example = new Example(BudgetMaterial.class);
+        example.createCriteria().andIn(BudgetMaterial.ID,  Arrays.asList(ids));
+        List<BudgetMaterial> budgetMaterials = budgetMaterialMapper.selectByExample(example);
+        for (BudgetMaterial bm : budgetMaterials) {
             if (bm != null) {
-                Product product = productMapper.selectByPrimaryKey(bm.getProductId());
-                if (product != null) {
-                    totalPrice = totalPrice + product.getPrice() * bm.getConvertCount();
-                }
+                totalPrice = totalPrice + bm.getTotalPrice();
             }
         }
         return totalPrice;
