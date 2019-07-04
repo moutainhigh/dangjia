@@ -58,12 +58,14 @@ public class PurchaseOrderService {
         if (budgetMaterialList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
+        String address=configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        String appAddress=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
         Map<String, Object> datas = new HashMap<>();
         PurchaseOrder purchaseOrder = getPurchaseOrderExample(houseId, true);
         String[] ids = purchaseOrder.getBudgetIds().split(",");
         List<FlowActuaryDTO> flowActuaryDTOList = new ArrayList<>();
         for (BudgetMaterial bm : budgetMaterialList) {
-            FlowActuaryDTO flowActuaryDTO = getFlowActuaryDTO(bm);
+            FlowActuaryDTO flowActuaryDTO = getFlowActuaryDTO( address, appAddress,bm);
             boolean flag = Arrays.asList(ids).contains(bm.getId());
             flowActuaryDTO.setSelection(flag ? 1 : 0);
             flowActuaryDTOList.add(flowActuaryDTO);
@@ -74,7 +76,7 @@ public class PurchaseOrderService {
         return ServerResponse.createBySuccess("查询成功", datas);
     }
 
-    private FlowActuaryDTO getFlowActuaryDTO(BudgetMaterial bm) {
+    private FlowActuaryDTO getFlowActuaryDTO(String address,String appAddress,BudgetMaterial bm) {
         Goods goods = goodsMapper.selectByPrimaryKey(bm.getGoodsId());
         Product product = productMapper.selectByPrimaryKey(bm.getProductId());
         FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
@@ -83,14 +85,11 @@ public class PurchaseOrderService {
         String convertUnitName = bm.getUnitName();
         if (product != null) {
             flowActuaryDTO.setId(product.getId());
-            flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
-            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                    String.format(DjConstants.YZPageAddress.COMMODITY, "", "",
-                            flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + 2;
+            flowActuaryDTO.setImage(address + product.getImage());
+            String url = appAddress + String.format(DjConstants.YZPageAddress.COMMODITY, "", "",flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + 2;
             flowActuaryDTO.setUrl(url);
             flowActuaryDTO.setAttribute(actuaryOperationService.getAttributes(product));//拼接属性品牌
-            convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
-            flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
+            flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" +  bm.getUnitName());
             flowActuaryDTO.setTotalPrice(product.getPrice() * bm.getConvertCount());
         }
         flowActuaryDTO.setShopCount(bm.getShopCount());
@@ -151,18 +150,18 @@ public class PurchaseOrderService {
         if (purchaseOrder == null) {
             return null;
         }
+        String address=configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        String appAddress=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
         String[] ids = purchaseOrder.getBudgetIds().split(",");
         List<FlowActuaryDTO> flowActuaryDTOList = new ArrayList<>();
-
+        Example example = new Example(BudgetMaterial.class);
+        example.createCriteria().andIn(BudgetMaterial.ID,  Arrays.asList(ids));
+        List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.selectByExample(example);
         double totalPrice = 0d;
-        for (String id : ids) {
-            BudgetMaterial bm = budgetMaterialMapper.selectByPrimaryKey(id);
+        for (BudgetMaterial bm : budgetMaterialList) {
             if (bm != null) {
-                Product product = productMapper.selectByPrimaryKey(bm.getProductId());
-                if (product != null) {
-                    totalPrice = totalPrice + product.getPrice() * bm.getConvertCount();
-                }
-                flowActuaryDTOList.add(getFlowActuaryDTO(bm));
+                totalPrice = totalPrice + bm.getTotalPrice();
+                flowActuaryDTOList.add(getFlowActuaryDTO(address,appAddress,bm));
             }
         }
         if (flowActuaryDTOList.size() <= 0) {
