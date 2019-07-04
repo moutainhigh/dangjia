@@ -29,7 +29,7 @@
         LEFT JOIN dj_deliver_order_item AS oi ON oi.order_id = o.id
         where bo.member_id = #{memberId} and bo.state !=1
         <if test="queryId!=null and queryId!=''">
-            and oi.product_id = #{queryId}
+            and (oi.product_id = #{queryId} or oi.worker_goods_id = #{queryId})
         </if>
         ORDER BY bo.create_date desc
     </select>
