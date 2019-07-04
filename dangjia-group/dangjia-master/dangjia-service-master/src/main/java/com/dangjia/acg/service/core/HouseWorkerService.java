@@ -200,7 +200,7 @@ public class HouseWorkerService {
             map.put("workerName", workerType.getName());
             map.put("houseFlowId", houseFlow.getId());
             map.put("houseWorkerId", houseWorker.getId());
-            map.put("isSubstitution", houseWorker.getWorkType() == 1 ? 1 : 0);
+            map.put("isSubstitution", houseWorker.getWorkType() == 2 ? 0 : 1);
             mapData.put("houseWorker", map);
         }
         Example example = new Example(HouseWorker.class);

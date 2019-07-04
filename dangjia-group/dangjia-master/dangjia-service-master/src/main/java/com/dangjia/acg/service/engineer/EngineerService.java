@@ -360,7 +360,7 @@ public class EngineerService {
             map.put("mobile", worker.getMobile());
             map.put("createDate", houseFlow.getCreateDate());
             map.put("workSteta", houseFlow.getWorkSteta());
-            map.put(" EndTime",null);
+            map.put("EndTime",null);
             if(houseFlow.getWorkSteta()==2){
                 map.put(" EndTime",houseFlow.getModifyDate());
             }
