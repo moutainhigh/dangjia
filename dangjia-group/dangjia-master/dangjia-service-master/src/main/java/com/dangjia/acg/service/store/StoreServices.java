@@ -3,6 +3,7 @@ package com.dangjia.acg.service.store;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreSubscribeMapper;
@@ -168,10 +169,10 @@ public class StoreServices {
      * @return
      */
     public ServerResponse IndexqueryStore(String cityId,String latitude, String longitude) {
-            if (StringUtil.isEmpty(latitude)) {
+            if (CommonUtil.isEmpty(latitude)) {
                 latitude = "28.228259";
             }
-            if (StringUtil.isEmpty(longitude)) {
+            if (CommonUtil.isEmpty(longitude)) {
                 longitude = "112.938904";
             }
             List<Store> stores = iStoreMapper.IndexqueryStore(cityId,latitude, longitude);
