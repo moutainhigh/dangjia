@@ -757,14 +757,15 @@ public class MendRecordService {
             example.createCriteria().andEqualTo(MendOrderCheck.MEND_ORDER_ID, mendOrderId);
             List<MendOrderCheck> mendOrderChecks = mendOrderCheckMapper.selectByExample(example);
             boolean flag = false;
-            for (MendOrderCheck m : mendOrderChecks) {
-                //0处理中,1未通过,2已通过 3已撤回
-                if (m.getState() == 0) {
-                    flag = true;
-                }
-            }
-            if (mendOrderChecks == null || mendOrderChecks.size() == 0) {
+            if (mendOrderChecks.size() <= 0) {
                 flag = true;
+            } else {
+                for (MendOrderCheck m : mendOrderChecks) {
+                    //0处理中,1未通过,2已通过 3已撤回
+                    if (m.getState() == 0) {
+                        flag = true;
+                    }
+                }
             }
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
             //"0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回"
