@@ -26,7 +26,8 @@ public interface OrderAPI {
 
     @PostMapping("app/order/businessOrderList")
     @ApiOperation(value = "订单列表", notes = "订单列表")
-    ServerResponse businessOrderList(String userToken);
+    ServerResponse businessOrderList(@RequestParam("userToken") String userToken,
+                                     @RequestParam("queryId") String queryId);
 
     @PostMapping("app/deliver/order/confirmOrderSplit")
     @ApiOperation(value = "管家确认要货", notes = "管家确认要货")
