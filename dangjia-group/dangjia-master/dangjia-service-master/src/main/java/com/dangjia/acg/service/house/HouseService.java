@@ -55,6 +55,7 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.design.DesignDataService;
 import com.dangjia.acg.service.member.GroupInfoService;
+import com.dangjia.acg.service.other.IndexPageService;
 import com.dangjia.acg.util.HouseUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -148,6 +149,8 @@ public class HouseService {
     private IHouseChoiceCaseMapper iHouseChoiceCaseMapper;
     @Autowired
     private IWorkDepositMapper workDepositMapper;
+    @Autowired
+    private IndexPageService indexPageService;
     protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
 
     /**
@@ -1067,7 +1070,12 @@ public class HouseService {
         if (!CommonUtil.isEmpty(image)){
             shareDTO.setImage(address+image);//户型图片
         }else{
-            shareDTO.setImage(address+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),0));//户型图片
+            image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),0);
+            if (!CommonUtil.isEmpty(image)){
+                shareDTO.setImage(address+image);//户型图片
+            }else {
+                shareDTO.setImage(indexPageService.getHouseImage(house.getId()));//户型图片
+            }
         }
 //        ServerResponse serverResponse = designDataService.getPlaneMap(house.getId());
 //        if (serverResponse.isSuccess()) {
