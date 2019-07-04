@@ -147,6 +147,7 @@ public class SystemServices {
             Example example=new Example(Job.class);
             Example.Criteria criteria= example.createCriteria();
             criteria.andEqualTo(Job.CODE,job.getCode());
+            criteria.andNotEqualTo(Job.ID,job.getId());
             List<Job> jobs = jobMapper.selectByExample(example);
             if (jobs.size()>0) {
                 return ServerResponse.createByErrorMessage("岗位编号不能重复");
@@ -156,6 +157,7 @@ public class SystemServices {
             Example example=new Example(Job.class);
             Example.Criteria criteria= example.createCriteria();
                 criteria.andEqualTo(Job.NAME,job.getName());
+                criteria.andNotEqualTo(Job.ID,job.getId());
             List<Job> jobs = jobMapper.selectByExample(example);
             if (jobs.size()>0) {
                 return ServerResponse.createByErrorMessage("岗位名称不能重复");
@@ -175,7 +177,7 @@ public class SystemServices {
             // 删除之前的角色
             Example example=new Example(JobRole.class);
             example.createCriteria().andEqualTo(JobRole.JOB_ID,job.getId());
-            this.jobMapper.deleteByExample(example);
+            this.jobRoleMapper.deleteByExample(example);
             jobId=job.getId();
         } else {
             // 新增用户
