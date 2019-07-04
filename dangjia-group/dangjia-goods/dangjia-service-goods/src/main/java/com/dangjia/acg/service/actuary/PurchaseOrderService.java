@@ -179,8 +179,10 @@ public class PurchaseOrderService {
             return budgetMaterialList;
         }
         String[] ids = purchaseOrder.getBudgetIds().split(",");
-        for (String id : ids) {
-            BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(id);
+        Example example = new Example(BudgetMaterial.class);
+        example.createCriteria().andIn(BudgetMaterial.ID,  Arrays.asList(ids));
+        List<BudgetMaterial> budgetMaterials = budgetMaterialMapper.selectByExample(example);
+        for (BudgetMaterial budgetMaterial : budgetMaterials) {
             Product product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());
             if (product != null) {
                 budgetMaterial.setModifyDate(new Date());
