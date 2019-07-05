@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.app.deliver;
 
 import com.dangjia.acg.api.app.deliver.OrderAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.deliver.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +40,8 @@ public class OrderController implements OrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse businessOrderList(String userToken, String queryId) {
-        return orderService.businessOrderList(userToken, queryId);
+    public ServerResponse businessOrderList(PageDTO pageDTO, String userToken, String queryId) {
+        return orderService.businessOrderList(pageDTO, userToken, queryId);
     }
 
     /**
