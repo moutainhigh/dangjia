@@ -161,11 +161,16 @@ public class HomeModularService {
                                     .andEqualTo(RenovationStage.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
                                     .andEqualTo(RenovationStage.DATA_STATUS, 0);
                             List<RenovationStage> rmList = renovationStageMapper.selectByExample(example);
-                            if (rmList.size() > 0) {
-                                if (workerTypeIds == null) {
-                                    workerTypeIds = new ArrayList<>();
+                            if(house.getDesignerOk()==0||house.getBudgetOk()==0&&house.getVisitState()==0){
+                                workerTypeIds.add("1");
+                                workerTypeIds.add("2");
+                            }else if(house.getVisitState()==1) {
+                                if (rmList.size() > 0) {
+                                    if (workerTypeIds == null) {
+                                        workerTypeIds = new ArrayList<>();
+                                    }
+                                    workerTypeIds.add(rmList.get(0).getId());
                                 }
-                                workerTypeIds.add(rmList.get(0).getId());
                             }
                         }
                     }

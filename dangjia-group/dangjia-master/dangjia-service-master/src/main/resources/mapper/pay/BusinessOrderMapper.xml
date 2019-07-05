@@ -23,7 +23,20 @@
     <!-- 根据memberId查询 -->
     <select id="byMemberId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.pay.BusinessOrder">
         SELECT
-        <include refid="all_columns"/>
+        bo.id,
+        bo.member_id as memberId,
+        bo.number,
+        bo.pay_order_number as payOrderNumber,
+        bo.house_id as houseId,
+        bo.task_id as taskId,
+        bo.state,
+        bo.total_price as totalPrice,
+        bo.discounts_price as discountsPrice,
+        bo.pay_price as payPrice,
+        bo.type,
+        bo.data_status as dataStatus,
+        bo.create_date as createDate,
+        bo.modify_date as modifyDate
         FROM dj_pay_business_order bo
         LEFT JOIN dj_deliver_order AS o ON o.business_order_number = bo.id
         LEFT JOIN dj_deliver_order_item AS oi ON oi.order_id = o.id
