@@ -17,7 +17,6 @@ import com.dangjia.acg.modle.system.Department;
 import com.dangjia.acg.modle.system.Job;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.user.Role;
-import com.dangjia.acg.modle.user.UserRoleKey;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -123,11 +122,11 @@ public class MainUserService {
                 return ServerResponse.createByErrorMessage("该用户名已经存在");
             }
         }
-        String userId;
+//        String userId;
         if (user.getId() != null) {
             MainUser dataUser = this.userMapper.selectByPrimaryKey(user.getId());
             // 更新用户
-            userId = user.getId();
+//            userId = user.getId();
             user.setModifyDate(new Date());
             // 设置加密密码
             if (!StringUtils.isEmpty(user.getPassword())) {
@@ -139,13 +138,13 @@ public class MainUserService {
                 user.setMobile(dataUser.getMobile());
             }
             this.userMapper.updateByPrimaryKeySelective(user);
-            // 删除之前的角色
-            List<UserRoleKey> urs = this.userRoleMapper.findByUserId(userId);
-            if (null != urs && urs.size() > 0) {
-                for (UserRoleKey ur : urs) {
-                    this.userRoleMapper.deleteByPrimaryKey(ur);
-                }
-            }
+//            // 删除之前的角色
+//            List<UserRoleKey> urs = this.userRoleMapper.findByUserId(userId);
+//            if (null != urs && urs.size() > 0) {
+//                for (UserRoleKey ur : urs) {
+//                    this.userRoleMapper.deleteByPrimaryKey(ur);
+//                }
+//            }
             // 如果是自己，修改完成之后，直接退出；重新登录
             MainUser adminUser = redisClient.getCache(Constants.USER_KEY + user.getId(), MainUser.class);
             if (adminUser != null
@@ -169,16 +168,16 @@ public class MainUserService {
                 user.setPassword(DigestUtils.md5Hex("654321"));
             }
             this.userMapper.insert(user);
-            userId = user.getId();
+//            userId = user.getId();
         }
-        // 给用户授角色
-        String[] arrays = roleIds.split(",");
-        for (String roleId : arrays) {
-            UserRoleKey urk = new UserRoleKey();
-            urk.setRoleId(roleId);
-            urk.setUserId(userId);
-            this.userRoleMapper.insert(urk);
-        }
+//        // 给用户授角色
+//        String[] arrays = roleIds.split(",");
+//        for (String roleId : arrays) {
+//            UserRoleKey urk = new UserRoleKey();
+//            urk.setRoleId(roleId);
+//            urk.setUserId(userId);
+//            this.userRoleMapper.insert(urk);
+//        }
         return ServerResponse.createBySuccessMessage("ok");
     }
 
@@ -206,15 +205,15 @@ public class MainUserService {
             user.setPassword(DigestUtils.md5Hex("654321"));
         }
         this.userMapper.insert(user);
-        String userId = user.getId();
-        // 给用户授角色
-        String[] arrays = roleIds.split(",");
-        for (String roleId : arrays) {
-            UserRoleKey urk = new UserRoleKey();
-            urk.setRoleId(roleId);
-            urk.setUserId(userId);
-            this.userRoleMapper.insert(urk);
-        }
+//        String userId = user.getId();
+//        // 给用户授角色
+//        String[] arrays = roleIds.split(",");
+//        for (String roleId : arrays) {
+//            UserRoleKey urk = new UserRoleKey();
+//            urk.setRoleId(roleId);
+//            urk.setUserId(userId);
+//            this.userRoleMapper.insert(urk);
+//        }
         return ServerResponse.createBySuccessMessage("ok");
     }
 
