@@ -1,6 +1,5 @@
 package com.dangjia.acg.service;
 
-import com.github.pagehelper.PageHelper;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageBean;
@@ -8,6 +7,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.mapper.IConfigMapper;
 import com.dangjia.acg.model.Config;
+import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
