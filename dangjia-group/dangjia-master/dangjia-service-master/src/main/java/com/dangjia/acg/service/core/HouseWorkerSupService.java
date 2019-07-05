@@ -270,7 +270,7 @@ public class HouseWorkerSupService {
     public ServerResponse getShutdownWorkerType(String houseId) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Example example = new Example(HouseFlow.class);
-        example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andCondition(" worker_type>3 and  work_steta not in (1,2,6) ");
+        example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andCondition(" worker_type>3 and state=0 and work_steta not in (1,2,6) ");
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         List listtype=new ArrayList();
         for (HouseFlow flow : houseFlowList) {
