@@ -396,8 +396,9 @@ public class ActuaryOperationService {
             }
             List<AttributeDTO> attrList = getAllAttributes(product, productList, imageList);
             goodsDTO.setAttrList(attrList);
+            String img=StringUtils.join(imageList,",");
             imageList.remove(0);
-            imageList.add(0,imageList.toString());
+            imageList.add(0,img);
             goodsDTO.setImageList(imageList);
 
             return goodsDTO;
