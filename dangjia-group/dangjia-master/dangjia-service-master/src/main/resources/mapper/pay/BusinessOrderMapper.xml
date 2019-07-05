@@ -47,6 +47,8 @@
         <if test="queryId!=null and queryId!=''">
             and (oi.product_id = #{queryId} or oi.worker_goods_id = #{queryId})
         </if>
+        GROUP BY
+        bo.id
         ORDER BY bo.create_date desc
     </select>
 
