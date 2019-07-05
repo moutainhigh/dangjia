@@ -605,26 +605,29 @@ public class ActuaryOperationService {
                     Brand brand = iBrandMapper.selectByPrimaryKey(atId.getBrandId());
                     strbuf.append(brand.getName()).append(" ");
                 }
-                if (atId.getId().equals(product.getId())) {//如果包含该属性
+
                     if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
                         strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
-                        String[] strAtIdArr = atId.getValueIdArr().split(",");
-                        for (String atValId : strAtIdArr) {
-                            AttributeValue strVIs = iAttributeValueMapper.selectByPrimaryKey(atValId);
-                            if (strVIs != null && !CommonUtil.isEmpty(strVIs.getImage())) {
-                                imageList.add(getImage(strVIs.getImage()));//属性图
+                        if (atId.getId().equals(product.getId())) {//如果包含该属性
+                            String[] strAtIdArr = atId.getValueIdArr().split(",");
+                            for (String atValId : strAtIdArr) {
+                                AttributeValue strVIs = iAttributeValueMapper.selectByPrimaryKey(atValId);
+                                if (strVIs != null && !CommonUtil.isEmpty(strVIs.getImage())) {
+                                    imageList.add(getImage(strVIs.getImage()));//属性图
+                                }
                             }
                         }
                     }
                     if (!CommonUtil.isEmpty(atId.getBrandSeriesId())) {
                         BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(atId.getBrandSeriesId());
                         strbuf.append(brandSeries.getName()).append(" ");
-                        if (!CommonUtil.isEmpty(brandSeries.getImage())) {
-                            imageList.add(getImage(brandSeries.getImage()));//属性图
+                        if (atId.getId().equals(product.getId())) {//如果包含该属性
+                            if (!CommonUtil.isEmpty(brandSeries.getImage())) {
+                                imageList.add(getImage(brandSeries.getImage()));//属性图
+                            }
                         }
                     }
 
-                }
                 AttributeValueDTO avDTO = new AttributeValueDTO();
                 avDTO.setAttributeValueId(atId.getId());
                 avDTO.setName(strbuf.toString().trim());
