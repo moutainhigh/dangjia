@@ -9,9 +9,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.FlowActuaryDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IPurchaseOrderMapper;
-import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
-import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.PurchaseOrder;
 import com.dangjia.acg.modle.basics.Product;
@@ -35,15 +33,11 @@ public class PurchaseOrderService {
     @Autowired
     private IBudgetMaterialMapper budgetMaterialMapper;
     @Autowired
-    private IGoodsMapper goodsMapper;
-    @Autowired
     private IProductMapper productMapper;
     @Autowired
     private ActuaryOperationService actuaryOperationService;
     @Autowired
     private ConfigUtil configUtil;
-    @Autowired
-    private IUnitMapper iUnitMapper;
 
     public ServerResponse getBudgetMaterialList(String houseId) {
         if (CommonUtil.isEmpty(houseId)) {
