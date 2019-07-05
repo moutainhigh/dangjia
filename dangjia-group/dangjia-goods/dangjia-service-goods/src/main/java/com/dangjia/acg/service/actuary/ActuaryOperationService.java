@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
-import tk.mybatis.mapper.util.StringUtil;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -289,7 +288,7 @@ public class ActuaryOperationService {
      * 商品详情
      * gId:  WorkerGoodsId   ProductId
      */
-    public ServerResponse getGoodsDetail(String gId, String cityId, int type) {
+    public ServerResponse getGoodsDetail(String gId, int type) {
         try {
             if (type == 1 || type == 4) {//人工
                 WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
@@ -407,17 +406,13 @@ public class ActuaryOperationService {
 
     //取第一张图
     private String getImage(String images) {
-        try {
-            if (StringUtil.isNotEmpty(images)) {
-                String[] imageArr = images.split(",");
-                for (int i = 0; i < imageArr.length; i++) {
-                    imageArr[i] = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + imageArr[i];
-                }
-                return StringUtils.join(imageArr, ",");
+        if (!CommonUtil.isEmpty(images)) {
+            String[] imageArr = images.split(",");
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            for (int i = 0; i < imageArr.length; i++) {
+                imageArr[i] = imageAddress + imageArr[i];
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";//图片上传错误
+            return StringUtils.join(imageArr, ",");
         }
         return "";//暂无图片
     }
@@ -506,7 +501,7 @@ public class ActuaryOperationService {
 //                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO, userToken,
 ////                            cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + budgetMaterial.getId() + "&type=2";
 ////                    flowActuaryDTO.setUrl(url);
-                    flowActuaryDTO.setAttribute(getAttributes(product));//拼接属性品牌
+                    flowActuaryDTO.setAttribute(getAttributes(mendMateriel.getProductId()));//拼接属性品牌
 
                     Unit convertUnit = iUnitMapper.selectByPrimaryKey(product.getConvertUnit());
                     flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnit.getName());
@@ -553,7 +548,7 @@ public class ActuaryOperationService {
                                     String.format(DjConstants.YZPageAddress.COMMODITY, userToken,
                                             cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + type;
                             flowActuaryDTO.setUrl(url);
-                            flowActuaryDTO.setAttribute(getAttributes(product));//拼接属性品牌
+                            flowActuaryDTO.setAttribute(getAttributes(product.getId()));//拼接属性品牌
 //                        flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + product.getUnitName());
                             convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
 //                        flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName());
@@ -587,17 +582,10 @@ public class ActuaryOperationService {
     }
 
     //拼接属性品牌
-    public String getAttributes(Product product) {
-        String attributes = product.getValueNameArr();
-        if (attributes == null) {
-            attributes = "";
-        }
-        BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(product.getBrandSeriesId());
-        if (brandSeries != null) {
-            attributes = attributes + " " + brandSeries.getName();
-        }
+    String getAttributes(String productId) {
+        String  attributes = iBrandSeriesMapper.getAttributesName(productId);
         if (CommonUtil.isEmpty(attributes)) {
-            return "无";
+            return "";
         }
         return attributes.replaceAll(",", " ");
     }
@@ -616,27 +604,22 @@ public class ActuaryOperationService {
                 if (!CommonUtil.isEmpty(atId.getBrandId())) {
                     Brand brand = iBrandMapper.selectByPrimaryKey(atId.getBrandId());
                     strbuf.append(brand.getName()).append(" ");
-
                 }
-                if (!CommonUtil.isEmpty(atId.getBrandSeriesId())) {
-                    BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(atId.getBrandSeriesId());
-                    strbuf.append(brandSeries.getName()).append(" ");
-                    if (atId.getId().equals(product.getId())) {//如果包含该属性
-                        if (StringUtils.isNoneBlank(brandSeries.getImage())) {
+                if (atId.getId().equals(product.getId())) {//如果包含该属性
+                    if (!CommonUtil.isEmpty(atId.getBrandSeriesId())) {
+                        BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(atId.getBrandSeriesId());
+                        strbuf.append(brandSeries.getName()).append(" ");
+                        if (!CommonUtil.isEmpty(brandSeries.getImage())) {
                             imageList.add(getImage(brandSeries.getImage()));//属性图
                         }
                     }
-                }
-                if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
-                    strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
-                    if (atId.getId().equals(product.getId())) {//如果包含该属性
+                    if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
+                        strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
                         String[] strAtIdArr = atId.getValueIdArr().split(",");
-                        if (StringUtils.isNoneBlank(strAtIdArr)) {
-                            for (String atValId : strAtIdArr) {
-                                AttributeValue strVIs = iAttributeValueMapper.selectByPrimaryKey(atValId);
-                                if (strVIs != null && StringUtils.isNoneBlank(strVIs.getImage())) {
-                                    imageList.add(getImage(strVIs.getImage()));//属性图
-                                }
+                        for (String atValId : strAtIdArr) {
+                            AttributeValue strVIs = iAttributeValueMapper.selectByPrimaryKey(atValId);
+                            if (strVIs != null && !CommonUtil.isEmpty(strVIs.getImage())) {
+                                imageList.add(getImage(strVIs.getImage()));//属性图
                             }
                         }
                     }

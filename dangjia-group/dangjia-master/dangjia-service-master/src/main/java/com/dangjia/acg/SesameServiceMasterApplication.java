@@ -1,5 +1,7 @@
 package com.dangjia.acg;
 
+import com.dangjia.acg.service.ConfigService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.cloud.client.SpringCloudApplication;
@@ -25,7 +27,8 @@ public class SesameServiceMasterApplication implements CommandLineRunner {
     return new RestTemplate();
   }
 
-
+  @Autowired
+  private ConfigService configService;
   public static void main(String[] args) {
     SpringApplication.run(SesameServiceMasterApplication.class, args);
   }
@@ -88,6 +91,7 @@ public class SesameServiceMasterApplication implements CommandLineRunner {
             "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n";
     System.out.println(log);
     System.out.println("启动完成！！！");
+    configService.cacheConfig();
   }
 
 

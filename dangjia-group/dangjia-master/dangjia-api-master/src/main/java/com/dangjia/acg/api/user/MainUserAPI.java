@@ -37,7 +37,8 @@ public interface MainUserAPI {
     @ApiOperation(value = "分页查询用户列表", notes = "分页查询用户列表")
     ServerResponse getUsers(@RequestParam("request") HttpServletRequest request,
                             @RequestParam("pageDTO") PageDTO pageDTO,
-                            @RequestParam("userSearch") UserSearchDTO userSearch);
+                            @RequestParam("userSearch") UserSearchDTO userSearch,
+                            @RequestParam("isJob") Integer isJob);
 
     /**
      * 设置用户是否离职

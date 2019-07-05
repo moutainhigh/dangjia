@@ -123,7 +123,7 @@ public class HomeModularService {
     }
 
     public ServerResponse getStrategyList(String userToken, PageDTO pageDTO) {
-        String workerTypeId = null;
+        List<String> workerTypeIds = null;
         if (!CommonUtil.isEmpty(userToken)) {
             Object object = constructionService.getMember(userToken);
             if (object instanceof Member) {
@@ -146,22 +146,42 @@ public class HomeModularService {
                     if (house == null) {//有很多房子但是没有isSelect为1的
                         house = houseList.get(0);
                     }
-                    List<HouseFlow> houseFlows = houseFlowMapper.unfinishedFlow(house.getId());
+                    example = new Example(HouseFlow.class);
+                    example.createCriteria()
+                            .andEqualTo(HouseFlow.WORK_TYPE, 4)
+                            .andNotEqualTo(HouseFlow.WORK_STETA, 2)
+                            .andEqualTo(HouseFlow.HOUSE_ID, house.getId());
+                    example.orderBy(HouseFlow.SORT).asc();
+                    List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+                    if(house.getDesignerOk()==1&&house.getBudgetOk()==0&&house.getVisitState()==0){//设计阶段
+                        workerTypeIds.add("1");
+                    }else if(house.getDesignerOk()==0&&house.getBudgetOk()==1&&house.getVisitState()==0) {//精算阶段
+                        workerTypeIds.add("2");
+                    }
                     if (houseFlows.size() > 0) {
-                        example = new Example(RenovationStage.class);
-                        example.createCriteria()
-                                .andEqualTo(RenovationStage.WORKER_TYPE_ID, houseFlows.get(houseFlows.size() - 1).getWorkerTypeId())
-                                .andEqualTo(RenovationStage.DATA_STATUS, 0);
-                        List<RenovationStage> rmList = renovationStageMapper.selectByExample(example);
-                        if (rmList.size() > 0) {
-                            workerTypeId = rmList.get(0).getId();
+                        for (int i = houseFlows.size() - 1; i >= 0; i--) {
+                            if(house.getVisitState()==1) {//施工阶段
+                                HouseFlow houseFlow = houseFlows.get(i);
+                                example = new Example(RenovationStage.class);
+                                example.createCriteria()
+                                        .andEqualTo(RenovationStage.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
+                                        .andEqualTo(RenovationStage.DATA_STATUS, 0);
+                                List<RenovationStage> rmList = renovationStageMapper.selectByExample(example);
+                                if (rmList.size() > 0) {
+                                    if (workerTypeIds == null) {
+                                        workerTypeIds = new ArrayList<>();
+                                    }
+                                    workerTypeIds.add(rmList.get(0).getId());
+                                }
+                            }
                         }
                     }
                 }
             }
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<RenovationManual> rmList = renovationManualMapper.getStrategyList(workerTypeId);
+        List<RenovationManual> rmList = renovationManualMapper.getStrategyList(workerTypeIds==null?null
+                :workerTypeIds.toArray(new String[workerTypeIds.size()]));
         if (rmList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }

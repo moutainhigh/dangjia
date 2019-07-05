@@ -17,7 +17,7 @@ public interface UserMapper  extends Mapper<MainUser> {
 	 * 分页查询用户数据
 	 * @return
 	 */
-	List<UserRoleDTO> getUsers(@Param("userSearch") UserSearchDTO userSearch);
+	List<UserRoleDTO> getUsers(@Param("userSearch") UserSearchDTO userSearch,@Param("isJob") Integer isJob);
 
 	/**
 	 * 删除用户

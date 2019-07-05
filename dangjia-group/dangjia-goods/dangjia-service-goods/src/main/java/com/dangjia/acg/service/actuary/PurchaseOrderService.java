@@ -14,7 +14,6 @@ import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.PurchaseOrder;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,12 +57,14 @@ public class PurchaseOrderService {
         if (budgetMaterialList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
+        String address=configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        String appAddress=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
         Map<String, Object> datas = new HashMap<>();
         PurchaseOrder purchaseOrder = getPurchaseOrderExample(houseId, true);
         String[] ids = purchaseOrder.getBudgetIds().split(",");
         List<FlowActuaryDTO> flowActuaryDTOList = new ArrayList<>();
         for (BudgetMaterial bm : budgetMaterialList) {
-            FlowActuaryDTO flowActuaryDTO = getFlowActuaryDTO(bm);
+            FlowActuaryDTO flowActuaryDTO = getFlowActuaryDTO( address, appAddress,bm);
             boolean flag = Arrays.asList(ids).contains(bm.getId());
             flowActuaryDTO.setSelection(flag ? 1 : 0);
             flowActuaryDTOList.add(flowActuaryDTO);
@@ -74,25 +75,18 @@ public class PurchaseOrderService {
         return ServerResponse.createBySuccess("查询成功", datas);
     }
 
-    private FlowActuaryDTO getFlowActuaryDTO(BudgetMaterial bm) {
-        Goods goods = goodsMapper.selectByPrimaryKey(bm.getGoodsId());
-        Product product = productMapper.selectByPrimaryKey(bm.getProductId());
+    private FlowActuaryDTO getFlowActuaryDTO(String address,String appAddress,BudgetMaterial bm) {
         FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
         flowActuaryDTO.setTypeName("材料");
         flowActuaryDTO.setType(2);
         String convertUnitName = bm.getUnitName();
-        if (product != null) {
-            flowActuaryDTO.setId(product.getId());
-            flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
-            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                    String.format(DjConstants.YZPageAddress.COMMODITY, "", "",
-                            flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + 2;
-            flowActuaryDTO.setUrl(url);
-            flowActuaryDTO.setAttribute(actuaryOperationService.getAttributes(product));//拼接属性品牌
-            convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
-            flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
-            flowActuaryDTO.setTotalPrice(product.getPrice() * bm.getConvertCount());
-        }
+        flowActuaryDTO.setId(bm.getProductId());
+        flowActuaryDTO.setImage(address + bm.getImage());
+        String url = appAddress + String.format(DjConstants.YZPageAddress.COMMODITY, "", "",flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + 2;
+        flowActuaryDTO.setUrl(url);
+        flowActuaryDTO.setAttribute(actuaryOperationService.getAttributes(bm.getProductId()));//拼接属性品牌
+        flowActuaryDTO.setPrice("¥" + String.format("%.2f", bm.getPrice()) + "/" +  bm.getUnitName());
+        flowActuaryDTO.setTotalPrice(bm.getTotalPrice());
         flowActuaryDTO.setShopCount(bm.getShopCount());
         flowActuaryDTO.setConvertCount(bm.getConvertCount());
         flowActuaryDTO.setBudgetMaterialId(bm.getId());
@@ -101,11 +95,7 @@ public class PurchaseOrderService {
             flowActuaryDTO.setName(bm.getProductName());
         }
         flowActuaryDTO.setUnitName(convertUnitName);
-        if (bm.getDeleteState() == 2) {
-            flowActuaryDTO.setBuy(3);//可选没选中(业主已取消)
-        } else {
-            flowActuaryDTO.setBuy(goods.getBuy());
-        }
+        flowActuaryDTO.setBuy(1);
         return flowActuaryDTO;
     }
 
@@ -151,18 +141,18 @@ public class PurchaseOrderService {
         if (purchaseOrder == null) {
             return null;
         }
+        String address=configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        String appAddress=configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
         String[] ids = purchaseOrder.getBudgetIds().split(",");
         List<FlowActuaryDTO> flowActuaryDTOList = new ArrayList<>();
-
+        Example example = new Example(BudgetMaterial.class);
+        example.createCriteria().andIn(BudgetMaterial.ID,  Arrays.asList(ids));
+        List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.selectByExample(example);
         double totalPrice = 0d;
-        for (String id : ids) {
-            BudgetMaterial bm = budgetMaterialMapper.selectByPrimaryKey(id);
+        for (BudgetMaterial bm : budgetMaterialList) {
             if (bm != null) {
-                Product product = productMapper.selectByPrimaryKey(bm.getProductId());
-                if (product != null) {
-                    totalPrice = totalPrice + product.getPrice() * bm.getConvertCount();
-                }
-                flowActuaryDTOList.add(getFlowActuaryDTO(bm));
+                totalPrice = totalPrice + bm.getTotalPrice();
+                flowActuaryDTOList.add(getFlowActuaryDTO(address,appAddress,bm));
             }
         }
         if (flowActuaryDTOList.size() <= 0) {
@@ -188,8 +178,10 @@ public class PurchaseOrderService {
             return budgetMaterialList;
         }
         String[] ids = purchaseOrder.getBudgetIds().split(",");
-        for (String id : ids) {
-            BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(id);
+        Example example = new Example(BudgetMaterial.class);
+        example.createCriteria().andIn(BudgetMaterial.ID,  Arrays.asList(ids));
+        List<BudgetMaterial> budgetMaterials = budgetMaterialMapper.selectByExample(example);
+        for (BudgetMaterial budgetMaterial : budgetMaterials) {
             Product product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());
             if (product != null) {
                 budgetMaterial.setModifyDate(new Date());
@@ -219,13 +211,12 @@ public class PurchaseOrderService {
      */
     private double getTotalPrice(String[] ids) {
         double totalPrice = 0d;
-        for (String id : ids) {
-            BudgetMaterial bm = budgetMaterialMapper.selectByPrimaryKey(id);
+        Example example = new Example(BudgetMaterial.class);
+        example.createCriteria().andIn(BudgetMaterial.ID,  Arrays.asList(ids));
+        List<BudgetMaterial> budgetMaterials = budgetMaterialMapper.selectByExample(example);
+        for (BudgetMaterial bm : budgetMaterials) {
             if (bm != null) {
-                Product product = productMapper.selectByPrimaryKey(bm.getProductId());
-                if (product != null) {
-                    totalPrice = totalPrice + product.getPrice() * bm.getConvertCount();
-                }
+                totalPrice = totalPrice + bm.getTotalPrice();
             }
         }
         return totalPrice;

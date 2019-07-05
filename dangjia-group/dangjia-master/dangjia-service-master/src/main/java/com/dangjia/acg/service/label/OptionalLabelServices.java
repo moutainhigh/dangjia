@@ -80,6 +80,11 @@ public class OptionalLabelServices {
      */
     public ServerResponse editOptionalLabel(OptionalLabel optionalLabel){
         try {
+            Example example=new Example(OptionalLabel.class);
+            example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME,optionalLabel.getLabelName());
+            if(optionalLabelMapper.selectByExample(example).size()>0) {
+                return ServerResponse.createByErrorMessage("标签已存在");
+            }
             optionalLabel.setCreateDate(null);
             optionalLabelMapper.updateByPrimaryKeySelective(optionalLabel);
             return ServerResponse.createBySuccessMessage("编辑成功");

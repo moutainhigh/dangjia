@@ -12,12 +12,14 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HomePageBean;
 import com.dangjia.acg.dto.house.HouseChatDTO;
 import com.dangjia.acg.dto.house.MyHouseFlowDTO;
+import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
@@ -27,6 +29,7 @@ import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Technology;
+import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
@@ -110,6 +113,8 @@ public class HouseWorkerService {
     private String active;
     @Autowired
     private CraftsmanConstructionService constructionService;
+    @Autowired
+    private IComplainMapper complainMapper;
 
     /**
      * 根据工人id查询所有房子任务
@@ -165,10 +170,10 @@ public class HouseWorkerService {
     }
 
     public ServerResponse getHouseWorker(String userToken, String houseFlowId) {
-        Object object = constructionService.getMember(userToken);
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
-        }
+//        Object object = constructionService.getMember(userToken);
+//        if (object instanceof ServerResponse) {
+//            return (ServerResponse) object;
+//        }
         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
         if (houseFlow == null) {
             return ServerResponse.createByErrorMessage("该工序不存在");
@@ -200,7 +205,17 @@ public class HouseWorkerService {
             map.put("workerName", workerType.getName());
             map.put("houseFlowId", houseFlow.getId());
             map.put("houseWorkerId", houseWorker.getId());
-            map.put("isSubstitution", houseWorker.getWorkType() == 1 ? 1 : 0);
+            Example example = new Example(Complain.class);
+            example.createCriteria().andEqualTo(Complain.MEMBER_ID, houseFlow.getWorkerId())
+                    .andEqualTo(Complain.HOUSE_ID, houseFlow.getHouseId())
+                    .andEqualTo(Complain.STATUS, 0)
+                    .andEqualTo(Complain.COMPLAIN_TYPE,6);
+            List<Complain> complains = complainMapper.selectByExample(example);
+            if (houseWorker.getWorkType() == 6){
+                map.put("isSubstitution", complains.size() > 0 ? 0 : 1);
+            }else {
+                map.put("isSubstitution", 2);
+            }
             mapData.put("houseWorker", map);
         }
         Example example = new Example(HouseWorker.class);
@@ -704,6 +719,11 @@ public class HouseWorkerService {
                 end = houseFlowApply.getEndDate();
                 //更新实际停工天数
                 houseFlowApply.setEndDate(DateUtil.delDateDays(start, 1));
+                if(houseFlowApply.getStartDate().getTime()<=houseFlowApply.getEndDate().getTime()){
+                    houseFlowApply.setEndDate(houseFlowApply.getStartDate());
+                    houseFlowApply.setSuspendDay(0);
+                    houseFlowApply.setDataStatus(1);
+                }
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
             }
         }
@@ -891,6 +911,7 @@ public class HouseWorkerService {
                     for (String anImageArr : imageArr) {
                         HouseFlowApplyImage houseFlowApplyImage = new HouseFlowApplyImage();
                         houseFlowApplyImage.setHouseFlowApplyId(hfa.getId());
+                        houseFlowApplyImage.setHouseId(house.getId());
                         houseFlowApplyImage.setImageUrl(anImageArr);
                         houseFlowApplyImage.setImageType(imageType);//图片类型 0：材料照片；1：进度照片；2:现场照片；3:其他
                         houseFlowApplyImage.setImageTypeName(imageObj.getString("imageTypeName"));//图片类型名称 例如：材料照片；进度照片

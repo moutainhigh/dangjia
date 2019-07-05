@@ -25,7 +25,7 @@ public class MainAuthController implements MainAuthAPI {
 	private static final Logger logger = LoggerFactory
 			.getLogger(MainAuthController.class);
 	@Autowired
-    private MainAuthService mainAuthService;
+	private MainAuthService mainAuthService;
 	/****
 	 * 注入配置
 	 */
@@ -92,7 +92,7 @@ public class MainAuthController implements MainAuthAPI {
 	 * @param permission
 	 * @return ModelAndView ok/fail
 	 */
-    @Override
+	@Override
 	@ApiMethod
 	public ServerResponse setPerm(HttpServletRequest request,int type, Permission permission) {
 		logger.debug("设置权限--区分type-" + type + "【0：编辑；1：新增子节点权限】，权限--permission-"
@@ -324,7 +324,7 @@ public class MainAuthController implements MainAuthAPI {
 			throw new BaseException(ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN, ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN.getDesc());
 		}
 		try {
-			pvo = mainAuthService.getUserPerms(existUser.getJobId());
+			pvo = mainAuthService.getUserPerms(existUser.getId());
 			//生成页面需要的json格式
 			logger.debug("根据用户id查询限树列表查询=pvo:" + pvo);
 		} catch (Exception e) {

@@ -14,34 +14,36 @@ import java.util.Map;
 
 public class HouseUtil {
 
-
-    public static NodeDTO getWorkerDatas(House house, HouseFlow houseFlow,WorkerType workerType,String address ) {
+    public static NodeDTO getWorkerDatas(House house, HouseFlow houseFlow, WorkerType workerType, String address) {
         NodeDTO nodeDTO = new NodeDTO();
         String[] nameBs;
+        String[] nameD = null;
         String[] iconsY;
         nodeDTO.setNameA(workerType.getName());
         nodeDTO.setColor(workerType.getColor());
-        if(!CommonUtil.isEmpty(workerType.getImage())) {
+        if (!CommonUtil.isEmpty(workerType.getImage())) {
             nodeDTO.setImage(address + workerType.getImage());
         }
         if (workerType.getType() == 1) {//设计
             if (house.getDecorationType() == 2) {//自带设计流程
-                nameBs= new String[]{"设计抢单", "设计平面图", "设计施工图", "设计完成"};
-                iconsY= new String[]{"zx_icon_1_2.png", "zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
+                nameBs = new String[]{"设计抢单", "设计平面图", "设计施工图", "设计完成"};
+                iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
                 nodeDTO.setTotal(nameBs.length);
-            }else{
-                nameBs = new String[]{"设计抢单", "业主支付", "量房阶段", "设计平面图", "设计施工图", "设计完成"};
-                iconsY= new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png","zx_icon_3_2.png","zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
+            } else {
+                nameBs = new String[]{"设计抢单", "支付设计费", "量房阶段", "设计平面图", "设计施工图", "设计完成"};
+                nameD = new String[]{"", "", "", "5天内提交,需业主确认", "2天内提交,需业主确认", ""};
+                iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png", "zx_icon_3_2.png", "zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
                 nodeDTO.setTotal(nameBs.length);
             }
-            nodeDTO=getDesignDatas(house,nodeDTO);
-        }else if (workerType.getType() == 2) {//精算
-            nameBs = new String[]{"精算抢单", "业主支付", "制作精算", "精算完成"};
-            iconsY= new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png","zx_icon_4_2.png", "zx_icon_7_2.png"};
-            nodeDTO=getBudgetDatas(house,nodeDTO);
-        }else if (workerType.getType() == 3) {//大管家
-            iconsY=null;
-            nameBs = new String[]{"未开始","大管家抢单", "业主支付", "工程排期", "确认开工", "监管工地", "整体竣工"};
+            nodeDTO = getDesignDatas(house, nodeDTO);
+        } else if (workerType.getType() == 2) {//精算
+            nameBs = new String[]{"精算抢单", "支付精算费", "制作精算", "精算完成"};
+            nameD = new String[]{"", "", "3天内提交,需业主确认", ""};
+            iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png", "zx_icon_4_2.png", "zx_icon_7_2.png"};
+            nodeDTO = getBudgetDatas(house, nodeDTO);
+        } else if (workerType.getType() == 3) {//大管家
+            iconsY = null;
+            nameBs = new String[]{"未开始", "大管家抢单", "支付大管家费", "工程排期", "确认开工", "监管工地", "整体竣工"};
             if (houseFlow.getWorkType() == 1) {
                 nodeDTO.setRank(0);
                 nodeDTO.setNameB("未开始");
@@ -65,14 +67,14 @@ public class HouseUtil {
                 }
                 nodeDTO.setRank(5);
             }
-        }else if (workerType.getType() == 4) {//拆除
-            iconsY=null;
-            nameBs = new String[]{"未开始","拆除抢单", "业主支付", "施工交底","施工中", "整体完工"};
-        }else{//其他
-            iconsY=null;
-            nameBs = new String[]{"未开始",workerType.getName()+"抢单", "业主支付", "施工交底","施工中", "阶段完工", "整体完工"};
+        } else if (workerType.getType() == 4) {//拆除
+            iconsY = null;
+            nameBs = new String[]{"未开始", "拆除抢单", "支付拆除费", "施工交底", "施工中", "整体完工"};
+        } else {//其他
+            iconsY = null;
+            nameBs = new String[]{"未开始", workerType.getName() + "抢单", "支付" + workerType.getName() + "费", "施工交底", "施工中", "阶段完工", "整体完工"};
         }
-        if (workerType.getType() >3) {
+        if (workerType.getType() > 3) {
             nodeDTO = getWorkerDatas(houseFlow, nodeDTO);
         }
         nodeDTO.setTotal(nameBs.length);
@@ -81,20 +83,23 @@ public class HouseUtil {
         for (int i = 0; i < nameBs.length; i++) {
             Map<String, Object> map = new HashMap<>();
             map.put("name", nameBs[i]);
-            if(houseFlow.getWorkerType()<3){
-                map.put("icon",address + "icon/"+iconsY[i]);
-                map.put("begin", i +1);
-            }else{
+            if (nameD != null) {
+                map.put("nameD", nameD[i]);
+            }
+            if (houseFlow.getWorkerType() < 3) {
+                map.put("icon", address + "icon/" + iconsY[i]);
+                map.put("begin", i + 1);
+            } else {
                 map.put("begin", i);
             }
-
             dataList.add(map);
         }
         dataMap.put("dataList", dataList);
         nodeDTO.setProgress(dataMap);
         return nodeDTO;
     }
-    public static NodeDTO getWorkerDatas(HouseFlow houseFlow,NodeDTO nodeDTO) {
+
+    public static NodeDTO getWorkerDatas(HouseFlow houseFlow, NodeDTO nodeDTO) {
         if (houseFlow.getWorkType() == 1) {
             nodeDTO.setRank(0);
             nodeDTO.setNameB("未开始");
@@ -119,7 +124,7 @@ public class HouseUtil {
                 if (houseFlow.getWorkSteta() == 2 || houseFlow.getWorkSteta() == 6) {
                     if (houseFlow.getWorkerType() == 4) {//拆除
                         nodeDTO.setRank(5);
-                    }else{
+                    } else {
                         nodeDTO.setRank(6);
                     }
                     if (houseFlow.getWorkSteta() == 2) {
@@ -133,49 +138,50 @@ public class HouseUtil {
         return nodeDTO;
     }
 
-    public static NodeDTO getBudgetDatas(House house,NodeDTO nodeDTO) {
+    public static NodeDTO getBudgetDatas(House house, NodeDTO nodeDTO) {
         switch (house.getBudgetOk()) {
             case 0:
                 nodeDTO.setRank(1);
-                nodeDTO.setNameB( "待抢单");
+                nodeDTO.setNameB("待抢单");
                 break;
             case 5:
                 nodeDTO.setRank(2);
-                nodeDTO.setNameB( "待业主支付");
+                nodeDTO.setNameB("待业主支付");
                 break;
             case 1:
                 if (house.getDecorationType() == 2 && house.getDesignerOk() != 3) {
                     nodeDTO.setRank(3);
-                    nodeDTO.setNameB( "待上传设计图");
+                    nodeDTO.setNameB("待上传设计图");
                 } else {
                     nodeDTO.setRank(3);
-                    nodeDTO.setNameB( "精算中");
+                    nodeDTO.setNameB("精算中");
                     nodeDTO.setNameC("5天内提交,需业主确认");
                 }
                 break;
             case -1:
                 nodeDTO.setRank(3);
-                nodeDTO.setNameB( "未发送精算");
+                nodeDTO.setNameB("未发送精算");
                 nodeDTO.setNameC("5天内提交,需业主确认");
                 break;
             case 2:
                 nodeDTO.setRank(3);
-                nodeDTO.setNameB( "待审核精算");
+                nodeDTO.setNameB("待审核精算");
                 nodeDTO.setNameC("5天内提交,需业主确认");
                 break;
             case 4:
                 nodeDTO.setRank(3);
-                nodeDTO.setNameB( "修改精算");
+                nodeDTO.setNameB("修改精算");
                 nodeDTO.setNameC("5天内提交,需业主确认");
                 break;
             case 3:
                 nodeDTO.setRank(4);
-                nodeDTO.setNameB( "完成");
+                nodeDTO.setNameB("完成");
                 break;
         }
         return nodeDTO;
     }
-    public static NodeDTO getDesignDatas(House house,NodeDTO nodeDTO) {
+
+    public static NodeDTO getDesignDatas(House house, NodeDTO nodeDTO) {
         if (house.getDecorationType() == 2) {//自带设计流程
             switch (house.getDesignerOk()) {
                 case 0://0未确定设计师
@@ -273,43 +279,48 @@ public class HouseUtil {
     }
 
 
-
-    public static Map getWorkerDatas(House house,String address ) {
-         Map progress=new HashMap();
+    public static Map getWorkerDatas(House house, String address) {
+        Map progress = new HashMap();
         String[] nameBs;
         String[] iconsY;
-        Integer[] workerTypes=new Integer[]{1,2,3};
+        Integer[] workerTypes = new Integer[]{1, 2, 3};
         for (Integer workerType : workerTypes) {
+            String[] nameD = null;
             if (workerType == 1) {//设计
-                if (house!=null&&house.getDecorationType() == 2) {//自带设计流程
-                    nameBs= new String[]{"设计抢单", "设计平面图", "设计施工图", "设计完成"};
-                    iconsY= new String[]{"zx_icon_1_2.png", "zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
-                }else{
-                    nameBs = new String[]{"设计抢单", "业主支付", "量房阶段", "设计平面图", "设计施工图", "设计完成"};
-                    iconsY= new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png","zx_icon_3_2.png","zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
+                if (house != null && house.getDecorationType() == 2) {//自带设计流程
+                    nameBs = new String[]{"设计抢单", "设计平面图", "设计施工图", "设计完成"};
+                    iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
+                } else {
+                    nameBs = new String[]{"设计抢单", "支付设计费", "量房阶段", "设计平面图", "设计施工图", "设计完成"};
+                    nameD = new String[]{"", "", "", "5天内提交,需业主确认", "2天内提交,需业主确认", ""};
+                    iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png", "zx_icon_3_2.png", "zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
                 }
-            }else if (workerType == 2) {//精算
-                nameBs = new String[]{"精算抢单", "业主支付", "制作精算", "精算完成"};
-                iconsY= new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png","zx_icon_4_2.png", "zx_icon_7_2.png"};
-            }else{//其他
-                nameBs = new String[]{"工匠抢单", "支付费用", "正常施工", "阶段完工", "整体完工", "施工完成"};
-                iconsY= new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png","zx_icon_sg_default@2x.png", "zx_icon_ztwg_default@2x.png", "zx_icon_wg_default@2x.png", "zx_icon_7_2.png"};
+            } else if (workerType == 2) {//精算
+                nameBs = new String[]{"精算抢单", "支付精算费", "制作精算", "精算完成"};
+                nameD = new String[]{"", "", "3天内提交,需业主确认", ""};
+                iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png", "zx_icon_4_2.png", "zx_icon_7_2.png"};
+            } else {//其他
+                nameBs = new String[]{"工匠抢单", "支付工匠费", "正常施工", "阶段完工", "整体完工", "施工完成"};
+                nameD = new String[]{"", "", "", "过程中完成施工节点", "需业主确认，完成后暂停施工", "需业主确认，完成全部施工作业"};
+                iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png", "zx_icon_sg_default@2x.png", "zx_icon_ztwg_default@2x.png", "zx_icon_wg_default@2x.png", "zx_icon_7_2.png"};
             }
             Map<String, Object> dataMap = new HashMap<>();
             List<Map<String, Object>> dataList = new ArrayList<>();
             for (int i = 0; i < nameBs.length; i++) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("name", nameBs[i]);
-                map.put("begin", i +1);
-                map.put("icon",address + "icon/"+iconsY[i]);
+                if (nameD != null) {
+                    map.put("nameD", nameD[i]);
+                }
+                map.put("begin", i + 1);
+                map.put("icon", address + "icon/" + iconsY[i]);
                 dataList.add(map);
             }
             dataMap.put("dataList", dataList);
-            progress.put("workerType"+workerType,dataMap);
+            progress.put("workerType" + workerType, dataMap);
         }
         return progress;
     }
-
 
 
     /**

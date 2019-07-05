@@ -71,8 +71,8 @@ public class MainUserController implements MainUserAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getUsers(HttpServletRequest request, PageDTO pageDTO, UserSearchDTO userSearch) {
-        return userService.getUsers(userSearch, pageDTO);
+    public ServerResponse getUsers(HttpServletRequest request, PageDTO pageDTO, UserSearchDTO userSearch,Integer isJob) {
+        return userService.getUsers(userSearch, pageDTO,isJob);
     }
 
     /**
@@ -127,10 +127,10 @@ public class MainUserController implements MainUserAPI {
                 logger.debug("置用户[新增或更新]，结果=请您填写用户信息");
                 return ServerResponse.createByErrorMessage("请您填写用户信息");
             }
-//            if (StringUtils.isEmpty(roleIds)) {
-//                logger.debug("置用户[新增或更新]，结果=请您给用户设置角色");
-//                return ServerResponse.createByErrorMessage("请您给用户设置角色");
-//            }
+            if (StringUtils.isEmpty(roleIds)) {
+                logger.debug("置用户[新增或更新]，结果=请您给用户设置角色");
+                return ServerResponse.createByErrorMessage("请您给用户设置角色");
+            }
             String userID = request.getParameter(Constants.USERID);
             MainUser existUser = redisClient.getCache(Constants.USER_KEY + userID, MainUser.class);
             if (null == existUser) {

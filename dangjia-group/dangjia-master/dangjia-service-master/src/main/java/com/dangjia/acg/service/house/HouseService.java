@@ -55,6 +55,7 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.design.DesignDataService;
 import com.dangjia.acg.service.member.GroupInfoService;
+import com.dangjia.acg.service.other.IndexPageService;
 import com.dangjia.acg.util.HouseUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -148,6 +149,8 @@ public class HouseService {
     private IHouseChoiceCaseMapper iHouseChoiceCaseMapper;
     @Autowired
     private IWorkDepositMapper workDepositMapper;
+    @Autowired
+    private IndexPageService indexPageService;
     protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
 
     /**
@@ -1063,7 +1066,7 @@ public class HouseService {
         String jobLocationDetail = address + String.format(DjConstants.YZPageAddress.JOBLOCATIONDETAIL, "", house.getCityId(), "施工现场") + "&houseId=" + house.getId();
         shareDTO.setUrl(jobLocationDetail);
         shareDTO.setImageNum(0 + "张图片");
-        shareDTO.setImage(address+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId()));//户型图片
+        shareDTO.setImage(address+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null));//户型图片
 //        ServerResponse serverResponse = designDataService.getPlaneMap(house.getId());
 //        if (serverResponse.isSuccess()) {
 //            QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
@@ -1286,8 +1289,10 @@ public class HouseService {
         Map<String, Object> map = new HashMap<>();
         map.put("id", hfa.getSourceId());
         Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
-        map.put("workerHead", address + member.getHead());//工人头像
-        if (member.getWorkerType() != null) {
+        if(null!=member) {
+            map.put("workerHead", address + member.getHead());//工人头像
+        }
+        if (member.getWorkerType()>=1) {
             map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
         } else {
             map.put("workerTypeName", "业主");//工匠类型
@@ -1314,16 +1319,18 @@ public class HouseService {
         }
         if (hfa.getSourceType() == 1) {
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(hfa.getSourceId());
-            map.put("type", mendOrder.getType());
-            map.put("number", mendOrder.getNumber());
-            if (mendOrder.getType() == 2 && StringUtil.isNotEmpty(mendOrder.getImageArr())) {
-                String[] imageArr = mendOrder.getImageArr().split(",");
-                if (imageArr.length > 0) {
-                    List<String> imageList = new ArrayList<>();
-                    for (String anImageArr : imageArr) {
-                        imageList.add(address + anImageArr);
+            if(null!=mendOrder) {
+                map.put("type", mendOrder.getType());
+                map.put("number", mendOrder.getNumber());
+                if (mendOrder.getType() == 2 && StringUtil.isNotEmpty(mendOrder.getImageArr())) {
+                    String[] imageArr = mendOrder.getImageArr().split(",");
+                    if (imageArr.length > 0) {
+                        List<String> imageList = new ArrayList<>();
+                        for (String anImageArr : imageArr) {
+                            imageList.add(address + anImageArr);
+                        }
+                        map.put("imgArr", imageList);
                     }
-                    map.put("imgArr", imageList);
                 }
             }
         }
@@ -1635,6 +1642,16 @@ public class HouseService {
                 houseConstructionRecord.setHouseId(houseFlowApply.getHouseId());
                 houseConstructionRecord.setSourceId(houseFlowApply.getId());
                 houseConstructionRecord.setContent(houseFlowApply.getApplyDec());
+
+                if (houseFlowApply.getApplyType() == 3) {
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
+                    String dayse="("+DateUtil.dateToString(houseFlowApply.getStartDate(), DateUtil.FORMAT1)+"至"+DateUtil.dateToString(houseFlowApply.getEndDate(), DateUtil.FORMAT1)+")";
+                    if (houseFlowApply.getWorkerId()!=null && (CommonUtil.isEmpty(houseFlowApply.getOperator()) || houseFlowApply.getWorkerId().equals(houseFlowApply.getOperator())) ) {
+                        houseConstructionRecord.setContent("申请停工"+ houseFlowApply.getSuspendDay() +"天"+ dayse + (CommonUtil.isEmpty(houseFlowApply.getApplyDec()) ? "" : ",理由：" + houseFlowApply.getApplyDec()));
+                    } else {
+                        houseConstructionRecord.setContent("申请(" + workerType.getName() + ")停工"+ houseFlowApply.getSuspendDay() +"天"+ dayse+ (CommonUtil.isEmpty(houseFlowApply.getApplyDec()) ? "" : ",理由：" + houseFlowApply.getApplyDec()));
+                    }
+                }
                 houseConstructionRecord.setWorkerId(houseFlowApply.getOperator());
                 houseConstructionRecord.setWorkerType(houseFlowApply.getWorkerType());
                 houseConstructionRecord.setApplyType(houseFlowApply.getApplyType());

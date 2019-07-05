@@ -29,18 +29,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!--施工现场图片-->
     <select id="getHouseFlowApplyImage" resultType="java.lang.String">
         SELECT
-          b.image_url AS imageUrl
+            image_url
         FROM
-        dj_core_house_flow_apply a
-        INNER JOIN dj_core_house_flow_apply_image b ON a.id = b.house_flow_apply_id
-        WHERE
-        a.house_id = #{houseId}
-        AND b.image_type = 2
-        AND b.data_status = 0
-        AND b.image_url IS NOT NULL
-        AND a.apply_type in (1,2,5)
+            dj_core_house_flow_apply_image
+        WHERE house_id=#{houseId}
+        <if test="null==imageType and ''==imageType">
+            AND image_type = 2
+        </if>
+        <if test="null!=imageType and ''!=imageType">
+           and image_type = 0
+        </if>
         ORDER BY
-        b.create_date DESC
+            create_date DESC
         LIMIT 1
     </select>
 </mapper>
