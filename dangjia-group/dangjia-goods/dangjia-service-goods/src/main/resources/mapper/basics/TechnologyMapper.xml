@@ -56,12 +56,6 @@
         ORDER BY create_date desc
     </select>
 
-    <!-- 删除对象 -->
-    <delete id="deleteById" parameterType="java.lang.String">
-		DELETE FROM dj_basics_technology 
-		WHERE id=#{id}
-	</delete>
-
     <!-- 查询所有 -->
     <select id="query" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Technology">
         SELECT

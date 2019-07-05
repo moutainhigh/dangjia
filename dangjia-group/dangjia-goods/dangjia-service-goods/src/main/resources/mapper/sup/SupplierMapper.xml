@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.sup.ISupplierMapper">
 
-	<sql id="all_columns">
+    <sql id="all_columns">
 		id,
 		name,
 		address,
@@ -18,7 +18,7 @@
 		create_date,
 		modify_date
 	</sql>
-	<sql id="all_supplierProduct">
+    <sql id="all_supplierProduct">
 		 id,
 		 product_id,
 		 supplier_id,
@@ -28,13 +28,13 @@
 		 create_date,
 		 modify_date
 	</sql>
-	<!-- 删除对象 -->
-	<delete id="deleteById" parameterType="java.lang.String">
+    <!-- 删除对象 -->
+    <delete id="deleteById" parameterType="java.lang.String">
 		DELETE FROM dj_sup_supplier
 		WHERE id=#{id}
 	</delete>
-	<!-- 查询所有 -->
-	<select id="query" resultType="com.dangjia.acg.modle.sup.Supplier">
+    <!-- 查询所有 -->
+    <select id="query" resultType="com.dangjia.acg.modle.sup.Supplier">
 		SELECT
 		id,
 		name,
@@ -52,108 +52,8 @@
 		ORDER BY create_date desc
 	</select>
 
-	<!-- 按照名字模糊查询所有供应商 -->
-	<select id="querySupplierListLikeByName" resultType="com.dangjia.acg.modle.sup.Supplier">
-		SELECT
-		id,
-		name,
-		address,
-		telephone,
-		checkPeople,
-		gender,
-		email,
-		notice,
-		supplier_level as supplierLevel,
-		state,
-		create_date as createDate,
-		modify_date as modifyDate
-		FROM dj_sup_supplier
-		where 1=1
-		<if test="name!=null and name!=''">
-			and name like CONCAT('%',#{name},'%')
-		</if>
-		ORDER BY create_date desc
-	</select>
-
-	<!-- 按照名字查询所有供应商 -->
-	<select id="queryByName" resultType="com.dangjia.acg.modle.sup.Supplier">
-		SELECT *
-		FROM dj_sup_supplier
-		where 1=1
-		<if test="name!=null and name!=''">
-			and name=#{name}
-		</if>
-		ORDER BY create_date desc
-	</select>
-
-	<!-- 按照电话查询所有供应商 -->
-	<select id="queryByTelephone" resultType="com.dangjia.acg.modle.sup.Supplier">
-		SELECT *
-		FROM dj_sup_supplier
-		where 1=1
-		<if test="telephone!=null and telephone!=''">
-			and telephone=#{telephone}
-		</if>
-		ORDER BY create_date desc
-	</select>
-
-	<!-- 批量更新数据 -->
-	<update id="updateBatch" parameterType="java.util.List">
-		update dj_sup_supplier set
-		name =
-		<foreach collection="list" item="supplier" index="index"
-				 separator=" " open="case id" close="end">
-			when #{supplier.id} then #{supplier.name}
-		</foreach>
-		,address =
-		<foreach collection="list" item="supplier" index="index"
-				 separator=" " open="case id" close="end">
-			when #{supplier.id} then #{supplier.address}
-		</foreach>
-		,telephone =
-		<foreach collection="list" item="supplier" index="index"
-				 separator=" " open="case id" close="end">
-			when #{supplier.id} then #{supplier.telephone}
-		</foreach>
-		,checkPeople =
-		<foreach collection="list" item="supplier" index="index"
-				 separator=" " open="case id" close="end">
-			when #{supplier.id} then #{supplier.checkPeople}
-		</foreach>
-		,gender =
-		<foreach collection="list" item="supplier" index="index"
-				 separator=" " open="case id" close="end">
-			when #{supplier.id} then #{supplier.gender}
-		</foreach>
-		,email =
-		<foreach collection="list" item="supplier" index="index"
-				 separator=" " open="case id" close="end">
-			when #{supplier.id} then #{supplier.email}
-		</foreach>
-		,notice =
-		<foreach collection="list" item="supplier" index="index"
-				 separator=" " open="case id" close="end">
-			when #{supplier.id} then #{supplier.notice}
-		</foreach>
-		,supplier_level =
-		<foreach collection="list" item="supplier" index="index"
-				 separator=" " open="case id" close="end">
-			when #{supplier.id} then #{supplier.supplier_level}
-		</foreach>
-		,state =
-		<foreach collection="list" item="supplier" index="index"
-				 separator=" " open="case id" close="end">
-			when #{supplier.id} then #{supplier.state}
-		</foreach>
-		,modify_date=SYSDATE()
-		where id in
-		<foreach collection="list" item="supplier" index="index"
-				 separator="," open="(" close=")">
-			#{supplier.id}
-		</foreach>
-	</update>
-	<!-- 新增供应商和商品关系 -->
-	<insert id="insertSupplierProduct" parameterType="com.dangjia.acg.modle.sup.SupplierProduct" >
+    <!-- 新增供应商和商品关系 -->
+    <insert id="insertSupplierProduct" parameterType="com.dangjia.acg.modle.sup.SupplierProduct">
 		INSERT INTO dj_sup_supplier_product(
 			id,
 			product_id,
@@ -167,74 +67,74 @@
 		VALUES (#{id}, #{productId},#{supplierId}, #{price}, #{stock},#{isSupply},
 		SYSDATE(),SYSDATE())
     </insert>
-	<!-- 修改供应商和商品关系 -->
-	<update id="updateSupplierProduct" parameterType="com.dangjia.acg.modle.sup.SupplierProduct" >
-		UPDATE dj_sup_supplier_product
-		SET
-		<if test="productId!=null">
-			product_id=#{productId},
-		</if>
-		<if test="supplierId!=null">
-			supplier_id=#{supplierId},
-		</if>
-		<if test="price!=null">
-			price=#{price},
-		</if>
-		<if test="stock!=null">
-			stock=#{stock},
-		</if>
-		<if test="isSupply!=null">
-			is_supply=#{isSupply},
-		</if>
-		modify_date=SYSDATE()
-		WHERE
-		product_id=#{productId}
-		and
-		supplier_id=#{supplierId}
-	</update>
-	<!-- 根据供应商查询自己所供应的商品-->
-	<select id="querySupplierProduct" resultType="com.dangjia.acg.modle.basics.Product" >
-		select
-			p.id,
-			p.NAME,
-			p.goods_id AS goodsId,
-			p.category_id AS categoryId,
-			p.product_sn AS productSn,
-			p.image,
-			p.unit_name as unitName,
-			p.unit_id as unitId,
-			p.weight,
-			p.type,
-			p.maket,
-			p.cost,
-			p.price,
-			p.profit,
-			p.brand_id AS brandId,
-			p.brand_series_id AS brandSeriesId,
-			p.attribute_id_arr AS attributeIdArr,
-			p.value_name_arr AS valueNameArr,
-			p.value_id_arr AS valueIdArr,
-			p.convert_unit AS convertUnit,
-			p.convert_quality AS convertQuality,
-			p.create_date AS createDate,
-			p.modify_date AS modifyDate
-		from
-		    dj_basics_product p
-		INNER JOIN dj_sup_supplier_product sp ON p.id = sp.product_id
-		where  p.data_status=0
-			<if test="supplierId!=null and supplierId!=''">
-				and sp.supplier_id=#{supplierId}
-			</if>
-			<if test="isSupply!= -1">
-				and sp.is_supply=#{isSupply}
-			</if>
-			<if test="likeProductName!=null and likeProductName!=''">
-				and p.name like CONCAT('%',#{likeProductName},'%')
-			</if>
-		ORDER BY p.category_id desc
+    <!-- 修改供应商和商品关系 -->
+    <update id="updateSupplierProduct" parameterType="com.dangjia.acg.modle.sup.SupplierProduct">
+        UPDATE dj_sup_supplier_product
+        SET
+        <if test="productId!=null">
+            product_id=#{productId},
+        </if>
+        <if test="supplierId!=null">
+            supplier_id=#{supplierId},
+        </if>
+        <if test="price!=null">
+            price=#{price},
+        </if>
+        <if test="stock!=null">
+            stock=#{stock},
+        </if>
+        <if test="isSupply!=null">
+            is_supply=#{isSupply},
+        </if>
+        modify_date=SYSDATE()
+        WHERE
+        product_id=#{productId}
+        and
+        supplier_id=#{supplierId}
+    </update>
+    <!-- 根据供应商查询自己所供应的商品-->
+    <select id="querySupplierProduct" resultType="com.dangjia.acg.modle.basics.Product">
+        select
+        p.id,
+        p.NAME,
+        p.goods_id AS goodsId,
+        p.category_id AS categoryId,
+        p.product_sn AS productSn,
+        p.image,
+        p.unit_name as unitName,
+        p.unit_id as unitId,
+        p.weight,
+        p.type,
+        p.maket,
+        p.cost,
+        p.price,
+        p.profit,
+        p.brand_id AS brandId,
+        p.brand_series_id AS brandSeriesId,
+        p.attribute_id_arr AS attributeIdArr,
+        p.value_name_arr AS valueNameArr,
+        p.value_id_arr AS valueIdArr,
+        p.convert_unit AS convertUnit,
+        p.convert_quality AS convertQuality,
+        p.create_date AS createDate,
+        p.modify_date AS modifyDate
+        from
+        dj_basics_product p
+        INNER JOIN dj_sup_supplier_product sp ON p.id = sp.product_id
+        where p.data_status=0
+        <if test="supplierId!=null and supplierId!=''">
+            and sp.supplier_id=#{supplierId}
+        </if>
+        <if test="isSupply!= -1">
+            and sp.is_supply=#{isSupply}
+        </if>
+        <if test="likeProductName!=null and likeProductName!=''">
+            and p.name like CONCAT('%',#{likeProductName},'%')
+        </if>
+        ORDER BY p.category_id desc
     </select>
-	<!-- 根据供应商查询在供应的货品种类-->
-	<select id="getSupplierProductByProductId" parameterType="java.lang.String" resultType="java.lang.Integer">
+    <!-- 根据供应商查询在供应的货品种类-->
+    <select id="getSupplierProductByProductId" parameterType="java.lang.String" resultType="java.lang.Integer">
 		select 
 		     count(*)
 		from dj_sup_supplier_product
@@ -243,8 +143,8 @@
 		     and
 		     is_supply=1
     </select>
-	<!-- 根据供应商查询在供应的商品种类-->
-	<select id="getSupplierProductByGoodId" parameterType="java.lang.String" resultType="java.lang.Integer">
+    <!-- 根据供应商查询在供应的商品种类-->
+    <select id="getSupplierProductByGoodId" parameterType="java.lang.String" resultType="java.lang.Integer">
 		select 
 		 count(*)
 		from dj_sup_supplier_product
@@ -253,8 +153,8 @@
 		    and
 		    is_supply=1
     </select>
-	<!-- 根据供应商查询在供应的库存小于50的商品-->
-	<select id="getSupplierProductByStock" parameterType="java.lang.String" resultType="java.lang.Integer">
+    <!-- 根据供应商查询在供应的库存小于50的商品-->
+    <select id="getSupplierProductByStock" parameterType="java.lang.String" resultType="java.lang.Integer">
 		select 
 		 count(*)
 		from dj_sup_supplier_product
@@ -265,8 +165,8 @@
 		    and
 		    stock <![CDATA[<]]>50 
     </select>
-	<!-- 根据供应商、商品、属性查询对应关系-->
-	<select id="querySupplierProductRelation" resultType="com.dangjia.acg.modle.sup.SupplierProduct" >
+    <!-- 根据供应商、商品、属性查询对应关系-->
+    <select id="querySupplierProductRelation" resultType="com.dangjia.acg.modle.sup.SupplierProduct">
 	    select
 			id,
 			product_id as productId,
