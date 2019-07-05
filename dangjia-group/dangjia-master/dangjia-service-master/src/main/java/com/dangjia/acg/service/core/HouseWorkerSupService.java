@@ -117,6 +117,16 @@ public class HouseWorkerSupService {
                 if(houseFlowIds.length>0){
                     for (String flowId : houseFlowIds) {
                         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(flowId);
+
+                        HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(houseFlow.getHouseId(), houseFlow.getWorkerId(), new Date());//查询今日开工记录
+                        if (todayStart != null && DateUtil.daysofTwo(new Date(), start) == 0) {
+                            start=DateUtil.addDateDays(start,1);
+                            //如果结束日期小于开始日期，则表示请假的开始结束日期即是今天，则不记录停工申请
+                            if(start.getTime()>end.getTime()){
+                                continue;//跳过
+                            }
+                        }
+
                         Example example = new Example(HouseFlowApply.class);
                         example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, flowId)
                                 .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
