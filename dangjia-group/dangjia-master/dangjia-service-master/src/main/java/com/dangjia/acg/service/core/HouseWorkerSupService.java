@@ -122,14 +122,14 @@ public class HouseWorkerSupService {
                                 .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
                                 .andEqualTo(HouseFlowApply.MEMBER_CHECK,1);
                         List<HouseFlowApply> houseFlowList = houseFlowApplyMapper.selectByExample(example);
-                        for (HouseFlowApply flow : houseFlowList) {
-                            if(start.getTime()>=flow.getStartDate().getTime() && start.getTime()<=flow.getEndDate().getTime()){
-                                return ServerResponse.createByErrorMessage("已申请过("+DateUtil.getDateString2(flow.getStartDate().getTime())+"-"+DateUtil.getDateString2(flow.getEndDate().getTime())+")范围内的停工，请更换其他开始时间");
-                            }
-                            if(end.getTime()>=flow.getStartDate().getTime() && end.getTime()<=flow.getEndDate().getTime()){
-                                return ServerResponse.createByErrorMessage("已申请过("+DateUtil.getDateString2(flow.getStartDate().getTime())+"-"+DateUtil.getDateString2(flow.getEndDate().getTime())+")范围内的停工，请更换其他结束时间");
-                            }
-                        }
+//                        for (HouseFlowApply flow : houseFlowList) {
+//                            if(start.getTime()>=flow.getStartDate().getTime() && start.getTime()<=flow.getEndDate().getTime()){
+//                                return ServerResponse.createByErrorMessage("已申请过("+DateUtil.getDateString2(flow.getStartDate().getTime())+"-"+DateUtil.getDateString2(flow.getEndDate().getTime())+")范围内的停工，请更换其他开始时间");
+//                            }
+//                            if(end.getTime()>=flow.getStartDate().getTime() && end.getTime()<=flow.getEndDate().getTime()){
+//                                return ServerResponse.createByErrorMessage("已申请过("+DateUtil.getDateString2(flow.getStartDate().getTime())+"-"+DateUtil.getDateString2(flow.getEndDate().getTime())+")范围内的停工，请更换其他结束时间");
+//                            }
+//                        }
 
                         Boolean isBG=false;//是否变开始时间，用于不差延续，不包括当前，因为上次的延续包括了当前
                         for (HouseFlowApply flow : houseFlowList) {
@@ -141,7 +141,7 @@ public class HouseWorkerSupService {
                         if(start.getTime()>end.getTime()){
                             start=end;
                         }
-                        int suspendDay=DateUtil.daysofTwo(start, end) ;
+                        int suspendDay=1+DateUtil.daysofTwo(start, end) ;
                         //如果没有变更则加上开始第一天
                         if(!isBG){
                             suspendDay++;
