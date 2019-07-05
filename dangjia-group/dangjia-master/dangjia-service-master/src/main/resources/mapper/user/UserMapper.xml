@@ -26,7 +26,7 @@
 		a.id, a.username, a.mobile, a.email, a.password, a.insert_uid insertUid,
 		a.create_date createDate,
 		a.modify_date modifyDate, a.is_del isDel,
-		a.is_job isJob,a.is_receive isReceive, a.department, department_id departmentId, job_id jobId
+		a.is_job isJob,a.is_receive isReceive, a.department, a.department_id departmentId, a.job_id jobId
 	</sql>
 
     <!--=Start getUsers 分页查询用户列表userSearch -->
@@ -34,10 +34,6 @@
         select
         <include refid="a_Column_List"/>
         from dj_user a
-        INNER JOIN dj_user_user_role b
-        on a.id=b.user_id
-        inner join dj_user_role c
-        on b.role_id=c.id
         where 1=1
         AND is_del=0
         <if test="userSearch.umobile!=null and userSearch.umobile!=''">
