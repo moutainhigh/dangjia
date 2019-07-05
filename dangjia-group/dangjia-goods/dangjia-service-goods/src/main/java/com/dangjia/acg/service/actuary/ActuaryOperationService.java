@@ -606,13 +606,6 @@ public class ActuaryOperationService {
                     strbuf.append(brand.getName()).append(" ");
                 }
                 if (atId.getId().equals(product.getId())) {//如果包含该属性
-                    if (!CommonUtil.isEmpty(atId.getBrandSeriesId())) {
-                        BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(atId.getBrandSeriesId());
-                        strbuf.append(brandSeries.getName()).append(" ");
-                        if (!CommonUtil.isEmpty(brandSeries.getImage())) {
-                            imageList.add(getImage(brandSeries.getImage()));//属性图
-                        }
-                    }
                     if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
                         strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
                         String[] strAtIdArr = atId.getValueIdArr().split(",");
@@ -623,6 +616,14 @@ public class ActuaryOperationService {
                             }
                         }
                     }
+                    if (!CommonUtil.isEmpty(atId.getBrandSeriesId())) {
+                        BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(atId.getBrandSeriesId());
+                        strbuf.append(brandSeries.getName()).append(" ");
+                        if (!CommonUtil.isEmpty(brandSeries.getImage())) {
+                            imageList.add(getImage(brandSeries.getImage()));//属性图
+                        }
+                    }
+
                 }
                 AttributeValueDTO avDTO = new AttributeValueDTO();
                 avDTO.setAttributeValueId(atId.getId());
