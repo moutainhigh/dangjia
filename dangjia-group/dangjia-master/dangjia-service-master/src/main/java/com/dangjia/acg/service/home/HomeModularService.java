@@ -153,25 +153,26 @@ public class HomeModularService {
                             .andEqualTo(HouseFlow.HOUSE_ID, house.getId());
                     example.orderBy(HouseFlow.SORT).asc();
                     List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
-                    if(house.getDesignerOk()==1&&house.getBudgetOk()==0&&house.getVisitState()==0){//设计阶段
+                    if (house.getDesignerOk() == 1 && house.getBudgetOk() == 0 && house.getVisitState() == 0) {//设计阶段
                         workerTypeIds.add("1");
-                    }else if(house.getDesignerOk()==0&&house.getBudgetOk()==1&&house.getVisitState()==0) {//精算阶段
+                    } else if (house.getDesignerOk() == 0 && house.getBudgetOk() == 1 && house.getVisitState() == 0) {//精算阶段
                         workerTypeIds.add("2");
-                    }
-                    if (houseFlows.size() > 0) {
-                        for (int i = houseFlows.size() - 1; i >= 0; i--) {
-                            if(house.getVisitState()==1) {//施工阶段
-                                HouseFlow houseFlow = houseFlows.get(i);
-                                example = new Example(RenovationStage.class);
-                                example.createCriteria()
-                                        .andEqualTo(RenovationStage.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
-                                        .andEqualTo(RenovationStage.DATA_STATUS, 0);
-                                List<RenovationStage> rmList = renovationStageMapper.selectByExample(example);
-                                if (rmList.size() > 0) {
-                                    if (workerTypeIds == null) {
-                                        workerTypeIds = new ArrayList<>();
+                    } else {
+                        if (houseFlows.size() > 0) {
+                            for (int i = houseFlows.size() - 1; i >= 0; i--) {
+                                if (house.getVisitState() == 1) {//施工阶段
+                                    HouseFlow houseFlow = houseFlows.get(i);
+                                    example = new Example(RenovationStage.class);
+                                    example.createCriteria()
+                                            .andEqualTo(RenovationStage.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
+                                            .andEqualTo(RenovationStage.DATA_STATUS, 0);
+                                    List<RenovationStage> rmList = renovationStageMapper.selectByExample(example);
+                                    if (rmList.size() > 0) {
+                                        if (workerTypeIds == null) {
+                                            workerTypeIds = new ArrayList<>();
+                                        }
+                                        workerTypeIds.add(rmList.get(0).getId());
                                     }
-                                    workerTypeIds.add(rmList.get(0).getId());
                                 }
                             }
                         }
