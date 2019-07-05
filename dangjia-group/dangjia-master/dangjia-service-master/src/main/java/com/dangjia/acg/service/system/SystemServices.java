@@ -120,6 +120,26 @@ public class SystemServices {
             return null;
         }
     }
+
+    //查询组织架构
+    public ServerResponse queryTopDepartmentAll(String parentId) {
+        try {
+            List list =new ArrayList();
+            Department departments = departmentMapper.selectByPrimaryKey(parentId);
+            if(departments!=null){
+                list.add(departments.getId());
+                while (!CommonUtil.isEmpty(departments.getParentId())){
+                    departments = departmentMapper.selectByPrimaryKey(departments.getParentId());
+                    list.add(departments.getId());
+                }
+            }
+            return ServerResponse.createBySuccess("查询成功",list.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
     //修改组织架构信息
     public ServerResponse editDepartment(String user_id,Department department) {
         try {
