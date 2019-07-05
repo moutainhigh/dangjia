@@ -6,7 +6,6 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDetail;
-import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
@@ -76,8 +75,6 @@ public class MendRecordService {
 
     @Autowired
     private IEvaluateMapper evaluateMapper;
-    @Autowired
-    private IComplainMapper complainMapper;
 
     /**
      * 要补退明细
