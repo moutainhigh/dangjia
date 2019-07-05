@@ -170,10 +170,10 @@ public class HouseWorkerService {
     }
 
     public ServerResponse getHouseWorker(String userToken, String houseFlowId) {
-        Object object = constructionService.getMember(userToken);
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
-        }
+//        Object object = constructionService.getMember(userToken);
+//        if (object instanceof ServerResponse) {
+//            return (ServerResponse) object;
+//        }
         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
         if (houseFlow == null) {
             return ServerResponse.createByErrorMessage("该工序不存在");
@@ -209,7 +209,7 @@ public class HouseWorkerService {
             example.createCriteria().andEqualTo(Complain.MEMBER_ID, houseFlow.getWorkerId())
                     .andEqualTo(Complain.HOUSE_ID, houseFlow.getHouseId())
                     .andEqualTo(Complain.STATUS, 0)
-                    .andEqualTo(Complain.COMPLAIN_TYPE,3);
+                    .andEqualTo(Complain.COMPLAIN_TYPE,6);
             List<Complain> complains = complainMapper.selectByExample(example);
             if (houseWorker.getWorkType() == 6){
                 map.put("isSubstitution", complains.size() > 0 ? 0 : 1);
