@@ -19,14 +19,14 @@
 		id, username, mobile, email, password, insert_uid insertUid,
 		create_date createDate,
 		modify_date modifyDate, is_del isDel,
-		is_job isJob,is_receive isReceive, department
+		is_job isJob,is_receive isReceive, department, department_id departmentId, job_id jobId
 	</sql>
 
     <sql id="a_Column_List">
 		a.id, a.username, a.mobile, a.email, a.password, a.insert_uid insertUid,
 		a.create_date createDate,
 		a.modify_date modifyDate, a.is_del isDel,
-		a.is_job isJob,a.is_receive isReceive, a.department
+		a.is_job isJob,a.is_receive isReceive, a.department, department_id departmentId, job_id jobId
 	</sql>
 
     <!--=Start getUsers 分页查询用户列表userSearch -->
