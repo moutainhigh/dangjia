@@ -213,14 +213,14 @@ public class OrderService {
     /**
      * 业务订单列表
      */
-    public ServerResponse businessOrderList(PageDTO pageDTO, String userToken, String queryId) {
+    public ServerResponse businessOrderList(PageDTO pageDTO, String userToken, String houseId, String queryId) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
         Member member = (Member) object;
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<BusinessOrder> businessOrderList = businessOrderMapper.byMemberId(member.getId(), queryId);
+        List<BusinessOrder> businessOrderList = businessOrderMapper.byMemberId(member.getId(), houseId, queryId);
         PageInfo pageResult = new PageInfo(businessOrderList);
         List<BusinessOrderDTO> businessOrderDTOS = new ArrayList<>();
         for (BusinessOrder businessOrder : businessOrderList) {

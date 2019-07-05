@@ -40,7 +40,7 @@ public class OrderController implements OrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse businessOrderList(PageDTO pageDTO, String userToken, String queryId) {
+    public ServerResponse businessOrderList(PageDTO pageDTO, String userToken,String houseId, String queryId) {
         return orderService.businessOrderList(pageDTO, userToken, queryId);
     }
 
