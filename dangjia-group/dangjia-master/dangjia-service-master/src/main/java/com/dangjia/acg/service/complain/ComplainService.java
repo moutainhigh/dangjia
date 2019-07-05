@@ -157,9 +157,11 @@ public class ComplainService {
 //        1:工匠被处罚后不服.2：业主要求整改.3：要求换人.4:部分收货申诉.
         if (complainType == 4) {
             Supplier supplier = supplierProductAPI.getSupplier(complain.getUserId());
-            complain.setUserMobile(supplier.getTelephone());
-            complain.setUserName(supplier.getName());
-            complain.setUserNickName("供应商-" + supplier.getCheckPeople());
+            if (supplier != null) {
+                complain.setUserMobile(supplier.getTelephone());
+                complain.setUserName(supplier.getName());
+                complain.setUserNickName("供应商-" + supplier.getCheckPeople());
+            }
         } else {
             String field = "业主-";
             Member member = memberMapper.selectByPrimaryKey(complain.getUserId());

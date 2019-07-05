@@ -34,8 +34,6 @@ public interface ITechnologyMapper extends Mapper<Technology> {
 
     List<Technology> workerPatrolList(@Param("goodsId") String goodsId);
 
-    void deleteById(String id);
-
     List<Technology> query(@Param("workerTypeId") String workerTypeId, @Param("name") String name, @Param("materialOrWorker") Integer materialOrWorker);
 
     List<Technology> getByName(@Param("workerTypeId") String workerTypeId,

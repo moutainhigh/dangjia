@@ -26,14 +26,6 @@ public interface ISupplierMapper extends Mapper<Supplier> {
 
     List<Supplier> query();
 
-    //	按照名字模糊查询所有供应商
-    List<Supplier> querySupplierListLikeByName(@Param("name") String name);
-
-    //	按照名字查询所有供应商
-    List<Supplier> queryByName(@Param("name") String name);
-
-    List<Supplier> queryByTelephone(@Param("telephone") String telephone);
-
     void insertSupplierProduct(SupplierProduct supplierGoods);
 
     void updateSupplierProduct(SupplierProduct supplierGoods);

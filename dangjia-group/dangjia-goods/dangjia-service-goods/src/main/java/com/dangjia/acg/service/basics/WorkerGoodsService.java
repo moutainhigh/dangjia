@@ -23,8 +23,6 @@ import com.dangjia.acg.util.DateUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,9 +57,6 @@ public class WorkerGoodsService {
     @Autowired
     private MasterMendWorkerAPI masterMendWorkerAPI;
 
-
-    private static Logger LOG = LoggerFactory.getLogger(WorkerGoodsService.class);
-
     public ServerResponse<PageInfo> getWorkerGoodses(PageDTO pageDTO, String workerTypeId, String searchKey, String showGoods) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<WorkerGoods> productList = iWorkerGoodsMapper.selectList(StringUtils.isBlank(workerTypeId) ? null : workerTypeId,
@@ -79,10 +74,7 @@ public class WorkerGoodsService {
         PageInfo pageResult = new PageInfo(productList);
         pageResult.setList(workerGoodsResults);
         return ServerResponse.createBySuccess("获取工价商品列表成功", pageResult);
-
-
     }
-
 
     public WorkerGoodsDTO getWorkerGoodsDTO(String workerGoodsSn, String workerTypeId, String shopCount) {
         Example example = new Example(WorkerGoods.class);
@@ -203,11 +195,6 @@ public class WorkerGoodsService {
                 return ServerResponse.createByErrorMessage("商品编号不能重复");
 
         }
-
-//            WorkerGoods workerO = iWorkerGoodsMapper.selectByPrimaryKey(workerGoods.getOtherName());
-//            workerGoods.setOtherName(workerGoods.getOtherName());
-//            iWorkerGoodsMapper.updateByPrimaryKey(workerO);
-
         String ret = technologyService.insertTechnologyList(technologyJsonList, workerGoods.getWorkerTypeId(), 1, workerGoods.getId());
         if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
             return ServerResponse.createByErrorMessage(ret);
@@ -231,7 +218,6 @@ public class WorkerGoodsService {
             if (iWorkerGoodsMapper.insert(workerGoods) < 0)
                 return ServerResponse.createByErrorMessage("新增工价商品失败");
         }
-
         if (!CommonUtil.isEmpty(deleteTechnologyIds)) {
             String[] deleteTechnologyIdArr = deleteTechnologyIds.split(",");
             for (String aDeleteTechnologyIdArr : deleteTechnologyIdArr) {
