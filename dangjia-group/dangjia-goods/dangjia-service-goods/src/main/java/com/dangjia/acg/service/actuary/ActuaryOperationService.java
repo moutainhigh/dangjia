@@ -396,9 +396,10 @@ public class ActuaryOperationService {
             }
             List<AttributeDTO> attrList = getAllAttributes(product, productList, imageList);
             goodsDTO.setAttrList(attrList);
+            imageList.remove(0);
+            imageList.add(0,imageList.toString());
             goodsDTO.setImageList(imageList);
 
-            LOG.info("获取明细图片3:"+imageList.toString());
             return goodsDTO;
         } catch (Exception e) {
             e.printStackTrace();
@@ -608,14 +609,6 @@ public class ActuaryOperationService {
                     strbuf.append(brand.getName()).append(" ");
                 }
                 if (atId.getId().equals(product.getId())) {//如果包含该属性
-                    if (!CommonUtil.isEmpty(atId.getBrandSeriesId())) {
-                        BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(atId.getBrandSeriesId());
-                        strbuf.append(brandSeries.getName()).append(" ");
-                        if (!CommonUtil.isEmpty(brandSeries.getImage())) {
-                            imageList.add(getImage(brandSeries.getImage()));//属性图
-                            LOG.info("获取明细图片1:"+imageList.toString());
-                        }
-                    }
                     if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
                         strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
                         String[] strAtIdArr = atId.getValueIdArr().split(",");
@@ -623,8 +616,14 @@ public class ActuaryOperationService {
                             AttributeValue strVIs = iAttributeValueMapper.selectByPrimaryKey(atValId);
                             if (strVIs != null && !CommonUtil.isEmpty(strVIs.getImage())) {
                                 imageList.add(getImage(strVIs.getImage()));//属性图
-                                LOG.info("获取明细图片2:"+imageList.toString());
                             }
+                        }
+                    }
+                    if (!CommonUtil.isEmpty(atId.getBrandSeriesId())) {
+                        BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(atId.getBrandSeriesId());
+                        strbuf.append(brandSeries.getName()).append(" ");
+                        if (!CommonUtil.isEmpty(brandSeries.getImage())) {
+                            imageList.add(getImage(brandSeries.getImage()));//属性图
                         }
                     }
                 }
