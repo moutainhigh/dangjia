@@ -170,10 +170,10 @@ public class HouseWorkerService {
     }
 
     public ServerResponse getHouseWorker(String userToken, String houseFlowId) {
-//        Object object = constructionService.getMember(userToken);
-//        if (object instanceof ServerResponse) {
-//            return (ServerResponse) object;
-//        }
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
         if (houseFlow == null) {
             return ServerResponse.createByErrorMessage("该工序不存在");
