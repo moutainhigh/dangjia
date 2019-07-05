@@ -117,7 +117,7 @@ public class DjConstants {
         public final static String COMMODITY = "commodity?userToken=%s&cityId=%s&title=%s";//精算-商品更换
         public final static String WAITINGPAYDETAIL = "waitingPayDetail?userToken=%s&cityId=%s&title=%s";//待付款明细
         public final static String MYSHOPLIST = "myShopList?userToken=%s&cityId=%s&title=%s";//自购清单
-        public final static String DESIGNLIST = "designList?userToken=%s&cityId=%s&title=%s";//设计图
+        public final static String DESIGNLIST = "applyDesign?userToken=%s&cityId=%s&title=%s";//审核平面图/设计图
         public final static String JINGSUANLIST = "jingsuanList?userToken=%s&cityId=%s&title=%s";//精算
         public final static String CONSTUCTIONRECORD = "constuctionRecord?userToken=%s&cityId=%s&title=%s";//施工记录
         public final static String YZREGISTERPROTOCOL = "yzRegisterProtocol?userToken=%s&cityId=%s&title=%s";//注册协议

@@ -40,6 +40,5 @@ public interface IWorkerGoodsMapper extends Mapper<WorkerGoods> {
     /*更新单位*/
     void updateWorkerGoodsByUnitId(@Param("unitId") String unitId, @Param("unitName") String unitName);
 
-
     List<HomeProductDTO> getHomeProductList();
 }
