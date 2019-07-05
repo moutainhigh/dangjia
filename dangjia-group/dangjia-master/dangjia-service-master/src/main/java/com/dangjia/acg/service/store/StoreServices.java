@@ -4,9 +4,12 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreSubscribeMapper;
+import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreSubscribe;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.util.StringUtil;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -137,7 +141,16 @@ public class StoreServices {
             storeSubscribe.setCustomerName(customerName);
             storeSubscribe.setCustomerPhone(customerPhone);
             storeSubscribe.setModifyDate(modifyDate);
-            iStoreSubscribeMapper.insert(storeSubscribe);
+            if(iStoreSubscribeMapper.insert(storeSubscribe)>0) {
+                Map<String, String> temp_para = new HashMap();
+                temp_para.put("time", modifyDate.toGMTString());
+                temp_para.put("name", storeName);
+                Store store = iStoreMapper.selectByPrimaryKey(storeId);
+                temp_para.put("address",store.getStoreAddress());
+                temp_para.put("phone",store.getReservationNumber());
+                //给预约客户发送短信
+                JsmsUtil.sendSMS(customerPhone, "166800", temp_para);
+            }
             return ServerResponse.createBySuccessMessage("预约成功");
         } catch (Exception e) {
             e.printStackTrace();

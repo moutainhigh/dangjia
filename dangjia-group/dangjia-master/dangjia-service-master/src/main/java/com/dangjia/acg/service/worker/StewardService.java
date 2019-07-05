@@ -387,35 +387,36 @@ public class StewardService {
                 } else if (stageAppList.size() > 0) {
                     courseDTO.setIfBackOut(2);
                 }else {
-                    Example example = new Example(HouseFlowApply.class);
-                    example.createCriteria()
-                            .andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlow.getId())
-                            .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                            .andEqualTo(HouseFlowApply.PAY_STATE, 1);
-                    List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
-                    if (houseFlowApplies != null && houseFlowApplies.size() > 0) {
-                        HouseFlowApply hfa = houseFlowApplies.get(0);
-                        switch (hfa.getMemberCheck()) {
-                            case 0://0未审核
-                                courseDTO.setIfBackOut(4);//0可放弃；1：申请停工；2：已停工 3 审核中
-                                break;
-                            case 1://1审核通过
-                                Date date = new Date();
-                                if (hfa.getStartDate() != null && date.getTime() < hfa.getStartDate().getTime()) {
-                                    courseDTO.setIfBackOut(4);//0可放弃；1：申请停工；2：已停工 3 审核中
-                                } else if (hfa.getEndDate() != null && date.getTime() > hfa.getEndDate().getTime()) {
-                                    courseDTO.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
-                                } else {
-                                    courseDTO.setIfBackOut(2);//0可放弃；1：申请停工；2：已停工 3 审核中
-                                }
-                                break;
-                            default://2审核不通过
-                                courseDTO.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
-                                break;
-                        }
-                    } else {
-                        courseDTO.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
-                    }
+                    courseDTO.setIfBackOut(1);
+//                    Example example = new Example(HouseFlowApply.class);
+//                    example.createCriteria()
+//                            .andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlow.getId())
+//                            .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
+//                            .andEqualTo(HouseFlowApply.PAY_STATE, 1);
+//                    List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
+//                    if (houseFlowApplies != null && houseFlowApplies.size() > 0) {
+//                        HouseFlowApply hfa = houseFlowApplies.get(0);
+//                        switch (hfa.getMemberCheck()) {
+//                            case 0://0未审核
+//                                courseDTO.setIfBackOut(4);//0可放弃；1：申请停工；2：已停工 3 审核中
+//                                break;
+//                            case 1://1审核通过
+//                                Date date = new Date();
+//                                if (hfa.getStartDate() != null && date.getTime() < hfa.getStartDate().getTime()) {
+//                                    courseDTO.setIfBackOut(4);//0可放弃；1：申请停工；2：已停工 3 审核中
+//                                } else if (hfa.getEndDate() != null && date.getTime() > hfa.getEndDate().getTime()) {
+//                                    courseDTO.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
+//                                } else {
+//                                    courseDTO.setIfBackOut(2);//0可放弃；1：申请停工；2：已停工 3 审核中
+//                                }
+//                                break;
+//                            default://2审核不通过
+//                                courseDTO.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
+//                                break;
+//                        }
+//                    } else {
+//                        courseDTO.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
+//                    }
                 }
             }
 
