@@ -133,7 +133,7 @@ public class SystemServices {
                     list.add(departments.getId());
                 }
             }
-            return ServerResponse.createBySuccess("查询成功",list.toString());
+            return ServerResponse.createBySuccess("查询成功",StringUtils.join(list,","));
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
