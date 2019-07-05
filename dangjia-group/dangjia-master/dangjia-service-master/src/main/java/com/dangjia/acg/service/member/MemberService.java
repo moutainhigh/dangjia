@@ -633,7 +633,9 @@ public class MemberService {
                 mcDTO.setCreateDate(member.getCreateDate());
                 if (customer.getUserId() != null) {
                     MainUser mainUser = userMapper.selectByPrimaryKey(customer.getUserId());
-                    mcDTO.setUserName(mainUser.getUsername());
+                    if(null!=mainUser) {
+                        mcDTO.setUserName(mainUser.getUsername());
+                    }
                 }
                 //找到提醒内容 ： 离当前时间最近的那一条
                 if (customer.getRemindRecordId() != null) {

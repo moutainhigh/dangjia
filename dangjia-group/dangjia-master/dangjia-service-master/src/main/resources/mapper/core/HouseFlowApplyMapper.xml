@@ -302,6 +302,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             f.apply_type applyType,
             f.create_date createDate,
             f.start_date startDate,
+            f.worker_id workerId,
+            f.operator,
             f.end_date endDate,
             (
                 CASE
