@@ -57,6 +57,10 @@ public class HouseFlowScheduleService {
      * @return
      */
     public ServerResponse getHouseFlows(String houseId) {
+        House house = houseMapper.selectByPrimaryKey(houseId);
+        if(house.getVisitState()==4){
+            return ServerResponse.createByErrorMessage("已提前结束，无法排期");
+        }
         List<HouseFlow> houseFlowList = houseFlowMapper.getForCheckMoney(houseId);
         Map mapObj = new HashMap();
         List<Map> houseFlowMap = new ArrayList<>();
@@ -148,6 +152,9 @@ public class HouseFlowScheduleService {
      */
     public ServerResponse makeCalendar(String houseId) {
         House house = houseMapper.selectByPrimaryKey(houseId);
+        if(house.getVisitState()==4){
+            return ServerResponse.createByErrorMessage("已提前结束，无法排期");
+        }
         house.setSchedule("1");
 
         houseMapper.updateByPrimaryKeySelective(house);
