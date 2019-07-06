@@ -5,6 +5,7 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -36,6 +37,8 @@ import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.repair.MendOrderService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -210,13 +213,15 @@ public class OrderService {
     /**
      * 业务订单列表
      */
-    public ServerResponse businessOrderList(String userToken, String queryId) {
+    public ServerResponse businessOrderList(PageDTO pageDTO, String userToken, String houseId, String queryId) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
         Member member = (Member) object;
-        List<BusinessOrder> businessOrderList = businessOrderMapper.byMemberId(member.getId(), queryId);
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<BusinessOrder> businessOrderList = businessOrderMapper.byMemberId(member.getId(), houseId, queryId);
+        PageInfo pageResult = new PageInfo(businessOrderList);
         List<BusinessOrderDTO> businessOrderDTOS = new ArrayList<>();
         for (BusinessOrder businessOrder : businessOrderList) {
             BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
@@ -269,7 +274,8 @@ public class OrderService {
             businessOrderDTO.setType(businessOrder.getType());
             businessOrderDTOS.add(businessOrderDTO);
         }
-        return ServerResponse.createBySuccess("查询成功", businessOrderDTOS);
+        pageResult.setList(businessOrderDTOS);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
     /*订单流水*/
@@ -486,6 +492,7 @@ public class OrderService {
 
                 /*删除补货信息*/
                 if (!CommonUtil.isEmpty(orderSplit.getMendNumber())) {
+                    orderSplit.setMendNumber(null);
                     mendOrderMapper.deleteByPrimaryKey(orderSplit.getMendNumber());
                     example = new Example(MendMateriel.class);
                     example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, orderSplit.getMendNumber());

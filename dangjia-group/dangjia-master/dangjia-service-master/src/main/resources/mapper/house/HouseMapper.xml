@@ -254,7 +254,10 @@
         INNER JOIN (
                 SELECT
                     mv.*, (
-                      11
+                        st_distance (
+                        point (mv.locationx, mv.locationy),
+                        point (#{locationx}	,#{locationy})
+                        ) * 111195 / 1000
                     ) AS juli
                 FROM
                 `dj_house_modeling_village` mv
@@ -266,7 +269,6 @@
         <if test="cityId!=null and cityId!=''">
             and h.city_id = #{cityId}
         </if>
-
         <if test="minSquare!=null and minSquare!=''">
             and h.build_square &gt;= #{minSquare}
         </if>
@@ -275,6 +277,7 @@
         </if>
         and ((h.decoration_type in (1,2) and h.budget_ok=3) or (h.decoration_type=3 and h.visit_state=1))
         and h.site_display=0
+        AND h.visit_state =3
         ORDER BY
         v.juli ASC
     </select>

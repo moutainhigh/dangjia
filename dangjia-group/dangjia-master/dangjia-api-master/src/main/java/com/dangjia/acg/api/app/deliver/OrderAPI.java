@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.app.deliver;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,7 +27,9 @@ public interface OrderAPI {
 
     @PostMapping("app/order/businessOrderList")
     @ApiOperation(value = "订单列表", notes = "订单列表")
-    ServerResponse businessOrderList(@RequestParam("userToken") String userToken,
+    ServerResponse businessOrderList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                     @RequestParam("userToken") String userToken,
+                                     @RequestParam("houseId") String houseId,
                                      @RequestParam("queryId") String queryId);
 
     @PostMapping("app/deliver/order/confirmOrderSplit")

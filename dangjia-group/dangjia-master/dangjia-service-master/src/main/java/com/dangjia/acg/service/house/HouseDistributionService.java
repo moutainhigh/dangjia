@@ -3,17 +3,22 @@ package com.dangjia.acg.service.house;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.model.PageDTO;
+import com.dangjia.acg.common.pay.domain.Data;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IWebsiteVisitMapper;
+import com.dangjia.acg.mapper.member.ICustomerMapper;
+import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.house.WebsiteVisit;
+import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.member.CustomerRecordService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +26,8 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -41,6 +48,10 @@ public class HouseDistributionService {
     private ICityMapper iCityMapper;
     @Autowired
     private IWebsiteVisitMapper websiteVisitMapper;
+    @Autowired
+    private CustomerRecordService customerRecordService;
+    @Autowired
+    private ICustomerRecordMapper customerRecordMapper;
 
     /**
      * 获取所有验房分销
@@ -94,6 +105,7 @@ public class HouseDistributionService {
         String userToken = request.getParameter(Constants.USER_TOKEY);
         String cityId = request.getParameter(Constants.CITY_ID);
         Object object = constructionService.getMember(userToken);
+        Member user = (Member) object;
         if (object instanceof ServerResponse) {
             String modifyDate = request.getParameter(HouseDistribution.MODIFY_DATE);
             houseDistribution.setId(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
@@ -107,7 +119,6 @@ public class HouseDistributionService {
                 houseDistribution.setModifyDate(DateUtil.toDate(modifyDate));
             }
         } else {
-            Member user = (Member) object;
             user = memberMapper.selectByPrimaryKey(user.getId());
             houseDistribution.setId(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
             houseDistribution.setHead(user.getHead());
@@ -121,6 +132,18 @@ public class HouseDistributionService {
             houseDistribution.setType(1);
         }
         if (this.iHouseDistributionMapper.insertSelective(houseDistribution) > 0) {
+            Example example=new Example(CustomerRecord.class);
+            example.createCriteria().andEqualTo(CustomerRecord.MEMBER_ID,user.getId());
+            example.orderBy(CustomerRecord.CREATE_DATE).desc();
+            CustomerRecord customerRecords = customerRecordMapper.selectByExample(example).get(0);
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(houseDistribution.getCreateDate());
+                calendar.add(Calendar.DAY_OF_MONTH, +1);//+1今天的时间加一天
+                customerRecords.setDescribes((houseDistribution.getType()==1 ? "验房分销":"验房预约")
+                        +houseDistribution.getInfo()
+                        +(houseDistribution.getState()==1 ? "已支付":houseDistribution.getState()==0 ? "未支付":"预约"));
+                customerRecords.setRemindTime(calendar.getTime());
+                customerRecordService.addCustomerRecord(customerRecords);
             return ServerResponse.createBySuccess("ok", houseDistribution.getId());
         } else {
             return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");

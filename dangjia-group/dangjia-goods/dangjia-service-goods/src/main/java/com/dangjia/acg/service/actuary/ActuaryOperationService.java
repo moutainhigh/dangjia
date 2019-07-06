@@ -396,7 +396,13 @@ public class ActuaryOperationService {
             }
             List<AttributeDTO> attrList = getAllAttributes(product, productList, imageList);
             goodsDTO.setAttrList(attrList);
+            if(imageList.size()>0) {
+                String img = StringUtils.join(imageList, ",");
+                imageList.remove(0);
+                imageList.add(0, img);
+            }
             goodsDTO.setImageList(imageList);
+
             return goodsDTO;
         } catch (Exception e) {
             e.printStackTrace();
@@ -605,7 +611,15 @@ public class ActuaryOperationService {
                     Brand brand = iBrandMapper.selectByPrimaryKey(atId.getBrandId());
                     strbuf.append(brand.getName()).append(" ");
                 }
-
+                if (!CommonUtil.isEmpty(atId.getBrandSeriesId())) {
+                    BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(atId.getBrandSeriesId());
+                    strbuf.append(brandSeries.getName()).append(" ");
+                    if (atId.getId().equals(product.getId())) {//如果包含该属性
+                        if (!CommonUtil.isEmpty(brandSeries.getImage())) {
+                            imageList.add(getImage(brandSeries.getImage()));//属性图
+                        }
+                    }
+                }
                 if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
                     strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
                     if (atId.getId().equals(product.getId())) {//如果包含该属性
@@ -615,15 +629,6 @@ public class ActuaryOperationService {
                             if (strVIs != null && !CommonUtil.isEmpty(strVIs.getImage())) {
                                 imageList.add(getImage(strVIs.getImage()));//属性图
                             }
-                        }
-                    }
-                }
-                if (!CommonUtil.isEmpty(atId.getBrandSeriesId())) {
-                    BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(atId.getBrandSeriesId());
-                    strbuf.append(brandSeries.getName()).append(" ");
-                    if (atId.getId().equals(product.getId())) {//如果包含该属性
-                        if (!CommonUtil.isEmpty(brandSeries.getImage())) {
-                            imageList.add(getImage(brandSeries.getImage()));//属性图
                         }
                     }
                 }

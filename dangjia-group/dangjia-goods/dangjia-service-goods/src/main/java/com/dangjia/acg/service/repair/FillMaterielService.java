@@ -80,7 +80,7 @@ public class FillMaterielService {
                 for (BudgetMaterial bm : budgetMaterialList) {
                     if (productId.equals(bm.getProductId())) {
                         flag = false;
-                        continue;
+                        break;
                     }
                 }
                 if (flag) {

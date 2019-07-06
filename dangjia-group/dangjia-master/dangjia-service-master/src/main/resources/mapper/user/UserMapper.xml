@@ -56,11 +56,14 @@
         </if>
         <if test="null!=isJob and ''!=isJob">
             AND is_job=0
+        </if>
+        <if test="isJob==2">
             AND (
-              c.role_name like CONCAT('%','售前客服','%') or
-              c.role_name like CONCAT('%','工程部','%')
+            c.role_name like CONCAT('%','售前客服','%') or
+            c.role_name like CONCAT('%','工程部','%')
             )
         </if>
+        GROUP BY a.id
         ORDER BY a.create_date DESC
     </select>
     <!--=End getUsers 分页查询用户列表 -->

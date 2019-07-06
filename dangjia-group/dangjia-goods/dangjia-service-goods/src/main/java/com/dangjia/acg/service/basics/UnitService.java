@@ -1,18 +1,13 @@
 package com.dangjia.acg.service.basics;
 
-import com.dangjia.acg.api.product.MasterProductAPI;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
-import com.dangjia.acg.mapper.basics.IProductMapper;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
-import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
 import com.dangjia.acg.modle.brand.Unit;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,120 +29,81 @@ public class UnitService {
      */
     @Autowired
     private IUnitMapper iUnitMapper;
-    @Autowired
-    private IProductMapper iProductMapper;
-    @Autowired
-    private MasterProductAPI masterProductAPI;
-    @Autowired
-    private IBudgetMaterialMapper iBudgetMaterialMapper;
-    @Autowired
-    private IWorkerGoodsMapper iWorkerGoodsMapper;
-
-    protected static final Logger LOG = LoggerFactory.getLogger(UnitService.class);
 
     //查询所有的单位
     public ServerResponse<PageInfo> getAllUnit(PageDTO pageDTO) {
-        try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Map<String, Object>> mapList = new ArrayList<>();
-            List<Unit> unitList = iUnitMapper.getUnit();
-            for (Unit unit : unitList) {
-                Map<String, Object> map = new HashMap<>();
-                String dateStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(unit.getCreateDate());
-                map.put("id", unit.getId());
-                map.put("creatDate", dateStr);
-                map.put("name", unit.getName());
-                List<Unit> linkUnitList = new ArrayList<>();
-                if (unit.getLinkUnitIdArr() != null) {
-                    String[] linkUnitIdArr = unit.getLinkUnitIdArr().split(",");
-                    for (String linkUnitId : linkUnitIdArr) {
-                        Unit linkUnit = iUnitMapper.selectByPrimaryKey(linkUnitId);
-                        linkUnitList.add(linkUnit);
-                    }
-                }
-                map.put("linkUnitList", linkUnitList);
-                mapList.add(map);
-            }
-            PageInfo pageResult = new PageInfo(unitList);
-            pageResult.setList(mapList);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<Unit> unitList = iUnitMapper.getUnit();
+        if (unitList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
+        PageInfo pageResult = new PageInfo(unitList);
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        for (Unit unit : unitList) {
+            Map<String, Object> map = new HashMap<>();
+            String dateStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(unit.getCreateDate());
+            map.put("id", unit.getId());
+            map.put("creatDate", dateStr);
+            map.put("name", unit.getName());
+            List<Unit> linkUnitList = new ArrayList<>();
+            if (unit.getLinkUnitIdArr() != null) {
+                String[] linkUnitIdArr = unit.getLinkUnitIdArr().split(",");
+                for (String linkUnitId : linkUnitIdArr) {
+                    Unit linkUnit = iUnitMapper.selectByPrimaryKey(linkUnitId);
+                    linkUnitList.add(linkUnit);
+                }
+            }
+            map.put("linkUnitList", linkUnitList);
+            mapList.add(map);
+        }
+        pageResult.setList(mapList);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
     //新增商品单位
     public ServerResponse insert(String unitName, String linkUnitIdArr) {
-        try {
-            List<Unit> unitList = iUnitMapper.getUnitByName(unitName);
-            if (unitList != null && unitList.size() > 0) {
-                return ServerResponse.createByErrorMessage("单位名称重复");
-            }
-            Unit unit = new Unit();
-            unit.setName(unitName);
-
-            if (!StringUtils.isNotBlank(linkUnitIdArr))
-                unit.setLinkUnitIdArr(unit.getId());//包括本身  如果为null ，就只关联 自己本身
-            else
-                unit.setLinkUnitIdArr(unit.getId() + "," + linkUnitIdArr);//包括本身
-
-            unit.setCreateDate(new Date());
-            unit.setModifyDate(new Date());
-            iUnitMapper.insert(unit);
-            return ServerResponse.createBySuccessMessage("新增成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("新增失败");
+        List<Unit> unitList = iUnitMapper.getUnitByName(unitName);
+        if (unitList != null && unitList.size() > 0) {
+            return ServerResponse.createByErrorMessage("单位名称重复");
         }
+        Unit unit = new Unit();
+        unit.setName(unitName);
+        if (CommonUtil.isEmpty(linkUnitIdArr))
+            unit.setLinkUnitIdArr(unit.getId());
+        else
+            unit.setLinkUnitIdArr(unit.getId() + "," + linkUnitIdArr);//包括本身
+        iUnitMapper.insert(unit);
+        return ServerResponse.createBySuccessMessage("新增成功");
     }
 
     //修改商品单位
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse update(String unitId, String unitName, String linkUnitIdArr)throws RuntimeException {
-        try {
-            if (!StringUtils.isNotBlank(unitName))
-                return ServerResponse.createByErrorMessage("单位名称不能为空");
-            Unit unit = iUnitMapper.selectByPrimaryKey(unitId);
-            if (unit == null)
-                return ServerResponse.createByErrorMessage("不存在此单位,修改失败");
-
-            if (!unit.getName().equals(unitName))//如果修改了名称 就判断，修改的名字 是否已经存在
-            {
-                if (iUnitMapper.getUnitByName(unitName).size() > 0)
-                    return ServerResponse.createByErrorMessage("单位名称已存在");
-            }
-            unit.setName(unitName);
-            if (!StringUtils.isNotBlank(linkUnitIdArr))
-                unit.setLinkUnitIdArr(unit.getId());//包括本身  如果为null ，就只关联 自己本身
-            else
-                unit.setLinkUnitIdArr(unit.getId() + "," + linkUnitIdArr);//包括本身
-            unit.setModifyDate(new Date());
-            iUnitMapper.updateByPrimaryKeySelective(unit);
-//            iProductMapper.updateProductByUnitId(unitName,unitId);
-//            iWorkerGoodsMapper.updateWorkerGoodsByUnitId(unitId,unitName);
-//            Example example=new Example(Product.class);
-//            example.createCriteria().andEqualTo(Product.UNIT_ID,unitId);
-//            List<Product> products = iProductMapper.selectByExample(example);
-//            if(products.size()>0) {
-//                iBudgetMaterialMapper.updateBudgetMaterialByUnitName(unitName, products);
-//                masterProductAPI.updateProductByProductId(JSON.toJSONString(products), null, null, null, null);
-//            }
-            return ServerResponse.createBySuccessMessage("修改成功");
-        } catch (Exception e) {
-            return ServerResponse.createByErrorMessage("修改失败");
+    public ServerResponse update(String unitId, String unitName, String linkUnitIdArr) {
+        if (CommonUtil.isEmpty(unitName))
+            return ServerResponse.createByErrorMessage("单位名称不能为空");
+        Unit unit = iUnitMapper.selectByPrimaryKey(unitId);
+        if (unit == null)
+            return ServerResponse.createByErrorMessage("该单位不存在");
+        if (!unit.getName().equals(unitName)) {
+            if (iUnitMapper.getUnitByName(unitName).size() > 0)
+                return ServerResponse.createByErrorMessage("单位名称已存在");
         }
+        unit.setName(unitName);
+        if (CommonUtil.isEmpty(linkUnitIdArr))
+            unit.setLinkUnitIdArr(unit.getId());//包括本身  如果为null ，就只关联 自己本身
+        else
+            unit.setLinkUnitIdArr(unit.getId() + "," + linkUnitIdArr);//包括本身
+        unit.setModifyDate(new Date());
+        iUnitMapper.updateByPrimaryKeySelective(unit);
+        return ServerResponse.createBySuccessMessage("修改成功");
     }
 
-    //
     public ServerResponse getUnitById(String id) {
-        try {
-            Unit unit = iUnitMapper.selectByPrimaryKey(id);
-            return ServerResponse.createBySuccess("查询成功", unit);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
+        Unit unit = iUnitMapper.selectByPrimaryKey(id);
+        if (unit == null) {
+            return ServerResponse.createByErrorMessage("该单位不存在");
         }
+        return ServerResponse.createBySuccess("查询成功", unit);
     }
 
 }

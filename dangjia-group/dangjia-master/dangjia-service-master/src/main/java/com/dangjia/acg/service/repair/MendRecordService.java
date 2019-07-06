@@ -6,7 +6,6 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDetail;
-import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
@@ -76,8 +75,6 @@ public class MendRecordService {
 
     @Autowired
     private IEvaluateMapper evaluateMapper;
-    @Autowired
-    private IComplainMapper complainMapper;
 
     /**
      * 要补退明细
@@ -259,7 +256,6 @@ public class MendRecordService {
                         } else {
                             map.put("goodsType", "服务");
                         }
-
                         map.put("productId", mendMateriel.getProductId());
                         map.put("name", mendMateriel.getProductName());
                         map.put("price", "¥" + String.format("%.2f", mendMateriel.getPrice()) + "/" + mendMateriel.getUnitName());
@@ -281,7 +277,6 @@ public class MendRecordService {
                     }
                 }
                 mendOrderDetail.setMapList(mapList);
-
                 if (mendOrder.getType() == 2 && StringUtil.isNotEmpty(mendOrder.getImageArr())) {
                     String[] imageArr = mendOrder.getImageArr().split(",");
                     if (imageArr.length > 0) {
@@ -292,7 +287,6 @@ public class MendRecordService {
                         mendOrderDetail.setImageList(imageList);
                     }
                 }
-
                 if (mendOrder.getType() == 1 || mendOrder.getType() == 3) {//补退人工
                     ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
                     mendOrderDetail.setChangeOrder(changeOrder);
@@ -575,8 +569,9 @@ public class MendRecordService {
                 map.put("name", workerType.getName() + "阶段完工审核");
             }
             if (houseFlowApply.getApplyType() == 2) {
-                map.put("number", workerType.getName() + "整体完工审核");
-                map.put("name", workerType.getName() + "整体完工审核");
+                String name = workerType.getType() == 3 ? "竣工审核" : "整体完工审核";
+                map.put("number", workerType.getName() + name);
+                map.put("name", workerType.getName() + name);
             }
             map.put("state", houseFlowApply.getApplyType());
             map.put("createDate", houseFlowApply.getCreateDate());
