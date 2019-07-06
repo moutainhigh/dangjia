@@ -91,8 +91,10 @@ public class HouseWorkerController implements HouseWorkerAPI {
     @Override
     @ApiMethod
     public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId,
-                                            String applyDec, String imageList, String houseFlowId2) {
-        return houseWorkerService.setHouseFlowApply(userToken, applyType, houseFlowId, applyDec, imageList, houseFlowId2);
+                                            String applyDec, String imageList, String houseFlowId2,
+                                            String latitude, String longitude) {
+        return houseWorkerService.setHouseFlowApply(userToken, applyType, houseFlowId, applyDec,
+                imageList, houseFlowId2, latitude, longitude);
     }
 
     /**

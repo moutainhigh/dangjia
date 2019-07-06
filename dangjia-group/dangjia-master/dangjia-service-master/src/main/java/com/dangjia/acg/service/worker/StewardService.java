@@ -8,6 +8,7 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.CourseDTO;
@@ -18,7 +19,6 @@ import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.matter.IWorkerDisclosureHouseFlowMapper;
 import com.dangjia.acg.mapper.matter.IWorkerDisclosureMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -27,16 +27,15 @@ import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
 import com.dangjia.acg.modle.matter.WorkerDisclosureHouseFlow;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.util.LocationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
-import tk.mybatis.mapper.util.StringUtil;
 
 import java.math.BigDecimal;
 import java.util.Calendar;
@@ -75,10 +74,7 @@ public class StewardService {
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
-    private IModelingVillageMapper modelingVillageMapper;
-    @Autowired
     private BudgetWorkerAPI budgetWorkerAPI;
-
     @Autowired
     private IComplainMapper complainMapper;
     @Autowired
@@ -90,124 +86,89 @@ public class StewardService {
      * 管家巡查扫验证二维码
      */
     public ServerResponse scanCode(String userToken, String code, String latitude, String longitude) {
-        try {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member steward = (Member) object;
-            String[] str = code.split("=");
-            String houseFlowId = str[1];
-            HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);//工匠houseFlow
-            if (hf.getWorkType() != 4) {
-                return ServerResponse.createByErrorMessage("该工匠未被业主支付");
-            }
-            switch (hf.getWorkSteta()) {
-                case 0:
-                    return ServerResponse.createByErrorMessage("该工匠未被业主支付");
-                case 2:
-                    return ServerResponse.createByErrorMessage("该工序已整体完工，无法巡查");
-                case 3:
-                    return ServerResponse.createByErrorMessage("该工匠未交底，去交底");
-            }
-            //工匠的坐标
-            String x = hf.getLatitude();
-            String y = hf.getLongitude();
-            System.out.println("工匠坐标:经度" + y + ",工匠纬度:" + x);
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(hf.getPast());//二维码生成时间
-            cal.add(Calendar.MINUTE, 30);
-            Calendar now = Calendar.getInstance();
-            if (cal.before(now)) {
-                return ServerResponse.createByErrorMessage("二维码失效,请重新生成");
-            }
-            //根据房子id找出该房子大管家
-            Member stewardHouse = memberMapper.getSupervisor(hf.getHouseId());
-            if (!stewardHouse.getId().equals(steward.getId())) {
-                return ServerResponse.createByErrorMessage("工人与大管家不是同一个工地");
-            }
-            House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
-            ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
-            Double locationx = Double.parseDouble(village.getLocationx() == null ? "0" : village.getLocationx());//小区经度
-            Double locationy = Double.parseDouble(village.getLocationy() == null ? "0" : village.getLocationy());//小区维度
-            System.out.println("小区坐标:经度" + locationx + ",小区纬度:" + locationy);
-            /*if(locationx == 0 || locationy == 0){
-               return ServerResponse.createByErrorMessage("请配置该房子所在小区地理位置");
-            }*/
-            double distance = GetShortDistance(locationx, locationy, Double.valueOf(y), Double.valueOf(x));//计算距离
-            System.out.println("工匠与小区的距离:" + distance + "米*********************");
-//		    if(distance > 3000){
-//	   			return ServerResponse.createByErrorMessage("工匠未在工地范围！");
-//		    }
-            distance = GetShortDistance(Double.valueOf(longitude), Double.valueOf(latitude), locationx, locationy);//计算距离
-            System.out.println("管家坐标:经度" + longitude + ",管家纬度:" + latitude);
-            System.out.println("管家与小区的距离:" + distance + "米*********************");
-//		    if(distance > 3000){
-//		    	return ServerResponse.createByErrorMessage("大管家未在工地范围！");
-//		    }
-            distance = GetShortDistance(Double.valueOf(longitude), Double.valueOf(latitude), Double.valueOf(y), Double.valueOf(x));//计算距离
-            System.out.println("管家与工匠的距离:" + distance + "米*********************");
-            if (distance > 3000) {
-                return ServerResponse.createByErrorMessage("大管家与工匠不在一起");
-            }
-            return ServerResponse.createBySuccess("巡查成功", houseFlowId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("扫码失败");
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
-    }
-
-    /**
-     * 根据经纬度计算距离，经度1，纬度1，经度2，纬度2
-     */
-    private double GetShortDistance(double lon1, double lat1, double lon2, double lat2) {
-        double DEF_PI = 3.14159265359; // PI
-        double DEF_2PI = 6.28318530712; // 2*PI
-        double DEF_PI180 = 0.01745329252; // PI/180.0
-        double DEF_R = 6370693.5; // radius of earth
-
-        double ew1, ns1, ew2, ns2;
-        double dx, dy, dew;
-        double distance;
-        // 角度转换为弧度
-        ew1 = lon1 * DEF_PI180;
-        ns1 = lat1 * DEF_PI180;
-        ew2 = lon2 * DEF_PI180;
-        ns2 = lat2 * DEF_PI180;
-        // 经度差
-        dew = ew1 - ew2;
-        // 若跨东经和西经180 度，进行调整
-        if (dew > DEF_PI)
-            dew = DEF_2PI - dew;
-        else if (dew < -DEF_PI)
-            dew = DEF_2PI + dew;
-        dx = DEF_R * Math.cos(ns1) * dew; // 东西方向长度(在纬度圈上的投影长度)
-        dy = DEF_R * (ns1 - ns2); // 南北方向长度(在经度圈上的投影长度)
-        // 勾股定理求斜边长
-        distance = Math.sqrt(dx * dx + dy * dy);
-        return distance;
+        Member member = (Member) object;
+        if (CommonUtil.isEmpty(code)) {
+            return ServerResponse.createByErrorMessage("二维码信息有误");
+        }
+        if (CommonUtil.isEmpty(latitude) || CommonUtil.isEmpty(longitude)) {
+            return ServerResponse.createByErrorMessage("经纬度信息不正确");
+        }
+        String[] str = code.split("=");
+        if (str.length < 2) {
+            return ServerResponse.createByErrorMessage("二维码内容不正确");
+        }
+        String houseFlowId = str[1];
+        HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);//工匠houseFlow
+        if (hf == null) {
+            return ServerResponse.createByErrorMessage("工匠工序不存在");
+        }
+        if (hf.getWorkType() != 4) {
+            return ServerResponse.createByErrorMessage("该工匠未被业主支付");
+        }
+        if (hf.getPast() == null) {
+            return ServerResponse.createByErrorMessage("二维码信息有误，请重新生成");
+        }
+        switch (hf.getWorkSteta()) {
+            case 0:
+                return ServerResponse.createByErrorMessage("该工匠未被业主支付");
+            case 2:
+                return ServerResponse.createByErrorMessage("该工序已整体完工，无法巡查");
+            case 3:
+                return ServerResponse.createByErrorMessage("该工匠未交底，去交底");
+        }
+        //根据房子id找出该房子大管家
+        Member stewardHouse = memberMapper.getSupervisor(hf.getHouseId());
+        if (!stewardHouse.getId().equals(member.getId())) {
+            return ServerResponse.createByErrorMessage("工人与大管家不是同一个工地");
+        }
+        double longitude1;
+        double latitude1;
+        double longitude2;
+        double latitude2;
+        try {
+            longitude1 = Double.valueOf(longitude);
+            latitude1 = Double.valueOf(latitude);
+            longitude2 = Double.valueOf(hf.getLongitude());
+            latitude2 = Double.valueOf(hf.getLatitude());
+        } catch (NumberFormatException e) {
+            return ServerResponse.createByErrorMessage("位置信息有误");
+        }
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(hf.getPast());//二维码生成时间
+        cal.add(Calendar.MINUTE, 30);
+        Calendar now = Calendar.getInstance();
+        if (cal.before(now)) {
+            return ServerResponse.createByErrorMessage("二维码失效,请重新生成");
+        }
+        double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
+        if (distance > 3000) {
+            return ServerResponse.createByErrorMessage("大管家与工匠不在一起");
+        }
+        return ServerResponse.createBySuccess("巡查成功", houseFlowId);
     }
 
     /**
      * 管家巡查工匠生成二维码内容
      */
     public ServerResponse workerQrcode(String houseFlowId, String latitude, String longitude) {
-        try {
-            if (StringUtil.isEmpty(latitude) || StringUtil.isEmpty(longitude)) {
-                return ServerResponse.createByErrorMessage("获取定位失败");
-            }
-            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
-            houseFlow.setPast(new Date());//记录二维码生成时间
-            houseFlow.setLatitude(latitude);
-            houseFlow.setLongitude(longitude);
-            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-            return ServerResponse.createBySuccess("操作成功", "http://weixin.fengjiangit.com/g.html?a=" + houseFlowId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("返回失败");
+        if (CommonUtil.isEmpty(latitude) || CommonUtil.isEmpty(longitude)) {
+            return ServerResponse.createByErrorMessage("获取定位失败");
         }
-
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        if (houseFlow == null) {
+            return ServerResponse.createByErrorMessage("工序不存在");
+        }
+        houseFlow.setPast(new Date());//记录二维码生成时间
+        houseFlow.setLatitude(latitude);
+        houseFlow.setLongitude(longitude);
+        houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+        return ServerResponse.createBySuccess("操作成功", "http://weixin.fengjiangit.com/g.html?a=" + houseFlowId);
     }
+
     /**
      * 管家审核停工申请
      * state 1通过 0不通过
@@ -221,19 +182,16 @@ public class StewardService {
                 houseFlowApply.setSupervisorCheck(1);
                 houseFlowApply.setModifyDate(new Date());
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-
             } else {
                 houseFlowApply.setMemberCheck(2);
                 houseFlowApply.setSupervisorCheck(2);
                 houseFlowApply.setModifyDate(new Date());
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-
                 //不通过停工申请
                 HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowId());
                 hf.setPause(0);
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
             }
-
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -260,8 +218,8 @@ public class StewardService {
                 wdList.add(workerDisclosure);
             }
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            for (WorkerDisclosure w:wdList){
-                if(w.getImg()!=null) {
+            for (WorkerDisclosure w : wdList) {
+                if (w.getImg() != null) {
                     w.setImg(imageAddress + w.getImg());
                 }
             }
@@ -325,7 +283,6 @@ public class StewardService {
             Example example = new Example(WorkerDisclosureHouseFlow.class);
             example.createCriteria().andEqualTo(WorkerDisclosureHouseFlow.HOUSE_FLOW_ID, houseFlowId);
             workerDisclosureHouseFlowMapper.deleteByExample(example);
-
             String[] tellList = disclosureIds.split(",");
             for (String tell : tellList) {
                 WorkerDisclosureHouseFlow wdh = new WorkerDisclosureHouseFlow();
@@ -334,7 +291,6 @@ public class StewardService {
                 wdh.setState(1);
                 workerDisclosureHouseFlowMapper.insert(wdh);
             }
-
             return ServerResponse.createBySuccess("操作成功", "http://weixin.fengjiangit.com/g.html?a=" + houseFlowId);
         } catch (Exception e) {
             e.printStackTrace();
@@ -362,7 +318,7 @@ public class StewardService {
                     String.format(DjConstants.GJPageAddress.JFREGULATIONS, userToken, houseFlow.getCityId(), "选择奖罚条例"));//奖罚页面
             if (houseFlow.getWorkType() == 4 && houseFlow.getWorkSteta() == 3) {//待交底
                 Example example = new Example(WorkerDisclosure.class);
-                example.createCriteria().andEqualTo("state", 1).andEqualTo("type",0);
+                example.createCriteria().andEqualTo("state", 1).andEqualTo("type", 0);
                 List<WorkerDisclosure> wdList = workerDisclosureMapper.selectByExample(example);
                 courseDTO.setWorkerDisclosureList(wdList);
                 courseDTO.setApplyType(0);//没有申请
@@ -375,7 +331,7 @@ public class StewardService {
                     courseDTO.setApplyType(0);//没有申请
                 }
             }
-            if (houseFlow.getWorkType() !=4) {//如果是已抢单待支付。则提醒业主支付
+            if (houseFlow.getWorkType() != 4) {//如果是已抢单待支付。则提醒业主支付
                 courseDTO.setIfBackOut(0);//0可放弃；1：申请停工；2：已停工 3 审核中
             } else if (houseFlow.getPause() == 1) {//已暂停  停工有两种情况需要处理
                 courseDTO.setIfBackOut(2);
@@ -386,47 +342,15 @@ public class StewardService {
                     courseDTO.setIfBackOut(2);
                 } else if (stageAppList.size() > 0) {
                     courseDTO.setIfBackOut(2);
-                }else {
+                } else {
                     courseDTO.setIfBackOut(1);
-//                    Example example = new Example(HouseFlowApply.class);
-//                    example.createCriteria()
-//                            .andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlow.getId())
-//                            .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-//                            .andEqualTo(HouseFlowApply.PAY_STATE, 1);
-//                    List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
-//                    if (houseFlowApplies != null && houseFlowApplies.size() > 0) {
-//                        HouseFlowApply hfa = houseFlowApplies.get(0);
-//                        switch (hfa.getMemberCheck()) {
-//                            case 0://0未审核
-//                                courseDTO.setIfBackOut(4);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                                break;
-//                            case 1://1审核通过
-//                                Date date = new Date();
-//                                if (hfa.getStartDate() != null && date.getTime() < hfa.getStartDate().getTime()) {
-//                                    courseDTO.setIfBackOut(4);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                                } else if (hfa.getEndDate() != null && date.getTime() > hfa.getEndDate().getTime()) {
-//                                    courseDTO.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                                } else {
-//                                    courseDTO.setIfBackOut(2);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                                }
-//                                break;
-//                            default://2审核不通过
-//                                courseDTO.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                                break;
-//                        }
-//                    } else {
-//                        courseDTO.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                    }
                 }
             }
-
-            //查询是否存在申诉。防止重复申诉
-//            Member stewardHouse = memberMapper.getSupervisor(houseFlow.getHouseId());
             Example example = new Example(Complain.class);
             example.createCriteria().andEqualTo(Complain.MEMBER_ID, houseFlow.getWorkerId())
                     .andEqualTo(Complain.HOUSE_ID, houseFlow.getHouseId())
                     .andEqualTo(Complain.STATUS, 0)
-                    .andEqualTo(Complain.COMPLAIN_TYPE,3);
+                    .andEqualTo(Complain.COMPLAIN_TYPE, 3);
             List<Complain> complains = complainMapper.selectByExample(example);
             if (complains.size() > 0) {
                 Map map = BeanUtils.beanToMap(courseDTO);

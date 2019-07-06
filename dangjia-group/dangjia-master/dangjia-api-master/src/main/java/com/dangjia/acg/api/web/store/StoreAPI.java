@@ -74,4 +74,11 @@ public interface StoreAPI {
                                    @RequestParam("latitude") String latitude,
                                    @RequestParam("longitude") String longitude);
 
+
+    @PostMapping("/app/store/Callback")
+    @ApiOperation(value = "回访记录", notes = "回访记录")
+    ServerResponse Callback(@RequestParam("storeSubscribeId") String storeSubscribeId,@RequestParam("info") String info);
+
+
+
 }

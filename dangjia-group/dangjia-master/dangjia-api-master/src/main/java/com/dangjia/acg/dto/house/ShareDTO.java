@@ -5,7 +5,8 @@ import lombok.Data;
 import java.util.List;
 @Data
 public class ShareDTO {
-	private String name;//户型名或者房号
+	private String houseName;//户型名或者房号
+	private String noNumberHouseName;
 	private String imageNum;//设计图数量
 	private String jianzhumianji;//建筑面积
 	private String jvillageacreage;//计算面积

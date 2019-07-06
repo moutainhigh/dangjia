@@ -145,7 +145,6 @@ public class WarehouseService {
                 }
                 List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
                 LOG.info(" warehouseList size:" + warehouseList.size());
-
                 List<String> categoryIdList = warehouseMapper.categoryIdList(houseId);
                 for (String categoryId : categoryIdList) {
                     //获取低级类别

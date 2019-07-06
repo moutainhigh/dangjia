@@ -12,7 +12,6 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -22,6 +21,7 @@ import com.dangjia.acg.dto.house.MyHouseFlowDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
@@ -32,6 +32,7 @@ import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
@@ -41,6 +42,7 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.complain.ComplainService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.house.HouseService;
+import com.dangjia.acg.util.LocationUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,6 +117,8 @@ public class HouseWorkerService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private IComplainMapper complainMapper;
+    @Autowired
+    private IModelingVillageMapper modelingVillageMapper;
 
     /**
      * 根据工人id查询所有房子任务
@@ -209,11 +213,11 @@ public class HouseWorkerService {
             example.createCriteria().andEqualTo(Complain.MEMBER_ID, houseFlow.getWorkerId())
                     .andEqualTo(Complain.HOUSE_ID, houseFlow.getHouseId())
                     .andEqualTo(Complain.STATUS, 0)
-                    .andEqualTo(Complain.COMPLAIN_TYPE,6);
+                    .andEqualTo(Complain.COMPLAIN_TYPE, 6);
             List<Complain> complains = complainMapper.selectByExample(example);
-            if (houseWorker.getWorkType() == 6){
+            if (houseWorker.getWorkType() == 6) {
                 map.put("isSubstitution", complains.size() > 0 ? 0 : 1);
-            }else {
+            } else {
                 map.put("isSubstitution", 2);
             }
             mapData.put("houseWorker", map);
@@ -441,7 +445,8 @@ public class HouseWorkerService {
      * applyType   0每日完工申请，1阶段完工申请，2整体完工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
      */
     public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId,
-                                            String applyDec, String imageList, String houseFlowId2) {
+                                            String applyDec, String imageList, String houseFlowId2,
+                                            String latitude, String longitude) {
         if (CommonUtil.isEmpty(applyType)) {
             return ServerResponse.createByErrorMessage("请选择提交审核类别");
         }
@@ -466,7 +471,7 @@ public class HouseWorkerService {
             case 2:
                 return setWholeCompletion(worker, hf, house, imageList);
             case 4:
-                return setStartDaily(worker, hf);
+                return setStartDaily(worker, hf, house, latitude, longitude);
             case 5:
             case 6:
             case 7:
@@ -666,7 +671,22 @@ public class HouseWorkerService {
     /**
      * 每日开工
      */
-    private ServerResponse setStartDaily(Member worker, HouseFlow hf) {
+    private ServerResponse setStartDaily(Member worker, HouseFlow hf, House house, String latitude, String longitude) {
+        ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
+        if (village != null && village.getLocationx() != null && village.getLocationy() != null
+                && latitude != null && longitude != null) {
+            try {
+                double longitude1 = Double.valueOf(longitude);
+                double latitude1 = Double.valueOf(latitude);
+                double longitude2 = Double.valueOf(village.getLocationx());
+                double latitude2 = Double.valueOf(village.getLocationy());
+                double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
+                if (distance > 2000) {
+                    return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
+                }
+            } catch (Exception ignored) {
+            }
+        }
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
         if (hf.getWorkSteta() == 2) {
             return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已经整体完工，无法开工");
@@ -719,7 +739,7 @@ public class HouseWorkerService {
                 end = houseFlowApply.getEndDate();
                 //更新实际停工天数
                 houseFlowApply.setEndDate(DateUtil.delDateDays(start, 1));
-                if(houseFlowApply.getStartDate().getTime()<=houseFlowApply.getEndDate().getTime()){
+                if (houseFlowApply.getStartDate().getTime() <= houseFlowApply.getEndDate().getTime()) {
                     houseFlowApply.setEndDate(houseFlowApply.getStartDate());
                     houseFlowApply.setSuspendDay(0);
                     houseFlowApply.setDataStatus(1);

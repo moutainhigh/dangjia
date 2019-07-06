@@ -79,4 +79,10 @@ public class StoreContoller implements StoreAPI {
     public ServerResponse IndexqueryStore(String cityId,String latitude, String longitude) {
         return storeServices.IndexqueryStore(cityId,latitude,longitude);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse Callback(String storeSubscribeId, String info) {
+        return storeServices.Callback(storeSubscribeId,info);
+    }
 }
