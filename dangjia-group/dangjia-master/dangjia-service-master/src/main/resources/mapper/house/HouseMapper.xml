@@ -239,7 +239,6 @@
         </if>
         and ((decoration_type in (1,2) and budget_ok=3) or (decoration_type=3 and visit_state=1))
         and site_display=0
-        AND h.visit_state in(1,3)
         order by num desc
     </select>
     <select id="getSameLayoutDistance" resultType="com.dangjia.acg.modle.house.House">
