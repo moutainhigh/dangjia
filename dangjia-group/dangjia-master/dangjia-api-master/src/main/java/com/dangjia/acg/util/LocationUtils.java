@@ -39,8 +39,8 @@ public class LocationUtils {
     }
 
     public static void main(String[] args) {
-        double distance = getDistance(34.2675560000, 108.9534750000,
-                34.2464320000, 108.9534750000);
-        System.out.println("距离" + distance + "公里");
+        double distance = getDistance(28.227988, 112.875791,
+                28.189381, 112.841035);
+        System.out.println("距离" + distance + "米");
     }
 }
