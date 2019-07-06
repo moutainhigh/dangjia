@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.util.StringUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -143,7 +144,7 @@ public class StoreServices {
             storeSubscribe.setModifyDate(modifyDate);
             if(iStoreSubscribeMapper.insert(storeSubscribe)>0) {
                 Map<String, String> temp_para = new HashMap();
-                temp_para.put("time", modifyDate.toGMTString());
+                temp_para.put("time", new SimpleDateFormat("yyyy-MM-dd").format(modifyDate));
                 temp_para.put("name", storeName);
                 Store store = iStoreMapper.selectByPrimaryKey(storeId);
                 temp_para.put("address",store.getStoreAddress());
