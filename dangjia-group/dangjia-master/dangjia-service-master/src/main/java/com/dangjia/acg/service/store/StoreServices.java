@@ -8,18 +8,15 @@ import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreSubscribeMapper;
-import com.dangjia.acg.modle.core.WorkerType;
-import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.mapper.system.IDepartmentMapper;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreSubscribe;
+import com.dangjia.acg.modle.system.Department;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tk.mybatis.mapper.util.StringUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -45,6 +42,8 @@ public class StoreServices {
     @Autowired
     private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private IDepartmentMapper departmentMapper;
     /**
      * 创建门店
      * @param store
@@ -52,6 +51,10 @@ public class StoreServices {
      */
     public ServerResponse addStore(Store store) {
         try {
+            if(!CommonUtil.isEmpty(store.getDepartmentId())) {
+                Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
+                department.setCityName(department.getCityName());
+            }
             iStoreMapper.insert(store);
             return ServerResponse.createBySuccessMessage("创建成功");
         } catch (Exception e) {
@@ -83,7 +86,12 @@ public class StoreServices {
      */
     public ServerResponse updateStore(Store store) {
         try {
+            if(!CommonUtil.isEmpty(store.getDepartmentId())) {
+                Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
+                department.setCityName(department.getCityName());
+            }
             store.setCreateDate(null);
+            store.setModifyDate(new Date());
             iStoreMapper.updateByPrimaryKeySelective(store);
             return ServerResponse.createBySuccessMessage("编辑成功");
         } catch (Exception e) {

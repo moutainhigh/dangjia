@@ -2,7 +2,6 @@ package com.dangjia.acg.modle.store;
 
 import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
-import com.dangjia.acg.modle.house.House;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -51,6 +50,11 @@ public class Store extends BaseEntity {
     @ApiModelProperty("门店预约号码")
     private String reservationNumber;
 
+    @Column(name = "department_id")
+    @Desc(value = "部门ID")
+    @ApiModelProperty("部门ID")
+    private String departmentId;
+
     @Column(name = "latitude")
     @Desc(value = "门店纬度")
     @ApiModelProperty("门店纬度")
@@ -60,6 +64,12 @@ public class Store extends BaseEntity {
     @Desc(value = "门店经度")
     @ApiModelProperty("门店经度")
     private String longitude;
+
+
+    @Column(name = "scope_itude")
+    @Desc(value = "门店范围")
+    @ApiModelProperty("门店范围")
+    private String scopeItude;
 
     @Transient
     private Integer juli;//门店距离
