@@ -55,6 +55,11 @@ public class Store extends BaseEntity {
     @ApiModelProperty("部门ID")
     private String departmentId;
 
+    @Column(name = "department_name")
+    @Desc(value = "部门name")
+    @ApiModelProperty("部门name")
+    private String departmentName;
+
     @Column(name = "latitude")
     @Desc(value = "门店纬度")
     @ApiModelProperty("门店纬度")

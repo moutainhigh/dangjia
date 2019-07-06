@@ -53,7 +53,8 @@ public class StoreServices {
         try {
             if(!CommonUtil.isEmpty(store.getDepartmentId())) {
                 Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
-                department.setCityName(department.getCityName());
+                store.setCityName(department.getCityName());
+                store.setDepartmentName(department.getName());
             }
             iStoreMapper.insert(store);
             return ServerResponse.createBySuccessMessage("创建成功");
@@ -88,7 +89,8 @@ public class StoreServices {
         try {
             if(!CommonUtil.isEmpty(store.getDepartmentId())) {
                 Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
-                department.setCityName(department.getCityName());
+                store.setCityName(department.getCityName());
+                store.setDepartmentName(department.getName());
             }
             store.setCreateDate(null);
             store.setModifyDate(new Date());
