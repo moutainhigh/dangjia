@@ -108,7 +108,9 @@ public interface HouseWorkerAPI {
                                      @RequestParam("houseFlowId") String houseFlowId,
                                      @RequestParam("applyDec") String applyDec,
                                      @RequestParam("imageList") String imageList,
-                                     @RequestParam("houseFlowId2") String houseFlowId2);
+                                     @RequestParam("houseFlowId2") String houseFlowId2,
+                                     @RequestParam("latitude") String latitude,
+                                     @RequestParam("longitude") String longitude);
 
     @PostMapping("app/core/houseWorker/getAdvanceInAdvance")
     @ApiOperation(value = "提前进场", notes = "提前进场")
