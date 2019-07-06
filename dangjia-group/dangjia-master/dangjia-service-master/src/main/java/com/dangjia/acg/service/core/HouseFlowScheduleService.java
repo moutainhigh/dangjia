@@ -233,7 +233,7 @@ public class HouseFlowScheduleService {
                     Map map = new HashMap<>();
                     map.put("info", "当前为" + houseFlow.getWorkerTypeName() + "开工日期");
                     map.put("date", DateUtil.dateToString(houseFlow.getCreateDate(), DateUtil.FORMAT2));
-                    map.put("type", houseFlow.getWorkerType()*10);
+                    map.put("type", 1);
                     amap.put("state", 1);
                     plans.add(map);
                 }
@@ -245,7 +245,7 @@ public class HouseFlowScheduleService {
                         map.put("info", "当前为" + houseFlow.getWorkerTypeName() + "阶段完工日期");
                     }
                     amap.put("state", 2);
-                    map.put("type", houseFlow.getWorkerType()*20);
+                    map.put("type", 2);
                     map.put("date", DateUtil.dateToString(houseFlow.getCreateDate(), DateUtil.FORMAT2));
                     plans.add(map);
                 }
@@ -273,7 +273,7 @@ public class HouseFlowScheduleService {
                         } else {
                             map.put("info", houseFlow.getWorkerTypeName() + "今日完工");
                         }
-                        map.put("type", houseFlow.getWorkerType()*10);
+                        map.put("type", 1);
                         actuals.add(map);
                     }
                     //1阶段完工申请
@@ -288,7 +288,7 @@ public class HouseFlowScheduleService {
                                 map.put("info", "大管家验收" + houseFlow.getWorkerTypeName() + "的阶段完工");
                             }
                         }
-                        map.put("type", houseFlow.getWorkerType()*20);
+                        map.put("type", 2);
                         actuals.add(map);
                     }
                     //2整体完工申请
@@ -304,7 +304,7 @@ public class HouseFlowScheduleService {
                             }
 
                         }
-                        map.put("type", houseFlow.getWorkerType()*20);
+                        map.put("type", 2);
                         actuals.add(map);
                     }
                     //3停工申请
@@ -326,7 +326,7 @@ public class HouseFlowScheduleService {
                         Map map = new HashMap<>();
                         map.put("date", DateUtil.dateToString(houseFlowApply.getCreateDate(), DateUtil.FORMAT2));
                         map.put("info", houseFlow.getWorkerTypeName() + "今日开工");
-                        map.put("type", houseFlow.getWorkerType()*10);
+                        map.put("type", 1);
                         actuals.add(map);
                     }
 
