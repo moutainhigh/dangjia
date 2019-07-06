@@ -673,7 +673,7 @@ public class HouseWorkerService {
      */
     private ServerResponse setStartDaily(Member worker, HouseFlow hf, House house, String latitude, String longitude) {
         ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
-        if (village.getLocationx() != null && village.getLocationy() != null
+        if (village != null && village.getLocationx() != null && village.getLocationy() != null
                 && latitude != null && longitude != null) {
             try {
                 double longitude1 = Double.valueOf(longitude);
