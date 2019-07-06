@@ -12,7 +12,9 @@
           store_id AS storeId,
           store_name AS storeName,
           customer_name AS customerName,
-          customer_phone AS customerPhone
+          customer_phone AS customerPhone,
+          state,
+          info
 	</sql>
 
     <!--门店预约查询-->
@@ -28,6 +30,7 @@
               customer_phone LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
+        ORDER BY modify_date DESC
     </select>
 
 

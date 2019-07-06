@@ -113,7 +113,7 @@ public class WalletService {
             //生成提现订单
             BankCard bankCard = bankCardMapper.selectByPrimaryKey(workerBankCard.getBankCardId());
             WithdrawDeposit wd = new WithdrawDeposit();
-            wd.setRoleType(roleType);
+            wd.setRoleType(roleType==1 ? 1:worker.getWorkerType()==3 ? 2:3);
             wd.setName(worker.getName());
             wd.setWorkerId(worker.getId());
             wd.setMoney(new BigDecimal(money));
