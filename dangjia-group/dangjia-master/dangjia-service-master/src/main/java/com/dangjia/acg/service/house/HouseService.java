@@ -1716,10 +1716,16 @@ public class HouseService {
     /**
      * 房子装修列表（利润统计）
      */
-    public ServerResponse getHouseProfitList(PageDTO pageDTO, String visitState, String searchKey) {
+    public ServerResponse getHouseProfitList(HttpServletRequest request,PageDTO pageDTO, String visitState, String searchKey) {
         try {
+            String userID = request.getParameter(Constants.USERID);
+
+            String cityKey = redisClient.getCache(Constants.CITY_KEY + userID, String.class);
+            if (CommonUtil.isEmpty(cityKey)) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(visitState, searchKey);
+            List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(cityKey,visitState, searchKey);
             if (houseList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");
