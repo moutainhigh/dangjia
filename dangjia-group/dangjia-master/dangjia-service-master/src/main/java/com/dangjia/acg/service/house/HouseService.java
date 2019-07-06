@@ -810,7 +810,7 @@ public class HouseService {
     /**
      * 房子装修列表
      */
-    public ServerResponse getList(PageDTO pageDTO, Integer visitState, String startDate, String endDate, String searchKey, String orderBy, String memberId) {
+    public ServerResponse getList(PageDTO pageDTO, String cityKey,Integer visitState, String startDate, String endDate, String searchKey, String orderBy, String memberId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (!CommonUtil.isEmpty(startDate) && !CommonUtil.isEmpty(endDate)) {
@@ -819,7 +819,7 @@ public class HouseService {
                     endDate = endDate + " " + "23:59:59";
                 }
             }
-            List<HouseListDTO> houseList = iHouseMapper.getHouseList(memberId, visitState, startDate, endDate, orderBy, searchKey);
+            List<HouseListDTO> houseList = iHouseMapper.getHouseList( cityKey,memberId, visitState, startDate, endDate, orderBy, searchKey);
             if (houseList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");

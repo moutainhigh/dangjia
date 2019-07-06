@@ -331,6 +331,9 @@
         INNER JOIN dj_member m ON h.member_id = m.id
         WHERE
         h.data_status =0
+        <if test="cityKey!=null and cityKey!=''">
+            AND FIND_IN_SET(h.city_id,#{cityKey})
+        </if>
         <if test="memberId!=null and memberId!=''">
             and m.id = #{memberId}
         </if>
@@ -486,6 +489,9 @@
         INNER JOIN dj_member m ON h.member_id = m.id
         WHERE
         h.data_status =0
+        <if test="cityKey!=null and cityKey!=''">
+            AND FIND_IN_SET(h.city_id,#{cityKey})
+        </if>
         <if test="visitState==0 || visitState==1">
             and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and h.pause=0
         </if>

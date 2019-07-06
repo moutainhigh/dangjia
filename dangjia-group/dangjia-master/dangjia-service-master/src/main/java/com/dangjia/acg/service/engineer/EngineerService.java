@@ -1,6 +1,9 @@
 package com.dangjia.acg.service.engineer;
 
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -37,6 +40,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -79,6 +83,8 @@ public class EngineerService {
     @Autowired
     private IWorkerDisclosureMapper iWorkerDisclosureMapper;
 
+    @Autowired
+    private RedisClient redisClient;//缓存
     /**
      * 已支付换工匠
      */
@@ -573,10 +579,15 @@ public class EngineerService {
     /**
      * 工地列表
      */
-    public ServerResponse getHouseList(PageDTO pageDTO, Integer visitState, String searchKey) {
+    public ServerResponse getHouseList(HttpServletRequest request, PageDTO pageDTO, Integer visitState, String searchKey) {
+        String userID = request.getParameter(Constants.USERID);
+
+        String cityKey = redisClient.getCache(Constants.CITY_KEY + userID, String.class);
+        if (CommonUtil.isEmpty(cityKey)) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-//        List<House> houseList = houseMapper.selectAll();
-        List<House> houseList = houseMapper.getHouseListLikeSearchKey(visitState, searchKey);
+        List<House> houseList = houseMapper.getHouseListLikeSearchKey(cityKey,visitState, searchKey);
         PageInfo pageResult = new PageInfo(houseList);
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (House house : houseList) {

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -76,7 +77,8 @@ public interface WebEngineerAPI {
 
     @PostMapping(value = "web/engineer/getHouseList")
     @ApiOperation(value = "工地列表", notes = "工地列表")
-    ServerResponse getHouseList(@RequestParam("pageDTO") PageDTO pageDTO,
+    ServerResponse getHouseList(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("pageDTO") PageDTO pageDTO,
                                 @RequestParam("visitState") Integer visitState,
                                 @RequestParam("searchKey") String searchKey);
 

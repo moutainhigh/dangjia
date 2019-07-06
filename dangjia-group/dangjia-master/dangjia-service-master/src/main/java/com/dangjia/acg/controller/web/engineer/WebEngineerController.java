@@ -10,6 +10,7 @@ import com.dangjia.acg.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -141,8 +142,8 @@ public class WebEngineerController implements WebEngineerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getHouseList(PageDTO pageDTO, Integer visitState, String searchKey) {
-        return engineerService.getHouseList(pageDTO, visitState, searchKey);
+    public ServerResponse getHouseList(HttpServletRequest request, PageDTO pageDTO, Integer visitState, String searchKey) {
+        return engineerService.getHouseList( request,pageDTO, visitState, searchKey);
     }
 
     /**
