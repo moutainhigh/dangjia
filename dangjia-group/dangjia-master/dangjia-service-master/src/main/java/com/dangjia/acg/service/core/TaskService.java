@@ -310,6 +310,9 @@ public class TaskService {
     private List<Task> getTask(String houseId, String userToken) {
         House house = houseMapper.selectByPrimaryKey(houseId);
         List<Task> taskList = new ArrayList<>();
+        if(house.getVisitState()==4){
+            return taskList;
+        }
         //查询待支付工序
         Example example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 3).andEqualTo(HouseFlow.HOUSE_ID, houseId)
