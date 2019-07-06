@@ -295,6 +295,7 @@ public class MainUserController implements MainUserAPI {
         if (null == user) {
             return ServerResponse.createByErrorMessage("请求参数有误，请您稍后再试");
         }
+        String cityId = request.getParameter(Constants.CITY_ID);
         // 用户是否存在
         MainUser existUser = this.userService.findUserByMobile(user.getMobile());
         if (existUser == null) {
@@ -314,14 +315,21 @@ public class MainUserController implements MainUserAPI {
                 return ServerResponse.createByErrorMessage("用户名或密码不正确！");
             }
         }
+        if(CommonUtil.isEmpty(existUser.getDepartmentId())){
+            return ServerResponse.createByErrorMessage("登录用户暂未分配所属部门，请您联系管理员");
+        }
+        Department department=departmentMapper.selectByPrimaryKey(existUser.getDepartmentId());
+        if(department==null){
+            return ServerResponse.createByErrorMessage("登录用户暂未分配所属部门，请您联系管理员");
+        }
+        if(CommonUtil.isEmpty(cityId)||department.getCityId().indexOf(cityId)==-1){
+            return ServerResponse.createByErrorMessage("登录用户只能在("+department.getCityName()+")下登录，请选择正确的城市");
+        }
         // 用户登录
         try {
             logger.debug("用户登录，用户验证开始！member=" + user.getMobile());
             redisClient.put(Constants.USER_KEY + existUser.getId(), existUser);
-            if(!CommonUtil.isEmpty(existUser.getDepartmentId())) {
-                Department department = departmentMapper.selectByPrimaryKey(existUser.getDepartmentId());
-                redisClient.put(Constants.CITY_KEY + existUser.getId(), department.getCityId());
-            }
+            redisClient.put(Constants.CITY_KEY + existUser.getId(), department.getCityId());
             groupInfoService.registerJGUsers("gj", new String[]{existUser.getId()}, new String[1]);
             logger.info("用户登录，用户验证通过！member=" + user.getMobile());
             msg = ServerResponse.createBySuccess("用户登录，用户验证通过！member=" + user.getMobile(), existUser.getId());
