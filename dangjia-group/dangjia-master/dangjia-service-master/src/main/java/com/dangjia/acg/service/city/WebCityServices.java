@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.city;
 
-import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.other.ICityMapper;
@@ -30,6 +29,7 @@ public class WebCityServices {
     }
 
     public ServerResponse addCity(City city){
+        city.setState("1");
         cityMapper.insert(city);
         return ServerResponse.createBySuccessMessage("创建成功");
     }

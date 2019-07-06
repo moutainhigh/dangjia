@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,6 +21,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_other_city")
 @ApiModel(description = "城市地区")
+@FieldNameConstants(prefix = "")
 public class City extends BaseEntity {
 
     @Column(name = "name")

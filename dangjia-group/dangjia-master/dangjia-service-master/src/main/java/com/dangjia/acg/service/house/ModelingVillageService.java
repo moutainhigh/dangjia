@@ -61,7 +61,10 @@ public class ModelingVillageService {
     private RedisClient redisClient;
 
     public ServerResponse getCityList() {
-        List<City> cityList = cityMapper.selectAll();
+        Example example = new Example(City.class);
+        example.createCriteria()
+                .andEqualTo(City.STATE ,"0");
+        List<City> cityList = cityMapper.selectByExample(example);
         return ServerResponse.createBySuccess("查询列表成功", cityList);
     }
 
