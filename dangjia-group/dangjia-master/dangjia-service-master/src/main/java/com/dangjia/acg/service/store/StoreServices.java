@@ -63,7 +63,7 @@ public class StoreServices {
      */
     public ServerResponse getStorePrecinctVillage(HttpServletRequest request,String storeId) {
         Store store = iStoreMapper.selectByPrimaryKey(storeId);
-        if(store==null||CommonUtil.isEmpty(store.getScopeItude())){
+        if(store==null||CommonUtil.isEmpty(store.getScopeItude())||CommonUtil.isEmpty(store.getVillages())){
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         Example example = new Example(ModelingVillage.class);
