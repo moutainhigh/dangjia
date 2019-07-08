@@ -19,6 +19,7 @@ import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
@@ -831,10 +832,10 @@ public class HouseFlowApplyService {
      */
     public ServerResponse stewardCheckDetail(String houseFlowApplyId) {
         try {
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             HouseFlowApplyDTO houseFlowApplyDTO = new HouseFlowApplyDTO();
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
-
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
             houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());
             houseFlowApplyDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId()).getName());
@@ -843,7 +844,7 @@ public class HouseFlowApplyService {
             List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
             List<String> imageList = new ArrayList<>();
             for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList) {
-                imageList.add(configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + houseFlowApplyImage.getImageUrl());
+                imageList.add(address + houseFlowApplyImage.getImageUrl());
             }
             houseFlowApplyDTO.setImageList(imageList);
             houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));
@@ -851,7 +852,24 @@ public class HouseFlowApplyService {
                 houseFlowApplyDTO.setStartDate(houseFlowApply.getStartDate().getTime() - new Date().getTime()); //自动审核时间
             }
 
-
+            example = new Example(TechnologyRecord.class);
+            example.createCriteria().andEqualTo(TechnologyRecord.HOUSE_FLOW_APPLY_ID, houseFlowApply.getId());
+            example.orderBy(TechnologyRecord.CREATE_DATE).desc();
+            //已验收节点
+            List<TechnologyRecord> recordList = technologyRecordMapper.selectByExample(example);
+            List<Map<String, Object>> nodeMap = new ArrayList<>();
+            for (TechnologyRecord technologyRecord : recordList) {
+                Map<String, Object> map1 = new HashMap<>();
+                map1.put("time", technologyRecord.getModifyDate());
+                map1.put("name", technologyRecord.getName());
+                String[] imgArr = technologyRecord.getImage().split(",");
+                for (int i = 0; i < imgArr.length; i++) {
+                    imgArr[i] = address + imgArr[i];
+                }
+                map1.put("imgArr", imgArr);
+                nodeMap.add(map1);
+            }
+            houseFlowApplyDTO.setRecordList(nodeMap);
             return ServerResponse.createBySuccess("查询成功", houseFlowApplyDTO);
         } catch (Exception e) {
             e.printStackTrace();

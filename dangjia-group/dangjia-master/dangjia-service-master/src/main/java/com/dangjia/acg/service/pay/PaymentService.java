@@ -1033,6 +1033,7 @@ public class PaymentService {
                 if (mendOrder == null) {
                     return ServerResponse.createByErrorMessage("订单记录不存在");
                 }
+                House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
                 Example example = new Example(BusinessOrder.class);
                 example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andEqualTo(BusinessOrder.STATE, 1);
@@ -1040,7 +1041,7 @@ public class PaymentService {
                 BusinessOrder businessOrder;
                 if (businessOrderList.size() == 0) {
                     businessOrder = new BusinessOrder();
-                    businessOrder.setMemberId(mendOrder.getApplyMemberId()); //公众号唯一标识
+                    businessOrder.setMemberId(house.getMemberId()); //公众号唯一标识
                     businessOrder.setHouseId(mendOrder.getHouseId());
                     businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
                     businessOrder.setState(1);//刚生成

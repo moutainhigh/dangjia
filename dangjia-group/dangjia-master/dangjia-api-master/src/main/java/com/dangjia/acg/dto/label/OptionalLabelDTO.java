@@ -1,6 +1,5 @@
 package com.dangjia.acg.dto.label;
 
-import com.dangjia.acg.common.model.BaseEntity;
 import lombok.Data;
 
 /**
@@ -10,7 +9,7 @@ import lombok.Data;
  * Time: 11:00
  */
 @Data
-public class OptionalLabelDTO{
+public class OptionalLabelDTO {
 
     private String id;
     private String labelName;
