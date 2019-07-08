@@ -273,6 +273,13 @@ public class IndexPageService {
         }
         if (houses.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }else if(houses.size()>limit){
+            for (int i=houses.size()-1;i>=0;i--){
+                houses.remove(i);
+                if(houses.size()==limit){
+                    break;
+                }
+            }
         }
         for (House house : houses) {
             String image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null);
@@ -287,14 +294,6 @@ public class IndexPageService {
                 }
             }
             house.setHouseId(house.getId());
-        }
-        if(houses.size()>limit){
-            for (int i=houses.size()-1;i>=0;i--){
-                houses.remove(i);
-                if(houses.size()==limit){
-                    break;
-                }
-            }
         }
         return ServerResponse.createBySuccess("查询成功", houses);
     }
