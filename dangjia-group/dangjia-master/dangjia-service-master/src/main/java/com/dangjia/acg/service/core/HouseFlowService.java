@@ -68,8 +68,6 @@ public class HouseFlowService {
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
-    private RedisClient redisClient;
-    @Autowired
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private IHouseFlowCountDownTimeMapper houseFlowCountDownTimeMapper;

@@ -262,13 +262,10 @@ public class IndexPageService {
         }
         List<String> strings = modelingVillageMapper.jobModelingVillage(latitude, longitude, null);
         List<House> houses=new ArrayList<>();
-        int count=2;
         for (String string : strings) {
-            List<House> houses1 = modelingVillageMapper.jobLocation(latitude, longitude, string, count);
+            List<House> houses1 = modelingVillageMapper.jobLocation(latitude, longitude, string, 2);
             if(houses1.size()>1){
                 houses.addAll(houses1);
-            }else if(houses1.size()<=1){
-                count+=1;
             }
             if(houses.size()>=limit){
                 break;
@@ -276,6 +273,13 @@ public class IndexPageService {
         }
         if (houses.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }else if(houses.size()>limit){
+            for (int i=houses.size()-1;i>=0;i--){
+                houses.remove(i);
+                if(houses.size()==limit){
+                    break;
+                }
+            }
         }
         for (House house : houses) {
             String image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null);
@@ -290,14 +294,6 @@ public class IndexPageService {
                 }
             }
             house.setHouseId(house.getId());
-        }
-        if(houses.size()>limit){
-            for (int i=houses.size()-1;i>=0;i--){
-                houses.remove(i);
-                if(houses.size()==limit){
-                    break;
-                }
-            }
         }
         return ServerResponse.createBySuccess("查询成功", houses);
     }
