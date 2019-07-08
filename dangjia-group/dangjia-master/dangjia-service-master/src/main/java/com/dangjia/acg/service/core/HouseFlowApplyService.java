@@ -4,6 +4,7 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -851,20 +852,14 @@ public class HouseFlowApplyService {
             example.orderBy(TechnologyRecord.CREATE_DATE).desc();
             //已验收节点
             List<TechnologyRecord> recordList = technologyRecordMapper.selectByExample(example);
-            List<Map<String, Object>> nodeMap = new ArrayList<>();
             for (TechnologyRecord technologyRecord : recordList) {
-                Map<String, Object> map1 = new HashMap<>();
-                map1.put("time", technologyRecord.getModifyDate());
-                map1.put("name", technologyRecord.getName());
-                String[] imgArr = technologyRecord.getImage().split(",");
-                for (int i = 0; i < imgArr.length; i++) {
-                    imgArr[i] = address + imgArr[i];
-                    imageList.add(address + imgArr[i]);
+                if (!CommonUtil.isEmpty(technologyRecord.getImage())) {
+                    String[] imgArr = technologyRecord.getImage().split(",");
+                    for (String s : imgArr) {
+                        imageList.add(address + s);
+                    }
                 }
-                map1.put("imgArr", imgArr);
-                nodeMap.add(map1);
             }
-            houseFlowApplyDTO.setRecordList(nodeMap);
             houseFlowApplyDTO.setImageList(imageList);
             houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));
             if (houseFlowApply.getStartDate() != null) {
