@@ -145,7 +145,7 @@ public class StewardService {
             return ServerResponse.createByErrorMessage("二维码失效,请重新生成");
         }
         double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
-        if (distance > 3000) {
+        if (distance > 1000) {
             return ServerResponse.createByErrorMessage("大管家与工匠不在一起");
         }
         return ServerResponse.createBySuccess("巡查成功", houseFlowId);
