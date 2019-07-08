@@ -177,7 +177,11 @@ public class TaskService {
             for (MendDeliver mendDeliver : mendDeliverList) {
                 String productType = "0";
                 MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendDeliver.getMendOrderId());
+                if (mendOrder == null)
+                    continue;
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
+                if (workerType == null)
+                    continue;
                 Task task = new Task();
                 task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), DateUtil.FORMAT11));
                 task.setName("退材料待审核处理");
@@ -196,6 +200,8 @@ public class TaskService {
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getSupervisorCheckList(houseId);
             for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
+                if (workerType == null)
+                    continue;
                 Task task = new Task();
                 task.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), DateUtil.FORMAT11));
                 if (houseFlowApply.getApplyType() == 1) {
@@ -218,6 +224,8 @@ public class TaskService {
             List<ChangeOrder> changeOrders = changeOrderMapper.selectByExample(example);
             for (ChangeOrder changeOrder : changeOrders) {
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(changeOrder.getWorkerTypeId());
+                if (workerType == null)
+                    continue;
                 Task task = new Task();
                 task.setDate(DateUtil.dateToString(changeOrder.getModifyDate(), DateUtil.FORMAT11));
                 String reMark = "4";
@@ -252,6 +260,8 @@ public class TaskService {
                 if (mendOrderList.size() > 0) {
                     MendOrder mendOrder = mendOrderList.get(0);
                     WorkerType workerType = workerTypeMapper.selectByPrimaryKey(changeOrder.getWorkerTypeId());
+                    if (workerType == null)
+                        continue;
                     Task task = new Task();
                     task.setDate(DateUtil.dateToString(changeOrder.getModifyDate(), DateUtil.FORMAT11));
                     task.setName(workerType.getName() + "退人工");

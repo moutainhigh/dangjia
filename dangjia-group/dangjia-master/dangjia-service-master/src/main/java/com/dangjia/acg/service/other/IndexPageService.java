@@ -291,7 +291,7 @@ public class IndexPageService {
             }
             house.setHouseId(house.getId());
         }
-        if(houses.size()!=8){
+        if(houses.size()>limit){
             for (int i=houses.size()-1;i>=0;i--){
                 houses.remove(i);
                 if(houses.size()==limit){

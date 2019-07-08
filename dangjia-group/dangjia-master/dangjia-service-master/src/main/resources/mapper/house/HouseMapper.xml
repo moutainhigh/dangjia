@@ -271,7 +271,7 @@
         <if test="maxSquare!=null and maxSquare!=''">
             and h.build_square &lt;= #{maxSquare}
         </if>
-        and ((h.decoration_type in (1,2) and h.budget_ok=3) or (h.decoration_type=3 and h.visit_state=1))
+        and h.show_house=0
         and h.site_display=0
         AND h.visit_state =3
         ORDER BY
