@@ -3,14 +3,11 @@ package com.dangjia.acg.service.core;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
-import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowDTO;
-import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
@@ -33,20 +30,12 @@ public class HouseFlowScheduleService {
 
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
-
-    @Autowired
-    private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
-    @Autowired
-    private IMemberMapper memberMapper;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private IHouseMapper houseMapper;
-    @Autowired
-    private ConfigUtil configUtil;
-
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
 
