@@ -7,6 +7,7 @@ import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.IAttributeMapper;
 import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
@@ -255,7 +256,9 @@ public class AttributeService {
                     attributeValue.setAttributeId(goodsAttribute.getId());
                     attributeValue.setName(obj.getString("name"));
                     if (type == 1) {//是规格属性不用存图
-                        attributeValue.setImage(obj.getString("image"));
+                        if(!CommonUtil.isEmpty(obj.getString("image"))) {//是规格属性不用存图
+                            attributeValue.setImage(obj.getString("image"));
+                        }
                     }
                     attributeValue.setCreateDate(new Date());
                     attributeValue.setModifyDate(new Date());
@@ -264,8 +267,10 @@ public class AttributeService {
                     attributeValue.setId(obj.getString("id"));
                     attributeValue.setAttributeId(goodsAttribute.getId());
                     attributeValue.setName(obj.getString("name"));
-                    if (type == 1) {//是规格属性不用存图
-                        attributeValue.setImage(obj.getString("image"));
+                    if (type == 1) {
+                        if(!CommonUtil.isEmpty(obj.getString("image"))) {//是规格属性不用存图
+                            attributeValue.setImage(obj.getString("image"));
+                        }
                     }
                     attributeValue.setModifyDate(new Date());
                     iAttributeValueMapper.updateByPrimaryKeySelective(attributeValue);

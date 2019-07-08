@@ -107,6 +107,7 @@ public class CustomerRecordService {
             if (customerRecordList.size() == 1)
                 customer.setStage(1);// 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单
             customer.setCurrRecordId(newCustomerRecord.getId());
+            customer.setModifyDate(new Date());
             customerMapper.updateByPrimaryKeySelective(customer);
 
             //更新最近的提醒时间
