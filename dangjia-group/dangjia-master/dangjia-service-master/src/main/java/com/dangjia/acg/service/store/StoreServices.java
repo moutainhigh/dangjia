@@ -128,7 +128,7 @@ public class StoreServices {
             return ServerResponse.createBySuccessMessage("编辑成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("编辑成功");
+            return ServerResponse.createByErrorMessage("编辑失败");
         }
     }
 
@@ -253,6 +253,8 @@ public class StoreServices {
             }
             if(villageIds.size()>0){
                 store.setVillages(StringUtils.join(villageIds,","));
+            }else{
+                store.setVillages("");
             }
         }
     }
