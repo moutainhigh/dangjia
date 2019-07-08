@@ -3,10 +3,13 @@ package com.dangjia.acg.service.house;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.house.VillageClassifyDTO;
 import com.dangjia.acg.dto.house.VillageDTO;
@@ -254,5 +257,17 @@ public class ModelingVillageService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询出错");
         }
+    }
+
+    public ServerResponse getModelingVillage(HttpServletRequest request) {
+        String userID = request.getParameter(Constants.USERID);
+        String cityKey = redisClient.getCache(Constants.CITY_KEY + userID, String.class);
+        if (CommonUtil.isEmpty(cityKey)) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        Example example = new Example(ModelingVillage.class);
+        example.createCriteria().andCondition("   FIND_IN_SET(city_id,'"+cityKey+"') ").andIsNotNull(ModelingVillage.LOCATIONX);
+        List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
+        return ServerResponse.createBySuccess("查询列表成功", modelingVillages);
     }
 }
