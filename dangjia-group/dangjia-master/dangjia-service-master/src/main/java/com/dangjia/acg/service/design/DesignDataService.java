@@ -432,7 +432,7 @@ public class DesignDataService {
             }
         }
         pageResult.setList(designDTOList);
-        return ServerResponse.createBySuccess("查询用户列表成功", pageResult);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
 }
