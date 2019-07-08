@@ -10,6 +10,7 @@ import com.dangjia.acg.service.store.StoreServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 /**
@@ -23,7 +24,11 @@ public class StoreContoller implements StoreAPI {
     @Autowired
     private StoreServices storeServices;
 
-
+    @Override
+    @ApiMethod
+    public ServerResponse getStorePrecinctVillage(HttpServletRequest request, String storeId){
+        return storeServices.getStorePrecinctVillage(request,storeId);
+    }
     @Override
     @ApiMethod
     public ServerResponse addStore(Store store) {

@@ -76,6 +76,11 @@ public class Store extends BaseEntity {
     @ApiModelProperty("门店范围")
     private String scopeItude;
 
+    @Column(name = "villages")
+    @Desc(value = "门店管辖范围的小区集合")
+    @ApiModelProperty("门店管辖范围的小区集合")
+    private String villages;
+
     @Transient
     private Integer juli;//门店距离
 
