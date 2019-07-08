@@ -36,7 +36,6 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.member.MemberAuth;
 import com.dangjia.acg.modle.member.MemberInfo;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -306,7 +305,7 @@ public class MendOrderService {
 //                        (DjConstants.PushMessage.CRAFTSMAN_T_WORK, house.getHouseName()), "");
 
 
-                houseFlowScheduleService.updateFlowSchedule(houseId,changeOrder.getWorkerTypeId(),null,changeOrder.getScheduleDay());
+//                houseFlowScheduleService.updateFlowSchedule(houseId,changeOrder.getWorkerTypeId(),null,changeOrder.getScheduleDay());
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 String urlyz = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "refundList?title=要补退记录&houseId=" + houseId + "&roleType=1";
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "退人工变更", String.format
