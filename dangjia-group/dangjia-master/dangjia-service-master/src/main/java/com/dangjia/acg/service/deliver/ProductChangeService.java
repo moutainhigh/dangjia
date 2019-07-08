@@ -41,8 +41,6 @@ import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,7 +85,6 @@ public class ProductChangeService {
 
     @Autowired
     private ForMasterAPI forMasterAPI;
-    private static Logger LOG = LoggerFactory.getLogger(ProductChangeService.class);
 
     /**
      * 添加更换商品

@@ -846,12 +846,6 @@ public class HouseFlowApplyService {
             for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList) {
                 imageList.add(address + houseFlowApplyImage.getImageUrl());
             }
-            houseFlowApplyDTO.setImageList(imageList);
-            houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));
-            if (houseFlowApply.getStartDate() != null) {
-                houseFlowApplyDTO.setStartDate(houseFlowApply.getStartDate().getTime() - new Date().getTime()); //自动审核时间
-            }
-
             example = new Example(TechnologyRecord.class);
             example.createCriteria().andEqualTo(TechnologyRecord.HOUSE_FLOW_APPLY_ID, houseFlowApply.getId());
             example.orderBy(TechnologyRecord.CREATE_DATE).desc();
@@ -865,11 +859,17 @@ public class HouseFlowApplyService {
                 String[] imgArr = technologyRecord.getImage().split(",");
                 for (int i = 0; i < imgArr.length; i++) {
                     imgArr[i] = address + imgArr[i];
+                    imageList.add(address + imgArr[i]);
                 }
                 map1.put("imgArr", imgArr);
                 nodeMap.add(map1);
             }
             houseFlowApplyDTO.setRecordList(nodeMap);
+            houseFlowApplyDTO.setImageList(imageList);
+            houseFlowApplyDTO.setDate(DateUtil.dateToString(houseFlowApply.getModifyDate(), "yyyy-MM-dd HH:mm"));
+            if (houseFlowApply.getStartDate() != null) {
+                houseFlowApplyDTO.setStartDate(houseFlowApply.getStartDate().getTime() - new Date().getTime()); //自动审核时间
+            }
             return ServerResponse.createBySuccess("查询成功", houseFlowApplyDTO);
         } catch (Exception e) {
             e.printStackTrace();
@@ -878,16 +878,3 @@ public class HouseFlowApplyService {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
