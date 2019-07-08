@@ -1,7 +1,7 @@
 package com.dangjia.acg.service.other;
 
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.mapper.other.ICityMapper;
+import com.dangjia.acg.service.house.ModelingVillageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,12 +12,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CityService {
-
     @Autowired
-    private ICityMapper iCityMapper;
+    private ModelingVillageService modelingVillageService;
 
     public ServerResponse getAllCity(){
-        return ServerResponse.createBySuccess("查询城市列表成功", iCityMapper.getAllCity());
+        return ServerResponse.createBySuccess("查询城市列表成功", modelingVillageService.getCityList());
     }
 
 }
