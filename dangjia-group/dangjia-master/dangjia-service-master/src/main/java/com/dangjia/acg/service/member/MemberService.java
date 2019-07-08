@@ -638,8 +638,8 @@ public class MemberService {
                     }
                 }
                 //找到提醒内容 ： 离当前时间最近的那一条
-                if (customer.getRemindRecordId() != null) {
-                    CustomerRecord remindCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getRemindRecordId());
+                if (customer.getCurrRecordId() != null) {
+                    CustomerRecord remindCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getCurrRecordId());
                     mcDTO.setRemindContent(remindCustomerRecord.getDescribes());
                     mcDTO.setRemindTime(remindCustomerRecord.getRemindTime());
                     if (remindCustomerRecord.getRemindTime() != null) {
