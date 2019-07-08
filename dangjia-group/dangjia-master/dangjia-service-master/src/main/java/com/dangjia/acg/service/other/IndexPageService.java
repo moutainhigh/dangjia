@@ -262,13 +262,10 @@ public class IndexPageService {
         }
         List<String> strings = modelingVillageMapper.jobModelingVillage(latitude, longitude, null);
         List<House> houses=new ArrayList<>();
-        int count=2;
         for (String string : strings) {
-            List<House> houses1 = modelingVillageMapper.jobLocation(latitude, longitude, string, count);
+            List<House> houses1 = modelingVillageMapper.jobLocation(latitude, longitude, string, 2);
             if(houses1.size()>1){
                 houses.addAll(houses1);
-            }else if(houses1.size()<=1){
-                count+=1;
             }
             if(houses.size()>=limit){
                 break;
