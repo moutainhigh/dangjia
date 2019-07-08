@@ -590,7 +590,7 @@
         INNER JOIN dj_member member ON member.id = house.member_id
         WHERE house.data_status=0
         <if test="villageId!=null and villageId!=''">
-            AND FIND_IN_SET(house.village_id,#{cityKey})
+            AND FIND_IN_SET(house.village_id,#{villageId})
         </if>
         <if test="visitState!=null and visitState!=''">
             AND house.visit_state=#{visitState}
