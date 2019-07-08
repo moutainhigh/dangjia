@@ -15,7 +15,9 @@
           store_address AS storeAddress,
           reservation_number AS reservationNumber,
           latitude,
-          longitude
+          longitude,
+          scope_itude scopeItude,
+          villages
 	</sql>
 
     <!--查询门店-->
