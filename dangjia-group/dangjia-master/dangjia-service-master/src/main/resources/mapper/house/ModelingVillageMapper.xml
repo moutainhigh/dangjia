@@ -267,6 +267,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         AND
         mv.locationx IS NOT NULL
         AND h.show_house=0
+        AND ((h.decoration_type in (1,2) and h.budget_ok=3) OR (h.
+        decoration_type=3 and h.
+        visit_state=1))
         AND h.visit_state in(1,3)
         AND h.site_display=0
         AND mv.locationx IS NOT NULL
