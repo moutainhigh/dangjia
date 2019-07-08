@@ -3,9 +3,13 @@ package com.dangjia.acg.service.store;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.GaoDeUtils;
 import com.dangjia.acg.common.util.JsmsUtil;
+import com.dangjia.acg.dto.house.DesignDTO;
+import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
@@ -38,6 +42,9 @@ import java.util.*;
 public class StoreServices {
     @Autowired
     private IStoreMapper iStoreMapper;
+
+    @Autowired
+    private IHouseMapper iHouseMapper;
     @Autowired
     private IStoreSubscribeMapper iStoreSubscribeMapper;
     @Autowired
@@ -48,7 +55,6 @@ public class StoreServices {
     private IModelingVillageMapper modelingVillageMapper;//小区
     @Autowired
     private IDepartmentMapper departmentMapper;
-
     /**
      * 根据门店ID,得到设置的管辖范围，得到所有范围内的小区
      * @param request
@@ -249,5 +255,43 @@ public class StoreServices {
                 store.setVillages(StringUtils.join(villageIds,","));
             }
         }
+    }
+
+    /**
+     * 门店利润列表（利润统计）
+     */
+    public ServerResponse getStoreProfitList(HttpServletRequest request,PageDTO pageDTO, String searchKey) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<Store> stores = iStoreMapper.queryStore(null, searchKey);
+        List<Map> storemaps =new ArrayList<>();
+        if(stores.size()<0){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        PageInfo pageResult=new PageInfo(stores);
+        for (Store store : stores) {
+            Double profit = 0d;
+            if(!CommonUtil.isEmpty(store.getVillages())) {
+                List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(store.getVillages(), null, searchKey);
+                if (houseList.size() <= 0) {
+                    continue;
+                }
+                for (DesignDTO houseListDTO : houseList) {
+                    List<HouseProfitSummaryDTO> list = iHouseMapper.getHouseProfitSummary(houseListDTO.getHouseId());
+                    for (HouseProfitSummaryDTO houseProfitSummaryDTO : list) {
+                        if ("0".equals(houseProfitSummaryDTO.getPlus())) {
+                            profit = profit + houseProfitSummaryDTO.getMoney();
+                        }
+                        if ("1".equals(houseProfitSummaryDTO.getPlus())) {
+                            profit = profit - houseProfitSummaryDTO.getMoney();
+                        }
+                    }
+                }
+            }
+            Map map= BeanUtils.beanToMap(store);
+            map.put("profit",profit);
+            storemaps.add(map);
+        }
+        pageResult.setList(storemaps);
+        return ServerResponse.createBySuccess("查询成功",pageResult);
     }
 }

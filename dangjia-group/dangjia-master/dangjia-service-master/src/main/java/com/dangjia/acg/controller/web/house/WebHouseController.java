@@ -79,7 +79,7 @@ public class WebHouseController implements WebHouseAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getHouseProfitList( HttpServletRequest request, PageDTO pageDTO, String visitState, String searchKey){
-        return houseService.getHouseProfitList(request,pageDTO, visitState, searchKey);
+    public ServerResponse getHouseProfitList( HttpServletRequest request, PageDTO pageDTO,String villageId, String visitState, String searchKey){
+        return houseService.getHouseProfitList(request,pageDTO, villageId, visitState, searchKey);
     }
 }

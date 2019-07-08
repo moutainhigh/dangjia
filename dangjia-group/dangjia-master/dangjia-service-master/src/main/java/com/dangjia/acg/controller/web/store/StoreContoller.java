@@ -83,5 +83,14 @@ public class StoreContoller implements StoreAPI {
     @ApiMethod
     public ServerResponse IndexqueryStore(String cityId,String latitude, String longitude) {
         return storeServices.IndexqueryStore(cityId,latitude,longitude);
+}
+
+    /**
+     * 门店利润列表（利润统计）
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getStoreProfitList(HttpServletRequest request,PageDTO pageDTO, String searchKey){
+        return storeServices.getStoreProfitList(request,pageDTO,searchKey);
     }
 }

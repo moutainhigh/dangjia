@@ -92,10 +92,15 @@
         house.number AS number,
         member.nick_name AS nickName,
         member.NAME AS NAME,
-        member.mobile AS mobile
+        member.mobile AS mobile,
+        s.store_name storeName
         FROM
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
+        LEFT JOIN dj_store s ON FIND_IN_SET(
+        house.village_id,
+        s.villages
+        )
         WHERE 1=1
         <if test="dataStatus!=null and dataStatus!=''">
             AND house.data_status=#{dataStatus}
@@ -584,8 +589,8 @@
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
         WHERE house.data_status=0
-        <if test="cityKey!=null and cityKey!=''">
-            AND FIND_IN_SET(house.city_id,#{cityKey})
+        <if test="villageId!=null and villageId!=''">
+            AND FIND_IN_SET(house.village_id,#{cityKey})
         </if>
         <if test="visitState!=null and visitState!=''">
             AND house.visit_state=#{visitState}

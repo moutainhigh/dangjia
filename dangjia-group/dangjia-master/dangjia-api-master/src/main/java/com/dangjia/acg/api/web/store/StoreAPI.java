@@ -78,4 +78,10 @@ public interface StoreAPI {
                                    @RequestParam("latitude") String latitude,
                                    @RequestParam("longitude") String longitude);
 
+    @PostMapping("web/store/getStoreProfitList")
+    @ApiOperation(value = "门店利润列表（利润统计）", notes = "门店利润列表（利润统计）")
+    ServerResponse getStoreProfitList(@RequestParam("request")HttpServletRequest request,
+                                      @RequestParam("pageDTO")PageDTO pageDTO,
+                                      @RequestParam("searchKey")String searchKey);
+
 }

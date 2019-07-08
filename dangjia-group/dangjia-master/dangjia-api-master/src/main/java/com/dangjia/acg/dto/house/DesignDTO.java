@@ -38,4 +38,5 @@ public class DesignDTO {
     private Integer showUpdata;//是否显示上传图片按钮，0否，1是
     private List<HouseProfitSummaryDTO> profitSummarys;// 利润集合
 
+    private String storeName;// 归属分店
 }
