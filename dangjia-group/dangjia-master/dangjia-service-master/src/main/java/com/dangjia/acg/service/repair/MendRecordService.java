@@ -554,14 +554,13 @@ public class MendRecordService {
 
     private void getHouseFlowApplies(Member worker, int roleType, String houseId, Integer type, List<Map<String, Object>> returnMap) {
         Example example = new Example(HouseFlowApply.class);
+        Example.Criteria criteria=example.createCriteria();
+        criteria.andEqualTo(HouseFlowApply.HOUSE_ID, houseId);
+        criteria.andCondition(" apply_type <3 and apply_type!=0 ");
+        criteria.andCondition(" (`apply_money` > '0' OR `supervisor_money` > '0') ");
         /*审核记录*/
         if (roleType == 3) {//工匠
-            example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId)
-                    .andCondition(" apply_type <3 and apply_type!=0 ")
-                    .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
-        } else {
-            example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId)
-                    .andCondition(" apply_type <3 and apply_type!=0 ");
+            criteria.andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
         }
         example.orderBy(HouseFlowApply.CREATE_DATE).desc();
         List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
