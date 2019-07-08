@@ -701,7 +701,9 @@ public class HouseWorkerService {
             List<HouseFlowApply> houseFlowApplyList1 = houseFlowApplyMapper.selectByExample(example);
             if (houseFlowApplyList1.size() == 0) {
                 House house1 = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());//工序
-                return ServerResponse.createByErrorMessage("工地[" + house1.getHouseName() + "]今日还未完工，无法开工");
+                if (house1 != null && house1.getVisitState() == 1) {
+                    return ServerResponse.createByErrorMessage("工地[" + house1.getHouseName() + "]今日还未完工，无法开工");
+                }
             }
         }
         houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 4, worker.getId(), new Date());
