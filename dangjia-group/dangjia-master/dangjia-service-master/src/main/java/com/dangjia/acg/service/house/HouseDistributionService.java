@@ -135,15 +135,23 @@ public class HouseDistributionService {
             Example example=new Example(CustomerRecord.class);
             example.createCriteria().andEqualTo(CustomerRecord.MEMBER_ID,user.getId());
             example.orderBy(CustomerRecord.CREATE_DATE).desc();
-            CustomerRecord customerRecords = customerRecordMapper.selectByExample(example).get(0);
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(houseDistribution.getCreateDate());
-                calendar.add(Calendar.DAY_OF_MONTH, +1);//+1今天的时间加一天
-                customerRecords.setDescribes((houseDistribution.getType()==1 ? "验房分销":"验房预约")
-                        +houseDistribution.getInfo()
-                        +(houseDistribution.getState()==1 ? "已支付":houseDistribution.getState()==0 ? "未支付":"预约"));
-                customerRecords.setRemindTime(calendar.getTime());
-                customerRecordService.addCustomerRecord(customerRecords);
+            List<CustomerRecord> customerRecords = customerRecordMapper.selectByExample(example);
+            CustomerRecord customerRecord=null;
+            if(customerRecords.size()>0){
+                customerRecord = customerRecordMapper.selectByExample(example).get(0);
+            }else{
+                customerRecord=new CustomerRecord();
+                customerRecord.setMemberId(user.getId());
+                customerRecord.setUserId("");
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(houseDistribution.getCreateDate());
+            calendar.add(Calendar.DAY_OF_MONTH, +1);//+1今天的时间加一天
+            customerRecord.setDescribes((houseDistribution.getType()==1 ? "验房分销，":"验房预约，")
+                    +houseDistribution.getInfo()
+                    +(houseDistribution.getState()==1 ? "，已支付":houseDistribution.getState()==0 ? "，未支付":"，预约"));
+            customerRecord.setRemindTime(calendar.getTime());
+            customerRecordService.addCustomerRecord(customerRecord);
             return ServerResponse.createBySuccess("ok", houseDistribution.getId());
         } else {
             return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");
