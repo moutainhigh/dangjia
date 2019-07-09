@@ -260,40 +260,29 @@ public class IndexPageService {
         if (CommonUtil.isEmpty(longitude)) {
             longitude = "112.938904";
         }
-        List<String> strings = modelingVillageMapper.jobModelingVillage(latitude, longitude, null);
         List<House> houses=new ArrayList<>();
-        for (String string : strings) {
-            List<House> houses1 = modelingVillageMapper.jobLocation(latitude, longitude, string, 2);
-            if(houses1.size()>1){
-                houses.addAll(houses1);
+        Integer endDistance=3;
+        Integer beginDistance=0;
+        for (int i=1;i<limit/2+1;i++){
+            List<House> houses1 = modelingVillageMapper.jobLocation(latitude, longitude, beginDistance,endDistance, 2);
+            for (House house : houses1) {
+                String image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null);
+                if (CommonUtil.isEmpty(image)){
+                    image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),0);
+                }
+                if(!CommonUtil.isEmpty(image)){
+                    house.setImage(address+image);
+                    house.setHouseId(house.getId());
+                    houses.add(house);
+                }
             }
-            if(houses.size()>=limit){
-                break;
-            }
+            beginDistance=endDistance;
+            endDistance+=3;
         }
         if (houses.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-        }else if(houses.size()>limit){
-            for (int i=houses.size()-1;i>=0;i--){
-                houses.remove(i);
-                if(houses.size()==limit){
-                    break;
-                }
-            }
-        }
-        for (House house : houses) {
-            String image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null);
-            if (!CommonUtil.isEmpty(image)){
-                house.setImage(address+image);
-            }else{
-                image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),0);
-                if(!CommonUtil.isEmpty(image)) {
-                    house.setImage(address + image);
-                }else{
-                    house.setImage(address+house.getImage());
-                }
-            }
-            house.setHouseId(house.getId());
+        }else if(houses.size()<limit){
+            this.jobLocation(request,latitude,longitude,limit);
         }
         return ServerResponse.createBySuccess("查询成功", houses);
     }

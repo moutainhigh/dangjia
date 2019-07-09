@@ -282,5 +282,14 @@ public class House extends BaseEntity {
                 + (TextUtils.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
     }
 
-
+    public boolean equals(Object obj){
+        if(obj instanceof House){
+            House house=(House) obj;
+            return (house.getId().equals(house.getId()));
+        }
+        return super.equals(obj);
+    }
+    public int hashCode(){
+        return id.hashCode();
+    }
 }

@@ -244,7 +244,7 @@ public class StoreServices {
      * @param info
      * @return
      */
-    public ServerResponse Callback(String storeSubscribeId, String info) {
+    public ServerResponse callback(String storeSubscribeId, String info) {
         StoreSubscribe storeSubscribe=new StoreSubscribe();
         storeSubscribe.setId(storeSubscribeId);
         storeSubscribe.setInfo(info);
