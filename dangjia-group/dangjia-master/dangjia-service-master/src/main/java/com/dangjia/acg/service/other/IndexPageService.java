@@ -270,22 +270,23 @@ public class IndexPageService {
                 if (CommonUtil.isEmpty(image)){
                     image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),0);
                 }
-                if(!CommonUtil.isEmpty(image)){
-                    house.setImage(address+image);
-                    house.setHouseId(house.getId());
-                    houses.add(house);
+                house.setImage(address+image);
+                house.setHouseId(house.getId());
+                if(CommonUtil.isEmpty(image)){
+                    house.setImage(address+house.getImage());
                 }
+                houses.add(house);
             }
             beginDistance=endDistance;
             endDistance+=3;
         }
         if (houses.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-        }else if(houses.size()<limit){
-            this.jobLocation(request,latitude,longitude,limit);
-        }else if(houses.size()==0){
-            modelingVillageMapper.jobModelingVillage(latitude,longitude,limit);
         }
+        if(houses.size()==0){
+            houses=modelingVillageMapper.jobModelingVillage(latitude,longitude,limit);
+        }
+        System.out.println(houses.size());
         return ServerResponse.createBySuccess("查询成功", houses);
     }
 
