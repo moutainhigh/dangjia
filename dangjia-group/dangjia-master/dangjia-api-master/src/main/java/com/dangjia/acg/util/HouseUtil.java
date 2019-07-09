@@ -44,7 +44,14 @@ public class HouseUtil {
         } else if (workerType.getType() == 3) {//大管家
             iconsY = null;
             nameBs = new String[]{"未开始", "大管家抢单", "支付大管家费", "工程排期", "确认开工", "监管工地", "整体竣工"};
-            if (houseFlow.getWorkType() == 1) {
+            if (houseFlow.getWorkSteta() == 2 || houseFlow.getWorkSteta() == 6) {
+                if (houseFlow.getWorkSteta() == 2) {
+                    nodeDTO.setNameB("整体完工");
+                } else {
+                    nodeDTO.setNameB("提前结束装修");
+                }
+                nodeDTO.setRank(5);
+            } else if (houseFlow.getWorkType() == 1) {
                 nodeDTO.setRank(0);
                 nodeDTO.setNameB("未开始");
             } else if (houseFlow.getWorkType() == 2) {
@@ -59,13 +66,6 @@ public class HouseUtil {
             } else if (houseFlow.getSupervisorStart() == 1 && houseFlow.getWorkType() == 4) {
                 nodeDTO.setRank(4);
                 nodeDTO.setNameB("监工中");
-            } else if (houseFlow.getWorkSteta() == 2 || houseFlow.getWorkSteta() == 6) {
-                if (houseFlow.getWorkSteta() == 2) {
-                    nodeDTO.setNameB("整体完工");
-                } else {
-                    nodeDTO.setNameB("提前结束装修");
-                }
-                nodeDTO.setRank(5);
             }
         } else if (workerType.getType() == 4) {//拆除
             iconsY = null;
