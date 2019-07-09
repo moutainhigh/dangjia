@@ -1291,7 +1291,7 @@ public class HouseService {
         if (null != member) {
             map.put("workerHead", address + member.getHead());//工人头像
         }
-        if (member.getWorkerType() >= 1) {
+        if (member.getWorkerType()!=null&&member.getWorkerType() >= 1) {
             map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
         } else {
             map.put("workerTypeName", "业主");//工匠类型
