@@ -247,6 +247,7 @@
         </if>
         and ((decoration_type in (1,2) and budget_ok=3) or (decoration_type=3 and visit_state=1))
         and site_display=0
+        and visit_state=3
         order by num desc
     </select>
     <select id="getSameLayoutDistance" resultType="com.dangjia.acg.modle.house.House">
@@ -266,7 +267,8 @@
                 FROM
                 `dj_house_modeling_village` mv
                 WHERE
-                mv.locationx IS NOT NULL AND mv.id=#{villageId}
+                mv.locationx IS NOT NULL
+                AND mv.id=#{villageId}
         ) v ON v.id = h.village_id
         where
         h.data_status=0
@@ -279,9 +281,8 @@
         <if test="maxSquare!=null and maxSquare!=''">
             or h.build_square &lt;= #{maxSquare}
         </if>
-        and h.show_house=0
-        and h.visit_state=3
-        and h.site_display=0
+        and ((decoration_type in (1,2) and budget_ok=3) or (decoration_type=3 and visit_state=1))
+        and site_display=0
         ORDER BY
         v.juli ASC
     </select>

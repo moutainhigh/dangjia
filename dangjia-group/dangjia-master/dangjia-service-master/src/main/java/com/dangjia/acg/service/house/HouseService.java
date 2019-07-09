@@ -607,8 +607,7 @@ public class HouseService {
         if (houseDTO.getDecorationType() >= 3 || houseDTO.getDecorationType() == 0) {
             return ServerResponse.createByErrorMessage("装修类型参数错误");
         }
-        if (StringUtils.isEmpty(houseDTO.getHouseId()) || StringUtils.isEmpty(houseDTO.getCityId())
-                || StringUtils.isEmpty(houseDTO.getStyle()) || StringUtils.isEmpty(houseDTO.getVillageId())) {
+        if (StringUtils.isEmpty(houseDTO.getHouseId()) || StringUtils.isEmpty(houseDTO.getCityId()) || StringUtils.isEmpty(houseDTO.getVillageId())) {
             return ServerResponse.createByErrorMessage("参数为空");
         }
         if (houseDTO.getSquare() <= 0) {
