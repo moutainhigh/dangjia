@@ -1,4 +1,4 @@
-package com.dangjia.acg.util;
+package com.dangjia.acg.common.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
