@@ -1,6 +1,5 @@
 package com.dangjia.acg.dto.matter;
 
-import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -10,7 +9,7 @@ import java.util.Date;
  * 实体类 - 装修指南
  */
 @Data
-public class RenovationManualDTO extends BaseEntity {
+public class RenovationManualDTO {
     protected String id;
 
     @ApiModelProperty("创建时间")
