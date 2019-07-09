@@ -277,14 +277,11 @@
             and h.build_square &gt;= #{minSquare}
         </if>
         <if test="maxSquare!=null and maxSquare!=''">
-            and h.build_square &lt;= #{maxSquare}
+            or h.build_square &lt;= #{maxSquare}
         </if>
         and h.show_house=0
+        and h.visit_state=3
         and h.site_display=0
-        AND ((h.decoration_type in (1,2) and h.budget_ok=3) OR (h.
-        decoration_type=3 and h.
-        visit_state=1))
-        AND h.visit_state =3
         ORDER BY
         v.juli ASC
     </select>

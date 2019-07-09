@@ -55,7 +55,6 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.design.DesignDataService;
 import com.dangjia.acg.service.member.GroupInfoService;
-import com.dangjia.acg.service.other.IndexPageService;
 import com.dangjia.acg.util.HouseUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -150,7 +149,7 @@ public class HouseService {
     @Autowired
     private IWorkDepositMapper workDepositMapper;
     @Autowired
-    private IndexPageService indexPageService;
+    private MyHouseService myHouseService;
     protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
 
     /**
@@ -213,19 +212,13 @@ public class HouseService {
      * @return
      */
     public ServerResponse getMyHouseList(PageDTO pageDTO, String userToken) {
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
         Member worker = (Member) object;
-        Example example = new Example(House.class);
-        example.createCriteria()
-                .andEqualTo(House.MEMBER_ID, worker.getId())
-//                .andNotEqualTo(House.VISIT_STATE, 0)
-                .andNotEqualTo(House.VISIT_STATE, 2)
-                .andEqualTo(House.DATA_STATUS, 0);
-        List<House> houseList = iHouseMapper.selectByExample(example);
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<House> houseList = iHouseMapper.selectByExample(myHouseService.getHouseExample(worker.getId()));
         if (houseList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无房产");
         }
@@ -810,7 +803,7 @@ public class HouseService {
     /**
      * 房子装修列表
      */
-    public ServerResponse getList(PageDTO pageDTO, String cityKey,Integer visitState, String startDate, String endDate, String searchKey, String orderBy, String memberId) {
+    public ServerResponse getList(PageDTO pageDTO, String cityKey, Integer visitState, String startDate, String endDate, String searchKey, String orderBy, String memberId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (!CommonUtil.isEmpty(startDate) && !CommonUtil.isEmpty(endDate)) {
@@ -819,7 +812,7 @@ public class HouseService {
                     endDate = endDate + " " + "23:59:59";
                 }
             }
-            List<HouseListDTO> houseList = iHouseMapper.getHouseList( cityKey,memberId, visitState, startDate, endDate, orderBy, searchKey);
+            List<HouseListDTO> houseList = iHouseMapper.getHouseList(cityKey, memberId, visitState, startDate, endDate, orderBy, searchKey);
             if (houseList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");
@@ -1288,15 +1281,16 @@ public class HouseService {
         Map<String, Object> map = new HashMap<>();
         map.put("id", hfa.getSourceId());
         Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
-        if (null != member) {
-            map.put("workerHead", address + member.getHead());//工人头像
+        if (member != null) {
+            member.initPath(address);
+            map.put("workerHead", member.getHead());//工人头像
+            if (member.getWorkerType() != null && member.getWorkerType() >= 1) {
+                map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+            } else {
+                map.put("workerTypeName", "业主");//工匠类型
+            }
+            map.put("workerName", member.getName());//工人名称
         }
-        if (member.getWorkerType()!=null&&member.getWorkerType() >= 1) {
-            map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
-        } else {
-            map.put("workerTypeName", "业主");//工匠类型
-        }
-        map.put("workerName", member.getName());//工人名称
         map.put("content", hfa.getContent());
         map.put("sourceType", hfa.getApplyType());
         Example example = new Example(HouseFlowApplyImage.class);
@@ -1715,10 +1709,10 @@ public class HouseService {
     /**
      * 房子利润列表（利润统计）
      */
-    public ServerResponse getHouseProfitList(HttpServletRequest request,PageDTO pageDTO, String villageId, String visitState, String searchKey) {
+    public ServerResponse getHouseProfitList(HttpServletRequest request, PageDTO pageDTO, String villageId, String visitState, String searchKey) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(villageId,visitState, searchKey);
+            List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(villageId, visitState, searchKey);
             if (houseList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");

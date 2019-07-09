@@ -43,21 +43,52 @@
     </select>
 
     <select id="getStrategyList" resultType="com.dangjia.acg.modle.matter.RenovationManual">
-        select
-        <include refid="new_columns"/>
-        FROM dj_matter_renovation_manual c
-        LEFT JOIN ( SELECT a.route, COUNT( a.route ) num FROM dj_website_visit a GROUP BY a.route ) b ON b.route = c.id
-        WHERE
-        state = 0
-        AND data_status = 0
         <if test="workerTypeIds!=null">
-            ORDER BY
-            <foreach collection="workerTypeIds" item="item" index="index">
-                FIELD(c.worker_type_id, #{item}) DESC,
+            ( SELECT
+            <include refid="new_columns"/>
+            FROM
+            dj_matter_renovation_manual c
+            LEFT JOIN ( SELECT a.route, COUNT( a.route ) num FROM dj_website_visit a GROUP BY a.route ) b ON b.route =
+            c.id
+            WHERE
+            state = 0
+            AND data_status = 0
+            AND c.worker_type_id IN
+            <foreach collection="workerTypeIds" item="item" index="index"
+                     separator="," open="(" close=")">
+                #{item}
             </foreach>
-            num desc
+            ORDER BY
+            num DESC
+            ) UNION ALL
+            (
+            SELECT
+            <include refid="new_columns"/>
+            FROM
+            dj_matter_renovation_manual c
+            LEFT JOIN ( SELECT a.route, COUNT( a.route ) num FROM dj_website_visit a GROUP BY a.route ) b ON b.route =
+            c.id
+            WHERE
+            state = 0
+            AND data_status = 0
+            AND c.worker_type_id NOT IN
+            <foreach collection="workerTypeIds" item="item" index="index"
+                     separator="," open="(" close=")">
+                #{item}
+            </foreach>
+            ORDER BY
+            num DESC
+            )
         </if>
         <if test="workerTypeIds ==null or workerTypeIds ==''">
+            select
+            <include refid="new_columns"/>
+            FROM dj_matter_renovation_manual c
+            LEFT JOIN ( SELECT a.route, COUNT( a.route ) num FROM dj_website_visit a GROUP BY a.route ) b ON b.route =
+            c.id
+            WHERE
+            state = 0
+            AND data_status = 0
             ORDER BY num DESC
         </if>
     </select>

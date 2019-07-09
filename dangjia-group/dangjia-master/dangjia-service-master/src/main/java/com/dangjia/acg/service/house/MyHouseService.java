@@ -27,7 +27,6 @@ import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
-import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.util.HouseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +56,6 @@ public class MyHouseService {
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
-    private HouseFlowService houseFlowService;
-    @Autowired
     private IMendOrderMapper mendOrderMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
@@ -69,11 +66,71 @@ public class MyHouseService {
     private UserMapper userMapper;
     protected static final Logger LOG = LoggerFactory.getLogger(MyHouseService.class);
 
+    /**
+     * 获取我的房产的查询条件
+     *
+     * @param memberId 用户ID
+     * @return 条件实体
+     */
+    public Example getHouseExample(String memberId) {
+        Example example = new Example(House.class);
+        example.createCriteria()
+                .andEqualTo(House.MEMBER_ID, memberId)
+//                .andNotEqualTo(House.VISIT_STATE, 0)
+                .andNotEqualTo(House.VISIT_STATE, 2)
+                .andEqualTo(House.DATA_STATUS, 0);
+        return example;
+    }
+
+    public Object getHouse(String memberId, HouseResult houseResult) {
+        //该城市该用户所有开工房产
+        List<House> houseList = iHouseMapper.selectByExample(getHouseExample(memberId));
+        String houseId = getCurrentHouse(houseList);
+        if (CommonUtil.isEmpty(houseId)) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        House house = iHouseMapper.selectByPrimaryKey(houseId);
+        if (house == null) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        if (houseResult != null) {
+            //统计几套房
+            int again = houseList.size();
+            houseResult.setAgain(again);
+            /*其它房产待处理任务列表状态*/
+            int task = 0;
+            for (House elseHouse : houseList) {
+                if (!elseHouse.getId().equals(houseId)) {
+                    task += this.getTask(elseHouse.getId());
+                }
+            }
+            houseResult.setTask(task);
+        }
+        return house;
+    }
+
+    private String getCurrentHouse(List<House> houseList) {
+        String houseId = null;
+        if (houseList.size() > 1) {
+            for (House house : houseList) {
+                if (house.getIsSelect() == 1) {//当前选中
+                    houseId = house.getId();
+                    break;
+                }
+            }
+            if (houseId == null) {//有很多房子但是没有isSelect为1的
+                houseId = houseList.get(0).getId();
+            }
+        } else if (houseList.size() == 1) {
+            houseId = houseList.get(0).getId();
+        }
+        return houseId;
+    }
 
     /**
      * APP我的房产
      */
-    public ServerResponse getMyHouse(String userToken, String cityId, String isNew) {
+    public ServerResponse getMyHouse(String userToken, String isNew) {
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         if (!CommonUtil.isEmpty(isNew)) {
             return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null, address));
@@ -83,49 +140,30 @@ public class MyHouseService {
             return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null, address));
         }
         Member member = (Member) object;
-
-        //该城市该用户所有开工房产
-        Example example = new Example(House.class);
-        example.createCriteria()
-                .andEqualTo(House.MEMBER_ID, member.getId())
-                .andEqualTo(House.DATA_STATUS, 0);
-        List<House> houseList = iHouseMapper.selectByExample(example);
-        String houseId = getCurrentHouse(houseList);
-        if (CommonUtil.isEmpty(houseId)) {
+        HouseResult houseResult = new HouseResult();
+        object = getHouse(member.getId(), houseResult);
+        if (object instanceof ServerResponse) {
             return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null, address));
         }
-
-        House house = iHouseMapper.selectByPrimaryKey(houseId);
-        //统计几套房
-        int again = houseList.size();
-        HouseResult houseResult = new HouseResult();
+        House house = (House) object;
         houseResult.setHouseName(house.getHouseName());
-        houseResult.setAgain(again);
-        houseResult.setHouseId(houseId);
-        /*其它房产待处理任务列表状态*/
-        int task = 0;
-        for (House elseHouse : houseList) {
-            if (!elseHouse.getId().equals(houseId)) {
-                task += this.getTask(elseHouse.getId());
-            }
-        }
-        houseResult.setTask(task);
+        houseResult.setHouseId(house.getId());
         Map<Integer, String> applyTypeMap = DjConstants.VisitState.getVisitStateMap();
         houseResult.setBuildStage(applyTypeMap.get(house.getVisitState()));
 
         HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart1(house.getId(), new Date());//查询今日开工记录
         if (todayStart == null) {//没有今日开工记录
             houseResult.setIsStart(0);//今日是否开工0:否；1：是；
-        }else{
+        } else {
             houseResult.setIsStart(1);//今日是否开工0:否；1：是；
         }
         /*展示各种进度*/
-        List<HouseFlow> houseFlowList = houseFlowMapper.getAllFlowByHouseId(houseId);
+        List<HouseFlow> houseFlowList = houseFlowMapper.getAllFlowByHouseId(house.getId());
         List<NodeDTO> courseList = new ArrayList<>();
         for (HouseFlow houseFlow : houseFlowList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             NodeDTO nodeDTO = HouseUtil.getWorkerDatas(house, houseFlow, workerType, address);
-            Map progress = nodeDTO.getProgress();
+            Map<String, Object> progress = nodeDTO.getProgress();
             Example example1 = new Example(HouseFlowApply.class);
             example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId()).andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.APPLY_TYPE, 3);
             List<HouseFlowApply> houseFlowss = houseFlowApplyMapper.selectByExample(example1);
@@ -157,7 +195,6 @@ public class MyHouseService {
                 map.put("houseFlowId", houseFlow.getId());
                 nodeDTO.setMember(map);
             }
-
             if (workerType.getType() == 1) {
                 houseResult.setDesignList(nodeDTO);
             } else if (workerType.getType() == 2) {
@@ -169,15 +206,14 @@ public class MyHouseService {
                 setMenus(houseResult, house, houseFlow);
             }
         }
-
         //获取客服明细
-        example = new Example(MainUser.class);
+        Example example = new Example(MainUser.class);
         example.createCriteria().andEqualTo(MainUser.IS_RECEIVE, 1);
         example.orderBy(GroupUserConfig.CREATE_DATE).desc();
         List<MainUser> list = userMapper.selectByExample(example);
         if (list != null && list.size() > 0) {
             MainUser user = list.get(0);
-            Map map = new HashMap();
+            Map<String, Object> map = new HashMap<>();
             map.put("id", user.getId());
             map.put("targetId", user.getId());
             map.put("targetAppKey", "49957e786a91f9c55b223d58");
@@ -238,21 +274,17 @@ public class MyHouseService {
         example.createCriteria().andEqualTo("workType", 3).andEqualTo("houseId", houseId);
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         task = houseFlowList.size();
-
         House house = iHouseMapper.selectByPrimaryKey(houseId);
-
         example = new Example(MendOrder.class);
         example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 1)
                 .andEqualTo(MendOrder.STATE, 3);//审核状态
         List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
         task += mendOrderList.size();
-
         example = new Example(MendOrder.class);
         example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
                 .andEqualTo(MendOrder.STATE, 3);//补材料审核状态全通过
         mendOrderList = mendOrderMapper.selectByExample(example);
         task += mendOrderList.size();
-
         if (house.getDesignerOk() == 5 || house.getDesignerOk() == 2) {
             task++;
         }
@@ -265,23 +297,6 @@ public class MyHouseService {
         return task;
     }
 
-    private String getCurrentHouse(List<House> houseList) {
-        String houseId = null;
-        if (houseList.size() > 1) {
-            for (House house : houseList) {
-                if (house.getIsSelect() == 1) {//当前选中
-                    houseId = house.getId();
-                    break;
-                }
-            }
-            if (houseId == null) {//有很多房子但是没有isSelect为1的
-                houseId = houseList.get(0).getId();
-            }
-        } else if (houseList.size() == 1) {
-            houseId = houseList.get(0).getId();
-        }
-        return houseId;
-    }
 
 }
 

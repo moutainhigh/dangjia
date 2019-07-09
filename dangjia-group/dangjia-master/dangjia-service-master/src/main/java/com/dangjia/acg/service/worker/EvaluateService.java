@@ -2,7 +2,6 @@ package com.dangjia.acg.service.worker;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -16,29 +15,35 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.WorkIntegralDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
+import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.house.IHouseAccountsMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
+import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
+import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.HouseAccounts;
 import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.safe.WorkerTypeSafe;
+import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
-import com.dangjia.acg.service.core.HouseWorkerSupService;
 import com.dangjia.acg.service.house.HouseService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -76,13 +81,17 @@ public class EvaluateService {
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
+    private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
+    @Autowired
+    private IHouseWorkerOrderMapper houseWorkerOrderMapper;
+    @Autowired
+    private IHouseAccountsMapper houseAccountsMapper;
+    @Autowired
+    private IWorkerTypeSafeMapper workerTypeSafeMapper;
+    @Autowired
     private ConfigMessageService configMessageService;
     @Autowired
     private ConfigUtil configUtil;
-    @Autowired
-    private RedisClient redisClient;
-    @Autowired
-    private IChangeOrderMapper changeOrderMapper;
     @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired
@@ -90,11 +99,7 @@ public class EvaluateService {
     @Autowired
     private ITechnologyRecordMapper technologyRecordMapper;
     @Autowired
-    private HouseWorkerSupService houseWorkerSupService;
-
-    @Autowired
     private IWorkerTypeMapper workerTypeMapper;
-
     @Autowired
     private IWorkerDetailMapper iWorkerDetailMapper;
     @Autowired
@@ -105,7 +110,6 @@ public class EvaluateService {
 
     /**
      * 获取积分记录
-     *
      * @param userToken
      * @return
      */
@@ -174,16 +178,13 @@ public class EvaluateService {
             houseFlowApply.setSupervisorCheck(2);
             houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-
             /*
             验收节点不通过
              */
             technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(), houseFlowApply.getWorkerTypeId());
-
             //业主不通过工匠发起阶段/整体完工申请驳回次数超过两次后将扣工人钱
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.noPassList(houseFlowApply.getHouseFlowId());
             if (houseFlowApplyList.size() > 2) {
-
                 BigDecimal money = new BigDecimal(100);
                 Member member = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
                 WorkerDetail workerDetail = new WorkerDetail();
@@ -194,18 +195,16 @@ public class EvaluateService {
                 workerDetail.setMoney(money);
                 workerDetail.setState(3);
                 iWorkerDetailMapper.insert(workerDetail);
-
                 BigDecimal surplusMoney = member.getSurplusMoney().subtract(money);
                 BigDecimal haveMoney = member.getHaveMoney().subtract(money);
                 member.setSurplusMoney(surplusMoney);
                 member.setHaveMoney(haveMoney);
                 memberMapper.updateByPrimaryKeySelective(member);
-
             }
-
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            configMessageService.addConfigMessage(null, "gj", houseFlowApply.getWorkerId(), "0", "完工申请结果", String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS, house.getHouseName()), "5");
-
+            configMessageService.addConfigMessage(null, "gj", houseFlowApply.getWorkerId(),
+                    "0", "完工申请结果", String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS,
+                            house.getHouseName()), "5");
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -234,23 +233,17 @@ public class EvaluateService {
             workerDetail.setHaveMoney(haveMoney);
             workerDetail.setState(3);
             iWorkerDetailMapper.insert(workerDetail);
-
-
             member.setSurplusMoney(surplusMoney);
             member.setHaveMoney(haveMoney);
             memberMapper.updateByPrimaryKeySelective(member);
-
             //当前时间延后一天等待审核
             houseFlowApply.setStartDate(DateUtil.addDateDays(new Date(), 1));
             houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-
-
-            configMessageService.addConfigMessage(null, "gj", member.getId(), "0", "阶段/整体审核超时扣钱提醒", String.format(DjConstants.PushMessage.STEWARD_SHENGHECHAOSHI, house.getHouseName(), workerType.getName()), "0");
-
+            configMessageService.addConfigMessage(null, "gj", member.getId(), "0",
+                    "阶段/整体审核超时扣钱提醒", String.format(DjConstants.PushMessage.STEWARD_SHENGHECHAOSHI, house.getHouseName(),
+                            workerType.getName()), "0");
         }
-
-
     }
 
     //工匠今日未开工，将扣除100
@@ -272,11 +265,12 @@ public class EvaluateService {
             workerDetail.setHaveMoney(haveMoney);
             workerDetail.setState(3);
             iWorkerDetailMapper.insert(workerDetail);
-
             member.setSurplusMoney(surplusMoney);
             member.setHaveMoney(haveMoney);
             memberMapper.updateByPrimaryKeySelective(member);
-            configMessageService.addConfigMessage(null, "gj", member.getId(), "0", workerType.getName() + "旷工扣钱", String.format(DjConstants.PushMessage.CRAFTSMAN_ABSENTEEISM, house.getHouseName()), "0");
+            configMessageService.addConfigMessage(null, "gj", member.getId(), "0",
+                    workerType.getName() + "旷工扣钱",
+                    String.format(DjConstants.PushMessage.CRAFTSMAN_ABSENTEEISM, house.getHouseName()), "0");
         }
     }
 
@@ -306,7 +300,6 @@ public class EvaluateService {
                 materialRecord.setProductName(product.getName());
                 materialRecordMapper.insert(materialRecord);
             }
-
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
@@ -388,6 +381,11 @@ public class EvaluateService {
                 HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowId());
                 hf.setPause(1);
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
+            }else{
+
+                HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlowApply.getHouseId(), houseFlowApply.getWorkerTypeId());
+                /*处理保险订单*/
+                this.insurance(hwo, "3");
             }
             //推送工匠审核结果
             //configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_PASS,house.getHouseName()) ,"5");
@@ -401,7 +399,45 @@ public class EvaluateService {
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }
+    /**
+     * 保险订单
+     */
+    private void insurance(HouseWorkerOrder hwo, String payState) {
+        try {
+            WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByWorkerTypeId(hwo.getWorkerTypeId(), hwo.getHouseId());
+            if (wtso != null) {
+                wtso.setState(1);  //已支付
+                wtso.setShopDate(new Date());  //设置购买时间
+                workerTypeSafeOrderMapper.updateByPrimaryKeySelective(wtso);
 
+                hwo.setSafePrice(wtso.getPrice());
+                houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);//记录保险费
+
+                House house = houseMapper.selectByPrimaryKey(hwo.getHouseId());
+                WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());
+                if (house.getMoney() == null) {
+                    house.setMoney(new BigDecimal(0));
+                }
+                //记录项目流水 保险
+                HouseAccounts ha = new HouseAccounts();
+                ha.setReason("收入" + wts.getName() + "费用");
+                ha.setMoney(house.getMoney().add(hwo.getSafePrice()));//项目总钱
+                ha.setState(0);//进
+                ha.setPayMoney(hwo.getSafePrice());//本次数额
+                ha.setHouseId(house.getId());
+                ha.setHouseName(house.getHouseName());
+                ha.setMemberId(house.getMemberId());
+                ha.setName("业主支付");
+                ha.setPayment(payState);//统计支付方式
+                houseAccountsMapper.insert(ha);
+                house.setMoney(house.getMoney().add(hwo.getSafePrice()));//累计项目钱
+                houseMapper.updateByPrimaryKeySelective(house);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+    }
     /**
      * 业主评价管家完工 最后完工
      */
