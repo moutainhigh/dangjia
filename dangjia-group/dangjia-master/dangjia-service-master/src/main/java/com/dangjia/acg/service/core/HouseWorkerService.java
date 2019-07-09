@@ -130,47 +130,53 @@ public class HouseWorkerService {
         }
         Member operator = (Member) object;
         List list = houseWorkerMapper.queryWorkerHouse(operator.getId());
-        return ServerResponse.createBySuccess("ok", list);
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询成功", list);
     }
 
     /**
      * 换人
      */
     public ServerResponse setChangeWorker(String userToken, String houseWorkerId) {
-        try {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(houseWorkerId);
-            if (houseWorker.getWorkType() == 6) {
-                return ServerResponse.createByErrorMessage("已支付不能换人,请联系当家装修");
-            }
-            houseWorker.setWorkType(2);//被业主换
-            houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-//            complainService.addComplain(userToken, houseWorker.getWorkerId(), 6, houseWorkerId, houseWorker.getHouseId(), "");
-            HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
-            String workerId = houseWorker.getWorkerId();
-            houseFlow.setWorkerId("");
-            houseFlow.setWorkType(2);
-            houseFlow.setReleaseTime(new Date());//重新发布
-            houseFlow.setRefuseNumber(houseFlow.getRefuseNumber() + 1);
-            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-            if (!CommonUtil.isEmpty(workerId)) {
-                House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(houseWorkerId);
+        if (houseWorker == null) {
+            return ServerResponse.createByErrorMessage("该工匠订单不存在");
+        }
+        if (houseWorker.getWorkType() == 6) {
+            return ServerResponse.createByErrorMessage("已支付不能换人,请联系当家装修");
+        }
+        houseWorker.setWorkType(2);//被业主换
+        HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
+        if (houseFlow == null) {
+            return ServerResponse.createByErrorMessage("该工序不存在");
+        }
+        String workerId = houseWorker.getWorkerId();
+        houseFlow.setWorkerId("");
+        houseFlow.setWorkType(2);
+        houseFlow.setReleaseTime(new Date());//重新发布
+        houseFlow.setRefuseNumber(houseFlow.getRefuseNumber() + 1);
+        if (!CommonUtil.isEmpty(workerId)) {
+            House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+            if (house != null) {
                 configMessageService.addConfigMessage(null, "gj", workerId, "0", "业主换人提醒",
                         String.format(DjConstants.PushMessage.STEWARD_REPLACE, house.getHouseName()), "5");
                 HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
                 if (houseFlowDgj != null && !CommonUtil.isEmpty(houseFlowDgj.getWorkerId())) {
-                    configMessageService.addConfigMessage(null, "gj", houseFlowDgj.getWorkerId(), "0", "业主换人提醒",
-                            String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_REPLACE, house.getHouseName()), "5");
+                    configMessageService.addConfigMessage(null, "gj", houseFlowDgj.getWorkerId(), "0",
+                            "业主换人提醒", String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_REPLACE,
+                                    house.getHouseName()), "5");
                 }
             }
-            return ServerResponse.createBySuccessMessage("操作成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("换人失败");
         }
+        houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+        houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+        return ServerResponse.createBySuccessMessage("操作成功");
     }
 
     public ServerResponse getHouseWorker(String userToken, String houseFlowId) {
@@ -209,9 +215,9 @@ public class HouseWorkerService {
             map.put("workerName", workerType.getName());
             map.put("houseFlowId", houseFlow.getId());
             map.put("houseWorkerId", houseWorker.getId());
-            if(workerType.getType()==1||workerType.getType()==2){//设计精算不展示换人按钮
+            if (workerType.getType() == 1 || workerType.getType() == 2) {//设计精算不展示换人按钮
                 map.put("isSubstitution", 2);//0:审核中 1：申请换人 2：不显示
-            }else {
+            } else {
                 Example example = new Example(Complain.class);
                 example.createCriteria().andEqualTo(Complain.MEMBER_ID, houseFlow.getWorkerId())
                         .andEqualTo(Complain.HOUSE_ID, houseFlow.getHouseId())
