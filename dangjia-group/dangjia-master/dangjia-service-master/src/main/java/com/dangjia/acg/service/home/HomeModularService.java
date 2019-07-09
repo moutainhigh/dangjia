@@ -140,9 +140,8 @@ public class HomeModularService {
                             Example example = new Example(HouseFlow.class);
                             example.createCriteria()
                                     .andEqualTo(HouseFlow.WORK_TYPE, 4)
-                                    .andEqualTo(HouseFlow.WORK_STETA, 3)
-                                    .andEqualTo(HouseFlow.WORK_STETA, 4)
                                     .andNotEqualTo(HouseFlow.WORK_STETA, 2)
+                                    .andNotEqualTo(HouseFlow.WORK_STETA, 6)
                                     .andGreaterThan(HouseFlow.WORKER_TYPE, 2)
                                     .andEqualTo(HouseFlow.HOUSE_ID, house.getId());
                             example.orderBy(HouseFlow.SORT).desc();
