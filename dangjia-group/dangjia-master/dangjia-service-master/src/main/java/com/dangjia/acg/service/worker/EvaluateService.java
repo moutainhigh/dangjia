@@ -405,7 +405,7 @@ public class EvaluateService {
     private void insurance(HouseWorkerOrder hwo, String payState) {
         try {
             WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByWorkerTypeId(hwo.getWorkerTypeId(), hwo.getHouseId());
-            if (wtso != null) {
+            if (wtso != null&&wtso.getState()!=1) {
                 wtso.setState(1);  //已支付
                 wtso.setShopDate(new Date());  //设置购买时间
                 workerTypeSafeOrderMapper.updateByPrimaryKeySelective(wtso);
