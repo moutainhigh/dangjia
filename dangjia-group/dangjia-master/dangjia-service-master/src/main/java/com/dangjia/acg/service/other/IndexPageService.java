@@ -283,6 +283,8 @@ public class IndexPageService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }else if(houses.size()<limit){
             this.jobLocation(request,latitude,longitude,limit);
+        }else if(houses.size()==0){
+            modelingVillageMapper.jobModelingVillage(latitude,longitude,limit);
         }
         return ServerResponse.createBySuccess("查询成功", houses);
     }

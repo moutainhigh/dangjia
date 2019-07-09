@@ -242,86 +242,47 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         )tab
         order by rand() limit 2
     </select>
-    
-    <!--<select id="jobModelingVillage" resultType="java.lang.String">-->
-        <!--SELECT-->
-			<!--mv.*,-->
-			<!--ROUND(-->
-				<!--6378.138 * 2 * ASIN(-->
-					<!--SQRT(-->
-						<!--POW(-->
-							<!--SIN(-->
-								<!--(-->
-									<!--#{latitude} * PI() / 180 - mv.locationy * PI() / 180-->
-								<!--) / 2-->
-							<!--),-->
-							<!--2-->
-						<!--) + COS(-->
-							<!--#{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(-->
-							<!--SIN(-->
-								<!--(-->
-									<!--#{longitude} * PI() / 180 - mv.locationx * PI() / 180-->
-								<!--) / 2-->
-							<!--),-->
-							<!--2-->
-						<!--)-->
-					<!--)-->
-				<!--) * 1000-->
-			<!--) AS juli-->
-		<!--FROM-->
-		<!--`dj_house_modeling_village` mv-->
-		<!--WHERE-->
-		<!--mv.locationx IS NOT NULL-->
-		<!--ORDER BY juli-->
-    <!--</select>-->
 
-    <!--&lt;!&ndash;查询指定距离的施工现场&ndash;&gt;-->
-    <!--<select id="jobLocation" resultType="com.dangjia.acg.modle.house.House">-->
-        <!--SELECT-->
-        <!--<include refid="basic_h_columns"/>-->
-        <!--,ROUND(-->
-        <!--6378.138 * 2-->
-        <!--* ASIN(-->
-        <!--SQRT(-->
-        <!--POW(-->
-        <!--SIN(-->
-        <!--(-->
-        <!--#{latitude} * PI() / 180 - mv.locationy * PI() / 180-->
-        <!--) / 2-->
-        <!--)-->
-        <!--,-->
-        <!--2-->
-        <!--) + COS(-->
-        <!--#{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(-->
-        <!--SIN(-->
-        <!--(-->
-        <!--#{longitude} * PI() / 180 - mv.locationx * PI() / 180-->
-        <!--) / 2-->
-        <!--),-->
-        <!--2-->
-        <!--)-->
-        <!--)-->
-        <!--) * 1000-->
-        <!--) AS juli-->
-        <!--FROM-->
-        <!--`dj_house_modeling_village` mv ,dj_house h-->
-        <!--WHERE-->
-        <!--mv.id=h-->
-        <!--.village_id-->
-        <!--AND-->
-        <!--mv.locationx IS NOT NULL-->
-        <!--AND h.show_house=0-->
-        <!--AND ((h.decoration_type in (1,2) and h.budget_ok=3) OR (h.-->
-        <!--decoration_type=3 and h.-->
-        <!--visit_state=1))-->
-        <!--AND h.visit_state in(1,3)-->
-        <!--AND h.site_display=0-->
-        <!--AND mv.locationx IS NOT NULL-->
-        <!--AND mv.id=#{villageId}-->
-        <!--ORDER BY rand()-->
-        <!--<if test="null!=limit and ''!=limit">-->
-            <!--LIMIT #{limit}-->
-        <!--</if>-->
-    <!--</select>-->
+
+    <!--查询指定距离的施工现场-->
+    <select id="jobModelingVillage" resultType="com.dangjia.acg.modle.house.House">
+        SELECT * FROM (SELECT
+        <include refid="basic_h_columns"/>
+        ,ROUND(
+        6378.138 * 2
+        * ASIN(
+        SQRT(
+        POW(
+        SIN(
+        (
+        #{latitude} * PI() / 180 - mv.locationy * PI() / 180
+        ) / 2
+        )
+        ,
+        2
+        ) + COS(
+        #{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(
+        SIN(
+        (
+        #{longitude} * PI() / 180 - mv.locationx * PI() / 180
+        ) / 2
+        ),
+        2
+        )
+        )
+        ) * 1000
+        ) AS juli
+        FROM
+        `dj_house_modeling_village` mv ,dj_house h
+        WHERE
+        mv.id=h.village_id
+        AND mv.locationx IS NOT NULL
+        AND ((h.decoration_type in (1,2) and h.budget_ok=3) OR (h.decoration_type=3 and h.visit_state=1))
+        AND h.visit_state in(1,3)
+        AND h.site_display=0
+        ORDER BY juli,h.construction_date DESC limit 20
+        )tab
+        order by rand() limit #{limit}
+    </select>
 </mapper>
 
