@@ -59,15 +59,20 @@ public class SystemServices {
     public ServerResponse queryDepartment(String user_id,String parentId) {
         try {
             Example example=new Example(Department.class);
-            MainUser existUser = redisClient.getCache(Constants.USER_KEY + user_id, MainUser.class);
-            if (null != existUser && CommonUtil.isEmpty(parentId)) {
-                example.createCriteria().andEqualTo(Department.ID, existUser.getDepartmentId());
-            }else {
-                if (CommonUtil.isEmpty(parentId)) {
-                    example.createCriteria().andCondition(" (parent_top is null or parent_top ='')  ");
-                } else {
-                    example.createCriteria().andEqualTo(Department.PARENT_ID, parentId);
-                }
+//            MainUser existUser = redisClient.getCache(Constants.USER_KEY + user_id, MainUser.class);
+//            if (null != existUser && CommonUtil.isEmpty(parentId)) {
+//                example.createCriteria().andEqualTo(Department.ID, existUser.getDepartmentId());
+//            }else {
+//                if (CommonUtil.isEmpty(parentId)) {
+//                    example.createCriteria().andCondition(" (parent_top is null or parent_top ='')  ");
+//                } else {
+//                    example.createCriteria().andEqualTo(Department.PARENT_ID, parentId);
+//                }
+//            }
+            if (CommonUtil.isEmpty(parentId)) {
+                example.createCriteria().andCondition(" (parent_top is null or parent_top ='')  ");
+            } else {
+                example.createCriteria().andEqualTo(Department.PARENT_ID, parentId);
             }
             List<Department> departments = departmentMapper.selectByExample(example);
             return ServerResponse.createBySuccess("查询成功",departments);
