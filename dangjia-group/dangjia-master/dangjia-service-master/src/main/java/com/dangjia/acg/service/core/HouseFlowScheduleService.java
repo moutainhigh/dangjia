@@ -113,7 +113,7 @@ public class HouseFlowScheduleService {
     public ServerResponse updateFlowSchedule(String houseId, String workerTypeId, Integer extend, Integer advance) {
         HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseId, workerTypeId);
         if (houseFlow.getWorkSteta() == 1 || houseFlow.getWorkSteta() == 2 || houseFlow.getWorkSteta() == 6) {
-            return ServerResponse.createBySuccessMessage("保持成功");
+            return ServerResponse.createBySuccessMessage("保存成功");
         }
         if (houseFlow.getEndDate() != null) {
             if (extend != null && extend > 0) {
@@ -130,7 +130,7 @@ public class HouseFlowScheduleService {
             }
         }
         houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-        return ServerResponse.createBySuccessMessage("保持成功");
+        return ServerResponse.createBySuccessMessage("保存成功");
     }
 
     /**
