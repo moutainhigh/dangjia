@@ -131,10 +131,10 @@ public class HomeModularService {
                     House house = (House) object;
                     if (house.getDesignerOk() != 3) {//设计阶段
                         workerTypeIds.add("1");
-                        setWorkerTypeIds(workerTypeIds);
+                        workerTypeIds=setWorkerTypeIds(workerTypeIds);
                     } else if (house.getBudgetOk() != 3) {//精算阶段
                         workerTypeIds.add("2");
-                        setWorkerTypeIds(workerTypeIds);
+                        workerTypeIds=setWorkerTypeIds(workerTypeIds);
                     } else {
                         if (house.getVisitState() == 1) {//施工阶段
                             Example example = new Example(HouseFlow.class);
@@ -151,7 +151,7 @@ public class HomeModularService {
                                     workerTypeIds.add(houseFlow.getWorkerTypeId());
                                 }
                             }
-                            setWorkerTypeIds(workerTypeIds);
+                            workerTypeIds=setWorkerTypeIds(workerTypeIds);
                         }
                     }
                 }
@@ -172,7 +172,8 @@ public class HomeModularService {
         return ServerResponse.createBySuccess("获取所有装修指南成功", pageResult);
     }
 
-    private void setWorkerTypeIds(List<String> workerTypeIds) {
+    private List<String> setWorkerTypeIds(List<String> workerTypeIds) {
+        List<String> stages=new ArrayList<>();
         Example example = new Example(RenovationStage.class);
         example.createCriteria()
                 .andIn(RenovationStage.WORKER_TYPE_ID, workerTypeIds)
@@ -180,9 +181,9 @@ public class HomeModularService {
         List<RenovationStage> rmList = renovationStageMapper.selectByExample(example);
         if (rmList.size() > 0) {
             for (int i = 0; i < rmList.size(); i++) {
-                workerTypeIds.remove(i);
-                workerTypeIds.add(i,rmList.get(i).getId());
+                stages.add(rmList.get(i).getId());
             }
         }
-    }
+        return stages;
+    };
 }
