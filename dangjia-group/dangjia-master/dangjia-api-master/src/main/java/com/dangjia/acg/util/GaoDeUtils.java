@@ -1,4 +1,4 @@
-package com.dangjia.acg.common.util;
+package com.dangjia.acg.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -14,7 +14,7 @@ import java.util.List;
  * 根据点的经纬度判断是否在多边形区域内
  */
 public class GaoDeUtils {
-
+ 
     public static void main(String[] args) {
         // 被检测的经纬度点
         // 区域（多边形区域经纬度集合）
