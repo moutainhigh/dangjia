@@ -178,7 +178,7 @@ public class ChangeOrderService {
         }
 
         boolean isCheck=false;
-        List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
+        List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, changeOrder.getWorkerTypeId());
         if (houseFlowApplyList.size() > 0) {
             for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
                 if(houseFlowApply.getApplyType()==2){
