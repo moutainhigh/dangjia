@@ -669,7 +669,7 @@
             `dj_repair_mend_order`
             WHERE
             `house_id` = #{houseId}
-            AND state = 4
+            AND state = 4 AND type not in(3,4,5)
             )
         UNION ALL
         (
