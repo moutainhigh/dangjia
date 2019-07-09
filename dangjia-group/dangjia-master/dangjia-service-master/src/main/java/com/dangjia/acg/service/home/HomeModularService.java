@@ -24,6 +24,7 @@ import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.matter.RenovationStage;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.house.MyHouseService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,8 @@ public class HomeModularService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
+    @Autowired
+    private MyHouseService myHouseService;
 
     public ServerResponse getBroadcastList() {
         PageHelper.startPage(1, 20);
@@ -128,30 +131,15 @@ public class HomeModularService {
             Object object = constructionService.getMember(userToken);
             if (object instanceof Member) {
                 Member member = (Member) object;
-                Example example = new Example(House.class);
-                example.createCriteria()
-                        .andEqualTo(House.MEMBER_ID, member.getId())
-                        .andNotEqualTo(House.VISIT_STATE, 0)
-                        .andNotEqualTo(House.VISIT_STATE, 2)
-                        .andEqualTo(House.DATA_STATUS, 0);
-                List<House> houseList = iHouseMapper.selectByExample(example);
-                House house = null;
-                if (houseList.size() > 0) {
-                    for (House house1 : houseList) {
-                        if (house1.getIsSelect() == 1) {//当前选中
-                            house = house1;
-                            break;
-                        }
-                    }
-                    if (house == null) {//有很多房子但是没有isSelect为1的
-                        house = houseList.get(0);
-                    }
+                object = myHouseService.getHouse(member.getId(), null);
+                if (object instanceof House) {
+                    House house = (House) object;
                     if (house.getDesignerOk() != 3) {//设计阶段
                         setWorkerTypeIds("1", workerTypeIds);
                     } else if (house.getBudgetOk() != 3) {//精算阶段
                         setWorkerTypeIds("2", workerTypeIds);
                     } else {
-                        example = new Example(HouseFlow.class);
+                        Example example = new Example(HouseFlow.class);
                         example.createCriteria()
                                 .andEqualTo(HouseFlow.WORK_TYPE, 4)
                                 .andNotEqualTo(HouseFlow.WORK_STETA, 2)
