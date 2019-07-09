@@ -50,4 +50,12 @@ public interface IndexPageAPI {
                                @RequestParam("latitude") String latitude,
                                @RequestParam("longitude") String longitude,
                                @RequestParam("limit")Integer limit);
+
+
+    @PostMapping("/app/other/indexPage/getRecommended")
+    @ApiOperation(value = "参考花费推荐", notes = "参考花费推荐")
+    ServerResponse getRecommended(@RequestParam("request")HttpServletRequest request,
+                                  @RequestParam("latitude") String latitude,
+                                  @RequestParam("longitude") String longitude,
+                                  @RequestParam("limit")Integer limit);
 }

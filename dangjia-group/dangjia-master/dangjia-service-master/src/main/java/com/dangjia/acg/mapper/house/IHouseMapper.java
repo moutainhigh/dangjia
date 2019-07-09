@@ -64,4 +64,6 @@ public interface IHouseMapper extends Mapper<House> {
 
     List<HouseProfitSummaryDTO> getHouseProfitSummary(@Param("houseId") String houseId);
 
+    List<House> getRecommended(@Param("latitude")  String latitude,@Param("longitude") String longitude, @Param("limit") Integer limit);
+
 }
