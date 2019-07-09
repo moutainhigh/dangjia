@@ -130,7 +130,7 @@ public class MyHouseService {
     /**
      * APP我的房产
      */
-    public ServerResponse getMyHouse(String userToken, String cityId, String isNew) {
+    public ServerResponse getMyHouse(String userToken, String isNew) {
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         if (!CommonUtil.isEmpty(isNew)) {
             return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null, address));
@@ -163,7 +163,7 @@ public class MyHouseService {
         for (HouseFlow houseFlow : houseFlowList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             NodeDTO nodeDTO = HouseUtil.getWorkerDatas(house, houseFlow, workerType, address);
-            Map progress = nodeDTO.getProgress();
+            Map<String, Object> progress = nodeDTO.getProgress();
             Example example1 = new Example(HouseFlowApply.class);
             example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId()).andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.APPLY_TYPE, 3);
             List<HouseFlowApply> houseFlowss = houseFlowApplyMapper.selectByExample(example1);
@@ -195,7 +195,6 @@ public class MyHouseService {
                 map.put("houseFlowId", houseFlow.getId());
                 nodeDTO.setMember(map);
             }
-
             if (workerType.getType() == 1) {
                 houseResult.setDesignList(nodeDTO);
             } else if (workerType.getType() == 2) {
@@ -214,7 +213,7 @@ public class MyHouseService {
         List<MainUser> list = userMapper.selectByExample(example);
         if (list != null && list.size() > 0) {
             MainUser user = list.get(0);
-            Map map = new HashMap();
+            Map<String, Object> map = new HashMap<>();
             map.put("id", user.getId());
             map.put("targetId", user.getId());
             map.put("targetAppKey", "49957e786a91f9c55b223d58");
@@ -275,21 +274,17 @@ public class MyHouseService {
         example.createCriteria().andEqualTo("workType", 3).andEqualTo("houseId", houseId);
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         task = houseFlowList.size();
-
         House house = iHouseMapper.selectByPrimaryKey(houseId);
-
         example = new Example(MendOrder.class);
         example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 1)
                 .andEqualTo(MendOrder.STATE, 3);//审核状态
         List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
         task += mendOrderList.size();
-
         example = new Example(MendOrder.class);
         example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
                 .andEqualTo(MendOrder.STATE, 3);//补材料审核状态全通过
         mendOrderList = mendOrderMapper.selectByExample(example);
         task += mendOrderList.size();
-
         if (house.getDesignerOk() == 5 || house.getDesignerOk() == 2) {
             task++;
         }
