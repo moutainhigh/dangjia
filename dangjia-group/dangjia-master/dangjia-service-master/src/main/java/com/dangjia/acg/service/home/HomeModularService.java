@@ -4,9 +4,9 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.matter.RenovationManualDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
@@ -19,8 +19,6 @@ import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.house.WebsiteVisit;
-import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.matter.RenovationStage;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -159,31 +157,17 @@ public class HomeModularService {
             }
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<RenovationManual> rmList = renovationManualMapper.getStrategyList(workerTypeIds.size() <= 0 ? null
+        List<RenovationManualDTO> rmList = renovationManualMapper.getStrategyList(workerTypeIds.size() <= 0 ? null
                 : workerTypeIds.toArray(new String[workerTypeIds.size()]));
         if (rmList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         PageInfo pageResult = new PageInfo(rmList);
-        List<Map<String, Object>> listMap = new ArrayList<>();
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-        for (RenovationManual renovationManual : rmList) {
-            Map<String, Object> map = BeanUtils.beanToMap(renovationManual);
-            Example example = new Example(WebsiteVisit.class);
-            Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo(WebsiteVisit.DATA_STATUS, 0)
-                    .andEqualTo(WebsiteVisit.ROUTE, renovationManual.getId());
-            Integer num = websiteVisitMapper.selectCountByExample(example);
-            map.put("num", num);
-            String imageUrl = renovationManual.getImage();
-            map.put("imageUrl", CommonUtil.isEmpty(imageUrl) ? null : (imageAddress + imageUrl));
-            RenovationStage renovationStage = renovationStageMapper.selectByPrimaryKey(renovationManual.getWorkerTypeId());
-            if (renovationStage != null) {
-                map.put("workerTypeName", renovationStage.getName());
-            }
-            listMap.add(map);
+        for (RenovationManualDTO renovationManual : rmList) {
+            renovationManual.setImageUrl(CommonUtil.isEmpty(renovationManual.getImage()) ? null : (imageAddress + renovationManual.getImage()));
         }
-        pageResult.setList(listMap);
+        pageResult.setList(rmList);
         return ServerResponse.createBySuccess("获取所有装修指南成功", pageResult);
     }
 

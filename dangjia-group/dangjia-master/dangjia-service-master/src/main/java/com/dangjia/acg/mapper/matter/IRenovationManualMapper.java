@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.matter;
 
+import com.dangjia.acg.dto.matter.RenovationManualDTO;
 import com.dangjia.acg.modle.matter.RenovationManual;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -15,6 +16,6 @@ import java.util.List;
 public interface IRenovationManualMapper extends Mapper<RenovationManual> {
     List<RenovationManual> getRenovationManualByWorkertyId(String workertyid);
 
-    List<RenovationManual> getStrategyList(@Param("workerTypeIds") String[] workerTypeIds);
+    List<RenovationManualDTO> getStrategyList(@Param("workerTypeIds") String[] workerTypeIds);
 }
 
