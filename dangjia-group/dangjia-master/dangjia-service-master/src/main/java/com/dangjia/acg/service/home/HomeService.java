@@ -155,6 +155,7 @@ public class HomeService {
     //-------------------模版详情---------------------//
 
     public ServerResponse getAppHomeCollocation(String templateId) {
+        String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Example example = new Example(HomeCollocation.class);
         Example.Criteria criteria = example.createCriteria()
                 .andEqualTo(HomeCollocation.DATA_STATUS, 0);
@@ -185,7 +186,7 @@ public class HomeService {
         int i = 0;
         for (String masterpieceId : masterpieceIds) {
             HomeMasterplate homeMasterplate = iHomeMasterplateMapper.selectByPrimaryKey(masterpieceId);
-            HomeMasterplateDTO homeMasterplateDTO = getHomeMasterplateDTO(homeMasterplate);
+            HomeMasterplateDTO homeMasterplateDTO = getHomeMasterplateDTO(homeMasterplate, imageAddress);
             if (homeMasterplateDTO != null) {
                 homeMasterplateDTO.setSort(i++);
                 homeMasterplateDTOS.add(homeMasterplateDTO);
@@ -223,6 +224,7 @@ public class HomeService {
         if (CommonUtil.isEmpty(templateId)) {
             return ServerResponse.createByErrorMessage("请传入模板ID");
         }
+        String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(HomeCollocation.class);
         example.createCriteria()
@@ -252,7 +254,7 @@ public class HomeService {
             List<HomeMasterplateDTO> homeMasterplateDTOS = new ArrayList<>();
             for (int i = 0; i < masterpieceIds.length; i++) {
                 HomeMasterplate homeMasterplate = iHomeMasterplateMapper.selectByPrimaryKey(masterpieceIds[i]);
-                HomeMasterplateDTO homeMasterplateDTO = getHomeMasterplateDTO(homeMasterplate);
+                HomeMasterplateDTO homeMasterplateDTO = getHomeMasterplateDTO(homeMasterplate, imageAddress);
                 if (homeMasterplateDTO != null) {
                     homeMasterplateDTO.setSort(i);
                     homeMasterplateDTOS.add(homeMasterplateDTO);
@@ -268,6 +270,7 @@ public class HomeService {
     //-------------------模块---------------------//
 
     public ServerResponse getHomeMasterplateList(PageDTO pageDTO) {
+        String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(HomeMasterplate.class);
         example.createCriteria()
@@ -280,7 +283,7 @@ public class HomeService {
         PageInfo pageResult = new PageInfo(homeMasterplates);
         List<HomeMasterplateDTO> homeMasterplateDTOS = new ArrayList<>();
         for (HomeMasterplate homeMasterplate : homeMasterplates) {
-            homeMasterplateDTOS.add(getHomeMasterplateDTO(homeMasterplate));
+            homeMasterplateDTOS.add(getHomeMasterplateDTO(homeMasterplate, imageAddress));
         }
         pageResult.setList(homeMasterplateDTOS);
         return ServerResponse.createBySuccess("查询用户列表成功", pageResult);
@@ -353,11 +356,10 @@ public class HomeService {
      * @param homeMasterplate 数据库实体
      * @return 返回体
      */
-    private HomeMasterplateDTO getHomeMasterplateDTO(HomeMasterplate homeMasterplate) {
+    private HomeMasterplateDTO getHomeMasterplateDTO(HomeMasterplate homeMasterplate, String imageAddress) {
         if (homeMasterplate == null) {
             return null;
         }
-        String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         HomeMasterplateDTO homeMasterplateDTO = new HomeMasterplateDTO();
         homeMasterplateDTO.setId(homeMasterplate.getId());
         homeMasterplateDTO.setDataStatus(homeMasterplate.getDataStatus());

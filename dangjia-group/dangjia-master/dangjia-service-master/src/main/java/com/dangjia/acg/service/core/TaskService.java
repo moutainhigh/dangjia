@@ -27,6 +27,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.service.house.MyHouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -66,6 +67,8 @@ public class TaskService {
     private IChangeOrderMapper changeOrderMapper;
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
+    @Autowired
+    private MyHouseService myHouseService;
 
     /**
      * 任务列表
@@ -94,13 +97,8 @@ public class TaskService {
                 buttonDTO.setTaskList(getWorkerTask(houseId, userToken, member, imageAddress, address));
             }
         } else {
-            Example example = new Example(House.class);
-            example.createCriteria()
-                    .andEqualTo(House.MEMBER_ID, member.getId())
-                    .andNotEqualTo(House.VISIT_STATE, 2)
-                    //.andNotEqualTo(House.VISIT_STATE, 4)
-                    .andEqualTo(House.DATA_STATUS, 0);
-            List<House> houseList = houseMapper.selectByExample(example);
+            List<House> houseList = houseMapper.selectByExample(myHouseService.getHouseExample(member.getId()));
+            //初始化花费
             for (House house : houseList) {
                 HouseExpend houseExpend = houseExpendMapper.getByHouseId(house.getId());
                 if (houseExpend == null) {
@@ -109,7 +107,6 @@ public class TaskService {
                     houseExpendMapper.insert(houseExpend);
                 }
             }
-
             //业主待处理任务
             if (houseList.size() > 1) {
                 buttonDTO.setState(2);
