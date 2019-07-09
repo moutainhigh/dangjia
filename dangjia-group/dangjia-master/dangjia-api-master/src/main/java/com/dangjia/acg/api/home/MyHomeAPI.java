@@ -18,11 +18,10 @@ public interface MyHomeAPI {
 
     /**
      * @param userToken 必选 string 操作人ID
-     * @param cityId   必选 string 模版名称
      */
     @PostMapping("app/home/my")
     @ApiOperation(value = "业主端，我的装修界面", notes = "业主端，我的装修界面")
-    ServerResponse getMyHouse(@RequestParam("userToken") String userToken, @RequestParam("cityId")String cityId, @RequestParam("isNew")String isNew) ;
+    ServerResponse getMyHouse(@RequestParam("userToken") String userToken, @RequestParam("isNew")String isNew) ;
 
 
 }
