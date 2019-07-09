@@ -1,11 +1,8 @@
 package com.dangjia.acg.service.safe;
 
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
-import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
@@ -85,7 +82,7 @@ public class WorkerTypeSafeOrderService {
             return (ServerResponse) object;
         }
         Example example = new Example(WorkerTypeSafeOrder.class);
-        example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId).andEqualTo(WorkerTypeSafeOrder.DATA_STATUS, 0);
+        example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId).andEqualTo(WorkerTypeSafeOrder.STATE, 1).andEqualTo(WorkerTypeSafeOrder.DATA_STATUS, 0);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<WorkerTypeSafeOrder> list = workerTypeSafeOrderMapper.selectByExample(example);
         List<Map> listMap = new ArrayList<>();

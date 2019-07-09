@@ -250,6 +250,7 @@
         and visit_state=3
         order by num desc
     </select>
+    <!--参考花费-->
     <select id="getSameLayoutDistance" resultType="com.dangjia.acg.modle.house.House">
         SELECT
         <include refid="basic_h_columns"/>
@@ -281,8 +282,8 @@
         <if test="maxSquare!=null and maxSquare!=''">
             or h.build_square &lt;= #{maxSquare}
         </if>
-        and ((decoration_type in (1,2) and budget_ok=3) or (decoration_type=3 and visit_state=1))
         and site_display=0
+        and visit_state=3
         ORDER BY
         v.juli ASC
     </select>
@@ -726,6 +727,50 @@
         ) a
         ORDER BY
         a.date DESC
+    </select>
+
+    <!--根据位置取距离近的参考推荐-->
+    <select id="getRecommended" resultType="com.dangjia.acg.modle.house.House">
+        SELECT * FROM (SELECT
+        <include refid="basic_h_columns"/>
+        ,ROUND(
+        6378.138 * 2
+        * ASIN(
+        SQRT(
+        POW(
+        SIN(
+        (
+        #{latitude} * PI() / 180 - mv.locationy * PI() / 180
+        ) / 2
+        )
+        ,
+        2
+        ) + COS(
+        #{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(
+        SIN(
+        (
+        #{longitude} * PI() / 180 - mv.locationx * PI() / 180
+        ) / 2
+        ),
+        2
+        )
+        )
+        ) * 1000
+        ) AS juli
+        FROM
+        `dj_house_modeling_village` mv ,dj_house h
+        inner join
+        (SELECT a.house_id,COUNT(a.id) num FROM dj_core_house_flow_apply a GROUP BY a.house_id ) b ON
+        b.house_id=h.id/*筛选调无施工记录的房子*/
+        WHERE
+        mv.id=h.village_id
+        AND mv.locationx IS NOT NULL
+        AND ((h.decoration_type in (1,2) and h.budget_ok=3) OR (h.decoration_type=3 and h.visit_state=1))
+        AND h.visit_state =3
+        AND h.site_display=0
+        ORDER BY juli limit 30
+        )tab
+        order by rand() limit #{limit}
     </select>
 </mapper>
 
