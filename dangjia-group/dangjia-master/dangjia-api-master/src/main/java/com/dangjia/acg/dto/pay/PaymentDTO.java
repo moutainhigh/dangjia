@@ -27,4 +27,6 @@ public class PaymentDTO<T> {
     private String taskId;
     private String info;//支付温馨提示用于
     private int type;
+    private String agreementName;//协议名
+    private String agreementUrl;//协议链接
 }
