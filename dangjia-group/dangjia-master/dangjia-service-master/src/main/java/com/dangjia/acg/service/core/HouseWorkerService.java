@@ -628,7 +628,7 @@ public class HouseWorkerService {
             }
         }
         /*提交整体完工申请检测是否存在待处理的变跟单进行控制*/
-        List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(hf.getHouseId(), hf.getWorkerTypeId());
+        List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(hf.getHouseId(), workerType.getId());
         if (changeOrderList.size() > 0) {
             return ServerResponse.createByErrorMessage("该工种（" + workerType.getName() + "）有未处理变更单,通知管家处理");
         }
