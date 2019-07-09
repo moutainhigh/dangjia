@@ -49,4 +49,10 @@ public class IndexPageController implements IndexPageAPI {
     public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude,Integer limit) {
         return indexPageService.jobLocation(request,latitude,longitude,limit);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getRecommended(HttpServletRequest request, String latitude, String longitude, Integer limit) {
+        return indexPageService.getRecommended(request,latitude,longitude,limit);
+    }
 }
