@@ -148,7 +148,7 @@ public class HouseWorkerService {
             }
             houseWorker.setWorkType(2);//被业主换
             houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-            complainService.addComplain(userToken, houseWorker.getWorkerId(), 6, houseWorkerId, houseWorker.getHouseId(), "");
+//            complainService.addComplain(userToken, houseWorker.getWorkerId(), 6, houseWorkerId, houseWorker.getHouseId(), "");
             HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
             String workerId = houseWorker.getWorkerId();
             houseFlow.setWorkerId("");
@@ -209,16 +209,20 @@ public class HouseWorkerService {
             map.put("workerName", workerType.getName());
             map.put("houseFlowId", houseFlow.getId());
             map.put("houseWorkerId", houseWorker.getId());
-            Example example = new Example(Complain.class);
-            example.createCriteria().andEqualTo(Complain.MEMBER_ID, houseFlow.getWorkerId())
-                    .andEqualTo(Complain.HOUSE_ID, houseFlow.getHouseId())
-                    .andEqualTo(Complain.STATUS, 0)
-                    .andEqualTo(Complain.COMPLAIN_TYPE, 6);
-            List<Complain> complains = complainMapper.selectByExample(example);
-            if (houseWorker.getWorkType() == 6) {
-                map.put("isSubstitution", complains.size() > 0 ? 0 : 1);
-            } else {
-                map.put("isSubstitution", 2);
+            if(workerType.getType()==1||workerType.getType()==2){//设计精算不展示换人按钮
+                map.put("isSubstitution", 2);//0:审核中 1：申请换人 2：不显示
+            }else {
+                Example example = new Example(Complain.class);
+                example.createCriteria().andEqualTo(Complain.MEMBER_ID, houseFlow.getWorkerId())
+                        .andEqualTo(Complain.HOUSE_ID, houseFlow.getHouseId())
+                        .andEqualTo(Complain.STATUS, 0)
+                        .andEqualTo(Complain.COMPLAIN_TYPE, 6);
+                List<Complain> complains = complainMapper.selectByExample(example);
+                if (houseWorker.getWorkType() == 6) {
+                    map.put("isSubstitution", complains.size() > 0 ? 0 : 1);//判断换人申请状态
+                } else {
+                    map.put("isSubstitution", 2);
+                }
             }
             mapData.put("houseWorker", map);
         }
@@ -247,7 +251,7 @@ public class HouseWorkerService {
                 map.put("workerName", workerType.getName());
                 map.put("houseFlowId", houseFlow.getId());
                 map.put("houseWorkerId", worker.getId());
-                map.put("isSubstitution", 0);
+                map.put("isSubstitution", 2);
                 historyWorkerList.add(map);
             }
         }

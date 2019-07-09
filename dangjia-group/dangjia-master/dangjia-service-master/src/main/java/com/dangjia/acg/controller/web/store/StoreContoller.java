@@ -96,7 +96,7 @@ public class StoreContoller implements StoreAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse Callback(String storeSubscribeId, String info) {
-        return storeServices.Callback(storeSubscribeId,info);
+    public ServerResponse callback(String storeSubscribeId, String info) {
+        return storeServices.callback(storeSubscribeId,info);
     }
 }

@@ -85,9 +85,9 @@ public interface StoreAPI {
                                       @RequestParam("searchKey")String searchKey);
 
 
-    @PostMapping("/app/store/Callback")
+    @PostMapping("/app/store/callback")
     @ApiOperation(value = "回访记录", notes = "回访记录")
-    ServerResponse Callback(@RequestParam("storeSubscribeId") String storeSubscribeId,@RequestParam("info") String info);
+    ServerResponse callback(@RequestParam("storeSubscribeId") String storeSubscribeId,@RequestParam("info") String info);
 
 
 

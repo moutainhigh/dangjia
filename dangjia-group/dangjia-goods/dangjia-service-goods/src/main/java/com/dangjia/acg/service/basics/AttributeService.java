@@ -70,8 +70,13 @@ public class AttributeService {
                     Map<String, Object> avMap = new HashMap<>();
                     avMap.put("avId", av.getId());
                     avMap.put("avName", av.getName());
-                    avMap.put("image", address + av.getImage());
-                    avMap.put("imageUrl", av.getImage());
+                    if(!CommonUtil.isEmpty(av.getImage())) {
+                        avMap.put("image", address + av.getImage());
+                        avMap.put("imageUrl", av.getImage());
+                    }else{
+                        avMap.put("image", null);
+                        avMap.put("imageUrl", null);
+                    }
                     avListMap.add(avMap);
                 }
                 caMap.put("avListMap", avListMap);
@@ -112,8 +117,13 @@ public class AttributeService {
                     Map<String, Object> avMap = new HashMap<>();
                     avMap.put("avId", av.getId());
                     avMap.put("avName", av.getName());
-                    avMap.put("image", address + av.getImage());
-                    avMap.put("imageUrl", av.getImage());
+                    if(!CommonUtil.isEmpty(av.getImage())) {
+                        avMap.put("image", address + av.getImage());
+                        avMap.put("imageUrl", av.getImage());
+                    }else{
+                        avMap.put("image", null);
+                        avMap.put("imageUrl", null);
+                    }
                     avListMap.add(avMap);
                 }
                 caMap.put("avListMap", avListMap);
@@ -143,8 +153,13 @@ public class AttributeService {
                     Map<String, Object> avMap = new HashMap<>();
                     avMap.put("avId", av.getId());
                     avMap.put("avName", av.getName());
-                    avMap.put("image", address + av.getImage());
-                    avMap.put("imageUrl", av.getImage());
+                    if(!CommonUtil.isEmpty(av.getImage())) {
+                        avMap.put("image", address + av.getImage());
+                        avMap.put("imageUrl", av.getImage());
+                    }else{
+                        avMap.put("image", null);
+                        avMap.put("imageUrl", null);
+                    }
                     avListMap.add(avMap);
                 }
                 gaMap.put("avListMap", avListMap);
