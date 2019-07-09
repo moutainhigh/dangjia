@@ -68,7 +68,7 @@
                 FROM
                 dj_matter_renovation_manual c
                 INNER JOIN dj_matter_renovation_stage s on s.id=c.worker_type_id
-                LEFT JOIN ( SELECT a.route, COUNT( a.route ) num FROM dj_website_visit a GROUP BY a.route ) c ON b.route =
+                LEFT JOIN ( SELECT a.route, COUNT( a.route ) num FROM dj_website_visit a GROUP BY a.route ) b ON b.route =
                 c.id
                 WHERE
             c.state = 0
