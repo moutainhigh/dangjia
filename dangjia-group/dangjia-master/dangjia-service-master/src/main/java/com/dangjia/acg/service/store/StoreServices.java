@@ -156,9 +156,9 @@ public class StoreServices {
      * @param searchKey
      * @return
      */
-    public ServerResponse queryStoreSubscribe(String searchKey, PageDTO pageDTO) {
+    public ServerResponse queryStoreSubscribe(String searchKey, PageDTO pageDTO, String state) {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<StoreSubscribe> storeSubscribes = iStoreSubscribeMapper.queryStoreSubscribe(searchKey);
+            List<StoreSubscribe> storeSubscribes = iStoreSubscribeMapper.queryStoreSubscribe(searchKey,state);
             if(storeSubscribes.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }

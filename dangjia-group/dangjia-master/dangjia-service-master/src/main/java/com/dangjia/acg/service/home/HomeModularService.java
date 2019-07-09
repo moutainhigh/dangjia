@@ -11,7 +11,6 @@ import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.house.IWebsiteVisitMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
 import com.dangjia.acg.mapper.matter.IRenovationStageMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -131,24 +130,28 @@ public class HomeModularService {
                 if (object instanceof House) {
                     House house = (House) object;
                     if (house.getDesignerOk() != 3) {//设计阶段
-                        setWorkerTypeIds("1", workerTypeIds);
+                        workerTypeIds.add("1");
+                        setWorkerTypeIds(workerTypeIds);
                     } else if (house.getBudgetOk() != 3) {//精算阶段
-                        setWorkerTypeIds("2", workerTypeIds);
+                        workerTypeIds.add("2");
+                        setWorkerTypeIds(workerTypeIds);
                     } else {
-                        Example example = new Example(HouseFlow.class);
-                        example.createCriteria()
-                                .andEqualTo(HouseFlow.WORK_TYPE, 4)
-                                .andNotEqualTo(HouseFlow.WORK_STETA, 2)
-                                .andEqualTo(HouseFlow.HOUSE_ID, house.getId());
-                        example.orderBy(HouseFlow.SORT).asc();
-                        List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
-                        if (houseFlows.size() > 0) {
-                            for (int i = houseFlows.size() - 1; i >= 0; i--) {
-                                if (house.getVisitState() == 1) {//施工阶段
-                                    HouseFlow houseFlow = houseFlows.get(i);
-                                    setWorkerTypeIds(houseFlow.getWorkerTypeId(), workerTypeIds);
+                        if (house.getVisitState() == 1) {//施工阶段
+                            Example example = new Example(HouseFlow.class);
+                            example.createCriteria()
+                                    .andEqualTo(HouseFlow.WORK_TYPE, 4)
+                                    .andNotEqualTo(HouseFlow.WORK_STETA, 2)
+                                    .andNotEqualTo(HouseFlow.WORK_STETA, 6)
+                                    .andGreaterThan(HouseFlow.WORKER_TYPE, 2)
+                                    .andEqualTo(HouseFlow.HOUSE_ID, house.getId());
+                            example.orderBy(HouseFlow.SORT).desc();
+                            List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+                            if (houseFlows.size() > 0) {
+                                for (HouseFlow houseFlow : houseFlows) {
+                                    workerTypeIds.add(houseFlow.getWorkerTypeId());
                                 }
                             }
+                            setWorkerTypeIds(workerTypeIds);
                         }
                     }
                 }
@@ -169,15 +172,16 @@ public class HomeModularService {
         return ServerResponse.createBySuccess("获取所有装修指南成功", pageResult);
     }
 
-    private void setWorkerTypeIds(String workerTypeId, List<String> workerTypeIds) {
+    private void setWorkerTypeIds(List<String> workerTypeIds) {
         Example example = new Example(RenovationStage.class);
         example.createCriteria()
-                .andEqualTo(RenovationStage.WORKER_TYPE_ID, workerTypeId)
+                .andIn(RenovationStage.WORKER_TYPE_ID, workerTypeIds)
                 .andEqualTo(RenovationStage.DATA_STATUS, 0);
         List<RenovationStage> rmList = renovationStageMapper.selectByExample(example);
         if (rmList.size() > 0) {
-            for (RenovationStage renovationStage : rmList) {
-                workerTypeIds.add(renovationStage.getId());
+            for (int i = 0; i < rmList.size(); i++) {
+                workerTypeIds.remove(i);
+                workerTypeIds.add(i,rmList.get(i).getId());
             }
         }
     }

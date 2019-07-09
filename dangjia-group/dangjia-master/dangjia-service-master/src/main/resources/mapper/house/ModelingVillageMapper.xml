@@ -183,6 +183,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ) AS juli
         FROM
         `dj_house_modeling_village` mv ,dj_house h
+        inner join
+        (SELECT a.house_id,COUNT(a.id) num FROM dj_core_house_flow_apply a GROUP BY a.house_id ) b ON
+        b.house_id=h.id/*筛选调无施工记录的房子*/
         WHERE
         mv.id=h.village_id
         AND mv.locationx IS NOT NULL

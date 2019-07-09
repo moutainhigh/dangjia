@@ -30,6 +30,9 @@
               customer_phone LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
+        <if test="null!=state and ''!=state">
+            AND  state = #{state}
+        </if>
         ORDER BY modify_date DESC
     </select>
 
