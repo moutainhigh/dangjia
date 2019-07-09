@@ -9,6 +9,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 /**
@@ -20,6 +21,9 @@ import java.util.Date;
 @FeignClient("dangjia-service-master")
 @Api(value = "门店管理接口", description = "门店管理接口")
 public interface StoreAPI {
+    @PostMapping("/web/store/precinctVillage")
+    @ApiOperation(value = "门店所管辖的小区集合", notes = "门店所管辖的小区集合")
+    ServerResponse getStorePrecinctVillage(@RequestParam("request") HttpServletRequest request, @RequestParam("storeId") String storeId);
 
     @PostMapping("/web/store/addStore")
     @ApiOperation(value = "创建门店", notes = "创建门店")
@@ -73,6 +77,12 @@ public interface StoreAPI {
     ServerResponse IndexqueryStore(@RequestParam("cityId") String cityId,
                                    @RequestParam("latitude") String latitude,
                                    @RequestParam("longitude") String longitude);
+
+    @PostMapping("web/store/getStoreProfitList")
+    @ApiOperation(value = "门店利润列表（利润统计）", notes = "门店利润列表（利润统计）")
+    ServerResponse getStoreProfitList(@RequestParam("request")HttpServletRequest request,
+                                      @RequestParam("pageDTO")PageDTO pageDTO,
+                                      @RequestParam("searchKey")String searchKey);
 
 
     @PostMapping("/app/store/Callback")

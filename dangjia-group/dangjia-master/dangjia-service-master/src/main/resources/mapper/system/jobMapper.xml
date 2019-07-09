@@ -24,10 +24,10 @@
 		select
 		u.id, u.name,
 		u.department_id, u.operate_id, u.code ,u.create_date ,
-		u.modify_date , u.info ,u.city_name,u.city_id,u.job_id,u.role_id
+		u.modify_date , u.info ,u.city_name,u.city_id,ur.job_id,ur.role_id
 		from dj_system_job u
 		LEFT JOIN dj_system_job_role ur ON
-		u.id=ur.Job_id
+		u.id=ur.job_id
 		WHERE u.id=#{id}
 	</select>
 </mapper>

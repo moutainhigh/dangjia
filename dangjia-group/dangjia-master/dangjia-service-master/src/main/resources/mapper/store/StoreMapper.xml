@@ -12,10 +12,14 @@
           store_name AS storeName,
           city_id AS cityId,
           city_name AS cityName,
+          department_id AS departmentId,
+          department_name AS departmentName,
           store_address AS storeAddress,
           reservation_number AS reservationNumber,
           latitude,
-          longitude
+          longitude,
+          scope_itude scopeItude,
+          villages
 	</sql>
 
     <!--查询门店-->

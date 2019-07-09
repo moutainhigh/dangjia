@@ -83,12 +83,17 @@
         a.type AS type,
         a.state AS state,
         a.task_id AS taskId,
-        b.pay_state AS payType
+        b.pay_state AS payType,
+        s.store_name storeName
         FROM
         dj_pay_business_order AS a
         LEFT JOIN dj_pay_pay_order AS b ON b.number = a.pay_order_number
         LEFT JOIN dj_house AS c ON a.house_id = c.id
         LEFT JOIN dj_member AS d ON d.id = c.member_id
+        LEFT JOIN dj_store s ON FIND_IN_SET(
+        c.village_id,
+        s.villages
+        )
         WHERE
         a.data_status = 0
         <if test="state != -1">

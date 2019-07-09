@@ -50,4 +50,11 @@ public interface WebModelingVillageAPI {
     ServerResponse getHouseList(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("modelingLayoutId") String modelingLayoutId);
 
+    /**
+     * 根据城市查询小区
+     */
+    @PostMapping("web/village/getModelingVillage")
+    @ApiOperation(value = "获取所有设置了经纬度的小区", notes = "获取所有设置了经纬度的小区")
+    ServerResponse getModelingVillage( @RequestParam("request") HttpServletRequest request);
+
 }

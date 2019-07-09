@@ -55,4 +55,9 @@ public class WebModelingVillageController implements WebModelingVillageAPI {
     public ServerResponse getHouseList(HttpServletRequest request,String modelingLayoutId){
         return modelingVillageService.getHouseList(request,modelingLayoutId);
     }
+    @Override
+    @ApiMethod
+    public ServerResponse getModelingVillage(HttpServletRequest request){
+        return modelingVillageService.getModelingVillage(request);
+    }
 }

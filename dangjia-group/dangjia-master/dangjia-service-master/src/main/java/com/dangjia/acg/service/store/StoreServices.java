@@ -3,22 +3,33 @@ package com.dangjia.acg.service.store;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.GaoDeUtils;
 import com.dangjia.acg.common.util.JsmsUtil;
+import com.dangjia.acg.dto.house.DesignDTO;
+import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
+import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.house.IModelingVillageMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreSubscribeMapper;
+import com.dangjia.acg.mapper.system.IDepartmentMapper;
+import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreSubscribe;
+import com.dangjia.acg.modle.system.Department;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -31,8 +42,35 @@ import java.util.Map;
 public class StoreServices {
     @Autowired
     private IStoreMapper iStoreMapper;
+
+    @Autowired
+    private IHouseMapper iHouseMapper;
     @Autowired
     private IStoreSubscribeMapper iStoreSubscribeMapper;
+    @Autowired
+    private IMemberMapper memberMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
+    @Autowired
+    private IModelingVillageMapper modelingVillageMapper;//小区
+    @Autowired
+    private IDepartmentMapper departmentMapper;
+    /**
+     * 根据门店ID,得到设置的管辖范围，得到所有范围内的小区
+     * @param request
+     * @param storeId 门店ID
+     * @return
+     */
+    public ServerResponse getStorePrecinctVillage(HttpServletRequest request,String storeId) {
+        Store store = iStoreMapper.selectByPrimaryKey(storeId);
+        if(store==null||CommonUtil.isEmpty(store.getScopeItude())||CommonUtil.isEmpty(store.getVillages())){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        Example example = new Example(ModelingVillage.class);
+        example.createCriteria().andIn(ModelingVillage.ID,Arrays.asList(store.getVillages().split(",")));
+        List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
+        return ServerResponse.createBySuccess("查询列表成功", modelingVillages);
+    }
 
     /**
      * 创建门店
@@ -41,6 +79,12 @@ public class StoreServices {
      */
     public ServerResponse addStore(Store store) {
         try {
+            if(!CommonUtil.isEmpty(store.getDepartmentId())) {
+                Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
+                store.setCityName(department.getCityName());
+                store.setDepartmentName(department.getName());
+            }
+            getStoreVillages(store);
             iStoreMapper.insert(store);
             return ServerResponse.createBySuccessMessage("创建成功");
         } catch (Exception e) {
@@ -48,6 +92,7 @@ public class StoreServices {
             return ServerResponse.createByErrorMessage("创建失败");
         }
     }
+
 
     /**
      * 查询门店
@@ -72,12 +117,19 @@ public class StoreServices {
      */
     public ServerResponse updateStore(Store store) {
         try {
+            if(!CommonUtil.isEmpty(store.getDepartmentId())) {
+                Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
+                store.setCityName(department.getCityName());
+                store.setDepartmentName(department.getName());
+            }
+            getStoreVillages(store);
             store.setCreateDate(null);
+            store.setModifyDate(new Date());
             iStoreMapper.updateByPrimaryKeySelective(store);
             return ServerResponse.createBySuccessMessage("编辑成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("编辑成功");
+            return ServerResponse.createByErrorMessage("编辑失败");
         }
     }
 
@@ -202,5 +254,66 @@ public class StoreServices {
         }else{
             return ServerResponse.createByErrorMessage("处理失败");
         }
+    }
+
+    /**
+     * 根据本店设置的管辖范围，得到所有范围内的小区
+     * @param store
+     */
+    public void getStoreVillages(Store store){
+        if(!CommonUtil.isEmpty(store.getScopeItude())){
+            Example example = new Example(ModelingVillage.class);
+            example.createCriteria().andIsNotNull(ModelingVillage.LOCATIONX);
+            List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
+            List<String> villageIds = new ArrayList<>();
+            for (ModelingVillage modelingVillage : modelingVillages) {
+                if(GaoDeUtils.isInPolygon(modelingVillage.getLocationx()+","+modelingVillage.getLocationy(),store.getScopeItude())){
+                    villageIds.add(modelingVillage.getId());
+                }
+            }
+            if(villageIds.size()>0){
+                store.setVillages(StringUtils.join(villageIds,","));
+            }else{
+                store.setVillages("");
+            }
+        }
+    }
+
+    /**
+     * 门店利润列表（利润统计）
+     */
+    public ServerResponse getStoreProfitList(HttpServletRequest request,PageDTO pageDTO, String searchKey) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<Store> stores = iStoreMapper.queryStore(null, searchKey);
+        List<Map> storemaps =new ArrayList<>();
+        if(stores.size()<0){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        PageInfo pageResult=new PageInfo(stores);
+        for (Store store : stores) {
+            Double profit = 0d;
+            if(!CommonUtil.isEmpty(store.getVillages())) {
+                List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(store.getVillages(), null, searchKey);
+                if (houseList.size() <= 0) {
+                    continue;
+                }
+                for (DesignDTO houseListDTO : houseList) {
+                    List<HouseProfitSummaryDTO> list = iHouseMapper.getHouseProfitSummary(houseListDTO.getHouseId());
+                    for (HouseProfitSummaryDTO houseProfitSummaryDTO : list) {
+                        if ("0".equals(houseProfitSummaryDTO.getPlus())) {
+                            profit = profit + houseProfitSummaryDTO.getMoney();
+                        }
+                        if ("1".equals(houseProfitSummaryDTO.getPlus())) {
+                            profit = profit - houseProfitSummaryDTO.getMoney();
+                        }
+                    }
+                }
+            }
+            Map map= BeanUtils.beanToMap(store);
+            map.put("profit",profit);
+            storemaps.add(map);
+        }
+        pageResult.setList(storemaps);
+        return ServerResponse.createBySuccess("查询成功",pageResult);
     }
 }

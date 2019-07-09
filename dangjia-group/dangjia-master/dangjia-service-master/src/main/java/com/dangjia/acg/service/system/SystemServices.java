@@ -6,6 +6,7 @@ import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.system.JobRolesVO;
 import com.dangjia.acg.mapper.other.ICityMapper;
@@ -21,12 +22,15 @@ import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.user.Role;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -60,13 +64,76 @@ public class SystemServices {
 //                example.createCriteria().andEqualTo(Department.ID, existUser.getDepartmentId());
             }else {
                 if (CommonUtil.isEmpty(parentId)) {
-                    example.createCriteria().andCondition(" parent_top is null ");
+                    example.createCriteria().andCondition(" (parent_top is null or parent_top ='')  ");
                 } else {
                     example.createCriteria().andEqualTo(Department.PARENT_ID, parentId);
                 }
             }
             List<Department> departments = departmentMapper.selectByExample(example);
             return ServerResponse.createBySuccess("查询成功",departments);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+    //查询组织架构
+    public ServerResponse queryDepartmentAll() {
+        try {
+            Example example=new Example(Department.class);
+            List<Department> departments = departmentMapper.selectByExample(example);
+            List<Map> departmentMap =new ArrayList<>();
+            if(departments.size()>0){
+                for (Department department : departments) {
+                    Map map = BeanUtils.beanToMap(department);
+                    if(CommonUtil.isEmpty(department.getParentId())){
+                        departmentMap.add(map);
+                    }
+                }
+            }
+            departmentMap=getDepartmentLower(departmentMap,departments);
+            return ServerResponse.createBySuccess("查询成功",departmentMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+    public List<Map> getDepartmentLower(List<Map> departmentMap,List<Department> departments) {
+        try {
+            if(departments.size()>0){
+                for (int i = 0; i < departmentMap.size(); i++) {
+                   Map map= departmentMap.get(i);
+                    List<Map> maps =new ArrayList<>();
+                    for (Department department : departments) {
+                        if(map.get(Department.ID).equals(department.getParentId())){
+                            maps.add(BeanUtils.beanToMap(department));
+                        }
+                    }
+                    if(maps.size()>0) {
+                        maps=getDepartmentLower(maps,departments);
+                        map.put("lower", maps);
+                    }
+                }
+            }
+            return departmentMap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    //查询组织架构
+    public ServerResponse queryTopDepartmentAll(String parentId) {
+        try {
+            List list =new ArrayList();
+            Department departments = departmentMapper.selectByPrimaryKey(parentId);
+            if(departments!=null){
+                list.add(departments.getId());
+                while (!CommonUtil.isEmpty(departments.getParentId())){
+                    departments = departmentMapper.selectByPrimaryKey(departments.getParentId());
+                    list.add(departments.getId());
+                }
+            }
+            return ServerResponse.createBySuccess("查询成功",StringUtils.join(list,","));
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -80,9 +147,14 @@ public class SystemServices {
             if (null == existUser) {
                 throw new BaseException(ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN, ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN.getDesc());
             }
+
             if(!CommonUtil.isEmpty(department.getCityId())){
-                City city=cityMapper.selectByPrimaryKey(department.getCityId());
-                department.setCityName(city.getName());
+                String[] cityids=department.getCityId().split(",");
+                for (int i = 0; i < cityids.length; i++) {
+                    City city=cityMapper.selectByPrimaryKey(cityids[i]);
+                    cityids[i]=city.getName();
+                }
+                department.setCityName(StringUtils.join(cityids, ","));
             }
             department.setOperateId(existUser.getId());
             department.setModifyDate(new Date());
@@ -141,6 +213,7 @@ public class SystemServices {
             Example example=new Example(Job.class);
             Example.Criteria criteria= example.createCriteria();
             criteria.andEqualTo(Job.CODE,job.getCode());
+            criteria.andNotEqualTo(Job.ID,job.getId());
             List<Job> jobs = jobMapper.selectByExample(example);
             if (jobs.size()>0) {
                 return ServerResponse.createByErrorMessage("岗位编号不能重复");
@@ -150,6 +223,7 @@ public class SystemServices {
             Example example=new Example(Job.class);
             Example.Criteria criteria= example.createCriteria();
                 criteria.andEqualTo(Job.NAME,job.getName());
+                criteria.andNotEqualTo(Job.ID,job.getId());
             List<Job> jobs = jobMapper.selectByExample(example);
             if (jobs.size()>0) {
                 return ServerResponse.createByErrorMessage("岗位名称不能重复");
@@ -169,7 +243,7 @@ public class SystemServices {
             // 删除之前的角色
             Example example=new Example(JobRole.class);
             example.createCriteria().andEqualTo(JobRole.JOB_ID,job.getId());
-            this.jobMapper.deleteByExample(example);
+            this.jobRoleMapper.deleteByExample(example);
             jobId=job.getId();
         } else {
             // 新增用户

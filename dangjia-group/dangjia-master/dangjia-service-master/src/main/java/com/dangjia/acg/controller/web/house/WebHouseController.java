@@ -1,9 +1,13 @@
 package com.dangjia.acg.controller.web.house;
 
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.web.house.WebHouseAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.service.house.HouseService;
@@ -23,10 +27,18 @@ public class WebHouseController implements WebHouseAPI {
     @Autowired
     private HouseService houseService;
 
+    @Autowired
+    private RedisClient redisClient;//缓存
     @Override
     @ApiMethod
     public ServerResponse getList(HttpServletRequest request, PageDTO pageDTO, Integer visitState, String startDate, String endDate, String searchKey, String orderBy, String memberId) {
-        return houseService.getList(pageDTO, visitState, startDate, endDate, searchKey, orderBy, memberId);
+        String userID = request.getParameter(Constants.USERID);
+
+        String cityKey = redisClient.getCache(Constants.CITY_KEY + userID, String.class);
+        if (CommonUtil.isEmpty(cityKey)) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return houseService.getList(pageDTO,cityKey ,visitState, startDate, endDate, searchKey, orderBy, memberId);
     }
 
     @Override
@@ -67,7 +79,7 @@ public class WebHouseController implements WebHouseAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getHouseProfitList(PageDTO pageDTO, String visitState,  String searchKey){
-        return houseService.getHouseProfitList(pageDTO, visitState, searchKey);
+    public ServerResponse getHouseProfitList( HttpServletRequest request, PageDTO pageDTO,String villageId, String visitState, String searchKey){
+        return houseService.getHouseProfitList(request,pageDTO, villageId, visitState, searchKey);
     }
 }
