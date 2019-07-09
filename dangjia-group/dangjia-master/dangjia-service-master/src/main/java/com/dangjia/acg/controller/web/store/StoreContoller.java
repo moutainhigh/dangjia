@@ -93,4 +93,10 @@ public class StoreContoller implements StoreAPI {
     public ServerResponse getStoreProfitList(HttpServletRequest request,PageDTO pageDTO, String searchKey){
         return storeServices.getStoreProfitList(request,pageDTO,searchKey);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse Callback(String storeSubscribeId, String info) {
+        return storeServices.Callback(storeSubscribeId,info);
+    }
 }

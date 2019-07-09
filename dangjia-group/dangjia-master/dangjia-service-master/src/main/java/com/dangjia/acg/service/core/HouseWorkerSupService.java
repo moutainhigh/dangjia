@@ -151,7 +151,17 @@ public class HouseWorkerSupService {
                         if(start.getTime()>end.getTime()){
                             start=end;
                         }
+                        //查看是否存在相同的结束时间的停工申请，存在则不延后时间
+                        example = new Example(HouseFlowApply.class);
+                        example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, flowId)
+                                .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
+                                .andEqualTo(HouseFlowApply.END_DATE,end);
+                        List<HouseFlowApply> houseFlowLists = houseFlowApplyMapper.selectByExample(example);
+
                         int suspendDay=1+DateUtil.daysofTwo(start, end) ;
+                        if(houseFlowLists.size()>0){
+                            suspendDay=0;
+                        }
                         //如果没有变更则加上开始第一天
                         if(!isBG){
                             suspendDay++;

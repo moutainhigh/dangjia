@@ -44,4 +44,15 @@ public class StoreSubscribe extends BaseEntity {
     @ApiModelProperty("客户电话")
     private String customerPhone;
 
+
+    @Column(name = "info")
+    @Desc(value = "回访记录")
+    @ApiModelProperty("回访记录")
+    private String info;
+
+    @Column(name = "state")
+    @Desc(value = "回访状态")
+    @ApiModelProperty("回访状态")
+    private Integer state;
+
 }

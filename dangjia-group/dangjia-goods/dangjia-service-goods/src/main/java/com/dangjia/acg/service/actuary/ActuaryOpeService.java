@@ -172,11 +172,15 @@ public class ActuaryOpeService {
             budgetItemDTO.setRowImage(address + workerType.getImage());
             budgetItemDTO.setRowName(workerType.getName());
             Double rowPrice = budgetWorkerMapper.getTypeAllPrice(houseId, deleteState, workerTypeId);
+            if (rowPrice <= 0) {
+                continue;
+            }
             budgetItemDTO.setRowPrice(rowPrice);
-
             List<GoodsItemDTO> goodsItemDTOList = new ArrayList<>();
             for (BudgetWorker budgetWorker : budgetWorkerList) {
-                if (!workerTypeId.equals(budgetWorker.getWorkerTypeId())) continue;
+                if (!workerTypeId.equals(budgetWorker.getWorkerTypeId())) {
+                    continue;
+                }
                 GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
                 goodsItemDTO.setGoodsImage(address + budgetWorker.getImage());
                 goodsItemDTO.setGoodsName(budgetWorker.getName());

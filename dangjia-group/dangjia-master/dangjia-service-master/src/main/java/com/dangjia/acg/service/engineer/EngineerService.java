@@ -607,10 +607,6 @@ public class EngineerService {
                 }
                 HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart1(house.getId(), new Date());//查询今日开工记录
                 map.put("todayStartPause", todayStart == null ? "0" : "1"); //0否,1是
-
-                Example example = new Example(HouseFlow.class);
-                example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.SUPERVISOR_START, 1);
-                List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
                 map.put("createDate", house.getConstructionDate());
 
                 Example example1 = new Example(HouseFlowApply.class);
@@ -620,15 +616,11 @@ public class EngineerService {
                 for (HouseFlowApply flowss : houseFlowss) {
                     suspendDay += flowss.getSuspendDay();
                 }
-                Date date;
-                if (house.getVisitState() != 3) {
-                    date = new Date();
-                } else {
-                    date = house.getModifyDate();
-                }
                 int startDay = 0;
-                if (houseFlows.size() != 0) {
-                    startDay = DateUtil.daysofTwo(houseFlows.get(0).getReleaseTime(), date);
+                if (house.getCompletedDate()!=null) {
+                    startDay = DateUtil.daysofTwo(house.getConstructionDate(), house.getCompletedDate());
+                }else{
+                    startDay = DateUtil.daysofTwo(house.getConstructionDate(), new Date());
                 }
                 map.put("startDay", 0);
                 if (suspendDay < startDay) {

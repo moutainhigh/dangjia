@@ -71,6 +71,7 @@ public class StoreServices {
         List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
         return ServerResponse.createBySuccess("查询列表成功", modelingVillages);
     }
+
     /**
      * 创建门店
      * @param store
@@ -102,7 +103,7 @@ public class StoreServices {
     public ServerResponse queryStore(String cityId, String storeName,PageDTO pageDTO) {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Store> stores = iStoreMapper.queryStore(cityId, storeName);
-            if(stores.size()<0){
+            if(stores.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             PageInfo pageResult=new PageInfo(stores);
@@ -158,7 +159,7 @@ public class StoreServices {
     public ServerResponse queryStoreSubscribe(String searchKey, PageDTO pageDTO) {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<StoreSubscribe> storeSubscribes = iStoreSubscribeMapper.queryStoreSubscribe(searchKey);
-            if(storeSubscribes.size()<0){
+            if(storeSubscribes.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             PageInfo pageResult=new PageInfo(storeSubscribes);
@@ -177,6 +178,7 @@ public class StoreServices {
     public ServerResponse storeSubscribe(String storeId, String storeName, String customerName, String customerPhone, Date modifyDate) {
         try {
             StoreSubscribe storeSubscribe=new StoreSubscribe();
+            storeSubscribe.setState(0);
             storeSubscribe.setStoreId(storeId);
             storeSubscribe.setStoreName(storeName);
             storeSubscribe.setCustomerName(customerName);
@@ -208,7 +210,7 @@ public class StoreServices {
     public ServerResponse queryStoreDistance(PageDTO pageDTO,String cityId, String storeName) {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Store> stores = iStoreMapper.queryStoreDistance(cityId, storeName);
-            if(stores.size()<0){
+            if(stores.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             PageInfo pageResult = new PageInfo(stores);
@@ -234,6 +236,24 @@ public class StoreServices {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             return ServerResponse.createBySuccess("查询成功",stores);
+    }
+
+    /**
+     *
+     * @param storeSubscribeId
+     * @param info
+     * @return
+     */
+    public ServerResponse Callback(String storeSubscribeId, String info) {
+        StoreSubscribe storeSubscribe=new StoreSubscribe();
+        storeSubscribe.setId(storeSubscribeId);
+        storeSubscribe.setInfo(info);
+        storeSubscribe.setState(1);
+        if(iStoreSubscribeMapper.updateByPrimaryKeySelective(storeSubscribe)>0) {
+            return ServerResponse.createBySuccessMessage("处理成功");
+        }else{
+            return ServerResponse.createByErrorMessage("处理失败");
+        }
     }
 
     /**

@@ -68,8 +68,6 @@ public class HouseFlowService {
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
-    private RedisClient redisClient;
-    @Autowired
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private IHouseFlowCountDownTimeMapper houseFlowCountDownTimeMapper;
@@ -244,7 +242,6 @@ public class HouseFlowService {
                 houseFlow.setWorkerType(workerType.getType());
                 houseFlow.setHouseId(house.getId());
                 houseFlow.setState(workerType.getState());
-
                 if (!StringUtils.isNoneBlank(house.getCustomSort()))
                     houseFlow.setSort(workerType.getSort());
                 else {
@@ -254,7 +251,6 @@ public class HouseFlowService {
                             LOG.info("makeOfBudget sort:" + sort);
                             return ServerResponse.createByErrorMessage("在自定义排序中，不存在 workerType" + workerType.getType());
                         }
-
                         houseFlow.setSort(sort);
                     } else {
                         houseFlow.setSort(workerType.getSort());

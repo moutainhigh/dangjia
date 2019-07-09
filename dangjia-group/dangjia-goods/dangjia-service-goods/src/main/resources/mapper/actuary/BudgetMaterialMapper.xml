@@ -48,7 +48,6 @@
 			<if test = "workerTypeId!=null and workerTypeId!=''">
 				AND `worker_type_id` = #{workerTypeId}
 			</if>
-			AND `worker_type_id` = #{workerTypeId}
 			AND `house_id` = #{houseId}
 			GROUP BY
 				houseId,
@@ -74,6 +73,7 @@
 					workerTypeId
 			);
 	</select>
+
 	<!--精算分类(支付和未支付)-->
 	<select id="getCategoryAllList" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
 		SELECT

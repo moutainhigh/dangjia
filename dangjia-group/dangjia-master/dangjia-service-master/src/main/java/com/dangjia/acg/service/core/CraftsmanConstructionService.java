@@ -378,7 +378,7 @@ public class CraftsmanConstructionService {
                             "engineeringSchedule?title=工程日历&houseId=" + house.getId() +
                             "&houseFlowId=" + hf.getId() + "&houseName=" + house.getHouseName();
                     buttonList.add(Utils.getButton("装修排期", url, 0));
-                }else{
+                } else {
                     buttonList.add(Utils.getButton("确认开工", 3));
                 }
             }
@@ -396,7 +396,7 @@ public class CraftsmanConstructionService {
                 } else {
                     if (houseFlowApp.getMemberCheck() == 4) {
                         promptList.add("业主要求整改");
-                    }else {
+                    } else {
                         promptList.add("您已提交业主验收申请，请耐心等待业主审核！");
                     }
 
@@ -485,7 +485,7 @@ public class CraftsmanConstructionService {
         if (earliestTime != null) {
             Date EarliestDay = earliestTime.getCreateDate();//最早开工时间
             Date newDate = new Date();
-            totalDay = 1+ DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
+            totalDay = 1 + DateUtil.daysofTwo(EarliestDay, newDate);//计算当前时间隔最早开工时间相差多少天
             if (suspendDay != null) {
                 totalDay = totalDay - suspendDay;
                 if (totalDay <= 0) totalDay = 0;
@@ -718,7 +718,7 @@ public class CraftsmanConstructionService {
             } else if (checkFlowApp.getSupervisorCheck() == 1) {
                 if (checkFlowApp.getMemberCheck() == 4) {
                     promptList.add("业主要求整改");
-                }else {
+                } else {
                     promptList.add("大管家已审核您的整体完工,待业主审核");
                 }
             }
@@ -760,7 +760,7 @@ public class CraftsmanConstructionService {
      * @param workerId 工匠ID
      * @return HouseWorker/ServerResponse
      */
-    private Object getHouseWorker(ConstructionByWorkerIdBean bean, String workerId) {
+    public Object getHouseWorker(ConstructionByWorkerIdBean bean, String workerId) {
         Example example = new Example(HouseWorker.class);
         example.createCriteria()
                 .andEqualTo(HouseWorker.DATA_STATUS, 0)
@@ -788,7 +788,8 @@ public class CraftsmanConstructionService {
                 List<HouseFlowApply> supervisorCheckList = houseFlowApplyMapper.getSupervisorCheckList(houseWorker.getHouseId());//查询所有待大管家审核
                 count += supervisorCheckList.size();
             }
-            bean.setTaskNumber(count);//总任务数量
+            if (bean != null)
+                bean.setTaskNumber(count);//总任务数量
             hw = houseWorkerList.get(0);
             hw.setIsSelect(1);//设置成默认
             houseWorkerMapper.updateByPrimaryKeySelective(hw);
