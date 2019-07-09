@@ -58,6 +58,7 @@ public class HouseWorkerSupService {
     private HouseService houseService;
     @Autowired
     private HouseFlowScheduleService houseFlowScheduleService;
+
     /**
      * 管家审核验收申请h
      * 材料审查
@@ -76,7 +77,7 @@ public class HouseWorkerSupService {
         Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Map<String, Object> map = new HashMap();
+        Map<String, Object> map = new HashMap<>();
         map.put("head", configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + worker.getHead());
         map.put("workName", workerType.getName());
         map.put("name", worker.getName());
@@ -112,65 +113,53 @@ public class HouseWorkerSupService {
             //如果为大管家整体停工， 则功所有工序整体顺延（效果为：对于已完工工序无效果，对于已开工未完工工序相当于请假XX天，对于未开工工序相当于同时推迟开工和阶段完工工序；）
             //5查看装修排期时，计划有工序开始或结束的日期有特殊标记
             //6已经停工的工序，若大管家再操作“整体停工”，不能简单累加两次停工天数，而是比对两次停工的日期，修改停工天数
-            if(worker.getWorkerType()==3){
+            if (worker.getWorkerType() == 3) {
                 String[] houseFlowIds = houseFlowId.split(",");
-                if(houseFlowIds.length>0){
+                if (houseFlowIds.length > 0) {
                     for (String flowId : houseFlowIds) {
                         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(flowId);
-
                         HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(houseFlow.getHouseId(), houseFlow.getWorkerId(), new Date());//查询今日开工记录
                         if (todayStart != null && DateUtil.daysofTwo(new Date(), start) == 0) {
-                            start=DateUtil.addDateDays(start,1);
+                            start = DateUtil.addDateDays(start, 1);
                             //如果结束日期小于开始日期，则表示请假的开始结束日期即是今天，则不记录停工申请
-                            if(start.getTime()>end.getTime()){
+                            if (start.getTime() > end.getTime()) {
                                 continue;//跳过
                             }
                         }
-
                         Example example = new Example(HouseFlowApply.class);
                         example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, flowId)
                                 .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                                .andEqualTo(HouseFlowApply.MEMBER_CHECK,1);
+                                .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1);
                         List<HouseFlowApply> houseFlowList = houseFlowApplyMapper.selectByExample(example);
-//                        for (HouseFlowApply flow : houseFlowList) {
-//                            if(start.getTime()>=flow.getStartDate().getTime() && start.getTime()<=flow.getEndDate().getTime()){
-//                                return ServerResponse.createByErrorMessage("已申请过("+DateUtil.getDateString2(flow.getStartDate().getTime())+"-"+DateUtil.getDateString2(flow.getEndDate().getTime())+")范围内的停工，请更换其他开始时间");
-//                            }
-//                            if(end.getTime()>=flow.getStartDate().getTime() && end.getTime()<=flow.getEndDate().getTime()){
-//                                return ServerResponse.createByErrorMessage("已申请过("+DateUtil.getDateString2(flow.getStartDate().getTime())+"-"+DateUtil.getDateString2(flow.getEndDate().getTime())+")范围内的停工，请更换其他结束时间");
-//                            }
-//                        }
-
-                        Boolean isBG=false;//是否变开始时间，用于不差延续，不包括当前，因为上次的延续包括了当前
+                        boolean isBG = false;//是否变开始时间，用于不差延续，不包括当前，因为上次的延续包括了当前
                         for (HouseFlowApply flow : houseFlowList) {
-                           if(flow.getEndDate().getTime()>start.getTime()){
-                               start=flow.getEndDate();
-                               isBG=true;
-                           }
+                            if (flow.getEndDate().getTime() > start.getTime()) {
+                                start = flow.getEndDate();
+                                isBG = true;
+                            }
                         }
-                        if(start.getTime()>end.getTime()){
-                            start=end;
+                        if (start.getTime() > end.getTime()) {
+                            start = end;
                         }
                         //查看是否存在相同的结束时间的停工申请，存在则不延后时间
                         example = new Example(HouseFlowApply.class);
                         example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, flowId)
                                 .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                                .andEqualTo(HouseFlowApply.END_DATE,end);
+                                .andEqualTo(HouseFlowApply.END_DATE, end);
                         List<HouseFlowApply> houseFlowLists = houseFlowApplyMapper.selectByExample(example);
 
-                        int suspendDay=1+DateUtil.daysofTwo(start, end) ;
-                        if(houseFlowLists.size()>0){
-                            suspendDay=0;
+                        int suspendDay = 1 + DateUtil.daysofTwo(start, end);
+                        if (houseFlowLists.size() > 0) {
+                            suspendDay = 0;
                         }
                         //如果没有变更则加上开始第一天
-                        if(!isBG){
+                        if (!isBG) {
                             suspendDay++;
                         }
-                        if(suspendDay>0) {
+                        if (suspendDay > 0) {
                             //计划顺延
                             houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), suspendDay, null);
                         }
-
                         HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
                         hfa.setHouseFlowId(flowId);//工序id
                         hfa.setWorkerId(houseFlow.getWorkerId());//工人id
@@ -191,8 +180,7 @@ public class HouseWorkerSupService {
                         hfa.setEndDate(end);
                         hfa.setOperator(worker.getId());
                         houseFlowApplyMapper.insert(hfa);
-
-                        if(houseFlow.getWorkSteta()!=1&&houseFlow.getWorkSteta()!=2&&houseFlow.getWorkSteta()!=6) {
+                        if (houseFlow.getWorkSteta() != 1 && houseFlow.getWorkSteta() != 2 && houseFlow.getWorkSteta() != 6) {
                             if (start.getTime() == DateUtil.toDate(DateUtil.getDateString2(new Date().getTime())).getTime()) {
                                 houseFlow.setPause(1);//0:正常；1暂停；
                                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
@@ -202,14 +190,13 @@ public class HouseWorkerSupService {
                     }
                 }
 
-            }else {
+            } else {
                 HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
                 House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());//查询房子
                 Example example = new Example(HouseFlowApply.class);
                 example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
                         .andCondition(" member_check in (1,3) ").andEqualTo(HouseFlowApply.PAY_STATE, 1);
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
-
                 if (houseFlowApplyList.size() > 0) {
                     HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
                     if (houseFlowApply.getEndDate().getTime() > new Date().getTime()) {
@@ -227,14 +214,12 @@ public class HouseWorkerSupService {
                 if (todayStart != null && DateUtil.daysofTwo(new Date(), start) == 0) {
                     return ServerResponse.createByErrorMessage("工序今日已开工，请勿选择今日时间！");
                 }
-
-
                 for (HouseFlowApply flow : houseFlowApplyList) {
-                    if(start.getTime()>=flow.getStartDate().getTime() && start.getTime()<=flow.getEndDate().getTime()){
-                        return ServerResponse.createByErrorMessage("已申请过("+DateUtil.getDateString2(flow.getStartDate().getTime())+"-"+DateUtil.getDateString2(flow.getEndDate().getTime())+")范围内的停工，请更换其他开始时间");
+                    if (start.getTime() >= flow.getStartDate().getTime() && start.getTime() <= flow.getEndDate().getTime()) {
+                        return ServerResponse.createByErrorMessage("已申请过(" + DateUtil.getDateString2(flow.getStartDate().getTime()) + "-" + DateUtil.getDateString2(flow.getEndDate().getTime()) + ")范围内的停工，请更换其他开始时间");
                     }
-                    if(end.getTime()>=flow.getStartDate().getTime() && end.getTime()<=flow.getEndDate().getTime()){
-                        return ServerResponse.createByErrorMessage("已申请过("+DateUtil.getDateString2(flow.getStartDate().getTime())+"-"+DateUtil.getDateString2(flow.getEndDate().getTime())+")范围内的停工，请更换其他结束时间");
+                    if (end.getTime() >= flow.getStartDate().getTime() && end.getTime() <= flow.getEndDate().getTime()) {
+                        return ServerResponse.createByErrorMessage("已申请过(" + DateUtil.getDateString2(flow.getStartDate().getTime()) + "-" + DateUtil.getDateString2(flow.getEndDate().getTime()) + ")范围内的停工，请更换其他结束时间");
 
                     }
                 }
@@ -259,21 +244,12 @@ public class HouseWorkerSupService {
                 hfa.setOperator(worker.getId());
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
-                if(houseFlow.getWorkSteta()!=1&&houseFlow.getWorkSteta()!=2&&houseFlow.getWorkSteta()!=6) {
+                if (houseFlow.getWorkSteta() != 1 && houseFlow.getWorkSteta() != 2 && houseFlow.getWorkSteta() != 6) {
                     houseFlow.setPause(1);//0:正常；1暂停；
                     houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
                 }
                 //计划顺延
                 houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), hfa.getSuspendDay(), null);
-
-//            //大管家停工，不扣除工人积分
-//            if(worker.getWorkerType()>3) {
-//                //工匠申请停工不用审核，申请停工超过2天的，第3天起每天扣除1积分
-//                int score = hfa.getSuspendDay() - 2;
-//                if (score > 0) {
-//                    evaluateService.updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(score), "申请停工超过2天，积分扣除");
-//                }
-//            }
                 configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠申请停工",
                         String.format(DjConstants.PushMessage.STEWARD_CRAFTSMEN_APPLY_FOR_STOPPAGE, house.getHouseName()), "");
             }
@@ -292,15 +268,17 @@ public class HouseWorkerSupService {
         Example example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andCondition(" worker_type>3 and state=0 and work_steta not in (1,2,6) ");
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
-        List listtype=new ArrayList();
+        List<WorkerType> listtype = new ArrayList<>();
         for (HouseFlow flow : houseFlowList) {
-            WorkerType workerType=workerTypeMapper.selectByPrimaryKey(flow.getWorkerTypeId());
-            workerType.setImage(address+workerType.getImage());
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(flow.getWorkerTypeId());
+            if (workerType == null) {
+                continue;
+            }
+            workerType.setImage(address + workerType.getImage());
             workerType.setId(flow.getId());
             listtype.add(workerType);
-
         }
-        return ServerResponse.createBySuccess("ok",listtype);
+        return ServerResponse.createBySuccess("查询成功", listtype);
     }
 
 }
