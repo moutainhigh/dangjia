@@ -11,7 +11,6 @@ import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.house.IWebsiteVisitMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
 import com.dangjia.acg.mapper.matter.IRenovationStageMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -138,7 +137,9 @@ public class HomeModularService {
                         Example example = new Example(HouseFlow.class);
                         example.createCriteria()
                                 .andEqualTo(HouseFlow.WORK_TYPE, 4)
-                                .andNotEqualTo(HouseFlow.WORK_STETA, 2)
+                                .andEqualTo(HouseFlow.WORK_STETA, 3)
+                                .andEqualTo(HouseFlow.WORK_STETA, 4)
+                                .andGreaterThan(HouseFlow.WORKER_TYPE, 3)
                                 .andEqualTo(HouseFlow.HOUSE_ID, house.getId());
                         example.orderBy(HouseFlow.SORT).asc();
                         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
