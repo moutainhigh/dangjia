@@ -110,7 +110,6 @@ public class EvaluateService {
 
     /**
      * 获取积分记录
-     *
      * @param userToken
      * @return
      */
