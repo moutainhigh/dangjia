@@ -58,8 +58,6 @@ public class HomeModularService {
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
-    private IWebsiteVisitMapper websiteVisitMapper;
-    @Autowired
     private CraftsmanConstructionService constructionService;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
