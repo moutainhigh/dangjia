@@ -85,21 +85,15 @@ public class HouseService {
     @Autowired
     private IHouseMapper iHouseMapper;
     @Autowired
-    private GroupInfoService groupInfoService;
-    @Autowired
     private ICityMapper iCityMapper;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
-    private RedisClient redisClient;
-    @Autowired
     private IModelingLayoutMapper modelingLayoutMapper;
     @Autowired
     private IModelingVillageMapper modelingVillageMapper;
-    //    @Autowired
-//    private IHouseDesignImageMapper houseDesignImageMapper;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
@@ -235,11 +229,8 @@ public class HouseService {
                 case 0:
                     map.put("btName", "待确认开工");
                 case 1:
-//                    if ((house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getDesignerOk() != 3)
-//                            || (house.getDesignerOk() == 3 && house.getBudgetOk() != 0 && house.getBudgetOk() != 5)) {
                     map.put("btName", "申请结束装修");
                     map.put("onclick", webAddress + "ownerEnd?title=填写原因&houseId=" + house.getId());
-//                    }
                     break;
                 case 2:
                     map.put("btName", "休眠中");
