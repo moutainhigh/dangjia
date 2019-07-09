@@ -245,8 +245,10 @@ public class HouseWorkerSupService {
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
                 if (houseFlow.getWorkSteta() != 1 && houseFlow.getWorkSteta() != 2 && houseFlow.getWorkSteta() != 6) {
-                    houseFlow.setPause(1);//0:正常；1暂停；
-                    houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
+                    if (start.getTime() == DateUtil.toDate(DateUtil.getDateString2(new Date().getTime())).getTime()) {
+                        houseFlow.setPause(1);//0:正常；1暂停；
+                        houseFlowMapper.updateByPrimaryKeySelective(houseFlow);//发停工申请默认修改施工状态为暂停
+                    }
                 }
                 //计划顺延
                 houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), hfa.getSuspendDay(), null);
