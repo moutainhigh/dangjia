@@ -3,7 +3,7 @@ package com.dangjia.acg.controller.app.other;
 import com.dangjia.acg.api.app.other.CityAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.service.other.CityService;
+import com.dangjia.acg.service.house.ModelingVillageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CityController implements CityAPI {
 
     @Autowired
-    private CityService cityService;
+    private ModelingVillageService modelingVillageService;
 
     /**
      * 所有城市
@@ -25,6 +25,6 @@ public class CityController implements CityAPI {
     @Override
     @ApiMethod
     public ServerResponse getAllCity(){
-        return cityService.getAllCity();
+        return modelingVillageService.getCityList();
     }
 }
