@@ -403,10 +403,15 @@
         h.construction_date as constructionDate,
         h.number as number,
         h.optional_label as optionalLabel,
-        ( CASE WHEN (h.decoration_type = 2 AND h.designer_ok != 3) THEN 1 ELSE 0 END ) AS showUpdata
+        ( CASE WHEN (h.decoration_type = 2 AND h.designer_ok != 3) THEN 1 ELSE 0 END ) AS showUpdata,
+        s.store_name storeName
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
+        LEFT JOIN dj_store s ON FIND_IN_SET(
+        h.village_id,
+        s.villages
+        )
         WHERE
         (h.decoration_type = 2 or (h.decoration_type != 2 and h.designer_ok =3))
         <if test="dataStatus!=null and dataStatus!=''">

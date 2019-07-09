@@ -1166,15 +1166,15 @@ public class PaymentService {
                         switch (house.getStyle()) {
                             case "极简需求":
                                 paymentDTO.setAgreementName("《设计服务须知》");
-                                paymentDTO.setAgreementUrl(webAddress + "paymentAgreement?title=精算服务须知&protocolTpye=4");
+                                paymentDTO.setAgreementUrl(webAddress + "paymentAgreement?title=设计服务须知&protocolTpye=4");
                                 break;
                             case "简单装修":
                                 paymentDTO.setAgreementName("《设计服务须知》");
-                                paymentDTO.setAgreementUrl(webAddress + "paymentAgreement?title=精算服务须知&protocolTpye=5");
+                                paymentDTO.setAgreementUrl(webAddress + "paymentAgreement?title=设计服务须知&protocolTpye=5");
                                 break;
                             case "个性化":
                                 paymentDTO.setAgreementName("《设计服务须知》");
-                                paymentDTO.setAgreementUrl(webAddress + "paymentAgreement?title=精算服务须知&protocolTpye=6");
+                                paymentDTO.setAgreementUrl(webAddress + "paymentAgreement?title=设计服务须知&protocolTpye=6");
                                 break;
                         }
                     }
