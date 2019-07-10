@@ -1,7 +1,5 @@
 package com.dangjia.acg.util;
 
-import org.apache.commons.lang.StringUtils;
-
 public enum DataSourceType {
  
 
@@ -9,6 +7,8 @@ public enum DataSourceType {
 	CS_CHANGSHA("402881882ba8753a012ba93101120116"),
 	// 深圳从表
 	SZ_CHANGSHA("zxs"),
+	// 株洲从表
+	ZZ_CHANGSHA("961188961562724011757"),
 	// 主表
 	DANGJIA("dataSource");
 	private String name;
