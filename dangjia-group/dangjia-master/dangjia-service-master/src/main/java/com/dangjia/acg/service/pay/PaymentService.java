@@ -578,8 +578,8 @@ public class PaymentService {
                 /*处理人工和取消的材料改到自购精算*/
                 budgetCorrect(businessOrderNumber, payState, houseFlowId);
 
-//                /*处理保险订单*/
-//                this.insurance(hwo, payState);
+                /*处理保险订单*/
+                this.insurance(hwo, payState);
             }
             /*记录项目流水工钱+材料钱*/
             //liuShui(businessOrderNumber,house,hwo,paystate);
@@ -619,7 +619,45 @@ public class PaymentService {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
     }
+    /**
+     * 保险订单
+     */
+    private void insurance(HouseWorkerOrder hwo, String payState) {
+        try {
+            WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByNotPay(hwo.getWorkerTypeId(), hwo.getHouseId());
+            if (wtso != null) {
+                wtso.setState(1);  //已支付
+                wtso.setShopDate(new Date());  //设置购买时间
+                workerTypeSafeOrderMapper.updateByPrimaryKeySelective(wtso);
 
+                hwo.setSafePrice(wtso.getPrice());
+                houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);//记录保险费
+
+                House house = houseMapper.selectByPrimaryKey(hwo.getHouseId());
+                WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());
+                if (house.getMoney() == null) {
+                    house.setMoney(new BigDecimal(0));
+                }
+                //记录项目流水 保险
+                HouseAccounts ha = new HouseAccounts();
+                ha.setReason("收入" + wts.getName() + "费用");
+                ha.setMoney(house.getMoney().add(hwo.getSafePrice()));//项目总钱
+                ha.setState(0);//进
+                ha.setPayMoney(hwo.getSafePrice());//本次数额
+                ha.setHouseId(house.getId());
+                ha.setHouseName(house.getHouseName());
+                ha.setMemberId(house.getMemberId());
+                ha.setName("业主支付");
+                ha.setPayment(payState);//统计支付方式
+                houseAccountsMapper.insert(ha);
+                house.setMoney(house.getMoney().add(hwo.getSafePrice()));//累计项目钱
+                houseMapper.updateByPrimaryKeySelective(house);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+    }
     /**
      * 处理待付款提前付生成订单
      */
