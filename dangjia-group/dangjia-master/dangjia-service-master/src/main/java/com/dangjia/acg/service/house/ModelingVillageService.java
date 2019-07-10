@@ -68,10 +68,16 @@ public class ModelingVillageService {
         example.createCriteria()
                 .andEqualTo(City.STATE, "0");
         List<City> cityList = cityMapper.selectByExample(example);
+        List<Map> cityMaps =new ArrayList<>();
+        for (City city : cityList) {
+            Map map =BeanUtils.beanToMap(city);
+            map.put("cityId",city.getId());
+            cityMaps.add(map);
+        }
         if (cityList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        return ServerResponse.createBySuccess("查询列表成功", cityList);
+        return ServerResponse.createBySuccess("查询列表成功", cityMaps);
     }
 
     public ServerResponse getVillageList(HttpServletRequest request, String cityId) {
