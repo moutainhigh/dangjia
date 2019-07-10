@@ -23,9 +23,9 @@ public class BudgetMaterialController implements BudgetMaterialAPI {
 	 */
 	@Autowired
 	private BudgetMaterialService budgetMaterialService;
-	@Autowired
-	private GetForBudgetAPI getForBudgetAPI;
 
+
+	@Override
 	public BigDecimal getHouseBudgetTotalAmount(HttpServletRequest request,String houseId){
 		return budgetMaterialService.getHouseBudgetTotalAmount(houseId);
 	}

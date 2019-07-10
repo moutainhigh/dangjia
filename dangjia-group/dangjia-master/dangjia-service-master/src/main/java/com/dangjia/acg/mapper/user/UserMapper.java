@@ -90,4 +90,6 @@ public interface UserMapper  extends Mapper<MainUser> {
 	int setUserLockNum(@Param("id") String id, @Param("isLock") int isLock);
 
 	MainUser getNameById(@Param("id") String id);
+
+	int insertMemberId(@Param("mobile") String mobile);
 }

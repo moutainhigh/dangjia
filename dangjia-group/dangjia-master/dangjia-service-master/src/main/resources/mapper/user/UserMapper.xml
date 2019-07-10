@@ -19,14 +19,14 @@
 		id, username, mobile, email, password, insert_uid insertUid,
 		create_date createDate,
 		modify_date modifyDate, is_del isDel,
-		is_job isJob,is_receive isReceive, department, department_id departmentId, job_id jobId
+		is_job isJob,is_receive isReceive, department, department_id departmentId, job_id jobId,member_id memberId
 	</sql>
 
     <sql id="a_Column_List">
 		a.id, a.username, a.mobile, a.email, a.password, a.insert_uid insertUid,
 		a.create_date createDate,
 		a.modify_date modifyDate, a.is_del isDel,
-		a.is_job isJob,a.is_receive isReceive, a.department, a.department_id departmentId, a.job_id jobId
+		a.is_job isJob,a.is_receive isReceive, a.department, a.department_id departmentId, a.job_id jobId,a.member_id memberId
 	</sql>
 
     <!--=Start getUsers 分页查询用户列表userSearch -->
@@ -181,4 +181,13 @@
     <!-- <update id="setUserLockNum"> update member set is_lock = #{isLock}, lock_time=NOW()
         where id = #{id,jdbcType=INTEGER} and is_del=0 AND is_job=0 </update> -->
     <!--=Start setUserLockNum 锁定用户 -->
+
+    <!--插入memberId-->
+    <update id="insertMemberId">
+        update dj_user a
+        INNER JOIN dj_member b
+        on a.mobile=b.mobile
+        set a.member_id=b.id
+        where a.mobile=#{mobile}
+    </update>
 </mapper>
