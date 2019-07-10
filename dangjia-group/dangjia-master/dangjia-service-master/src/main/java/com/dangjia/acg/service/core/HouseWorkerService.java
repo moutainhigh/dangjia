@@ -724,14 +724,14 @@ public class HouseWorkerService {
         if (houseFlowApplyList.size() > 0) {
             return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
         }
-        houseFlowApplyList = getLeave(hf);
-        if (houseFlowApplyList.size() > 0) {
-            for (HouseFlowApply hfa : houseFlowApplyList) {
-                hfa.setMemberCheck(2);//不通过不通过
-                hfa.setModifyDate(new Date());
-                houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
-            }
-        }
+//        houseFlowApplyList = getLeave(hf);
+//        if (houseFlowApplyList.size() > 0) {
+//            for (HouseFlowApply hfa : houseFlowApplyList) {
+//                hfa.setMemberCheck(2);//不通过不通过
+//                hfa.setModifyDate(new Date());
+//                houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
+//            }
+//        }
         HouseFlowApply hfa = getHouseFlowApply(hf, 4, null);
         hfa.setPayState(0);//是否付款
         hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经开工了");//描述
