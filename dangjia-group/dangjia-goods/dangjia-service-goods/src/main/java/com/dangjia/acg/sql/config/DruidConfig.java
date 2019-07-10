@@ -89,6 +89,14 @@ public class DruidConfig {
     @Value("${spring.datasource.changsha.password}")
     public   String cspassword;
 
+    //长沙数据源配置
+    @Value("${spring.datasource.zhuzhou.url}")
+    public   String zzdbUrl;
+    @Value("${spring.datasource.zhuzhou.username}")
+    public   String zzusername;
+    @Value("${spring.datasource.zhuzhou.password}")
+    public   String zzpassword;
+
     //深圳数据源配置
     @Value("${spring.datasource.shenzhen.url}")
     public   String szdbUrl;
@@ -114,6 +122,13 @@ public class DruidConfig {
             DataSource csDataSource = getDruidDataSource(csusername, cspassword,csdbUrl);
             if (csDataSource != null) {
                 map.put(DataSourceType.CS_CHANGSHA.getName(), csDataSource);
+            }
+        }
+        //株洲数据源
+        if(!StringUtils.isEmpty(csdbUrl)) {
+            DataSource csDataSource = getDruidDataSource(zzusername, zzpassword,zzdbUrl);
+            if (csDataSource != null) {
+                map.put(DataSourceType.ZZ_CHANGSHA.getName(), csDataSource);
             }
         }
         //深圳数据源
