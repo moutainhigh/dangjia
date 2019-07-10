@@ -100,6 +100,7 @@ public class DruidConfig {
                 map.put(DataSourceType.CS_CHANGSHA.getName(), csDataSource);
             }
         }
+
         //株洲数据源
         String zzdbUrl=dbUrl.replaceAll("changsha","zhuzhou");
         DataSource csDataSource = getDruidDataSource(username, password,zzdbUrl);
