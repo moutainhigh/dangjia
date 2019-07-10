@@ -148,14 +148,15 @@ public class HouseWorkerSupService {
                                 .andEqualTo(HouseFlowApply.END_DATE, end);
                         List<HouseFlowApply> houseFlowLists = houseFlowApplyMapper.selectByExample(example);
 
-                        int suspendDay = 1 + DateUtil.daysofTwo(start, end);
-                        if (houseFlowLists.size() > 0) {
-                            suspendDay = 0;
-                        }
+                        int suspendDay =  DateUtil.daysofTwo(start, end);
                         //如果没有变更则加上开始第一天
                         if (!isBG) {
                             suspendDay++;
                         }
+                        if (houseFlowLists.size() > 0) {
+                            suspendDay = 0;
+                        }
+
                         if (suspendDay > 0) {
                             //计划顺延
                             houseFlowScheduleService.updateFlowSchedule(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), suspendDay, null);
