@@ -742,13 +742,15 @@ public class HouseWorkerService {
         houseService.insertConstructionRecord(hfa);
         //已经停工的工序，若工匠提前复工，则复工日期以及之后的停工全部取消，
         // 原来被停工推后了的计划完工日期往前推，推的天数等于被取消的停工天数
-        Date start = new Date();
+        Date start = DateUtil.toDate(DateUtil.dateToString(new Date(),null));
         Date end = start;
+
         Example example = new Example(HouseFlowApply.class);
         example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, hf.getId())
                 .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
                 .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1)
-                .andCondition(" ('" + DateUtil.getDateString(new Date().getTime()) + "' BETWEEN start_date and end_date)   ");
+//                .andCondition("( start_date >= '" + DateUtil.getDateString2(new Date().getTime()) + "' and end_date <= '" + DateUtil.getDateString2(new Date().getTime()) + "')");
+                .andCondition(" ('" + DateUtil.getDateString2(new Date().getTime()) + "' BETWEEN start_date and end_date)   ");
         List<HouseFlowApply> houseFlowList = houseFlowApplyMapper.selectByExample(example);
         for (HouseFlowApply houseFlowApply : houseFlowList) {
             if (houseFlowApply.getEndDate().getTime() > end.getTime()) {
