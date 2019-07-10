@@ -204,6 +204,11 @@ public class MemberService {
         redisClient.put(userRole, accessToken.getUserToken());
         groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
         groupInfoService.registerJGUsers("gj", new String[]{accessToken.getMemberId()}, new String[1]);
+        MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
+        if(CommonUtil.isEmpty(mainUser.getMemberId())) {
+            //插入MemberId
+            userMapper.insertMemberId(user.getMobile());
+        }
         return ServerResponse.createBySuccess("登录成功，正在跳转", accessToken);
     }
 
