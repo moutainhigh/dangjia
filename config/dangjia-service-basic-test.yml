@@ -1,8 +1,8 @@
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://192.168.0.202:3306/dangjia_master_test?useUnicode=true
-    username: dangjia
+    url: jdbc:mysql://139.159.192.14:3306/dangjia_master_test?useUnicode=true
+    username: qiyuxiang
     password: Fengjiang123!
     driverClassName: com.mysql.jdbc.Driver
     initialSize: 10
@@ -17,13 +17,13 @@ spring:
     testOnBorrow: false
     testOnReturn: false
     poolPreparedStatements: true
-    logAbandoned: true
-    removeAbandoned: true
-    removeAbandonedTimeout: 60
     maxPoolPreparedStatementPerConnectionSize: 20
     filters: stat,wall,log4j
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
-
+    changsha:
+      url: jdbc:mysql://114.116.77.199:3306/dj_changsha?useUnicode=true
+      username: qiyuxiang
+      password: root
 server:
   port: 8005
 

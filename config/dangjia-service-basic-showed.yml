@@ -1,8 +1,8 @@
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://192.168.0.202:3306/dangjia_master_pro?useUnicode=true
-    username: dangjia
+    url: jdbc:mysql://139.159.192.14:3306/dangjia_master_showed?useUnicode=true
+    username: qiyuxiang
     password: Fengjiang123!
     driverClassName: com.mysql.jdbc.Driver
     initialSize: 10
@@ -17,27 +17,27 @@ spring:
     testOnBorrow: false
     testOnReturn: false
     poolPreparedStatements: true
+    logAbandoned: true
+    removeAbandoned: true
+    removeAbandonedTimeout: 60
     maxPoolPreparedStatementPerConnectionSize: 20
     filters: stat,wall,log4j
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+
 server:
-  port: 8010
+  port: 8105
+
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.168.0.229:8888/eureka/   # 指定注册中心的地址
+      defaultZone: http://192.168.0.48:8889/eureka/   # 指定注册中心的地址
   instance:
     preferIpAddress: true
-hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 60000
-hystrix.threadpool.default.coreSize: 2000
+hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 20000
+hystrix.threadpool.default.coreSize: 500
 ribbon:
-  ConnectTimeout: 20000
-  ReadTimeout: 60000
+  ConnectTimeout: 10000
+  ReadTimeout: 20000
   MaxAutoRetriesNextServer: 1
   OkToRetryOnAllOperations: true
-huawei:
-  obs:
-    endPoint: https://obs.cn-south-1.myhuaweicloud.com
-    keyId: KU8IPBQCNKNDOPMVDRDM
-    keySecret: d2T2CFKnjY9FqTkxqqD0wDOTV8h5lQFvf7OhxTIV
-    bucketName: dangjia-tests
+
