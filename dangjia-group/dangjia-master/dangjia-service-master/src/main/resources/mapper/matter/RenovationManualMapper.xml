@@ -60,9 +60,8 @@
     </select>
 
     <select id="getStrategyList" resultType="com.dangjia.acg.dto.matter.RenovationManualDTO">
-
-        <if test="workerTypeIds!=null">
-            <if test="type=0">
+        <if test="workerTypeIds != null">
+            <if test="type == 0">
                 SELECT * from (
                 ( SELECT
                 <include refid="new_columnsDTO"/>
@@ -103,7 +102,7 @@
                 )
                 ) a
             </if>
-            <if test="type=1">
+            <if test="type == 1">
                 SELECT
                 <include refid="new_columnsDTO"/>
                 FROM
@@ -123,7 +122,7 @@
                 num DESC
             </if>
         </if>
-        <if test="workerTypeIds ==null or workerTypeIds ==''">
+        <if test="workerTypeIds == null or workerTypeIds == ''">
             select
             <include refid="new_columnsDTO"/>
             FROM dj_matter_renovation_manual c
