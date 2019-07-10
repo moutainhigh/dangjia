@@ -205,8 +205,8 @@ public class CartService {
             List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
             String[] productIdArr =new String[warehouseList.size()];
             for (int i = 0; i < warehouseList.size(); i++) {
-                productIdArr[i]=warehouseList.get(0).getProductId();
-                warehouseMap.put(warehouseList.get(0).getProductId(),warehouseList.get(0));
+                productIdArr[i]=warehouseList.get(i).getProductId();
+                warehouseMap.put(warehouseList.get(i).getProductId(),warehouseList.get(i));
             }
             if(warehouseList==null||warehouseList.size()==0){
                 return ServerResponse.createBySuccessMessage("查询成功");
