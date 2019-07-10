@@ -193,16 +193,6 @@ public class HouseWorkerSupService {
             } else {
                 HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
                 House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());//查询房子
-                Example example = new Example(HouseFlowApply.class);
-                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                        .andCondition(" member_check in (1,3) ").andEqualTo(HouseFlowApply.PAY_STATE, 1);
-                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
-                if (houseFlowApplyList.size() > 0) {
-                    HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
-                    if (houseFlowApply.getEndDate().getTime() > new Date().getTime()) {
-                        return ServerResponse.createByErrorMessage("工序处于停工期间!");
-                    }
-                }
                 if (houseFlow.getPause() == 1) {
                     return ServerResponse.createByErrorMessage("工序已暂停施工,请勿重复申请");
                 }
@@ -214,6 +204,10 @@ public class HouseWorkerSupService {
                 if (todayStart != null && DateUtil.daysofTwo(new Date(), start) == 0) {
                     return ServerResponse.createByErrorMessage("工序今日已开工，请勿选择今日时间！");
                 }
+                Example example = new Example(HouseFlowApply.class);
+                example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowId).andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
+                        .andCondition(" member_check in (1,3) ").andEqualTo(HouseFlowApply.PAY_STATE, 1);
+                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
                 for (HouseFlowApply flow : houseFlowApplyList) {
                     if (start.getTime() >= flow.getStartDate().getTime() && start.getTime() <= flow.getEndDate().getTime()) {
                         return ServerResponse.createByErrorMessage("已申请过(" + DateUtil.getDateString2(flow.getStartDate().getTime()) + "-" + DateUtil.getDateString2(flow.getEndDate().getTime()) + ")范围内的停工，请更换其他开始时间");
