@@ -16,6 +16,7 @@ import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreSubscribeMapper;
 import com.dangjia.acg.mapper.system.IDepartmentMapper;
 import com.dangjia.acg.modle.house.ModelingVillage;
+import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreSubscribe;
 import com.dangjia.acg.modle.system.Department;
@@ -122,10 +123,13 @@ public class StoreServices {
      */
     public ServerResponse updateStore(Store store) {
         try {
-            Example example = new Example(Store.class);
-            example.createCriteria().andEqualTo(Store.STORE_NAME, store.getStoreName());
-            if (iStoreMapper.selectByExample(example).size() > 0) {
-                return ServerResponse.createByErrorMessage("门店已存在");
+            Store oldStore = iStoreMapper.selectByPrimaryKey(store.getId());
+            if(!oldStore.getStoreName().equals(store.getStoreName())){
+                Example example = new Example(Store.class);
+                example.createCriteria().andEqualTo(Store.STORE_NAME, store.getStoreName());
+                if (iStoreMapper.selectByExample(example).size() > 0) {
+                    return ServerResponse.createByErrorMessage("门店已存在");
+                }
             }
             if(!CommonUtil.isEmpty(store.getDepartmentId())) {
                 Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());

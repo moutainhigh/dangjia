@@ -4,6 +4,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.label.OptionalLabelMapper;
 import com.dangjia.acg.modle.label.OptionalLabel;
+import com.dangjia.acg.modle.store.Store;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -84,10 +85,13 @@ public class OptionalLabelServices {
      */
     public ServerResponse editOptionalLabel(OptionalLabel optionalLabel) {
         try {
-            Example example = new Example(OptionalLabel.class);
-            example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, optionalLabel.getLabelName());
-            if (optionalLabelMapper.selectByExample(example).size() > 0) {
-                return ServerResponse.createByErrorMessage("标签已存在");
+            OptionalLabel oldOptionalLabel = optionalLabelMapper.selectByPrimaryKey(optionalLabel.getId());
+            if(!oldOptionalLabel.getLabelName().equals(optionalLabel.getLabelName())){
+                Example example = new Example(OptionalLabel.class);
+                example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, optionalLabel.getLabelName());
+                if (optionalLabelMapper.selectByExample(example).size() > 0) {
+                    return ServerResponse.createByErrorMessage("标签已存在");
+                }
             }
             optionalLabel.setCreateDate(null);
             optionalLabelMapper.updateByPrimaryKeySelective(optionalLabel);
