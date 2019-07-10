@@ -1,7 +1,7 @@
 package com.dangjia.acg.service.label;
 
-import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.label.OptionalLabelMapper;
 import com.dangjia.acg.modle.label.OptionalLabel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +22,15 @@ public class OptionalLabelServices {
 
     /**
      * 添加标题
+     *
      * @param optionalLabel
      * @return
      */
-    public ServerResponse addOptionalLabel(OptionalLabel optionalLabel){
+    public ServerResponse addOptionalLabel(OptionalLabel optionalLabel) {
         try {
-            Example example=new Example(OptionalLabel.class);
-            example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME,optionalLabel.getLabelName());
-            if(optionalLabelMapper.selectByExample(example).size()>0) {
+            Example example = new Example(OptionalLabel.class);
+            example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, optionalLabel.getLabelName());
+            if (optionalLabelMapper.selectByExample(example).size() > 0) {
                 return ServerResponse.createByErrorMessage("标签已存在");
             }
             optionalLabelMapper.insert(optionalLabel);
@@ -42,27 +43,29 @@ public class OptionalLabelServices {
 
     /**
      * 查询标签
+     *
      * @param id
      * @return
      */
-    public ServerResponse queryOptionalLabel(String id){
-        if(null!=id&&""!=id){
-            return ServerResponse.createBySuccess("查询成功",optionalLabelMapper.selectByPrimaryKey(id));
-        }else{
-            Example example=new Example(OptionalLabel.class);
+    public ServerResponse queryOptionalLabel(String id) {
+        if (!CommonUtil.isEmpty(id)) {
+            return ServerResponse.createBySuccess("查询成功", optionalLabelMapper.selectByPrimaryKey(id));
+        } else {
+            Example example = new Example(OptionalLabel.class);
             example.createCriteria().andCondition(" DATA_STATUS !=0");
-            return ServerResponse.createBySuccess("查询成功",optionalLabelMapper.selectAll());
+            return ServerResponse.createBySuccess("查询成功", optionalLabelMapper.selectAll());
         }
     }
 
     /**
      * 删除标签
+     *
      * @param id
      * @return
      */
-    public ServerResponse delOptionalLabel(String id){
+    public ServerResponse delOptionalLabel(String id) {
         try {
-            OptionalLabel optionalLabel=new OptionalLabel();
+            OptionalLabel optionalLabel = new OptionalLabel();
             optionalLabel.setId(id);
             optionalLabel.setDataStatus(1);
             optionalLabelMapper.updateByPrimaryKeySelective(optionalLabel);
@@ -75,14 +78,15 @@ public class OptionalLabelServices {
 
     /**
      * 编辑标签
+     *
      * @param optionalLabel
      * @return
      */
-    public ServerResponse editOptionalLabel(OptionalLabel optionalLabel){
+    public ServerResponse editOptionalLabel(OptionalLabel optionalLabel) {
         try {
-            Example example=new Example(OptionalLabel.class);
-            example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME,optionalLabel.getLabelName());
-            if(optionalLabelMapper.selectByExample(example).size()>0) {
+            Example example = new Example(OptionalLabel.class);
+            example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, optionalLabel.getLabelName());
+            if (optionalLabelMapper.selectByExample(example).size() > 0) {
                 return ServerResponse.createByErrorMessage("标签已存在");
             }
             optionalLabel.setCreateDate(null);

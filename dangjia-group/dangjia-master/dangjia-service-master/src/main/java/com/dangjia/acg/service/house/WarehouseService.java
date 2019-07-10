@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.house;
 
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.ActuaryOpeAPI;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
@@ -53,9 +52,6 @@ public class WarehouseService {
     private IHouseMapper houseMapper;
     @Autowired
     private IProductChangeMapper productChangeMapper;
-
-    @Autowired
-    private RedisClient redisClient;
     private static Logger LOG = LoggerFactory.getLogger(WarehouseService.class);
 
 
@@ -65,7 +61,6 @@ public class WarehouseService {
      */
     public ServerResponse warehouseList(String userToken, PageDTO pageDTO, String houseId, String categoryId, String name, String type) {
         try {
-
             House house = houseMapper.selectByPrimaryKey(houseId);
             if (house == null) {
                 return ServerResponse.createByErrorMessage("未找到该房产");
@@ -216,9 +211,5 @@ public class WarehouseService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
-    }
-
-    public static void main(String[] args) {
-        System.out.println();
     }
 }
