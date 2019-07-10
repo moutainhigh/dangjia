@@ -1,8 +1,8 @@
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://192.168.0.202:3306/dangjia_master_pro?useUnicode=true
-    username: dangjia
+    url: jdbc:mysql://139.159.192.14:3306/dangjia_master_test?useUnicode=true
+    username: qiyuxiang
     password: Fengjiang123!
     driverClassName: com.mysql.jdbc.Driver
     initialSize: 10

@@ -1,0 +1,24 @@
+spring:
+  data:
+    jmessage:
+      zhuangxiu:
+        appkey: 0989b0db447914c7bcb17a46
+        masterSecret: fb15cefa3f693c0d6a45fe51
+      gongjiang:
+        appkey: 49957e786a91f9c55b223d58
+        masterSecret: 238de1316d08743d12ac4603
+server:
+  port: 8115
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://192.168.0.48:8889/eureka/   # 指定注册中心的地址
+  instance:
+    preferIpAddress: true
+hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 20000
+hystrix.threadpool.default.coreSize: 500
+ribbon:
+  ConnectTimeout: 10000
+  ReadTimeout: 20000
+  MaxAutoRetriesNextServer: 1
+  OkToRetryOnAllOperations: true
