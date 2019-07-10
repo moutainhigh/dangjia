@@ -510,9 +510,11 @@ public class HouseWorkerService {
         }
         houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 4, worker.getId(), new Date());
         if (houseFlowApplyList.size() > 0) {
-            HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
-            if (new Date().getTime() < DateUtil.addDateHours(houseFlowApply.getCreateDate(), 3).getTime()) {
-                return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）开工后3小时才能申请完工！");
+            if(active!=null&&(active.equals("pre"))) {
+                HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
+                if (new Date().getTime() < DateUtil.addDateHours(houseFlowApply.getCreateDate(), 3).getTime()) {
+                    return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）开工后3小时才能申请完工！");
+                }
             }
         } else {
             return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）未开工，无法申请完工！");
