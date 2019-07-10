@@ -194,6 +194,4 @@ public class HomeModularService {
         }
         return stages;
     }
-
-    ;
 }
