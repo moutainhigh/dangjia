@@ -756,8 +756,8 @@ public class HouseWorkerService {
             if (houseFlowApply.getEndDate().getTime() > end.getTime()) {
                 end = houseFlowApply.getEndDate();
                 //更新实际停工天数
-                houseFlowApply.setEndDate(DateUtil.delDateDays(start, 1));
-                if (houseFlowApply.getStartDate().getTime() <= houseFlowApply.getEndDate().getTime()) {
+                houseFlowApply.setEndDate(start);
+                if (houseFlowApply.getStartDate().getTime() >= houseFlowApply.getEndDate().getTime()) {
                     houseFlowApply.setEndDate(houseFlowApply.getStartDate());
                     houseFlowApply.setSuspendDay(0);
                     houseFlowApply.setDataStatus(1);
@@ -765,7 +765,7 @@ public class HouseWorkerService {
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
             }
         }
-        int suspendDay = DateUtil.daysofTwo(start, end);
+        int suspendDay = 1+DateUtil.daysofTwo(start, end);
         if (suspendDay > 0) {
             //计划提前
             houseFlowScheduleService.updateFlowSchedule(hf.getHouseId(), hf.getWorkerTypeId(), null, suspendDay);
