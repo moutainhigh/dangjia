@@ -16,6 +16,6 @@ import java.util.List;
 public interface IRenovationManualMapper extends Mapper<RenovationManual> {
     List<RenovationManual> getRenovationManualByWorkertyId(String workertyid);
 
-    List<RenovationManualDTO> getStrategyList(@Param("workerTypeIds") String[] workerTypeIds);
+    List<RenovationManualDTO> getStrategyList(@Param("workerTypeIds") String[] workerTypeIds,@Param("type") Integer type);
 }
 

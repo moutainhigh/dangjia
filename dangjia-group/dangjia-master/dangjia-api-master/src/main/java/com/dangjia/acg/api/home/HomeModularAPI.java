@@ -46,6 +46,7 @@ public interface HomeModularAPI {
      * @param pageNum   必选 int 页码
      * @param pageSize  必选 int 记录数
      * @param userToken 可选 string userToken
+     * @param type      必选 int 0：首页调用，1：装修页面调用
      * @return {"res": 1000,"msg": {"resultCode": 1000, "resultMsg": "ok", "resultObj": { "pageNum": 0,"pageSize": 10,"size": 1,"startRow": 1,"endRow": 1,"total": 1, "pages": 1,"list": [{返回参数说明}],"prePage": 0, "nextPage": 1,"isFirstPage": false,"isLastPage": false,"hasPreviousPage": false,"hasNextPage": true,"navigatePages": 8,"navigatepageNums": [1],"navigateFirstPage": 1,"navigateLastPage": 1}}}
      * @catalog 当家接口文档/首页模块
      * @title 获取攻略列表
@@ -77,5 +78,6 @@ public interface HomeModularAPI {
     @ApiOperation(value = "获取攻略列表", notes = "获取攻略列表")
     ServerResponse getStrategyList(@RequestParam("request") HttpServletRequest request,
                                    @RequestParam("userToken") String userToken,
-                                   @RequestParam("pageDTO") PageDTO pageDTO);
+                                   @RequestParam("pageDTO") PageDTO pageDTO,
+                                   @RequestParam("type") Integer type);
 }
