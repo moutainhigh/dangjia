@@ -71,7 +71,13 @@ public class ModelingVillageService {
         if (cityList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        return ServerResponse.createBySuccess("查询列表成功", cityList);
+        List<Map> cityMaps =new ArrayList<>();
+        for (City city : cityList) {
+            Map map =BeanUtils.beanToMap(city);
+            map.put("cityId",city.getId());
+            cityMaps.add(map);
+        }
+        return ServerResponse.createBySuccess("查询列表成功", cityMaps);
     }
 
     public ServerResponse getVillageList(HttpServletRequest request, String cityId) {

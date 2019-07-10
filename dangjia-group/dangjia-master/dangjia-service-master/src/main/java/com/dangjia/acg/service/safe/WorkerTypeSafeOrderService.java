@@ -82,7 +82,10 @@ public class WorkerTypeSafeOrderService {
             return (ServerResponse) object;
         }
         Example example = new Example(WorkerTypeSafeOrder.class);
-        example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId).andEqualTo(WorkerTypeSafeOrder.STATE, 1).andIsNotNull(WorkerTypeSafeOrder.FORCE_TIME).andEqualTo(WorkerTypeSafeOrder.DATA_STATUS, 0);
+        example.createCriteria()
+                .andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId)
+                .andIsNotNull(WorkerTypeSafeOrder.FORCE_TIME)
+                .andEqualTo(WorkerTypeSafeOrder.DATA_STATUS, 0);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<WorkerTypeSafeOrder> list = workerTypeSafeOrderMapper.selectByExample(example);
         List<Map> listMap = new ArrayList<>();

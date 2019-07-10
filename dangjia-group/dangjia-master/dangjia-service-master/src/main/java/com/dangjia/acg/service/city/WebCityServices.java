@@ -25,6 +25,11 @@ public class WebCityServices {
     }
 
     public ServerResponse addCity(City city){
+        Example example = new Example(City.class);
+        example.createCriteria().andEqualTo(City.NAME, city.getName());
+        if (cityMapper.selectByExample(example).size() > 0) {
+            return ServerResponse.createByErrorMessage("城市已存在");
+        }
         city.setState("1");
         cityMapper.insert(city);
         return ServerResponse.createBySuccessMessage("创建成功");
@@ -39,6 +44,11 @@ public class WebCityServices {
     }
 
     public ServerResponse updateCity(City city){
+        Example example = new Example(City.class);
+        example.createCriteria().andEqualTo(City.NAME, city.getName());
+        if (cityMapper.selectByExample(example).size() > 0) {
+            return ServerResponse.createByErrorMessage("城市已存在");
+        }
         city.setCreateDate(null);
         cityMapper.updateByPrimaryKeySelective(city);
         return ServerResponse.createBySuccessMessage("修改成功");

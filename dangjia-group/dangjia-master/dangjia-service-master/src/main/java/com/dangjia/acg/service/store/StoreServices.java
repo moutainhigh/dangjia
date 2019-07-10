@@ -79,6 +79,11 @@ public class StoreServices {
      */
     public ServerResponse addStore(Store store) {
         try {
+            Example example = new Example(Store.class);
+            example.createCriteria().andEqualTo(Store.STORE_NAME, store.getStoreName());
+            if (iStoreMapper.selectByExample(example).size() > 0) {
+                return ServerResponse.createByErrorMessage("门店已存在");
+            }
             if(!CommonUtil.isEmpty(store.getDepartmentId())) {
                 Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
                 store.setCityName(department.getCityName());
@@ -117,6 +122,11 @@ public class StoreServices {
      */
     public ServerResponse updateStore(Store store) {
         try {
+            Example example = new Example(Store.class);
+            example.createCriteria().andEqualTo(Store.STORE_NAME, store.getStoreName());
+            if (iStoreMapper.selectByExample(example).size() > 0) {
+                return ServerResponse.createByErrorMessage("门店已存在");
+            }
             if(!CommonUtil.isEmpty(store.getDepartmentId())) {
                 Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
                 store.setCityName(department.getCityName());

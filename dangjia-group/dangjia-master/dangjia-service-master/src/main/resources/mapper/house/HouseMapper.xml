@@ -281,7 +281,7 @@
             and h.build_square &gt;= #{minSquare}
         </if>
         <if test="maxSquare!=null and maxSquare!=''">
-            or h.build_square &lt;= #{maxSquare}
+            and h.build_square &lt;= #{maxSquare}
         </if>
         and site_display=0
         and visit_state=3
