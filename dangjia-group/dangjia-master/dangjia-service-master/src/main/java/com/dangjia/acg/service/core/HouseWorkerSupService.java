@@ -133,7 +133,7 @@ public class HouseWorkerSupService {
                         List<HouseFlowApply> houseFlowList = houseFlowApplyMapper.selectByExample(example);
                         boolean isBG = false;//是否变开始时间，用于不差延续，不包括当前，因为上次的延续包括了当前
                         for (HouseFlowApply flow : houseFlowList) {
-                            if (flow.getEndDate().getTime() > start.getTime()) {
+                            if (flow.getEndDate().getTime() >= start.getTime()) {
                                 start = flow.getEndDate();
                                 isBG = true;
                             }
