@@ -682,19 +682,21 @@ public class HouseWorkerService {
      * 每日开工
      */
     private ServerResponse setStartDaily(Member worker, HouseFlow hf, House house, String latitude, String longitude) {
-        ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
-        if (village != null && village.getLocationx() != null && village.getLocationy() != null
-                && latitude != null && longitude != null) {
-            try {
-                double longitude1 = Double.valueOf(longitude);
-                double latitude1 = Double.valueOf(latitude);
-                double longitude2 = Double.valueOf(village.getLocationx());
-                double latitude2 = Double.valueOf(village.getLocationy());
-                double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
-                if (distance > 1000) {
-                    return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
+        if(active!=null&&(active.equals("pre"))) {
+            ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
+            if (village != null && village.getLocationx() != null && village.getLocationy() != null
+                    && latitude != null && longitude != null) {
+                try {
+                    double longitude1 = Double.valueOf(longitude);
+                    double latitude1 = Double.valueOf(latitude);
+                    double longitude2 = Double.valueOf(village.getLocationx());
+                    double latitude2 = Double.valueOf(village.getLocationy());
+                    double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
+                    if (distance > 1000) {
+                        return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
+                    }
+                } catch (Exception ignored) {
                 }
-            } catch (Exception ignored) {
             }
         }
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
