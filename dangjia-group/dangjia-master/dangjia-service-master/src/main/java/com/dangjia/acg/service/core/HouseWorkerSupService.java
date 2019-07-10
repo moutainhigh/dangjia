@@ -199,7 +199,7 @@ public class HouseWorkerSupService {
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
                 if (houseFlowApplyList.size() > 0) {
                     HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
-                    if (houseFlowApply.getEndDate().getTime() > new Date().getTime()) {
+                    if (houseFlowApply.getStartDate().getTime() < new Date().getTime()&&houseFlowApply.getEndDate().getTime() > new Date().getTime()) {
                         return ServerResponse.createByErrorMessage("工序处于停工期间!");
                     }
                 }
