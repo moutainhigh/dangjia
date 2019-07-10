@@ -49,8 +49,8 @@ public class WorkerTypeSafeOrder extends BaseEntity {
 	private Integer workerType;//workertype
 
 	@Column(name = "state")
-	@Desc(value = "支付状态0未支付1已支付")
-	@ApiModelProperty("支付状态0未支付1已支付")
+	@Desc(value = "支付状态0未支付1已支付2已生效")
+	@ApiModelProperty("支付状态0未支付1已支付2已生效")
 	private Integer state;
 
 	@Column(name = "price")

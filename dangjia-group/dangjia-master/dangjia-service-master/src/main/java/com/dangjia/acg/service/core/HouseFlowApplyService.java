@@ -172,6 +172,7 @@ public class HouseFlowApplyService {
                     int month = (wts.getMonth()); //获取保险时长(月)
                     Calendar cal = Calendar.getInstance();
                     cal.add(Calendar.MONTH, month);
+                    wtso.setState(2);  //已生效
                     wtso.setForceTime(new Date());//设置生效时间
                     wtso.setExpirationDate(cal.getTime()); //设置到期时间
                     workerTypeSafeOrderMapper.updateByPrimaryKeySelective(wtso);
