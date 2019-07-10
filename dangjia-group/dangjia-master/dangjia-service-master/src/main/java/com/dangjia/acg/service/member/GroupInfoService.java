@@ -58,26 +58,20 @@ public class GroupInfoService {
 
     @Autowired
     private ConfigUtil configUtil;
-
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private IGroupMapper groupMapper;
     @Autowired
     private IGroupNotifyInfoMapper groupNotifyInfoMapper;
-
     @Autowired
     private IGroupUserConfigMapper groupUserConfigMapper;
     @Autowired
     private UserMapper userMapper;
     @Autowired
     private IHouseMapper houseMapper;
-
     @Autowired
     private IMemberMapper memberMapper;
-
-    @Autowired
-    private RedisClient redisClient;
     @Autowired
     private GroupAPI groupAPI;
     @Autowired

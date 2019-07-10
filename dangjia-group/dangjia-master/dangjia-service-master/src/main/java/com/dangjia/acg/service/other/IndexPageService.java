@@ -64,8 +64,6 @@ public class IndexPageService {
     @Autowired
     private IModelingVillageMapper modelingVillageMapper;
     @Autowired
-    private DesignDataService designDataService;
-    @Autowired
     private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
 
     /**
