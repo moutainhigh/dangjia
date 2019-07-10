@@ -73,7 +73,17 @@
 					workerTypeId
 			);
 	</select>
-
+	<!--精算阶段总花费统计-->
+	<select id="getHouseBudgetTotalAmount" resultType="java.math.BigDecimal">
+		SELECT
+			SUM(a.totalAmount) totalAmount
+		FROM
+		(
+			( SELECT SUM( total_price ) totalAmount FROM `dj_actuary_budget_material` WHERE delete_state != 1 AND `house_id` = #{houseId})
+				UNION ALL
+			( SELECT SUM( total_price ) totalAmount FROM `dj_actuary_budget_worker` WHERE delete_state != 1 AND `house_id` = #{houseId})
+		) a;
+	</select>
 	<!--精算分类(支付和未支付)-->
 	<select id="getCategoryAllList" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
 		SELECT

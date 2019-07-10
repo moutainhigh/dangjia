@@ -277,15 +277,12 @@
         <if test="cityId!=null and cityId!=''">
             and h.city_id = #{cityId}
         </if>
-        <if test="minSquare!=null and minSquare!=''">
-            and h.build_square &gt;= #{minSquare}
-        </if>
-        <if test="maxSquare!=null and maxSquare!=''">
-            and h.build_square &lt;= #{maxSquare}
-        </if>
         and site_display=0
         and visit_state=3
         ORDER BY
+        <if test="minSquare!=null and minSquare!='' and maxSquare!=null and maxSquare!=''">
+          IF(( h.build_square &gt;= #{minSquare} AND h.build_square &lt;= #{maxSquare}), 0, 1 ) ,
+        </if>
         v.juli ASC
     </select>
     <!--参考报价-->

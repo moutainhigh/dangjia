@@ -77,11 +77,7 @@ public class IndexPageService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<House> houseList = houseMapper.getSameLayoutDistance(cityId, modelingVillage.getLocationx(), modelingVillage.getLocationy(), minSquare, maxSquare,villageId);
             if(houseList.size()<=0){
-                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                houseList=houseMapper.getSameLayoutDistance(cityId, modelingVillage.getLocationx(), modelingVillage.getLocationy(),null,null,villageId);
-                if(houseList.size()<=0){
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-                }
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             PageInfo pageResult = new PageInfo(houseList);
             List<Map> houseMap = new ArrayList<>();
@@ -98,20 +94,8 @@ public class IndexPageService {
                 if (order != null) {
                     totalPrice = totalPrice.add(order.getTotalAmount());
                 }
-                Example example = new Example(HouseFlow.class);
-                example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andGreaterThan(HouseFlow.WORKER_TYPE, 2);
-                example.orderBy(HouseFlow.WORKER_TYPE);
-                List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
-                for (HouseFlow houseFlow : houseFlowList) {
-                    ServerResponse serverResponse = budgetMaterialAPI.getHouseBudgetStageCost(request, house.getId(), houseFlow.getWorkerTypeId());
-                    JSONArray pageInfo = (JSONArray) serverResponse.getResultObj();
-                    if(!CommonUtil.isEmpty(pageInfo)) {
-                        List<BudgetStageCostDTO> budgetStageCostDTOS = pageInfo.toJavaList(BudgetStageCostDTO.class);
-                        for (BudgetStageCostDTO budgetStageCostDTO : budgetStageCostDTOS) {
-                            totalPrice = totalPrice.add(budgetStageCostDTO.getTotalAmount());
-                        }
-                    }
-                }
+                BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getId());
+                totalPrice = totalPrice.add(totalAmount);
                 house.setMoney(totalPrice);
                 Map map = BeanUtils.beanToMap(house);
                 map.put("houseName", house.getHouseName());
@@ -331,20 +315,9 @@ public class IndexPageService {
             if (order != null) {
                 totalPrice = totalPrice.add(order.getTotalAmount());
             }
-            Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andGreaterThan(HouseFlow.WORKER_TYPE, 2);
-            example.orderBy(HouseFlow.WORKER_TYPE);
-            List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
-            for (HouseFlow houseFlow : houseFlowList) {
-                ServerResponse serverResponse = budgetMaterialAPI.getHouseBudgetStageCost(request, house.getId(), houseFlow.getWorkerTypeId());
-                JSONArray pageInfo = (JSONArray) serverResponse.getResultObj();
-                if(!CommonUtil.isEmpty(pageInfo)) {
-                    List<BudgetStageCostDTO> budgetStageCostDTOS = pageInfo.toJavaList(BudgetStageCostDTO.class);
-                    for (BudgetStageCostDTO budgetStageCostDTO : budgetStageCostDTOS) {
-                        totalPrice = totalPrice.add(budgetStageCostDTO.getTotalAmount());
-                    }
-                }
-            }
+
+            BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getId());
+            totalPrice = totalPrice.add(totalAmount);
             house = this.getHouseImage(house);
             house.setMoney(totalPrice);
         }
