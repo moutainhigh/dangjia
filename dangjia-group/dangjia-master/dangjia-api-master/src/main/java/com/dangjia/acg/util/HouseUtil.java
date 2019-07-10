@@ -50,7 +50,7 @@ public class HouseUtil {
                 } else {
                     nodeDTO.setNameB("提前结束装修");
                 }
-                nodeDTO.setRank(5);
+                nodeDTO.setRank(6);
             } else if (houseFlow.getWorkType() == 1) {
                 nodeDTO.setRank(0);
                 nodeDTO.setNameB("未开始");
@@ -61,10 +61,15 @@ public class HouseUtil {
                 nodeDTO.setRank(2);
                 nodeDTO.setNameB("待支付");
             } else if (houseFlow.getSupervisorStart() == 0 && houseFlow.getWorkType() == 4) {
-                nodeDTO.setRank(3);
-                nodeDTO.setNameB("待开工");
+                if(CommonUtil.isEmpty(house.getSchedule())||"0".equals(house.getSchedule())){
+                    nodeDTO.setRank(3);
+                    nodeDTO.setNameB("待排期");
+                }else{
+                    nodeDTO.setRank(4);
+                    nodeDTO.setNameB("待开工");
+                }
             } else if (houseFlow.getSupervisorStart() == 1 && houseFlow.getWorkType() == 4) {
-                nodeDTO.setRank(4);
+                nodeDTO.setRank(5);
                 nodeDTO.setNameB("监工中");
             }
         } else if (workerType.getType() == 4) {//拆除
