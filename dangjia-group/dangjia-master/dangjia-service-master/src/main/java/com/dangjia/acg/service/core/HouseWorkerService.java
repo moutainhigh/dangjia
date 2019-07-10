@@ -737,7 +737,6 @@ public class HouseWorkerService {
         hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经开工了");//描述
         hfa.setMemberCheck(1);//默认业主审核状态通过
         hfa.setSupervisorCheck(1);//默认大管家审核状态通过
-        hf.setPause(0);//0:正常；1暂停；
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
         //已经停工的工序，若工匠提前复工，则复工日期以及之后的停工全部取消，
@@ -749,6 +748,7 @@ public class HouseWorkerService {
         example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, hf.getId())
                 .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
                 .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1)
+                .andEqualTo(HouseFlowApply.DATA_STATUS, 0)
 //                .andCondition("( start_date >= '" + DateUtil.getDateString2(new Date().getTime()) + "' and end_date <= '" + DateUtil.getDateString2(new Date().getTime()) + "')");
                 .andCondition(" ('" + DateUtil.getDateString2(new Date().getTime()) + "' BETWEEN start_date and end_date)   ");
         List<HouseFlowApply> houseFlowList = houseFlowApplyMapper.selectByExample(example);
@@ -770,12 +770,15 @@ public class HouseWorkerService {
             //计划提前
             houseFlowScheduleService.updateFlowSchedule(hf.getHouseId(), hf.getWorkerTypeId(), null, suspendDay);
         }
+        //重新获取最新信息,防止计划时间变更后还原
+        hf=houseFlowMapper.selectByPrimaryKey(hf.getId());
         //若未进场的工序比计划开工日期提早开工，则计划开工日期修改为实际开工日期，（施工天数不变）完工日期随之提早
         if (hf.getStartDate() != null && hf.getStartDate().getTime() > start.getTime()) {
             suspendDay = DateUtil.daysofTwo(start, hf.getStartDate());
             hf.setStartDate(DateUtil.delDateDays(hf.getStartDate(), suspendDay));
             hf.setEndDate(DateUtil.delDateDays(hf.getEndDate(), suspendDay));
         }
+        hf.setPause(0);//0:正常；1暂停；
         houseFlowMapper.updateByPrimaryKeySelective(hf);//发每日开工将暂停状态改为正常
         return ServerResponse.createBySuccessMessage("操作成功");
     }
