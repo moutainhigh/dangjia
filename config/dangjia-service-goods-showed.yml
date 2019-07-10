@@ -28,6 +28,10 @@ spring:
       url: jdbc:mysql://139.159.192.14:3306/dangjia_shenzhen_showed?useUnicode=true
       username: qiyuxiang
       password: Fengjiang123!
+    zhuzhou:
+      url: jdbc:mysql://139.159.192.14:3306/dangjia_zhuzhou_showed?useUnicode=true
+      username: qiyuxiang
+      password: Fengjiang123!
   elasticsearch:
     jest:
       uris: http://172.16.30.95:9200
