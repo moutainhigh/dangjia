@@ -112,6 +112,8 @@
             or a.pay_order_number like CONCAT('%',#{searchKey},'%')
             or a.number like CONCAT('%',#{searchKey},'%'))
         </if>
+
+        GROUP BY a.id
         ORDER BY
         b.create_date DESC
     </select>
