@@ -14,6 +14,7 @@ import com.dangjia.acg.dto.user.PermissionVO;
 import com.dangjia.acg.dto.user.UserDTO;
 import com.dangjia.acg.dto.user.UserSearchDTO;
 import com.dangjia.acg.mapper.system.IDepartmentMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.system.Department;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.member.GroupInfoService;
@@ -25,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -42,6 +44,8 @@ public class MainUserController implements MainUserAPI {
 
     @Autowired
     private GroupInfoService groupInfoService;
+    @Autowired
+    private UserMapper userMapper;
     /****
      * 注入配置
      */
@@ -322,9 +326,9 @@ public class MainUserController implements MainUserAPI {
         if(department==null){
             return ServerResponse.createByErrorMessage("登录用户暂未分配所属部门，请您联系管理员");
         }
-        if(CommonUtil.isEmpty(cityId)||department.getCityId().indexOf(cityId)==-1){
-            return ServerResponse.createByErrorMessage("登录用户只能在("+department.getCityName()+")下登录，请选择正确的城市");
-        }
+//        if(CommonUtil.isEmpty(cityId)||department.getCityId().indexOf(cityId)==-1){
+//            return ServerResponse.createByErrorMessage("登录用户只能在("+department.getCityName()+")下登录，请选择正确的城市");
+//        }
         // 用户登录
         try {
             logger.debug("用户登录，用户验证开始！member=" + user.getMobile());
@@ -333,6 +337,11 @@ public class MainUserController implements MainUserAPI {
             groupInfoService.registerJGUsers("gj", new String[]{existUser.getId()}, new String[1]);
             logger.info("用户登录，用户验证通过！member=" + user.getMobile());
             msg = ServerResponse.createBySuccess("用户登录，用户验证通过！member=" + user.getMobile(), existUser.getId());
+            MainUser mainUser = userMapper.selectByPrimaryKey(existUser.getId());
+            if(CommonUtil.isEmpty(mainUser.getMemberId())) {
+                //插入MemberId
+                userMapper.insertMemberId(user.getMobile());
+            }
         } catch (Exception e) {
             logger.error("用户登录，用户验证未通过：操作异常，异常信息如下！member=" + user.getMobile(), e);
             msg = ServerResponse.createByErrorMessage("用户登录失败，请您稍后再试");

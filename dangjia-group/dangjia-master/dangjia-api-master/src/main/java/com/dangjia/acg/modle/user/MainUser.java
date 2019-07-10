@@ -74,4 +74,9 @@ public class MainUser extends BaseEntity {
 	@ApiModelProperty("部门ID")
 	private String departmentId;
 
+	@Column(name = "member_id")
+	@Desc(value = "当家用户ID")
+	@ApiModelProperty("当家用户ID")
+	private String memberId;
+
 }
