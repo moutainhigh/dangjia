@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 
 /**
    * @类 名： BudgetMaterialController.java
@@ -24,6 +25,10 @@ public class BudgetMaterialController implements BudgetMaterialAPI {
 	private BudgetMaterialService budgetMaterialService;
 	@Autowired
 	private GetForBudgetAPI getForBudgetAPI;
+
+	public BigDecimal getHouseBudgetTotalAmount(HttpServletRequest request,String houseId){
+		return budgetMaterialService.getHouseBudgetTotalAmount(houseId);
+	}
 	/**
 	 * 精算阶段花费统计
 	 * @return
