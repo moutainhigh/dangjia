@@ -205,7 +205,7 @@ public class MemberService {
         groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
         groupInfoService.registerJGUsers("gj", new String[]{accessToken.getMemberId()}, new String[1]);
         MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
-        if(CommonUtil.isEmpty(mainUser.getMemberId())) {
+        if(mainUser!=null&&CommonUtil.isEmpty(mainUser.getMemberId())) {
             //插入MemberId
             userMapper.insertMemberId(user.getMobile());
         }

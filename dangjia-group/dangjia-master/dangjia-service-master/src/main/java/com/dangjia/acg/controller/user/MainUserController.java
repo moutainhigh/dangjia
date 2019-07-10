@@ -337,7 +337,7 @@ public class MainUserController implements MainUserAPI {
             logger.info("用户登录，用户验证通过！member=" + user.getMobile());
             msg = ServerResponse.createBySuccess("用户登录，用户验证通过！member=" + user.getMobile(), existUser.getId());
             MainUser mainUser = userMapper.selectByPrimaryKey(existUser.getId());
-            if(CommonUtil.isEmpty(mainUser.getMemberId())) {
+            if(mainUser!=null&&CommonUtil.isEmpty(mainUser.getMemberId())) {
                 //插入MemberId
                 userMapper.insertMemberId(user.getMobile());
             }
