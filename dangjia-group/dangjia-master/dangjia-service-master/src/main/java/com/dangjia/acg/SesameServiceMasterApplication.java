@@ -32,12 +32,7 @@ public class SesameServiceMasterApplication implements CommandLineRunner {
   public static void main(String[] args) {
     SpringApplication.run(SesameServiceMasterApplication.class, args);
   }
-//  @Bean
-//  MultipartConfigElement multipartConfigElement() {
-//    MultipartConfigFactory factory = new MultipartConfigFactory();
-//    factory.setLocation("d:/dangjia/temporary/");
-//    return factory.createMultipartConfig();
-//  }
+
   @Override
   public void run(String... args) throws Exception {
     String log="0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n" +
