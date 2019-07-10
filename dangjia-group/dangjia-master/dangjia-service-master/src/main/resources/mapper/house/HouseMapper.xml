@@ -145,6 +145,7 @@
             OR member.mobile like CONCAT('%',#{searchKey},'%')
             )
         </if>
+        GROUP BY house.id
         ORDER BY house.create_date DESC
     </select>
 
@@ -442,6 +443,8 @@
             ) LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
+
+        GROUP BY h.id
         ORDER by h.create_date desc
 
     </select>

@@ -28,6 +28,10 @@ spring:
       url: jdbc:mysql://172.16.30.95:3306/dj_shenzhen?useUnicode=true
       username: root
       password: root
+    zhuzhou:
+      url: jdbc:mysql://172.16.30.95:3306/dj_zhuzhou?useUnicode=true
+      username: root
+      password: root
   elasticsearch:
     jest:
       uris: http://172.16.30.95:9200
