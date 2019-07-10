@@ -766,6 +766,13 @@ public class HouseWorkerService {
             }
         }
         int suspendDay = 1+DateUtil.daysofTwo(start, end);
+        System.out.println("==================================================================" +
+                "=============================" +
+                "========================" +
+                "============================================" +
+                "=====================================" +
+                "================================" +
+                "=========================="+suspendDay);
         if (suspendDay > 0) {
             //计划提前
             houseFlowScheduleService.updateFlowSchedule(hf.getHouseId(), hf.getWorkerTypeId(), null, suspendDay);
