@@ -24,8 +24,7 @@ public class HomeModularController implements HomeModularAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getStrategyList(HttpServletRequest request, String userToken, PageDTO pageDTO) {
-        return homeModularService.getStrategyList(userToken, pageDTO);
-
+    public ServerResponse getStrategyList(HttpServletRequest request, String userToken, PageDTO pageDTO, Integer type) {
+        return homeModularService.getStrategyList(userToken, pageDTO, type);
     }
 }

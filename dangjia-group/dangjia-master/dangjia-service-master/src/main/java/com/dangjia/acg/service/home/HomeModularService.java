@@ -120,7 +120,27 @@ public class HomeModularService {
         return ServerResponse.createBySuccess("查询成功", listMap);
     }
 
-    public ServerResponse getStrategyList(String userToken, PageDTO pageDTO) {
+    public ServerResponse getStrategyList(String userToken, PageDTO pageDTO, Integer type) {
+        List<String> workerTypeIds = getVorkerTypeIds(userToken);
+        if (type == null) {
+            type = 0;
+        }
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<RenovationManualDTO> rmList = renovationManualMapper.getStrategyList(workerTypeIds.size() <= 0 ? null
+                : workerTypeIds.toArray(new String[workerTypeIds.size()]), type);
+        if (rmList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        PageInfo pageResult = new PageInfo(rmList);
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        for (RenovationManualDTO renovationManual : rmList) {
+            renovationManual.setImageUrl(CommonUtil.isEmpty(renovationManual.getImage()) ? null : (imageAddress + renovationManual.getImage()));
+        }
+        pageResult.setList(rmList);
+        return ServerResponse.createBySuccess("获取所有装修指南成功", pageResult);
+    }
+
+    private List<String> getVorkerTypeIds(String userToken) {
         List<String> workerTypeIds = new ArrayList<>();
         if (!CommonUtil.isEmpty(userToken)) {
             Object object = constructionService.getMember(userToken);
@@ -131,10 +151,10 @@ public class HomeModularService {
                     House house = (House) object;
                     if (house.getDesignerOk() != 3) {//设计阶段
                         workerTypeIds.add("1");
-                        workerTypeIds=setWorkerTypeIds(workerTypeIds);
+                        workerTypeIds = setWorkerTypeIds(workerTypeIds);
                     } else if (house.getBudgetOk() != 3) {//精算阶段
                         workerTypeIds.add("2");
-                        workerTypeIds=setWorkerTypeIds(workerTypeIds);
+                        workerTypeIds = setWorkerTypeIds(workerTypeIds);
                     } else {
                         if (house.getVisitState() == 1) {//施工阶段
                             Example example = new Example(HouseFlow.class);
@@ -151,39 +171,27 @@ public class HomeModularService {
                                     workerTypeIds.add(houseFlow.getWorkerTypeId());
                                 }
                             }
-                            workerTypeIds=setWorkerTypeIds(workerTypeIds);
+                            workerTypeIds = setWorkerTypeIds(workerTypeIds);
                         }
                     }
                 }
             }
         }
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<RenovationManualDTO> rmList = renovationManualMapper.getStrategyList(workerTypeIds.size() <= 0 ? null
-                : workerTypeIds.toArray(new String[workerTypeIds.size()]));
-        if (rmList.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-        }
-        PageInfo pageResult = new PageInfo(rmList);
-        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-        for (RenovationManualDTO renovationManual : rmList) {
-            renovationManual.setImageUrl(CommonUtil.isEmpty(renovationManual.getImage()) ? null : (imageAddress + renovationManual.getImage()));
-        }
-        pageResult.setList(rmList);
-        return ServerResponse.createBySuccess("获取所有装修指南成功", pageResult);
+        return workerTypeIds;
     }
 
     private List<String> setWorkerTypeIds(List<String> workerTypeIds) {
-        List<String> stages=new ArrayList<>();
+        List<String> stages = new ArrayList<>();
         Example example = new Example(RenovationStage.class);
         example.createCriteria()
                 .andIn(RenovationStage.WORKER_TYPE_ID, workerTypeIds)
                 .andEqualTo(RenovationStage.DATA_STATUS, 0);
         List<RenovationStage> rmList = renovationStageMapper.selectByExample(example);
         if (rmList.size() > 0) {
-            for (int i = 0; i < rmList.size(); i++) {
-                stages.add(rmList.get(i).getId());
+            for (RenovationStage aRmList : rmList) {
+                stages.add(aRmList.getId());
             }
         }
         return stages;
-    };
+    }
 }
