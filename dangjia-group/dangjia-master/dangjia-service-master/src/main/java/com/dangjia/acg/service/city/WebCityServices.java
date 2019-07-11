@@ -37,10 +37,10 @@ public class WebCityServices {
     }
 
     public ServerResponse delCity(String cityId){
-        City city=new City();
-        city.setId(cityId);
-        city.setDataStatus(1);
-        cityMapper.updateByPrimaryKeySelective(city);
+//        City city=new City();
+//        city.setId(cityId);
+//        city.setDataStatus(1);
+        cityMapper.deleteByPrimaryKey(cityId);
         return ServerResponse.createBySuccessMessage("删除成功");
     }
 

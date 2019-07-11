@@ -156,10 +156,7 @@ public class StoreServices {
      */
     public ServerResponse delStore(String id) {
         try {
-            Store store=new Store();
-            store.setId(id);
-            store.setDataStatus(1);
-            iStoreMapper.updateByPrimaryKeySelective(store);
+            iStoreMapper.deleteByPrimaryKey(id);
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             e.printStackTrace();

@@ -67,10 +67,7 @@ public class OptionalLabelServices {
      */
     public ServerResponse delOptionalLabel(String id) {
         try {
-            OptionalLabel optionalLabel = new OptionalLabel();
-            optionalLabel.setId(id);
-            optionalLabel.setDataStatus(1);
-            optionalLabelMapper.updateByPrimaryKeySelective(optionalLabel);
+            optionalLabelMapper.deleteByPrimaryKey(id);
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
