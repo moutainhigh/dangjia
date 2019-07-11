@@ -56,6 +56,6 @@ public interface ServerPortAPI {
 
     @PostMapping("serverPort/updateBudgetMaterial")
     void updateBudgetMaterial(@RequestParam("cityId") String cityId,
-                              @RequestParam("budgetMaterial") BudgetMaterial budgetMaterial);
+                              @RequestParam("json") String json);
 
 }

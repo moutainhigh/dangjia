@@ -57,7 +57,7 @@ public class ServerPortController implements ServerPortAPI {
     }
 
     @Override
-    public void updateBudgetMaterial(String cityId, BudgetMaterial budgetMaterial) {
-        technologyService.updateBudgetMaterial(budgetMaterial);
+    public void updateBudgetMaterial(String cityId, String json) {
+        technologyService.updateBudgetMaterial(json);
     }
 }

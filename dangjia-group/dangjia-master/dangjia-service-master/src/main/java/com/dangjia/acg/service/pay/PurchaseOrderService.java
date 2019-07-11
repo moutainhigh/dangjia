@@ -14,6 +14,7 @@ import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.pay.PurchaseOrder;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -174,7 +175,7 @@ public class PurchaseOrderService {
             if (product != null) {
                 budgetMaterial.setModifyDate(new Date());
                 budgetMaterial.setDeleteState(1);//找不到商品标记删除
-                serverPortAPI.updateBudgetMaterial(house.getCityId(), budgetMaterial);
+                serverPortAPI.updateBudgetMaterial(house.getCityId(), new Gson().toJson(budgetMaterial));
             } else {
                 //重新记录支付时精算价格
                 budgetMaterial.setPrice(product.getPrice());
@@ -182,7 +183,7 @@ public class PurchaseOrderService {
                 budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * product.getPrice());//已支付 记录总价
                 budgetMaterial.setDeleteState(3);//已支付
                 budgetMaterial.setModifyDate(new Date());
-                serverPortAPI.updateBudgetMaterial(house.getCityId(), budgetMaterial);
+                serverPortAPI.updateBudgetMaterial(house.getCityId(), new Gson().toJson(budgetMaterial));
                 budgetMaterialList.add(budgetMaterial);
             }
         }
