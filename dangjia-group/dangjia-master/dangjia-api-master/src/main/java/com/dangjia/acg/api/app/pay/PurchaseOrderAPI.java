@@ -1,18 +1,14 @@
-package com.dangjia.acg.api.actuary;
+package com.dangjia.acg.api.app.pay;
 
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-import java.util.Map;
-
 @Api(description = "购买单")
-@FeignClient("dangjia-service-goods")
+@FeignClient("dangjia-service-master")
 public interface PurchaseOrderAPI {
     /**
      * showdoc
@@ -23,7 +19,7 @@ public interface PurchaseOrderAPI {
      * @title 获取未购买的商品
      * @description 获取未购买的商品
      * @method POST
-     * @url goods/purchaseOrder/getBudgetMaterialList
+     * @url master/purchaseOrder/getBudgetMaterialList
      * @return_param price Double 总价
      * @return_param purchaseOrderId string purchaseOrderId
      * @return_param datas List 商品
@@ -62,7 +58,7 @@ public interface PurchaseOrderAPI {
      * @title 添加选中未购买的商品
      * @description 添加选中未购买的商品
      * @method POST
-     * @url goods/purchaseOrder/setPurchaseOrder
+     * @url master/purchaseOrder/setPurchaseOrder
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 2
      * @Author: Ruking 18075121944
@@ -71,12 +67,4 @@ public interface PurchaseOrderAPI {
     @PostMapping("purchaseOrder/setPurchaseOrder")
     @ApiOperation(value = "添加选中未购买的商品", notes = "添加选中未购买的商品")
     ServerResponse setPurchaseOrder(@RequestParam("houseId") String houseId, @RequestParam("budgetIds") String budgetIds);
-
-    @PostMapping("purchaseOrder/getPurchaseOrder")
-    @ApiOperation(value = "查询选中的", notes = "查询选中的")
-    Map<String,Object> getPurchaseOrder(@RequestParam("purchaseOrderId") String purchaseOrderId);
-
-    @PostMapping("purchaseOrder/payPurchaseOrder")
-    @ApiOperation(value = "支付成功后回调", notes = "支付成功后回调")
-    List<BudgetMaterial> payPurchaseOrder(@RequestParam("purchaseOrderId") String purchaseOrderId);
 }
