@@ -205,7 +205,7 @@ public class StoreServices {
                 temp_para.put("address",store.getStoreAddress());
                 temp_para.put("phone",store.getReservationNumber());
                 //给预约客户发送短信
-                JsmsUtil.sendSMS(customerPhone, "166800", temp_para);
+                JsmsUtil.sendSMS(customerPhone, "167166", temp_para);
             }
             return ServerResponse.createBySuccessMessage("预约成功");
         } catch (Exception e) {
