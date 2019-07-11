@@ -1,4 +1,4 @@
-package com.dangjia.acg.modle.actuary;
+package com.dangjia.acg.modle.pay;
 
 import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;

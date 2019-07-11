@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetMaterialAPI;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
-import com.dangjia.acg.api.actuary.PurchaseOrderAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
@@ -39,7 +38,6 @@ import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
-import com.dangjia.acg.modle.actuary.PurchaseOrder;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
@@ -52,6 +50,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
+import com.dangjia.acg.modle.pay.PurchaseOrder;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -161,7 +160,7 @@ public class PaymentService {
     @Autowired
     private CraftsmanConstructionService constructionService;
     @Autowired
-    private PurchaseOrderAPI purchaseOrderAPI;
+    private PurchaseOrderService purchaseOrderService;
 
     /**
      * 服务器回调
@@ -696,7 +695,7 @@ public class PaymentService {
     private void awaitPayPurchaseOrder(BusinessOrder businessOrder, String payState) {
         try {
             House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
-            List<BudgetMaterial> budgetMaterialList = purchaseOrderAPI.payPurchaseOrder(businessOrder.getTaskId());
+            List<BudgetMaterial> budgetMaterialList = purchaseOrderService.payPurchaseOrder(businessOrder.getTaskId());
             if (budgetMaterialList.size() > 0) {
                 HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
                 houseExpend.setMaterialMoney(houseExpend.getMaterialMoney() + businessOrder.getTotalPrice().doubleValue());//材料钱
@@ -995,12 +994,11 @@ public class PaymentService {
                 actuaryDTO.setType(6);
                 actuaryDTOList.add(actuaryDTO);
             } else if (type == 8) {//未购买过来的
-                Map<String, Object> datas = purchaseOrderAPI.getPurchaseOrder(houseDistributionId);
+                Map<String, Object> datas = purchaseOrderService.getPurchaseOrder(houseDistributionId);
                 if (datas == null) {
                     return ServerResponse.createByErrorMessage("订单记录不存在");
                 }
-                JSONObject job = (JSONObject) datas.get("purchaseOrder");
-                PurchaseOrder purchaseOrder = job.toJavaObject(PurchaseOrder.class);
+                PurchaseOrder purchaseOrder = (PurchaseOrder) datas.get("purchaseOrder");
                 List<FlowActuaryDTO> flowActuaryDTOList = (List<FlowActuaryDTO>) datas.get("list");
                 House house = houseMapper.selectByPrimaryKey(purchaseOrder.getHouseId());
                 Example example = new Example(BusinessOrder.class);

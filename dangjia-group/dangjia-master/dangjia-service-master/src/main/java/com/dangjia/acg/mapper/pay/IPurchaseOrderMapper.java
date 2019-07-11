@@ -1,6 +1,6 @@
-package com.dangjia.acg.mapper.actuary;
+package com.dangjia.acg.mapper.pay;
 
-import com.dangjia.acg.modle.actuary.PurchaseOrder;
+import com.dangjia.acg.modle.pay.PurchaseOrder;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 

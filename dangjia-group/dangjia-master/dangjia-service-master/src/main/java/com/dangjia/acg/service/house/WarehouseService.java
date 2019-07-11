@@ -121,12 +121,12 @@ public class WarehouseService {
             if (house == null) {
                 return ServerResponse.createByErrorMessage("未找到该房产");
             }
-            String cityId = request.getParameter(Constants.CITY_ID);
+            request.setAttribute(Constants.CITY_ID,house.getCityId());
             Map<String, Map> maps = new HashMap<>();
             Map map = new HashMap();
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             if (!CommonUtil.isEmpty(type) && "2".equals(type)) {
-                List<BudgetItemDTO> budgetItemDTOS = actuaryOpeAPI.getHouseWorkerInfo(cityId, "3", houseId, address);
+                List<BudgetItemDTO> budgetItemDTOS = actuaryOpeAPI.getHouseWorkerInfo(house.getCityId(), "3", houseId, address);
                 map.put("goodsItemDTOList", budgetItemDTOS);
             } else {
                 Example example = new Example(Warehouse.class);
@@ -180,7 +180,7 @@ public class WarehouseService {
                         warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                         warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
                         warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
-                        warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(cityId, warehouse.getProductId()));
+                        warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
                         // type为空时查询 是否更换
                         if (CommonUtil.isEmpty(type)) {
                             if (productChangeMapper.queryProductChangeExist(warehouse.getHouseId(), warehouse.getProductId(), "0") > 0) {
@@ -200,7 +200,7 @@ public class WarehouseService {
                 }
                 map.put("goodsItemDTOList", budgetItemDTOList);
             }
-            Double workerPrice = actuaryOpeAPI.getHouseWorkerPrice(cityId, "3", houseId);
+            Double workerPrice = actuaryOpeAPI.getHouseWorkerPrice(house.getCityId(), "3", houseId);
             Double caiPrice = warehouseMapper.getHouseGoodsPrice(houseId, name);
             Double totalPrice = workerPrice + caiPrice;
             map.put("workerPrice", workerPrice);

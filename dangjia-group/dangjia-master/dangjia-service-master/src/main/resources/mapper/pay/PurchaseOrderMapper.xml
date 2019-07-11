@@ -2,5 +2,5 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dangjia.acg.mapper.actuary.IPurchaseOrderMapper">
+<mapper namespace="com.dangjia.acg.mapper.pay.IPurchaseOrderMapper">
 </mapper>

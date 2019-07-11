@@ -110,6 +110,7 @@ public class MemberService {
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
         String mobile = "";
         request.setAttribute("isShow", "true");
+        String cityId = request.getParameter(Constants.CITY_ID);
         switch (idType) {
             case "1":
                 House house = houseMapper.selectByPrimaryKey(id);
@@ -119,7 +120,7 @@ public class MemberService {
                 }
                 break;
             case "3":
-                Supplier supplier = supplierProductAPI.getSupplier(id);
+                Supplier supplier = supplierProductAPI.getSupplier(cityId,id);
                 if (supplier != null) {
                     mobile = supplier.getTelephone();
                 }

@@ -396,7 +396,7 @@ public class ActuaryOperationService {
             }
             List<AttributeDTO> attrList = getAllAttributes(product, productList, imageList);
             goodsDTO.setAttrList(attrList);
-            if(imageList.size()>0) {
+            if (imageList.size() > 0) {
                 String img = StringUtils.join(imageList, ",");
                 imageList.remove(0);
                 imageList.add(0, img);
@@ -588,8 +588,8 @@ public class ActuaryOperationService {
     }
 
     //拼接属性品牌
-    String getAttributes(String productId) {
-        String  attributes = iBrandSeriesMapper.getAttributesName(productId);
+    public String getAttributes(String productId) {
+        String attributes = iBrandSeriesMapper.getAttributesName(productId);
         if (CommonUtil.isEmpty(attributes)) {
             return "";
         }

@@ -27,25 +27,25 @@ public class SupplierProductController implements SupplierProductAPI {
     @Autowired
     private SupplierProductService supplierProductService;
 
-    public Supplier getSupplier(String productId) {
+    public Supplier getSupplier(String cityId, String productId) {
         return supplierService.getSupplier(productId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse byTelephone(String telephone) {
+    public ServerResponse byTelephone(String cityId,String telephone) {
         return supplierService.byTelephone(telephone);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse supplierList(HttpServletRequest request, String productId) {
+    public ServerResponse supplierList(String cityId, String productId) {
         return supplierProductService.supplierList(productId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse insertSupplier(HttpServletRequest request, String name, String address,
+    public ServerResponse insertSupplier(String cityId, String name, String address,
                                          String telephone, String checkPeople, Integer gender,
                                          String email, String notice, Integer supplierLevel, Integer state) {
 
@@ -55,7 +55,7 @@ public class SupplierProductController implements SupplierProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse updateSupplier(HttpServletRequest request, String id, String name, String address,
+    public ServerResponse updateSupplier(String cityId, String id, String name, String address,
                                          String telephone, String checkPeople, Integer gender,
                                          String email, String notice, Integer supplierLevel, Integer state) {
         return supplierService.updateSupplier(id, name, address, telephone, checkPeople, gender,
@@ -64,26 +64,26 @@ public class SupplierProductController implements SupplierProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> querySupplierListLikeByName(HttpServletRequest request, PageDTO pageDTO, String name) {
+    public ServerResponse<PageInfo> querySupplierListLikeByName(String cityId, PageDTO pageDTO, String name) {
         return supplierService.querySupplierListLikeByName(pageDTO, name);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse querySupplierProduct(HttpServletRequest request, int type, String supplierId,
+    public ServerResponse querySupplierProduct(String cityId, int type, String supplierId,
                                                String likeProductName, PageDTO pageDTO) {
         return supplierService.querySupplierProduct(type, supplierId, likeProductName, pageDTO);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse saveSupplierProduct(String arrString) {
+    public ServerResponse saveSupplierProduct(String cityId,String arrString) {
         return supplierService.saveSupplierProduct(arrString);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse querySupplierProductByPid(PageDTO pageDTO, String productId) {
+    public ServerResponse querySupplierProductByPid(String cityId,PageDTO pageDTO, String productId) {
         return supplierProductService.querySupplierProductByPid(pageDTO, productId);
     }
 }

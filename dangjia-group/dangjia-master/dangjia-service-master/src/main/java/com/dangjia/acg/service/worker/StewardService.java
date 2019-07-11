@@ -207,7 +207,8 @@ public class StewardService {
         try {
             List<WorkerDisclosure> wdList = workerDisclosureMapper.getWorkerDisclosureList(houseFlowId);
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
-            JSONArray jsonArray = budgetWorkerAPI.getTecByHouseFlowId(hf.getHouseId(), hf.getId());
+            House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
+            JSONArray jsonArray = budgetWorkerAPI.getTecByHouseFlowId(house.getCityId(),hf.getHouseId(), hf.getId());
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject object = jsonArray.getJSONObject(i);
                 String technologyName = object.getString("technologyName");
