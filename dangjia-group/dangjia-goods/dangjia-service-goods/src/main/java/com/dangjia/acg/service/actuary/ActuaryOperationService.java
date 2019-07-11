@@ -160,6 +160,7 @@ public class ActuaryOperationService {
                             srcBudgetMaterial.setProductId(targetProduct.getId());
                             srcBudgetMaterial.setProductSn(targetProduct.getProductSn());
                             srcBudgetMaterial.setProductName(targetProduct.getName());
+                            srcBudgetMaterial.setImage(targetProduct.getImage());
                             srcBudgetMaterial.setPrice(targetProduct.getPrice());
                             srcBudgetMaterial.setGoodsGroupId(targetGroupId);
                             GoodsGroup goodsGroup = iGoodsGroupMapper.selectByPrimaryKey(targetGroupId);
@@ -174,6 +175,12 @@ public class ActuaryOperationService {
                             }
                             srcBudgetMaterial.setConvertCount(converCount);
                             srcBudgetMaterial.setTotalPrice(targetProduct.getPrice() * srcBudgetMaterial.getConvertCount());
+
+                            srcBudgetMaterial.setCategoryId(targetProduct.getCategoryId());
+                            srcBudgetMaterial.setImage(targetProduct.getImage());
+                            srcBudgetMaterial.setUnitName(convertUnit.getName());
+                            Goods goods = goodsMapper.queryById( targetProduct.getGoodsId());
+                            srcBudgetMaterial.setProductType(goods.getType());//0：材料；1：服务
                             budgetMaterialMapper.updateByPrimaryKey(srcBudgetMaterial);
                             count++;
                         }
@@ -195,6 +202,12 @@ public class ActuaryOperationService {
                 }
                 budgetMaterial.setConvertCount(converCount);
                 budgetMaterial.setTotalPrice(product.getPrice() * budgetMaterial.getConvertCount());
+
+                budgetMaterial.setCategoryId(product.getCategoryId());
+                budgetMaterial.setImage(product.getImage());
+                budgetMaterial.setUnitName(convertUnit.getName());
+                Goods goods = goodsMapper.queryById( product.getGoodsId());
+                budgetMaterial.setProductType(goods.getType());//0：材料；1：服务
                 budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
                 return ServerResponse.createBySuccessMessage("操作成功" + ret);
             }
