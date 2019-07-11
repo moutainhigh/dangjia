@@ -3,7 +3,6 @@ package com.dangjia.acg.service.design;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -70,8 +69,6 @@ public class DesignerOperationService {
     private IHouseWorkerOrderMapper houseWorkerOrderMapper;
     @Autowired
     private IWorkDepositMapper workDepositMapper;
-    @Autowired
-    private RedisClient redisClient;//缓存
     @Autowired
     private IQuantityRoomMapper quantityRoomMapper;
     @Autowired
