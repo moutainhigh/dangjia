@@ -446,13 +446,18 @@ public class ComplainService {
                         if (response.isSuccess()) {
                             SplitDeliverDTO json = (SplitDeliverDTO) response.getResultObj();
                             List<SplitDeliverItemDTO> list_Map = json.getSplitDeliverItemDTOList();
+                            double applyMoney=0d;
                             for (SplitDeliverItemDTO tmp : list_Map) {
                                 OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(tmp.getId());
                                 if (orderSplitItem.getReceive() == null || (orderSplitItem.getNum() > orderSplitItem.getReceive())) {
                                     orderSplitItem.setReceive(orderSplitItem.getNum());
                                     orderSplitItemMapper.updateByPrimaryKey(orderSplitItem);
                                 }
+                                applyMoney+=orderSplitItem.getSupCost()*orderSplitItem.getReceive();
                             }
+                            SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(complain.getBusinessId());
+                            splitDeliver.setApplyMoney(applyMoney);
+                            splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
                         } else {
                             return response;
                         }

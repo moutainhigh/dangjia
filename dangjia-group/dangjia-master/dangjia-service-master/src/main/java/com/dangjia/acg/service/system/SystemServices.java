@@ -90,7 +90,7 @@ public class SystemServices {
             if(departments.size()>0){
                 for (Department department : departments) {
                     if(!CommonUtil.isEmpty(parentId)){
-                        if(department.getId().equals(parentId)||department.getParentTop().equals(parentId)){
+                        if(department.getId().equals(parentId)||(!CommonUtil.isEmpty(department.getParentTop())&&department.getParentTop().equals(parentId))){
                             Map map = BeanUtils.beanToMap(department);
                             if(CommonUtil.isEmpty(department.getParentId())){
                                 departmentMap.add(map);
