@@ -17,7 +17,7 @@ public interface UserMapper  extends Mapper<MainUser> {
 	 * 分页查询用户数据
 	 * @return
 	 */
-	List<UserRoleDTO> getUsers(@Param("userSearch") UserSearchDTO userSearch);
+	List<UserRoleDTO> getUsers(@Param("userSearch") UserSearchDTO userSearch,@Param("isJob") Integer isJob);
 
 	/**
 	 * 删除用户
@@ -90,4 +90,6 @@ public interface UserMapper  extends Mapper<MainUser> {
 	int setUserLockNum(@Param("id") String id, @Param("isLock") int isLock);
 
 	MainUser getNameById(@Param("id") String id);
+
+	int insertMemberId(@Param("mobile") String mobile);
 }

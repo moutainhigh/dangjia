@@ -15,7 +15,6 @@ import com.dangjia.acg.dto.deliver.DeliverHouseDTO;
 import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverDetailDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
-import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
@@ -23,7 +22,6 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
-import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
@@ -75,11 +73,6 @@ public class OrderSplitService {
     @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired
-    private IWorkerTypeMapper workerTypeMapper;
-    @Autowired
-    private IWorkerDetailMapper workerDetailMapper;
-
-    @Autowired
     private IMendOrderMapper mendOrderMapper;
     @Autowired
     private IComplainMapper complainMapper;
@@ -94,18 +87,14 @@ public class OrderSplitService {
      */
     public ServerResponse setSplitDeliver(SplitDeliver splitDeliver) {
         try {
-
             if (!StringUtils.isNoneBlank(splitDeliver.getId()))
                 return ServerResponse.createByErrorMessage("id 不能为null");
-
             SplitDeliver srcSplitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliver.getId());
             if (srcSplitDeliver == null)
                 return ServerResponse.createByErrorMessage("无供应商结算单");
-
             //配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收）
             if (!(srcSplitDeliver.getShippingState() == 2 || srcSplitDeliver.getShippingState() == 4 || srcSplitDeliver.getShippingState() == 6))
                 return ServerResponse.createByErrorMessage("当前为未收货状态，不能申请结算");
-
             Example example = new Example(Complain.class);
             example.createCriteria()
                     .andEqualTo(Complain.COMPLAIN_TYPE, 4)
@@ -419,6 +408,33 @@ public class OrderSplitService {
         }
     }
 
+    /**
+     * 发货单打回
+     */
+    public ServerResponse cancelSplitDeliver(String splitDeliverId) {
+        try {
+            //将发货单设置为撤回状态
+            SplitDeliver splitDeliver=splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+            if (splitDeliver.getShippingState()==6) {
+                Example example = new Example(OrderSplitItem.class);
+                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());
+                List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+                for (OrderSplitItem orderSplitItem : orderSplitItemList) {
+                    Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), splitDeliver.getHouseId());
+                    if (warehouse != null) {
+                        warehouse.setAskCount(warehouse.getAskCount() - orderSplitItem.getNum());
+                        warehouseMapper.updateByPrimaryKeySelective(warehouse);
+                    }
+                }
+                splitDeliver.setShippingState(3);//取消发货单
+                splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
+            }
+            return ServerResponse.createBySuccessMessage("打回成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("打回成功");
+        }
+    }
 
     /**
      * 要货单看明细

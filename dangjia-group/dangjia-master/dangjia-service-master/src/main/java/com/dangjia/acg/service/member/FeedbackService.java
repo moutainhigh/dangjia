@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.member;
 
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
@@ -13,9 +12,9 @@ import com.dangjia.acg.mapper.member.IFeedbackMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.group.Group;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Feedback;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -41,7 +40,7 @@ public class FeedbackService {
     @Autowired
     private IFeedbackMapper iFeedbackMapper;
     @Autowired
-    private RedisClient redisClient;
+    private CraftsmanConstructionService constructionService;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
 
@@ -85,10 +84,11 @@ public class FeedbackService {
     public ServerResponse addFeedback(HttpServletRequest request, Feedback customer) {
         String userToken = request.getParameter(Constants.USER_TOKEY);
         if (userToken != null) {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (accessToken != null && accessToken.getMember() != null) {
-                customer.setMemberId(accessToken.getMemberId());
-                customer.setMobile(accessToken.getMember().getMobile());
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof Member) {
+                Member operator = (Member) object;
+                customer.setMemberId(operator.getId());
+                customer.setMobile(operator.getMobile());
             }
         }
         customer.setState(0);

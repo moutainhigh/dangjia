@@ -19,7 +19,8 @@ public class HouseListDTO {
     private String houseName;
     private String customSort;
     private String name;
-    private String budgetOk;
+    private Integer budgetOk;
+    private Integer designerOk;
     private String houseId;
     private String cityName;
     private String address;
@@ -49,7 +50,9 @@ public class HouseListDTO {
     private String operatorName;// 操作人名字
     private String operatorMobile;// 操作人电话
     private Integer showUpdata;//是否显示上传图片按钮，0否，1是
+    private String optionalLabel;//选配标签
 
+    private String storeName;// 归属分店
 
     public String getHouseName() {
         return (TextUtils.isEmpty(getResidential()) ? "*" : getResidential())

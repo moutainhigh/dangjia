@@ -68,14 +68,4 @@ public interface UnitAPI {
     ServerResponse getUnitById(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("unitId") String unitId);
 
-    /**
-     * 根据ID删除商品单位
-     *
-     * @param unitId
-     * @return
-     */
-    @PostMapping("/basics/unit/deleteById")
-    @ApiOperation(value = "根据ID删除商品单位", notes = "根据ID删除商品单位")
-    ServerResponse deleteById(@RequestParam("request") HttpServletRequest request,
-                              @RequestParam("unitId") String unitId);
 }

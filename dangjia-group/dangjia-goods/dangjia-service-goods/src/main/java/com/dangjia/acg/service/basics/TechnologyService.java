@@ -8,19 +8,26 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.ISearchBoxMapper;
-import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.basics.IProductMapper;
+import com.dangjia.acg.mapper.basics.ITechnologyMapper;
+import com.dangjia.acg.mapper.basics.IUnitMapper;
+import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
+import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.SearchBox;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.service.actuary.ActuaryOperationService;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -35,7 +42,12 @@ import java.util.*;
  */
 @Service
 public class TechnologyService {
-
+    @Autowired
+    private IBudgetMaterialMapper budgetMaterialMapper;
+    @Autowired
+    private IProductMapper productMapper;
+    @Autowired
+    private ActuaryOperationService actuaryOperationService;
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
     @Autowired
@@ -44,17 +56,12 @@ public class TechnologyService {
     private IProductMapper iProductMapper;
     @Autowired
     private IUnitMapper iUnitMapper;
-
-    @Autowired
-    private IGoodsMapper iGoodsMapper;
     @Autowired
     private WorkerTypeAPI workerTypeAPI;
     @Autowired
     private ISearchBoxMapper searchBoxMapper;
     @Autowired
     private ConfigUtil configUtil;
-
-    private static Logger LOG = LoggerFactory.getLogger(TechnologyService.class);
 
 
     /**
@@ -68,41 +75,32 @@ public class TechnologyService {
      */
     public String insertTechnologyList(String jsonStr, String workerTypeId, Integer materialOrWorker, String goodsId) {
         try {
-//            LOG.info("insertTechnologyList jsonStr:" + jsonStr + "  workerTypeId:" + workerTypeId + " goodsId:" + goodsId);
             if (!StringUtils.isNotBlank(jsonStr))
                 return "1";
-//                return "jsonStr不能为空";
             JSONArray technologyArr = JSONArray.parseArray(jsonStr);
             for (int i = 0; i < technologyArr.size(); i++) {//遍历工艺
                 JSONObject obj = technologyArr.getJSONObject(i);
                 String id = obj.getString("id");//
                 String name = obj.getString("name");//
-
                 for (int j = i + 1; j < technologyArr.size(); j++) {//不能重复
                     JSONObject objJ = technologyArr.getJSONObject(j);
                     String nameJ = objJ.getString("name");//
                     if (nameJ.equals(name))
                         return "工艺名称不能有重复的";
                 }
-
-//                List<Technology> technologyList = iTechnologyMapper.query(workerTypeId, name, materialOrWorker);
                 List<Technology> technologyList = iTechnologyMapper.getByName(workerTypeId, name, materialOrWorker, goodsId);
-                if (!StringUtils.isNotBlank(id))//为空 ： 就是新增
-                {
+                if (!StringUtils.isNotBlank(id)) {//为空 ： 就是新增
                     if (technologyList.size() > 0)
                         return "工艺名称已经存在";
                 } else { //修改
                     Technology technology = iTechnologyMapper.selectByPrimaryKey(id);
-                    if (!technology.getName().equals(name))//是修改了名字 ，
-                    {
+                    if (!technology.getName().equals(name)) {//是修改了名字 ，
                         if (technologyList.size() > 0)
                             return "工艺名称已经存在";
                     }
                 }
             }
-
-            for (int j = 0; j < technologyArr.size(); j++) //遍历工艺
-            {
+            for (int j = 0; j < technologyArr.size(); j++) {//遍历工艺
                 JSONObject obj = technologyArr.getJSONObject(j);
                 String id = obj.getString("id");//
                 String name = obj.getString("name");//
@@ -110,16 +108,13 @@ public class TechnologyService {
                 Integer type = obj.getInteger("type");//
                 String image = obj.getString("image");//
                 String sampleImage = obj.getString("sampleImage");//
-
                 Technology t = new Technology();
                 t.setName(name);
                 t.setContent(content);
                 t.setGoodsId(goodsId);//根据 materialOrWorker字段决定：  0:服务productId;  1:人工商品
                 t.setImage(image);
                 t.setSampleImage(sampleImage);
-
                 t.setType(type);
-
                 //0服务工艺;1:人工工艺
                 if (materialOrWorker == 1) { //1人工工艺
                     t.setWorkerTypeId(workerTypeId);
@@ -129,11 +124,8 @@ public class TechnologyService {
 //                    t.setType(1);
                     t.setMaterialOrWorker(0);
                 }
-
-                if (!StringUtils.isNotBlank(id))//为空 ： 就是新增
-                {
+                if (!StringUtils.isNotBlank(id)) {//为空 ： 就是新增
                     iTechnologyMapper.insertSelective(t);
-                    LOG.info("新增成功" + t.getId() + " name:" + t.getName());
                 } else { //修改
                     Technology technology = iTechnologyMapper.selectByPrimaryKey(id);
                     technology.setName(t.getName());
@@ -141,13 +133,11 @@ public class TechnologyService {
                     technology.setGoodsId(t.getGoodsId());
                     technology.setImage(t.getImage());
                     technology.setSampleImage(t.getSampleImage());
-
                     technology.setWorkerTypeId(t.getWorkerTypeId());
                     technology.setType(t.getType());
                     technology.setMaterialOrWorker(t.getMaterialOrWorker());
                     technology.setModifyDate(new Date());
                     iTechnologyMapper.updateByPrimaryKeySelective(technology);
-                    LOG.info("修改成功" + t.getId() + " name:" + t.getName());
                 }
             }
             return "1";
@@ -166,7 +156,6 @@ public class TechnologyService {
             if (technologyList.size() > 0) {
                 return ServerResponse.createByErrorMessage("工艺名称不能重复");
             }
-
             Technology t = new Technology();
             t.setName(name);
             t.setCreateDate(new Date());
@@ -194,20 +183,15 @@ public class TechnologyService {
         try {
             if (!StringUtils.isNotBlank(name))
                 return ServerResponse.createByErrorMessage("名称不能为空");
-
             Technology t = iTechnologyMapper.selectByPrimaryKey(id);
             if (t == null) {
                 return ServerResponse.createByErrorMessage("不存在此工艺,修改失败");
             }
-
-            if (!t.getName().equals(name))//如果修改了名称 就判断，修改的名字 是否已经存在
-            {
+            if (!t.getName().equals(name)) {//如果修改了名称 就判断，修改的名字 是否已经存在
                 List<Technology> technologyList = iTechnologyMapper.query(t.getWorkerTypeId(), name, t.getMaterialOrWorker());
                 if (technologyList.size() > 0)
                     return ServerResponse.createByErrorMessage("工艺名称已存在");
             }
-
-//            t.setId(id);//id 不能修改
             t.setName(name);
             t.setModifyDate(new Date());
             t.setContent(content);
@@ -231,13 +215,11 @@ public class TechnologyService {
     //删除工艺说明
     public ServerResponse deleteTechnology(String id) {
         try {
-            Technology technology = iTechnologyMapper.selectByPrimaryKey(id);
-
-            iTechnologyMapper.deleteById(id);
-            return ServerResponse.createBySuccessMessage("删除成功");
+            iTechnologyMapper.deleteByPrimaryKey(id);
+            return ServerResponse.createBySuccessMessage("删除工艺说明成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("删除失败");
+            return ServerResponse.createByErrorMessage("删除工艺说明失败");
         }
     }
 
@@ -266,15 +248,7 @@ public class TechnologyService {
                 StringBuilder imgUrlStr = new StringBuilder();
                 if (t.getImage() != null) {
                     String[] imgArr = t.getImage().split(",");
-                    for (int i = 0; i < imgArr.length; i++) {
-                        if (i == imgArr.length - 1) {
-                            imgStr.append(address).append(imgArr[i]);
-                            imgUrlStr.append(imgArr[i]);
-                        } else {
-                            imgStr.append(address).append(imgArr[i]).append(",");
-                            imgUrlStr.append(imgArr[i]).append(",");
-                        }
-                    }
+                    StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                 }
                 map.put("image", imgStr.toString());
                 map.put("imageUrl", imgUrlStr.toString());
@@ -286,27 +260,6 @@ public class TechnologyService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
-        }
-    }
-
-    //新增人工商品关联工艺
-    public ServerResponse insertWokerTechnology(String workerGoodsId, String tIdArr) {
-        try {
-//            JSONArray arr = JSONArray.parseArray(JSON.toJSONString(tIdArr));
-//            for (int i = 0; i < arr.size(); i++) {
-//                JSONObject obj = arr.getJSONObject(i);
-//                WorkerTechnology wt = new WorkerTechnology();
-//                wt.setWorkerGoodsId(workerGoodsId);
-//                wt.setTechnologyId(obj.getString("technologyId"));
-//                wt.setCreateDate(new Date());
-//                wt.setModifyDate(new Date());
-//                iTechnologyMapper.insertWokerTechnology(wt);
-//            }
-//            return ServerResponse.createBySuccessMessage("新增成功");
-            return ServerResponse.createBySuccessMessage("接口弃用");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("新增失败");
         }
     }
 
@@ -327,15 +280,7 @@ public class TechnologyService {
                 StringBuilder imgUrlStr = new StringBuilder();
                 if (t.getImage() != null) {
                     String[] imgArr = t.getImage().split(",");
-                    for (int i = 0; i < imgArr.length; i++) {
-                        if (i == imgArr.length - 1) {
-                            imgStr.append(address).append(imgArr[i]);
-                            imgUrlStr.append(imgArr[i]);
-                        } else {
-                            imgStr.append(address).append(imgArr[i]).append(",");
-                            imgUrlStr.append(imgArr[i]).append(",");
-                        }
-                    }
+                    StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                 }
                 map.put("image", imgStr.toString());
                 map.put("imageUrl", imgUrlStr.toString());
@@ -372,10 +317,10 @@ public class TechnologyService {
             if (type == 0 || type == 1) {
                 //根据内容模糊搜索商品
                 example = new Example(Goods.class);
-                example.createCriteria().andLike(Goods.NAME, "%"+name+"%").andEqualTo(Goods.DATA_STATUS,"0");
+                example.createCriteria().andLike(Goods.NAME, "%" + name + "%").andEqualTo(Goods.DATA_STATUS, "0");
                 example.orderBy(Goods.CREATE_DATE).desc();
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<Product> pList =iProductMapper.serchBoxName(name);
+                List<Product> pList = iProductMapper.serchBoxName(name);
                 pageResult = new PageInfo<>(pList);
                 for (Product product : pList) {
                     String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
@@ -423,4 +368,36 @@ public class TechnologyService {
         }
     }
 
+
+    public List<BudgetMaterial> getBudgetMaterialList(String houseId) {
+        Example example = new Example(BudgetMaterial.class);
+        example.createCriteria()
+                .andEqualTo(BudgetMaterial.HOUSE_ID, houseId)
+                .andEqualTo(BudgetMaterial.DELETE_STATE, 2);
+        return budgetMaterialMapper.selectByExample(example);
+    }
+
+    public Product getProduct(String productId) {
+        return productMapper.selectByPrimaryKey(productId);
+    }
+
+    public String getAttributes(String productId) {
+        return actuaryOperationService.getAttributes(productId);
+    }
+
+    public List<BudgetMaterial> getInIdsBudgetMaterialList(String budgetIds) {
+        if (budgetIds == null) {
+            budgetIds = "";
+        }
+        String[] ids = budgetIds.split(",");
+        Example example = new Example(BudgetMaterial.class);
+        example.createCriteria().andIn(BudgetMaterial.ID, Arrays.asList(ids));
+        return budgetMaterialMapper.selectByExample(example);
+    }
+
+    public void updateBudgetMaterial(String json) {
+        BudgetMaterial budgetMaterial = new Gson().fromJson(json, new TypeToken<BudgetMaterial>() {
+        }.getType());
+        budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
+    }
 }

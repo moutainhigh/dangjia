@@ -34,4 +34,11 @@ public interface HouseWorkerSupAPI {
     @ApiOperation(value = "工匠申请停工", notes = "工匠申请停工")
     ServerResponse applyShutdown(@RequestParam("userToken")String userToken, @RequestParam("houseFlowId")String houseFlowId, @RequestParam("applyDec")String applyDec,
                                  @RequestParam("startDate")String startDate, @RequestParam("endDate")String endDate);
+
+    /**
+     * 管家停工选择影响顺延的工序列表
+     */
+    @PostMapping("app/core/houseWorkerSup/getShutdownWorkerType")
+    @ApiOperation(value = "管家停工选择影响顺延的工序列表", notes = "管家停工选择影响顺延的工序列表")
+     ServerResponse getShutdownWorkerType(String houseId);
 }

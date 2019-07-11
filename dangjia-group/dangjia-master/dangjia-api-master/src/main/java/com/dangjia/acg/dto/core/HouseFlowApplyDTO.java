@@ -29,8 +29,6 @@ public class HouseFlowApplyDTO {
     private String mobileB;//大管家手机
     private String date;
     private List<Map> list;
-
-
     private Long startDate;
     private Long endDate; //自动审核时间
 

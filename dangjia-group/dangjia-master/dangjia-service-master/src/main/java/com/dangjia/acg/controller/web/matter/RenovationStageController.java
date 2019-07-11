@@ -7,57 +7,35 @@ import com.dangjia.acg.service.matter.RenovationStageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Date: 2018/11/5 0005
- * Time: 15:40
- */
+import javax.servlet.http.HttpServletRequest;
+
 @RestController
 public class RenovationStageController implements WebRenovationStageAPI {
 
     @Autowired
     private RenovationStageService renovationStageService;
 
-    /**
-     *查询所有装修指南阶段配置
-     * @return
-     */
     @Override
     @ApiMethod
-    public ServerResponse queryRenovationStage(){
+    public ServerResponse queryRenovationStage(HttpServletRequest request) {
         return renovationStageService.queryRenovationStage();
     }
 
-     /**
-     *新增装修指南阶段配置
-     * @param name
-     * @return
-     */
     @Override
     @ApiMethod
-    public ServerResponse addRenovationStage(String name,  String image){
-        return renovationStageService.addRenovationStage(name,image);
+    public ServerResponse addRenovationStage(HttpServletRequest request, String name, String image, String workerTypeId) {
+        return renovationStageService.addRenovationStage(name, image, workerTypeId);
     }
 
-    /**
-     * 修改装修指南阶段配置
-     * @param id
-     * @param name
-     * @return
-     */
     @Override
     @ApiMethod
-    public ServerResponse updateRenovationStage(String id,String name,  String image){
-        return renovationStageService.updateRenovationStage(id,name,image);
+    public ServerResponse updateRenovationStage(HttpServletRequest request, String id, String name, String image, String workerTypeId) {
+        return renovationStageService.updateRenovationStage(id, name, image, workerTypeId);
     }
 
-    /**
-     * 删除装修指南阶段配置
-     * @param id
-     * @return
-     */
     @Override
     @ApiMethod
-    public ServerResponse deleteRenovationStage(String id){
+    public ServerResponse deleteRenovationStage(HttpServletRequest request, String id) {
         return renovationStageService.deleteRenovationStage(id);
     }
 

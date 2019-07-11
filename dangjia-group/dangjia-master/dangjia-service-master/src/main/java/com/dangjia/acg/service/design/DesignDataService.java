@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.design;
 
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -32,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +69,8 @@ public class DesignDataService {
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
 
-
+    @Autowired
+    private RedisClient redisClient;//缓存
     /**
      * 获取平面图
      *
@@ -112,14 +116,14 @@ public class DesignDataService {
         if (worker != null && house.getDesignerOk() != 3 && worker.getId().equals(house.getMemberId())) {//是业主而且没有设计完工将走审核逻辑
 
             if (house.getDesignerOk() != 5 && house.getDesignerOk() != 2) {
-                if (house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getVisitState() == 1) {
-                    designDTO.setHistoryRecord(0);
-                    String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
-                    designDTO.addButton(Utils.getButton("申请提前结束", webAddress + "ownerEnd?title=填写原因&houseId=" + houseId, 0));
-                    return ServerResponse.createBySuccess("设计师还在设计中", designDTO);
-                } else {
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "设计师还在设计中");
-                }
+//                if (house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getVisitState() == 1) {
+//                    designDTO.setHistoryRecord(0);
+//                    String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
+//                    designDTO.addButton(Utils.getButton("申请提前结束", webAddress + "ownerEnd?title=填写原因&houseId=" + houseId, 0));
+//                    return ServerResponse.createBySuccess("设计师还在设计中", designDTO);
+//                } else {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "设计师还在设计中");
+//                }
             }
             Example example = new Example(PayConfiguration.class);
             Example.Criteria criteria = example.createCriteria()
@@ -187,22 +191,18 @@ public class DesignDataService {
                         .andNotEqualTo(DesignBusinessOrder.OPERATION_STATE, 2);
                 if (house.getDecorationType() != 2) {
                     criteria.andEqualTo(DesignBusinessOrder.TYPE, 4);
-                    List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
-                    if (designBusinessOrders == null || designBusinessOrders.size() <= 0) {
-                        designDTO.addButton(Utils.getButton("申请额外修改设计", 3));
-                    }
                 } else {
                     criteria.andEqualTo(DesignBusinessOrder.TYPE, 3);
-                    List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
-                    if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
-                        DesignBusinessOrder order = designBusinessOrders.get(0);
-                        if (order.getOperationState() == 1) {
-                            designDTO.addButton(Utils.getButton("需要修改设计", 4));
-                            designDTO.addButton(Utils.getButton("确认设计", 5));
-                        }
-                    } else {
-                        designDTO.addButton(Utils.getButton("申请额外修改设计", 3));
+                }
+                List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
+                if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
+                    DesignBusinessOrder order = designBusinessOrders.get(0);
+                    if (order.getOperationState() == 1) {
+                        designDTO.addButton(Utils.getButton("需要修改设计", 4));
+                        designDTO.addButton(Utils.getButton("确认设计", 5));
                     }
+                } else {
+                    designDTO.addButton(Utils.getButton("申请额外修改设计", 3));
                 }
             }
         }
@@ -312,14 +312,19 @@ public class DesignDataService {
      * @param designerType 0：未支付和设计师未抢单，1：带量房，2：平面图，3：施工图，4：完工
      * @param searchKey    业主手机号/房子名称
      */
-    public ServerResponse getDesignList(PageDTO pageDTO, int designerType, String searchKey) {
+    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey) {
+        String userID = request.getParameter(Constants.USERID);
+        String cityKey = redisClient.getCache(Constants.CITY_KEY + userID, String.class);
+        if (CommonUtil.isEmpty(cityKey)) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         String dataStatus = "0";//正常数据
         if (designerType < 0) {
             //当类型小于0时，则查询移除的数据
             dataStatus = "1";
         }
-        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, searchKey, dataStatus);
+        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType,cityKey, searchKey, dataStatus);
         PageInfo pageResult = new PageInfo(designDTOList);
         for (DesignDTO designDTO : designDTOList) {
             HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(designDTO.getHouseId(), 1);
@@ -344,6 +349,7 @@ public class DesignDataService {
                     designDTO.setImageUrl(images.get(0).getImage());
                 }
             }
+            designDTO.setShowUpdata(0);
             if (designDTO.getDecorationType() == 2) {//自带设计流程
                 switch (designDTO.getDesignerOk()) {
                     case 0://0未确定设计师
@@ -404,12 +410,29 @@ public class DesignDataService {
                         break;
                     case 3://施工图(全部图)审核通过（OK，完成）
                         designDTO.setSchedule("完成");
+                        Example example = new Example(DesignBusinessOrder.class);
+                        Example.Criteria criteria = example.createCriteria()
+                                .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
+                                .andEqualTo(DesignBusinessOrder.HOUSE_ID, designDTO.getHouseId())
+                                .andEqualTo(DesignBusinessOrder.STATUS, 1)
+                                .andNotEqualTo(DesignBusinessOrder.OPERATION_STATE, 2);
+                        criteria.andEqualTo(DesignBusinessOrder.TYPE, 4);
+                        List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
+                        if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
+                            DesignBusinessOrder order = designBusinessOrders.get(0);
+                            if (order.getOperationState() == 0) {
+                                designDTO.setSchedule("待上传设计图");
+                                designDTO.setShowUpdata(1);
+                            } else {
+                                designDTO.setSchedule("待审核设计图");
+                            }
+                        }
                         break;
                 }
             }
         }
         pageResult.setList(designDTOList);
-        return ServerResponse.createBySuccess("查询用户列表成功", pageResult);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
 }

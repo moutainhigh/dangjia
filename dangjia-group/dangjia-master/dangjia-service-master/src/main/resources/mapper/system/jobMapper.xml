@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.system.IJobMapper">
+    <!--=Start getJobAndRoles 查询用户及他对应的角色ids -->
+    <resultMap id="getJobRoles" type="com.dangjia.acg.dto.system.JobRolesVO">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="department_id" jdbcType="VARCHAR" property="departmentId"/>
+        <result column="operate_id" jdbcType="VARCHAR" property="operateId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="code" jdbcType="VARCHAR" property="code"/>
+        <result column="info" jdbcType="TIMESTAMP" property="info"/>
+        <result column="city_name" jdbcType="TIMESTAMP" property="cityName"/>
+        <result column="city_id" jdbcType="INTEGER" property="cityId"/>
+        <result column="create_date" jdbcType="TIMESTAMP" property="createDate"/>
+        <result column="modify_date" jdbcType="TIMESTAMP" property="modifyDate"/>
+        <collection property="jobRoles" ofType="com.dangjia.acg.modle.system.JobRole">
+            <result column="job_id" property="jobId"/>
+            <result column="role_id" property="roleId"/>
+        </collection>
+
+    </resultMap>
+
+    <select id="getJobAndRoles" resultMap="getJobRoles">
+		select
+		u.id, u.name,
+		u.department_id, u.operate_id, u.code ,u.create_date ,
+		u.modify_date , u.info ,u.city_name,u.city_id,ur.job_id,ur.role_id
+		from dj_system_job u
+		LEFT JOIN dj_system_job_role ur ON
+		u.id=ur.job_id
+		WHERE u.id=#{id}
+	</select>
+</mapper>

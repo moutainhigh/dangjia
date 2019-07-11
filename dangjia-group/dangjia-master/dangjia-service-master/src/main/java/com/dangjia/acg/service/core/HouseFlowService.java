@@ -1,7 +1,6 @@
 package com.dangjia.acg.service.core;
 
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
@@ -28,7 +27,6 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
@@ -68,8 +66,6 @@ public class HouseFlowService {
     private IHouseMapper houseMapper;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
-    @Autowired
-    private RedisClient redisClient;
     @Autowired
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
@@ -147,6 +143,9 @@ public class HouseFlowService {
                     }
                     House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
                     if (house == null) continue;
+                    if (house.getVisitState() == 2 || house.getVisitState() == 3 || house.getVisitState() == 4) {
+                        continue;
+                    }
                     AllgrabBean allgrabBean = new AllgrabBean();
                     example = new Example(HouseFlowCountDownTime.class);
                     example.createCriteria().andEqualTo(HouseFlowCountDownTime.WORKER_ID, member.getId()).andEqualTo(HouseFlowCountDownTime.HOUSE_FLOW_ID, houseFlow.getId());
@@ -242,7 +241,6 @@ public class HouseFlowService {
                 houseFlow.setWorkerType(workerType.getType());
                 houseFlow.setHouseId(house.getId());
                 houseFlow.setState(workerType.getState());
-
                 if (!StringUtils.isNoneBlank(house.getCustomSort()))
                     houseFlow.setSort(workerType.getSort());
                 else {
@@ -252,7 +250,6 @@ public class HouseFlowService {
                             LOG.info("makeOfBudget sort:" + sort);
                             return ServerResponse.createByErrorMessage("在自定义排序中，不存在 workerType" + workerType.getType());
                         }
-
                         houseFlow.setSort(sort);
                     } else {
                         houseFlow.setSort(workerType.getSort());
@@ -337,7 +334,12 @@ public class HouseFlowService {
             if (house.getVisitState() == 2) {
                 return ServerResponse.createByErrorMessage("该房已休眠");
             }
-
+            if (house.getVisitState() == 3) {
+                return ServerResponse.createByErrorMessage("该房已停工");
+            }
+            if (house.getVisitState() == 4) {
+                return ServerResponse.createByErrorMessage("该房已提前结束");
+            }
             //通过查看奖罚限制抢单时间限制抢单
             for (RewardPunishRecord record : recordList) {
                 example = new Example(RewardPunishCondition.class);
@@ -368,9 +370,9 @@ public class HouseFlowService {
                 }
             }
             if (member.getWorkerType() > 3) {//其他工人
-                if (hf.getPause() == 1) {
-                    return ServerResponse.createByErrorMessage("该房子已暂停施工！");
-                }
+//                if (hf.getPause() == 1) {
+//                    return ServerResponse.createByErrorMessage("该房子已暂停施工！");
+//                }
                 //持单数
                 long num = houseWorkerMapper.grabControl(member.getId());//查询未完工工地
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
@@ -404,14 +406,11 @@ public class HouseFlowService {
      */
     public ServerResponse setGiveUpOrder(String userToken, String houseFlowId) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (accessToken == null) {
-                return ServerResponse.createbyUserTokenError();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
-            Member member = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
-            if (member == null) {
-                return ServerResponse.createByErrorMessage("用户不存在");
-            }
+            Member member = (Member) object;
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(HouseWorker.class);
             example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId()).andEqualTo(HouseWorker.HOUSE_ID, hf.getHouseId());
@@ -502,11 +501,12 @@ public class HouseFlowService {
             ServerResponse serverResponse = setGrabVerification(userToken, cityId, houseFlowId);
             if (!serverResponse.isSuccess())
                 return serverResponse;
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (accessToken == null) {
-                return ServerResponse.createbyUserTokenError();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
-            Member member = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+            Member member = (Member) object;
+            member = memberMapper.selectByPrimaryKey(member.getId());
             if (member == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
             }

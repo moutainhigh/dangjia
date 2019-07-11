@@ -23,24 +23,26 @@ public class MendRecordController implements MendRecordAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse mendOrderDetail(String userToken, String mendOrderId, Integer type){
-        return mendRecordService.mendOrderDetail( userToken,mendOrderId,type);
+    public ServerResponse mendOrderDetail(String userToken, String mendOrderId, Integer type) {
+        return mendRecordService.mendOrderDetail(userToken, mendOrderId, type);
     }
+
     /**
      * 供应商退明细
      */
     @Override
     @ApiMethod
-    public ServerResponse mendDeliverDetail(String userToken, String mendDeliverId){
-        return mendRecordService.mendDeliverDetail( userToken,mendDeliverId);
+    public ServerResponse mendDeliverDetail(String userToken, String mendDeliverId) {
+        return mendRecordService.mendDeliverDetail(userToken, mendDeliverId);
     }
+
     /**
-     *  记录列表
+     * 记录列表
      */
     @Override
     @ApiMethod
-    public ServerResponse recordList(String userToken,int roleType,String houseId, Integer type){
-        return mendRecordService.recordList(userToken,roleType,houseId,type);
+    public ServerResponse recordList(String userToken, int roleType, String houseId, String queryId, Integer type) {
+        return mendRecordService.recordList(userToken, roleType, houseId, queryId, type);
     }
 
     /**
@@ -48,13 +50,13 @@ public class MendRecordController implements MendRecordAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse mendList(String userToken,String houseId, int roleType){
-        return mendRecordService.mendList(userToken,houseId,roleType);
+    public ServerResponse mendList(String userToken, String houseId, int roleType) {
+        return mendRecordService.mendList(userToken, houseId, roleType);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse backOrder(String mendOrderId,Integer type) {
-        return mendRecordService.backOrder(mendOrderId,type);
+    public ServerResponse backOrder(String mendOrderId, Integer type) {
+        return mendRecordService.backOrder(mendOrderId, type);
     }
 }

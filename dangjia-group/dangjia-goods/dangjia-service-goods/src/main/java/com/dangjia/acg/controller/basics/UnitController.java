@@ -68,15 +68,4 @@ public class UnitController implements UnitAPI {
         return unitService.getUnitById(unitId);
     }
 
-    /**
-     * 根据ID删除商品单位
-     *
-     * @param unitId
-     * @return
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse deleteById(HttpServletRequest request, String unitId) {
-        return unitService.deleteById(unitId);
-    }
 }

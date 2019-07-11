@@ -10,9 +10,11 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
+import com.dangjia.acg.dto.actuary.FlowActuaryDTO;
 import com.dangjia.acg.dto.group.GroupDTO;
 import com.dangjia.acg.dto.pay.*;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
@@ -44,11 +46,11 @@ import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.*;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
+import com.dangjia.acg.modle.pay.PurchaseOrder;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -56,7 +58,7 @@ import com.dangjia.acg.modle.repair.MendWorker;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.service.config.ConfigMessageService;
-import com.dangjia.acg.service.core.HouseFlowScheduleService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.deliver.ProductChangeService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
 import com.dangjia.acg.service.member.GroupInfoService;
@@ -144,8 +146,6 @@ public class PaymentService {
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
     @Autowired
-    private HouseFlowScheduleService houseFlowScheduleService;
-    @Autowired
     private IOrderSplitMapper orderSplitMapper;
     @Autowired
     private IOrderSplitItemMapper orderSplitItemMapper;
@@ -157,6 +157,10 @@ public class PaymentService {
     private IProductChangeOrderMapper productChangeOrderMapper;
     @Autowired
     private HouseDesignPayService houseDesignPayService;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
+    @Autowired
+    private PurchaseOrderService purchaseOrderService;
 
     /**
      * 服务器回调
@@ -191,6 +195,8 @@ public class PaymentService {
             } else if (businessOrder.getType() == 4) {//待付款 支付时业主包括取消的
                 //待付款 提前付材料
                 this.awaitPay(businessOrder, payState);
+            } else if (businessOrder.getType() == 8) {//待付款 支付时业主包括取消的
+                this.awaitPayPurchaseOrder(businessOrder, payState);
             } else if (businessOrder.getType() == 5) {//验房分销
                 HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
                 houseDistribution.setNumber(businessOrder.getNumber());//业务订单号
@@ -229,9 +235,9 @@ public class PaymentService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setPaySuccess(String userToken, String businessOrderNumber) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createbyUserTokenError();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
         Map<String, Object> returnMap = new HashMap<>();
         try {
@@ -385,7 +391,19 @@ public class PaymentService {
                 ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
                 changeOrder.setState(4);//已支付
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
-                houseFlowScheduleService.updateFlowSchedule(changeOrder.getHouseId(),changeOrder.getWorkerTypeId(),changeOrder.getScheduleDay(),null);
+                //若工序发生补人工，则所有未完工工序顺延XX天
+                Example example = new Example(HouseFlow.class);
+                example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, changeOrder.getHouseId())
+                        .andGreaterThan(HouseFlow.WORKER_TYPE, 3)
+                        .andCondition(" work_steta not in (1,2,6)  ");
+                List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
+                for (HouseFlow houseFlow : houseFlowList) {
+                    if (houseFlow.getStartDate() != null) {
+                        houseFlow.setEndDate(DateUtil.addDateDays(houseFlow.getEndDate(), changeOrder.getScheduleDay()));
+                        houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+                    }
+                }
+//                houseFlowScheduleService.updateFlowSchedule(changeOrder.getHouseId(),changeOrder.getWorkerTypeId(),changeOrder.getScheduleDay(),null);
 
                 HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(mendOrder.getHouseId(), mendOrder.getWorkerTypeId());
                 HouseWorkerOrder houseWorkerOrdernew = new HouseWorkerOrder();
@@ -400,13 +418,16 @@ public class PaymentService {
                 BigDecimal repairTotalPrice = houseWorkerOrdernew.getRepairTotalPrice().add(houseWorkerOrdernew.getRepairPrice());
                 houseWorkerOrdernew.setRepairTotalPrice(repairTotalPrice);
                 houseWorkerOrderMapper.updateByPrimaryKeySelective(houseWorkerOrdernew);
-                Example example = new Example(MendWorker.class);
+
+                example = new Example(MendWorker.class);
                 example.createCriteria().andEqualTo(MendWorker.MEND_ORDER_ID, mendOrder.getId());
                 List<MendWorker> mendWorkerList = mendWorkerMapper.selectByExample(example);
+
                 Order order = new Order();
                 order.setHouseId(businessOrder.getHouseId());
                 order.setBusinessOrderNumber(businessOrder.getNumber());//业务订单号
                 order.setTotalAmount(businessOrder.getTotalPrice());// 订单总额(补人工总钱)
+
                 example = new Example(MendOrder.class);
                 example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, businessOrder.getHouseId()).andEqualTo(MendOrder.TYPE, 1)
                         .andEqualTo(MendOrder.STATE, 4);
@@ -597,7 +618,45 @@ public class PaymentService {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
     }
+    /**
+     * 保险订单
+     */
+    private void insurance(HouseWorkerOrder hwo, String payState) {
+        try {
+            WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByNotPay(hwo.getWorkerTypeId(), hwo.getHouseId());
+            if (wtso != null) {
+                wtso.setState(1);  //已支付
+                wtso.setShopDate(new Date());  //设置购买时间
+                workerTypeSafeOrderMapper.updateByPrimaryKeySelective(wtso);
 
+                hwo.setSafePrice(wtso.getPrice());
+                houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);//记录保险费
+
+                House house = houseMapper.selectByPrimaryKey(hwo.getHouseId());
+                WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());
+                if (house.getMoney() == null) {
+                    house.setMoney(new BigDecimal(0));
+                }
+                //记录项目流水 保险
+                HouseAccounts ha = new HouseAccounts();
+                ha.setReason("收入" + wts.getName() + "费用");
+                ha.setMoney(house.getMoney().add(hwo.getSafePrice()));//项目总钱
+                ha.setState(0);//进
+                ha.setPayMoney(hwo.getSafePrice());//本次数额
+                ha.setHouseId(house.getId());
+                ha.setHouseName(house.getHouseName());
+                ha.setMemberId(house.getMemberId());
+                ha.setName("业主支付");
+                ha.setPayment(payState);//统计支付方式
+                houseAccountsMapper.insert(ha);
+                house.setMoney(house.getMoney().add(hwo.getSafePrice()));//累计项目钱
+                houseMapper.updateByPrimaryKeySelective(house);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+    }
     /**
      * 处理待付款提前付生成订单
      */
@@ -622,6 +681,34 @@ public class PaymentService {
                 order.setPayment(payState);// 支付方式
                 orderMapper.insert(order);
 
+                this.addWarehouse(budgetMaterialList, businessOrder.getHouseId(), order.getId(), 2);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+    }
+
+    /**
+     * 未购买支付成功
+     */
+    private void awaitPayPurchaseOrder(BusinessOrder businessOrder, String payState) {
+        try {
+            House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+            List<BudgetMaterial> budgetMaterialList = purchaseOrderService.payPurchaseOrder(businessOrder.getTaskId());
+            if (budgetMaterialList.size() > 0) {
+                HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
+                houseExpend.setMaterialMoney(houseExpend.getMaterialMoney() + businessOrder.getTotalPrice().doubleValue());//材料钱
+                houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
+                Order order = new Order();
+                order.setHouseId(house.getId());
+                order.setBusinessOrderNumber(businessOrder.getNumber());//业务订单
+                order.setTotalAmount(businessOrder.getTotalPrice());// 订单总额(材料总钱)
+                order.setWorkerTypeName("材料订单");
+                order.setWorkerTypeId("");
+                order.setType(2);//材料
+                order.setPayment(payState);// 支付方式
+                orderMapper.insert(order);
                 this.addWarehouse(budgetMaterialList, businessOrder.getHouseId(), order.getId(), 2);
             }
         } catch (Exception e) {
@@ -823,50 +910,15 @@ public class PaymentService {
         }
     }
 
-    /**
-     * 保险订单
-     */
-    private void insurance(HouseWorkerOrder hwo, String payState) {
-        try {
-            WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByWorkerTypeId(hwo.getWorkerTypeId(), hwo.getHouseId());
-            if (wtso != null) {
-                wtso.setState(1);  //已支付
-                wtso.setShopDate(new Date());  //设置购买时间
-                workerTypeSafeOrderMapper.updateByPrimaryKeySelective(wtso);
-
-                hwo.setSafePrice(wtso.getPrice());
-                houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);//记录保险费
-
-                House house = houseMapper.selectByPrimaryKey(hwo.getHouseId());
-                WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());
-                if (house.getMoney() == null) {
-                    house.setMoney(new BigDecimal(0));
-                }
-                //记录项目流水 保险
-                HouseAccounts ha = new HouseAccounts();
-                ha.setReason("收入" + wts.getName() + "费用");
-                ha.setMoney(house.getMoney().add(hwo.getSafePrice()));//项目总钱
-                ha.setState(0);//进
-                ha.setPayMoney(hwo.getSafePrice());//本次数额
-                ha.setHouseId(house.getId());
-                ha.setHouseName(house.getHouseName());
-                ha.setMemberId(house.getMemberId());
-                ha.setName("业主支付");
-                ha.setPayment(payState);//统计支付方式
-                houseAccountsMapper.insert(ha);
-                house.setMoney(house.getMoney().add(hwo.getSafePrice()));//累计项目钱
-                houseMapper.updateByPrimaryKeySelective(house);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-        }
-    }
 
     /**
      * 支付页面(通用)
      */
     public ServerResponse getPaymentAllOrder(String userToken, String houseDistributionId, int type) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
         PaymentDTO paymentDTO = new PaymentDTO();
         List<ActuaryDTO> actuaryDTOList = new ArrayList<>();//商品
         try {
@@ -895,7 +947,6 @@ public class PaymentService {
                 } else {
                     businessOrder = businessOrderList.get(0);
                 }
-
                 paymentDTO.setTotalPrice(new BigDecimal(houseDistribution.getPrice()));
                 paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
                 paymentDTO.setPayPrice(new BigDecimal(houseDistribution.getPrice()));//实付
@@ -932,7 +983,6 @@ public class PaymentService {
                 } else {
                     businessOrder = businessOrderList.get(0);
                 }
-
                 paymentDTO.setTotalPrice(productChangeOrder.getDifferencePrice());
                 paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
                 paymentDTO.setPayPrice(productChangeOrder.getDifferencePrice());//实付
@@ -943,12 +993,44 @@ public class PaymentService {
                 actuaryDTO.setPrice("¥" + String.format("%.2f", productChangeOrder.getDifferencePrice().doubleValue()));
                 actuaryDTO.setType(6);
                 actuaryDTOList.add(actuaryDTO);
+            } else if (type == 8) {//未购买过来的
+                Map<String, Object> datas = purchaseOrderService.getPurchaseOrder(houseDistributionId);
+                if (datas == null) {
+                    return ServerResponse.createByErrorMessage("订单记录不存在");
+                }
+                PurchaseOrder purchaseOrder = (PurchaseOrder) datas.get("purchaseOrder");
+                List<FlowActuaryDTO> flowActuaryDTOList = (List<FlowActuaryDTO>) datas.get("list");
+                House house = houseMapper.selectByPrimaryKey(purchaseOrder.getHouseId());
+                Example example = new Example(BusinessOrder.class);
+                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId)
+                        .andEqualTo(BusinessOrder.STATE, 1);
+                List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
+                BusinessOrder businessOrder;
+                if (businessOrderList.size() == 0) {
+                    businessOrder = new BusinessOrder();
+                    businessOrder.setMemberId(house.getMemberId()); //公众号唯一标识
+                    businessOrder.setHouseId(purchaseOrder.getHouseId());
+                    businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+                    businessOrder.setState(1);//刚生成
+                    businessOrder.setTotalPrice(new BigDecimal(purchaseOrder.getPrice()));
+                    businessOrder.setDiscountsPrice(new BigDecimal(0));
+                    businessOrder.setPayPrice(new BigDecimal(purchaseOrder.getPrice()));
+                    businessOrder.setType(8);//记录支付类型任务类型
+                    businessOrder.setTaskId(houseDistributionId);//保存任务ID
+                    businessOrderMapper.insert(businessOrder);
+                } else {
+                    businessOrder = businessOrderList.get(0);
+                }
+                paymentDTO.setTotalPrice(new BigDecimal(purchaseOrder.getPrice()));
+                paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
+                paymentDTO.setPayPrice(new BigDecimal(purchaseOrder.getPrice()));//实付
+                paymentDTO.setDatas(flowActuaryDTOList);
             } else if (type == 2) {
                 MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(houseDistributionId);
                 if (mendOrder == null) {
                     return ServerResponse.createByErrorMessage("订单记录不存在");
                 }
-
+                House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
                 Example example = new Example(BusinessOrder.class);
                 example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andEqualTo(BusinessOrder.STATE, 1);
@@ -956,7 +1038,7 @@ public class PaymentService {
                 BusinessOrder businessOrder;
                 if (businessOrderList.size() == 0) {
                     businessOrder = new BusinessOrder();
-                    businessOrder.setMemberId(mendOrder.getApplyMemberId()); //公众号唯一标识
+                    businessOrder.setMemberId(house.getMemberId()); //公众号唯一标识
                     businessOrder.setHouseId(mendOrder.getHouseId());
                     businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
                     businessOrder.setState(1);//刚生成
@@ -1025,12 +1107,12 @@ public class PaymentService {
      */
     public ServerResponse getPaymentOrder(String userToken, String houseId, String taskId, int type) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            if (accessToken == null) {//无效的token
-                return ServerResponse.createbyUserTokenError();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
-
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             if (type != 4) {
                 BusinessOrder busOrder = businessOrderMapper.byTaskId(taskId, type);
                 if (busOrder != null) {
@@ -1039,7 +1121,6 @@ public class PaymentService {
                     }
                 }
             }
-
             House house = houseMapper.selectByPrimaryKey(houseId);
             Example example = new Example(BusinessOrder.class);
             example.createCriteria().andEqualTo(BusinessOrder.HOUSE_ID, houseId).andEqualTo(BusinessOrder.STATE, 1);
@@ -1111,31 +1192,31 @@ public class PaymentService {
                     hwo.setTotalPrice(workPrice);
                     houseWorkerOrderMapper.updateByPrimaryKey(hwo);
                     paymentPrice = paymentPrice.add(workPrice);
-
-                    //TODO 设计师升级服务暂时取消
-//                    example = new Example(HouseDesignImage.class);
-//                    example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId);
-//                    List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);
-//                    UpgradeDesignDTO upgradeDesignDTO = new UpgradeDesignDTO();//升级设计
-//                    List<DesignImageDTO> designImageDTOList = new ArrayList<DesignImageDTO>();
-//                    upgradeDesignDTO.setTitle("升级设计");
-//                    upgradeDesignDTO.setType(1);//多选
-//                    for (HouseDesignImage hdi : houseDesignImageList) {
-//                        hdi.setBusinessOrderNumber(businessOrder.getNumber());
-//                        houseDesignImageMapper.updateByPrimaryKeySelective(hdi);
-//                        DesignImageType designImageType = designImageTypeMapper.selectByPrimaryKey(hdi.getDesignImageTypeId());
-//                        DesignImageDTO designImageDTO = new DesignImageDTO();
-//                        //升级用设计图
-//                        designImageDTO.setName(designImageType.getName());
-//                        designImageDTO.setPrice("¥" + String.format("%.2f", designImageType.getPrice().doubleValue()));
-//                        designImageDTO.setDesignImageTypeId(designImageType.getId());
-//                        designImageDTO.setSelected(1);//已选
-//                        designImageDTOList.add(designImageDTO);
-//                        paymentPrice = paymentPrice.add(designImageType.getPrice());//加上升级钱
-//                    }
-//                    upgradeDesignDTO.setDesignImageDTOList(designImageDTOList);
-//                    paymentDTO.setUpgradeDesignDTO(upgradeDesignDTO);
+                    // protocolTpye==1 精算商品定义
+                    // protocolTpye=2 精算修改费用明细
+                    // protocolTpye=3 设计改图费用
+                    // protocolTpye=4 9.9设计商品定义
+                    // protocolTpye=5 18.8设计商品定义
+                    // protocolTpye=6 28.8设计商品定义
+                    if (house.getStyle() != null) {
+                        switch (house.getStyle()) {
+                            case "极简需求":
+                                paymentDTO.setAgreementName("《设计服务须知》");
+                                paymentDTO.setAgreementUrl(webAddress + "paymentAgreement?title=设计服务须知&protocolTpye=4");
+                                break;
+                            case "简单装修":
+                                paymentDTO.setAgreementName("《设计服务须知》");
+                                paymentDTO.setAgreementUrl(webAddress + "paymentAgreement?title=设计服务须知&protocolTpye=5");
+                                break;
+                            case "个性化":
+                                paymentDTO.setAgreementName("《设计服务须知》");
+                                paymentDTO.setAgreementUrl(webAddress + "paymentAgreement?title=设计服务须知&protocolTpye=6");
+                                break;
+                        }
+                    }
                 } else if (houseFlow.getWorkerType() == 2) {
+                    paymentDTO.setAgreementName("《精算服务须知》");
+                    paymentDTO.setAgreementUrl(webAddress + "paymentAgreement?title=精算服务须知&protocolTpye=1");
                     /*记录精算费*/
                     BigDecimal workPrice = houseFlow.getWorkPrice();
                     hwo.setWorkPrice(workPrice);
@@ -1221,10 +1302,6 @@ public class PaymentService {
                     actuaryDTO.setKind(workerType.getName());
                     actuaryDTO.setName("补人工花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
-//                    actuaryDTO.setButton("补人工明细");
-//                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
-//                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=4";
-//                    actuaryDTO.setUrl(url);
                     actuaryDTO.setType(4);
 
                 } else if (mendOrder.getType() == 0) {
@@ -1232,13 +1309,8 @@ public class PaymentService {
                     actuaryDTO.setKind(workerType.getName());
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
                     actuaryDTO.setName("补材料花费");
-//                    actuaryDTO.setButton("补材料明细");
-//                  String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
-//                            + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getWorkerTypeId() + "&type=5";
-//                    actuaryDTO.setUrl(url);
                     if (workerType.getType() == 3) {
                         actuaryDTO.setName("补服务花费");
-//                        actuaryDTO.setButton("补服务明细");
                     }
                     actuaryDTO.setType(5);
                 }
@@ -1254,7 +1326,6 @@ public class PaymentService {
                 Double serPrice = forMasterAPI.getBudgetSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算服务钱
                 paymentPrice = paymentPrice.add(new BigDecimal(caiPrice));
                 paymentPrice = paymentPrice.add(new BigDecimal(serPrice));
-
                 if (caiPrice > 0) {
                     ActuaryDTO actuaryDTO = new ActuaryDTO();
                     actuaryDTO.setImage(imageAddress + "icon/Acailiao.png");
@@ -1274,7 +1345,6 @@ public class PaymentService {
                     actuaryDTOList.add(actuaryDTO);
                 }
                 paymentDTO.setActuaryDTOList(actuaryDTOList);
-
             } else {
                 return ServerResponse.createByErrorMessage("参数错误");
             }
@@ -1412,8 +1482,12 @@ public class PaymentService {
      */
     public ServerResponse getPaymentPage(String userToken, String houseId, String taskId, int type) {
         try {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             House house = houseMapper.selectByPrimaryKey(houseId);
             PaymentDTO paymentDTO = new PaymentDTO();
             List<ActuaryDTO> actuaryDTOList = new ArrayList<ActuaryDTO>();//商品
@@ -1455,37 +1529,6 @@ public class PaymentService {
                     HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
                     workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
                     totalPrice = totalPrice.add(workPrice);
-                    //TODO 设计师升级服务暂时取消
-//                    example = new Example(HouseDesignImage.class);
-//                    example.createCriteria().andEqualTo(HouseDesignImage.HOUSE_ID, houseId);
-//                    List<HouseDesignImage> houseDesignImageList = houseDesignImageMapper.selectByExample(example);
-//                    UpgradeDesignDTO upgradeDesignDTO = new UpgradeDesignDTO();//升级设计
-//                    upgradeDesignDTO.setTitle("升级设计");
-//                    upgradeDesignDTO.setType(1);//多选
-                    //所有升级设计图
-//                    example = new Example(DesignImageType.class);
-//                    example.createCriteria().andEqualTo(DesignImageType.SELL, 1);
-//                    List<DesignImageType> designImageTypeList = designImageTypeMapper.selectByExample(example);
-//                    List<DesignImageDTO> designImageDTOList = new ArrayList<>();
-//                    for (DesignImageType designImageType : designImageTypeList) {
-//                        DesignImageDTO designImageDTO = new DesignImageDTO();
-//                        designImageDTO.setName(designImageType.getName());
-//                        designImageDTO.setDesignImageTypeId(designImageType.getId());
-//                        designImageDTO.setPrice("¥" + String.format("%.2f", designImageType.getPrice().doubleValue()));
-//                        designImageDTO.setSelected(0);//未选
-//                        //匹配该房子图
-//                        for (HouseDesignImage hdi : houseDesignImageList) {
-//                            if (hdi.getDesignImageTypeId().equals(designImageType.getId())) {
-//                                designImageDTO.setSelected(1);//已选
-//                                totalPrice = totalPrice.add(designImageType.getPrice());
-//                                break;
-//                            }
-//                        }
-//                        designImageDTOList.add(designImageDTO);//所有升级图
-//                    }
-//                    upgradeDesignDTO.setDesignImageDTOList(designImageDTOList);
-//                    paymentDTO.setUpgradeDesignDTO(upgradeDesignDTO);
-
                 } else if (houseFlow.getWorkerType() == 2) {//精算
                     workPrice = houseFlow.getWorkPrice();
                     totalPrice = totalPrice.add(workPrice);
@@ -1493,9 +1536,6 @@ public class PaymentService {
                     Double workerPrice = forMasterAPI.getBudgetWorkerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
                     Double caiPrice = forMasterAPI.getBudgetCaiPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算材料钱
                     Double serPrice = forMasterAPI.getBudgetSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算服务钱
-
-//                    Double notCaiPrice = forMasterAPI.getNotCaiPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//未选择材料钱
-//                    Double notSerPrice = forMasterAPI.getNotSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//未选择服务钱
                     totalPrice = totalPrice.add(new BigDecimal(workerPrice));
                     totalPrice = totalPrice.add(new BigDecimal(caiPrice));
                     totalPrice = totalPrice.add(new BigDecimal(serPrice));
@@ -1506,7 +1546,7 @@ public class PaymentService {
                         actuaryDTO.setName(workerType.getName() + "阶段人工花费");
                         actuaryDTO.setPrice("¥" + String.format("%.2f", workerPrice));
                         actuaryDTO.setButton("人工明细");
-                        String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
+                        String url = webAddress + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                                 + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=1";
                         actuaryDTO.setUrl(url);
                         actuaryDTO.setType(1);
@@ -1519,26 +1559,12 @@ public class PaymentService {
                         actuaryDTO.setName(workerType.getName() + "阶段材料花费");
                         actuaryDTO.setPrice("¥" + String.format("%.2f", caiPrice));
                         actuaryDTO.setButton("材料明细");
-                        String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
+                        String url = webAddress + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                                 + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=2";
                         actuaryDTO.setUrl(url);
                         actuaryDTO.setType(2);
                         actuaryDTOList.add(actuaryDTO);
                     }
-//                    if (notCaiPrice > 0) {
-//                        ActuaryDTO actuaryDTO = new ActuaryDTO();
-//                        actuaryDTO.setImage(imageAddress + "icon/Acailiao.png");
-//                        actuaryDTO.setKind("材料");
-//                        actuaryDTO.setName(workerType.getName() + "未选择的材料");
-//                        actuaryDTO.setPrice("¥" + String.format("%.2f", notCaiPrice));
-//                        actuaryDTO.setButton("材料明细");
-//                        String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
-//                                + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=" + 2;
-//                        actuaryDTO.setUrl(url);
-//                        actuaryDTO.setType(2);
-//                        actuaryDTOList.add(actuaryDTO);
-//                    }
-
                     if (serPrice > 0) {
                         ActuaryDTO actuaryDTO = new ActuaryDTO();
                         actuaryDTO.setImage(imageAddress + "icon/Afuwu.png");
@@ -1546,27 +1572,13 @@ public class PaymentService {
                         actuaryDTO.setName(workerType.getName() + "阶段服务花费");
                         actuaryDTO.setPrice("¥" + String.format("%.2f", serPrice));
                         actuaryDTO.setButton("服务明细");
-                        String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
+                        String url = webAddress + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                                 + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=" + 3;
                         actuaryDTO.setUrl(url);
                         actuaryDTO.setType(3);
                         actuaryDTOList.add(actuaryDTO);
                     }
-//                    if (notSerPrice > 0) {
-//                        ActuaryDTO actuaryDTO = new ActuaryDTO();
-//                        actuaryDTO.setImage(imageAddress + "icon/Afuwu.png");
-//                        actuaryDTO.setKind("服务");
-//                        actuaryDTO.setName(workerType.getName() + "未选择的服务");
-//                        actuaryDTO.setPrice("¥" + String.format("%.2f", notSerPrice));
-//                        actuaryDTO.setButton("服务明细");
-//                        String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
-//                                + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=" + 3;
-//                        actuaryDTO.setUrl(url);
-//                        actuaryDTO.setType(3);
-//                        actuaryDTOList.add(actuaryDTO);
-//                    }
                     paymentDTO.setActuaryDTOList(actuaryDTOList);
-
                     //该工钟所有保险
                     example = new Example(WorkerTypeSafe.class);
                     example.createCriteria().andEqualTo(WorkerTypeSafe.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
@@ -1628,7 +1640,7 @@ public class PaymentService {
                     actuaryDTO.setName("补人工花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
                     actuaryDTO.setButton("补人工明细");
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                    String url = webAddress +
                             String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                             + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getId() + "&type=4";
                     actuaryDTO.setUrl(url);
@@ -1640,7 +1652,7 @@ public class PaymentService {
                     actuaryDTO.setName("补材料花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
                     actuaryDTO.setButton("补材料明细");
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                    String url = webAddress +
                             String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                             + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getId() + "&type=5";
 
@@ -1681,7 +1693,7 @@ public class PaymentService {
                     actuaryDTO.setName(workerType.getName() + "阶段材料花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", caiPrice));
                     actuaryDTO.setButton("材料明细");
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
+                    String url = webAddress + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                             + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=" + 2;
                     actuaryDTO.setUrl(url);
                     actuaryDTO.setType(2);
@@ -1694,7 +1706,7 @@ public class PaymentService {
                     actuaryDTO.setName(workerType.getName() + "阶段服务花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", serPrice));
                     actuaryDTO.setButton("服务明细");
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
+                    String url = webAddress + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                             + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=" + 3;
                     actuaryDTO.setUrl(url);
                     actuaryDTO.setType(3);

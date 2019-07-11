@@ -49,6 +49,7 @@ public class HouseController implements HouseAPI {
 
     /**
      * 我的房产
+     * TODO 1.4.0后删除此接口
      */
     @Override
     @ApiMethod
@@ -121,7 +122,10 @@ public class HouseController implements HouseAPI {
         return houseService.queryHouseByCity(userToken, cityId, villageId, minSquare, maxSquare, houseType, pageDTO);
     }
 
-    //装修指南
+    /**
+     * TODO 1.4.0后删除此接口
+     * 装修指南
+     */
     @Override
     @ApiMethod
     public ServerResponse getRenovationManual(String userToken, Integer type) {
@@ -156,9 +160,9 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryConstructionRecord(String houseId, PageDTO pageDTO) {
+    public ServerResponse queryConstructionRecord(String houseId, String day, String workerType, PageDTO pageDTO) {
 //        return  houseService.queryConstructionRecord(houseId, pageDTO, null);
-        return houseService.queryConstructionRecordAll(houseId, pageDTO);
+        return houseService.queryConstructionRecordAll(houseId, day, workerType, pageDTO);
     }
 
     /**
@@ -170,8 +174,14 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryConstructionRecordAll(String houseId, PageDTO pageDTO) {
-        return houseService.queryConstructionRecordAll(houseId, pageDTO);
+    public ServerResponse queryConstructionRecordAll(String houseId, String day, String workerType, PageDTO pageDTO) {
+        return houseService.queryConstructionRecordAll(houseId, day, workerType, pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getStageProgress(String houseFlowId) {
+        return houseService.getStageProgress(houseFlowId);
     }
 
     @Override
@@ -228,6 +238,12 @@ public class HouseController implements HouseAPI {
     @ApiMethod
     public ServerResponse updateByHouseId(String building, String unit, String number, String houseId, String villageId, String cityId, String modelingLayoutId) {
         return houseService.updateByHouseId(building, unit, number, houseId, villageId, cityId, modelingLayoutId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseChoiceCases(String id) {
+        return houseService.getHouseChoiceCases(id);
     }
 
 }

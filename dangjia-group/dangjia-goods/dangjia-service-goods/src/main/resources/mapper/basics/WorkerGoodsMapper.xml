@@ -114,7 +114,8 @@
     </select>
 
     <!-- 根据商品编号查询 -->
-    <select id="selectByWorkerGoodsSn" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
+    <select id="selectByWorkerGoodsSn" resultType="com.dangjia.acg.modle.basics.WorkerGoods"
+            parameterType="java.lang.String">
         SELECT
         id,
         name,
@@ -164,7 +165,7 @@
         show_goods as showGoods,
         create_date as createDate,
         modify_date as modifyDate
-        from dj_basics_worker_goods  as w
+        from dj_basics_worker_goods as w
         where w.data_status = 0
         <if test="name!=null and name!=''">
             and
@@ -221,7 +222,7 @@
         w.create_date as createDate,
         w.modify_date as modifyDate
         from dj_actuary_budget_worker abw ,dj_basics_worker_goods w
-        WHERE  abw.worker_goods_id =w.id
+        WHERE abw.worker_goods_id =w.id
         and abw.delete_state!=1
         and abw.steta=1
         and abw.house_id =#{houseId}
@@ -233,6 +234,52 @@
             AND
             w.worker_type_id =#{workerTypeId}
         </if>
+    </select>
+    <select id="getHomeProductList" resultType="com.dangjia.acg.modle.basics.HomeProductDTO">
+           ( SELECT
+            p.id AS id,
+            p.image AS image,
+            p.price AS price,
+            p.unit_name AS unitName,
+            g.type AS goodsType,
+            0 AS type,
+            p.NAME AS NAME
+            FROM
+                dj_basics_product p
+                INNER JOIN dj_basics_goods g ON g.id = p.goods_id
+                INNER JOIN dj_basics_brand_series s ON s.id = p.brand_series_id
+            WHERE
+                p.data_status = 0
+                AND p.type = 1
+                AND p.maket = 1
+                AND p.image !='qrcode/moren.png'
+                AND s.image !=''
+                AND s.image is not null
+            ORDER BY
+                rand( )
+                LIMIT 6
+                ) UNION ALL
+                (
+            SELECT
+                id AS id,
+                image AS image,
+                price AS price,
+                unit_name AS unitName,
+                NULL AS goodsType,
+                1 AS type,
+            NAME AS NAME
+            FROM
+                dj_basics_worker_goods
+            WHERE
+                data_status = 0
+                AND show_goods = 1
+                AND image !='qrcode/moren.png'
+                AND worker_dec !=''
+                AND worker_dec is not null
+            ORDER BY
+                rand( )
+                LIMIT 6
+                )
     </select>
 
 

@@ -10,5 +10,7 @@ import tk.mybatis.mapper.common.Mapper;
 @Repository
 public interface IMemberAuthMapper extends Mapper<MemberAuth> {
 
+
+
 }
 

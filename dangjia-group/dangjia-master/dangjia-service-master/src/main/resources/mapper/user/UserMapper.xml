@@ -19,29 +19,52 @@
 		id, username, mobile, email, password, insert_uid insertUid,
 		create_date createDate,
 		modify_date modifyDate, is_del isDel,
-		is_job isJob,is_receive isReceive, department
+		is_job isJob,is_receive isReceive, department, department_id departmentId, job_id jobId,member_id memberId
+	</sql>
+
+    <sql id="a_Column_List">
+		a.id, a.username, a.mobile, a.email, a.password, a.insert_uid insertUid,
+		a.create_date createDate,
+		a.modify_date modifyDate, a.is_del isDel,
+		a.is_job isJob,a.is_receive isReceive, a.department, a.department_id departmentId, a.job_id jobId,a.member_id memberId
 	</sql>
 
     <!--=Start getUsers 分页查询用户列表userSearch -->
     <select id="getUsers" resultType="com.dangjia.acg.dto.user.UserRoleDTO">
         select
-        <include refid="Base_Column_List"/>
-        from dj_user
+        <include refid="a_Column_List"/>
+        from dj_user a
         where 1=1
+        AND is_del=0
         <if test="userSearch.umobile!=null and userSearch.umobile!=''">
             AND mobile =#{userSearch.umobile}
+        </if>
+        <if test="userSearch.jobId!=null and userSearch.jobId!=''">
+            AND job_id =#{userSearch.jobId}
+        </if>
+        <if test="userSearch.departmentId!=null and userSearch.departmentId!=''">
+            AND department_id =#{userSearch.departmentId}
         </if>
         <if test="userSearch.uname!=null and userSearch.uname!=''">
             AND username like CONCAT('%',#{userSearch.uname},'%')
         </if>
-        <if
-                test="userSearch.insertTimeStart!=null and userSearch.insertTimeStart!=''">
+        <if test="userSearch.insertTimeStart!=null and userSearch.insertTimeStart!=''">
             AND create_date &gt;= #{userSearch.insertTimeStart}
         </if>
         <if test="userSearch.insertTimeEnd!=null and userSearch.insertTimeEnd!=''">
             AND create_date &lt;= #{userSearch.insertTimeEnd}
         </if>
-        ORDER BY create_date DESC
+        <if test="null!=isJob and ''!=isJob">
+            AND is_job=0
+        </if>
+        <if test="isJob==2">
+            AND (
+            c.role_name like CONCAT('%','售前客服','%') or
+            c.role_name like CONCAT('%','工程部','%')
+            )
+        </if>
+        GROUP BY a.id
+        ORDER BY a.create_date DESC
     </select>
     <!--=End getUsers 分页查询用户列表 -->
 
@@ -158,4 +181,13 @@
     <!-- <update id="setUserLockNum"> update member set is_lock = #{isLock}, lock_time=NOW()
         where id = #{id,jdbcType=INTEGER} and is_del=0 AND is_job=0 </update> -->
     <!--=Start setUserLockNum 锁定用户 -->
+
+    <!--插入memberId-->
+    <update id="insertMemberId">
+        update dj_user a
+        INNER JOIN dj_member b
+        on a.mobile=b.mobile
+        set a.member_id=b.id
+        where a.mobile=#{mobile}
+    </update>
 </mapper>

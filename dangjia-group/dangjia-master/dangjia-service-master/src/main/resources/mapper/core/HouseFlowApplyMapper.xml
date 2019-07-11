@@ -189,7 +189,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from dj_core_house_flow_apply
         where 1=1
         and house_flow_id = #{houseFlowId}
-        and member_check = 0
+        and (member_check = 0 or member_check = 4)
         and worker_id = #{workerId}
         LIMIT 1
     </select>
@@ -302,6 +302,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             f.apply_type applyType,
             f.create_date createDate,
             f.start_date startDate,
+            f.worker_id workerId,
+            f.operator,
             f.end_date endDate,
             (
                 CASE
@@ -316,7 +318,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         LEFT JOIN `dj_matter_technology_record`  fi ON fi.house_flow_apply_id = f.id
         AND fi.state = 1
         WHERE
-            f.member_check = 1
+            f.data_status = 0
+        AND f.member_check = 1
         AND f.house_id = #{houseId}
         AND (
             f.apply_type = 0

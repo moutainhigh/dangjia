@@ -93,6 +93,24 @@ public class TimingApplyService {
                     houseFlowMapper.updateByPrimaryKey(houseFlow);
                 }
             }
+
+            if(houseFlow.getPause()==0) {
+                if(houseFlow.getWorkSteta()!=1&&houseFlow.getWorkSteta()!=2&&houseFlow.getWorkSteta()!=6) {
+                    //达到停工日期内，状态变为停工
+                    Example example1 = new Example(HouseFlowApply.class);
+
+                    example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlow.getId())
+                            .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
+                            .andCondition(" member_check in (1,3) ")
+                            .andCondition("  to_days(start_date) <= to_days('" + DateUtil.getDateString(DateUtil.getNextDay().getTime()) + "') AND to_days(end_date) >= to_days('" + DateUtil.getDateString(DateUtil.getNextDay().getTime()) + "') ");
+                    List list = houseFlowApplyMapper.selectByExample(example1);
+                    if (list.size() > 0) {
+                        houseFlow.setPause(1);
+                        houseFlow.setModifyDate(new Date());
+                        houseFlowMapper.updateByPrimaryKey(houseFlow);
+                    }
+                }
+            }
         }
     }
 

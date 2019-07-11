@@ -81,22 +81,6 @@ public class DruidConfig {
     @Value("{spring.datasource.connectionProperties}")
     private String connectionProperties;
 
-    //长沙数据源配置
-    @Value("${spring.datasource.changsha.url}")
-    public   String csdbUrl;
-    @Value("${spring.datasource.changsha.username}")
-    public   String csusername;
-    @Value("${spring.datasource.changsha.password}")
-    public   String cspassword;
-
-    //深圳数据源配置
-    @Value("${spring.datasource.shenzhen.url}")
-    public   String szdbUrl;
-    @Value("${spring.datasource.shenzhen.username}")
-    public   String szusername;
-    @Value("${spring.datasource.shenzhen.password}")
-    public   String szpassword;
-
 
     @Bean(value = "dataSource")
     @Primary    //优先使用，多数据源
@@ -110,18 +94,24 @@ public class DruidConfig {
         map.put(DataSourceType.DANGJIA.getName(), dataSource);	//key需要跟ThreadLocal中的值对应
 
         //长沙数据源
-        if(!StringUtils.isEmpty(csdbUrl)) {
-            DataSource csDataSource = getDruidDataSource(csusername, cspassword,csdbUrl);
+        if(!StringUtils.isEmpty(dbUrl)) {
+            DataSource csDataSource = getDruidDataSource(username, password,dbUrl);
             if (csDataSource != null) {
                 map.put(DataSourceType.CS_CHANGSHA.getName(), csDataSource);
             }
         }
+
+        //株洲数据源
+        String zzdbUrl=dbUrl.replaceAll("changsha","zhuzhou");
+        DataSource csDataSource = getDruidDataSource(username, password,zzdbUrl);
+        if (csDataSource != null) {
+            map.put(DataSourceType.ZZ_CHANGSHA.getName(), csDataSource);
+        }
         //深圳数据源
-        if(!StringUtils.isEmpty(szdbUrl)) {
-            DataSource csDataSource = getDruidDataSource(szusername, szpassword,szdbUrl);
-            if (csDataSource != null) {
-                map.put(DataSourceType.SZ_CHANGSHA.getName(), csDataSource);
-            }
+        String szdbUrl=dbUrl.replaceAll("changsha","shenzhen");
+        csDataSource = getDruidDataSource(username, password,szdbUrl);
+        if (csDataSource != null) {
+            map.put(DataSourceType.SZ_CHANGSHA.getName(), csDataSource);
         }
         dynamicDataSource.setTargetDataSources(map);
         return dynamicDataSource;

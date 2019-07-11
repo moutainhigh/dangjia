@@ -17,7 +17,7 @@ import java.util.List;
 @Repository
 public interface IBusinessOrderMapper extends Mapper<BusinessOrder> {
 
-    List<BusinessOrder> byMemberId(@Param("memberId") String memberId);
+    List<BusinessOrder> byMemberId(@Param("memberId") String memberId, @Param("houseId") String houseId, @Param("queryId") String queryId);
 
     BusinessOrder byTaskId(@Param("taskId") String taskId, @Param("type") int type);
 

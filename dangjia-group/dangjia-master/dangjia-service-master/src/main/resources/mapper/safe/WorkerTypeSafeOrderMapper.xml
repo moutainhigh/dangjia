@@ -41,7 +41,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where
             worker_type_id = #{workerTypeId}
         and house_id = #{houseId}
-        and state = 1
 		and data_status=0
     </select>
 

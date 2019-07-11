@@ -11,10 +11,11 @@ import java.util.List;
  * Time: 17:28
  */
 @Data
-public class PaymentDTO {
+public class PaymentDTO<T> {
     private WorkerDTO workerDTO;//工匠信息
     private UpgradeDesignDTO upgradeDesignDTO;//升级设计
     private List<ActuaryDTO> actuaryDTOList;//商品
+    private List<T> datas;//数据集合
     private UpgradeSafeDTO upgradeSafeDTO;//升级保险
 
     private BigDecimal totalPrice;//总价
@@ -26,4 +27,6 @@ public class PaymentDTO {
     private String taskId;
     private String info;//支付温馨提示用于
     private int type;
+    private String agreementName;//协议名
+    private String agreementUrl;//协议链接
 }

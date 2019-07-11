@@ -110,6 +110,7 @@ public class MemberService {
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
         String mobile = "";
         request.setAttribute("isShow", "true");
+        String cityId = request.getParameter(Constants.CITY_ID);
         switch (idType) {
             case "1":
                 House house = houseMapper.selectByPrimaryKey(id);
@@ -119,7 +120,7 @@ public class MemberService {
                 }
                 break;
             case "3":
-                Supplier supplier = supplierProductAPI.getSupplier(id);
+                Supplier supplier = supplierProductAPI.getSupplier(cityId,id);
                 if (supplier != null) {
                     mobile = supplier.getTelephone();
                 }
@@ -181,7 +182,7 @@ public class MemberService {
     }
 
     ServerResponse getUser(Member user, String userRole) {
-        if("1".equals(userRole)) {
+        if ("1".equals(userRole)) {
             clueService.sendUser(user, user.getMobile());
         }
         updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
@@ -204,6 +205,11 @@ public class MemberService {
         redisClient.put(userRole, accessToken.getUserToken());
         groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
         groupInfoService.registerJGUsers("gj", new String[]{accessToken.getMemberId()}, new String[1]);
+        MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
+        if(mainUser!=null&&CommonUtil.isEmpty(mainUser.getMemberId())) {
+            //插入MemberId
+            userMapper.insertMemberId(user.getMobile());
+        }
         return ServerResponse.createBySuccess("登录成功，正在跳转", accessToken);
     }
 
@@ -264,22 +270,6 @@ public class MemberService {
             Member user = new Member();
             user.setMobile(phone);
             user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
-            //生成二维码
-//            if(StringUtils.isEmpty(user.getQrcode())){//二维码为空 生成二维码
-//                //根据配置文件设置路径
-//                //图片放项目目录下
-//				String fileName=new Date().getTime()+".png";
-//				String visitRoot=configUtil.getValue(SysConfig.PUBLIC_DANGJIA_PATH, String.class)+configUtil.getValue(SysConfig.PUBLIC_QRCODE_PATH, String.class);
-//				String logoPath = visitRoot+"logo.png";
-//                String encoderContent =  configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class)+"/app/app_invite!workRegister.action?memberid="+user.getId();
-//				try{
-//					QRCodeUtil.encode(encoderContent, logoPath, visitRoot, fileName, true);
-//				}catch (Exception e){
-//					return ServerResponse.createByErrorMessage("二维码生成错误！");
-//				}
-//				String imgurl=configUtil.getValue(SysConfig.PUBLIC_QRCODE_PATH, String.class)+"/"+fileName;
-//				user.setQrcode(imgurl);
-//            }
             user.setPraiseRate(new BigDecimal(1));//好评率
             user.setEvaluationScore(new BigDecimal(60));//积分
             user.setCheckType(5);//未提交资料
@@ -299,7 +289,7 @@ public class MemberService {
             user.setHead("qrcode/logo.png");
             memberMapper.insertSelective(user);
 //            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
-            if(userRole==1) {
+            if (userRole == 1) {
                 clueService.sendUser(user, user.getMobile());
             }
             updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
@@ -313,7 +303,7 @@ public class MemberService {
             }
             redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
             redisClient.deleteCache(Constants.SMS_CODE + phone);
-            if(userRole==1) {
+            if (userRole == 1) {
                 try {
                     //检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
                     redPackPayService.checkUpActivity(request, user.getMobile(), "1");
@@ -326,7 +316,7 @@ public class MemberService {
         }
     }
 
-    public void updateOrInsertInfo(String memberid, String policyId, String pwd) {
+    private void updateOrInsertInfo(String memberid, String policyId, String pwd) {
         try {
             //检测是否已有指定身份，无则初始化
             Example example = new Example(MemberInfo.class);
@@ -415,11 +405,12 @@ public class MemberService {
      * @return
      */
     public ServerResponse certification(String userToken, String name, String idcaoda, String idcaodb, String idcaodall, String idnumber) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createbyUserTokenError();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
-        Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+        Member user = (Member) object;
+        user = memberMapper.selectByPrimaryKey(user.getId());
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
@@ -459,7 +450,7 @@ public class MemberService {
             user.setIdnumber(idnumber);
         user.setRealNameState(1);
         memberMapper.updateByPrimaryKeySelective(user);
-        updataMember(user, accessToken);
+        updataMember(user, userToken);
         return ServerResponse.createBySuccessMessage("提交资料成功");
     }
 
@@ -471,15 +462,16 @@ public class MemberService {
      * @return
      */
     public ServerResponse certificationWorkerType(String userToken, String workerTypeId) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createbyUserTokenError();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
-        Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
+        Member user = (Member) object;
+        user = memberMapper.selectByPrimaryKey(user.getId());
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
-        if (user.getCheckType() ==4) {
+        if (user.getCheckType() == 4) {
             //冻结的帐户不能修改资料信息
             return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
         }
@@ -493,7 +485,7 @@ public class MemberService {
         }
         user.setCheckType(0);
         memberMapper.updateByPrimaryKeySelective(user);
-        updataMember(user, accessToken);
+        updataMember(user, userToken);
         return ServerResponse.createBySuccessMessage("提交工种认证成功");
     }
 
@@ -557,9 +549,9 @@ public class MemberService {
         user.setMobile(phone);
         user = memberMapper.getUser(user);
         if (user == null) {
-            return ServerResponse.createByErrorMessage( "电话号码未注册！");
+            return ServerResponse.createByErrorMessage("电话号码未注册！");
         } else {
-            if (user.getCheckType() ==4) {
+            if (user.getCheckType() == 4) {
                 //冻结的帐户不能修改资料信息
                 return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
             }
@@ -575,37 +567,14 @@ public class MemberService {
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             AccessToken accessToken = TokenUtil.generateAccessToken(user);
             redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
-            return ServerResponse.createBySuccessMessage("设置密码成功，正在跳转");
-        }
-    }
-
-
-    //根据userToken查询token记录并验证是否失效
-    public ServerResponse getAccessTokenByUserToken(String userToken) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createbyUserTokenError();
-        } else {
-            boolean flag;
-            try {
-                flag = TokenUtil.verifyAccessToken(accessToken.getTimestamp());
-            } catch (Exception e) {
-                e.printStackTrace();
-                return ServerResponse.createByErrorMessage("系统错误");
-            }//验证是否失效
-            if (flag) {//失效
-                return ServerResponse.createbyUserTokenError();
-            } else {
-                return ServerResponse.createBySuccessMessage("有效！");
-            }
+            return ServerResponse.createBySuccessMessage("设置密码成功");
         }
     }
 
     /**
      * 业主列表
      */
-    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy,String type, String userId,String beginDate,String endDate) {
+    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
         try {
             List<String> childsLabelIdList = new ArrayList<>();
             if (StringUtils.isNotBlank(parentId)) {
@@ -619,13 +588,13 @@ public class MemberService {
             String[] childsLabelIdArr = new String[childsLabelIdList.size()];
             childsLabelIdList.toArray(childsLabelIdArr);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
-                if(beginDate.equals(endDate)){
-                    beginDate=beginDate+" "+"00:00:00";
-                    endDate=endDate+" "+"23:59:59";
+            if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
+                if (beginDate.equals(endDate)) {
+                    beginDate = beginDate + " " + "00:00:00";
+                    endDate = endDate + " " + "23:59:59";
                 }
             }
-            List<Member> list = memberMapper.getMemberListByName(searchKey, stage, userRole, childsLabelIdArr, orderBy,type,userId,beginDate,endDate);
+            List<Member> list = memberMapper.getMemberListByName(searchKey, stage, userRole, childsLabelIdArr, orderBy, type, userId, beginDate, endDate);
             PageInfo pageResult = new PageInfo(list);
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
             for (Member member : list) {
@@ -670,11 +639,13 @@ public class MemberService {
                 mcDTO.setCreateDate(member.getCreateDate());
                 if (customer.getUserId() != null) {
                     MainUser mainUser = userMapper.selectByPrimaryKey(customer.getUserId());
-                    mcDTO.setUserName(mainUser.getUsername());
+                    if(null!=mainUser) {
+                        mcDTO.setUserName(mainUser.getUsername());
+                    }
                 }
                 //找到提醒内容 ： 离当前时间最近的那一条
-                if (customer.getRemindRecordId() != null) {
-                    CustomerRecord remindCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getRemindRecordId());
+                if (customer.getCurrRecordId() != null) {
+                    CustomerRecord remindCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getCurrRecordId());
                     mcDTO.setRemindContent(remindCustomerRecord.getDescribes());
                     mcDTO.setRemindTime(remindCustomerRecord.getRemindTime());
                     if (remindCustomerRecord.getRemindTime() != null) {
@@ -722,7 +693,7 @@ public class MemberService {
                 srcMember.setMobile(member.getMobile());
             if (StringUtils.isNotBlank(member.getRemarks()))
                 srcMember.setRemarks(member.getRemarks());
-            if (srcMember.getCheckType() ==4) {
+            if (srcMember.getCheckType() == 4) {
                 //冻结的帐户不能修改资料信息
                 return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
             }
@@ -842,7 +813,7 @@ public class MemberService {
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
-        if (user.getCheckType() ==4) {
+        if (user.getCheckType() == 4) {
             //冻结的帐户不能修改资料信息
             return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
         }
@@ -879,7 +850,7 @@ public class MemberService {
         if (user == null) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
-        if (checkType!=4&&checkType!=2&&user.getCheckType() ==4) {
+        if (checkType != 4 && checkType != 2 && user.getCheckType() == 4) {
             //冻结的帐户不能修改资料信息
             return ServerResponse.createByErrorMessage("账户冻结，无法修改资料");
         }
@@ -943,9 +914,9 @@ public class MemberService {
      * @return
      */
     public ServerResponse getMembers(String userToken, String memberId, String phone) {
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createbyUserTokenError();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
         Member member = null;
         if (!CommonUtil.isEmpty(memberId)) {
@@ -995,7 +966,6 @@ public class MemberService {
             map.put("appKey", messageAPI.getAppKey("gj"));
             datas.add(map);
         }
-
         if (datas.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无该用户");
         }

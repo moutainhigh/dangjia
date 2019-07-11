@@ -30,10 +30,61 @@ public interface HouseWorkerAPI {
                                  @RequestParam("cityId") String cityId,
                                  @RequestParam("houseFlowId") String houseFlowId);
 
+    /**
+     * showdoc
+     *
+     * @param userToken     必选 string userToken
+     * @param houseWorkerId 必选 string houseWorkerId
+     * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
+     * @catalog 当家接口文档/房产任务模块
+     * @title 业主换工匠
+     * @description 业主换工匠
+     * @method POST
+     * @url master/app/core/houseWorker/setChangeWorker
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 3
+     * @Author: Ruking 18075121944
+     * @Date: 2019/6/24 12:01 PM
+     */
     @PostMapping("app/core/houseWorker/setChangeWorker")
-    @ApiOperation(value = "业主换人", notes = "业主换人")
+    @ApiOperation(value = "业主换工匠", notes = "业主换工匠")
     ServerResponse setChangeWorker(@RequestParam("userToken") String userToken,
                                    @RequestParam("houseWorkerId") String houseWorkerId);
+
+    /**
+     * showdoc
+     *
+     * @param userToken   必选 string userToken
+     * @param houseFlowId 必选 string houseFlowId
+     * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
+     * @catalog 当家接口文档/房产任务模块
+     * @title 获取工匠详情
+     * @description 获取工匠详情
+     * @method POST
+     * @url master/app/core/houseWorker/getHouseWorker
+     * @return_param houseWorker Object 当前工匠，返回参数查看member_下的
+     * @return_param historyWorkerList List 历史工匠，返回参数查看member_下的
+     * @return_param member_id String 工匠ID
+     * @return_param member_targetId String 工匠极光账号
+     * @return_param member_targetAppKey String 工匠极光key
+     * @return_param member_nickName String 工匠昵称
+     * @return_param member_name String 工匠姓名
+     * @return_param member_mobile String 工匠手机
+     * @return_param member_head String 工匠头像
+     * @return_param member_workerTypeId String 工种ID
+     * @return_param member_workerName String 工种名称
+     * @return_param member_houseFlowId String 工序ID
+     * @return_param member_houseWorkerId String 工序订单ID
+     * @return_param member_isSubstitution int 是否可以更换，0：不可以，1：可以
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 4
+     * @Author: Ruking 18075121944
+     * @Date: 2019/6/24 12:03 PM
+     */
+    @PostMapping("app/core/houseWorker/getHouseWorker")
+    @ApiOperation(value = "获取工匠详情", notes = "获取工匠详情")
+    ServerResponse getHouseWorker(@RequestParam("userToken") String userToken,
+                                  @RequestParam("houseFlowId") String houseFlowId);
 
     @PostMapping("app/core/houseWorker/getConstructionByWorkerId")
     @ApiOperation(value = "根据工人查询自己的施工界面", notes = "根据工人查询自己的施工界面")
@@ -55,10 +106,11 @@ public interface HouseWorkerAPI {
     ServerResponse setHouseFlowApply(@RequestParam("userToken") String userToken,
                                      @RequestParam("applyType") Integer applyType,
                                      @RequestParam("houseFlowId") String houseFlowId,
-                                     @RequestParam("suspendDay") Integer suspendDay,
                                      @RequestParam("applyDec") String applyDec,
                                      @RequestParam("imageList") String imageList,
-                                     @RequestParam("houseFlowId2") String houseFlowId2);
+                                     @RequestParam("houseFlowId2") String houseFlowId2,
+                                     @RequestParam("latitude") String latitude,
+                                     @RequestParam("longitude") String longitude);
 
     @PostMapping("app/core/houseWorker/getAdvanceInAdvance")
     @ApiOperation(value = "提前进场", notes = "提前进场")

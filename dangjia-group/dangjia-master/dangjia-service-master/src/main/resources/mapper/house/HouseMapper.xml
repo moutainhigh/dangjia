@@ -39,7 +39,47 @@
         data_status as dataStatus,
         create_date as createDate,
         construction_date as constructionDate,
-        modify_date as modifyDate
+        modify_date as modifyDate,
+        h.optional_label as optionalLabel
+    </sql>
+    <sql id="basic_h_columns">
+        h.id,
+        h.building,
+        h.city_name as cityName,
+        h.residential,
+        h.type,
+        h.unit,
+        h.member_id as memberId,
+        h.task_number as taskNumber,
+        h.square,
+        h.number,
+        h.style,
+        h.designer_ok as designerOk,
+        h.budget_ok as budgetOk,
+        h.image,
+        h.decoration_type as decorationType,
+        h.city_id as cityId,
+        h.modeling_layout_id as modelingLayoutId,
+        h.money,
+        h.pause,
+        h.show_house as showHouse,
+        h.village_id as villageId,
+        h.refer_house_id as referHouseId,
+        h.have_complete as haveComplete,
+        h.record_type as recordType,
+        h.build_square as buildSquare,
+        h.again,
+        h.house_type as houseType,
+        h.drawings,
+        h.work_deposit_id as workDepositId,
+        h.custom_sort as customSort,
+        h.is_select as isSelect,
+        h.visit_state as visitState,
+        h.data_status as dataStatus,
+        h.create_date as createDate,
+        h.construction_date as constructionDate,
+        h.modify_date as modifyDate,
+        h.optional_label as optionalLabel
     </sql>
     <select id="getDesignList" resultType="com.dangjia.acg.dto.house.DesignDTO">
         SELECT
@@ -52,10 +92,15 @@
         house.number AS number,
         member.nick_name AS nickName,
         member.NAME AS NAME,
-        member.mobile AS mobile
+        member.mobile AS mobile,
+        s.store_name storeName
         FROM
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
+        LEFT JOIN dj_store s ON FIND_IN_SET(
+        house.village_id,
+        s.villages
+        )
         WHERE 1=1
         <if test="dataStatus!=null and dataStatus!=''">
             AND house.data_status=#{dataStatus}
@@ -85,6 +130,9 @@
         <if test="designerType == 4">
             AND house.designer_ok =3
         </if>
+        <if test="cityKey!=null and cityKey!=''">
+            AND FIND_IN_SET(house.city_id,#{cityKey})
+        </if>
         <if test="searchKey!=null and searchKey!=''">
             AND (CONCAT(
             house.residential,
@@ -97,6 +145,7 @@
             OR member.mobile like CONCAT('%',#{searchKey},'%')
             )
         </if>
+        GROUP BY house.id
         ORDER BY house.create_date DESC
     </select>
 
@@ -199,9 +248,43 @@
         </if>
         and ((decoration_type in (1,2) and budget_ok=3) or (decoration_type=3 and visit_state=1))
         and site_display=0
+        and visit_state=3
         order by num desc
     </select>
-
+    <!--参考花费-->
+    <select id="getSameLayoutDistance" resultType="com.dangjia.acg.modle.house.House">
+        SELECT
+        <include refid="basic_h_columns"/>
+        from dj_house h
+        INNER JOIN (SELECT a.house_id,COUNT(a.id) num FROM dj_core_house_flow_apply a GROUP BY a.house_id ) b ON
+        b.house_id=h.id
+        INNER JOIN (
+                SELECT
+                    mv.*, (
+                        st_distance (
+                        point (mv.locationx, mv.locationy),
+                        point (#{locationx}	,#{locationy})
+                        ) * 111195 / 1000
+                    ) AS juli
+                FROM
+                `dj_house_modeling_village` mv
+                WHERE
+                mv.locationx IS NOT NULL
+                AND mv.id=#{villageId}
+        ) v ON v.id = h.village_id
+        where
+        h.data_status=0
+        <if test="cityId!=null and cityId!=''">
+            and h.city_id = #{cityId}
+        </if>
+        and site_display=0
+        and visit_state=3
+        ORDER BY
+        <if test="minSquare!=null and minSquare!='' and maxSquare!=null and maxSquare!=''">
+          IF(( h.build_square &gt;= #{minSquare} AND h.build_square &lt;= #{maxSquare}), 0, 1 ) ,
+        </if>
+        v.juli ASC
+    </select>
     <!--参考报价-->
     <select id="getReferenceBudget" resultType="com.dangjia.acg.modle.house.House">
         SELECT
@@ -252,6 +335,9 @@
         INNER JOIN dj_member m ON h.member_id = m.id
         WHERE
         h.data_status =0
+        <if test="cityKey!=null and cityKey!=''">
+            AND FIND_IN_SET(h.city_id,#{cityKey})
+        </if>
         <if test="memberId!=null and memberId!=''">
             and m.id = #{memberId}
         </if>
@@ -295,6 +381,7 @@
         ) houseName,
         h.city_name as cityName,
         h.budget_ok as budgetOk,
+        h.designer_ok as designerOk,
         h.custom_sort as customSort,
         m.nick_name as name,
         m.id as memberId,
@@ -315,10 +402,16 @@
         h.modify_date AS modifyDate,
         h.construction_date as constructionDate,
         h.number as number,
-        ( CASE WHEN (h.decoration_type = 2 AND h.designer_ok != 3) THEN 1 ELSE 0 END ) AS showUpdata
+        h.optional_label as optionalLabel,
+        ( CASE WHEN (h.decoration_type = 2 AND h.designer_ok != 3) THEN 1 ELSE 0 END ) AS showUpdata,
+        s.store_name storeName
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
+        LEFT JOIN dj_store s ON FIND_IN_SET(
+        h.village_id,
+        s.villages
+        )
         WHERE
         (h.decoration_type = 2 or (h.decoration_type != 2 and h.designer_ok =3))
         <if test="dataStatus!=null and dataStatus!=''">
@@ -347,6 +440,8 @@
             ) LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
+
+        GROUP BY h.id
         ORDER by h.create_date desc
 
     </select>
@@ -405,6 +500,9 @@
         INNER JOIN dj_member m ON h.member_id = m.id
         WHERE
         h.data_status =0
+        <if test="cityKey!=null and cityKey!=''">
+            AND FIND_IN_SET(h.city_id,#{cityKey})
+        </if>
         <if test="visitState==0 || visitState==1">
             and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and h.pause=0
         </if>
@@ -497,6 +595,9 @@
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
         WHERE house.data_status=0
+        <if test="villageId!=null and villageId!=''">
+            AND FIND_IN_SET(house.village_id,#{villageId})
+        </if>
         <if test="visitState!=null and visitState!=''">
             AND house.visit_state=#{visitState}
         </if>
@@ -569,7 +670,7 @@
             `dj_repair_mend_order`
             WHERE
             `house_id` = #{houseId}
-            AND state = 4
+            AND state = 4 AND type not in(3,4,5)
             )
         UNION ALL
         (
@@ -626,6 +727,49 @@
         ) a
         ORDER BY
         a.date DESC
+    </select>
+
+    <!--根据位置取距离近的参考推荐-->
+    <select id="getRecommended" resultType="com.dangjia.acg.modle.house.House">
+        SELECT * FROM (SELECT
+        <include refid="basic_h_columns"/>
+        ,ROUND(
+        6378.138 * 2
+        * ASIN(
+        SQRT(
+        POW(
+        SIN(
+        (
+        #{latitude} * PI() / 180 - mv.locationy * PI() / 180
+        ) / 2
+        )
+        ,
+        2
+        ) + COS(
+        #{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(
+        SIN(
+        (
+        #{longitude} * PI() / 180 - mv.locationx * PI() / 180
+        ) / 2
+        ),
+        2
+        )
+        )
+        ) * 1000
+        ) AS juli
+        FROM
+        `dj_house_modeling_village` mv ,dj_house h
+        inner join
+        (SELECT a.house_id,COUNT(a.id) num FROM dj_core_house_flow_apply a GROUP BY a.house_id ) b ON
+        b.house_id=h.id/*筛选调无施工记录的房子*/
+        WHERE
+        mv.id=h.village_id
+        AND mv.locationx IS NOT NULL
+        AND h.visit_state =3
+        AND h.site_display=0
+        ORDER BY juli limit 30
+        )tab
+        order by rand() limit #{limit}
     </select>
 </mapper>
 

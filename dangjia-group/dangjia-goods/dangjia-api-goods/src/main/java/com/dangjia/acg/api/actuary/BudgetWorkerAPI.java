@@ -155,17 +155,6 @@ public interface BudgetWorkerAPI {
                                        @RequestParam("workerTypeId") String workerTypeId);
 
     /**
-     * 业主修改精算
-     *
-     * @param listOfGoods
-     * @return
-     */
-    @PostMapping("/actuary/budgetWorker/doModifyBudgets")
-    @ApiOperation(value = "业主修改精算", notes = "业主修改精算")
-    ServerResponse doModifyBudgets(@RequestParam("request") HttpServletRequest request,
-                                   @RequestParam("listOfGoods") String listOfGoods);
-
-    /**
      * 估价
      *
      * @param houseId
@@ -184,27 +173,32 @@ public interface BudgetWorkerAPI {
      */
     @PostMapping("/actuary/budgetWorker/getAllTechnologyByHouseId")
     @ApiOperation(value = "根据houseId查询所有验收节点", notes = "根据houseId查询所有验收节点")
-    JSONArray getAllTechnologyByHouseId(@RequestParam("houseId") String houseId);
+    JSONArray getAllTechnologyByHouseId(@RequestParam("cityId") String cityId,@RequestParam("houseId") String houseId);
 
     @PostMapping("/actuary/budgetWorker/getTecByHouseFlowId")
     @ApiOperation(value = "交底节点", notes = "交底节点")
-    JSONArray getTecByHouseFlowId(@RequestParam("houseId") String houseId,
+    JSONArray getTecByHouseFlowId(@RequestParam("cityId") String cityId,
+                                  @RequestParam("houseId") String houseId,
                                   @RequestParam("houseFlowId") String houseFlowId);
 
 
     @PostMapping("/actuary/budgetWorker/getTecList")
     @ApiOperation(value = "根据人工商品查询工艺", notes = "根据人工商品查询工艺")
-   JSONArray getTecList(@RequestParam("workerType")int workerType,@RequestParam("workerGoodsId")String workerGoodsId);
+   JSONArray getTecList(@RequestParam("cityId") String cityId,
+                        @RequestParam("workerType")int workerType,@RequestParam("workerGoodsId")String workerGoodsId);
 
     @PostMapping("/actuary/budgetWorker/getWorkerGoodsList")
     @ApiOperation(value = "精算查询包含工艺的人工商品", notes = "精算查询包含工艺的人工商品")
-    JSONArray getWorkerGoodsList(@RequestParam("houseId")String houseId, @RequestParam("houseFlowId")String houseFlowId);
+    JSONArray getWorkerGoodsList(@RequestParam("cityId") String cityId,
+                                 @RequestParam("houseId")String houseId, @RequestParam("houseFlowId")String houseFlowId);
 
     @PostMapping("/actuary/budgetWorker/workerPatrolList")
     @ApiOperation(value = "是否有巡查工艺节点", notes = "是否有巡查工艺节点")
-    boolean workerPatrolList(@RequestParam("workerGoodsId")String workerGoodsId);
+    boolean workerPatrolList(@RequestParam("cityId") String cityId,
+                             @RequestParam("workerGoodsId")String workerGoodsId);
 
     @PostMapping("/actuary/budgetWorker/patrolList")
     @ApiOperation(value = "管家巡查工艺", notes = "管家巡查工艺")
-    boolean patrolList(@RequestParam("workerGoodsId")String workerGoodsId);
+    boolean patrolList(@RequestParam("cityId") String cityId,
+                       @RequestParam("workerGoodsId")String workerGoodsId);
 }

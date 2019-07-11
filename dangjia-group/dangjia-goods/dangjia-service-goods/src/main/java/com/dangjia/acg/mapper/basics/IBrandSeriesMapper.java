@@ -19,6 +19,9 @@ public interface IBrandSeriesMapper extends Mapper<BrandSeries> {
 
 	/**根据货品id查询品牌名*/
 	String brandName(@Param("productId")String productId);
+
+	/**根据货品id查询品牌系列名属性名*/
+	String getAttributesName(@Param("productId")String productId);
 	/**根据货品id查询品牌系列名*/
 	String brandSeriesName(@Param("productId")String productId);
 	/**根据货品id查询品牌系列名*/

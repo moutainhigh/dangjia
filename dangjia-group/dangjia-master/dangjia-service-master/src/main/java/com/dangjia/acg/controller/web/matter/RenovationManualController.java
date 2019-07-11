@@ -4,76 +4,47 @@ import com.dangjia.acg.api.web.matter.WebRenovationManualAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.service.matter.RenovationManualService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * author: zmj
- * Date: 2018/11/5 0005
- * Time: 15:40
- */
+import javax.servlet.http.HttpServletRequest;
+
 @RestController
 public class RenovationManualController implements WebRenovationManualAPI {
 
     @Autowired
     private RenovationManualService renovationManualService;
 
-    /**
-     * 根据工序id查询所有装修指南
-     *
-     * @return
-     */
     @Override
     @ApiMethod
-    public ServerResponse queryRenovationManual(PageDTO pageDTO, RenovationManual renovationManual) {
-        return renovationManualService.queryRenovationManual(pageDTO, renovationManual);
+    public ServerResponse queryRenovationManual(HttpServletRequest request, PageDTO pageDTO, String workerTypeId, String name) {
+        return renovationManualService.queryRenovationManual(pageDTO, workerTypeId, name);
     }
 
-    /**
-     * 新增装修指南
-     *
-     * @return
-     */
     @Override
     @ApiMethod
-    public ServerResponse addRenovationManual(RenovationManual renovationManual) {
-        return renovationManualService.addRenovationManual(renovationManual);
+    public ServerResponse addRenovationManual(HttpServletRequest request, String name, String workerTypeId, String urlName, String test,
+                                              String url, String types, Integer state, Integer orderNumber, String image) {
+        return renovationManualService.addRenovationManual(name, workerTypeId, urlName, test, url, types, state, orderNumber, image);
     }
 
-    /**
-     * 修改装修指南
-     *
-     * @return
-     */
     @Override
     @ApiMethod
-    public ServerResponse updateRenovationManual(RenovationManual renovationManual) {
-        return renovationManualService.updateRenovationManual(renovationManual);
+    public ServerResponse updateRenovationManual(HttpServletRequest request, String id, String name, String workerTypeId, String urlName, String test,
+                                                 String url, String types, Integer state, Integer orderNumber, String image) {
+        return renovationManualService.updateRenovationManual(id, name, workerTypeId, urlName, test, url, types, state, orderNumber, image);
     }
 
-    /**
-     * 删除装修指南
-     *
-     * @param id
-     * @return
-     */
     @Override
     @ApiMethod
-    public ServerResponse deleteRenovationManual(String id) {
+    public ServerResponse deleteRenovationManual(HttpServletRequest request, String id) {
         return renovationManualService.deleteRenovationManual(id);
     }
 
-    /**
-     * 根据id查询装修指南对象
-     *
-     * @param id
-     * @return
-     */
     @Override
     @ApiMethod
-    public ServerResponse getRenovationManualById(String id) {
+    public ServerResponse getRenovationManualById(HttpServletRequest request, String id) {
         return renovationManualService.getRenovationManualById(id);
     }
 

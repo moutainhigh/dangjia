@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.house;
 
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.ActuaryOpeAPI;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
@@ -28,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
-import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -54,9 +52,6 @@ public class WarehouseService {
     private IHouseMapper houseMapper;
     @Autowired
     private IProductChangeMapper productChangeMapper;
-
-    @Autowired
-    private RedisClient redisClient;
     private static Logger LOG = LoggerFactory.getLogger(WarehouseService.class);
 
 
@@ -122,16 +117,16 @@ public class WarehouseService {
      */
     public ServerResponse warehouseGmList(HttpServletRequest request, String userToken, String houseId, String name, String type) {
         try {
-            if (StringUtil.isEmpty(houseId)) {
-                return ServerResponse.createByErrorMessage("houseId不能为空");
-            }
             House house = houseMapper.selectByPrimaryKey(houseId);
-            String cityId = request.getParameter(Constants.CITY_ID);
+            if (house == null) {
+                return ServerResponse.createByErrorMessage("未找到该房产");
+            }
+            request.setAttribute(Constants.CITY_ID,house.getCityId());
             Map<String, Map> maps = new HashMap<>();
             Map map = new HashMap();
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             if (!CommonUtil.isEmpty(type) && "2".equals(type)) {
-                List<BudgetItemDTO> budgetItemDTOS = actuaryOpeAPI.getHouseWorkerInfo(cityId, "3", houseId, address);
+                List<BudgetItemDTO> budgetItemDTOS = actuaryOpeAPI.getHouseWorkerInfo(house.getCityId(), "3", houseId, address);
                 map.put("goodsItemDTOList", budgetItemDTOS);
             } else {
                 Example example = new Example(Warehouse.class);
@@ -145,7 +140,6 @@ public class WarehouseService {
                 }
                 List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
                 LOG.info(" warehouseList size:" + warehouseList.size());
-
                 List<String> categoryIdList = warehouseMapper.categoryIdList(houseId);
                 for (String categoryId : categoryIdList) {
                     //获取低级类别
@@ -180,12 +174,13 @@ public class WarehouseService {
                         WarehouseDTO warehouseDTO = new WarehouseDTO();
                         BeanUtils.beanToBean(warehouse, warehouseDTO);
                         warehouseDTO.setImage(address + warehouse.getImage());
+                        warehouseDTO.setShopCount(warehouse.getShopCount());
                         warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                         warehouseDTO.setBackCount((warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
                         warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                         warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
                         warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
-                        warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(cityId, warehouse.getProductId()));
+                        warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
                         // type为空时查询 是否更换
                         if (CommonUtil.isEmpty(type)) {
                             if (productChangeMapper.queryProductChangeExist(warehouse.getHouseId(), warehouse.getProductId(), "0") > 0) {
@@ -205,7 +200,7 @@ public class WarehouseService {
                 }
                 map.put("goodsItemDTOList", budgetItemDTOList);
             }
-            Double workerPrice = actuaryOpeAPI.getHouseWorkerPrice(cityId, "3", houseId);
+            Double workerPrice = actuaryOpeAPI.getHouseWorkerPrice(house.getCityId(), "3", houseId);
             Double caiPrice = warehouseMapper.getHouseGoodsPrice(houseId, name);
             Double totalPrice = workerPrice + caiPrice;
             map.put("workerPrice", workerPrice);
@@ -216,9 +211,5 @@ public class WarehouseService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
-    }
-
-    public static void main(String[] args) {
-        System.out.println();
     }
 }

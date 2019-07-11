@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.app.deliver;
 
 import com.dangjia.acg.api.app.deliver.OrderAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.deliver.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +25,13 @@ public class OrderController implements OrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse orderDetail(String orderId){
+    public ServerResponse orderDetail(String orderId) {
         return orderService.orderDetail(orderId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse orderList(String businessOrderId){
+    public ServerResponse orderList(String businessOrderId) {
         return orderService.orderList(businessOrderId);
     }
 
@@ -39,18 +40,18 @@ public class OrderController implements OrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse businessOrderList(String userToken){
-        return orderService.businessOrderList(userToken);
+    public ServerResponse businessOrderList(PageDTO pageDTO, String userToken, String houseId, String queryId) {
+        return orderService.businessOrderList(pageDTO, userToken, houseId, queryId);
     }
 
     /**
      * 管家确认要货
-     *  提交到后台材料员审核
+     * 提交到后台材料员审核
      */
     @Override
     @ApiMethod
-    public ServerResponse confirmOrderSplit(String houseId, String userToken){
-        return orderService.confirmOrderSplit(userToken,houseId);
+    public ServerResponse confirmOrderSplit(String houseId, String userToken) {
+        return orderService.confirmOrderSplit(userToken, houseId);
     }
 
     /**
@@ -58,8 +59,8 @@ public class OrderController implements OrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getOrderItemList(String userToken,String houseId){
-        return orderService.getOrderItemList(userToken,houseId);
+    public ServerResponse getOrderItemList(String userToken, String houseId) {
+        return orderService.getOrderItemList(userToken, houseId);
     }
 
     /**
@@ -67,7 +68,7 @@ public class OrderController implements OrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse saveOrderSplit(String productArr, String houseId, String userToken){
-        return orderService.saveOrderSplit(productArr,houseId,userToken);
+    public ServerResponse saveOrderSplit(String productArr, String houseId, String userToken) {
+        return orderService.saveOrderSplit(productArr, houseId, userToken);
     }
 }

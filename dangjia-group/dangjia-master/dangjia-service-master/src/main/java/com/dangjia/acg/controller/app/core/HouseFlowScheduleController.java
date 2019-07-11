@@ -23,12 +23,13 @@ public class HouseFlowScheduleController implements HouseFlowScheduleAPI {
 
     /**
      * 工程日历工序列表
+     *
      * @param houseId 房子ID
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse getHouseFlows(String houseId){
+    public ServerResponse getHouseFlows(String houseId) {
 
         return houseFlowScheduleService.getHouseFlows(houseId);
     }
@@ -36,27 +37,29 @@ public class HouseFlowScheduleController implements HouseFlowScheduleAPI {
 
     /**
      * 设置指定工序的工期
+     *
      * @param houseFlowId 工序ID
-     * @param startDate 工期开始时间
-     * @param endDate   工期结束时间
+     * @param startDate   工期开始时间
+     * @param endDate     工期结束时间
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse setHouseFlowSchedule(String  houseFlowId, Date startDate, Date endDate){
+    public ServerResponse setHouseFlowSchedule(String houseFlowId, Date startDate, Date endDate) {
 
-        return houseFlowScheduleService.setHouseFlowSchedule(houseFlowId,startDate,endDate);
+        return houseFlowScheduleService.setHouseFlowSchedule(houseFlowId, startDate, endDate);
     }
 
 
     /**
      * 生产工程日历
+     *
      * @param houseId 房子ID
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse makeCalendar(String houseId){
+    public ServerResponse makeCalendar(String houseId) {
 
         return houseFlowScheduleService.makeCalendar(houseId);
     }
@@ -64,15 +67,16 @@ public class HouseFlowScheduleController implements HouseFlowScheduleAPI {
 
     /**
      * 查看日历
+     *
      * @param houseId 房子ID
-     * @param day 指定哪天
-     * @return   {date:'2019-05-01',type:1}
-     *   type: 1,正常;2,特殊;3,其他;4,正常+特殊;5,其他+特殊
+     * @param day     指定哪天
+     * @return {date:'2019-05-01',type:1}
+     * type: 1,正常;2,特殊;3,其他;4,正常+特殊;5,其他+特殊
      */
     @Override
     @ApiMethod
-    public ServerResponse viewCalendar(String houseId,Date day){
-        return houseFlowScheduleService.viewCalendar(houseId,day);
+    public ServerResponse viewCalendar(String houseId, Date day) {
+        return houseFlowScheduleService.viewCalendar(houseId, day);
     }
 
 }

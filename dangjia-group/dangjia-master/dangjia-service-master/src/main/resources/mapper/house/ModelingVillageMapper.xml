@@ -21,6 +21,44 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         create_date as createDate,
         modify_date as modifyDate
     </sql>
+    <sql id="basic_h_columns">
+        h.id,
+        h.building,
+        h.city_name as cityName,
+        h.residential,
+        h.type,
+        h.unit,
+        h.member_id as memberId,
+        h.task_number as taskNumber,
+        h.square,
+        h.number,
+        h.style,
+        h.designer_ok as designerOk,
+        h.budget_ok as budgetOk,
+        h.image,
+        h.decoration_type as decorationType,
+        h.city_id as cityId,
+        h.modeling_layout_id as modelingLayoutId,
+        h.money,
+        h.pause,
+        h.show_house as showHouse,
+        h.village_id as villageId,
+        h.refer_house_id as referHouseId,
+        h.have_complete as haveComplete,
+        h.record_type as recordType,
+        h.build_square as buildSquare,
+        h.again,
+        h.house_type as houseType,
+        h.drawings,
+        h.work_deposit_id as workDepositId,
+        h.custom_sort as customSort,
+        h.is_select as isSelect,
+        h.visit_state as visitState,
+        h.data_status as dataStatus,
+        h.create_date as createDate,
+        h.construction_date as constructionDate,
+        h.modify_date as modifyDate
+    </sql>
     <resultMap id="findVillageClassifys" type="com.dangjia.acg.dto.house.VillageClassifyDTO" >
         <result column="initials" property="initials"/>
         <collection property="villageDTOList" ofType="com.dangjia.acg.dto.house.VillageDTO">
@@ -80,6 +118,177 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and state=0
         ORDER by
         initials asc ,layout_sum desc
+    </select>
+
+
+    <!--&lt;!&ndash;查询指定距离的施工现场数&ndash;&gt;-->
+    <!--<select id="jobLocationCount" resultType="java.lang.Integer">-->
+        <!--SELECT-->
+            <!--count(0)-->
+        <!--FROM-->
+            <!--`dj_house_modeling_village` mv-->
+        <!--WHERE-->
+            <!--mv.locationx IS NOT NULL-->
+        <!--AND ROUND(-->
+            <!--6378.138 * 2 * ASIN(-->
+                <!--SQRT(-->
+                    <!--POW(-->
+                        <!--SIN(-->
+                            <!--(-->
+                                <!--#{latitude} * PI() / 180 - mv.locationy * PI() / 180-->
+                            <!--) / 2-->
+                        <!--),-->
+                        <!--2-->
+                    <!--) + COS(-->
+                        <!--#{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(-->
+                        <!--SIN(-->
+                            <!--(-->
+                               <!--#{longitude} * PI() / 180 - mv.locationx * PI() / 180-->
+                            <!--) / 2-->
+                        <!--),-->
+                        <!--2-->
+                    <!--)-->
+                <!--)-->
+            <!--) * 1000-->
+        <!--)&lt;=(#{distance}*1000)-->
+    <!--</select>-->
+
+    <!--查询指定距离的施工现场-->
+    <select id="jobLocation" resultType="com.dangjia.acg.modle.house.House">
+        SELECT * FROM (SELECT
+        <include refid="basic_h_columns"/>
+        ,ROUND(
+        6378.138 * 2
+        * ASIN(
+        SQRT(
+        POW(
+        SIN(
+        (
+        #{latitude} * PI() / 180 - mv.locationy * PI() / 180
+        ) / 2
+        )
+        ,
+        2
+        ) + COS(
+        #{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(
+        SIN(
+        (
+        #{longitude} * PI() / 180 - mv.locationx * PI() / 180
+        ) / 2
+        ),
+        2
+        )
+        )
+        ) * 1000
+        ) AS juli
+        FROM
+        `dj_house_modeling_village` mv ,dj_house h
+        inner join
+        (SELECT a.house_id,COUNT(a.id) num FROM dj_core_house_flow_apply a GROUP BY a.house_id ) b ON
+        b.house_id=h.id/*筛选调无施工记录的房子*/
+        WHERE
+        mv.id=h.village_id
+        AND mv.locationx IS NOT NULL
+        AND ((h.decoration_type in (1,2) and h.budget_ok=3) OR (h.decoration_type=3 and h.visit_state=1))
+        AND h.visit_state in(1,3)
+        AND h.site_display=0
+        AND ROUND(
+        6378.138 * 2
+        * ASIN(
+        SQRT(
+        POW(
+        SIN(
+        (
+        #{latitude} * PI() / 180 - mv.locationy * PI() / 180
+        ) / 2
+        )
+        ,
+        2
+        ) + COS(
+        #{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(
+        SIN(
+        (
+        #{longitude} * PI() / 180 - mv.locationx * PI() / 180
+        ) / 2
+        ),
+        2
+        )
+        )
+        ) * 1000
+        ) &lt;=(#{endDistance}*1000)
+        AND
+        ROUND(
+        6378.138 * 2
+        * ASIN(
+        SQRT(
+        POW(
+        SIN(
+        (
+        #{latitude} * PI() / 180 - mv.locationy * PI() / 180
+        ) / 2
+        )
+        ,
+        2
+        ) + COS(
+        #{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(
+        SIN(
+        (
+        #{longitude} * PI() / 180 - mv.locationx * PI() / 180
+        ) / 2
+        ),
+        2
+        )
+        )
+        ) * 1000
+        ) &gt;=(#{beginDistance}*1000)
+        ORDER BY juli,h.construction_date DESC
+        )tab
+        order by rand() limit 2
+    </select>
+
+
+    <!--查询指定距离的施工现场-->
+    <select id="jobModelingVillage" resultType="com.dangjia.acg.modle.house.House">
+        SELECT * FROM (SELECT
+        <include refid="basic_h_columns"/>
+        ,ROUND(
+        6378.138 * 2
+        * ASIN(
+        SQRT(
+        POW(
+        SIN(
+        (
+        #{latitude} * PI() / 180 - mv.locationy * PI() / 180
+        ) / 2
+        )
+        ,
+        2
+        ) + COS(
+        #{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(
+        SIN(
+        (
+        #{longitude} * PI() / 180 - mv.locationx * PI() / 180
+        ) / 2
+        ),
+        2
+        )
+        )
+        ) * 1000
+        ) AS juli
+        FROM
+        `dj_house_modeling_village` mv ,dj_house h
+        inner join
+        (SELECT a.house_id,COUNT(a.id) num FROM dj_core_house_flow_apply a GROUP BY a.house_id ) b ON
+        b.house_id=h.id/*筛选调无施工记录的房子*/
+        WHERE
+        mv.id=h.village_id
+        AND mv.locationx IS NOT NULL
+        AND ((h.decoration_type in (1,2) and h.budget_ok=3) OR (h.decoration_type=3 and h.visit_state=1))
+        AND h.visit_state in(1,3)
+        AND h.site_display=0
+        ORDER BY juli,h.construction_date DESC limit 20
+        )tab
+        order by rand() limit #{limit}
     </select>
 </mapper>
 

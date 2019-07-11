@@ -117,7 +117,7 @@ public class DjConstants {
         public final static String COMMODITY = "commodity?userToken=%s&cityId=%s&title=%s";//精算-商品更换
         public final static String WAITINGPAYDETAIL = "waitingPayDetail?userToken=%s&cityId=%s&title=%s";//待付款明细
         public final static String MYSHOPLIST = "myShopList?userToken=%s&cityId=%s&title=%s";//自购清单
-        public final static String DESIGNLIST = "designList?userToken=%s&cityId=%s&title=%s";//设计图
+        public final static String DESIGNLIST = "applyDesign?userToken=%s&cityId=%s&title=%s";//审核平面图/设计图
         public final static String JINGSUANLIST = "jingsuanList?userToken=%s&cityId=%s&title=%s";//精算
         public final static String CONSTUCTIONRECORD = "constuctionRecord?userToken=%s&cityId=%s&title=%s";//施工记录
         public final static String YZREGISTERPROTOCOL = "yzRegisterProtocol?userToken=%s&cityId=%s&title=%s";//注册协议
@@ -160,6 +160,9 @@ public class DjConstants {
         public final static Integer TUICAILIAO = 11;// 11退材料
         public final static Integer YZ_TUICAILIAO = 12;// 12业主退材料
         public final static Integer TIQIANJIESHU = 13;// 13提前结束装修
+        public final static Integer SCSJT = 14;// 上传平面图
+        public final static Integer SCSGT = 15;// 上传施工图
+        public final static Integer SJWC = 16;// 精算完成
 
         public final static Map getRecordTypeMap(){
             Map<Integer, String> applyTypeMap = new HashMap<>();
@@ -177,10 +180,36 @@ public class DjConstants {
             applyTypeMap.put(DjConstants.RecordType.TUICAILIAO, "退材料");
             applyTypeMap.put(DjConstants.RecordType.YZ_TUICAILIAO, "业主退材料");
             applyTypeMap.put(DjConstants.RecordType.TIQIANJIESHU, "提前结束装修");
+            applyTypeMap.put(DjConstants.RecordType.SCSJT, "上传平面图");
+            applyTypeMap.put(DjConstants.RecordType.SCSGT, "上传施工图");
+            applyTypeMap.put(DjConstants.RecordType.SJWC, "精算完成");
             return applyTypeMap;
         }
     }
 
+    /**
+     * ApplyType 任务进程-申请类型
+     */
+    public static class VisitState {
+//        0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
+        public final static Integer DAIKAIGONG = 0;//0待确认开工
+        public final static Integer ZHAUNGXIUZHONG = 1;// 1装修中
+        public final static Integer XIUMIANZHONG = 2;// 2休眠中
+        public final static Integer WANGONG = 3;// 3已完工
+        public final static Integer TIQIANJIESHU = 4;//4提前结束装修
+        public final static Integer TIQIANSHENHEZHONG = 5;//5提前结束装修申请中
+
+        public final static Map getVisitStateMap(){
+            Map<Integer, String> visitStateMap = new HashMap<>();
+            visitStateMap.put(DjConstants.VisitState.DAIKAIGONG, "待确认开工");
+            visitStateMap.put(DjConstants.VisitState.ZHAUNGXIUZHONG, "装修中");
+            visitStateMap.put(DjConstants.VisitState.XIUMIANZHONG, "休眠中");
+            visitStateMap.put(DjConstants.VisitState.WANGONG, "已完工");
+            visitStateMap.put(DjConstants.VisitState.TIQIANJIESHU, "提前结束装修");
+            visitStateMap.put(DjConstants.VisitState.TIQIANSHENHEZHONG, "提前结束装修申请中");
+            return visitStateMap;
+        }
+    }
     /**
      * Type 工序类型 人工1 材料2 服务3
      */

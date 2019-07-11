@@ -62,10 +62,10 @@ public class WebSplitDeliverService {
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate) && (applyState == 0 || applyState == -1)) {
                 applyState = -2;
             }
-            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
-                if(beginDate.equals(endDate)){
-                    beginDate=beginDate+" "+"00:00:00";
-                    endDate=endDate+" "+"23:59:59";
+            if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
+                if (beginDate.equals(endDate)) {
+                    beginDate = beginDate + " " + "00:00:00";
+                    endDate = endDate + " " + "23:59:59";
                 }
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
@@ -81,6 +81,7 @@ public class WebSplitDeliverService {
 
     /**
      * 根据供应商id查询要货单列表/模糊查询要货单列表
+     *
      * @param pageDTO
      * @param supplierId
      * @param searchKey
@@ -88,18 +89,18 @@ public class WebSplitDeliverService {
      * @param endDate
      * @return
      */
-    public ServerResponse getOrderSplitList(PageDTO pageDTO,String supplierId,String searchKey,String beginDate,String endDate){
+    public ServerResponse getOrderSplitList(PageDTO pageDTO, String supplierId, String searchKey, String beginDate, String endDate) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
-                if(beginDate.equals(endDate)){
-                    beginDate=beginDate+" "+"00:00:00";
-                    endDate=endDate+" "+"23:59:59";
+            if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
+                if (beginDate.equals(endDate)) {
+                    beginDate = beginDate + " " + "00:00:00";
+                    endDate = endDate + " " + "23:59:59";
                 }
             }
-            List<WebSplitDeliverItemDTO> orderSplitList = iSplitDeliverMapper.getOrderSplitList(supplierId,searchKey,beginDate,endDate);
-            PageInfo pageResult=new PageInfo(orderSplitList);
-            return ServerResponse.createBySuccess("查询成功",pageResult);
+            List<WebSplitDeliverItemDTO> orderSplitList = iSplitDeliverMapper.getOrderSplitList(supplierId, searchKey, beginDate, endDate);
+            PageInfo pageResult = new PageInfo(orderSplitList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -108,21 +109,19 @@ public class WebSplitDeliverService {
 
     /**
      * 供应商端发货列表
+     *
      * @param splitDeliverId
      * @return
      */
-    public ServerResponse splitDeliverList(String splitDeliverId){
+    public ServerResponse splitDeliverList(String splitDeliverId) {
         try {
             List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOS = iSplitDeliverMapper.splitDeliverList(splitDeliverId);
-            return ServerResponse.createBySuccess("查询成功",webSplitDeliverItemDTOS);
+            return ServerResponse.createBySuccess("查询成功", webSplitDeliverItemDTOS);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-
-
-
 
 
     /**
@@ -162,40 +161,42 @@ public class WebSplitDeliverService {
 
     /**
      * 供应商查看货单列表
+     *
      * @param supplierId
      * @param shipAddress
      * @param beginDate
      * @param endDate
      * @return
      */
-    public ServerResponse mendDeliverList(String supplierId, String shipAddress, String beginDate, String endDate,Integer applyState){
+    public ServerResponse mendDeliverList(String supplierId, String shipAddress, String beginDate, String endDate, Integer applyState) {
         try {
-            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
-                if(beginDate.equals(endDate)){
-                    beginDate=beginDate+" "+"00:00:00";
-                    endDate=endDate+" "+"23:59:59";
+            if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
+                if (beginDate.equals(endDate)) {
+                    beginDate = beginDate + " " + "00:00:00";
+                    endDate = endDate + " " + "23:59:59";
                 }
             }
-            List<SupplierDeliverDTO> supplierDeliverDTOS = iSplitDeliverMapper.mendDeliverList(supplierId, shipAddress, beginDate, endDate,applyState);
+            List<SupplierDeliverDTO> supplierDeliverDTOS = iSplitDeliverMapper.mendDeliverList(supplierId, shipAddress, beginDate, endDate, applyState);
             for (SupplierDeliverDTO supplierDeliverDTO : supplierDeliverDTOS) {
                 supplierDeliverDTO.setDeliverType(1);
-                Example example=new Example(OrderSplitItem.class);
-                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID,supplierDeliverDTO.getId());
+                Example example = new Example(OrderSplitItem.class);
+                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, supplierDeliverDTO.getId());
                 List<OrderSplitItem> orderSplitItems = iOrderSplitItemMapper.selectByExample(example);
-                Double totalAmount=0d;
-                Double applyMoney=0d;
+                Double totalAmount = 0d;
+//                Double applyMoney = 0d;
                 for (OrderSplitItem orderSplitItem : orderSplitItems) {
-                    totalAmount+=orderSplitItem.getTotalPrice();
-                    applyMoney+=orderSplitItem.getSupCost()*orderSplitItem.getReceive();
+//                    totalAmount += orderSplitItem.getTotalPrice();
+                    totalAmount += orderSplitItem.getPrice() * orderSplitItem.getReceive();
+//                    applyMoney += orderSplitItem.getSupCost() * orderSplitItem.getReceive();
                 }
                 supplierDeliverDTO.setTotalAmount(totalAmount);
             }
-            List<SupplierDeliverDTO> supplierDeliverDTOS1 = iMendDeliverMapper.mendDeliverList(supplierId, shipAddress, beginDate, endDate,applyState);
+            List<SupplierDeliverDTO> supplierDeliverDTOS1 = iMendDeliverMapper.mendDeliverList(supplierId, shipAddress, beginDate, endDate, applyState);
             for (SupplierDeliverDTO supplierDeliverDTO : supplierDeliverDTOS1) {
                 supplierDeliverDTO.setDeliverType(2);
             }
             supplierDeliverDTOS.addAll(supplierDeliverDTOS1);
-            return ServerResponse.createBySuccess("查询成功",supplierDeliverDTOS);
+            return ServerResponse.createBySuccess("查询成功", supplierDeliverDTOS);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -205,45 +206,46 @@ public class WebSplitDeliverService {
 
     /**
      * 供应商结算
+     *
      * @param image 图片
      * @param merge 表的id和类型 1发货单；2退货单
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse Settlemen(String image,String merge,String supplierId) throws RuntimeException{
+    public ServerResponse Settlemen(String image, String merge, String supplierId) throws RuntimeException {
         try {
-            if(StringUtils.isNotEmpty(merge)){
+            if (StringUtils.isNotEmpty(merge)) {
                 JSONArray itemObjArr = JSON.parseArray(merge);
-                double splitDeliverPrice=0d;
-                double mendDeliverPrice=0d;
+                double splitDeliverPrice = 0d;
+                double mendDeliverPrice = 0d;
                 for (int i = 0; i < itemObjArr.size(); i++) {
                     JSONObject jsonObject = itemObjArr.getJSONObject(i);
-                    String id=jsonObject.getString("id");
-                    int  deliverType=jsonObject.getInteger("deliverType");
-                    if(deliverType==1){
+                    String id = jsonObject.getString("id");
+                    int deliverType = jsonObject.getInteger("deliverType");
+                    if (deliverType == 1) {
                         //发货单结算通过
-                        SplitDeliver splitDeliver=new SplitDeliver();
+                        SplitDeliver splitDeliver = new SplitDeliver();
                         splitDeliver.setId(id);
                         splitDeliver.setApplyState(2);
                         this.setSplitDeliver(splitDeliver);
-                        splitDeliverPrice+=iSplitDeliverMapper.selectByPrimaryKey(id).getTotalAmount();
-                    }else if(deliverType==2){
+                        splitDeliverPrice += iSplitDeliverMapper.selectByPrimaryKey(id).getTotalAmount();
+                    } else if (deliverType == 2) {
                         //退货单结算通过
-                        MendDeliver mendDeliver=new MendDeliver();
+                        MendDeliver mendDeliver = new MendDeliver();
                         mendDeliver.setId(id);
                         mendDeliver.setApplyState(2);
                         mendDeliver.setShippingState(2);
                         iMendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
-                        mendDeliverPrice+=iMendDeliverMapper.selectByPrimaryKey(id).getTotalAmount();
+                        mendDeliverPrice += iMendDeliverMapper.selectByPrimaryKey(id).getTotalAmount();
                     }
                 }
                 //添加回执
-                Receipt receipt=new Receipt();
+                Receipt receipt = new Receipt();
                 receipt.setImage(image);
                 receipt.setMerge(merge);
                 receipt.setCreateDate(new Date());
                 receipt.setSupplierId(supplierId);
-                receipt.setTotalAmount(splitDeliverPrice-mendDeliverPrice);
+                receipt.setTotalAmount(splitDeliverPrice - mendDeliverPrice);
                 iReceiptMapper.insert(receipt);
             }
             return ServerResponse.createBySuccess("结算成功");
@@ -256,39 +258,40 @@ public class WebSplitDeliverService {
 
     /**
      * 已结算货单列表
+     *
      * @param shipAddress
      * @param beginDate
      * @param endDate
      * @return
      */
-    public ServerResponse ClsdMendDeliverList(String shipAddress, String beginDate, String endDate,String supplierId){
+    public ServerResponse ClsdMendDeliverList(String shipAddress, String beginDate, String endDate, String supplierId) {
         try {
-            if(beginDate!=null && beginDate!="" && endDate!=null && endDate!=""){
-                if(beginDate.equals(endDate)){
-                    beginDate=beginDate+" "+"00:00:00";
-                    endDate=endDate+" "+"23:59:59";
+            if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
+                if (beginDate.equals(endDate)) {
+                    beginDate = beginDate + " " + "00:00:00";
+                    endDate = endDate + " " + "23:59:59";
                 }
             }
-            Example example=new Example(Receipt.class);
-            example.createCriteria().andEqualTo(Receipt.SUPPLIER_ID,supplierId);
+            Example example = new Example(Receipt.class);
+            example.createCriteria().andEqualTo(Receipt.SUPPLIER_ID, supplierId);
             List<Receipt> receipts = iReceiptMapper.selectByExample(example);
-            System.out.println(receipts);
-            List<ReceiptDTO> list=new ArrayList();
+            List<ReceiptDTO> list = new ArrayList();
             for (Receipt receipt : receipts) {
-                List<SupplierDeliverDTO> supplierDeliverDTOList=new ArrayList<>();
-                double amount=0D;
-                double sd=0D;
-                double md=0D;
+                List<SupplierDeliverDTO> supplierDeliverDTOList = new ArrayList<>();
+                double amount = 0D;
+                double sd = 0D;
+                double md = 0D;
                 JSONArray itemObjArr = JSON.parseArray(receipt.getMerge());
-                ReceiptDTO receiptDTO=new ReceiptDTO();
+                ReceiptDTO receiptDTO = new ReceiptDTO();
                 for (int i = 0; i < itemObjArr.size(); i++) {
-                    SupplierDeliverDTO supplierDeliverDTO=new SupplierDeliverDTO();
+                    SupplierDeliverDTO supplierDeliverDTO =null;
                     JSONObject jsonObject = itemObjArr.getJSONObject(i);
-                    String id=jsonObject.getString("id");
-                    int  deliverType=jsonObject.getInteger("deliverType");
-                    if(deliverType==1){
-                        SplitDeliver splitDeliver = iSplitDeliverMapper.selectClsd(id,shipAddress,beginDate,endDate);
-                        if(null!=splitDeliver) {
+                    String id = jsonObject.getString("id");
+                    int deliverType = jsonObject.getInteger("deliverType");
+                    if (deliverType == 1) {
+                        SplitDeliver splitDeliver = iSplitDeliverMapper.selectClsd(id, shipAddress, beginDate, endDate);
+                        if (null != splitDeliver) {
+                            supplierDeliverDTO=new SupplierDeliverDTO();
                             supplierDeliverDTO.setId(splitDeliver.getId());
                             supplierDeliverDTO.setNumber(splitDeliver.getNumber());
                             supplierDeliverDTO.setShipAddress(splitDeliver.getShipAddress());
@@ -296,9 +299,10 @@ public class WebSplitDeliverService {
                             supplierDeliverDTO.setDeliverType(1);
                             sd += splitDeliver.getTotalAmount();
                         }
-                    }else if(deliverType==2){
-                        MendDeliver mendDeliver = iMendDeliverMapper.selectClsd(id,shipAddress,beginDate,endDate);
-                        if(null!=mendDeliver) {
+                    } else if (deliverType == 2) {
+                        MendDeliver mendDeliver = iMendDeliverMapper.selectClsd(id, shipAddress, beginDate, endDate);
+                        if (null != mendDeliver) {
+                            supplierDeliverDTO=new SupplierDeliverDTO();
                             supplierDeliverDTO.setId(mendDeliver.getId());
                             supplierDeliverDTO.setNumber(mendDeliver.getNumber());
                             supplierDeliverDTO.setShipAddress(mendDeliver.getShipAddress());
@@ -307,30 +311,34 @@ public class WebSplitDeliverService {
                             md += mendDeliver.getTotalAmount();
                         }
                     }
-                    supplierDeliverDTOList.add(supplierDeliverDTO);
-                }
-                //结算金额
-                amount = sd - md;
-                receiptDTO.setAmount(amount);
-                receiptDTO.setList(supplierDeliverDTOList);
-                receiptDTO.setCreateDate(receipt.getCreateDate());
-                receiptDTO.setId(receipt.getId());
-                list.add(receiptDTO);
-                //对list进行排序 根据时间降序排序
-                Collections.sort(list, new Comparator<ReceiptDTO>() {
-                    @Override
-                    public int compare(ReceiptDTO r1, ReceiptDTO r2) {
-                        int flag = r1.getCreateDate().compareTo(r2.getCreateDate());
-                        if(flag == -1){
-                            flag = 1;
-                        }else if(flag == 1){
-                            flag = -1;
-                        }
-                        return flag;
+                    if(null!=supplierDeliverDTO) {
+                        supplierDeliverDTOList.add(supplierDeliverDTO);
                     }
-                });
+                }
+                if (supplierDeliverDTOList.size() > 0) {
+                    //结算金额
+                    amount = sd - md;
+                    receiptDTO.setAmount(amount);
+                    receiptDTO.setList(supplierDeliverDTOList);
+                    receiptDTO.setCreateDate(receipt.getCreateDate());
+                    receiptDTO.setId(receipt.getId());
+                    list.add(receiptDTO);
+                    //对list进行排序 根据时间降序排序
+                    Collections.sort(list, new Comparator<ReceiptDTO>() {
+                        @Override
+                        public int compare(ReceiptDTO r1, ReceiptDTO r2) {
+                            int flag = r1.getCreateDate().compareTo(r2.getCreateDate());
+                            if (flag == -1) {
+                                flag = 1;
+                            } else if (flag == 1) {
+                                flag = -1;
+                            }
+                            return flag;
+                        }
+                    });
+                }
             }
-            return ServerResponse.createBySuccess("查询成功",list);
+            return ServerResponse.createBySuccess("查询成功", list);
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -338,14 +346,15 @@ public class WebSplitDeliverService {
 
     /**
      * 查看回执
+     *
      * @param id
      * @return
      */
-    public ServerResponse selectReceipt(String id){
+    public ServerResponse selectReceipt(String id) {
         try {
             Receipt receipt = iReceiptMapper.selectByPrimaryKey(id);
             JSONArray itemObjArr = JSON.parseArray(receipt.getImage());
-            return ServerResponse.createBySuccess("查询成功",itemObjArr);
+            return ServerResponse.createBySuccess("查询成功", itemObjArr);
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -354,13 +363,14 @@ public class WebSplitDeliverService {
 
     /**
      * 退货单查看详情
+     *
      * @param id
      * @return
      */
-    public ServerResponse mendDeliverDetail(String id){
+    public ServerResponse mendDeliverDetail(String id) {
         try {
             List<MendMateriel> mendMateriels = iMendDeliverMapper.mendDeliverDetail(id);
-            return  ServerResponse.createBySuccess("查询成功",mendMateriels);
+            return ServerResponse.createBySuccess("查询成功", mendMateriels);
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("查询失败");
         }

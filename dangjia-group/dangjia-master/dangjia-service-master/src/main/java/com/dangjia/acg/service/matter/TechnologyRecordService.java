@@ -137,11 +137,11 @@ public class TechnologyRecordService {
         List<WorkNodeDTO> workNodeDTOList = new ArrayList<>();
         JSONArray jsonArray;
         if(worker.getWorkerType() == 3){ //管家查询管家应验收节点
-            jsonArray = budgetWorkerAPI.getAllTechnologyByHouseId(house.getId());
+            jsonArray = budgetWorkerAPI.getAllTechnologyByHouseId(house.getCityId(),house.getId());
             /* 补人工的节点也加入进来 */
             List<MendWorker> mendWorkerList = mendWorkerMapper.houseMendWorkerList(house.getId());
             for (MendWorker mendWorker : mendWorkerList){
-                if (budgetWorkerAPI.patrolList(mendWorker.getWorkerGoodsId())){
+                if (budgetWorkerAPI.patrolList(house.getCityId(),mendWorker.getWorkerGoodsId())){
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("workerGoodsId", mendWorker.getWorkerGoodsId());
                     jsonObject.put("workerGoodsName", mendWorker.getWorkerGoodsName());
@@ -150,11 +150,11 @@ public class TechnologyRecordService {
             }
         }else {//工匠提交的验收节点
             //含工艺人工商品
-            jsonArray = budgetWorkerAPI.getWorkerGoodsList(houseFlow.getHouseId(),houseFlowId);
+            jsonArray = budgetWorkerAPI.getWorkerGoodsList(house.getCityId(),houseFlow.getHouseId(),houseFlowId);
             /* 补人工的节点也加入进来 */
             List<MendWorker> mendWorkerList = mendWorkerMapper.mendWorkerList(house.getId(),worker.getWorkerTypeId());
             for (MendWorker mendWorker : mendWorkerList){
-                if (budgetWorkerAPI.workerPatrolList(mendWorker.getWorkerGoodsId())){
+                if (budgetWorkerAPI.workerPatrolList(house.getCityId(),mendWorker.getWorkerGoodsId())){
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("workerGoodsId", mendWorker.getWorkerGoodsId());
                     jsonObject.put("workerGoodsName", mendWorker.getWorkerGoodsName());
@@ -170,7 +170,7 @@ public class TechnologyRecordService {
 
             WorkNodeDTO workNodeDTOA = new WorkNodeDTO();
             workNodeDTOA.setTecName(workerGoodsName);//商品名
-            JSONArray tecArray = budgetWorkerAPI.getTecList(worker.getWorkerType(),workerGoodsId);
+            JSONArray tecArray = budgetWorkerAPI.getTecList(house.getCityId(),worker.getWorkerType(),workerGoodsId);
             List<TechnologyRecordDTO> trList = new ArrayList<>();
             for(int j=0; j<tecArray.size(); j++){
                 JSONObject tecObject = tecArray.getJSONObject(j);
@@ -257,7 +257,7 @@ public class TechnologyRecordService {
 
             //所有已进场未完工工序的节点
             List<TechnologyRecordDTO> technologyRecordDTOS = new ArrayList<>();
-            JSONArray jsonArray = budgetWorkerAPI.getAllTechnologyByHouseId(house.getId());
+            JSONArray jsonArray = budgetWorkerAPI.getAllTechnologyByHouseId(house.getCityId(),house.getId());
             for(int i=0;i<jsonArray.size();i++){
                 JSONObject object = jsonArray.getJSONObject(i);
                 String technologyId = object.getString("technologyId");

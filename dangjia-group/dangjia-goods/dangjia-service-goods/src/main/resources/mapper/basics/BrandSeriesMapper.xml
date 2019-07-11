@@ -14,6 +14,15 @@
 		modify_date
 	</sql>
 	<!--根据货品id查询品牌系列名-->
+	<select id="getAttributesName" resultType="java.lang.String">
+        select CONCAT(bs.name,'  ',p.value_name_arr)
+		From dj_basics_brand_series bs, dj_basics_product p
+		where
+		    p.brand_series_id = bs.id
+		and
+		    p.id = #{productId}
+	</select>
+	<!--根据货品id查询品牌系列名-->
 	<select id="brandSeriesName" resultType="java.lang.String">
         select bs.name
 		From dj_basics_brand_series bs, dj_basics_product p

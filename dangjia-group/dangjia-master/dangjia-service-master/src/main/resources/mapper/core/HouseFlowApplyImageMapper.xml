@@ -25,5 +25,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and ap.house_flow_id=#{houseFlowId}
         and img.image_sign=#{imageSign}
     </select>
+
+    <!--施工现场图片-->
+    <select id="getHouseFlowApplyImage" resultType="java.lang.String">
+        SELECT
+            image_url
+        FROM
+            dj_core_house_flow_apply_image
+        WHERE house_id=#{houseId}
+        <if test="null==imageType and ''==imageType">
+            AND image_type = 2
+        </if>
+        <if test="null!=imageType and ''!=imageType">
+           and image_type = 0
+        </if>
+        ORDER BY
+            create_date DESC
+        LIMIT 1
+    </select>
 </mapper>
 

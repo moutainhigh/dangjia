@@ -76,5 +76,9 @@ public final class Constants {
    * 用户ID
    **/
   public static final String USER_KEY = "user_";
+  /**
+   * 中台城市Key
+   **/
+  public static final String CITY_KEY = "city_";
 
 }

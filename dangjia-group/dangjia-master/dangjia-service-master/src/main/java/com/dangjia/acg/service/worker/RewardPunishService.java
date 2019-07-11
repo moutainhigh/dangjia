@@ -239,7 +239,7 @@ public class RewardPunishService {
                 rewardPunishRecord.setType(rewardPunishCorrelation.getType());
             }
             rewardPunishRecord.setState(0);//0:启用;1:不启用
-            rewardPunishRecordMapper.insertSelective(rewardPunishRecord);
+            rewardPunishRecordMapper.insert(rewardPunishRecord);
 
             //工人ID账户奖罚积分和金额变更
             updateWorkerInfo(rewardPunishRecord.getId());

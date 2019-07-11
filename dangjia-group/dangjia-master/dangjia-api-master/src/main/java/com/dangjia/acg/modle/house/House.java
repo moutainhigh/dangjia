@@ -11,6 +11,7 @@ import org.apache.http.util.TextUtils;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -239,6 +240,15 @@ public class House extends BaseEntity {
     @Desc(value = "竣工时间")
     @ApiModelProperty("竣工时间")
     protected Date completedDate;
+
+    @Column(name = "optional_label")
+    @Desc(value = "选配标签")
+    @ApiModelProperty("选配标签")
+    private String optionalLabel;
+
+    @Transient
+    private String houseId;
+
     public House() {
 
     }
@@ -272,5 +282,14 @@ public class House extends BaseEntity {
                 + (TextUtils.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
     }
 
-
+    public boolean equals(Object obj){
+        if(obj instanceof House){
+            House house=(House) obj;
+            return (house.getId().equals(house.getId()));
+        }
+        return super.equals(obj);
+    }
+    public int hashCode(){
+        return id.hashCode();
+    }
 }

@@ -51,6 +51,12 @@ public class HouseWorkerController implements HouseWorkerAPI {
         return houseWorkerService.setChangeWorker(userToken, houseWorkerId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseWorker(String userToken, String houseFlowId) {
+        return houseWorkerService.getHouseWorker(userToken, houseFlowId);
+    }
+
     /**
      * 根据工人id查询自己的施工界面
      */
@@ -81,21 +87,14 @@ public class HouseWorkerController implements HouseWorkerAPI {
 
     /**
      * 提交审核、停工
-     *
-     * @param userToken
-     * @param applyType
-     * @param houseFlowId
-     * @param suspendDay
-     * @param applyDec
-     * @param imageList
-     * @param houseFlowId2
-     * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId, Integer suspendDay,
-                                            String applyDec, String imageList, String houseFlowId2) {
-        return houseWorkerService.setHouseFlowApply(userToken, applyType, houseFlowId, suspendDay, applyDec, imageList, houseFlowId2);
+    public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId,
+                                            String applyDec, String imageList, String houseFlowId2,
+                                            String latitude, String longitude) {
+        return houseWorkerService.setHouseFlowApply(userToken, applyType, houseFlowId, applyDec,
+                imageList, houseFlowId2, latitude, longitude);
     }
 
     /**

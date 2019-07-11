@@ -29,4 +29,5 @@ public class WebOrderDTO {
     private Integer state;//处理状态  1刚生成(可编辑),2去支付(不修改),3已支付
     private Integer payType;//支付类型1微信，2支付宝
     private String taskId;//工序支付   补货补人工  提前付
+    private String storeName;// 归属分店
 }

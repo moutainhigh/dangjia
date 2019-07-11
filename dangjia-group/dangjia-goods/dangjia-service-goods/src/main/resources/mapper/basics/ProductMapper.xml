@@ -583,6 +583,7 @@
         <if test="name!=null and name!=''">
             AND (
             CONCAT(
+            IFNULL(g.other_name,''),
             ca.`name`,
             IFNULL(tca.`name`,''),
             p.`name`,

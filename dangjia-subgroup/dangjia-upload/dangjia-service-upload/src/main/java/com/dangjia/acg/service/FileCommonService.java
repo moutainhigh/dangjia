@@ -158,7 +158,7 @@ public class FileCommonService {
 //                .toFile(address + fileName);
 //      }
       //上传至华为云OBS
-      if(active!=null&&(active.equals("pre")||active.equals("test"))){
+      if(active!=null&&(active.equals("pre")||active.equals("test")||active.equals("showed"))){
         // 创建ObsClient实例
         ObsClient obsClient = new ObsClient(ConstantProperties.HUAWEI_ACCESS_KEY_ID, ConstantProperties.HUAWEI_ACCESS_KEY_SECRET, ConstantProperties.HUAWEI_END_POINT);
         obsClient.putObject(ConstantProperties.HUAWEI_BUCKET_NAME, webAddress+"/"+fileName,  new File(address + fileName));

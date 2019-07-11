@@ -21,6 +21,6 @@ public interface ICartMapper extends Mapper<Cart> {
                         @Param("goodsId") String goodsId, @Param("id") String id);
 
     /*更新商品名称和各项信息*/
-    List<Cart> cartList(@Param("houseId") String houseId, @Param("workerTypeId") String workerTypeId, @Param("memberId") String memberId);
+    List<Cart> cartList( @Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId, @Param("memberId") String memberId);
 
 }

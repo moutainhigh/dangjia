@@ -8,9 +8,11 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.basics.*;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -120,61 +122,6 @@ public class GoodsGroupService {
     }
 
     /**
-     * 修改货品关联组关系
-     *
-     * @param listOfProductId
-     * @param goodsGroupId
-     * @param state
-     * @param name
-     * @return
-     */
-    public ServerResponse updateGroupLink(String listOfProductId, String goodsGroupId, int state, String name) {
-        try {
-            if (true)
-                return ServerResponse.createByErrorMessage("接口弃用");
-//            GoodsGroup goodsGroup = iGoodsGroupMapper.selectByPrimaryKey(goodsGroupId);
-//
-//            List<GoodsGroup> goodsGroups = iGoodsGroupMapper.selectByName(name);//要修改的name
-//            if (goodsGroups.size() > 1)
-//                return ServerResponse.createByErrorMessage("不能修改，该关联组已存在");
-//
-//            goodsGroup.setState(state);
-//            goodsGroup.setName(name);
-//            goodsGroup.setModifyDate(new Date());
-//            iGoodsGroupMapper.updateByPrimaryKey(goodsGroup);
-//            iGoodsGroupMapper.deleteGroupLink(goodsGroupId);
-//            JSONArray goodsList = JSONArray.parseArray(listOfProductId);
-//            for (int i = 0; i < goodsList.size(); i++) {//循环添加商品关系
-//                JSONObject job = goodsList.getJSONObject(i);
-//                String id = job.getString("productId");//得到值
-//                Product product = iProductMapper.getById(id);//根据商品id查询商品对象
-//                List<GroupLink> listG = iGoodsGroupMapper.queryGroupLinkByGidAndPid(goodsGroupId, id);//根据关联组id和货品id查询关联关系
-//                if ((listG != null && listG.size() > 0) || product == null) {
-//                    continue;
-//                }
-//                GroupLink groupLink = new GroupLink();
-//                groupLink.setGroupId(goodsGroupId);//关联组id
-//                groupLink.setGroupName(name);//关联组名称
-//                groupLink.setProductId(id);//货品id
-//                groupLink.setProductName(product.getName());//货品名称
-//                groupLink.setGoodsId(product.getGoodsId());
-//                groupLink.setGoodsName(iGoodsMapper.selectByPrimaryKey(product.getGoodsId()) == null ? "" : iGoodsMapper.selectByPrimaryKey(product.getGoodsId()).getName());
-//                iGoodsGroupMapper.addGroupLink(groupLink);//新增关联组货品关系
-////                List<GroupLink> groupLinkList = iGoodsGroupMapper.queryGroupLinkByPid(product.getId());
-//                List<GroupLink> groupLinkList = iGoodsGroupMapper.queryGroupLinkByPidAndGid(product.getId(), groupLink.getGoodsId());
-//                LOG.info("groupLinkList size::" + groupLinkList.size() + " productId:" + product.getId() + " goodsId:" + groupLink.getGoodsId());
-//                if (groupLinkList.size() >= 2) {//根据货品查询关联关系，超过两条则都修改为不可切换
-//                    iGoodsGroupMapper.updateGLinkByPid(product.getId(), 1);
-//                }
-//            }
-            return ServerResponse.createBySuccessMessage("修改成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("修改失败");
-        }
-    }
-
-    /**
      * 查询所有关联组
      *
      * @return
@@ -217,16 +164,9 @@ public class GoodsGroupService {
      */
     public ServerResponse queryGoodsGroupListByCategoryLikeName(PageDTO pageDTO, String categoryId, String name) {
         try {
-            if (pageDTO.getPageNum() == null) {
-                pageDTO.setPageNum(1);
-            }
-            if (pageDTO.getPageSize() == null) {
-                pageDTO.setPageSize(10);
-            }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<Goods> goodsList = iGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
-
             // 去除商品是 服务类型的 或者 是自购的
             List<Goods> goodsList = iGoodsMapper.queryGoodsGroupListByCategoryLikeName(categoryId, name, "0", "2");
             List<Map<String, Object>> gMapList = new ArrayList<>();
@@ -241,19 +181,11 @@ public class GoodsGroupService {
                         continue;
                     String[] imgArr = p.getImage().split(",");
                     StringBuilder imgStr = new StringBuilder();
-                    String imgUrlStr = "";
-                    for (int i = 0; i < imgArr.length; i++) {
-                        if (i == imgArr.length - 1) {
-                            imgStr.append(address).append(imgArr[i]);
-                            imgUrlStr += imgArr[i];
-                        } else {
-                            imgStr.append(address).append(imgArr[i]).append(",");
-                            imgUrlStr += imgArr[i] + ",";
-                        }
-                    }
+                    StringBuilder imgUrlStr = new StringBuilder();
+                    StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                     p.setImage(imgStr.toString());
                     Map<String, Object> map = BeanUtils.beanToMap(p);
-                    map.put("imageUrl", imgUrlStr);
+                    map.put("imageUrl", imgUrlStr.toString());
                     if (!StringUtils.isNotBlank(p.getLabelId())) {
                         map.put("labelId", "");
                         map.put("labelName", "");
@@ -356,8 +288,8 @@ public class GoodsGroupService {
             String[] deleteProductIdArr = {};
             if (StringUtils.isNotBlank(deleteProductIds)) {
                 deleteProductIdArr = jsonObject.getString("deleteProductIds").split(",");
-                for (int i = 0; i < deleteProductIdArr.length; i++) {
-                    GroupLink deleteGL = iGroupLinkMapper.queryGroupLinkByGroupIdAndPid(goodsGroup.getId(), deleteProductIdArr[i]);
+                for (String aDeleteProductIdArr : deleteProductIdArr) {
+                    GroupLink deleteGL = iGroupLinkMapper.queryGroupLinkByGroupIdAndPid(goodsGroup.getId(), aDeleteProductIdArr);
                     iGroupLinkMapper.deleteGroupLinkById(deleteGL.getId());
                     isUpdateProduct = true;
                 }
@@ -379,9 +311,9 @@ public class GoodsGroupService {
                 String[] oldSwitchArr = strOldSwitch.split(",");
                 if (oldSwitchArr.length > 1) {//注意：因为每个关联组 可切换的包括自己，所以，必须2个以上才可以 切换 ，只有 1个不能切换
                     String oldGroupId = ""; //老的group,非当前groupId的 要重新 计算匹配 是否 可以切换、
-                    for (int i = 0; i < oldSwitchArr.length; i++) {
-                        if (!oldSwitchArr[i].equals(goodsGroup.getId()))
-                            oldGroupId = oldSwitchArr[i];
+                    for (String anOldSwitchArr : oldSwitchArr) {
+                        if (!anOldSwitchArr.equals(goodsGroup.getId()))
+                            oldGroupId = anOldSwitchArr;
                     }
                     GoodsGroup oldGoodsGroup = iGoodsGroupMapper.selectByPrimaryKey(oldGroupId);
                     // 重新找出最新的可以切换的 关联组
@@ -497,7 +429,7 @@ public class GoodsGroupService {
 
         String retSwitchArr = "";
         for (String strGroupId : goodsIdSameByGroupList) {
-            if (retSwitchArr == "")
+            if (CommonUtil.isEmpty(retSwitchArr))
                 retSwitchArr = strGroupId;
             else
                 retSwitchArr = retSwitchArr + "," + strGroupId;
@@ -598,31 +530,28 @@ public class GoodsGroupService {
      * 根据关联组id删除关联组和货品关联关系
      */
     public ServerResponse deleteGoodsGroupById(String goodsGroupId) {
-        try {
-            if (true) {
-                return ServerResponse.createByErrorMessage("不能执行删除操作");
-            }
-
-            List<GroupLink> mapList = iGoodsGroupMapper.queryGroupLinkByGid(goodsGroupId);
-            List<Product> productList = new ArrayList<>();
-            for (GroupLink groupLink : mapList) {
-                productList.add(iProductMapper.selectByPrimaryKey(groupLink.getProductId()));
-            }
-            iGoodsGroupMapper.deleteByPrimaryKey(goodsGroupId);
-            iGroupLinkMapper.deleteGroupLink(goodsGroupId);
-            for (Product product : productList) {
-                List<GroupLink> groupLinkList = iGroupLinkMapper.queryGroupLinkByPid(product.getId());
-                if (groupLinkList.size() >= 2) {//根据货品查询关联关系，超过两条则都修改为不可切换
-                    iGoodsGroupMapper.updateGLinkByPid(product.getId(), 1);
-                } else {
-                    iGoodsGroupMapper.updateGLinkByPid(product.getId(), 0);
-                }
-            }
-            return ServerResponse.createBySuccessMessage("删除成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new BaseException(ServerCode.WRONG_PARAM, "删除失败");
-        }
+        return ServerResponse.createByErrorMessage("不能执行删除操作");
+//        try {
+//            List<GroupLink> mapList = iGoodsGroupMapper.queryGroupLinkByGid(goodsGroupId);
+//            List<Product> productList = new ArrayList<>();
+//            for (GroupLink groupLink : mapList) {
+//                productList.add(iProductMapper.selectByPrimaryKey(groupLink.getProductId()));
+//            }
+//            iGoodsGroupMapper.deleteByPrimaryKey(goodsGroupId);
+//            iGroupLinkMapper.deleteGroupLink(goodsGroupId);
+//            for (Product product : productList) {
+//                List<GroupLink> groupLinkList = iGroupLinkMapper.queryGroupLinkByPid(product.getId());
+//                if (groupLinkList.size() >= 2) {//根据货品查询关联关系，超过两条则都修改为不可切换
+//                    iGoodsGroupMapper.updateGLinkByPid(product.getId(), 1);
+//                } else {
+//                    iGoodsGroupMapper.updateGLinkByPid(product.getId(), 0);
+//                }
+//            }
+//            return ServerResponse.createBySuccessMessage("删除成功");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            throw new BaseException(ServerCode.WRONG_PARAM, "删除失败");
+//        }
     }
 
 }

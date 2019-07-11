@@ -24,7 +24,8 @@ public interface GoodsCategoryAPI {
 
     @PostMapping("/basics/goodsCategory/getGoodsCategory")
     @ApiOperation(value = "商品类别明细", notes = "商品类别明细")
-    GoodsCategory getGoodsCategory(@RequestParam("request") HttpServletRequest request,@RequestParam("categoryId") String categoryId);
+    GoodsCategory getGoodsCategory(@RequestParam("request") HttpServletRequest request, @RequestParam("categoryId") String categoryId);
+
     /**
      * 新增商品类别
      *
@@ -35,7 +36,8 @@ public interface GoodsCategoryAPI {
     ServerResponse insertGoodsCategory(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("name") String name,
                                        @RequestParam("parentID") String parentID,
-                                       @RequestParam("parentTop") String parentTop);
+                                       @RequestParam("parentTop") String parentTop,
+                                       @RequestParam("sort") Integer sort);
 
     /**
      * 修改商品类别
@@ -48,7 +50,8 @@ public interface GoodsCategoryAPI {
                                          @RequestParam("id") String id,
                                          @RequestParam("name") String name,
                                          @RequestParam("parentID") String parentID,
-                                         @RequestParam("parentTop") String parentTop);
+                                         @RequestParam("parentTop") String parentTop,
+                                         @RequestParam("sort") Integer sort);
 
     /**
      * 查询商品类别列表

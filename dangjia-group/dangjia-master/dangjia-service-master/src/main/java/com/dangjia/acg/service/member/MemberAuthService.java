@@ -1,16 +1,14 @@
 package com.dangjia.acg.service.member;
 
 
-import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.member.IMemberAuthMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAuth;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,15 +27,15 @@ public class MemberAuthService {
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
-    private RedisClient redisClient;
-    @Autowired
     private MemberService memberService;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     /**
      * 当家用户第三方认证登录
      *
      * @param openType 认证类型 1:微信，2：QQ，3:新浪，4:支付宝
-     * @param unionid   第三方认证ID
+     * @param unionid  第三方认证ID
      * @param userRole app应用角色  1为业主角色，2为工匠角色
      * @return
      */
@@ -142,14 +140,11 @@ public class MemberAuthService {
                 || memberAuth.getUnionid() == null) {
             return ServerResponse.createByErrorMessage("传入参数有误");
         }
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createbyUserTokenError();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
-        Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
-        if (user == null) {
-            return ServerResponse.createByErrorMessage("用户不存在");
-        }
+        Member user = (Member) object;
         Example example = new Example(MemberAuth.class);
         example.createCriteria()
                 .andEqualTo(MemberAuth.OPEN_TYPE, memberAuth.getOpenType())
@@ -180,14 +175,12 @@ public class MemberAuthService {
         if (CommonUtil.isEmpty(password)) {
             return ServerResponse.createByErrorMessage("请输入密码");
         }
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createbyUserTokenError();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
-        Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
-        if (user == null) {
-            return ServerResponse.createByErrorMessage("用户不存在");
-        }
+        Member user = (Member) object;
+        user = memberMapper.selectByPrimaryKey(user.getId());
         if (!user.getPassword().equals(DigestUtils.md5Hex(password))) {
             return ServerResponse.createByErrorMessage("密码不正确");
         }
@@ -220,14 +213,11 @@ public class MemberAuthService {
                 || openType == null || openType == 0) {
             return ServerResponse.createByErrorMessage("传入参数有误");
         }
-        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-        if (accessToken == null) {//无效的token
-            return ServerResponse.createbyUserTokenError();
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
-        Member user = memberMapper.selectByPrimaryKey(accessToken.getMember().getId());
-        if (user == null) {
-            return ServerResponse.createByErrorMessage("用户不存在");
-        }
+        Member user = (Member) object;
         Example example = new Example(MemberAuth.class);
         example.createCriteria()
                 .andEqualTo(MemberAuth.OPEN_TYPE, openType)

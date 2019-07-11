@@ -33,6 +33,7 @@ import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.core.HouseFlowScheduleService;
 import com.dangjia.acg.service.deliver.OrderSplitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,6 +52,10 @@ import java.util.List;
  */
 @Service
 public class MendOrderCheckService {
+
+
+    @Autowired
+    private HouseFlowScheduleService houseFlowScheduleService;
     @Autowired
     private IMendOrderCheckMapper mendOrderCheckMapper;
     @Autowired
@@ -462,7 +467,7 @@ public class MendOrderCheckService {
                     String id = obj.getString("id");
                     String productId = obj.getString("productId");
                     String shopCount = obj.getString("shopCount");
-                    MendMateriel mendMateriel =  mendMaterialMapper.getMendOrderGoods(mendOrder.getId(),productId);
+                    MendMateriel mendMateriel = mendMaterialMapper.getMendOrderGoods(mendOrder.getId(), productId);
                     if(mendMateriel==null){
                          mendMateriel = mendOrderService.saveMendMaterial(mendOrder,house,productId,shopCount);
                     }
@@ -536,6 +541,8 @@ public class MendOrderCheckService {
                 member.setSurplusMoney(surplusMoney);
                 member.setHaveMoney(haveMoney);
                 memberMapper.updateByPrimaryKeySelective(member);
+
+                houseFlowScheduleService.updateFlowSchedule(changeOrder.getHouseId(),changeOrder.getWorkerTypeId(),null,changeOrder.getScheduleDay());
 
                 //记录流水
                 WorkerDetail workerDetail = new WorkerDetail();

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.store.IStoreSubscribeMapper">
+
+    <sql id="all_columns">
+	      id,
+          create_date AS createDate,
+          modify_date AS modifyDate,
+          data_status AS dataStatus,
+          store_id AS storeId,
+          store_name AS storeName,
+          customer_name AS customerName,
+          customer_phone AS customerPhone,
+          state,
+          info
+	</sql>
+
+    <!--门店预约查询-->
+    <select id="queryStoreSubscribe" resultType="com.dangjia.acg.modle.store.StoreSubscribe">
+        SELECT
+          <include refid="all_columns"/>
+        FROM dj_store_subscribe
+        WHERE 1=1
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+              customer_name LIKE CONCAT('%',#{searchKey},'%')
+              OR
+              customer_phone LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        <if test="null!=state and ''!=state">
+            AND  state = #{state}
+        </if>
+        ORDER BY modify_date DESC
+    </select>
+
+
+
+</mapper>

@@ -45,6 +45,10 @@ public interface WebOrderSplitAPI {
     @ApiOperation(value = "取消打回", notes = "取消打回")
     ServerResponse cancelOrderSplit(@RequestParam("orderSplitId") String orderSplitId);
 
+    @PostMapping("web/deliver/orderSplit/cancelSplitDeliver")
+    @ApiOperation(value = "发货单取消打回(仅还原库存)", notes = "发货单取消打回")
+    ServerResponse cancelSplitDeliver(@RequestParam("splitDeliverId") String splitDeliverId);
+
     @PostMapping("web/deliver/orderSplit/orderSplitItemList")
     @ApiOperation(value = "要货单看明细", notes = "要货单看明细")
     ServerResponse orderSplitItemList(@RequestParam("orderSplitId") String orderSplitId);

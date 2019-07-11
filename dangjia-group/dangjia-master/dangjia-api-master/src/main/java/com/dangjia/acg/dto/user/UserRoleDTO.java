@@ -27,9 +27,12 @@ public class UserRoleDTO {
 
 	private Integer isReceive;
 
-	private String roleNames;
+	private String jobName;
+	private String departmentName;
 
 	private Integer version;
 
+	private String jobId;
+	private String departmentId;
 
 }

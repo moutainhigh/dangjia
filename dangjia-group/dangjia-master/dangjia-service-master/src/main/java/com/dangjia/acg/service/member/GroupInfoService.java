@@ -58,26 +58,20 @@ public class GroupInfoService {
 
     @Autowired
     private ConfigUtil configUtil;
-
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private IGroupMapper groupMapper;
     @Autowired
     private IGroupNotifyInfoMapper groupNotifyInfoMapper;
-
     @Autowired
     private IGroupUserConfigMapper groupUserConfigMapper;
     @Autowired
     private UserMapper userMapper;
     @Autowired
     private IHouseMapper houseMapper;
-
     @Autowired
     private IMemberMapper memberMapper;
-
-    @Autowired
-    private RedisClient redisClient;
     @Autowired
     private GroupAPI groupAPI;
     @Autowired
@@ -208,16 +202,17 @@ public class GroupInfoService {
         registerJGUsers("zx", new String[]{group.getUserId()}, new String[]{"业主"});
         //创建群组
         CreateGroupResultDTO groupResult = groupAPI.createGroup("gj", group.getAdminId(), group.getHouseName(), memberlist, "", "", 1);
-        group.setGroupId(String.valueOf(groupResult.getGid()));
-        crossAppAPI.addOrRemoveMembersFromCrossGroup("gj", "zx", groupResult.getGid(), new String[]{group.getUserId()}, new String[]{});
+        if(groupResult!=null) {
+            group.setGroupId(String.valueOf(groupResult.getGid()));
+            crossAppAPI.addOrRemoveMembersFromCrossGroup("gj", "zx", groupResult.getGid(), new String[]{group.getUserId()}, new String[]{});
 
-        for (String userid : memberlist) {
-            String nickname = getUserName(userid);
-            //给业主发送默认提示语
-            String text = KEFU.replaceAll("NAME", nickname);
-            messageAPI.sendGroupTextByAdmin("gj", group.getGroupId(), userid, text);
+            for (String userid : memberlist) {
+                String nickname = getUserName(userid);
+                //给业主发送默认提示语
+                String text = KEFU.replaceAll("NAME", nickname);
+                messageAPI.sendGroupTextByAdmin("gj", group.getGroupId(), userid, text);
+            }
         }
-
         if (this.groupMapper.insertSelective(group) > 0) {
             return ServerResponse.createBySuccessMessage("ok");
         } else {

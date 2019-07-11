@@ -117,42 +117,38 @@ public class HouseDataService {
             List<TActuaryGoods> tActuaryGoodsList = new ArrayList<>();//商品基础数据结果集
             List<TActuaryGoodsTotal> tActuaryGoodsTotalList = new ArrayList<>();//商品汇总数据结果集
             Map<String, TActuaryGoodsTotal> mapsTotal = new HashMap<>();//存放 统计结果数据
-            ServerResponse serverResponse=workerTypeAPI.getWorkerTypeList(-1);
-            JSONArray jsonArray =null;
+            ServerResponse serverResponse = workerTypeAPI.getWorkerTypeList(-1);
+            JSONArray jsonArray = null;
             if (serverResponse.isSuccess()) {
                 jsonArray = (JSONArray) serverResponse.getResultObj();
             }
-
-            /**
-             *  // 工匠数据库对应id： 3: 大管家 ，4：拆除 ，5：防水（弃用）  ，6：水电 ，7：泥工 ，8：木工 ，9：油漆
-             *  // 一维： 0: 大管家 ，1：拆除 ，2：  ，3：水电 ，4：泥工 ，5：木工 ，6：油漆
-             *  //二维： 0：材料 ，1，服务，2，人工
-             *   例如： [0][0]: 表示 大管家->材料
-             *   例如： [0][1]: 表示 大管家->服务
-             */
-            for (int i = 0; i < jsonArray.size(); ++i) {
-                for (int j = 0; j < 3; ++j) {
-                    JSONObject workerType = (JSONObject)jsonArray.get(i);
-                    if(workerType.getInteger(WorkerType.TYPE)<3){
-                        continue;
+            if (jsonArray != null) {
+                /**
+                 *  // 工匠数据库对应id： 3: 大管家 ，4：拆除 ，5：防水（弃用）  ，6：水电 ，7：泥工 ，8：木工 ，9：油漆
+                 *  // 一维： 0: 大管家 ，1：拆除 ，2：  ，3：水电 ，4：泥工 ，5：木工 ，6：油漆
+                 *  //二维： 0：材料 ，1，服务，2，人工
+                 *   例如： [0][0]: 表示 大管家->材料
+                 *   例如： [0][1]: 表示 大管家->服务
+                 */
+                for (Object aJsonArray : jsonArray) { //遍历每个工序
+                    for (int j = 0; j < 3; ++j) {
+                        JSONObject workerType = (JSONObject) aJsonArray;
+                        if (workerType.getInteger(WorkerType.TYPE) < 3) {
+                            continue;
+                        }
+                        TActuaryGoodsTotal tActuaryGoodsTotal = new TActuaryGoodsTotal();
+                        tActuaryGoodsTotal.setName(workerType.getString(WorkerType.NAME));
+                        tActuaryGoodsTotal.setPriceTotal(0.0);
+                        if (j == 0)
+                            tActuaryGoodsTotal.setGoodsType("材料");
+                        if (j == 1)
+                            tActuaryGoodsTotal.setGoodsType("服务");
+                        if (j == 2)
+                            tActuaryGoodsTotal.setGoodsType("人工");
+                        mapsTotal.put(workerType.getString(WorkerType.ID) + "-" + j, tActuaryGoodsTotal);
                     }
-                    TActuaryGoodsTotal tActuaryGoodsTotal = new TActuaryGoodsTotal();
-                    tActuaryGoodsTotal.setName(workerType.getString(WorkerType.NAME));
-                    tActuaryGoodsTotal.setPriceTotal(0.0);
-                    if (j == 0)
-                        tActuaryGoodsTotal.setGoodsType("材料");
-                    if (j == 1)
-                        tActuaryGoodsTotal.setGoodsType("服务");
-                    if (j == 2)
-                        tActuaryGoodsTotal.setGoodsType("人工");
-                    mapsTotal.put(workerType.getString(WorkerType.ID)+"-"+j, tActuaryGoodsTotal);
-                }
-            }
-
-            if (jsonArray != null&&jsonArray.size()>0) {
-                for (int i = 0; i < jsonArray.size(); i++) { //遍历每个工序
-                    JSONObject workerType = (JSONObject)jsonArray.get(i);  // 3: 大管家 ，4：拆除 ，5：  ，6：水电 ，7：泥工 ，8：木工 ，9：油漆
-                    if(workerType.getInteger(WorkerType.TYPE)<3){
+                    JSONObject workerType = (JSONObject) aJsonArray;  // 3: 大管家 ，4：拆除 ，5：  ，6：水电 ，7：泥工 ，8：木工 ，9：油漆
+                    if (workerType.getInteger(WorkerType.TYPE) < 3) {
                         continue;
                     }
                     //根据houseId和workerTypeId查询房子材料精算
@@ -165,7 +161,7 @@ public class HouseDataService {
                         TActuaryGoods tActuaryGoods = new TActuaryGoods();
                         tActuaryGoods.setName(workerType.getString(WorkerType.NAME));
                         tActuaryGoods.setShopNum(material.getShopCount());
-    //                    购买性质0：必买；1可选；2自购
+                        //                    购买性质0：必买；1可选；2自购
                         if (goods.getBuy() != 2) {
                             Product product = iProductMapper.selectByPrimaryKey(material.getProductId());
                             tActuaryGoods.setProductSn(product.getProductSn());
@@ -192,15 +188,11 @@ public class HouseDataService {
                                 tActuaryGoods.setDeleteState("再次购买");
                                 break;
                         }
-
-                        if (goods != null) {
-                            if (0 == goods.getType())//0:材料；1：服务
-                                tActuaryGoods.setGoodsType("材料");//商品类型 : 材料，服务，人工，
-                            else if (1 == goods.getType())
-                                tActuaryGoods.setGoodsType("服务");//商品类型 : 材料，服务，人工，
-                        }
-
-                        TActuaryGoodsTotal total = mapsTotal.get(workerType.getString(WorkerType.ID)+"-"+goods.getType());
+                        if (0 == goods.getType())//0:材料；1：服务
+                            tActuaryGoods.setGoodsType("材料");//商品类型 : 材料，服务，人工，
+                        else if (1 == goods.getType())
+                            tActuaryGoods.setGoodsType("服务");//商品类型 : 材料，服务，人工，
+                        TActuaryGoodsTotal total = mapsTotal.get(workerType.getString(WorkerType.ID) + "-" + goods.getType());
                         if (goods.getBuy() == 2) //自购
                         {
                             tActuaryGoods.setProductName("自购商品:" + material.getProductName());
@@ -210,7 +202,7 @@ public class HouseDataService {
                             tActuaryGoods.setUnit("自购商品单位:" + material.getUnitName());
                         } else {
                             tActuaryGoods.setProductName(material.getProductName());
-    //                        tActuaryGoods.setProductNum(materialMap.get("shopCount").toString());
+                            //                        tActuaryGoods.setProductNum(materialMap.get("shopCount").toString());
                             tActuaryGoods.setProductNum(material.getConvertCount());
                             tActuaryGoods.setPrice(material.getPrice());
                             tActuaryGoods.setPriceTotal(material.getTotalPrice());
@@ -222,7 +214,7 @@ public class HouseDataService {
                     }
 
                     //根据houseId和wokerTypeId查询房子人工精算
-    //                List<Map<String, Object>> workerMapList = iBudgetWorkerMapper.getBudgetWorkerById(houseId, workerTypeId);
+                    //                List<Map<String, Object>> workerMapList = iBudgetWorkerMapper.getBudgetWorkerById(houseId, workerTypeId);
                     List<BudgetWorker> workerMapList = iBudgetWorkerMapper.getBudgetWorkerByHouseIdAndWorkerTypeId(houseId, workerType.getString(WorkerType.ID));
                     for (BudgetWorker worker : workerMapList) {
                         TActuaryGoods tActuaryGoods = new TActuaryGoods();
@@ -257,21 +249,17 @@ public class HouseDataService {
                         tActuaryGoods.setProductSn(worker.getWorkerGoodsSn());
                         tActuaryGoodsList.add(tActuaryGoods);
 
-                        TActuaryGoodsTotal total = mapsTotal.get(workerType.getString(WorkerType.ID)+"-2");
+                        TActuaryGoodsTotal total = mapsTotal.get(workerType.getString(WorkerType.ID) + "-2");
                         total.setPriceTotal(total.getPriceTotal() + tActuaryGoods.getPriceTotal());
                     }
                 }
-
             }
             for (Map.Entry<String, TActuaryGoodsTotal> entry : mapsTotal.entrySet())
                 tActuaryGoodsTotalList.add(entry.getValue());
-
             ExportExcel exportExcel = new ExportExcel();//创建表格实例
             exportExcel.setDataList("精算价格单", TActuaryGoods.class, tActuaryGoodsList);
             exportExcel.setDataList("精算价格汇总", TActuaryGoodsTotal.class, tActuaryGoodsTotalList);
             exportExcel.write(response, houseId + ".xlsx");
-//            File file= ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX+"excel/template.xlsx");
-//            exportExcel.writeFileDownload(response, file.getPath(),houseId + ".xlsx");//创建文件并输出
             return ServerResponse.createBySuccessMessage("导出Excel成功");
         } catch (Exception e) {
             e.printStackTrace();

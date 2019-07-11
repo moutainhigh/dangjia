@@ -49,10 +49,8 @@ public class CustomerRecordService {
     public ServerResponse<PageInfo> getCustomerRecordList(PageDTO pageDTO, String memberId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-
             List<CustomerRecord> customerRecordList = iCustomerRecordMapper.getCustomerRecordByMemberId(memberId);
             LOG.info("customerRecordList:" + customerRecordList.size());
-
             List<CustomerRecordDTO> customerRecordListDTO = new ArrayList<>();
             for (CustomerRecord customerRecord : customerRecordList) {
                 CustomerRecordDTO customerRecordDTO = new CustomerRecordDTO();
@@ -64,7 +62,6 @@ public class CustomerRecordService {
 //                customerRecordDTO.setRemindCustomerRecord(customerRecord);
                 customerRecordListDTO.add(customerRecordDTO);
             }
-
             PageInfo pageResult = new PageInfo(customerRecordList);
             pageResult.setList(customerRecordListDTO);
             return ServerResponse.createBySuccess("查询成功", pageResult);
@@ -85,14 +82,12 @@ public class CustomerRecordService {
             LOG.info("addCustomerRecord:" + customerRecord);
             if (!StringUtils.isNotBlank(customerRecord.getMemberId()))
                 return ServerResponse.createByErrorMessage("业主id不能为null");
-
             CustomerRecord newCustomerRecord = new CustomerRecord();
             newCustomerRecord.setMemberId(customerRecord.getMemberId());
             newCustomerRecord.setUserId(customerRecord.getUserId());
             newCustomerRecord.setDescribes(customerRecord.getDescribes());
             newCustomerRecord.setRemindTime(customerRecord.getRemindTime());
             iCustomerRecordMapper.insertSelective(newCustomerRecord);
-
             Customer customer = customerMapper.getCustomerByMemberId(newCustomerRecord.getMemberId());
             if (customer == null) {
                 customer = new Customer();
@@ -101,14 +96,13 @@ public class CustomerRecordService {
                 customer.setStage(0);
                 customerMapper.insertSelective(customer);
             }
-
             List<CustomerRecord> customerRecordList = iCustomerRecordMapper.getCustomerRecordByMemberId(newCustomerRecord.getMemberId());
             //录入第一条的时候，改为 stage 继续跟进
             if (customerRecordList.size() == 1)
                 customer.setStage(1);// 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单
             customer.setCurrRecordId(newCustomerRecord.getId());
+            customer.setModifyDate(new Date());
             customerMapper.updateByPrimaryKeySelective(customer);
-
             //更新最近的提醒时间
             if (newCustomerRecord.getRemindTime() != null) //设置新的提醒了，需要重新计算最新最近的提醒记录和时间
                 updateMaxNearRemind(customer);
@@ -200,7 +194,7 @@ public class CustomerRecordService {
                 customerMapper.updateByPrimaryKey(customer);
                 LOG.info("更新后最近的沟通提醒 成功了");
             }
-        } else if (oldRemindRecordId == null && customer.getRemindRecordId() != null) { //第一次 设置提醒
+        } else if (customer.getRemindRecordId() != null) { //第一次 设置提醒
             customerMapper.updateByPrimaryKey(customer);
             LOG.info("更新后最近的沟通提醒 第一次设置提醒 成功了");
         }

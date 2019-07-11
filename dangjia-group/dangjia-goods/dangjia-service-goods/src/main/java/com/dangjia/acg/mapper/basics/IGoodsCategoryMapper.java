@@ -1,6 +1,8 @@
 package com.dangjia.acg.mapper.basics;
 
 import com.dangjia.acg.modle.attribute.GoodsCategory;
+import com.dangjia.acg.modle.basics.HomeProductDTO;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -19,8 +21,11 @@ public interface IGoodsCategoryMapper extends Mapper<GoodsCategory> {
 	List<GoodsCategory> query();
 
 	//根据父id查询下属商品类型
-	List<GoodsCategory> queryCategoryByParentId(String parentId);
+	List<GoodsCategory> queryCategoryByParentId(@Param("parentId") String parentId);
 
 	//根据name查询商品对象
-	List<GoodsCategory> queryCategoryByName(String name);
+	List<GoodsCategory> queryCategoryByName(@Param("name") String name);
+
+	//根据name查询商品对象
+	List<HomeProductDTO> getProductList(@Param("categoryId") String categoryId);
 }

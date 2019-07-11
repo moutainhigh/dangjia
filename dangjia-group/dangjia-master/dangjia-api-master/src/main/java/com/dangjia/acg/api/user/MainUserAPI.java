@@ -28,16 +28,21 @@ public interface MainUserAPI {
     ServerResponse sysSwitching(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("source") Integer source);
 
+
     /**
      * 分页查询用户列表
-     *
-     * @return ok/fail
+     * @param request
+     * @param pageDTO
+     * @param userSearch
+     * @param isJob 1：查询未离职的用户 2：查询未离职售前客服、工程部、工程部经理三个角色的用户  "" ：不传则展示所有
+     * @return
      */
     @RequestMapping(value = "/user/getUsers", method = RequestMethod.POST)
     @ApiOperation(value = "分页查询用户列表", notes = "分页查询用户列表")
     ServerResponse getUsers(@RequestParam("request") HttpServletRequest request,
                             @RequestParam("pageDTO") PageDTO pageDTO,
-                            @RequestParam("userSearch") UserSearchDTO userSearch);
+                            @RequestParam("userSearch") UserSearchDTO userSearch,
+                            @RequestParam("isJob") Integer isJob);
 
     /**
      * 设置用户是否离职

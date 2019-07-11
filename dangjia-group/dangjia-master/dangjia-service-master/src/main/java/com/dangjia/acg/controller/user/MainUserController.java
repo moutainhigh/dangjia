@@ -8,10 +8,14 @@ import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.dto.user.PermissionVO;
 import com.dangjia.acg.dto.user.UserDTO;
 import com.dangjia.acg.dto.user.UserSearchDTO;
+import com.dangjia.acg.mapper.system.IDepartmentMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
+import com.dangjia.acg.modle.system.Department;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.member.GroupInfoService;
 import com.dangjia.acg.service.user.MainAuthService;
@@ -39,12 +43,16 @@ public class MainUserController implements MainUserAPI {
 
     @Autowired
     private GroupInfoService groupInfoService;
+    @Autowired
+    private UserMapper userMapper;
     /****
      * 注入配置
      */
     @Autowired
     private RedisClient redisClient;
 
+    @Autowired
+    private IDepartmentMapper departmentMapper;
     /**
      * 系统来源切换
      *
@@ -66,8 +74,8 @@ public class MainUserController implements MainUserAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getUsers(HttpServletRequest request, PageDTO pageDTO, UserSearchDTO userSearch) {
-        return userService.getUsers(userSearch, pageDTO);
+    public ServerResponse getUsers(HttpServletRequest request, PageDTO pageDTO, UserSearchDTO userSearch,Integer isJob) {
+        return userService.getUsers(userSearch, pageDTO,isJob);
     }
 
     /**
@@ -122,10 +130,10 @@ public class MainUserController implements MainUserAPI {
                 logger.debug("置用户[新增或更新]，结果=请您填写用户信息");
                 return ServerResponse.createByErrorMessage("请您填写用户信息");
             }
-            if (StringUtils.isEmpty(roleIds)) {
-                logger.debug("置用户[新增或更新]，结果=请您给用户设置角色");
-                return ServerResponse.createByErrorMessage("请您给用户设置角色");
-            }
+//            if (StringUtils.isEmpty(roleIds)) {
+//                logger.debug("置用户[新增或更新]，结果=请您给用户设置角色");
+//                return ServerResponse.createByErrorMessage("请您给用户设置角色");
+//            }
             String userID = request.getParameter(Constants.USERID);
             MainUser existUser = redisClient.getCache(Constants.USER_KEY + userID, MainUser.class);
             if (null == existUser) {
@@ -157,10 +165,10 @@ public class MainUserController implements MainUserAPI {
                 logger.debug("置用户[新增或更新]，结果=请您填写用户信息");
                 return ServerResponse.createByErrorMessage("请您填写用户信息");
             }
-            if (StringUtils.isEmpty(roleIds)) {
-                logger.debug("置用户[新增或更新]，结果=请您给用户设置角色");
-                return ServerResponse.createByErrorMessage("请您给用户设置角色");
-            }
+//            if (StringUtils.isEmpty(roleIds)) {
+//                logger.debug("置用户[新增或更新]，结果=请您给用户设置角色");
+//                return ServerResponse.createByErrorMessage("请您给用户设置角色");
+//            }
             String userID = request.getParameter(Constants.USERID);
             MainUser existUser = redisClient.getCache(Constants.USER_KEY + userID, MainUser.class);
             if (null == existUser) {
@@ -290,6 +298,7 @@ public class MainUserController implements MainUserAPI {
         if (null == user) {
             return ServerResponse.createByErrorMessage("请求参数有误，请您稍后再试");
         }
+        String cityId = request.getParameter(Constants.CITY_ID);
         // 用户是否存在
         MainUser existUser = this.userService.findUserByMobile(user.getMobile());
         if (existUser == null) {
@@ -309,14 +318,29 @@ public class MainUserController implements MainUserAPI {
                 return ServerResponse.createByErrorMessage("用户名或密码不正确！");
             }
         }
+        if(CommonUtil.isEmpty(existUser.getDepartmentId())){
+            return ServerResponse.createByErrorMessage("登录用户暂未分配所属部门，请您联系管理员");
+        }
+        Department department=departmentMapper.selectByPrimaryKey(existUser.getDepartmentId());
+        if(department==null){
+            return ServerResponse.createByErrorMessage("登录用户暂未分配所属部门，请您联系管理员");
+        }
+//        if(CommonUtil.isEmpty(cityId)||department.getCityId().indexOf(cityId)==-1){
+//            return ServerResponse.createByErrorMessage("登录用户只能在("+department.getCityName()+")下登录，请选择正确的城市");
+//        }
         // 用户登录
         try {
             logger.debug("用户登录，用户验证开始！member=" + user.getMobile());
             redisClient.put(Constants.USER_KEY + existUser.getId(), existUser);
-
+            redisClient.put(Constants.CITY_KEY + existUser.getId(), department.getCityId());
             groupInfoService.registerJGUsers("gj", new String[]{existUser.getId()}, new String[1]);
             logger.info("用户登录，用户验证通过！member=" + user.getMobile());
             msg = ServerResponse.createBySuccess("用户登录，用户验证通过！member=" + user.getMobile(), existUser.getId());
+            MainUser mainUser = userMapper.selectByPrimaryKey(existUser.getId());
+            if(mainUser!=null&&CommonUtil.isEmpty(mainUser.getMemberId())) {
+                //插入MemberId
+                userMapper.insertMemberId(user.getMobile());
+            }
         } catch (Exception e) {
             logger.error("用户登录，用户验证未通过：操作异常，异常信息如下！member=" + user.getMobile(), e);
             msg = ServerResponse.createByErrorMessage("用户登录失败，请您稍后再试");
