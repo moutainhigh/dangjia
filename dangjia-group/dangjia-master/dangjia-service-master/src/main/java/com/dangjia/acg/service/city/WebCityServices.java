@@ -31,7 +31,7 @@ public class WebCityServices {
         if (cityMapper.selectByExample(example).size() > 0) {
             return ServerResponse.createByErrorMessage("城市已存在");
         }
-        city.setState("1");
+        city.setState("0");
         cityMapper.insert(city);
         return ServerResponse.createBySuccessMessage("创建成功");
     }
