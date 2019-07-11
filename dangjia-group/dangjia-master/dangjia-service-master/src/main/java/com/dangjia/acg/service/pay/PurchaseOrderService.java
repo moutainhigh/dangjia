@@ -14,6 +14,7 @@ import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.pay.PurchaseOrder;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -106,8 +107,7 @@ public class PurchaseOrderService {
             purchaseOrder = purchaseOrders.get(0);
         }
         if (selPrice != null && selPrice) {
-            String[] ids = purchaseOrder.getBudgetIds().split(",");
-            purchaseOrder.setPrice(getTotalPrice(cityId, ids));
+            purchaseOrder.setPrice(getTotalPrice(cityId, purchaseOrder.getBudgetIds()));
         }
         return purchaseOrder;
     }
@@ -135,9 +135,8 @@ public class PurchaseOrderService {
             return null;
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         String appAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
-        String[] ids = purchaseOrder.getBudgetIds().split(",");
         List<FlowActuaryDTO> flowActuaryDTOList = new ArrayList<>();
-        List<BudgetMaterial> budgetMaterialList = serverPortAPI.getInIdsBudgetMaterialList(house.getCityId(), ids);
+        List<BudgetMaterial> budgetMaterialList = serverPortAPI.getInIdsBudgetMaterialList(house.getCityId(), purchaseOrder.getBudgetIds());
         double totalPrice = 0d;
         for (BudgetMaterial bm : budgetMaterialList) {
             if (bm != null) {
@@ -170,14 +169,13 @@ public class PurchaseOrderService {
         House house = iHouseMapper.selectByPrimaryKey(purchaseOrder.getHouseId());
         if (house == null)
             return budgetMaterialList;
-        String[] ids = purchaseOrder.getBudgetIds().split(",");
-        List<BudgetMaterial> budgetMaterials = serverPortAPI.getInIdsBudgetMaterialList(house.getCityId(), ids);
+        List<BudgetMaterial> budgetMaterials = serverPortAPI.getInIdsBudgetMaterialList(house.getCityId(), purchaseOrder.getBudgetIds());
         for (BudgetMaterial budgetMaterial : budgetMaterials) {
             Product product = serverPortAPI.getProduct(house.getCityId(), budgetMaterial.getProductId());
             if (product != null) {
                 budgetMaterial.setModifyDate(new Date());
                 budgetMaterial.setDeleteState(1);//找不到商品标记删除
-                serverPortAPI.updateBudgetMaterial(house.getCityId(), budgetMaterial);
+                serverPortAPI.updateBudgetMaterial(house.getCityId(), new Gson().toJson(budgetMaterial));
             } else {
                 //重新记录支付时精算价格
                 budgetMaterial.setPrice(product.getPrice());
@@ -185,7 +183,7 @@ public class PurchaseOrderService {
                 budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * product.getPrice());//已支付 记录总价
                 budgetMaterial.setDeleteState(3);//已支付
                 budgetMaterial.setModifyDate(new Date());
-                serverPortAPI.updateBudgetMaterial(house.getCityId(), budgetMaterial);
+                serverPortAPI.updateBudgetMaterial(house.getCityId(), new Gson().toJson(budgetMaterial));
                 budgetMaterialList.add(budgetMaterial);
             }
         }
@@ -197,12 +195,12 @@ public class PurchaseOrderService {
     /**
      * 获取价格
      *
-     * @param ids BudgetMaterial id集合
+     * @param budgetIds BudgetMaterial id集合
      * @return
      */
-    private double getTotalPrice(String cityId, String[] ids) {
+    private double getTotalPrice(String cityId, String budgetIds) {
         double totalPrice = 0d;
-        List<BudgetMaterial> budgetMaterials = serverPortAPI.getInIdsBudgetMaterialList(cityId, ids);
+        List<BudgetMaterial> budgetMaterials = serverPortAPI.getInIdsBudgetMaterialList(cityId, budgetIds);
         for (BudgetMaterial bm : budgetMaterials) {
             if (bm != null) {
                 totalPrice = totalPrice + bm.getTotalPrice();

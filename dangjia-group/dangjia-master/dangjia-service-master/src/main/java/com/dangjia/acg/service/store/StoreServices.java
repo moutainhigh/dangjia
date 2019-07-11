@@ -81,7 +81,8 @@ public class StoreServices {
     public ServerResponse addStore(Store store) {
         try {
             Example example = new Example(Store.class);
-            example.createCriteria().andEqualTo(Store.STORE_NAME, store.getStoreName());
+            example.createCriteria().andEqualTo(Store.STORE_NAME, store.getStoreName())
+                    .andEqualTo(Store.DATA_STATUS,0);
             if (iStoreMapper.selectByExample(example).size() > 0) {
                 return ServerResponse.createByErrorMessage("门店已存在");
             }
@@ -126,7 +127,8 @@ public class StoreServices {
             Store oldStore = iStoreMapper.selectByPrimaryKey(store.getId());
             if(!oldStore.getStoreName().equals(store.getStoreName())){
                 Example example = new Example(Store.class);
-                example.createCriteria().andEqualTo(Store.STORE_NAME, store.getStoreName());
+                example.createCriteria().andEqualTo(Store.STORE_NAME, store.getStoreName())
+                        .andEqualTo(Store.DATA_STATUS,0);;
                 if (iStoreMapper.selectByExample(example).size() > 0) {
                     return ServerResponse.createByErrorMessage("门店已存在");
                 }
@@ -154,10 +156,7 @@ public class StoreServices {
      */
     public ServerResponse delStore(String id) {
         try {
-            Store store=new Store();
-            store.setId(id);
-            store.setDataStatus(1);
-            iStoreMapper.updateByPrimaryKeySelective(store);
+            iStoreMapper.deleteByPrimaryKey(id);
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -200,13 +199,13 @@ public class StoreServices {
             storeSubscribe.setModifyDate(modifyDate);
             if(iStoreSubscribeMapper.insert(storeSubscribe)>0) {
                 Map<String, String> temp_para = new HashMap();
-                temp_para.put("time", new SimpleDateFormat("yyyy-MM-dd").format(modifyDate));
+//                temp_para.put("time", new SimpleDateFormat("yyyy-MM-dd").format(modifyDate));
                 temp_para.put("name", storeName);
                 Store store = iStoreMapper.selectByPrimaryKey(storeId);
                 temp_para.put("address",store.getStoreAddress());
                 temp_para.put("phone",store.getReservationNumber());
                 //给预约客户发送短信
-                JsmsUtil.sendSMS(customerPhone, "166800", temp_para);
+                JsmsUtil.sendSMS(customerPhone, "167166", temp_para);
             }
             return ServerResponse.createBySuccessMessage("预约成功");
         } catch (Exception e) {

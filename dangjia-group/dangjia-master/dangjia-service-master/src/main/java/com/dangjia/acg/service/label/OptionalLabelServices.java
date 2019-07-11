@@ -30,7 +30,8 @@ public class OptionalLabelServices {
     public ServerResponse addOptionalLabel(OptionalLabel optionalLabel) {
         try {
             Example example = new Example(OptionalLabel.class);
-            example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, optionalLabel.getLabelName());
+            example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, optionalLabel.getLabelName())
+                    .andEqualTo(OptionalLabel.DATA_STATUS,0);
             if (optionalLabelMapper.selectByExample(example).size() > 0) {
                 return ServerResponse.createByErrorMessage("标签已存在");
             }
@@ -66,10 +67,7 @@ public class OptionalLabelServices {
      */
     public ServerResponse delOptionalLabel(String id) {
         try {
-            OptionalLabel optionalLabel = new OptionalLabel();
-            optionalLabel.setId(id);
-            optionalLabel.setDataStatus(1);
-            optionalLabelMapper.updateByPrimaryKeySelective(optionalLabel);
+            optionalLabelMapper.deleteByPrimaryKey(id);
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -88,7 +86,8 @@ public class OptionalLabelServices {
             OptionalLabel oldOptionalLabel = optionalLabelMapper.selectByPrimaryKey(optionalLabel.getId());
             if(!oldOptionalLabel.getLabelName().equals(optionalLabel.getLabelName())){
                 Example example = new Example(OptionalLabel.class);
-                example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, optionalLabel.getLabelName());
+                example.createCriteria().andEqualTo(OptionalLabel.LABEL_NAME, optionalLabel.getLabelName())
+                        .andEqualTo(OptionalLabel.DATA_STATUS,0);
                 if (optionalLabelMapper.selectByExample(example).size() > 0) {
                     return ServerResponse.createByErrorMessage("标签已存在");
                 }

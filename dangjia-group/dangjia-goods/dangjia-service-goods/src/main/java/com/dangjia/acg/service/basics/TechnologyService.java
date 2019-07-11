@@ -25,6 +25,8 @@ import com.dangjia.acg.service.actuary.ActuaryOperationService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -383,13 +385,19 @@ public class TechnologyService {
         return actuaryOperationService.getAttributes(productId);
     }
 
-    public List<BudgetMaterial> getInIdsBudgetMaterialList(String[] ids) {
+    public List<BudgetMaterial> getInIdsBudgetMaterialList(String budgetIds) {
+        if (budgetIds == null) {
+            budgetIds = "";
+        }
+        String[] ids = budgetIds.split(",");
         Example example = new Example(BudgetMaterial.class);
         example.createCriteria().andIn(BudgetMaterial.ID, Arrays.asList(ids));
         return budgetMaterialMapper.selectByExample(example);
     }
 
-    public void updateBudgetMaterial(BudgetMaterial budgetMaterial) {
+    public void updateBudgetMaterial(String json) {
+        BudgetMaterial budgetMaterial = new Gson().fromJson(json, new TypeToken<BudgetMaterial>() {
+        }.getType());
         budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
     }
 }
