@@ -21,18 +21,18 @@ public interface MendMaterielAPI {
 
     @PostMapping("/repair/mendMateriel/surplusList")
     @ApiOperation(value = "材料列表", notes = "材料列表")
-    ServerResponse surplusList(@RequestParam("workerTypeId")String workerTypeId,@RequestParam("houseId")String houseId);
+    ServerResponse surplusList(@RequestParam("cityId") String cityId,@RequestParam("workerTypeId")String workerTypeId,@RequestParam("houseId")String houseId);
 
     @PostMapping("/repair/mendMateriel/askAndQuit")
     @ApiOperation(value = "要退查询仓库", notes = "要退查询仓库")
-    ServerResponse askAndQuit(@RequestParam("userToken") String userToken,
+    ServerResponse askAndQuit(@RequestParam("cityId") String cityId,@RequestParam("userToken") String userToken,
                                     @RequestParam("houseId") String houseId,
                                     @RequestParam("categoryId") String categoryId,
                                     @RequestParam("name") String name);
 
     @PostMapping("/repair/mendMateriel/selectProduct")
     @ApiOperation(value = "选择货", notes = "选择货")
-    ServerResponse selectProduct(@RequestParam("request") HttpServletRequest request,
+    ServerResponse selectProduct(@RequestParam("cityId") String cityId,
                                  @RequestParam("goodsId") String goodsId,
                                  @RequestParam("selectVal") String selectVal,
                                  @RequestParam("attributeIdArr") String attributeIdArr);
@@ -40,7 +40,7 @@ public interface MendMaterielAPI {
 
     @PostMapping("/repair/mendMateriel/repairLibraryMaterial")
     @ApiOperation(value = "补货查询商品库商品", notes = "补货查询商品库商品")
-    ServerResponse repairLibraryMaterial(@RequestParam("userToken") String userToken,
+    ServerResponse repairLibraryMaterial(@RequestParam("cityId") String cityId,@RequestParam("userToken") String userToken,
                                          @RequestParam("request") HttpServletRequest request,
                                          @RequestParam("categoryId") String categoryId,
                                          @RequestParam("name") String name,
@@ -48,7 +48,7 @@ public interface MendMaterielAPI {
 
     @PostMapping("/repair/mendMateriel/workerTypeBudget")
     @ApiOperation(value = "补退要查询工种精算商品", notes = "补退要查询工种精算商品")
-    ServerResponse workerTypeBudget(@RequestParam("userToken") String userToken,
+    ServerResponse workerTypeBudget(@RequestParam("cityId") String cityId,@RequestParam("userToken") String userToken,
                                     @RequestParam("houseId") String houseId,
                                     @RequestParam("categoryId") String categoryId,
                                     @RequestParam("name") String name,

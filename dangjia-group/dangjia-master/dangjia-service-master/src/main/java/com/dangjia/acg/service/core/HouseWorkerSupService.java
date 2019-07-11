@@ -66,7 +66,8 @@ public class HouseWorkerSupService {
      */
     public ServerResponse surplusList(String houseFlowApplyId) {
         HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
-        return mendMaterielAPI.surplusList(houseFlowApply.getWorkerTypeId(), houseFlowApply.getHouseId());
+        House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());//查询房子
+        return mendMaterielAPI.surplusList(house.getCityId(),houseFlowApply.getWorkerTypeId(), houseFlowApply.getHouseId());
     }
 
     /**

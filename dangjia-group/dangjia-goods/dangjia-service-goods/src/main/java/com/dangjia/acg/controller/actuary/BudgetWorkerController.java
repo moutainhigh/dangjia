@@ -6,6 +6,7 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.actuary.BudgetWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
@@ -193,33 +194,39 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
      */
     @Override
     @ApiMethod
-    public JSONArray getAllTechnologyByHouseId(String houseId) {
+    public JSONArray getAllTechnologyByHouseId(String cityId,
+                                               String houseId) {
         return budgetWorkerService.getAllTechnologyByHouseId(houseId);
     }
 
     /**
      * 工种施工节点
      */
-    public JSONArray getTecByHouseFlowId(String houseId,String houseFlowId) {
+    public JSONArray getTecByHouseFlowId(String cityId,
+                                         String houseId,String houseFlowId) {
         return budgetWorkerService.getTecByHouseFlowId(houseId, houseFlowId);
     }
 
     /**
      * 查询精算工序所有工艺
      */
-    public JSONArray getTecList(int workerType,String workerGoodsId) {
+    public JSONArray getTecList(String cityId,
+                                int workerType,String workerGoodsId) {
         return budgetWorkerService.getTecList(workerType,workerGoodsId);
     }
 
-    public JSONArray getWorkerGoodsList(String houseId, String houseFlowId){
+    public JSONArray getWorkerGoodsList(String cityId,
+                                        String houseId, String houseFlowId){
         return budgetWorkerService.getWorkerGoodsList(houseId, houseFlowId);
     }
 
-    public boolean workerPatrolList(String workerGoodsId){
+    public boolean workerPatrolList(String cityId,
+                                    String workerGoodsId){
         return budgetWorkerService.workerPatrolList(workerGoodsId);
     }
 
-    public boolean patrolList(String workerGoodsId){
+    public boolean patrolList(String cityId,
+                              String workerGoodsId){
         return budgetWorkerService.patrolList(workerGoodsId);
     }
 }

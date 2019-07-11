@@ -125,11 +125,11 @@ public class ComplainService {
         if (CommonUtil.isEmpty(complainType) || CommonUtil.isEmpty(businessId)) {
             return ServerResponse.createByErrorMessage("参数错误");
         }
+        House house = houseMapper.selectByPrimaryKey(houseId);
         if (complainType != 1 && complainType != 4) {
             if (CommonUtil.isEmpty(houseId)) {
                 return ServerResponse.createByErrorMessage("参数错误");
             }
-            House house = houseMapper.selectByPrimaryKey(houseId);
             if (house == null) {
                 return ServerResponse.createByErrorMessage("没有查询到相关房子");
             }
@@ -156,7 +156,7 @@ public class ComplainService {
         complain.setFiles(files);
 //        1:工匠被处罚后不服.2：业主要求整改.3：要求换人.4:部分收货申诉.
         if (complainType == 4) {
-            Supplier supplier = supplierProductAPI.getSupplier(complain.getUserId());
+            Supplier supplier = supplierProductAPI.getSupplier(house.getCityId(),complain.getUserId());
             if (supplier != null) {
                 complain.setUserMobile(supplier.getTelephone());
                 complain.setUserName(supplier.getName());
