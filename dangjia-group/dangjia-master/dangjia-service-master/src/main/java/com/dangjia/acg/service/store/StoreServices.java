@@ -200,7 +200,7 @@ public class StoreServices {
             storeSubscribe.setModifyDate(modifyDate);
             if(iStoreSubscribeMapper.insert(storeSubscribe)>0) {
                 Map<String, String> temp_para = new HashMap();
-                temp_para.put("time", new SimpleDateFormat("yyyy-MM-dd").format(modifyDate));
+//                temp_para.put("time", new SimpleDateFormat("yyyy-MM-dd").format(modifyDate));
                 temp_para.put("name", storeName);
                 Store store = iStoreMapper.selectByPrimaryKey(storeId);
                 temp_para.put("address",store.getStoreAddress());
