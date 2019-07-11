@@ -129,7 +129,8 @@ public class HouseWorkerSupService {
                         Example example = new Example(HouseFlowApply.class);
                         example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, flowId)
                                 .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                                .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1);
+                                .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1)
+                                .andEqualTo(HouseFlowApply.DATA_STATUS, 0);
                         List<HouseFlowApply> houseFlowList = houseFlowApplyMapper.selectByExample(example);
                         boolean isBG = false;//是否变开始时间，用于不差延续，不包括当前，因为上次的延续包括了当前
                         for (HouseFlowApply flow : houseFlowList) {
@@ -145,6 +146,7 @@ public class HouseWorkerSupService {
                         example = new Example(HouseFlowApply.class);
                         example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, flowId)
                                 .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
+                                .andEqualTo(HouseFlowApply.DATA_STATUS, 0)
                                 .andEqualTo(HouseFlowApply.END_DATE, end);
                         List<HouseFlowApply> houseFlowLists = houseFlowApplyMapper.selectByExample(example);
 
@@ -181,6 +183,9 @@ public class HouseWorkerSupService {
                         hfa.setEndDate(end);
                         hfa.setOperator(worker.getId());
                         houseFlowApplyMapper.insert(hfa);
+
+                        //重新获取
+                        houseFlow = houseFlowMapper.selectByPrimaryKey(flowId);
                         if (houseFlow.getWorkSteta() != 1 && houseFlow.getWorkSteta() != 2 && houseFlow.getWorkSteta() != 6) {
                             if (start.getTime() == DateUtil.toDate(DateUtil.getDateString2(new Date().getTime())).getTime()) {
                                 houseFlow.setPause(1);//0:正常；1暂停；
