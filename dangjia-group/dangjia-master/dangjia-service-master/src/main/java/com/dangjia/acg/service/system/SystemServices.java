@@ -85,16 +85,23 @@ public class SystemServices {
     public ServerResponse queryDepartmentAll(String parentId) {
         try {
             Example example=new Example(Department.class);
-            if(!CommonUtil.isEmpty(parentId)){
-                example.createCriteria().andEqualTo(Department.ID,parentId);
-            }
             List<Department> departments = departmentMapper.selectByExample(example);
             List<Map> departmentMap =new ArrayList<>();
             if(departments.size()>0){
                 for (Department department : departments) {
-                    Map map = BeanUtils.beanToMap(department);
-                    if(CommonUtil.isEmpty(department.getParentId())){
-                        departmentMap.add(map);
+                    if(!CommonUtil.isEmpty(parentId)){
+                        if(department.getId().equals(parentId)||department.getParentTop().equals(parentId)){
+                            Map map = BeanUtils.beanToMap(department);
+                            if(CommonUtil.isEmpty(department.getParentId())){
+                                departmentMap.add(map);
+                            }
+                        }
+                    }
+                    if(CommonUtil.isEmpty(parentId)){
+                        Map map = BeanUtils.beanToMap(department);
+                        if(CommonUtil.isEmpty(department.getParentId())){
+                            departmentMap.add(map);
+                        }
                     }
                 }
             }
