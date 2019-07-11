@@ -22,8 +22,8 @@ public class SystemController implements SystemAPI {
 	}
 	@Override
 	@ApiMethod
-	public ServerResponse queryDepartmentAll() {
-		return systemServices.queryDepartmentAll();
+	public ServerResponse queryDepartmentAll(String parentId) {
+		return systemServices.queryDepartmentAll(parentId);
 	}
 
 	@Override

@@ -82,9 +82,12 @@ public class SystemServices {
         }
     }
     //查询组织架构
-    public ServerResponse queryDepartmentAll() {
+    public ServerResponse queryDepartmentAll(String parentId) {
         try {
             Example example=new Example(Department.class);
+            if(!CommonUtil.isEmpty(parentId)){
+                example.createCriteria().andEqualTo(Department.ID,parentId);
+            }
             List<Department> departments = departmentMapper.selectByExample(example);
             List<Map> departmentMap =new ArrayList<>();
             if(departments.size()>0){
