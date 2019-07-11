@@ -156,9 +156,6 @@ public class PurchaseOrderService {
 
     /**
      * 支付成功后回调
-     *
-     * @param purchaseOrderId purchaseOrderId
-     * @return
      */
     List<BudgetMaterial> payPurchaseOrder(String purchaseOrderId) {
         PurchaseOrder purchaseOrder = purchaseOrderMapper.selectByPrimaryKey(purchaseOrderId);
@@ -172,7 +169,7 @@ public class PurchaseOrderService {
         List<BudgetMaterial> budgetMaterials = serverPortAPI.getInIdsBudgetMaterialList(house.getCityId(), purchaseOrder.getBudgetIds());
         for (BudgetMaterial budgetMaterial : budgetMaterials) {
             Product product = serverPortAPI.getProduct(house.getCityId(), budgetMaterial.getProductId());
-            if (product != null) {
+            if (product == null) {
                 budgetMaterial.setModifyDate(new Date());
                 budgetMaterial.setDeleteState(1);//找不到商品标记删除
                 serverPortAPI.updateBudgetMaterial(house.getCityId(), new Gson().toJson(budgetMaterial));
@@ -194,9 +191,6 @@ public class PurchaseOrderService {
 
     /**
      * 获取价格
-     *
-     * @param budgetIds BudgetMaterial id集合
-     * @return
      */
     private double getTotalPrice(String cityId, String budgetIds) {
         double totalPrice = 0d;
