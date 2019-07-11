@@ -306,7 +306,7 @@ public class StoreServices {
         for (Store store : stores) {
             Double profit = 0d;
             if(!CommonUtil.isEmpty(store.getVillages())) {
-                List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(store.getVillages(), null, searchKey);
+                List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(store.getVillages(), null, null);
                 if (houseList.size() <= 0) {
                     continue;
                 }
