@@ -383,7 +383,11 @@ public class TechnologyService {
         return actuaryOperationService.getAttributes(productId);
     }
 
-    public List<BudgetMaterial> getInIdsBudgetMaterialList(String[] ids) {
+    public List<BudgetMaterial> getInIdsBudgetMaterialList(String budgetIds) {
+        if (budgetIds == null) {
+            budgetIds = "";
+        }
+        String[] ids = budgetIds.split(",");
         Example example = new Example(BudgetMaterial.class);
         example.createCriteria().andIn(BudgetMaterial.ID, Arrays.asList(ids));
         return budgetMaterialMapper.selectByExample(example);

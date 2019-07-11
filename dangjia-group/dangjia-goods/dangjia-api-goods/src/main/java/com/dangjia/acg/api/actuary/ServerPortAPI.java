@@ -52,7 +52,7 @@ public interface ServerPortAPI {
 
     @PostMapping("serverPort/getInIdsBudgetMaterialList")
     List<BudgetMaterial> getInIdsBudgetMaterialList(@RequestParam("cityId") String cityId,
-                                                    @RequestParam("ids") String[] ids);
+                                                    @RequestParam("budgetIds") String budgetIds);
 
     @PostMapping("serverPort/updateBudgetMaterial")
     void updateBudgetMaterial(@RequestParam("cityId") String cityId,

@@ -52,8 +52,8 @@ public class ServerPortController implements ServerPortAPI {
     }
 
     @Override
-    public List<BudgetMaterial> getInIdsBudgetMaterialList(String cityId, String[] ids) {
-        return technologyService.getInIdsBudgetMaterialList(ids);
+    public List<BudgetMaterial> getInIdsBudgetMaterialList(String cityId, String budgetIds) {
+        return technologyService.getInIdsBudgetMaterialList(budgetIds);
     }
 
     @Override

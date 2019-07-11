@@ -106,8 +106,7 @@ public class PurchaseOrderService {
             purchaseOrder = purchaseOrders.get(0);
         }
         if (selPrice != null && selPrice) {
-            String[] ids = purchaseOrder.getBudgetIds().split(",");
-            purchaseOrder.setPrice(getTotalPrice(cityId, ids));
+            purchaseOrder.setPrice(getTotalPrice(cityId, purchaseOrder.getBudgetIds()));
         }
         return purchaseOrder;
     }
@@ -135,9 +134,8 @@ public class PurchaseOrderService {
             return null;
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         String appAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
-        String[] ids = purchaseOrder.getBudgetIds().split(",");
         List<FlowActuaryDTO> flowActuaryDTOList = new ArrayList<>();
-        List<BudgetMaterial> budgetMaterialList = serverPortAPI.getInIdsBudgetMaterialList(house.getCityId(), ids);
+        List<BudgetMaterial> budgetMaterialList = serverPortAPI.getInIdsBudgetMaterialList(house.getCityId(), purchaseOrder.getBudgetIds());
         double totalPrice = 0d;
         for (BudgetMaterial bm : budgetMaterialList) {
             if (bm != null) {
@@ -170,8 +168,7 @@ public class PurchaseOrderService {
         House house = iHouseMapper.selectByPrimaryKey(purchaseOrder.getHouseId());
         if (house == null)
             return budgetMaterialList;
-        String[] ids = purchaseOrder.getBudgetIds().split(",");
-        List<BudgetMaterial> budgetMaterials = serverPortAPI.getInIdsBudgetMaterialList(house.getCityId(), ids);
+        List<BudgetMaterial> budgetMaterials = serverPortAPI.getInIdsBudgetMaterialList(house.getCityId(), purchaseOrder.getBudgetIds());
         for (BudgetMaterial budgetMaterial : budgetMaterials) {
             Product product = serverPortAPI.getProduct(house.getCityId(), budgetMaterial.getProductId());
             if (product != null) {
@@ -197,12 +194,12 @@ public class PurchaseOrderService {
     /**
      * 获取价格
      *
-     * @param ids BudgetMaterial id集合
+     * @param budgetIds BudgetMaterial id集合
      * @return
      */
-    private double getTotalPrice(String cityId, String[] ids) {
+    private double getTotalPrice(String cityId, String budgetIds) {
         double totalPrice = 0d;
-        List<BudgetMaterial> budgetMaterials = serverPortAPI.getInIdsBudgetMaterialList(cityId, ids);
+        List<BudgetMaterial> budgetMaterials = serverPortAPI.getInIdsBudgetMaterialList(cityId, budgetIds);
         for (BudgetMaterial bm : budgetMaterials) {
             if (bm != null) {
                 totalPrice = totalPrice + bm.getTotalPrice();
