@@ -81,7 +81,8 @@ public class StoreServices {
     public ServerResponse addStore(Store store) {
         try {
             Example example = new Example(Store.class);
-            example.createCriteria().andEqualTo(Store.STORE_NAME, store.getStoreName());
+            example.createCriteria().andEqualTo(Store.STORE_NAME, store.getStoreName())
+                    .andEqualTo(Store.DATA_STATUS,0);
             if (iStoreMapper.selectByExample(example).size() > 0) {
                 return ServerResponse.createByErrorMessage("门店已存在");
             }
@@ -126,7 +127,8 @@ public class StoreServices {
             Store oldStore = iStoreMapper.selectByPrimaryKey(store.getId());
             if(!oldStore.getStoreName().equals(store.getStoreName())){
                 Example example = new Example(Store.class);
-                example.createCriteria().andEqualTo(Store.STORE_NAME, store.getStoreName());
+                example.createCriteria().andEqualTo(Store.STORE_NAME, store.getStoreName())
+                        .andEqualTo(Store.DATA_STATUS,0);;
                 if (iStoreMapper.selectByExample(example).size() > 0) {
                     return ServerResponse.createByErrorMessage("门店已存在");
                 }
