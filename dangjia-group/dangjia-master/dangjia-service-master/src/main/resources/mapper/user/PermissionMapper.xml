@@ -89,8 +89,8 @@
     from dj_user_permission p
     LEFT JOIN dj_user_role_permission rp ON rp.permit_id=p.id
     LEFT JOIN dj_user_role r ON r.id=rp.role_id
-    LEFT JOIN dj_user_user_role ur ON ur.role_id=r.id
-    WHERE ur.user_id=#{userId} AND p.sys_id=#{source}
+    LEFT JOIN dj_dydtem_job_role ur ON ur.role_id=r.id
+    WHERE ur.job_id=#{userId} AND p.sys_id=#{source}
     GROUP BY p.id
     order by p.zindex
   </select>
