@@ -503,36 +503,13 @@ public class HouseService {
     }
 
     /**
-     * 修改房子信息
+     * 修改房子工序顺序以及选配标签
      */
     public ServerResponse setHouseInfo(House house) {
         try {
             House srcHouse = iHouseMapper.selectByPrimaryKey(house.getId());
-            if (srcHouse == null)
+            if (srcHouse == null) {
                 return ServerResponse.createByErrorMessage("没有该房子");
-            if (!CommonUtil.isEmpty(house.getSiteDisplay())) {
-                srcHouse.setSiteDisplay(house.getSiteDisplay());
-            }
-            if (house.getShowHouse() != -1) {
-                srcHouse.setShowHouse(house.getShowHouse());
-                house.setVisitState(-1);
-                if (house.getShowHouse() == 1) {
-                    HouseChoiceCase houseChoiceCase = new HouseChoiceCase();
-                    houseChoiceCase.setDataStatus(0);
-                    houseChoiceCase.setCityId(srcHouse.getCityId());
-                    houseChoiceCase.setHouseId(srcHouse.getId());
-//                    houseChoiceCase.setImage(srcHouse.getImage());
-                    houseChoiceCase.setMoney(srcHouse.getMoney());
-                    houseChoiceCase.setTitle(srcHouse.getNoNumberHouseName());
-                    houseChoiceCase.setLabel(srcHouse.getStyle());
-                    houseChoiceCase.setSource("房源来自当家装修精选推荐");
-                    houseChoiceCaseService.addHouseChoiceCase(houseChoiceCase);
-                } else {
-                    houseChoiceCaseService.delHouseChoiceCase(house.getId());
-                }
-            }
-            if (house.getVisitState() != -1) {
-                srcHouse.setVisitState(house.getVisitState());
             }
             if (!house.getCustomSort().equals("ignore")) {
                 LOG.info("setHouseInfo getCustomSort:" + house.getCustomSort());
@@ -585,12 +562,57 @@ public class HouseService {
             srcHouse.setOptionalLabel(house.getOptionalLabel());
             iHouseMapper.updateByPrimaryKeySelective(srcHouse);
             return ServerResponse.createBySuccessMessage("保存成功");
-        } catch (
-                Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }
+
+
+    /**
+     *修改房子状态
+     * @param house
+     * @return
+     */
+    public ServerResponse setHouseState(House house){
+        try {
+            House srcHouse = iHouseMapper.selectByPrimaryKey(house.getId());
+            if (!CommonUtil.isEmpty(house.getSiteDisplay())) {
+                srcHouse.setSiteDisplay(house.getSiteDisplay());
+            }
+            if (!CommonUtil.isEmpty(house.getShowHouse())) {
+                srcHouse.setShowHouse(house.getShowHouse());
+                if (house.getShowHouse() == 1) {
+                    HouseChoiceCase houseChoiceCase = new HouseChoiceCase();
+                    houseChoiceCase.setDataStatus(0);
+                    houseChoiceCase.setCityId(srcHouse.getCityId());
+                    houseChoiceCase.setHouseId(srcHouse.getId());
+                    houseChoiceCase.setMoney(srcHouse.getMoney());
+                    houseChoiceCase.setTitle(srcHouse.getNoNumberHouseName());
+                    houseChoiceCase.setLabel(srcHouse.getStyle());
+                    houseChoiceCase.setSource("房源来自当家装修精选推荐");
+                    houseChoiceCaseService.addHouseChoiceCase(houseChoiceCase);
+                } else {
+                    houseChoiceCaseService.delHouseChoiceCase(house.getId());
+                }
+            }
+            if(!CommonUtil.isEmpty(house.getVisitState())){
+                srcHouse.setVisitState(house.getVisitState());
+            }
+            iHouseMapper.updateByPrimaryKeySelective(srcHouse);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
+
+
+
+
+
+
+
 
     /**
      * WEB确认开工

@@ -376,7 +376,6 @@ public class EvaluateService {
                 //阶段审核
                 HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowId());
                 hf.setPause(1);
-                hf.setWorkSteta(1);
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
             }
             //推送工匠审核结果
