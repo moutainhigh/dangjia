@@ -324,7 +324,7 @@ public class MainAuthController implements MainAuthAPI {
 			throw new BaseException(ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN, ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN.getDesc());
 		}
 		try {
-			pvo = mainAuthService.getUserPerms(existUser.getId());
+			pvo = mainAuthService.getUserPerms(userID,existUser.getJobId());
 			//生成页面需要的json格式
 			logger.debug("根据用户id查询限树列表查询=pvo:" + pvo);
 		} catch (Exception e) {
