@@ -307,7 +307,7 @@ public class WorkerService {
                     .andEqualTo(WorkerBankCard.BANK_CARD_NUMBER, bankCard.getBankCardNumber())
                     .andEqualTo(WorkerBankCard.WORKER_ID, worker.getId());
             if (workerBankCardMapper.selectByExample(example).size() > 0) {
-                return ServerResponse.createByErrorMessage("添加失败，银行卡以被使用！");
+                return ServerResponse.createByErrorMessage("添加失败，银行卡已被使用！");
             }
             bankCard.setWorkerId(worker.getId());
             bankCard.setDataStatus(0);
