@@ -515,6 +515,7 @@ public class HouseService {
             }
             if (house.getShowHouse() != -1) {
                 srcHouse.setShowHouse(house.getShowHouse());
+                srcHouse.setVisitState(null);
                 if (house.getShowHouse() == 1) {
                     HouseChoiceCase houseChoiceCase = new HouseChoiceCase();
                     houseChoiceCase.setDataStatus(0);
@@ -582,7 +583,7 @@ public class HouseService {
                 srcHouse.setCustomSort(house.getCustomSort());
             }
             srcHouse.setOptionalLabel(house.getOptionalLabel());
-            iHouseMapper.updateByPrimaryKey(srcHouse);
+            iHouseMapper.updateByPrimaryKeySelective(srcHouse);
             return ServerResponse.createBySuccessMessage("保存成功");
         } catch (
                 Exception e) {
