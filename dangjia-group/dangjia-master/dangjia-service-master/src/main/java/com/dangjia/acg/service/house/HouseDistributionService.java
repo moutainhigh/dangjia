@@ -45,6 +45,10 @@ public class HouseDistributionService {
     private ICityMapper iCityMapper;
     @Autowired
     private IWebsiteVisitMapper websiteVisitMapper;
+    @Autowired
+    private CustomerRecordService customerRecordService;
+    @Autowired
+    private ICustomerRecordMapper customerRecordMapper;
 
     /**
      * 获取所有验房分销
@@ -128,6 +132,26 @@ public class HouseDistributionService {
         houseDistribution.setState(0);
         houseDistribution.setType(1);
         if (this.iHouseDistributionMapper.insertSelective(houseDistribution) > 0) {
+            Example example =new Example(CustomerRecord.class);
+            example.createCriteria().andEqualTo(CustomerRecord.MEMBER_ID, houseDistribution.getOpenid());
+            example.orderBy(CustomerRecord.CREATE_DATE).desc();
+            List<CustomerRecord> customerRecords = customerRecordMapper.selectByExample(example);
+            CustomerRecord customerRecord;
+            if (customerRecords.size() > 0) {
+                customerRecord = customerRecordMapper.selectByExample(example).get(0);
+            } else {
+                customerRecord = new CustomerRecord();
+                customerRecord.setMemberId(houseDistribution.getOpenid());
+                customerRecord.setUserId("");
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(houseDistribution.getCreateDate());
+            calendar.add(Calendar.DAY_OF_MONTH, +1);//+1今天的时间加一天
+            customerRecord.setDescribes((houseDistribution.getType() == 1 ? "验房分销，" : "验房预约，")
+                    + houseDistribution.getInfo()
+                    + (houseDistribution.getState() == 1 ? "，已支付" : houseDistribution.getState() == 0 ? "，未支付" : "，预约"));
+            customerRecord.setRemindTime(calendar.getTime());
+            customerRecordService.addCustomerRecord(customerRecord);
             return ServerResponse.createBySuccess("ok", houseDistribution.getId());
         } else {
             return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");
