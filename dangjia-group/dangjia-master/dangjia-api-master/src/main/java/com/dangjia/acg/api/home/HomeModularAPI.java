@@ -23,6 +23,7 @@ public interface HomeModularAPI {
     /**
      * showdoc
      *
+     * @param cityId 必选 string cityId
      * @return {"res":1000,"msg":{"resultObj":[{返回参数说明},{返回参数说明}],"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/首页模块
      * @title 首页获取播报
@@ -38,7 +39,8 @@ public interface HomeModularAPI {
      */
     @PostMapping("home/getBroadcastList")
     @ApiOperation(value = "首页获取播报", notes = "首页获取播报")
-    ServerResponse getBroadcastList(@RequestParam("request") HttpServletRequest request);
+    ServerResponse getBroadcastList(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("cityId") String cityId);
 
     /**
      * showdoc

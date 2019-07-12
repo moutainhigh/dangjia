@@ -63,16 +63,9 @@ public class HomeModularService {
     @Autowired
     private MyHouseService myHouseService;
 
-    public ServerResponse getBroadcastList() {
+    public ServerResponse getBroadcastList(String cityId) {
         PageHelper.startPage(1, 20);
-        Example example = new Example(HouseFlowApply.class);
-        //过滤掉提前结束的房子
-        example.createCriteria()
-                .andNotEqualTo(HouseFlowApply.APPLY_TYPE, 8)
-                .andNotEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                .andNotEqualTo(HouseFlowApply.APPLY_TYPE, 9);
-        example.orderBy(HouseFlowApply.CREATE_DATE).desc();
-        List<HouseFlowApply> houseFlowApplies = iHouseFlowApplyMapper.selectByExample(example);
+        List<HouseFlowApply> houseFlowApplies = iHouseFlowApplyMapper.getBroadcastList(cityId);
         if (houseFlowApplies.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
