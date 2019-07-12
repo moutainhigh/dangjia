@@ -366,7 +366,7 @@ public class MainUserController implements MainUserAPI {
             }
             List<PermissionVO> source = redisClient.getListCache("userPerms:" + existUser.getId(), PermissionVO.class);
             if (source == null || source.size() == 0) {
-                ServerResponse pvo = mainAuthService.getUserPerms(existUser.getId());
+                ServerResponse pvo = mainAuthService.getUserPerms(userID,existUser.getId());
                 source = (List) pvo.getResultObj();
                 redisClient.putListCache("userPerms" + existUser.getId(), source);
             }
