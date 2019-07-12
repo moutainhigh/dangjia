@@ -297,12 +297,12 @@ public class HouseUtil {
                     iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
                 } else {
                     nameBs = new String[]{"设计抢单", "支付设计费", "量房阶段", "设计平面图", "设计施工图", "设计完成"};
-                    nameD = new String[]{"", "", "", "2个工作内提交,需业主确认", "5个工作内提交,需业主确认", ""};
+                    nameD = new String[]{"", "", "", "2个工作日内提交,需业主确认", "5个工作日内提交,需业主确认", ""};
                     iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png", "zx_icon_3_2.png", "zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
                 }
             } else if (workerType == 2) {//精算
                 nameBs = new String[]{"精算抢单", "支付精算费", "制作精算", "精算完成"};
-                nameD = new String[]{"", "", "3个工作内提交,需业主确认", ""};
+                nameD = new String[]{"", "", "3个工作日内提交,需业主确认", ""};
                 iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png", "zx_icon_4_2.png", "zx_icon_7_2.png"};
             } else {//其他
                 nameBs = new String[]{"工匠抢单", "支付工匠费", "正常施工", "阶段完工", "整体完工", "施工完成"};

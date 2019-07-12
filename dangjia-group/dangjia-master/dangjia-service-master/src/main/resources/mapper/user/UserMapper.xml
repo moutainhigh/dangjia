@@ -34,6 +34,8 @@
         select
         <include refid="a_Column_List"/>
         from dj_user a
+        inner join dj_system_job b
+        on a.job_id=b.id
         where 1=1
         AND is_del=0
         <if test="userSearch.umobile!=null and userSearch.umobile!=''">
@@ -59,8 +61,8 @@
         </if>
         <if test="isJob==2">
             AND (
-            c.role_name like CONCAT('%','售前客服','%') or
-            c.role_name like CONCAT('%','工程部','%')
+            b.name like CONCAT('%','售前客服','%') or
+            b.name like CONCAT('%','工程','%')
             )
         </if>
         GROUP BY a.id

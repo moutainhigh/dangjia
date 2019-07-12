@@ -85,6 +85,7 @@ public class StoreServices {
             if(!CommonUtil.isEmpty(store.getDepartmentId())) {
                 Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
                 store.setCityName(department.getCityName());
+                store.setCityId(department.getCityId());
                 store.setDepartmentName(department.getName());
             }
             getStoreVillages(store);
