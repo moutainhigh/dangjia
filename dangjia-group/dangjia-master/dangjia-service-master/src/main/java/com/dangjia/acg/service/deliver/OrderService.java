@@ -465,11 +465,11 @@ public class OrderService {
 
                 /*删除补货信息*/
                 if (!CommonUtil.isEmpty(orderSplit.getMendNumber())) {
-                    orderSplit.setMendNumber(null);
                     mendOrderMapper.deleteByPrimaryKey(orderSplit.getMendNumber());
                     example = new Example(MendMateriel.class);
                     example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, orderSplit.getMendNumber());
                     mendMaterialMapper.deleteByExample(example);
+                    orderSplit.setMendNumber(null);
                 }
                 orderSplit.setSupervisorId(worker.getId());
                 orderSplit.setSupervisorName(worker.getName());
