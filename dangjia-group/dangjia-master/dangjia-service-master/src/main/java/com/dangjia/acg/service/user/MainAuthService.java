@@ -194,8 +194,8 @@ public class MainAuthService {
 	}
 
 	
-	public ServerResponse getUserPerms(String id) {
-		Integer source= redisClient.getCache("sysSource:"+id,Integer.class);
+	public ServerResponse getUserPerms(String userID,String id) {
+		Integer source= redisClient.getCache("sysSource:"+userID,Integer.class);
 		if(source==null){
 			source=1;
 		}
