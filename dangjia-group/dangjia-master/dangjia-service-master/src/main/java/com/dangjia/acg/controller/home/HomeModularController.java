@@ -18,8 +18,8 @@ public class HomeModularController implements HomeModularAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getBroadcastList(HttpServletRequest request) {
-        return homeModularService.getBroadcastList();
+    public ServerResponse getBroadcastList(HttpServletRequest request, String cityId) {
+        return homeModularService.getBroadcastList(cityId);
     }
 
     @Override

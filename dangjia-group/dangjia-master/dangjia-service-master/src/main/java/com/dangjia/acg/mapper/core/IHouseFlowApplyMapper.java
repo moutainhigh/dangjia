@@ -83,4 +83,7 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
      */
     List<HouseFlowApply> getHouseScheduleFlowApply(@Param("houseId") String houseId, @Param("month") String month);
 
+
+    List<HouseFlowApply> getBroadcastList(@Param("cityId") String cityId);
+
 }
