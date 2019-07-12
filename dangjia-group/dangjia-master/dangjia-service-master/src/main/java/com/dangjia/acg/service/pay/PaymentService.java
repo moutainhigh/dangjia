@@ -209,6 +209,7 @@ public class PaymentService {
                 houseDistribution.setNumber(businessOrder.getNumber());//业务订单号
                 houseDistribution.setState(1);//已支付Example example = new Example(CustomerRecord.class);
                 iHouseDistributionMapper.updateByPrimaryKeySelective(houseDistribution);
+                example =new Example(CustomerRecord.class);
                 example.createCriteria().andEqualTo(CustomerRecord.MEMBER_ID, houseDistribution.getOpenid());
                 example.orderBy(CustomerRecord.CREATE_DATE).desc();
                 List<CustomerRecord> customerRecords = customerRecordMapper.selectByExample(example);
