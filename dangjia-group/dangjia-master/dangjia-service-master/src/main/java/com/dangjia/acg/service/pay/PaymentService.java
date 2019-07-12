@@ -63,7 +63,6 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.deliver.ProductChangeService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
-import com.dangjia.acg.service.member.CustomerRecordService;
 import com.dangjia.acg.service.member.GroupInfoService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
 import com.github.pagehelper.PageInfo;
@@ -165,8 +164,6 @@ public class PaymentService {
     @Autowired
     private PurchaseOrderService purchaseOrderService;
     @Autowired
-    private CustomerRecordService customerRecordService;
-    @Autowired
     private ICustomerRecordMapper customerRecordMapper;
 
     /**
@@ -212,15 +209,7 @@ public class PaymentService {
                 example =new Example(CustomerRecord.class);
                 example.createCriteria().andEqualTo(CustomerRecord.MEMBER_ID, houseDistribution.getOpenid());
                 example.orderBy(CustomerRecord.CREATE_DATE).desc();
-                List<CustomerRecord> customerRecords = customerRecordMapper.selectByExample(example);
-                CustomerRecord customerRecord;
-                if (customerRecords.size() > 0) {
-                    customerRecord = customerRecordMapper.selectByExample(example).get(0);
-                } else {
-                    customerRecord = new CustomerRecord();
-                    customerRecord.setMemberId(houseDistribution.getOpenid());
-                    customerRecord.setUserId("");
-                }
+                CustomerRecord customerRecord=customerRecordMapper.selectByExample(example).get(0);
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(houseDistribution.getCreateDate());
                 calendar.add(Calendar.DAY_OF_MONTH, +1);//+1今天的时间加一天
@@ -228,7 +217,7 @@ public class PaymentService {
                         + houseDistribution.getInfo()
                         + (houseDistribution.getState() == 1 ? "，已支付" : houseDistribution.getState() == 0 ? "，未支付" : "，预约"));
                 customerRecord.setRemindTime(calendar.getTime());
-                customerRecordService.addCustomerRecord(customerRecord);
+                customerRecordMapper.updateByPrimaryKeySelective(customerRecord);
                 return ServerResponse.createBySuccessMessage("支付成功");
             } else if (businessOrder.getType() == 6) {//待付款 更换结算
                 HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
