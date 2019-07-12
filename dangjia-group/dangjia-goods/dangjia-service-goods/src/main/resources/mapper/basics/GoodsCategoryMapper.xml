@@ -93,7 +93,7 @@
         p.id AS id,
         p.image AS image,
         p.price AS price,
-        p.unit_name AS unitName,
+        u.name AS unitName,
         g.type AS goodsType,
         0 AS type,
         p.NAME AS NAME
@@ -101,6 +101,7 @@
         dj_basics_product p
         INNER JOIN dj_basics_goods_category c ON c.id = p.category_id
         INNER JOIN dj_basics_goods g ON g.id = p.goods_id
+        INNER JOIN dj_basics_unit u ON u.id = p.convert_unit
         WHERE
         p.maket = 1
         AND p.type = 1
