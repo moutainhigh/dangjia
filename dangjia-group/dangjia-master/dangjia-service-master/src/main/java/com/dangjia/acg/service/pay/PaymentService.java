@@ -25,6 +25,7 @@ import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.*;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.*;
+import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
@@ -46,6 +47,7 @@ import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.*;
+import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.pay.BusinessOrder;
@@ -61,6 +63,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.deliver.ProductChangeService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
+import com.dangjia.acg.service.member.CustomerRecordService;
 import com.dangjia.acg.service.member.GroupInfoService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
 import com.github.pagehelper.PageInfo;
@@ -161,6 +164,10 @@ public class PaymentService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private PurchaseOrderService purchaseOrderService;
+    @Autowired
+    private CustomerRecordService customerRecordService;
+    @Autowired
+    private ICustomerRecordMapper customerRecordMapper;
 
     /**
      * 服务器回调
@@ -200,8 +207,27 @@ public class PaymentService {
             } else if (businessOrder.getType() == 5) {//验房分销
                 HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
                 houseDistribution.setNumber(businessOrder.getNumber());//业务订单号
-                houseDistribution.setState(1);//已支付
+                houseDistribution.setState(1);//已支付Example example = new Example(CustomerRecord.class);
                 iHouseDistributionMapper.updateByPrimaryKeySelective(houseDistribution);
+                example.createCriteria().andEqualTo(CustomerRecord.MEMBER_ID, houseDistribution.getOpenid());
+                example.orderBy(CustomerRecord.CREATE_DATE).desc();
+                List<CustomerRecord> customerRecords = customerRecordMapper.selectByExample(example);
+                CustomerRecord customerRecord;
+                if (customerRecords.size() > 0) {
+                    customerRecord = customerRecordMapper.selectByExample(example).get(0);
+                } else {
+                    customerRecord = new CustomerRecord();
+                    customerRecord.setMemberId(houseDistribution.getOpenid());
+                    customerRecord.setUserId("");
+                }
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(houseDistribution.getCreateDate());
+                calendar.add(Calendar.DAY_OF_MONTH, +1);//+1今天的时间加一天
+                customerRecord.setDescribes((houseDistribution.getType() == 1 ? "验房分销，" : "验房预约，")
+                        + houseDistribution.getInfo()
+                        + (houseDistribution.getState() == 1 ? "，已支付" : houseDistribution.getState() == 0 ? "，未支付" : "，预约"));
+                customerRecord.setRemindTime(calendar.getTime());
+                customerRecordService.addCustomerRecord(customerRecord);
                 return ServerResponse.createBySuccessMessage("支付成功");
             } else if (businessOrder.getType() == 6) {//待付款 更换结算
                 HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
