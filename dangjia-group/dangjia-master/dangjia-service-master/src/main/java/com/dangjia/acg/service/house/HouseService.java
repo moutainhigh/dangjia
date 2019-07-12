@@ -515,7 +515,7 @@ public class HouseService {
             }
             if (house.getShowHouse() != -1) {
                 srcHouse.setShowHouse(house.getShowHouse());
-                srcHouse.setVisitState(null);
+                house.setVisitState(-1);
                 if (house.getShowHouse() == 1) {
                     HouseChoiceCase houseChoiceCase = new HouseChoiceCase();
                     houseChoiceCase.setDataStatus(0);
