@@ -133,7 +133,7 @@ public class HouseDistributionService {
         houseDistribution.setType(1);
         if (this.iHouseDistributionMapper.insertSelective(houseDistribution) > 0) {
             Example example =new Example(CustomerRecord.class);
-            example.createCriteria().andEqualTo(CustomerRecord.MEMBER_ID, houseDistribution.getOpenid());
+            example.createCriteria().andEqualTo(CustomerRecord.MEMBER_ID, user.getId());
             example.orderBy(CustomerRecord.CREATE_DATE).desc();
             List<CustomerRecord> customerRecords = customerRecordMapper.selectByExample(example);
             CustomerRecord customerRecord;
