@@ -64,8 +64,6 @@ public class IndexPageService {
     @Autowired
     private IModelingVillageMapper modelingVillageMapper;
     @Autowired
-    private DesignDataService designDataService;
-    @Autowired
     private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
 
     /**
@@ -77,18 +75,11 @@ public class IndexPageService {
             Double minSquare = square - 15;
             Double maxSquare = square + 15;
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            PageInfo pageResult=null;
             List<House> houseList = houseMapper.getSameLayoutDistance(cityId, modelingVillage.getLocationx(), modelingVillage.getLocationy(), minSquare, maxSquare,villageId);
             if(houseList.size()<=0){
-                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                houseList=houseMapper.getSameLayoutDistance(cityId, modelingVillage.getLocationx(), modelingVillage.getLocationy(),null,null,villageId);
-                pageResult = new PageInfo(houseList);
-                if(houseList.size()<=0){
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-                }
-            }else{
-                pageResult = new PageInfo(houseList);
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
+            PageInfo pageResult = new PageInfo(houseList);
             List<Map> houseMap = new ArrayList<>();
             for (House house : houseList) {
                 request.setAttribute(Constants.CITY_ID, house.getCityId());
@@ -103,12 +94,8 @@ public class IndexPageService {
                 if (order != null) {
                     totalPrice = totalPrice.add(order.getTotalAmount());
                 }
-                ServerResponse serverResponse = budgetMaterialAPI.getHouseBudgetStageCost(request, house.getId(), null);
-                JSONArray pageInfo = (JSONArray) serverResponse.getResultObj();
-                List<BudgetStageCostDTO> budgetStageCostDTOS = pageInfo.toJavaList(BudgetStageCostDTO.class);
-                for (BudgetStageCostDTO budgetStageCostDTO : budgetStageCostDTOS) {
-                    totalPrice = totalPrice.add(budgetStageCostDTO.getTotalAmount());
-                }
+                BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getId());
+                totalPrice = totalPrice.add(totalAmount);
                 house.setMoney(totalPrice);
                 Map map = BeanUtils.beanToMap(house);
                 map.put("houseName", house.getHouseName());
@@ -195,13 +182,15 @@ public class IndexPageService {
                 map.put("workerTypeId", workerType.getId());
                 ServerResponse serverResponse = budgetMaterialAPI.getHouseBudgetStageCost(request, houseId, houseFlow.getWorkerTypeId());
                 JSONArray pageInfo = (JSONArray) serverResponse.getResultObj();
-                List<BudgetStageCostDTO> budgetStageCostDTOS = pageInfo.toJavaList(BudgetStageCostDTO.class);
-                for (BudgetStageCostDTO budgetStageCostDTO : budgetStageCostDTOS) {
-                    totalPrice = totalPrice.add(budgetStageCostDTO.getTotalAmount());
-                }
-                if (budgetStageCostDTOS.size() > 0) {
-                    map.put("workers", serverResponse.getResultObj());
-                    mapList.add(map);
+                if(!CommonUtil.isEmpty(pageInfo)) {
+                    List<BudgetStageCostDTO> budgetStageCostDTOS = pageInfo.toJavaList(BudgetStageCostDTO.class);
+                    for (BudgetStageCostDTO budgetStageCostDTO : budgetStageCostDTOS) {
+                        totalPrice = totalPrice.add(budgetStageCostDTO.getTotalAmount());
+                    }
+                    if (budgetStageCostDTOS.size() > 0) {
+                        map.put("workers", serverResponse.getResultObj());
+                        mapList.add(map);
+                    }
                 }
             }
             houseDetailsDTO.setMapList(mapList);
@@ -326,12 +315,9 @@ public class IndexPageService {
             if (order != null) {
                 totalPrice = totalPrice.add(order.getTotalAmount());
             }
-            ServerResponse serverResponse = budgetMaterialAPI.getHouseBudgetStageCost(request, house.getId(), null);
-            JSONArray pageInfo = (JSONArray) serverResponse.getResultObj();
-            List<BudgetStageCostDTO> budgetStageCostDTOS = pageInfo.toJavaList(BudgetStageCostDTO.class);
-            for (BudgetStageCostDTO budgetStageCostDTO : budgetStageCostDTOS) {
-                totalPrice = totalPrice.add(budgetStageCostDTO.getTotalAmount());
-            }
+
+            BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getId());
+            totalPrice = totalPrice.add(totalAmount);
             house = this.getHouseImage(house);
             house.setMoney(totalPrice);
         }

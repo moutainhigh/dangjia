@@ -82,7 +82,6 @@ public class DruidConfig {
     private String connectionProperties;
 
 
-
     @Bean(value = "dataSource")
     @Primary    //优先使用，多数据源
     public DataSource dataSource() {
@@ -101,6 +100,7 @@ public class DruidConfig {
                 map.put(DataSourceType.CS_CHANGSHA.getName(), csDataSource);
             }
         }
+
         //株洲数据源
         String zzdbUrl=dbUrl.replaceAll("changsha","zhuzhou");
         DataSource csDataSource = getDruidDataSource(username, password,zzdbUrl);

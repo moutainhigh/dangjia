@@ -50,7 +50,7 @@ public class HouseUtil {
                 } else {
                     nodeDTO.setNameB("提前结束装修");
                 }
-                nodeDTO.setRank(5);
+                nodeDTO.setRank(6);
             } else if (houseFlow.getWorkType() == 1) {
                 nodeDTO.setRank(0);
                 nodeDTO.setNameB("未开始");
@@ -61,10 +61,15 @@ public class HouseUtil {
                 nodeDTO.setRank(2);
                 nodeDTO.setNameB("待支付");
             } else if (houseFlow.getSupervisorStart() == 0 && houseFlow.getWorkType() == 4) {
-                nodeDTO.setRank(3);
-                nodeDTO.setNameB("待开工");
+                if(CommonUtil.isEmpty(house.getSchedule())||"0".equals(house.getSchedule())){
+                    nodeDTO.setRank(3);
+                    nodeDTO.setNameB("待排期");
+                }else{
+                    nodeDTO.setRank(4);
+                    nodeDTO.setNameB("待开工");
+                }
             } else if (houseFlow.getSupervisorStart() == 1 && houseFlow.getWorkType() == 4) {
-                nodeDTO.setRank(4);
+                nodeDTO.setRank(5);
                 nodeDTO.setNameB("监工中");
             }
         } else if (workerType.getType() == 4) {//拆除
@@ -292,12 +297,12 @@ public class HouseUtil {
                     iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
                 } else {
                     nameBs = new String[]{"设计抢单", "支付设计费", "量房阶段", "设计平面图", "设计施工图", "设计完成"};
-                    nameD = new String[]{"", "", "", "5天内提交,需业主确认", "2天内提交,需业主确认", ""};
+                    nameD = new String[]{"", "", "", "2个工作日内提交,需业主确认", "5个工作日内提交,需业主确认", ""};
                     iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png", "zx_icon_3_2.png", "zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
                 }
             } else if (workerType == 2) {//精算
                 nameBs = new String[]{"精算抢单", "支付精算费", "制作精算", "精算完成"};
-                nameD = new String[]{"", "", "3天内提交,需业主确认", ""};
+                nameD = new String[]{"", "", "3个工作日内提交,需业主确认", ""};
                 iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png", "zx_icon_4_2.png", "zx_icon_7_2.png"};
             } else {//其他
                 nameBs = new String[]{"工匠抢单", "支付工匠费", "正常施工", "阶段完工", "整体完工", "施工完成"};

@@ -25,20 +25,20 @@ public interface SupplierProductAPI {
 
     @PostMapping("/sup/supplierProduct/info")
     @ApiOperation(value = "供应商明细", notes = "供应商明细")
-    Supplier getSupplier(@RequestParam("productId") String productId);
+    Supplier getSupplier(@RequestParam("cityId") String cityId,@RequestParam("productId") String productId);
 
     @PostMapping("/sup/supplierProduct/byTelephone")
     @ApiOperation(value = "供应商登录", notes = "供应商登录")
-    ServerResponse byTelephone(@RequestParam("telephone") String telephone);
+    ServerResponse byTelephone(@RequestParam("cityId") String cityId,@RequestParam("telephone") String telephone);
 
     @PostMapping("/sup/supplierProduct/supplierList")
     @ApiOperation(value = "查询供应商", notes = "查询供应商")
-    ServerResponse supplierList(@RequestParam("request") HttpServletRequest request,
+    ServerResponse supplierList(@RequestParam("cityId") String cityId,
                                 @RequestParam("productId") String productId);
 
     @PostMapping("/sup/supplierProduct/insertSupplier")
     @ApiOperation(value = "新增供应商", notes = "新增供应商")
-    ServerResponse insertSupplier(@RequestParam("request") HttpServletRequest request,
+    ServerResponse insertSupplier(@RequestParam("cityId") String cityId,
                                   @RequestParam("name") String name,
                                   @RequestParam("address") String address,
                                   @RequestParam("telephone") String telephone,
@@ -51,7 +51,7 @@ public interface SupplierProductAPI {
 
     @PostMapping("/sup/supplierProduct/updateSupplier")
     @ApiOperation(value = "新增供应商", notes = "新增供应商")
-    ServerResponse updateSupplier(@RequestParam("request") HttpServletRequest request,
+    ServerResponse updateSupplier(@RequestParam("cityId") String cityId,
                                   @RequestParam("id") String id,
                                   @RequestParam("name") String name,
                                   @RequestParam("address") String address,
@@ -65,13 +65,13 @@ public interface SupplierProductAPI {
 
     @PostMapping("/sup/supplierProduct/querySupplierListLikeByName")
     @ApiOperation(value = "按照名字模糊查询所有供应商", notes = "按照名字模糊查询所有供应商")
-    ServerResponse<PageInfo> querySupplierListLikeByName(@RequestParam("request") HttpServletRequest request,
+    ServerResponse<PageInfo> querySupplierListLikeByName(@RequestParam("cityId") String cityId,
                                                          @RequestParam("pageDTO") PageDTO pageDTO,
                                                          @RequestParam("name") String name);
 
     @PostMapping("/sup/supplierProduct/querySupplierProduct")
     @ApiOperation(value = "查询所有货品供应关系", notes = "查询所有货品供应关系")
-    ServerResponse querySupplierProduct(@RequestParam("request") HttpServletRequest request,
+    ServerResponse querySupplierProduct(@RequestParam("cityId") String cityId,
                                         @RequestParam("type") int type,
                                         @RequestParam("supplierId") String supplierId,
                                         @RequestParam("likeProductName") String likeProductName,
@@ -79,10 +79,12 @@ public interface SupplierProductAPI {
 
     @PostMapping("/sup/supplierProduct/saveSupplierProduct")
     @ApiOperation(value = "保存供应商与货品供应关系", notes = "保存供应商与货品供应关系")
-    ServerResponse saveSupplierProduct(@RequestParam("arrString") String arrString);
+    ServerResponse saveSupplierProduct(@RequestParam("cityId") String cityId,
+                                       @RequestParam("arrString") String arrString);
 
     @PostMapping("/sup/supplierProduct/querySupplierProductByPid")
     @ApiOperation(value = "根据货品查询相应供应商", notes = "根据货品查询相应供应商")
-    ServerResponse querySupplierProductByPid(@RequestParam("pageDTO") PageDTO pageDTO,
+    ServerResponse querySupplierProductByPid(@RequestParam("cityId") String cityId,
+                                             @RequestParam("pageDTO") PageDTO pageDTO,
                                              @RequestParam("productId") String productId);
 }

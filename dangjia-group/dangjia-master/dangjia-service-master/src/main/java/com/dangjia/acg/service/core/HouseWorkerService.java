@@ -510,9 +510,11 @@ public class HouseWorkerService {
         }
         houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 4, worker.getId(), new Date());
         if (houseFlowApplyList.size() > 0) {
-            HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
-            if (new Date().getTime() < DateUtil.addDateHours(houseFlowApply.getCreateDate(), 3).getTime()) {
-                return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）开工后3小时才能申请完工！");
+            if(active!=null&&(active.equals("pre"))) {
+                HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
+                if (new Date().getTime() < DateUtil.addDateHours(houseFlowApply.getCreateDate(), 3).getTime()) {
+                    return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）开工后3小时才能申请完工！");
+                }
             }
         } else {
             return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）未开工，无法申请完工！");
@@ -682,19 +684,21 @@ public class HouseWorkerService {
      * 每日开工
      */
     private ServerResponse setStartDaily(Member worker, HouseFlow hf, House house, String latitude, String longitude) {
-        ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
-        if (village != null && village.getLocationx() != null && village.getLocationy() != null
-                && latitude != null && longitude != null) {
-            try {
-                double longitude1 = Double.valueOf(longitude);
-                double latitude1 = Double.valueOf(latitude);
-                double longitude2 = Double.valueOf(village.getLocationx());
-                double latitude2 = Double.valueOf(village.getLocationy());
-                double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
-                if (distance > 1000) {
-                    return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
+        if(active!=null&&(active.equals("pre"))) {
+            ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
+            if (village != null && village.getLocationx() != null && village.getLocationy() != null
+                    && latitude != null && longitude != null) {
+                try {
+                    double longitude1 = Double.valueOf(longitude);
+                    double latitude1 = Double.valueOf(latitude);
+                    double longitude2 = Double.valueOf(village.getLocationx());
+                    double latitude2 = Double.valueOf(village.getLocationy());
+                    double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
+                    if (distance > 1000) {
+                        return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
+                    }
+                } catch (Exception ignored) {
                 }
-            } catch (Exception ignored) {
             }
         }
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
@@ -720,38 +724,40 @@ public class HouseWorkerService {
         if (houseFlowApplyList.size() > 0) {
             return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
         }
-        houseFlowApplyList = getLeave(hf);
-        if (houseFlowApplyList.size() > 0) {
-            for (HouseFlowApply hfa : houseFlowApplyList) {
-                hfa.setMemberCheck(2);//不通过不通过
-                hfa.setModifyDate(new Date());
-                houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
-            }
-        }
+//        houseFlowApplyList = getLeave(hf);
+//        if (houseFlowApplyList.size() > 0) {
+//            for (HouseFlowApply hfa : houseFlowApplyList) {
+//                hfa.setMemberCheck(2);//不通过不通过
+//                hfa.setModifyDate(new Date());
+//                houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
+//            }
+//        }
         HouseFlowApply hfa = getHouseFlowApply(hf, 4, null);
         hfa.setPayState(0);//是否付款
         hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经开工了");//描述
         hfa.setMemberCheck(1);//默认业主审核状态通过
         hfa.setSupervisorCheck(1);//默认大管家审核状态通过
-        hf.setPause(0);//0:正常；1暂停；
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
         //已经停工的工序，若工匠提前复工，则复工日期以及之后的停工全部取消，
         // 原来被停工推后了的计划完工日期往前推，推的天数等于被取消的停工天数
-        Date start = new Date();
+        Date start = DateUtil.toDate(DateUtil.dateToString(new Date(),null));
         Date end = start;
+
         Example example = new Example(HouseFlowApply.class);
         example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, hf.getId())
                 .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
                 .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1)
-                .andCondition(" ('" + DateUtil.getDateString(new Date().getTime()) + "' BETWEEN start_date and end_date)   ");
+                .andEqualTo(HouseFlowApply.DATA_STATUS, 0)
+//                .andCondition("( start_date >= '" + DateUtil.getDateString2(new Date().getTime()) + "' and end_date <= '" + DateUtil.getDateString2(new Date().getTime()) + "')");
+                .andCondition(" ('" + DateUtil.getDateString2(new Date().getTime()) + "' BETWEEN start_date and end_date)   ");
         List<HouseFlowApply> houseFlowList = houseFlowApplyMapper.selectByExample(example);
         for (HouseFlowApply houseFlowApply : houseFlowList) {
             if (houseFlowApply.getEndDate().getTime() > end.getTime()) {
                 end = houseFlowApply.getEndDate();
                 //更新实际停工天数
-                houseFlowApply.setEndDate(DateUtil.delDateDays(start, 1));
-                if (houseFlowApply.getStartDate().getTime() <= houseFlowApply.getEndDate().getTime()) {
+                houseFlowApply.setEndDate(start);
+                if (houseFlowApply.getStartDate().getTime() >= houseFlowApply.getEndDate().getTime()) {
                     houseFlowApply.setEndDate(houseFlowApply.getStartDate());
                     houseFlowApply.setSuspendDay(0);
                     houseFlowApply.setDataStatus(1);
@@ -759,17 +765,20 @@ public class HouseWorkerService {
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
             }
         }
-        int suspendDay = DateUtil.daysofTwo(start, end);
+        int suspendDay = 1+DateUtil.daysofTwo(start, end);
         if (suspendDay > 0) {
             //计划提前
             houseFlowScheduleService.updateFlowSchedule(hf.getHouseId(), hf.getWorkerTypeId(), null, suspendDay);
         }
+        //重新获取最新信息,防止计划时间变更后还原
+        hf=houseFlowMapper.selectByPrimaryKey(hf.getId());
         //若未进场的工序比计划开工日期提早开工，则计划开工日期修改为实际开工日期，（施工天数不变）完工日期随之提早
         if (hf.getStartDate() != null && hf.getStartDate().getTime() > start.getTime()) {
             suspendDay = DateUtil.daysofTwo(start, hf.getStartDate());
             hf.setStartDate(DateUtil.delDateDays(hf.getStartDate(), suspendDay));
             hf.setEndDate(DateUtil.delDateDays(hf.getEndDate(), suspendDay));
         }
+        hf.setPause(0);//0:正常；1暂停；
         houseFlowMapper.updateByPrimaryKeySelective(hf);//发每日开工将暂停状态改为正常
         return ServerResponse.createBySuccessMessage("操作成功");
     }

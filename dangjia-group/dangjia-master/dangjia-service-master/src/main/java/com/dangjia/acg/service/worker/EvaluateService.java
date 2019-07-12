@@ -30,14 +30,10 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
-import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.house.HouseAccounts;
 import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.safe.WorkerTypeSafe;
-import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
@@ -380,12 +376,8 @@ public class EvaluateService {
                 //阶段审核
                 HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowId());
                 hf.setPause(1);
+                hf.setWorkSteta(1);
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
-            }else{
-
-                HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlowApply.getHouseId(), houseFlowApply.getWorkerTypeId());
-                /*处理保险订单*/
-                this.insurance(hwo, "3");
             }
             //推送工匠审核结果
             //configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_PASS,house.getHouseName()) ,"5");
@@ -399,45 +391,7 @@ public class EvaluateService {
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }
-    /**
-     * 保险订单
-     */
-    private void insurance(HouseWorkerOrder hwo, String payState) {
-        try {
-            WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByWorkerTypeId(hwo.getWorkerTypeId(), hwo.getHouseId());
-            if (wtso != null&&wtso.getState()!=1) {
-                wtso.setState(1);  //已支付
-                wtso.setShopDate(new Date());  //设置购买时间
-                workerTypeSafeOrderMapper.updateByPrimaryKeySelective(wtso);
 
-                hwo.setSafePrice(wtso.getPrice());
-                houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);//记录保险费
-
-                House house = houseMapper.selectByPrimaryKey(hwo.getHouseId());
-                WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());
-                if (house.getMoney() == null) {
-                    house.setMoney(new BigDecimal(0));
-                }
-                //记录项目流水 保险
-                HouseAccounts ha = new HouseAccounts();
-                ha.setReason("收入" + wts.getName() + "费用");
-                ha.setMoney(house.getMoney().add(hwo.getSafePrice()));//项目总钱
-                ha.setState(0);//进
-                ha.setPayMoney(hwo.getSafePrice());//本次数额
-                ha.setHouseId(house.getId());
-                ha.setHouseName(house.getHouseName());
-                ha.setMemberId(house.getMemberId());
-                ha.setName("业主支付");
-                ha.setPayment(payState);//统计支付方式
-                houseAccountsMapper.insert(ha);
-                house.setMoney(house.getMoney().add(hwo.getSafePrice()));//累计项目钱
-                houseMapper.updateByPrimaryKeySelective(house);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-        }
-    }
     /**
      * 业主评价管家完工 最后完工
      */

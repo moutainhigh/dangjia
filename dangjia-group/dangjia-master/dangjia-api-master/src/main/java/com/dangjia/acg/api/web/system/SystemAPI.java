@@ -24,7 +24,7 @@ public interface SystemAPI {
     //查询组织架构
     @PostMapping("/web/system/queryDepartmentAll")
     @ApiOperation(value = "查询所有组织架构", notes = "查询所有组织架构")
-    ServerResponse queryDepartmentAll() ;
+    ServerResponse queryDepartmentAll(String parentId) ;
 
     //查询组织架构
     @PostMapping("/web/system/queryTopDepartmentAll")

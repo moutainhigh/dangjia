@@ -17,12 +17,14 @@ import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.util.StringTool;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +57,10 @@ public class BudgetMaterialService {
 
 
     private static Logger LOG = LoggerFactory.getLogger(BudgetMaterialService.class);
-
+    //房子精算总花费
+    public BigDecimal getHouseBudgetTotalAmount(String houseId){
+        return iBudgetMaterialMapper.getHouseBudgetTotalAmount(houseId);
+    }
     //精算阶段花费统计
     public ServerResponse getHouseBudgetStageCost(String houseId, String workerTypeId) {
         try {

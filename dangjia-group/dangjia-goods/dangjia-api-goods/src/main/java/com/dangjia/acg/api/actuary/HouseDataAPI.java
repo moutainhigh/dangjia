@@ -28,7 +28,8 @@ public interface HouseDataAPI {
 
     @PostMapping("/actuary/houseData/selfBuyingList")
     @ApiOperation(value = "自购清单", notes = "自购清单")
-    ServerResponse selfBuyingList(@RequestParam("houseId") String houseId);
+    ServerResponse selfBuyingList(@RequestParam("cityId") String cityId,
+                                  @RequestParam("houseId") String houseId);
 
     @PostMapping("/actuary/houseData/workerGoodsDetail")
     @ApiOperation(value = "人工详情", notes = "人工详情")
@@ -57,7 +58,8 @@ public interface HouseDataAPI {
 
     @GetMapping("/actuary/houseData/export/actuary/exportActuaryTotal")
     @ApiOperation(value = "导出精算汇总表", notes = "导出精算汇总表", produces = "*/*,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream")
-    ServerResponse exportActuaryTotal(@RequestParam("response") HttpServletResponse response,
+    ServerResponse exportActuaryTotal(@RequestParam("cityId") String cityId,
+                                      @RequestParam("response") HttpServletResponse response,
                                       @RequestParam("houseId") String houseId);
 
 }

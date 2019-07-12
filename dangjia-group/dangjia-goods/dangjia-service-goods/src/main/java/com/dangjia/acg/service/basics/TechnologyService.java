@@ -8,20 +8,25 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.ISearchBoxMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
+import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.SearchBox;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.service.actuary.ActuaryOperationService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +42,12 @@ import java.util.*;
  */
 @Service
 public class TechnologyService {
-
+    @Autowired
+    private IBudgetMaterialMapper budgetMaterialMapper;
+    @Autowired
+    private IProductMapper productMapper;
+    @Autowired
+    private ActuaryOperationService actuaryOperationService;
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
     @Autowired
@@ -358,4 +368,36 @@ public class TechnologyService {
         }
     }
 
+
+    public List<BudgetMaterial> getBudgetMaterialList(String houseId) {
+        Example example = new Example(BudgetMaterial.class);
+        example.createCriteria()
+                .andEqualTo(BudgetMaterial.HOUSE_ID, houseId)
+                .andEqualTo(BudgetMaterial.DELETE_STATE, 2);
+        return budgetMaterialMapper.selectByExample(example);
+    }
+
+    public Product getProduct(String productId) {
+        return productMapper.selectByPrimaryKey(productId);
+    }
+
+    public String getAttributes(String productId) {
+        return actuaryOperationService.getAttributes(productId);
+    }
+
+    public List<BudgetMaterial> getInIdsBudgetMaterialList(String budgetIds) {
+        if (budgetIds == null) {
+            budgetIds = "";
+        }
+        String[] ids = budgetIds.split(",");
+        Example example = new Example(BudgetMaterial.class);
+        example.createCriteria().andIn(BudgetMaterial.ID, Arrays.asList(ids));
+        return budgetMaterialMapper.selectByExample(example);
+    }
+
+    public void updateBudgetMaterial(String json) {
+        BudgetMaterial budgetMaterial = new Gson().fromJson(json, new TypeToken<BudgetMaterial>() {
+        }.getType());
+        budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
+    }
 }

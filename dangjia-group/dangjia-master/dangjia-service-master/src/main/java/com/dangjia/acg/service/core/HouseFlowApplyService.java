@@ -167,11 +167,30 @@ public class HouseFlowApplyService {
                 stewardMoney(hfa);
                 //设置保险时间
                 WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByWorkerTypeId(hwo.getWorkerTypeId(), hwo.getHouseId());
+
+                //临时代码-补充未生成的质保卡
+                if (wtso == null) {//默认生成一条
+                    //该工钟所有保险
+                    Example example = new Example(WorkerTypeSafe.class);
+                    example.createCriteria().andEqualTo(WorkerTypeSafe.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
+                    List<WorkerTypeSafe> wtsList = workerTypeSafeMapper.selectByExample(example);
+                    House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+
+                    wtso = new WorkerTypeSafeOrder();
+                    wtso.setWorkerTypeSafeId(wtsList.get(0).getId()); // 向保险订单中存入保险服务类型的id
+                    wtso.setHouseId(houseFlow.getHouseId()); // 存入房子id
+                    wtso.setWorkerTypeId(houseFlow.getWorkerTypeId()); // 工种id
+                    wtso.setWorkerType(houseFlow.getWorkerType());
+                    wtso.setPrice(wtsList.get(0).getPrice().multiply(house.getSquare()));
+                    wtso.setState(1);
+                    workerTypeSafeOrderMapper.insert(wtso);
+                }
                 if (wtso != null) {
                     WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());//获得类型算出时间
                     int month = (wts.getMonth()); //获取保险时长(月)
                     Calendar cal = Calendar.getInstance();
                     cal.add(Calendar.MONTH, month);
+                    wtso.setState(2);  //已生效
                     wtso.setForceTime(new Date());//设置生效时间
                     wtso.setExpirationDate(cal.getTime()); //设置到期时间
                     workerTypeSafeOrderMapper.updateByPrimaryKeySelective(wtso);

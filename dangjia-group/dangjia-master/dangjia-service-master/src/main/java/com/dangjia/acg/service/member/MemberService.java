@@ -110,6 +110,7 @@ public class MemberService {
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
         String mobile = "";
         request.setAttribute("isShow", "true");
+        String cityId = request.getParameter(Constants.CITY_ID);
         switch (idType) {
             case "1":
                 House house = houseMapper.selectByPrimaryKey(id);
@@ -119,7 +120,7 @@ public class MemberService {
                 }
                 break;
             case "3":
-                Supplier supplier = supplierProductAPI.getSupplier(id);
+                Supplier supplier = supplierProductAPI.getSupplier(cityId,id);
                 if (supplier != null) {
                     mobile = supplier.getTelephone();
                 }
@@ -204,6 +205,11 @@ public class MemberService {
         redisClient.put(userRole, accessToken.getUserToken());
         groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
         groupInfoService.registerJGUsers("gj", new String[]{accessToken.getMemberId()}, new String[1]);
+        MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
+        if(mainUser!=null&&CommonUtil.isEmpty(mainUser.getMemberId())) {
+            //插入MemberId
+            userMapper.insertMemberId(user.getMobile());
+        }
         return ServerResponse.createBySuccess("登录成功，正在跳转", accessToken);
     }
 

@@ -7,6 +7,7 @@ import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -68,13 +69,14 @@ public class CartService {
 
     /**
      * 设置购物车商品数量
+     *
      * @param request
      * @param userToken
      * @param cart
      * @return
      */
-    public ServerResponse setCart(HttpServletRequest request, String userToken, Cart cart){
-        request.setAttribute(Constants.CITY_ID,request.getParameter(Constants.CITY_ID));
+    public ServerResponse setCart(HttpServletRequest request, String userToken, Cart cart) {
+        request.setAttribute(Constants.CITY_ID, request.getParameter(Constants.CITY_ID));
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -82,24 +84,24 @@ public class CartService {
         Member operator = (Member) object;
         Example example = new Example(Cart.class);
         example.createCriteria()
-                .andEqualTo(Cart.HOUSE_ID,cart.getHouseId())
-                .andEqualTo(Cart.WORKER_TYPE_ID,operator.getWorkerTypeId())
-                .andEqualTo(Cart.PRODUCT_ID,cart.getProductId())
-                .andEqualTo(Cart.MEMBER_ID,operator.getId());
-        List<Cart> list=cartMapper.selectByExample(example);
-        if(list.size()>0){
-            Cart cart1=list.get(0);
-            if(cart.getShopCount()<0){
+                .andEqualTo(Cart.HOUSE_ID, cart.getHouseId())
+                .andEqualTo(Cart.WORKER_TYPE_ID, operator.getWorkerTypeId())
+                .andEqualTo(Cart.PRODUCT_ID, cart.getProductId())
+                .andEqualTo(Cart.MEMBER_ID, operator.getId());
+        List<Cart> list = cartMapper.selectByExample(example);
+        if (list.size() > 0) {
+            Cart cart1 = list.get(0);
+            if (cart.getShopCount() < 0) {
                 cartMapper.delete(cart1);
             }
             cart1.setShopCount(cart.getShopCount());
             cartMapper.updateByPrimaryKeySelective(cart1);
-        }else{
-            if(cart.getShopCount()>0){
-                ServerResponse serverResponse=productAPI.getProductById(request,cart.getProductId());
-                if(serverResponse!=null&&serverResponse.getResultObj()!=null){
+        } else {
+            if (cart.getShopCount() > 0) {
+                ServerResponse serverResponse = productAPI.getProductById(request, cart.getProductId());
+                if (serverResponse != null && serverResponse.getResultObj() != null) {
                     Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
-                    Goods goods=forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), product.getGoodsId());
+                    Goods goods = forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), product.getGoodsId());
                     cart.setProductSn(product.getProductSn());
                     cart.setProductName(product.getName());
                     cart.setMemberId(operator.getId());
@@ -117,11 +119,12 @@ public class CartService {
 
     /**
      * 清空购物车商品
+     *
      * @param userToken
      * @param cart
      * @return
      */
-    public ServerResponse clearCart(String userToken, Cart cart){
+    public ServerResponse clearCart(String userToken, Cart cart) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -129,20 +132,21 @@ public class CartService {
         Member operator = (Member) object;
         Example example = new Example(Cart.class);
         example.createCriteria()
-                .andEqualTo(Cart.HOUSE_ID,cart.getHouseId())
-                .andEqualTo(Cart.WORKER_TYPE_ID,operator.getWorkerTypeId())
-                .andEqualTo(Cart.MEMBER_ID,operator.getId());
+                .andEqualTo(Cart.HOUSE_ID, cart.getHouseId())
+                .andEqualTo(Cart.WORKER_TYPE_ID, operator.getWorkerTypeId())
+                .andEqualTo(Cart.MEMBER_ID, operator.getId());
         cartMapper.deleteByExample(example);
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
     /**
      * 查询购物车商品
+     *
      * @param userToken
      * @param cart
      * @return
      */
-    public ServerResponse queryCart(String userToken, Cart cart){
+    public ServerResponse queryCart(String userToken, Cart cart) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                 .getRequest();
         House house = iHouseMapper.selectByPrimaryKey(cart.getHouseId());
@@ -154,17 +158,20 @@ public class CartService {
         Member operator = (Member) object;
         Example example = new Example(Cart.class);
         example.createCriteria()
-                .andEqualTo(Cart.HOUSE_ID,cart.getHouseId())
-                .andEqualTo(Cart.WORKER_TYPE_ID,operator.getWorkerTypeId())
-                .andEqualTo(Cart.MEMBER_ID,operator.getId());
-        List<Cart> list=cartMapper.selectByExample(example);
-        List<Map> listMap=new ArrayList<>();
+                .andEqualTo(Cart.HOUSE_ID, cart.getHouseId())
+                .andEqualTo(Cart.WORKER_TYPE_ID, operator.getWorkerTypeId())
+                .andEqualTo(Cart.MEMBER_ID, operator.getId());
+        List<Cart> list = cartMapper.selectByExample(example);
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        List<Map> listMap = new ArrayList<>();
         for (Cart cart1 : list) {
-            Map map= BeanUtils.beanToMap(cart1);
-            ServerResponse serverResponse=productAPI.getProductById(request,cart.getProductId());
-            if(serverResponse!=null&&serverResponse.getResultObj()!=null) {
+            Map map = BeanUtils.beanToMap(cart1);
+            ServerResponse serverResponse = productAPI.getProductById(request, cart.getProductId());
+            if (serverResponse != null && serverResponse.getResultObj() != null) {
                 Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
-                if(product.getType()==0||product.getMaket()==0) {
+                if (product.getType() == 0 || product.getMaket() == 0) {
                     example = new Example(Warehouse.class);
                     example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, cart1.getHouseId()).andEqualTo(Warehouse.PRODUCT_ID, cart1.getProductId());
                     List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
@@ -176,7 +183,7 @@ public class CartService {
             }
             listMap.add(map);
         }
-        return ServerResponse.createBySuccess("操作成功",listMap);
+        return ServerResponse.createBySuccess("操作成功", listMap);
     }
 
     /**
@@ -191,42 +198,42 @@ public class CartService {
                 return (ServerResponse) object;
             }
             Member worker = (Member) object;
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            String productType="0";
-            if(worker.getWorkerType() == 3){
-                productType="1";
+            String productType = "0";
+            if (worker.getWorkerType() == 3) {
+                productType = "1";
             }
-            List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
-            Map<String,Warehouse> warehouseMap=new HashMap<>();
             Example example = new Example(Warehouse.class);
-            Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
-            criteria.andEqualTo(Warehouse.PRODUCT_TYPE, productType);
+            example.createCriteria()
+                    .andEqualTo(Warehouse.HOUSE_ID, houseId)
+                    .andEqualTo(Warehouse.PRODUCT_TYPE, productType);
             List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
-            String[] productIdArr =new String[warehouseList.size()];
-            for (int i = 0; i < warehouseList.size(); i++) {
-                productIdArr[i]=warehouseList.get(0).getProductId();
-                warehouseMap.put(warehouseList.get(0).getProductId(),warehouseList.get(0));
+            if (warehouseList.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-            if(warehouseList==null||warehouseList.size()==0){
-                return ServerResponse.createBySuccessMessage("查询成功");
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
+            Map<String, Warehouse> warehouseMap = new HashMap<>();
+            String[] productIdArr = new String[warehouseList.size()];
+            for (int i = 0; i < warehouseList.size(); i++) {
+                productIdArr[i] = warehouseList.get(i).getProductId();
+                warehouseMap.put(warehouseList.get(i).getProductId(), warehouseList.get(i));
             }
             request.setAttribute(Constants.CITY_ID, cityId);
-            PageInfo pageResult= productAPI.queryProductData(request,pageDTO.getPageNum(),pageDTO.getPageSize(),name,categoryId,productType,productIdArr);
-            List<JSONObject> products=pageResult.getList();
+            PageInfo pageResult = productAPI.queryProductData(request, pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
+            List<JSONObject> products = pageResult.getList();
             for (JSONObject product : products) {
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
                 warehouseDTO.setProductId(String.valueOf(product.get(Product.ID)));
                 warehouseDTO.setProductName(String.valueOf(product.get(Product.NAME)));
                 warehouseDTO.setMaket(1);
-                if("0".equals(product.get(Product.MAKET).toString())||"0".equals(product.get(Product.TYPE).toString())) {
+                if ("0".equals(product.get(Product.MAKET).toString()) || "0".equals(product.get(Product.TYPE).toString())) {
                     warehouseDTO.setMaket(0);
                 }
                 warehouseDTO.setPrice(Double.parseDouble(String.valueOf(product.get(Product.PRICE))));
                 warehouseDTO.setProductType(Integer.parseInt(productType));
                 warehouseDTO.setImage(address + product.get(Product.IMAGE));
                 Warehouse warehouse = warehouseMap.get(warehouseDTO.getProductId());
-                if (warehouse!=null) {
+                if (warehouse != null) {
                     Goods goods = forMasterAPI.getGoods(cityId, String.valueOf(product.get(Product.GOODS_ID)));
                     if (goods != null) {
                         warehouseDTO.setSales(goods.getSales());
@@ -235,18 +242,18 @@ public class CartService {
                     warehouseDTO.setImage(address + warehouse.getImage());
                     warehouseDTO.setShopCount(warehouse.getShopCount());
                     warehouseDTO.setAskCount(warehouse.getAskCount());
-                    warehouseDTO.setBackCount((warehouse.getWorkBack()==null?0D:warehouse.getWorkBack()));
+                    warehouseDTO.setBackCount((warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                     warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
-                    warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack()==null?0D:warehouse.getOwnerBack())- warehouse.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
+                    warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
                     warehouseDTO.setPrice(warehouse.getPrice());
                     warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
-                    warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack()==null?0D:warehouse.getWorkBack()));
+                    warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                     warehouseDTO.setAskTime(warehouse.getAskTime());
                     warehouseDTO.setRepTime(warehouse.getRepTime());
                     warehouseDTO.setBackTime(warehouse.getBackTime());
                     warehouseDTOS.add(warehouseDTO);
-                }else{
-                    String unit = forMasterAPI.getUnitName(cityId,String.valueOf(product.get(Product.CONVERT_UNIT)));
+                } else {
+                    String unit = forMasterAPI.getUnitName(cityId, String.valueOf(product.get(Product.CONVERT_UNIT)));
                     warehouseDTO.setUnitName(unit);
                     warehouseDTO.setShopCount(0.0);
                     warehouseDTO.setRepairCount(0.0);
@@ -271,41 +278,44 @@ public class CartService {
     }
 
     //查询分类
-    public ServerResponse queryGoodsCategory(HttpServletRequest request, String userToken,String houseId) {
-        try {
-            String cityId = request.getParameter(Constants.CITY_ID);
-            request.setAttribute(Constants.CITY_ID, cityId);
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member worker = (Member) object;
-            String productType="0";
-            if(worker.getWorkerType() == 3){
-                productType="1";
-            }
-            List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
-            Map<String, Object> mapTop = new HashMap<String, Object>();//记录以及添加的顶级分类
-            List<String> orderCategory = orderSplitMapper.getOrderCategory(houseId,productType,worker.getWorkerTypeId(),worker.getId());
-            for (String categoryId : orderCategory) {
-                GoodsCategory goodsCategory=goodsCategoryAPI.getGoodsCategory(request,categoryId);
-                GoodsCategory goodsCategorytop=goodsCategoryAPI.getGoodsCategory(request,goodsCategory.getParentTop());
-                if(goodsCategorytop!=null){
-                    goodsCategory=goodsCategorytop;
+    public ServerResponse queryGoodsCategory(HttpServletRequest request, String userToken, String houseId) {
+        String cityId = request.getParameter(Constants.CITY_ID);
+        request.setAttribute(Constants.CITY_ID, cityId);
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member worker = (Member) object;
+        String productType = "0";
+        if (worker.getWorkerType() == 3) {
+            productType = "1";
+        }
+        List<String> orderCategory = orderSplitMapper.getOrderCategory(houseId, productType, worker.getWorkerTypeId(), worker.getId());
+        if (orderCategory.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        Map<String, Object> mapTop = new HashMap<>();//记录以及添加的顶级分类
+        for (String categoryId : orderCategory) {
+            GoodsCategory goodsCategory = goodsCategoryAPI.getGoodsCategory(request, categoryId);
+            if (goodsCategory != null) {
+                GoodsCategory goodsCategorytop = goodsCategoryAPI.getGoodsCategory(request, goodsCategory.getParentTop());
+                if (goodsCategorytop != null) {
+                    goodsCategory = goodsCategorytop;
                 }
-                Map<String, Object> map = new HashMap<String, Object>();
-                if(goodsCategory!=null&&mapTop.get(goodsCategory.getId())==null){
+                Map<String, Object> map = new HashMap<>();
+                if (mapTop.get(goodsCategory.getId()) == null) {
                     map.put("id", goodsCategory.getId());
                     map.put("name", goodsCategory.getName());
                     mapList.add(map);
-                    mapTop.put(goodsCategory.getId(),goodsCategory);
+                    mapTop.put(goodsCategory.getId(), goodsCategory);
                 }
             }
-            return ServerResponse.createBySuccess("查询成功", mapList);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
         }
+        if (mapList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询成功", mapList);
     }
 
 }

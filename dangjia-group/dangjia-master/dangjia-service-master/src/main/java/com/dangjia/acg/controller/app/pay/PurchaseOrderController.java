@@ -1,15 +1,11 @@
-package com.dangjia.acg.controller.actuary;
+package com.dangjia.acg.controller.app.pay;
 
-import com.dangjia.acg.api.actuary.PurchaseOrderAPI;
+import com.dangjia.acg.api.app.pay.PurchaseOrderAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.service.actuary.PurchaseOrderService;
+import com.dangjia.acg.service.pay.PurchaseOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ruking.Cheng
@@ -33,17 +29,5 @@ public class PurchaseOrderController implements PurchaseOrderAPI {
     @ApiMethod
     public ServerResponse setPurchaseOrder(String houseId, String budgetIds) {
         return purchaseOrderService.setPurchaseOrder(houseId, budgetIds);
-    }
-
-    @Override
-    @ApiMethod
-    public Map<String,Object> getPurchaseOrder(String purchaseOrderId) {
-        return purchaseOrderService.getPurchaseOrder(purchaseOrderId);
-    }
-
-    @Override
-    @ApiMethod
-    public List<BudgetMaterial> payPurchaseOrder(String purchaseOrderId) {
-        return purchaseOrderService.payPurchaseOrder(purchaseOrderId);
     }
 }

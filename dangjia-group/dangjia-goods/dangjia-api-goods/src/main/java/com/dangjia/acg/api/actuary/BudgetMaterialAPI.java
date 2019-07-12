@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 
 /**
  * @创建时间： 2018-9-18下午3:53:07
@@ -16,6 +17,11 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-goods")
 public interface BudgetMaterialAPI {
 
+
+    @PostMapping("/actuary/budgetMaterial/getHouseBudgetTotalAmount")
+    @ApiOperation(value = "房子精算总花费统计", notes = "房子精算总花费统计")
+    BigDecimal getHouseBudgetTotalAmount( @RequestParam("request") HttpServletRequest request,
+                                          @RequestParam("houseId") String houseId);
 
     @PostMapping("/actuary/budgetMaterial/getHouseBudgetStageCost")
     @ApiOperation(value = "精算阶段花费统计", notes = "精算阶段花费统计")

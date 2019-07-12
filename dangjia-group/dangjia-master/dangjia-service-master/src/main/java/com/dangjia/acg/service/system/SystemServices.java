@@ -82,16 +82,26 @@ public class SystemServices {
         }
     }
     //查询组织架构
-    public ServerResponse queryDepartmentAll() {
+    public ServerResponse queryDepartmentAll(String parentId) {
         try {
             Example example=new Example(Department.class);
             List<Department> departments = departmentMapper.selectByExample(example);
             List<Map> departmentMap =new ArrayList<>();
             if(departments.size()>0){
                 for (Department department : departments) {
-                    Map map = BeanUtils.beanToMap(department);
-                    if(CommonUtil.isEmpty(department.getParentId())){
-                        departmentMap.add(map);
+                    if(!CommonUtil.isEmpty(parentId)){
+                        if(department.getId().equals(parentId)||(!CommonUtil.isEmpty(department.getParentTop())&&department.getParentTop().equals(parentId))){
+                            Map map = BeanUtils.beanToMap(department);
+                            if(CommonUtil.isEmpty(department.getParentId())){
+                                departmentMap.add(map);
+                            }
+                        }
+                    }
+                    if(CommonUtil.isEmpty(parentId)){
+                        Map map = BeanUtils.beanToMap(department);
+                        if(CommonUtil.isEmpty(department.getParentId())){
+                            departmentMap.add(map);
+                        }
                     }
                 }
             }

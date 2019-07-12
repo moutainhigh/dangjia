@@ -185,6 +185,17 @@ public class HouseFlowScheduleService {
             map.put("type", type);
             map.put("date", o);
             map.put("plans", plans);
+
+
+            //重新排序
+            Collections.sort(actuals, new Comparator<Map<String, String>>(){
+                public int compare(Map<String, String> o1, Map<String, String> o2)
+                {
+                    Date date1 = DateUtil.toDate(o1.get("date"));
+                    Date date2 = DateUtil.toDate(o2.get("date"));
+                    return date1.compareTo(date2);
+                }
+            });
             map.put("actuals", actuals);
             mapList.add(map);
         }

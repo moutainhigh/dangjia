@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,9 @@ import java.util.Map;
 @Repository
 public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 
+
+	/**房子精算总花费*/
+	BigDecimal getHouseBudgetTotalAmount(@Param("houseId")String houseId);
 	/**精算阶段花费统计*/
 	List<BudgetStageCostDTO> getHouseBudgetStageCost(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 
