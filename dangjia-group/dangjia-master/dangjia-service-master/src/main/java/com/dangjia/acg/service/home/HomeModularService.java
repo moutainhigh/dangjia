@@ -43,12 +43,6 @@ import java.util.Map;
 @Service
 public class HomeModularService {
     @Autowired
-    private IHouseMapper iHouseMapper;
-    @Autowired
-    private IMemberMapper iMemberMapper;
-    @Autowired
-    private IWorkerTypeMapper iWorkerTypeMapper;
-    @Autowired
     private IHouseFlowApplyMapper iHouseFlowApplyMapper;
     @Autowired
     private IRenovationManualMapper renovationManualMapper;
@@ -64,7 +58,6 @@ public class HomeModularService {
     private MyHouseService myHouseService;
 
     public ServerResponse getBroadcastList(String cityId) {
-        PageHelper.startPage(1, 20);
         List<HouseFlowApply> houseFlowApplies = iHouseFlowApplyMapper.getBroadcastList(cityId);
         if (houseFlowApplies.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -73,7 +66,7 @@ public class HomeModularService {
         for (HouseFlowApply houseFlowApply : houseFlowApplies) {
             Map<String, Object> map = new HashMap<>();
             StringBuilder describe = new StringBuilder();
-            describe.append(houseFlowApply.getHouseId());
+            describe.append(houseFlowApply.getApplyDec());
             describe.append(" ");
             describe.append(houseFlowApply.getWorkerTypeId());
             switch (houseFlowApply.getApplyType()) {
