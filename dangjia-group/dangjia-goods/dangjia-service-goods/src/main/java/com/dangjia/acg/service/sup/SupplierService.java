@@ -154,7 +154,7 @@ public class SupplierService {
         Example example = new Example(Supplier.class);
         Example.Criteria criteria = example.createCriteria();
         if (!CommonUtil.isEmpty(name))
-            criteria.andLike(Supplier.NAME, name);
+            criteria.andLike(Supplier.NAME, "%" + name + "%");
         example.orderBy(Supplier.CREATE_DATE).desc();
         List<Supplier> supplierList = iSupplierMapper.selectByExample(example);
         if (supplierList.size() <= 0) {
