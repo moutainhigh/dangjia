@@ -73,19 +73,9 @@ public class HomeModularService {
         for (HouseFlowApply houseFlowApply : houseFlowApplies) {
             Map<String, Object> map = new HashMap<>();
             StringBuilder describe = new StringBuilder();
-            House house = iHouseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            if (house == null) {
-                continue;
-            }
-            describe.append(house.getNoNumberHouseName());
-            Member member = iMemberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
-            if (member != null) {
-                WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                if (workerType != null) {
-                    describe.append(" ");
-                    describe.append(workerType.getName());
-                }
-            }
+            describe.append(houseFlowApply.getHouseId());
+            describe.append(" ");
+            describe.append(houseFlowApply.getWorkerTypeId());
             switch (houseFlowApply.getApplyType()) {
                 case 0:
                     describe.append("今日已完工");

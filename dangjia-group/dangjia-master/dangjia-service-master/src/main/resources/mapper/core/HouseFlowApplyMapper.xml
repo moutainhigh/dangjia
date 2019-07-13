@@ -360,25 +360,16 @@
         f.id,
         f.house_flow_id AS houseFlowId,
         f.worker_id AS workerId,
-        f.worker_type_id AS workerTypeId,
-        f.worker_type AS workerType,
-        f.house_id AS houseId,
-        f.apply_type AS applyType,
+        w.`name` AS workerTypeId,
+        CONCAT( h.residential, '**栋**单元', IFNULL( h.number, '*' ), '号' ) AS houseId,
         f.suspend_day AS suspendDay,
-        f.end_date AS endDate,
-        f.start_date AS startDate,
         f.apply_dec AS applyDec,
-        f.member_check AS memberCheck,
-        f.supervisor_check AS supervisorCheck,
-        f.apply_money AS applyMoney,
-        f.pay_state AS payState,
-        f.other_money AS otherMoney,
-        f.supervisor_money AS supervisorMoney,
         f.create_date AS createDate,
         f.modify_date AS modifyDate
         FROM
         dj_core_house_flow_apply f
         INNER JOIN dj_house h ON h.id = f.house_id
+        INNER JOIN dj_core_worker_type w ON w.id = f.worker_type_id
         WHERE
         f.apply_type != 3
         AND f.apply_type != 8
@@ -386,8 +377,10 @@
         <if test="cityId!=null and cityId!=''">
             AND h.city_id = #{cityId}
         </if>
+        AND DATE_SUB( CURDATE( ), INTERVAL 1 DAY ) &lt;= date( f.create_date )
         ORDER BY
         f.create_date DESC
+        LIMIT 20
     </select>
 </mapper>
 
