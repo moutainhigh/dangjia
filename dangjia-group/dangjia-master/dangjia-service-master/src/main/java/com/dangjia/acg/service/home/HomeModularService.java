@@ -64,7 +64,6 @@ public class HomeModularService {
     private MyHouseService myHouseService;
 
     public ServerResponse getBroadcastList(String cityId) {
-        PageHelper.startPage(1, 20);
         List<HouseFlowApply> houseFlowApplies = iHouseFlowApplyMapper.getBroadcastList(cityId);
         if (houseFlowApplies.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
