@@ -33,7 +33,7 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
     @Override
     @ApiMethod
     public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey) {
-        return designDataService.getDesignList( request,pageDTO, designerType, searchKey);
+        return designDataService.getDesignList(request, pageDTO, designerType, searchKey);
     }
 
     @Override
@@ -92,8 +92,8 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getDesign(HttpServletRequest request, String userToken, String houseId) {
-        return designDataService.getDesign(userToken, houseId);
+    public ServerResponse getDesign(HttpServletRequest request, String userToken, String houseId, Integer type) {
+        return designDataService.getDesign(userToken, houseId, type);
     }
 
     @Override

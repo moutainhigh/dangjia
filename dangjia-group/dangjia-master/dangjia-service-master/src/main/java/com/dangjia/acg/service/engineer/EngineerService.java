@@ -616,7 +616,7 @@ public class EngineerService {
                 for (HouseFlowApply flowss : houseFlowss) {
                     suspendDay += flowss.getSuspendDay();
                 }
-                int startDay = 0;
+                int startDay;
                 if (house.getCompletedDate()!=null) {
                     startDay = DateUtil.daysofTwo(house.getConstructionDate(), house.getCompletedDate());
                 }else{
