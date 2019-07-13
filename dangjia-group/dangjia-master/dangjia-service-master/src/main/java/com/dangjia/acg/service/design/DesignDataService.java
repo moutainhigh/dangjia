@@ -71,6 +71,7 @@ public class DesignDataService {
 
     @Autowired
     private RedisClient redisClient;//缓存
+
     /**
      * 获取平面图
      *
@@ -99,7 +100,7 @@ public class DesignDataService {
      * @param houseId   houseId
      * @return ServerResponse
      */
-    public ServerResponse getDesign(String userToken, String houseId) {
+    public ServerResponse getDesign(String userToken, String houseId, Integer type) {
         Object object = constructionService.getMember(userToken);
         Member worker = null;
         if (object instanceof Member) {
@@ -114,7 +115,9 @@ public class DesignDataService {
         }
         DesignListDTO designDTO = new DesignListDTO();
         if (worker != null && house.getDesignerOk() != 3 && worker.getId().equals(house.getMemberId())) {//是业主而且没有设计完工将走审核逻辑
-
+            if (!CommonUtil.isEmpty(type) && type == 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "设计师还在设计中");
+            }
             if (house.getDesignerOk() != 5 && house.getDesignerOk() != 2) {
 //                if (house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getVisitState() == 1) {
 //                    designDTO.setHistoryRecord(0);
@@ -324,7 +327,7 @@ public class DesignDataService {
             //当类型小于0时，则查询移除的数据
             dataStatus = "1";
         }
-        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType,cityKey, searchKey, dataStatus);
+        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, cityKey, searchKey, dataStatus);
         PageInfo pageResult = new PageInfo(designDTOList);
         for (DesignDTO designDTO : designDTOList) {
             HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(designDTO.getHouseId(), 1);

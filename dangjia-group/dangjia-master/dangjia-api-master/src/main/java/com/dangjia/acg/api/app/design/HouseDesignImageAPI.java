@@ -339,6 +339,7 @@ public interface HouseDesignImageAPI {
      *
      * @param userToken 必选 string userToken
      * @param houseId   必选 string houseId
+     * @param type      必选 Integer 0:查看页面，1：审核页面
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/设计模块
      * @title 获取设计图
@@ -369,7 +370,8 @@ public interface HouseDesignImageAPI {
     @ApiOperation(value = "获取设计图", notes = "获取设计图")
     ServerResponse getDesign(@RequestParam("request") HttpServletRequest request,
                              @RequestParam("userToken") String userToken,
-                             @RequestParam("houseId") String houseId);
+                             @RequestParam("houseId") String houseId,
+                             @RequestParam("type") Integer type);
 
     /**
      * showdoc
