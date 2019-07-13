@@ -362,9 +362,9 @@
         f.worker_id AS workerId,
         f.apply_type AS applyType,
         w.`name` AS workerTypeId,
-        CONCAT( h.residential, '**栋**单元', IFNULL( h.number, '*' ), '号' ) AS houseId,
+        f.house_id AS houseId,
+        CONCAT( h.residential, '**栋**单元', IFNULL( h.number, '*' ), '号' ) AS applyDec,
         f.suspend_day AS suspendDay,
-        f.apply_dec AS applyDec,
         f.create_date AS createDate,
         f.modify_date AS modifyDate
         FROM
