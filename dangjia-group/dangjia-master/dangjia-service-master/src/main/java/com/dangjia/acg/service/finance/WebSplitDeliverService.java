@@ -275,10 +275,10 @@ public class WebSplitDeliverService {
             Example example = new Example(Receipt.class);
             example.createCriteria().andEqualTo(Receipt.SUPPLIER_ID, supplierId);
             List<Receipt> receipts = iReceiptMapper.selectByExample(example);
-            List<ReceiptDTO> list = new ArrayList();
+            List<ReceiptDTO> list = new ArrayList<>();
             for (Receipt receipt : receipts) {
                 List<SupplierDeliverDTO> supplierDeliverDTOList = new ArrayList<>();
-                double amount = 0D;
+                double amount;
                 double sd = 0D;
                 double md = 0D;
                 JSONArray itemObjArr = JSON.parseArray(receipt.getMerge());
@@ -324,17 +324,14 @@ public class WebSplitDeliverService {
                     receiptDTO.setId(receipt.getId());
                     list.add(receiptDTO);
                     //对list进行排序 根据时间降序排序
-                    Collections.sort(list, new Comparator<ReceiptDTO>() {
-                        @Override
-                        public int compare(ReceiptDTO r1, ReceiptDTO r2) {
-                            int flag = r1.getCreateDate().compareTo(r2.getCreateDate());
-                            if (flag == -1) {
-                                flag = 1;
-                            } else if (flag == 1) {
-                                flag = -1;
-                            }
-                            return flag;
+                    Collections.sort(list, (r1, r2) -> {
+                        int flag = r1.getCreateDate().compareTo(r2.getCreateDate());
+                        if (flag == -1) {
+                            flag = 1;
+                        } else if (flag == 1) {
+                            flag = -1;
                         }
+                        return flag;
                     });
                 }
             }
