@@ -18,7 +18,6 @@ import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
-import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.*;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.BrandSeries;
@@ -633,19 +632,18 @@ public class ActuaryOperationService {
                         }
                     }
                 }
-                if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
-                    strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
-                    if (atId.getId().equals(product.getId())) {//如果包含该属性
-                        String[] strAtIdArr = atId.getValueIdArr().split(",");
-                        for (String atValId : strAtIdArr) {
-                            AttributeValue strVIs = iAttributeValueMapper.selectByPrimaryKey(atValId);
-                            if (strVIs != null && !CommonUtil.isEmpty(strVIs.getImage())) {
-                                imageList.add(getImage(strVIs.getImage()));//属性图
-                            }
-                        }
-                    }
-                }
-
+//                if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
+//                    strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
+//                    if (atId.getId().equals(product.getId())) {//如果包含该属性
+//                        String[] strAtIdArr = atId.getValueIdArr().split(",");
+//                        for (String atValId : strAtIdArr) {
+//                            AttributeValue strVIs = iAttributeValueMapper.selectByPrimaryKey(atValId);
+//                            if (strVIs != null && !CommonUtil.isEmpty(strVIs.getImage())) {
+//                                imageList.add(getImage(strVIs.getImage()));//属性图
+//                            }
+//                        }
+//                    }
+//                }
                 AttributeValueDTO avDTO = new AttributeValueDTO();
                 avDTO.setAttributeValueId(atId.getId());
                 avDTO.setName(strbuf.toString().trim());

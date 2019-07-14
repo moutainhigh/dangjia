@@ -46,9 +46,15 @@ public interface WebHouseAPI {
                              @RequestParam("prefixs") String prefixs);
 
     @PostMapping("web/house/setHouseInfo")
-    @ApiOperation(value = "设置房子为精选或者休眠", notes = "设置房子为精选或者休眠")
+    @ApiOperation(value = "修改房子工序顺序以及选配标签", notes = "修改房子工序顺序以及选配标签")
     ServerResponse setHouseInfo(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("house") House house);
+
+    @PostMapping("web/house/setHouseState")
+    @ApiOperation(value = "设置房子为精选或者休眠", notes = "设置房子为精选或者休眠")
+    ServerResponse setHouseState(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("house") House house);
+
 
     @PostMapping("web/house/queryConstructionRecord")
     @ApiOperation(value = "施工记录", notes = "施工记录")

@@ -132,7 +132,7 @@ public class HouseDistributionService {
         houseDistribution.setState(0);
         houseDistribution.setType(1);
         if (this.iHouseDistributionMapper.insertSelective(houseDistribution) > 0) {
-            Example example = new Example(CustomerRecord.class);
+            Example example =new Example(CustomerRecord.class);
             example.createCriteria().andEqualTo(CustomerRecord.MEMBER_ID, user.getId());
             example.orderBy(CustomerRecord.CREATE_DATE).desc();
             List<CustomerRecord> customerRecords = customerRecordMapper.selectByExample(example);
@@ -141,7 +141,7 @@ public class HouseDistributionService {
                 customerRecord = customerRecordMapper.selectByExample(example).get(0);
             } else {
                 customerRecord = new CustomerRecord();
-                customerRecord.setMemberId(user.getId());
+                customerRecord.setMemberId(houseDistribution.getOpenid());
                 customerRecord.setUserId("");
             }
             Calendar calendar = Calendar.getInstance();

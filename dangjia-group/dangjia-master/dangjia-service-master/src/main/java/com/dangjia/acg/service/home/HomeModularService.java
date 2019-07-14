@@ -43,12 +43,6 @@ import java.util.Map;
 @Service
 public class HomeModularService {
     @Autowired
-    private IHouseMapper iHouseMapper;
-    @Autowired
-    private IMemberMapper iMemberMapper;
-    @Autowired
-    private IWorkerTypeMapper iWorkerTypeMapper;
-    @Autowired
     private IHouseFlowApplyMapper iHouseFlowApplyMapper;
     @Autowired
     private IRenovationManualMapper renovationManualMapper;
@@ -63,16 +57,8 @@ public class HomeModularService {
     @Autowired
     private MyHouseService myHouseService;
 
-    public ServerResponse getBroadcastList() {
-        PageHelper.startPage(1, 20);
-        Example example = new Example(HouseFlowApply.class);
-        //过滤掉提前结束的房子
-        example.createCriteria()
-                .andNotEqualTo(HouseFlowApply.APPLY_TYPE, 8)
-                .andNotEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-                .andNotEqualTo(HouseFlowApply.APPLY_TYPE, 9);
-        example.orderBy(HouseFlowApply.CREATE_DATE).desc();
-        List<HouseFlowApply> houseFlowApplies = iHouseFlowApplyMapper.selectByExample(example);
+    public ServerResponse getBroadcastList(String cityId) {
+        List<HouseFlowApply> houseFlowApplies = iHouseFlowApplyMapper.getBroadcastList(cityId);
         if (houseFlowApplies.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
@@ -80,19 +66,9 @@ public class HomeModularService {
         for (HouseFlowApply houseFlowApply : houseFlowApplies) {
             Map<String, Object> map = new HashMap<>();
             StringBuilder describe = new StringBuilder();
-            House house = iHouseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            if (house == null) {
-                continue;
-            }
-            describe.append(house.getNoNumberHouseName());
-            Member member = iMemberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
-            if (member != null) {
-                WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                if (workerType != null) {
-                    describe.append(" ");
-                    describe.append(workerType.getName());
-                }
-            }
+            describe.append(houseFlowApply.getApplyDec());
+            describe.append(" ");
+            describe.append(houseFlowApply.getWorkerTypeId());
             switch (houseFlowApply.getApplyType()) {
                 case 0:
                     describe.append("今日已完工");
