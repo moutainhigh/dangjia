@@ -632,8 +632,8 @@ public class ActuaryOperationService {
                         }
                     }
                 }
-//                if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
-//                    strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
+                if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
+                    strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
 //                    if (atId.getId().equals(product.getId())) {//如果包含该属性
 //                        String[] strAtIdArr = atId.getValueIdArr().split(",");
 //                        for (String atValId : strAtIdArr) {
@@ -643,7 +643,7 @@ public class ActuaryOperationService {
 //                            }
 //                        }
 //                    }
-//                }
+                }
                 AttributeValueDTO avDTO = new AttributeValueDTO();
                 avDTO.setAttributeValueId(atId.getId());
                 avDTO.setName(strbuf.toString().trim());
