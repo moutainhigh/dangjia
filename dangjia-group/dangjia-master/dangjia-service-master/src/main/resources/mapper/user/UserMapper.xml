@@ -63,7 +63,7 @@
             AND (
             b.name like CONCAT('%','售前客服','%') or
             b.name like CONCAT('%','工程部经理','%') or
-            b.name like CONCAT('%','客服主管','%') or
+            b.name like CONCAT('%','客服主管','%')
             )
         </if>
         GROUP BY a.id
