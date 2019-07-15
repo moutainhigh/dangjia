@@ -143,8 +143,9 @@ public class WorkerService {
         }
         Member worker = (Member) object;
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        Example example = new Example(HouseFlow.class);
-        example.createCriteria().andEqualTo("workerId", worker.getId());
+        Example example = new Example(WithdrawDeposit.class);
+        example.createCriteria().andEqualTo(WithdrawDeposit.WORKER_ID, worker.getId());
+        example.orderBy(WithdrawDeposit.CREATE_DATE).desc();
         List<WithdrawDeposit> wdList = withdrawDepositMapper.selectByExample(example);
         PageInfo pageResult = new PageInfo(wdList);
         return ServerResponse.createBySuccess("获取工匠提现记录成功", pageResult);
