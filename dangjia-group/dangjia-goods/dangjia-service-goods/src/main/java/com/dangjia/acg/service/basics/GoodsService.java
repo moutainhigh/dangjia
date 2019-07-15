@@ -193,6 +193,17 @@ public class GoodsService {
     public ServerResponse getGoodsByGid(String goodsId) {
         try {
             Goods goods = iGoodsMapper.queryById(goodsId);
+            Map goodsMap=BeanUtils.beanToMap(goods);
+
+            List<Brand> bList = iGoodsMapper.queryBrandByGid(goodsId);
+            List<Map> bListMap =new ArrayList<>();
+            for (Brand brand : bList) {
+                Map brandMap=BeanUtils.beanToMap(goods);
+                List<BrandSeries> brandSeriesList = iGoodsMapper.queryBrandByGidAndBid(goodsId, brand.getId());
+                brandMap.put("brandSeries",brandSeriesList);
+                bListMap.add(brandMap);
+            }
+            goodsMap.put("brands",bListMap);
             return ServerResponse.createBySuccess("查询成功", goods);
         } catch (Exception e) {
             e.printStackTrace();
