@@ -808,7 +808,7 @@ public class HouseWorkerService {
             if (houseFlowApplyList.size() > 0) {
                 return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
             }
-            hfa = getHouseFlowApply(supervisorHF, applyType, supervisorHF);
+            hfa = getHouseFlowApply(hf, applyType, supervisorHF);
             hfa.setApplyDec("业主您好，我已巡查了" + workerType.getName() + "，现场情况如下：" + applyDec);//描述
             //描述
             hfa.setMemberCheck(1);//默认业主审核状态通过
