@@ -151,6 +151,7 @@ public class WebWithdrawDepositService {
                             DjConstants.PushMessage.WITHDRAW_CASH_SUCCESS, "");
                 }
                 srcWithdrawDeposit.setModifyDate(new Date());
+                srcWithdrawDeposit.setProcessingDate(new Date());
                 iWithdrawDepositMapper.updateByPrimaryKey(srcWithdrawDeposit);
             }
 
