@@ -862,8 +862,7 @@ public class HouseWorkerService {
                 workerDetailMapper.insert(workerDetail);
             }
         } else {
-            HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId2);
-            hfa = getHouseFlowApply(hf, applyType, supervisorHF);
+            hfa = getHouseFlowApply(supervisorHF, applyType, supervisorHF);
             hfa.setApplyDec("业主您好，我已巡查了工地，现场情况如下：" + applyDec);//描述
             hfa.setMemberCheck(1);//默认业主审核状态通过
             hfa.setSupervisorCheck(1);//默认大管家审核状态通过
