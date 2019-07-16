@@ -159,13 +159,15 @@ public class HomeModularService {
     private List<String> setWorkerTypeIds(List<String> workerTypeIds) {
         List<String> stages = new ArrayList<>();
         Example example = new Example(RenovationStage.class);
-        example.createCriteria()
-                .andIn(RenovationStage.WORKER_TYPE_ID, workerTypeIds)
-                .andEqualTo(RenovationStage.DATA_STATUS, 0);
-        List<RenovationStage> rmList = renovationStageMapper.selectByExample(example);
-        if (rmList.size() > 0) {
-            for (RenovationStage aRmList : rmList) {
-                stages.add(aRmList.getId());
+        if(workerTypeIds.size()>0) {
+            example.createCriteria()
+                    .andIn(RenovationStage.WORKER_TYPE_ID, workerTypeIds)
+                    .andEqualTo(RenovationStage.DATA_STATUS, 0);
+            List<RenovationStage> rmList = renovationStageMapper.selectByExample(example);
+            if (rmList.size() > 0) {
+                for (RenovationStage aRmList : rmList) {
+                    stages.add(aRmList.getId());
+                }
             }
         }
         return stages;
