@@ -78,6 +78,7 @@
                          separator="," open="(" close=")">
                     #{item}
                 </foreach>
+
                 ORDER BY
                 num DESC
                 ) UNION ALL
@@ -97,6 +98,7 @@
                          separator="," open="(" close=")">
                     #{item}
                 </foreach>
+
                 ORDER BY
                 num DESC
                 )
