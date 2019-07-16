@@ -155,7 +155,7 @@ public class GoodsGroupService {
 
     /**
      * 模糊查询商品关联组的商品及下属货品
-     * 去除条件 ：自购 ，服务，禁用，查询 product 为空
+     * 去除条件 ：自购 ，包工包料，禁用，查询 product 为空
      *
      * @param pageDTO
      * @param categoryId
@@ -167,7 +167,7 @@ public class GoodsGroupService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<Goods> goodsList = iGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
-            // 去除商品是 服务类型的 或者 是自购的
+            // 去除商品是 包工包料类型的 或者 是自购的
             List<Goods> goodsList = iGoodsMapper.queryGoodsGroupListByCategoryLikeName(categoryId, name, "0", "2");
             List<Map<String, Object>> gMapList = new ArrayList<>();
             for (Goods goods : goodsList) {

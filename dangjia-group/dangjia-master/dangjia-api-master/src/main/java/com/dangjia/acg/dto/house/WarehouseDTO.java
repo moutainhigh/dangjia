@@ -21,7 +21,7 @@ public class WarehouseDTO {
     private Integer maket;//是否上架  0:未上架；1已上架
     private double tolPrice; //总计价 = realCount * price
     private String unitName;
-    private int productType;// 0：材料；1：服务
+    private int productType;// 0：材料；1：包工包料
     private String image;
     private Double repairCount;
     private String productId;
