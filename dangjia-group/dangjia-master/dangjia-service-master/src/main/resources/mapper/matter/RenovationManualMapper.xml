@@ -73,11 +73,14 @@
                 WHERE
                 c.state = 0
                 AND c.data_status = 0
-                AND c.worker_type_id IN
-                <foreach collection="workerTypeIds" item="item" index="index"
-                         separator="," open="(" close=")">
-                    #{item}
-                </foreach>
+                <if test="workerTypeIds=null">
+                    AND c.worker_type_id IN
+                    <foreach collection="workerTypeIds" item="item" index="index"
+                             separator="," open="(" close=")">
+                        #{item}
+                    </foreach>
+                </if>
+
                 ORDER BY
                 num DESC
                 ) UNION ALL
@@ -92,11 +95,15 @@
                 WHERE
                 c.state = 0
                 AND c.data_status = 0
-                AND c.worker_type_id NOT IN
-                <foreach collection="workerTypeIds" item="item" index="index"
-                         separator="," open="(" close=")">
-                    #{item}
-                </foreach>
+                <if test="workerTypeIds=null">
+                    AND c.worker_type_id NOT IN
+                    <foreach collection="workerTypeIds" item="item" index="index"
+                             separator="," open="(" close=")">
+                        #{item}
+                    </foreach>
+                </if>
+
+
                 ORDER BY
                 num DESC
                 )
