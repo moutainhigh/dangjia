@@ -38,6 +38,14 @@ public class IndexPageController implements IndexPageAPI {
     }
 
     /**
+     * 工地标签详情
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseLabels(HttpServletRequest request, String houseId){
+        return indexPageService.getHouseLabels(request,houseId);
+    }
+    /**
      * 施工现场
      * @param request
      * @param latitude

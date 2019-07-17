@@ -509,9 +509,9 @@ public class HouseService {
         try {
             House srcHouse = iHouseMapper.selectByPrimaryKey(house.getId());
             if (srcHouse == null) {
-                return ServerResponse.createByErrorMessage("没有该房子");
+                srcHouse = iHouseMapper.selectByPrimaryKey(house.getHouseId());
             }
-            if (!house.getCustomSort().equals("ignore")) {
+            if (!CommonUtil.isEmpty(house.getCustomSort())&&!house.getCustomSort().equals("ignore")) {
                 LOG.info("setHouseInfo getCustomSort:" + house.getCustomSort());
                 if (StringUtils.isNoneBlank(house.getCustomSort())
                         && StringUtils.isNoneBlank(srcHouse.getCustomSort())) {//如果不问null ，说明已经排序过，就是修改顺序

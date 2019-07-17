@@ -57,7 +57,7 @@ public class WarehouseService {
 
     /**
      * 查询仓库材料
-     * type 0材料 1服务 2所有
+     * type 0材料 1包工包料 2所有
      */
     public ServerResponse warehouseList(String userToken, PageDTO pageDTO, String houseId, String categoryId, String name, String type) {
         try {
@@ -113,7 +113,7 @@ public class WarehouseService {
 
     /**
      * 查询仓库材料（已购买）
-     * type 0材料 1服务 2人工
+     * type 0材料 1包工包料 2人工
      */
     public ServerResponse warehouseGmList(HttpServletRequest request, String userToken, String houseId, String name, String type) {
         try {
