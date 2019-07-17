@@ -231,7 +231,36 @@ public class IndexPageService {
             return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
         }
     }
-
+    /**
+     * 工地标签详情
+     */
+    public ServerResponse getHouseLabels(HttpServletRequest request, String houseId) {
+        try {
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            List<OptionalLabelDTO> fieldValues = new ArrayList<>();
+            List<OptionalLabel> optionalLabels = optionalLabelMapper.selectAll();
+            for (OptionalLabel label : optionalLabels) {
+                OptionalLabelDTO optionalLabelDTO=new OptionalLabelDTO();
+                optionalLabelDTO.setId(label.getId());
+                optionalLabelDTO.setLabelName(label.getLabelName());
+                optionalLabelDTO.setStatus("1");
+                if(!CommonUtil.isEmpty(house.getOptionalLabel())){
+                    String[] optionalLabel=house.getOptionalLabel().split(",");
+                    for (String s : optionalLabel) {
+                        if(s.equals(label.getId())) {
+                            optionalLabelDTO.setStatus("0");
+                            break;
+                        }
+                    }
+                }
+                fieldValues.add(optionalLabelDTO);
+            }
+            return ServerResponse.createBySuccess("查询成功", fieldValues);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
+        }
+    }
 
     /**
      * 施工现场
