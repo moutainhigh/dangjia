@@ -55,7 +55,9 @@ public class CustomerRecordService {
             for (CustomerRecord customerRecord : customerRecordList) {
                 CustomerRecordDTO customerRecordDTO = new CustomerRecordDTO();
                 MainUser mainUser = userMapper.selectByPrimaryKey(customerRecord.getUserId());
-                customerRecordDTO.setCustomerName(mainUser.getUsername());
+                if(null!=mainUser) {
+                    customerRecordDTO.setCustomerName(mainUser.getUsername());
+                }
                 customerRecordDTO.setCreateDate(customerRecord.getCreateDate());
                 customerRecordDTO.setRemindTime(customerRecord.getRemindTime());
                 customerRecordDTO.setDescribes(customerRecord.getDescribes());

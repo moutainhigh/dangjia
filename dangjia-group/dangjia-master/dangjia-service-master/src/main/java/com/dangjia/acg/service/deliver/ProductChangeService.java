@@ -95,7 +95,7 @@ public class ProductChangeService {
      * @param srcProductId
      * @param destProductId
      * @param srcSurCount
-     * @param productType   0:材料 1：服务
+     * @param productType   0:材料 1：包工包料
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
@@ -152,7 +152,7 @@ public class ProductChangeService {
                 change.setDestPrice(destProduct.getPrice());
                 change.setDestImage(destProduct.getImage());
                 change.setDestSurCount(srcSurCount);
-                // 类型 0 材料 1 服务
+                // 类型 0 材料 1 包工包料
                 change.setProductType(productType);
                 // 差额单价
                 BigDecimal price = BigDecimal.valueOf(MathUtil.sub(change.getDestPrice(), change.getSrcPrice()));
@@ -187,7 +187,7 @@ public class ProductChangeService {
                 productChange.setDestSurCount(srcSurCount);
                 // 未处理
                 productChange.setType(0);
-                // 类型 0 材料 1 服务
+                // 类型 0 材料 1 包工包料
                 productChange.setProductType(productType);
                 // 差额单价
                 BigDecimal price = BigDecimal.valueOf(MathUtil.sub(productChange.getDestPrice(), productChange.getSrcPrice()));
