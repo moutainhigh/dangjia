@@ -25,8 +25,8 @@ public interface PurchaseOrderAPI {
      * @return_param datas List 商品
      * @return_param datas_budgetMaterialId string budgetMaterialId
      * @return_param datas_id string 货品ID
-     * @return_param datas_typeName string 人工，材料，包工包料
-     * @return_param datas_type int 1：人工，2：材料，3：包工包料
+     * @return_param datas_typeName string 人工，材料，服务
+     * @return_param datas_type int 1：人工，2：材料，3：服务
      * @return_param datas_name string 商品名
      * @return_param datas_image string 图片
      * @return_param datas_shopCount Double 购买总数

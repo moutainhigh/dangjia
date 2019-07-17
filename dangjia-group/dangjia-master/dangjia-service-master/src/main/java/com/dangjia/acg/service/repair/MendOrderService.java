@@ -699,7 +699,7 @@ public class MendOrderService {
 
     /**
      * 确认退货
-     * 管家退包工包料
+     * 管家退服务
      */
     public ServerResponse confirmBackMendMaterial(String userToken, String houseId, String imageArr) {
         try {
@@ -734,7 +734,7 @@ public class MendOrderService {
                 houseService.insertConstructionRecord(mendOrder);
                 House house = houseMapper.selectByPrimaryKey(houseId);
 //                if (worker.getWorkerType() == 3) {
-//                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家退包工包料", String.format
+//                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家退服务", String.format
 //                            (DjConstants.PushMessage.STEWARD_T_SERVER, house.getHouseName()), "");
 //                } else {
 //                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠退材料", String.format
@@ -807,7 +807,7 @@ public class MendOrderService {
     /**
      * 工匠
      * 提交退货(登记剩余材料)
-     * WorkerTypeId 3 管家退包工包料
+     * WorkerTypeId 3 管家退服务
      */
     public ServerResponse backMendMaterial(String userToken, String houseId, String productArr) {
         try {
@@ -841,8 +841,8 @@ public class MendOrderService {
                 mendOrder.setWorkerTypeId(worker.getWorkerTypeId());
                 mendOrder.setApplyMemberId(worker.getId());
                 mendOrder.setType(2);//退材料
-                if (worker.getWorkerType() == 3) {//管家退包工包料
-                    mendOrder.setOrderName("退包工包料");
+                if (worker.getWorkerType() == 3) {//管家退服务
+                    mendOrder.setOrderName("退服务");
                 } else {
                     mendOrder.setOrderName("退材料");
                 }
@@ -873,7 +873,7 @@ public class MendOrderService {
 
     /**
      * 确认补货
-     * 管家补包工包料
+     * 管家补服务
      */
     public ServerResponse confirmMendMaterial(String userToken, String houseId) {
         try {
@@ -907,7 +907,7 @@ public class MendOrderService {
                 houseService.insertConstructionRecord(mendOrder);
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 if (worker.getWorkerType() == 3) {
-                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家补包工包料", String.format
+                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家补服务", String.format
                             (DjConstants.PushMessage.STEWARD_B_SERVER, house.getHouseName()), "");
                 } else {
                     configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠补材料", String.format
@@ -964,7 +964,7 @@ public class MendOrderService {
     /**
      * 工匠
      * 提交补材料
-     * WorkerTypeId 3 管家补包工包料
+     * WorkerTypeId 3 管家补服务
      */
     public ServerResponse saveMendMaterial(String userToken, String houseId, String productArr) {
         try {
@@ -995,8 +995,8 @@ public class MendOrderService {
                 mendOrder.setWorkerTypeId(worker.getWorkerTypeId());
                 mendOrder.setApplyMemberId(worker.getId());
                 mendOrder.setType(0);//补材料
-                if (worker.getWorkerType() == 3) {//管家退包工包料
-                    mendOrder.setOrderName("补包工包料");
+                if (worker.getWorkerType() == 3) {//管家退服务
+                    mendOrder.setOrderName("补服务");
                 } else {
                     mendOrder.setOrderName("补材料");
                 }
@@ -1072,7 +1072,7 @@ public class MendOrderService {
             mendMateriel.setCost(warehouse.getCost());
             mendMateriel.setUnitName(warehouse.getUnitName());
             mendMateriel.setTotalPrice(num * warehouse.getPrice());
-            mendMateriel.setProductType(warehouse.getProductType());//0：材料；1：包工包料
+            mendMateriel.setProductType(warehouse.getProductType());//0：材料；1：服务
             mendMateriel.setCategoryId(warehouse.getCategoryId());
             mendMateriel.setImage(warehouse.getImage());
         } else {
@@ -1085,7 +1085,7 @@ public class MendOrderService {
             mendMateriel.setImage(product.getImage());
             String unitName = forMasterAPI.getUnitName(house.getCityId(), product.getConvertUnit());
             mendMateriel.setUnitName(unitName);
-            mendMateriel.setProductType(forMasterAPI.getGoods(house.getCityId(), product.getGoodsId()).getType());//0：材料；1：包工包料
+            mendMateriel.setProductType(forMasterAPI.getGoods(house.getCityId(), product.getGoodsId()).getType());//0：材料；1：服务
         }
         ServerResponse serverResponse = unitAPI.getUnitById(request, product.getConvertUnit());
         Unit unit;

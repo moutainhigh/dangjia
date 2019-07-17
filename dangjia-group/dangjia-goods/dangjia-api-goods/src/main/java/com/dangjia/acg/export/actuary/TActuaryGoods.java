@@ -13,7 +13,7 @@ public class TActuaryGoods {
     @ExcelField(titile = "工序名称", offset = 1)//
     private String name;
 
-    @ExcelField(titile = "商品类型", offset = 2)//材料，包工包料，人工
+    @ExcelField(titile = "商品类型", offset = 2)//材料，服务，人工
     private String goodsType;
 
     @ExcelField(titile = "货号编号", offset = 3)
