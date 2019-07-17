@@ -70,5 +70,5 @@ public class Cart extends BaseEntity {
 	private String categoryId;//分类id
 
 	@Column(name = "product_type")
-	private Integer productType; //0：材料；1：包工包料
+	private Integer productType; //0：材料；1：服务
 }

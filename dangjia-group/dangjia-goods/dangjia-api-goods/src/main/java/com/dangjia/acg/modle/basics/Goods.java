@@ -28,7 +28,7 @@ public class Goods extends BaseEntity{
     private String categoryId;//分类id
 
 	@Column(name = "type")
-    private Integer type;//0:材料；1：包工包料
+    private Integer type;//0:材料；1：服务
 
 	@Column(name = "buy")
     private Integer buy;//购买性质0：必买；1可选；2自购

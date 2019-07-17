@@ -179,7 +179,7 @@ public class ActuaryOperationService {
                             srcBudgetMaterial.setImage(targetProduct.getImage());
                             srcBudgetMaterial.setUnitName(convertUnit.getName());
                             Goods goods = goodsMapper.queryById( targetProduct.getGoodsId());
-                            srcBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
+                            srcBudgetMaterial.setProductType(goods.getType());//0：材料；1：服务
                             budgetMaterialMapper.updateByPrimaryKey(srcBudgetMaterial);
                             count++;
                         }
@@ -206,7 +206,7 @@ public class ActuaryOperationService {
                 budgetMaterial.setImage(product.getImage());
                 budgetMaterial.setUnitName(convertUnit.getName());
                 Goods goods = goodsMapper.queryById( product.getGoodsId());
-                budgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
+                budgetMaterial.setProductType(goods.getType());//0：材料；1：服务
                 budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
                 return ServerResponse.createBySuccessMessage("操作成功" + ret);
             }
@@ -267,7 +267,7 @@ public class ActuaryOperationService {
                 }
                 wGoodsDTO.setTechnologyList(technologyList);
                 return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
-            } else if (type == 2 || type == 3 || type == 5) {//材料商品  包工包料商品
+            } else if (type == 2 || type == 3 || type == 5) {//材料商品  服务商品
                 Product product;
                 String budgetMaterialId = null;
                 if (type != 5) {
@@ -317,7 +317,7 @@ public class ActuaryOperationService {
                 }
                 wGoodsDTO.setTechnologyList(technologyList);
                 return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
-            } else if (type == 2 || type == 3 || type == 5) {//材料商品  包工包料商品
+            } else if (type == 2 || type == 3 || type == 5) {//材料商品  服务商品
                 Product product = productMapper.selectByPrimaryKey(gId);//当前 货品
                 GoodsDTO goodsDTO = goodsDetail(product, null);
                 if (goodsDTO != null) {
@@ -436,7 +436,7 @@ public class ActuaryOperationService {
     }
 
     /**
-     * 查看工序 type 人工1 材料2 包工包料3
+     * 查看工序 type 人工1 材料2 服务3
      * 支付时精算goods详情 查最新价格 共用此方法
      */
     public ServerResponse confirmActuaryDetail(String userToken, String houseId, String workerTypeId,
@@ -455,7 +455,7 @@ public class ActuaryOperationService {
             Map<Integer, String> mapgx = new HashMap<>();
             mapgx.put(DjConstants.GXType.RENGGONG, "人工");
             mapgx.put(DjConstants.GXType.CAILIAO, "材料");
-            mapgx.put(DjConstants.GXType.FUWU, "包工包料");
+            mapgx.put(DjConstants.GXType.FUWU, "服务");
             mapgx.put(DjConstants.GXType.BU_RENGGONG, "补人工");
             mapgx.put(DjConstants.GXType.BU_CAILIAO, "补材料");
             FlowDTO flowDTO = new FlowDTO();
@@ -661,7 +661,7 @@ public class ActuaryOperationService {
     }
 
     /**
-     * 精算详情 productType  0：材料；1：包工包料
+     * 精算详情 productType  0：材料；1：服务
      */
     public ServerResponse confirmActuary(String userToken, String houseId, String cityId) {
         //从master获取工序详情
@@ -673,15 +673,15 @@ public class ActuaryOperationService {
             String workerTypeId = map.get("workerTypeId");
             FlowDetailsDTO flowDetailsDTO = new FlowDetailsDTO();
             flowDetailsDTO.setName(name);
-            List<DetailsDTO> detailsDTOList = new ArrayList<>();//人工材料包工包料
+            List<DetailsDTO> detailsDTOList = new ArrayList<>();//人工材料服务
             List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getBudgetWorkerList(houseId, workerTypeId);//人工明细
             List<BudgetMaterial> materialCaiList = budgetMaterialMapper.getBudgetCaiList(houseId, workerTypeId);//材料明细
-            List<BudgetMaterial> materialSerList = budgetMaterialMapper.getBudgetSerList(houseId, workerTypeId);//包工包料明细
+            List<BudgetMaterial> materialSerList = budgetMaterialMapper.getBudgetSerList(houseId, workerTypeId);//服务明细
             List<Map> mapworker = new ArrayList<>();
             Map<Integer, String> mapgx = new HashMap<>();
             mapgx.put(DjConstants.GXType.RENGGONG, "人工");
             mapgx.put(DjConstants.GXType.CAILIAO, "材料");
-            mapgx.put(DjConstants.GXType.FUWU, "包工包料");
+            mapgx.put(DjConstants.GXType.FUWU, "服务");
             for (Map.Entry<Integer, String> entry : mapgx.entrySet()) {
                 Map<String, Object> m = new HashMap<>();
                 m.put("key", String.valueOf(entry.getKey()));

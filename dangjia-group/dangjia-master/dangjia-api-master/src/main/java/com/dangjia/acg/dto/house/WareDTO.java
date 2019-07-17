@@ -100,8 +100,8 @@ public class WareDTO {
     @ApiModelProperty("单位")
     private String unitName;
 
-    @ApiModelProperty("0：材料；1：包工包料")
-    private Integer productType; //0：材料；1：包工包料
+    @ApiModelProperty("0：材料；1：服务")
+    private Integer productType; //0：材料；1：服务
 
     @ApiModelProperty("分类id")
     private String categoryId;

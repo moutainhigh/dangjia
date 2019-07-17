@@ -31,7 +31,7 @@ public class BudgetMaterialDTO {
 
     private double totalPrice; //总价
 
-    private int productType; //0：材料；1：包工包料
+    private int productType; //0：材料；1：服务
 
     private String categoryId;//分类id
 

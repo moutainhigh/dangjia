@@ -81,7 +81,7 @@ public class WebOrderService {
                             WorkerType workerType=workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
                             if (mendOrder.getType() == 0) {
                                 if(workerType.getType()==3){
-                                    webOrderDTO.setTypeText(workerType.getName() + "补包工包料");
+                                    webOrderDTO.setTypeText(workerType.getName() + "补服务");
                                 }else{
                                     webOrderDTO.setTypeText(workerType.getName() + "补材料");
                                 }

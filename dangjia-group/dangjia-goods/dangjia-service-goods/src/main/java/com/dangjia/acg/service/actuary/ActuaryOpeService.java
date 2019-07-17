@@ -209,7 +209,7 @@ public class ActuaryOpeService {
 
     /**
      * 精算详情
-     * type: 1人工 2材料包工包料
+     * type: 1人工 2材料服务
      */
     public ServerResponse actuary(String houseId, Integer type) {
         try {

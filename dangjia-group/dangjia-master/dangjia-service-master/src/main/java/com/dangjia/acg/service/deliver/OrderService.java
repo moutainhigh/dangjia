@@ -351,7 +351,7 @@ public class OrderService {
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 if (worker.getWorkerType() == 3) {
-                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家要包工包料",
+                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家要服务",
                             String.format(DjConstants.PushMessage.STEWARD_Y_SERVER, house.getHouseName()), "");
                 } else {
                     configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠要材料", String.format
@@ -420,7 +420,7 @@ public class OrderService {
     }
 
     /**
-     * 管家要包工包料
+     * 管家要服务
      * 工匠要工序材料
      * 提交到要货
      */

@@ -13,5 +13,5 @@ public class ItemDTO {
     private String image;
     private String price;//价格
     private Double shopCount;//购买总数
-    private Integer productType; //0：材料；1：包工包料 2 人工 3空白
+    private Integer productType; //0：材料；1：服务 2 人工 3空白
 }

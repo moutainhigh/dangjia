@@ -211,12 +211,12 @@ public class DjConstants {
         }
     }
     /**
-     * Type 工序类型 人工1 材料2 包工包料3
+     * Type 工序类型 人工1 材料2 服务3
      */
     public static class GXType {
         public final static Integer RENGGONG = 1;// 人工
         public final static Integer CAILIAO = 2;// 材料
-        public final static Integer FUWU = 3;// 包工包料
+        public final static Integer FUWU = 3;// 服务
         public final static Integer BU_RENGGONG = 4;// 补人工
         public final static Integer BU_CAILIAO = 5;// 补材料
     }
@@ -293,9 +293,9 @@ public class DjConstants {
         public final static String YEZHUTUIHUO = "业主您好！您发起的退材料操作成功，退款即将进入您的钱包，请注意查收";
 
 
-        public final static String STEWARD_Y_SERVER = "业主您好！【%s】大管家已为您安排了包工包料，请知晓。";
-        public final static String STEWARD_T_SERVER = "业主您好！根据【%s】装修施工需要，现场退部分包工包料，请查看。";
-        public final static String STEWARD_B_SERVER = "业主您好！工匠根据【%s】装修施工需要，补部分包工包料，请查看并支付";
+        public final static String STEWARD_Y_SERVER = "业主您好！【%s】大管家已为您安排了服务，请知晓。";
+        public final static String STEWARD_T_SERVER = "业主您好！根据【%s】装修施工需要，现场退部分服务，请查看。";
+        public final static String STEWARD_B_SERVER = "业主您好！工匠根据【%s】装修施工需要，补部分服务，请查看并支付";
         public final static String CRAFTSMAN_Y_MATERIAL = "业主您好！【%s】工匠已为您安排了材料发货，请及时收货。";
         public final static String CRAFTSMAN_T_MATERIAL = "业主您好！根据【%s】装修施工需要，现场盘点部分材料退货，具体退货数量以卖家验货为准，请知晓。";
         public final static String CRAFTSMAN_B_MATERIAL = "业主您好！工匠根据【%s】装修施工需要，补部分材料，请查看并支付";
