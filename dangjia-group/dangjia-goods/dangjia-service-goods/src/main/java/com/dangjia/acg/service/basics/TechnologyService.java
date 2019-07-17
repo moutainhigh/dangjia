@@ -69,7 +69,7 @@ public class TechnologyService {
      *
      * @param jsonStr          多个工艺对象list的json
      * @param workerTypeId     工序id : 如果是 服务product类型的 传递 空 。查询的时候忽略 该字段
-     * @param materialOrWorker 0服务工艺;1:人工工艺
+     * @param materialOrWorker 0服务 工艺;1:人工工艺
      * @param goodsId          根据 materialOrWorker字段决定：  0:服务productId;  1:人工商品
      * @return
      */

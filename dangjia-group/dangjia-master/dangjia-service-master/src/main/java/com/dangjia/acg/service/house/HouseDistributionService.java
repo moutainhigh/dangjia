@@ -6,6 +6,7 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IWebsiteVisitMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
@@ -106,52 +107,54 @@ public class HouseDistributionService {
         String cityId = request.getParameter(Constants.CITY_ID);
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
-//            String modifyDate = request.getParameter(HouseDistribution.MODIFY_DATE);
-//            houseDistribution.setId(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
-//            houseDistribution.setHead("");
-//            houseDistribution.setCity(iCityMapper.selectByPrimaryKey(cityId).getName());
-//            houseDistribution.setPrice(0d);
-//            houseDistribution.setSex("0");
-//            houseDistribution.setState(2);
-//            houseDistribution.setType(2);
-//            if (houseDistribution.getModifyDate() == null && !CommonUtil.isEmpty(modifyDate)) {
-//                houseDistribution.setModifyDate(DateUtil.toDate(modifyDate));
-//            }
-            return (ServerResponse) object;
-        }
-        Member user = (Member) object;
-        user = memberMapper.selectByPrimaryKey(user.getId());
-        houseDistribution.setId(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
-        houseDistribution.setHead(user.getHead());
-        houseDistribution.setNickname(user.getNickName());
-        houseDistribution.setPhone(user.getMobile());
-        houseDistribution.setCity(iCityMapper.selectByPrimaryKey(cityId).getName());
-        houseDistribution.setPrice(DjConstants.distribution.PRICE.doubleValue());
-        houseDistribution.setOpenid(user.getId());
-        houseDistribution.setSex("0");
-        houseDistribution.setState(0);
-        houseDistribution.setType(1);
-        if (this.iHouseDistributionMapper.insertSelective(houseDistribution) > 0) {
-            Example example =new Example(CustomerRecord.class);
-            example.createCriteria().andEqualTo(CustomerRecord.MEMBER_ID, user.getId());
-            example.orderBy(CustomerRecord.CREATE_DATE).desc();
-            List<CustomerRecord> customerRecords = customerRecordMapper.selectByExample(example);
-            CustomerRecord customerRecord;
-            if (customerRecords.size() > 0) {
-                customerRecord = customerRecordMapper.selectByExample(example).get(0);
-            } else {
-                customerRecord = new CustomerRecord();
-                customerRecord.setMemberId(houseDistribution.getOpenid());
-                customerRecord.setUserId("");
+            String modifyDate = request.getParameter(HouseDistribution.MODIFY_DATE);
+            houseDistribution.setId(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+            houseDistribution.setHead("");
+            houseDistribution.setCity(iCityMapper.selectByPrimaryKey(cityId).getName());
+            houseDistribution.setPrice(0d);
+            houseDistribution.setSex("0");
+            houseDistribution.setState(2);
+            houseDistribution.setType(2);
+            if (houseDistribution.getModifyDate() == null && !CommonUtil.isEmpty(modifyDate)) {
+                houseDistribution.setModifyDate(DateUtil.toDate(modifyDate));
             }
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(houseDistribution.getCreateDate());
-            calendar.add(Calendar.DAY_OF_MONTH, +1);//+1今天的时间加一天
-            customerRecord.setDescribes((houseDistribution.getType() == 1 ? "验房分销，" : "验房预约，")
-                    + houseDistribution.getInfo()
-                    + (houseDistribution.getState() == 1 ? "，已支付" : houseDistribution.getState() == 0 ? "，未支付" : "，预约"));
-            customerRecord.setRemindTime(calendar.getTime());
-            customerRecordService.addCustomerRecord(customerRecord);
+        }else {
+            Member user = (Member) object;
+            user = memberMapper.selectByPrimaryKey(user.getId());
+            houseDistribution.setId(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+            houseDistribution.setHead(user.getHead());
+            houseDistribution.setNickname(user.getNickName());
+            houseDistribution.setPhone(user.getMobile());
+            houseDistribution.setCity(iCityMapper.selectByPrimaryKey(cityId).getName());
+            houseDistribution.setPrice(DjConstants.distribution.PRICE.doubleValue());
+            houseDistribution.setOpenid(user.getId());
+            houseDistribution.setSex("0");
+            houseDistribution.setState(0);
+            houseDistribution.setType(1);
+        }
+        if (this.iHouseDistributionMapper.insertSelective(houseDistribution) > 0) {
+            if(!CommonUtil.isEmpty(houseDistribution.getOpenid())) {
+                Example example = new Example(CustomerRecord.class);
+                example.createCriteria().andEqualTo(CustomerRecord.MEMBER_ID, houseDistribution.getOpenid());
+                example.orderBy(CustomerRecord.CREATE_DATE).desc();
+                List<CustomerRecord> customerRecords = customerRecordMapper.selectByExample(example);
+                CustomerRecord customerRecord;
+                if (customerRecords.size() > 0) {
+                    customerRecord = customerRecordMapper.selectByExample(example).get(0);
+                } else {
+                    customerRecord = new CustomerRecord();
+                    customerRecord.setMemberId(houseDistribution.getOpenid());
+                    customerRecord.setUserId("");
+                }
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(houseDistribution.getCreateDate());
+                calendar.add(Calendar.DAY_OF_MONTH, +1);//+1今天的时间加一天
+                customerRecord.setDescribes((houseDistribution.getType() == 1 ? "验房分销，" : "验房预约，")
+                        + houseDistribution.getInfo()
+                        + (houseDistribution.getState() == 1 ? "，已支付" : houseDistribution.getState() == 0 ? "，未支付" : "，预约"));
+                customerRecord.setRemindTime(calendar.getTime());
+                customerRecordService.addCustomerRecord(customerRecord);
+            }
             return ServerResponse.createBySuccess("ok", houseDistribution.getId());
         } else {
             return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");

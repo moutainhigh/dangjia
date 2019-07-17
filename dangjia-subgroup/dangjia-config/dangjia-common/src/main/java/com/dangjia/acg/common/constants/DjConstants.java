@@ -293,9 +293,9 @@ public class DjConstants {
         public final static String YEZHUTUIHUO = "业主您好！您发起的退材料操作成功，退款即将进入您的钱包，请注意查收";
 
 
-        public final static String STEWARD_Y_SERVER = "业主您好！【%s】大管家已为您安排了服务发货，请知晓。";
-        public final static String STEWARD_T_SERVER = "业主您好！根据【%s】装修施工需要，现场退部分服务商品，请查看。";
-        public final static String STEWARD_B_SERVER = "业主您好！工匠根据【%s】装修施工需要，补部分服务商品，请查看并支付";
+        public final static String STEWARD_Y_SERVER = "业主您好！【%s】大管家已为您安排了服务，请知晓。";
+        public final static String STEWARD_T_SERVER = "业主您好！根据【%s】装修施工需要，现场退部分服务，请查看。";
+        public final static String STEWARD_B_SERVER = "业主您好！工匠根据【%s】装修施工需要，补部分服务，请查看并支付";
         public final static String CRAFTSMAN_Y_MATERIAL = "业主您好！【%s】工匠已为您安排了材料发货，请及时收货。";
         public final static String CRAFTSMAN_T_MATERIAL = "业主您好！根据【%s】装修施工需要，现场盘点部分材料退货，具体退货数量以卖家验货为准，请知晓。";
         public final static String CRAFTSMAN_B_MATERIAL = "业主您好！工匠根据【%s】装修施工需要，补部分材料，请查看并支付";
