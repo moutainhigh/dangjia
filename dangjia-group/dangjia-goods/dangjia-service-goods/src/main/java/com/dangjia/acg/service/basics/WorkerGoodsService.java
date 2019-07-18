@@ -139,6 +139,14 @@ public class WorkerGoodsService {
             workerGoodsResult.setWorkerTypeId(workerGoods.getWorkerTypeId());
             workerGoodsResult.setWorkerTypeName(workerTypeName);
             workerGoodsResult.setShowGoods(workerGoods.getShowGoods());
+
+            workerGoodsResult.setLastPrice(workerGoods.getLastPrice());
+            workerGoodsResult.setLastTime(workerGoods.getLastTime());
+            workerGoodsResult.setTechnologyIds(workerGoods.getTechnologyIds());
+            workerGoodsResult.setConsiderations(workerGoods.getConsiderations());
+            workerGoodsResult.setCalculateContent(workerGoods.getCalculateContent());
+            workerGoodsResult.setBuildContent(workerGoods.getBuildContent());
+
             //将工艺列表返回
             List<TechnologyDTO> technologies = new ArrayList<>();
             List<Technology> technologyList = iTechnologyMapper.queryTechnologyList(workerGoods.getTechnologyIds());
