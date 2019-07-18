@@ -7,6 +7,7 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.ISearchBoxMapper;
@@ -150,27 +151,19 @@ public class TechnologyService {
     /**
      * 添加人工工艺和添加服务节点
      */
-    public ServerResponse insertTechnology(String name, String content, String workerTypeId, Integer type, String image, Integer materialOrWorker) {
+    public ServerResponse insertTechnology(Technology technology) {
         try {
-            List<Technology> technologyList = iTechnologyMapper.query(workerTypeId, name, materialOrWorker);
+            List<Technology> technologyList = iTechnologyMapper.query(technology.getWorkerTypeId(), technology.getName(), technology.getMaterialOrWorker());
             if (technologyList.size() > 0) {
                 return ServerResponse.createByErrorMessage("工艺名称不能重复");
             }
-            Technology t = new Technology();
-            t.setName(name);
-            t.setCreateDate(new Date());
-            t.setModifyDate(new Date());
-            t.setContent(content);
-            t.setImage(image);
-            if (materialOrWorker == 1) {
-                t.setWorkerTypeId(workerTypeId);
-                t.setType(type);
-                t.setMaterialOrWorker(1);
-            } else {
-                t.setType(1);
-                t.setMaterialOrWorker(0);
+            if (technology.getMaterialOrWorker()!=null&&technology.getMaterialOrWorker() != 1) {
+                technology.setType(1);
+                technology.setMaterialOrWorker(0);
+            }else{
+                technology.setMaterialOrWorker(1);
             }
-            iTechnologyMapper.insertSelective(t);
+            iTechnologyMapper.insertSelective(technology);
             return ServerResponse.createBySuccessMessage("新增成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -179,32 +172,26 @@ public class TechnologyService {
     }
 
     //修改工艺说明
-    public ServerResponse updateTechnology(String id, String name, String content, Integer type, String image) {
+    public ServerResponse updateTechnology(Technology technology) {
         try {
-            if (!StringUtils.isNotBlank(name))
+            if (!StringUtils.isNotBlank(technology.getName()))
                 return ServerResponse.createByErrorMessage("名称不能为空");
-            Technology t = iTechnologyMapper.selectByPrimaryKey(id);
+            Technology t = iTechnologyMapper.selectByPrimaryKey(technology.getId());
             if (t == null) {
                 return ServerResponse.createByErrorMessage("不存在此工艺,修改失败");
             }
-            if (!t.getName().equals(name)) {//如果修改了名称 就判断，修改的名字 是否已经存在
-                List<Technology> technologyList = iTechnologyMapper.query(t.getWorkerTypeId(), name, t.getMaterialOrWorker());
+            if (!t.getName().equals(technology.getName())) {//如果修改了名称 就判断，修改的名字 是否已经存在
+                List<Technology> technologyList = iTechnologyMapper.query(t.getWorkerTypeId(), technology.getName(), t.getMaterialOrWorker());
                 if (technologyList.size() > 0)
                     return ServerResponse.createByErrorMessage("工艺名称已存在");
             }
-            t.setName(name);
-            t.setModifyDate(new Date());
-            t.setContent(content);
-            t.setType(type);
-            if (null != image && !"".equals(image)) {
-                t.setImage(image);
+            if (technology.getMaterialOrWorker()!=null&&technology.getMaterialOrWorker() != 1) {
+                technology.setType(1);
+                technology.setMaterialOrWorker(0);
+            }else{
+                technology.setMaterialOrWorker(1);
             }
-            if (t.getMaterialOrWorker() == 1) {
-                t.setType(type);
-            } else {
-                t.setType(1);
-            }
-            iTechnologyMapper.updateByPrimaryKeySelective(t);
+            iTechnologyMapper.updateByPrimaryKeySelective(technology);
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -232,18 +219,17 @@ public class TechnologyService {
             PageInfo pageResult = new PageInfo(tList);
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (Technology t : tList) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("id", t.getId());
-                map.put("name", t.getName());
-                map.put("workerTypeId", t.getWorkerTypeId());
+                Map<String, Object> map = BeanUtils.beanToMap(t);
+                Example example = new Example(WorkerGoods.class);
+                example.createCriteria().andCondition(" FIND_IN_SET( '"+t.getId()+"', technology_ids)");
+                List<WorkerGoods> wList = iWorkerGoodsMapper.selectByExample(example);
                 String workerTypeName = "";
                 ServerResponse response = workerTypeAPI.getWorkerType(t.getWorkerTypeId());
                 if (response.isSuccess()) {
                     workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
                 }
                 map.put("workerTypeName", workerTypeName);
-                map.put("content", t.getContent());
-                map.put("type", t.getType());
+                map.put("workerNum", wList.size());
                 StringBuilder imgStr = new StringBuilder();
                 StringBuilder imgUrlStr = new StringBuilder();
                 if (t.getImage() != null) {
@@ -252,7 +238,6 @@ public class TechnologyService {
                 }
                 map.put("image", imgStr.toString());
                 map.put("imageUrl", imgUrlStr.toString());
-                map.put("materialOrWorker", t.getMaterialOrWorker());
                 mapList.add(map);
             }
             pageResult.setList(mapList);
@@ -263,19 +248,26 @@ public class TechnologyService {
         }
     }
 
+    //根据名称查询所有工艺（名称去重）
+    public ServerResponse queryByName(String name,String workerTypeId) {
+        try {
+            List<Technology> tList = iTechnologyMapper.queryByName(name, workerTypeId);
+            return ServerResponse.createBySuccess("查询成功", tList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
     //根据商品id查询人工商品关联工艺实体
     public ServerResponse queryTechnologyByWgId(String workerGoodsId) {
         try {
+
+            WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(workerGoodsId);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<Technology> tList = iTechnologyMapper.queryTechnologyByWgId(workerGoodsId);
+            List<Technology> tList = iTechnologyMapper.queryTechnologyByWgId(wg.getTechnologyIds());
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (Technology t : tList) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("id", t.getId());
-                map.put("name", t.getName());
-                map.put("workerTypeId", t.getWorkerTypeId());
-                map.put("content", t.getContent());
-                map.put("type", t.getType());
+                Map<String, Object> map =BeanUtils.beanToMap(t);
                 StringBuilder imgStr = new StringBuilder();
                 StringBuilder imgUrlStr = new StringBuilder();
                 if (t.getImage() != null) {
@@ -284,7 +276,6 @@ public class TechnologyService {
                 }
                 map.put("image", imgStr.toString());
                 map.put("imageUrl", imgUrlStr.toString());
-                map.put("materialOrWorker", t.getMaterialOrWorker());
                 mapList.add(map);
             }
             return ServerResponse.createBySuccess("查询成功", mapList);

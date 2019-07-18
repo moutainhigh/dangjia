@@ -1066,15 +1066,15 @@ public class MendOrderService {
         Warehouse warehouse = warehouseMapper.getByProductId(productId, house.getId());
         Product product = forMasterAPI.getProduct(house.getCityId(), productId);
         if (warehouse != null) {
-            mendMateriel.setProductSn(warehouse.getProductSn());
-            mendMateriel.setProductName(warehouse.getProductName());
+            mendMateriel.setProductSn(product.getProductSn());
+            mendMateriel.setProductName(product.getName());
             mendMateriel.setPrice(warehouse.getPrice());
             mendMateriel.setCost(warehouse.getCost());
             mendMateriel.setUnitName(warehouse.getUnitName());
             mendMateriel.setTotalPrice(num * warehouse.getPrice());
             mendMateriel.setProductType(warehouse.getProductType());//0：材料；1：包工包料
-            mendMateriel.setCategoryId(warehouse.getCategoryId());
-            mendMateriel.setImage(warehouse.getImage());
+            mendMateriel.setCategoryId(product.getCategoryId());
+            mendMateriel.setImage(product.getImage());
         } else {
             mendMateriel.setProductSn(product.getProductSn());
             mendMateriel.setProductName(product.getName());

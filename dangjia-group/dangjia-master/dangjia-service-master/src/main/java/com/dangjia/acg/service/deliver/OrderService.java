@@ -510,9 +510,9 @@ public class OrderService {
                 if (warehouse != null) {
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
                     orderSplitItem.setWarehouseId(warehouse.getId());//仓库子项id
-                    orderSplitItem.setProductId(warehouse.getProductId());
-                    orderSplitItem.setProductSn(warehouse.getProductSn());
-                    orderSplitItem.setProductName(warehouse.getProductName());
+                    orderSplitItem.setProductId(product.getId());
+                    orderSplitItem.setProductSn(product.getProductSn());
+                    orderSplitItem.setProductName(product.getName());
                     orderSplitItem.setPrice(warehouse.getPrice());
                     orderSplitItem.setAskCount(warehouse.getAskCount());
                     orderSplitItem.setCost(warehouse.getCost());
@@ -522,7 +522,7 @@ public class OrderService {
                     orderSplitItem.setTotalPrice(warehouse.getPrice() * num);//单项总价 销售价
                     orderSplitItem.setProductType(warehouse.getProductType());
                     orderSplitItem.setCategoryId(warehouse.getCategoryId());
-                    orderSplitItem.setImage(warehouse.getImage());//货品图片
+                    orderSplitItem.setImage(product.getImage());//货品图片
                     orderSplitItem.setHouseId(houseId);
                     orderSplitItemMapper.insert(orderSplitItem);
                 } else {

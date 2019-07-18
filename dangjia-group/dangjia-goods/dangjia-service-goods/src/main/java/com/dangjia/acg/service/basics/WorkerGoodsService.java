@@ -141,7 +141,7 @@ public class WorkerGoodsService {
             workerGoodsResult.setShowGoods(workerGoods.getShowGoods());
             //将工艺列表返回
             List<TechnologyDTO> technologies = new ArrayList<>();
-            List<Technology> technologyList = iTechnologyMapper.queryTechnologyList(workerGoods.getId());
+            List<Technology> technologyList = iTechnologyMapper.queryTechnologyList(workerGoods.getTechnologyIds());
             for (Technology technology : technologyList) {
                 TechnologyDTO technologyResult = new TechnologyDTO();
                 technologyResult.setId(technology.getId());
@@ -195,9 +195,9 @@ public class WorkerGoodsService {
                 return ServerResponse.createByErrorMessage("商品编号不能重复");
 
         }
-        String ret = technologyService.insertTechnologyList(technologyJsonList, workerGoods.getWorkerTypeId(), 1, workerGoods.getId());
-        if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
-            return ServerResponse.createByErrorMessage(ret);
+//        String ret = technologyService.insertTechnologyList(technologyJsonList, workerGoods.getWorkerTypeId(), 1, workerGoods.getId());
+//        if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
+//            return ServerResponse.createByErrorMessage(ret);
 
         if (StringUtils.isNotBlank(workerGoods.getId()) && workerG != null) {
             workerGoods.setModifyDate(new Date());
@@ -209,7 +209,6 @@ public class WorkerGoodsService {
                 Example example = new Example(WorkerGoods.class);
                 example.createCriteria().andEqualTo(WorkerGoods.ID, workerGoods.getId());
                 List<WorkerGoods> list = iWorkerGoodsMapper.selectByExample(example);
-                System.out.println(list);
                 masterMendWorkerAPI.updateMendWorker(JSON.toJSONString(list));
             }
         } else {

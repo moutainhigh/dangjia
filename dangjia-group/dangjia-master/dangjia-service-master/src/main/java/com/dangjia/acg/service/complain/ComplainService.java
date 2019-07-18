@@ -2,6 +2,7 @@ package com.dangjia.acg.service.complain;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -30,6 +31,7 @@ import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
@@ -105,6 +107,8 @@ public class ComplainService {
     @Autowired
     private HouseService houseService;
 
+    @Autowired
+    private ForMasterAPI forMasterAPI;
     /**
      * 添加申诉
      *
@@ -548,6 +552,7 @@ public class ComplainService {
                 complain.setData(rewardPunishRecordMapper.queryRewardPunishRecord(rewardPunishRecordDTO));
             } else if (complain.getComplainType() == 4) {//收货
                 SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(complain.getBusinessId());
+                House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
                 SplitDeliverDTO splitDeliverDTO = new SplitDeliverDTO();
                 splitDeliverDTO.setShipState(splitDeliver.getShippingState());//发货状态
                 splitDeliverDTO.setNumber(splitDeliver.getNumber());
@@ -565,10 +570,11 @@ public class ComplainService {
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
                 List<SplitDeliverItemDTO> splitDeliverItemDTOList = new ArrayList<>();
                 for (OrderSplitItem orderSplitItem : orderSplitItemList) {
+                    Product product=forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
                     SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
-                    splitDeliverItemDTO.setImage(address + orderSplitItem.getImage());
-                    splitDeliverItemDTO.setProductSn(orderSplitItem.getProductSn());
-                    splitDeliverItemDTO.setProductName(orderSplitItem.getProductName());
+                    splitDeliverItemDTO.setImage(address + product.getImage());
+                    splitDeliverItemDTO.setProductSn(product.getProductSn());
+                    splitDeliverItemDTO.setProductName(product.getName());
                     splitDeliverItemDTO.setTotalPrice(orderSplitItem.getTotalPrice());
                     splitDeliverItemDTO.setShopCount(orderSplitItem.getShopCount());
                     splitDeliverItemDTO.setNum(orderSplitItem.getNum());
