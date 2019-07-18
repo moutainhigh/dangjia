@@ -96,14 +96,15 @@ public class FillMaterielService {
                 Object warehouseStr = response.getResultObj();
                 Warehouse warehouse = JSON.parseObject(JSON.toJSONString(warehouseStr), Warehouse.class);
                 if (warehouse == null) continue;
+                Product product = iProductMapper.selectByPrimaryKey(warehouse.getProductId());
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
-                warehouseDTO.setImage(address + warehouse.getImage());
+                warehouseDTO.setImage(address + product.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
                 warehouseDTO.setAskCount(warehouse.getAskCount());
                 warehouseDTO.setBackCount((warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                 warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getReceive());//所有买的数量 - 退货 - 收的
-                warehouseDTO.setProductName(warehouse.getProductName());
+                warehouseDTO.setProductName(product.getName());
                 warehouseDTO.setPrice(warehouse.getPrice());
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                 warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
@@ -170,13 +171,13 @@ public class FillMaterielService {
                 if (goods != null) {
                     warehouseDTO.setSales(goods.getSales());
                 }
-                warehouseDTO.setImage(address + warehouse.getImage());
+                warehouseDTO.setImage(address + product.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
                 warehouseDTO.setAskCount(warehouse.getAskCount());
                 warehouseDTO.setBackCount((warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                 warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
-                warehouseDTO.setProductName(warehouse.getProductName());
+                warehouseDTO.setProductName(product.getName());
                 warehouseDTO.setPrice(warehouse.getPrice());
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                 warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
@@ -265,13 +266,15 @@ public class FillMaterielService {
                 Warehouse warehouse = JSON.parseObject(JSON.toJSONString(warehouseStr), Warehouse.class);
                 if (warehouse == null) continue;
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
-                warehouseDTO.setImage(address + warehouse.getImage());
+
+                Product product = iProductMapper.selectByPrimaryKey(warehouse.getProductId());
+                warehouseDTO.setImage(address + product.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
                 warehouseDTO.setAskCount(warehouse.getAskCount());
                 warehouseDTO.setBackCount((warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                 warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
-                warehouseDTO.setProductName(warehouse.getProductName());
+                warehouseDTO.setProductName(product.getName());
                 warehouseDTO.setPrice(warehouse.getPrice());
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                 warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));

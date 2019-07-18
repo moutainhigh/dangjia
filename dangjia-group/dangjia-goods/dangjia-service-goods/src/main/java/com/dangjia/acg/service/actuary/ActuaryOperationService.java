@@ -261,7 +261,7 @@ public class ActuaryOperationService {
                 wGoodsDTO.setPrice("¥" + String.format("%.2f", workerGoods.getPrice()) + "/" + workerGoods.getUnitName());
                 wGoodsDTO.setName(workerGoods.getName());
                 wGoodsDTO.setWorkerDec(getImage(workerGoods.getWorkerDec()));
-                List<Technology> technologyList = technologyMapper.queryTechnologyByWgId(workerGoods.getId());
+                List<Technology> technologyList = technologyMapper.queryTechnologyByWgId(workerGoods.getTechnologyIds());
                 for (Technology technology : technologyList) {
                     technology.setImage(getImage(technology.getImage()));//图一张
                 }
@@ -311,7 +311,7 @@ public class ActuaryOperationService {
                 wGoodsDTO.setPrice("¥" + String.format("%.2f", workerGoods.getPrice()) + "/" + workerGoods.getUnitName());
                 wGoodsDTO.setName(workerGoods.getName());
                 wGoodsDTO.setWorkerDec(getImage(workerGoods.getWorkerDec()));
-                List<Technology> technologyList = technologyMapper.queryTechnologyByWgId(workerGoods.getId());
+                List<Technology> technologyList = technologyMapper.queryTechnologyByWgId(workerGoods.getTechnologyIds());
                 for (Technology technology : technologyList) {
                     technology.setImage(getImage(technology.getImage()));//图一张
                 }

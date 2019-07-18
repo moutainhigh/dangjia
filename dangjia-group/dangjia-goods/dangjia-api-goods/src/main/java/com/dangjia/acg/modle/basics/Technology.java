@@ -1,7 +1,9 @@
 package com.dangjia.acg.modle.basics;
 
+import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.persistence.Column;
@@ -42,6 +44,19 @@ public class Technology extends BaseEntity {
     @Column(name = "sample_image")
     private String sampleImage;//示例图
 
+
+    @Column(name = "considerations")
+    @Desc(value = "注意事项")
+    @ApiModelProperty("注意事项")
+    private String considerations;//注意事项
+
+    @Column(name = "text_content")
+    @Desc(value = "商品详情配置内容")
+    @ApiModelProperty("商品详情配置内容，json串")
+    private String textContent;
+
     @Column(name = "goods_id")
+    @Desc(value = "商品详情配置内容(已失效，暂时保留)")
+    @ApiModelProperty("商品详情配置内容(已失效，暂时保留)，json串")
     private String goodsId;//人工id ,服务货品productId  :  根据 materialOrWorker字段决定：  0:服务productId;  1:人工商品
 }

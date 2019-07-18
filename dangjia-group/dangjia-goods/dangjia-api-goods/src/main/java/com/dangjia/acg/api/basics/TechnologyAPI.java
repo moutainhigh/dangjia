@@ -2,6 +2,7 @@ package com.dangjia.acg.api.basics;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.basics.Technology;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,21 +19,12 @@ public interface TechnologyAPI {
     @PostMapping("/basics/technology/insertTechnology")
     @ApiOperation(value = "新增工艺说明", notes = "新增工艺说明")
     ServerResponse insertTechnology(@RequestParam("request") HttpServletRequest request,
-                                    @RequestParam("name") String name,
-                                    @RequestParam("content") String content,
-                                    @RequestParam("workerTypeId") String workerTypeId,
-                                    @RequestParam("type") Integer type,
-                                    @RequestParam("image") String image,
-                                    @RequestParam("materialOrWorker") Integer materialOrWorker);
+                                    @RequestParam("technology") Technology technology);
 
     @PostMapping("/basics/technology/updateTechnology")
     @ApiOperation(value = "修改工艺说明", notes = "修改工艺说明")
     ServerResponse updateTechnology(@RequestParam("request") HttpServletRequest request,
-                                    @RequestParam("id") String id,
-                                    @RequestParam("name") String name,
-                                    @RequestParam("content") String content,
-                                    @RequestParam("type") Integer type,
-                                    @RequestParam("image") String image);
+                                    @RequestParam("technology") Technology technology);
 
     @PostMapping("/basics/technology/deleteTechnology")
     @ApiOperation(value = "删除工艺说明", notes = "删除工艺说明")
@@ -51,5 +43,10 @@ public interface TechnologyAPI {
     @ApiOperation(value = "根据商品id查询人工商品关联工艺实体", notes = "根据商品id查询人工商品关联工艺实体")
     ServerResponse queryTechnologyByWgId(@RequestParam("request") HttpServletRequest request,
                                          @RequestParam("workerGoodsId") String workerGoodsId);
+
+
+    @PostMapping("/basics/technology/queryByName")
+    @ApiOperation(value = "根据名称查询所有工艺（名称去重）", notes = "根据名称查询所有工艺（名称去重）")
+    ServerResponse queryByName(@RequestParam("request")HttpServletRequest request,@RequestParam("name")String name,@RequestParam("workerTypeId")String workerTypeId);
 
 }
