@@ -174,16 +174,17 @@ public class HouseFlowApplyService {
                     Example example = new Example(WorkerTypeSafe.class);
                     example.createCriteria().andEqualTo(WorkerTypeSafe.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
                     List<WorkerTypeSafe> wtsList = workerTypeSafeMapper.selectByExample(example);
-                    House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
-
-                    wtso = new WorkerTypeSafeOrder();
-                    wtso.setWorkerTypeSafeId(wtsList.get(0).getId()); // 向保险订单中存入保险服务类型的id
-                    wtso.setHouseId(houseFlow.getHouseId()); // 存入房子id
-                    wtso.setWorkerTypeId(houseFlow.getWorkerTypeId()); // 工种id
-                    wtso.setWorkerType(houseFlow.getWorkerType());
-                    wtso.setPrice(wtsList.get(0).getPrice().multiply(house.getSquare()));
-                    wtso.setState(1);
-                    workerTypeSafeOrderMapper.insert(wtso);
+                    if (wtsList.size() > 0) {
+                        House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+                        wtso = new WorkerTypeSafeOrder();
+                        wtso.setWorkerTypeSafeId(wtsList.get(0).getId()); // 向保险订单中存入保险服务类型的id
+                        wtso.setHouseId(houseFlow.getHouseId()); // 存入房子id
+                        wtso.setWorkerTypeId(houseFlow.getWorkerTypeId()); // 工种id
+                        wtso.setWorkerType(houseFlow.getWorkerType());
+                        wtso.setPrice(wtsList.get(0).getPrice().multiply(house.getSquare()));
+                        wtso.setState(1);
+                        workerTypeSafeOrderMapper.insert(wtso);
+                    }
                 }
                 if (wtso != null) {
                     WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());//获得类型算出时间
