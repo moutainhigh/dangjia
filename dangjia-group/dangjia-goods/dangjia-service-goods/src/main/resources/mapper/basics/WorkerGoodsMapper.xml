@@ -4,21 +4,29 @@
     <sql id="Base_Column_List">
         id,
         name,
-        worker_goods_sn,
+        worker_goods_sn workerGoodsSn,
         image,
-        unit_id,
-        other_name ,
-        unit_name,
+        unit_id unitId,
+        other_name otherName ,
+        unit_name unitName,
         price,
         sales,
-        work_explain,
-        worker_dec,
-        worker_standard,
-        worker_type_id,
-        show_goods,
-        create_date,
-        modify_date
+        work_explain workExplain,
+        worker_dec workerDec,
+        worker_standard workerStandard,
+        worker_type_id workerTypeId,
+        show_goods showGoods,
+        create_date createDate,
+        modify_date modifyDate,
+        last_price lastPrice,
+        last_time lastTime,
+        technology_ids technologyIds,
+        considerations,
+        calculate_content calculateContent,
+        build_content buildContent
   </sql>
+
+
 
     <select id="selectList" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
         SELECT
@@ -37,7 +45,13 @@
         worker_type_id as workerTypeId,
         show_goods as showGoods,
         create_date as createDate,
-        modify_date as modifyDate
+        modify_date as modifyDate,
+        last_price lastPrice,
+        last_time lastTime,
+        technology_ids technologyIds,
+        considerations,
+        calculate_content calculateContent,
+        build_content buildContent
         from dj_basics_worker_goods
         where data_status = 0
         <if test="workerTypeId != null">
