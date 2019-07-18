@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.data;
 
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
@@ -47,6 +48,7 @@ public class ActuaryService {
      * @return
      */
     public ServerResponse getActuaryAll(HttpServletRequest request, PageDTO pageDTO, String name, String budgetOk) {
+        String cityId = request.getParameter(Constants.CITY_ID);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         String dataStatus = "0";//正常数据
         if (Integer.parseInt(budgetOk) < 0) {
@@ -54,7 +56,7 @@ public class ActuaryService {
             dataStatus = "1";
             budgetOk = "";
         }
-        List<HouseListDTO> houseList = houseMapper.getActuaryAll(budgetOk, name, dataStatus);
+        List<HouseListDTO> houseList = houseMapper.getActuaryAll( cityId ,budgetOk, name, dataStatus);
         PageInfo pageResult = new PageInfo(houseList);
         for (HouseListDTO houseListDTO : houseList) {
             HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(houseListDTO.getHouseId(), 2);

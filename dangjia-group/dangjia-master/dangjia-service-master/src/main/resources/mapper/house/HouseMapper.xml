@@ -417,6 +417,9 @@
         <if test="dataStatus!=null and dataStatus!=''">
             AND h.data_status=#{dataStatus}
         </if>
+        <if test="cityId!=null and cityId!=''">
+            and h.city_id = #{cityId}
+        </if>
         <if test="budgetOk!=null and budgetOk!=''">
             <if test="budgetOk==1">
                 and (budget_ok =1 or budget_ok = 4)
