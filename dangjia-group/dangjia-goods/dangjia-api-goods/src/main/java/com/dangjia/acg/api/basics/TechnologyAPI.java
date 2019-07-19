@@ -39,6 +39,11 @@ public interface TechnologyAPI {
                                              @RequestParam("name") String name,
                                              @RequestParam("materialOrWorker") Integer materialOrWorker);
 
+    @PostMapping("/basics/technology/getTechnology")
+    @ApiOperation(value = "根据id查询工艺实体", notes = "根据id查询工艺实体")
+    ServerResponse getTechnology(@RequestParam("request") HttpServletRequest request,
+                                         @RequestParam("workerGoodsId") String technologyId);
+
     @PostMapping("/basics/technology/queryTechnologyByWgId")
     @ApiOperation(value = "根据商品id查询人工商品关联工艺实体", notes = "根据商品id查询人工商品关联工艺实体")
     ServerResponse queryTechnologyByWgId(@RequestParam("request") HttpServletRequest request,

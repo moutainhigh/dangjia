@@ -95,6 +95,11 @@ public class TechnologyController implements TechnologyAPI {
         return technologyService.queryTechnology(pageDTO, workerTypeId, name, materialOrWorker);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse getTechnology(HttpServletRequest request, String technologyId) {
+        return technologyService.getTechnology(technologyId);
+    }
     /**
      * 根据商品id查询人工商品关联工艺实体
      *
