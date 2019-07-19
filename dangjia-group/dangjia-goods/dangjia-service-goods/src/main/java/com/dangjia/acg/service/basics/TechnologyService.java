@@ -248,6 +248,37 @@ public class TechnologyService {
         }
     }
 
+    //根据工艺明细
+    public ServerResponse getTechnology(String technologyId) {
+        try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            Technology t = iTechnologyMapper.selectByPrimaryKey(technologyId);
+            Map<String, Object> map = BeanUtils.beanToMap(t);
+            Example example = new Example(WorkerGoods.class);
+            example.createCriteria().andCondition(" FIND_IN_SET( '"+t.getId()+"', technology_ids)");
+            List<WorkerGoods> wList = iWorkerGoodsMapper.selectByExample(example);
+            String workerTypeName = "";
+            ServerResponse response = workerTypeAPI.getWorkerType(t.getWorkerTypeId());
+            if (response.isSuccess()) {
+                workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
+            }
+            map.put("workerTypeName", workerTypeName);
+            map.put("workerNum", wList.size());
+            map.put("workerList", wList);
+            StringBuilder imgStr = new StringBuilder();
+            StringBuilder imgUrlStr = new StringBuilder();
+            if (t.getImage() != null) {
+                String[] imgArr = t.getImage().split(",");
+                StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+            }
+            map.put("image", imgStr.toString());
+            map.put("imageUrl", imgUrlStr.toString());
+            return ServerResponse.createBySuccess("查询成功", map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
     //根据名称查询所有工艺（名称去重）
     public ServerResponse queryByName(String name,String workerTypeId) {
         try {
