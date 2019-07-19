@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.house;
 
+import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -7,12 +8,14 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.UserInfoResultDTO;
 import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.core.NodeDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
@@ -22,6 +25,7 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.group.GroupUserConfig;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -62,6 +66,10 @@ public class MyHouseService {
     @Autowired
     private IMenuConfigurationMapper iMenuConfigurationMapper;
 
+    @Autowired
+    private UserAPI userAPI;
+    @Autowired
+    private ICustomerMapper iCustomerMapper;
     @Autowired
     private UserMapper userMapper;
     protected static final Logger LOG = LoggerFactory.getLogger(MyHouseService.class);
@@ -207,8 +215,13 @@ public class MyHouseService {
             }
         }
         //获取客服明细
+        Customer srcCustomer = iCustomerMapper.getCustomerByMemberId(member.getId());
+        String userid="773075761552045112068";
+        if(srcCustomer!=null&&!CommonUtil.isEmpty(srcCustomer.getUserId())){
+            userid=srcCustomer.getUserId();
+        }
         Example example = new Example(MainUser.class);
-        example.createCriteria().andEqualTo(MainUser.IS_RECEIVE, 1);
+        example.createCriteria().andEqualTo(MainUser.ID, userid);//默认李优
         example.orderBy(GroupUserConfig.CREATE_DATE).desc();
         List<MainUser> list = userMapper.selectByExample(example);
         if (list != null && list.size() > 0) {
@@ -217,7 +230,12 @@ public class MyHouseService {
             map.put("id", user.getId());
             map.put("targetId", user.getId());
             map.put("targetAppKey", "49957e786a91f9c55b223d58");
-            map.put("nickName", "装修顾问 " + user.getUsername());
+            UserInfoResultDTO userInfoResult = userAPI.getUserInfo("gj", userid);
+            if(userInfoResult != null && !CommonUtil.isEmpty(userInfoResult.getNickname())) {
+                map.put("nickName", "装修顾问 " + userInfoResult.getNickname());
+            }else{
+                map.put("nickName", "装修顾问 小" + user.getUsername().substring(0,1));
+            }
             map.put("name", user.getUsername());
             map.put("mobile", user.getMobile());
             map.put("head", address + "qrcode/logo.png");
