@@ -30,12 +30,6 @@ public class DruidConfig {
     @Value("${spring.datasource.url}")
     private String dbUrl;
 
-    @Value("${spring.datasource.zhuzhou.url}")
-    private String zzdbUrl;
-
-    @Value("${spring.datasource.shenzhen.url}")
-    private String szdbUrl;
-
     @Value("${spring.datasource.username}")
     private String username;
 
@@ -108,12 +102,13 @@ public class DruidConfig {
         }
 
         //株洲数据源
+        String zzdbUrl=dbUrl.replaceAll("changsha","zhuzhou");
         DataSource csDataSource = getDruidDataSource(username, password,zzdbUrl);
         if (csDataSource != null) {
             map.put(DataSourceType.ZZ_CHANGSHA.getName(), csDataSource);
         }
-
         //深圳数据源
+        String szdbUrl=dbUrl.replaceAll("changsha","shenzhen");
         csDataSource = getDruidDataSource(username, password,szdbUrl);
         if (csDataSource != null) {
             map.put(DataSourceType.SZ_CHANGSHA.getName(), csDataSource);
