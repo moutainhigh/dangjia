@@ -112,7 +112,7 @@ public class WorkerGoodsService {
         return imgStr.toString();
     }
 
-    private WorkerGoodsDTO assembleWorkerGoodsResult(WorkerGoods workerGoods) {
+    public WorkerGoodsDTO assembleWorkerGoodsResult(WorkerGoods workerGoods) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             WorkerGoodsDTO workerGoodsResult = new WorkerGoodsDTO();
