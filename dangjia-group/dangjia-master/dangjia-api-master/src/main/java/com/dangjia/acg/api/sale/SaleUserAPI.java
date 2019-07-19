@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 @FeignClient("dangjia-service-master")
 @Api(value = "销售用户模块", description = "销售用户模块")
-public interface UserAPI {
+public interface SaleUserAPI {
 
     @PostMapping("sale/user/demo")
     @ApiOperation(value = "样例描叙", notes = "样例描叙")
