@@ -15,7 +15,7 @@ public class AccessToken extends BaseEntity {
 
 	@ApiModelProperty("用户名")
 	private String memberId;//用户id
-
+	private String userId;
 	@ApiModelProperty("用户电话")
 	private String phone;//用户电话
 	@ApiModelProperty("工匠类型(0:大管家；1：普通工匠;2:业主)")

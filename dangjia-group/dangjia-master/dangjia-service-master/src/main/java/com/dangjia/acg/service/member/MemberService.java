@@ -120,7 +120,7 @@ public class MemberService {
                 }
                 break;
             case "3":
-                Supplier supplier = supplierProductAPI.getSupplier(cityId,id);
+                Supplier supplier = supplierProductAPI.getSupplier(cityId, id);
                 if (supplier != null) {
                     mobile = supplier.getTelephone();
                 }
@@ -185,6 +185,15 @@ public class MemberService {
         if ("1".equals(userRole)) {
             clueService.sendUser(user, user.getMobile());
         }
+        MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
+        if (mainUser != null) {
+            if (CommonUtil.isEmpty(mainUser.getMemberId())) {
+                //插入MemberId
+                userMapper.insertMemberId(user.getMobile());
+            }
+        } else if ("3".equals(userRole)) {
+            return ServerResponse.createByErrorMessage("当前用户暂无权限登录，请联系管理员");
+        }
         updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
         userRole = "role" + userRole + ":" + user.getId();
         String token = redisClient.getCache(userRole, String.class);
@@ -193,23 +202,17 @@ public class MemberService {
             redisClient.deleteCache(token + Constants.SESSIONUSERID);
         }
         user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-        AccessToken accessToken = TokenUtil.generateAccessToken(user);
+        AccessToken accessToken = TokenUtil.generateAccessToken(user, mainUser);
         if (!CommonUtil.isEmpty(user.getWorkerTypeId())) {
             WorkerType wt = workerTypeMapper.selectByPrimaryKey(user.getWorkerTypeId());
             if (wt != null) {
                 accessToken.setWorkerTypeName(wt.getName());
             }
         }
-
         redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
         redisClient.put(userRole, accessToken.getUserToken());
         groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
         groupInfoService.registerJGUsers("gj", new String[]{accessToken.getMemberId()}, new String[1]);
-        MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
-        if(mainUser!=null&&CommonUtil.isEmpty(mainUser.getMemberId())) {
-            //插入MemberId
-            userMapper.insertMemberId(user.getMobile());
-        }
         return ServerResponse.createBySuccess("登录成功，正在跳转", accessToken);
     }
 
@@ -261,7 +264,8 @@ public class MemberService {
     /**
      * 校验验证码并保存密码
      */
-    public ServerResponse checkRegister(HttpServletRequest request, String phone, int smscode, String password, String invitationCode, Integer userRole) {
+    public ServerResponse checkRegister(HttpServletRequest request, String phone, int smscode, String
+            password, String invitationCode, Integer userRole) {
         Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
         if (registerCode == null || smscode != registerCode) {
 
@@ -294,7 +298,8 @@ public class MemberService {
             }
             updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-            AccessToken accessToken = TokenUtil.generateAccessToken(user);
+            MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
+            AccessToken accessToken = TokenUtil.generateAccessToken(user, mainUser);
             if (!CommonUtil.isEmpty(user.getWorkerTypeId())) {
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(user.getWorkerTypeId());
                 if (wt != null) {
@@ -372,7 +377,8 @@ public class MemberService {
             user = memberMapper.selectByPrimaryKey(user.getId());
 
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-            accessToken = TokenUtil.generateAccessToken(user);
+            MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
+            accessToken = TokenUtil.generateAccessToken(user, mainUser);
             accessToken.setUserToken(userToken);
             accessToken.setTimestamp(accessToken.getTimestamp());
             if (wt != null) {
@@ -404,7 +410,8 @@ public class MemberService {
      * @param idnumber  身份证号
      * @return
      */
-    public ServerResponse certification(String userToken, String name, String idcaoda, String idcaodb, String idcaodall, String idnumber) {
+    public ServerResponse certification(String userToken, String name, String idcaoda, String idcaodb, String
+            idcaodall, String idnumber) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -565,7 +572,8 @@ public class MemberService {
             user.setSmscode(0);
             memberMapper.updateByPrimaryKeySelective(user);
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-            AccessToken accessToken = TokenUtil.generateAccessToken(user);
+            MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
+            AccessToken accessToken = TokenUtil.generateAccessToken(user, mainUser);
             redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
             return ServerResponse.createBySuccessMessage("设置密码成功");
         }
@@ -574,7 +582,8 @@ public class MemberService {
     /**
      * 业主列表
      */
-    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
+    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String userRole, String searchKey, String
+            parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
         try {
             List<String> childsLabelIdList = new ArrayList<>();
             if (StringUtils.isNotBlank(parentId)) {
@@ -639,7 +648,7 @@ public class MemberService {
                 mcDTO.setCreateDate(member.getCreateDate());
                 if (customer.getUserId() != null) {
                     MainUser mainUser = userMapper.selectByPrimaryKey(customer.getUserId());
-                    if(null!=mainUser) {
+                    if (null != mainUser) {
                         mcDTO.setUserName(mainUser.getUsername());
                     }
                 }

@@ -266,7 +266,4 @@ public class MainUserService {
         return this.userMapper.updatePwd(id, password);
     }
 
-    public int setUserLockNum(String id, int isLock) {
-        return this.userMapper.setUserLockNum(id, isLock);
-    }
 }
