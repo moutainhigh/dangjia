@@ -388,7 +388,7 @@ public class ActuaryOperationService {
                 }
             } else {
                 Example example = new Example(Product.class);
-                example.createCriteria().andEqualTo(Product.GOODS_ID, goods.getId());
+                example.createCriteria().andEqualTo(Product.GOODS_ID, goods.getId()).andEqualTo(Product.TYPE, "1");
                 example.orderBy(Product.VALUE_ID_ARR);
                 productList = productMapper.selectByExample(example);
             }

@@ -1534,7 +1534,11 @@ public class PaymentService {
                 WorkerDTO workerDTO = new WorkerDTO();
                 workerDTO.setHouseWorkerId(houseWorkerList.get(0).getId());//换人参数
                 workerDTO.setHead(imageAddress + worker.getHead());
-                workerDTO.setWorkerTypeName(workerType.getName());
+                if(workerType.getType()==3){
+                    workerDTO.setWorkerTypeName("开工准备");
+                }else {
+                    workerDTO.setWorkerTypeName(workerType.getName());
+                }
                 workerDTO.setWorkerId(houseWorkerList.get(0).getWorkerId());
                 workerDTO.setName(worker.getName());
                 workerDTO.setMobile(worker.getMobile());
