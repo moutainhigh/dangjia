@@ -106,13 +106,15 @@ public class GroupInfoService {
         PageInfo pageResult = new PageInfo(list);
         List<GroupDTO> listdto = new ArrayList<>();
         for (Group g : list) {
-            GroupDTO dto = new GroupDTO();
-            BeanUtils.beanToBean(g, dto);
-            List<Map> members = crossAppAPI.getCrossGroupMembers("gj", Integer.parseInt(g.getGroupId()));
-            if (members != null) {
-                dto.setMembers(members);
+            if(!CommonUtil.isEmpty(g.getGroupId())) {
+                GroupDTO dto = new GroupDTO();
+                BeanUtils.beanToBean(g, dto);
+                List<Map> members = crossAppAPI.getCrossGroupMembers("gj", Integer.parseInt(g.getGroupId()));
+                if (members != null) {
+                    dto.setMembers(members);
+                }
+                listdto.add(dto);
             }
-            listdto.add(dto);
         }
         pageResult.setList(listdto);
         return ServerResponse.createBySuccess("ok", pageResult);
