@@ -11,10 +11,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.ISearchBoxMapper;
-import com.dangjia.acg.mapper.basics.IProductMapper;
-import com.dangjia.acg.mapper.basics.ITechnologyMapper;
-import com.dangjia.acg.mapper.basics.IUnitMapper;
-import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
+import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.SearchBox;
 import com.dangjia.acg.modle.basics.Goods;
@@ -64,6 +61,8 @@ public class TechnologyService {
     @Autowired
     private ConfigUtil configUtil;
 
+    @Autowired
+    private IGoodsMapper goodsMapper;
 
     /**
      * 添加多个人工工艺和添加服务节点
@@ -336,25 +335,6 @@ public class TechnologyService {
                 searchBoxMapper.insertSelective(serchBox);
             }
 
-            if (type == 0 || type == 1) {
-                //根据内容模糊搜索商品
-                example = new Example(Goods.class);
-                example.createCriteria().andLike(Goods.NAME, "%" + name + "%").andEqualTo(Goods.DATA_STATUS, "0");
-                example.orderBy(Goods.CREATE_DATE).desc();
-                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<Product> pList = iProductMapper.serchBoxName(name);
-                pageResult = new PageInfo<>(pList);
-                for (Product product : pList) {
-                    String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") + "&gId=" + product.getId() + "&type=" + DjConstants.GXType.CAILIAO;
-                    JSONObject object = new JSONObject();
-                    object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
-                    object.put("price", product.getPrice() + "/" + convertUnitName);
-                    object.put("name", product.getName());
-                    object.put("url", url);//0:工艺；1：商品；2：人工
-                    arr.add(object);
-                }
-            }
             if (type == 2) {
                 //根据内容模糊搜索人工
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
@@ -369,7 +349,31 @@ public class TechnologyService {
                     object.put("url", url);//0:工艺；1：商品；2：人工
                     arr.add(object);
                 }
+            }else{
+                //根据内容模糊搜索商品
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+                List<Product> pList = iProductMapper.serchBoxName(name);
+                pageResult = new PageInfo<>(pList);
+                for (Product product : pList) {
+                    if(product.getType()==0){
+                        type=DjConstants.GXType.CAILIAO;
+                    }else{
+                        type=DjConstants.GXType.FUWU;
+                    }
+                    String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
+                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                            String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") +
+                            "&gId=" + product.getId() +
+                            "&type=" + type;
+                    JSONObject object = new JSONObject();
+                    object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
+                    object.put("price", product.getPrice() + "/" + convertUnitName);
+                    object.put("name", product.getName());
+                    object.put("url", url);//0:工艺；1：商品；2：人工
+                    arr.add(object);
+                }
             }
+
             pageResult.setList(arr);
         } catch (Exception e) {
             e.printStackTrace();
