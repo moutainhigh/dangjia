@@ -37,27 +37,27 @@
         inner join dj_system_job b
         on a.job_id=b.id
         where 1=1
-        AND is_del=0
+        AND a.is_del=0
         <if test="userSearch.umobile!=null and userSearch.umobile!=''">
-            AND mobile =#{userSearch.umobile}
+            AND a.mobile =#{userSearch.umobile}
         </if>
         <if test="userSearch.jobId!=null and userSearch.jobId!=''">
-            AND job_id =#{userSearch.jobId}
+            AND a.job_id =#{userSearch.jobId}
         </if>
         <if test="userSearch.departmentId!=null and userSearch.departmentId!=''">
-            AND department_id =#{userSearch.departmentId}
+            AND a.department_id =#{userSearch.departmentId}
         </if>
         <if test="userSearch.uname!=null and userSearch.uname!=''">
-            AND username like CONCAT('%',#{userSearch.uname},'%')
+            AND a.username like CONCAT('%',#{userSearch.uname},'%')
         </if>
         <if test="userSearch.insertTimeStart!=null and userSearch.insertTimeStart!=''">
-            AND create_date &gt;= #{userSearch.insertTimeStart}
+            AND a.create_date &gt;= #{userSearch.insertTimeStart}
         </if>
         <if test="userSearch.insertTimeEnd!=null and userSearch.insertTimeEnd!=''">
-            AND create_date &lt;= #{userSearch.insertTimeEnd}
+            AND a.create_date &lt;= #{userSearch.insertTimeEnd}
         </if>
         <if test="null!=isJob and ''!=isJob">
-            AND is_job=0
+            AND a.is_job=0
         </if>
         <if test="isJob==2">
             AND (
