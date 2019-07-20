@@ -256,6 +256,7 @@ public class TechnologyService {
             Example example = new Example(WorkerGoods.class);
             example.createCriteria().andCondition(" FIND_IN_SET( '"+t.getId()+"', technology_ids)");
             List<WorkerGoods> wList = iWorkerGoodsMapper.selectByExample(example);
+            List<Map<String, Object>> mapList = new ArrayList<>();
             String workerTypeName = "";
             ServerResponse response = workerTypeAPI.getWorkerType(t.getWorkerTypeId());
             if (response.isSuccess()) {
@@ -263,7 +264,19 @@ public class TechnologyService {
             }
             map.put("workerTypeName", workerTypeName);
             map.put("workerNum", wList.size());
-            map.put("workerList", wList);
+            for (WorkerGoods w : wList) {
+                Map<String, Object> wmap = BeanUtils.beanToMap(w);
+                StringBuilder imgStr = new StringBuilder();
+                StringBuilder imgUrlStr = new StringBuilder();
+                if (w.getImage() != null) {
+                    String[] imgArr = w.getImage().split(",");
+                    StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+                }
+                wmap.put("image", imgStr.toString());
+                wmap.put("imageUrl", imgUrlStr.toString());
+                mapList.add(wmap);
+            }
+            map.put("workerList", mapList);
             StringBuilder imgStr = new StringBuilder();
             StringBuilder imgUrlStr = new StringBuilder();
             if (t.getImage() != null) {
