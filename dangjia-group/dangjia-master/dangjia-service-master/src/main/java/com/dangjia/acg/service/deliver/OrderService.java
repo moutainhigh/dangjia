@@ -469,7 +469,7 @@ public class OrderService {
                     example = new Example(MendMateriel.class);
                     example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, orderSplit.getMendNumber());
                     mendMaterialMapper.deleteByExample(example);
-                    orderSplit.setMendNumber(null);
+                    orderSplit.setMendNumber("");
                 }
                 orderSplit.setSupervisorId(worker.getId());
                 orderSplit.setSupervisorName(worker.getName());
