@@ -248,7 +248,8 @@ public class House extends BaseEntity {
 
     @Transient
     private String houseId;
-
+    @Transient
+    private Long juli;
     public House() {
 
     }
