@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.home;
 
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -46,7 +47,11 @@ public class HomeService {
     private ConfigUtil configUtil;
     @Autowired
     private UserMapper userMapper;
-
+    /****
+     * 注入配置
+     */
+    @Autowired
+    private RedisClient redisClient;
     //-------------------模版---------------------//
 
     public ServerResponse addHomeTemplate(String userId, String name) {
@@ -153,7 +158,6 @@ public class HomeService {
     }
 
     //-------------------模版详情---------------------//
-
     public ServerResponse getAppHomeCollocation(String templateId) {
         String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Example example = new Example(HomeCollocation.class);
@@ -177,20 +181,24 @@ public class HomeService {
         if (homeCollocationList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        List<HomeMasterplateDTO> homeMasterplateDTOS = new ArrayList<>();
         HomeCollocation collocation = homeCollocationList.get(0);
         if (CommonUtil.isEmpty(collocation.getMasterpieceIds())) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        String[] masterpieceIds = collocation.getMasterpieceIds().split(",");
-        int i = 0;
-        for (String masterpieceId : masterpieceIds) {
-            HomeMasterplate homeMasterplate = iHomeMasterplateMapper.selectByPrimaryKey(masterpieceId);
-            HomeMasterplateDTO homeMasterplateDTO = getHomeMasterplateDTO(homeMasterplate, imageAddress);
-            if (homeMasterplateDTO != null) {
-                homeMasterplateDTO.setSort(i++);
-                homeMasterplateDTOS.add(homeMasterplateDTO);
+        List<HomeMasterplateDTO> homeMasterplateDTOS =redisClient.getListCache(collocation.getId(),HomeMasterplateDTO.class);
+        if(homeMasterplateDTOS==null){
+            homeMasterplateDTOS=new ArrayList<>();
+            String[] masterpieceIds = collocation.getMasterpieceIds().split(",");
+            int i = 0;
+            for (String masterpieceId : masterpieceIds) {
+                HomeMasterplate homeMasterplate = iHomeMasterplateMapper.selectByPrimaryKey(masterpieceId);
+                HomeMasterplateDTO homeMasterplateDTO = getHomeMasterplateDTO(homeMasterplate, imageAddress);
+                if (homeMasterplateDTO != null) {
+                    homeMasterplateDTO.setSort(i++);
+                    homeMasterplateDTOS.add(homeMasterplateDTO);
+                }
             }
+            redisClient.putListCacheWithExpireTime(collocation.getId(),homeMasterplateDTOS,1800);
         }
         if (homeMasterplateDTOS.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
