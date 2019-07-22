@@ -285,17 +285,18 @@ public class IndexPageService {
         for (int i=1;i<limit/2+1;i++){
             List<House> lsHouse=new ArrayList<>();
             for (House house : houses1) {
-                if(lsHouse.size()==2){
-                    break;
-                }
                 if(house.getJuli()>=(beginDistance*1000)&&house.getJuli()<=(endDistance*1000)) {
                     lsHouse.add(house);
                 }
             }
             Map map=new HashMap();
+            int num=0;
             if(lsHouse.size()>0){
                 for (House house : lsHouse) {
                     if(map.get(house.getVillageId())==null) {
+                        if(num==2){
+                            break;
+                        }
                         house.setHouseId(house.getId());
                         if(!CommonUtil.isEmpty(house.getImage())){
                             house.setImage(address+house.getImage());
@@ -304,6 +305,7 @@ public class IndexPageService {
                         }
                         houses.add(house);
                         map.put(house.getVillageId(), "Y");
+                        num++;
                     }
                 }
             }
