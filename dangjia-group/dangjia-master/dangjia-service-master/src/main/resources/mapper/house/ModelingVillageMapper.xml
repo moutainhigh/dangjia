@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.house.IModelingVillageMapper">
     <sql id="basic_columns">
         id,
@@ -123,34 +123,34 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!--&lt;!&ndash;查询指定距离的施工现场数&ndash;&gt;-->
     <!--<select id="jobLocationCount" resultType="java.lang.Integer">-->
-        <!--SELECT-->
-            <!--count(0)-->
-        <!--FROM-->
-            <!--`dj_house_modeling_village` mv-->
-        <!--WHERE-->
-            <!--mv.locationx IS NOT NULL-->
-        <!--AND ROUND(-->
-            <!--6378.138 * 2 * ASIN(-->
-                <!--SQRT(-->
-                    <!--POW(-->
-                        <!--SIN(-->
-                            <!--(-->
-                                <!--#{latitude} * PI() / 180 - mv.locationy * PI() / 180-->
-                            <!--) / 2-->
-                        <!--),-->
-                        <!--2-->
-                    <!--) + COS(-->
-                        <!--#{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(-->
-                        <!--SIN(-->
-                            <!--(-->
-                               <!--#{longitude} * PI() / 180 - mv.locationx * PI() / 180-->
-                            <!--) / 2-->
-                        <!--),-->
-                        <!--2-->
-                    <!--)-->
-                <!--)-->
-            <!--) * 1000-->
-        <!--)&lt;=(#{distance}*1000)-->
+    <!--SELECT-->
+    <!--count(0)-->
+    <!--FROM-->
+    <!--`dj_house_modeling_village` mv-->
+    <!--WHERE-->
+    <!--mv.locationx IS NOT NULL-->
+    <!--AND ROUND(-->
+    <!--6378.138 * 2 * ASIN(-->
+    <!--SQRT(-->
+    <!--POW(-->
+    <!--SIN(-->
+    <!--(-->
+    <!--#{latitude} * PI() / 180 - mv.locationy * PI() / 180-->
+    <!--) / 2-->
+    <!--),-->
+    <!--2-->
+    <!--) + COS(-->
+    <!--#{latitude} * PI() / 180) * COS(mv.locationy * PI() / 180) * POW(-->
+    <!--SIN(-->
+    <!--(-->
+    <!--#{longitude} * PI() / 180 - mv.locationx * PI() / 180-->
+    <!--) / 2-->
+    <!--),-->
+    <!--2-->
+    <!--)-->
+    <!--)-->
+    <!--) * 1000-->
+    <!--)&lt;=(#{distance}*1000)-->
     <!--</select>-->
 
     <!--查询指定距离的施工现场-->
@@ -185,17 +185,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         `dj_house_modeling_village` mv ,dj_house h
         inner join
         (
-            SELECT
-                a.house_id,
-                a.image_url
-            FROM
-              dj_core_house_flow_apply_image a
-            WHERE
-              ( image_type = 2 OR image_type = 0 )
-            GROUP BY
-              a.house_id
-            ORDER BY
-              create_date DESC
+        SELECT
+        a.house_id,
+        a.image_url
+        FROM
+        dj_core_house_flow_apply_image a
+        WHERE
+        ( image_type = 2 OR image_type = 0 )
+        GROUP BY
+        a.house_id
+        ORDER BY
+        create_date DESC
         ) b ON
         b.house_id=h.id/*筛选调无施工记录的房子*/
         WHERE
@@ -210,14 +210,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ORDER BY
         rand( )
     </select>
-    SELECT
-    image_url
-    FROM
-    dj_core_house_flow_apply_image
-    WHERE house_id=#{houseId}
-    ORDER BY
-    create_date DESC
-    LIMIT 1
 
     <!--查询指定距离的施工现场-->
     <select id="jobModelingVillage" resultType="com.dangjia.acg.modle.house.House">
