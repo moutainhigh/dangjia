@@ -285,6 +285,9 @@ public class IndexPageService {
         for (int i=1;i<limit/2+1;i++){
             List<House> lsHouse=new ArrayList<>();
             for (House house : houses1) {
+                if(lsHouse.size()==2){
+                    break;
+                }
                 if(house.getJuli()>=(beginDistance*1000)&&house.getJuli()<=(endDistance*1000)) {
                     lsHouse.add(house);
                 }
