@@ -277,13 +277,32 @@ public class IndexPageService {
         if (CommonUtil.isEmpty(longitude)) {
             longitude = "112.938904";
         }
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         List<House> houses=new ArrayList<>();
         Integer endDistance=3;
         Integer beginDistance=0;
+        List<House> houses1 = modelingVillageMapper.jobLocation(latitude, longitude, beginDistance,3*(limit/2), limit);
         for (int i=1;i<limit/2+1;i++){
-            List<House> houses1 = modelingVillageMapper.jobLocation(latitude, longitude, beginDistance,endDistance, 2);
+            List<House> lsHouse=new ArrayList<>();
             for (House house : houses1) {
-                houses.add(getHouseImage(house));
+                if(house.getJuli()>=(beginDistance*1000)&&house.getJuli()<=(endDistance*1000)) {
+                    lsHouse.add(house);
+                }
+            }
+            Map map=new HashMap();
+            if(lsHouse.size()>0){
+                for (House house : lsHouse) {
+                    if(map.get(house.getVillageId())==null) {
+                        house.setHouseId(house.getId());
+                        if(!CommonUtil.isEmpty(house.getImage())){
+                            house.setImage(address+house.getImage());
+                        }else{
+                            house.setImage(null);
+                        }
+                        houses.add(house);
+                        map.put(house.getVillageId(), "Y");
+                    }
+                }
             }
             beginDistance=endDistance;
             endDistance+=3;
@@ -291,12 +310,12 @@ public class IndexPageService {
         if (houses.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        if(houses.size()==0){
-            List<House> houses1 = modelingVillageMapper.jobModelingVillage(latitude, longitude, limit);
-            for (House house : houses1) {
-                houses.add(getHouseImage(house));
-            }
-        }
+//        if(houses.size()==0){
+//            List<House> houseslist = modelingVillageMapper.jobModelingVillage(latitude, longitude, limit);
+//            for (House house : houseslist) {
+//                houses.add(getHouseImage(house));
+//            }
+//        }
         return ServerResponse.createBySuccess("查询成功", houses);
     }
 
