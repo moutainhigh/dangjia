@@ -229,6 +229,7 @@ public class TechnologyService {
                 }
                 map.put("workerTypeName", workerTypeName);
                 map.put("workerNum", wList.size());
+                map.put("workerList", wList);
                 StringBuilder imgStr = new StringBuilder();
                 StringBuilder imgUrlStr = new StringBuilder();
                 if (t.getImage() != null) {
