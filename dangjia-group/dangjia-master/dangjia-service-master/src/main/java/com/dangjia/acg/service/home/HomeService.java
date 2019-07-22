@@ -19,14 +19,11 @@ import com.dangjia.acg.modle.home.HomeTemplate;
 import com.dangjia.acg.modle.user.MainUser;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -187,14 +184,8 @@ public class HomeService {
         }
         String[] masterpieceIds = collocation.getMasterpieceIds().split(",");
         int i = 0;
-        Example example1=new Example(HomeMasterplate.class);
-        example1.createCriteria().andIn(HomeMasterplate.ID, Arrays.asList(masterpieceIds));
-        for (int j = 0; j < masterpieceIds.length; j++) {
-            masterpieceIds[j]="'"+masterpieceIds[j]+"'";
-        }
-        example1.setOrderByClause("FIELD(id,"+ StringUtils.join(masterpieceIds,",") +")");
-        List<HomeMasterplate> homeMasterplates = iHomeMasterplateMapper.selectByExample(example1);
-        for (HomeMasterplate homeMasterplate : homeMasterplates) {
+        for (String masterpieceId : masterpieceIds) {
+            HomeMasterplate homeMasterplate = iHomeMasterplateMapper.selectByPrimaryKey(masterpieceId);
             HomeMasterplateDTO homeMasterplateDTO = getHomeMasterplateDTO(homeMasterplate, imageAddress);
             if (homeMasterplateDTO != null) {
                 homeMasterplateDTO.setSort(i++);
