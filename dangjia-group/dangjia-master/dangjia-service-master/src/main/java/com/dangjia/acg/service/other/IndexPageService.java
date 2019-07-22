@@ -169,62 +169,62 @@ public class IndexPageService {
             }
             mapList.add(mapReady);
 
-            Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andGreaterThan(HouseFlow.WORKER_TYPE, 2);
-            example.orderBy(HouseFlow.WORKER_TYPE);
-            List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
-            for (HouseFlow houseFlow : houseFlowList) {
-                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
-                Map<String, Object> map = new HashMap<>();
-                map.put("name", workerType.getName());
-                map.put("image", address + workerType.getImage());
-                map.put("workerType", workerType.getType());
-                map.put("workerTypeId", workerType.getId());
-                ServerResponse serverResponse = budgetMaterialAPI.getHouseBudgetStageCost(request, houseId, houseFlow.getWorkerTypeId());
-                JSONArray pageInfo = (JSONArray) serverResponse.getResultObj();
-                if(!CommonUtil.isEmpty(pageInfo)) {
-                    List<BudgetStageCostDTO> budgetStageCostDTOS = pageInfo.toJavaList(BudgetStageCostDTO.class);
-                    for (BudgetStageCostDTO budgetStageCostDTO : budgetStageCostDTOS) {
-                        totalPrice = totalPrice.add(budgetStageCostDTO.getTotalAmount());
-                    }
-                    if (budgetStageCostDTOS.size() > 0) {
-                        map.put("workers", serverResponse.getResultObj());
-                        mapList.add(map);
-                    }
-                }
-            }
-            houseDetailsDTO.setMapList(mapList);
-            houseDetailsDTO.setTotalPrice(totalPrice);
-            if(!CommonUtil.isEmpty(house.getOptionalLabel())){
-                List<OptionalLabelDTO> fieldValues = new ArrayList<>();
-                String[] optionalLabel=house.getOptionalLabel().split(",");
-//                for (String s : optionalLabel) {
-//                    fieldValues.add(s);
-//                };
-                List<OptionalLabel> optionalLabels = optionalLabelMapper.selectAll();
-                for (OptionalLabel label : optionalLabels) {
-                    OptionalLabelDTO optionalLabelDTO=new OptionalLabelDTO();
-                    optionalLabelDTO.setId(label.getId());
-                    optionalLabelDTO.setLabelName(label.getLabelName());
-                    optionalLabelDTO.setStatus("1");
-                    for (String s : optionalLabel) {
-                        if(s.equals(label.getId())) {
-                            optionalLabelDTO.setStatus("0");
-                            break;
-                        }
-                    }
-                    fieldValues.add(optionalLabelDTO);
-                }
-//                example = new Example(OptionalLabel.class);
-//                example.createCriteria().andIn(OptionalLabel.ID,fieldValues);
-////                example.orderBy(HouseFlow.WORKER_TYPE);
-//                List<OptionalLabel> optionalLabels=optionalLabelMapper.selectByExample(example);
-//                for (int i = 0; i < optionalLabels.size(); i++) {
-//                    fieldValues.remove(i);
-//                    fieldValues.add(i,optionalLabels.get(i).getLabelName());
+//            Example example = new Example(HouseFlow.class);
+//            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId).andGreaterThan(HouseFlow.WORKER_TYPE, 2);
+//            example.orderBy(HouseFlow.WORKER_TYPE);
+//            List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
+//            for (HouseFlow houseFlow : houseFlowList) {
+//                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+//                Map<String, Object> map = new HashMap<>();
+//                map.put("name", workerType.getName());
+//                map.put("image", address + workerType.getImage());
+//                map.put("workerType", workerType.getType());
+//                map.put("workerTypeId", workerType.getId());
+//                ServerResponse serverResponse = budgetMaterialAPI.getHouseBudgetStageCost(request, houseId, houseFlow.getWorkerTypeId());
+//                JSONArray pageInfo = (JSONArray) serverResponse.getResultObj();
+//                if(!CommonUtil.isEmpty(pageInfo)) {
+//                    List<BudgetStageCostDTO> budgetStageCostDTOS = pageInfo.toJavaList(BudgetStageCostDTO.class);
+//                    for (BudgetStageCostDTO budgetStageCostDTO : budgetStageCostDTOS) {
+//                        totalPrice = totalPrice.add(budgetStageCostDTO.getTotalAmount());
+//                    }
+//                    if (budgetStageCostDTOS.size() > 0) {
+//                        map.put("workers", serverResponse.getResultObj());
+//                        mapList.add(map);
+//                    }
 //                }
-                houseDetailsDTO.setLabelList(fieldValues);
-            }
+//            }
+//            houseDetailsDTO.setMapList(mapList);
+//            houseDetailsDTO.setTotalPrice(totalPrice);
+//            if(!CommonUtil.isEmpty(house.getOptionalLabel())){
+//                List<OptionalLabelDTO> fieldValues = new ArrayList<>();
+//                String[] optionalLabel=house.getOptionalLabel().split(",");
+////                for (String s : optionalLabel) {
+////                    fieldValues.add(s);
+////                };
+//                List<OptionalLabel> optionalLabels = optionalLabelMapper.selectAll();
+//                for (OptionalLabel label : optionalLabels) {
+//                    OptionalLabelDTO optionalLabelDTO=new OptionalLabelDTO();
+//                    optionalLabelDTO.setId(label.getId());
+//                    optionalLabelDTO.setLabelName(label.getLabelName());
+//                    optionalLabelDTO.setStatus("1");
+//                    for (String s : optionalLabel) {
+//                        if(s.equals(label.getId())) {
+//                            optionalLabelDTO.setStatus("0");
+//                            break;
+//                        }
+//                    }
+//                    fieldValues.add(optionalLabelDTO);
+//                }
+////                example = new Example(OptionalLabel.class);
+////                example.createCriteria().andIn(OptionalLabel.ID,fieldValues);
+//////                example.orderBy(HouseFlow.WORKER_TYPE);
+////                List<OptionalLabel> optionalLabels=optionalLabelMapper.selectByExample(example);
+////                for (int i = 0; i < optionalLabels.size(); i++) {
+////                    fieldValues.remove(i);
+////                    fieldValues.add(i,optionalLabels.get(i).getLabelName());
+////                }
+//                houseDetailsDTO.setLabelList(fieldValues);
+//            }
             return ServerResponse.createBySuccess("查询成功", houseDetailsDTO);
         } catch (Exception e) {
             e.printStackTrace();
