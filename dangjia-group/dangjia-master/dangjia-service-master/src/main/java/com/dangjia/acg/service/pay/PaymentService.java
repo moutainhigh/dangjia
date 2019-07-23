@@ -1535,10 +1535,11 @@ public class PaymentService {
                 workerDTO.setHouseWorkerId(houseWorkerList.get(0).getId());//换人参数
                 workerDTO.setHead(imageAddress + worker.getHead());
                 if(workerType.getType()==3){
-                    workerDTO.setWorkerTypeName("开工准备");
+                    paymentDTO.setWorkerTypeName("开工准备");
                 }else {
-                    workerDTO.setWorkerTypeName(workerType.getName());
+                    paymentDTO.setWorkerTypeName(workerType.getName());
                 }
+                workerDTO.setWorkerTypeName(workerType.getName());
                 workerDTO.setWorkerId(houseWorkerList.get(0).getWorkerId());
                 workerDTO.setName(worker.getName());
                 workerDTO.setMobile(worker.getMobile());
@@ -1690,7 +1691,7 @@ public class PaymentService {
 
                 actuaryDTOList.add(actuaryDTO);
                 paymentDTO.setActuaryDTOList(actuaryDTOList);
-
+                paymentDTO.setWorkerTypeName(workerType.getName());
                 totalPrice = new BigDecimal(mendOrder.getTotalAmount());
             } else if (type == 4) {
                 //待付款只付材料费
@@ -1736,7 +1737,7 @@ public class PaymentService {
                     actuaryDTOList.add(actuaryDTO);
                 }
                 paymentDTO.setActuaryDTOList(actuaryDTOList);
-
+                paymentDTO.setWorkerTypeName(workerType.getName());
             } else {
                 return ServerResponse.createByErrorMessage("参数错误");
             }
