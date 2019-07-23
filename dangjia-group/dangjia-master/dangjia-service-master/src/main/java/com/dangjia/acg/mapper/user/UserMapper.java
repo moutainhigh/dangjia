@@ -31,16 +31,6 @@ public interface UserMapper extends Mapper<MainUser> {
                    @Param("insertUid") String insertUid);
 
     /**
-     * 设置用户是否离职
-     *
-     * @param id
-     * @param isJob
-     * @return
-     */
-    int setJobUser(@Param("id") String id, @Param("isJob") boolean isJob,
-                   @Param("insertUid") String insertUid);
-
-    /**
      * 查询当前坐席的用户
      *
      * @return

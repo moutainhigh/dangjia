@@ -221,13 +221,15 @@ public class MemberService {
         if (userRole == 3) {
             accessToken.setMemberType(-1);
             Example example = new Example(Store.class);
-            example.createCriteria().andEqualTo(Store.USER_ID, mainUser.getId());
+            example.createCriteria().andEqualTo(Store.USER_ID, mainUser.getId())
+                    .andEqualTo(Store.DATA_STATUS, 0);
             int c = iStoreMapper.selectCountByExample(example);
             if (c > 0) {
                 accessToken.setMemberType(3);
             } else {
                 example = new Example(StoreUser.class);
-                example.createCriteria().andEqualTo(StoreUser.USER_ID, mainUser.getId());
+                example.createCriteria().andEqualTo(StoreUser.USER_ID, mainUser.getId())
+                        .andEqualTo(StoreUser.DATA_STATUS, 0);
                 List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
                 if (storeUsers.size() > 0) {
                     StoreUser storeUser = storeUsers.get(0);
@@ -905,6 +907,9 @@ public class MemberService {
         String token = redisClient.getCache(userRole, String.class);
         updataMember(user, token);
         userRole = "role" + 2 + ":" + user.getId();
+        token = redisClient.getCache(userRole, String.class);
+        updataMember(user, token);
+        userRole = "role" + 3 + ":" + user.getId();
         token = redisClient.getCache(userRole, String.class);
         updataMember(user, token);
     }
