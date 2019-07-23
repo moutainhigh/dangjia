@@ -290,7 +290,7 @@ public class TaskService {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             HouseWorker hw = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(),1);
             Task task = new Task();
-            task.setDate(DateUtil.dateToString(hw.getCreateDate(), DateUtil.FORMAT11));
+            task.setDate(DateUtil.dateToString(hw.getModifyDate(), DateUtil.FORMAT11));
             task.setName(workerType.getName() + "待支付");
             task.setImage(imageAddress + "icon/chaichu.png");
             task.setHtmlUrl("");
