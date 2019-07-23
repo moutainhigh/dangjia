@@ -250,6 +250,23 @@ public class House extends BaseEntity {
     private String houseId;
     @Transient
     private Long juli;
+
+
+    //管家
+    @Transient
+    private String supName;
+    @Transient
+    private String supMobile;
+
+
+    //业主
+    @Transient
+    private String ownerName;
+    @Transient
+    private String ownerNickName;
+    @Transient
+    private String ownerMobile;
+
     public House() {
 
     }

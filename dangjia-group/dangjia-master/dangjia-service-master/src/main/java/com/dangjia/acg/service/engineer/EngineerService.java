@@ -33,6 +33,7 @@ import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.service.core.HouseWorkerService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -579,7 +580,7 @@ public class EngineerService {
     /**
      * 工地列表
      */
-    public ServerResponse getHouseList(HttpServletRequest request, PageDTO pageDTO, Integer visitState, String searchKey) {
+    public ServerResponse getHouseList(HttpServletRequest request, PageDTO pageDTO, Integer visitState, String searchKey,String startDate, String endDate, String supKey) {
         String userID = request.getParameter(Constants.USERID);
 
         String cityKey = redisClient.getCache(Constants.CITY_KEY + userID, String.class);
@@ -587,24 +588,20 @@ public class EngineerService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<House> houseList = houseMapper.getHouseListLikeSearchKey(cityKey,visitState, searchKey);
+        List<House> houseList = houseMapper.getHouseListLikeSearchKey(cityKey,visitState, searchKey, startDate,  endDate,  supKey);
         PageInfo pageResult = new PageInfo(houseList);
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (House house : houseList) {
-            Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-            if (member != null) {
+            if (StringUtils.isNotEmpty(house.getMemberId())) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("houseId", house.getId());
                 map.put("address", house.getHouseName());
-                map.put("memberName", member.getNickName() == null ? member.getName() : member.getNickName());
-                map.put("mobile", member.getMobile());
+                map.put("memberName", house.getOwnerNickName() == null ? house.getOwnerName() : house.getOwnerNickName());
+                map.put("mobile", house.getOwnerMobile());
                 map.put("pause", house.getPause());
                 map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工 4提前结束装修 5提前结束装修申请中
-                Member supervisor = memberMapper.getSupervisor(house.getId());
-                if (supervisor != null) {
-                    map.put("supName", supervisor.getName());
-                    map.put("supMobile", supervisor.getMobile());
-                }
+                map.put("supName", house.getSupName());
+                map.put("supMobile", house.getSupMobile());
                 HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart1(house.getId(), new Date());//查询今日开工记录
                 map.put("todayStartPause", todayStart == null ? "0" : "1"); //0否,1是
                 map.put("createDate", house.getConstructionDate());
