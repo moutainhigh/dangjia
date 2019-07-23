@@ -161,9 +161,10 @@ public class HouseDataService {
                         TActuaryGoods tActuaryGoods = new TActuaryGoods();
                         tActuaryGoods.setName(workerType.getString(WorkerType.NAME));
                         tActuaryGoods.setShopNum(material.getShopCount());
+
+                        Product product = iProductMapper.selectByPrimaryKey(material.getProductId());
                         //                    购买性质0：必买；1可选；2自购
                         if (goods.getBuy() != 2) {
-                            Product product = iProductMapper.selectByPrimaryKey(material.getProductId());
                             tActuaryGoods.setProductSn(product.getProductSn());
                             tActuaryGoods.setGoodsUnitName(product.getUnitName());
                             tActuaryGoods.setConvertQuality(product.getConvertQuality());
@@ -195,13 +196,13 @@ public class HouseDataService {
                         TActuaryGoodsTotal total = mapsTotal.get(workerType.getString(WorkerType.ID) + "-" + goods.getType());
                         if (goods.getBuy() == 2) //自购
                         {
-                            tActuaryGoods.setProductName("自购商品:" + material.getProductName());
+                            tActuaryGoods.setProductName("自购商品:" + product.getName());
                             tActuaryGoods.setProductNum(0d);
                             tActuaryGoods.setPrice(0.0);
                             tActuaryGoods.setPriceTotal(0.0);
                             tActuaryGoods.setUnit("自购商品单位:" + material.getUnitName());
                         } else {
-                            tActuaryGoods.setProductName(material.getProductName());
+                            tActuaryGoods.setProductName(product.getName());
                             //                        tActuaryGoods.setProductNum(materialMap.get("shopCount").toString());
                             tActuaryGoods.setProductNum(material.getConvertCount());
                             tActuaryGoods.setPrice(material.getPrice());

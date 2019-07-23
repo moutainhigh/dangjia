@@ -265,6 +265,7 @@ public class ActuaryOpeService {
                         } else {
                             goodsItemDTO.setGoodsName(budgetMaterial.getProductName());
                         }
+                        goodsItemDTO.setProductType(budgetMaterial.getProductType());
                         goodsItemDTO.setConvertCount(budgetMaterial.getConvertCount());
                         goodsItemDTO.setPrice(budgetMaterial.getPrice());
                         goodsItemDTO.setUnitName(budgetMaterial.getUnitName());

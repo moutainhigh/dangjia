@@ -97,9 +97,9 @@ public class ReturnAspect {
     @AfterThrowing(pointcut = "aspect()", throwing = "ex")
     public void afterThrow(JoinPoint joinPoint, Exception ex) {
         String name = joinPoint.getSignature().getName();// 获得目标方法名
-        log.info("<=============" + name + "方法--AOP 异常后通知=============>");
+        log.error("<=============" + name + "方法--AOP 异常后通知=============>");
         ex.printStackTrace();
-        log.info(name + "方法抛出异常为：" + "\t" + ex.getMessage());
+        log.error(name + "方法抛出异常为：" + "\t" + ex.getMessage());
     }
 
 }

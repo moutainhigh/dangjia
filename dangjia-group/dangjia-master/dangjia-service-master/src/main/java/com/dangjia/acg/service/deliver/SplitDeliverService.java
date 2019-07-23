@@ -16,6 +16,7 @@ import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
@@ -218,9 +219,10 @@ public class SplitDeliverService {
                 if(orderSplitItem.getReceive()==null){
                     orderSplitItem.setReceive(0D);
                 }
+                Product product=forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
                 SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
-                splitDeliverItemDTO.setImage(address + orderSplitItem.getImage());
-                splitDeliverItemDTO.setProductName(orderSplitItem.getProductName());
+                splitDeliverItemDTO.setImage(address + product.getImage());
+                splitDeliverItemDTO.setProductName(product.getName());
                 if(splitDeliver.getShippingState()==2||splitDeliver.getShippingState()==4||splitDeliver.getShippingState()==5){
                     splitDeliverItemDTO.setTotalPrice(orderSplitItem.getPrice()*orderSplitItem.getReceive());
                     sumprice+=orderSplitItem.getPrice()*orderSplitItem.getReceive();

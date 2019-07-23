@@ -513,6 +513,8 @@ public class DesignerOperationService {
                 quantityRoomImages.setName("平面图");
                 quantityRoomImages.setImage(imageString);
                 quantityRoomImages.setSort(0);
+                house.setImage(imageString);
+                houseMapper.updateByPrimaryKeySelective(house);
                 quantityRoomImagesMapper.insert(quantityRoomImages);
                 break;
             case 2:
@@ -533,6 +535,12 @@ public class DesignerOperationService {
                             images.setImage(object.getString("image"));
                             images.setSort(object.getInteger("sort"));
                             quantityRoomImagesList.add(images);
+                            if(i==1){
+                                if (CommonUtil.isEmpty(house.getImage())) {
+                                    house.setImage(object.getString("image"));
+                                    houseMapper.updateByPrimaryKeySelective(house);
+                                }
+                            }
                         } else {
                             return ServerResponse.createByErrorMessage("图片传入参数有误，请确认图片名和地址无误");
                         }
