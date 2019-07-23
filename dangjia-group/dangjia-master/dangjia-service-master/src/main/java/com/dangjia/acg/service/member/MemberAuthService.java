@@ -61,7 +61,7 @@ public class MemberAuthService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                     , "没有绑定账号");
         } else {
-            return memberService.getUser(user, userRole + "");
+            return memberService.getUser(user, userRole);
         }
     }
 
@@ -98,7 +98,7 @@ public class MemberAuthService {
             }
             memberAuth.setMemberId(user.getId());
             memberAuthMapper.insertSelective(memberAuth);
-            return memberService.getUser(user, memberAuth.getUserRole() + "");
+            return memberService.getUser(user, memberAuth.getUserRole());
         }
     }
 

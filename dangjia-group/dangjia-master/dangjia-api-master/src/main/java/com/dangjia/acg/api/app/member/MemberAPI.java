@@ -4,7 +4,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.member.Member;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -115,7 +114,7 @@ public interface MemberAPI {
      */
     @RequestMapping(value = "member/info", method = RequestMethod.POST)
     @ApiOperation(value = "获取用户详细资料", notes = "获取用户详细资料")
-    ServerResponse getMemberInfo(@RequestParam("userToken") String userToken);
+    ServerResponse getMemberInfo(@RequestParam("userToken") Integer userToken);
 
     /**
      * showdoc
@@ -188,7 +187,7 @@ public interface MemberAPI {
     @ApiOperation(value = "用户登录", notes = "用户登录")
     ServerResponse login(@RequestParam("phone") String phone,
                          @RequestParam("password") String password,
-                         @RequestParam("userRole") String userRole);
+                         @RequestParam("userRole") Integer userRole);
 
     /**
      * showdoc
@@ -320,8 +319,7 @@ public interface MemberAPI {
     @RequestMapping(value = "member/updateWokerRegister", method = RequestMethod.POST)
     @ApiOperation(value = "工匠提交详细资料", notes = "工匠提交详细资料")
     ServerResponse updateWokerRegister(@RequestParam("member") Member user,
-                                       @RequestParam("userToken") String userToken,
-                                       @RequestParam("userRole") String userRole);
+                                       @RequestParam("userToken") String userToken);
 
     /**
      * showdoc
