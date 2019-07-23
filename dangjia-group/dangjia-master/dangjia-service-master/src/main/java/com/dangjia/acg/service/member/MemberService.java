@@ -5,6 +5,7 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -196,8 +197,8 @@ public class MemberService {
             return serverResponse;
         }
         updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
-        groupInfoService.registerJGUsers("zx", new String[]{user.getId()}, new String[1]);
-        groupInfoService.registerJGUsers("gj", new String[]{user.getId()}, new String[1]);
+        groupInfoService.registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{user.getId()}, new String[1]);
+        groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{user.getId()}, new String[1]);
         return ServerResponse.createBySuccess("登录成功，正在跳转", serverResponse.getResultObj());
     }
 
@@ -347,7 +348,7 @@ public class MemberService {
                 try {
                     //检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
                     redPackPayService.checkUpActivity(request, user.getMobile(), "1");
-                    configMessageService.addConfigMessage(request, "zx", user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
+                    configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
                 } catch (Exception e) {
                     logger.error("注册送优惠券活动异常-zhuce：原因：" + e.getMessage(), e);
                 }
@@ -927,8 +928,9 @@ public class MemberService {
                 }
             }
             redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
-            groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
-            groupInfoService.registerJGUsers("gj", new String[]{accessToken.getMemberId()}, new String[1]);
+            groupInfoService.registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{accessToken.getMemberId()}, new String[1]);
+            groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{accessToken.getMemberId()}, new String[1]);
+            groupInfoService.registerJGUsers(AppType.SALE.getDesc(), new String[]{accessToken.getMemberId()}, new String[1]);
         }
     }
 
@@ -970,7 +972,7 @@ public class MemberService {
             map.put("name", member.getNickName());
             map.put("mobile", member.getMobile());
             map.put("head", member.getHead());
-            map.put("appKey", messageAPI.getAppKey("zx"));
+            map.put("appKey", messageAPI.getAppKey(AppType.ZHUANGXIU.getDesc()));
             datas.add(map);
         }
         example = new Example(MemberInfo.class);
@@ -991,7 +993,7 @@ public class MemberService {
                     map.put("workerName", wt.getName());
                 }
             }
-            map.put("appKey", messageAPI.getAppKey("gj"));
+            map.put("appKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
             datas.add(map);
         }
         if (datas.size() <= 0) {

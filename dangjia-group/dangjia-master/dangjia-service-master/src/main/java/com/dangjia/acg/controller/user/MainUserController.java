@@ -4,6 +4,7 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.user.MainUserAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -333,7 +334,7 @@ public class MainUserController implements MainUserAPI {
             logger.debug("用户登录，用户验证开始！member=" + user.getMobile());
             redisClient.put(Constants.USER_KEY + existUser.getId(), existUser);
             redisClient.put(Constants.CITY_KEY + existUser.getId(), department.getCityId());
-            groupInfoService.registerJGUsers("gj", new String[]{existUser.getId()}, new String[1]);
+            groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{existUser.getId()}, new String[1]);
             logger.info("用户登录，用户验证通过！member=" + user.getMobile());
             msg = ServerResponse.createBySuccess("用户登录，用户验证通过！member=" + user.getMobile(), existUser.getId());
             MainUser mainUser = userMapper.selectByPrimaryKey(existUser.getId());

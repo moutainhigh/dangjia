@@ -1,7 +1,11 @@
 package com.dangjia.acg.service.member;
 
-import com.dangjia.acg.api.*;
+import com.dangjia.acg.api.CrossAppAPI;
+import com.dangjia.acg.api.GroupAPI;
+import com.dangjia.acg.api.MessageAPI;
+import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -109,7 +113,7 @@ public class GroupInfoService {
             if(!CommonUtil.isEmpty(g.getGroupId())) {
                 GroupDTO dto = new GroupDTO();
                 BeanUtils.beanToBean(g, dto);
-                List<Map> members = crossAppAPI.getCrossGroupMembers("gj", Integer.parseInt(g.getGroupId()));
+                List<Map> members = crossAppAPI.getCrossGroupMembers(AppType.GONGJIANG.getDesc(), Integer.parseInt(g.getGroupId()));
                 if (members != null) {
                     dto.setMembers(members);
                 }
@@ -128,7 +132,7 @@ public class GroupInfoService {
      */
     public ServerResponse sendGroupsNotify(HttpServletRequest request, GroupNotifyInfo groupNotifyInfo) {
         groupNotifyInfo.setUserId(ADMIN_NAME);
-        messageAPI.sendGroupTextByAdmin("gj", groupNotifyInfo.getGroupId(), ADMIN_NAME, groupNotifyInfo.getText());
+        messageAPI.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), groupNotifyInfo.getGroupId(), ADMIN_NAME, groupNotifyInfo.getText());
         groupNotifyInfoMapper.insert(groupNotifyInfo);
         return ServerResponse.createBySuccessMessage("ok");
     }
@@ -144,9 +148,9 @@ public class GroupInfoService {
         String[] adds = StringUtils.split(addList, ",");
         String[] removes = StringUtils.split(removeList, ",");
         if (!CommonUtil.isEmpty(addList)) {
-            registerJGUsers("gj", adds, new String[adds.length]);
+            registerJGUsers(AppType.GONGJIANG.getDesc(), adds, new String[adds.length]);
         }
-        groupAPI.manageGroup("gj", groupId, adds, removes);
+        groupAPI.manageGroup(AppType.GONGJIANG.getDesc(), groupId, adds, removes);
         if (CommonUtil.isEmpty(addList)) {
             return ServerResponse.createBySuccessMessage("ok");
         }
@@ -169,7 +173,7 @@ public class GroupInfoService {
                     text = GONGJIANG.replaceAll("WORKERNAME", workerType.getName());
                 }
                 if (!CommonUtil.isEmpty(text)) {
-                    messageAPI.sendGroupTextByAdmin("gj", String.valueOf(groupId), userid, text);
+                    messageAPI.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), String.valueOf(groupId), userid, text);
                 }
             }
         }
@@ -198,21 +202,20 @@ public class GroupInfoService {
         }
         //检查用户是否注册，不存在自动注册(工匠端)
         if (memberlist != null && memberlist.length > 0) {
-            registerJGUsers("gj", memberlist, prefixlist);
+            registerJGUsers(AppType.GONGJIANG.getDesc(), memberlist, prefixlist);
         }
         //检查用户是否注册，不存在自动注册(业主端口)
-        registerJGUsers("zx", new String[]{group.getUserId()}, new String[]{"业主"});
+        registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{group.getUserId()}, new String[]{"业主"});
         //创建群组
-        CreateGroupResultDTO groupResult = groupAPI.createGroup("gj", group.getAdminId(), group.getHouseName(), memberlist, "", "", 1);
+        CreateGroupResultDTO groupResult = groupAPI.createGroup(AppType.GONGJIANG.getDesc(), group.getAdminId(), group.getHouseName(), memberlist, "", "", 1);
         if(groupResult!=null) {
             group.setGroupId(String.valueOf(groupResult.getGid()));
-            crossAppAPI.addOrRemoveMembersFromCrossGroup("gj", "zx", groupResult.getGid(), new String[]{group.getUserId()}, new String[]{});
-
+            crossAppAPI.addOrRemoveMembersFromCrossGroup(AppType.GONGJIANG.getDesc(), AppType.ZHUANGXIU.getDesc(), groupResult.getGid(), new String[]{group.getUserId()}, new String[]{});
             for (String userid : memberlist) {
                 String nickname = getUserName(userid);
                 //给业主发送默认提示语
                 String text = KEFU.replaceAll("NAME", nickname);
-                messageAPI.sendGroupTextByAdmin("gj", group.getGroupId(), userid, text);
+                messageAPI.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), group.getGroupId(), userid, text);
             }
         }
         if (this.groupMapper.insertSelective(group) > 0) {
@@ -288,7 +291,7 @@ public class GroupInfoService {
             MainUser user = list.get(0);
             Map map = new HashMap();
             map.put("targetId", user.getId());
-            map.put("targetAppKey", "49957e786a91f9c55b223d58");
+            map.put("targetAppKey",  messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
             String text=null;
             if(type==1){
                 text="业主您好！我是您的售前客服！";

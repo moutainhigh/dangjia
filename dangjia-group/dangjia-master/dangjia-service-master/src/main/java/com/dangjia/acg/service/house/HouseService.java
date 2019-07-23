@@ -3,12 +3,12 @@ package com.dangjia.acg.service.house;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -54,7 +54,6 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.design.DesignDataService;
-import com.dangjia.acg.service.member.GroupInfoService;
 import com.dangjia.acg.util.HouseUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -718,7 +717,7 @@ public class HouseService {
 //            groupInfoService.addGroup(request, group, members, prefixs);
 
             //通知业主确认开工
-            configMessageService.addConfigMessage(request, "zx", house.getMemberId(), "0", "装修提醒",
+            configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修提醒",
                     String.format(DjConstants.PushMessage.START_FITTING_UP, house.getHouseName()), "");
             //通知设计师/精算师/大管家 抢单
             Example example = new Example(WorkerType.class);
@@ -728,7 +727,7 @@ public class HouseService {
                 List<String> workerTypes = new ArrayList<>();
                 workerTypes.add("wtId" + workerType.getId());
 //                workerTypes.add(house.getId());
-                configMessageService.addConfigMessage(request, "gj", StringUtils.join(workerTypes, ","), "0",
+                configMessageService.addConfigMessage(request, AppType.GONGJIANG, StringUtils.join(workerTypes, ","), "0",
                         "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "4");
             }
             //确认开工后，要修改 业主客服阶段 为已下单
@@ -903,10 +902,10 @@ public class HouseService {
                 houseFlow.setWorkType(2);//待抢单
                 houseFlow.setReleaseTime(new Date());//发布时间
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-                configMessageService.addConfigMessage(null, "gj", "wtId3" + houseFlow.getCityId(),
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, "wtId3" + houseFlow.getCityId(),
                         "0", "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "4");
                 //推送消息给业主等待大管家抢单
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(),
+                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),
                         "0", "等待大管家抢单", String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION,
                                 house.getHouseName()), "");
                 //告知工程部精算已通过
