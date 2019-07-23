@@ -451,6 +451,11 @@
 
     <select id="getHouseListLikeSearchKey" resultType="com.dangjia.acg.modle.house.House">
         SELECT
+        f.supName,
+        f.supMobile,
+        m.name ownerName,
+        m.nick_name ownerNickName,
+        m.mobile ownerMobile,
         h.id as id,
         h.building,
         h.city_name as cityName,
@@ -499,7 +504,12 @@
         h.modify_date as modifyDate
         FROM
         dj_house h
-        INNER JOIN dj_core_house_flow f ON h.id=f.house_id and f.worker_type=3 and f.work_type > 1
+        INNER JOIN (
+            SELECT f.house_id,f.supervisor_start ,m.`name` supName,m.mobile supMobile
+            FROM dj_core_house_flow f
+            INNER JOIN dj_member m ON f.worker_id = m.id
+            WHERE f.worker_type=3 and f.work_type > 1
+        ) f ON h.id=f.house_id
         INNER JOIN dj_member m ON h.member_id = m.id
         WHERE
         h.data_status =0
@@ -512,7 +522,16 @@
         <if test="visitState>=2">
             and h.visit_state = #{visitState}
         </if>
-
+        <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
+            and h.construction_date BETWEEN #{startDate} and #{endDate}
+        </if>
+        <if test="supKey!=null and supKey!=''">
+            and (
+                f.supName like CONCAT('%',#{supKey},'%')
+                  or
+                f.supMobile like CONCAT('%',#{supKey},'%')
+            )
+        </if>
         <if test="searchKey!=null and searchKey!=''">
             and ( m.mobile like CONCAT('%',#{searchKey},'%')
             or CONCAT(
