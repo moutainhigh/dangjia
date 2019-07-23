@@ -7,19 +7,14 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.ButtonDTO;
 import com.dangjia.acg.dto.core.Task;
-import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
-import com.dangjia.acg.mapper.core.IHouseFlowMapper;
-import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseExpendMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendDeliverMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
-import com.dangjia.acg.modle.core.HouseFlow;
-import com.dangjia.acg.modle.core.HouseFlowApply;
-import com.dangjia.acg.modle.core.HouseWorker;
-import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseExpend;
@@ -70,6 +65,8 @@ public class TaskService {
     @Autowired
     private MyHouseService myHouseService;
 
+    @Autowired
+    private IHouseWorkerMapper houseWorkerMapper;
     /**
      * 任务列表
      */
@@ -291,8 +288,9 @@ public class TaskService {
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         for (HouseFlow houseFlow : houseFlowList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+            HouseWorker hw = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(),1);
             Task task = new Task();
-            task.setDate(DateUtil.dateToString(houseFlow.getModifyDate(), DateUtil.FORMAT11));
+            task.setDate(DateUtil.dateToString(hw.getCreateDate(), DateUtil.FORMAT11));
             task.setName(workerType.getName() + "待支付");
             task.setImage(imageAddress + "icon/chaichu.png");
             task.setHtmlUrl("");
