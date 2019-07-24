@@ -12,6 +12,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.*;
+import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
 import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
@@ -26,6 +27,7 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendWorker;
+import com.dangjia.acg.service.basics.WorkerGoodsService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +80,10 @@ public class ActuaryOperationService {
     private HouseAPI houseAPI;
     @Autowired
     private MendOrderAPI mendOrderAPI;
+
+
+    @Autowired
+    private WorkerGoodsService workerGoodsService;
     protected static final Logger LOG = LoggerFactory.getLogger(ActuaryOperationService.class);
 
     /**
@@ -256,16 +262,7 @@ public class ActuaryOperationService {
                 } else {
                     workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
                 }
-                WGoodsDTO wGoodsDTO = new WGoodsDTO();
-                wGoodsDTO.setImage(getImage(workerGoods.getImage()));
-                wGoodsDTO.setPrice("¥" + String.format("%.2f", workerGoods.getPrice()) + "/" + workerGoods.getUnitName());
-                wGoodsDTO.setName(workerGoods.getName());
-                wGoodsDTO.setWorkerDec(getImage(workerGoods.getWorkerDec()));
-                List<Technology> technologyList = technologyMapper.queryTechnologyByWgId(workerGoods.getId());
-                for (Technology technology : technologyList) {
-                    technology.setImage(getImage(technology.getImage()));//图一张
-                }
-                wGoodsDTO.setTechnologyList(technologyList);
+                WorkerGoodsDTO wGoodsDTO = workerGoodsService.assembleWorkerGoodsResult(workerGoods);
                 return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
             } else if (type == 2 || type == 3 || type == 5) {//材料商品  服务商品
                 Product product;
@@ -304,18 +301,7 @@ public class ActuaryOperationService {
         try {
             if (type == 1 || type == 4) {//人工
                 WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
-                WGoodsDTO wGoodsDTO = new WGoodsDTO();
-                if (!CommonUtil.isEmpty(workerGoods.getImage())) {
-                    wGoodsDTO.setImage(getImage(workerGoods.getImage()));
-                }
-                wGoodsDTO.setPrice("¥" + String.format("%.2f", workerGoods.getPrice()) + "/" + workerGoods.getUnitName());
-                wGoodsDTO.setName(workerGoods.getName());
-                wGoodsDTO.setWorkerDec(getImage(workerGoods.getWorkerDec()));
-                List<Technology> technologyList = technologyMapper.queryTechnologyByWgId(workerGoods.getId());
-                for (Technology technology : technologyList) {
-                    technology.setImage(getImage(technology.getImage()));//图一张
-                }
-                wGoodsDTO.setTechnologyList(technologyList);
+                WorkerGoodsDTO wGoodsDTO = workerGoodsService.assembleWorkerGoodsResult(workerGoods);
                 return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
             } else if (type == 2 || type == 3 || type == 5) {//材料商品  服务商品
                 Product product = productMapper.selectByPrimaryKey(gId);//当前 货品
@@ -402,7 +388,7 @@ public class ActuaryOperationService {
                 }
             } else {
                 Example example = new Example(Product.class);
-                example.createCriteria().andEqualTo(Product.GOODS_ID, goods.getId());
+                example.createCriteria().andEqualTo(Product.GOODS_ID, goods.getId()).andEqualTo(Product.TYPE, "1");
                 example.orderBy(Product.VALUE_ID_ARR);
                 productList = productMapper.selectByExample(example);
             }

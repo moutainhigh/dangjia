@@ -3,9 +3,9 @@ package com.dangjia.acg.dto;
 import lombok.Data;
 
 @Data
-public class UserInfoResultDTO  {
+public class UserInfoResultDTO {
 
-    private  String username;
+    private String username;
     private String nickname;
 
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.store.IStoreUserMapper">
+
+    <select id="getStoreUsers" resultType="com.dangjia.acg.dto.sale.store.StoreUserDTO">
+        SELECT
+        su.id AS storeUserId,
+        su.user_id AS userId,
+        su.store_id AS storeId,
+        su.type AS type,
+        u.username AS userName,
+        u.mobile AS userMobile,
+        m.head AS userHead,
+        u.is_job AS isJob,
+        su.create_date AS createDate,
+        su.modify_date AS modifyDate
+        FROM
+        dj_store_users su
+        INNER JOIN dj_user u ON su.user_id = u.id
+        LEFT JOIN dj_member m ON u.member_id = m.id
+        WHERE
+        su.data_status = 0
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            u.username LIKE CONCAT('%',#{searchKey},'%')
+            OR
+            u.mobile LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        <if test="null!=storeId and ''!=storeId">
+            AND su.store_id = #{storeId}
+        </if>
+        ORDER BY
+        su.create_date DESC
+    </select>
+</mapper>

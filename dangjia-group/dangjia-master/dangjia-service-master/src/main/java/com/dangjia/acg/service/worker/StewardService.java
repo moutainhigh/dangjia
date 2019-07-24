@@ -6,6 +6,7 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -241,7 +242,7 @@ public class StewardService {
             houseFlowMapper.updateByPrimaryKeySelective(hf);
             House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
-            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家交底",
+            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家交底",
                     String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_FINISHED, house.getHouseName(), workerType.getName()), "");
             return ServerResponse.createBySuccessMessage("交底成功");
         } catch (Exception e) {

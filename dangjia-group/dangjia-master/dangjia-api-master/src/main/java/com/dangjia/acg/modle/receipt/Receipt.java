@@ -43,5 +43,5 @@ public class Receipt extends BaseEntity {
     @Column(name = "total_amount")
     @Desc(value = "该订单总价")
     @ApiModelProperty("该订单总价")
-    private double totalAmount;
+    private Double totalAmount;
 }

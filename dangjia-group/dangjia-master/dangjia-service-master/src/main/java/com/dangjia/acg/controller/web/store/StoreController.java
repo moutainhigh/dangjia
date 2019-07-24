@@ -20,7 +20,7 @@ import java.util.Date;
  * Time: 16:23
  */
 @RestController
-public class StoreContoller implements StoreAPI {
+public class StoreController implements StoreAPI {
     @Autowired
     private StoreServices storeServices;
 

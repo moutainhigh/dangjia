@@ -4,9 +4,11 @@ import com.dangjia.acg.api.basics.TechnologyAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.service.basics.TechnologyService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,8 +40,8 @@ public class TechnologyController implements TechnologyAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertTechnology(HttpServletRequest request, String name, String content, String workerTypeId, Integer type, String image, Integer materialOrWorker) {
-        return technologyService.insertTechnology(name, content, workerTypeId, type, image, materialOrWorker);
+    public ServerResponse insertTechnology(HttpServletRequest request,  Technology technology) {
+        return technologyService.insertTechnology(technology);
     }
 
     /**
@@ -56,8 +58,8 @@ public class TechnologyController implements TechnologyAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateTechnology(HttpServletRequest request, String id, String name, String content, Integer type, String image) {
-        return technologyService.updateTechnology(id, name, content, type, image);
+    public ServerResponse updateTechnology(HttpServletRequest request, Technology technology) {
+        return technologyService.updateTechnology(technology);
     }
 
     /**
@@ -93,6 +95,11 @@ public class TechnologyController implements TechnologyAPI {
         return technologyService.queryTechnology(pageDTO, workerTypeId, name, materialOrWorker);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse getTechnology(HttpServletRequest request, String technologyId) {
+        return technologyService.getTechnology(technologyId);
+    }
     /**
      * 根据商品id查询人工商品关联工艺实体
      *
@@ -109,4 +116,10 @@ public class TechnologyController implements TechnologyAPI {
         return technologyService.queryTechnologyByWgId(workerGoodsId);
     }
 
+    //根据名称查询所有工艺（名称去重）
+    @Override
+    @ApiMethod
+    public ServerResponse queryByName(HttpServletRequest request,String name,String workerTypeId){
+        return technologyService.queryByName(name, workerTypeId);
+    }
 }

@@ -8,6 +8,7 @@ import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
@@ -39,6 +40,7 @@ import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
@@ -344,21 +346,22 @@ public class PaymentService {
 
                 //处理补材料
                 for (MendMateriel mendMateriel : mendMaterielList) {
+                    Product product=forMasterAPI.getProduct(house.getCityId(),mendMateriel.getProductId());
                     OrderItem orderItem = new OrderItem();
                     orderItem.setOrderId(order.getId());
                     orderItem.setHouseId(businessOrder.getHouseId());
                     orderItem.setProductId(mendMateriel.getProductId());//货品id
-                    orderItem.setProductSn(mendMateriel.getProductSn());//货品编号
-                    orderItem.setProductName(mendMateriel.getProductName());//货品名称
+                    orderItem.setProductSn(product.getProductSn());//货品编号
+                    orderItem.setProductName(product.getName());//货品名称
                     orderItem.setProductNickName(mendMateriel.getProductNickName() + "");//货品昵称
                     orderItem.setPrice(mendMateriel.getPrice());//销售价
                     orderItem.setCost(mendMateriel.getCost());//成本价
                     orderItem.setShopCount(mendMateriel.getShopCount());//购买总数
                     orderItem.setUnitName(mendMateriel.getUnitName());//单位
                     orderItem.setTotalPrice(mendMateriel.getTotalPrice());//总价
-                    orderItem.setProductType(mendMateriel.getProductType());//0：材料；1：服务
+                    orderItem.setProductType(mendMateriel.getProductType());//0：材料；1：包工包料
                     orderItem.setCategoryId(mendMateriel.getCategoryId());
-                    orderItem.setImage(mendMateriel.getImage());
+                    orderItem.setImage(product.getImage());
                     orderItemMapper.insert(orderItem);
                     example = new Example(Warehouse.class);
                     example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, businessOrder.getHouseId()).andEqualTo(Warehouse.PRODUCT_ID, mendMateriel.getProductId());
@@ -369,7 +372,7 @@ public class PaymentService {
                         warehouse.setRepairCount(warehouse.getRepairCount() + mendMateriel.getShopCount());
                         warehouse.setPrice(mendMateriel.getPrice());
                         warehouse.setCost(mendMateriel.getCost());
-                        warehouse.setImage(mendMateriel.getImage());
+                        warehouse.setImage(product.getImage());
                         warehouse.setRepTime(warehouse.getRepTime() + 1);//补次数
                         warehouseMapper.updateByPrimaryKeySelective(warehouse);
                     } else {
@@ -383,13 +386,13 @@ public class PaymentService {
                         warehouse.setBackCount(0.0);//退总数
                         warehouse.setReceive(0.0);
                         warehouse.setProductId(mendMateriel.getProductId());
-                        warehouse.setProductSn(mendMateriel.getProductSn());
-                        warehouse.setProductName(mendMateriel.getProductName());
+                        warehouse.setProductSn(product.getProductSn());
+                        warehouse.setProductName(product.getName());
                         warehouse.setPrice(mendMateriel.getPrice());
                         warehouse.setCost(mendMateriel.getCost());
                         warehouse.setUnitName(mendMateriel.getUnitName());
                         warehouse.setProductType(mendMateriel.getProductType());
-                        warehouse.setCategoryId(mendMateriel.getCategoryId());
+                        warehouse.setCategoryId(product.getCategoryId());
                         warehouse.setImage(mendMateriel.getImage());
                         warehouse.setPayTime(0);
                         warehouse.setAskTime(0);
@@ -509,10 +512,10 @@ public class PaymentService {
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 if (workerType == 3) {
-                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家要服务",
+                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家要包工包料",
                             String.format(DjConstants.PushMessage.STEWARD_Y_SERVER, house.getHouseName()), "");
                 } else {
-                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠要材料", String.format
+                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠要材料", String.format
                             (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL, house.getHouseName()), "");
                 }
             }
@@ -580,7 +583,7 @@ public class PaymentService {
                 house.setBudgetOk(1);//房间工种表里标记开始精算
                 houseMapper.updateByPrimaryKeySelective(house);
                 //推送消息给精算师业主已付款
-                configMessageService.addConfigMessage(null, "gj", house.getMemberId(),
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, house.getMemberId(),
                         "0", "业主支付精算费", String.format(DjConstants.PushMessage.JINGSUANFEIZHIFUWANC,
                                 house.getHouseName()), "");
             } else {//其它工种
@@ -605,22 +608,22 @@ public class PaymentService {
             //app推送和发送短信给工匠
             if (houseWorker.getWorkerType() == 1) {//设计师
 
-                configMessageService.addConfigMessage(null, "gj", houseWorker.getWorkerId(), "0", "业主支付提醒",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseWorker.getWorkerId(), "0", "业主支付提醒",
                         String.format(DjConstants.PushMessage.PAYMENT_OF_DESIGN_FEE, member.getMobile(), house.getHouseName()), "5");
                 //短信通知
                 JsmsUtil.sendDesigner(memberGr.getMobile(), member.getMobile(), house.getHouseName());
 
             }
             if (houseWorker.getWorkerType() == 3) {//大管家
-                configMessageService.addConfigMessage(null, "gj", houseWorker.getWorkerId(), "0", "业主支付提醒",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseWorker.getWorkerId(), "0", "业主支付提醒",
                         String.format(DjConstants.PushMessage.STEWARD_PAYMENT, house.getHouseName()), "5");
             }
             if (houseWorker.getWorkerType() > 3) {//其它工种
-                configMessageService.addConfigMessage(null, "gj", houseWorker.getWorkerId(), "0", "业主支付提醒",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseWorker.getWorkerId(), "0", "业主支付提醒",
                         String.format(DjConstants.PushMessage.CRAFTSMAN_PAYMENT, house.getHouseName()), "5");
 
                 HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
-                configMessageService.addConfigMessage(null, "gj", houseFlowDgj.getWorkerId(), "0", "业主支付提醒",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "业主支付提醒",
                         String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_PAYMENT, house.getHouseName()), "5");
 
             }
@@ -811,7 +814,7 @@ public class PaymentService {
         if (this.renGong(businessOrderNumber, hwo, payState, houseFlowId)) {
             /*处理材料*/
             Double caiPrice = forMasterAPI.getBudgetCaiPrice(hwo.getHouseId(), houseFlow.getWorkerTypeId(), houseFlow.getCityId());//精算材料钱
-            Double serPrice = forMasterAPI.getBudgetSerPrice(hwo.getHouseId(), houseFlow.getWorkerTypeId(), houseFlow.getCityId());//精算服务钱
+            Double serPrice = forMasterAPI.getBudgetSerPrice(hwo.getHouseId(), houseFlow.getWorkerTypeId(), houseFlow.getCityId());//精算包工包料钱
             if (caiPrice > 0 || serPrice > 0) {
                 this.caiLiao(businessOrderNumber, hwo, payState, houseFlowId);
             }
@@ -830,23 +833,24 @@ public class PaymentService {
             warehouseDetail.setRecordType(0);//支付精算
             warehouseDetail.setRelationId(orderId);
             warehouseDetailMapper.insert(warehouseDetail);
-
+            House house = houseMapper.selectByPrimaryKey(houseId);
             for (BudgetMaterial budgetMaterial : budgetMaterialList) {
                 OrderItem orderItem = new OrderItem();
+                Product product=forMasterAPI.getProduct(house.getCityId(),budgetMaterial.getProductId());
                 orderItem.setOrderId(orderId);
                 orderItem.setHouseId(houseId);
                 orderItem.setProductId(budgetMaterial.getProductId());//货品id
-                orderItem.setProductSn(budgetMaterial.getProductSn());//货品编号
-                orderItem.setProductName(budgetMaterial.getProductName());//货品名称
+                orderItem.setProductSn(product.getProductSn());//货品编号
+                orderItem.setProductName(product.getName());//货品名称
                 orderItem.setProductNickName(budgetMaterial.getProductNickName());//货品昵称
                 orderItem.setPrice(budgetMaterial.getPrice());//销售价
                 orderItem.setCost(budgetMaterial.getCost());//成本价
                 orderItem.setShopCount(budgetMaterial.getConvertCount());//购买总数
                 orderItem.setUnitName(budgetMaterial.getUnitName());//单位
                 orderItem.setTotalPrice(budgetMaterial.getTotalPrice());//总价
-                orderItem.setProductType(budgetMaterial.getProductType());//0：材料；1：服务
+                orderItem.setProductType(budgetMaterial.getProductType());//0：材料；1：包工包料
                 orderItem.setCategoryId(budgetMaterial.getCategoryId());
-                orderItem.setImage(budgetMaterial.getImage());
+                orderItem.setImage(product.getImage());
                 orderItemMapper.insert(orderItem);
 
                 Example example = new Example(Warehouse.class);
@@ -862,7 +866,7 @@ public class PaymentService {
                     }
                     warehouse.setPrice(budgetMaterial.getPrice());
                     warehouse.setCost(budgetMaterial.getCost());
-                    warehouse.setImage(budgetMaterial.getImage());
+                    warehouse.setImage(product.getImage());
                     warehouse.setPayTime(warehouse.getPayTime() + 1);//买次数
                     warehouseMapper.updateByPrimaryKeySelective(warehouse);
                 } else {//增加一条
@@ -882,13 +886,13 @@ public class PaymentService {
                     warehouse.setReceive(0.0);
                     warehouse.setProductId(budgetMaterial.getProductId());
                     warehouse.setProductSn(budgetMaterial.getProductSn());
-                    warehouse.setProductName(budgetMaterial.getProductName());
+                    warehouse.setProductName(product.getName());
                     warehouse.setPrice(budgetMaterial.getPrice());
                     warehouse.setCost(budgetMaterial.getCost());
                     warehouse.setUnitName(budgetMaterial.getUnitName());
                     warehouse.setProductType(budgetMaterial.getProductType());
-                    warehouse.setCategoryId(budgetMaterial.getCategoryId());
-                    warehouse.setImage(budgetMaterial.getImage());
+                    warehouse.setCategoryId(product.getCategoryId());
+                    warehouse.setImage(product.getImage());
                     warehouse.setPayTime(1);//买次数
                     warehouse.setAskTime(0);
                     warehouse.setRepTime(0);
@@ -1084,7 +1088,7 @@ public class PaymentService {
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
                     actuaryDTO.setName("补材料花费");
                     if (workerType.getType() == 3) {
-                        actuaryDTO.setName("补服务花费");
+                        actuaryDTO.setName("补包工包料花费");
                     }
                     actuaryDTO.setType(5);
                 }
@@ -1242,7 +1246,7 @@ public class PaymentService {
                 } else {//其它工序
                     Double workerPrice = forMasterAPI.getBudgetWorkerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
                     Double caiPrice = forMasterAPI.getBudgetCaiPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算材料钱
-                    Double serPrice = forMasterAPI.getBudgetSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算服务钱
+                    Double serPrice = forMasterAPI.getBudgetSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算包工包料钱
                     hwo.setWorkPrice(new BigDecimal(workerPrice));//工钱
                     hwo.setMaterialPrice(new BigDecimal(caiPrice + serPrice));//材料钱
                     hwo.setTotalPrice(hwo.getWorkPrice().add(hwo.getMaterialPrice()));//工钱+拆料
@@ -1271,8 +1275,8 @@ public class PaymentService {
                     if (serPrice > 0) {
                         ActuaryDTO actuaryDTO = new ActuaryDTO();
                         actuaryDTO.setImage(imageAddress + "icon/Afuwu.png");
-                        actuaryDTO.setKind("服务");
-                        actuaryDTO.setName(workerType.getName() + "阶段服务花费");
+                        actuaryDTO.setKind("包工包料");
+                        actuaryDTO.setName(workerType.getName() + "阶段包工包料花费");
                         actuaryDTO.setPrice("¥" + String.format("%.2f", serPrice));
                         actuaryDTO.setType(3);
                         actuaryDTOList.add(actuaryDTO);
@@ -1326,7 +1330,7 @@ public class PaymentService {
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
                     actuaryDTO.setName("补材料花费");
                     if (workerType.getType() == 3) {
-                        actuaryDTO.setName("补服务花费");
+                        actuaryDTO.setName("补包工包料花费");
                     }
                     actuaryDTO.setType(5);
                 }
@@ -1339,7 +1343,7 @@ public class PaymentService {
                 HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(taskId);
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
                 Double caiPrice = forMasterAPI.getBudgetCaiPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算材料钱
-                Double serPrice = forMasterAPI.getBudgetSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算服务钱
+                Double serPrice = forMasterAPI.getBudgetSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算包工包料钱
                 paymentPrice = paymentPrice.add(new BigDecimal(caiPrice));
                 paymentPrice = paymentPrice.add(new BigDecimal(serPrice));
                 if (caiPrice > 0) {
@@ -1354,8 +1358,8 @@ public class PaymentService {
                 if (serPrice > 0) {
                     ActuaryDTO actuaryDTO = new ActuaryDTO();
                     actuaryDTO.setImage(imageAddress + "icon/Afuwu.png");
-                    actuaryDTO.setKind("服务");
-                    actuaryDTO.setName(workerType.getName() + "阶段服务花费");
+                    actuaryDTO.setKind("包工包料");
+                    actuaryDTO.setName(workerType.getName() + "阶段包工包料花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", serPrice));
                     actuaryDTO.setType(3);
                     actuaryDTOList.add(actuaryDTO);
@@ -1531,6 +1535,11 @@ public class PaymentService {
                 WorkerDTO workerDTO = new WorkerDTO();
                 workerDTO.setHouseWorkerId(houseWorkerList.get(0).getId());//换人参数
                 workerDTO.setHead(imageAddress + worker.getHead());
+                if(workerType.getType()==3){
+                    paymentDTO.setWorkerTypeName("开工准备");
+                }else {
+                    paymentDTO.setWorkerTypeName(workerType.getName());
+                }
                 workerDTO.setWorkerTypeName(workerType.getName());
                 workerDTO.setWorkerId(houseWorkerList.get(0).getWorkerId());
                 workerDTO.setName(worker.getName());
@@ -1561,7 +1570,7 @@ public class PaymentService {
                         actuaryDTO.setKind("人工");
                         actuaryDTO.setName(workerType.getName() + "阶段人工花费");
                         actuaryDTO.setPrice("¥" + String.format("%.2f", workerPrice));
-                        actuaryDTO.setButton("人工明细");
+                        actuaryDTO.setButton("明细");
                         String url = webAddress + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                                 + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=1";
                         actuaryDTO.setUrl(url);
@@ -1574,7 +1583,7 @@ public class PaymentService {
                         actuaryDTO.setKind("材料");
                         actuaryDTO.setName(workerType.getName() + "阶段材料花费");
                         actuaryDTO.setPrice("¥" + String.format("%.2f", caiPrice));
-                        actuaryDTO.setButton("材料明细");
+                        actuaryDTO.setButton("明细");
                         String url = webAddress + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                                 + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=2";
                         actuaryDTO.setUrl(url);
@@ -1584,10 +1593,10 @@ public class PaymentService {
                     if (serPrice > 0) {
                         ActuaryDTO actuaryDTO = new ActuaryDTO();
                         actuaryDTO.setImage(imageAddress + "icon/Afuwu.png");
-                        actuaryDTO.setKind("服务");
-                        actuaryDTO.setName(workerType.getName() + "阶段服务花费");
+                        actuaryDTO.setKind("包工包料");
+                        actuaryDTO.setName(workerType.getName() + "阶段包工包料花费");
                         actuaryDTO.setPrice("¥" + String.format("%.2f", serPrice));
-                        actuaryDTO.setButton("服务明细");
+                        actuaryDTO.setButton("明细");
                         String url = webAddress + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                                 + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=" + 3;
                         actuaryDTO.setUrl(url);
@@ -1655,7 +1664,7 @@ public class PaymentService {
                     actuaryDTO.setKind(workerType.getName());
                     actuaryDTO.setName("补人工花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
-                    actuaryDTO.setButton("补人工明细");
+                    actuaryDTO.setButton("明细");
                     String url = webAddress +
                             String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                             + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getId() + "&type=4";
@@ -1667,14 +1676,14 @@ public class PaymentService {
                     actuaryDTO.setKind(workerType.getName());
                     actuaryDTO.setName("补材料花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", mendOrder.getTotalAmount()));
-                    actuaryDTO.setButton("补材料明细");
+                    actuaryDTO.setButton("明细");
                     String url = webAddress +
                             String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                             + "&houseId=" + houseId + "&workerTypeId=" + mendOrder.getId() + "&type=5";
 
                     if (workerType.getType() == 3) {
-                        actuaryDTO.setName("补服务花费");
-                        actuaryDTO.setButton("补服务明细");
+                        actuaryDTO.setName("补包工包料花费");
+                        actuaryDTO.setButton("明细");
                     }
                     actuaryDTO.setUrl(url);
                     actuaryDTO.setType(5);
@@ -1683,7 +1692,7 @@ public class PaymentService {
 
                 actuaryDTOList.add(actuaryDTO);
                 paymentDTO.setActuaryDTOList(actuaryDTOList);
-
+                paymentDTO.setWorkerTypeName(workerType.getName());
                 totalPrice = new BigDecimal(mendOrder.getTotalAmount());
             } else if (type == 4) {
                 //待付款只付材料费
@@ -1708,7 +1717,7 @@ public class PaymentService {
                     actuaryDTO.setKind("支付材料");
                     actuaryDTO.setName(workerType.getName() + "阶段材料花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", caiPrice));
-                    actuaryDTO.setButton("材料明细");
+                    actuaryDTO.setButton("明细");
                     String url = webAddress + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                             + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=" + 2;
                     actuaryDTO.setUrl(url);
@@ -1718,10 +1727,10 @@ public class PaymentService {
                 if (serPrice > 0 || notSerPrice > 0) {
                     ActuaryDTO actuaryDTO = new ActuaryDTO();
                     actuaryDTO.setImage(imageAddress + "icon/Afuwu.png");
-                    actuaryDTO.setKind("支付服务");
-                    actuaryDTO.setName(workerType.getName() + "阶段服务花费");
+                    actuaryDTO.setKind("支付包工包料");
+                    actuaryDTO.setName(workerType.getName() + "阶段包工包料花费");
                     actuaryDTO.setPrice("¥" + String.format("%.2f", serPrice));
-                    actuaryDTO.setButton("服务明细");
+                    actuaryDTO.setButton("明细");
                     String url = webAddress + String.format(DjConstants.YZPageAddress.WAITINGPAYDETAIL, userToken, house.getCityId(), "待付款明细")
                             + "&houseId=" + houseId + "&workerTypeId=" + houseFlow.getWorkerTypeId() + "&type=" + 3;
                     actuaryDTO.setUrl(url);
@@ -1729,7 +1738,7 @@ public class PaymentService {
                     actuaryDTOList.add(actuaryDTO);
                 }
                 paymentDTO.setActuaryDTOList(actuaryDTOList);
-
+                paymentDTO.setWorkerTypeName(workerType.getName());
             } else {
                 return ServerResponse.createByErrorMessage("参数错误");
             }

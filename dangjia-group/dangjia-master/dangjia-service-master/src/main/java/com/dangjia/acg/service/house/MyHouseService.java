@@ -1,8 +1,10 @@
 package com.dangjia.acg.service.house;
 
+import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -32,8 +34,6 @@ import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.HouseUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -71,8 +71,9 @@ public class MyHouseService {
     @Autowired
     private ICustomerMapper iCustomerMapper;
     @Autowired
+    private MessageAPI messageAPI;
+    @Autowired
     private UserMapper userMapper;
-    protected static final Logger LOG = LoggerFactory.getLogger(MyHouseService.class);
 
     /**
      * 获取我的房产的查询条件
@@ -192,7 +193,7 @@ public class MyHouseService {
                 map.put("memberType", 1);
                 map.put("id", member1.getId());
                 map.put("targetId", member1.getId());
-                map.put("targetAppKey", "49957e786a91f9c55b223d58");
+                map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
                 map.put("nickName", member1.getNickName());
                 map.put("name", member1.getName());
                 map.put("mobile", member1.getMobile());
@@ -216,9 +217,9 @@ public class MyHouseService {
         }
         //获取客服明细
         Customer srcCustomer = iCustomerMapper.getCustomerByMemberId(member.getId());
-        String userid="773075761552045112068";
-        if(srcCustomer!=null&&!CommonUtil.isEmpty(srcCustomer.getUserId())){
-            userid=srcCustomer.getUserId();
+        String userid = "773075761552045112068";
+        if (srcCustomer != null && !CommonUtil.isEmpty(srcCustomer.getUserId())) {
+            userid = srcCustomer.getUserId();
         }
         Example example = new Example(MainUser.class);
         example.createCriteria().andEqualTo(MainUser.ID, userid);//默认李优
@@ -229,12 +230,12 @@ public class MyHouseService {
             Map<String, Object> map = new HashMap<>();
             map.put("id", user.getId());
             map.put("targetId", user.getId());
-            map.put("targetAppKey", "49957e786a91f9c55b223d58");
-            UserInfoResultDTO userInfoResult = userAPI.getUserInfo("gj", userid);
-            if(userInfoResult != null && !CommonUtil.isEmpty(userInfoResult.getNickname())) {
+            map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
+            UserInfoResultDTO userInfoResult = userAPI.getUserInfo(AppType.GONGJIANG.getDesc(), userid);
+            if (userInfoResult != null && !CommonUtil.isEmpty(userInfoResult.getNickname())) {
                 map.put("nickName", "装修顾问 " + userInfoResult.getNickname());
-            }else{
-                map.put("nickName", "装修顾问 小" + user.getUsername().substring(0,1));
+            } else {
+                map.put("nickName", "装修顾问 小" + user.getUsername().substring(0, 1));
             }
             map.put("name", user.getUsername());
             map.put("mobile", user.getMobile());

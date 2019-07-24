@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -351,10 +352,10 @@ public class OrderService {
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 if (worker.getWorkerType() == 3) {
-                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家要服务",
+                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家要服务",
                             String.format(DjConstants.PushMessage.STEWARD_Y_SERVER, house.getHouseName()), "");
                 } else {
-                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠要材料", String.format
+                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠要材料", String.format
                             (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL, house.getHouseName()), "");
                 }
                 return ServerResponse.createBySuccessMessage("操作成功");
@@ -510,9 +511,9 @@ public class OrderService {
                 if (warehouse != null) {
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
                     orderSplitItem.setWarehouseId(warehouse.getId());//仓库子项id
-                    orderSplitItem.setProductId(warehouse.getProductId());
-                    orderSplitItem.setProductSn(warehouse.getProductSn());
-                    orderSplitItem.setProductName(warehouse.getProductName());
+                    orderSplitItem.setProductId(product.getId());
+                    orderSplitItem.setProductSn(product.getProductSn());
+                    orderSplitItem.setProductName(product.getName());
                     orderSplitItem.setPrice(warehouse.getPrice());
                     orderSplitItem.setAskCount(warehouse.getAskCount());
                     orderSplitItem.setCost(warehouse.getCost());
@@ -522,7 +523,7 @@ public class OrderService {
                     orderSplitItem.setTotalPrice(warehouse.getPrice() * num);//单项总价 销售价
                     orderSplitItem.setProductType(warehouse.getProductType());
                     orderSplitItem.setCategoryId(warehouse.getCategoryId());
-                    orderSplitItem.setImage(warehouse.getImage());//货品图片
+                    orderSplitItem.setImage(product.getImage());//货品图片
                     orderSplitItem.setHouseId(houseId);
                     orderSplitItemMapper.insert(orderSplitItem);
                 } else {

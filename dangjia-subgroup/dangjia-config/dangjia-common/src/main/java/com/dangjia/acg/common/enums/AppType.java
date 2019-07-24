@@ -8,8 +8,9 @@ package com.dangjia.acg.common.enums;
  */
 public enum AppType implements IBaseEnum {
 
-    ZHUANGXIU(0, "当家装修"),
-    GONGJIANG(1, "当家工匠");
+    ZHUANGXIU(1, "zx"),
+    GONGJIANG(2, "gj"),
+    SALE(3, "sale");
 
     public static AppType getInstance(int code) {
         for (AppType entity : AppType.values()) {
@@ -20,7 +21,7 @@ public enum AppType implements IBaseEnum {
         return null;
     }
 
-    AppType(int code, String desc){
+    AppType(int code, String desc) {
         this.code = code;
         this.desc = desc;
     }

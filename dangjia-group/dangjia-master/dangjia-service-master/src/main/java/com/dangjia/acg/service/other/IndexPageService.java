@@ -231,7 +231,36 @@ public class IndexPageService {
             return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
         }
     }
-
+    /**
+     * 工地标签详情
+     */
+    public ServerResponse getHouseLabels(HttpServletRequest request, String houseId) {
+        try {
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            List<OptionalLabelDTO> fieldValues = new ArrayList<>();
+            List<OptionalLabel> optionalLabels = optionalLabelMapper.selectAll();
+            for (OptionalLabel label : optionalLabels) {
+                OptionalLabelDTO optionalLabelDTO=new OptionalLabelDTO();
+                optionalLabelDTO.setId(label.getId());
+                optionalLabelDTO.setLabelName(label.getLabelName());
+                optionalLabelDTO.setStatus("1");
+                if(!CommonUtil.isEmpty(house.getOptionalLabel())){
+                    String[] optionalLabel=house.getOptionalLabel().split(",");
+                    for (String s : optionalLabel) {
+                        if(s.equals(label.getId())) {
+                            optionalLabelDTO.setStatus("0");
+                            break;
+                        }
+                    }
+                }
+                fieldValues.add(optionalLabelDTO);
+            }
+            return ServerResponse.createBySuccess("查询成功", fieldValues);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
+        }
+    }
 
     /**
      * 施工现场
@@ -248,13 +277,35 @@ public class IndexPageService {
         if (CommonUtil.isEmpty(longitude)) {
             longitude = "112.938904";
         }
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         List<House> houses=new ArrayList<>();
         Integer endDistance=3;
         Integer beginDistance=0;
+        List<House> houses1 = modelingVillageMapper.jobLocation(latitude, longitude, beginDistance,3*(limit/2), limit);
         for (int i=1;i<limit/2+1;i++){
-            List<House> houses1 = modelingVillageMapper.jobLocation(latitude, longitude, beginDistance,endDistance, 2);
+            List<House> lsHouse=new ArrayList<>();
+            Map map=new HashMap();
             for (House house : houses1) {
-                houses.add(getHouseImage(house));
+                if(lsHouse.size()==2){
+                    break;
+                }
+                if(map.get(house.getVillageId())==null) {
+                    if (house.getJuli() >= (beginDistance * 1000) && house.getJuli() <= (endDistance * 1000)) {
+                        lsHouse.add(house);
+                    }
+                }
+            }
+            if(lsHouse.size()>0){
+                for (House house : lsHouse) {
+                    house.setHouseId(house.getId());
+                    if(!CommonUtil.isEmpty(house.getImage())){
+                        house.setImage(address+house.getImage());
+                    }else{
+                        house.setImage(null);
+                    }
+                    houses.add(house);
+                    map.put(house.getVillageId(), "Y");
+                }
             }
             beginDistance=endDistance;
             endDistance+=3;
@@ -262,12 +313,12 @@ public class IndexPageService {
         if (houses.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        if(houses.size()==0){
-            List<House> houses1 = modelingVillageMapper.jobModelingVillage(latitude, longitude, limit);
-            for (House house : houses1) {
-                houses.add(getHouseImage(house));
-            }
-        }
+//        if(houses.size()==0){
+//            List<House> houseslist = modelingVillageMapper.jobModelingVillage(latitude, longitude, limit);
+//            for (House house : houseslist) {
+//                houses.add(getHouseImage(house));
+//            }
+//        }
         return ServerResponse.createBySuccess("查询成功", houses);
     }
 

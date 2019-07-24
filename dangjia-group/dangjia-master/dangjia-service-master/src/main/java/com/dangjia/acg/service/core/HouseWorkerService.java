@@ -9,6 +9,7 @@ import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -164,11 +165,11 @@ public class HouseWorkerService {
         if (!CommonUtil.isEmpty(workerId)) {
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             if (house != null) {
-                configMessageService.addConfigMessage(null, "gj", workerId, "0", "业主换人提醒",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, workerId, "0", "业主换人提醒",
                         String.format(DjConstants.PushMessage.STEWARD_REPLACE, house.getHouseName()), "5");
                 HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
                 if (houseFlowDgj != null && !CommonUtil.isEmpty(houseFlowDgj.getWorkerId())) {
-                    configMessageService.addConfigMessage(null, "gj", houseFlowDgj.getWorkerId(), "0",
+                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0",
                             "业主换人提醒", String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_REPLACE,
                                     house.getHouseName()), "5");
                 }
@@ -206,7 +207,7 @@ public class HouseWorkerService {
             Map<String, Object> map = new HashMap<>();
             map.put("id", member1.getId());
             map.put("targetId", member1.getId());
-            map.put("targetAppKey", "49957e786a91f9c55b223d58");
+            map.put("targetAppKey",  messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
             map.put("nickName", member1.getNickName());
             map.put("name", member1.getName());
             map.put("mobile", member1.getMobile());
@@ -248,7 +249,7 @@ public class HouseWorkerService {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", member1.getId());
                 map.put("targetId", member1.getId());
-                map.put("targetAppKey", "49957e786a91f9c55b223d58");
+                map.put("targetAppKey",  messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
                 map.put("nickName", member1.getNickName());
                 map.put("name", member1.getName());
                 map.put("mobile", member1.getMobile());
@@ -300,27 +301,27 @@ public class HouseWorkerService {
 //            3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工
             //通知业主设计师抢单成功
             if (worker.getWorkerType() == 1) {//设计师
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计师抢单提醒",
+                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计师抢单提醒",
                         String.format(DjConstants.PushMessage.DESIGNER_GRABS_THE_BILL, house.getHouseName()), "");
             }
             //通知业主精算师抢单成功
             if (worker.getWorkerType() == 2) {//精算师
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "精算师抢单提醒",
+                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "精算师抢单提醒",
                         String.format(DjConstants.PushMessage.BUDGET_GRABS_THE_BILL, house.getHouseName()), "");
             }
             //通知业主大管家抢单成功
             if (worker.getWorkerType() == 3) {//大管家
 
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家抢单提醒",
+                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家抢单提醒",
                         String.format(DjConstants.PushMessage.STEWARD_RUSH_TO_PURCHASE, house.getHouseName()), "");
             }
             if (worker.getWorkerType() > 3) {//其他工匠
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠抢单提醒",
+                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠抢单提醒",
                         String.format(DjConstants.PushMessage.CRAFTSMAN_RUSH_TO_PURCHASE, house.getHouseName()), "4");
                 //通知大管家已有工匠抢单
                 //通知大管家抢单
                 HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
-                configMessageService.addConfigMessage(null, "gj", houseFlowDgj.getWorkerId(), "0", "工匠抢单提醒",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠抢单提醒",
                         String.format(DjConstants.PushMessage.STEWARD_TWO_RUSH_TO_PURCHASE, house.getHouseName()), "4");
             }
             Example example = new Example(WorkerType.class);
@@ -329,7 +330,7 @@ public class HouseWorkerService {
             String text = "业主您好,我是" + workerType.get(0).getName() + worker.getName() + "已成功抢单";
             HouseChatDTO h = new HouseChatDTO();
             h.setTargetId(house.getMemberId());
-            h.setTargetAppKey(messageAPI.getAppKey("zx"));
+            h.setTargetAppKey(messageAPI.getAppKey(AppType.ZHUANGXIU.getDesc()));
             h.setText(text);
             return ServerResponse.createBySuccess("抢单成功", h);
         } catch (Exception e) {
@@ -610,7 +611,7 @@ public class HouseWorkerService {
         // 阶段完工,管家审核通过工匠完工申请 @link checkOk()
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
-        configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "阶段完工申请",
+        configMessageService.addConfigMessage(null, AppType.GONGJIANG, supervisorHF.getWorkerId(), "0", "阶段完工申请",
                 String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED, house.getHouseName(), workerType.getName()), "5");
         setHouseFlowApplyImage(hfa, house, imageList);
         return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）阶段完工申请成功");
@@ -674,7 +675,7 @@ public class HouseWorkerService {
         hfa.setStartDate(calendar.getTime());
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
-        configMessageService.addConfigMessage(null, "gj", supervisorHF.getWorkerId(), "0", "整体完工申请",
+        configMessageService.addConfigMessage(null, AppType.GONGJIANG, supervisorHF.getWorkerId(), "0", "整体完工申请",
                 String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED, house.getHouseName(), workerType.getName()), "5");
         setHouseFlowApplyImage(hfa, house, imageList);
         return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）整体完工申请成功");
@@ -870,7 +871,7 @@ public class HouseWorkerService {
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
         //推送消息给业主大管家巡查完成
-        configMessageService.addConfigMessage(null, "zx", house.getMemberId(),
+        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),
                 "0", "大管家巡查", String.format(DjConstants.PushMessage.DAGUANGJIAXUNCHAWANGCHENG,
                         house.getHouseName()), "5");
         setHouseFlowApplyImage(hfa, house, imageList);
@@ -1214,7 +1215,7 @@ public class HouseWorkerService {
             house.setTaskNumber(house.getTaskNumber() + 1);
             houseMapper.updateByPrimaryKeySelective(house);
 
-            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "竣工验收申请",
+            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "竣工验收申请",
                     String.format(DjConstants.PushMessage.CRAFTSMAN_ALL_FINISHED, house.getHouseName()), "");
             return ServerResponse.createBySuccessMessage("申请验收成功");
         } catch (Exception e) {

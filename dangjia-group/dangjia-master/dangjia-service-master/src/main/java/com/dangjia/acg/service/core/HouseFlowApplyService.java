@@ -174,7 +174,7 @@ public class HouseFlowApplyService {
                     Example example = new Example(WorkerTypeSafe.class);
                     example.createCriteria().andEqualTo(WorkerTypeSafe.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
                     List<WorkerTypeSafe> wtsList = workerTypeSafeMapper.selectByExample(example);
-                    if(wtsList.size()>0) {
+                    if (wtsList.size() > 0) {
                         House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
                         wtso = new WorkerTypeSafeOrder();
                         wtso.setWorkerTypeSafeId(wtsList.get(0).getId()); // 向保险订单中存入保险服务类型的id

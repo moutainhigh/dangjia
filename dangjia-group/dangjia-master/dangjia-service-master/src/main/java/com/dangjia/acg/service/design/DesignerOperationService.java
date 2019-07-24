@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.DjConstants;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
@@ -113,7 +114,7 @@ public class DesignerOperationService {
                     if (order.getOperationState() == 0) {
                         order.setOperationState(1);
                         designBusinessOrderMapper.updateByPrimaryKeySelective(order);
-                        configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计图上传提醒",
+                        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",
                                 String.format("业主您好！您的美宅【%s】设计图已经上传，请确认。", house.getHouseName()), "");
                         return ServerResponse.createBySuccessMessage("发送成功");
                     }
@@ -126,7 +127,7 @@ public class DesignerOperationService {
                     if (order.getOperationState() == 0) {
                         order.setOperationState(2);
                         designBusinessOrderMapper.updateByPrimaryKeySelective(order);
-                        configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计图上传提醒",
+                        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",
                                 String.format("业主您好！您的美宅【%s】设计图已经上传。", house.getHouseName()), "");
                         return ServerResponse.createBySuccessMessage("发送成功");
                     }
@@ -181,7 +182,7 @@ public class DesignerOperationService {
         hfa.setApplyDec("我是设计师，我已经上传了设计图 ");//描述
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
-        configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计图上传提醒",
+        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",
                 String.format(DjConstants.PushMessage.PLANE_UPLOADING, house.getHouseName()), "");
         return ServerResponse.createBySuccessMessage("发送成功");
     }
@@ -231,7 +232,7 @@ public class DesignerOperationService {
         }
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
-        configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计图上传提醒",
+        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",
                 String.format(DjConstants.PushMessage.CONSTRUCTION_UPLOADING, house.getHouseName()), "");
         return ServerResponse.createBySuccessMessage("发送成功");
     }
@@ -286,7 +287,7 @@ public class DesignerOperationService {
                 if (type == 1) {//通过
                     house.setDesignerOk(7);
                     if (hwo != null) {
-                        configMessageService.addConfigMessage(null, "gj", hwo.getWorkerId(), "0", "平面图已通过", String.format(DjConstants.PushMessage.PLANE_OK, house.getHouseName()), "");
+                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "平面图已通过", String.format(DjConstants.PushMessage.PLANE_OK, house.getHouseName()), "");
                     }
                     houseMapper.updateByPrimaryKeySelective(house);
                     return ServerResponse.createBySuccessMessage("操作成功");
@@ -346,7 +347,7 @@ public class DesignerOperationService {
                         houseFlowMapper.insert(houseFlow);
                     }
                     if (hwo != null) {
-                        configMessageService.addConfigMessage(null, "gj", hwo.getWorkerId(), "0", "施工图已通过", String.format(DjConstants.PushMessage.CONSTRUCTION_OK, house.getHouseName()), "");
+                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "施工图已通过", String.format(DjConstants.PushMessage.CONSTRUCTION_OK, house.getHouseName()), "");
                     }
                     houseMapper.updateByPrimaryKeySelective(house);
                     return ServerResponse.createBySuccessMessage("操作成功");
@@ -502,7 +503,7 @@ public class DesignerOperationService {
                 house.setDesignerOk(9);
                 houseMapper.updateByPrimaryKeySelective(house);
                 //推送消息给业主已完成量房
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(),
+                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),
                         "0", "设计师完成量房", String.format(DjConstants.PushMessage.LIANGFANGWANCHENG,
                                 house.getHouseName()), "");
                 break;
@@ -513,6 +514,8 @@ public class DesignerOperationService {
                 quantityRoomImages.setName("平面图");
                 quantityRoomImages.setImage(imageString);
                 quantityRoomImages.setSort(0);
+                house.setImage(imageString);
+                houseMapper.updateByPrimaryKeySelective(house);
                 quantityRoomImagesMapper.insert(quantityRoomImages);
                 break;
             case 2:
@@ -533,6 +536,12 @@ public class DesignerOperationService {
                             images.setImage(object.getString("image"));
                             images.setSort(object.getInteger("sort"));
                             quantityRoomImagesList.add(images);
+                            if(i==1){
+                                if (CommonUtil.isEmpty(house.getImage())) {
+                                    house.setImage(object.getString("image"));
+                                    houseMapper.updateByPrimaryKeySelective(house);
+                                }
+                            }
                         } else {
                             return ServerResponse.createByErrorMessage("图片传入参数有误，请确认图片名和地址无误");
                         }

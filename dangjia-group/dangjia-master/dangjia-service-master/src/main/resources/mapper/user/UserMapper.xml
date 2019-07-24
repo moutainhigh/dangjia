@@ -71,18 +71,6 @@
     </select>
     <!--=End getUsers 分页查询用户列表 -->
 
-    <!--=Start setJobUser 设置用户是否离职 -->
-    <update id="setJobUser">
-		update dj_user
-		set
-		is_job = #{isJob,jdbcType=INTEGER},
-		insert_uid = #{insertUid},
-		modify_date=NOW()
-		where id =
-		#{id,jdbcType=VARCHAR} AND is_del=0
-	</update>
-    <!--=Start setJobUser 设置用户是否离职 -->
-
     <!--=Start setDelUser 删除用户 -->
     <update id="setDelUser">
 		update dj_user

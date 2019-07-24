@@ -55,6 +55,17 @@
 		FROM dj_member_label WHERE name=#{name}
         ORDER by create_date
 	</select>
+    
+    <select id="getLabelByIds" resultType="com.dangjia.acg.dto.member.SaleMemberLabelDTO">
+        SELECT
+          id，
+          CONCAT_WS("-",parent_name,name) name
+        FROM dj_member_label
+        WHERE id in 
+        <foreach collection="labelIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
 
 </mapper>
 

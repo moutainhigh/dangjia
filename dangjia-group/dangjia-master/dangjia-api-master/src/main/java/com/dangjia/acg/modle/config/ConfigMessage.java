@@ -41,11 +41,10 @@ public class ConfigMessage extends BaseEntity {
     @Desc(value = "消息图标")
     @ApiModelProperty("消息图标")
     private String icon;
-
-
+    
     @Column(name = "app_type")
-    @Desc(value = "来源应用（1:业主端，2:工匠端）")
-    @ApiModelProperty("来源应用（1:业主端，2:工匠端）")
+    @Desc(value = "来源应用（1:业主端，2:工匠端，3:销售端）")
+    @ApiModelProperty("来源应用（1:业主端，2:工匠端，3:销售端）")
     private String appType;
 
     @Column(name = "type")
@@ -72,8 +71,11 @@ public class ConfigMessage extends BaseEntity {
     @Desc(value = "目标id 个人填username ,群组填Group id ,聊天室 填chatroomid")
     @ApiModelProperty("目标id 个人填username ,群组填Group id ,聊天室 填chatroomid")
     private String targetUid;
+
     //所有图片字段加入域名和端口，形成全路径
-    public void initPath(String address){
-        this.icon= StringUtils.isEmpty(this.icon)?null:address+this.icon;
-    };
+    public void initPath(String address) {
+        this.icon = StringUtils.isEmpty(this.icon) ? null : address + this.icon;
+    }
+
+    ;
 }

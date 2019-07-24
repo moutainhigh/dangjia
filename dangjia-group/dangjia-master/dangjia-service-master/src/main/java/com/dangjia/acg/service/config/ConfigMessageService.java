@@ -4,6 +4,7 @@ import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -107,11 +108,14 @@ public class ConfigMessageService {
      * @param type       动作类型 动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面，5:工匠端施工界面，6:评价记录，7:奖罚记录）
      * @return
      */
-    public ServerResponse addConfigMessage(HttpServletRequest request, String appType, String memberId, String targetType, String title, String alert, String type) {
+    public ServerResponse addConfigMessage(HttpServletRequest request, AppType appType, String memberId,
+                                           String targetType, String title, String alert, String type) {
         ConfigMessage configMessage = new ConfigMessage();
-        appType = (!CommonUtil.isEmpty(appType) && appType.equals("zx")) ? "1" : "2";
+        if (appType == null) {
+            appType = AppType.ZHUANGXIU;
+        }
         type = (!CommonUtil.isEmpty(type)) ? type : "2";
-        configMessage.setAppType(appType);
+        configMessage.setAppType(appType.getCode() + "");
         configMessage.setTargetUid(memberId);
         configMessage.setTargetType(targetType);
         configMessage.setName(title);
@@ -132,7 +136,7 @@ public class ConfigMessageService {
         } else {
             configMessage.setType(Integer.parseInt(type));
         }
-        return addConfigMessage(request, configMessage);
+        return addConfigMessage(configMessage);
     }
 
     /**
@@ -141,23 +145,33 @@ public class ConfigMessageService {
      * @param configMessage
      * @return
      */
-    public ServerResponse addConfigMessage(HttpServletRequest request, ConfigMessage configMessage) {
-
+    public ServerResponse addConfigMessage(ConfigMessage configMessage) {
         try {
-
             if (this.configMessageMapper.insertSelective(configMessage) > 0) {
                 new Thread(() -> {
                     if (CommonUtil.isEmpty(configMessage.getIcon())) {
                         //设置默认图标
                         configMessage.setIcon("qrcode/push.png");
                     }
-                    //发送推送消息
-                    String appType = (!CommonUtil.isEmpty(configMessage.getAppType()) && configMessage.getAppType().equals("1")) ? "zx" : "gj";
+                    AppType appType = AppType.ZHUANGXIU;
+                    if (!CommonUtil.isEmpty(configMessage.getAppType())) {
+                        switch (configMessage.getAppType()) {
+                            case "1":
+                                appType = AppType.ZHUANGXIU;
+                                break;
+                            case "2":
+                                appType = AppType.GONGJIANG;
+                                break;
+                            case "3":
+                                appType = AppType.SALE;
+                                break;
+                        }
+                    }
                     if (!CommonUtil.isEmpty(configMessage.getTargetUid()) && configMessage.getTargetType().equals("0")) {
-                        messageAPI.sendMemberIdPush(appType, new String[]{configMessage.getTargetUid()}, configMessage.getName(), configMessage.getText(), configMessage.getSpeak());
+                        messageAPI.sendMemberIdPush(appType.getDesc(), new String[]{configMessage.getTargetUid()}, configMessage.getName(), configMessage.getText(), configMessage.getSpeak());
                     }
                     if (configMessage.getTargetType().equals("1")) {
-                        messageAPI.sendSysPush(appType, configMessage.getName(), configMessage.getText(), configMessage.getSpeak());
+                        messageAPI.sendSysPush(appType.getDesc(), configMessage.getName(), configMessage.getText(), configMessage.getSpeak());
                     }
                 }).start();
             }

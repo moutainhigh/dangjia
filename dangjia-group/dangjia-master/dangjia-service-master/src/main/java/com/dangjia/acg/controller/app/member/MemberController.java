@@ -32,13 +32,13 @@ public class MemberController implements MemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getMemberInfo(String userToken) {
+    public ServerResponse getMemberInfo(Integer userToken) {
         return memberService.getMemberInfo(userToken);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse login(String phone, String password, String userRole) {
+    public ServerResponse login(String phone, String password, Integer userRole) {
         return memberService.login(phone, password, userRole);
     }
 
@@ -56,8 +56,8 @@ public class MemberController implements MemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse updateWokerRegister(Member user, String userToken, String userRole) {
-        return memberService.updateWokerRegister(user, userToken, userRole);
+    public ServerResponse updateWokerRegister(Member user, String userToken) {
+        return memberService.updateWokerRegister(user, userToken);
     }
 
     @Override

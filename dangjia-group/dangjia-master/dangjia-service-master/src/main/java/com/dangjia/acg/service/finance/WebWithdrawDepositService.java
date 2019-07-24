@@ -2,6 +2,7 @@ package com.dangjia.acg.service.finance;
 
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -91,31 +92,26 @@ public class WebWithdrawDepositService {
     public ServerResponse setWithdraw(WithdrawDeposit withdrawDeposit) {
         try {
 //            LOG.info("setWithdraw :" + withdrawDeposit);
-            String appType = "zx"; //zx =当家装修  ，     gj =当家工匠
+            AppType appType; //zx =当家装修  ，     gj =当家工匠
             if (!StringUtils.isNoneBlank(withdrawDeposit.getId()))
                 return ServerResponse.createByErrorMessage("Id 不能为null");
             WithdrawDeposit srcWithdrawDeposit = iWithdrawDepositMapper.selectByPrimaryKey(withdrawDeposit.getId());
             if (srcWithdrawDeposit == null)
                 return ServerResponse.createByErrorMessage("无该提醒申请单");
-
             if (withdrawDeposit.getState() != -1) {//0未处理,1同意 2不同意(驳回)
-
                 if (srcWithdrawDeposit.getRoleType() == 1) //1：业主端  2 大管家 3：工匠端
-                    appType = "zx"; // appType ：  zx =当家装修  ，     gj =当家工匠
+                    appType = AppType.ZHUANGXIU; // appType ：  zx =当家装修  ，     gj =当家工匠
                 else
-                    appType = "gj";
-
+                    appType = AppType.GONGJIANG;
                 if (withdrawDeposit.getState() == 2) {//2不同意
                     srcWithdrawDeposit.setState(2);
                     srcWithdrawDeposit.setReason(withdrawDeposit.getReason());
                     if (StringUtils.isNoneBlank(withdrawDeposit.getMemo()))
                         srcWithdrawDeposit.setMemo(withdrawDeposit.getMemo());
-
                     Member worker = iMemberMapper.selectByPrimaryKey(srcWithdrawDeposit.getWorkerId());
                     BigDecimal money = srcWithdrawDeposit.getMoney();
                     BigDecimal haveMoney = worker.getHaveMoney().add(money);
                     BigDecimal surplusMoney = worker.getSurplusMoney().add(money);
-
                     //记录流水
                     WorkerDetail workerDetail = new WorkerDetail();
                     workerDetail.setName("提现驳回");
@@ -126,13 +122,11 @@ public class WebWithdrawDepositService {
                     workerDetail.setState(8);//8提现驳回到余额
                     workerDetail.setWalletMoney(surplusMoney);
                     iWorkerDetailMapper.insert(workerDetail);
-
                     //把钱 转到 余额上面
                     worker.setHaveMoney(haveMoney);//更新已有钱
                     worker.setSurplusMoney(surplusMoney);
                     worker.setModifyDate(new Date());
                     iMemberMapper.updateByPrimaryKeySelective(worker);
-
                     //提现失败推送
                     configMessageService.addConfigMessage(null, appType,
                             withdrawDeposit.getWorkerId(),

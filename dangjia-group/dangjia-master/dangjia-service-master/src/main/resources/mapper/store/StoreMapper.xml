@@ -7,6 +7,7 @@
     <sql id="all_columns">
 	      id,
           create_date AS createDate,
+          user_id AS userId,
           modify_date AS modifyDate,
           data_status AS dataStatus,
           store_name AS storeName,

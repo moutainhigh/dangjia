@@ -75,6 +75,8 @@ public class BudgetWorkerService {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private IWorkerGoodsMapper workerGoodsMapper;
 
     private static Logger LOG = LoggerFactory.getLogger(BudgetWorkerService.class);
 
@@ -726,7 +728,7 @@ public class BudgetWorkerService {
             for (BudgetWorker abw : budgetWorkerList) {
                 if (abw.getShopCount() + abw.getRepairCount() - abw.getBackCount() > 0) {
                     WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
-                    List<Technology> tList = iTechnologyMapper.patrolList(wg.getId());
+                    List<Technology> tList = iTechnologyMapper.patrolList(wg.getTechnologyIds());
                     for (Technology t : tList) {
                         JSONObject map = new JSONObject();
                         map.put("technologyName", t.getName());
@@ -756,7 +758,7 @@ public class BudgetWorkerService {
                 for (BudgetWorker abw : budgetWorkerList) {
                     if (abw.getShopCount() + abw.getRepairCount() - abw.getBackCount() > 0) {
                         WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
-                        List<Technology> tList = iTechnologyMapper.patrolList(wg.getId());
+                        List<Technology> tList = iTechnologyMapper.patrolList(wg.getTechnologyIds());
                         if (tList.size() > 0) {
                             JSONObject jsonObject = new JSONObject();
                             jsonObject.put("workerGoodsId", wg.getId());
@@ -798,8 +800,8 @@ public class BudgetWorkerService {
             List<BudgetWorker> budgetWorkerList = iBudgetWorkerMapper.getByHouseFlowId(houseId, houseFlowId);
             for (BudgetWorker abw : budgetWorkerList) {
                 if (abw.getShopCount() + abw.getRepairCount() - abw.getBackCount() > 0) {
-                    List<Technology> tList = iTechnologyMapper.workerPatrolList(abw.getWorkerGoodsId());
-                    if (tList.size() > 0) {
+                    WorkerGoods  workerGoods = workerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());//人工商品
+                    if (!CommonUtil.isEmpty(workerGoods)) {
                         JSONObject jsonObject = new JSONObject();
                         jsonObject.put("workerGoodsId", abw.getWorkerGoodsId());
                         jsonObject.put("workerGoodsName", abw.getName());
@@ -820,11 +822,12 @@ public class BudgetWorkerService {
     public JSONArray getTecList(int workerType, String workerGoodsId) {
         try {
             JSONArray jsonArray = new JSONArray();
+            WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(workerGoodsId);
             List<Technology> tList;
             if (workerType == 3) {
-                tList = iTechnologyMapper.patrolList(workerGoodsId);
+                tList = iTechnologyMapper.patrolList(wg.getTechnologyIds());
             } else {
-                tList = iTechnologyMapper.workerPatrolList(workerGoodsId);
+                tList = iTechnologyMapper.workerPatrolList(wg.getTechnologyIds());
             }
             for (Technology t : tList) {
                 JSONObject jsonObject = new JSONObject();
@@ -840,7 +843,8 @@ public class BudgetWorkerService {
     }
 
     public boolean workerPatrolList(String workerGoodsId) {
-        List<Technology> tList = iTechnologyMapper.workerPatrolList(workerGoodsId);
+        WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(workerGoodsId);
+        List<Technology> tList = iTechnologyMapper.workerPatrolList(wg.getTechnologyIds());
         if (tList.size() > 0) {
             return true;
         } else {
@@ -849,7 +853,8 @@ public class BudgetWorkerService {
     }
 
     public boolean patrolList(String workerGoodsId) {
-        List<Technology> tList = iTechnologyMapper.patrolList(workerGoodsId);
+        WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(workerGoodsId);
+        List<Technology> tList = iTechnologyMapper.patrolList(wg.getTechnologyIds());
         if (tList.size() > 0) {
             return true;
         } else {

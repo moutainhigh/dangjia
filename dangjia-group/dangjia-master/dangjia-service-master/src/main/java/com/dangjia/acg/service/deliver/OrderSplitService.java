@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -22,6 +23,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
@@ -131,7 +133,7 @@ public class OrderSplitService {
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
             //业主
-            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "供应商发货", String.format
+            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "供应商发货", String.format
                     (DjConstants.PushMessage.YZ_F_001, house.getHouseName()), "");
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
@@ -192,15 +194,16 @@ public class OrderSplitService {
                 if (orderSplitItem.getReceive() == null) {
                     orderSplitItem.setReceive(0D);
                 }
+                Product product=forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
                 OrderSplitItemDTO orderSplitItemDTO = new OrderSplitItemDTO();
-                orderSplitItemDTO.setProductName(orderSplitItem.getProductName());
+                orderSplitItemDTO.setProductName(product.getName());
                 orderSplitItemDTO.setNum(orderSplitItem.getNum());
-                orderSplitItemDTO.setCost(orderSplitItem.getCost());
+                orderSplitItemDTO.setCost(product.getCost());
                 orderSplitItemDTO.setSupCost(orderSplitItem.getSupCost());
                 orderSplitItemDTO.setUnitName(orderSplitItem.getUnitName());
                 orderSplitItemDTO.setAskCount(orderSplitItem.getAskCount());
                 orderSplitItemDTO.setShopCount(String.valueOf(orderSplitItem.getShopCount()));
-                orderSplitItemDTO.setImage(address + orderSplitItem.getImage());
+                orderSplitItemDTO.setImage(address + product.getImage());
                 orderSplitItemDTO.setReceive(orderSplitItem.getReceive());
                 orderSplitItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), orderSplitItem.getProductId()));
                 orderSplitItemDTO.setBrandName(forMasterAPI.brandName(house.getCityId(), orderSplitItem.getProductId()));

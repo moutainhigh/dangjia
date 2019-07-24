@@ -11,7 +11,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
+import java.util.Date;
 
 
 @Data
@@ -46,6 +46,16 @@ public class Clue extends BaseEntity {
     @ExcelField(titile = "地址", offset = 4)
     private String address;
 
+    @Column(name = "building")
+    @Desc(value = "楼栋")
+    @ApiModelProperty("楼栋")
+    private String building;//
+
+    @Column(name = "number")
+    @Desc(value = "房间号")
+    @ApiModelProperty("房间号")
+    private String number;
+
     @Column(name = "stage")
     @Desc(value = "阶段 0:新线索 1：继续跟进 2:已放弃 3:黑名单")
     @ApiModelProperty("阶段 0:新线索 1：继续跟进 2:已放弃 3:黑名单")
@@ -60,6 +70,26 @@ public class Clue extends BaseEntity {
     @Desc(value = "标签Id")
     @ApiModelProperty("标签Id")
     private String labelId;
+
+    @Column(name = "remark")
+    @Desc(value = "备注")
+    @ApiModelProperty("备注")
+    private String remark;
+
+    @Column(name = "report_date")
+    @Desc(value = "报备时间")
+    @ApiModelProperty("报备时间")
+    private Date reportDate;
+
+    @Column(name = "member_id")
+    @Desc(value = "用户Id")
+    @ApiModelProperty("用户Id")
+    private String memberId;
+
+    @Column(name = "user_id")
+    @Desc(value = "销售Id")
+    @ApiModelProperty("销售Id")
+    private String userId;
 
 
 }

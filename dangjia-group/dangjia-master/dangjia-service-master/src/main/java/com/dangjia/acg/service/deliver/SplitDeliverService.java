@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -16,6 +17,7 @@ import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
@@ -103,7 +105,7 @@ public class SplitDeliverService {
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
             //业主
-            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "装修材料部分收货", String.format
+            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修材料部分收货", String.format
                     (DjConstants.PushMessage.YZ_S_001, house.getHouseName()), "");
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
@@ -146,7 +148,7 @@ public class SplitDeliverService {
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
             //业主
-            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "装修材料已收货", String.format
+            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修材料已收货", String.format
                     (DjConstants.PushMessage.YZ_S_001, house.getHouseName()), "");
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
@@ -218,9 +220,10 @@ public class SplitDeliverService {
                 if(orderSplitItem.getReceive()==null){
                     orderSplitItem.setReceive(0D);
                 }
+                Product product=forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
                 SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
-                splitDeliverItemDTO.setImage(address + orderSplitItem.getImage());
-                splitDeliverItemDTO.setProductName(orderSplitItem.getProductName());
+                splitDeliverItemDTO.setImage(address + product.getImage());
+                splitDeliverItemDTO.setProductName(product.getName());
                 if(splitDeliver.getShippingState()==2||splitDeliver.getShippingState()==4||splitDeliver.getShippingState()==5){
                     splitDeliverItemDTO.setTotalPrice(orderSplitItem.getPrice()*orderSplitItem.getReceive());
                     sumprice+=orderSplitItem.getPrice()*orderSplitItem.getReceive();

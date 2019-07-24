@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -41,7 +42,7 @@ public class MainUserService {
     private UserMapper userMapper;
     @Autowired
     private RoleMapper roleMapper;
-//    @Autowired
+    //    @Autowired
 //    private UserRoleMapper userRoleMapper;
     @Autowired
     private IDepartmentMapper departmentMapper;
@@ -55,7 +56,7 @@ public class MainUserService {
     @Autowired
     private RedisClient redisClient;
 
-    public ServerResponse getUsers(UserSearchDTO userSearch, PageDTO pageDTO,Integer isJob) {
+    public ServerResponse getUsers(UserSearchDTO userSearch, PageDTO pageDTO, Integer isJob) {
         // 时间处理
         if (null != userSearch) {
             if (StringUtils.isNotEmpty(userSearch.getInsertTimeStart())
@@ -77,13 +78,13 @@ public class MainUserService {
             }
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<UserRoleDTO> urList = userMapper.getUsers(userSearch,isJob);
+        List<UserRoleDTO> urList = userMapper.getUsers(userSearch, isJob);
         // 获取分页查询后的数据
         PageInfo pageInfo = new PageInfo(urList);
         // 将角色名称提取到对应的字段中
         if (null != urList && urList.size() > 0) {
             for (UserRoleDTO ur : urList) {
-                if(!CommonUtil.isEmpty(ur.getDepartmentId())) {
+                if (!CommonUtil.isEmpty(ur.getDepartmentId())) {
                     Department department = departmentMapper.selectByPrimaryKey(ur.getDepartmentId());
                     Job job = jobMapper.selectByPrimaryKey(ur.getJobId());
                     ur.setDepartmentName(department.getName());
@@ -157,7 +158,7 @@ public class MainUserService {
             logger.debug("清除所有用户权限缓存！！！");
         } else {
             // 新增用户
-            user.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
+            user.setId((int) (Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
             user.setCreateDate(new Date());
             user.setIsDel(false);
             user.setIsJob(false);
@@ -194,7 +195,7 @@ public class MainUserService {
             return ServerResponse.createByErrorMessage("该用户名已经存在");
         }
         // 新增用户
-        user.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
+        user.setId((int) (Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
         user.setCreateDate(new Date());
         user.setIsDel(false);
         user.setIsJob(false);
@@ -217,11 +218,27 @@ public class MainUserService {
         return ServerResponse.createBySuccessMessage("ok");
     }
 
-
-    public ServerResponse setJobUser(String id, boolean isJob, String insertUid) {
-        String msg = this.userMapper.setJobUser(id, isJob, insertUid) == 1 ? "ok"
-                : "操作失败，请您稍后再试";
-        return ServerResponse.createBySuccessMessage(msg);
+    public ServerResponse setJobUser(HttpServletRequest request, String id, boolean isJob) {
+        MainUser mainUser = userMapper.selectByPrimaryKey(id);
+        if (mainUser == null) {
+            return ServerResponse.createByErrorMessage("该用户不存在");
+        }
+        String userID = request.getParameter(Constants.USERID);
+        MainUser existUser = redisClient.getCache(Constants.USER_KEY + userID, MainUser.class);
+        if (existUser == null) {
+            return ServerResponse.createbyUserTokenError();
+        }
+        if (!CommonUtil.isEmpty(mainUser.getMemberId()) && isJob) {
+            String userRole = "role" + 3 + ":" + mainUser.getMemberId();
+            String token = redisClient.getCache(userRole, String.class);
+            redisClient.deleteCache(userRole);
+            redisClient.deleteCache(token);
+        }
+        mainUser.setIsJob(isJob);
+        mainUser.setInsertUid(existUser.getId());
+        mainUser.setModifyDate(new Date());
+        userMapper.updateByPrimaryKeySelective(mainUser);
+        return ServerResponse.createBySuccessMessage("操作成功");
     }
 
     /**
@@ -237,7 +254,6 @@ public class MainUserService {
                 oldMainUser.setIsReceive(0);
                 userMapper.updateByPrimaryKeySelective(oldMainUser);
             }
-
             MainUser newMainUser = userMapper.selectByPrimaryKey(id);
             newMainUser.setIsReceive(type);
             userMapper.updateByPrimaryKeySelective(newMainUser);
@@ -266,7 +282,4 @@ public class MainUserService {
         return this.userMapper.updatePwd(id, password);
     }
 
-    public int setUserLockNum(String id, int isLock) {
-        return this.userMapper.setUserLockNum(id, isLock);
-    }
 }

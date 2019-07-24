@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -56,6 +57,13 @@ public class WorkerGoodsDTO {
     @ApiModelProperty("otherName")
     private String otherName;
 
+
+    private Double lastPrice;
+    private Date lastTime;
+    private String technologyIds;
+    private String considerations;
+    private String calculateContent;
+    private String buildContent;
 
     @ExcelField(titile = "精算数", offset = 6)
     private String shopCount;//精算数

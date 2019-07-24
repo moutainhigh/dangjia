@@ -6,11 +6,16 @@
 
     <sql id="Clue_List">
       id,owername,phone,wechat,address,stage,
+      building,number,
+      label_id as labelId,
       cus_service as cusService,
       create_date as createDate,
       modify_date as modifyDate,
-      data_status as dataStatus
-
+      data_status as dataStatus,
+      remark,
+      report_date as reportDate,
+      member_id as memberId,
+      user_id as userId
     </sql>
     <select id="getByStage"  parameterType="int" resultType="com.dangjia.acg.modle.clue.Clue">
         SELECT
@@ -39,6 +44,136 @@
 
     </select>
 
+    <select id="getGroupBy" parameterType="String" resultType="com.dangjia.acg.modle.clue.Clue">
+       select
+         <include refid="Clue_List" />
+       from dj_clue
+       WHERE
+       data_status=0
+       <if test="null!=phone and ''!=phone">
+           and phone=#{phone}
+       </if>
+       <if test="null!=phone and ''!=phone">
+           and user_id=#{userId}
+       </if>
+    </select>
+
+    <select id="followList" resultType="com.dangjia.acg.modle.clue.Clue">
+       select
+        <include refid="Clue_List" />
+       from dj_clue
+       WHERE
+       data_status=0
+       <if test="null!=label_id and ''!=label_id">
+           and label_id like CONCAT('%',#{label},'%')
+       </if>
+       <if test="null!=searchKey and ''!=searchKey">
+           and CONCAT(owername,phone) like CONCAT('%',#{searchKey},'%')
+       </if>
+       <if test="stage==4">
+           and stage=4
+       </if>
+       <if test="stage=''">
+        and stage in (0,1)
+       </if>
+       and user_id=#{userId}
+       ORDER BY create_date
+       <if test="null!=time and ''!=time">
+           desc
+       </if>
+    </select>
+
+    <!--客户页-->
+    <select id="clientPage" resultType="com.dangjia.acg.dto.sale.client.CustomerIndexDTO">
+        SELECT 
+          <if test="type==0">
+              owername as name,phone,modify_date as modifyDate
+          </if>
+          <if test="type==1 or type==2">
+              if(m.name is not null,m.nick_name,m.name) as name,
+              m.mobile as phone,
+              modify_date as modifyDate,
+              CONCAT(IFNULL(residential,'*'),IFNULL(building,'*栋'),IFNULL(unit,'*单元'),IFNULL(number,'*号')) as houseName
+          </if>
+        FROM dj_clue c
+        <if test="type==0">
+            WHERE c.data_status = 0 and c.stage NOT IN (2,3)
+            and c.user_id=#{userId}
+            ORDER BY c.modify_date desc
+        </if>
+        <if test="type==1">
+            INNER JOIN dj_member m
+            ON m.member_id=c.member_id
+            INNER JOIN dj_house h
+            ON h.member_id = m.member_id  and h.data_status =0 and h.visit_state =1
+            WHERE m.data_status = 0
+            and c.data_status = 0
+            and c.user_id=#{userId}
+            ORDER BY h.modify_date desc
+        </if>
+        <if test="type==2">
+            INNER JOIN dj_member m
+            ON m.member_id=c.member_id
+            INNER JOIN dj_house h
+            ON h.member_id = m.member_id  and h.data_status =0 and h.visit_state =3
+            WHERE m.data_status = 0
+            and c.data_status = 0
+            and c.user_id=#{userId}
+            ORDER BY h.modify_date desc
+        </if>
+        limit 1
+    </select>
+
+    <select id="Complete" >
+        SELECT count (0) FROM dj_FROM dj_clue c
+        INNER JOIN dj_member m
+        ON m.member_id=c.member_id
+        INNER JOIN dj_house h
+        ON h.member_id = m.member_id  and h.data_status =0 and h.visit_state =1
+        WHERE m.data_status = 0
+        and c.data_status = 0
+        and c.user_id=#{userId}
+        and date_format(h.modify_date,'%Y-%m')=#{time}
+    </select>
+    
+    <select id="ordersCustomer" resultType="com.dangjia.acg.dto.sale.client.OrdersCustomerDTO">
+        SELECT
+        m.id as memberId,
+        c.id as clueId,
+        h.id as houseId,
+        CONCAT(IFNULL(h.residential,'*'),IFNULL(h.building,'*栋'),IFNULL(h.unit,'*单元'),IFNULL(h.number,'*号')) as houseName,
+        m.mobile,
+        if(m.name is not null,m.nick_name,m.name) as name,
+        h.create_date as createDate,
+        h.completed_date as completedDate
+        FROM dj_clue c
+        INNER JOIN dj_member m
+        ON c.member_id=m.id
+        INNER JOIN dj_member_customer mc
+        ON m.id=mc.member_id
+        INNER JOIN dj_house h
+        ON mc.member_id=h.member_id
+        WHERE c.user_id=#{userId}
+        AND mc.stage=4
+        <if test="visitState==1">
+            AND h.visit_state=1
+        </if>
+        <if test="visitState==3">
+            AND h.visit_state=3
+        </if>
+        <if test="null!=searchKey and ''!=searchKey">
+            AND CONCAT(m.name,m.mobile,h.residential) like CONCAT('%',#{searchKey},'%')
+        </if>
+        <if test="visitState==1">
+            ORDER BY h.create_date
+        </if>
+        <if test="visitState==1">
+            ORDER BY h.completed_date
+        </if>
+        <if test="null!=time and ''!=time">
+            desc
+        </if>
+    </select>
 
 
 </mapper>

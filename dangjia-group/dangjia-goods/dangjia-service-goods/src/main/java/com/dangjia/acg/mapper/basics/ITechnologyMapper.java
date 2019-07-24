@@ -47,6 +47,6 @@ public interface ITechnologyMapper extends Mapper<Technology> {
     Technology queryById(@Param("id") String id);
 
     //根据内容模糊搜索工艺
-    List<Technology> queryByName(@Param("name") String name);
+    List<Technology> queryByName(@Param("name") String name,@Param("workerTypeId") String workerTypeId);
 
 }
