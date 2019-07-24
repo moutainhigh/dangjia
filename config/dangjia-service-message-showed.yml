@@ -7,6 +7,9 @@ spring:
       gongjiang:
         appkey: 49957e786a91f9c55b223d58
         masterSecret: 238de1316d08743d12ac4603
+      sale:
+        appkey: 308f876d2b4ce0ae3ebbcab2
+        masterSecret: b22f8f58f32e8db39ea083ae
 server:
   port: 8115
 eureka:
