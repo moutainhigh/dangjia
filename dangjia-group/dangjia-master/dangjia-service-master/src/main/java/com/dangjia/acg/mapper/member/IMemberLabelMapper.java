@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.member;
 
+import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
 import com.dangjia.acg.modle.member.MemberLabel;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -41,5 +42,12 @@ public interface IMemberLabelMapper extends Mapper<MemberLabel> {
      * 根据拿到的父name拿到标签对象
      */
     List<MemberLabel> getLabelByParentName(@Param("parentName") String parentName);
+
+    /**
+     * 根据id查询标签
+     * @param labelIds
+     * @return
+     */
+    List<SaleMemberLabelDTO> getLabelByIds(@Param("labelIds") String[] labelIds );
 }
 
