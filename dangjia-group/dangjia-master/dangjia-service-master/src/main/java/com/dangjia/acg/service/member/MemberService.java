@@ -922,7 +922,7 @@ public class MemberService {
     }
 
     private void updataMember(Member user, AccessToken accessToken) {
-        if (accessToken != null) {//无效的token
+        if (accessToken != null) {
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             user.setPassword(null);
             accessToken.setMember(user);

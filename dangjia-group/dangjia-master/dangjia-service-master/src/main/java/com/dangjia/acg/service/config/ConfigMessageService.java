@@ -111,7 +111,6 @@ public class ConfigMessageService {
     public ServerResponse addConfigMessage(HttpServletRequest request, AppType appType, String memberId,
                                            String targetType, String title, String alert, String type) {
         ConfigMessage configMessage = new ConfigMessage();
-//        appType = (!CommonUtil.isEmpty(appType) && appType.equals("zx")) ? "1" : "2";
         if (appType == null) {
             appType = AppType.ZHUANGXIU;
         }

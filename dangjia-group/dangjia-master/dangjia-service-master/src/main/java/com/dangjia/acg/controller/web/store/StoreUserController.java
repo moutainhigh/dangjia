@@ -5,7 +5,6 @@ import com.dangjia.acg.api.web.store.StoreUserAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.service.store.StoreUserServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,21 +17,19 @@ public class StoreUserController implements StoreUserAPI {
     private StoreUserServices storeUserServices;
 
     @Override
-    @ApiMethod
-    public ServerResponse addStoreUser(HttpServletRequest request, StoreUser storeUser) {
-        return storeUserServices.addStoreUser(storeUser);
+    public ServerResponse addStoreUser(HttpServletRequest request, String userId, String storeId, Integer type) {
+        return storeUserServices.addStoreUser(userId, storeId, type);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryStoreUser(String storeId, String userName, PageDTO pageDTO) {
-        return storeUserServices.queryStoreUser(storeId, userName, pageDTO);
+    public ServerResponse queryStoreUser(String storeId, String searchKey, PageDTO pageDTO) {
+        return storeUserServices.queryStoreUser(storeId, searchKey, pageDTO);
     }
 
     @Override
-    @ApiMethod
-    public ServerResponse updateStoreUser(HttpServletRequest request, StoreUser storeUser) {
-        return storeUserServices.updateStoreUser(storeUser);
+    public ServerResponse updateStoreUser(HttpServletRequest request, String storeUserId, Integer type) {
+        return storeUserServices.updateStoreUser(storeUserId, type);
     }
 
     @Override
