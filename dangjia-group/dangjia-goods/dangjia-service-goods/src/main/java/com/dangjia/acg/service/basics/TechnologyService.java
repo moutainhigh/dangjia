@@ -7,13 +7,11 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.ISearchBoxMapper;
-import com.dangjia.acg.mapper.basics.IProductMapper;
-import com.dangjia.acg.mapper.basics.ITechnologyMapper;
-import com.dangjia.acg.mapper.basics.IUnitMapper;
-import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
+import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.SearchBox;
 import com.dangjia.acg.modle.basics.Goods;
@@ -63,6 +61,8 @@ public class TechnologyService {
     @Autowired
     private ConfigUtil configUtil;
 
+    @Autowired
+    private IGoodsMapper goodsMapper;
 
     /**
      * 添加多个人工工艺和添加服务节点
@@ -150,27 +150,19 @@ public class TechnologyService {
     /**
      * 添加人工工艺和添加服务节点
      */
-    public ServerResponse insertTechnology(String name, String content, String workerTypeId, Integer type, String image, Integer materialOrWorker) {
+    public ServerResponse insertTechnology(Technology technology) {
         try {
-            List<Technology> technologyList = iTechnologyMapper.query(workerTypeId, name, materialOrWorker);
+            List<Technology> technologyList = iTechnologyMapper.query(technology.getWorkerTypeId(), technology.getName(), technology.getMaterialOrWorker());
             if (technologyList.size() > 0) {
                 return ServerResponse.createByErrorMessage("工艺名称不能重复");
             }
-            Technology t = new Technology();
-            t.setName(name);
-            t.setCreateDate(new Date());
-            t.setModifyDate(new Date());
-            t.setContent(content);
-            t.setImage(image);
-            if (materialOrWorker == 1) {
-                t.setWorkerTypeId(workerTypeId);
-                t.setType(type);
-                t.setMaterialOrWorker(1);
-            } else {
-                t.setType(1);
-                t.setMaterialOrWorker(0);
+            if (technology.getMaterialOrWorker()!=null&&technology.getMaterialOrWorker() != 1) {
+                technology.setType(1);
+                technology.setMaterialOrWorker(0);
+            }else{
+                technology.setMaterialOrWorker(1);
             }
-            iTechnologyMapper.insertSelective(t);
+            iTechnologyMapper.insertSelective(technology);
             return ServerResponse.createBySuccessMessage("新增成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -179,32 +171,26 @@ public class TechnologyService {
     }
 
     //修改工艺说明
-    public ServerResponse updateTechnology(String id, String name, String content, Integer type, String image) {
+    public ServerResponse updateTechnology(Technology technology) {
         try {
-            if (!StringUtils.isNotBlank(name))
+            if (!StringUtils.isNotBlank(technology.getName()))
                 return ServerResponse.createByErrorMessage("名称不能为空");
-            Technology t = iTechnologyMapper.selectByPrimaryKey(id);
+            Technology t = iTechnologyMapper.selectByPrimaryKey(technology.getId());
             if (t == null) {
                 return ServerResponse.createByErrorMessage("不存在此工艺,修改失败");
             }
-            if (!t.getName().equals(name)) {//如果修改了名称 就判断，修改的名字 是否已经存在
-                List<Technology> technologyList = iTechnologyMapper.query(t.getWorkerTypeId(), name, t.getMaterialOrWorker());
+            if (!t.getName().equals(technology.getName())) {//如果修改了名称 就判断，修改的名字 是否已经存在
+                List<Technology> technologyList = iTechnologyMapper.query(t.getWorkerTypeId(), technology.getName(), t.getMaterialOrWorker());
                 if (technologyList.size() > 0)
                     return ServerResponse.createByErrorMessage("工艺名称已存在");
             }
-            t.setName(name);
-            t.setModifyDate(new Date());
-            t.setContent(content);
-            t.setType(type);
-            if (null != image && !"".equals(image)) {
-                t.setImage(image);
+            if (technology.getMaterialOrWorker()!=null&&technology.getMaterialOrWorker() != 1) {
+                technology.setType(1);
+                technology.setMaterialOrWorker(0);
+            }else{
+                technology.setMaterialOrWorker(1);
             }
-            if (t.getMaterialOrWorker() == 1) {
-                t.setType(type);
-            } else {
-                t.setType(1);
-            }
-            iTechnologyMapper.updateByPrimaryKeySelective(t);
+            iTechnologyMapper.updateByPrimaryKeySelective(technology);
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -232,18 +218,18 @@ public class TechnologyService {
             PageInfo pageResult = new PageInfo(tList);
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (Technology t : tList) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("id", t.getId());
-                map.put("name", t.getName());
-                map.put("workerTypeId", t.getWorkerTypeId());
+                Map<String, Object> map = BeanUtils.beanToMap(t);
+                Example example = new Example(WorkerGoods.class);
+                example.createCriteria().andCondition(" FIND_IN_SET( '"+t.getId()+"', technology_ids)");
+                List<WorkerGoods> wList = iWorkerGoodsMapper.selectByExample(example);
                 String workerTypeName = "";
                 ServerResponse response = workerTypeAPI.getWorkerType(t.getWorkerTypeId());
                 if (response.isSuccess()) {
                     workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
                 }
                 map.put("workerTypeName", workerTypeName);
-                map.put("content", t.getContent());
-                map.put("type", t.getType());
+                map.put("workerNum", wList.size());
+                map.put("workerList", wList);
                 StringBuilder imgStr = new StringBuilder();
                 StringBuilder imgUrlStr = new StringBuilder();
                 if (t.getImage() != null) {
@@ -252,7 +238,6 @@ public class TechnologyService {
                 }
                 map.put("image", imgStr.toString());
                 map.put("imageUrl", imgUrlStr.toString());
-                map.put("materialOrWorker", t.getMaterialOrWorker());
                 mapList.add(map);
             }
             pageResult.setList(mapList);
@@ -263,19 +248,70 @@ public class TechnologyService {
         }
     }
 
+    //根据工艺明细
+    public ServerResponse getTechnology(String technologyId) {
+        try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            Technology t = iTechnologyMapper.selectByPrimaryKey(technologyId);
+            Map<String, Object> map = BeanUtils.beanToMap(t);
+            Example example = new Example(WorkerGoods.class);
+            example.createCriteria().andCondition(" FIND_IN_SET( '"+t.getId()+"', technology_ids)");
+            List<WorkerGoods> wList = iWorkerGoodsMapper.selectByExample(example);
+            List<Map<String, Object>> mapList = new ArrayList<>();
+            String workerTypeName = "";
+            ServerResponse response = workerTypeAPI.getWorkerType(t.getWorkerTypeId());
+            if (response.isSuccess()) {
+                workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
+            }
+            map.put("workerTypeName", workerTypeName);
+            map.put("workerNum", wList.size());
+            for (WorkerGoods w : wList) {
+                Map<String, Object> wmap = BeanUtils.beanToMap(w);
+                StringBuilder imgStr = new StringBuilder();
+                StringBuilder imgUrlStr = new StringBuilder();
+                if (w.getImage() != null) {
+                    String[] imgArr = w.getImage().split(",");
+                    StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+                }
+                wmap.put("image", imgStr.toString());
+                wmap.put("imageUrl", imgUrlStr.toString());
+                mapList.add(wmap);
+            }
+            map.put("workerList", mapList);
+            StringBuilder imgStr = new StringBuilder();
+            StringBuilder imgUrlStr = new StringBuilder();
+            if (t.getImage() != null) {
+                String[] imgArr = t.getImage().split(",");
+                StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+            }
+            map.put("image", imgStr.toString());
+            map.put("imageUrl", imgUrlStr.toString());
+            return ServerResponse.createBySuccess("查询成功", map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+    //根据名称查询所有工艺（名称去重）
+    public ServerResponse queryByName(String name,String workerTypeId) {
+        try {
+            List<Technology> tList = iTechnologyMapper.queryByName(name, workerTypeId);
+            return ServerResponse.createBySuccess("查询成功", tList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
     //根据商品id查询人工商品关联工艺实体
     public ServerResponse queryTechnologyByWgId(String workerGoodsId) {
         try {
+
+            WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(workerGoodsId);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<Technology> tList = iTechnologyMapper.queryTechnologyByWgId(workerGoodsId);
+            List<Technology> tList = iTechnologyMapper.queryTechnologyByWgId(wg.getTechnologyIds());
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (Technology t : tList) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("id", t.getId());
-                map.put("name", t.getName());
-                map.put("workerTypeId", t.getWorkerTypeId());
-                map.put("content", t.getContent());
-                map.put("type", t.getType());
+                Map<String, Object> map =BeanUtils.beanToMap(t);
                 StringBuilder imgStr = new StringBuilder();
                 StringBuilder imgUrlStr = new StringBuilder();
                 if (t.getImage() != null) {
@@ -284,7 +320,6 @@ public class TechnologyService {
                 }
                 map.put("image", imgStr.toString());
                 map.put("imageUrl", imgUrlStr.toString());
-                map.put("materialOrWorker", t.getMaterialOrWorker());
                 mapList.add(map);
             }
             return ServerResponse.createBySuccess("查询成功", mapList);
@@ -314,25 +349,6 @@ public class TechnologyService {
                 searchBoxMapper.insertSelective(serchBox);
             }
 
-            if (type == 0 || type == 1) {
-                //根据内容模糊搜索商品
-                example = new Example(Goods.class);
-                example.createCriteria().andLike(Goods.NAME, "%" + name + "%").andEqualTo(Goods.DATA_STATUS, "0");
-                example.orderBy(Goods.CREATE_DATE).desc();
-                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<Product> pList = iProductMapper.serchBoxName(name);
-                pageResult = new PageInfo<>(pList);
-                for (Product product : pList) {
-                    String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") + "&gId=" + product.getId() + "&type=" + DjConstants.GXType.CAILIAO;
-                    JSONObject object = new JSONObject();
-                    object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
-                    object.put("price", product.getPrice() + "/" + convertUnitName);
-                    object.put("name", product.getName());
-                    object.put("url", url);//0:工艺；1：商品；2：人工
-                    arr.add(object);
-                }
-            }
             if (type == 2) {
                 //根据内容模糊搜索人工
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
@@ -347,7 +363,31 @@ public class TechnologyService {
                     object.put("url", url);//0:工艺；1：商品；2：人工
                     arr.add(object);
                 }
+            }else{
+                //根据内容模糊搜索商品
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+                List<Product> pList = iProductMapper.serchBoxName(name);
+                pageResult = new PageInfo<>(pList);
+                for (Product product : pList) {
+                    if(product.getType()==0){
+                        type=DjConstants.GXType.CAILIAO;
+                    }else{
+                        type=DjConstants.GXType.FUWU;
+                    }
+                    String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
+                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                            String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") +
+                            "&gId=" + product.getId() +
+                            "&type=" + type;
+                    JSONObject object = new JSONObject();
+                    object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
+                    object.put("price", product.getPrice() + "/" + convertUnitName);
+                    object.put("name", product.getName());
+                    object.put("url", url);//0:工艺；1：商品；2：人工
+                    arr.add(object);
+                }
             }
+
             pageResult.setList(arr);
         } catch (Exception e) {
             e.printStackTrace();

@@ -15,6 +15,7 @@ public class GoodsItemDTO {
     private Double convertCount;//计算数量
     private String unitName;//单位
     private Double price;// 销售价
+    private Integer productType;//0:材料；1：包工包料
     private String id;  //人工商品workerGoodsId 服务材料 productId
     private Double shopCount;//购买
     private Double repairCount;//补退

@@ -142,8 +142,8 @@ public class WebEngineerController implements WebEngineerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getHouseList(HttpServletRequest request, PageDTO pageDTO, Integer visitState, String searchKey) {
-        return engineerService.getHouseList( request,pageDTO, visitState, searchKey);
+    public ServerResponse getHouseList(HttpServletRequest request, PageDTO pageDTO, Integer visitState, String searchKey,String startDate, String endDate, String supKey) {
+        return engineerService.getHouseList( request,pageDTO, visitState, searchKey, startDate,  endDate, supKey);
     }
 
     /**

@@ -44,6 +44,10 @@ public interface IndexPageAPI {
     @ApiOperation(value = "施工现场详情", notes = "施工现场详情")
     ServerResponse houseDetails(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId") String houseId);
 
+    @PostMapping("/app/other/indexPage/getHouseLabels")
+    @ApiOperation(value = "工地标签详情", notes = "工地标签详情")
+    ServerResponse getHouseLabels(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId") String houseId);
+
     @PostMapping("/app/other/indexPage/jobLocation")
     @ApiOperation(value = "施工现场", notes = "施工现场")
     ServerResponse jobLocation(@RequestParam("request") HttpServletRequest request,

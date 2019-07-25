@@ -17,7 +17,7 @@ public class PaymentDTO<T> {
     private List<ActuaryDTO> actuaryDTOList;//商品
     private List<T> datas;//数据集合
     private UpgradeSafeDTO upgradeSafeDTO;//升级保险
-
+    private String workerTypeName;//阶段名
     private BigDecimal totalPrice;//总价
     private BigDecimal discountsPrice;//优惠总价
     private BigDecimal payPrice;//应付

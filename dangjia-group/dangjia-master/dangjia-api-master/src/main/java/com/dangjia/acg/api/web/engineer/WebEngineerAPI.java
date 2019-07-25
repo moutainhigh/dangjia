@@ -80,7 +80,10 @@ public interface WebEngineerAPI {
     ServerResponse getHouseList(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                 @RequestParam("visitState") Integer visitState,
-                                @RequestParam("searchKey") String searchKey);
+                                @RequestParam("searchKey") String searchKey,
+                                @RequestParam("startDate") String startDate,
+                                @RequestParam("endDate") String endDate,
+                                @RequestParam("supKey") String supKey);
 
     @PostMapping(value = "web/engineer/artisanList")
     @ApiOperation(value = "工匠列表", notes = "工匠列表")

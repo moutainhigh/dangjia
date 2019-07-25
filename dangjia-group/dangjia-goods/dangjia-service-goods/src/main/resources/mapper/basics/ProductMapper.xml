@@ -628,6 +628,7 @@
         bg.`name`,
         bp.image,
         bp.price,
+        bg.type,
         bp.convert_unit AS convertUnit
         FROM
         dj_basics_goods bg
