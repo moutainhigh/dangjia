@@ -478,7 +478,8 @@ public class ProductService {
      */
     public ServerResponse getProductById(String id) {
         try {
-            return ServerResponse.createBySuccess("查询成功", iProductMapper.selectByPrimaryKey(id));
+            Product product =iProductMapper.selectByPrimaryKey(id);
+            return ServerResponse.createBySuccess("查询成功", product);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
