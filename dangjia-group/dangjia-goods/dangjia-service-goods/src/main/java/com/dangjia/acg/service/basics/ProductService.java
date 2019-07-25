@@ -493,7 +493,7 @@ public class ProductService {
             Map<String, Object> map = BeanUtils.beanToMap(product);
             List<Unit> linkUnitList = new ArrayList<>();
             Unit unit = iUnitMapper.selectByPrimaryKey(oldGoods.getUnitId());
-            linkUnitList.add(unit);
+//            linkUnitList.add(unit);
             if (unit.getLinkUnitIdArr() != null) {
                 String[] linkUnitIdArr = unit.getLinkUnitIdArr().split(",");
                 for (String linkUnitId : linkUnitIdArr) {

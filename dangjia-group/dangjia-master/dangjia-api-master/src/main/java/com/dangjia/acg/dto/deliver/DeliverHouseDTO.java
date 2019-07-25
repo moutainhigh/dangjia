@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.deliver;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;
@@ -17,7 +18,7 @@ public class DeliverHouseDTO {
     private String houseName;
     private String name;//业主名字
     private String mobile;// 手机
-
+    protected Date constructionDate;//开工时间
     private int sent;
     private int wait;
 }
