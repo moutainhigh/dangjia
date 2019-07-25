@@ -2,6 +2,8 @@ package com.dangjia.acg.dto.sale.client;
 
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * Created with IntelliJ IDEA.
  * author: wk
@@ -10,8 +12,9 @@ import lombok.Data;
  */
 @Data
 public class CustomerIndexDTO {
+    private String id;
     private String name;//客户名称
     private String phone;//号码
-    private String modifyDate;//时间
+    private Date modifyDate;//时间
     private String houseName;//房子名称
 }

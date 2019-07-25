@@ -3,6 +3,7 @@ package com.dangjia.acg.mapper.clue;
 
 import com.dangjia.acg.dto.sale.client.CustomerIndexDTO;
 import com.dangjia.acg.dto.sale.client.OrdersCustomerDTO;
+import com.dangjia.acg.dto.sale.store.StoreUserDTO;
 import com.dangjia.acg.modle.clue.Clue;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -29,9 +30,11 @@ public interface ClueMapper extends Mapper<Clue> {
                           @Param("searchKey") String searchKey,
                           @Param("userId") String userId);
 
-    CustomerIndexDTO clientPage(@Param("type") String type,@Param("userId") String userId);
+    CustomerIndexDTO clientPage(@Param("type") String type,@Param("userId") String userId,@Param("storeUsers") List<StoreUserDTO> storeUsers);
 
     Integer Complete(@Param("userId") String userId,@Param("time") String time);
 
     List<OrdersCustomerDTO> ordersCustomer(@Param("userId") String userId,@Param("visitState") String visitState,@Param("searchKey") String searchKey,@Param("time") String time);
+
+    List<CustomerIndexDTO> sleepingCustomer(@Param("storeUsers") List<StoreUserDTO> storeUsers);
 }
