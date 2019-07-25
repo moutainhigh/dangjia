@@ -502,6 +502,7 @@ public class ProductService {
                 }
             }
             map.put("unitList",linkUnitList);
+            map.put("imageUrl",imgUrlStr.toString());
             return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             e.printStackTrace();
