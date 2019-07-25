@@ -43,35 +43,40 @@ public class WareDTO {
     @ApiModelProperty("买总数")
     private Double shopCount; //买总数 = repairCount + stayCount + robCount
 
-    @ExcelField(titile = "已要总数", offset = 6)
+
+    @ExcelField(titile = "精算总数", offset = 6)
+    @ApiModelProperty("精算总数")
+    private Double budgetCount;
+
+    @ExcelField(titile = "已要总数", offset = 7)
     @ApiModelProperty("已要总数")
     private Double askCount;
 
-    @ExcelField(titile = "收货总数", offset = 7)
+    @ExcelField(titile = "收货总数", offset = 8)
     @ApiModelProperty("收货总数")
     private Double receive;//收货总数
 
-    @ExcelField(titile = "未发货数", offset = 8)
+    @ExcelField(titile = "未发货数", offset = 9)
     @ApiModelProperty("未发")
     private Double noSend;//未发
 
-    @ExcelField(titile = "剩余可要货数", offset = 9)
+    @ExcelField(titile = "剩余可要货数", offset = 10)
     @ApiModelProperty("剩余可要货数")
     private Double leftAskCount;//剩余可要货数
 
-    @ExcelField(titile = "补总数", offset = 10)
+    @ExcelField(titile = "补总数", offset = 11)
     @ApiModelProperty("补总数")
     private Double repairCount;
 
-    @ExcelField(titile = "工人退货", offset = 11)
+    @ExcelField(titile = "工人退货", offset = 12)
     @ApiModelProperty("工人退")
     private Double workBack;//工人退
 
-    @ExcelField(titile = "业主退货", offset = 12)
+    @ExcelField(titile = "业主退货", offset = 13)
     @ApiModelProperty("业主退")
     private Double ownerBack;//业主退
 
-    @ExcelField(titile = "已使用的数", offset = 13)
+    @ExcelField(titile = "已使用的数", offset = 14)
     @ApiModelProperty("已使用的数")
     private Double useCount;//已使用
 
