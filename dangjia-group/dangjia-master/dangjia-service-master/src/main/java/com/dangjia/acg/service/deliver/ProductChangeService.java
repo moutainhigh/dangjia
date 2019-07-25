@@ -580,6 +580,7 @@ public class ProductChangeService {
                         Warehouse newWareHouse = new Warehouse();
                         newWareHouse.setHouseId(houseId);
                         newWareHouse.setShopCount(change.getDestSurCount());
+                        newWareHouse.setBudgetCount(0.0);
                         newWareHouse.setRepairCount(0.0);
                         newWareHouse.setStayCount(0.0);
                         newWareHouse.setRobCount(0.0);
