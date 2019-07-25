@@ -255,7 +255,8 @@ public class TechnologyService {
             Technology t = iTechnologyMapper.selectByPrimaryKey(technologyId);
             Map<String, Object> map = BeanUtils.beanToMap(t);
             Example example = new Example(WorkerGoods.class);
-            example.createCriteria().andCondition(" FIND_IN_SET( '"+t.getId()+"', technology_ids)");
+            example.createCriteria().andEqualTo(WorkerGoods.SHOW_GOODS,1)
+                    .andCondition(" FIND_IN_SET( '"+t.getId()+"', technology_ids)");
             List<WorkerGoods> wList = iWorkerGoodsMapper.selectByExample(example);
             List<Map<String, Object>> mapList = new ArrayList<>();
             String workerTypeName = "";
