@@ -2,6 +2,7 @@ package com.dangjia.acg.api.basics;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.basics.Product;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -62,6 +63,11 @@ public interface ProductAPI {
     ServerResponse updateProductById(@RequestParam("request") HttpServletRequest request,
                                      @RequestParam("id") String id,
                                      @RequestParam("name") String name);
+
+    @PostMapping("/basics/product/editProduct")
+    @ApiOperation(value = "更新货品", notes = "更新货品")
+    ServerResponse updateProduct(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("product") Product product);
 
     @PostMapping("/basics/product/insertProduct")
     @ApiOperation(value = "新增货品", notes = "新增货品")

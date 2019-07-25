@@ -10,6 +10,7 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
@@ -44,6 +45,9 @@ import java.util.Map;
  */
 @Service
 public class ProductService {
+
+    @Autowired
+    private IGoodsMapper iGoodsMapper;
     @Autowired
     private IProductMapper iProductMapper;
     @Autowired
@@ -478,8 +482,27 @@ public class ProductService {
      */
     public ServerResponse getProductById(String id) {
         try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             Product product =iProductMapper.selectByPrimaryKey(id);
-            return ServerResponse.createBySuccess("查询成功", product);
+            Goods oldGoods = iGoodsMapper.selectByPrimaryKey(product.getGoodsId());
+            String[] imgArr = product.getImage().split(",");
+            StringBuilder imgStr = new StringBuilder();
+            StringBuilder imgUrlStr = new StringBuilder();
+            StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+            product.setImage(imgStr.toString());
+            Map<String, Object> map = BeanUtils.beanToMap(product);
+            List<Unit> linkUnitList = new ArrayList<>();
+            Unit unit = iUnitMapper.selectByPrimaryKey(oldGoods.getUnitId());
+            linkUnitList.add(unit);
+            if (unit.getLinkUnitIdArr() != null) {
+                String[] linkUnitIdArr = unit.getLinkUnitIdArr().split(",");
+                for (String linkUnitId : linkUnitIdArr) {
+                    Unit linkUnit = iUnitMapper.selectByPrimaryKey(linkUnitId);
+                    linkUnitList.add(linkUnit);
+                }
+            }
+            map.put("unitList",linkUnitList);
+            return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -504,6 +527,28 @@ public class ProductService {
         }
     }
 
+    /**
+     * 根据product更新名称
+     *
+     * @param product
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse updateProduct(Product product) {
+        try {
+            if(!CommonUtil.isEmpty(product.getId())){
+                Product product1 = iProductMapper.selectByPrimaryKey(product.getId());
+                if(product1==null){
+                    return ServerResponse.createBySuccessMessage("更新失败！ 该商品不存在！");
+                }
+                iProductMapper.updateByPrimaryKeySelective(product);
+                return ServerResponse.createBySuccessMessage("更新成功");
+            }
+        } catch (Exception e) {
+            throw new BaseException(ServerCode.WRONG_PARAM, "更新异常");
+        }
+        return ServerResponse.createBySuccessMessage("更新成功");
+    }
     /**
      * 根据productid更新名称
      *
