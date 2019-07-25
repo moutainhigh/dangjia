@@ -61,9 +61,8 @@
         </if>
         <if test="isJob==2">
             AND (
-            b.name like CONCAT('%','售前客服','%') or
-            b.name like CONCAT('%','工程部经理','%') or
-            b.name like CONCAT('%','客服主管','%')
+            b.name like CONCAT('%','销售','%') or
+            b.name like CONCAT('%','工程部经理','%')
             )
         </if>
         GROUP BY a.id
