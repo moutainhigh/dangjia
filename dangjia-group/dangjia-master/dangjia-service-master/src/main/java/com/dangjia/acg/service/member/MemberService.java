@@ -159,7 +159,7 @@ public class MemberService {
     /**
      * 获取用户详细资料
      */
-    public ServerResponse getMemberInfo(Integer userToken) {
+    public ServerResponse getMemberInfo(String userToken, Integer userRole) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
             return ServerResponse.createbyUserTokenError();
@@ -167,6 +167,12 @@ public class MemberService {
             Member user = memberMapper.selectByPrimaryKey(accessToken.getMemberId());
             if (user == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
+            }
+            if (userRole == 3) {
+                ServerResponse serverResponse = setSale(accessToken, accessToken.getUserId());
+                if (!serverResponse.isSuccess()) {
+                    return ServerResponse.createbyUserTokenError();
+                }
             }
             updataMember(user, accessToken);
             return ServerResponse.createBySuccess("有效！", accessToken);
@@ -202,6 +208,33 @@ public class MemberService {
         return ServerResponse.createBySuccess("登录成功，正在跳转", serverResponse.getResultObj());
     }
 
+    private ServerResponse setSale(AccessToken accessToken, String userId) {
+        accessToken.setMemberType(-1);
+        Example example = new Example(Store.class);
+        example.createCriteria().andEqualTo(Store.USER_ID, userId)
+                .andEqualTo(Store.DATA_STATUS, 0);
+        int c = iStoreMapper.selectCountByExample(example);
+        if (c > 0) {
+            accessToken.setMemberType(3);
+        } else {
+            example = new Example(StoreUser.class);
+            example.createCriteria().andEqualTo(StoreUser.USER_ID, userId)
+                    .andEqualTo(StoreUser.DATA_STATUS, 0);
+            List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
+            if (storeUsers.size() > 0) {
+                StoreUser storeUser = storeUsers.get(0);
+                if (storeUser.getType() == 0 || storeUser.getType() == 1) {
+                    accessToken.setMemberType(storeUser.getType() == 0 ? 4 : 5);
+                } else {
+                    return ServerResponse.createByErrorMessage("当前用户暂无权限使用该终端，请联系管理员");
+                }
+            } else {
+                return ServerResponse.createByErrorMessage("当前用户暂无权限使用该终端，请联系管理员");
+            }
+        }
+        return ServerResponse.createBySuccess();
+    }
+
     private ServerResponse setAccessToken(Member user, Integer userRole) {
         MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
         if (mainUser != null && CommonUtil.isEmpty(mainUser.getMemberId())) {
@@ -219,28 +252,9 @@ public class MemberService {
         user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
         AccessToken accessToken = TokenUtil.generateAccessToken(user, mainUser);
         if (userRole == 3) {
-            accessToken.setMemberType(-1);
-            Example example = new Example(Store.class);
-            example.createCriteria().andEqualTo(Store.USER_ID, mainUser.getId())
-                    .andEqualTo(Store.DATA_STATUS, 0);
-            int c = iStoreMapper.selectCountByExample(example);
-            if (c > 0) {
-                accessToken.setMemberType(3);
-            } else {
-                example = new Example(StoreUser.class);
-                example.createCriteria().andEqualTo(StoreUser.USER_ID, mainUser.getId())
-                        .andEqualTo(StoreUser.DATA_STATUS, 0);
-                List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
-                if (storeUsers.size() > 0) {
-                    StoreUser storeUser = storeUsers.get(0);
-                    if (storeUser.getType() == 0 || storeUser.getType() == 1) {
-                        accessToken.setMemberType(storeUser.getType() == 0 ? 4 : 5);
-                    } else {
-                        return ServerResponse.createByErrorMessage("当前用户暂无权限使用该终端，请联系管理员");
-                    }
-                } else {
-                    return ServerResponse.createByErrorMessage("当前用户暂无权限使用该终端，请联系管理员");
-                }
+            ServerResponse serverResponse = setSale(accessToken, mainUser.getId());
+            if (!serverResponse.isSuccess()) {
+                return serverResponse;
             }
         }
         if (!CommonUtil.isEmpty(user.getWorkerTypeId())) {

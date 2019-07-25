@@ -32,8 +32,8 @@ public class MemberController implements MemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getMemberInfo(Integer userToken) {
-        return memberService.getMemberInfo(userToken);
+    public ServerResponse getMemberInfo(String userToken, Integer userRole) {
+        return memberService.getMemberInfo(userToken, userRole);
     }
 
     @Override

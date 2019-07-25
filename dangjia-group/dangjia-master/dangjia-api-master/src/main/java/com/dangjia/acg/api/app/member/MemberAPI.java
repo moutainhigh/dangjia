@@ -114,7 +114,8 @@ public interface MemberAPI {
      */
     @RequestMapping(value = "member/info", method = RequestMethod.POST)
     @ApiOperation(value = "获取用户详细资料", notes = "获取用户详细资料")
-    ServerResponse getMemberInfo(@RequestParam("userToken") Integer userToken);
+    ServerResponse getMemberInfo(@RequestParam("userToken") String userToken,
+                                 @RequestParam("userRole") Integer userRole);
 
     /**
      * showdoc
