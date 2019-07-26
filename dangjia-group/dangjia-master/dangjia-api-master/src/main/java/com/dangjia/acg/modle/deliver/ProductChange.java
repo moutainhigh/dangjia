@@ -25,6 +25,11 @@ import java.math.BigDecimal;
 @FieldNameConstants(prefix = "")
 public class ProductChange extends BaseEntity {
 
+	@Column(name = "city_id")
+	@Desc(value = "城市id")
+	@ApiModelProperty("城市id")
+	private String cityId;
+
 	@Column(name = "house_id")
 	@Desc(value = "房子ID")
 	@ApiModelProperty("房子ID")

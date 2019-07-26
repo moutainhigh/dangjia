@@ -22,6 +22,11 @@ import javax.persistence.Table;
 @FieldNameConstants(prefix = "")
 public class Warehouse extends BaseEntity {
 
+	@Column(name = "city_id")
+	@Desc(value = "城市id")
+	@ApiModelProperty("城市id")
+	private String cityId;
+
 	@Column(name = "house_id")
 	@Desc(value = "房子ID")
 	@ApiModelProperty("房子ID")

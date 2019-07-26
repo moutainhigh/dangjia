@@ -12,14 +12,22 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.budget.BudgetItemDTO;
 import com.dangjia.acg.dto.house.WarehouseDTO;
+import com.dangjia.acg.mapper.deliver.IOrderItemMapper;
+import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.IProductChangeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.deliver.OrderItem;
+import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.modle.repair.MendMateriel;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -30,10 +38,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class WarehouseService {
@@ -52,6 +57,19 @@ public class WarehouseService {
     private IHouseMapper houseMapper;
     @Autowired
     private IProductChangeMapper productChangeMapper;
+
+
+
+    @Autowired
+    private IMaterialRecordMapper materialRecordMapper;
+    @Autowired
+    private IOrderItemMapper orderItemMapper;
+    @Autowired
+    private IOrderSplitItemMapper orderSplitItemMapper;
+    @Autowired
+    private IMendMaterialMapper mendMaterielMapper;
+
+
     private static Logger LOG = LoggerFactory.getLogger(WarehouseService.class);
 
 
@@ -247,5 +265,68 @@ public class WarehouseService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+
+
+
+
+
+    public ServerResponse editProductData(String cityId, Product product) {
+
+        Example example =new Example(MaterialRecord.class);
+        example.createCriteria().andEqualTo(MaterialRecord.CITY_ID,cityId)
+                .andEqualTo(MaterialRecord.PRODUCT_ID,product.getId());
+        MaterialRecord materialRecord=new MaterialRecord();
+        materialRecord.setId(null);
+        materialRecord.setModifyDate(new Date());
+        materialRecord.setProductName(product.getName());
+        materialRecordMapper.updateByExampleSelective(materialRecord,example);
+
+        example =new Example(OrderItem.class);
+        example.createCriteria().andEqualTo(OrderItem.CITY_ID,cityId)
+                .andEqualTo(OrderItem.PRODUCT_ID,product.getId());
+        OrderItem orderItem=new OrderItem();
+        orderItem.setId(null);
+        orderItem.setModifyDate(new Date());
+        orderItem.setProductName(product.getName());
+        orderItem.setImage(product.getImage());
+        orderItemMapper.updateByExampleSelective(orderItem,example);
+
+        example =new Example(OrderSplitItem.class);
+        example.createCriteria().andEqualTo(OrderSplitItem.CITY_ID,cityId)
+                .andEqualTo(OrderSplitItem.PRODUCT_ID,product.getId());
+        OrderSplitItem orderSplitItem=new OrderSplitItem();
+        orderSplitItem.setId(null);
+        orderSplitItem.setProductName(product.getName());
+        orderSplitItem.setModifyDate(new Date());
+        orderSplitItem.setImage(product.getImage());
+        orderSplitItemMapper.updateByExampleSelective(orderSplitItem,example);
+
+        example =new Example(MendMateriel.class);
+        example.createCriteria().andEqualTo(MendMateriel.CITY_ID,cityId)
+                .andEqualTo(MendMateriel.PRODUCT_ID,product.getId());
+        MendMateriel mendMateriel=new MendMateriel();
+        mendMateriel.setId(null);
+        mendMateriel.setModifyDate(new Date());
+        mendMateriel.setProductName(product.getName());
+        mendMateriel.setImage(product.getImage());
+        mendMaterielMapper.updateByExampleSelective(mendMateriel,example);
+
+
+        example =new Example(Warehouse.class);
+        example.createCriteria().andEqualTo(Warehouse.CITY_ID,cityId)
+                .andEqualTo(Warehouse.PRODUCT_ID,product.getId());
+        Warehouse warehouse=new Warehouse();
+        warehouse.setId(null);
+        warehouse.setModifyDate(new Date());
+        warehouse.setProductName(product.getName());
+        warehouse.setImage(product.getImage());
+        warehouseMapper.updateByExampleSelective(warehouse,example);
+
+//         dj_house_surplus_ware_house_item ;
+//         dj_house_surplus_ware_divert ;
+//         dj_deliver_cart ;
+//         dj_deliver_product_change ;
+        return ServerResponse.createBySuccessMessage("查询失败");
     }
 }

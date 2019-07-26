@@ -2,6 +2,7 @@ package com.dangjia.acg.api.app.house;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.basics.Product;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -39,4 +40,8 @@ public interface WarehouseAPI {
                                    @RequestParam("houseId") String houseId,
                                    @RequestParam("name") String name,
                                    @RequestParam("type") String type);
+
+    @PostMapping("edit/product/edit")
+    @ApiOperation(value = "批量更新指定商品信息", notes = "批量更新指定商品信息")
+    ServerResponse editProductData(String cityId, Product product);
 }
