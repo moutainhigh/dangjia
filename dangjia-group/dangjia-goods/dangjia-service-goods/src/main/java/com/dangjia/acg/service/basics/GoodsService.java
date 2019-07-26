@@ -1,9 +1,7 @@
 package com.dangjia.acg.service.basics;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.product.MasterProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -60,8 +58,6 @@ public class GoodsService {
     private ConfigUtil configUtil;
     @Autowired
     private ProductService productService;
-    @Autowired
-    private MasterProductAPI masterProductAPI;
 
 
     /**
@@ -249,15 +245,6 @@ public class GoodsService {
             goods.setOtherName(otherName);
             goods.setModifyDate(new Date());
             iGoodsMapper.updateByPrimaryKeySelective(goods);
-            //修改品牌对应的product名称也更新
-            productService.updateProductName(oldGoods.getName(),name,null,null,id,null);
-            Example example=new Example(Product.class);
-            example.createCriteria().andEqualTo(Product.GOODS_ID,id);
-            List<Product> list = iProductMapper.selectByExample(example);
-            //更新master库相关商品名称
-            if(list.size()>0) {
-                masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, id);
-            }
             if (buy != 2) //非自购goods ，有品牌
             {
                 if (!StringUtils.isNoneBlank(arrString)) {

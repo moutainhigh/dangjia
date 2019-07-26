@@ -372,7 +372,8 @@ public class PaymentService {
                         warehouse.setRepairCount(warehouse.getRepairCount() + mendMateriel.getShopCount());
                         warehouse.setPrice(mendMateriel.getPrice());
                         warehouse.setCost(mendMateriel.getCost());
-                        warehouse.setImage(product.getImage());
+                        warehouse.setProductName(product.getName());
+                        warehouse.setImage(mendMateriel.getImage());
                         warehouse.setRepTime(warehouse.getRepTime() + 1);//补次数
                         warehouseMapper.updateByPrimaryKeySelective(warehouse);
                     } else {
@@ -868,6 +869,7 @@ public class PaymentService {
                     warehouse.setPrice(budgetMaterial.getPrice());
                     warehouse.setCost(budgetMaterial.getCost());
                     warehouse.setImage(product.getImage());
+                    warehouse.setProductName(product.getName());
                     warehouse.setPayTime(warehouse.getPayTime() + 1);//买次数
                     warehouseMapper.updateByPrimaryKeySelective(warehouse);
                 } else {//增加一条

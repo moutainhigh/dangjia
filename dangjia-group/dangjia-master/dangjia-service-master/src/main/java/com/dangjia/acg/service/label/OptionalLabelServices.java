@@ -4,7 +4,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.label.OptionalLabelMapper;
 import com.dangjia.acg.modle.label.OptionalLabel;
-import com.dangjia.acg.modle.store.Store;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;

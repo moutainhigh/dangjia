@@ -383,12 +383,19 @@ public class EvaluateService {
      * 业主评价管家完工 最后完工
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveEvaluateSupervisor(String userToken,String houseFlowApplyId, String content, int star, boolean isAuto,Boolean onekey) {
+    public ServerResponse saveEvaluateSupervisor(String userToken,String houseFlowApplyId, String content, int star, boolean isAuto,String onekey) {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
                 return ServerResponse.createByErrorMessage("重复审核");
+            }
+            //业主同意一键退款
+            if(!CommonUtil.isEmpty(onekey)&&"1".equals(onekey)) {
+                ServerResponse response=mendOrderService.landlordOnekeyBack(userToken, house.getId());
+                if (!response.isSuccess()) {
+                    return response;
+                }
             }
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             Evaluate evaluate = new Evaluate();
@@ -417,11 +424,9 @@ public class EvaluateService {
             //业主审核管家
             houseFlowApplyService.checkSupervisor(houseFlowApplyId, isAuto);
 
-            //业主同意一键退款
-            if(onekey) {
-                mendOrderService.landlordOnekeyBack(userToken, house.getId());
-            }
-             configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
+
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
+
 
             //短信通知业务本门
             Map<String, String> temp_para = new HashMap();

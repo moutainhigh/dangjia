@@ -1,12 +1,9 @@
 package com.dangjia.acg.dto.repair;
 
-import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import lombok.Data;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.

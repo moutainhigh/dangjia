@@ -1,6 +1,5 @@
 package com.dangjia.acg.mapper.deliver;
 
-import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -21,7 +20,4 @@ public interface IOrderItemMapper extends Mapper<OrderItem> {
 
     List<OrderItem> byOrderIdList(@Param("orderId")String orderId);
 
-    //更新名称
-    void updateOrderItemById(@Param("lists") JSONArray lists, @Param("brandSeriesId") String brandSeriesId, @Param("brandId") String brandId,
-                             @Param("goodsId") String goodsId, @Param("id") String id);
 }

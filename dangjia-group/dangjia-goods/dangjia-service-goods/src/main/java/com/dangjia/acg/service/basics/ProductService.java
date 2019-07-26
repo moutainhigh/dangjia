@@ -1,9 +1,7 @@
 package com.dangjia.acg.service.basics;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.product.MasterProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -72,8 +70,6 @@ public class ProductService {
     private IBudgetMaterialMapper iBudgetMaterialMapper;
     @Autowired
     private ProductService productService;
-    @Autowired
-    private MasterProductAPI masterProductAPI;
 
     private static Logger LOG = LoggerFactory.getLogger(ProductService.class);
 
@@ -386,9 +382,6 @@ public class ProductService {
                     product.setAttributeIdArr(obj.getString("attributeIdArr"));
                 }
 
-//                product.setValueNameArr(obj.getString("valueNameArr"));//选中的属性选项名称字符串
-//                product.setValueIdArr(obj.getString("valueIdArr"));//选中的属性选项id串
-//                product.setAttributeIdArr(obj.getString("attributeIdArr"));//选中的属性id字符串
                 if (productId == null || "".equals(productId)) {//没有id则新增
                     product.setCreateDate(new Date());
                     product.setModifyDate(new Date());
@@ -397,14 +390,6 @@ public class ProductService {
                     product.setId(productId);
                     product.setModifyDate(new Date());
                     iProductMapper.updateByPrimaryKey(product);
-                    productService.updateProductName(product.getName(), product.getName(), null, null, null, productId);
-                    Example example = new Example(Product.class);
-                    example.createCriteria().andEqualTo(Product.ID, productId);
-                    List<Product> list = iProductMapper.selectByExample(example);
-                    //更新master库相关商品名称
-                    if (list.size() > 0) {
-                        masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, null);
-                    }
                 }
 
                 LOG.info("insertProduct productId:" + product.getId());
@@ -564,19 +549,6 @@ public class ProductService {
             product.setId(id);
             product.setName(name);
             iProductMapper.updateByPrimaryKeySelective(product);
-            productService.updateProductName(product1.getName(), name, null, null, null, id);
-            Example example = new Example(Product.class);
-            example.createCriteria().andEqualTo(Product.ID, id);
-            List<Product> list = iProductMapper.selectByExample(example);
-            //更新master库相关商品名称
-            if (list.size() > 0) {
-                masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, null);
-            }
-//            example=new Example(GroupLink.class);
-//            example.createCriteria().andEqualTo("productId",id);
-//            GroupLink oldLabel =new GroupLink();
-//            oldLabel.setProductName(name);
-//            iGroupLinkMapper.updateByExampleSelective(oldLabel,example);
             return ServerResponse.createBySuccessMessage("更新成功");
         } catch (Exception e) {
             throw new BaseException(ServerCode.WRONG_PARAM, "更新成功");
@@ -700,26 +672,4 @@ public class ProductService {
         return pageResult;
     }
 
-
-    /**
-     * 修改product名称全局更新商品
-     *
-     * @param brandSeriesId
-     * @param brandId
-     * @param goodsId
-     * @return
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public ServerResponse updateProductName(String oldName, String newName, String brandSeriesId, String brandId, String goodsId, String id) {
-        try {
-            //更新商品名称
-            iProductMapper.updateProductById(oldName, newName, brandSeriesId, brandId, goodsId, id);
-            //更新相关联商品名称
-            iGroupLinkMapper.updateGroupLinkById(brandSeriesId, brandId, goodsId, id);
-            iBudgetMaterialMapper.updateBudgetMaterialById(brandSeriesId, brandId, goodsId, id);
-        } catch (Exception e) {
-            throw new BaseException(ServerCode.WRONG_PARAM, "修改失败");
-        }
-        return ServerResponse.createBySuccessMessage("修改成功");
-    }
 }

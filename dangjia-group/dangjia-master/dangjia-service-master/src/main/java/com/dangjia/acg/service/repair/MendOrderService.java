@@ -13,7 +13,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -42,7 +41,6 @@ import com.dangjia.acg.modle.member.MemberInfo;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
-import com.dangjia.acg.service.core.HouseFlowScheduleService;
 import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -230,17 +228,21 @@ public class MendOrderService {
             List<Map> productArrMap=new ArrayList<>();
             for (Warehouse warehouse : warehouseList) {
                 Map<String, Object> map = new HashMap<>();
-                map.put("num",warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());//剩余数量 所有买的数量 - 业主退货 - 要的
+                double num=warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount();
+                map.put("num",num);//剩余数量 所有买的数量 - 业主退货 - 要的
                 map.put("productId", warehouse.getProductId());
-                Product product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
-                if (product != null) {
-                    Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
-                    if (goods != null) {
-                        if(goods.getSales()==0){
-                            productArrMap.add(map);
+                if(num>0) {
+                    Product product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
+                    if (product != null) {
+                        Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
+                        if (goods != null) {
+                            if (goods.getSales() == 0) {
+                                productArrMap.add(map);
+                            }
                         }
                     }
                 }
+
             }
             //生成退货单
             String productArr=JSON.toJSONString(productArrMap);

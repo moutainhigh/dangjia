@@ -1,8 +1,6 @@
 package com.dangjia.acg.mapper.basics;
 
 import com.dangjia.acg.modle.basics.GroupLink;
-import com.dangjia.acg.modle.basics.Product;
-import com.dangjia.acg.modle.brand.Brand;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -51,8 +49,5 @@ public interface IGroupLinkMapper extends Mapper<GroupLink> {
     //根据关联组id删除货品关联关系
     void deleteGroupLinkById(@Param("id") String id);
 
-    //货品名更新
-    void updateGroupLinkById(@Param("brandSeriesId") String brandSeriesId,@Param("brandId") String brandId,
-                               @Param("goodsId") String goodsId,@Param("id") String id);
 
 }

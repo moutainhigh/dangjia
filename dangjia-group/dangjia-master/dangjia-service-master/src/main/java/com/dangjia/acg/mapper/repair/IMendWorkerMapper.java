@@ -1,7 +1,6 @@
 package com.dangjia.acg.mapper.repair;
 
 import com.alibaba.fastjson.JSONArray;
-import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.repair.MendWorker;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;

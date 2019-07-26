@@ -322,19 +322,18 @@ public class ClueService {
                 member.setCreateDate(clue.getCreateDate());
                 iMemberMapper.updateByPrimaryKeySelective(member);
             }else{
-                List<Store> stores = iStoreMapper.selectAll();
-                for (Store store : stores) {
-                    if (GaoDeUtils.isInPolygon(longitude+ "," + latitude, store.getScopeItude())) {
-                        clue=new Clue();
-                        clue.setOwername(member.getName()!=null?member.getName():member.getNickName());
-                        clue.setPhone(phone);
-                        clue.setStage(4);
-                        clue.setDataStatus(0);
-                        clue.setMemberId(member.getId());
-                        clue.setUserId(store.getUserId());
-                        clue.setStoreId(store.getId());
-                        clueMapper.insert(clue);
-                        break;
+                if (!CommonUtil.isEmpty(longitude) && !CommonUtil.isEmpty(latitude)) {
+                    List<Store> stores = iStoreMapper.selectAll();
+                    for (Store store : stores) {
+                        if (GaoDeUtils.isInPolygon(longitude + "," + latitude, store.getScopeItude())) {
+                            Customer customer = new Customer();
+                            customer.setUserId(store.getUserId());
+                            customer.setMemberId(member.getId());
+                            customer.setDataStatus(0);
+                            customer.setStage(1);
+                            iCustomerMapper.insert(customer);
+                            break;
+                        }
                     }
                 }
             }
