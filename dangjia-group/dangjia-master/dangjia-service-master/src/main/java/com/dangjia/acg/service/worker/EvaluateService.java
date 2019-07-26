@@ -191,7 +191,7 @@ public class EvaluateService {
                 memberMapper.updateByPrimaryKeySelective(member);
             }
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            configMessageService.addConfigMessage(null, "gj", houseFlowApply.getWorkerId(),
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(),
                     "0", "完工申请结果", String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS,
                             house.getHouseName()), "5");
             return ServerResponse.createBySuccessMessage("操作成功");
@@ -229,7 +229,7 @@ public class EvaluateService {
             houseFlowApply.setStartDate(DateUtil.addDateDays(new Date(), 1));
             houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-            configMessageService.addConfigMessage(null, "gj", member.getId(), "0",
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, member.getId(), "0",
                     "阶段/整体审核超时扣钱提醒", String.format(DjConstants.PushMessage.STEWARD_SHENGHECHAOSHI, house.getHouseName(),
                             workerType.getName()), "0");
         }
@@ -257,7 +257,7 @@ public class EvaluateService {
             member.setSurplusMoney(surplusMoney);
             member.setHaveMoney(haveMoney);
             memberMapper.updateByPrimaryKeySelective(member);
-            configMessageService.addConfigMessage(null, "gj", member.getId(), "0",
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, member.getId(), "0",
                     workerType.getName() + "旷工扣钱",
                     String.format(DjConstants.PushMessage.CRAFTSMAN_ABSENTEEISM, house.getHouseName()), "0");
         }
@@ -425,7 +425,7 @@ public class EvaluateService {
             houseFlowApplyService.checkSupervisor(houseFlowApplyId, isAuto);
 
 
-            configMessageService.addConfigMessage(null, "gj", houseFlowApply.getWorkerId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
 
 
             //短信通知业务本门
@@ -523,8 +523,8 @@ public class EvaluateService {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return serverResponse;
             }
-            configMessageService.addConfigMessage(null, "gj", worker.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
-            configMessageService.addConfigMessage(null, "gj", supervisor.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.STEWARD_EVALUATE, house.getHouseName()), "6");
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, worker.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, supervisor.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.STEWARD_EVALUATE, house.getHouseName()), "6");
 
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
