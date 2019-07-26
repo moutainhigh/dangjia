@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * @Time 上午9:57
  * @Version V1.0.0
  */
-@FeignClient("dangjia-service-basic")
+@FeignClient("dangjia-service-master")
 @Api(value = "Basic管理端接口", description = "Basic管理端接口")
 public interface BasicManageAPI {
 
