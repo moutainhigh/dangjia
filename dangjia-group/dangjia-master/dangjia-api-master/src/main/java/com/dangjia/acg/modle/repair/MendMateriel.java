@@ -24,6 +24,11 @@ import javax.persistence.Transient;
 @FieldNameConstants(prefix = "")
 public class MendMateriel extends BaseEntity {
 
+	@Column(name = "city_id")
+	@Desc(value = "城市id")
+	@ApiModelProperty("城市id")
+	private String cityId;
+
 	@Column(name = "mend_order_id")
 	@Desc(value = "补退单Id")
 	@ApiModelProperty("补退单Id")

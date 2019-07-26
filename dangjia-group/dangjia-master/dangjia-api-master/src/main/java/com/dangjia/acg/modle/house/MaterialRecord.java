@@ -22,6 +22,12 @@ import javax.persistence.Table;
 @ApiModel(description = "管家材料登记")
 @FieldNameConstants(prefix = "")
 public class MaterialRecord extends BaseEntity {
+
+    @Column(name = "city_id")
+    @Desc(value = "城市id")
+    @ApiModelProperty("城市id")
+    private String cityId;
+
     @Column(name = "house_id")
     @Desc(value = "房子ID")
     @ApiModelProperty("房子ID")
