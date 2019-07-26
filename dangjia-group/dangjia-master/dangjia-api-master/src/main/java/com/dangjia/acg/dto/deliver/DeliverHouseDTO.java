@@ -1,6 +1,5 @@
 package com.dangjia.acg.dto.deliver;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;

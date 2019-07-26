@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -191,7 +190,7 @@ public class EvaluateService {
                 memberMapper.updateByPrimaryKeySelective(member);
             }
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(),
+            configMessageService.addConfigMessage(null, "gj", houseFlowApply.getWorkerId(),
                     "0", "完工申请结果", String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS,
                             house.getHouseName()), "5");
             return ServerResponse.createBySuccessMessage("操作成功");
@@ -229,7 +228,7 @@ public class EvaluateService {
             houseFlowApply.setStartDate(DateUtil.addDateDays(new Date(), 1));
             houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-            configMessageService.addConfigMessage(null, AppType.GONGJIANG, member.getId(), "0",
+            configMessageService.addConfigMessage(null, "gj", member.getId(), "0",
                     "阶段/整体审核超时扣钱提醒", String.format(DjConstants.PushMessage.STEWARD_SHENGHECHAOSHI, house.getHouseName(),
                             workerType.getName()), "0");
         }
@@ -257,7 +256,7 @@ public class EvaluateService {
             member.setSurplusMoney(surplusMoney);
             member.setHaveMoney(haveMoney);
             memberMapper.updateByPrimaryKeySelective(member);
-            configMessageService.addConfigMessage(null, AppType.GONGJIANG, member.getId(), "0",
+            configMessageService.addConfigMessage(null, "gj", member.getId(), "0",
                     workerType.getName() + "旷工扣钱",
                     String.format(DjConstants.PushMessage.CRAFTSMAN_ABSENTEEISM, house.getHouseName()), "0");
         }
@@ -371,6 +370,11 @@ public class EvaluateService {
                 hf.setPause(1);
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
             }
+            //推送工匠审核结果
+            //configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_PASS,house.getHouseName()) ,"5");
+            //推送业主大管家的审核结果
+            //configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","完工申请结果",String.format(DjConstants.PushMessage.OWNER_TWO_FINISHED,house.getHouseName()) ,"");
+
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -383,12 +387,19 @@ public class EvaluateService {
      * 业主评价管家完工 最后完工
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveEvaluateSupervisor(String userToken,String houseFlowApplyId, String content, int star, boolean isAuto,Boolean onekey) {
+    public ServerResponse saveEvaluateSupervisor(String userToken,String houseFlowApplyId, String content, int star, boolean isAuto,String onekey) {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
                 return ServerResponse.createByErrorMessage("重复审核");
+            }
+            //业主同意一键退款
+            if(!CommonUtil.isEmpty(onekey)&&"1".equals(onekey)) {
+                ServerResponse response=mendOrderService.landlordOnekeyBack(userToken, house.getId());
+                if (!response.isSuccess()) {
+                    return response;
+                }
             }
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             Evaluate evaluate = new Evaluate();
@@ -417,11 +428,9 @@ public class EvaluateService {
             //业主审核管家
             houseFlowApplyService.checkSupervisor(houseFlowApplyId, isAuto);
 
-            //业主同意一键退款
-            if(onekey) {
-                mendOrderService.landlordOnekeyBack(userToken, house.getId());
-            }
-             configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
+
+            configMessageService.addConfigMessage(null, "gj", houseFlowApply.getWorkerId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
+
 
             //短信通知业务本门
             Map<String, String> temp_para = new HashMap();
@@ -518,8 +527,8 @@ public class EvaluateService {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return serverResponse;
             }
-            configMessageService.addConfigMessage(null, AppType.GONGJIANG, worker.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
-            configMessageService.addConfigMessage(null, AppType.GONGJIANG, supervisor.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.STEWARD_EVALUATE, house.getHouseName()), "6");
+            configMessageService.addConfigMessage(null, "gj", worker.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
+            configMessageService.addConfigMessage(null, "gj", supervisor.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.STEWARD_EVALUATE, house.getHouseName()), "6");
 
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {

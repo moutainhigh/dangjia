@@ -1,6 +1,5 @@
 package com.dangjia.acg.mapper.deliver;
 
-import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.modle.deliver.Cart;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -16,9 +15,6 @@ import java.util.List;
 @Repository
 public interface ICartMapper extends Mapper<Cart> {
 
-    /*更新商品名称和各项信息*/
-    void updateCartById(@Param("lists") JSONArray lists, @Param("brandSeriesId") String brandSeriesId, @Param("brandId") String brandId,
-                        @Param("goodsId") String goodsId, @Param("id") String id);
 
     /*更新商品名称和各项信息*/
     List<Cart> cartList( @Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId, @Param("memberId") String memberId);
