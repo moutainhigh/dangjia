@@ -1,5 +1,7 @@
 package com.dangjia.acg.dto.other;
+
 import lombok.Data;
+
 import java.util.Date;
 @Data
 public class ClueDTO {

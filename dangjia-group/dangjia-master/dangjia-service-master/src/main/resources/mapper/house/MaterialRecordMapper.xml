@@ -11,20 +11,6 @@
 		create_date as createDate,
 		modify_date as modifyDate
 	</sql>
-	<!--更新商品名称-->
-	<update id="updateMaterialRecordById" parameterType="java.lang.String">
-		UPDATE dj_house_material_record p1
-		SET p1.product_name =
-		<foreach collection="lists" item="item" index="index"
-				 separator=" " open="case id" close="end">
-			when id then #{item.name}
-		</foreach>
-		where product_id in
-		<foreach collection="lists" index="index" item="item"
-				 separator="," open="(" close=")">
-			#{item.id,jdbcType=BIGINT}
-		</foreach>
-	</update>
 
 
 </mapper>

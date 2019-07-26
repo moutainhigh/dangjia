@@ -70,36 +70,6 @@
             )
         </foreach>
     </insert>
-    <!-- 批量更新数据 -->
-    <update id="updateBatch" parameterType="java.util.List">
-        update dj_basics_attribute_value set
-        name =
-        <foreach collection="list" item="attributeValue" index="index"
-                 separator=" " open="case id" close="end">
-            when #{attributeValue.id} then #{attributeValue.name}
-        </foreach>
-        ,attribute_id =
-        <foreach collection="list" item="attributeValue" index="index"
-                 separator=" " open="case id" close="end">
-            when #{attributeValue.id} then #{attributeValue.attribute_id}
-        </foreach>
-        ,introduction =
-        <foreach collection="list" item="attributeValue" index="index"
-                 separator=" " open="case id" close="end">
-            when #{attributeValue.id} then #{attributeValue.introduction}
-        </foreach>
-        ,image =
-        <foreach collection="list" item="attributeValue" index="index"
-                 separator=" " open="case id" close="end">
-            when #{attributeValue.id} then #{attributeValue.image}
-        </foreach>
-        ,modify_date=SYSDATE()
-        where id in
-        <foreach collection="list" item="attributeValue" index="index"
-                 separator="," open="(" close=")">
-            #{attributeValue.id}
-        </foreach>
-    </update>
 
     <!-- 根据属性id查询所有属性选项 -->
     <!--<select id="queryByAttributeId" resultMap="attributeValueResultMap">-->
