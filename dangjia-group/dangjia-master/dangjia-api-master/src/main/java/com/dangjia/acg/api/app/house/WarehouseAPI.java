@@ -43,5 +43,5 @@ public interface WarehouseAPI {
 
     @PostMapping("edit/product/edit")
     @ApiOperation(value = "批量更新指定商品信息", notes = "批量更新指定商品信息")
-    ServerResponse editProductData(String cityId, Product product);
+    ServerResponse editProductData(@RequestParam("cityId") String cityId,@RequestParam("productJson")  String productJson);
 }

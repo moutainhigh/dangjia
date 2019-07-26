@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.house;
 
+import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.actuary.ActuaryOpeAPI;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
@@ -271,57 +272,60 @@ public class WarehouseService {
 
 
 
-    public ServerResponse editProductData(String cityId, Product product) {
+    public ServerResponse editProductData(String cityId, String productJson) {
 
-        Example example =new Example(MaterialRecord.class);
-        example.createCriteria().andEqualTo(MaterialRecord.CITY_ID,cityId)
-                .andEqualTo(MaterialRecord.PRODUCT_ID,product.getId());
-        MaterialRecord materialRecord=new MaterialRecord();
-        materialRecord.setId(null);
-        materialRecord.setModifyDate(new Date());
-        materialRecord.setProductName(product.getName());
-        materialRecordMapper.updateByExampleSelective(materialRecord,example);
+        Product product = JSON.parseObject(productJson, Product.class);
+        if(product!=null) {
+            Example example = new Example(MaterialRecord.class);
+            example.createCriteria().andEqualTo(MaterialRecord.CITY_ID, cityId)
+                    .andEqualTo(MaterialRecord.PRODUCT_ID, product.getId());
+            MaterialRecord materialRecord = new MaterialRecord();
+            materialRecord.setId(null);
+            materialRecord.setModifyDate(new Date());
+            materialRecord.setProductName(product.getName());
+            materialRecordMapper.updateByExampleSelective(materialRecord, example);
 
-        example =new Example(OrderItem.class);
-        example.createCriteria().andEqualTo(OrderItem.CITY_ID,cityId)
-                .andEqualTo(OrderItem.PRODUCT_ID,product.getId());
-        OrderItem orderItem=new OrderItem();
-        orderItem.setId(null);
-        orderItem.setModifyDate(new Date());
-        orderItem.setProductName(product.getName());
-        orderItem.setImage(product.getImage());
-        orderItemMapper.updateByExampleSelective(orderItem,example);
+            example = new Example(OrderItem.class);
+            example.createCriteria().andEqualTo(OrderItem.CITY_ID, cityId)
+                    .andEqualTo(OrderItem.PRODUCT_ID, product.getId());
+            OrderItem orderItem = new OrderItem();
+            orderItem.setId(null);
+            orderItem.setModifyDate(new Date());
+            orderItem.setProductName(product.getName());
+            orderItem.setImage(product.getImage());
+            orderItemMapper.updateByExampleSelective(orderItem, example);
 
-        example =new Example(OrderSplitItem.class);
-        example.createCriteria().andEqualTo(OrderSplitItem.CITY_ID,cityId)
-                .andEqualTo(OrderSplitItem.PRODUCT_ID,product.getId());
-        OrderSplitItem orderSplitItem=new OrderSplitItem();
-        orderSplitItem.setId(null);
-        orderSplitItem.setProductName(product.getName());
-        orderSplitItem.setModifyDate(new Date());
-        orderSplitItem.setImage(product.getImage());
-        orderSplitItemMapper.updateByExampleSelective(orderSplitItem,example);
+            example = new Example(OrderSplitItem.class);
+            example.createCriteria().andEqualTo(OrderSplitItem.CITY_ID, cityId)
+                    .andEqualTo(OrderSplitItem.PRODUCT_ID, product.getId());
+            OrderSplitItem orderSplitItem = new OrderSplitItem();
+            orderSplitItem.setId(null);
+            orderSplitItem.setProductName(product.getName());
+            orderSplitItem.setModifyDate(new Date());
+            orderSplitItem.setImage(product.getImage());
+            orderSplitItemMapper.updateByExampleSelective(orderSplitItem, example);
 
-        example =new Example(MendMateriel.class);
-        example.createCriteria().andEqualTo(MendMateriel.CITY_ID,cityId)
-                .andEqualTo(MendMateriel.PRODUCT_ID,product.getId());
-        MendMateriel mendMateriel=new MendMateriel();
-        mendMateriel.setId(null);
-        mendMateriel.setModifyDate(new Date());
-        mendMateriel.setProductName(product.getName());
-        mendMateriel.setImage(product.getImage());
-        mendMaterielMapper.updateByExampleSelective(mendMateriel,example);
+            example = new Example(MendMateriel.class);
+            example.createCriteria().andEqualTo(MendMateriel.CITY_ID, cityId)
+                    .andEqualTo(MendMateriel.PRODUCT_ID, product.getId());
+            MendMateriel mendMateriel = new MendMateriel();
+            mendMateriel.setId(null);
+            mendMateriel.setModifyDate(new Date());
+            mendMateriel.setProductName(product.getName());
+            mendMateriel.setImage(product.getImage());
+            mendMaterielMapper.updateByExampleSelective(mendMateriel, example);
 
 
-        example =new Example(Warehouse.class);
-        example.createCriteria().andEqualTo(Warehouse.CITY_ID,cityId)
-                .andEqualTo(Warehouse.PRODUCT_ID,product.getId());
-        Warehouse warehouse=new Warehouse();
-        warehouse.setId(null);
-        warehouse.setModifyDate(new Date());
-        warehouse.setProductName(product.getName());
-        warehouse.setImage(product.getImage());
-        warehouseMapper.updateByExampleSelective(warehouse,example);
+            example = new Example(Warehouse.class);
+            example.createCriteria().andEqualTo(Warehouse.CITY_ID, cityId)
+                    .andEqualTo(Warehouse.PRODUCT_ID, product.getId());
+            Warehouse warehouse = new Warehouse();
+            warehouse.setId(null);
+            warehouse.setModifyDate(new Date());
+            warehouse.setProductName(product.getName());
+            warehouse.setImage(product.getImage());
+            warehouseMapper.updateByExampleSelective(warehouse, example);
+        }
 
 //         dj_house_surplus_ware_house_item ;
 //         dj_house_surplus_ware_divert ;
