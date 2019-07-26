@@ -120,7 +120,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			product_name LIKE CONCAT('%',#{name},'%')
 		</if>
 	</select>
-	<!--更新商品
 
 </mapper>
 
