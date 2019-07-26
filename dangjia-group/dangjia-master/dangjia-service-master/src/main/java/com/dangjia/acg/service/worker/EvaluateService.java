@@ -398,6 +398,13 @@ public class EvaluateService {
             if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
                 return ServerResponse.createByErrorMessage("重复审核");
             }
+            //业主同意一键退款
+            if(!CommonUtil.isEmpty(onekey)&&"1".equals(onekey)) {
+                ServerResponse response=mendOrderService.landlordOnekeyBack(userToken, house.getId());
+                if (!response.isSuccess()) {
+                    return response;
+                }
+            }
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             Evaluate evaluate = new Evaluate();
             evaluate.setContent(content);
@@ -425,10 +432,7 @@ public class EvaluateService {
             //业主审核管家
             houseFlowApplyService.checkSupervisor(houseFlowApplyId, isAuto);
 
-            //业主同意一键退款
-            if(!CommonUtil.isEmpty(onekey)&&"1".equals(onekey)) {
-                mendOrderService.landlordOnekeyBack(userToken, house.getId());
-            }
+
             configMessageService.addConfigMessage(null, "gj", houseFlowApply.getWorkerId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
 
 
