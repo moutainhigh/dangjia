@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.basics;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.house.WarehouseAPI;
@@ -529,7 +530,7 @@ public class ProductService {
 
                 if(!CommonUtil.isEmpty(cityId)){
                     Product product1 = iProductMapper.selectByPrimaryKey(product.getId());
-                    warehouseAPI.editProductData(cityId,product1);
+                    warehouseAPI.editProductData(cityId, JSON.toJSONString(product1));
 
                     Example example =new Example(BudgetMaterial.class);
                     example.createCriteria().andEqualTo(MaterialRecord.PRODUCT_ID,product.getId());

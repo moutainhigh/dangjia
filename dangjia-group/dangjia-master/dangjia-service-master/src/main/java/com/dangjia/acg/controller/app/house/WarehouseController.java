@@ -42,7 +42,7 @@ public class WarehouseController implements WarehouseAPI {
     }
 
     @Override
-    public ServerResponse editProductData(String cityId, Product product){
-        return warehouseService.editProductData(cityId, product);
+    public ServerResponse editProductData(String cityId, String  productJson){
+        return warehouseService.editProductData(cityId, productJson);
     }
 }
