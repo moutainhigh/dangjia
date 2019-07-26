@@ -314,7 +314,7 @@ public class MainUserController implements MainUserAPI {
             logger.debug("用户登录，用户验证开始！member=" + user.getMobile());
             redisClient.put(Constants.USER_KEY + existUser.getId(), existUser);
             redisClient.put(Constants.CITY_KEY + existUser.getId(), department.getCityId());
-            groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{existUser.getId()}, new String[1]);
+            groupInfoService.registerJGUsers(AppType.SALE.getDesc(), new String[]{existUser.getId()}, new String[1]);
             logger.info("用户登录，用户验证通过！member=" + user.getMobile());
             msg = ServerResponse.createBySuccess("用户登录，用户验证通过！member=" + user.getMobile(), existUser.getId());
             MainUser mainUser = userMapper.selectByPrimaryKey(existUser.getId());
