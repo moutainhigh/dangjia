@@ -285,7 +285,9 @@ public interface MemberAPI {
                                  @RequestParam("password") String password,
                                  @RequestParam("smscode") int smscode,
                                  @RequestParam("invitationCode") String invitationCode,
-                                 @RequestParam("userRole") Integer userRole);
+                                 @RequestParam("userRole") Integer userRole,
+                                 @RequestParam("longitude")String longitude,
+                                 @RequestParam("latitude") String latitude);
 
     /**
      * showdoc

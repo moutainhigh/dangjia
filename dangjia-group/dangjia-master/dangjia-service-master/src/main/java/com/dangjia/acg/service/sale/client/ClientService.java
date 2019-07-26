@@ -1,9 +1,11 @@
 package com.dangjia.acg.service.sale.client;
 
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.controller.user.MainUserController;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
 import com.dangjia.acg.dto.sale.client.OrdersCustomerDTO;
 import com.dangjia.acg.dto.sale.client.SaleClueDTO;
@@ -19,13 +21,17 @@ import com.dangjia.acg.mapper.sale.residential.ResidentialRangeMapper;
 import com.dangjia.acg.mapper.sale.stroe.MonthlyTargetMappper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.house.ModelingVillage;
+import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
 import com.dangjia.acg.modle.sale.store.MonthlyTarget;
 import com.dangjia.acg.modle.store.Store;
+import com.dangjia.acg.modle.store.StoreUser;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -65,6 +71,8 @@ public class ClientService {
     private IStoreMapper iStoreMapper;
     @Autowired
     private IStoreUserMapper iStoreUserMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * 录入客户
@@ -73,11 +81,23 @@ public class ClientService {
      * @return
      */
     public ServerResponse enterCustomer(Clue clue,String userToken) {
-        Object object = constructionService.getMember(userToken);
+        Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        Member user = (Member) object;
+        AccessToken accessToken = (AccessToken) object;
+        if (CommonUtil.isEmpty(accessToken.getUserId())) {
+            return ServerResponse.createbyUserTokenError();
+        }
+        MainUser user = userMapper.getNameById(accessToken.getUserId());
+        Example example = new Example(Store.class);
+        example.createCriteria().andEqualTo(Store.USER_ID, user.getId())
+                .andEqualTo(Store.DATA_STATUS, 0);
+        List<Store> storeList = iStoreMapper.selectByExample(example);
+        if (storeList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        Store store = storeList.get(0);
         Clue groupBy = clueMapper.getGroupBy(clue.getPhone(), user.getId());
         if(null!=groupBy){//如果客户已录入过则把录入的房子变为意向房子
             groupBy.setAddress(groupBy.getAddress()+","+clue.getAddress());
@@ -92,6 +112,8 @@ public class ClientService {
         clue.setStage(0);
         clue.setDataStatus(0);
         clue.setUserId(user.getId());
+        clue.setStoreId(store.getId());
+        clue.setCusService(user.getId());
         if(clueMapper.insert(clue)>0){
             return ServerResponse.createBySuccessMessage("提交成功");
         }
@@ -118,11 +140,15 @@ public class ClientService {
      * @return
      */
     public ServerResponse clientPage(String userToken,String storeId) {
-        Object object = constructionService.getMember(userToken);
+        Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        Member user = (Member) object;
+        AccessToken accessToken = (AccessToken) object;
+        if (CommonUtil.isEmpty(accessToken.getUserId())) {
+            return ServerResponse.createbyUserTokenError();
+        }
+        MainUser user = userMapper.getNameById(accessToken.getUserId());
         Map<String, Object> map=new HashedMap();
         Example example=new Example(Store.class);
         example.createCriteria().andEqualTo(Store.USER_ID,user.getId());
@@ -157,11 +183,12 @@ public class ClientService {
             }
             map.put("outField", residentialRangeDTOList);
         }else{
-            List<StoreUserDTO> storeUsers = iStoreUserMapper.getStoreUsers(storeId, null);
+            List<StoreUserDTO> storeUsers = iStoreUserMapper.getStoreUsers(storeId, null,null);
             map.put("followList", clueMapper.clientPage("0", null,storeUsers));
             map.put("placeOrder", clueMapper.clientPage("1", null,storeUsers));
             map.put("completion", clueMapper.clientPage("2", null,storeUsers));
             map.put("sleepingCustomer",clueMapper.sleepingCustomer(storeUsers));
+
         }
        return ServerResponse.createBySuccess("查询成功",map);
     }
@@ -178,11 +205,15 @@ public class ClientService {
      */
     public ServerResponse followList(String userToken, PageDTO pageDTO,String label, String time, Integer stage , String searchKey) {
         try {
-            Object object = constructionService.getMember(userToken);
+            Object object = constructionService.getAccessToken(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member user = (Member) object;
+            AccessToken accessToken = (AccessToken) object;
+            if (CommonUtil.isEmpty(accessToken.getUserId())) {
+                return ServerResponse.createbyUserTokenError();
+            }
+            MainUser user = userMapper.getNameById(accessToken.getUserId());
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Clue> clues = clueMapper.followList(label, time, stage, searchKey ,user.getId());
             PageInfo pageResult = new PageInfo(clues);
@@ -223,11 +254,15 @@ public class ClientService {
      * @return
      */
     public ServerResponse ordersCustomer( String userToken,String visitState,PageDTO pageDTO,String searchKey, String time) {
-            Object object = constructionService.getMember(userToken);
+            Object object = constructionService.getAccessToken(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member user = (Member) object;
+            AccessToken accessToken = (AccessToken) object;
+            if (CommonUtil.isEmpty(accessToken.getUserId())) {
+                return ServerResponse.createbyUserTokenError();
+            }
+            MainUser user = userMapper.getNameById(accessToken.getUserId());
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<OrdersCustomerDTO> ordersCustomerDTOS = clueMapper.ordersCustomer(user.getId(), visitState, searchKey, time);
             PageInfo pageResult = new PageInfo(ordersCustomerDTOS);

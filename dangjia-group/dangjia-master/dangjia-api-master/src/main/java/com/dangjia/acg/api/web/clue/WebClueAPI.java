@@ -84,6 +84,6 @@ public interface WebClueAPI {
      */
     @PostMapping("web/clue/sendUser")
     @ApiOperation(value = "转客户", notes = "转客户")
-    ServerResponse sendUser(@RequestParam("member") Member member, @RequestParam("phone") String phone);
+    ServerResponse sendUser(@RequestParam("member") Member member, @RequestParam("phone") String phone ,@RequestParam("longitude") String longitude,@RequestParam("latitude") String latitude);
 
 }
