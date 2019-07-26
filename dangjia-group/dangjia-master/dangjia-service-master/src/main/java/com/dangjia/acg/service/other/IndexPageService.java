@@ -298,11 +298,7 @@ public class IndexPageService {
             if(lsHouse.size()>0){
                 for (House house : lsHouse) {
                     house.setHouseId(house.getId());
-                    if(!CommonUtil.isEmpty(house.getImage())){
-                        house.setImage(address+house.getImage());
-                    }else{
-                        house.setImage(null);
-                    }
+                    house = this.getHouseImage( address,house);
                     houses.add(house);
                     map.put(house.getVillageId(), "Y");
                 }
@@ -322,8 +318,7 @@ public class IndexPageService {
         return ServerResponse.createBySuccess("查询成功", houses);
     }
 
-    private House getHouseImage(House house) {
-        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+    private House getHouseImage(String address,House house) {
         String image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null);
         if (CommonUtil.isEmpty(image)){
             image=houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),0);
@@ -352,6 +347,7 @@ public class IndexPageService {
         if (CommonUtil.isEmpty(longitude)) {
             longitude = "112.938904";
         }
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         List<House> houses = houseMapper.getRecommended(latitude, longitude, limit);
         for (House house : houses) {
             request.setAttribute(Constants.CITY_ID, house.getCityId());
@@ -369,7 +365,7 @@ public class IndexPageService {
 
             BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getId());
             totalPrice = totalPrice.add(totalAmount);
-            house = this.getHouseImage(house);
+            house = this.getHouseImage(address,house);
             house.setMoney(totalPrice);
         }
         return ServerResponse.createBySuccess("查询成功", houses);

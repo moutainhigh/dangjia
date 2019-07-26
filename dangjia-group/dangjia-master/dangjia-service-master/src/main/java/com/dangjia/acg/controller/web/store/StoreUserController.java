@@ -17,6 +17,7 @@ public class StoreUserController implements StoreUserAPI {
     private StoreUserServices storeUserServices;
 
     @Override
+    @ApiMethod
     public ServerResponse addStoreUser(HttpServletRequest request, String userId, String storeId, Integer type) {
         return storeUserServices.addStoreUser(userId, storeId, type);
     }
@@ -28,6 +29,7 @@ public class StoreUserController implements StoreUserAPI {
     }
 
     @Override
+    @ApiMethod
     public ServerResponse updateStoreUser(HttpServletRequest request, String storeUserId, Integer type) {
         return storeUserServices.updateStoreUser(storeUserId, type);
     }

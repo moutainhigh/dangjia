@@ -60,7 +60,7 @@ public class StoreUserServices {
 
     public ServerResponse queryStoreUser(String storeId, String searchKey, PageDTO pageDTO) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<StoreUserDTO> storeUserDTOS = iStoreUserMapper.getStoreUsers(storeId, searchKey);
+        List<StoreUserDTO> storeUserDTOS = iStoreUserMapper.getStoreUsers(storeId, searchKey,null);
         if (storeUserDTOS.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }

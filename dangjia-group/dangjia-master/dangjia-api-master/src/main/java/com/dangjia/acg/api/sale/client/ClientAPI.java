@@ -21,29 +21,46 @@ import javax.servlet.http.HttpServletRequest;
 @Api(value = "销售端客户页接口", description = "销售端客户页接口")
 public interface ClientAPI {
 
+
+    @PostMapping(value = "sale/client/clientPage")
+    @ApiOperation(value = "客户页", notes = "客户页")
+    ServerResponse clientPage(@RequestParam("request") HttpServletRequest request,
+                              @RequestParam("userToken") String userToken,
+                              @RequestParam("storeId") String storeId);
+
+    /**
+     * showdoc
+     * @param clue      必选/可选 string TODO
+     * @param clue      必选/可选 string TODO
+     * @param clue      必选/可选 string TODO
+     * @param clue      必选/可选 string TODO
+     * @param userToken 必选 string userToken
+     * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
+     * @catalog 当家接口文档/销售模块/客户模块
+     * @title 录入客户
+     * @description 录入客户
+     * @method POST
+     * @url  master/sale/client/enterCustomer
+     * @return_param groupid int 用户组id
+     * @return_param name string 用户昵称
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 99
+     * @Author: Ruking 18075121944
+     * @Date: 2019/7/24 9:43
+     */
     @PostMapping(value = "sale/client/enterCustomer")
     @ApiOperation(value = "录入客户", notes = "录入客户")
     ServerResponse enterCustomer(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("clue") Clue clue,
                                  @RequestParam("userToken") String userToken);
 
-    @PostMapping(value = "sale/client/updateCustomer")
-    @ApiOperation(value = "编辑客户", notes = "编辑客户")
-    ServerResponse updateCustomer(@RequestParam("request") HttpServletRequest request,
-                                  @RequestParam("clue") Clue clue);
-
-
-    @PostMapping(value = "sale/client/clientPage")
-    @ApiOperation(value = "客户页", notes = "客户页")
-    ServerResponse  clientPage(@RequestParam("request") HttpServletRequest request,
-                               @RequestParam("userToken") String userToken);
-
     /**
      * 跟进列表
+     *
      * @param request
      * @param label
-     * @param time 排序 "desc":降序  不传升序
-     * @param stage 0:新线索（线索阶段） 1：继续跟进（线索阶段）  4：转客服 （客户阶段）
+     * @param time    排序 "desc":降序  不传升序
+     * @param stage   0:新线索（线索阶段） 1：继续跟进（线索阶段）  4：转客服 （客户阶段）
      * @return
      */
     @PostMapping(value = "sale/client/followList")
@@ -56,9 +73,7 @@ public interface ClientAPI {
                               @RequestParam("stage") Integer stage,
                               @RequestParam("searchKey") String searchKey);
 
-
     /**
-     *
      * @param request
      * @param userToken
      * @param visitState 1:已下单  3：已竣工
@@ -75,4 +90,9 @@ public interface ClientAPI {
                                   @RequestParam("pageDTO") PageDTO pageDTO,
                                   @RequestParam("time") String time,
                                   @RequestParam("searchKey") String searchKey);
+
+    @PostMapping(value = "sale/client/updateCustomer")
+    @ApiOperation(value = "编辑客户", notes = "编辑客户")
+    ServerResponse updateCustomer(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("clue") Clue clue);
 }

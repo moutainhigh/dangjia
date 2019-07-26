@@ -58,12 +58,12 @@
     
     <select id="getLabelByIds" resultType="com.dangjia.acg.dto.member.SaleMemberLabelDTO">
         SELECT
-          id，
+          id,
           CONCAT_WS("-",parent_name,name) name
         FROM dj_member_label
-        WHERE id in 
+        WHERE id in
         <foreach collection="labelIds" index="index" item="item" open="(" separator="," close=")">
-            #{item}
+             #{item}
         </foreach>
     </select>
 

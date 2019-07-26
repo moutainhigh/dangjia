@@ -74,7 +74,11 @@ public class SaleService {
         if (!CommonUtil.isEmpty(storeId)) {
             Store store = iStoreMapper.selectByPrimaryKey(storeId);
             if (store != null) {
-                return store;
+                if (store.getUserId().equals(userId)) {
+                    return store;
+                } else {
+                    redisClient.deleteCache("storeId" + userId);
+                }
             }
         }
         PageHelper.startPage(0, 1);

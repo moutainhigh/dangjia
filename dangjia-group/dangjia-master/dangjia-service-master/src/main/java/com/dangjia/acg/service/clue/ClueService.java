@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.GaoDeUtils;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.common.util.excel.ImportExcel;
 import com.dangjia.acg.dto.other.ClueDTO;
@@ -14,6 +15,7 @@ import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.user.UserRoleMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.clue.ClueTalk;
@@ -21,6 +23,7 @@ import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberLabel;
+import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.user.UserRoleKey;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -53,6 +56,8 @@ public class ClueService {
     private IMemberLabelMapper iMemberLabelMapper;
     @Autowired
     private UserRoleMapper userRoleMapper;
+    @Autowired
+    private IStoreMapper iStoreMapper;
 
     /**
      * 获取所有线索
@@ -266,7 +271,7 @@ public class ClueService {
      * 转客户
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse sendUser(Member member, String phone) {
+    public ServerResponse sendUser(Member member, String phone ,String longitude, String latitude) {
         try {
             Clue clue = clueMapper.getByPhone(phone);
             //表示线索表存在线索
@@ -316,6 +321,22 @@ public class ClueService {
                 //操作dj_member表
                 member.setCreateDate(clue.getCreateDate());
                 iMemberMapper.updateByPrimaryKeySelective(member);
+            }else{
+                List<Store> stores = iStoreMapper.selectAll();
+                for (Store store : stores) {
+                    if (GaoDeUtils.isInPolygon(longitude+ "," + latitude, store.getScopeItude())) {
+                        clue=new Clue();
+                        clue.setOwername(member.getName()!=null?member.getName():member.getNickName());
+                        clue.setPhone(phone);
+                        clue.setStage(4);
+                        clue.setDataStatus(0);
+                        clue.setMemberId(member.getId());
+                        clue.setUserId(store.getUserId());
+                        clue.setStoreId(store.getId());
+                        clueMapper.insert(clue);
+                        break;
+                    }
+                }
             }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {

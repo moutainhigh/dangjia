@@ -32,8 +32,8 @@ public class MemberController implements MemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getMemberInfo(Integer userToken) {
-        return memberService.getMemberInfo(userToken);
+    public ServerResponse getMemberInfo(String userToken, Integer userRole) {
+        return memberService.getMemberInfo(userToken, userRole);
     }
 
     @Override
@@ -50,8 +50,8 @@ public class MemberController implements MemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse checkRegister(HttpServletRequest request, String phone, String password, int smscode, String invitationCode, Integer userRole) {
-        return memberService.checkRegister(request, phone, smscode, password, invitationCode, userRole);
+    public ServerResponse checkRegister(HttpServletRequest request, String phone, String password, int smscode, String invitationCode, Integer userRole ,String longitude, String latitude) {
+        return memberService.checkRegister(request, phone, smscode, password, invitationCode, userRole,longitude,latitude);
     }
 
     @Override

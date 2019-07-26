@@ -50,10 +50,8 @@
        from dj_clue
        WHERE
        data_status=0
-       <if test="null!=phone and ''!=phone">
-           and phone=#{phone}
-       </if>
-       <if test="null!=phone and ''!=phone">
+       and phone=#{phone}
+       <if test="null!=userId and ''!=userId">
            and user_id=#{userId}
        </if>
     </select>
@@ -64,7 +62,7 @@
        from dj_clue
        WHERE
        data_status=0
-       <if test="null!=label_id and ''!=label_id">
+       <if test="null!=label and ''!=label">
            and label_id like CONCAT('%',#{label},'%')
        </if>
        <if test="null!=searchKey and ''!=searchKey">
@@ -87,53 +85,74 @@
     <select id="clientPage" resultType="com.dangjia.acg.dto.sale.client.CustomerIndexDTO">
         SELECT 
           <if test="type==0">
-              owername as name,phone,modify_date as modifyDate
+              c.id,owername as name,phone,c.modify_date as modifyDate
           </if>
           <if test="type==1 or type==2">
+              m.id,
               if(m.name is not null,m.nick_name,m.name) as name,
               m.mobile as phone,
-              modify_date as modifyDate,
-              CONCAT(IFNULL(residential,'*'),IFNULL(building,'*栋'),IFNULL(unit,'*单元'),IFNULL(number,'*号')) as houseName
+              m.modify_date as modifyDate,
+              CONCAT(IFNULL(h.residential,'*'),IFNULL(h.building,'*栋'),IFNULL(h.unit,'*单元'),IFNULL(h.number,'*号')) as houseName
           </if>
         FROM dj_clue c
         <if test="type==0">
             WHERE c.data_status = 0 and c.stage NOT IN (2,3)
-            and c.user_id=#{userId}
+            <if test="null!=userId and ''!=userId">
+                and c.user_id=#{userId}
+            </if>
+            <if test="null!=storeUsers and ''!=storeUsers">
+                <foreach collection="storeUsers" index="index" item="item" open="(" separator="," close=")">
+                    and c.user_id in #{item}
+                </foreach>
+            </if>
             ORDER BY c.modify_date desc
         </if>
         <if test="type==1">
             INNER JOIN dj_member m
-            ON m.member_id=c.member_id
+            ON m.id=c.member_id
             INNER JOIN dj_house h
-            ON h.member_id = m.member_id  and h.data_status =0 and h.visit_state =1
+            ON h.member_id = m.id  and h.data_status =0 and h.visit_state =1
             WHERE m.data_status = 0
             and c.data_status = 0
-            and c.user_id=#{userId}
+            <if test="null!=userId and ''!=userId">
+                and c.user_id=#{userId}
+            </if>
+            <if test="null!=storeUsers and ''!=storeUsers">
+                <foreach collection="storeUsers" index="index" item="item" open="(" separator="," close=")">
+                    and c.user_id in #{item}
+                </foreach>
+            </if>
             ORDER BY h.modify_date desc
         </if>
         <if test="type==2">
             INNER JOIN dj_member m
-            ON m.member_id=c.member_id
+            ON m.id=c.member_id
             INNER JOIN dj_house h
-            ON h.member_id = m.member_id  and h.data_status =0 and h.visit_state =3
+            ON h.member_id = m.id  and h.data_status =0 and h.visit_state =3
             WHERE m.data_status = 0
             and c.data_status = 0
-            and c.user_id=#{userId}
+            <if test="null!=userId and ''!=userId">
+                and c.user_id=#{userId}
+            </if>
+            <if test="null!=storeUsers and ''!=storeUsers">
+                <foreach collection="storeUsers" index="index" item="item" open="(" separator="," close=")">
+                    and c.user_id in #{item}
+                </foreach>
+            </if>
             ORDER BY h.modify_date desc
         </if>
         limit 1
     </select>
 
-    <select id="Complete" >
-        SELECT count (0) FROM dj_FROM dj_clue c
-        INNER JOIN dj_member m
-        ON m.member_id=c.member_id
-        INNER JOIN dj_house h
-        ON h.member_id = m.member_id  and h.data_status =0 and h.visit_state =1
-        WHERE m.data_status = 0
-        and c.data_status = 0
+    <select id="Complete" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM  dj_clue c
+        INNER JOIN dj_member_customer mc
+        ON mc.member_id=c.member_id
+        WHERE c.data_status = 0
+        and mc.data_status = 0
+        and mc.stage=4
         and c.user_id=#{userId}
-        and date_format(h.modify_date,'%Y-%m')=#{time}
+        and date_format(mc.modify_date,'%Y-%m')=#{time}
     </select>
     
     <select id="ordersCustomer" resultType="com.dangjia.acg.dto.sale.client.OrdersCustomerDTO">
@@ -167,12 +186,34 @@
         <if test="visitState==1">
             ORDER BY h.create_date
         </if>
-        <if test="visitState==1">
+        <if test="visitState==3">
             ORDER BY h.completed_date
         </if>
         <if test="null!=time and ''!=time">
             desc
         </if>
+    </select>
+
+
+    <select id="sleepingCustomer" resultType="com.dangjia.acg.dto.sale.client.CustomerIndexDTO">
+        SELECT id,name,phone,modify_date FROM dj_clue c
+        WHERE c.member_id is null
+        and c.stage=2
+        <foreach collection="storeUsers" index="index" item="item" open="(" separator="," close=")">
+             and c.user_id in #{item}
+        </foreach>
+        UNION
+        SELECT id,name,phone,modify_date FROM dj_clue c
+        INNER JOIN dj_member m
+        ON c.member_id=m.id
+        INNER JOIN dj_member_customer mc
+        ON m.id=mc.member_id
+        INNER JOIN dj_house h
+        ON mc.member_id=h.member_id
+        WHERE mc.stage=2
+        <foreach collection="storeUsers" index="index" item="item" open="(" separator="," close=")">
+            and c.user_id in #{item}
+        </foreach>
     </select>
 
 

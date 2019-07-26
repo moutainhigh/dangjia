@@ -236,8 +236,8 @@ public class HouseController implements HouseAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse updateByHouseId(String building, String unit, String number, String houseId, String villageId, String cityId, String modelingLayoutId) {
-        return houseService.updateByHouseId(building, unit, number, houseId, villageId, cityId, modelingLayoutId);
+    public ServerResponse updateByHouseId(String building, String unit, String number, String houseId, String villageId, String cityId) {
+        return houseService.updateByHouseId(building, unit, number, houseId, villageId, cityId);
     }
 
     @Override

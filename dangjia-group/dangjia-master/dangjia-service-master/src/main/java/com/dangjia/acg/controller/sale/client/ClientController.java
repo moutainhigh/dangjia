@@ -36,8 +36,8 @@ public class ClientController implements ClientAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse clientPage(HttpServletRequest request, String userToken) {
-        return customerService.clientPage(userToken);
+    public ServerResponse clientPage(HttpServletRequest request, String userToken ,String storeId) {
+        return customerService.clientPage(userToken,storeId);
     }
 
     @Override

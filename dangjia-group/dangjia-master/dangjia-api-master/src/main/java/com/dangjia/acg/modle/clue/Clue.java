@@ -91,5 +91,8 @@ public class Clue extends BaseEntity {
     @ApiModelProperty("销售Id")
     private String userId;
 
-
+    @Column(name = "store_id")
+    @Desc(value = "门店Id")
+    @ApiModelProperty("门店Id")
+    private String storeId;
 }

@@ -159,7 +159,7 @@ public class MemberService {
     /**
      * 获取用户详细资料
      */
-    public ServerResponse getMemberInfo(Integer userToken) {
+    public ServerResponse getMemberInfo(String userToken, Integer userRole) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
             return ServerResponse.createbyUserTokenError();
@@ -167,6 +167,12 @@ public class MemberService {
             Member user = memberMapper.selectByPrimaryKey(accessToken.getMemberId());
             if (user == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
+            }
+            if (userRole == 3) {
+                ServerResponse serverResponse = setSale(accessToken, accessToken.getUserId());
+                if (!serverResponse.isSuccess()) {
+                    return ServerResponse.createbyUserTokenError();
+                }
             }
             updataMember(user, accessToken);
             return ServerResponse.createBySuccess("有效！", accessToken);
@@ -190,7 +196,7 @@ public class MemberService {
 
     ServerResponse getUser(Member user, Integer userRole) {
         if (userRole == 1) {
-            clueService.sendUser(user, user.getMobile());
+            clueService.sendUser(user, user.getMobile(),null,null);
         }
         ServerResponse serverResponse = setAccessToken(user, userRole);
         if (!serverResponse.isSuccess()) {
@@ -200,6 +206,33 @@ public class MemberService {
         groupInfoService.registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{user.getId()}, new String[1]);
         groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{user.getId()}, new String[1]);
         return ServerResponse.createBySuccess("登录成功，正在跳转", serverResponse.getResultObj());
+    }
+
+    private ServerResponse setSale(AccessToken accessToken, String userId) {
+        accessToken.setMemberType(-1);
+        Example example = new Example(Store.class);
+        example.createCriteria().andEqualTo(Store.USER_ID, userId)
+                .andEqualTo(Store.DATA_STATUS, 0);
+        int c = iStoreMapper.selectCountByExample(example);
+        if (c > 0) {
+            accessToken.setMemberType(3);
+        } else {
+            example = new Example(StoreUser.class);
+            example.createCriteria().andEqualTo(StoreUser.USER_ID, userId)
+                    .andEqualTo(StoreUser.DATA_STATUS, 0);
+            List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
+            if (storeUsers.size() > 0) {
+                StoreUser storeUser = storeUsers.get(0);
+                if (storeUser.getType() == 0 || storeUser.getType() == 1) {
+                    accessToken.setMemberType(storeUser.getType() == 0 ? 4 : 5);
+                } else {
+                    return ServerResponse.createByErrorMessage("当前用户暂无权限使用该终端，请联系管理员");
+                }
+            } else {
+                return ServerResponse.createByErrorMessage("当前用户暂无权限使用该终端，请联系管理员");
+            }
+        }
+        return ServerResponse.createBySuccess();
     }
 
     private ServerResponse setAccessToken(Member user, Integer userRole) {
@@ -219,28 +252,9 @@ public class MemberService {
         user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
         AccessToken accessToken = TokenUtil.generateAccessToken(user, mainUser);
         if (userRole == 3) {
-            accessToken.setMemberType(-1);
-            Example example = new Example(Store.class);
-            example.createCriteria().andEqualTo(Store.USER_ID, mainUser.getId())
-                    .andEqualTo(Store.DATA_STATUS, 0);
-            int c = iStoreMapper.selectCountByExample(example);
-            if (c > 0) {
-                accessToken.setMemberType(3);
-            } else {
-                example = new Example(StoreUser.class);
-                example.createCriteria().andEqualTo(StoreUser.USER_ID, mainUser.getId())
-                        .andEqualTo(StoreUser.DATA_STATUS, 0);
-                List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
-                if (storeUsers.size() > 0) {
-                    StoreUser storeUser = storeUsers.get(0);
-                    if (storeUser.getType() == 0 || storeUser.getType() == 1) {
-                        accessToken.setMemberType(storeUser.getType() == 0 ? 4 : 5);
-                    } else {
-                        return ServerResponse.createByErrorMessage("当前用户暂无权限使用该终端，请联系管理员");
-                    }
-                } else {
-                    return ServerResponse.createByErrorMessage("当前用户暂无权限使用该终端，请联系管理员");
-                }
+            ServerResponse serverResponse = setSale(accessToken, mainUser.getId());
+            if (!serverResponse.isSuccess()) {
+                return serverResponse;
             }
         }
         if (!CommonUtil.isEmpty(user.getWorkerTypeId())) {
@@ -309,7 +323,7 @@ public class MemberService {
      * 校验验证码并保存密码
      */
     public ServerResponse checkRegister(HttpServletRequest request, String phone, int smscode, String
-            password, String invitationCode, Integer userRole) {
+            password, String invitationCode, Integer userRole ,String longitude, String latitude) {
         Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
         if (registerCode == null || smscode != registerCode) {
             return ServerResponse.createByErrorMessage("验证码错误");
@@ -343,7 +357,7 @@ public class MemberService {
             memberMapper.insertSelective(user);
 //            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
             if (userRole == 1) {
-                clueService.sendUser(user, user.getMobile());
+                clueService.sendUser(user, user.getMobile(),longitude,latitude);
             }
             redisClient.deleteCache(Constants.SMS_CODE + phone);
             if (userRole == 1) {

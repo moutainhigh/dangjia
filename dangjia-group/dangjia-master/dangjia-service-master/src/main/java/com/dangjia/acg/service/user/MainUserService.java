@@ -224,10 +224,6 @@ public class MainUserService {
             return ServerResponse.createByErrorMessage("该用户不存在");
         }
         String userID = request.getParameter(Constants.USERID);
-        MainUser existUser = redisClient.getCache(Constants.USER_KEY + userID, MainUser.class);
-        if (existUser == null) {
-            return ServerResponse.createbyUserTokenError();
-        }
         if (!CommonUtil.isEmpty(mainUser.getMemberId()) && isJob) {
             String userRole = "role" + 3 + ":" + mainUser.getMemberId();
             String token = redisClient.getCache(userRole, String.class);
@@ -235,7 +231,7 @@ public class MainUserService {
             redisClient.deleteCache(token);
         }
         mainUser.setIsJob(isJob);
-        mainUser.setInsertUid(existUser.getId());
+        mainUser.setInsertUid(userID);
         mainUser.setModifyDate(new Date());
         userMapper.updateByPrimaryKeySelective(mainUser);
         return ServerResponse.createBySuccessMessage("操作成功");

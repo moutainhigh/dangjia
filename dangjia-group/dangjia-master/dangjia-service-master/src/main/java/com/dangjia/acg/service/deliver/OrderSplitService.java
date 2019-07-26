@@ -479,11 +479,11 @@ public class OrderSplitService {
     /**
      * 材料员看房子列表
      */
-    public ServerResponse getHouseList(PageDTO pageDTO, String likeAddress) {
+    public ServerResponse getHouseList(PageDTO pageDTO, String likeAddress,String startDate, String endDate) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //        List<House> houseList = houseMapper.selectAll();
-            List<House> houseList = houseMapper.getByLikeAddress(likeAddress);
+            List<House> houseList = houseMapper.getByLikeAddress(likeAddress,startDate,endDate);
             PageInfo pageResult = new PageInfo(houseList);
 
             List<DeliverHouseDTO> deliverHouseDTOList = new ArrayList<DeliverHouseDTO>();
@@ -493,6 +493,7 @@ public class OrderSplitService {
                 deliverHouseDTO.setHouseId(house.getId());
                 deliverHouseDTO.setCreateDate(house.getCreateDate());
                 deliverHouseDTO.setHouseName(house.getHouseName());
+                deliverHouseDTO.setConstructionDate(house.getConstructionDate());
                 deliverHouseDTO.setName("-");
                 deliverHouseDTO.setMobile("-");
                 if (member != null) {
@@ -508,9 +509,6 @@ public class OrderSplitService {
                 deliverHouseDTOList.add(deliverHouseDTO);
             }
             pageResult.setList(deliverHouseDTOList);
-            for (DeliverHouseDTO deliverHouseDTO : deliverHouseDTOList) {
-                System.out.println(deliverHouseDTO);
-            }
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();

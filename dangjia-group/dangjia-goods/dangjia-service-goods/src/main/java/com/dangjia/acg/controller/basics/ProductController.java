@@ -5,6 +5,7 @@ import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.service.basics.GoodsService;
 import com.dangjia.acg.service.basics.ProductService;
 import com.github.pagehelper.PageInfo;
@@ -191,6 +192,11 @@ public class ProductController implements ProductAPI {
         return productService.updateProductById(id, name);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse updateProduct(HttpServletRequest request,Product product){
+        return productService.updateProduct(product);
+    }
     /**
      * 查询商品及下属货品
      *

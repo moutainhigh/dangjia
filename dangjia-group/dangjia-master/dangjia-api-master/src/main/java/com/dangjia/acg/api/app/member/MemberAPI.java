@@ -114,7 +114,8 @@ public interface MemberAPI {
      */
     @RequestMapping(value = "member/info", method = RequestMethod.POST)
     @ApiOperation(value = "获取用户详细资料", notes = "获取用户详细资料")
-    ServerResponse getMemberInfo(@RequestParam("userToken") Integer userToken);
+    ServerResponse getMemberInfo(@RequestParam("userToken") String userToken,
+                                 @RequestParam("userRole") Integer userRole);
 
     /**
      * showdoc
@@ -284,7 +285,9 @@ public interface MemberAPI {
                                  @RequestParam("password") String password,
                                  @RequestParam("smscode") int smscode,
                                  @RequestParam("invitationCode") String invitationCode,
-                                 @RequestParam("userRole") Integer userRole);
+                                 @RequestParam("userRole") Integer userRole,
+                                 @RequestParam("longitude")String longitude,
+                                 @RequestParam("latitude") String latitude);
 
     /**
      * showdoc

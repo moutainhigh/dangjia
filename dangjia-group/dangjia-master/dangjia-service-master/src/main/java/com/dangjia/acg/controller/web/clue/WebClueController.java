@@ -73,8 +73,8 @@ public class WebClueController implements WebClueAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse sendUser(Member member, String phone) {
-        return clueService.sendUser(member, phone);
+    public ServerResponse sendUser(Member member, String phone ,String longitude, String latitude) {
+        return clueService.sendUser(member, phone,longitude,latitude);
     }
 
 }

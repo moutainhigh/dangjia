@@ -381,6 +381,7 @@ public class PaymentService {
                         warehouse.setShopCount(mendMateriel.getShopCount());
                         warehouse.setRepairCount(mendMateriel.getShopCount());
                         warehouse.setStayCount(0.0);
+                        warehouse.setBudgetCount(0.0);
                         warehouse.setRobCount(0.0);
                         warehouse.setAskCount(0.0);//已要数量
                         warehouse.setBackCount(0.0);//退总数
@@ -872,6 +873,7 @@ public class PaymentService {
                 } else {//增加一条
                     Warehouse warehouse = new Warehouse();
                     warehouse.setHouseId(houseId);
+                    warehouse.setBudgetCount(budgetMaterial.getConvertCount());
                     warehouse.setShopCount(budgetMaterial.getConvertCount());
                     if (type == 1) {
                         warehouse.setRobCount(budgetMaterial.getConvertCount());//抢单任务进来总数

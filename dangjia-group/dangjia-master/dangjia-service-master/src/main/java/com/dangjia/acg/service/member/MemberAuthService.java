@@ -114,13 +114,13 @@ public class MemberAuthService {
      */
     public ServerResponse newUserBinding(HttpServletRequest request, String phone, String password,
                                          int smscode, String invitationCode,
-                                         MemberAuth memberAuth) {
+                                         MemberAuth memberAuth ,String longitude, String latitude) {
         if (memberAuth.getUserRole() == null || memberAuth.getUserRole() == 0
                 || memberAuth.getOpenType() == null || memberAuth.getOpenType() == 0
                 || memberAuth.getUnionid() == null) {
             return ServerResponse.createByErrorMessage("传入参数有误");
         }
-        ServerResponse response = memberService.checkRegister(request, phone, smscode, password, invitationCode, memberAuth.getUserRole());
+        ServerResponse response = memberService.checkRegister(request, phone, smscode, password, invitationCode, memberAuth.getUserRole(),longitude,latitude);
         if (!response.isSuccess()) {
             return response;
         }
