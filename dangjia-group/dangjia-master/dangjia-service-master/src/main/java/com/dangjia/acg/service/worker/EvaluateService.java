@@ -400,7 +400,10 @@ public class EvaluateService {
             }
             //业主同意一键退款
             if(!CommonUtil.isEmpty(onekey)&&"1".equals(onekey)) {
-                mendOrderService.landlordOnekeyBack(userToken, house.getId());
+                ServerResponse response=mendOrderService.landlordOnekeyBack(userToken, house.getId());
+                if (!response.isSuccess()) {
+                    return response;
+                }
             }
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             Evaluate evaluate = new Evaluate();
