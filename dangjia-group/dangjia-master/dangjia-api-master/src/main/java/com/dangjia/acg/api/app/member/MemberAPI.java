@@ -450,8 +450,8 @@ public interface MemberAPI {
      * @description 我的邀请码
      * @method POST
      * @url master/member/getMyInvitation
-     * @return_param invitationCode int 邀请码
-     * @return_param invitationNum string 已邀请数
+     * @return_param invitationCode string 邀请码
+     * @return_param invitationNum int 已邀请数
      * @return_param id string 用户ID
      * @return_param codeData string 二维码内容（目前只有销售端有）
      * @remark 更多返回错误代码请看首页的错误代码描述
