@@ -49,8 +49,8 @@ public class WebHouseController implements WebHouseAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO, String members, String prefixs) {
-        return houseService.startWork(request, houseDTO, members, prefixs);
+    public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO) {
+        return houseService.startWork(request, houseDTO);
     }
 
     @Override

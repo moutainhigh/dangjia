@@ -19,6 +19,7 @@ public class HouseDTO {
     private String unit;
     private String number;
     private double square;//外框面积
+    private double buildSquare; //acreage
     private String referHouseId;//参考房子id;
     private String referHouseName;//参考房子信息;
     private String style;//风格

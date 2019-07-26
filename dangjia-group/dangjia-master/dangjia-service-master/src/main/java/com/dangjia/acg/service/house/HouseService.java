@@ -510,7 +510,7 @@ public class HouseService {
             if (srcHouse == null) {
                 srcHouse = iHouseMapper.selectByPrimaryKey(house.getHouseId());
             }
-            if (!CommonUtil.isEmpty(house.getCustomSort())&&!house.getCustomSort().equals("ignore")) {
+            if (!CommonUtil.isEmpty(house.getCustomSort()) && !house.getCustomSort().equals("ignore")) {
                 LOG.info("setHouseInfo getCustomSort:" + house.getCustomSort());
                 if (StringUtils.isNoneBlank(house.getCustomSort())
                         && StringUtils.isNoneBlank(srcHouse.getCustomSort())) {//如果不问null ，说明已经排序过，就是修改顺序
@@ -569,11 +569,12 @@ public class HouseService {
 
 
     /**
-     *修改房子状态
+     * 修改房子状态
+     *
      * @param house
      * @return
      */
-    public ServerResponse setHouseState(House house){
+    public ServerResponse setHouseState(House house) {
         try {
             House srcHouse = iHouseMapper.selectByPrimaryKey(house.getId());
             if (!CommonUtil.isEmpty(house.getSiteDisplay())) {
@@ -595,7 +596,7 @@ public class HouseService {
                     houseChoiceCaseService.delHouseChoiceCase(house.getId());
                 }
             }
-            if(!CommonUtil.isEmpty(house.getVisitState())){
+            if (!CommonUtil.isEmpty(house.getVisitState())) {
                 srcHouse.setVisitState(house.getVisitState());
             }
             iHouseMapper.updateByPrimaryKeySelective(srcHouse);
@@ -607,16 +608,10 @@ public class HouseService {
     }
 
 
-
-
-
-
-
-
     /**
      * WEB确认开工
      */
-    public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO, String members, String prefixs) {
+    public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO) {
         if (houseDTO.getDecorationType() >= 3 || houseDTO.getDecorationType() == 0) {
             return ServerResponse.createByErrorMessage("装修类型参数错误");
         }
@@ -626,15 +621,15 @@ public class HouseService {
         if (houseDTO.getSquare() <= 0) {
             return ServerResponse.createByErrorMessage("面积错误");
         }
-        ModelingLayout modelingLayout = modelingLayoutMapper.selectByPrimaryKey(houseDTO.getModelingLayoutId());
-
         House house = iHouseMapper.selectByPrimaryKey(houseDTO.getHouseId());
-        house.setBuildSquare(new BigDecimal(modelingLayout.getBuildSquare()));//建筑面积
+        if (house == null) {
+            return ServerResponse.createByErrorMessage("该房产不存在");
+        }
+        house.setBuildSquare(new BigDecimal(houseDTO.getBuildSquare()));//建筑面积
         house.setCityId(houseDTO.getCityId());
         house.setCityName(houseDTO.getCityName());
         house.setVillageId(houseDTO.getVillageId());
         house.setResidential(houseDTO.getResidential());
-        house.setModelingLayoutId(houseDTO.getModelingLayoutId());
         house.setBuilding(houseDTO.getBuilding());
         house.setUnit(houseDTO.getUnit());
         house.setNumber(houseDTO.getNumber());
@@ -1576,23 +1571,22 @@ public class HouseService {
      * 业主装修的房子可修改
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse updateByHouseId(String building, String unit, String number, String houseId, String villageId, String cityId, String modelingLayoutId) {
-        try {
-            House house = iHouseMapper.selectByPrimaryKey(houseId);
-            house.setBuilding(building);                 //楼栋
-            house.setUnit(unit);                         //单元号
-            house.setNumber(number);                     //房间号
-            house.setVillageId(villageId);                //小区Id
-            house.setCityId(cityId);                      //城市Id
-            house.setModelingLayoutId(modelingLayoutId);  //户型Id
-            ModelingVillage modelingVillage = modelingVillageMapper.selectByPrimaryKey(villageId);
-            house.setResidential(modelingVillage.getName());
-            iHouseMapper.updateByPrimaryKeySelective(house);
-            return ServerResponse.createBySuccessMessage("更新成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("更新失败");
+    public ServerResponse updateByHouseId(String building, String unit, String number,
+                                          String houseId, String villageId, String cityId) {
+        House house = iHouseMapper.selectByPrimaryKey(houseId);
+        if (house == null) {
+            return ServerResponse.createByErrorMessage("该房产不存在");
         }
+        house.setBuilding(building);                 //楼栋
+        house.setUnit(unit);                         //单元号
+        house.setNumber(number);                     //房间号
+        house.setVillageId(villageId);                //小区Id
+        house.setCityId(cityId);                      //城市Id
+        ModelingVillage modelingVillage = modelingVillageMapper.selectByPrimaryKey(villageId);
+        if (modelingVillage != null)
+            house.setResidential(modelingVillage.getName());
+        iHouseMapper.updateByPrimaryKeySelective(house);
+        return ServerResponse.createBySuccessMessage("更新成功");
 
     }
 
