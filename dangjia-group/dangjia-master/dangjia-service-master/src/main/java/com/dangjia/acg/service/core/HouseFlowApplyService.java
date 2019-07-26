@@ -66,6 +66,7 @@ public class HouseFlowApplyService {
     private IWorkerDetailMapper workerDetailMapper;
     @Autowired
     private IHouseMapper houseMapper;
+
     @Autowired
     private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
     @Autowired

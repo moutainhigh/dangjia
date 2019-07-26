@@ -35,30 +35,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         member_id = #{memberId}
         GROUP BY product_id
     </select>
-    <!--更新商品名称各项信息-->
-    <update id="updateCartById" parameterType="java.lang.String">
-        UPDATE dj_deliver_cart p1
-        SET p1.product_name =
-        <foreach collection="lists" item="item" index="index"
-                 separator=" " open="case id" close="end">
-            when id then #{item.name}
-        </foreach>
-        ,p1.price=
-        <foreach collection="lists" item="item" index="index"
-                 separator=" " open="case id" close="end">
-            when id then #{item.price}
-        </foreach>
-        ,p1.category_id=
-        <foreach collection="lists" item="item" index="index"
-                 separator=" " open="case id" close="end">
-            when id then #{item.categoryId}
-        </foreach>
-        where product_id in
-        <foreach collection="lists" index="index" item="item"
-                 separator="," open="(" close=")">
-            #{item.id,jdbcType=BIGINT}
-        </foreach>
-    </update>
 
 </mapper>
 

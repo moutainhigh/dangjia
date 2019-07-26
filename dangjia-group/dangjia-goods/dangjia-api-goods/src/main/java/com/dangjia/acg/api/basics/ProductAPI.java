@@ -2,6 +2,7 @@ package com.dangjia.acg.api.basics;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.basics.Product;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -62,6 +63,11 @@ public interface ProductAPI {
     ServerResponse updateProductById(@RequestParam("request") HttpServletRequest request,
                                      @RequestParam("id") String id,
                                      @RequestParam("name") String name);
+
+    @PostMapping("/basics/product/editProduct")
+    @ApiOperation(value = "更新货品", notes = "更新货品")
+    ServerResponse updateProduct(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("product") Product product);
 
     @PostMapping("/basics/product/insertProduct")
     @ApiOperation(value = "新增货品", notes = "新增货品")
@@ -131,19 +137,4 @@ public interface ProductAPI {
                               @RequestParam("productType") String productType,
                               @RequestParam("productId") String[] productId);
 
-	/*@PostMapping("/basics/product/getSwitchProduct")
-	@ApiOperation(value = "根据系列和属性查询切换货品", notes = "根据系列和属性查询切换货品")
-	  ServerResponse getSwitchProduct(@RequestParam("request")HttpServletRequest request,@RequestParam("brandSeriesId")String brandSeriesId,
-											@RequestParam("attributeIdArr")String attributeIdArr);*/
-
-//	@PostMapping("/basics/product/updateProductByProductId")
-//    @ApiOperation(value = "修改商品库内商品,全局更新", notes ="修改商品库内商品,全局更新")
-//	ServerResponse updateProductByProductId(@RequestParam("request") HttpServletRequest request,
-//                                            @RequestParam("id") String id,
-//                                            @RequestParam("categoryId") String  categoryId,
-//                                            @RequestParam("brandSeriesId") String brandSeriesId,
-//                                            @RequestParam("brandId") String brandId,
-//                                            @RequestParam("name") String name,
-//                                            @RequestParam("unitId") String unitId,
-//                                            @RequestParam("unitName") String unitName);
 }

@@ -371,7 +371,8 @@ public class PaymentService {
                         warehouse.setRepairCount(warehouse.getRepairCount() + mendMateriel.getShopCount());
                         warehouse.setPrice(mendMateriel.getPrice());
                         warehouse.setCost(mendMateriel.getCost());
-                        warehouse.setImage(product.getImage());
+                        warehouse.setProductName(product.getName());
+                        warehouse.setImage(mendMateriel.getImage());
                         warehouse.setRepTime(warehouse.getRepTime() + 1);//补次数
                         warehouseMapper.updateByPrimaryKeySelective(warehouse);
                     } else {
@@ -380,6 +381,7 @@ public class PaymentService {
                         warehouse.setShopCount(mendMateriel.getShopCount());
                         warehouse.setRepairCount(mendMateriel.getShopCount());
                         warehouse.setStayCount(0.0);
+                        warehouse.setBudgetCount(0.0);
                         warehouse.setRobCount(0.0);
                         warehouse.setAskCount(0.0);//已要数量
                         warehouse.setBackCount(0.0);//退总数
@@ -866,11 +868,13 @@ public class PaymentService {
                     warehouse.setPrice(budgetMaterial.getPrice());
                     warehouse.setCost(budgetMaterial.getCost());
                     warehouse.setImage(product.getImage());
+                    warehouse.setProductName(product.getName());
                     warehouse.setPayTime(warehouse.getPayTime() + 1);//买次数
                     warehouseMapper.updateByPrimaryKeySelective(warehouse);
                 } else {//增加一条
                     Warehouse warehouse = new Warehouse();
                     warehouse.setHouseId(houseId);
+                    warehouse.setBudgetCount(budgetMaterial.getConvertCount());
                     warehouse.setShopCount(budgetMaterial.getConvertCount());
                     if (type == 1) {
                         warehouse.setRobCount(budgetMaterial.getConvertCount());//抢单任务进来总数

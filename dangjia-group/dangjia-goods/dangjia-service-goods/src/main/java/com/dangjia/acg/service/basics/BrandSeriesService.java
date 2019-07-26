@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.basics;
 
-import com.dangjia.acg.api.product.MasterProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -37,12 +36,6 @@ public class BrandSeriesService {
     private IBrandSeriesMapper iBrandSeriesMapper;
     @Autowired
     private ConfigUtil configUtil;
-    @Autowired
-    private IProductMapper iProductMapper;
-    @Autowired
-    private ProductService productService;
-    @Autowired
-    private MasterProductAPI masterProductAPI;
 
     //查询所有
     public ServerResponse<PageInfo> getAllBrandExplain(PageDTO pageDTO) {
@@ -77,15 +70,6 @@ public class BrandSeriesService {
             brandEx.setContent(content);
             brandEx.setModifyDate(new Date());
             iBrandSeriesMapper.updateByPrimaryKeySelective(brandEx);
-            //修改品牌系列对应的product名称也更新
-            productService.updateProductName(brandSeries.getName(), name, id, null, null, null);
-//            Example example = new Example(Product.class);
-//            example.createCriteria().andEqualTo(Product.BRAND_SERIES_ID, id);
-//            List<Product> list = iProductMapper.selectByExample(example);
-//            //更新master库相关商品名称
-//            if (list.size() > 0) {
-//                masterProductAPI.updateProductByProductId(JSON.toJSONString(list), id, null, null, null);
-//            }
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
             e.printStackTrace();

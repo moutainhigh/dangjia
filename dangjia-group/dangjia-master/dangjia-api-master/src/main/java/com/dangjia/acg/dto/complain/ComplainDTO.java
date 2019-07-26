@@ -4,7 +4,6 @@ import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 申诉返回体

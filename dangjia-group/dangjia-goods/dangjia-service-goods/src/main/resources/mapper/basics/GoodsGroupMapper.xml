@@ -117,53 +117,6 @@
 		where goods_id=#{id}
 		ORDER BY create_date desc
 	</select>
-	
-	<!-- 新增关联组和货品关系-->
-	<insert id="addGroupLink" parameterType="com.dangjia.acg.modle.basics.GroupLink">
-		INSERT INTO dj_basics_group_link(
-		id,
-		group_id,
-		product_id,
-		product_name,
-		goods_id,
-		goods_name,
-		group_name,
-		state,
-		is_switch,
-		create_date,
-		modify_date
-		)
-		VALUES (
-		#{id},
-		#{groupId},
-		#{productId},
-		#{productName},
-		#{goodsId},
-		#{goodsName},
-		#{groupName},
-		#{state},
-		#{isSwitch},
-		SYSDATE(),
-		SYSDATE()
-		)
-	</insert>
-	<!-- 根据关联组id删除货品关联关系 -->
-	<delete id="deleteGroupLink" parameterType="java.lang.String">
-		DELETE FROM dj_basics_group_link
-		WHERE group_id=#{groupId}
-	</delete>
-	<!-- 根据关联组id删除货品关联关系 -->
-	<delete id="deleteGroupLinkById" parameterType="java.lang.String">
-		DELETE FROM dj_basics_group_link
-		WHERE id=#{id}
-	</delete>
-	<!-- 根据关联组id和货品id修改关联关系-->
-	<update id="updateGroupLink" parameterType="com.dangjia.acg.modle.basics.GroupLink">
-		UPDATE dj_basics_group_link
-		SET state=#{state},modify_date=#{modifyDate}
-		where group_id=#{groupId}
-		and  product_id=#{productId}
-	</update>
 	<!-- 根据关联组id查询关联货品关系 -->
 	<select id="queryGroupLinkByGid" resultType="com.dangjia.acg.modle.basics.GroupLink">
 		SELECT

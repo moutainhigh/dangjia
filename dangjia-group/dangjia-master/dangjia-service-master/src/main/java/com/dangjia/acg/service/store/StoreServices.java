@@ -11,16 +11,13 @@ import com.dangjia.acg.dto.house.DesignDTO;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
-import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreSubscribeMapper;
 import com.dangjia.acg.mapper.system.IDepartmentMapper;
 import com.dangjia.acg.modle.house.ModelingVillage;
-import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreSubscribe;
 import com.dangjia.acg.modle.system.Department;
-import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +26,6 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -15,15 +16,11 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.WorkIntegralDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
-import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
-import com.dangjia.acg.mapper.house.IHouseAccountsMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
-import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
@@ -41,6 +38,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
 import com.dangjia.acg.service.house.HouseService;
+import com.dangjia.acg.service.repair.MendOrderService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,14 +74,9 @@ public class EvaluateService {
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IHouseMapper houseMapper;
+
     @Autowired
-    private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
-    @Autowired
-    private IHouseWorkerOrderMapper houseWorkerOrderMapper;
-    @Autowired
-    private IHouseAccountsMapper houseAccountsMapper;
-    @Autowired
-    private IWorkerTypeSafeMapper workerTypeSafeMapper;
+    private MendOrderService mendOrderService;
     @Autowired
     private ConfigMessageService configMessageService;
     @Autowired
@@ -378,11 +371,6 @@ public class EvaluateService {
                 hf.setPause(1);
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
             }
-            //推送工匠审核结果
-            //configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_PASS,house.getHouseName()) ,"5");
-            //推送业主大管家的审核结果
-            //configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","完工申请结果",String.format(DjConstants.PushMessage.OWNER_TWO_FINISHED,house.getHouseName()) ,"");
-
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -395,12 +383,19 @@ public class EvaluateService {
      * 业主评价管家完工 最后完工
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveEvaluateSupervisor(String houseFlowApplyId, String content, int star, boolean isAuto) {
+    public ServerResponse saveEvaluateSupervisor(String userToken,String houseFlowApplyId, String content, int star, boolean isAuto,String onekey) {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
                 return ServerResponse.createByErrorMessage("重复审核");
+            }
+            //业主同意一键退款
+            if(!CommonUtil.isEmpty(onekey)&&"1".equals(onekey)) {
+                ServerResponse response=mendOrderService.landlordOnekeyBack(userToken, house.getId());
+                if (!response.isSuccess()) {
+                    return response;
+                }
             }
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             Evaluate evaluate = new Evaluate();
@@ -429,7 +424,9 @@ public class EvaluateService {
             //业主审核管家
             houseFlowApplyService.checkSupervisor(houseFlowApplyId, isAuto);
 
+
             configMessageService.addConfigMessage(null, "gj", houseFlowApply.getWorkerId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
+
 
             //短信通知业务本门
             Map<String, String> temp_para = new HashMap();

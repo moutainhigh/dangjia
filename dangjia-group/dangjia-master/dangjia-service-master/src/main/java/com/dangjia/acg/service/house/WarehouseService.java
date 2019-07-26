@@ -56,6 +56,43 @@ public class WarehouseService {
 
 
     /**
+     * 查询仓库剩余总金额
+     */
+    public ServerResponse checkWarehouseSurplus(String userToken,  String houseId) {
+        try {
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            if (house == null) {
+                return ServerResponse.createByErrorMessage("未找到该房产");
+            }
+            Example example = new Example(Warehouse.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
+            List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
+            Double tolPrice=0d;
+            for (Warehouse warehouse : warehouseList) {
+                WarehouseDTO warehouseDTO = new WarehouseDTO();
+                warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());//剩余数量 所有买的数量 - 业主退货 - 要的
+                warehouseDTO.setTolPrice(warehouseDTO.getSurCount() * warehouse.getPrice());
+                if(warehouseDTO.getSurCount()>0) {
+                    Product product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
+                    if (product != null) {
+                        Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
+                        if (goods != null) {
+                            if (goods.getSales() == 0) {
+                                tolPrice = tolPrice + warehouseDTO.getTolPrice();
+                            }
+                        }
+                    }
+                }
+            }
+            return ServerResponse.createBySuccess("查询成功", tolPrice);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
      * 查询仓库材料
      * type 0材料 1服务 2所有
      */
@@ -110,7 +147,6 @@ public class WarehouseService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-
     /**
      * 查询仓库材料（已购买）
      * type 0材料 1服务 2人工

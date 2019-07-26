@@ -42,36 +42,6 @@
             )
         </foreach>
     </insert>
-    <!-- 批量更新数据 -->
-    <update id="updateBatch" parameterType="java.util.List">
-        update dj_basics_goods_category set
-        name =
-        <foreach collection="list" item="goods" index="index"
-                 separator=" " open="case id" close="end">
-            when #{goods.id} then #{goods.name}
-        </foreach>
-        ,parent_id =
-        <foreach collection="list" item="goods" index="index"
-                 separator=" " open="case id" close="end">
-            when #{goods.id} then #{goods.parent_id}
-        </foreach>
-        ,parent_top =
-        <foreach collection="list" item="goods" index="index"
-                 separator=" " open="case id" close="end">
-            when #{goods.id} then #{goods.parent_top}
-        </foreach>
-        ,image =
-        <foreach collection="list" item="goods" index="index"
-                 separator=" " open="case id" close="end">
-            when #{goods.id} then #{goods.image}
-        </foreach>
-        ,modify_date=SYSDATE()
-        where id in
-        <foreach collection="list" item="goods" index="index"
-                 separator="," open="(" close=")">
-            #{goods.id}
-        </foreach>
-    </update>
 
     <!-- 根据父id查询下属商品类别 -->
     <select id="queryCategoryByParentId" resultType="com.dangjia.acg.modle.attribute.GoodsCategory">

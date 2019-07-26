@@ -1,6 +1,9 @@
 package com.dangjia.acg.service.member;
 
-import com.dangjia.acg.api.*;
+import com.dangjia.acg.api.CrossAppAPI;
+import com.dangjia.acg.api.GroupAPI;
+import com.dangjia.acg.api.MessageAPI;
+import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;

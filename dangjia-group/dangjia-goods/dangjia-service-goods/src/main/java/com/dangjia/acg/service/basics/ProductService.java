@@ -2,13 +2,13 @@ package com.dangjia.acg.service.basics;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.product.MasterProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
@@ -43,6 +43,9 @@ import java.util.Map;
  */
 @Service
 public class ProductService {
+
+    @Autowired
+    private IGoodsMapper iGoodsMapper;
     @Autowired
     private IProductMapper iProductMapper;
     @Autowired
@@ -67,8 +70,6 @@ public class ProductService {
     private IBudgetMaterialMapper iBudgetMaterialMapper;
     @Autowired
     private ProductService productService;
-    @Autowired
-    private MasterProductAPI masterProductAPI;
 
     private static Logger LOG = LoggerFactory.getLogger(ProductService.class);
 
@@ -381,9 +382,6 @@ public class ProductService {
                     product.setAttributeIdArr(obj.getString("attributeIdArr"));
                 }
 
-//                product.setValueNameArr(obj.getString("valueNameArr"));//选中的属性选项名称字符串
-//                product.setValueIdArr(obj.getString("valueIdArr"));//选中的属性选项id串
-//                product.setAttributeIdArr(obj.getString("attributeIdArr"));//选中的属性id字符串
                 if (productId == null || "".equals(productId)) {//没有id则新增
                     product.setCreateDate(new Date());
                     product.setModifyDate(new Date());
@@ -392,14 +390,6 @@ public class ProductService {
                     product.setId(productId);
                     product.setModifyDate(new Date());
                     iProductMapper.updateByPrimaryKey(product);
-//                    productService.updateProductName(product.getName(), product.getName(), null, null, null, productId);
-//                    Example example = new Example(Product.class);
-//                    example.createCriteria().andEqualTo(Product.ID, productId);
-//                    List<Product> list = iProductMapper.selectByExample(example);
-//                    //更新master库相关商品名称
-//                    if (list.size() > 0) {
-//                        masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, null);
-//                    }
                 }
 
                 LOG.info("insertProduct productId:" + product.getId());
@@ -477,8 +467,28 @@ public class ProductService {
      */
     public ServerResponse getProductById(String id) {
         try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             Product product =iProductMapper.selectByPrimaryKey(id);
-            return ServerResponse.createBySuccess("查询成功", product);
+            Goods oldGoods = iGoodsMapper.selectByPrimaryKey(product.getGoodsId());
+            String[] imgArr = product.getImage().split(",");
+            StringBuilder imgStr = new StringBuilder();
+            StringBuilder imgUrlStr = new StringBuilder();
+            StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+            product.setImage(imgStr.toString());
+            Map<String, Object> map = BeanUtils.beanToMap(product);
+            List<Unit> linkUnitList = new ArrayList<>();
+            Unit unit = iUnitMapper.selectByPrimaryKey(oldGoods.getUnitId());
+//            linkUnitList.add(unit);
+            if (unit.getLinkUnitIdArr() != null) {
+                String[] linkUnitIdArr = unit.getLinkUnitIdArr().split(",");
+                for (String linkUnitId : linkUnitIdArr) {
+                    Unit linkUnit = iUnitMapper.selectByPrimaryKey(linkUnitId);
+                    linkUnitList.add(linkUnit);
+                }
+            }
+            map.put("unitList",linkUnitList);
+            map.put("imageUrl",imgUrlStr.toString());
+            return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -504,6 +514,28 @@ public class ProductService {
     }
 
     /**
+     * 根据product更新名称
+     *
+     * @param product
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse updateProduct(Product product) {
+        try {
+            if(!CommonUtil.isEmpty(product.getId())){
+                Product product1 = iProductMapper.selectByPrimaryKey(product.getId());
+                if(product1==null){
+                    return ServerResponse.createBySuccessMessage("更新失败！ 该商品不存在！");
+                }
+                iProductMapper.updateByPrimaryKeySelective(product);
+                return ServerResponse.createBySuccessMessage("更新成功");
+            }
+        } catch (Exception e) {
+            throw new BaseException(ServerCode.WRONG_PARAM, "更新异常");
+        }
+        return ServerResponse.createBySuccessMessage("更新成功");
+    }
+    /**
      * 根据productid更新名称
      *
      * @param id
@@ -512,24 +544,11 @@ public class ProductService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateProductById(String id, String name) {
         try {
-//            Product product1 = iProductMapper.selectByPrimaryKey(id);
+            Product product1 = iProductMapper.selectByPrimaryKey(id);
             Product product = new Product();
             product.setId(id);
             product.setName(name);
             iProductMapper.updateByPrimaryKeySelective(product);
-//            productService.updateProductName(product1.getName(), name, null, null, null, id);
-//            Example example = new Example(Product.class);
-//            example.createCriteria().andEqualTo(Product.ID, id);
-//            List<Product> list = iProductMapper.selectByExample(example);
-//            //更新master库相关商品名称
-//            if (list.size() > 0) {
-//                masterProductAPI.updateProductByProductId(JSON.toJSONString(list), null, null, null, null);
-//            }
-//            example=new Example(GroupLink.class);
-//            example.createCriteria().andEqualTo("productId",id);
-//            GroupLink oldLabel =new GroupLink();
-//            oldLabel.setProductName(name);
-//            iGroupLinkMapper.updateByExampleSelective(oldLabel,example);
             return ServerResponse.createBySuccessMessage("更新成功");
         } catch (Exception e) {
             throw new BaseException(ServerCode.WRONG_PARAM, "更新成功");
@@ -653,26 +672,4 @@ public class ProductService {
         return pageResult;
     }
 
-
-    /**
-     * 修改product名称全局更新商品
-     *
-     * @param brandSeriesId
-     * @param brandId
-     * @param goodsId
-     * @return
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public ServerResponse updateProductName(String oldName, String newName, String brandSeriesId, String brandId, String goodsId, String id) {
-        try {
-            //更新商品名称
-            iProductMapper.updateProductById(oldName, newName, brandSeriesId, brandId, goodsId, id);
-            //更新相关联商品名称
-            iGroupLinkMapper.updateGroupLinkById(brandSeriesId, brandId, goodsId, id);
-            iBudgetMaterialMapper.updateBudgetMaterialById(brandSeriesId, brandId, goodsId, id);
-        } catch (Exception e) {
-            throw new BaseException(ServerCode.WRONG_PARAM, "修改失败");
-        }
-        return ServerResponse.createBySuccessMessage("修改成功");
-    }
 }
