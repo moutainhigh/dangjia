@@ -41,7 +41,6 @@ public class ConfigService {
    * @return
    */
   public byte[] getValue(String name, Integer appType) {
-
     Config config = new Config();
     config.setParamKey(name);
     config.setAppType(appType);
@@ -50,14 +49,10 @@ public class ConfigService {
     if (StringUtils.isEmpty(res)) {
       return null;
     } else {
-
       redisClient.put(Constants.CONFIG_KEY + config.getParamKey(), config.getParamValue());
       byte[] b = ProtoStuffSerializerUtil.serialize(res);
       return b;
     }
-
-
-
   }
 
   /****
@@ -70,7 +65,6 @@ public class ConfigService {
     Validator.hasText(name, "系统参数名不能为空.");
     Validator.notNull(appType, "应用不能为空.");
     Validator.hasText(value, "系统参数名不能为空.");
-
     Config config = new Config();
     config.setParamKey(name);
     config.setAppType(appType);
@@ -78,7 +72,6 @@ public class ConfigService {
     Validator.notNull(config, "参数有误,系统参数不存在.");
     config.setParamValue(value);
     configMapper.updateByPrimaryKeySelective(config);
-
     redisClient.put(Constants.CONFIG_KEY + config.getParamKey(), config.getParamValue());
   }
 

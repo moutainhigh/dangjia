@@ -286,7 +286,7 @@ public interface MemberAPI {
                                  @RequestParam("smscode") int smscode,
                                  @RequestParam("invitationCode") String invitationCode,
                                  @RequestParam("userRole") Integer userRole,
-                                 @RequestParam("longitude")String longitude,
+                                 @RequestParam("longitude") String longitude,
                                  @RequestParam("latitude") String latitude);
 
     /**
@@ -452,6 +452,8 @@ public interface MemberAPI {
      * @url master/member/getMyInvitation
      * @return_param invitationCode int 邀请码
      * @return_param invitationNum string 已邀请数
+     * @return_param id string 用户ID
+     * @return_param codeData string 二维码内容（目前只有销售端有）
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 12
      * @Author: Ruking 18075121944
@@ -459,7 +461,8 @@ public interface MemberAPI {
      */
     @RequestMapping(value = "member/getMyInvitation", method = RequestMethod.POST)
     @ApiOperation(value = "我的邀请码", notes = "我的邀请码")
-    ServerResponse getMyInvitation(@RequestParam("userToken") String userToken);
+    ServerResponse getMyInvitation(@RequestParam("userToken") String userToken,
+                                   @RequestParam("userRole") Integer userRole);
 
     /**
      * showdoc

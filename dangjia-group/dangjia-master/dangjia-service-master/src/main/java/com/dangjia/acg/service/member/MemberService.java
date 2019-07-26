@@ -9,7 +9,6 @@ import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.common.util.Validator;
@@ -196,7 +195,7 @@ public class MemberService {
 
     ServerResponse getUser(Member user, Integer userRole) {
         if (userRole == 1) {
-            clueService.sendUser(user, user.getMobile(),null,null);
+            clueService.sendUser(user, user.getMobile(), null, null);
         }
         ServerResponse serverResponse = setAccessToken(user, userRole);
         if (!serverResponse.isSuccess()) {
@@ -323,7 +322,7 @@ public class MemberService {
      * 校验验证码并保存密码
      */
     public ServerResponse checkRegister(HttpServletRequest request, String phone, int smscode, String
-            password, String invitationCode, Integer userRole ,String longitude, String latitude) {
+            password, String invitationCode, Integer userRole, String longitude, String latitude) {
         Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
         if (registerCode == null || smscode != registerCode) {
             return ServerResponse.createByErrorMessage("验证码错误");
@@ -357,7 +356,7 @@ public class MemberService {
             memberMapper.insertSelective(user);
 //            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
             if (userRole == 1) {
-                clueService.sendUser(user, user.getMobile(),longitude,latitude);
+                clueService.sendUser(user, user.getMobile(), longitude, latitude);
             }
             redisClient.deleteCache(Constants.SMS_CODE + phone);
             if (userRole == 1) {
@@ -758,7 +757,7 @@ public class MemberService {
     /**
      * 我的邀请码
      */
-    public ServerResponse getMyInvitation(String userToken) {
+    public ServerResponse getMyInvitation(String userToken, Integer userRole) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -766,8 +765,15 @@ public class MemberService {
         Member member = (Member) object;
         Example example = new Example(Member.class);
         example.createCriteria().andEqualTo(Member.OTHERS_INVITATION_CODE, member.getInvitationCode());
-        Map memberMap = BeanUtils.beanToMap(member);
+        Map<String, Object> memberMap = new HashMap<>();
         memberMap.put("invitationNum", memberMapper.selectCountByExample(example));
+        memberMap.put("invitationCode", member.getInvitationCode());
+        memberMap.put("id", member.getId());
+        if (userRole == 3) {
+            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+            memberMap.put("codeData", url + String.format("codeDetails?invitationCode=%s&memberId=%s&title=%s",
+                    member.getInvitationCode(), member.getId(), "好工匠 在当家"));
+        }
         return ServerResponse.createBySuccess("ok", memberMap);
     }
 
