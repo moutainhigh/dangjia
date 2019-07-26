@@ -2,7 +2,6 @@ package com.dangjia.acg.service.basics;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.product.MasterProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -71,8 +70,6 @@ public class ProductService {
     private IBudgetMaterialMapper iBudgetMaterialMapper;
     @Autowired
     private ProductService productService;
-    @Autowired
-    private MasterProductAPI masterProductAPI;
 
     private static Logger LOG = LoggerFactory.getLogger(ProductService.class);
 

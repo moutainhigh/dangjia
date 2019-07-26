@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.basics;
 
-import com.dangjia.acg.api.product.MasterProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -37,12 +36,6 @@ public class BrandSeriesService {
     private IBrandSeriesMapper iBrandSeriesMapper;
     @Autowired
     private ConfigUtil configUtil;
-    @Autowired
-    private IProductMapper iProductMapper;
-    @Autowired
-    private ProductService productService;
-    @Autowired
-    private MasterProductAPI masterProductAPI;
 
     //查询所有
     public ServerResponse<PageInfo> getAllBrandExplain(PageDTO pageDTO) {
