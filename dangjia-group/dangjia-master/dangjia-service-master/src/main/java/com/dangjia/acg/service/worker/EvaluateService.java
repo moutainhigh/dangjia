@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -370,11 +371,6 @@ public class EvaluateService {
                 hf.setPause(1);
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
             }
-            //推送工匠审核结果
-            //configMessageService.addConfigMessage(null,"gj",houseFlowApply.getWorkerId(),"0","完工申请结果",String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_PASS,house.getHouseName()) ,"5");
-            //推送业主大管家的审核结果
-            //configMessageService.addConfigMessage(null,"zx",house.getMemberId(),"0","完工申请结果",String.format(DjConstants.PushMessage.OWNER_TWO_FINISHED,house.getHouseName()) ,"");
-
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
