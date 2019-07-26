@@ -16,6 +16,12 @@ public class WarehouseController implements WarehouseAPI {
     @Autowired
     private WarehouseService warehouseService;
 
+    @Override
+    @ApiMethod
+    public ServerResponse checkWarehouseSurplus(String userToken,  String houseId){
+        return warehouseService.checkWarehouseSurplus(userToken, houseId);
+    }
+
     /**
      * 购买的材料
      */

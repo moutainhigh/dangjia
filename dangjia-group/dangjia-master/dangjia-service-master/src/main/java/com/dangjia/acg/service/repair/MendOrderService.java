@@ -12,6 +12,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -53,8 +54,7 @@ import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 补退货管理
@@ -65,8 +65,6 @@ import java.util.List;
 @Service
 public class MendOrderService {
 
-    @Autowired
-    private HouseFlowScheduleService houseFlowScheduleService;
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
@@ -212,6 +210,50 @@ public class MendOrderService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 业主一键退
+     */
+    public ServerResponse landlordOnekeyBack(String userToken,  String houseId) {
+        try {
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            if (house == null) {
+                return ServerResponse.createByErrorMessage("未找到该房产");
+            }
+            Example example = new Example(Warehouse.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
+            List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
+            List<Map> productArrMap=new ArrayList<>();
+            for (Warehouse warehouse : warehouseList) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("num",warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());//剩余数量 所有买的数量 - 业主退货 - 要的
+                map.put("productId", warehouse.getProductId());
+                Product product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
+                if (product != null) {
+                    Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
+                    if (goods != null) {
+                        if(goods.getSales()==0){
+                            productArrMap.add(map);
+                        }
+                    }
+                }
+            }
+            //生成退货单
+            String productArr=JSON.toJSONString(productArrMap);
+            ServerResponse response=landlordBack(userToken,houseId,productArr);
+            if (!response.isSuccess()) {
+                return response;
+            }
+
+            //确认退货单
+            confirmLandlordState(houseId);
+            return ServerResponse.createBySuccess("退款成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("退款失败");
         }
     }
 
@@ -1039,7 +1081,7 @@ public class MendOrderService {
                             //判断用户角色是否为业主业主可任意退
                             if(memberInfos.size()<=0) {
                                 if (goods != null && goods.getSales() == 1) {
-                                    return ServerResponse.createByErrorMessage(product.getName() + "不可退");
+                                    continue;//跳过
                                 }
                             }
                         }
