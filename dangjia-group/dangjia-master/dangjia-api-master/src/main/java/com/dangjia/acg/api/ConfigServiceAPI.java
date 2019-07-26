@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * Created by QiYuXiang on 2017/8/3.
  */
-@FeignClient("dangjia-service-basic")
+@FeignClient("dangjia-service-master")
 @Api(value = "系统配置的接口",description = "系统配置的接口")
 public interface ConfigServiceAPI {
 
