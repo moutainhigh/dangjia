@@ -121,7 +121,7 @@ public class TimingApplyService {
         List<HouseFlowApply> houseFlowApplyList =  houseFlowApplyMapper.couponApply(new Date());
         for (HouseFlowApply houseFlowApply : houseFlowApplyList){
             if(houseFlowApply.getWorkerType() == 3){
-                evaluateService.saveEvaluateSupervisor(null,houseFlowApply.getId(),"",5,true,false);
+                evaluateService.saveEvaluateSupervisor(null,houseFlowApply.getId(),"",5,true,null);
             }else {
                 evaluateService.saveEvaluate(houseFlowApply.getId(),"",5,"",5,true);
             }

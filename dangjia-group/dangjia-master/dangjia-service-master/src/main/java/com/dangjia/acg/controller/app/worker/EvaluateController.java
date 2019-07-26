@@ -57,7 +57,7 @@ public class EvaluateController implements EvaluateAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse saveEvaluateSupervisor(String userToken, String houseFlowApplyId,String content,int star,Boolean onekey){
+    public ServerResponse saveEvaluateSupervisor(String userToken, String houseFlowApplyId,String content,int star,String onekey){
         return evaluateService.saveEvaluateSupervisor( userToken,houseFlowApplyId,content,star,false, onekey);
     }
 

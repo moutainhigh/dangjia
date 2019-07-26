@@ -60,7 +60,7 @@ public interface EvaluateAPI {
                                           @RequestParam("houseFlowApplyId") String houseFlowApplyId,
                                           @RequestParam("content") String content,
                                           @RequestParam("star") int star,
-                                          @RequestParam("onekey") Boolean onekey);
+                                          @RequestParam("onekey") String onekey);
 
     @PostMapping("app/worker/evaluate/saveEvaluate")
     @ApiOperation(value = "业主端评价工匠", notes = "业主端评价工匠")

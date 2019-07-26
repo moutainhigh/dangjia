@@ -391,7 +391,7 @@ public class EvaluateService {
      * 业主评价管家完工 最后完工
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveEvaluateSupervisor(String userToken,String houseFlowApplyId, String content, int star, boolean isAuto,Boolean onekey) {
+    public ServerResponse saveEvaluateSupervisor(String userToken,String houseFlowApplyId, String content, int star, boolean isAuto,String onekey) {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
@@ -426,7 +426,7 @@ public class EvaluateService {
             houseFlowApplyService.checkSupervisor(houseFlowApplyId, isAuto);
 
             //业主同意一键退款
-            if(onekey) {
+            if(!CommonUtil.isEmpty(onekey)&&"1".equals(onekey)) {
                 mendOrderService.landlordOnekeyBack(userToken, house.getId());
             }
             configMessageService.addConfigMessage(null, "gj", houseFlowApply.getWorkerId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
