@@ -41,6 +41,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
 import com.dangjia.acg.service.house.HouseService;
+import com.dangjia.acg.service.repair.MendOrderService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,14 +77,9 @@ public class EvaluateService {
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IHouseMapper houseMapper;
+
     @Autowired
-    private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
-    @Autowired
-    private IHouseWorkerOrderMapper houseWorkerOrderMapper;
-    @Autowired
-    private IHouseAccountsMapper houseAccountsMapper;
-    @Autowired
-    private IWorkerTypeSafeMapper workerTypeSafeMapper;
+    private MendOrderService mendOrderService;
     @Autowired
     private ConfigMessageService configMessageService;
     @Autowired
@@ -395,7 +391,7 @@ public class EvaluateService {
      * 业主评价管家完工 最后完工
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveEvaluateSupervisor(String houseFlowApplyId, String content, int star, boolean isAuto) {
+    public ServerResponse saveEvaluateSupervisor(String userToken,String houseFlowApplyId, String content, int star, boolean isAuto,Boolean onekey) {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
@@ -429,7 +425,12 @@ public class EvaluateService {
             //业主审核管家
             houseFlowApplyService.checkSupervisor(houseFlowApplyId, isAuto);
 
+            //业主同意一键退款
+            if(onekey) {
+                mendOrderService.landlordOnekeyBack(userToken, house.getId());
+            }
             configMessageService.addConfigMessage(null, "gj", houseFlowApply.getWorkerId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
+
 
             //短信通知业务本门
             Map<String, String> temp_para = new HashMap();

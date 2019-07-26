@@ -182,7 +182,8 @@
         ) * 1000
         ) AS juli
         FROM
-        `dj_house_modeling_village` mv ,dj_house h
+        `dj_house_modeling_village` mv
+        inner join dj_house h ON   mv.id=h.village_id
         inner join
         (
         SELECT
@@ -199,8 +200,7 @@
         ) b ON
         b.house_id=h.id/*筛选调无施工记录的房子*/
         WHERE
-        mv.id=h.village_id
-        AND mv.locationx IS NOT NULL
+         mv.locationx IS NOT NULL
         AND ((h.decoration_type in (1,2) and h.budget_ok=3) OR (h.decoration_type=3 and h.visit_state=1))
         AND h.visit_state in(1,3)
         AND h.site_display=0

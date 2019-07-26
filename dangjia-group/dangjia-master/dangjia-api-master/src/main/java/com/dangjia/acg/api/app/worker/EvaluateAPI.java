@@ -59,7 +59,8 @@ public interface EvaluateAPI {
     ServerResponse saveEvaluateSupervisor(@RequestParam("userToken") String userToken,
                                           @RequestParam("houseFlowApplyId") String houseFlowApplyId,
                                           @RequestParam("content") String content,
-                                          @RequestParam("star") int star);
+                                          @RequestParam("star") int star,
+                                          @RequestParam("onekey") Boolean onekey);
 
     @PostMapping("app/worker/evaluate/saveEvaluate")
     @ApiOperation(value = "业主端评价工匠", notes = "业主端评价工匠")
