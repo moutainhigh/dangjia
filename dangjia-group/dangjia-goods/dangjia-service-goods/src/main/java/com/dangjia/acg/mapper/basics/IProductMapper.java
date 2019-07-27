@@ -90,4 +90,8 @@ public interface IProductMapper extends Mapper<Product> {
 
     /*更新单位*/
     void updateProductByUnitId(@Param("unitName") String unitName,@Param("unitId") String unitId);
+
+
+    /*更新单位*/
+    void updateProductValueId(@Param("valueId") String valueId);
 }
