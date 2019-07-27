@@ -84,6 +84,26 @@ public interface WebClueAPI {
      */
     @PostMapping("web/clue/sendUser")
     @ApiOperation(value = "转客户", notes = "转客户")
-    ServerResponse sendUser(@RequestParam("member") Member member, @RequestParam("phone") String phone ,@RequestParam("longitude") String longitude,@RequestParam("latitude") String latitude);
+    ServerResponse sendUser(@RequestParam("member") Member member, @RequestParam("phone") String phone, @RequestParam("longitude") String longitude, @RequestParam("latitude") String latitude);
 
+
+    /**
+     * showdoc
+     *
+     * @param userId 必选 string 销售员ID
+     * @param phone  必选 string 客户手机号
+     * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
+     * @catalog 当家接口文档/销售模块/线索模块
+     * @title 分享页添加线索
+     * @description 分享页添加线索
+     * @method POST
+     * @url master/clue/addH5Clue
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 1
+     * @Author: Ruking 18075121944
+     * @Date: 2019/7/27 11:50 AM
+     */
+    @PostMapping("clue/addH5Clue")
+    @ApiOperation(value = "分享页添加线索", notes = "分享页添加线索")
+    ServerResponse addH5Clue(@RequestParam("userId") String userId, @RequestParam("phone") String phone);
 }

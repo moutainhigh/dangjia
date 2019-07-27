@@ -781,8 +781,9 @@ public class MemberService {
         memberMap.put("id", member.getId());
         if (userRole == 3) {
             String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-            memberMap.put("codeData", url + String.format("codeDetails?invitationCode=%s&memberId=%s&title=%s",
-                    member.getInvitationCode(), member.getId(), "好工匠 在当家"));
+            MainUser mainUser = userMapper.findUserByMobile(member.getMobile());
+            memberMap.put("codeData", url + String.format("codeDetails?invitationCode=%s&memberId=%s&userId=%s&title=%s",
+                    member.getInvitationCode(), member.getId(), mainUser == null ? "" : mainUser.getId(), "好工匠 在当家"));
         }
         return ServerResponse.createBySuccess("ok", memberMap);
     }
