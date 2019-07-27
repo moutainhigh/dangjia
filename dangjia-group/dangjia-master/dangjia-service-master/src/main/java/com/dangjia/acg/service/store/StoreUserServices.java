@@ -7,7 +7,9 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.sale.store.StoreUserDTO;
+import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
+import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreUser;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -24,6 +26,8 @@ public class StoreUserServices {
     @Autowired
     private IStoreUserMapper iStoreUserMapper;
     @Autowired
+    private IStoreMapper iStoreMapper;
+    @Autowired
     private ConfigUtil configUtil;
 
     public ServerResponse addStoreUser(String userId, String storeId, Integer type) {
@@ -36,7 +40,14 @@ public class StoreUserServices {
         if (CommonUtil.isEmpty(type)) {
             return ServerResponse.createByErrorMessage("请选择岗位");
         }
-        Example example = new Example(StoreUser.class);
+        Example example = new Example(Store.class);
+        example.createCriteria().andEqualTo(Store.USER_ID, userId)
+                .andEqualTo(Store.DATA_STATUS, 0);
+        List<Store> stores = iStoreMapper.selectByExample(example);
+        if (stores.size() > 0) {
+            return ServerResponse.createByErrorMessage("该用户已被设置为店长，请勿添加");
+        }
+        example = new Example(StoreUser.class);
         example.createCriteria().andEqualTo(StoreUser.USER_ID, userId)
                 .andEqualTo(StoreUser.DATA_STATUS, 0);
         List<StoreUser> storeUserList = iStoreUserMapper.selectByExample(example);
@@ -60,7 +71,7 @@ public class StoreUserServices {
 
     public ServerResponse queryStoreUser(String storeId, String searchKey, PageDTO pageDTO) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<StoreUserDTO> storeUserDTOS = iStoreUserMapper.getStoreUsers(storeId, searchKey,null);
+        List<StoreUserDTO> storeUserDTOS = iStoreUserMapper.getStoreUsers(storeId, searchKey, null);
         if (storeUserDTOS.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
