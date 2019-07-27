@@ -268,10 +268,18 @@ public class MemberService {
             redisClient.deleteCache(token + Constants.SESSIONUSERID);
         }
         redisClient.put(userRoleText, accessToken.getUserToken());
-        groupInfoService.registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{user.getId()}, new String[1]);
-        groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{user.getId()}, new String[1]);
-        if (!CommonUtil.isEmpty(accessToken.getUserId()))
-            groupInfoService.registerJGUsers(AppType.SALE.getDesc(), new String[]{accessToken.getUserId()}, new String[1]);
+        switch (userRole) {
+            case 1:
+                groupInfoService.registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{user.getId()}, new String[1]);
+                break;
+            case 2:
+                groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{user.getId()}, new String[1]);
+                break;
+            case 3:
+                if (!CommonUtil.isEmpty(accessToken.getUserId()))
+                    groupInfoService.registerJGUsers(AppType.SALE.getDesc(), new String[]{accessToken.getUserId()}, new String[1]);
+                break;
+        }
         return ServerResponse.createBySuccess(accessToken);
     }
 
@@ -955,10 +963,6 @@ public class MemberService {
                 }
             }
             redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
-            groupInfoService.registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{accessToken.getMemberId()}, new String[1]);
-            groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{accessToken.getMemberId()}, new String[1]);
-            if (!CommonUtil.isEmpty(accessToken.getUserId()))
-                groupInfoService.registerJGUsers(AppType.SALE.getDesc(), new String[]{accessToken.getUserId()}, new String[1]);
         }
     }
 

@@ -59,11 +59,11 @@ public class BaseService {
     @PostConstruct //加上该注解表明该方法会在bean初始化后调用
     public void init() {
         map.put("zx_appkey", zx_appkey);
-        map.put("gj_appkey", gj_appkey);
-        map.put("sale_appkey", sale_appkey);
         map.put("zx_masterSecret", zx_masterSecret);
-        map.put("sale_masterSecret", sale_masterSecret);
+        map.put("gj_appkey", gj_appkey);
         map.put("gj_masterSecret", gj_masterSecret);
+        map.put("sale_appkey", sale_appkey);
+        map.put("sale_masterSecret", sale_masterSecret);
     }
 
     public String getAppkey(String appType) {
