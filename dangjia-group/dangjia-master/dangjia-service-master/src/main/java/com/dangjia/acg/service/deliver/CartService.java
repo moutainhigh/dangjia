@@ -110,6 +110,7 @@ public class CartService {
                     cart.setProductType(goods.getType());
                     cart.setUnitName(product.getUnitName());
                     cart.setCategoryId(product.getCategoryId());
+                    cart.setCityId(request.getParameter(Constants.CITY_ID));
                     cartMapper.insert(cart);
                 }
             }

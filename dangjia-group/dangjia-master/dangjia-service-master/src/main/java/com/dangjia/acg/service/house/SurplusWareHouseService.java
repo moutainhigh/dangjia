@@ -180,6 +180,7 @@ public class SurplusWareHouseService {
                         newSurplusWareHouseItem.setCategoryId(product.getCategoryId());
                         newSurplusWareHouseItem.setProductName(product.getName());
                     }
+                    newSurplusWareHouseItem.setCityId(house.getCityId());
                     iSurplusWareHouseItemMapper.insert(newSurplusWareHouseItem);
                 } else {
                     srcSurplusWareHouseItem.setProductCount(srcSurplusWareHouseItem.getProductCount() + productCount);
