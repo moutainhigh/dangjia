@@ -269,10 +269,10 @@ public class MendOrderService {
                 return (ServerResponse) object;
             }
             Member member = (Member) object;
-            House house = houseMapper.selectByPrimaryKey(houseId);
-            if (house.getVisitState() == 3 || house.getHaveComplete() == 1) {
-                return ServerResponse.createByErrorMessage("该房子已完工");
-            }
+//            House house = houseMapper.selectByPrimaryKey(houseId);
+//            if (house.getVisitState() == 3 || house.getHaveComplete() == 1) {
+//                return ServerResponse.createByErrorMessage("该房子已完工");
+//            }
             ServerResponse serverResponse = mendChecking(houseId, null, 4);
             if (!serverResponse.isSuccess()) {
                 return ServerResponse.createByErrorMessage(serverResponse.getResultMsg());
@@ -1109,6 +1109,7 @@ public class MendOrderService {
         double num = Double.parseDouble(shopCount);
         Warehouse warehouse = warehouseMapper.getByProductId(productId, house.getId());
         Product product = forMasterAPI.getProduct(house.getCityId(), productId);
+        mendMateriel.setCityId(house.getCityId());
         if (warehouse != null) {
             mendMateriel.setProductSn(product.getProductSn());
             mendMateriel.setProductName(product.getName());

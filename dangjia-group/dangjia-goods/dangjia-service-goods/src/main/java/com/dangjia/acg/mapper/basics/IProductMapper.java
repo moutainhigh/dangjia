@@ -84,10 +84,7 @@ public interface IProductMapper extends Mapper<Product> {
 
     Product selectProductByGoodsIdAndBrandIdAndBrandSeriesId(String goodsId, String brandId, String brandSeriesId);
 
-    /*更新商品名称*/
-    void updateProductById(@Param("oldName") String oldName,@Param("newName") String newName,@Param("brandSeriesId") String brandSeriesId,@Param("brandId") String brandId,
-                           @Param("goodsId") String goodsId,@Param("id") String id);
 
     /*更新单位*/
-    void updateProductByUnitId(@Param("unitName") String unitName,@Param("unitId") String unitId);
+    void updateProductValueId(@Param("valueId") String valueId);
 }

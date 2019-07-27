@@ -19,6 +19,11 @@ import javax.persistence.Table;
 @FieldNameConstants(prefix = "")
 public class OrderSplitItem extends BaseEntity {
 
+	@Column(name = "city_id")
+	@Desc(value = "城市id")
+	@ApiModelProperty("城市id")
+	private String cityId;
+
 	@Column(name = "order_split_id")
 	@Desc(value = "拆分单id")
 	@ApiModelProperty("拆分单id")

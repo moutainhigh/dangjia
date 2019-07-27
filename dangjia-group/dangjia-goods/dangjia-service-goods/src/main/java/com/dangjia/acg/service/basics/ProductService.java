@@ -1,7 +1,9 @@
 package com.dangjia.acg.service.basics;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.app.house.WarehouseAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -13,12 +15,14 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.BrandSeries;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -65,11 +69,10 @@ public class ProductService {
     @Autowired
     private TechnologyService technologyService;
     @Autowired
-    private IGroupLinkMapper iGroupLinkMapper;
+    private WarehouseAPI warehouseAPI;
+
     @Autowired
     private IBudgetMaterialMapper iBudgetMaterialMapper;
-    @Autowired
-    private ProductService productService;
 
     private static Logger LOG = LoggerFactory.getLogger(ProductService.class);
 
@@ -520,14 +523,24 @@ public class ProductService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse updateProduct(Product product) {
+    public ServerResponse updateProduct(String cityId,Product product) {
         try {
             if(!CommonUtil.isEmpty(product.getId())){
-                Product product1 = iProductMapper.selectByPrimaryKey(product.getId());
-                if(product1==null){
-                    return ServerResponse.createBySuccessMessage("更新失败！ 该商品不存在！");
-                }
                 iProductMapper.updateByPrimaryKeySelective(product);
+
+                if(!CommonUtil.isEmpty(cityId)){
+                    Product product1 = iProductMapper.selectByPrimaryKey(product.getId());
+                    warehouseAPI.editProductData(cityId, JSON.toJSONString(product1));
+
+                    Example example =new Example(BudgetMaterial.class);
+                    example.createCriteria().andEqualTo(MaterialRecord.PRODUCT_ID,product.getId());
+                    BudgetMaterial budgetMaterial=new BudgetMaterial();
+                    budgetMaterial.setId(null);
+                    budgetMaterial.setCreateDate(null);
+                    budgetMaterial.setModifyDate(new Date());
+                    budgetMaterial.setProductName(product.getName());
+                    iBudgetMaterialMapper.updateByExampleSelective(budgetMaterial,example);
+                }
                 return ServerResponse.createBySuccessMessage("更新成功");
             }
         } catch (Exception e) {

@@ -22,7 +22,12 @@ import java.util.Date;
 @FieldNameConstants(prefix = "")
 public class SurplusWareDivert extends BaseEntity {
 
-	@Column(name = "product_id")
+    @Column(name = "city_id")
+    @Desc(value = "城市id")
+    @ApiModelProperty("城市id")
+    private String cityId;
+
+    @Column(name = "product_id")
 	@Desc(value = "挪货的商品id")
 	@ApiModelProperty("挪货的商品id")
 	private String productId;
