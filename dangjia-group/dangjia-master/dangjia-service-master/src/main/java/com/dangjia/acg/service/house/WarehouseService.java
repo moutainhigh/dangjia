@@ -281,6 +281,7 @@ public class WarehouseService {
                     .andEqualTo(MaterialRecord.PRODUCT_ID, product.getId());
             MaterialRecord materialRecord = new MaterialRecord();
             materialRecord.setId(null);
+            materialRecord.setCreateDate(null);
             materialRecord.setModifyDate(new Date());
             materialRecord.setProductName(product.getName());
             materialRecordMapper.updateByExampleSelective(materialRecord, example);
@@ -290,6 +291,7 @@ public class WarehouseService {
                     .andEqualTo(OrderItem.PRODUCT_ID, product.getId());
             OrderItem orderItem = new OrderItem();
             orderItem.setId(null);
+            orderItem.setCreateDate(null);
             orderItem.setModifyDate(new Date());
             orderItem.setProductName(product.getName());
             orderItem.setImage(product.getImage());
@@ -300,6 +302,7 @@ public class WarehouseService {
                     .andEqualTo(OrderSplitItem.PRODUCT_ID, product.getId());
             OrderSplitItem orderSplitItem = new OrderSplitItem();
             orderSplitItem.setId(null);
+            orderSplitItem.setCreateDate(null);
             orderSplitItem.setProductName(product.getName());
             orderSplitItem.setModifyDate(new Date());
             orderSplitItem.setImage(product.getImage());
@@ -310,6 +313,7 @@ public class WarehouseService {
                     .andEqualTo(MendMateriel.PRODUCT_ID, product.getId());
             MendMateriel mendMateriel = new MendMateriel();
             mendMateriel.setId(null);
+            mendMateriel.setCreateDate(null);
             mendMateriel.setModifyDate(new Date());
             mendMateriel.setProductName(product.getName());
             mendMateriel.setImage(product.getImage());
@@ -321,6 +325,7 @@ public class WarehouseService {
                     .andEqualTo(Warehouse.PRODUCT_ID, product.getId());
             Warehouse warehouse = new Warehouse();
             warehouse.setId(null);
+            warehouse.setCreateDate(null);
             warehouse.setModifyDate(new Date());
             warehouse.setProductName(product.getName());
             warehouse.setImage(product.getImage());

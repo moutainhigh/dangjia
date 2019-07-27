@@ -536,6 +536,7 @@ public class ProductService {
                     example.createCriteria().andEqualTo(MaterialRecord.PRODUCT_ID,product.getId());
                     BudgetMaterial budgetMaterial=new BudgetMaterial();
                     budgetMaterial.setId(null);
+                    budgetMaterial.setCreateDate(null);
                     budgetMaterial.setModifyDate(new Date());
                     budgetMaterial.setProductName(product.getName());
                     iBudgetMaterialMapper.updateByExampleSelective(budgetMaterial,example);

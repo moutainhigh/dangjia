@@ -289,6 +289,8 @@ public class AttributeService {
                     }
                     attributeValue.setModifyDate(new Date());
                     iAttributeValueMapper.updateByPrimaryKeySelective(attributeValue);
+                    //更新指定属性值关联的商品属性名称
+                    iProductMapper.updateProductValueId(attributeValue.getId());
                 }
             }
             return ServerResponse.createBySuccessMessage("保存成功");
