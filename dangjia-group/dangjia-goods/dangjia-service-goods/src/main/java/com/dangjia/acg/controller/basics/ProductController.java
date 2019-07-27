@@ -3,6 +3,7 @@ package com.dangjia.acg.controller.basics;
 
 import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.basics.Product;
@@ -195,7 +196,8 @@ public class ProductController implements ProductAPI {
     @Override
     @ApiMethod
     public ServerResponse updateProduct(HttpServletRequest request,Product product){
-        return productService.updateProduct(product);
+        String cityId = request.getParameter(Constants.CITY_ID);
+        return productService.updateProduct(cityId,product);
     }
     /**
      * 查询商品及下属货品
