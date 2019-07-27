@@ -337,9 +337,11 @@ public class MemberService {
         if (registerCode == null || smscode != registerCode) {
             return ServerResponse.createByErrorMessage("验证码错误");
         } else {
+            if(CommonUtil.isEmpty(password)||password.length()<6){
+                return ServerResponse.createByErrorMessage("密码不得小于六位数");
+            }
             Member user = new Member();
             user.setMobile(phone);
-            user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
             user.setPraiseRate(new BigDecimal(1));//好评率
             user.setEvaluationScore(new BigDecimal(60));//积分
             user.setCheckType(5);//未提交资料
@@ -363,6 +365,7 @@ public class MemberService {
             if (!serverResponse.isSuccess()) {
                 return serverResponse;
             }
+            user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
             memberMapper.insertSelective(user);
 //            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
             if (userRole == 1) {
@@ -600,6 +603,9 @@ public class MemberService {
     public ServerResponse updateForgotPassword(String phone, String password, String token) {
         if (CommonUtil.isEmpty(token)) {
             return ServerResponse.createByErrorMessage("身份认证错误,无认证参数！");
+        }
+        if(CommonUtil.isEmpty(password)||password.length()<6){
+            return ServerResponse.createByErrorMessage("密码不得小于六位数");
         }
         Member user = new Member();
         user.setMobile(phone);

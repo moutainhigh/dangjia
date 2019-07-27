@@ -1090,6 +1090,7 @@ public class MendOrderService {
         double num = Double.parseDouble(shopCount);
         Warehouse warehouse = warehouseMapper.getByProductId(productId, house.getId());
         Product product = forMasterAPI.getProduct(house.getCityId(), productId);
+        mendMateriel.setCityId(house.getCityId());
         if (warehouse != null) {
             mendMateriel.setProductSn(product.getProductSn());
             mendMateriel.setProductName(product.getName());

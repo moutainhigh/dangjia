@@ -195,6 +195,8 @@ public class ProductChangeService {
                 BigDecimal differPrice = price.multiply(BigDecimal.valueOf(srcSurCount));
                 // 差价默认为可以更换数量的最大值
                 productChange.setDifferencePrice(differPrice);
+                productChange.setCityId(request.getParameter(Constants.CITY_ID));
+
                 productChangeMapper.insert(productChange);
             }
         } catch (Exception e) {
@@ -601,6 +603,7 @@ public class ProductChangeService {
                         newWareHouse.setAskTime(0);
                         newWareHouse.setRepTime(0);//补次数
                         newWareHouse.setBackTime(0);
+                        newWareHouse.setCityId(request.getParameter(Constants.CITY_ID));
                         warehouseMapper.insert(newWareHouse);
                     } else {
                         // 原商品剩余数

@@ -451,6 +451,7 @@ public class OrderService {
             if (!serverResponse.isSuccess()) {
                 return ServerResponse.createByErrorMessage(serverResponse.getResultMsg());
             }
+
             example = new Example(OrderSplit.class);
             example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
                     .andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
@@ -508,6 +509,7 @@ public class OrderService {
                 if (orderSplitItems.size() > 0) {
                     orderSplitItem = orderSplitItems.get(0);
                 }
+                orderSplitItem.setCityId(house.getCityId());
                 if (warehouse != null) {
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
                     orderSplitItem.setWarehouseId(warehouse.getId());//仓库子项id

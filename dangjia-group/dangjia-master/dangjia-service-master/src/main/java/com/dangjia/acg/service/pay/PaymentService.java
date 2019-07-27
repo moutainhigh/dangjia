@@ -362,6 +362,7 @@ public class PaymentService {
                     orderItem.setProductType(mendMateriel.getProductType());//0：材料；1：包工包料
                     orderItem.setCategoryId(mendMateriel.getCategoryId());
                     orderItem.setImage(product.getImage());
+                    orderItem.setCityId(house.getCityId());
                     orderItemMapper.insert(orderItem);
                     example = new Example(Warehouse.class);
                     example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, businessOrder.getHouseId()).andEqualTo(Warehouse.PRODUCT_ID, mendMateriel.getProductId());
@@ -400,6 +401,7 @@ public class PaymentService {
                         warehouse.setAskTime(0);
                         warehouse.setRepTime(1);//补次数
                         warehouse.setBackTime(0);
+                        warehouse.setCityId(house.getCityId());
                         warehouseMapper.insert(warehouse);
                     }
                 }
@@ -469,6 +471,7 @@ public class PaymentService {
                     orderItem.setWorkerGoodsSn(mendWorker.getWorkerGoodsSn());
                     orderItem.setWorkerGoodsId(mendWorker.getWorkerGoodsId());
                     orderItem.setImage(mendWorker.getImage());
+                    orderItem.setCityId(house.getCityId());
                     orderItemMapper.insert(orderItem);
                     /*记录补数量*/
                     forMasterAPI.repairCount(house.getCityId(), mendOrder.getHouseId(), mendWorker.getWorkerGoodsId(), mendWorker.getShopCount());
@@ -770,6 +773,7 @@ public class PaymentService {
                     orderItem.setWorkerGoodsSn(budgetWorker.getWorkerGoodsSn());
                     orderItem.setWorkerGoodsId(budgetWorker.getWorkerGoodsId());
                     orderItem.setImage(budgetWorker.getImage());
+                    orderItem.setCityId(house.getCityId());
                     orderItemMapper.insert(orderItem);
                 }
             }
@@ -853,6 +857,7 @@ public class PaymentService {
                 orderItem.setProductType(budgetMaterial.getProductType());//0：材料；1：包工包料
                 orderItem.setCategoryId(budgetMaterial.getCategoryId());
                 orderItem.setImage(product.getImage());
+                orderItem.setCityId(house.getCityId());
                 orderItemMapper.insert(orderItem);
 
                 Example example = new Example(Warehouse.class);
@@ -901,6 +906,7 @@ public class PaymentService {
                     warehouse.setAskTime(0);
                     warehouse.setRepTime(0);
                     warehouse.setBackTime(0);
+                    warehouse.setCityId(house.getCityId());
                     warehouseMapper.insert(warehouse);
                 }
             }

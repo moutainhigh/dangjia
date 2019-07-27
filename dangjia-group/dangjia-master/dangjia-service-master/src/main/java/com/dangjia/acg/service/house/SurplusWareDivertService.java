@@ -150,6 +150,7 @@ public class SurplusWareDivertService {
                 surplusWareDivert.setProductId(productId);
                 surplusWareDivert.setSrcSurplusWareHouseId(srcSurplusWareHouseId);
                 surplusWareDivert.setToSurplusWareHouseId(toSurplusWareHouseId);
+                surplusWareDivert.setCityId(house.getCityId());
                 iSurplusWareDivertMapper.insert(surplusWareDivert);
             }
             return ServerResponse.createBySuccessMessage("操作成功");
@@ -186,6 +187,7 @@ public class SurplusWareDivertService {
                     newSurplusWareHouseItem.setCategoryId(product.getCategoryId());
                     newSurplusWareHouseItem.setProductName(product.getName());
                 }
+                newSurplusWareHouseItem.setCityId(house.getCityId());
                 iSurplusWareHouseItemMapper.insert(newSurplusWareHouseItem);
             } else {
                 toSurplusWareHouseItem.setProductCount(toSurplusWareHouseItem.getProductCount() + divertCount);
