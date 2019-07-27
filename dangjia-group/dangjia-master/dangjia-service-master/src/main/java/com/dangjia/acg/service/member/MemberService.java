@@ -337,6 +337,9 @@ public class MemberService {
         if (registerCode == null || smscode != registerCode) {
             return ServerResponse.createByErrorMessage("验证码错误");
         } else {
+            if(CommonUtil.isEmpty(password)||password.length()<6){
+                return ServerResponse.createByErrorMessage("密码不得小于六位数");
+            }
             Member user = new Member();
             user.setMobile(phone);
             user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
@@ -600,6 +603,9 @@ public class MemberService {
     public ServerResponse updateForgotPassword(String phone, String password, String token) {
         if (CommonUtil.isEmpty(token)) {
             return ServerResponse.createByErrorMessage("身份认证错误,无认证参数！");
+        }
+        if(CommonUtil.isEmpty(password)||password.length()<6){
+            return ServerResponse.createByErrorMessage("密码不得小于六位数");
         }
         Member user = new Member();
         user.setMobile(phone);
