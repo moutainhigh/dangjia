@@ -271,7 +271,7 @@ public class ClueService {
      * 转客户
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse sendUser(Member member, String phone ,String longitude, String latitude) {
+    public ServerResponse sendUser(Member member, String phone, String longitude, String latitude) {
         try {
             Clue clue = clueMapper.getByPhone(phone);
             //表示线索表存在线索
@@ -321,7 +321,7 @@ public class ClueService {
                 //操作dj_member表
                 member.setCreateDate(clue.getCreateDate());
                 iMemberMapper.updateByPrimaryKeySelective(member);
-            }else{
+            } else {
                 if (!CommonUtil.isEmpty(longitude) && !CommonUtil.isEmpty(latitude)) {
                     List<Store> stores = iStoreMapper.selectAll();
                     for (Store store : stores) {
@@ -343,6 +343,20 @@ public class ClueService {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ServerResponse.createByErrorMessage("操作失败");
         }
+    }
+
+    public ServerResponse addH5Clue(String userId, String phone) {
+        Example example = new Example(Clue.class);
+        example.createCriteria().andEqualTo(Clue.CUS_SERVICE, userId).andEqualTo(Clue.PHONE, phone);
+        List<Clue> clueList = clueMapper.selectByExample(example);
+        if (clueList.size() > 0) {
+            return ServerResponse.createBySuccessMessage("操作成功");
+        }
+        Clue clue = new Clue();
+        clue.setCusService(userId);
+        clue.setPhone(phone);
+        clueMapper.insert(clue);
+        return ServerResponse.createBySuccessMessage("操作成功");
     }
 }
 
