@@ -658,32 +658,6 @@
         AND brand_id = 'PP027'
         AND brand_series_id = 'XL0093'
     </select>
-    <!--更新货品名称-->
-    <update id="updateProductById" parameterType="java.lang.String">
-        UPDATE `dj_basics_product` p
-        SET p.`name` = REPLACE (p.`name`,#{oldName},#{newName})
-        WHERE 1=1
-        <if test="null!=brandSeriesId and ''!=brandSeriesId">
-            or p.brand_series_id = #{brandSeriesId};
-        </if>
-        <if test="null!=brandId and ''!=brandId">
-            or p.brand_id=#{brandId}
-        </if>
-        <if test="null!=goodsId and ''!=goodsId">
-            or p.goods_id=#{goodsId}
-        </if>
-        <if test="null!=id and ''!=id">
-            or p.id=#{id}
-        </if>
-    </update>
-    
-    <!--更新货品单位-->
-    <update id="updateProductByUnitId" parameterType="java.lang.String">
-        update dj_basics_product
-        set unit_name=#{unitName}
-        where unit_id=#{unitId}
-    </update>
-
 
     <!--更新货品属性-->
     <update id="updateProductValueId" parameterType="java.lang.String">
