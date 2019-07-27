@@ -285,6 +285,7 @@ public class EvaluateService {
                 materialRecord.setApplyType(houseFlowApply.getApplyType());
                 materialRecord.setNum(num);
                 materialRecord.setProductId(productId);
+                materialRecord.setCityId(house.getCityId());
                 materialRecord.setProductSn(product.getProductSn());
                 materialRecord.setProductName(product.getName());
                 materialRecordMapper.insert(materialRecord);
