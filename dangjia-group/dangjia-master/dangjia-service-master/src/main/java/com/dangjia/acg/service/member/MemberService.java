@@ -342,7 +342,6 @@ public class MemberService {
             }
             Member user = new Member();
             user.setMobile(phone);
-            user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
             user.setPraiseRate(new BigDecimal(1));//好评率
             user.setEvaluationScore(new BigDecimal(60));//积分
             user.setCheckType(5);//未提交资料
@@ -366,6 +365,7 @@ public class MemberService {
             if (!serverResponse.isSuccess()) {
                 return serverResponse;
             }
+            user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
             memberMapper.insertSelective(user);
 //            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
             if (userRole == 1) {
