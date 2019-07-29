@@ -23,6 +23,8 @@ public class DateUtil implements AutoCloseable, Serializable {
      */
     private static Logger log = Logger.getLogger(DateUtil.class);
     /***/
+    public static final String FORMAT = "yyyy-MM";
+    /***/
     public static final String FORMAT1 = "yyyy-MM-dd";
     /***/
     public static final String FORMAT2 = "yyyy-MM-dd HH:mm:ss";

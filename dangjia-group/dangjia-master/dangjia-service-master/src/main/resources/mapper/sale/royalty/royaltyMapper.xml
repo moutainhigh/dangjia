@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.sale.royalty.RoyaltyMapper">
+
+
+    <!--查询成交量-->
+    <select id="queryRoyaltySurface" resultType="com.dangjia.acg.common.model.BaseEntity">
+        select id,create_date as createDate from dj_royalty_surface
+    </select>
+
+
+
+
+</mapper>
