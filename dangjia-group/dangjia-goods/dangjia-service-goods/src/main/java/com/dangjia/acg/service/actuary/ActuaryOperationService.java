@@ -278,6 +278,9 @@ public class ActuaryOperationService {
                 } else {
                     product = productMapper.selectByPrimaryKey(gId);//当前 货品
                 }
+                if(product == null){
+                    return ServerResponse.createByErrorMessage("该商品已禁用！");
+                }
                 GoodsDTO goodsDTO = goodsDetail(product, budgetMaterialId);
                 if (goodsDTO != null) {
                     return ServerResponse.createBySuccess("查询成功", goodsDTO);
