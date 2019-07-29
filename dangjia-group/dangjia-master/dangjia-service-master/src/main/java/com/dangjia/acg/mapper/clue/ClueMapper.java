@@ -34,7 +34,15 @@ public interface ClueMapper extends Mapper<Clue> {
 
     Integer Complete(@Param("userId") String userId,@Param("time") String time);
 
-    List<OrdersCustomerDTO> ordersCustomer(@Param("userId") String userId,@Param("visitState") String visitState,@Param("searchKey") String searchKey,@Param("time") String time);
+    List<OrdersCustomerDTO> ordersCustomer(@Param("userId") String userId,
+                                           @Param("visitState") String visitState,
+                                           @Param("searchKey") String searchKey,
+                                           @Param("time") String time,
+                                           @Param("storeId") String storeId,
+                                           @Param("staff") String staff);
 
-    List<CustomerIndexDTO> sleepingCustomer(@Param("storeUsers") List<StoreUserDTO> storeUsers);
+    List<CustomerIndexDTO> sleepingCustomer(@Param("storeId") String storeId,
+                                            @Param("searchKey") String searchKey,
+                                            @Param("time") String time,
+                                            @Param("staff") String staff);
 }

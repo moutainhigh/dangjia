@@ -41,5 +41,45 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </if>
         ORDER by create_date desc
     </select>
+
+    <!--待分配客户-->
+    <select id="waitDistribution" parameterType="String" resultType="com.dangjia.acg.dto.sale.client.CustomerIndexDTO">
+        SELECT
+        m.id, if(m.name is not null,m.nick_name,m.name) as name,
+        m.mobile as phone,
+        mc.modify_date AS modifyDate,
+        mc.create_date AS createDate,
+        mc.label_id_arr AS labelIdArr
+        FROM dj_member_customer mc
+        INNER join dj_member m
+        ON mc.member_id=m.id
+        WHERE user_id=#{userId}
+        AND mc.data_status=0
+        AND stage IN(0,1)
+        <if test="null!=searchKey and ''!=searchKey">
+            AND CONCAT(m.name,m.mobile) like CONCAT('%',#{searchKey},'%')
+        </if>
+        ORDER by mc.create_date
+        <if test="null!=time and ''!=time">
+            desc
+        </if>
+    </select>
+    
+    <select id="grabSheet" resultType="com.dangjia.acg.dto.sale.store.GrabSheetDTO">
+        SELECT
+          mc.id as customerId,
+          h.id as houseId,
+          if(m.name is not null,m.nick_name,m.name) as name,
+          h.create_date AS createDate,
+          h.visit_state as visitState
+        FROM dj_member_customer mc
+        INNER  JOIN dj_member m
+        on mc.member_id=m.id
+        INNER JOIN dj_house h
+        on m.id=h.member_id
+        where h.visit_state=0
+        and store_id=#{storeId}
+        order By h.create_date
+    </select>
 </mapper>
 

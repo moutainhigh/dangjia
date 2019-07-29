@@ -1,9 +1,14 @@
 package com.dangjia.acg.mapper.member;
 
+import com.dangjia.acg.dto.sale.client.CustomerIndexDTO;
+import com.dangjia.acg.dto.sale.client.SaleClueDTO;
+import com.dangjia.acg.dto.sale.store.GrabSheetDTO;
 import com.dangjia.acg.modle.member.Customer;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
+
+import java.util.List;
 
 /**
  * 客服表dao层
@@ -25,5 +30,10 @@ public interface ICustomerMapper extends Mapper<Customer> {
      * @return
      */
     Customer getCustomerByMemberIdAndStage(@Param("memberId") String memberId,@Param("stage") Integer stage);
+
+
+    List<CustomerIndexDTO> waitDistribution(@Param("userId") String userId,@Param("searchKey") String searchKey,@Param("time") String time);
+
+    List<GrabSheetDTO> grabSheet(@Param("storeId") String storeId);
 }
 

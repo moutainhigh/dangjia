@@ -18,11 +18,11 @@ import java.util.Date;
  * Time: 14:23
  */
 @FeignClient("dangjia-service-master")
-@Api(value = "员工详情接口", description = "员工详情接口")
+@Api(value = "销售员工详情接口", description = "销售员工详情接口")
 public interface EmployeeDetailsAPI {
 
     @PostMapping(value = "sale/store/monthlyTarget")
-    @ApiOperation(value = "员工月目标", notes = "员工月目标")
+    @ApiOperation(value = "制定员工月目标", notes = "制定员工月目标")
     ServerResponse setMonthlyTarget(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("userId") String userId,
                                     @RequestParam("time") Date time,

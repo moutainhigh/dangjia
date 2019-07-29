@@ -143,7 +143,6 @@ public class StoreServices {
                 Example example = new Example(Store.class);
                 example.createCriteria().andEqualTo(Store.STORE_NAME, store.getStoreName())
                         .andEqualTo(Store.DATA_STATUS, 0);
-                ;
                 if (iStoreMapper.selectByExample(example).size() > 0) {
                     return ServerResponse.createByErrorMessage("门店已存在");
                 }

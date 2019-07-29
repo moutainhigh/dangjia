@@ -7,6 +7,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.controller.user.MainUserController;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
+import com.dangjia.acg.dto.sale.client.CustomerIndexDTO;
 import com.dangjia.acg.dto.sale.client.OrdersCustomerDTO;
 import com.dangjia.acg.dto.sale.client.SaleClueDTO;
 import com.dangjia.acg.dto.sale.residential.ResidentialRangeDTO;
@@ -15,6 +16,7 @@ import com.dangjia.acg.dto.sale.store.StoreUserDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.clue.ClueTalkMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
+import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.mapper.sale.residential.ResidentialBuildingMapper;
 import com.dangjia.acg.mapper.sale.residential.ResidentialRangeMapper;
@@ -25,6 +27,7 @@ import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
@@ -33,6 +36,7 @@ import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.sale.SaleService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
@@ -73,6 +77,10 @@ public class ClientService {
     private IStoreUserMapper iStoreUserMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private SaleService saleService;
+    @Autowired
+    private ICustomerMapper iCustomerMapper;
 
     /**
      * 录入客户
@@ -111,7 +119,6 @@ public class ClientService {
         }
         clue.setStage(0);
         clue.setDataStatus(0);
-        clue.setUserId(user.getId());
         clue.setStoreId(store.getId());
         clue.setCusService(user.getId());
         if(clueMapper.insert(clue)>0){
@@ -139,7 +146,7 @@ public class ClientService {
      * @param userToken
      * @return
      */
-    public ServerResponse clientPage(String userToken,String storeId) {
+    public ServerResponse clientPage(String userToken) {
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -183,12 +190,17 @@ public class ClientService {
             }
             map.put("outField", residentialRangeDTOList);
         }else{
-            List<StoreUserDTO> storeUsers = iStoreUserMapper.getStoreUsers(storeId, null,null);
+            Store store = (Store)saleService.getStore(accessToken.getUserId());
+            List<StoreUserDTO> storeUsers = iStoreUserMapper.getStoreUsers(store.getId(), null,null);
             map.put("followList", clueMapper.clientPage("0", null,storeUsers));
             map.put("placeOrder", clueMapper.clientPage("1", null,storeUsers));
             map.put("completion", clueMapper.clientPage("2", null,storeUsers));
-            map.put("sleepingCustomer",clueMapper.sleepingCustomer(storeUsers));
-
+            List<CustomerIndexDTO> customerIndexDTOS = clueMapper.sleepingCustomer(store.getId(), null,"desc",null);
+            map.put("sleepingCustomer",customerIndexDTOS.size()>0?customerIndexDTOS.get(0):null);
+            List<CustomerIndexDTO> customerIndexDTOS1 = iCustomerMapper.waitDistribution(user.getId(), null,"desc");
+            map.put("waitDistribution",customerIndexDTOS1.size()>0?customerIndexDTOS1.get(0):null);
+            map.put("storeId",store.getId());
+            map.put("grabSheet",iCustomerMapper.grabSheet(store.getId()));
         }
        return ServerResponse.createBySuccess("查询成功",map);
     }
@@ -216,7 +228,6 @@ public class ClientService {
             MainUser user = userMapper.getNameById(accessToken.getUserId());
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Clue> clues = clueMapper.followList(label, time, stage, searchKey ,user.getId());
-            PageInfo pageResult = new PageInfo(clues);
             List<SaleClueDTO> list=new ArrayList<>();
             for (Clue clue : clues) {
                 SaleClueDTO saleClueDTO=new SaleClueDTO();
@@ -235,7 +246,7 @@ public class ClientService {
                 saleClueDTO.setCommunicationDate(null!=maxDate?maxDate : null);
                 list.add(saleClueDTO);
             }
-            pageResult.setList(list);
+            PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功",pageResult);
         } catch (Exception e) {
             e.printStackTrace();
@@ -253,7 +264,7 @@ public class ClientService {
      * @param searchKey
      * @return
      */
-    public ServerResponse ordersCustomer( String userToken,String visitState,PageDTO pageDTO,String searchKey, String time) {
+    public ServerResponse ordersCustomer( String userToken,String visitState,PageDTO pageDTO,String searchKey, String time ,Integer type ,String userId) {
             Object object = constructionService.getAccessToken(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
@@ -263,8 +274,41 @@ public class ClientService {
                 return ServerResponse.createbyUserTokenError();
             }
             MainUser user = userMapper.getNameById(accessToken.getUserId());
+            Store store = (Store)saleService.getStore(accessToken.getUserId());
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<OrdersCustomerDTO> ordersCustomerDTOS = clueMapper.ordersCustomer(user.getId(), visitState, searchKey, time);
+            List<OrdersCustomerDTO> ordersCustomerDTOS=new ArrayList<>();
+            if(!CommonUtil.isEmpty(visitState)) {
+                Example example = new Example(Store.class);
+                example.createCriteria().andEqualTo(Store.USER_ID, user.getId());
+                if (iStoreMapper.selectByExample(example).size() <= 0) {
+                    ordersCustomerDTOS = clueMapper.ordersCustomer(user.getId(), visitState, searchKey, time, null,null);
+                } else {
+                    ordersCustomerDTOS = clueMapper.ordersCustomer(null, visitState, searchKey, time, store.getId(),userId);
+                }
+            }else{
+                List<CustomerIndexDTO> customerIndexDTOS=new ArrayList<>();
+                if(null!=type && type==1) {//待分配客户
+                     customerIndexDTOS= iCustomerMapper.waitDistribution(user.getId(),searchKey,time);
+                }
+                if(null!=type && type==2){//沉睡客户
+                    customerIndexDTOS = clueMapper.sleepingCustomer(store.getId(),searchKey,time,userId);
+                }
+                for (CustomerIndexDTO customerIndexDTO : customerIndexDTOS) {
+                    OrdersCustomerDTO ordersCustomerDTO=new OrdersCustomerDTO();
+                    if(!CommonUtil.isEmpty(customerIndexDTO.getLabelIdArr())) {
+                        String[] labelIds = customerIndexDTO.getLabelIdArr().split(",");
+                        List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
+                        ordersCustomerDTO.setList(labelByIds);
+                    }
+                    ordersCustomerDTO.setMemberId(customerIndexDTO.getId());
+                    ordersCustomerDTO.setMobile(customerIndexDTO.getPhone());
+                    ordersCustomerDTO.setName(customerIndexDTO.getName());
+                    ordersCustomerDTO.setCreateDate(customerIndexDTO.getCreateDate());
+                    ordersCustomerDTO.setModifyDate(customerIndexDTO.getModifyDate());
+                    ordersCustomerDTO.setUserName(customerIndexDTO.getUserName());
+                    ordersCustomerDTOS.add(ordersCustomerDTO);
+                }
+            }
             PageInfo pageResult = new PageInfo(ordersCustomerDTOS);
             return ServerResponse.createBySuccess("查询成功",pageResult);
     }

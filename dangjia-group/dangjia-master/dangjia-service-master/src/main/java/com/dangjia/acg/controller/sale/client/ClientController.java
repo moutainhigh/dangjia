@@ -36,8 +36,8 @@ public class ClientController implements ClientAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse clientPage(HttpServletRequest request, String userToken ,String storeId) {
-        return customerService.clientPage(userToken,storeId);
+    public ServerResponse clientPage(HttpServletRequest request, String userToken) {
+        return customerService.clientPage(userToken);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class ClientController implements ClientAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse ordersCustomer(HttpServletRequest request, String userToken,String visitState , PageDTO pageDTO,String searchKey, String time) {
-        return customerService.ordersCustomer(userToken,visitState,pageDTO,searchKey,time);
+    public ServerResponse ordersCustomer(HttpServletRequest request, String userToken,String visitState , PageDTO pageDTO,String searchKey, String time,Integer type,String userId) {
+        return customerService.ordersCustomer(userToken,visitState,pageDTO,searchKey,time,type,userId);
     }
 }
