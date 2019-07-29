@@ -138,7 +138,50 @@ public class GroupInfoService {
     }
 
     /**
-     * 批量更新群组成员
+     * 批量更新群组成员（本地）
+     *
+     * @param groupId    gid群组ID
+     * @param addList    添加到群组的用户,多个以逗号分割（任选）
+     * @param removeList 从群组删除的用户,多个以逗号分割（任选）addList和removeList  两者至少要有一个
+     */
+    public ServerResponse editManageLocalGroup(int groupId, String addList, String removeList) {
+        String[] adds = StringUtils.split(addList, ",");
+        String[] removes = StringUtils.split(removeList, ",");
+        if (!CommonUtil.isEmpty(addList)) {
+            registerJGUsers(AppType.GONGJIANG.getDesc(), adds, new String[adds.length]);
+        }
+        //夸应用添加删除
+        groupAPI.manageGroup(AppType.GONGJIANG.getDesc(), groupId, adds, removes);
+        if (CommonUtil.isEmpty(addList)) {
+            return ServerResponse.createBySuccessMessage("ok");
+        }
+        //给业主发送默认提示语
+        for (String userid : adds) {
+            Member member = memberMapper.selectByPrimaryKey(userid);
+            if (member != null) {
+                String text = "";
+                if (member.getWorkerType() == 1) {
+                    text = SHEJISHI;
+                }
+                if (member.getWorkerType() == 2) {
+                    text = JINGSUANSHI;
+                }
+                if (member.getWorkerType() == 3) {
+                    text = DAGUANGJIA;
+                }
+                if (member.getWorkerType() > 3) {
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                    text = GONGJIANG.replaceAll("WORKERNAME", workerType.getName());
+                }
+                if (!CommonUtil.isEmpty(text)) {
+                    messageAPI.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), String.valueOf(groupId), userid, text);
+                }
+            }
+        }
+        return ServerResponse.createBySuccessMessage("ok");
+    }
+    /**
+     * 批量更新群组成员(跨域)
      *
      * @param groupId    gid群组ID
      * @param addList    添加到群组的用户,多个以逗号分割（任选）
@@ -152,7 +195,6 @@ public class GroupInfoService {
         }
         //夸应用添加删除
         crossAppAPI.addOrRemoveMembersFromCrossGroup(AppType.GONGJIANG.getDesc(), AppType.SALE.getDesc(), groupId, adds, removes);
-//        groupAPI.manageGroup(AppType.GONGJIANG.getDesc(), groupId, adds, removes);
         if (CommonUtil.isEmpty(addList)) {
             return ServerResponse.createBySuccessMessage("ok");
         }
