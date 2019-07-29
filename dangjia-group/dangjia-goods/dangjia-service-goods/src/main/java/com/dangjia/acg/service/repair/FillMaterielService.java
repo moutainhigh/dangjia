@@ -325,9 +325,8 @@ public class FillMaterielService {
                 if(product!=null) {
                     budgetMaterialDTO.setProductName(product.getName());
                     budgetMaterialDTO.setImage(product.getImage() == null ? "" : address + product.getImage());
-                    budgetMaterialDTOS.add(budgetMaterialDTO);
                 }
-
+                budgetMaterialDTOS.add(budgetMaterialDTO);
             }
             pageResult.setList(budgetMaterialDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);
