@@ -305,6 +305,9 @@ public class ActuaryOperationService {
                 return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
             } else if (type == 2 || type == 3 || type == 5) {//材料商品  包工包料商品
                 Product product = productMapper.selectByPrimaryKey(gId);//当前 货品
+                if(product == null){
+                    return ServerResponse.createByErrorMessage("该商品已禁用！");
+                }
                 GoodsDTO goodsDTO = goodsDetail(product, null);
                 if (goodsDTO != null) {
                     return ServerResponse.createBySuccess("查询成功", goodsDTO);
