@@ -21,23 +21,6 @@ import java.util.Date;
 @Api(value = "销售端业绩接口", description = "销售端业绩接口")
 public interface AchievementAPI {
 
-    /**
-     * showdoc
-     * @catalog
-    TODO 当家接口文档/设计模块
-     * @title TODO
-     * @description TODO
-     * @method POST
-     * @url TODO master/
-     * @param null 必选/可选 string TODO
-     * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
-     * @return_param groupid int 用户组id
-     * @return_param name string 用户昵称
-     * @remark 更多返回错误代码请看首页的错误代码描述
-     * @number 99
-     * @Author: ljl 18075121944
-     * @Date: 2019/7/29 0029 09:11
-     */
     @PostMapping(value = "sale/achievement/queryLeaderAchievementData")
     @ApiOperation(value = "客户查询业绩", notes = "客户查询业绩")
     ServerResponse queryLeaderAchievementData(
@@ -47,28 +30,10 @@ public interface AchievementAPI {
                     @RequestParam("time")Date time);
 
 
-    /**
-     * showdoc
-     * @catalog TODO 当家接口文档/设计模块
-     * @title TODO
-     * @description TODO
-     * @method POST
-     * @url TODO master/
-     * @param null 必选/可选 string TODO
-     * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
-     * @return_param groupid int 用户组id
-     * @return_param name string 用户昵称
-     * @remark 更多返回错误代码请看首页的错误代码描述
-     * @number 99
-     * @Author: ljl 18075121944
-     * @Date: 2019/7/29 0029 09:11
-     */
     @PostMapping(value = "sale/achievement/queryUserAchievementData")
     @ApiOperation(value = "查询员工业绩", notes = "查询员工业绩")
     ServerResponse queryUserAchievementData(@RequestParam("request")HttpServletRequest request,
                                                    @RequestParam("visitState")Integer visitState ,
                                                    @RequestParam("userId")String userId,
                                                    @RequestParam("time")Date time);
-
-
 }
