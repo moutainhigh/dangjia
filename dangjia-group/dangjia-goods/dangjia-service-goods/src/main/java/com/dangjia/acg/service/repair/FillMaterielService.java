@@ -312,7 +312,8 @@ public class FillMaterielService {
                 budgetMaterialDTO.setId(budgetMaterial.getId());
                 budgetMaterialDTO.setProductId(budgetMaterial.getProductId());
                 budgetMaterialDTO.setProductSn(budgetMaterial.getProductSn());
-                budgetMaterialDTO.setProductName(product.getName());
+                budgetMaterialDTO.setProductName(budgetMaterial.getProductName());
+                budgetMaterialDTO.setImage(budgetMaterial.getImage() == null ? "" : address + budgetMaterial.getImage());
                 budgetMaterialDTO.setProductNickName(budgetMaterial.getProductNickName());
                 budgetMaterialDTO.setPrice(budgetMaterial.getPrice());
                 budgetMaterialDTO.setCost(budgetMaterial.getCost());
@@ -321,8 +322,12 @@ public class FillMaterielService {
                 budgetMaterialDTO.setUnitName(budgetMaterial.getUnitName());
                 budgetMaterialDTO.setProductType(budgetMaterial.getProductType());
                 budgetMaterialDTO.setCategoryId(budgetMaterial.getCategoryId());
-                budgetMaterialDTO.setImage(product.getImage() == null ? "" : address + product.getImage());
-                budgetMaterialDTOS.add(budgetMaterialDTO);
+                if(product!=null) {
+                    budgetMaterialDTO.setProductName(product.getName());
+                    budgetMaterialDTO.setImage(product.getImage() == null ? "" : address + product.getImage());
+                    budgetMaterialDTOS.add(budgetMaterialDTO);
+                }
+
             }
             pageResult.setList(budgetMaterialDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);
