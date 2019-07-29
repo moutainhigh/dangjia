@@ -93,15 +93,7 @@ public class WarehouseService {
                 warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());//剩余数量 所有买的数量 - 业主退货 - 要的
                 warehouseDTO.setTolPrice(warehouseDTO.getSurCount() * warehouse.getPrice());
                 if(warehouseDTO.getSurCount()>0) {
-                    Product product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
-                    if (product != null) {
-                        Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
-                        if (goods != null) {
-                            if (goods.getSales() == 0) {
-                                tolPrice = tolPrice + warehouseDTO.getTolPrice();
-                            }
-                        }
-                    }
+                    tolPrice = tolPrice + warehouseDTO.getTolPrice();
                 }
             }
             return ServerResponse.createBySuccess("查询成功", tolPrice);
