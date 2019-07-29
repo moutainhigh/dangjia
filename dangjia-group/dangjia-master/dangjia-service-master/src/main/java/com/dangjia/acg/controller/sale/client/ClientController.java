@@ -30,6 +30,12 @@ public class ClientController implements ClientAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse crossDomainOrder(HttpServletRequest request, Clue clue, String userToken, String cityId, String villageId) {
+        return null;
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse updateCustomer(HttpServletRequest request, Clue clue) {
         return customerService.updateCustomer(clue);
     }

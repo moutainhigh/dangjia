@@ -359,7 +359,6 @@ public class MemberService {
             user.setInviteNum(0);
             user.setIsCrowned(0);
             user.setHead("qrcode/logo.png");
-            System.out.println(user);
             updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             ServerResponse serverResponse = setAccessToken(user, userRole);

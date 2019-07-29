@@ -112,4 +112,10 @@ public class StoreUserServices {
             return ServerResponse.createByErrorMessage("删除失败");
         }
     }
+
+    public ServerResponse getStoreUser(String userToken, String userId) {
+
+
+        return null;
+    }
 }

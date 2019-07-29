@@ -39,4 +39,9 @@ public class StoreUserController implements StoreUserAPI {
     public ServerResponse delStoreUser(String storeUserId) {
         return storeUserServices.delStoreUser(storeUserId);
     }
+
+    @Override
+    public ServerResponse getStoreUser(HttpServletRequest request, String userToken, String userId) {
+        return storeUserServices.getStoreUser(userToken, userId);
+    }
 }
