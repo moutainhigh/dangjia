@@ -23,4 +23,6 @@ public class StoreUserDTO {
     private Boolean isJob;//是否在职（0：正常；1，离职）
     protected Date createDate;// 创建日期
     protected Date modifyDate;// 修改日期
+    private String storeName;//门店——岗位名称
+
 }

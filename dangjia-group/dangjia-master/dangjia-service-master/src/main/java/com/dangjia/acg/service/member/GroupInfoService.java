@@ -110,7 +110,7 @@ public class GroupInfoService {
         PageInfo pageResult = new PageInfo(list);
         List<GroupDTO> listdto = new ArrayList<>();
         for (Group g : list) {
-            if(!CommonUtil.isEmpty(g.getGroupId())) {
+            if (!CommonUtil.isEmpty(g.getGroupId())) {
                 GroupDTO dto = new GroupDTO();
                 BeanUtils.beanToBean(g, dto);
                 List<Map> members = crossAppAPI.getCrossGroupMembers(AppType.GONGJIANG.getDesc(), Integer.parseInt(g.getGroupId()));
@@ -138,7 +138,50 @@ public class GroupInfoService {
     }
 
     /**
-     * 批量更新群组成员
+     * 批量更新群组成员（本地）
+     *
+     * @param groupId    gid群组ID
+     * @param addList    添加到群组的用户,多个以逗号分割（任选）
+     * @param removeList 从群组删除的用户,多个以逗号分割（任选）addList和removeList  两者至少要有一个
+     */
+    public ServerResponse editManageLocalGroup(int groupId, String addList, String removeList) {
+        String[] adds = StringUtils.split(addList, ",");
+        String[] removes = StringUtils.split(removeList, ",");
+        if (!CommonUtil.isEmpty(addList)) {
+            registerJGUsers(AppType.GONGJIANG.getDesc(), adds, new String[adds.length]);
+        }
+        //夸应用添加删除
+        groupAPI.manageGroup(AppType.GONGJIANG.getDesc(), groupId, adds, removes);
+        if (CommonUtil.isEmpty(addList)) {
+            return ServerResponse.createBySuccessMessage("ok");
+        }
+        //给业主发送默认提示语
+        for (String userid : adds) {
+            Member member = memberMapper.selectByPrimaryKey(userid);
+            if (member != null) {
+                String text = "";
+                if (member.getWorkerType() == 1) {
+                    text = SHEJISHI;
+                }
+                if (member.getWorkerType() == 2) {
+                    text = JINGSUANSHI;
+                }
+                if (member.getWorkerType() == 3) {
+                    text = DAGUANGJIA;
+                }
+                if (member.getWorkerType() > 3) {
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                    text = GONGJIANG.replaceAll("WORKERNAME", workerType.getName());
+                }
+                if (!CommonUtil.isEmpty(text)) {
+                    messageAPI.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), String.valueOf(groupId), userid, text);
+                }
+            }
+        }
+        return ServerResponse.createBySuccessMessage("ok");
+    }
+    /**
+     * 批量更新群组成员(跨域)
      *
      * @param groupId    gid群组ID
      * @param addList    添加到群组的用户,多个以逗号分割（任选）
@@ -148,9 +191,10 @@ public class GroupInfoService {
         String[] adds = StringUtils.split(addList, ",");
         String[] removes = StringUtils.split(removeList, ",");
         if (!CommonUtil.isEmpty(addList)) {
-            registerJGUsers(AppType.GONGJIANG.getDesc(), adds, new String[adds.length]);
+            registerJGUsers(AppType.SALE.getDesc(), adds, new String[adds.length]);
         }
-        groupAPI.manageGroup(AppType.GONGJIANG.getDesc(), groupId, adds, removes);
+        //夸应用添加删除
+        crossAppAPI.addOrRemoveMembersFromCrossGroup(AppType.GONGJIANG.getDesc(), AppType.SALE.getDesc(), groupId, adds, removes);
         if (CommonUtil.isEmpty(addList)) {
             return ServerResponse.createBySuccessMessage("ok");
         }
@@ -208,15 +252,16 @@ public class GroupInfoService {
         registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{group.getUserId()}, new String[]{"业主"});
         //创建群组
         CreateGroupResultDTO groupResult = groupAPI.createGroup(AppType.GONGJIANG.getDesc(), group.getAdminId(), group.getHouseName(), memberlist, "", "", 1);
-        if(groupResult!=null) {
+        if (groupResult != null) {
             group.setGroupId(String.valueOf(groupResult.getGid()));
             crossAppAPI.addOrRemoveMembersFromCrossGroup(AppType.GONGJIANG.getDesc(), AppType.ZHUANGXIU.getDesc(), groupResult.getGid(), new String[]{group.getUserId()}, new String[]{});
-            for (String userid : memberlist) {
-                String nickname = getUserName(userid);
-                //给业主发送默认提示语
-                String text = KEFU.replaceAll("NAME", nickname);
-                messageAPI.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), group.getGroupId(), userid, text);
-            }
+            if (memberlist != null)
+                for (String userid : memberlist) {
+                    String nickname = getUserName(userid);
+                    //给业主发送默认提示语
+                    String text = KEFU.replaceAll("NAME", nickname);
+                    messageAPI.sendGroupTextByAdmin(AppType.GONGJIANG.getDesc(), group.getGroupId(), userid, text);
+                }
         }
         if (this.groupMapper.insertSelective(group) > 0) {
             return ServerResponse.createBySuccessMessage("ok");
@@ -284,26 +329,26 @@ public class GroupInfoService {
      */
     public ServerResponse getOnlineService(HttpServletRequest request, Integer type) {
         Example example = new Example(MainUser.class);
-        example.createCriteria().andEqualTo(MainUser.IS_RECEIVE,type);
+        example.createCriteria().andEqualTo(MainUser.IS_RECEIVE, type);
         example.orderBy(GroupUserConfig.CREATE_DATE).desc();
         List<MainUser> list = userMapper.selectByExample(example);
         if (list != null && list.size() > 0) {
             MainUser user = list.get(0);
             Map map = new HashMap();
             map.put("targetId", user.getId());
-            map.put("targetAppKey",  messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
-            String text=null;
-            if(type==1){
-                text="业主您好！我是您的售前客服！";
+            map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
+            String text = null;
+            if (type == 1) {
+                text = "业主您好！我是您的售前客服！";
             }
-            if(type==2){
-                text="业主您好！我是您的售中客服！";
+            if (type == 2) {
+                text = "业主您好！我是您的售中客服！";
             }
-            if(type==3){
-                text="业主您好！我是您的材料顾问！";
+            if (type == 3) {
+                text = "业主您好！我是您的材料顾问！";
             }
-            if(type==4){
-                text="业主您好！我是您的工程顾问！";
+            if (type == 4) {
+                text = "业主您好！我是您的工程顾问！";
             }
             map.put("text", text);
             return ServerResponse.createBySuccess("ok", map);

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,4 +28,12 @@ public class StoreManagementController implements StoreManagementAPI {
     public ServerResponse storeManagementPage(HttpServletRequest request, String userToken, PageDTO pageDTO) {
         return storeManagementService.storeManagementPage(userToken,pageDTO);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addBuilding(HttpServletRequest request, String villageId, Date modifyDate, String building,String storeId) {
+        return storeManagementService.addBuilding(villageId,modifyDate,building,storeId);
+    }
+
+
 }

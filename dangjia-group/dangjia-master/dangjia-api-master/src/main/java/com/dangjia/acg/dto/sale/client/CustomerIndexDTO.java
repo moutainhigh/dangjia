@@ -17,4 +17,7 @@ public class CustomerIndexDTO {
     private String phone;//号码
     private Date modifyDate;//时间
     private String houseName;//房子名称
+    private Date createDate;
+    private String labelIdArr;//标签id
+    private String userName;//跟进人
 }

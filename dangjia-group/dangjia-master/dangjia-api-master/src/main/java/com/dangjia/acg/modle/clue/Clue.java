@@ -61,11 +61,6 @@ public class Clue extends BaseEntity {
     @ApiModelProperty("阶段 0:新线索 1：继续跟进 2:已放弃 3:黑名单")
     private Integer stage;
 
-    @Column(name = "cus_service")
-    @Desc(value = "客服ID")
-    @ApiModelProperty("客服ID")
-    private String cusService;
-
     @Column(name = "label_id")
     @Desc(value = "标签Id")
     @ApiModelProperty("标签Id")
@@ -86,13 +81,18 @@ public class Clue extends BaseEntity {
     @ApiModelProperty("用户Id")
     private String memberId;
 
-    @Column(name = "user_id")
-    @Desc(value = "销售Id")
-    @ApiModelProperty("销售Id")
-    private String userId;
+    @Column(name = "cus_service")
+    @Desc(value = "客服ID")
+    @ApiModelProperty("客服ID")
+    private String cusService;
 
     @Column(name = "store_id")
     @Desc(value = "门店Id")
     @ApiModelProperty("门店Id")
     private String storeId;
+
+    @Column(name = "clue_type")
+    @Desc(value = "线索类型 1：跨域下单  0：正常")
+    @ApiModelProperty("线索类型 1：跨域下单  0：正常")
+    private Integer clueType;
 }

@@ -19,7 +19,7 @@ import java.util.Date;
  * Time: 11:04
  */
 @FeignClient("dangjia-service-master")
-@Api(value = "门店管理页接口", description = "门店管理页接口")
+@Api(value = "销售门店管理页接口", description = "销售门店管理页接口")
 public interface StoreManagementAPI {
 
     @PostMapping(value = "sale/store/storeManagementPage")
@@ -27,6 +27,14 @@ public interface StoreManagementAPI {
     ServerResponse storeManagementPage(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("userToken") String userToken,
                                        @RequestParam("pageDTO") PageDTO pageDTO);
+
+    @PostMapping(value = "sale/store/addBuilding")
+    @ApiOperation(value = "小区添加楼栋", notes = "小区添加楼栋")
+    ServerResponse addBuilding(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("villageId") String villageId,
+                               @RequestParam("modifyDate") Date modifyDate,
+                               @RequestParam("building") String building,
+                               @RequestParam("storeId") String storeId);
 
 
 }

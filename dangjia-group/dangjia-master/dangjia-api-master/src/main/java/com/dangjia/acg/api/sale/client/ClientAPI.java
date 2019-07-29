@@ -25,8 +25,7 @@ public interface ClientAPI {
     @PostMapping(value = "sale/client/clientPage")
     @ApiOperation(value = "客户页", notes = "客户页")
     ServerResponse clientPage(@RequestParam("request") HttpServletRequest request,
-                              @RequestParam("userToken") String userToken,
-                              @RequestParam("storeId") String storeId);
+                              @RequestParam("userToken") String userToken);
 
     /**
      * showdoc
@@ -53,6 +52,23 @@ public interface ClientAPI {
     ServerResponse enterCustomer(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("clue") Clue clue,
                                  @RequestParam("userToken") String userToken);
+
+
+    /**
+     * 跨域下单
+     * @param request
+     * @param clue
+     * @param userToken
+     * @return
+     */
+    @PostMapping(value = "sale/client/crossDomainOrder")
+    @ApiOperation(value = "跨域下单", notes = "跨域下单")
+    ServerResponse crossDomainOrder(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("clue") Clue clue,
+                                    @RequestParam("userToken") String userToken,
+                                    @RequestParam("cityId") String cityId,
+                                    @RequestParam("villageId") String villageId);
+
 
     /**
      * 跟进列表
@@ -81,15 +97,18 @@ public interface ClientAPI {
      * @param time
      * @param searchKey
      * @return
+     * @param type 1:待分配客户 2:沉睡客户
      */
     @PostMapping(value = "sale/client/ordersCustomer")
-    @ApiOperation(value = "已下单竣工列表", notes = "已下单竣工列表")
+    @ApiOperation(value = "已下单/竣工/待分配/沉睡列表", notes = "已下单/竣工/待分配/沉睡列表")
     ServerResponse ordersCustomer(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("userToken") String userToken,
                                   @RequestParam("visitState") String visitState,
                                   @RequestParam("pageDTO") PageDTO pageDTO,
                                   @RequestParam("time") String time,
-                                  @RequestParam("searchKey") String searchKey);
+                                  @RequestParam("searchKey") String searchKey,
+                                  @RequestParam("type") Integer type,
+                                  @RequestParam("userId") String userId);
 
     @PostMapping(value = "sale/client/updateCustomer")
     @ApiOperation(value = "编辑客户", notes = "编辑客户")

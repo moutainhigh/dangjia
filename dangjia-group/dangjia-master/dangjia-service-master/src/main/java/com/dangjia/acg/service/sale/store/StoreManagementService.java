@@ -23,10 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -59,7 +56,11 @@ public class StoreManagementService {
         if (CommonUtil.isEmpty(accessToken.getUserId())) {
             return ServerResponse.createbyUserTokenError();
         }
-        Store store = (Store)saleService.getStore(accessToken.getUserId());
+        object = saleService.getStore(accessToken.getUserId());
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Store store = (Store) object;
         List<StoreUserDTO> storeUserDTOS = iStoreUserMapper.getStoreUsers(store.getId(), null,4);
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         for (StoreUserDTO storeUserDTO : storeUserDTOS) {
@@ -87,6 +88,27 @@ public class StoreManagementService {
         resultMap.put("residentialRangeDTOList",pageResult);
         resultMap.put("managerId",store.getUserId());
         return ServerResponse.createBySuccess("查询成功",resultMap);
+    }
+
+
+    public ServerResponse  addBuilding(String villageId, Date modifyDate, String building,String storeId) {
+        Example example=new Example(ResidentialBuilding.class);
+        example.createCriteria().andEqualTo(ResidentialBuilding.VILLAGE_ID,villageId)
+                                .andEqualTo(ResidentialBuilding.STORE_ID,storeId)
+                                .andEqualTo(ResidentialBuilding.BUILDING,building);
+        if(residentialBuildingMapper.selectByExample(example).size()>0){
+            return ServerResponse.createByErrorMessage("改楼栋已存在");
+        }
+        ResidentialBuilding residentialBuilding=new ResidentialBuilding();
+        residentialBuilding.setVillageId(villageId);
+        residentialBuilding.setModifyDate(CommonUtil.isEmpty(modifyDate)?null:modifyDate);
+        residentialBuilding.setBuilding(building);
+        residentialBuilding.setDataStatus(0);
+        residentialBuilding.setStoreId(storeId);
+        if(residentialBuildingMapper.insert(residentialBuilding)>0){
+            return ServerResponse.createBySuccessMessage("添加成功");
+        }
+        return ServerResponse.createByErrorMessage("添加失败");
     }
 
 }

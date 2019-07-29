@@ -9,8 +9,11 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.sale.store.StoreUserDTO;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
+import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreUser;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.sale.SaleService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,10 @@ public class StoreUserServices {
     private IStoreMapper iStoreMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
+    @Autowired
+    private SaleService saleService;
 
     public ServerResponse addStoreUser(String userId, String storeId, Integer type) {
         if (CommonUtil.isEmpty(userId)) {
@@ -111,5 +118,34 @@ public class StoreUserServices {
         } else {
             return ServerResponse.createByErrorMessage("删除失败");
         }
+    }
+
+    public ServerResponse getStoreUser(String userToken, String userId) {
+        Object object = constructionService.getAccessToken(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        AccessToken accessToken = (AccessToken) object;
+        if (CommonUtil.isEmpty(accessToken.getUserId())) {
+            return ServerResponse.createbyUserTokenError();
+        }
+        object = saleService.getStore(accessToken.getUserId());
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Store store = (Store) object;
+        Example example = new Example(StoreUser.class);
+        example.createCriteria()
+                .andEqualTo(StoreUser.USER_ID, userId)
+                .andEqualTo(StoreUser.STORE_ID, store.getId())
+                .andEqualTo(StoreUser.DATA_STATUS, 0);
+        List<StoreUser> storeUserList = iStoreUserMapper.selectByExample(example);
+        if (storeUserList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        StoreUser storeUser = storeUserList.get(0);
+
+
+        return null;
     }
 }

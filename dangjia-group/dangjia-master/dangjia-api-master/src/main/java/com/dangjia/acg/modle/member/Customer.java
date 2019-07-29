@@ -2,6 +2,7 @@ package com.dangjia.acg.modle.member;
 
 import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.dto.sale.client.CustomerIndexDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -26,8 +27,8 @@ public class Customer extends BaseEntity {
     private String memberId;
 
     @Column(name = "user_id")
-    @Desc(value = "当前客服id")
-    @ApiModelProperty("当前客服id")
+    @Desc(value = "销售id")
+    @ApiModelProperty("销售id")
     private String userId;
 
     @Column(name = "label_id_arr")
@@ -49,4 +50,10 @@ public class Customer extends BaseEntity {
     @Desc(value = "最近的提醒沟通记录id")
     @ApiModelProperty("最近的提醒沟通记录id")
     private String remindRecordId;
+
+
+    @Column(name = "store_id")
+    @Desc(value = "门店id")
+    @ApiModelProperty("门店id")
+    private String storeId;
 }

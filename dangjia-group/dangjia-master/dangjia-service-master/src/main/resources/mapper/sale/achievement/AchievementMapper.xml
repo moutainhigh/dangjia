@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.sale.achievement.AchievementMapper">
+
+
+    <!--查询成交量-->
+    <select id="queryDealNumber" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+        select   COUNT(*)
+        from dj_clue c inner join dj_house h
+        on c.member_id = h.member_id
+        where c.cus_service
+        in
+        (SELECT su.user_id from dj_store_users su
+            where 1=1
+            <if test="null != storeId and '' != storeId">
+                and su.store_id = #{storeId}
+            </if>
+        )
+        and h.visit_state = 1
+        <if test="null != time">
+            and date_format(h.modify_date,'%Y-%m') =# {time}
+        </if>
+    </select>
+
+    <!--查詢全部订单状态，结算累计提成-->
+    <select id="queryMeterVisitState" resultType="com.dangjia.acg.dto.sale.achievement.AchievementInfoDTO" parameterType="java.util.HashMap">
+        select  c.cus_service userId,h.visit_state visitState
+        from
+        dj_clue c  inner join dj_house h on c.member_id = h.member_id
+        where c.cus_service in
+        (SELECT su.user_id from dj_store_users su
+        where 1=1
+            <if test="null != storeId and '' != storeId">
+                and su.store_id = #{storeId}
+            </if>
+        )
+        and (h.visit_state = 1 or h.visit_state = 3)
+    </select>
+
+    <!--查詢当月订单状态，结算当月提成-->
+    <select id="queryVisitState" resultType="com.dangjia.acg.dto.sale.achievement.AchievementInfoDTO" parameterType="java.util.HashMap">
+        select  c.cus_service as userId,h.visit_state as visitState
+        from
+        dj_clue c  inner join dj_house h on c.member_id = h.member_id
+        where c.cus_service in
+        (SELECT su.user_id from dj_store_users su
+            where 1=1
+            <if test="null != storeId and '' != storeId">
+                and su.store_id = #{storeId}
+            </if>
+         )
+        <if test="null != time">
+            and date_format(h.modify_date,'%Y-%m') =# {time}
+        </if>
+        and (h.visit_state = 1 or h.visit_state = 3)
+    </select>
+
+    <!--根据店长查询销 售人员的下单数-->
+    <select id="querySingleNumber" resultType="com.dangjia.acg.dto.sale.achievement.AchievementInfoDTO" parameterType="java.util.HashMap">
+        select  c.cus_service as userId,count(*) as count,h.visit_state as visitState from
+        dj_clue c inner join dj_house h on c.member_id = h.member_id
+        where c.cus_service
+        in
+        (SELECT su.user_id from dj_store_users su
+            where 1=1
+            <if test="null != storeId and '' != storeId">
+                and su.store_id = #{storeId}
+            </if>
+        )
+        and (h.visit_state = 1 or h.visit_state = 3)
+        and (h.visit_state = 1 or h.visit_state = 3)  group by cus_service having count>0
+    </select>
+
+    <!--查询店长下面员工-->
+    <select id="queryUserId" resultType="com.dangjia.acg.dto.sale.achievement.AchievementInfoDTO" parameterType="java.util.HashMap">
+        SELECT su.user_id as userId,
+        u.username as username,
+        smt.target_number as targetNumber
+        from dj_store_users su
+        inner join dj_user u on su.user_id = u.id
+        inner join dj_sale_monthly_target smt on smt.user_id = su.user_id
+        where 1=1
+        <if test="null != storeId and '' != storeId">
+            and su.store_id = #{storeId}
+        </if>
+    </select>
+
+
+    <!--查询店长下面员工-->
+    <select id="queryUserAchievementData" resultType="com.dangjia.acg.dto.sale.achievement.UserAchievementInfoDTO" parameterType="java.util.HashMap">
+        select
+            h.id as id,
+            h.residential as residential,
+            h.building as building,
+            h.unit as unit,
+            h.number as number,
+            h.visit_state as visitState,
+            mc.user_id as userId
+        from
+        dj_member_customer mc inner join dj_house h
+        on mc.member_id = h.member_id
+        where 1=1
+        <if test="null != userId and '' != userId">
+            and mc.user_id = #{userId}
+        </if>
+        <if test="null != time">
+            and date_format(mc.modify_date,'%Y-%m') = #{time}
+        </if>
+        <if test="null != visitState">
+            and h.visit_state = #{visitState}
+        </if>
+    </select>
+
+
+</mapper>

@@ -298,6 +298,7 @@ public class ClueService {
                             //customer.setModifyDate(clueTalk.getModifyDate());
                             customer.setCreateDate(clueTalk.getCreateDate());
                             customer.setStage(1);
+                            customer.setStoreId(clue.getStoreId());
                             iCustomerMapper.insert(customer);
                         }
                         //改变线索沟通表的数据状态
@@ -311,6 +312,7 @@ public class ClueService {
                     //customer.setModifyDate(clueTalk.getModifyDate());
                     customer.setCreateDate(clue.getCreateDate());
                     customer.setStage(1);
+                    customer.setStoreId(clue.getStoreId());
                     iCustomerMapper.insert(customer);
                 }
                 //改变线索表的数据状态
@@ -325,12 +327,14 @@ public class ClueService {
                 if (!CommonUtil.isEmpty(longitude) && !CommonUtil.isEmpty(latitude)) {
                     List<Store> stores = iStoreMapper.selectAll();
                     for (Store store : stores) {
+                        //野生客户如果在门店范围内转给门店店长待分配
                         if (GaoDeUtils.isInPolygon(longitude + "," + latitude, store.getScopeItude())) {
                             Customer customer = new Customer();
                             customer.setUserId(store.getUserId());
                             customer.setMemberId(member.getId());
                             customer.setDataStatus(0);
-                            customer.setStage(1);
+                            customer.setStage(0);
+                            customer.setStoreId(store.getId());
                             iCustomerMapper.insert(customer);
                             break;
                         }
