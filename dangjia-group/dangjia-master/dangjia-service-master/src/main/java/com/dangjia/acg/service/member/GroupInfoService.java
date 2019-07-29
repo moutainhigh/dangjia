@@ -148,9 +148,11 @@ public class GroupInfoService {
         String[] adds = StringUtils.split(addList, ",");
         String[] removes = StringUtils.split(removeList, ",");
         if (!CommonUtil.isEmpty(addList)) {
-            registerJGUsers(AppType.GONGJIANG.getDesc(), adds, new String[adds.length]);
+            registerJGUsers(AppType.SALE.getDesc(), adds, new String[adds.length]);
         }
-        groupAPI.manageGroup(AppType.GONGJIANG.getDesc(), groupId, adds, removes);
+        //夸应用添加删除
+        crossAppAPI.addOrRemoveMembersFromCrossGroup(AppType.GONGJIANG.getDesc(), AppType.SALE.getDesc(), groupId, adds, removes);
+//        groupAPI.manageGroup(AppType.GONGJIANG.getDesc(), groupId, adds, removes);
         if (CommonUtil.isEmpty(addList)) {
             return ServerResponse.createBySuccessMessage("ok");
         }
