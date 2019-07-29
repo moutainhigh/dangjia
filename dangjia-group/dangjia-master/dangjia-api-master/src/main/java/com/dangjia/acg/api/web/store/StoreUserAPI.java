@@ -139,8 +139,23 @@ public interface StoreUserAPI {
      * @return_param appKey string 极光聊天的Key
      * @return_param monthlyTarget List<MonthlyTarget> 当前月份的目标
      * @return_param outField List<ResidentialRangeDTO> 销售范围
-     *
-     *
+     * @return_param monthlyTarget_id string id
+     * @return_param monthlyTarget_createDate string 创建时间
+     * @return_param monthlyTarget_modifyDate string 修改时间
+     * @return_param monthlyTarget_dataStatus int 数据状态 0=正常，1=删除
+     * @return_param monthlyTarget_targetNumber int 目标数
+     * @return_param monthlyTarget_userId string 销售Id
+     * @return_param monthlyTarget_targetDate string 目标月份
+     * @return_param outField_villageId string 小区id
+     * @return_param outField_villagename string 小区名称
+     * @return_param outField_list List<ResidentialBuilding> 小区楼栋集合
+     * @return_param outField_list_id string id
+     * @return_param outField_list_createDate string 创建时间
+     * @return_param outField_list_modifyDate string 修改时间
+     * @return_param outField_list_dataStatus int 数据状态 0=正常，1=删除
+     * @return_param outField_list_villageId string 小区id
+     * @return_param outField_list_building string 楼栋名称
+     * @return_param outField_list_storeId string 门店id
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 5
      * @Author: Ruking 18075121944
