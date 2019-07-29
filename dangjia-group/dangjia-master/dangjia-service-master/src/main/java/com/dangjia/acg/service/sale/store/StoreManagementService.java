@@ -56,7 +56,11 @@ public class StoreManagementService {
         if (CommonUtil.isEmpty(accessToken.getUserId())) {
             return ServerResponse.createbyUserTokenError();
         }
-        Store store = (Store)saleService.getStore(accessToken.getUserId());
+        object = saleService.getStore(accessToken.getUserId());
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Store store = (Store) object;
         List<StoreUserDTO> storeUserDTOS = iStoreUserMapper.getStoreUsers(store.getId(), null,4);
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         for (StoreUserDTO storeUserDTO : storeUserDTOS) {

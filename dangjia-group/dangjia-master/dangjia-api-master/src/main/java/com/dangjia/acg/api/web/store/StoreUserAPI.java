@@ -113,4 +113,25 @@ public interface StoreUserAPI {
     @ApiOperation(value = "删除门店成员", notes = "删除门店成员")
     ServerResponse delStoreUser(@RequestParam("storeUserId") String storeUserId);
 
+    /**
+     * showdoc
+     *
+     * @param storeUserId 必选 string 门店成员ID
+     * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
+     * @catalog 当家接口文档/销售模块/门店成员
+     * @title 获取门店成员详情
+     * @description 获取门店成员详情
+     * @method POST
+     * @url master/storeUser/getStoreUser
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 5
+     * @Author: Ruking 18075121944
+     * @Date: 2019/7/24 3:17 PM
+     */
+    @PostMapping("storeUser/getStoreUser")
+    @ApiOperation(value = "获取门店成员详情", notes = "获取门店成员详情")
+    ServerResponse getStoreUser(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("userToken") String userToken,
+                                @RequestParam("userId") String userId);
+
 }
