@@ -90,4 +90,9 @@ public class Clue extends BaseEntity {
     @Desc(value = "门店Id")
     @ApiModelProperty("门店Id")
     private String storeId;
+
+    @Column(name = "clue_type")
+    @Desc(value = "线索类型 1：跨域下单  0：正常")
+    @ApiModelProperty("线索类型 1：跨域下单  0：正常")
+    private Integer clueType;
 }
