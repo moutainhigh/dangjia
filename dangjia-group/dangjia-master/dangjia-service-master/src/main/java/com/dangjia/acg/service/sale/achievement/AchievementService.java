@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 业绩 业务逻辑层
@@ -50,8 +51,6 @@ public class AchievementService {
         //查詢當月订单状态
         List<AchievementInfoDTO> achievementInfoDTOs = achievementMapper.queryVisitState(map);
 
-        List<AchievementInfoDTO> copy = new ArrayList<>(achievementInfoDTOs);
-
         //全部提成数量
         int arrRoyalty = 1000;
 
@@ -73,30 +72,23 @@ public class AchievementService {
             achievementDataDTO.setStoreRoyalty(TheSum);
         }
 
-        Integer taskOrderNum = achievementInfoDTOs.stream().filter
-                (a -> a.getUserId().equals(a.getUserId())).mapToInt
-                (AchievementInfoDTO::getZiduan).sum();
+        //求一个销售人员当月提成总和
+        Map<String,Integer> royMap = achievementInfoDTOs.stream().collect(
+                Collectors.toMap(
+                        item -> item.getUserId(),
+                        item -> item.getZiduan(),
+                        Integer::sum));
 
-
-        //求每个销售人员当月提成总和
-        if(!achievementInfoDTOs.isEmpty()){
-            for (int j = 0; j < achievementInfoDTOs.size(); j++) {
-                for (int k = 1; k < copy.size() ; k++) {
-                    AchievementInfoDTO jj = achievementInfoDTOs.get(j);
-                    AchievementInfoDTO kk = copy.get(k);
-                    if(jj.getUserId().equals(kk.getUserId())){
-                        jj.setMonthRoyalty(achievementInfoDTOs.stream().filter
-                                (a -> a.getUserId().equals(a.getUserId())).mapToInt
-                                (AchievementInfoDTO::getZiduan).sum());
-                    }
+        /*for (AchievementInfoDTO aa:achievementInfoDTOs) {
+            for (String key : w.keySet()) {
+                if(aa.getUserId().equals(key)){
+                    aa.setMonthRoyalty(w.get(key));
                 }
             }
-        }
+        }*/
 
         //查詢全部订单状态
         List<AchievementInfoDTO> meterVisitState = achievementMapper.queryMeterVisitState(map);
-
-        List<AchievementInfoDTO> copyMonthRoyalty = new ArrayList<>(meterVisitState);
 
         if(!meterVisitState.isEmpty()){
             int s = 0;
@@ -114,18 +106,13 @@ public class AchievementService {
             }
         }
 
-        //求每个销售人员累计提成提成总和
-        if(!meterVisitState.isEmpty()){
-            for (int j = 0; j < meterVisitState.size(); j++) {
-                for (int k = 1; k < copyMonthRoyalty.size() ; k++) {
-                    AchievementInfoDTO jj = meterVisitState.get(j);
-                    AchievementInfoDTO kk = copyMonthRoyalty.get(k);
-                    if(jj.getUserId().equals(kk.getUserId())){
-                        jj.setMeterRoyalty(jj.getZiduan() + kk.getZiduan());
-                    }
-                }
-            }
-        }
+        //求一个销售人员累计提成总和
+        Map<String,Integer> mroMap = meterVisitState.stream().collect(
+                Collectors.toMap(
+                        item -> item.getUserId(),
+                        item -> item.getZiduan(),
+                        Integer::sum));
+
 
         //根据店长查询销 售人员的下单数
         List<AchievementInfoDTO> singleNumber = achievementMapper.querySingleNumber(map);
@@ -145,7 +132,7 @@ public class AchievementService {
             }
         }
 
-        if(!achievementInfoDTOs.isEmpty() && !queryUserId.isEmpty()){
+       /* if(!achievementInfoDTOs.isEmpty() && !queryUserId.isEmpty()){
             //销售人员当月提成  到销售人员列表里面
             for (AchievementInfoDTO to: queryUserId) {
                 for (AchievementInfoDTO aa:achievementInfoDTOs) {
@@ -155,6 +142,28 @@ public class AchievementService {
                 }
                 to.setArrRoyalty(arrRoyalty);
             }
+        }*/
+
+        if(!queryUserId.isEmpty()){
+            //销售人员当月提成  到销售人员列表里面
+            for (AchievementInfoDTO to: queryUserId) {
+                for (String key : royMap.keySet()) {
+                    if(to.getUserId().equals(key)){
+                        to.setMonthRoyalty(royMap.get(key));
+                    }
+                }
+                to.setArrRoyalty(arrRoyalty);
+            }
+        }
+
+        //销售人员累计提成  到销售人员列表里面
+        for (AchievementInfoDTO to: queryUserId) {
+            for (String key : mroMap.keySet()) {
+                if(to.getUserId().equals(key)){
+                    to.setMeterRoyalty(mroMap.get(key));
+                }
+            }
+            to.setArrRoyalty(arrRoyalty);
         }
 
         achievementDataDTO.setAchievementDataDTOS(queryUserId);
