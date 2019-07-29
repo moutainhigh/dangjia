@@ -1,7 +1,6 @@
 package com.dangjia.acg.api.sale.store;
 
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.clue.Clue;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -9,7 +8,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,11 +19,28 @@ import java.util.Date;
 @Api(value = "销售员工详情接口", description = "销售员工详情接口")
 public interface EmployeeDetailsAPI {
 
+    /**
+     * showdoc
+     *
+     * @param userId 必选 string 员工id
+     * @param time   必选 string 目标月份yyyy-MM
+     * @param target 必选 Integer 目标数量
+     * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
+     * @catalog 当家接口文档/销售模块/店长门店管理
+     * @title 制定员工月目标
+     * @description 制定员工月目标
+     * @method POST
+     * @url master/sale/store/monthlyTarget
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 7
+     * @Author: Ruking 18075121944
+     * @Date: 2019/7/29 5:21 PM
+     */
     @PostMapping(value = "sale/store/monthlyTarget")
     @ApiOperation(value = "制定员工月目标", notes = "制定员工月目标")
     ServerResponse setMonthlyTarget(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("userId") String userId,
-                                    @RequestParam("time") Date time,
+                                    @RequestParam("time") String time,
                                     @RequestParam("target") Integer target);
 
 }

@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -33,4 +34,9 @@ public class MonthlyTarget extends BaseEntity {
     @Desc(value = "销售Id")
     @ApiModelProperty("销售Id")
     private String userId;
+
+    @Column(name = "target_date")
+    @Desc(value = "目标月份")
+    @ApiModelProperty("目标月份")
+    protected Date targetDate;
 }
