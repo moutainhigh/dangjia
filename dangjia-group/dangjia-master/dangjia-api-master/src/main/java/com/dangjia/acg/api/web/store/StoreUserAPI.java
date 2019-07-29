@@ -113,20 +113,38 @@ public interface StoreUserAPI {
     @ApiOperation(value = "删除门店成员", notes = "删除门店成员")
     ServerResponse delStoreUser(@RequestParam("storeUserId") String storeUserId);
 
+
     /**
      * showdoc
      *
-     * @param storeUserId 必选 string 门店成员ID
-     * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
+     * @param userToken 必选 string userToken
+     * @param userId    必选 string 员工ID
+     * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/销售模块/门店成员
      * @title 获取门店成员详情
      * @description 获取门店成员详情
      * @method POST
      * @url master/storeUser/getStoreUser
+     * @return_param storeUserId string 门店成员ID
+     * @return_param userId string 成员用户ID
+     * @return_param storeId string 门店ID
+     * @return_param type Integer 类别：0:场内销售，1:场外销售
+     * @return_param userName string 用户名
+     * @return_param userMobile string 手机
+     * @return_param userHead string 头像
+     * @return_param isJob Boolean 是否在职（0：正常；1，离职）
+     * @return_param createDate Date 创建日期
+     * @return_param modifyDate Date 修改日期
+     * @return_param storeName string 门店——岗位名称
+     * @return_param appKey string 极光聊天的Key
+     * @return_param monthlyTarget List<MonthlyTarget> 当前月份的目标
+     * @return_param outField List<ResidentialRangeDTO> 销售范围
+     *
+     *
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 5
      * @Author: Ruking 18075121944
-     * @Date: 2019/7/24 3:17 PM
+     * @Date: 2019/7/29 6:08 PM
      */
     @PostMapping("storeUser/getStoreUser")
     @ApiOperation(value = "获取门店成员详情", notes = "获取门店成员详情")
