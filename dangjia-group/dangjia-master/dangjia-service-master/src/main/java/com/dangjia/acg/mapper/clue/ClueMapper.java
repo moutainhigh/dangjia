@@ -28,7 +28,8 @@ public interface ClueMapper extends Mapper<Clue> {
                           @Param("time") String time,
                           @Param("stage") Integer stage,
                           @Param("searchKey") String searchKey,
-                          @Param("userId") String userId);
+                          @Param("userId") String userId,
+                          @Param("storeId") String storeId);
 
     CustomerIndexDTO clientPage(@Param("type") String type,@Param("userId") String userId,@Param("storeUsers") List<StoreUserDTO> storeUsers);
 

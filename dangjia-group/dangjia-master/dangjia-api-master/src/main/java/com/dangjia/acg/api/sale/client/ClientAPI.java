@@ -87,7 +87,8 @@ public interface ClientAPI {
                               @RequestParam("label") String label,
                               @RequestParam("time") String time,
                               @RequestParam("stage") Integer stage,
-                              @RequestParam("searchKey") String searchKey);
+                              @RequestParam("searchKey") String searchKey,
+                              @RequestParam("userId") String userId);
 
     /**
      * @param request

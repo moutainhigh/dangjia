@@ -12,6 +12,7 @@ import com.dangjia.acg.mapper.sale.residential.ResidentialBuildingMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -47,6 +49,12 @@ public class StoreManagementService {
     @Autowired
     private ConfigUtil configUtil;
 
+    /**
+     * 门店管理页
+     * @param userToken
+     * @param pageDTO
+     * @return
+     */
     public ServerResponse storeManagementPage(String userToken, PageDTO pageDTO) {
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
@@ -92,13 +100,21 @@ public class StoreManagementService {
     }
 
 
+    /**
+     * 添加楼栋
+     * @param villageId
+     * @param modifyDate
+     * @param building
+     * @param storeId
+     * @return
+     */
     public ServerResponse  addBuilding(String villageId, Date modifyDate, String building,String storeId) {
         Example example=new Example(ResidentialBuilding.class);
         example.createCriteria().andEqualTo(ResidentialBuilding.VILLAGE_ID,villageId)
                                 .andEqualTo(ResidentialBuilding.STORE_ID,storeId)
                                 .andEqualTo(ResidentialBuilding.BUILDING,building);
         if(residentialBuildingMapper.selectByExample(example).size()>0){
-            return ServerResponse.createByErrorMessage("改楼栋已存在");
+            return ServerResponse.createByErrorMessage("该楼栋已存在");
         }
         ResidentialBuilding residentialBuilding=new ResidentialBuilding();
         residentialBuilding.setVillageId(villageId);
@@ -112,4 +128,40 @@ public class StoreManagementService {
         return ServerResponse.createByErrorMessage("添加失败");
     }
 
+
+    /**
+     * 删除楼栋
+     * @param buildingId
+     * @return
+     */
+    public ServerResponse delBuilding(String buildingId){
+        if(residentialBuildingMapper.deleteByPrimaryKey(buildingId)>0){
+            return ServerResponse.createBySuccessMessage("删除成功");
+        }
+        return ServerResponse.createByErrorMessage("删除失败");
+    }
+
+
+    /**
+     * 修改楼栋
+     * @param buildingId
+     * @param residentialBuilding
+     * @return
+     */
+    public ServerResponse updatBuilding(String buildingId , ResidentialBuilding residentialBuilding) {
+        ResidentialBuilding residentialBuilding1 = residentialBuildingMapper.selectByPrimaryKey(buildingId);
+        if (!residentialBuilding1.getBuilding().equals(residentialBuilding.getBuilding())) {
+            Example example = new Example(ResidentialBuilding.class);
+            example.createCriteria().andEqualTo(ResidentialBuilding.BUILDING, residentialBuilding.getBuilding())
+                    .andEqualTo(residentialBuilding.DATA_STATUS, 0);
+            if (residentialBuildingMapper.selectByExample(example).size() > 0) {
+                return ServerResponse.createByErrorMessage("该楼栋已存在");
+            }
+        }
+        residentialBuilding.setId(buildingId);
+        if(residentialBuildingMapper.updateByPrimaryKeySelective(residentialBuilding)>0) {
+            return ServerResponse.createBySuccessMessage("修改成功");
+        }
+        return ServerResponse.createByErrorMessage("修改失败");
+    }
 }

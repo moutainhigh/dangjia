@@ -476,7 +476,7 @@ public interface MemberAPI {
      * @description 通过手机号/ID获取用户信息
      * @method POST
      * @url master/member/getMembers
-     * @return_param memberType int 0业主，1工匠
+     * @return_param memberType int 0业主，1工匠，2销售
      * @return_param id string ID
      * @return_param nickName string 昵称
      * @return_param name string 昵称

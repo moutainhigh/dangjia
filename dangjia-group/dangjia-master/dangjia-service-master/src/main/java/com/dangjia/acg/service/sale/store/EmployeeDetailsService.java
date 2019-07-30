@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,8 +39,18 @@ public class EmployeeDetailsService {
         example.createCriteria()
                 .andEqualTo(MonthlyTarget.USER_ID, userId)
                 .andBetween(MonthlyTarget.TARGET_DATE, DateUtil.getMonthFirst(targetDate), DateUtil.getMonthLast(targetDate));
-        if (monthlyTargetMappper.selectByExample(example).size() > 0) {
-            return ServerResponse.createByErrorMessage("该员工当月目标已存在");
+        List<MonthlyTarget> monthlyTargets = monthlyTargetMappper.selectByExample(example);
+        if (monthlyTargets.size() > 0) {
+            MonthlyTarget monthlyTarget = new MonthlyTarget();
+            monthlyTarget.setId(monthlyTargets.get(0).getId());
+            monthlyTarget.setUserId(userId);
+            monthlyTarget.setTargetDate(targetDate);
+            monthlyTarget.setTargetNumber(target);
+            monthlyTarget.setDataStatus(0);
+            if (monthlyTargetMappper.updateByPrimaryKeySelective(monthlyTarget) > 0) {
+                return ServerResponse.createBySuccess("制定成功");
+            }
+            return ServerResponse.createByErrorMessage("制定失败");
         }
         MonthlyTarget monthlyTarget = new MonthlyTarget();
         monthlyTarget.setUserId(userId);
