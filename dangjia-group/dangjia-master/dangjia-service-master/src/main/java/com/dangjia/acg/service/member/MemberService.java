@@ -606,7 +606,6 @@ public class MemberService {
             }
             String[] childsLabelIdArr = new String[childsLabelIdList.size()];
             childsLabelIdList.toArray(childsLabelIdArr);
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
                 if (beginDate.equals(endDate)) {
                     beginDate = beginDate + " " + "00:00:00";
@@ -615,6 +614,7 @@ public class MemberService {
             }
             //数据权限控制（总部根据城市查看全部客户，城市管理者根据指定城市查看所有客户，店长可看门店所有销售的客户，销售只能看自己的客户）
             userKey=storeUserServices.getStoreUser(userKey);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Member> list = memberMapper.getMemberListByName(cityId,searchKey, stage, userRole, childsLabelIdArr, orderBy, type, userKey,userId, beginDate, endDate);
             PageInfo pageResult = new PageInfo(list);
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
