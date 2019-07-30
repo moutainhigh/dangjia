@@ -19,12 +19,14 @@ import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.*;
+import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.member.*;
+import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.activity.RedPackPayService;
@@ -61,6 +63,10 @@ public class MemberService {
     private RedPackPayService redPackPayService;
     @Autowired
     private IMemberMapper memberMapper;
+    @Autowired
+    private ICityMapper iCityMapper;
+    @Autowired
+    private IMemberCityMapper memberCityMapper;
     @Autowired
     private IMemberInfoMapper memberInfoMapper;
     @Autowired
@@ -288,6 +294,15 @@ public class MemberService {
             user.setIsCrowned(0);
             user.setHead("qrcode/logo.png");
             memberMapper.insertSelective(user);
+
+            MemberCity userCity = new MemberCity();
+            userCity.setMemberId(user.getId());
+            userCity.setCityId(request.getParameter(Constants.CITY_ID));
+            if(!CommonUtil.isEmpty(userCity.getCityId())){
+                City city = iCityMapper.selectByPrimaryKey(userCity.getCityId());
+                userCity.setCityName(city.getName());
+                memberCityMapper.insert(userCity);
+            }
 //            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
             if (userRole == 1) {
                 clueService.sendUser(user, user.getMobile());
@@ -574,7 +589,7 @@ public class MemberService {
     /**
      * 业主列表
      */
-    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
+    public ServerResponse getMemberList(PageDTO pageDTO, String cityId,Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
         try {
             List<String> childsLabelIdList = new ArrayList<>();
             if (StringUtils.isNotBlank(parentId)) {
@@ -594,7 +609,7 @@ public class MemberService {
                     endDate = endDate + " " + "23:59:59";
                 }
             }
-            List<Member> list = memberMapper.getMemberListByName(searchKey, stage, userRole, childsLabelIdArr, orderBy, type, userId, beginDate, endDate);
+            List<Member> list = memberMapper.getMemberListByName(cityId,searchKey, stage, userRole, childsLabelIdArr, orderBy, type, userId, beginDate, endDate);
             PageInfo pageResult = new PageInfo(list);
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
             for (Member member : list) {
