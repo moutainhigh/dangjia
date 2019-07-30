@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.web.engineer;
 
 import com.dangjia.acg.api.web.engineer.WebEngineerAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
@@ -151,8 +152,9 @@ public class WebEngineerController implements WebEngineerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse artisanList(String name, String workerTypeId, String type,String checkType ,PageDTO pageDTO) {
-        return engineerService.artisanList(name, workerTypeId, type, checkType ,pageDTO);
+    public ServerResponse artisanList(HttpServletRequest request,String name, String workerTypeId, String type,String checkType ,PageDTO pageDTO) {
+        String cityId = request.getParameter(Constants.CITY_ID);
+        return engineerService.artisanList(cityId,name, workerTypeId, type, checkType ,pageDTO);
     }
 
     @Override
