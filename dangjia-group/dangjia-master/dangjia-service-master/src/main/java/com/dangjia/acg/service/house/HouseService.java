@@ -19,8 +19,6 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowDTO;
-import com.dangjia.acg.dto.core.HouseResult;
-import com.dangjia.acg.dto.core.NodeDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
@@ -42,7 +40,6 @@ import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.matter.RenovationManualMember;
-import com.dangjia.acg.modle.matter.RenovationStage;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
@@ -55,7 +52,6 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.design.DesignDataService;
-import com.dangjia.acg.util.HouseUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -146,6 +142,8 @@ public class HouseService {
     private MyHouseService myHouseService;
     @Autowired
     private ClueMapper clueMapper;
+
+
     protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
 
     /**
@@ -588,9 +586,20 @@ public class HouseService {
             }
         }
 
+        Integer type = iCustomerMapper.queryType(member.getId());
+
         Integer result = clueMapper.queryTClue(member.getMobile());
+
         City city = iCityMapper.selectByPrimaryKey(cityId);
+
         House house = new House(true);//新增房产信息
+
+        //0:场内录入，1:场外录入
+        if(type == 0){
+            house.setIsType(0);
+        }else{
+            house.setIsType(1);
+        }
 
         if(result == 1){
             //一个销售人员下单

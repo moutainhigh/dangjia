@@ -256,6 +256,12 @@ public class House extends BaseEntity {
     @ApiModelProperty("0-未抢单 1-已抢单")
     private Integer isRobStats;
 
+    @Column(name = "is_type")
+    @Desc(value = " 类别：0:场内录入，1:场外录入")
+    @ApiModelProperty("类别：0:场内录入，1:场外录入")
+    private Integer isType;
+
+
     @Transient
     private String houseId;
     @Transient
