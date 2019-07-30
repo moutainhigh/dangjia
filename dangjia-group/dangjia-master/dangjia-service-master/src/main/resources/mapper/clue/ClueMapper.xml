@@ -69,7 +69,12 @@
             on mc.member_id=m.id
             where mc.data_status=0
             and mc.stage in (0,1)
-            and mc.user_id=#{userId}
+            <if test="null!=userId and ''!=userId">
+                and mc.user_id=#{userId}
+            </if>
+            <if test="null!=storeId and ''!=storeId">
+                and mc.store_id=#{storeId}
+            </if>
             <if test="null!=label and ''!=label">
                 and label_id like CONCAT('%',#{label},'%')
             </if>
@@ -90,7 +95,12 @@
                and CONCAT(owername,phone) like CONCAT('%',#{searchKey},'%')
            </if>
            and stage in (0,1)
-           and cus_service=#{userId}
+            <if test="null!=userId and ''!=userId">
+                and cus_service=#{userId}
+            </if>
+            <if test="null!=storeId and ''!=storeId">
+                and store_id=#{storeId}
+            </if>
            ORDER BY create_date
            <if test="null!=time and ''!=time">
                desc
