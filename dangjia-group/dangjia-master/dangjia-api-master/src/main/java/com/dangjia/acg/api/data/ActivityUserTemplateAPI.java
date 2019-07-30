@@ -23,14 +23,12 @@ public interface ActivityUserTemplateAPI {
     /**
      * 获取所有推送模板
      *
-     * @param activityUserTemplate
      * @return
      */
     @PostMapping("/data/Activity/template/list")
     @ApiOperation(value = "获取所有推送模板", notes = "获取所有推送模板")
     ServerResponse queryActivityUserTemplate(@RequestParam("request") HttpServletRequest request,
-                                             @RequestParam("pageDTO") PageDTO pageDTO,
-                                             @RequestParam("activityUserTemplate") ActivityUserTemplate activityUserTemplate);
+                                             @RequestParam("pageDTO") PageDTO pageDTO);
 
 
     /**

@@ -73,6 +73,7 @@ public class TaskService {
 
     @Autowired
     private IHouseWorkerMapper houseWorkerMapper;
+
     /**
      * 任务列表
      */
@@ -294,7 +295,7 @@ public class TaskService {
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         for (HouseFlow houseFlow : houseFlowList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
-            HouseWorker hw = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(),1);
+            HouseWorker hw = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
             Task task = new Task();
             task.setDate(DateUtil.dateToString(hw.getModifyDate(), DateUtil.FORMAT11));
             task.setName(workerType.getName() + "待支付");
@@ -414,22 +415,3 @@ public class TaskService {
         return taskList;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

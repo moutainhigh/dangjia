@@ -5,6 +5,7 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -47,12 +48,15 @@ public class ConfigMessageService {
      * @param configMessage
      * @return
      */
-    public ServerResponse queryConfigMessages(HttpServletRequest request, PageDTO pageDTO, ConfigMessage configMessage) {
+    public ServerResponse queryConfigMessages(HttpServletRequest request, PageDTO pageDTO) {
         Example example = new Example(ConfigMessage.class);
         example.createCriteria().andNotEqualTo(ConfigMessage.NAME, "");
         example.orderBy("createDate").desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<ConfigMessage> list = configMessageMapper.selectByExample(example);
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         PageInfo pageResult = new PageInfo(list);
         return ServerResponse.createBySuccess("ok", pageResult);
     }
@@ -89,6 +93,9 @@ public class ConfigMessageService {
         example.orderBy("createDate").desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<ConfigMessage> list = configMessageMapper.selectByExample(example);
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         for (ConfigMessage msg : list) {
             msg.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
         }

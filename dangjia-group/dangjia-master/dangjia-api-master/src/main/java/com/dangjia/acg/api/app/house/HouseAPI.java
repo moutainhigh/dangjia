@@ -226,7 +226,8 @@ public interface HouseAPI {
                                    @RequestParam("unit") String unit,                               //单元号
                                    @RequestParam("number") String number,                           //房间号
                                    @RequestParam("cityId") String cityId,                           //城市Id
-                                   @RequestParam("villageId") String villageId);                    //小区Id
+                                   @RequestParam("villageId") String villageId,                     //小区Id
+                                   @RequestParam("buildSquare") Double buildSquare);
 
 
     /**

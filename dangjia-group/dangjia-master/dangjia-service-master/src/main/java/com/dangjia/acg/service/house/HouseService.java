@@ -595,16 +595,16 @@ public class HouseService {
         House house = new House(true);//新增房产信息
 
         //0:场内录入，1:场外录入
-        if(type == 0){
+        if (type == 0) {
             house.setIsType(0);
-        }else{
+        } else {
             house.setIsType(1);
         }
 
-        if(result == 1){
+        if (result == 1) {
             //一个销售人员下单
             house.setAbroadStats(0);
-        }else if(result > 1){
+        } else if (result > 1) {
             //两个销售人员同时下单
             house.setAbroadStats(1);
         }
@@ -1343,7 +1343,7 @@ public class HouseService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateByHouseId(String building, String unit, String number,
-                                          String houseId, String villageId, String cityId) {
+                                          String houseId, String villageId, String cityId, Double buildSquare) {
         House house = iHouseMapper.selectByPrimaryKey(houseId);
         if (house == null) {
             return ServerResponse.createByErrorMessage("该房产不存在");
@@ -1353,6 +1353,8 @@ public class HouseService {
         house.setNumber(number);                     //房间号
         house.setVillageId(villageId);                //小区Id
         house.setCityId(cityId);                      //城市Id
+        if (!CommonUtil.isEmpty(buildSquare))
+            house.setBuildSquare(new BigDecimal(buildSquare));
         ModelingVillage modelingVillage = modelingVillageMapper.selectByPrimaryKey(villageId);
         if (modelingVillage != null)
             house.setResidential(modelingVillage.getName());

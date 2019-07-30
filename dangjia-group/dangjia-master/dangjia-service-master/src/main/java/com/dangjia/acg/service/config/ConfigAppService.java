@@ -59,6 +59,9 @@ public class ConfigAppService {
         criteria.andEqualTo(ConfigApp.DATA_STATUS, 0);
         example.orderBy(ConfigApp.CREATE_DATE).desc();
         List<ConfigApp> list = configAppMapper.selectByExample(example);
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         List listh = new ArrayList();
         PageInfo pageResult = new PageInfo(list);
         for (ConfigApp app : list) {

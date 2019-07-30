@@ -37,14 +37,12 @@ public class ConfigMessageController implements ConfigMessageAPI {
 
     /**
      * 获取所有公告消息(web端列表)
-     *
-     * @param configMessage
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse queryConfigMessages(HttpServletRequest request, PageDTO pageDTO, ConfigMessage configMessage) {
-        return configMessageService.queryConfigMessages(request, pageDTO, configMessage);
+    public ServerResponse queryConfigMessages(HttpServletRequest request, PageDTO pageDTO) {
+        return configMessageService.queryConfigMessages(request, pageDTO);
     }
 
 

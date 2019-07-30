@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.activity;
 
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -77,6 +78,9 @@ public class ActivityService {
         example.orderBy(Activity.MODIFY_DATE).desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Activity> list = activityMapper.selectByExample(example);
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         PageInfo pageResult = new PageInfo(list);
         return ServerResponse.createBySuccess("ok",pageResult);
     }
@@ -93,6 +97,9 @@ public class ActivityService {
         Example example = new Example(ActivityDiscount.class);
         example.createCriteria().andEqualTo(ActivityDiscount.ACTIVITY_ID,activity.getId());
         List<ActivityDiscount> discounts=activityDiscountMapper.selectByExample(example);
+        if (discounts.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         List<ActivityRedPackDTO> redPacks=new ArrayList<>();
         for (ActivityDiscount discount:discounts) {
             ActivityRedPack activityRedPack= activityRedPackMapper.selectByPrimaryKey(discount.getActivityRedPackId());
