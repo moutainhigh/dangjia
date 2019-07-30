@@ -14,10 +14,12 @@ import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreSubscribeMapper;
 import com.dangjia.acg.mapper.system.IDepartmentMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreSubscribe;
 import com.dangjia.acg.modle.system.Department;
+import com.dangjia.acg.modle.user.MainUser;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +41,9 @@ import java.util.*;
 public class StoreServices {
     @Autowired
     private IStoreMapper iStoreMapper;
+    @Autowired
+    private UserMapper userMapper;
+
 
     @Autowired
     private IHouseMapper iHouseMapper;
@@ -106,7 +111,19 @@ public class StoreServices {
             if(stores.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-            PageInfo pageResult=new PageInfo(stores);
+            PageInfo pageResult = new PageInfo(stores);
+            List<Map> storesMap = new ArrayList<>();
+            for (Store store : stores) {
+                Map map = BeanUtils.beanToMap(store);
+                MainUser mainUser = userMapper.selectByPrimaryKey(store.getUserId());
+                if (mainUser != null) {
+                    map.put("userName", mainUser.getUsername());//用户名
+                    map.put("userMobile", mainUser.getMobile());//手机
+                    map.put("isJob", mainUser.getIsJob());//是否在职（0：正常；1，离职）
+                }
+                storesMap.add(map);
+            }
+            pageResult.setList(storesMap);
             return ServerResponse.createBySuccess("查询成功",pageResult);
     }
 
