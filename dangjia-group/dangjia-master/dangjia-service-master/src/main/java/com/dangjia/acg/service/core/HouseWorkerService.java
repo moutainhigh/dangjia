@@ -693,7 +693,7 @@ public class HouseWorkerService {
                     double longitude2 = Double.valueOf(village.getLocationx());
                     double latitude2 = Double.valueOf(village.getLocationy());
                     double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
-                    if (distance > 1000) {
+                    if (distance > 1500) {
                         return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
                     }
                 } catch (Exception ignored) {
