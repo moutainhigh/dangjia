@@ -196,7 +196,7 @@ public class SystemServices {
                 criteria.andEqualTo(Job.DEPARTMENT_ID,departmentId);
             }
             if(!CommonUtil.isEmpty(cityId)){
-                criteria.andEqualTo(Job.CITY_ID,cityId);
+                criteria.andCondition(" FIND_IN_SET( '"+cityId+"', city_id)");
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Job> jobs = jobMapper.selectByExample(example);
