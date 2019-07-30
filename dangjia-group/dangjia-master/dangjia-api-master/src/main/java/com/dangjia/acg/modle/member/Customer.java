@@ -6,6 +6,7 @@ import com.dangjia.acg.dto.sale.client.CustomerIndexDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,6 +20,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_member_customer")
 @ApiModel(description = "客服基础类")
+@FieldNameConstants(prefix = "")
 public class Customer extends BaseEntity {
 
     @Column(name = "member_id")
