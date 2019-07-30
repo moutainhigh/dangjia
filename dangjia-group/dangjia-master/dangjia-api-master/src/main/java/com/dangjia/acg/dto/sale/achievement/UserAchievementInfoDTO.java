@@ -66,4 +66,14 @@ public class UserAchievementInfoDTO implements Serializable {
                 + (TextUtils.isEmpty(getUnit()) ? "*" : getUnit()) + "单元"
                 + (TextUtils.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
     }
+
+    public String getVisitStateName() {
+        if(null != getVisitState() && 1 == getVisitState()){
+            return "装修中";
+        }
+        if(null != getVisitState() && 3 == getVisitState()){
+            return "已完工";
+        }
+        return null;
+    }
 }
