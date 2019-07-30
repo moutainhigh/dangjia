@@ -232,15 +232,7 @@ public class MendOrderService {
                 map.put("num",num);//剩余数量 所有买的数量 - 业主退货 - 要的
                 map.put("productId", warehouse.getProductId());
                 if(num>0) {
-                    Product product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
-                    if (product != null) {
-                        Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
-                        if (goods != null) {
-                            if (goods.getSales() == 0) {
-                                productArrMap.add(map);
-                            }
-                        }
-                    }
+                    productArrMap.add(map);
                 }
 
             }
@@ -1060,9 +1052,8 @@ public class MendOrderService {
                         Product product = forMasterAPI.getProduct(house.getCityId(), productId);
                         if (product != null) {
                             Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
-                            List<MemberInfo> memberInfos = memberInfoMapper.queryUserRole(memberId);
                             //判断用户角色是否为业主业主可任意退
-                            if (memberInfos.size() <= 0) {
+                            if(mendOrder.getType() == 2) {
                                 if (goods != null && goods.getSales() == 1) {
                                     continue;//跳过
                                 }

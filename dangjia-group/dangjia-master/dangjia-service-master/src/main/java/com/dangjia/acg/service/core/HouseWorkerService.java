@@ -109,8 +109,6 @@ public class HouseWorkerService {
     @Autowired
     private HouseFlowScheduleService houseFlowScheduleService;
     @Autowired
-    private ComplainService complainService;
-    @Autowired
     private MessageAPI messageAPI;
     @Value("${spring.profiles.active}")
     private String active;

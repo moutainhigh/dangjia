@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.sale.client;
 
-import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -20,7 +19,6 @@ import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.sale.residential.ResidentialBuildingMapper;
 import com.dangjia.acg.mapper.sale.residential.ResidentialRangeMapper;
 import com.dangjia.acg.mapper.sale.stroe.MonthlyTargetMappper;
@@ -34,7 +32,6 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
 import com.dangjia.acg.modle.sale.store.MonthlyTarget;
@@ -114,24 +111,24 @@ public class ClientService {
         }
         //如果客户已录入过则把录入的房子变为意向房子
         groupBy = clueMapper.getGroupBy(clue.getPhone(), user.getId());
-        if(null!=groupBy) {
-            if(!groupBy.getAddress().contains(clue.getAddress())) {
+        if (null != groupBy) {
+            if (!groupBy.getAddress().contains(clue.getAddress())) {
                 groupBy.setAddress(groupBy.getAddress() + "," + clue.getAddress());
                 clueMapper.updateByPrimaryKeySelective(groupBy);
                 return ServerResponse.createBySuccessMessage("提交成功,已存在该线索录入为意向房子");
-            }else{
+            } else {
                 return ServerResponse.createByErrorMessage("请勿重复录入");
             }
         }
         Example example = new Example(Member.class);
-        example.createCriteria().andEqualTo(Member.MOBILE,clue.getPhone());
+        example.createCriteria().andEqualTo(Member.MOBILE, clue.getPhone());
         List<Member> members = iMemberMapper.selectByExample(example);
         object = saleService.getStore(accessToken.getUserId());
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
         Store store = (Store) object;
-        if(members.size()>0){
+        if (members.size() > 0) {
             //有沟通记录
             List<ClueTalk> clueTalkList = clueTalkMapper.getTalkByClueId(clue.getId());
             if (clueTalkList.size() != 0) {
@@ -182,7 +179,7 @@ public class ClientService {
             if (clueMapper.insert(clue) > 0) {
                 return ServerResponse.createBySuccessMessage("提交成功");
             }
-        }else{
+        } else {
             clue.setStage(0);
             clue.setDataStatus(0);
             clue.setStoreId(store.getId());
@@ -198,6 +195,7 @@ public class ClientService {
 
     /**
      * 跨域下单
+     *
      * @param clue
      * @param userToken
      * @param cityId
@@ -214,13 +212,13 @@ public class ClientService {
         }
         MainUser user = userMapper.getNameById(accessToken.getUserId());
         Clue groupBy = clueMapper.getGroupBy(clue.getPhone(), user.getId());
-        if(null!=groupBy){
+        if (null != groupBy) {
             groupBy.setAddress(groupBy.getAddress() + "," + clue.getAddress());
             clueMapper.updateByPrimaryKeySelective(groupBy);
             return ServerResponse.createBySuccessMessage("提交成功,已存在该线索录入为意向房子");
-        }else{
-            Example example=new Example(Store.class);
-            example.createCriteria().andEqualTo(Store.CITY_ID,cityId);
+        } else {
+            Example example = new Example(Store.class);
+            example.createCriteria().andEqualTo(Store.CITY_ID, cityId);
             List<Store> stores = iStoreMapper.selectByExample(example);
             ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(villageId);
             for (Store store : stores) {
@@ -231,7 +229,7 @@ public class ClientService {
                     clue.setClueType(1);
                     clueMapper.insert(clue);
                     break;
-                }else{
+                } else {
 
                 }
             }
@@ -281,27 +279,10 @@ public class ClientService {
             String date = dateFormat.format(new Date());
             monthlyTargetDTO.setModifyDate(date);
             monthlyTargetDTO.setComplete(clueMapper.Complete(user.getId(), date));
-            example = new Example(MonthlyTarget.class);
-            example.createCriteria().andEqualTo(MonthlyTarget.USER_ID, user.getId()).andCondition("date_format(modify_date,'%Y-%m')= " + date);
-            List<MonthlyTarget> monthlyTargets = monthlyTargetMappper.selectByExample(example);
+            List<MonthlyTarget> monthlyTargets = getMonthlyTargetList(user.getId());
             monthlyTargetDTO.setTargetNumber(monthlyTargets.size() > 0 ? monthlyTargets.get(0).getTargetNumber() : 0);
             map.put("monthlyTarget", monthlyTargetDTO);
-            example = new Example(ResidentialRange.class);
-            example.createCriteria().andEqualTo(ResidentialRange.USER_ID, user.getId());
-            List<ResidentialRange> residentialRanges = residentialRangeMapper.selectByExample(example);
-            List<ResidentialRangeDTO> residentialRangeDTOList = new ArrayList<>();
-            for (ResidentialRange residentialRange : residentialRanges) {
-                ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
-                String[] buildingId = residentialRange.getBuildingId().split(",");
-                example = new Example(ResidentialBuilding.class);
-                example.createCriteria().andIn(ResidentialBuilding.ID, Arrays.asList(buildingId));
-                ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(residentialRange.getVillageId());
-                residentialRangeDTO.setVillageId(modelingVillage.getId());
-                residentialRangeDTO.setVillagename(modelingVillage.getName());
-                residentialRangeDTO.setList(residentialBuildingMapper.selectByExample(example));
-                residentialRangeDTOList.add(residentialRangeDTO);
-            }
-            map.put("outField", residentialRangeDTOList);
+            map.put("outField", getResidentialRangeDTOList(user.getId()));
         } else {
             object = saleService.getStore(accessToken.getUserId());
             if (object instanceof ServerResponse) {
@@ -322,6 +303,44 @@ public class ClientService {
         return ServerResponse.createBySuccess("查询成功", map);
     }
 
+    /**
+     * 获取当前月份的目标
+     *
+     * @param userId
+     * @return
+     */
+    public List<MonthlyTarget> getMonthlyTargetList(String userId) {
+        Example example = new Example(MonthlyTarget.class);
+        example.createCriteria()
+                .andEqualTo(MonthlyTarget.USER_ID, userId)
+                .andBetween(MonthlyTarget.TARGET_DATE, DateUtil.getTimesMonthmorning(), DateUtil.getTimesMonthnight());
+        return monthlyTargetMappper.selectByExample(example);
+    }
+
+    /**
+     * 获取销售范围
+     *
+     * @param userId
+     * @return
+     */
+    public List<ResidentialRangeDTO> getResidentialRangeDTOList(String userId) {
+        Example example = new Example(ResidentialRange.class);
+        example.createCriteria().andEqualTo(ResidentialRange.USER_ID, userId);
+        List<ResidentialRange> residentialRanges = residentialRangeMapper.selectByExample(example);
+        List<ResidentialRangeDTO> residentialRangeDTOList = new ArrayList<>();
+        for (ResidentialRange residentialRange : residentialRanges) {
+            ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
+            String[] buildingId = residentialRange.getBuildingId().split(",");
+            example = new Example(ResidentialBuilding.class);
+            example.createCriteria().andIn(ResidentialBuilding.ID, Arrays.asList(buildingId));
+            ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(residentialRange.getVillageId());
+            residentialRangeDTO.setVillageId(modelingVillage.getId());
+            residentialRangeDTO.setVillagename(modelingVillage.getName());
+            residentialRangeDTO.setList(residentialBuildingMapper.selectByExample(example));
+            residentialRangeDTOList.add(residentialRangeDTO);
+        }
+        return residentialRangeDTOList;
+    }
 
     /**
      * 跟进列表

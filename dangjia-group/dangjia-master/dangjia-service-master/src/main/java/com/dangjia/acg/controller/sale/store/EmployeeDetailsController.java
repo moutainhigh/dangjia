@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,7 +23,7 @@ public class EmployeeDetailsController implements EmployeeDetailsAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setMonthlyTarget(HttpServletRequest request, String userId, Date time, Integer target) {
-        return employeeDetailsService.setMonthlyTarget(userId,time,target);
+    public ServerResponse setMonthlyTarget(HttpServletRequest request, String userId, String time, Integer target) {
+        return employeeDetailsService.setMonthlyTarget(userId, time, target);
     }
 }

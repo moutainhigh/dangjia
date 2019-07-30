@@ -75,7 +75,6 @@ public class MendOrderCheckService {
     private IHouseMapper houseMapper;
     @Autowired
     private IMemberMapper memberMapper;
-
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
@@ -94,13 +93,8 @@ public class MendOrderCheckService {
     private IWorkerDetailMapper workerDetailMapper;
     @Autowired
     private ConfigMessageService configMessageService;
-
     @Autowired
     private IOrderSplitMapper orderSplitMapper;
-    @Autowired
-    private OrderSplitService orderSplitService;
-    @Autowired
-    private IOrderSplitItemMapper orderSplitItemMapper;
     @Autowired
     private MendOrderService mendOrderService;
 
