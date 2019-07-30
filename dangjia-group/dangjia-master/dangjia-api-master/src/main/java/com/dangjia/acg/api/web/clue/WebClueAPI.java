@@ -47,7 +47,8 @@ public interface WebClueAPI {
      */
     @PostMapping("web/clue/clueMessage/viewByStage")
     @ApiOperation(value = "通过状态查找线索", notes = "通过状态查找线索")
-    ServerResponse getByStage(@RequestParam("stage") int stage, @RequestParam("pageDTO") PageDTO pageDTO);
+    ServerResponse getByStage(@RequestParam("stage") int stage,
+                              @RequestParam("pageDTO") PageDTO pageDTO);
 
     /**
      * 修改客服
@@ -84,7 +85,10 @@ public interface WebClueAPI {
      */
     @PostMapping("web/clue/sendUser")
     @ApiOperation(value = "转客户", notes = "转客户")
-    ServerResponse sendUser(@RequestParam("member") Member member, @RequestParam("phone") String phone, @RequestParam("longitude") String longitude, @RequestParam("latitude") String latitude);
+    ServerResponse sendUser(@RequestParam("member") Member member,
+                            @RequestParam("phone") String phone,
+                            @RequestParam("longitude") String longitude,
+                            @RequestParam("latitude") String latitude);
 
 
     /**
@@ -105,5 +109,6 @@ public interface WebClueAPI {
      */
     @PostMapping("clue/addH5Clue")
     @ApiOperation(value = "分享页添加线索", notes = "分享页添加线索")
-    ServerResponse addH5Clue(@RequestParam("userId") String userId, @RequestParam("phone") String phone);
+    ServerResponse addH5Clue(@RequestParam("userId") String userId,
+                             @RequestParam("phone") String phone);
 }
