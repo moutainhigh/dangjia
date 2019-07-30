@@ -631,15 +631,6 @@ public class MemberService {
                     if (customer.getRemindRecordId() != null)//有提醒记录的 更新 为最新的更新沟通记录
                         customerRecordService.updateMaxNearRemind(customer);
                 }
-                List<MemberLabel> memberLabelList = new ArrayList<>();
-                if (customer.getLabelIdArr() != null) {
-                    String[] labelIdArr = customer.getLabelIdArr().split(",");
-                    for (String aLabelIdArr : labelIdArr) {
-                        MemberLabel memberlabel = iMemberLabelMapper.selectByPrimaryKey(aLabelIdArr);
-                        if (memberlabel != null)
-                            memberLabelList.add(memberlabel);
-                    }
-                }
 
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
                 mcDTO.setOrderDate(member.getModifyDate());
@@ -684,6 +675,13 @@ public class MemberService {
                 }
                 if (member.getRemarks() != null) {
                     mcDTO.setRemarks(member.getRemarks());//业主备注
+                }
+                List<MemberLabel> memberLabelList = new ArrayList<>();
+                if (customer.getLabelIdArr() != null) {
+                    String[] labelIdArr = customer.getLabelIdArr().split(",");
+                    Example example = new Example(MemberLabel.class);
+                    example.createCriteria().andIn(Member.ID,Arrays.asList(labelIdArr));
+                    memberLabelList=iMemberLabelMapper.selectByExample(example);
                 }
                 mcDTO.setMemberLabelList(memberLabelList);
                 mcDTOList.add(mcDTO);
