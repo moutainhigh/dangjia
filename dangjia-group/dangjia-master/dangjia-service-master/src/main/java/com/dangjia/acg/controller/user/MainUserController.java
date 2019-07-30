@@ -62,7 +62,20 @@ public class MainUserController implements MainUserAPI {
     @ApiMethod
     public ServerResponse sysSwitching(HttpServletRequest request, Integer source) {
 //		SessionUtils.setSession("sysSource",source);
+
+        String cityId = request.getParameter(Constants.CITY_ID);
         String userID = request.getParameter(Constants.USERID);
+        MainUser existUser = redisClient.getCache(Constants.USER_KEY + userID, MainUser.class);
+        if (null == existUser) {
+            throw new BaseException(ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN, ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN.getDesc());
+        }
+        Department department=departmentMapper.selectByPrimaryKey(existUser.getDepartmentId());
+        if(department==null){
+            return ServerResponse.createByErrorMessage("登录用户暂未分配所属部门，请您联系管理员");
+        }
+        if(department.getCityId().indexOf(cityId)<0){
+            return ServerResponse.createByErrorMessage("登录用户暂未分配该城市，请选择("+department.getCityName()+")");
+        }
         redisClient.put("sysSource:" + userID, source);
         return ServerResponse.createBySuccessMessage("ok");
     }
