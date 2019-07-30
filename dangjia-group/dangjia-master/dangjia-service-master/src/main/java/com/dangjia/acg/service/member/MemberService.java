@@ -595,6 +595,7 @@ public class MemberService {
      */
     public ServerResponse getMemberList(PageDTO pageDTO, String cityId,String userKey ,Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
         try {
+            logger.info("权限返回结果 id:" + userKey);
             List<String> childsLabelIdList = new ArrayList<>();
             if (StringUtils.isNotBlank(parentId)) {
                 if (!StringUtils.isNotBlank(childId)) {//如果 子标签为null ，就是父标签的所有标签
@@ -606,6 +607,7 @@ public class MemberService {
             }
             String[] childsLabelIdArr = new String[childsLabelIdList.size()];
             childsLabelIdList.toArray(childsLabelIdArr);
+
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
                 if (beginDate.equals(endDate)) {
                     beginDate = beginDate + " " + "00:00:00";
@@ -613,7 +615,6 @@ public class MemberService {
                 }
             }
             //数据权限控制（总部根据城市查看全部客户，城市管理者根据指定城市查看所有客户，店长可看门店所有销售的客户，销售只能看自己的客户）
-            userKey=storeUserServices.getStoreUser(userKey);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Member> list = memberMapper.getMemberListByName(cityId,searchKey, stage, userRole, childsLabelIdArr, orderBy, type, userKey,userId, beginDate, endDate);
             PageInfo pageResult = new PageInfo(list);
@@ -629,15 +630,6 @@ public class MemberService {
                 } else {
                     if (customer.getRemindRecordId() != null)//有提醒记录的 更新 为最新的更新沟通记录
                         customerRecordService.updateMaxNearRemind(customer);
-                }
-                List<MemberLabel> memberLabelList = new ArrayList<>();
-                if (customer.getLabelIdArr() != null) {
-                    String[] labelIdArr = customer.getLabelIdArr().split(",");
-                    for (String aLabelIdArr : labelIdArr) {
-                        MemberLabel memberlabel = iMemberLabelMapper.selectByPrimaryKey(aLabelIdArr);
-                        if (memberlabel != null)
-                            memberLabelList.add(memberlabel);
-                    }
                 }
 
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
@@ -683,6 +675,13 @@ public class MemberService {
                 }
                 if (member.getRemarks() != null) {
                     mcDTO.setRemarks(member.getRemarks());//业主备注
+                }
+                List<MemberLabel> memberLabelList = new ArrayList<>();
+                if (customer.getLabelIdArr() != null) {
+                    String[] labelIdArr = customer.getLabelIdArr().split(",");
+                    Example example = new Example(MemberLabel.class);
+                    example.createCriteria().andIn(Member.ID,Arrays.asList(labelIdArr));
+                    memberLabelList=iMemberLabelMapper.selectByExample(example);
                 }
                 mcDTO.setMemberLabelList(memberLabelList);
                 mcDTOList.add(mcDTO);

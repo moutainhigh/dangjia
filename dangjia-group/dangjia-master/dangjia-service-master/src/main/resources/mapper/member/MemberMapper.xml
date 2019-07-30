@@ -172,9 +172,6 @@
         INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id FROM dj_member_city c GROUP BY c.member_id ) mt ON mt.member_id = w.id
         AND FIND_IN_SET(#{cityId}, mt.city_id )
         LEFT JOIN dj_member_customer mc on mc.member_id = w.id
-        <if test="userKey!=null and userKey!=''">
-            and FIND_IN_SET(mc.user_id, #{userKey} )
-        </if>
         <if test="userId!=null and userId!=''">
             and  mc.user_id=#{userId}
         </if>

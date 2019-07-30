@@ -128,10 +128,6 @@ public class StoreUserServices {
      * @return
      */
     public String getStoreUser(String userId){
-        MainUser existUser = redisClient.getCache(Constants.USER_KEY + userId, MainUser.class);
-        if (null == existUser) {
-            throw new BaseException(ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN, ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN.getDesc());
-        }
         List<String> users=new ArrayStack();
         //获取是否为店长，可看门店所有销售的客户
         Example example = new Example(Store.class);
@@ -164,7 +160,7 @@ public class StoreUserServices {
         //总店，根据组织架构设置的城市控制查所有用户
         //城市管理者，根据组织架构设置的城市控制查所有用户（设置指定城市来控制）
         //既不是店长又不是销售，默认定为空，查所有
-        return "";
+        return null;
     }
 
 }
