@@ -8,6 +8,7 @@ import com.dangjia.acg.api.data.GetForBudgetAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -278,6 +279,9 @@ public class ActuaryOperationService {
                 } else {
                     product = productMapper.selectByPrimaryKey(gId);//当前 货品
                 }
+                if(product == null){
+                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
+                }
                 GoodsDTO goodsDTO = goodsDetail(product, budgetMaterialId);
                 if (goodsDTO != null) {
                     return ServerResponse.createBySuccess("查询成功", goodsDTO);
@@ -305,6 +309,9 @@ public class ActuaryOperationService {
                 return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
             } else if (type == 2 || type == 3 || type == 5) {//材料商品  服务商品
                 Product product = productMapper.selectByPrimaryKey(gId);//当前 货品
+                if(product == null){
+                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
+                }
                 GoodsDTO goodsDTO = goodsDetail(product, null);
                 if (goodsDTO != null) {
                     return ServerResponse.createBySuccess("查询成功", goodsDTO);

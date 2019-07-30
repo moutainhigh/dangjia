@@ -152,7 +152,7 @@
 			and
 			category_id = #{categoryId}
 		</if>
-		GROUP BY product_sn
+		GROUP BY product_id
 		ORDER BY create_date,house_id,product_sn desc
 	</select>
 
