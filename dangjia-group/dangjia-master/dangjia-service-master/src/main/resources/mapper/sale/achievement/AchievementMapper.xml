@@ -109,9 +109,14 @@
         <if test="null != time">
             and date_format(mc.modify_date,'%Y-%m') = #{time}
         </if>
-        <if test="null != visitState">
-            and h.visit_state = #{visitState}
-        </if>
+        <choose>
+            <when test="visitState != null">
+                and h.visit_state = #{visitState}
+            </when>
+            <otherwise>
+                and (h.visit_state = 1 or h.visit_state = 3)
+            </otherwise>
+        </choose>
     </select>
 
 

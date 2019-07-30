@@ -24,6 +24,7 @@ import com.dangjia.acg.dto.core.NodeDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
+import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
@@ -143,6 +144,8 @@ public class HouseService {
     private IWorkDepositMapper workDepositMapper;
     @Autowired
     private MyHouseService myHouseService;
+    @Autowired
+    private ClueMapper clueMapper;
     protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
 
     /**
@@ -788,8 +791,19 @@ public class HouseService {
                 }
             }
         }
+
+        Integer result = clueMapper.queryTClue(member.getMobile());
         City city = iCityMapper.selectByPrimaryKey(cityId);
         House house = new House(true);//新增房产信息
+
+        if(result == 1){
+            //一个销售人员下单
+            house.setAbroadStats(0);
+        }else if(result > 1){
+            //两个销售人员同时下单
+            house.setAbroadStats(1);
+        }
+        house.setIsRobStats(0);
         house.setMemberId(member.getId());//用户id
         house.setCityName(city.getName());//城市名
         house.setCityId(cityId);

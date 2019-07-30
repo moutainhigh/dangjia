@@ -277,5 +277,10 @@
     </select>
 
 
+    <select id="queryTClue" resultType="java.lang.Integer" parameterType="java.lang.String">
+       select count(0) from dj_clue c where phone = #{mobile} GROUP BY c.cus_service
+    </select>
+
+
 </mapper>
 

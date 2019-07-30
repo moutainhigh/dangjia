@@ -45,4 +45,11 @@ public interface ClueMapper extends Mapper<Clue> {
                                             @Param("searchKey") String searchKey,
                                             @Param("time") String time,
                                             @Param("staff") String staff);
+
+    /**
+     * 查询现在表条数
+     * @return
+     */
+    Integer queryTClue(@Param("mobile") String mobile);
+
 }
