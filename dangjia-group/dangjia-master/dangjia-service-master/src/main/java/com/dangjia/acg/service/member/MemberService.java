@@ -206,13 +206,15 @@ public class MemberService {
     }
 
     private ServerResponse setSale(AccessToken accessToken, String userId) {
-        accessToken.setMemberType(-1);
+        if (accessToken != null)
+            accessToken.setMemberType(-1);
         Example example = new Example(Store.class);
         example.createCriteria().andEqualTo(Store.USER_ID, userId)
                 .andEqualTo(Store.DATA_STATUS, 0);
         int c = iStoreMapper.selectCountByExample(example);
         if (c > 0) {
-            accessToken.setMemberType(3);
+            if (accessToken != null)
+                accessToken.setMemberType(3);
         } else {
             example = new Example(StoreUser.class);
             example.createCriteria().andEqualTo(StoreUser.USER_ID, userId)
@@ -221,7 +223,8 @@ public class MemberService {
             if (storeUsers.size() > 0) {
                 StoreUser storeUser = storeUsers.get(0);
                 if (storeUser.getType() == 0 || storeUser.getType() == 1) {
-                    accessToken.setMemberType(storeUser.getType() == 0 ? 4 : 5);
+                    if (accessToken != null)
+                        accessToken.setMemberType(storeUser.getType() == 0 ? 4 : 5);
                 } else {
                     return ServerResponse.createByErrorMessage("当前用户暂无权限使用该终端，请联系管理员");
                 }
@@ -337,7 +340,7 @@ public class MemberService {
         if (registerCode == null || smscode != registerCode) {
             return ServerResponse.createByErrorMessage("验证码错误");
         } else {
-            if(CommonUtil.isEmpty(password)||password.length()<6){
+            if (CommonUtil.isEmpty(password) || password.length() < 6) {
                 return ServerResponse.createByErrorMessage("密码不得小于六位数");
             }
             Member user = new Member();
@@ -604,7 +607,7 @@ public class MemberService {
         if (CommonUtil.isEmpty(token)) {
             return ServerResponse.createByErrorMessage("身份认证错误,无认证参数！");
         }
-        if(CommonUtil.isEmpty(password)||password.length()<6){
+        if (CommonUtil.isEmpty(password) || password.length() < 6) {
             return ServerResponse.createByErrorMessage("密码不得小于六位数");
         }
         Member user = new Member();
@@ -1033,6 +1036,19 @@ public class MemberService {
                 }
             }
             map.put("appKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
+            datas.add(map);
+        }
+        MainUser mainUser = userMapper.findUserByMobile(member.getMobile());
+        ServerResponse serverResponse = setSale(null, mainUser.getId());
+        if (serverResponse.isSuccess()) {//有销售
+            Map<String, Object> map = new HashMap<>();
+            map.put("memberType", 2);
+            map.put("id", mainUser.getId());
+            map.put("nickName", member.getNickName());
+            map.put("name", member.getNickName());
+            map.put("mobile", member.getMobile());
+            map.put("head", member.getHead());
+            map.put("appKey", messageAPI.getAppKey(AppType.SALE.getDesc()));
             datas.add(map);
         }
         if (datas.size() <= 0) {
