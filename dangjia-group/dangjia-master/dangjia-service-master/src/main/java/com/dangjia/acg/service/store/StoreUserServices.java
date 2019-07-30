@@ -178,7 +178,7 @@ public class StoreUserServices {
         }
         storeUserDTO.setIsJob(mainUser.getIsJob());//是否在职（0：正常；1，离职）
         storeUserDTO.setCreateDate(storeUser.getCreateDate());// 创建日期
-        storeUserDTO.setModifyDate(storeUser.getModifyDate());// 修改日期
+        storeUserDTO.setModifyDate(mainUser.getModifyDate());// 修改日期
         String storeName = store.getStoreName() + (storeUser.getType() == 0 ? "-场内销售" : "-场外销售");
         storeUserDTO.setStoreName(storeName);//门店——岗位名称
         storeUserDTO.setAppKey(messageAPI.getAppKey(AppType.SALE.getDesc()));//极光聊天的Key
