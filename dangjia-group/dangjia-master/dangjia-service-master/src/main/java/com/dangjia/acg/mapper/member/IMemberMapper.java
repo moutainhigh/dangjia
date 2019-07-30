@@ -35,6 +35,7 @@ public interface IMemberMapper extends Mapper<Member> {
                                       @Param("stage") Integer stage, @Param("userRole") String userRole,
                                       @Param("childsLabelIdArr")String[] childsLabelIdArr,@Param("orderBy") String orderBy,
                                      @Param("type") String type,
+                                     @Param("userKey") String userKey,
                                      @Param("userId") String userId,
                                      @Param("beginDate") String beginDate,
                                      @Param("endDate") String endDate);
