@@ -31,7 +31,7 @@ public class ClientController implements ClientAPI {
     @Override
     @ApiMethod
     public ServerResponse crossDomainOrder(HttpServletRequest request, Clue clue, String userToken, String cityId, String villageId) {
-        return null;
+        return customerService.crossDomainOrder(clue,userToken,cityId,villageId);
     }
 
     @Override
@@ -48,8 +48,8 @@ public class ClientController implements ClientAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse followList(HttpServletRequest request, String userToken, PageDTO pageDTO, String label, String time, Integer stage, String searchKey) {
-        return customerService.followList(userToken,pageDTO,label,time,stage,searchKey);
+    public ServerResponse followList(HttpServletRequest request, String userToken, PageDTO pageDTO, String label, String time, Integer stage, String searchKey,String userId) {
+        return customerService.followList(userToken,pageDTO,label,time,stage,searchKey,userId);
     }
 
     @Override

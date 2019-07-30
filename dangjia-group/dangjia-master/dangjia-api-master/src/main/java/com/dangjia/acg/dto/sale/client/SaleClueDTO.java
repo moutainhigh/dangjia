@@ -32,5 +32,7 @@ public class SaleClueDTO{
 
     private Date modifyDate;//最新跟进时间
 
+    private Integer clueType;//线索类型 1：跨域下单  0：正常
+
 
 }

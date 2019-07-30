@@ -2,6 +2,7 @@ package com.dangjia.acg.api.sale.store;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.store.Store;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -35,6 +36,18 @@ public interface StoreManagementAPI {
                                @RequestParam("modifyDate") Date modifyDate,
                                @RequestParam("building") String building,
                                @RequestParam("storeId") String storeId);
+
+    @PostMapping(value = "sale/store/delBuilding")
+    @ApiOperation(value = "小区楼栋删除", notes = "小区楼栋删除")
+    ServerResponse delBuilding(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("buildingId") String buildingId);
+
+    @PostMapping(value = "sale/store/updatBuilding")
+    @ApiOperation(value = "小区楼栋修改", notes = "小区楼栋修改")
+    ServerResponse updatBuilding(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("buildingId") String buildingId,
+                                 @RequestParam("residentialBuilding") ResidentialBuilding residentialBuilding);
+
 
 
 }

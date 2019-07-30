@@ -4,6 +4,7 @@ import com.dangjia.acg.api.sale.store.StoreManagementAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.service.sale.store.StoreManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +34,18 @@ public class StoreManagementController implements StoreManagementAPI {
     @ApiMethod
     public ServerResponse addBuilding(HttpServletRequest request, String villageId, Date modifyDate, String building,String storeId) {
         return storeManagementService.addBuilding(villageId,modifyDate,building,storeId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse delBuilding(HttpServletRequest request,String buildingId) {
+        return storeManagementService.delBuilding(buildingId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse updatBuilding(HttpServletRequest request, String buildingId , ResidentialBuilding residentialBuilding) {
+        return storeManagementService.updatBuilding(buildingId,residentialBuilding);
     }
 
 
