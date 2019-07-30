@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.clue;
 
 
+import com.dangjia.acg.dto.other.ClueDTO;
 import com.dangjia.acg.dto.sale.client.CustomerIndexDTO;
 import com.dangjia.acg.dto.sale.client.OrdersCustomerDTO;
 import com.dangjia.acg.dto.sale.store.StoreUserDTO;
@@ -22,14 +23,16 @@ public interface ClueMapper extends Mapper<Clue> {
 
     List<Clue> getAllByCondition(String values);
 
-    Clue getGroupBy(@Param("phone") String phone,@Param("userId") String userId);
+    List<Clue> getGroupBy(@Param("phone") String phone,@Param("userId") String userId);
 
-    List<Clue> followList(@Param("label") String label,
-                          @Param("time") String time,
-                          @Param("stage") Integer stage,
-                          @Param("searchKey") String searchKey,
-                          @Param("userId") String userId,
-                          @Param("storeId") String storeId);
+    Clue getClue(@Param("phone") String phone,@Param("userId") String userId);
+
+    List<ClueDTO> followList(@Param("label") String label,
+                             @Param("time") String time,
+                             @Param("stage") Integer stage,
+                             @Param("searchKey") String searchKey,
+                             @Param("userId") String userId,
+                             @Param("storeId") String storeId);
 
     CustomerIndexDTO clientPage(@Param("type") String type,@Param("userId") String userId,@Param("storeUsers") List<StoreUserDTO> storeUsers);
 

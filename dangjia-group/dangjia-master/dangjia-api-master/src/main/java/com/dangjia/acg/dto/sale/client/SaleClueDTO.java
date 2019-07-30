@@ -34,5 +34,7 @@ public class SaleClueDTO{
 
     private Integer clueType;//线索类型 1：跨域下单  0：正常
 
+    private String username;
+
 
 }

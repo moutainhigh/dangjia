@@ -6,6 +6,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.GaoDeUtils;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
+import com.dangjia.acg.dto.other.ClueDTO;
 import com.dangjia.acg.dto.sale.client.CustomerIndexDTO;
 import com.dangjia.acg.dto.sale.client.OrdersCustomerDTO;
 import com.dangjia.acg.dto.sale.client.SaleClueDTO;
@@ -46,6 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -95,7 +97,7 @@ public class ClientService {
      * @param userToken
      * @return
      */
-    public ServerResponse enterCustomer(Clue clue, String userToken) {
+    public ServerResponse enterCustomer(Clue clue, String userToken){
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -105,20 +107,22 @@ public class ClientService {
             return ServerResponse.createbyUserTokenError();
         }
         MainUser user = userMapper.getNameById(accessToken.getUserId());
-        Clue groupBy = clueMapper.getGroupBy(clue.getPhone(), null);
-        if (null != groupBy && DateUtil.getDiffDays(new Date(), groupBy.getReportDate()) < 7) {
-            return ServerResponse.createBySuccess("该客户已被报备,剩余时间", groupBy.getReportDate());
+        List<Clue> groupBys = clueMapper.getGroupBy(clue.getPhone(), null);
+        for (Clue groupBy : groupBys) {
+            if (!CommonUtil.isEmpty(groupBy.getReportDate())&&DateUtil.getDiffDays(new Date(), groupBy.getReportDate()) < 7) {
+                long time=System.currentTimeMillis()-groupBy.getReportDate().getTime();
+                return ServerResponse.createByErrorMessage(String.valueOf(time));
+            }
         }
         //如果客户已录入过则把录入的房子变为意向房子
-        groupBy = clueMapper.getGroupBy(clue.getPhone(), user.getId());
-        if (null != groupBy) {
-            if (!groupBy.getAddress().contains(clue.getAddress())) {
-                groupBy.setAddress(groupBy.getAddress() + "," + clue.getAddress());
-                clueMapper.updateByPrimaryKeySelective(groupBy);
-                return ServerResponse.createBySuccessMessage("提交成功,已存在该线索录入为意向房子");
-            } else {
-                return ServerResponse.createByErrorMessage("请勿重复录入");
-            }
+        Clue clue1 = clueMapper.getClue(clue.getPhone(), user.getId());
+        if(null == clue1.getAddress()){
+            clue1.setAddress("");
+        }
+        if (clue1.getAddress().contains(clue.getAddress())) {
+            clue1.setAddress(clue1.getAddress() + "," + clue.getAddress());
+            clueMapper.updateByPrimaryKeySelective(clue1);
+            return ServerResponse.createBySuccessMessage("提交成功,已存在该线索录入为意向房子");
         }
         Example example = new Example(Member.class);
         example.createCriteria().andEqualTo(Member.MOBILE, clue.getPhone());
@@ -150,10 +154,9 @@ public class ClientService {
      *
      * @param clue
      * @param userToken
-     * @param cityId
      * @return
      */
-    public ServerResponse crossDomainOrder(Clue clue, String userToken, String cityId, String villageId) {
+    public ServerResponse crossDomainOrder(Clue clue, String userToken, String villageId) {
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -162,11 +165,11 @@ public class ClientService {
         if (CommonUtil.isEmpty(accessToken.getUserId())) {
             return ServerResponse.createbyUserTokenError();
         }
-        MainUser user = userMapper.getNameById(accessToken.getUserId());
-        Example example = new Example(Store.class);
-        example.createCriteria().andEqualTo(Store.CITY_ID, cityId);
-        List<Store> stores = iStoreMapper.selectByExample(example);
+//        MainUser user = userMapper.getNameById(accessToken.getUserId());
         ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(villageId);
+        Example example = new Example(Store.class);
+        example.createCriteria().andEqualTo(Store.CITY_ID, modelingVillage.getCityId());
+        List<Store> stores = iStoreMapper.selectByExample(example);
         example = new Example(Member.class);
         example.createCriteria().andEqualTo(Member.MOBILE, clue.getPhone());
         List<Member> members = iMemberMapper.selectByExample(example);
@@ -256,6 +259,7 @@ public class ClientService {
             map.put("waitDistribution", customerIndexDTOS1.size() > 0 ? customerIndexDTOS1.get(0) : null);
             map.put("storeId", store.getId());
             map.put("grabSheet", iCustomerMapper.grabSheet(store.getId()));
+
         }
         return ServerResponse.createBySuccess("查询成功", map);
     }
@@ -290,10 +294,13 @@ public class ClientService {
             String[] buildingId = residentialRange.getBuildingId().split(",");
             example = new Example(ResidentialBuilding.class);
             example.createCriteria().andIn(ResidentialBuilding.ID, Arrays.asList(buildingId));
-            ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(residentialRange.getVillageId());
-            residentialRangeDTO.setVillageId(modelingVillage.getId());
-            residentialRangeDTO.setVillagename(modelingVillage.getName());
-            residentialRangeDTO.setList(residentialBuildingMapper.selectByExample(example));
+            List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
+            for (ResidentialBuilding residentialBuilding : residentialBuildings) {
+                ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(residentialBuilding.getVillageId());
+                residentialRangeDTO.setVillageId(modelingVillage.getId());
+                residentialRangeDTO.setVillagename(modelingVillage.getName());
+            }
+            residentialRangeDTO.setList(residentialBuildings);
             residentialRangeDTOList.add(residentialRangeDTO);
         }
         return residentialRangeDTOList;
@@ -322,34 +329,36 @@ public class ClientService {
             MainUser user = userMapper.getNameById(accessToken.getUserId());
             Example example = new Example(Store.class);
             example.createCriteria().andEqualTo(Store.USER_ID, user.getId());
-            List<Clue> clues=new ArrayList<>();
+            List<ClueDTO> clueDTOS=new ArrayList<>();
             if (iStoreMapper.selectByExample(example).size() <= 0) {//判断用户是否为店长
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                clues=clueMapper.followList(label, time, stage, searchKey, user.getId(), null);
+                clueDTOS=clueMapper.followList(label, time, stage, searchKey, user.getId(), null);
             }else{
                 object = saleService.getStore(accessToken.getUserId());
                 if (object instanceof ServerResponse) {
                     return (ServerResponse) object;
                 }
                 Store store = (Store) object;
-                clues=clueMapper.followList(label, time, stage, searchKey, null, store.getId());
+                clueDTOS=clueMapper.followList(label, time, stage, searchKey, null, store.getId());
             }
             List<SaleClueDTO> list = new ArrayList<>();
-            for (Clue clue : clues) {
+            for (ClueDTO clueDTO : clueDTOS) {
                 SaleClueDTO saleClueDTO = new SaleClueDTO();
-                if (!CommonUtil.isEmpty(clue.getLabelId())) {
-                    String[] labelIds = clue.getLabelId().split(",");
+                if (!CommonUtil.isEmpty(clueDTO.getLabelId())) {
+                    String[] labelIds = clueDTO.getLabelId().split(",");
                     List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
                     saleClueDTO.setList(labelByIds);
                 }
-                saleClueDTO.setClueType(clue.getClueType());
-                saleClueDTO.setId(clue.getId());
-                saleClueDTO.setOwername(clue.getOwername());
-                saleClueDTO.setPhone(clue.getPhone());
-                saleClueDTO.setReportDate(clue.getReportDate());
-                saleClueDTO.setCreateDate(clue.getCreateDate());
-                saleClueDTO.setModifyDate(clue.getModifyDate());
-                Date maxDate = clueTalkMapper.getMaxDate(clue.getId());
+                saleClueDTO.setUsername(clueDTO.getUserName());
+                saleClueDTO.setClueType(clueDTO.getClueType());
+                saleClueDTO.setId(clueDTO.getId());
+                saleClueDTO.setOwername(clueDTO.getOwername());
+                saleClueDTO.setPhone(clueDTO.getPhone());
+                saleClueDTO.setReportDate(clueDTO.getReportDate());
+                saleClueDTO.setCreateDate(clueDTO.getCreateDate());
+                saleClueDTO.setModifyDate(clueDTO.getModifyDate());
+                saleClueDTO.setClueType(clueDTO.getClueType());
+                Date maxDate = clueTalkMapper.getMaxDate(clueDTO.getId());
                 saleClueDTO.setCommunicationDate(null != maxDate ? maxDate : null);
                 list.add(saleClueDTO);
             }

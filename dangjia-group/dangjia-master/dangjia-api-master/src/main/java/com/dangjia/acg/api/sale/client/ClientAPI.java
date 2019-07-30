@@ -47,7 +47,6 @@ public interface ClientAPI {
     ServerResponse crossDomainOrder(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("clue") Clue clue,
                                     @RequestParam("userToken") String userToken,
-                                    @RequestParam("cityId") String cityId,
                                     @RequestParam("villageId") String villageId);
 
 

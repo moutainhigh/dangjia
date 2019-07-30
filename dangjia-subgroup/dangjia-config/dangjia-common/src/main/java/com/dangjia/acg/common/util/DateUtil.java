@@ -613,6 +613,33 @@ public class DateUtil implements AutoCloseable, Serializable {
         }
     }
 
+    /**
+     * 两个时间相差多少天多少秒多少小时
+     * @param first
+     * @param second
+     * @return
+     * @throws ParseException
+     */
+    public static String daysBetween(Date first, Date second) throws ParseException {
+        SimpleDateFormat sformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        first = sformat.parse(sformat.format(first));
+        second = sformat.parse(sformat.format(second));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(first);
+        long firstMills = calendar.getTimeInMillis();
+        calendar.setTime(second);
+        long secondMills = calendar.getTimeInMillis();
+        long rateD = 1000 * 60 * 60 * 24;
+        long rateH = 1000 * 60 * 60;
+        long rateM = 1000 * 60;
+        long rateS = 1000;
+        long mills = secondMills - firstMills;
+        long days = mills / rateD;
+        long hours = (mills % rateD) / rateH;
+        long minutes = (mills % rateD % rateH) / rateM;
+        long seconds = (mills % rateD % rateH % rateM) / rateS;
+        return "" + days + "天" + hours + "时" + minutes + "分" + seconds + "秒";
+    }
 
     /***
      * 计算两个日期之间的天数

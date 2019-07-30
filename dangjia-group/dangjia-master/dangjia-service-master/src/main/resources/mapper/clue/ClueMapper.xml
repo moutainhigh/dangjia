@@ -56,17 +56,33 @@
        </if>
     </select>
 
-    <select id="followList" resultType="com.dangjia.acg.modle.clue.Clue">
+
+    <select id="getClue" parameterType="String" resultType="com.dangjia.acg.modle.clue.Clue">
+        select
+        <include refid="Clue_List" />
+        from dj_clue
+        WHERE
+        data_status=0
+        and phone=#{phone}
+        <if test="null!=userId and ''!=userId">
+            and cus_service=#{userId}
+        </if>
+    </select>
+
+    <select id="followList" resultType="com.dangjia.acg.dto.other.ClueDTO">
         <if test="stage==4">
             select
             mc.member_id as memberId,
             if(m.name is not null,m.nick_name,m.name) as owername,
             m.mobile as phone,
             m.modify_date as modifyDate,
-            mc.label_id_arr as labelId
+            mc.label_id_arr as labelId,
+            u.username as userName
             from dj_member_customer mc
             INNER JOIN dj_member m
             on mc.member_id=m.id
+            INNER JOIN dj_user u
+            on mc.user_id=u.id
             where mc.data_status=0
             and mc.stage in (0,1)
             <if test="null!=userId and ''!=userId">
@@ -84,8 +100,21 @@
         </if>
         <if test="stage==''">
            select
-            <include refid="Clue_List" />
-           from dj_clue
+            id,owername,phone,wechat,address,stage,
+            building,number,
+            label_id as labelId,
+            cus_service as cusService,
+            create_date as createDate,
+            modify_date as modifyDate,
+            data_status as dataStatus,
+            remark,
+            report_date as reportDate,
+            member_id as memberId,
+            store_id as storeId,
+            u.username as userName
+           from dj_clue c
+           INNER JOIN dj_user u
+           on c.cus_service=u.id
            WHERE
            data_status=0
            <if test="null!=label and ''!=label">
