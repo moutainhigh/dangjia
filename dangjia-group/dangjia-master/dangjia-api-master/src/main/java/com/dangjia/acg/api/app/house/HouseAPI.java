@@ -27,14 +27,6 @@ public interface HouseAPI {
                                   @RequestParam("cityId") String cityId,
                                   @RequestParam("houseId") String houseId);
 
-    /**
-     * 房产列表
-     * TODO 1.4.0后删除此接口
-     */
-    @PostMapping("app/house/house/getHouseList")
-    @ApiOperation(value = "房产列表", notes = "房产列表")
-    ServerResponse getHouseList(@RequestParam("userToken") String userToken,
-                                @RequestParam("cityId") String cityId);
 
     /**
      * showdoc
@@ -63,14 +55,6 @@ public interface HouseAPI {
     ServerResponse getMyHouseList(@RequestParam("pageDTO") PageDTO pageDTO,
                                   @RequestParam("userToken") String userToken);
 
-    /**
-     * 我的房产
-     * TODO 1.4.0后删除此接口
-     */
-    @PostMapping("app/house/house/getMyHouse")
-    @ApiOperation(value = "我的房产", notes = "我的房产")
-    ServerResponse getMyHouse(@RequestParam("userToken") String userToken,
-                              @RequestParam("cityId") String cityId);
 
     /**
      * 我的房子
@@ -115,14 +99,6 @@ public interface HouseAPI {
                                     @RequestParam("houseType") Integer houseType,
                                     @RequestParam("pageDTO") PageDTO pageDTO);
 
-    /**
-     * TODO 1.4.0后删除此接口
-     * 装修指南
-     */
-    @PostMapping("app/house/house/getRenovationManual")
-    @ApiOperation(value = "装修指南", notes = "装修指南")
-    ServerResponse getRenovationManual(@RequestParam("userToken") String userToken,
-                                       @RequestParam("type") Integer type);
 
     @PostMapping("app/house/house/saveRenovationManual")
     @ApiOperation(value = "保存装修指南", notes = "保存装修指南")

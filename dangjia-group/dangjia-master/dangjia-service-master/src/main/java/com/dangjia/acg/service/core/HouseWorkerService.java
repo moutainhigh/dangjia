@@ -1050,52 +1050,6 @@ public class HouseWorkerService {
         }
     }
 
-    /**
-     * 根据工匠id查询施工列表
-     * TODO 1.4.0后删除此接口
-     */
-    public ServerResponse getHouseFlowList(String userToken) {
-        try {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member worker = (Member) object;
-            List<MyHouseFlowDTO> listHouseWorker = houseWorkerMapper.getMyHouseFlowList(worker.getId(), worker.getWorkerType());
-            if (listHouseWorker == null || listHouseWorker.size() <= 0) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            }
-            for (MyHouseFlowDTO myHouseFlowDTO : listHouseWorker) {
-                HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(myHouseFlowDTO.getHouseId(), myHouseFlowDTO.getWorkerTypeId());
-                if (houseWorkerOrder != null) {
-                    if (houseWorkerOrder.getRepairPrice() == null) {
-                        houseWorkerOrder.setRepairPrice(new BigDecimal(0));
-                    }
-                    if (houseWorkerOrder.getWorkPrice() == null) {
-                        houseWorkerOrder.setWorkPrice(new BigDecimal(0));
-                    }
-                    BigDecimal remain = houseWorkerOrder.getWorkPrice().add(houseWorkerOrder.getRepairPrice());
-                    myHouseFlowDTO.setPrice("¥" + (String.format("%.2f", remain.doubleValue())));
-                }
-                Member member = memberMapper.selectByPrimaryKey(myHouseFlowDTO.getMemberId());
-                if (member != null) {
-                    myHouseFlowDTO.setMemberName(member.getNickName());
-                }
-                List<HouseFlowApply> supervisorCheckList = houseFlowApplyMapper.getSupervisorCheckList(myHouseFlowDTO.getHouseId());//查询所有待大管家审核
-                myHouseFlowDTO.setTaskNumber(supervisorCheckList == null ? 0 : supervisorCheckList.size());//任务数量
-                List<HouseFlowApply> todayStartList = houseFlowApplyMapper.getTodayStartByHouseId(myHouseFlowDTO.getHouseId(), new Date());//查询今日开工记录
-                if (todayStartList == null || todayStartList.size() == 0) {//没有今日开工记录
-                    myHouseFlowDTO.setHouseIsStart("今日未开工");//是否正常施工
-                } else {
-                    myHouseFlowDTO.setHouseIsStart("今日已开工");//是否正常施工
-                }
-            }
-            return ServerResponse.createBySuccess("获取施工列表成功", listHouseWorker);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("系统出错，获取施工列表失败！");
-        }
-    }
 
     public ServerResponse getMyHouseFlowList(PageDTO pageDTO, String userToken) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());

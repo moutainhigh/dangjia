@@ -336,7 +336,7 @@ public class GroupInfoService {
             MainUser user = list.get(0);
             Map map = new HashMap();
             map.put("targetId", user.getId());
-            map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
+            map.put("targetAppKey", messageAPI.getAppKey(AppType.SALE.getDesc()));
             String text = null;
             if (type == 1) {
                 text = "业主您好！我是您的售前客服！";
