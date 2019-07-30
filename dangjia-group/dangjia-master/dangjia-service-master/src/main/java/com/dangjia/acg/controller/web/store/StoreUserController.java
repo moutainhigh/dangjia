@@ -41,6 +41,7 @@ public class StoreUserController implements StoreUserAPI {
     }
 
     @Override
+    @ApiMethod
     public ServerResponse getStoreUser(HttpServletRequest request, String userToken, String userId) {
         return storeUserServices.getStoreUser(userToken, userId);
     }

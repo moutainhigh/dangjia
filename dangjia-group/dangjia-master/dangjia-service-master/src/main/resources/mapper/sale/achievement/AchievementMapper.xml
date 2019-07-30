@@ -10,8 +10,8 @@
         select   COUNT(*)
         from dj_clue c inner join dj_house h
         on c.member_id = h.member_id
-        where c.cus_service
-        in
+        where 1 =1
+        and c.cus_service in
         (SELECT su.user_id from dj_store_users su
             where 1=1
             <if test="null != storeId and '' != storeId">
@@ -20,13 +20,14 @@
         )
         and h.visit_state = 1
         <if test="null != time">
-            and date_format(h.modify_date,'%Y-%m') =# {time}
+            and date_format(h.modify_date,'%Y-%m') = #{time}
         </if>
     </select>
 
     <!--查詢全部订单状态，结算累计提成-->
     <select id="queryMeterVisitState" resultType="com.dangjia.acg.dto.sale.achievement.AchievementInfoDTO" parameterType="java.util.HashMap">
-        select  c.cus_service userId,h.visit_state visitState
+        select  c.cus_service userId,
+        h.visit_state visitState
         from
         dj_clue c  inner join dj_house h on c.member_id = h.member_id
         where c.cus_service in
@@ -52,7 +53,7 @@
             </if>
          )
         <if test="null != time">
-            and date_format(h.modify_date,'%Y-%m') =# {time}
+            and date_format(h.modify_date,'%Y-%m') =#{time}
         </if>
         and (h.visit_state = 1 or h.visit_state = 3)
     </select>

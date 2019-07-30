@@ -87,6 +87,7 @@ public class StoreManagementService {
         resultMap.put("storeUsers",storeUserDTOS);
         resultMap.put("residentialRangeDTOList",pageResult);
         resultMap.put("managerId",store.getUserId());
+        resultMap.put("storeId",store.getId());
         return ServerResponse.createBySuccess("查询成功",resultMap);
     }
 
