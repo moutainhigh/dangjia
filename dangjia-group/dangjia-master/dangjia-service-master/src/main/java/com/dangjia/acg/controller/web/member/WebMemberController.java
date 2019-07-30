@@ -38,7 +38,8 @@ public class WebMemberController implements WebMemberAPI {
     @ApiMethod
     public ServerResponse getMemberList(HttpServletRequest request, PageDTO pageDTO, Integer stage, String userRole,String searchKey, String parentId, String childId,String orderBy,String type, String userId,String beginDate,String endDate) {
         String cityId = request.getParameter(Constants.CITY_ID);
-        return memberService.getMemberList(pageDTO,  cityId, stage,  userRole,searchKey, parentId, childId, orderBy,type,userId,beginDate,endDate);
+        String userID = request.getParameter(Constants.USERID);
+        return memberService.getMemberList(pageDTO,  cityId, userID , stage,  userRole,searchKey, parentId, childId, orderBy,type,userId,beginDate,endDate);
     }
 
     @Override

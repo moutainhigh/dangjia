@@ -33,6 +33,7 @@ import com.dangjia.acg.service.activity.RedPackPayService;
 import com.dangjia.acg.service.clue.ClueService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.store.StoreUserServices;
 import com.dangjia.acg.util.RKIDCardUtil;
 import com.dangjia.acg.util.TokenUtil;
 import com.github.pagehelper.PageHelper;
@@ -61,8 +62,11 @@ public class MemberService {
     private ConfigUtil configUtil;
     @Autowired
     private RedPackPayService redPackPayService;
+
     @Autowired
     private IMemberMapper memberMapper;
+    @Autowired
+    private StoreUserServices storeUserServices;
     @Autowired
     private ICityMapper iCityMapper;
     @Autowired
@@ -589,7 +593,7 @@ public class MemberService {
     /**
      * 业主列表
      */
-    public ServerResponse getMemberList(PageDTO pageDTO, String cityId,Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
+    public ServerResponse getMemberList(PageDTO pageDTO, String cityId,String userKey ,Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
         try {
             List<String> childsLabelIdList = new ArrayList<>();
             if (StringUtils.isNotBlank(parentId)) {
@@ -609,7 +613,9 @@ public class MemberService {
                     endDate = endDate + " " + "23:59:59";
                 }
             }
-            List<Member> list = memberMapper.getMemberListByName(cityId,searchKey, stage, userRole, childsLabelIdArr, orderBy, type, userId, beginDate, endDate);
+            //数据权限控制（总部根据城市查看全部客户，城市管理者根据指定城市查看所有客户，店长可看门店所有销售的客户，销售只能看自己的客户）
+            userKey=storeUserServices.getStoreUser(userKey);
+            List<Member> list = memberMapper.getMemberListByName(cityId,searchKey, stage, userRole, childsLabelIdArr, orderBy, type, userKey,userId, beginDate, endDate);
             PageInfo pageResult = new PageInfo(list);
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
             for (Member member : list) {
