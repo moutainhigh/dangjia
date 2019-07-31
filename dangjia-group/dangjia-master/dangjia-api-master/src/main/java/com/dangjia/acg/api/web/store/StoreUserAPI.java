@@ -19,7 +19,7 @@ public interface StoreUserAPI {
      *
      * @param userId  必选 string 成员用户ID
      * @param storeId 必选 string 门店ID
-     * @param type    必选 int 类别：0:场内销售，1:场外销售
+     * @param type    必选 int 类别：0:内场销售，1:外场销售
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/销售模块/门店成员
      * @title 新增门店成员
@@ -54,7 +54,7 @@ public interface StoreUserAPI {
      * @return_param storeUserId string 门店成员ID
      * @return_param userId string 成员用户ID
      * @return_param storeId string 门店ID
-     * @return_param type Integer 类别：0:场内销售，1:场外销售
+     * @return_param type Integer 类别：0:内场销售，1:外场销售
      * @return_param userName string 用户名
      * @return_param userMobile string 手机
      * @return_param userHead string 头像
@@ -76,7 +76,7 @@ public interface StoreUserAPI {
      * showdoc
      *
      * @param storeUserId 必选 string 门店成员ID
-     * @param type        必选 string 类别：0:场内销售，1:场外销售
+     * @param type        必选 string 类别：0:内场销售，1:外场销售
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/销售模块/门店成员
      * @title 编辑门店成员
@@ -128,7 +128,7 @@ public interface StoreUserAPI {
      * @return_param storeUserId string 门店成员ID
      * @return_param userId string 成员用户ID
      * @return_param storeId string 门店ID
-     * @return_param type Integer 类别：0:场内销售，1:场外销售
+     * @return_param type Integer 类别：0:内场销售，1:外场销售
      * @return_param userName string 用户名
      * @return_param userMobile string 手机
      * @return_param userHead string 头像

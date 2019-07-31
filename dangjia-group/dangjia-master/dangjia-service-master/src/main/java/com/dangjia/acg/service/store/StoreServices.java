@@ -13,11 +13,13 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreSubscribeMapper;
+import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.system.IDepartmentMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreSubscribe;
+import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.system.Department;
 import com.dangjia.acg.modle.user.MainUser;
 import com.github.pagehelper.PageHelper;
@@ -41,7 +43,6 @@ import java.util.*;
 public class StoreServices {
     @Autowired
     private IStoreMapper iStoreMapper;
-
     @Autowired
     private IHouseMapper iHouseMapper;
     @Autowired
@@ -52,6 +53,8 @@ public class StoreServices {
     private IDepartmentMapper departmentMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private IStoreUserMapper iStoreUserMapper;
 
     /**
      * 根据门店ID,得到设置的管辖范围，得到所有范围内的小区
@@ -69,37 +72,6 @@ public class StoreServices {
         example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
         List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
         return ServerResponse.createBySuccess("查询列表成功", modelingVillages);
-    }
-
-    /**
-     * 创建门店
-     *
-     * @param store
-     * @return
-     */
-    public ServerResponse addStore(Store store) {
-        try {
-            Example example = new Example(Store.class);
-            example.createCriteria().andEqualTo(Store.STORE_NAME, store.getStoreName())
-                    .andEqualTo(Store.DATA_STATUS, 0);
-            if (iStoreMapper.selectByExample(example).size() > 0) {
-                return ServerResponse.createByErrorMessage("门店已存在");
-            }
-            if (!CommonUtil.isEmpty(store.getDepartmentId())) {
-                Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
-                if (department != null) {
-                    store.setCityName(department.getCityName());
-                    store.setCityId(department.getCityId());
-                    store.setDepartmentName(department.getName());
-                }
-            }
-            getStoreVillages(store);
-            iStoreMapper.insert(store);
-            return ServerResponse.createBySuccessMessage("创建成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("创建失败");
-        }
     }
 
 
@@ -139,33 +111,86 @@ public class StoreServices {
      * @return
      */
     public ServerResponse updateStore(Store store) {
-        try {
-            Store oldStore = iStoreMapper.selectByPrimaryKey(store.getId());
-            if (!oldStore.getStoreName().equals(store.getStoreName())) {
-                Example example = new Example(Store.class);
-                example.createCriteria().andEqualTo(Store.STORE_NAME, store.getStoreName())
-                        .andEqualTo(Store.DATA_STATUS, 0);
-                if (iStoreMapper.selectByExample(example).size() > 0) {
-                    return ServerResponse.createByErrorMessage("门店已存在");
-                }
-            }
-            if (!CommonUtil.isEmpty(store.getDepartmentId())) {
-                Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
-                if (department != null) {
-                    store.setCityName(department.getCityName());
-                    store.setCityId(department.getCityId());
-                    store.setDepartmentName(department.getName());
-                }
-            }
-            getStoreVillages(store);
-            store.setCreateDate(null);
-            store.setModifyDate(new Date());
-            iStoreMapper.updateByPrimaryKeySelective(store);
-            return ServerResponse.createBySuccessMessage("编辑成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("编辑失败");
+        ServerResponse serverResponse = getStoreVillages(store);
+        if (!serverResponse.isSuccess()) {
+            return serverResponse;
         }
+        store.setCreateDate(null);
+        store.setModifyDate(new Date());
+        iStoreMapper.updateByPrimaryKeySelective(store);
+        return ServerResponse.createBySuccessMessage("编辑成功");
+    }
+
+    /**
+     * 创建门店
+     *
+     * @param store
+     * @return
+     */
+    public ServerResponse addStore(Store store) {
+        ServerResponse serverResponse = getStoreVillages(store);
+        if (!serverResponse.isSuccess()) {
+            return serverResponse;
+        }
+        iStoreMapper.insert(store);
+        return ServerResponse.createBySuccessMessage("创建成功");
+    }
+
+    /**
+     * 根据本店设置的管辖范围，得到所有范围内的小区
+     *
+     * @param store
+     */
+    private ServerResponse getStoreVillages(Store store) {
+        if (CommonUtil.isEmpty(store.getStoreName())) {
+            return ServerResponse.createByErrorMessage("请设置门店名称");
+        }
+        Example example = new Example(Store.class);
+        example.createCriteria()
+                .andEqualTo(Store.STORE_NAME, store.getStoreName())
+                .andNotEqualTo(Store.ID, store.getId())
+                .andEqualTo(Store.DATA_STATUS, 0);
+        if (iStoreMapper.selectCountByExample(example) > 0) {
+            return ServerResponse.createByErrorMessage("门店已存在");
+        }
+        if (!CommonUtil.isEmpty(store.getUserId())) {
+            example = new Example(StoreUser.class);
+            example.createCriteria().andEqualTo(StoreUser.USER_ID, store.getUserId())
+                    .andEqualTo(StoreUser.DATA_STATUS, 0);
+            List<StoreUser> storeUserList = iStoreUserMapper.selectByExample(example);
+            if (storeUserList.size() > 0) {
+                if (store.getId().equals(storeUserList.get(0).getStoreId())) {
+                    return ServerResponse.createByErrorMessage("该用户是本门店销售员，不能设置为店长");
+                } else {
+                    return ServerResponse.createByErrorMessage("该用户是其他门店销售员，不能设置为店长");
+                }
+            }
+        }
+        if (!CommonUtil.isEmpty(store.getDepartmentId())) {
+            Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
+            if (department != null) {
+                store.setCityName(department.getCityName());
+                store.setCityId(department.getCityId());
+                store.setDepartmentName(department.getName());
+            }
+        }
+        if (!CommonUtil.isEmpty(store.getScopeItude())) {
+            example = new Example(ModelingVillage.class);
+            example.createCriteria().andIsNotNull(ModelingVillage.LOCATIONX);
+            List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
+            List<String> villageIds = new ArrayList<>();
+            for (ModelingVillage modelingVillage : modelingVillages) {
+                if (GaoDeUtils.isInPolygon(modelingVillage.getLocationx() + "," + modelingVillage.getLocationy(), store.getScopeItude())) {
+                    villageIds.add(modelingVillage.getId());
+                }
+            }
+            if (villageIds.size() > 0) {
+                store.setVillages(StringUtils.join(villageIds, ","));
+            } else {
+                store.setVillages("");
+            }
+        }
+        return ServerResponse.createBySuccess();
     }
 
     /**
@@ -175,13 +200,14 @@ public class StoreServices {
      * @return
      */
     public ServerResponse delStore(String id) {
-        try {
-            iStoreMapper.deleteByPrimaryKey(id);
-            return ServerResponse.createBySuccessMessage("删除成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("删除失败");
+        Store store = iStoreMapper.selectByPrimaryKey(id);
+        if (store == null) {
+            return ServerResponse.createByErrorMessage("该门店不存在");
         }
+        store.setModifyDate(new Date());
+        store.setDataStatus(1);
+        iStoreMapper.updateByPrimaryKeySelective(store);
+        return ServerResponse.createBySuccessMessage("删除成功");
     }
 
     /**
@@ -289,30 +315,6 @@ public class StoreServices {
             return ServerResponse.createBySuccessMessage("处理成功");
         } else {
             return ServerResponse.createByErrorMessage("处理失败");
-        }
-    }
-
-    /**
-     * 根据本店设置的管辖范围，得到所有范围内的小区
-     *
-     * @param store
-     */
-    public void getStoreVillages(Store store) {
-        if (!CommonUtil.isEmpty(store.getScopeItude())) {
-            Example example = new Example(ModelingVillage.class);
-            example.createCriteria().andIsNotNull(ModelingVillage.LOCATIONX);
-            List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
-            List<String> villageIds = new ArrayList<>();
-            for (ModelingVillage modelingVillage : modelingVillages) {
-                if (GaoDeUtils.isInPolygon(modelingVillage.getLocationx() + "," + modelingVillage.getLocationy(), store.getScopeItude())) {
-                    villageIds.add(modelingVillage.getId());
-                }
-            }
-            if (villageIds.size() > 0) {
-                store.setVillages(StringUtils.join(villageIds, ","));
-            } else {
-                store.setVillages("");
-            }
         }
     }
 

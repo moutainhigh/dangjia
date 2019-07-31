@@ -593,7 +593,7 @@ public class HouseService {
 
         House house = new House(true);//新增房产信息
 
-        //0:场内录入，1:场外录入
+        //0:内场录入，1:外场录入
         if (type == 0) {
             house.setIsType(0);
         } else {

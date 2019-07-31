@@ -257,8 +257,8 @@ public class House extends BaseEntity {
     private Integer isRobStats;
 
     @Column(name = "is_type")
-    @Desc(value = " 类别：0:场内录入，1:场外录入")
-    @ApiModelProperty("类别：0:场内录入，1:场外录入")
+    @Desc(value = " 类别：0:内场录入，1:外场录入")
+    @ApiModelProperty("类别：0:内场录入，1:外场录入")
     private Integer isType;
 
 

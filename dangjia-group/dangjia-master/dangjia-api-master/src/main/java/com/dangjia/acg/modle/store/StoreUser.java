@@ -29,8 +29,8 @@ public class StoreUser extends BaseEntity {
     private String storeId;
 
     @Column(name = "type")
-    @Desc(value = "类别：0:场内销售，1:场外销售")
-    @ApiModelProperty("类别：0:场内销售，1:场外销售")
+    @Desc(value = "类别：0:内场销售，1:外场销售")
+    @ApiModelProperty("类别：0:内场销售，1:外场销售")
     private Integer type;
 
 
