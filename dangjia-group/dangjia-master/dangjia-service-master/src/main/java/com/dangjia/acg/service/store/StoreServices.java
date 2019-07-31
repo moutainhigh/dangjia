@@ -323,7 +323,7 @@ public class StoreServices {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Store> stores = iStoreMapper.queryStore(null, searchKey);
         List<Map> storemaps = new ArrayList<>();
-        if (stores.size() < 0) {
+        if (stores.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         PageInfo pageResult = new PageInfo(stores);
