@@ -36,7 +36,7 @@ public interface ICustomerMapper extends Mapper<Customer> {
     List<GrabSheetDTO> grabSheet(@Param("storeId") String storeId);
 
 
-    Integer queryType(@Param("storeId") String memberId);
+    Integer queryType(@Param("memberId") String memberId);
 
 }
 
