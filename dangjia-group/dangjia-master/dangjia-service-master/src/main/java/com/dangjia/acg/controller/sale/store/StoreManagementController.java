@@ -48,5 +48,11 @@ public class StoreManagementController implements StoreManagementAPI {
         return storeManagementService.updatBuilding(buildingId,residentialBuilding);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse BuildingList(HttpServletRequest request,String storeId,PageDTO pageDTO) {
+        return storeManagementService.BuildingList(storeId,pageDTO);
+    }
+
 
 }
