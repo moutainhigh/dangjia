@@ -281,7 +281,7 @@
             and h.city_id = #{cityId}
         </if>
         and site_display=0
-        and visit_state=3
+        AND visit_state in(1,3)
         ORDER BY
         <if test="minSquare!=null and minSquare!='' and maxSquare!=null and maxSquare!=''">
           IF(( h.build_square &gt;= #{minSquare} AND h.build_square &lt;= #{maxSquare}), 0, 1 ) ,

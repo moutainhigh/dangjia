@@ -68,11 +68,22 @@ public class IndexPageService {
      */
     public ServerResponse queryHouseDistance(HttpServletRequest request, String userToken, String cityId, String villageId, Double square, PageDTO pageDTO) {
         try {
-            ModelingVillage modelingVillage = modelingVillageMapper.selectByPrimaryKey(villageId);
+            String locationx=null;
+            String Locationy=null;
+            if(!CommonUtil.isEmpty(villageId)) {
+                ModelingVillage modelingVillage = modelingVillageMapper.selectByPrimaryKey(villageId);
+                locationx=modelingVillage.getLocationx();
+                Locationy=modelingVillage.getLocationy();
+            }
             Double minSquare = square - 15;
             Double maxSquare = square + 15;
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<House> houseList = houseMapper.getSameLayoutDistance(cityId, modelingVillage.getLocationx(), modelingVillage.getLocationy(), minSquare, maxSquare,villageId);
+            List<House> houseList;
+            if(!CommonUtil.isEmpty(villageId)) {
+                houseList=houseMapper.getSameLayoutDistance(cityId, locationx, Locationy, minSquare, maxSquare,villageId);
+            }else{
+                houseList = houseMapper.getSameLayout(cityId, null, minSquare, maxSquare,null);
+            }
             if(houseList.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
@@ -367,7 +378,9 @@ public class IndexPageService {
             }
 
             BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getId());
-            totalPrice = totalPrice.add(totalAmount);
+            if(totalAmount!=null) {
+                totalPrice = totalPrice.add(totalAmount);
+            }
             house = this.getHouseImage(address,house);
             house.setMoney(totalPrice);
         }
