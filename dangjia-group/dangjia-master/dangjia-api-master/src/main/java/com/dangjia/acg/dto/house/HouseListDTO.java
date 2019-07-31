@@ -1,7 +1,7 @@
 package com.dangjia.acg.dto.house;
 
+import com.dangjia.acg.common.util.CommonUtil;
 import lombok.Data;
-import org.apache.http.util.TextUtils;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -55,9 +55,9 @@ public class HouseListDTO {
     private String storeName;// 归属分店
 
     public String getHouseName() {
-        return (TextUtils.isEmpty(getResidential()) ? "*" : getResidential())
-                + (TextUtils.isEmpty(getBuilding()) ? "*" : getBuilding()) + "栋"
-                + (TextUtils.isEmpty(getUnit()) ? "*" : getUnit()) + "单元"
-                + (TextUtils.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
+        return (CommonUtil.isEmpty(getResidential()) ? "*" : getResidential())
+                + (CommonUtil.isEmpty(getBuilding()) ? "*" : getBuilding()) + "栋"
+                + (CommonUtil.isEmpty(getUnit()) ? "*" : getUnit()) + "单元"
+                + (CommonUtil.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
     }
 }

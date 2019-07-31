@@ -55,7 +55,6 @@ import com.dangjia.acg.service.design.DesignDataService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -867,7 +866,7 @@ public class HouseService {
 //                shareDTO.setName(house.getHouseName());
 //            } else {
             shareDTO.setHouseName(house.getHouseName());
-            shareDTO.setNoNumberHouseName(house.getResidential() + "**" + "栋" + (TextUtils.isEmpty(house.getUnit()) ? "" : house.getUnit() + "单元") + house.getNumber() + "房");
+            shareDTO.setNoNumberHouseName(house.getResidential() + "**" + "栋" + (CommonUtil.isEmpty(house.getUnit()) ? "" : house.getUnit() + "单元") + house.getNumber() + "房");
 //            }
         } else {
             shareDTO.setHouseName(house.getHouseName());
@@ -877,9 +876,9 @@ public class HouseService {
         shareDTO.setJvillageacreage("计算面积:" + (house.getSquare() == null ? "0" : house.getSquare()) + "m²");//计算面积
         String biaoqian = house.getLiangDian();//标签
         List<String> biaoqians = new ArrayList<>();
-        if (!TextUtils.isEmpty(biaoqian)) {
+        if (!CommonUtil.isEmpty(biaoqian)) {
             for (String s1 : biaoqian.split(",")) {
-                if (!TextUtils.isEmpty(s1)) {
+                if (!CommonUtil.isEmpty(s1)) {
                     biaoqians.add(s1);
                 }
             }
