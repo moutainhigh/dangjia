@@ -338,6 +338,7 @@ public class IndexPageService {
      * @return
      */
     public ServerResponse getRecommended(HttpServletRequest request,String latitude, String longitude,Integer limit){
+       try {
         if (CommonUtil.isEmpty(latitude)) {
             latitude = "28.228259";
         }
@@ -366,5 +367,9 @@ public class IndexPageService {
             house.setMoney(totalPrice);
         }
         return ServerResponse.createBySuccess("查询成功", houses);
+       }catch (Exception e){
+           e.printStackTrace();
+           return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
+       }
     }
 }
