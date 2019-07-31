@@ -684,23 +684,24 @@ public class HouseWorkerService {
      * 每日开工
      */
     private ServerResponse setStartDaily(Member worker, HouseFlow hf, House house, String latitude, String longitude) {
-        if(active!=null&&(active.equals("pre"))) {
-            ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
-            if (village != null && village.getLocationx() != null && village.getLocationy() != null
-                    && latitude != null && longitude != null) {
-                try {
-                    double longitude1 = Double.valueOf(longitude);
-                    double latitude1 = Double.valueOf(latitude);
-                    double longitude2 = Double.valueOf(village.getLocationx());
-                    double latitude2 = Double.valueOf(village.getLocationy());
-                    double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
-                    if (distance > 1500) {
-                        return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
-                    }
-                } catch (Exception ignored) {
-                }
-            }
-        }
+        //存在问题，暂时取消
+//        if(active!=null&&(active.equals("pre"))) {
+//            ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
+//            if (village != null && village.getLocationx() != null && village.getLocationy() != null
+//                    && latitude != null && longitude != null) {
+//                try {
+//                    double longitude1 = Double.valueOf(longitude);
+//                    double latitude1 = Double.valueOf(latitude);
+//                    double longitude2 = Double.valueOf(village.getLocationx());
+//                    double latitude2 = Double.valueOf(village.getLocationy());
+//                    double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
+//                    if (distance > 1500) {
+//                        return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
+//                    }
+//                } catch (Exception ignored) {
+//                }
+//            }
+//        }
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
         if (hf.getWorkSteta() == 2) {
             return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已经整体完工，无法开工");
