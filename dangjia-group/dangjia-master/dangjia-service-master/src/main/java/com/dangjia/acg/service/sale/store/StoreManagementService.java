@@ -179,7 +179,9 @@ public class StoreManagementService {
     public ServerResponse BuildingList(String storeId,PageDTO pageDTO){
         Store store = iStoreMapper.selectByPrimaryKey(storeId);
         Example example = new Example(ModelingVillage.class);
-        example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
+        if(CommonUtil.isEmpty(store.getVillages())) {
+            example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
+        }
         List<ResidentialRange> residentialRanges = residentialRangeMapper.selectAll();
         List<String> slist=new ArrayList<>();
         for (ResidentialRange residentialRange : residentialRanges) {

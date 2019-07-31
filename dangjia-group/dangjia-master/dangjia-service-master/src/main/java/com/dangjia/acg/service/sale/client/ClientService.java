@@ -185,7 +185,10 @@ public class ClientService {
         for (Store store : stores) {
             //如果转出的该客户为自己门店范围内未录入的（野生），则记录进店长的线索阶段（给店长系统推送），然后仅分配给内场
             if (GaoDeUtils.isInPolygon(modelingVillage.getLocationx() + "," + modelingVillage.getLocationy(), store.getScopeItude())) {
-//                example=new Example(ResidentialBuilding)
+                String[] split = store.getVillages().split(",");
+                for (String s : split) {
+
+                }
                 clue.setCusService(store.getUserId());
                 clue.setStoreId(store.getId());
                 clue.setClueType(1);
