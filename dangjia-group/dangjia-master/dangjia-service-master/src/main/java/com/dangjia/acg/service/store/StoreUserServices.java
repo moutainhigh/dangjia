@@ -92,6 +92,9 @@ public class StoreUserServices {
     }
 
     public ServerResponse queryStoreUser(String storeId, String searchKey, PageDTO pageDTO) {
+        if (CommonUtil.isEmpty(storeId)) {
+            return ServerResponse.createByErrorMessage("请选择门店");
+        }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<StoreUserDTO> storeUserDTOS = iStoreUserMapper.getStoreUsers(storeId, searchKey, null);
         if (storeUserDTOS.size() <= 0) {
