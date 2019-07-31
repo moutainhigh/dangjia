@@ -102,7 +102,7 @@ public class IndexPageService {
                 if (order != null) {
                     totalPrice = totalPrice.add(order.getTotalAmount());
                 }
-                BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getId());
+                BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getCityId(),house.getId());
                 if(totalAmount!=null) {
                     totalPrice = totalPrice.add(totalAmount);
                 }
@@ -128,7 +128,6 @@ public class IndexPageService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             BigDecimal totalPrice = new BigDecimal(0);//总计
             House house = houseMapper.selectByPrimaryKey(houseId);
-            request.setAttribute(Constants.CITY_ID, house.getCityId());
             HouseDetailsDTO houseDetailsDTO = new HouseDetailsDTO();
             houseDetailsDTO.setCityId(house.getCityId());
             houseDetailsDTO.setCityName(house.getCityName());
@@ -190,7 +189,8 @@ public class IndexPageService {
                 map.put("image", address + workerType.getImage());
                 map.put("workerType", workerType.getType());
                 map.put("workerTypeId", workerType.getId());
-                ServerResponse serverResponse = budgetMaterialAPI.getHouseBudgetStageCost(request, houseId, houseFlow.getWorkerTypeId());
+                request.setAttribute(Constants.CITY_ID, house.getCityId());
+                ServerResponse serverResponse = budgetMaterialAPI.getHouseBudgetStageCost(request,house.getCityId(), houseId, houseFlow.getWorkerTypeId());
                 JSONArray pageInfo = (JSONArray) serverResponse.getResultObj();
                 if(!CommonUtil.isEmpty(pageInfo)) {
                     List<BudgetStageCostDTO> budgetStageCostDTOS = pageInfo.toJavaList(BudgetStageCostDTO.class);
@@ -377,7 +377,7 @@ public class IndexPageService {
                 totalPrice = totalPrice.add(order.getTotalAmount());
             }
 
-            BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getId());
+            BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request,house.getCityId(), house.getId());
             if(totalAmount!=null) {
                 totalPrice = totalPrice.add(totalAmount);
             }
