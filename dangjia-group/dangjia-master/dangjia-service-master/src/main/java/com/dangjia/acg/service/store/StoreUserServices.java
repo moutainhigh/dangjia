@@ -163,7 +163,7 @@ public class StoreUserServices {
         storeUserDTO.setStoreUserId(storeUser.getId());//门店成员ID
         storeUserDTO.setUserId(storeUser.getUserId());//成员用户ID
         storeUserDTO.setStoreId(storeUser.getStoreId());//门店ID
-        storeUserDTO.setType(storeUser.getType());//类别：0:场内销售，1:场外销售
+        storeUserDTO.setType(storeUser.getType());//类别：0:内场销售，1:外场销售
         MainUser mainUser = userMapper.selectByPrimaryKey(store.getUserId());
         if (mainUser == null) {
             return ServerResponse.createByErrorMessage("目标用户不存在");
@@ -179,7 +179,7 @@ public class StoreUserServices {
         storeUserDTO.setIsJob(mainUser.getIsJob());//是否在职（0：正常；1，离职）
         storeUserDTO.setCreateDate(storeUser.getCreateDate());// 创建日期
         storeUserDTO.setModifyDate(mainUser.getModifyDate());// 修改日期
-        String storeName = store.getStoreName() + (storeUser.getType() == 0 ? "-场内销售" : "-场外销售");
+        String storeName = store.getStoreName() + (storeUser.getType() == 0 ? "-内场销售" : "-外场销售");
         storeUserDTO.setStoreName(storeName);//门店——岗位名称
         storeUserDTO.setAppKey(messageAPI.getAppKey(AppType.SALE.getDesc()));//极光聊天的Key
         storeUserDTO.setOutField(clientService.getResidentialRangeDTOList(userId));

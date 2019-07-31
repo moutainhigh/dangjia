@@ -18,8 +18,8 @@ public class AccessToken extends BaseEntity {
     private String userId;
     @ApiModelProperty("用户电话")
     private String phone;//用户电话
-    @ApiModelProperty("工匠类型(0:大管家；1：普通工匠;2:业主;3:店长;4:场内销售;5:场外销售)")
-    private Integer memberType;//工匠类型(0:大管家；1：普通工匠;2:业主;3:店长;4:场内销售;5:场外销售)
+    @ApiModelProperty("工匠类型(0:大管家；1：普通工匠;2:业主;3:店长;4:内场销售;5:外场销售)")
+    private Integer memberType;//工匠类型(0:大管家；1：普通工匠;2:业主;3:店长;4:内场销售;5:外场销售)
     @ApiModelProperty("工匠类型名称")
     private String workerTypeName;//工匠类型名称
     @ApiModelProperty("时间戳")

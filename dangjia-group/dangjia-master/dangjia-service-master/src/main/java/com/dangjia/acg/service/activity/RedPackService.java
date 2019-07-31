@@ -85,6 +85,9 @@ public class RedPackService {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         example.orderBy("modifyDate").desc();
         List<ActivityRedPack> list = activityRedPackMapper.selectByExample(example);
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         PageInfo pageResult = new PageInfo(list);
         return ServerResponse.createBySuccess("ok", pageResult);
     }
@@ -106,9 +109,11 @@ public class RedPackService {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         example.orderBy(ActivityRedPack.MODIFY_DATE).desc();
         List<ActivityRedPack> list = activityRedPackMapper.selectByExample(example);
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         List<Map> listMap = new ArrayList<>();
         PageInfo pageResult = new PageInfo(list);
-
         for (ActivityRedPack redPack : list) {
             Map map = BeanUtils.beanToMap(redPack);
             Example exampleRecord = new Example(ActivityRedPackRecord.class);
@@ -175,6 +180,9 @@ public class RedPackService {
         activityRedPackRecord.setMemberId(member.getId());
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<ActivityRedPackRecordDTO> list = activityRedPackRecordMapper.queryActivityRedPackRecords(activityRedPackRecord);
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         PageInfo pageResult = new PageInfo(list);
         //格式化有效优惠券集合
         for (ActivityRedPackRecordDTO redPacetResult : list) {
@@ -226,7 +234,8 @@ public class RedPackService {
      * @param activityRedPack
      * @return
      */
-    public ServerResponse editActivityRedPack(HttpServletRequest request, ActivityRedPack activityRedPack, int[] num, BigDecimal[] money, BigDecimal[] satisfyMoney) {
+    public ServerResponse editActivityRedPack(HttpServletRequest request, ActivityRedPack activityRedPack, int[] num,
+                                              BigDecimal[] money, BigDecimal[] satisfyMoney) {
         activityRedPack.setModifyDate(new Date());
         activityRedPack.setDeleteState(0);
         if (activityRedPack.getNum() != null && activityRedPack.getNum() > 0) {
@@ -282,7 +291,8 @@ public class RedPackService {
      * @param activityRedPack
      * @return
      */
-    public ServerResponse addActivityRedPack(HttpServletRequest request, ActivityRedPack activityRedPack, int[] num, BigDecimal[] money, BigDecimal[] satisfyMoney) {
+    public ServerResponse addActivityRedPack(HttpServletRequest request, ActivityRedPack activityRedPack, int[] num,
+                                             BigDecimal[] money, BigDecimal[] satisfyMoney) {
         activityRedPack.setDeleteState(0);
         if (activityRedPack.getNum() != null && activityRedPack.getNum() > 0) {
             activityRedPack.setSurplusNums(activityRedPack.getNum());

@@ -26,4 +26,17 @@ public class EmployeeDetailsController implements EmployeeDetailsAPI {
     public ServerResponse setMonthlyTarget(HttpServletRequest request, String userId, String time, Integer target) {
         return employeeDetailsService.setMonthlyTarget(userId, time, target);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setSalesRange(HttpServletRequest request, String userId, String buildingId) {
+        return employeeDetailsService.setSalesRange(userId,buildingId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse delMonthlyTarget(HttpServletRequest request, String monthlyTargetId) {
+        return employeeDetailsService.delMonthlyTarget(monthlyTargetId);
+    }
+
 }

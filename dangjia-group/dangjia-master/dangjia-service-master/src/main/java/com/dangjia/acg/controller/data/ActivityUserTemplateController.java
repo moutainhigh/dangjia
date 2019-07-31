@@ -24,13 +24,12 @@ public class ActivityUserTemplateController implements ActivityUserTemplateAPI {
 
     /**
      * 获取所有推送模板
-     * @param activityUserTemplate
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse queryActivityUserTemplate(HttpServletRequest request, PageDTO pageDTO, ActivityUserTemplate activityUserTemplate) {
-        return activityUserTemplateService.queryActivityUserTemplate(request, pageDTO, activityUserTemplate);
+    public ServerResponse queryActivityUserTemplate(HttpServletRequest request, PageDTO pageDTO) {
+        return activityUserTemplateService.queryActivityUserTemplate(pageDTO);
     }
 
 
@@ -57,7 +56,6 @@ public class ActivityUserTemplateController implements ActivityUserTemplateAPI {
     @Override
     @ApiMethod
     public ServerResponse sendActivityPadPack(HttpServletRequest request,String members,String activityId){
-        ServerResponse serverResponse=activityUserTemplateService.sendActivityPadPack(request, members, activityId);
-        return serverResponse;
+        return activityUserTemplateService.sendActivityPadPack(request, members, activityId);
     }
 }

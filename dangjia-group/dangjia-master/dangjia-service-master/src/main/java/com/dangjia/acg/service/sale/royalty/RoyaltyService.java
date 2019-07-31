@@ -92,8 +92,6 @@ public class RoyaltyService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         return ServerResponse.createBySuccess("查询提成列表", djRoyaltyDetailsSurfaces);
-
-
     }
 
 }

@@ -585,7 +585,6 @@ public class HouseService {
                 }
             }
         }
-
         Integer type = iCustomerMapper.queryType(member.getId());
 
         Integer result = clueMapper.queryTClue(member.getMobile());
@@ -594,6 +593,11 @@ public class HouseService {
 
         House house = new House(true);//新增房产信息
 
+        //0:内场录入，1:外场录入
+        if (type == 0) {
+            house.setIsType(0);
+        } else {
+            house.setIsType(1);
         //0:场内录入，1:场外录入
         if(null != type){
             if(type == 0){
@@ -605,6 +609,12 @@ public class HouseService {
             house.setIsType(0);
         }
 
+        if (result == 1) {
+            //一个销售人员下单
+            house.setAbroadStats(0);
+        } else if (result > 1) {
+            //两个销售人员同时下单
+            house.setAbroadStats(1);
         if(null != result){
             if(result == 1){
                 //一个销售人员下单
@@ -616,6 +626,7 @@ public class HouseService {
         }else{
             house.setAbroadStats(0);
         }
+        //TODO 有待抢单时	外场销售/内场销售	:您有一个新的待抢单客户，请及时查看。	去抢单页
 
 
 

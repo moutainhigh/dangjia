@@ -43,4 +43,35 @@ public interface EmployeeDetailsAPI {
                                     @RequestParam("time") String time,
                                     @RequestParam("target") Integer target);
 
+    /**
+     * showdoc
+     *
+     * @param userId 必选 string 员工id
+     * @param buildingId   可选 string 楼栋id字符串
+     * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
+     * @catalog 当家接口文档/销售模块/店长门店管理
+     * @title 制定员工月目标
+     * @description 制定员工月目标
+     * @method POST
+     * @url master/sale/store/monthlyTarget
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 7
+     * @Author: wukang 18075121944
+     * @Date: 2019/7/29 5:21 PM
+     */
+    @PostMapping(value = "sale/store/setSalesRange")
+    @ApiOperation(value = "配置员工销售范围", notes = "配置员工销售范围")
+    ServerResponse setSalesRange(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("userId") String userId,
+                                 @RequestParam("buildingId") String buildingId);
+
+
+
+    @PostMapping(value = "sale/store/delMonthlyTarget")
+    @ApiOperation(value = "删除员工月目标", notes = "删除员工月目标")
+    ServerResponse delMonthlyTarget(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("monthlyTargetId") String monthlyTargetId);
+
+
+
 }

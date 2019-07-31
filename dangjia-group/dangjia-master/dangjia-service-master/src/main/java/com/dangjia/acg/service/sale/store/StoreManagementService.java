@@ -12,7 +12,6 @@ import com.dangjia.acg.mapper.sale.residential.ResidentialBuildingMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.AccessToken;
-import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -24,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -79,6 +77,7 @@ public class StoreManagementService {
         example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
+        PageInfo pageResult = new PageInfo(modelingVillages);
         List<ResidentialRangeDTO> residentialRangeDTOList=new ArrayList<>();
         for (ModelingVillage modelingVillage : modelingVillages) {
             ResidentialRangeDTO residentialRangeDTO=new ResidentialRangeDTO();
@@ -90,7 +89,7 @@ public class StoreManagementService {
             residentialRangeDTO.setList(residentialBuildingMapper.selectByExample(example));
             residentialRangeDTOList.add(residentialRangeDTO);
         }
-        PageInfo pageResult = new PageInfo(residentialRangeDTOList);
+        pageResult.setList(residentialRangeDTOList);
         Map<String,Object> resultMap=new HashedMap();
         resultMap.put("storeUsers",storeUserDTOS);
         resultMap.put("residentialRangeDTOList",pageResult);

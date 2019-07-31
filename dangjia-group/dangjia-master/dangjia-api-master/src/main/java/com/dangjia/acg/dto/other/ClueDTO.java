@@ -19,4 +19,8 @@ public class ClueDTO {
     private String labelId;
     private String labelName;
     private String[][] labelIds;
+    private Integer clueType;
+    private String userName;
+    private String memberId;
+    private Date reportDate;
 }

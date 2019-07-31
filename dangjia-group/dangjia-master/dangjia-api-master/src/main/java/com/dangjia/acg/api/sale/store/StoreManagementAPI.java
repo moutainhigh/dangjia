@@ -49,5 +49,4 @@ public interface StoreManagementAPI {
                                  @RequestParam("residentialBuilding") ResidentialBuilding residentialBuilding);
 
 
-
 }
