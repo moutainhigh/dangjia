@@ -131,12 +131,6 @@ public class MemberService {
                     mobile = supplier.getTelephone();
                 }
                 break;
-            case "4":
-                MainUser mainUser = userMapper.selectByPrimaryKey(id);
-                if (mainUser != null) {
-                    mobile = mainUser.getMobile();
-                }
-                break;
             case "5":
                 HouseDistribution distribution = iHouseDistributionMapper.selectByPrimaryKey(id);
                 if (distribution != null) {
@@ -145,7 +139,14 @@ public class MemberService {
                 break;
             default:
                 Member member = memberMapper.selectByPrimaryKey(id);
-                mobile = member == null ? "" : member.getMobile();
+                if (member != null) {
+                    mobile = member.getMobile();
+                } else {
+                    MainUser mainUser = userMapper.selectByPrimaryKey(id);
+                    if (mainUser != null) {
+                        mobile = mainUser.getMobile();
+                    }
+                }
                 break;
         }
         if (CommonUtil.isEmpty(mobile)) {
