@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.sale.store;
 
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -9,10 +10,13 @@ import com.dangjia.acg.dto.sale.residential.ResidentialRangeDTO;
 import com.dangjia.acg.dto.sale.store.StoreUserDTO;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.sale.residential.ResidentialBuildingMapper;
+import com.dangjia.acg.mapper.sale.residential.ResidentialRangeMapper;
+import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
+import com.dangjia.acg.modle.sale.residential.ResidentialRange;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.sale.SaleService;
@@ -46,6 +50,10 @@ public class StoreManagementService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private IStoreMapper iStoreMapper;
+    @Autowired
+    private ResidentialRangeMapper residentialRangeMapper;
 
     /**
      * 门店管理页
@@ -162,5 +170,41 @@ public class StoreManagementService {
             return ServerResponse.createBySuccessMessage("修改成功");
         }
         return ServerResponse.createByErrorMessage("修改失败");
+    }
+
+
+
+    public ServerResponse BuildingList(String storeId,PageDTO pageDTO){
+        Store store = iStoreMapper.selectByPrimaryKey(storeId);
+        Example example = new Example(ModelingVillage.class);
+        example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
+        List<ResidentialRange> residentialRanges = residentialRangeMapper.selectAll();
+        List<String> slist=new ArrayList<>();
+        for (ResidentialRange residentialRange : residentialRanges) {
+           slist.addAll(Arrays.asList(residentialRange.getBuildingId().split(",")));
+        }
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
+        List<ResidentialRangeDTO> residentialRangeDTOList=new ArrayList<>();
+        PageInfo pageResult = new PageInfo(modelingVillages);
+        for (ModelingVillage modelingVillage : modelingVillages) {
+            example = new Example(ResidentialBuilding.class);
+            example.createCriteria().andEqualTo(ResidentialBuilding.STORE_ID,store.getId())
+                    .andEqualTo(ResidentialBuilding.VILLAGE_ID,modelingVillage.getId())
+                    .andNotIn(ResidentialBuilding.ID,slist);
+            List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
+            if(residentialBuildings.size()>0){
+                ResidentialRangeDTO residentialRangeDTO=new ResidentialRangeDTO();
+                residentialRangeDTO.setVillageId(modelingVillage.getId());
+                residentialRangeDTO.setVillagename(modelingVillage.getName());
+                residentialRangeDTO.setList(residentialBuildings);
+                residentialRangeDTOList.add(residentialRangeDTO);
+            }
+        }
+        pageResult.setList(residentialRangeDTOList);
+        if(residentialRangeDTOList.size()>0) {
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        }
+        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
     }
 }

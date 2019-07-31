@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.sale.client;
 
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -37,6 +38,7 @@ import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
 import com.dangjia.acg.modle.sale.store.MonthlyTarget;
 import com.dangjia.acg.modle.store.Store;
+import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.sale.SaleService;
@@ -116,29 +118,35 @@ public class ClientService {
         }
         //如果客户已录入过则把录入的房子变为意向房子
         Clue clue1 = clueMapper.getClue(clue.getPhone(), user.getId());
-        if(null == clue1.getAddress()){
-            clue1.setAddress("");
-        }
-        if (clue1.getAddress().contains(clue.getAddress())) {
-            clue1.setAddress(clue1.getAddress() + "," + clue.getAddress());
-            clueMapper.updateByPrimaryKeySelective(clue1);
-            return ServerResponse.createBySuccessMessage("提交成功,已存在该线索录入为意向房子");
+        if(null!=clue1) {
+            if (null == clue1.getAddress()) {
+                clue1.setAddress("");
+            }
+            if (!clue1.getAddress().contains(clue.getAddress())) {
+                clue1.setAddress(clue1.getAddress() + "," + clue.getAddress());
+                clueMapper.updateByPrimaryKeySelective(clue1);
+                return ServerResponse.createBySuccessMessage("提交成功,已存在该线索录入为意向房子");
+            }
+            return ServerResponse.createByErrorMessage("该线索已存在");
         }
         Example example = new Example(Member.class);
         example.createCriteria().andEqualTo(Member.MOBILE, clue.getPhone());
         List<Member> members = iMemberMapper.selectByExample(example);
-        object = saleService.getStore(accessToken.getUserId());
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
+        example = new Example(StoreUser.class);
+        example.createCriteria().andEqualTo(StoreUser.USER_ID, accessToken.getUserId())
+                .andEqualTo(Store.DATA_STATUS, 0);
+        List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
+        if (storeUsers.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        Store store = (Store) object;
+        StoreUser storeUser = storeUsers.get(0);
         if (members.size() > 0) {
-            judgeRegister(clue,members.get(0).getId(),user.getId(),store.getId());
+            judgeRegister(clue,members.get(0).getId(),user.getId(),storeUser.getStoreId());
             return ServerResponse.createBySuccessMessage("提交成功");
         } else {
             clue.setStage(0);
             clue.setDataStatus(0);
-            clue.setStoreId(store.getId());
+            clue.setStoreId(storeUser.getStoreId());
             clue.setCusService(user.getId());
             clue.setClueType(0);
             if (clueMapper.insert(clue) > 0) {
@@ -177,12 +185,13 @@ public class ClientService {
         for (Store store : stores) {
             //如果转出的该客户为自己门店范围内未录入的（野生），则记录进店长的线索阶段（给店长系统推送），然后仅分配给内场
             if (GaoDeUtils.isInPolygon(modelingVillage.getLocationx() + "," + modelingVillage.getLocationy(), store.getScopeItude())) {
+//                example=new Example(ResidentialBuilding)
                 clue.setCusService(store.getUserId());
                 clue.setStoreId(store.getId());
                 clue.setClueType(1);
                 clueMapper.insert(clue);
                 b=false;
-                break;
+                return ServerResponse.createBySuccessMessage("提交成功");
             }
         }
         if(b){
@@ -192,9 +201,10 @@ public class ClientService {
             }else{
                 clue.setClueType(1);
                 clueMapper.insert(clue);
+                return ServerResponse.createBySuccessMessage("提交成功");
             }
         }
-        return null;
+        return ServerResponse.createByErrorMessage("提交失败");
     }
 
     /**
@@ -339,6 +349,7 @@ public class ClientService {
                     return (ServerResponse) object;
                 }
                 Store store = (Store) object;
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 clueDTOS=clueMapper.followList(label, time, stage, searchKey, null, store.getId());
             }
             List<SaleClueDTO> list = new ArrayList<>();

@@ -10,5 +10,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         FROM dj_other_city
         ORDER BY initials
     </select>
+
+    <select id="queryCityName" resultType="java.lang.String" parameterType="java.util.Map">
+        SELECT name
+        FROM dj_other_city where id={id}
+    </select>
 </mapper>
 

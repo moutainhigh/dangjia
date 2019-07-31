@@ -1,6 +1,7 @@
 package com.dangjia.acg.dto.sale.achievement;
 
 import com.dangjia.acg.common.annotation.Desc;
+import com.dangjia.acg.common.util.CommonUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -61,10 +62,10 @@ public class UserAchievementInfoDTO implements Serializable {
     private Integer arrRoyalty;
 
     public String getHouseName() {
-        return (TextUtils.isEmpty(getResidential()) ? "*" : getResidential())
-                + (TextUtils.isEmpty(getBuilding()) ? "*" : getBuilding()) + "栋"
-                + (TextUtils.isEmpty(getUnit()) ? "*" : getUnit()) + "单元"
-                + (TextUtils.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
+        return (CommonUtil.isEmpty(getResidential()) ? "*" : getResidential())
+                + (CommonUtil.isEmpty(getBuilding()) ? "*" : getBuilding()) + "栋"
+                + (CommonUtil.isEmpty(getUnit()) ? "*" : getUnit()) + "单元"
+                + (CommonUtil.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
     }
 
     public String getVisitStateName() {

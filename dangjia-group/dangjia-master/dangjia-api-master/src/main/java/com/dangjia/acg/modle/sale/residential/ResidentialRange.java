@@ -23,10 +23,6 @@ import javax.persistence.Table;
 @ApiModel(description = "外场销售小区范围")
 @FieldNameConstants(prefix = "")
 public class ResidentialRange extends BaseEntity {
-    @Column(name = "village_id")
-    @Desc(value = "小区id")
-    @ApiModelProperty("小区id")
-    private String villageId;
 
     @Column(name = "building_id")
     @Desc(value = "楼栋id字符串")

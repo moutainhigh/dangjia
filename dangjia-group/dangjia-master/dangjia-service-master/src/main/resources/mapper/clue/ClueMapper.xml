@@ -15,7 +15,8 @@
       remark,
       report_date as reportDate,
       member_id as memberId,
-      store_id as storeId
+      store_id as storeId,
+      clue_type as clueType
     </sql>
     <select id="getByStage"  parameterType="int" resultType="com.dangjia.acg.modle.clue.Clue">
         SELECT
@@ -76,7 +77,9 @@
             if(m.name is not null,m.nick_name,m.name) as owername,
             m.mobile as phone,
             m.modify_date as modifyDate,
+            m.create_date as create_date,
             mc.label_id_arr as labelId,
+            mcr.create_date as CommunicationDate,
             u.username as userName
             from dj_member_customer mc
             INNER JOIN dj_member m
@@ -97,26 +100,31 @@
             <if test="null!=searchKey and ''!=searchKey">
                 and CONCAT(m.nick_name,m.name,m.mobile) like CONCAT('%',#{searchKey},'%')
             </if>
+            ORDER BY mc.create_date
+            <if test="null!=time and ''!=time">
+                desc
+            </if>
         </if>
         <if test="stage==''">
            select
-            id,owername,phone,wechat,address,stage,
-            building,number,
-            label_id as labelId,
-            cus_service as cusService,
-            create_date as createDate,
-            modify_date as modifyDate,
-            data_status as dataStatus,
-            remark,
-            report_date as reportDate,
-            member_id as memberId,
-            store_id as storeId,
-            u.username as userName
+            c.id,c.owername,c.phone,c.wechat,c.address,c.stage,
+            c.building,c.number,
+            c.label_id as labelId,
+            c.cus_service as cusService,
+            c.create_date as createDate,
+            c.modify_date as modifyDate,
+            c.data_status as dataStatus,
+            c.remark,
+            c.report_date as reportDate,
+            c.member_id as memberId,
+            c.store_id as storeId,
+            u.username as userName,
+            c.clue_type as clueType
            from dj_clue c
            INNER JOIN dj_user u
            on c.cus_service=u.id
            WHERE
-           data_status=0
+           c.data_status=0
            <if test="null!=label and ''!=label">
                and label_id like CONCAT('%',#{label},'%')
            </if>
@@ -130,7 +138,7 @@
             <if test="null!=storeId and ''!=storeId">
                 and store_id=#{storeId}
             </if>
-           ORDER BY create_date
+           ORDER BY c.create_date
            <if test="null!=time and ''!=time">
                desc
            </if>
@@ -264,18 +272,18 @@
 
 
     <select id="sleepingCustomer" resultType="com.dangjia.acg.dto.sale.client.CustomerIndexDTO">
-        select name,phone,modifyDate,createDate,labelIdArr,username from (
+        select name,phone,modifyDate,createDate,labelIdArr,userName from (
             SELECT
             c.owername as name,
             c.phone,
             c.modify_date AS modifyDate,
             c.create_date AS createDate,
             c.label_id AS labelIdArr,
-            u.username as username
+            u.username as userName
             FROM dj_clue c
             inner join dj_user u
             on c.cus_service=u.id
-            WHERE (c.member_id IS NULL or c.member_id="")
+            WHERE (c.member_id IS NULL or c.member_id='')
             and c.stage=2
             and c.store_id=#{storeId}
             and c.data_status=0
@@ -291,9 +299,8 @@
             m.mobile AS phone,
             mc.modify_date AS modifyDate,
             mc.create_date AS createDate,
-            mc.label_id_arr AS
-            labelIdArr,
-            u.username as username
+            mc.label_id_arr AS labelIdArr,
+            u.username as userName
             FROM dj_member m
             INNER JOIN dj_member_customer mc
             ON m.id=mc.member_id
@@ -320,6 +327,56 @@
        select count(0) from dj_clue c where phone = #{mobile} GROUP BY c.cus_service
     </select>
 
+    <select id="queryRobSingledata" resultType="com.dangjia.acg.dto.sale.rob.RobDTO" parameterType="java.util.Map">
+       select c.owername as owerName,
+        c.phone as phone,
+        h.id as id,
+        h.member_id as memberId,
+        h.city_id as cityId,
+        h.village_id as villageId,
+        h.visit_state as visitState,
+        h.create_date as createDate,
+        mc.label_id_arr as labelIdArr
+        from dj_house h INNER JOIN dj_member_customer mc on h.member_id = mc.member_id
+        INNER JOIN dj_clue c on h.member_id = c.member_id
+        where h.visit_state = 0 and h.is_rob_stats = 0
+        <if test="null != userId">
+            and mc.user_id = #{userId}
+        </if>
+        <if test="null != storeId">
+            and mc.store_id = #{storeId}
+        </if>
+        <if test="null != type">
+            and h.is_type = #{type}
+        </if>
+    </select>
+
+
+    <select id="queryCustomerInfo" resultType="com.dangjia.acg.dto.sale.rob.RobInfoDTO" parameterType="java.util.Map">
+        select
+        h.id as houseId,
+        h.member_id as memberId,
+        h.city_id as cityId,
+        h.village_id as villageId,
+        h.visit_state as visitState,
+        h.create_date as createDate,
+        c.owername as owerName,
+        c.phone as phone,
+        c.wechat as wechat,
+        c.remark as remark,
+        c.id as id,
+        c.address as address,
+        c.building as building,
+        c.number as number
+        from dj_house h INNER JOIN dj_clue c on h.member_id = c.member_id
+        <where>
+            1=1
+            <if test="null != houseId">
+               and  h.id = #{houseId}
+            </if>
+        </where>
+
+    </select>
 
 </mapper>
 

@@ -49,4 +49,11 @@ public interface StoreManagementAPI {
                                  @RequestParam("residentialBuilding") ResidentialBuilding residentialBuilding);
 
 
+    @PostMapping(value = "sale/store/BuildingList")
+    @ApiOperation(value = "小区楼栋列表", notes = "小区楼栋列表")
+    ServerResponse BuildingList(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("storeId") String storeId,
+                                @RequestParam("pageDTO") PageDTO pageDTO);
+
+
 }
