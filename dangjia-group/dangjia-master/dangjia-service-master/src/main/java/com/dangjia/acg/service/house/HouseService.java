@@ -585,7 +585,6 @@ public class HouseService {
                 }
             }
         }
-
         Integer type = iCustomerMapper.queryType(member.getId());
 
         Integer result = clueMapper.queryTClue(member.getMobile());
@@ -608,6 +607,7 @@ public class HouseService {
             //两个销售人员同时下单
             house.setAbroadStats(1);
         }
+        //TODO 有待抢单时	外场销售/内场销售	:您有一个新的待抢单客户，请及时查看。	去抢单页
         house.setIsRobStats(0);
         house.setMemberId(member.getId());//用户id
         house.setCityName(city.getName());//城市名

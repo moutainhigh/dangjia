@@ -87,9 +87,11 @@ public class StoreServices {
             }
             if (!CommonUtil.isEmpty(store.getDepartmentId())) {
                 Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
-                store.setCityName(department.getCityName());
-                store.setCityId(department.getCityId());
-                store.setDepartmentName(department.getName());
+                if (department != null) {
+                    store.setCityName(department.getCityName());
+                    store.setCityId(department.getCityId());
+                    store.setDepartmentName(department.getName());
+                }
             }
             getStoreVillages(store);
             iStoreMapper.insert(store);
@@ -149,9 +151,11 @@ public class StoreServices {
             }
             if (!CommonUtil.isEmpty(store.getDepartmentId())) {
                 Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
-                store.setCityName(department.getCityName());
-                store.setCityId(department.getCityId());
-                store.setDepartmentName(department.getName());
+                if (department != null) {
+                    store.setCityName(department.getCityName());
+                    store.setCityId(department.getCityId());
+                    store.setDepartmentName(department.getName());
+                }
             }
             getStoreVillages(store);
             store.setCreateDate(null);
