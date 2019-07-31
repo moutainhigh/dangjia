@@ -3,14 +3,13 @@ package com.dangjia.acg.dto.member;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.util.Date;
 
 /**
  * 沟通记录
  */
 @Data
-public class CustomerRecordInFoDTO implements Serializable {
+public class CustomerRecordInFoDTO {
 
     @ApiModelProperty("业主id")
     private String memberId;
