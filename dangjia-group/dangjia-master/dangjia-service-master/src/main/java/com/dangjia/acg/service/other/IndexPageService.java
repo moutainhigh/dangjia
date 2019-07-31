@@ -92,7 +92,9 @@ public class IndexPageService {
                     totalPrice = totalPrice.add(order.getTotalAmount());
                 }
                 BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getId());
-                totalPrice = totalPrice.add(totalAmount);
+                if(totalAmount!=null) {
+                    totalPrice = totalPrice.add(totalAmount);
+                }
                 house.setMoney(totalPrice);
                 Map map = BeanUtils.beanToMap(house);
                 map.put("houseName", house.getHouseName());
