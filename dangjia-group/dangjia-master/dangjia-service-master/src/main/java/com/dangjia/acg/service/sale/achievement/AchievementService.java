@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.sale.achievement;
 
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
@@ -11,7 +12,10 @@ import com.dangjia.acg.mapper.sale.achievement.AchievementMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -149,7 +153,10 @@ public class AchievementService {
         achievementDataDTO.setAchievementDataDTOS(queryUserId);
         achievementDataDTO.setDealNumber(result);
 
-        return ServerResponse.createBySuccess("查询成功",achievementDataDTO);
+        if (achievementDataDTO == null) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询提成列表", achievementDataDTO);
     }
 
 
@@ -207,7 +214,10 @@ public class AchievementService {
         userAchievementDataDTO.setUserAchievementInfoDTOS(list);
         userAchievementDataDTO.setArrMonthRoyalty(taskOrderNum);
         userAchievementDataDTO.setDealNumber(list.size());
-        return ServerResponse.createBySuccess("查询成功",userAchievementDataDTO);
+        if (userAchievementDataDTO == null) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询提成列表", userAchievementDataDTO);
     }
 
 

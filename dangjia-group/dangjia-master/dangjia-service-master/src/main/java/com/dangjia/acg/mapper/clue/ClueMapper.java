@@ -3,6 +3,8 @@ package com.dangjia.acg.mapper.clue;
 
 import com.dangjia.acg.dto.sale.client.CustomerIndexDTO;
 import com.dangjia.acg.dto.sale.client.OrdersCustomerDTO;
+import com.dangjia.acg.dto.sale.rob.RobDTO;
+import com.dangjia.acg.dto.sale.rob.RobInfoDTO;
 import com.dangjia.acg.dto.sale.store.StoreUserDTO;
 import com.dangjia.acg.modle.clue.Clue;
 import org.apache.ibatis.annotations.Param;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Repository
@@ -52,5 +55,12 @@ public interface ClueMapper extends Mapper<Clue> {
      * @return
      */
     Integer queryTClue(@Param("mobile") String mobile);
+
+
+    List<RobDTO> queryRobSingledata(Map<String,Object> map);
+
+
+    RobInfoDTO queryCustomerInfo(Map<String,Object> map);
+
 
 }

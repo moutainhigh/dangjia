@@ -89,5 +89,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where mc.member_id = #{memberId})
     </select>
 
+    <select id="queryTypeId" resultType="java.lang.Integer" parameterType="java.lang.String">
+        select type from dj_store_users where user_id = #{userId}
+    </select>
+
 </mapper>
 

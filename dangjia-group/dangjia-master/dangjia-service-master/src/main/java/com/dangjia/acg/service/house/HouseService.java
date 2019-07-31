@@ -595,19 +595,30 @@ public class HouseService {
         House house = new House(true);//新增房产信息
 
         //0:场内录入，1:场外录入
-        if(type == 0){
-            house.setIsType(0);
+        if(null != type){
+            if(type == 0){
+                house.setIsType(0);
+            }else{
+                house.setIsType(1);
+            }
         }else{
-            house.setIsType(1);
+            house.setIsType(0);
         }
 
-        if(result == 1){
-            //一个销售人员下单
+        if(null != result){
+            if(result == 1){
+                //一个销售人员下单
+                house.setAbroadStats(0);
+            }else if(result > 1){
+                //两个销售人员同时下单
+                house.setAbroadStats(1);
+            }
+        }else{
             house.setAbroadStats(0);
-        }else if(result > 1){
-            //两个销售人员同时下单
-            house.setAbroadStats(1);
         }
+
+
+
         house.setIsRobStats(0);
         house.setMemberId(member.getId());//用户id
         house.setCityName(city.getName());//城市名

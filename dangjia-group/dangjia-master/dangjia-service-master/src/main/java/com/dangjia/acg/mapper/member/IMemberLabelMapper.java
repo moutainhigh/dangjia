@@ -49,5 +49,8 @@ public interface IMemberLabelMapper extends Mapper<MemberLabel> {
      * @return
      */
     List<SaleMemberLabelDTO> getLabelByIds(@Param("labelIds") String[] labelIds );
+
+
+
 }
 

@@ -17,4 +17,11 @@ public interface ICityMapper extends Mapper<City> {
 
     //所有城市
     List<Map<String,Object>> getAllCity();
+
+    /**
+     * 根据城市id查询名称
+     * @param map
+     * @return
+     */
+    String queryCityName(Map<String,Object> map);
 }

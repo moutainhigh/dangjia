@@ -291,6 +291,53 @@
        select count(0) from dj_clue c where phone = #{mobile} GROUP BY c.cus_service
     </select>
 
+    <select id="queryRobSingledata" resultType="com.dangjia.acg.dto.sale.rob.RobDTO" parameterType="java.util.Map">
+       select c.owername as owerName,
+        c.phone as phone,
+        h.id as id,
+        h.member_id as memberId,
+        h.city_id as cityId,
+        h.village_id as villageId,
+        h.visit_state as visitState,
+        h.create_date as createDate,
+        mc.label_id_arr as labelIdArr
+        from dj_house h INNER JOIN dj_member_customer mc on h.member_id = mc.member_id
+        INNER JOIN dj_clue c on h.member_id = c.member_id
+        where h.visit_state = 0 and h.is_rob_stats = 0
+        <if test="null != userId">
+            and mc.user_id = #{userId}
+        </if>
+        <if test="null != storeId">
+            and mc.store_id = #{storeId}
+        </if>
+        <if test="null != type">
+            and h.is_type = #{type}
+        </if>
+    </select>
+
+
+    <select id="queryCustomerInfo" resultType="com.dangjia.acg.dto.sale.rob.RobInfoDTO" parameterType="java.util.Map">
+        select
+        h.id as id,
+        h.member_id as memberId,
+        h.city_id as cityId,
+        h.village_id as villageId,
+        h.visit_state as visitState,
+        h.create_date as createDate,
+        c.owername as owerName,
+        c.phone as phone,
+        c.wechat as wechat,
+        c.remark as remark
+        from dj_house h INNER JOIN dj_clue c on h.member_id = c.member_id
+        <where>
+            1=1
+            <if test="null != houseId">
+               and  h.id = #{houseId}
+            </if>
+        </where>
+
+    </select>
+
 
 </mapper>
 

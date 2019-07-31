@@ -38,5 +38,7 @@ public interface ICustomerMapper extends Mapper<Customer> {
 
     Integer queryType(@Param("storeId") String memberId);
 
+
+    Integer queryTypeId(@Param("userId") String userId);
 }
 
