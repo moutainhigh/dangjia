@@ -164,7 +164,7 @@ public class StoreUserServices {
         storeUserDTO.setUserId(storeUser.getUserId());//成员用户ID
         storeUserDTO.setStoreId(storeUser.getStoreId());//门店ID
         storeUserDTO.setType(storeUser.getType());//类别：0:内场销售，1:外场销售
-        MainUser mainUser = userMapper.selectByPrimaryKey(store.getUserId());
+        MainUser mainUser = userMapper.selectByPrimaryKey(userId);
         if (mainUser == null) {
             return ServerResponse.createByErrorMessage("目标用户不存在");
         }

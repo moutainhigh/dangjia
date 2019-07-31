@@ -1,18 +1,29 @@
 package com.dangjia.acg.dto.sale.rob;
 
-import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.dto.member.CustomerRecordInFoDTO;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 /**
  *抢单详情 返回参数
  */
 @Data
-public class RobInfoDTO extends BaseEntity {
+public class RobInfoDTO {
+
+    private String id;
+
+    @ApiModelProperty("创建时间")
+    private Date createDate;// 创建日期
+
+    @ApiModelProperty("修改时间")
+    private Date modifyDate;// 修改日期
+
+    @ApiModelProperty("数据状态 0=正常，1=删除")
+    private Integer dataStatus;
 
     @ApiModelProperty("线索id")
     private String clueId;
