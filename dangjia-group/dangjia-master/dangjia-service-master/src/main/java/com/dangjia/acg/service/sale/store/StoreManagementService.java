@@ -82,7 +82,9 @@ public class StoreManagementService {
             storeUserDTO.setUserHead(CommonUtil.isEmpty(imageUrl) ? null : (imageAddress + imageUrl));
         }
         Example example = new Example(ModelingVillage.class);
-        example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
+        if(!CommonUtil.isEmpty(store.getVillages())) {
+            example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
+        }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
         PageInfo pageResult = new PageInfo(modelingVillages);
@@ -181,7 +183,9 @@ public class StoreManagementService {
         List<ResidentialRange> residentialRanges = residentialRangeMapper.selectAll();
         List<String> slist=new ArrayList<>();
         for (ResidentialRange residentialRange : residentialRanges) {
-           slist.addAll(Arrays.asList(residentialRange.getBuildingId().split(",")));
+            if(!CommonUtil.isEmpty(residentialRange.getBuildingId())) {
+                slist.addAll(Arrays.asList(residentialRange.getBuildingId().split(",")));
+            }
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
