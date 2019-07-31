@@ -365,7 +365,9 @@ public class IndexPageService {
             }
 
             BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getId());
-            totalPrice = totalPrice.add(totalAmount);
+            if(totalAmount!=null) {
+                totalPrice = totalPrice.add(totalAmount);
+            }
             house = this.getHouseImage(address,house);
             house.setMoney(totalPrice);
         }
