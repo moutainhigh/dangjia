@@ -10,8 +10,7 @@ import java.util.Date;
  * 沟通记录
  */
 @Data
-public aspect CustomerRecordInFoDTO implements Serializable {
-
+public class CustomerRecordInFoDTO implements Serializable {
 
     @ApiModelProperty("业主id")
     private String memberId;
