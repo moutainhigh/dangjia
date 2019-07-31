@@ -1,6 +1,7 @@
 package com.dangjia.acg.dto.sale.rob;
 
 import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.dto.member.CustomerRecordInFoDTO;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -12,6 +13,12 @@ import java.util.List;
  */
 @Data
 public class RobInfoDTO extends BaseEntity {
+
+    @ApiModelProperty("线索id")
+    private String clueId;
+
+    @ApiModelProperty("房子id")
+    private String houseId;
 
     @ApiModelProperty("业主名称")
     private String owerName;
@@ -34,7 +41,13 @@ public class RobInfoDTO extends BaseEntity {
     @ApiModelProperty("有无图纸0：无图纸；1：有图纸")
     private Integer drawings;
 
-    @ApiModelProperty("小区名称")
+    @ApiModelProperty("楼栋号")
+    private String building;
+
+    @ApiModelProperty("房号")
+    private String number;
+
+    @ApiModelProperty("装修小区名称")
     private String villageName;
 
     @ApiModelProperty("小区id")
@@ -48,4 +61,7 @@ public class RobInfoDTO extends BaseEntity {
 
     @ApiModelProperty("标签名称")
     private List<SaleMemberLabelDTO> list;
+
+    @ApiModelProperty("沟通记录")
+    private List<CustomerRecordInFoDTO> data;
 }

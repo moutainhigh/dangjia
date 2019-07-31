@@ -68,5 +68,17 @@
     </select>
 
 
+    <select id="queryDescribes" resultType="com.dangjia.acg.dto.member.CustomerRecordInFoDTO">
+        select m.head as head,
+        mcr.remind_time as remindTime,
+        mcr.describes as describes,
+        mcr.create_date as createDate
+        from dj_member_customer_record mcr INNER JOIN dj_member m
+        on m.id = mcr.member_id
+        where  mcr.member_id = #{memberId}
+    </select>
+
+
+
 </mapper>
 

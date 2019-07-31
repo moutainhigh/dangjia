@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.member;
 
+import com.dangjia.acg.dto.member.CustomerRecordInFoDTO;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
 import com.dangjia.acg.modle.member.MemberLabel;
 import org.apache.ibatis.annotations.Param;
@@ -51,6 +52,11 @@ public interface IMemberLabelMapper extends Mapper<MemberLabel> {
     List<SaleMemberLabelDTO> getLabelByIds(@Param("labelIds") String[] labelIds );
 
 
-
+    /**
+     * 根据id查询标签
+     * @param memberId
+     * @return
+     */
+    List<CustomerRecordInFoDTO> queryDescribes(@Param("memberId") String memberId);
 }
 

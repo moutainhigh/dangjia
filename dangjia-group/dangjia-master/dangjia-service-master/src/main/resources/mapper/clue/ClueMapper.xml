@@ -354,7 +354,7 @@
 
     <select id="queryCustomerInfo" resultType="com.dangjia.acg.dto.sale.rob.RobInfoDTO" parameterType="java.util.Map">
         select
-        h.id as id,
+        h.id as houseId,
         h.member_id as memberId,
         h.city_id as cityId,
         h.village_id as villageId,
@@ -363,7 +363,11 @@
         c.owername as owerName,
         c.phone as phone,
         c.wechat as wechat,
-        c.remark as remark
+        c.remark as remark,
+        c.id as id,
+        c.address as address,
+        c.building as building,
+        c.number as number
         from dj_house h INNER JOIN dj_clue c on h.member_id = c.member_id
         <where>
             1=1
@@ -373,7 +377,6 @@
         </where>
 
     </select>
-
 
 </mapper>
 

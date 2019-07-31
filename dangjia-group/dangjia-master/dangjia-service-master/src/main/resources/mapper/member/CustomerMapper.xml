@@ -89,9 +89,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where mc.member_id = #{memberId})
     </select>
 
+    <select id="queryLabelIdArr" resultType="java.lang.String" parameterType="java.lang.String">
+        select label_id_arr as labelIdArr from dj_member_customer mc where mc.member_id = #{memberId}
+    </select>
+
     <select id="queryTypeId" resultType="java.lang.Integer" parameterType="java.lang.String">
         select type from dj_store_users where user_id = #{userId}
     </select>
+
+
+    <update id="upDateLabelIdArr" parameterType="java.util.Map">
+        update dj_member_customer
+        set label_id_arr = {labelIdArr}
+        where member_id = #{memberId}
+    </update>
+
 
 </mapper>
 

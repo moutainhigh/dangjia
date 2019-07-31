@@ -3,6 +3,8 @@ package com.dangjia.acg.controller.sale.rob;
 import com.dangjia.acg.api.sale.rob.RobAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.clue.Clue;
+import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.service.sale.rob.RobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,15 +42,46 @@ public class RobController implements RobAPI {
      * @param houseId
      * @return
      */
-//    @Override
+    @Override
     @ApiMethod
-    public ServerResponse queryCustomerInfo(HttpServletRequest request, String houseId,String labelIdArr) {
-        return robService.queryCustomerInfo(houseId,labelIdArr);
+    public ServerResponse queryCustomerInfo(HttpServletRequest request, String houseId,String labelIdArr,String memberId) {
+        return robService.queryCustomerInfo(houseId,labelIdArr,memberId);
     }
 
 
+    /**
+     * 新增标签
+     * @param memberId
+     * @param labelId
+     * @return
+     */
+    @Override
+    @ApiMethod
     public ServerResponse addLabel(HttpServletRequest request,String memberId,String labelId) {
         return robService.addLabel(memberId,labelId);
     }
+
+    /**
+     * 新增沟通记录
+     * @param customerRecord
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse addDescribes(HttpServletRequest request, CustomerRecord customerRecord) {
+        return robService.addDescribes(customerRecord);
+    }
+
+    /**
+     * 修改客户信息
+     * @param clue
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse upDateCustomerInfo(HttpServletRequest request, Clue clue) {
+        return robService.upDateCustomerInfo(clue);
+    }
+
 
 }

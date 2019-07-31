@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 客服表dao层
@@ -37,6 +38,10 @@ public interface ICustomerMapper extends Mapper<Customer> {
 
 
     Integer queryType(@Param("memberId") String memberId);
+
+    String queryLabelIdArr(@Param("memberId") String memberId);
+
+    void upDateLabelIdArr(Map<String,Object> map);
 
 
     Integer queryTypeId(@Param("userId") String userId);
