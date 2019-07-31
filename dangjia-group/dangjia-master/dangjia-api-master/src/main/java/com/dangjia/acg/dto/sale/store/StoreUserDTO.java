@@ -19,7 +19,7 @@ public class StoreUserDTO {
     private String storeUserId;//门店成员ID
     private String userId;//成员用户ID
     private String storeId;//门店ID
-    private Integer type;//类别：0:场内销售，1:场外销售
+    private Integer type;//类别：0:内场销售，1:外场销售
     private String userName;//用户名
     private String userMobile;//手机
     private String userHead;//头像
