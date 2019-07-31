@@ -81,5 +81,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and store_id=#{storeId}
         order By h.create_date
     </select>
+
+
+    <select id="queryType" resultType="java.lang.Integer" parameterType="java.lang.String">
+        select type from dj_store_users where user_id in
+        (select user_id from dj_member_customer mc
+        where mc.member_id = #{memberId})
+    </select>
+
 </mapper>
 

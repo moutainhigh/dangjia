@@ -19,11 +19,10 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowDTO;
-import com.dangjia.acg.dto.core.HouseResult;
-import com.dangjia.acg.dto.core.NodeDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
+import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
@@ -41,7 +40,6 @@ import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.matter.RenovationManualMember;
-import com.dangjia.acg.modle.matter.RenovationStage;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
@@ -54,7 +52,6 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.design.DesignDataService;
-import com.dangjia.acg.util.HouseUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -143,6 +140,10 @@ public class HouseService {
     private IWorkDepositMapper workDepositMapper;
     @Autowired
     private MyHouseService myHouseService;
+    @Autowired
+    private ClueMapper clueMapper;
+
+
     protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
 
     /**
@@ -168,33 +169,6 @@ public class HouseService {
             iHouseMapper.updateByPrimaryKeySelective(house);
         }
         return ServerResponse.createBySuccessMessage("操作成功");
-    }
-
-    /**
-     * 房产列表
-     * TODO 1.4.0后删除此接口
-     */
-    public ServerResponse getHouseList(String userToken, String cityId) {
-        Object object = constructionService.getMember(userToken);
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
-        }
-        Member member = (Member) object;
-        Example example = new Example(House.class);
-        example.createCriteria()
-                .andEqualTo(House.MEMBER_ID, member.getId())
-                .andNotEqualTo(House.VISIT_STATE, 0).andNotEqualTo(House.VISIT_STATE, 2)
-                .andEqualTo(House.DATA_STATUS, 0);
-        List<House> houseList = iHouseMapper.selectByExample(example);
-        List<Map<String, String>> mapList = new ArrayList<>();
-        for (House house : houseList) {
-            Map<String, String> map = new HashMap<>();
-            map.put("houseId", house.getId());
-            map.put("houseName", house.getHouseName());
-            map.put("task", this.getTask(house.getId()) + "");
-            mapList.add(map);
-        }
-        return ServerResponse.createBySuccess("查询成功", mapList);
     }
 
     /**
@@ -311,183 +285,6 @@ public class HouseService {
         return ServerResponse.createBySuccess("查询成功", mapList);
     }
 
-    /**
-     * APP我的房产
-     * TODO 1.4.0后删除此接口
-     */
-    public ServerResponse getMyHouse(String userToken, String cityId) {
-        Object object = constructionService.getMember(userToken);
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
-        }
-        Member member = (Member) object;
-        //该城市该用户所有开工房产
-        Example example = new Example(House.class);
-        example.createCriteria()
-                .andEqualTo(House.MEMBER_ID, member.getId())
-                .andNotEqualTo(House.VISIT_STATE, 0)
-                .andNotEqualTo(House.VISIT_STATE, 2)
-                .andEqualTo(House.DATA_STATUS, 0);
-        List<House> houseList = iHouseMapper.selectByExample(example);
-        House house = null;
-        if (houseList.size() > 0) {
-            for (House house1 : houseList) {
-                if (house1.getIsSelect() == 1) {//当前选中
-                    house = house1;
-                    break;
-                }
-            }
-            if (house == null) {//有很多房子但是没有isSelect为1的
-                house = houseList.get(0);
-            }
-        } else {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无房产");
-        }
-        //统计几套房
-        int again = houseList.size();
-        HouseResult houseResult = new HouseResult();
-        houseResult.setHouseName(house.getHouseName());
-        houseResult.setAgain(again);
-        houseResult.setHouseId(house.getId());
-        /*其它房产待处理任务列表状态*/
-        int task = 0;
-        for (House elseHouse : houseList) {
-            if (!elseHouse.getId().equals(house.getId())) {
-                task += this.getTask(elseHouse.getId());
-            }
-        }
-        houseResult.setTask(task);
-        houseResult.setState("00000");
-        houseResult.setHouseName(house.getHouseName());
-        switch (house.getVisitState()) {
-            case 0:
-                houseResult.setBuildStage("待确认开工");
-                break;
-            case 1:
-                houseResult.setBuildStage("装修中");
-                break;
-            case 2:
-                houseResult.setBuildStage("休眠中");
-                break;
-            case 3:
-                houseResult.setBuildStage("已竣工");
-                break;
-            case 5:
-                houseResult.setBuildStage("提前结束装修审核中");
-                break;
-            default:
-                houseResult.setBuildStage("提前结束装修");
-                break;
-        }
-        /*展示各种进度*/
-        List<HouseFlow> houseFlowList = houseFlowMapper.getAllFlowByHouseId(house.getId());
-        List<NodeDTO> courseList = new ArrayList<>();
-        for (HouseFlow houseFlow : houseFlowList) {
-            NodeDTO nodeDTO = new NodeDTO();
-            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
-            nodeDTO.setNameA(workerType.getName());
-            nodeDTO.setColor(workerType.getColor());
-            nodeDTO.setNameC("工序详情");
-            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                    String.format(DjConstants.YZPageAddress.WORKINGDETAILS, userToken, cityId, "工序详情") + "&houseFlowId=" + houseFlow.getId();
-            nodeDTO.setUrl(url);
-            //0待抢单,4待支付,1已支付待发平面图,5平面图发给业主,6平面图审核不通过,7通过平面图待发施工图,2已发给业主施工图,8施工图片审核不通过,3施工图(全部图)审核通过
-            if (workerType.getType() == 1) {//设计
-                if (courseList.size() > 0) {//兼容以前自带设计没有发单的情况
-                    courseList.remove(0);
-                }
-                nodeDTO.setState(0);
-                Map<String, Object> dataMap = HouseUtil.getDesignDatas(house);
-                nodeDTO.setTotal((Integer) dataMap.get("total"));
-                nodeDTO.setRank((Integer) dataMap.get("rank"));
-                nodeDTO.setNameB((String) dataMap.get("nameB"));
-            } else if (workerType.getType() == 2) {//精算
-                //默认0未开始,1已开始精算,-1已精算没有发给业主,2已发给业主,3审核通过,4审核不通过
-                nodeDTO.setState(0);
-                Map<String, Object> dataMap = HouseUtil.getBudgetDatas(house);
-                nodeDTO.setTotal((Integer) dataMap.get("total"));
-                nodeDTO.setRank((Integer) dataMap.get("rank"));
-                nodeDTO.setNameB((String) dataMap.get("nameB"));
-            } else if (workerType.getType() == 3) {//管家
-                //管家状态1未发布,2待抢单,3待支付,4已支付,5完工
-                nodeDTO.setState(0);
-                nodeDTO.setTotal(5);
-                if (houseFlow.getWorkType() == 1) {
-                    nodeDTO.setRank(1);
-                    nodeDTO.setNameB("未发布");
-                } else if (houseFlow.getWorkType() == 2) {
-                    nodeDTO.setRank(2);
-                    nodeDTO.setNameB("待抢单");
-                } else if (houseFlow.getWorkType() == 3) {
-                    nodeDTO.setRank(3);
-                    nodeDTO.setNameB("待支付");
-                } else if (houseFlow.getWorkSteta() == 2 || houseFlow.getWorkSteta() == 6) {
-                    nodeDTO.setRank(5);
-                    if (houseFlow.getWorkSteta() == 2) {
-                        nodeDTO.setNameB("整体完工");
-                    } else {
-                        nodeDTO.setNameB("提前结束装修");
-                    }
-                } else if (houseFlow.getWorkType() == 4) {
-                    nodeDTO.setRank(4);
-                    nodeDTO.setNameB("监工中");
-                }
-            } else {
-                //workType 1还没有发布,2等待被抢，3有工匠抢单,
-                //workSteta  3已支付待交底 4施工中 1阶段完工通过,+ 2整体完工通过
-                nodeDTO.setState(0);
-                if (houseFlow.getWorkerType() == 4) {//拆除没有阶段完工
-                    nodeDTO.setTotal(6);//总共点
-                } else {
-                    nodeDTO.setTotal(7);//总共点
-                }
-                if (houseFlow.getWorkType() == 1) {
-                    nodeDTO.setRank(1);
-                    nodeDTO.setNameB("未发布");
-                } else if (houseFlow.getWorkType() == 2) {
-                    nodeDTO.setRank(2);
-                    nodeDTO.setNameB("待抢单");
-                } else if (houseFlow.getWorkType() == 3) {
-                    nodeDTO.setRank(3);
-                    nodeDTO.setNameB("待支付");
-                } else if (houseFlow.getWorkType() == 4) {//已支付
-                    if (houseFlow.getWorkSteta() == 3) {
-                        nodeDTO.setRank(4);
-                        nodeDTO.setNameB("待交底");
-                    } else if (houseFlow.getWorkSteta() == 4) {
-                        nodeDTO.setRank(5);
-                        nodeDTO.setNameB("施工中");
-                    } else {
-                        if (houseFlow.getWorkerType() == 4) {//拆除
-                            if (houseFlow.getWorkSteta() == 2 || houseFlow.getWorkSteta() == 6) {
-                                nodeDTO.setRank(6);
-                                if (houseFlow.getWorkSteta() == 2) {
-                                    nodeDTO.setNameB("整体完工");
-                                } else {
-                                    nodeDTO.setNameB("提前结束装修");
-                                }
-                            }
-                        } else {
-                            if (houseFlow.getWorkSteta() == 1) {
-                                nodeDTO.setRank(6);
-                                nodeDTO.setNameB("阶段完工");
-                            } else if (houseFlow.getWorkSteta() == 2 || houseFlow.getWorkSteta() == 6) {
-                                nodeDTO.setRank(7);
-                                if (houseFlow.getWorkSteta() == 2) {
-                                    nodeDTO.setNameB("整体完工");
-                                } else {
-                                    nodeDTO.setNameB("提前结束装修");
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            courseList.add(nodeDTO);
-        }
-        houseResult.setCourseList(courseList);
-        return ServerResponse.createBySuccess("查询成功", houseResult);
-    }
 
     /**
      * 开工页面
@@ -788,8 +585,30 @@ public class HouseService {
                 }
             }
         }
+        Integer type = iCustomerMapper.queryType(member.getId());
+
+        Integer result = clueMapper.queryTClue(member.getMobile());
+
         City city = iCityMapper.selectByPrimaryKey(cityId);
+
         House house = new House(true);//新增房产信息
+
+        //0:场内录入，1:场外录入
+        if (type == 0) {
+            house.setIsType(0);
+        } else {
+            house.setIsType(1);
+        }
+
+        if (result == 1) {
+            //一个销售人员下单
+            house.setAbroadStats(0);
+        } else if (result > 1) {
+            //两个销售人员同时下单
+            house.setAbroadStats(1);
+        }
+        //TODO 有待抢单时	外场销售/内场销售	:您有一个新的待抢单客户，请及时查看。	去抢单页
+        house.setIsRobStats(0);
         house.setMemberId(member.getId());//用户id
         house.setCityName(city.getName());//城市名
         house.setCityId(cityId);
@@ -1094,54 +913,6 @@ public class HouseService {
             }
         }
         return shareDTO;
-    }
-
-    /**
-     * TODO 1.4.0后删除此接口
-     * 装修指南
-     */
-    public ServerResponse getRenovationManual(String userToken, Integer type) {
-        try {
-            String imgUrl = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            Member member = null;
-            if (!CommonUtil.isEmpty(userToken)) {
-                Object object = constructionService.getMember(userToken);
-                if (object instanceof Member) {
-                    member = (Member) object;
-                }
-            }
-            Map<String, Object> returnMap = new HashMap<>();//返回对象
-            List<Map<String, Object>> workerTypeList = new ArrayList<>();
-            List<RenovationStage> wtList = renovationStageMapper.selectAll();
-            for (RenovationStage wt : wtList) {
-                List<RenovationManual> listR = renovationManualMapper.getRenovationManualByWorkertyId(wt.getId());
-                Map<String, Object> wMap = new HashMap<>();
-                wMap.put("workerTypeName", wt.getName());
-                wMap.put("image", imgUrl + wt.getImage());
-                List<Map<String, Object>> listMap = new ArrayList<>();
-                for (RenovationManual r : listR) {
-                    Map<String, Object> map = BeanUtils.beanToMap(r);
-                    if (member != null) {
-                        Example example = new Example(RenovationManualMember.class);
-                        example.createCriteria().andEqualTo("renovationManualId", r.getId()).andEqualTo("memberId", member.getId());
-                        List<RenovationManualMember> rmList = renovationManualMemberMapper.selectByExample(example);
-                        if (rmList.size() > 0) {
-                            map.put("isSelect", 1);//选中
-                        } else {
-                            map.put("isSelect", 0);//未选中
-                        }
-                    }
-                    listMap.add(map);
-                }
-                wMap.put("rList", listMap);
-                workerTypeList.add(wMap);
-            }
-            returnMap.put("list", workerTypeList);//大list
-            return ServerResponse.createBySuccess("获取装修指南成功", returnMap);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("系统出错,获取装修指南失败");
-        }
     }
 
     /**
@@ -1572,7 +1343,7 @@ public class HouseService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateByHouseId(String building, String unit, String number,
-                                          String houseId, String villageId, String cityId) {
+                                          String houseId, String villageId, String cityId, Double buildSquare) {
         House house = iHouseMapper.selectByPrimaryKey(houseId);
         if (house == null) {
             return ServerResponse.createByErrorMessage("该房产不存在");
@@ -1582,6 +1353,8 @@ public class HouseService {
         house.setNumber(number);                     //房间号
         house.setVillageId(villageId);                //小区Id
         house.setCityId(cityId);                      //城市Id
+        if (!CommonUtil.isEmpty(buildSquare))
+            house.setBuildSquare(new BigDecimal(buildSquare));
         ModelingVillage modelingVillage = modelingVillageMapper.selectByPrimaryKey(villageId);
         if (modelingVillage != null)
             house.setResidential(modelingVillage.getName());

@@ -87,9 +87,11 @@ public class StoreServices {
             }
             if (!CommonUtil.isEmpty(store.getDepartmentId())) {
                 Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
-                store.setCityName(department.getCityName());
-                store.setCityId(department.getCityId());
-                store.setDepartmentName(department.getName());
+                if (department != null) {
+                    store.setCityName(department.getCityName());
+                    store.setCityId(department.getCityId());
+                    store.setDepartmentName(department.getName());
+                }
             }
             getStoreVillages(store);
             iStoreMapper.insert(store);
@@ -149,9 +151,11 @@ public class StoreServices {
             }
             if (!CommonUtil.isEmpty(store.getDepartmentId())) {
                 Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
-                store.setCityName(department.getCityName());
-                store.setCityId(department.getCityId());
-                store.setDepartmentName(department.getName());
+                if (department != null) {
+                    store.setCityName(department.getCityName());
+                    store.setCityId(department.getCityId());
+                    store.setDepartmentName(department.getName());
+                }
             }
             getStoreVillages(store);
             store.setCreateDate(null);
@@ -319,7 +323,7 @@ public class StoreServices {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Store> stores = iStoreMapper.queryStore(null, searchKey);
         List<Map> storemaps = new ArrayList<>();
-        if (stores.size() < 0) {
+        if (stores.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         PageInfo pageResult = new PageInfo(stores);

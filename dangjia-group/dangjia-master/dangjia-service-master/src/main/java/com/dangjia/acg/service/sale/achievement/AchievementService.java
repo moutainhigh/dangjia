@@ -79,14 +79,6 @@ public class AchievementService {
                         item -> item.getZiduan(),
                         Integer::sum));
 
-        /*for (AchievementInfoDTO aa:achievementInfoDTOs) {
-            for (String key : w.keySet()) {
-                if(aa.getUserId().equals(key)){
-                    aa.setMonthRoyalty(w.get(key));
-                }
-            }
-        }*/
-
         //查詢全部订单状态
         List<AchievementInfoDTO> meterVisitState = achievementMapper.queryMeterVisitState(map);
 
@@ -131,18 +123,6 @@ public class AchievementService {
                 }
             }
         }
-
-       /* if(!achievementInfoDTOs.isEmpty() && !queryUserId.isEmpty()){
-            //销售人员当月提成  到销售人员列表里面
-            for (AchievementInfoDTO to: queryUserId) {
-                for (AchievementInfoDTO aa:achievementInfoDTOs) {
-                    if(to.getUserId().equals(aa.getUserId())){
-                        to.setMonthRoyalty(aa.getMonthRoyalty());
-                    }
-                }
-                to.setArrRoyalty(arrRoyalty);
-            }
-        }*/
 
         if(!queryUserId.isEmpty()){
             //销售人员当月提成  到销售人员列表里面

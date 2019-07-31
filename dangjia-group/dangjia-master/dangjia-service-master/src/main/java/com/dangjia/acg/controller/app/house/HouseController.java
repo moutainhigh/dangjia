@@ -31,30 +31,10 @@ public class HouseController implements HouseAPI {
         return houseService.setSelectHouse(userToken, cityId, houseId);
     }
 
-    /**
-     * 房产列表
-     * TODO 1.4.0后删除此接口
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse getHouseList(String userToken, String cityId) {
-        return houseService.getHouseList(userToken, cityId);
-    }
-
     @Override
     @ApiMethod
     public ServerResponse getMyHouseList(PageDTO pageDTO, String userToken) {
         return houseService.getMyHouseList(pageDTO, userToken);
-    }
-
-    /**
-     * 我的房产
-     * TODO 1.4.0后删除此接口
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse getMyHouse(String userToken, String cityId) {
-        return houseService.getMyHouse(userToken, cityId);
     }
 
     /**
@@ -120,16 +100,6 @@ public class HouseController implements HouseAPI {
     @ApiMethod
     public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId, Double minSquare, Double maxSquare, Integer houseType, PageDTO pageDTO) {
         return houseService.queryHouseByCity(userToken, cityId, villageId, minSquare, maxSquare, houseType, pageDTO);
-    }
-
-    /**
-     * TODO 1.4.0后删除此接口
-     * 装修指南
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse getRenovationManual(String userToken, Integer type) {
-        return houseService.getRenovationManual(userToken, type);
     }
 
     @Override
@@ -236,8 +206,9 @@ public class HouseController implements HouseAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse updateByHouseId(String building, String unit, String number, String houseId, String villageId, String cityId) {
-        return houseService.updateByHouseId(building, unit, number, houseId, villageId, cityId);
+    public ServerResponse updateByHouseId(String building, String unit, String number, String houseId,
+                                          String villageId, String cityId, Double buildSquare) {
+        return houseService.updateByHouseId(building, unit, number, houseId, villageId, cityId, buildSquare);
     }
 
     @Override

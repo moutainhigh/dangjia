@@ -3,6 +3,7 @@ package com.dangjia.acg.modle.clue;
 import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.annotation.ExcelField;
 import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.common.util.CommonUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -95,4 +96,6 @@ public class Clue extends BaseEntity {
     @Desc(value = "线索类型 1：跨域下单  0：正常")
     @ApiModelProperty("线索类型 1：跨域下单  0：正常")
     private Integer clueType;
+
+
 }

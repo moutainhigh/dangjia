@@ -56,7 +56,7 @@ public class ActuaryService {
             dataStatus = "1";
             budgetOk = "";
         }
-        List<HouseListDTO> houseList = houseMapper.getActuaryAll( cityId ,budgetOk, name, dataStatus);
+        List<HouseListDTO> houseList = houseMapper.getActuaryAll(cityId, budgetOk, name, dataStatus);
         PageInfo pageResult = new PageInfo(houseList);
         for (HouseListDTO houseListDTO : houseList) {
             HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(houseListDTO.getHouseId(), 2);
@@ -134,31 +134,12 @@ public class ActuaryService {
                 sum4++;
             }
         }
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("actuaryNumber", houseList.size());//获取精算接单数量
         map.put("actuaryPayNumber", sum1);//待业主支付数量
         map.put("actuaryUploadNumber", sum2);//待上传精算数量
         map.put("actuaryConfirmeNumber", sum3);//待确认精算数量
         map.put("actuarycompletedNumber", sum4);//已完成精算数量
         return map;
-    }
-
-    //提出重复代码
-    private List<Map<String, Object>> listResult(List<House> houseList) {
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        for (House house : houseList) {
-            Map<String, Object> map = new HashMap<String, Object>();
-            Member user = userMapper.selectByPrimaryKey(house.getMemberId());
-            if (user == null) continue;
-            map.put("houseName", house.getHouseName());
-            map.put("customSort", house.getCustomSort());
-            map.put("name", user.getNickName());
-            map.put("mobile", user.getMobile());
-            map.put("square", house.getSquare());
-            map.put("houseId", house.getId());
-            map.put("budgetOk", house.getBudgetOk());
-            list.add(map);
-        }
-        return list;
     }
 }

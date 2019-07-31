@@ -1,7 +1,6 @@
 package com.dangjia.acg.mapper.member;
 
 import com.dangjia.acg.dto.sale.client.CustomerIndexDTO;
-import com.dangjia.acg.dto.sale.client.SaleClueDTO;
 import com.dangjia.acg.dto.sale.store.GrabSheetDTO;
 import com.dangjia.acg.modle.member.Customer;
 import org.apache.ibatis.annotations.Param;
@@ -35,5 +34,9 @@ public interface ICustomerMapper extends Mapper<Customer> {
     List<CustomerIndexDTO> waitDistribution(@Param("userId") String userId,@Param("searchKey") String searchKey,@Param("time") String time);
 
     List<GrabSheetDTO> grabSheet(@Param("storeId") String storeId);
+
+
+    Integer queryType(@Param("storeId") String memberId);
+
 }
 

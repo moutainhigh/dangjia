@@ -246,6 +246,22 @@ public class House extends BaseEntity {
     @ApiModelProperty("选配标签")
     private String optionalLabel;
 
+    @Column(name = "abroad_stats")
+    @Desc(value = "0-一个销售人员下单 1-两个销售人员同时下单")
+    @ApiModelProperty("0-一个销售人员下单 1-两个销售人员同时下单")
+    private Integer abroadStats;
+
+    @Column(name = "is_rob_stats")
+    @Desc(value = " 0-未抢单 1-已抢单")
+    @ApiModelProperty("0-未抢单 1-已抢单")
+    private Integer isRobStats;
+
+    @Column(name = "is_type")
+    @Desc(value = " 类别：0:场内录入，1:场外录入")
+    @ApiModelProperty("类别：0:场内录入，1:场外录入")
+    private Integer isType;
+
+
     @Transient
     private String houseId;
     @Transient

@@ -27,26 +27,6 @@ public interface ClientAPI {
     ServerResponse clientPage(@RequestParam("request") HttpServletRequest request,
                               @RequestParam("userToken") String userToken);
 
-    /**
-     * showdoc
-     * @param clue      必选/可选 string TODO
-     * @param clue      必选/可选 string TODO
-     * @param clue      必选/可选 string TODO
-     * @param clue      必选/可选 string TODO
-     * @param userToken 必选 string userToken
-     * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
-     * @catalog 当家接口文档/销售模块/客户模块
-     * @title 录入客户
-     * @description 录入客户
-     * @method POST
-     * @url  master/sale/client/enterCustomer
-     * @return_param groupid int 用户组id
-     * @return_param name string 用户昵称
-     * @remark 更多返回错误代码请看首页的错误代码描述
-     * @number 99
-     * @Author: Ruking 18075121944
-     * @Date: 2019/7/24 9:43
-     */
     @PostMapping(value = "sale/client/enterCustomer")
     @ApiOperation(value = "录入客户", notes = "录入客户")
     ServerResponse enterCustomer(@RequestParam("request") HttpServletRequest request,
@@ -56,6 +36,7 @@ public interface ClientAPI {
 
     /**
      * 跨域下单
+     *
      * @param request
      * @param clue
      * @param userToken
@@ -66,7 +47,6 @@ public interface ClientAPI {
     ServerResponse crossDomainOrder(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("clue") Clue clue,
                                     @RequestParam("userToken") String userToken,
-                                    @RequestParam("cityId") String cityId,
                                     @RequestParam("villageId") String villageId);
 
 
@@ -97,8 +77,8 @@ public interface ClientAPI {
      * @param pageDTO
      * @param time
      * @param searchKey
+     * @param type       1:待分配客户 2:沉睡客户
      * @return
-     * @param type 1:待分配客户 2:沉睡客户
      */
     @PostMapping(value = "sale/client/ordersCustomer")
     @ApiOperation(value = "已下单/竣工/待分配/沉睡列表", notes = "已下单/竣工/待分配/沉睡列表")
