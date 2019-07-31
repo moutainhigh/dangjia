@@ -301,7 +301,10 @@ public class ClientService {
         List<ResidentialRangeDTO> residentialRangeDTOList = new ArrayList<>();
         for (ResidentialRange residentialRange : residentialRanges) {
             ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
-            String[] buildingId = residentialRange.getBuildingId().split(",");
+            String[] buildingId={};
+            if(!CommonUtil.isEmpty(residentialRange.getBuildingId())) {
+                buildingId = residentialRange.getBuildingId().split(",");
+            }
             example = new Example(ResidentialBuilding.class);
             example.createCriteria().andIn(ResidentialBuilding.ID, Arrays.asList(buildingId));
             List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
