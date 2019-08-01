@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.repair;
 
+import com.dangjia.acg.dto.house.WarehouseGoodsDTO;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -17,5 +18,6 @@ public interface IMendMaterialMapper extends Mapper<MendMateriel> {
 
     MendMateriel getMendOrderGoods(@Param("mendOrderId") String mendOrderId, @Param("productId") String productId);
 
-
+    List<WarehouseGoodsDTO> getWarehouseGoods(@Param("productId") String productId,@Param("houseId") String houseId);
+    List<WarehouseGoodsDTO> getWarehouseWorker(@Param("productId") String productId,@Param("houseId") String houseId);
 }

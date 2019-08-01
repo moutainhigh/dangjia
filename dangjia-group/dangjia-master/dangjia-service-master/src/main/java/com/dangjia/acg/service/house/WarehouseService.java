@@ -2,10 +2,12 @@ package com.dangjia.acg.service.house;
 
 import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.actuary.ActuaryOpeAPI;
+import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -13,6 +15,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.budget.BudgetItemDTO;
 import com.dangjia.acg.dto.house.WarehouseDTO;
+import com.dangjia.acg.dto.house.WarehouseGoodsDTO;
 import com.dangjia.acg.mapper.deliver.IOrderItemMapper;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.IProductChangeMapper;
@@ -20,6 +23,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
+import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
@@ -50,8 +54,11 @@ public class WarehouseService {
     private GoodsCategoryAPI goodsCategoryAPI;
     @Autowired
     private ConfigUtil configUtil;
+
     @Autowired
     private ForMasterAPI forMasterAPI;
+    @Autowired
+    private BudgetWorkerAPI budgetWorkerAPI;
     @Autowired
     private ActuaryOpeAPI actuaryOpeAPI;
     @Autowired
@@ -226,7 +233,7 @@ public class WarehouseService {
                         warehouseDTO.setBackCount((warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
                         warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                         warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
-                        warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
+                        warehouseDTO.setTolPrice((warehouse.getShopCount() - warehouse.getOwnerBack() - warehouse.getWorkBack()) * warehouse.getPrice());
                         warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
                         // type为空时查询 是否更换
                         if (CommonUtil.isEmpty(type)) {
@@ -328,6 +335,57 @@ public class WarehouseService {
 //         dj_house_surplus_ware_divert ;
 //         dj_deliver_cart ;
 //         dj_deliver_product_change ;
-        return ServerResponse.createBySuccessMessage("查询失败");
+        return ServerResponse.createBySuccessMessage("查询成功");
     }
+
+
+    /**
+     * 查询指定已购买的商品仓库明细
+     * @param houseId 工地ID
+     * @param gid 商品ID
+     * @param type 类型：  0 = 材料/包工包料   1=人工
+     * @return
+     */
+    public ServerResponse getWarehouseData(String houseId, String gid, Integer type){
+        if(type==0){
+            Example example = new Example(Warehouse.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
+            criteria.andEqualTo(Warehouse.PRODUCT_ID, gid);
+            List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
+            Map warehouseDTO = new HashMap();
+            warehouseDTO.put("type",type);
+            if(warehouseList.size()>0) {
+                for (Warehouse warehouse : warehouseList) {
+                    warehouseDTO.put("repairCount", warehouse.getRepairCount());//补货数
+                    warehouseDTO.put("shopCount", warehouse.getShopCount());//购买数
+                    warehouseDTO.put("receive", warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));//收货数
+                    warehouseDTO.put("workBack", (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));//工匠退货数
+                    warehouseDTO.put("ownerBack", (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));//业主退货数
+                    warehouseDTO.put("surCount", warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());//剩余数
+                    warehouseDTO.put("tolPrice", (warehouse.getShopCount() - warehouse.getOwnerBack() - warehouse.getWorkBack()) * warehouse.getPrice());//实际花费
+                }
+                List<WarehouseGoodsDTO> goodsDTOS=mendMaterielMapper.getWarehouseGoods(gid,houseId);
+                warehouseDTO.put("list",goodsDTOS);
+                return ServerResponse.createBySuccess("查询成功", warehouseDTO);
+            }
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }else{
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            BudgetWorker budgetWorker= budgetWorkerAPI.getHouseBudgetWorkerId(house.getCityId(),house.getId(),gid);
+            Map warehouseDTO = new HashMap();
+            if(budgetWorker!=null) {
+                warehouseDTO.put("type", type);
+                warehouseDTO.put("repairCount", budgetWorker.getRepairCount());//补人工数
+                warehouseDTO.put("shopCount", budgetWorker.getShopCount() + budgetWorker.getRepairCount());//购买数
+                warehouseDTO.put("workBack", budgetWorker.getBackCount());//退人工数
+                warehouseDTO.put("tolPrice", (budgetWorker.getShopCount() + budgetWorker.getRepairCount()) * budgetWorker.getPrice());//实际花费
+                List<WarehouseGoodsDTO> goodsDTOS=mendMaterielMapper.getWarehouseWorker(gid,houseId);
+                warehouseDTO.put("list",goodsDTOS);
+                return ServerResponse.createBySuccess("查询成功", warehouseDTO);
+            }
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+    }
+
 }

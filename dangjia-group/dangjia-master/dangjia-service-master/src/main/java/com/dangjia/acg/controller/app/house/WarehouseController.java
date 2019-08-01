@@ -45,4 +45,18 @@ public class WarehouseController implements WarehouseAPI {
     public ServerResponse editProductData(String cityId, String  productJson){
         return warehouseService.editProductData(cityId, productJson);
     }
+
+    /**
+     * 查询指定已购买的商品仓库明细
+     * @param houseId 工地ID
+     * @param gid 商品ID
+     * @param type 类型：  0 = 材料/包工包料   1=人工
+     * @return
+     *
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getWarehouseData(String houseId, String gid, Integer type){
+        return warehouseService.getWarehouseData(houseId, gid,type);
+    }
 }
