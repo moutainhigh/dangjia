@@ -73,6 +73,8 @@ public interface WarehouseAPI {
      */
     @PostMapping("app/house/warehouse/data")
     @ApiOperation(value = "查询指定已购买的商品仓库明细", notes = "查询指定已购买的商品仓库明细")
-    ServerResponse getWarehouseData(String houseId, String gid, Integer type);
+    ServerResponse getWarehouseData(@RequestParam("houseId")String houseId,
+                                    @RequestParam("gid")String gid,
+                                    @RequestParam("type")Integer type);
 
 }
