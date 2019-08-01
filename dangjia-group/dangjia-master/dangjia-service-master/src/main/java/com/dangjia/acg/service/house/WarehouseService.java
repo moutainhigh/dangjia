@@ -227,6 +227,8 @@ public class WarehouseService {
                         if (!categoryId.equals(warehouse.getCategoryId())) continue;
                         WarehouseDTO warehouseDTO = new WarehouseDTO();
                         BeanUtils.beanToBean(warehouse, warehouseDTO);
+                        warehouse.setOwnerBack((warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
+                        warehouse.setWorkBack((warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                         warehouseDTO.setImage(address + warehouse.getImage());
                         warehouseDTO.setShopCount(warehouse.getShopCount());
                         warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
@@ -359,6 +361,8 @@ public class WarehouseService {
             warehouseDTO.put("type",type);
             if(warehouseList.size()>0) {
                 for (Warehouse warehouse : warehouseList) {
+                    warehouse.setOwnerBack((warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
+                    warehouse.setWorkBack((warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                     warehouseDTO.put("name", warehouse.getProductName());//商品名字
                     warehouseDTO.put("image", address+warehouse.getImage());//图片地址
 
