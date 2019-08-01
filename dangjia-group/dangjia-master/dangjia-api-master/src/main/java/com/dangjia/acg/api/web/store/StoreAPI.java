@@ -32,7 +32,8 @@ public interface StoreAPI {
 
     @PostMapping("/web/store/queryStore")
     @ApiOperation(value = "查询门店", notes = "查询门店")
-    ServerResponse queryStore(@RequestParam("cityId") String cityId,
+    ServerResponse queryStore(@RequestParam("request") HttpServletRequest request,
+                              @RequestParam("cityId") String cityId,
                               @RequestParam("storeName") String storeName,
                               @RequestParam("pageDTO") PageDTO pageDTO);
 

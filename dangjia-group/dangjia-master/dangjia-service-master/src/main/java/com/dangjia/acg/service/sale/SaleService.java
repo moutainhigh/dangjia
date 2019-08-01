@@ -87,7 +87,7 @@ public class SaleService {
                 .andEqualTo(Store.DATA_STATUS, 0);
         List<Store> storeList = iStoreMapper.selectByExample(example);
         if (storeList.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createbyUserTokenError();
         }
         Store store = storeList.get(0);
         redisClient.put("storeId" + userId, store.getId());

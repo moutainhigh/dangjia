@@ -82,7 +82,8 @@ public class StoreServices {
      * @param storeName
      * @return
      */
-    public ServerResponse queryStore(String cityId, String storeName, PageDTO pageDTO) {
+    public ServerResponse queryStore(HttpServletRequest request, String cityId, String storeName, PageDTO pageDTO) {
+        request.setAttribute("isShow", "true");
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Store> stores = iStoreMapper.queryStore(cityId, storeName);
         if (stores.size() <= 0) {
