@@ -57,6 +57,7 @@ public class StoreManagementService {
 
     /**
      * 门店管理页
+     *
      * @param userToken
      * @param pageDTO
      * @return
@@ -75,63 +76,64 @@ public class StoreManagementService {
             return (ServerResponse) object;
         }
         Store store = (Store) object;
-        List<StoreUserDTO> storeUserDTOS = iStoreUserMapper.getStoreUsers(store.getId(), null,4);
+        List<StoreUserDTO> storeUserDTOS = iStoreUserMapper.getStoreUsers(store.getId(), null, 4);
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         for (StoreUserDTO storeUserDTO : storeUserDTOS) {
             String imageUrl = storeUserDTO.getUserHead();
             storeUserDTO.setUserHead(CommonUtil.isEmpty(imageUrl) ? null : (imageAddress + imageUrl));
         }
         Example example = new Example(ModelingVillage.class);
-        if(!CommonUtil.isEmpty(store.getVillages())) {
+        if (!CommonUtil.isEmpty(store.getVillages())) {
             example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
         PageInfo pageResult = new PageInfo(modelingVillages);
-        List<ResidentialRangeDTO> residentialRangeDTOList=new ArrayList<>();
+        List<ResidentialRangeDTO> residentialRangeDTOList = new ArrayList<>();
         for (ModelingVillage modelingVillage : modelingVillages) {
-            ResidentialRangeDTO residentialRangeDTO=new ResidentialRangeDTO();
+            ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
             residentialRangeDTO.setVillageId(modelingVillage.getId());
             residentialRangeDTO.setVillagename(modelingVillage.getName());
             example = new Example(ResidentialBuilding.class);
-            example.createCriteria().andEqualTo(ResidentialBuilding.STORE_ID,store.getId())
-                    .andEqualTo(ResidentialBuilding.VILLAGE_ID,modelingVillage.getId());
+            example.createCriteria().andEqualTo(ResidentialBuilding.STORE_ID, store.getId())
+                    .andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId());
             residentialRangeDTO.setList(residentialBuildingMapper.selectByExample(example));
             residentialRangeDTOList.add(residentialRangeDTO);
         }
         pageResult.setList(residentialRangeDTOList);
-        Map<String,Object> resultMap=new HashedMap();
-        resultMap.put("storeUsers",storeUserDTOS);
-        resultMap.put("residentialRangeDTOList",pageResult);
-        resultMap.put("managerId",store.getUserId());
-        resultMap.put("storeId",store.getId());
-        return ServerResponse.createBySuccess("查询成功",resultMap);
+        Map<String, Object> resultMap = new HashedMap();
+        resultMap.put("storeUsers", storeUserDTOS);
+        resultMap.put("residentialRangeDTOList", pageResult);
+        resultMap.put("managerId", store.getUserId());
+        resultMap.put("storeId", store.getId());
+        return ServerResponse.createBySuccess("查询成功", resultMap);
     }
 
 
     /**
      * 添加楼栋
+     *
      * @param villageId
      * @param modifyDate
      * @param building
      * @param storeId
      * @return
      */
-    public ServerResponse  addBuilding(String villageId, Date modifyDate, String building,String storeId) {
-        Example example=new Example(ResidentialBuilding.class);
-        example.createCriteria().andEqualTo(ResidentialBuilding.VILLAGE_ID,villageId)
-                                .andEqualTo(ResidentialBuilding.STORE_ID,storeId)
-                                .andEqualTo(ResidentialBuilding.BUILDING,building);
-        if(residentialBuildingMapper.selectByExample(example).size()>0){
+    public ServerResponse addBuilding(String villageId, Date modifyDate, String building, String storeId) {
+        Example example = new Example(ResidentialBuilding.class);
+        example.createCriteria().andEqualTo(ResidentialBuilding.VILLAGE_ID, villageId)
+                .andEqualTo(ResidentialBuilding.STORE_ID, storeId)
+                .andEqualTo(ResidentialBuilding.BUILDING, building);
+        if (residentialBuildingMapper.selectByExample(example).size() > 0) {
             return ServerResponse.createByErrorMessage("该楼栋已存在");
         }
-        ResidentialBuilding residentialBuilding=new ResidentialBuilding();
+        ResidentialBuilding residentialBuilding = new ResidentialBuilding();
         residentialBuilding.setVillageId(villageId);
-        residentialBuilding.setModifyDate(CommonUtil.isEmpty(modifyDate)?null:modifyDate);
+        residentialBuilding.setModifyDate(CommonUtil.isEmpty(modifyDate) ? null : modifyDate);
         residentialBuilding.setBuilding(building);
         residentialBuilding.setDataStatus(0);
         residentialBuilding.setStoreId(storeId);
-        if(residentialBuildingMapper.insert(residentialBuilding)>0){
+        if (residentialBuildingMapper.insert(residentialBuilding) > 0) {
             return ServerResponse.createBySuccessMessage("添加成功");
         }
         return ServerResponse.createByErrorMessage("添加失败");
@@ -140,11 +142,12 @@ public class StoreManagementService {
 
     /**
      * 删除楼栋
+     *
      * @param buildingId
      * @return
      */
-    public ServerResponse delBuilding(String buildingId){
-        if(residentialBuildingMapper.deleteByPrimaryKey(buildingId)>0){
+    public ServerResponse delBuilding(String buildingId) {
+        if (residentialBuildingMapper.deleteByPrimaryKey(buildingId) > 0) {
             return ServerResponse.createBySuccessMessage("删除成功");
         }
         return ServerResponse.createByErrorMessage("删除失败");
@@ -153,11 +156,12 @@ public class StoreManagementService {
 
     /**
      * 修改楼栋
+     *
      * @param buildingId
      * @param residentialBuilding
      * @return
      */
-    public ServerResponse updatBuilding(String buildingId , ResidentialBuilding residentialBuilding) {
+    public ServerResponse updatBuilding(String buildingId, ResidentialBuilding residentialBuilding) {
         ResidentialBuilding residentialBuilding1 = residentialBuildingMapper.selectByPrimaryKey(buildingId);
         if (!residentialBuilding1.getBuilding().equals(residentialBuilding.getBuilding())) {
             Example example = new Example(ResidentialBuilding.class);
@@ -168,17 +172,16 @@ public class StoreManagementService {
             }
         }
         residentialBuilding.setId(buildingId);
-        if(residentialBuildingMapper.updateByPrimaryKeySelective(residentialBuilding)>0) {
+        if (residentialBuildingMapper.updateByPrimaryKeySelective(residentialBuilding) > 0) {
             return ServerResponse.createBySuccessMessage("修改成功");
         }
         return ServerResponse.createByErrorMessage("修改失败");
     }
 
 
-
-    public ServerResponse BuildingList(String storeId,PageDTO pageDTO){
+    public ServerResponse BuildingList(String storeId, PageDTO pageDTO) {
         Store store = iStoreMapper.selectByPrimaryKey(storeId);
-        if(null!=store) {
+        if (null != store) {
             Example example = new Example(ModelingVillage.class);
             if (!CommonUtil.isEmpty(store.getVillages())) {
                 example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
@@ -196,9 +199,11 @@ public class StoreManagementService {
             PageInfo pageResult = new PageInfo(modelingVillages);
             for (ModelingVillage modelingVillage : modelingVillages) {
                 example = new Example(ResidentialBuilding.class);
-                example.createCriteria().andEqualTo(ResidentialBuilding.STORE_ID, store.getId())
-                        .andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId())
-                        .andNotIn(ResidentialBuilding.ID, slist);
+                Example.Criteria criteria = example.createCriteria();
+                criteria.andEqualTo(ResidentialBuilding.STORE_ID, store.getId());
+                criteria.andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId());
+                if (slist.size() > 0)
+                    criteria.andNotIn(ResidentialBuilding.ID, slist);
                 List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
                 if (residentialBuildings.size() > 0) {
                     ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
