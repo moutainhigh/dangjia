@@ -98,7 +98,7 @@ public class ClientService {
      * @param userToken
      * @return
      */
-    public ServerResponse enterCustomer(Clue clue, String userToken){
+    public ServerResponse enterCustomer(Clue clue, String userToken) {
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -110,14 +110,14 @@ public class ClientService {
         MainUser user = userMapper.getNameById(accessToken.getUserId());
         List<Clue> groupBys = clueMapper.getGroupBy(clue.getPhone(), null);
         for (Clue groupBy : groupBys) {
-            if (!CommonUtil.isEmpty(groupBy.getReportDate())&&DateUtil.getDiffDays(new Date(), groupBy.getReportDate()) < 7) {
-                long time=System.currentTimeMillis()-groupBy.getReportDate().getTime();
+            if (!CommonUtil.isEmpty(groupBy.getReportDate()) && DateUtil.getDiffDays(new Date(), groupBy.getReportDate()) < 7) {
+                long time = System.currentTimeMillis() - groupBy.getReportDate().getTime();
                 return ServerResponse.createByErrorMessage(String.valueOf(time));
             }
         }
         //如果客户已录入过则把录入的房子变为意向房子
         Clue clue1 = clueMapper.getClue(clue.getPhone(), user.getId());
-        if(null!=clue1) {
+        if (null != clue1) {
             if (null == clue1.getAddress()) {
                 clue1.setAddress("");
             }
@@ -140,7 +140,7 @@ public class ClientService {
         }
         StoreUser storeUser = storeUsers.get(0);
         if (members.size() > 0) {
-            judgeRegister(clue,members.get(0).getId(),user.getId(),storeUser.getStoreId());
+            judgeRegister(clue, members.get(0).getId(), user.getId(), storeUser.getStoreId());
             return ServerResponse.createBySuccessMessage("提交成功");
         } else {
             clue.setStage(0);
@@ -172,38 +172,34 @@ public class ClientService {
         if (CommonUtil.isEmpty(accessToken.getUserId())) {
             return ServerResponse.createbyUserTokenError();
         }
-//        MainUser user = userMapper.getNameById(accessToken.getUserId());
         ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(villageId);
+        if (modelingVillage == null) {
+            return ServerResponse.createByErrorMessage("该小区不存在");
+        }
         Example example = new Example(Store.class);
         example.createCriteria().andEqualTo(Store.CITY_ID, modelingVillage.getCityId());
         List<Store> stores = iStoreMapper.selectByExample(example);
-        example = new Example(Member.class);
-        example.createCriteria().andEqualTo(Member.MOBILE, clue.getPhone());
-        List<Member> members = iMemberMapper.selectByExample(example);
-        Boolean b=true;
         for (Store store : stores) {
             //如果转出的该客户为自己门店范围内未录入的（野生），则记录进店长的线索阶段（给店长系统推送），然后仅分配给内场
             if (GaoDeUtils.isInPolygon(modelingVillage.getLocationx() + "," + modelingVillage.getLocationy(), store.getScopeItude())) {
-                String[] split = store.getVillages().split(",");
                 clue.setCusService(store.getUserId());
                 clue.setStoreId(store.getId());
                 clue.setClueType(1);
                 clueMapper.insert(clue);
-                b=false;
-                break;
-            }
-        }
-        if(b){
-            if(members.size()>0){
-                judgeRegister(clue,members.get(0).getId(),null,null);
-                return ServerResponse.createBySuccessMessage("提交成功");
-            }else{
-                clue.setClueType(1);
-                clueMapper.insert(clue);
                 return ServerResponse.createBySuccessMessage("提交成功");
             }
         }
-        return ServerResponse.createByErrorMessage("提交失败");
+        example = new Example(Member.class);
+        example.createCriteria().andEqualTo(Member.MOBILE, clue.getPhone());
+        List<Member> members = iMemberMapper.selectByExample(example);
+        if (members.size() > 0) {
+            judgeRegister(clue, members.get(0).getId(), null, null);
+            return ServerResponse.createBySuccessMessage("提交成功");
+        } else {
+            clue.setClueType(1);
+            clueMapper.insert(clue);
+            return ServerResponse.createBySuccessMessage("提交成功");
+        }
     }
 
     /**
@@ -300,8 +296,8 @@ public class ClientService {
         List<ResidentialRangeDTO> residentialRangeDTOList = new ArrayList<>();
         for (ResidentialRange residentialRange : residentialRanges) {
             ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
-            String[] buildingId={};
-            if(!CommonUtil.isEmpty(residentialRange.getBuildingId())) {
+            String[] buildingId = {};
+            if (!CommonUtil.isEmpty(residentialRange.getBuildingId())) {
                 buildingId = residentialRange.getBuildingId().split(",");
             }
             example = new Example(ResidentialBuilding.class);
@@ -328,7 +324,7 @@ public class ClientService {
      * @param stage
      * @return
      */
-    public ServerResponse followList(String userToken, PageDTO pageDTO, String label, String time, Integer stage, String searchKey ,String userId) {
+    public ServerResponse followList(String userToken, PageDTO pageDTO, String label, String time, Integer stage, String searchKey, String userId) {
         try {
             Object object = constructionService.getAccessToken(userToken);
             if (object instanceof ServerResponse) {
@@ -341,18 +337,18 @@ public class ClientService {
             MainUser user = userMapper.getNameById(accessToken.getUserId());
             Example example = new Example(Store.class);
             example.createCriteria().andEqualTo(Store.USER_ID, user.getId());
-            List<ClueDTO> clueDTOS=new ArrayList<>();
+            List<ClueDTO> clueDTOS = new ArrayList<>();
             if (iStoreMapper.selectByExample(example).size() <= 0) {//判断用户是否为店长
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                clueDTOS=clueMapper.followList(label, time, stage, searchKey, user.getId(), null);
-            }else{
+                clueDTOS = clueMapper.followList(label, time, stage, searchKey, user.getId(), null);
+            } else {
                 object = saleService.getStore(accessToken.getUserId());
                 if (object instanceof ServerResponse) {
                     return (ServerResponse) object;
                 }
                 Store store = (Store) object;
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                clueDTOS=clueMapper.followList(label, time, stage, searchKey, null, store.getId());
+                clueDTOS = clueMapper.followList(label, time, stage, searchKey, null, store.getId());
             }
             List<SaleClueDTO> list = new ArrayList<>();
             for (ClueDTO clueDTO : clueDTOS) {
@@ -448,8 +444,7 @@ public class ClientService {
     }
 
 
-
-    private  void judgeRegister(Clue clue,String memberid,String userId,String storeId){
+    private void judgeRegister(Clue clue, String memberid, String userId, String storeId) {
         //有沟通记录
         List<ClueTalk> clueTalkList = clueTalkMapper.getTalkByClueId(clue.getId());
         if (clueTalkList.size() != 0) {
