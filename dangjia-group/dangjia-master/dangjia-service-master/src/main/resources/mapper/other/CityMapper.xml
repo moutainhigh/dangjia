@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.other.ICityMapper">
 
     <select id="getAllCity" resultType="map">
@@ -13,7 +13,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="queryCityName" resultType="java.lang.String" parameterType="java.util.Map">
         SELECT name
-        FROM dj_other_city where id={id}
+        FROM dj_other_city where id=#{id}
     </select>
 </mapper>
 
