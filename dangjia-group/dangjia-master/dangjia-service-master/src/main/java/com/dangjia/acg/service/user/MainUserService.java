@@ -225,10 +225,12 @@ public class MainUserService {
         }
         String userID = request.getParameter(Constants.USERID);
         if (!CommonUtil.isEmpty(mainUser.getMemberId()) && isJob) {
-            String userRole = "role" + 3 + ":" + mainUser.getMemberId();
-            String token = redisClient.getCache(userRole, String.class);
-            redisClient.deleteCache(userRole);
-            redisClient.deleteCache(token);
+            String userRoleText = "role" + 3 + ":" + mainUser.getMemberId();
+            String token = redisClient.getCache(userRoleText, String.class);
+            redisClient.deleteCache(userRoleText);
+            if (!CommonUtil.isEmpty(token)) {
+                redisClient.deleteCache(token + Constants.SESSIONUSERID);
+            }
         }
         mainUser.setIsJob(isJob);
         mainUser.setInsertUid(userID);

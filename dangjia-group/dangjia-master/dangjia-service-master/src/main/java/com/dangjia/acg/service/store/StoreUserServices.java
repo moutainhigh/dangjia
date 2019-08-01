@@ -1,6 +1,8 @@
 package com.dangjia.acg.service.store;
 
 import com.dangjia.acg.api.MessageAPI;
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -51,6 +53,8 @@ public class StoreUserServices {
     private MessageAPI messageAPI;
     @Autowired
     private IMemberMapper memberMapper;
+    @Autowired
+    private RedisClient redisClient;
 
     public ServerResponse addStoreUser(String userId, String storeId, Integer type) {
         if (CommonUtil.isEmpty(userId)) {
@@ -132,6 +136,17 @@ public class StoreUserServices {
         storeUser.setDataStatus(1);
         storeUser.setModifyDate(new Date());
         if (iStoreUserMapper.updateByPrimaryKeySelective(storeUser) > 0) {
+            MainUser mainUser = userMapper.selectByPrimaryKey(storeUser.getUserId());
+            if (mainUser != null) {
+                if (!CommonUtil.isEmpty(mainUser.getMemberId())) {
+                    String userRoleText = "role" + 3 + ":" + mainUser.getMemberId();
+                    String token = redisClient.getCache(userRoleText, String.class);
+                    redisClient.deleteCache(userRoleText);
+                    if (!CommonUtil.isEmpty(token)) {
+                        redisClient.deleteCache(token + Constants.SESSIONUSERID);
+                    }
+                }
+            }
             return ServerResponse.createBySuccessMessage("删除成功");
         } else {
             return ServerResponse.createByErrorMessage("删除失败");
