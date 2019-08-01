@@ -79,7 +79,6 @@
             m.modify_date as modifyDate,
             m.create_date as create_date,
             mc.label_id_arr as labelId,
-            mcr.create_date as CommunicationDate,
             u.username as userName
             from dj_member_customer mc
             INNER JOIN dj_member m
