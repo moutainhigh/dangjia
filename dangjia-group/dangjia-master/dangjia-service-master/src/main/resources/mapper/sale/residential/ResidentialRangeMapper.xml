@@ -7,7 +7,7 @@
           id,
           create_date as createDate,
           modify_date as modifyDate,
-          status,
+          data_status as dataStatus,
           building_id as buildingId,
           user_id as userId
         FROM dj_sale_residential_range

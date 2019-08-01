@@ -7,7 +7,7 @@
             id,
             create_date as createDate,
             modify_date as modifyDate,
-            status,
+            data_status as dataStatus,
             village_id as villageId,
             building,
             store_id as storeId
