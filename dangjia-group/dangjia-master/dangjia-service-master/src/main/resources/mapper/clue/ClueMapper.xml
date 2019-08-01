@@ -166,7 +166,7 @@
             <if test="null!=storeUsers and storeUsers.size>0">
                 and c.cus_service in
                 <foreach collection="storeUsers" index="index" item="item" open="(" separator="," close=")">
-                    #{item.storeUserId}
+                    #{item.userId}
                 </foreach>
             </if>
             ORDER BY c.modify_date desc
@@ -184,7 +184,7 @@
             <if test="null!=storeUsers and storeUsers.size>0">
                 and c.cus_service in
                 <foreach collection="storeUsers" index="index" item="item" open="(" separator="," close=")">
-                     #{item.storeUserId}
+                     #{item.userId}
                 </foreach>
             </if>
             ORDER BY h.modify_date desc
@@ -202,7 +202,7 @@
             <if test="null!=storeUsers and storeUsers.size>0">
                 and c.cus_service in
                 <foreach collection="storeUsers" index="index" item="item" open="(" separator="," close=")">
-                     #{item.storeUserId}
+                     #{item.userId}
                 </foreach>
             </if>
             ORDER BY h.modify_date desc
