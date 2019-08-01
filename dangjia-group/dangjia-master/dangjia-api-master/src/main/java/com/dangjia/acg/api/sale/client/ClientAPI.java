@@ -95,4 +95,32 @@ public interface ClientAPI {
     @ApiOperation(value = "编辑客户", notes = "编辑客户")
     ServerResponse updateCustomer(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("clue") Clue clue);
+
+
+    /**
+     *
+     * @param request
+     * @param id 线索阶段传线索id  客户阶段传客户阶段id
+     * @param phaseStatus 阶段
+     * @return
+     */
+    @PostMapping(value = "sale/client/setReported")
+    @ApiOperation(value = "报备", notes = "报备")
+    ServerResponse setReported(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("id") String id,
+                               @RequestParam("phaseStatus") Integer phaseStatus);
+
+
+    /**
+     *
+     * @param request
+     * @param id 线索阶段传线索id  客户阶段传客户阶段id
+     * @param phaseStatus 阶段
+     * @return
+     */
+    @PostMapping(value = "sale/client/setFollow")
+    @ApiOperation(value = "放弃跟进", notes = "放弃跟进")
+    ServerResponse setFollow(@RequestParam("request") HttpServletRequest request,
+                             @RequestParam("id") String id,
+                             @RequestParam("phaseStatus") Integer phaseStatus);
 }

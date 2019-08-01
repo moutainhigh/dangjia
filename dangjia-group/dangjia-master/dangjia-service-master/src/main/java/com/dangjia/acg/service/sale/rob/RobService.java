@@ -1,18 +1,20 @@
 package com.dangjia.acg.service.sale.rob;
 
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.member.CustomerRecordInFoDTO;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
+import com.dangjia.acg.dto.member.WorkerTypeDTO;
+import com.dangjia.acg.dto.sale.rob.RobArrInFoDTO;
 import com.dangjia.acg.dto.sale.rob.RobDTO;
 import com.dangjia.acg.dto.sale.rob.RobInfoDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
-import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
-import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,9 +41,7 @@ public class RobService {
     @Autowired
     private ICustomerMapper iCustomerMapper;
     @Autowired
-    private ICityMapper iCityMapper;
-    @Autowired
-    private IModelingVillageMapper iModelingVillageMapper;
+    private ConfigUtil configUtil;
 
     @Autowired
     private ICustomerRecordMapper iCustomerRecordMapper;
@@ -94,39 +94,46 @@ public class RobService {
     public ServerResponse queryCustomerInfo(String houseId,String labelIdArr,String memberId){
 
         Map<String,Object> map = new HashMap<>();
-        if (!CommonUtil.isEmpty(houseId)) {
-            map.put("houseId",houseId);
+        if (!CommonUtil.isEmpty(memberId)) {
+            map.put("memberId",memberId);
         }
 
-        RobInfoDTO robInfoDTO = clueMapper.queryCustomerInfo(map);
-        if(robInfoDTO != null){
-            Map<String,Object> icityMap = new HashMap<>();
-            icityMap.put("id",robInfoDTO.getCityId());
-            String cityName = iCityMapper.queryCityName(icityMap);
-            robInfoDTO.setCityName(cityName);
+        RobArrInFoDTO robArrInFoDTO = new RobArrInFoDTO();
 
-            Map<String,Object> villageMap = new HashMap<>();
-            villageMap.put("id",robInfoDTO.getVillageId());
-            String villageName = iModelingVillageMapper.queryVillageName(villageMap);
-            robInfoDTO.setVillageName(villageName);
-        }
+        List<RobInfoDTO> robInfoDTO = clueMapper.queryCustomerInfo(map);
 
         //查询标签
-        if (!CommonUtil.isEmpty(labelIdArr)) {
-            String[] labelIds = labelIdArr.split(",");
-            List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
-            robInfoDTO.setList(labelByIds);
+        if(!CommonUtil.isEmpty(robInfoDTO)){
+            String str = robInfoDTO.get(0).getLabelIdArr();
+            if(null != str){
+                String[] labelIds = str.split(",");
+                List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
+                robArrInFoDTO.setList(labelByIds);
+            }
         }
-
+        //获取图片url
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        //根据客户id查询沟通记录
         if (!CommonUtil.isEmpty(memberId)) {
             List<CustomerRecordInFoDTO> data = iMemberLabelMapper.queryDescribes(memberId);
-            robInfoDTO.setData(data);
+            for (CustomerRecordInFoDTO datum : data) {
+                datum.setHead(imageAddress + datum.getHead());
+            }
+            robArrInFoDTO.setData(data);
         }
 
-        if (robInfoDTO == null) {
+        //查询大管家信息
+        if (!CommonUtil.isEmpty(houseId)) {
+            WorkerTypeDTO workerTypeDTO = iMemberLabelMapper.queryWorkerType(houseId);
+            workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
+            robArrInFoDTO.setWorkerTypeDTO(workerTypeDTO);
+        }
+
+        robArrInFoDTO.setCustomerList(robInfoDTO);
+        if (CommonUtil.isEmpty(robArrInFoDTO)) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        return ServerResponse.createBySuccess("查询提成列表", robInfoDTO);
+        return ServerResponse.createBySuccess("查询客户详情", robArrInFoDTO);
     }
 
 
