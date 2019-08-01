@@ -233,7 +233,7 @@ public class WarehouseService {
                         warehouseDTO.setBackCount((warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
                         warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                         warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
-                        warehouseDTO.setTolPrice((warehouse.getShopCount() - warehouse.getOwnerBack() - warehouse.getWorkBack()) * warehouse.getPrice());
+                        warehouseDTO.setTolPrice((warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack())  - warehouse.getWorkBack()) * warehouse.getPrice());
                         warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
                         // type为空时查询 是否更换
                         if (CommonUtil.isEmpty(type)) {
@@ -369,7 +369,7 @@ public class WarehouseService {
                     warehouseDTO.put("workBack", (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));//工匠退货数
                     warehouseDTO.put("ownerBack", (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));//业主退货数
                     warehouseDTO.put("surCount", warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());//剩余数
-                    warehouseDTO.put("tolPrice", (warehouse.getShopCount() - warehouse.getOwnerBack() - warehouse.getWorkBack()) * warehouse.getPrice());//实际花费
+                    warehouseDTO.put("tolPrice", (warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack())  - warehouse.getWorkBack()) * warehouse.getPrice());//实际花费
                 }
                 List<WarehouseGoodsDTO> goodsDTOS=mendMaterielMapper.getWarehouseGoods(gid,houseId);
                 warehouseDTO.put("list",goodsDTOS);
