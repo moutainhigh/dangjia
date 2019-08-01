@@ -66,7 +66,7 @@ public interface RobAPI {
      * @Date: 2019/7/31 0031 18:04
      */
     @PostMapping(value = "sale/rob/queryCustomerInfo")
-    @ApiOperation(value = "抢单详情查询", notes = "抢单详情查询")
+    @ApiOperation(value = "客户详情查询", notes = "客户详情查询")
     ServerResponse queryCustomerInfo(@RequestParam("request")HttpServletRequest request,
                                      @RequestParam("houseId")String houseId,
                                      @RequestParam("labelIdArr")String labelIdArr,

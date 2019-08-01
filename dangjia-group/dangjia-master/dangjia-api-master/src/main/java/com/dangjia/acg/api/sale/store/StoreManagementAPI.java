@@ -3,7 +3,6 @@ package com.dangjia.acg.api.sale.store;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
-import com.dangjia.acg.modle.store.Store;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -55,5 +54,17 @@ public interface StoreManagementAPI {
                                 @RequestParam("storeId") String storeId,
                                 @RequestParam("pageDTO") PageDTO pageDTO);
 
+    @PostMapping(value = "sale/store/upDateCusService")
+    @ApiOperation(value = "分配销售", notes = "分配销售")
+    ServerResponse upDateCusService(@RequestParam("request")HttpServletRequest request,
+                                    @RequestParam("clueId")String clueId,
+                                    @RequestParam("cusService")String cusService);
 
+
+    @PostMapping(value = "sale/store/upDateCustomer")
+    @ApiOperation(value = "转出客户", notes = "转出客户")
+    ServerResponse upDateCustomer(@RequestParam("request")HttpServletRequest request,
+                                  @RequestParam("clueId")String clueId,
+                                  @RequestParam("mcId")String mcId,
+                                  @RequestParam("cityId")String cityId);
 }

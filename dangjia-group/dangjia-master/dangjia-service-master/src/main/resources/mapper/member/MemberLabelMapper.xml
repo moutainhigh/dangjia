@@ -79,6 +79,19 @@
     </select>
 
 
+    <select id="queryWorkerType" resultType="com.dangjia.acg.dto.member.WorkerTypeDTO">
+        select m.name as name,
+        m.mobile as mobile,
+        m.head as head,
+        h.visit_state as visitState
+        from
+        dj_core_house_worker chw INNER JOIN dj_member m on chw.worker_id = m.id
+        INNER JOIN dj_house h on h.id = chw.house_id
+        where m.worker_type = 3
+        and chw.house_id = #{houseId}
+    </select>
+
+
 
 </mapper>
 

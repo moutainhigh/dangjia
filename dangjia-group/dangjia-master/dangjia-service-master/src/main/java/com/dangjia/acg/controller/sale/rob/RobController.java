@@ -38,7 +38,7 @@ public class RobController implements RobAPI {
     }
 
     /**
-     * 查询客户详情列表
+     * 查询客户详情
      * @param houseId
      * @return
      */

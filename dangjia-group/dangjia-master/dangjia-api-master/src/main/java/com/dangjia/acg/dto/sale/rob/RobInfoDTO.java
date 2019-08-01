@@ -1,17 +1,17 @@
 package com.dangjia.acg.dto.sale.rob;
 
-import com.dangjia.acg.dto.member.CustomerRecordInFoDTO;
-import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
+import com.dangjia.acg.common.util.CommonUtil;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  *抢单详情 返回参数
  */
 @Data
+@ApiModel(description = "抢单详情 ")
 public class RobInfoDTO {
 
     private String id;
@@ -25,8 +25,17 @@ public class RobInfoDTO {
     @ApiModelProperty("数据状态 0=正常，1=删除")
     private Integer dataStatus;
 
+    @ApiModelProperty("销售id")
+    private String userId;
+
+    @ApiModelProperty("客户id")
+    private String memberId;
+
     @ApiModelProperty("线索id")
     private String clueId;
+
+    @ApiModelProperty("客户基础id")
+    private String mcId;
 
     @ApiModelProperty("房子id")
     private String houseId;
@@ -70,9 +79,34 @@ public class RobInfoDTO {
     @ApiModelProperty("城市id")
     private String cityId;
 
-    @ApiModelProperty("标签名称")
+    @ApiModelProperty("标签id")
+    private String labelIdArr;
+
+    @ApiModelProperty("建筑面积")
+    private Double buildSquare;
+    @ApiModelProperty("设计风格")
+    private String style;
+    @ApiModelProperty("外框面积")
+    private Double square;
+    @ApiModelProperty("装修类型: 0表示没有开始，1远程设计，2自带设计，3共享装修")
+    private Integer decorationType;
+
+    @ApiModelProperty("小区名")
+    private String residential;
+    @ApiModelProperty("单元号")
+    private String unit;
+
+
+    public String getHouseName() {
+        return (CommonUtil.isEmpty(getResidential()) ? "*" : getResidential())
+                + (CommonUtil.isEmpty(getBuilding()) ? "*" : getBuilding()) + "栋"
+                + (CommonUtil.isEmpty(getUnit()) ? "*" : getUnit()) + "单元"
+                + (CommonUtil.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
+    }
+
+   /* @ApiModelProperty("标签名称")
     private List<SaleMemberLabelDTO> list;
 
     @ApiModelProperty("沟通记录")
-    private List<CustomerRecordInFoDTO> data;
+    private List<CustomerRecordInFoDTO> data;*/
 }

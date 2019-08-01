@@ -359,6 +359,14 @@
         h.village_id as villageId,
         h.visit_state as visitState,
         h.create_date as createDate,
+        h.city_name as cityName,
+        h.residential as villageName,
+        h.build_square as buildSquare,
+        h.style as style,
+        h.square as square,
+        h.decoration_type as decorationType,
+        h.residential as residential,
+        h.unit as unit,
         c.owername as owerName,
         c.phone as phone,
         c.wechat as wechat,
@@ -366,12 +374,19 @@
         c.id as id,
         c.address as address,
         c.building as building,
-        c.number as number
+        c.number as number,
+        c.id as clueId,
+        c.square as
+        mc.id as mcId,
+        mc.user_id as userId,
+        mc.member_id as memberId,
+        mc.label_id_arr as labelIdArr
         from dj_house h INNER JOIN dj_clue c on h.member_id = c.member_id
+        INNER JOIN dj_member_customer mc on h.member_id = mc.member_id
         <where>
             1=1
             <if test="null != houseId">
-               and  h.id = #{houseId}
+               and  c.member_id = #{memberId}
             </if>
         </where>
 

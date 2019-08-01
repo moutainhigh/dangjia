@@ -63,7 +63,7 @@ public interface ClueMapper extends Mapper<Clue> {
     List<RobDTO> queryRobSingledata(Map<String,Object> map);
 
 
-    RobInfoDTO queryCustomerInfo(Map<String,Object> map);
+    List<RobInfoDTO> queryCustomerInfo(Map<String,Object> map);
 
 
 }

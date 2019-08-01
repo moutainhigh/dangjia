@@ -54,5 +54,33 @@ public class StoreManagementController implements StoreManagementAPI {
         return storeManagementService.BuildingList(storeId,pageDTO);
     }
 
+    /**
+     * 分配销售
+     * @param clueId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse upDateCusService(HttpServletRequest request,String clueId,String cusService) {
+        return storeManagementService.upDateCusService(clueId,cusService);
+    }
+
+
+    /**
+     * 转出客户
+     * @param request
+     * @param clueId 线索id
+     * @param mcId   客户基础id
+     * @param cityId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse upDateCustomer(HttpServletRequest request,
+                                         String clueId,
+                                         String mcId,
+                                         String cityId) {
+        return storeManagementService.upDateCustomer(clueId,mcId,cityId);
+    }
 
 }
