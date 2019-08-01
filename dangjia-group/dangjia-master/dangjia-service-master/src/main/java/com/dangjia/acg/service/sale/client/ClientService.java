@@ -150,9 +150,10 @@ public class ClientService {
             clue.setClueType(0);
             if (clueMapper.insert(clue) > 0) {
                 return ServerResponse.createBySuccessMessage("提交成功");
+            }else{
+                return ServerResponse.createByErrorMessage("提交失败");
             }
         }
-        return ServerResponse.createByErrorMessage("提交失败");
     }
 
 
