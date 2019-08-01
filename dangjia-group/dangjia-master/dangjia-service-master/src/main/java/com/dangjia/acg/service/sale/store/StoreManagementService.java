@@ -178,39 +178,42 @@ public class StoreManagementService {
 
     public ServerResponse BuildingList(String storeId,PageDTO pageDTO){
         Store store = iStoreMapper.selectByPrimaryKey(storeId);
-        Example example = new Example(ModelingVillage.class);
-        if(!CommonUtil.isEmpty(store.getVillages())) {
-            example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
-        }
-        List<ResidentialRange> residentialRanges = residentialRangeMapper.selectAll();
-        List<String> slist=new ArrayList<>();
-        for (ResidentialRange residentialRange : residentialRanges) {
-            if(!CommonUtil.isEmpty(residentialRange.getBuildingId())) {
-                slist.addAll(Arrays.asList(residentialRange.getBuildingId().split(",")));
+        if(null!=store) {
+            Example example = new Example(ModelingVillage.class);
+            if (!CommonUtil.isEmpty(store.getVillages())) {
+                example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
             }
-        }
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
-        List<ResidentialRangeDTO> residentialRangeDTOList=new ArrayList<>();
-        PageInfo pageResult = new PageInfo(modelingVillages);
-        for (ModelingVillage modelingVillage : modelingVillages) {
-            example = new Example(ResidentialBuilding.class);
-            example.createCriteria().andEqualTo(ResidentialBuilding.STORE_ID,store.getId())
-                    .andEqualTo(ResidentialBuilding.VILLAGE_ID,modelingVillage.getId())
-                    .andNotIn(ResidentialBuilding.ID,slist);
-            List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
-            if(residentialBuildings.size()>0){
-                ResidentialRangeDTO residentialRangeDTO=new ResidentialRangeDTO();
-                residentialRangeDTO.setVillageId(modelingVillage.getId());
-                residentialRangeDTO.setVillagename(modelingVillage.getName());
-                residentialRangeDTO.setList(residentialBuildings);
-                residentialRangeDTOList.add(residentialRangeDTO);
+            List<ResidentialRange> residentialRanges = residentialRangeMapper.selectAll();
+            List<String> slist = new ArrayList<>();
+            for (ResidentialRange residentialRange : residentialRanges) {
+                if (!CommonUtil.isEmpty(residentialRange.getBuildingId())) {
+                    slist.addAll(Arrays.asList(residentialRange.getBuildingId().split(",")));
+                }
             }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
+            List<ResidentialRangeDTO> residentialRangeDTOList = new ArrayList<>();
+            PageInfo pageResult = new PageInfo(modelingVillages);
+            for (ModelingVillage modelingVillage : modelingVillages) {
+                example = new Example(ResidentialBuilding.class);
+                example.createCriteria().andEqualTo(ResidentialBuilding.STORE_ID, store.getId())
+                        .andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId())
+                        .andNotIn(ResidentialBuilding.ID, slist);
+                List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
+                if (residentialBuildings.size() > 0) {
+                    ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
+                    residentialRangeDTO.setVillageId(modelingVillage.getId());
+                    residentialRangeDTO.setVillagename(modelingVillage.getName());
+                    residentialRangeDTO.setList(residentialBuildings);
+                    residentialRangeDTOList.add(residentialRangeDTO);
+                }
+            }
+            pageResult.setList(residentialRangeDTOList);
+            if (residentialRangeDTOList.size() > 0) {
+                return ServerResponse.createBySuccess("查询成功", pageResult);
+            }
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        pageResult.setList(residentialRangeDTOList);
-        if(residentialRangeDTOList.size()>0) {
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        }
-        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        return ServerResponse.createByErrorMessage("门店不存在");
     }
 }
