@@ -147,7 +147,7 @@ public class AchievementService {
                     to.setMeterRoyalty(mroMap.get(key));
                 }
             }
-            to.setArrRoyalty(arrRoyalty);
+//            to.setArrRoyalty(arrRoyalty);
         }
 
         achievementDataDTO.setAchievementDataDTOS(queryUserId);

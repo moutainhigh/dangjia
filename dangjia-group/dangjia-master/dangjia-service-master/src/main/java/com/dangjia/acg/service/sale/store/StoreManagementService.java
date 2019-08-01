@@ -8,13 +8,17 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.sale.residential.ResidentialRangeDTO;
 import com.dangjia.acg.dto.sale.store.StoreUserDTO;
+import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
+import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.sale.residential.ResidentialBuildingMapper;
 import com.dangjia.acg.mapper.sale.residential.ResidentialRangeMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
+import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
 import com.dangjia.acg.modle.store.Store;
@@ -54,7 +58,10 @@ public class StoreManagementService {
     private IStoreMapper iStoreMapper;
     @Autowired
     private ResidentialRangeMapper residentialRangeMapper;
-
+    @Autowired
+    private ICustomerMapper iCustomerMapper;
+    @Autowired
+    private ClueMapper clueMapper;
     /**
      * 门店管理页
      *
@@ -220,5 +227,73 @@ public class StoreManagementService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         return ServerResponse.createByErrorMessage("门店不存在");
+    }
+
+
+    /**
+     * 分配销售
+     * @param clueId
+     * @return
+     */
+    public ServerResponse upDateCusService(String clueId, String cusSerice) {
+        try {
+            Clue clue = new Clue();
+            clue.setCusService(cusSerice);
+            clue.setId(clueId);
+            clue.setModifyDate(new Date());
+            clueMapper.updateByPrimaryKeySelective(clue);
+            return ServerResponse.createBySuccessMessage("修改成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("修改成功");
+        }
+    }
+
+    /**
+     * 转出客户
+     * @param clueId 线索id
+     * @param mcId   客户基础id
+     * @param cityId 城市id
+     * @return
+     */
+    public ServerResponse upDateCustomer(String clueId,String mcId,String cityId) {
+
+        try {
+            Clue clue = new Clue();
+            Customer customer = new Customer();
+            clue.setCusService(null);
+            clue.setStoreId(null);
+            if (!CommonUtil.isEmpty(clueId)) {
+                clue.setId(clueId);
+
+            }
+            if (!CommonUtil.isEmpty(cityId)) {
+                clue.setCityId(cityId);
+                customer.setCityId(cityId);
+            }
+            clue.setModifyDate(new Date());
+            clue.setStage(1);
+            //转出
+            clue.setTurnStatus(1);
+            //转出修改线索表
+            clueMapper.updateByPrimaryKeySelective(clue);
+
+            if (!CommonUtil.isEmpty(mcId)) {
+                customer.setId(mcId);
+            }
+            customer.setModifyDate(new Date());
+            customer.setUserId(null);
+            customer.setStoreId(null);
+            customer.setStage(1);
+            //转出
+            customer.setTurnStatus(1);
+            //转出修改客户基础表
+            iCustomerMapper.updateByPrimaryKey(customer);
+            return ServerResponse.createBySuccessMessage("转出成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("转出成功");
+        }
+
     }
 }

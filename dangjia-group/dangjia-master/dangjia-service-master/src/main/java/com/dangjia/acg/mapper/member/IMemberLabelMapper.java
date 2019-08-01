@@ -2,6 +2,7 @@ package com.dangjia.acg.mapper.member;
 
 import com.dangjia.acg.dto.member.CustomerRecordInFoDTO;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
+import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import com.dangjia.acg.modle.member.MemberLabel;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -53,10 +54,19 @@ public interface IMemberLabelMapper extends Mapper<MemberLabel> {
 
 
     /**
-     * 根据id查询标签
+     * 根据id查询沟通记录
      * @param memberId
      * @return
      */
     List<CustomerRecordInFoDTO> queryDescribes(@Param("memberId") String memberId);
+
+
+    /**
+     * 查询大管家信息
+     * @param houseId
+     * @return
+     */
+    WorkerTypeDTO queryWorkerType(@Param("houseId") String houseId);
+
 }
 
