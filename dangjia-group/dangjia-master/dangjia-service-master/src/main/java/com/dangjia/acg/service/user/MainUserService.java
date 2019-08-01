@@ -9,6 +9,7 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.user.UserRoleDTO;
 import com.dangjia.acg.dto.user.UserRolesVO;
 import com.dangjia.acg.dto.user.UserSearchDTO;
+import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.system.IDepartmentMapper;
 import com.dangjia.acg.mapper.system.IJobMapper;
 import com.dangjia.acg.mapper.user.RoleMapper;
@@ -49,14 +50,18 @@ public class MainUserService {
     @Autowired
     private IJobMapper jobMapper;
 
+    @Autowired
+    private IStoreUserMapper iStoreUserMapper;
     /****
      * 注入配置
      */
     @Autowired
     private RedisClient redisClient;
 
-    public ServerResponse getUsers(UserSearchDTO userSearch, PageDTO pageDTO,Integer isJob) {
+    public ServerResponse getUsers(String userID,UserSearchDTO userSearch, PageDTO pageDTO,Integer isJob) {
         // 时间处理
+
+        userID=iStoreUserMapper.getVisitUser(userID);
         if (null != userSearch) {
             if (StringUtils.isNotEmpty(userSearch.getInsertTimeStart())
                     && StringUtils.isEmpty(userSearch.getInsertTimeEnd())) {
@@ -77,7 +82,7 @@ public class MainUserService {
             }
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<UserRoleDTO> urList = userMapper.getUsers(userSearch,isJob);
+        List<UserRoleDTO> urList = userMapper.getUsers(userID,userSearch,isJob);
         // 获取分页查询后的数据
         PageInfo pageInfo = new PageInfo(urList);
         // 将角色名称提取到对应的字段中

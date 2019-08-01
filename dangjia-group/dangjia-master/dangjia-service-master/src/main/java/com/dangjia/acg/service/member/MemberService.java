@@ -20,6 +20,7 @@ import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.*;
 import com.dangjia.acg.mapper.other.ICityMapper;
+import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -66,7 +67,7 @@ public class MemberService {
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
-    private StoreUserServices storeUserServices;
+    private IStoreUserMapper iStoreUserMapper;
     @Autowired
     private ICityMapper iCityMapper;
     @Autowired
@@ -595,6 +596,7 @@ public class MemberService {
      */
     public ServerResponse getMemberList(PageDTO pageDTO, String cityId,String userKey ,Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
         try {
+            userKey=iStoreUserMapper.getVisitUser(userKey);
             logger.info("权限返回结果 id:" + userKey);
             List<String> childsLabelIdList = new ArrayList<>();
             if (StringUtils.isNotBlank(parentId)) {
@@ -640,17 +642,19 @@ public class MemberService {
                 mcDTO.setMobile(member.getMobile());
                 mcDTO.setReferrals(member.getReferrals());
 
-                Member referralsMember = memberMapper.selectByPrimaryKey(member.getReferrals());
-                if (referralsMember != null) {
-                    mcDTO.setReferralsMobile(referralsMember.getMobile());
-                } else {
-                    mcDTO.setReferralsMobile("");
+                if(!CommonUtil.isEmpty(member.getReferrals())){
+                    Member referralsMember = memberMapper.selectByPrimaryKey(member.getReferrals());
+                    if (referralsMember != null) {
+                        mcDTO.setReferralsMobile(referralsMember.getMobile());
+                    } else {
+                        mcDTO.setReferralsMobile("");
+                    }
                 }
                 mcDTO.setSource("来源未知");
                 mcDTO.setStage(customer.getStage());
                 mcDTO.setUserId(customer.getUserId());
                 mcDTO.setCreateDate(member.getCreateDate());
-                if (customer.getUserId() != null) {
+                if(!CommonUtil.isEmpty(customer.getUserId())){
                     MainUser mainUser = userMapper.selectByPrimaryKey(customer.getUserId());
                     if(null!=mainUser) {
                         mcDTO.setUserName(mainUser.getUsername());

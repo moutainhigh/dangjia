@@ -1123,7 +1123,7 @@ public class MendOrderService {
             mendMateriel.setUnitName(unitName);
             mendMateriel.setProductType(forMasterAPI.getGoods(house.getCityId(), product.getGoodsId()).getType());//0：材料；1：包工包料
         }
-        ServerResponse serverResponse = unitAPI.getUnitById(request, product.getConvertUnit());
+        ServerResponse serverResponse = unitAPI.getUnitById(request,house.getCityId(), product.getConvertUnit());
         Unit unit;
         if (serverResponse.getResultObj() instanceof JSONObject) {
             unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);

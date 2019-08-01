@@ -66,6 +66,7 @@ public interface UnitAPI {
     @PostMapping("/basics/unit/selectunitById")
     @ApiOperation(value = "根据id查询单位对象", notes = "根据id查询单位对象")
     ServerResponse getUnitById(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("cityId") String cityId,
                                   @RequestParam("unitId") String unitId);
 
 }
