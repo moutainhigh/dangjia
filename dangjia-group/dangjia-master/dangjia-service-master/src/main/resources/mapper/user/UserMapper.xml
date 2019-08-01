@@ -60,10 +60,17 @@
             AND a.is_job=0
         </if>
         <if test="isJob==2">
-            AND (
-            b.name like CONCAT('%','销售','%') or
-            b.name like CONCAT('%','工程部经理','%')
-            )
+            <choose>
+                <when test="userKey!=null and userKey!=''">
+                    AND FIND_IN_SET(a.id,#{userKey})
+                </when>
+                <otherwise>
+                    AND (
+                        b.name like CONCAT('%','销售','%') or
+                        b.name like CONCAT('%','工程部经理','%')
+                    )
+                </otherwise>
+            </choose>
         </if>
         GROUP BY a.id
         ORDER BY a.create_date DESC

@@ -88,7 +88,8 @@ public class MainUserController implements MainUserAPI {
     @Override
     @ApiMethod
     public ServerResponse getUsers(HttpServletRequest request, PageDTO pageDTO, UserSearchDTO userSearch,Integer isJob) {
-        return userService.getUsers(userSearch, pageDTO,isJob);
+        String userID = request.getParameter(Constants.USERID);
+        return userService.getUsers(userID,userSearch, pageDTO,isJob);
     }
 
     /**
