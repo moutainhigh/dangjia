@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  * 客服跟进表（记录每个业主的跟进阶段）
@@ -81,4 +82,10 @@ public class Customer extends BaseEntity {
     @Desc(value = "城市id")
     @ApiModelProperty("城市id")
     private String cityId;
+
+
+    @Column(name = "report_date")
+    @Desc(value = "报备时间")
+    @ApiModelProperty("报备时间")
+    private Date reportDate;
 }
