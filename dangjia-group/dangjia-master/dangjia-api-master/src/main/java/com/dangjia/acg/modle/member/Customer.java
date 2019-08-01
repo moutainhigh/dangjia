@@ -58,6 +58,12 @@ public class Customer extends BaseEntity {
     @ApiModelProperty("门店id")
     private String storeId;
 
+    @Column(name = "phase_status")
+    @Desc(value = "阶段 0:线索阶段 1:客户阶段")
+    @ApiModelProperty("阶段 0:线索阶段 1:客户阶段")
+    private Integer phaseStatus;
+
+
 
     @Column(name = "clue_type")
     @Desc(value = "线索类型 1：跨域下单  0：正常")

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.sale.residential.ResidentialBuildingMapper">
+
+    <select id="selectSingleResidentialBuilding" resultType="com.dangjia.acg.modle.sale.residential.ResidentialBuilding">
+        select
+            id,
+            create_date as createDate,
+            modify_datedata_status as modifyDatedataStatus,
+            building_id as buildingId,
+            user_id as userId
+        from dj_sale_residential_building
+        WHERE store_id=#{storeId}
+        and building LIKE CONCAT('%',#{building},'%')
+        and village_id=#{villageId}
+    </select>
+
+</mapper>

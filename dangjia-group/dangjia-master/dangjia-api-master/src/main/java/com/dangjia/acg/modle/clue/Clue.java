@@ -96,6 +96,11 @@ public class Clue extends BaseEntity {
     @ApiModelProperty("线索类型 1：跨域下单  0：正常")
     private Integer clueType;
 
+    @Column(name = "phase_status")
+    @Desc(value = "阶段 0:线索阶段 1:客户阶段")
+    @ApiModelProperty("阶段 0:线索阶段 1:客户阶段")
+    private Integer phaseStatus;
+
 
     @Column(name = "turn_status")
     @Desc(value = "阶段 0:未转出阶段 1:转出阶段")
