@@ -2,7 +2,6 @@ package com.dangjia.acg.modle.member;
 
 import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
-import com.dangjia.acg.dto.sale.client.CustomerIndexDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -58,4 +57,22 @@ public class Customer extends BaseEntity {
     @Desc(value = "门店id")
     @ApiModelProperty("门店id")
     private String storeId;
+
+
+    @Column(name = "clue_type")
+    @Desc(value = "线索类型 1：跨域下单  0：正常")
+    @ApiModelProperty("线索类型 1：跨域下单  0：正常")
+    private Integer clueType;
+
+
+    @Column(name = "turn_status")
+    @Desc(value = "阶段 0:未转出阶段 1:转出阶段")
+    @ApiModelProperty("阶段 0:未转出阶段 1:转出阶段")
+    private Integer turnStatus;
+
+
+    @Column(name = "city_id")
+    @Desc(value = "城市id")
+    @ApiModelProperty("城市id")
+    private String cityId;
 }
