@@ -4,7 +4,12 @@
 
     <select id="selectSingleResidentialRange" resultType="com.dangjia.acg.modle.sale.residential.ResidentialRange">
         select
-          id,create_date,modify_date,data_status,building_id,user_id
+          id,
+          create_date as createDate,
+          modify_datedata as modifyDatedata,
+          status,
+          building_id as buildingId,
+          user_id as userId
         FROM dj_sale_residential_range
         where building_id LIKE CONCAT('%',#{buildingId},'%')
     </select>

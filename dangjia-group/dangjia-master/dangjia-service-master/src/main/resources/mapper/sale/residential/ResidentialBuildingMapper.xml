@@ -6,9 +6,11 @@
         select
             id,
             create_date as createDate,
-            modify_datedata_status as modifyDatedataStatus,
-            building_id as buildingId,
-            user_id as userId
+            modify_datedata as modifyDatedata,
+            status,
+            village_id as villageId,
+            building,
+            store_id as storeId
         from dj_sale_residential_building
         WHERE store_id=#{storeId}
         and building LIKE CONCAT('%',#{building},'%')
