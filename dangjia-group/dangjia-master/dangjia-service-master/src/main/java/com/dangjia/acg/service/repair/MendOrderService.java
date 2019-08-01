@@ -36,7 +36,6 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.member.MemberInfo;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -106,8 +105,6 @@ public class MendOrderService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private UnitAPI unitAPI;
-    @Autowired
-    private IMemberInfoMapper memberInfoMapper;
 
 
     /**
