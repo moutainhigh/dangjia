@@ -36,8 +36,6 @@ public class StoreUserServices {
     @Autowired
     private ConfigUtil configUtil;
 
-    @Autowired
-    private RedisClient redisClient;
 
     public ServerResponse addStoreUser(String userId, String storeId, Integer type) {
         if (CommonUtil.isEmpty(userId)) {
@@ -121,46 +119,4 @@ public class StoreUserServices {
             return ServerResponse.createByErrorMessage("删除失败");
         }
     }
-
-    /**
-     * 获取当前登陆人是否为城市管理者/门店店长/销售人员
-     * @param userId 当前登陆人ID
-     * @return
-     */
-    public String getStoreUser(String userId){
-        List<String> users=new ArrayStack();
-        //获取是否为店长，可看门店所有销售的客户
-        Example example = new Example(Store.class);
-        example.createCriteria().andEqualTo(Store.USER_ID, userId)
-                .andEqualTo(Store.DATA_STATUS, 0);
-        List<Store> stores = iStoreMapper.selectByExample(example);
-        if(stores.size()>0){
-            for (Store store : stores) {
-                example = new Example(StoreUser.class);
-                example.createCriteria().andEqualTo(StoreUser.STORE_ID, store.getId())
-                        .andEqualTo(StoreUser.DATA_STATUS, 0);
-                List<StoreUser> storeUserList = iStoreUserMapper.selectByExample(example);
-                for (StoreUser storeUser : storeUserList) {
-                    users.add(storeUser.getUserId());
-                }
-            }
-            if(users.size()>0){
-                return StringUtils.join(users,",");
-            }
-        }else{
-            //判断是否为销售，只能看自己的客户
-            example = new Example(StoreUser.class);
-            example.createCriteria().andEqualTo(StoreUser.USER_ID, userId)
-                    .andEqualTo(StoreUser.DATA_STATUS, 0);
-            List<StoreUser> storeUserList = iStoreUserMapper.selectByExample(example);
-            if(storeUserList.size()>0){
-                return userId;
-            }
-        }
-        //总店，根据组织架构设置的城市控制查所有用户
-        //城市管理者，根据组织架构设置的城市控制查所有用户（设置指定城市来控制）
-        //既不是店长又不是销售，默认定为空，查所有
-        return null;
-    }
-
 }
