@@ -107,7 +107,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                     dj_repair_mend_order o
                     INNER JOIN dj_repair_mend_materiel m ON o.id = m.mend_order_id
                 WHERE
-                    m.product_id =#{productId} and  o.house_id= #{houseId}
+                    m.product_id =#{productId} and  o.house_id= #{houseId} and o.state!=0
                 GROUP BY
                     o.id
                 ) UNION ALL
