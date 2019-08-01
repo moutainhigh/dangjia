@@ -195,6 +195,7 @@ public class ActuaryOpeService {
                 goodsItemDTO.setBackCount(budgetWorker.getBackCount());
                 goodsItemDTO.setRepairCount(budgetWorker.getRepairCount());
                 goodsItemDTO.setSurCount(budgetWorker.getShopCount() - budgetWorker.getBackCount() + budgetWorker.getRepairCount());
+                goodsItemDTO.setTolPrice(goodsItemDTO.getSurCount()*goodsItemDTO.getPrice());
                 goodsItemDTOList.add(goodsItemDTO);
             }
             budgetItemDTO.setGoodsItemDTOList(goodsItemDTOList);

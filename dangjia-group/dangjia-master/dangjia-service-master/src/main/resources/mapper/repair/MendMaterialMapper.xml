@@ -114,7 +114,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 (
                 SELECT
                     o.id orderId,
-                    '5' type,
+                    '7' type,
                     o.house_id,
                     o.number,
                     o.create_date createDate,

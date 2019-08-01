@@ -226,6 +226,8 @@ public class WarehouseService {
                     for (Warehouse warehouse : warehouseList) {
                         if (!categoryId.equals(warehouse.getCategoryId())) continue;
                         WarehouseDTO warehouseDTO = new WarehouseDTO();
+                        warehouse.setOwnerBack((warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
+                        warehouse.setWorkBack((warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                         BeanUtils.beanToBean(warehouse, warehouseDTO);
                         warehouse.setOwnerBack((warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
                         warehouse.setWorkBack((warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
