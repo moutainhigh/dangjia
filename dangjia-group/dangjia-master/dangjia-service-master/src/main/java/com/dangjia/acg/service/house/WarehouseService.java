@@ -347,6 +347,8 @@ public class WarehouseService {
      * @return
      */
     public ServerResponse getWarehouseData(String houseId, String gid, Integer type){
+
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         if(type==0){
             Example example = new Example(Warehouse.class);
             Example.Criteria criteria = example.createCriteria();
@@ -357,6 +359,10 @@ public class WarehouseService {
             warehouseDTO.put("type",type);
             if(warehouseList.size()>0) {
                 for (Warehouse warehouse : warehouseList) {
+                    warehouseDTO.put("name", warehouse.getProductName());//商品名字
+                    warehouseDTO.put("image", address+warehouse.getImage());//图片地址
+
+                    warehouseDTO.put("repairCount", warehouse.getRepairCount());//补货数
                     warehouseDTO.put("repairCount", warehouse.getRepairCount());//补货数
                     warehouseDTO.put("shopCount", warehouse.getShopCount());//购买数
                     warehouseDTO.put("receive", warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));//收货数
@@ -375,6 +381,8 @@ public class WarehouseService {
             BudgetWorker budgetWorker= budgetWorkerAPI.getHouseBudgetWorkerId(house.getCityId(),house.getId(),gid);
             Map warehouseDTO = new HashMap();
             if(budgetWorker!=null) {
+                warehouseDTO.put("name", budgetWorker.getName());//商品名字
+                warehouseDTO.put("image", address+budgetWorker.getImage());//图片地址
                 warehouseDTO.put("type", type);
                 warehouseDTO.put("repairCount", budgetWorker.getRepairCount());//补人工数
                 warehouseDTO.put("shopCount", budgetWorker.getShopCount() + budgetWorker.getRepairCount());//购买数
