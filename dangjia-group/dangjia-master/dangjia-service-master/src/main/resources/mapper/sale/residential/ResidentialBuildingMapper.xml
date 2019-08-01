@@ -6,7 +6,7 @@
         select
             id,
             create_date as createDate,
-            modify_datedata as modifyDatedata,
+            modify_date as modifyDate,
             status,
             village_id as villageId,
             building,
