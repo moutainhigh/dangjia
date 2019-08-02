@@ -500,6 +500,40 @@ public class EngineerService {
         return ServerResponse.createBySuccess("查询成功", mapList);
     }
 
+
+    /**
+     * 查看工序(业主申请的供需)
+     */
+    public ServerResponse getHouseFlowList(String houseId) {
+        House house = houseMapper.selectByPrimaryKey(houseId);
+        Example example = new Example(HouseFlow.class);
+        example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId);
+        example.orderBy(HouseFlow.SORT).desc();
+        List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        for (HouseFlow houseFlow : houseFlowList) {
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+            Map<String, Object> map = new HashMap<>();
+            map.put("houseFlowId", houseFlow.getId());
+            map.put("houseId", houseFlow.getHouseId());
+            map.put("workerTypeId", houseFlow.getWorkerTypeId());
+            map.put("workerTypeName", workerType.getName());
+            map.put("state", houseFlow.getWorkType()==1?0:1);
+            map.put("disable", false);
+            if(!CommonUtil.isEmpty(house.getCustomEdit())){
+                String[] workerTypeArr = house.getCustomSort().split(",");
+                for (String s : workerTypeArr) {
+                    if(houseFlow.getWorkerTypeId().equals(s)){
+                        map.put("disable", true);
+                        break;
+                    }
+                }
+            }
+            mapList.add(map);
+        }
+        return ServerResponse.createBySuccess("查询成功", mapList);
+    }
+
     /**
      * 工匠钱包 信息
      */

@@ -562,6 +562,7 @@ public class HouseService {
                 srcHouse.setCustomSort(house.getCustomSort());
             }
             srcHouse.setOptionalLabel(house.getOptionalLabel());
+            srcHouse.setCustomEdit(house.getCustomEdit());
             iHouseMapper.updateByPrimaryKeySelective(srcHouse);
             return ServerResponse.createBySuccessMessage("保存成功");
         } catch (Exception e) {
