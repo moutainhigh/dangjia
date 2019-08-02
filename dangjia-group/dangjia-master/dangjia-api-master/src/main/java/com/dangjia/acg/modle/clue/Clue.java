@@ -112,4 +112,10 @@ public class Clue extends BaseEntity {
     @Desc(value = "城市id")
     @ApiModelProperty("城市id")
     private String cityId;
+
+    @Column(name = "tips")
+    @Desc(value = "提示 0：无提示 1：提示")
+    @ApiModelProperty("提示 0：无提示 1：提示")
+    private String tips;
+
 }

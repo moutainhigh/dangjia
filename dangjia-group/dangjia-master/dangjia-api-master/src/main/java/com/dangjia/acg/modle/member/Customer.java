@@ -88,4 +88,10 @@ public class Customer extends BaseEntity {
     @Desc(value = "报备时间")
     @ApiModelProperty("报备时间")
     private Date reportDate;
+
+
+    @Column(name = "tips")
+    @Desc(value = "提示 0：无提示 1：提示")
+    @ApiModelProperty("提示 0：无提示 1：提示")
+    private String tips;
 }

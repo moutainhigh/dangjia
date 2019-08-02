@@ -52,7 +52,8 @@ public interface StoreManagementAPI {
     @ApiOperation(value = "小区楼栋列表", notes = "小区楼栋列表")
     ServerResponse BuildingList(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("storeId") String storeId,
-                                @RequestParam("pageDTO") PageDTO pageDTO);
+                                @RequestParam("pageDTO") PageDTO pageDTO,
+                                @RequestParam("userId")  String userId);
 
     @PostMapping(value = "sale/store/upDateCusService")
     @ApiOperation(value = "分配销售", notes = "分配销售")

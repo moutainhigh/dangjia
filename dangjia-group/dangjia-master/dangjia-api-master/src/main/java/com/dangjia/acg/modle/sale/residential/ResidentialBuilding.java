@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,4 +39,7 @@ public class ResidentialBuilding extends BaseEntity {
     @Desc(value = "门店id")
     @ApiModelProperty("门店id")
     private String storeId;
+
+    @Transient
+    private String Checked="0";//是否被选中 1:被选中 0：未被选中
 }

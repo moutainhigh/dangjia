@@ -186,36 +186,55 @@ public class StoreManagementService {
     }
 
 
-    public ServerResponse BuildingList(String storeId, PageDTO pageDTO) {
+    public ServerResponse BuildingList(String storeId, PageDTO pageDTO ,String userId) {
         Store store = iStoreMapper.selectByPrimaryKey(storeId);
         if (null != store) {
-            Example example = new Example(ModelingVillage.class);
-            if (!CommonUtil.isEmpty(store.getVillages())) {
-                example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
-            }
-            List<ResidentialRange> residentialRanges = residentialRangeMapper.selectAll();
+            Example example=new Example(ResidentialRange.class);
+            example.createCriteria().andNotEqualTo(ResidentialRange.USER_ID,userId);//过滤已分配楼栋
+            List<ResidentialRange> residentialRanges = residentialRangeMapper.selectByExample(example);
             List<String> slist = new ArrayList<>();
             for (ResidentialRange residentialRange : residentialRanges) {
                 if (!CommonUtil.isEmpty(residentialRange.getBuildingId())) {
                     slist.addAll(Arrays.asList(residentialRange.getBuildingId().split(",")));
                 }
             }
+            example = new Example(ModelingVillage.class);
+            if (!CommonUtil.isEmpty(store.getVillages())) {
+                example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
+            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
-            List<ResidentialRangeDTO> residentialRangeDTOList = new ArrayList<>();
+            List residentialRangeDTOList = new ArrayList();
+            example=new Example(ResidentialRange.class);
+            example.createCriteria().andEqualTo(ResidentialRange.USER_ID,userId);
+            List<ResidentialRange> residentialRanges1 = residentialRangeMapper.selectByExample(example);
+            List<String> slist1 = new ArrayList<>();
+            for (ResidentialRange residentialRange : residentialRanges1) {
+                if (!CommonUtil.isEmpty(residentialRange.getBuildingId())) {
+                    slist1.addAll(Arrays.asList(residentialRange.getBuildingId().split(",")));
+                }
+            }
             PageInfo pageResult = new PageInfo(modelingVillages);
             for (ModelingVillage modelingVillage : modelingVillages) {
                 example = new Example(ResidentialBuilding.class);
                 Example.Criteria criteria = example.createCriteria();
                 criteria.andEqualTo(ResidentialBuilding.STORE_ID, store.getId());
                 criteria.andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId());
-                if (slist.size() > 0)
+                if (slist.size() > 0) {
                     criteria.andNotIn(ResidentialBuilding.ID, slist);
+                }
                 List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
                 if (residentialBuildings.size() > 0) {
                     ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
                     residentialRangeDTO.setVillageId(modelingVillage.getId());
                     residentialRangeDTO.setVillagename(modelingVillage.getName());
+                    for (ResidentialBuilding residentialBuilding : residentialBuildings) {
+                        for (String s : slist1) {
+                            if(s.equals(residentialBuilding.getId())){
+                                residentialBuilding.setChecked("1");
+                            }
+                        }
+                    }
                     residentialRangeDTO.setList(residentialBuildings);
                     residentialRangeDTOList.add(residentialRangeDTO);
                 }
