@@ -299,9 +299,9 @@ public class DateUtil implements AutoCloseable, Serializable {
     public static Date getMonthLast(Date date) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-        cal.set(Calendar.HOUR_OF_DAY, 24);
+//        cal.set(Calendar.HOUR_OF_DAY, 24);
         cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }
@@ -1011,9 +1011,9 @@ public class DateUtil implements AutoCloseable, Serializable {
      */
     public static Date getTimesMonthnight() {
         Calendar cal = Calendar.getInstance();
-        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-        cal.set(Calendar.HOUR_OF_DAY, 24);
+//        cal.set(Calendar.HOUR_OF_DAY, 24);
         cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }

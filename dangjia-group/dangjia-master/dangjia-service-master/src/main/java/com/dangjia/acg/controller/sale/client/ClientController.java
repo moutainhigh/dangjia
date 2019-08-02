@@ -42,6 +42,19 @@ public class ClientController implements ClientAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse setReported(HttpServletRequest request, String id, Integer phaseStatus) {
+        return customerService.setReported(id,phaseStatus);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setFollow(HttpServletRequest request, String id, Integer phaseStatus) {
+        return customerService.setFollow(id,phaseStatus);
+    }
+
+
+    @Override
+    @ApiMethod
     public ServerResponse clientPage(HttpServletRequest request, String userToken) {
         return customerService.clientPage(userToken);
     }

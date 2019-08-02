@@ -298,6 +298,7 @@ public class ClueService {
                             //customer.setModifyDate(clueTalk.getModifyDate());
                             customer.setCreateDate(clueTalk.getCreateDate());
                             customer.setStage(1);
+                            customer.setPhaseStatus(1);
                             customer.setStoreId(clue.getStoreId());
                             iCustomerMapper.insert(customer);
                         }
@@ -312,6 +313,7 @@ public class ClueService {
                     //customer.setModifyDate(clueTalk.getModifyDate());
                     customer.setCreateDate(clue.getCreateDate());
                     customer.setStage(1);
+                    customer.setPhaseStatus(1);
                     customer.setStoreId(clue.getStoreId());
                     iCustomerMapper.insert(customer);
                 }
@@ -319,6 +321,7 @@ public class ClueService {
 //                clue.setDataStatus(1);
                 clue.setStage(4);
                 clue.setMemberId(member.getId());
+                clue.setPhaseStatus(1);
                 clueMapper.updateByPrimaryKeySelective(clue);
                 //操作dj_member表
                 member.setCreateDate(clue.getCreateDate());
@@ -334,6 +337,7 @@ public class ClueService {
                             customer.setMemberId(member.getId());
                             customer.setDataStatus(0);
                             customer.setStage(0);
+                            customer.setPhaseStatus(1);
                             customer.setStoreId(store.getId());
                             iCustomerMapper.insert(customer);
                             break;

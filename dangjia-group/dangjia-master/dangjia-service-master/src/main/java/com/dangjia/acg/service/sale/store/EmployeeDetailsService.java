@@ -71,6 +71,13 @@ public class EmployeeDetailsService {
 
 
     public ServerResponse setSalesRange(String userId, String buildingId){
+        Example example=new Example(ResidentialRange.class);
+        example.createCriteria().andEqualTo(ResidentialRange.USER_ID,userId)
+                .andEqualTo(ResidentialRange.BUILDING_ID,buildingId);
+        List<ResidentialRange> residentialRanges = residentialRangeMapper.selectByExample(example);
+        if(residentialRanges.size()>0){
+            return ServerResponse.createByErrorMessage("请勿重复提交");
+        }
         ResidentialRange residentialRange=new ResidentialRange();
         residentialRange.setBuildingId(buildingId);
         residentialRange.setUserId(userId);

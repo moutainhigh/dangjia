@@ -115,6 +115,13 @@ public class ClientService {
                 return ServerResponse.createByErrorMessage(String.valueOf(time));
             }
         }
+        List<Customer> customerGroupBy = iCustomerMapper.getCustomerGroupBy(clue.getPhone());
+        for (Customer customer : customerGroupBy) {
+            if (!CommonUtil.isEmpty(customer.getReportDate()) && DateUtil.getDiffDays(new Date(), customer.getReportDate()) < 7) {
+                long time = System.currentTimeMillis() - customer.getReportDate().getTime();
+                return ServerResponse.createByErrorMessage(String.valueOf(time));
+            }
+        }
         //如果客户已录入过则把录入的房子变为意向房子
         Clue clue1 = clueMapper.getClue(clue.getPhone(), user.getId());
         if (null != clue1) {
@@ -183,6 +190,13 @@ public class ClientService {
         for (Store store : stores) {
             //如果转出的该客户为自己门店范围内未录入的（野生），则记录进店长的线索阶段（给店长系统推送），然后仅分配给内场
             if (GaoDeUtils.isInPolygon(modelingVillage.getLocationx() + "," + modelingVillage.getLocationy(), store.getScopeItude())) {
+                ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectSingleResidentialBuilding(store.getId(), clue.getBuilding(), villageId);
+                if(null!=residentialBuilding){
+                    ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
+                    if(null!=residentialRange){
+                        clue.setCusService(residentialRange.getUserId());
+                    }
+                }
                 clue.setCusService(store.getUserId());
                 clue.setStoreId(store.getId());
                 clue.setClueType(1);
@@ -215,6 +229,58 @@ public class ClientService {
         }
         return ServerResponse.createByErrorMessage("提交失败");
     }
+
+
+    /**
+     * 报备
+     * @param id
+     * @param phaseStatus 0:线索阶段 1:客户阶段
+     * @return
+     */
+    public ServerResponse setReported(String id, Integer phaseStatus)  {
+        if(phaseStatus==0){
+            Clue clue1 = clueMapper.selectByPrimaryKey(id);
+            if(CommonUtil.isEmpty(clue1.getReportDate())){
+                return ServerResponse.createByErrorMessage("已报备");
+            }
+            Clue clue=new Clue();
+            clue.setId(id);
+            clue.setReportDate(new Date());
+            clueMapper.updateByPrimaryKeySelective(clue);
+        }else if(phaseStatus==1){
+            Customer customer1 = iCustomerMapper.selectByPrimaryKey(id);
+            if(CommonUtil.isEmpty(customer1.getReportDate())){
+                return ServerResponse.createByErrorMessage("已报备");
+            }
+            Customer customer=new Customer();
+            customer.setId(id);
+            customer.setReportDate(new Date());
+            iCustomerMapper.updateByPrimaryKeySelective(customer);
+        }
+        return ServerResponse.createBySuccessMessage("报备成功");
+    }
+
+    /**
+     * 放弃跟进
+     * @param id
+     * @param phaseStatus
+     * @return
+     */
+    public ServerResponse setFollow(String id, Integer phaseStatus)  {
+        if(phaseStatus==0){
+            Clue clue=new Clue();
+            clue.setId(id);
+            clue.setStage(2);
+            clueMapper.updateByPrimaryKeySelective(clue);
+        }else if(phaseStatus==1){
+            Customer customer=new Customer();
+            customer.setId(id);
+            customer.setStage(2);
+            iCustomerMapper.updateByPrimaryKeySelective(customer);
+        }
+        return ServerResponse.createBySuccessMessage("操作成功");
+    }
+
 
 
     /**

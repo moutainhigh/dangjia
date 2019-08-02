@@ -104,6 +104,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where member_id = #{memberId}
     </update>
 
+    <select id="getCustomerGroupBy" resultType="com.dangjia.acg.modle.member.Customer">
+        select * from dj_member_customer mc
+        inner join dj_member m
+        on mc.member_id=m.id
+        where m.mobile=#{mobile}
+    </select>
 
 </mapper>
 
