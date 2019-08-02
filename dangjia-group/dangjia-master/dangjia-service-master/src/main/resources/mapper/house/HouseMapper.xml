@@ -385,7 +385,7 @@
         h.city_name as cityName,
         h.budget_ok as budgetOk,
         h.designer_ok as designerOk,
-        h.custom_edit as customEdit
+        h.custom_edit as customEdit,
         h.custom_sort as customSort,
         m.nick_name as name,
         m.id as memberId,
