@@ -1610,9 +1610,22 @@ public class HouseService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("更新失败");
         }
-
     }
-
+    /**
+     * 房子申请修改未进场的工序还原
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse updateCustomEdit(String houseId) {
+        try {
+            House house = iHouseMapper.selectByPrimaryKey(houseId);
+            house.setCustomEdit(null);
+            iHouseMapper.updateByPrimaryKey(house);
+            return ServerResponse.createBySuccessMessage("更新成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("更新失败");
+        }
+    }
     public ServerResponse getHistoryWorker(String houseId, String workerTypeId, String workId, PageDTO pageDTO) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
