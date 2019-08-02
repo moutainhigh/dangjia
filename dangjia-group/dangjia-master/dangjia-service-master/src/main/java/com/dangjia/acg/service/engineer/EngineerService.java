@@ -508,7 +508,7 @@ public class EngineerService {
         House house = houseMapper.selectByPrimaryKey(houseId);
         Example example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId);
-        example.orderBy(HouseFlow.SORT).desc();
+        example.orderBy(HouseFlow.SORT).asc();
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (HouseFlow houseFlow : houseFlowList) {
@@ -519,7 +519,7 @@ public class EngineerService {
             map.put("workerTypeId", houseFlow.getWorkerTypeId());
             map.put("workerTypeName", workerType.getName());
             map.put("state", houseFlow.getWorkType()==1?0:1);
-            map.put("disable", false);
+            map.put("disable", houseFlow.getWorkType()==1?false:true);
             if(!CommonUtil.isEmpty(house.getCustomEdit())){
                 String[] workerTypeArr = house.getCustomSort().split(",");
                 for (String s : workerTypeArr) {
