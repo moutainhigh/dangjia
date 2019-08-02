@@ -519,7 +519,7 @@ public class EngineerService {
             map.put("workerTypeId", houseFlow.getWorkerTypeId());
             map.put("workerTypeName", workerType.getName());
             map.put("state", houseFlow.getWorkType()==1?0:1);
-            map.put("disable", false);
+            map.put("disable", houseFlow.getWorkType()==1?false:true);
             if(!CommonUtil.isEmpty(house.getCustomEdit())){
                 String[] workerTypeArr = house.getCustomSort().split(",");
                 for (String s : workerTypeArr) {
