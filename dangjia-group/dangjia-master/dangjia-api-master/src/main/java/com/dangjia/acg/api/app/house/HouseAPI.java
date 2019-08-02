@@ -253,7 +253,9 @@ public interface HouseAPI {
                                    @RequestParam("modelingLayoutId") String modelingLayoutId,       //户型Id
                                    @RequestParam("villageId") String villageId);                    //小区Id
 
-
+    @PostMapping("app/house/house/updateCustomEdit")
+    @ApiOperation(value = "房子申请修改未进场的工序还原", notes = "房子申请修改未进场的工序还原")
+    ServerResponse updateCustomEdit(@RequestParam("houseId") String houseId);
     /**
      * 获取房屋精选案例详情
      *

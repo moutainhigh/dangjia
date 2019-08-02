@@ -512,6 +512,7 @@ public class BudgetWorkerService {
                 iActuarialTemplateMapper.updateByPrimaryKeySelective(actuarialTemplate);
             }
 
+            houseAPI.updateCustomEdit(houseId);
             return ServerResponse.createBySuccessMessage("生成精算成功");
         } catch (Exception e) {
             e.printStackTrace();
