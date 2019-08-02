@@ -105,6 +105,7 @@ public class RobService {
         //查询标签
         if(!CommonUtil.isEmpty(robInfoDTO)){
             String str = robInfoDTO.get(0).getLabelIdArr();
+            houseId = robInfoDTO.get(0).getHouseId();
             if(null != str){
                 String[] labelIds = str.split(",");
                 List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);

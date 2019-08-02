@@ -367,6 +367,7 @@
         h.decoration_type as decorationType,
         h.residential as residential,
         h.unit as unit,
+        h.create_date as createDate,
         c.owername as owerName,
         c.phone as phone,
         c.wechat as wechat,
@@ -376,7 +377,6 @@
         c.building as building,
         c.number as number,
         c.id as clueId,
-        c.square as
         mc.id as mcId,
         mc.user_id as userId,
         mc.member_id as memberId,

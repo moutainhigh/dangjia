@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.persistence.Entity;
 import java.util.Date;
 
 /**
@@ -12,6 +13,7 @@ import java.util.Date;
  */
 @Data
 @ApiModel(description = "抢单详情 ")
+@Entity
 public class RobInfoDTO {
 
     private String id;
@@ -90,6 +92,9 @@ public class RobInfoDTO {
     private Double square;
     @ApiModelProperty("装修类型: 0表示没有开始，1远程设计，2自带设计，3共享装修")
     private Integer decorationType;
+    @ApiModelProperty("0待确认开工,1装修中,2休眠中,3已完工")
+    private Integer visitState;
+
 
     @ApiModelProperty("小区名")
     private String residential;
@@ -97,11 +102,45 @@ public class RobInfoDTO {
     private String unit;
 
 
+
+    public String getDrawingsName(){
+        if(null != getDrawings() && 0 == getDrawings()){
+            return "无图纸";
+        }else{
+            return "有图纸";
+        }
+
+    }
+
     public String getHouseName() {
         return (CommonUtil.isEmpty(getResidential()) ? "*" : getResidential())
                 + (CommonUtil.isEmpty(getBuilding()) ? "*" : getBuilding()) + "栋"
                 + (CommonUtil.isEmpty(getUnit()) ? "*" : getUnit()) + "单元"
                 + (CommonUtil.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
+    }
+
+
+    public String getDecorationTypeName() {
+        if (null != getDecorationType() && 1 == getDecorationType()) {
+            return "表示没有开始";
+        } else if (null != getDecorationType() && 2 == getDecorationType()) {
+            return "远程设计";
+        } else if (null != getDecorationType() && 3 == getDecorationType()) {
+            return "自带设计";
+        } else if (null != getDecorationType() && 4 == getDecorationType()) {
+            return "共享装修";
+        }
+            return "";
+    }
+
+    public String getVisitStateName() {
+        if(null != getVisitState() && 1 == getVisitState()){
+            return "装修中";
+        }
+        if(null != getVisitState() && 3 == getVisitState()){
+            return "已完工";
+        }
+        return null;
     }
 
    /* @ApiModelProperty("标签名称")
