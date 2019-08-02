@@ -55,6 +55,9 @@
        <if test="null!=userId and ''!=userId">
            and cus_service=#{userId}
        </if>
+       <if test="null!=storeId ans ''!=storeId">
+           and store_id=#{storeId}
+       </if>
     </select>
 
 
@@ -148,14 +151,15 @@
     <select id="clientPage" resultType="com.dangjia.acg.dto.sale.client.CustomerIndexDTO">
         SELECT 
           <if test="type==0">
-              c.id,owername as name,phone,c.modify_date as modifyDate
+              c.id,owername as name,phone,c.modify_date as modifyDate,c.cus_service as userId,c.member_id as memberId
           </if>
           <if test="type==1 or type==2">
-              m.id,
+              m.id as memberId,
               if(m.name is not null,m.nick_name,m.name) as name,
               m.mobile as phone,
               m.modify_date as modifyDate,
-              CONCAT(IFNULL(h.residential,'*'),IFNULL(h.building,'*栋'),IFNULL(h.unit,'*单元'),IFNULL(h.number,'*号')) as houseName
+              CONCAT(IFNULL(h.residential,'*'),IFNULL(h.building,'*栋'),IFNULL(h.unit,'*单元'),IFNULL(h.number,'*号')) as houseName,
+              c.cus_service as userId
           </if>
         FROM dj_clue c
         <if test="type==0">
@@ -329,6 +333,8 @@
     <select id="queryRobSingledata" resultType="com.dangjia.acg.dto.sale.rob.RobDTO" parameterType="java.util.Map">
        select c.owername as owerName,
         c.phone as phone,
+        c.cus_service as cusService,
+        c.member_id as memberId,
         h.id as id,
         h.member_id as memberId,
         h.city_id as cityId,
@@ -367,6 +373,7 @@
         h.decoration_type as decorationType,
         h.residential as residential,
         h.unit as unit,
+        h.create_date as createDate,
         c.owername as owerName,
         c.phone as phone,
         c.wechat as wechat,
@@ -376,11 +383,14 @@
         c.building as building,
         c.number as number,
         c.id as clueId,
-        c.square as
+        c.cus_service as cusService,
+        c.clue_type as clueType,
+        c.phase_status as phaseStatus,
         mc.id as mcId,
         mc.user_id as userId,
         mc.member_id as memberId,
-        mc.label_id_arr as labelIdArr
+        mc.label_id_arr as labelIdArr,
+        mc.stage as stage
         from dj_house h INNER JOIN dj_clue c on h.member_id = c.member_id
         INNER JOIN dj_member_customer mc on h.member_id = mc.member_id
         <where>
@@ -388,8 +398,31 @@
             <if test="null != houseId">
                and  c.member_id = #{memberId}
             </if>
+            <if test="null != houseId">
+                and  c.cus_service = #{cusService}
+            </if>
         </where>
+    </select>
 
+    <select id="queryUserAchievementInFo" resultType="com.dangjia.acg.dto.sale.achievement.UserAchievementDTO" parameterType="java.util.HashMap">
+        select
+        m.name as name,
+        m.nick_name as nickName,
+        m.head as head,
+        h.visit_state as visitState,
+        mc.user_id as userId
+        from
+        dj_member_customer mc inner join dj_house h
+        on mc.member_id = h.member_id
+        inner join dj_member m on m.id = mc.member_id
+        where 1=1
+        <if test="null != userId and '' != userId">
+            and mc.user_id = #{userId}
+        </if>
+        <if test="null != memberId and '' != memberId">
+            and h.member_id = #{memberId}
+        </if>
+            and (h.visit_state = 1 or h.visit_state = 3)
     </select>
 
 </mapper>

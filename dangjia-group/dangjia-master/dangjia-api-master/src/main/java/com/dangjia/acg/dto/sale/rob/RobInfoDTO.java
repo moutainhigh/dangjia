@@ -1,10 +1,12 @@
 package com.dangjia.acg.dto.sale.rob;
 
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.persistence.Entity;
 import java.util.Date;
 
 /**
@@ -12,6 +14,7 @@ import java.util.Date;
  */
 @Data
 @ApiModel(description = "抢单详情 ")
+@Entity
 public class RobInfoDTO {
 
     private String id;
@@ -30,6 +33,9 @@ public class RobInfoDTO {
 
     @ApiModelProperty("客户id")
     private String memberId;
+
+    @ApiModelProperty("销售id")
+    private String cusService;
 
     @ApiModelProperty("线索id")
     private String clueId;
@@ -79,6 +85,9 @@ public class RobInfoDTO {
     @ApiModelProperty("城市id")
     private String cityId;
 
+    @ApiModelProperty("阶段 0:线索阶段 1:客户阶段")
+    private String phaseStatus;
+
     @ApiModelProperty("标签id")
     private String labelIdArr;
 
@@ -90,18 +99,62 @@ public class RobInfoDTO {
     private Double square;
     @ApiModelProperty("装修类型: 0表示没有开始，1远程设计，2自带设计，3共享装修")
     private Integer decorationType;
+    @ApiModelProperty("0待确认开工,1装修中,2休眠中,3已完工")
+    private Integer visitState;
+
 
     @ApiModelProperty("小区名")
     private String residential;
     @ApiModelProperty("单元号")
     private String unit;
 
+    @ApiModelProperty("阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单")
+    private Integer stage;
+
+    @ApiModelProperty("线索类型 1：跨域下单  0：正常")
+    private Integer clueType;
+
+    @ApiModelProperty("大管家信息")
+    WorkerTypeDTO workerTypeDTO;
+
+    public String getDrawingsName(){
+        if(null != getDrawings() && 0 == getDrawings()){
+            return "无图纸";
+        }else{
+            return "有图纸";
+        }
+
+    }
 
     public String getHouseName() {
         return (CommonUtil.isEmpty(getResidential()) ? "*" : getResidential())
                 + (CommonUtil.isEmpty(getBuilding()) ? "*" : getBuilding()) + "栋"
                 + (CommonUtil.isEmpty(getUnit()) ? "*" : getUnit()) + "单元"
                 + (CommonUtil.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
+    }
+
+
+    public String getDecorationTypeName() {
+        if (null != getDecorationType() && 1 == getDecorationType()) {
+            return "表示没有开始";
+        } else if (null != getDecorationType() && 2 == getDecorationType()) {
+            return "远程设计";
+        } else if (null != getDecorationType() && 3 == getDecorationType()) {
+            return "自带设计";
+        } else if (null != getDecorationType() && 4 == getDecorationType()) {
+            return "共享装修";
+        }
+            return "";
+    }
+
+    public String getVisitStateName() {
+        if(null != getVisitState() && 1 == getVisitState()){
+            return "装修中";
+        }
+        if(null != getVisitState() && 3 == getVisitState()){
+            return "已完工";
+        }
+        return null;
     }
 
    /* @ApiModelProperty("标签名称")

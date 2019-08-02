@@ -26,4 +26,8 @@ public class CustomerRecordInFoDTO {
     @ApiModelProperty("头像")
     private String head;
 
+    @ApiModelProperty("销售顾问")
+    private String name;
+
+
 }

@@ -20,4 +20,6 @@ public class CustomerIndexDTO {
     private Date createDate;
     private String labelIdArr;//标签id
     private String userName;//跟进人
+    private String userId;
+    private String memberId;
 }

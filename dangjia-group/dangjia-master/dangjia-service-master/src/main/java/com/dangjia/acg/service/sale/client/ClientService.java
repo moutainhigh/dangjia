@@ -16,6 +16,7 @@ import com.dangjia.acg.dto.sale.store.MonthlyTargetDTO;
 import com.dangjia.acg.dto.sale.store.StoreUserDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.clue.ClueTalkMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
@@ -28,11 +29,10 @@ import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.clue.Clue;
-import com.dangjia.acg.modle.clue.ClueTalk;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
-import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
@@ -47,6 +47,7 @@ import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.text.SimpleDateFormat;
@@ -90,6 +91,8 @@ public class ClientService {
     private IMemberMapper iMemberMapper;
     @Autowired
     private ICustomerRecordMapper iCustomerRecordMapper;
+    @Autowired
+    private IHouseMapper iHouseMapper;
 
     /**
      * 录入客户
@@ -98,6 +101,7 @@ public class ClientService {
      * @param userToken
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse enterCustomer(Clue clue, String userToken) {
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
@@ -108,13 +112,15 @@ public class ClientService {
             return ServerResponse.createbyUserTokenError();
         }
         MainUser user = userMapper.getNameById(accessToken.getUserId());
-        List<Clue> groupBys = clueMapper.getGroupBy(clue.getPhone(), null);
+        //线索阶段是否报备
+        List<Clue> groupBys = clueMapper.getGroupBy(clue.getPhone(), null,null);
         for (Clue groupBy : groupBys) {
             if (!CommonUtil.isEmpty(groupBy.getReportDate()) && DateUtil.getDiffDays(new Date(), groupBy.getReportDate()) < 7) {
                 long time = System.currentTimeMillis() - groupBy.getReportDate().getTime();
                 return ServerResponse.createByErrorMessage(String.valueOf(time));
             }
         }
+        //客户阶段是否报备
         List<Customer> customerGroupBy = iCustomerMapper.getCustomerGroupBy(clue.getPhone());
         for (Customer customer : customerGroupBy) {
             if (!CommonUtil.isEmpty(customer.getReportDate()) && DateUtil.getDiffDays(new Date(), customer.getReportDate()) < 7) {
@@ -138,23 +144,49 @@ public class ClientService {
         Example example = new Example(Member.class);
         example.createCriteria().andEqualTo(Member.MOBILE, clue.getPhone());
         List<Member> members = iMemberMapper.selectByExample(example);
-        example = new Example(StoreUser.class);
-        example.createCriteria().andEqualTo(StoreUser.USER_ID, accessToken.getUserId())
-                .andEqualTo(Store.DATA_STATUS, 0);
-        List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
-        if (storeUsers.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-        }
-        StoreUser storeUser = storeUsers.get(0);
         if (members.size() > 0) {
-            judgeRegister(clue, members.get(0).getId(), user.getId(), storeUser.getStoreId());
-            return ServerResponse.createBySuccessMessage("提交成功");
-        } else {
+            example = new Example(StoreUser.class);
+            example.createCriteria().andEqualTo(StoreUser.USER_ID, accessToken.getUserId())
+                    .andEqualTo(Store.DATA_STATUS, 0);
+            List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
+            if (storeUsers.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            StoreUser storeUser = storeUsers.get(0);
+            Store store = iStoreMapper.selectByPrimaryKey(storeUser.getStoreId());
+            Customer customer = new Customer();
             clue.setStage(0);
             clue.setDataStatus(0);
             clue.setStoreId(storeUser.getStoreId());
             clue.setCusService(user.getId());
             clue.setClueType(0);
+            clue.setTurnStatus(0);
+            clue.setCityId(store.getCityId());
+            customer.setUserId(user.getId());
+            customer.setMemberId(members.get(0).getId());
+            customer.setStage(1);
+            customer.setStoreId(storeUser.getStoreId());
+            customer.setCityId(store.getCityId());
+            customer.setTurnStatus(0);
+            customer.setPhaseStatus(1);
+            customer.setClueType(0);
+            customer.setDataStatus(0);
+            if(groupBys.size()>0){//该线索已被其他人录入并成为客户阶段
+                clue.setPhaseStatus(1);
+                clue.setStage(4);
+                clue.setMemberId(members.get(0).getId());
+                clueMapper.insert(clue);//记录进入线索线索状态为转客户客户阶段
+                iCustomerMapper.insert(customer);
+            }else{//未录入但成已为客户阶段
+                clue.setPhaseStatus(1);
+                clue.setStage(4);
+                clue.setMemberId(members.get(0).getId());
+                clueMapper.insert(clue);//记录进入线索线索状态为转客户客户阶段
+                customer.setId(customerGroupBy.get(0).getId());
+                iCustomerMapper.updateByPrimaryKeySelective(customer);
+            }
+            return ServerResponse.createBySuccessMessage("提交成功");
+        }else {
             if (clueMapper.insert(clue) > 0) {
                 return ServerResponse.createBySuccessMessage("提交成功");
             }else{
@@ -164,6 +196,7 @@ public class ClientService {
     }
 
 
+
     /**
      * 跨域下单
      *
@@ -171,6 +204,7 @@ public class ClientService {
      * @param userToken
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse crossDomainOrder(Clue clue, String userToken, String villageId) {
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
@@ -188,8 +222,20 @@ public class ClientService {
         example.createCriteria().andEqualTo(Store.CITY_ID, modelingVillage.getCityId());
         List<Store> stores = iStoreMapper.selectByExample(example);
         for (Store store : stores) {
-            //如果转出的该客户为自己门店范围内未录入的（野生），则记录进店长的线索阶段（给店长系统推送），然后仅分配给内场
             if (GaoDeUtils.isInPolygon(modelingVillage.getLocationx() + "," + modelingVillage.getLocationy(), store.getScopeItude())) {
+                List<Clue> groupBys = clueMapper.getGroupBy(clue.getPhone(), null,store.getId());
+                //如果转出的该客户为自己门店范围内未录入的（野生），则记录进店长的线索阶段（给店长系统推送），然后仅分配给内场
+                if(groupBys.size()<=0){
+                    clue.setStage(0);
+                    clue.setDataStatus(0);
+                    clue.setStoreId(store.getId());
+                    clue.setClueType(0);
+                    clue.setTurnStatus(0);
+                    clue.setCityId(store.getCityId());
+                    clue.setClueType(1);
+                    clueMapper.insert(clue);
+                    return ServerResponse.createBySuccessMessage("提交成功");
+                }
                 ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectSingleResidentialBuilding(store.getId(), clue.getBuilding(), villageId);
                 if(null!=residentialBuilding){
                     ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
@@ -197,8 +243,12 @@ public class ClientService {
                         clue.setCusService(residentialRange.getUserId());
                     }
                 }
-                clue.setCusService(store.getUserId());
+                clue.setStage(0);
+                clue.setDataStatus(0);
                 clue.setStoreId(store.getId());
+                clue.setClueType(0);
+                clue.setTurnStatus(0);
+                clue.setCityId(store.getCityId());
                 clue.setClueType(1);
                 clueMapper.insert(clue);
                 return ServerResponse.createBySuccessMessage("提交成功");
@@ -207,14 +257,26 @@ public class ClientService {
         example = new Example(Member.class);
         example.createCriteria().andEqualTo(Member.MOBILE, clue.getPhone());
         List<Member> members = iMemberMapper.selectByExample(example);
-        if (members.size() > 0) {
-            judgeRegister(clue, members.get(0).getId(), null, null);
-            return ServerResponse.createBySuccessMessage("提交成功");
-        } else {
-            clue.setClueType(1);
-            clueMapper.insert(clue);
+        List<Customer> customerGroupBy = iCustomerMapper.getCustomerGroupBy(clue.getPhone());
+        if(members.size()>0){//判断该线索是否注册已经经是客户阶段
+            Customer customer = new Customer();
+            customer.setMemberId(members.get(0).getId());
+            customer.setStage(1);
+            customer.setCityId(modelingVillage.getCityId());
+            customer.setTurnStatus(0);
+            customer.setPhaseStatus(1);
+            customer.setClueType(1);
+            customer.setDataStatus(0);
+            customer.setId(customerGroupBy.get(0).getId());
+            iCustomerMapper.updateByPrimaryKeySelective(customer);
             return ServerResponse.createBySuccessMessage("提交成功");
         }
+        clue.setClueType(1);
+        clue.setTurnStatus(0);
+        clue.setPhaseStatus(0);
+        clue.setCityId(modelingVillage.getCityId());
+        clueMapper.insert(clue);//记录为中台的线索
+        return ServerResponse.createBySuccessMessage("提交成功");
     }
 
     /**
@@ -231,50 +293,54 @@ public class ClientService {
     }
 
 
+
     /**
      * 报备
-     * @param id
+     * @param clueId
      * @param phaseStatus 0:线索阶段 1:客户阶段
+     * @param mcId
      * @return
      */
-    public ServerResponse setReported(String id, Integer phaseStatus)  {
+    public ServerResponse setReported(String clueId, Integer phaseStatus, String mcId)  {
         if(phaseStatus==0){
-            Clue clue1 = clueMapper.selectByPrimaryKey(id);
-            if(CommonUtil.isEmpty(clue1.getReportDate())){
-                return ServerResponse.createByErrorMessage("已报备");
+            Clue clue1 = clueMapper.selectByPrimaryKey(clueId);
+            if(null!=clue1.getReportDate()){
+                return ServerResponse.createByErrorMessage("已报备不能再次报备");
             }
             Clue clue=new Clue();
-            clue.setId(id);
+            clue.setId(clueId);
             clue.setReportDate(new Date());
             clueMapper.updateByPrimaryKeySelective(clue);
         }else if(phaseStatus==1){
-            Customer customer1 = iCustomerMapper.selectByPrimaryKey(id);
-            if(CommonUtil.isEmpty(customer1.getReportDate())){
-                return ServerResponse.createByErrorMessage("已报备");
+            Customer customer1 = iCustomerMapper.selectByPrimaryKey(mcId);
+            if(null!=customer1.getReportDate()){
+                return ServerResponse.createByErrorMessage("已报备不能再次报备");
             }
             Customer customer=new Customer();
-            customer.setId(id);
+            customer.setId(mcId);
             customer.setReportDate(new Date());
             iCustomerMapper.updateByPrimaryKeySelective(customer);
         }
         return ServerResponse.createBySuccessMessage("报备成功");
     }
 
+
     /**
      * 放弃跟进
-     * @param id
-     * @param phaseStatus
+     * @param clueId
+     * @param phaseStatus 0:线索阶段 1:客户阶段
+     * @param mcId
      * @return
      */
-    public ServerResponse setFollow(String id, Integer phaseStatus)  {
+    public ServerResponse setFollow(String clueId, Integer phaseStatus, String mcId)  {
         if(phaseStatus==0){
             Clue clue=new Clue();
-            clue.setId(id);
+            clue.setId(clueId);
             clue.setStage(2);
             clueMapper.updateByPrimaryKeySelective(clue);
         }else if(phaseStatus==1){
             Customer customer=new Customer();
-            customer.setId(id);
+            customer.setId(mcId);
             customer.setStage(2);
             iCustomerMapper.updateByPrimaryKeySelective(customer);
         }
@@ -336,6 +402,7 @@ public class ClientService {
         return ServerResponse.createBySuccess("查询成功", map);
     }
 
+
     /**
      * 获取当前月份的目标
      *
@@ -349,6 +416,7 @@ public class ClientService {
                 .andBetween(MonthlyTarget.TARGET_DATE, DateUtil.getTimesMonthmorning(), DateUtil.getTimesMonthnight());
         return monthlyTargetMappper.selectByExample(example);
     }
+
 
     /**
      * 获取销售范围
@@ -511,54 +579,138 @@ public class ClientService {
     }
 
 
-    private void judgeRegister(Clue clue, String memberid, String userId, String storeId) {
-        //有沟通记录
-        List<ClueTalk> clueTalkList = clueTalkMapper.getTalkByClueId(clue.getId());
-        if (clueTalkList.size() != 0) {
-            Date date = clueTalkMapper.getMaxDate(clue.getId());
-            for (ClueTalk clueTalk : clueTalkList) {
-                //操作dj_member_customer_record表
-                CustomerRecord customerRecord = new CustomerRecord();
-                customerRecord.setUserId(clue.getCusService());
-                customerRecord.setMemberId(memberid);
-                customerRecord.setDescribes(clueTalk.getTalkContent());
-                //customerRecord.setModifyDate(clueTalk.getModifyDate());
-                customerRecord.setCreateDate(clueTalk.getCreateDate());
-                iCustomerRecordMapper.insert(customerRecord);
-                //操作dj_member_customer表
-                if (date.compareTo(clueTalk.getModifyDate()) == 0) {
-                    Customer customer = new Customer();
-                    customer.setUserId(clue.getCusService());
-                    customer.setMemberId(memberid);
-                    customer.setCurrRecordId(customerRecord.getId());
-                    //customer.setModifyDate(clueTalk.getModifyDate());
-                    customer.setCreateDate(clueTalk.getCreateDate());
-                    customer.setStage(1);
-                    customer.setStoreId(clue.getStoreId());
-                    iCustomerMapper.insert(customer);
-                }
-                //改变线索沟通表的数据状态
-                clueTalk.setDataStatus(1);
-                clueTalkMapper.updateByPrimaryKeySelective(clueTalk);
-            }
-        } else {
-            Customer customer = new Customer();
-            customer.setUserId(clue.getCusService());
-            customer.setMemberId(memberid);
-            //customer.setModifyDate(clueTalk.getModifyDate());
-            customer.setCreateDate(clue.getCreateDate());
-            customer.setStage(1);
-            customer.setStoreId(clue.getStoreId());
-            iCustomerMapper.insert(customer);
+
+    public ServerResponse  setTurnOut(String cityId, String storeId, String id ,Integer phaseStatus){
+        Store store = iStoreMapper.selectByPrimaryKey(storeId);
+        if(phaseStatus==0){
+            Clue clue=new Clue();
+            clue.setId(id);
+            clue.setStoreId(storeId);
+            clue.setCusService(store.getUserId());
+            clue.setCityId(cityId);
+            clue.setTurnStatus(1);
+            clueMapper.updateByPrimaryKeySelective(clue);
+        }else if(phaseStatus==1){
+            Customer customer=new Customer();
+            customer.setId(id);
+            customer.setStoreId(storeId);
+            customer.setUserId(store.getUserId());
+            customer.setCityId(cityId);
+            customer.setTurnStatus(1);
+            iCustomerMapper.updateByPrimaryKeySelective(customer);
         }
-        //改变线索表的数据状态
-        clue.setDataStatus(0);
-        clue.setStoreId(storeId);
-        clue.setCusService(userId);
-        clue.setClueType(0);
-        clue.setStage(4);
-        clue.setMemberId(memberid);
-        clue.setClueType(0);
-        clueMapper.insert(clue);
+        return ServerResponse.createBySuccessMessage("操作成功");
     }
+
+
+    public ServerResponse  setTips(Integer stage){
+        Example example=new Example(Clue.class);
+        if(stage==1){//跟进列表
+            example.createCriteria().andEqualTo(Clue.TIPS,1);
+            List<Clue> clues = clueMapper.selectByExample(example);
+            if(clues.size()>0){
+                return ServerResponse.createBySuccessMessage("红点提示");
+            }
+        }
+        if(stage==2){//已下单客户
+            example=new Example(Customer.class);
+            example.createCriteria().andEqualTo(Customer.TIPS,1);
+            List<Customer> customers = iCustomerMapper.selectByExample(example);
+            if(customers.size()>0){
+                return ServerResponse.createBySuccessMessage("红点提示");
+            }
+        }
+        if(stage==3){//已下单客户
+            example=new Example(Customer.class);
+            example.createCriteria().andEqualTo(Customer.TIPS,1);
+            List<Customer> customers = iCustomerMapper.selectByExample(example);
+            if(customers.size()>0){
+                return ServerResponse.createBySuccessMessage("红点提示");
+            }
+        }
+        if(stage==4){//沉睡客户
+            example.createCriteria().andEqualTo(Clue.STAGE,2);
+            List<Clue> clues = clueMapper.selectByExample(example);
+            example=new Example(Customer.class);
+            example.createCriteria().andEqualTo(Customer.STAGE,2);
+            List<Customer> customers = iCustomerMapper.selectByExample(example);
+            if(customers.size()>0||clues.size()>0){
+                return ServerResponse.createBySuccessMessage("红点提示");
+            }
+        }
+        return ServerResponse.createByErrorMessage("红点不提示");
+    }
+
+
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse  setWithdraw(String mcId,String houseId){
+        House house=new House();
+        house.setDataStatus(1);
+        house.setHouseId(houseId);
+        Customer customer=new Customer();
+        customer.setId(mcId);
+        customer.setStage(1);
+        if(iHouseMapper.updateByPrimaryKeySelective(house)>0&&iCustomerMapper.updateByPrimaryKeySelective(customer)>0) {
+            return ServerResponse.createBySuccessMessage("撤回成功");
+        }else{
+            return ServerResponse.createByErrorMessage("撤回失败");
+        }
+    }
+
+//    private void judgeRegister(Clue clue, String memberid, String userId, String storeId) {
+//        //有沟通记录
+//        List<ClueTalk> clueTalkList = clueTalkMapper.getTalkByClueId(clue.getId());
+//        if (clueTalkList.size() != 0) {
+//            Date date = clueTalkMapper.getMaxDate(clue.getId());
+//            for (ClueTalk clueTalk : clueTalkList) {
+//                //操作dj_member_customer_record表
+//                CustomerRecord customerRecord = new CustomerRecord();
+//                customerRecord.setUserId(clue.getCusService());
+//                customerRecord.setMemberId(memberid);
+//                customerRecord.setDescribes(clueTalk.getTalkContent());
+//                //customerRecord.setModifyDate(clueTalk.getModifyDate());
+//                customerRecord.setCreateDate(clueTalk.getCreateDate());
+//                iCustomerRecordMapper.insert(customerRecord);
+//                //操作dj_member_customer表
+//                if (date.compareTo(clueTalk.getModifyDate()) == 0) {
+//                    Customer customer = new Customer();
+//                    customer.setUserId(clue.getCusService());
+//                    customer.setMemberId(memberid);
+//                    customer.setCurrRecordId(customerRecord.getId());
+//                    //customer.setModifyDate(clueTalk.getModifyDate());
+//                    customer.setCreateDate(clueTalk.getCreateDate());
+//                    customer.setStage(1);
+//                    customer.setStoreId(clue.getStoreId());
+//                    iCustomerMapper.insert(customer);
+//                }
+//                //改变线索沟通表的数据状态
+//                clueTalk.setDataStatus(1);
+//                clueTalkMapper.updateByPrimaryKeySelective(clueTalk);
+//            }
+//        } else {
+//            Customer customer = new Customer();
+//            customer.setUserId(clue.getCusService());
+//            customer.setMemberId(memberid);
+//            //customer.setModifyDate(clueTalk.getModifyDate());
+//            customer.setCreateDate(clue.getCreateDate());
+//            customer.setStage(1);
+//            customer.setStoreId(clue.getStoreId());
+//            iCustomerMapper.insert(customer);
+//        }
+//        //改变线索表的数据状态
+//        clue.setDataStatus(0);
+//        clue.setStoreId(storeId);
+//        clue.setCusService(userId);
+//        clue.setClueType(0);
+//        clue.setStage(4);
+//        clue.setMemberId(memberid);
+//        clue.setClueType(0);
+//        clue.setTurnStatus(0);
+//        clue.setPhaseStatus(1);
+//        Example example=new Example(Store.class);
+//        Store store = iStoreMapper.selectByPrimaryKey(example);
+//        clue.setCityId(store.getCityId());
+//        clueMapper.insert(clue);
+//    }
 }
+

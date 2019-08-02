@@ -2,6 +2,7 @@ package com.dangjia.acg.mapper.clue;
 
 
 import com.dangjia.acg.dto.other.ClueDTO;
+import com.dangjia.acg.dto.sale.achievement.UserAchievementDTO;
 import com.dangjia.acg.dto.sale.client.CustomerIndexDTO;
 import com.dangjia.acg.dto.sale.client.OrdersCustomerDTO;
 import com.dangjia.acg.dto.sale.rob.RobDTO;
@@ -26,7 +27,7 @@ public interface ClueMapper extends Mapper<Clue> {
 
     List<Clue> getAllByCondition(String values);
 
-    List<Clue> getGroupBy(@Param("phone") String phone,@Param("userId") String userId);
+    List<Clue> getGroupBy(@Param("phone") String phone,@Param("userId") String userId,@Param("storeId") String storeId);
 
     Clue getClue(@Param("phone") String phone,@Param("userId") String userId);
 
@@ -64,6 +65,10 @@ public interface ClueMapper extends Mapper<Clue> {
 
 
     List<RobInfoDTO> queryCustomerInfo(Map<String,Object> map);
+
+
+    List<UserAchievementDTO> queryUserAchievementInFo(Map<String,Object> map);
+
 
 
 }

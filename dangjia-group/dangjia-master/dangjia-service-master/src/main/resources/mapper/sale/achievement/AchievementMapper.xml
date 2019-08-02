@@ -106,6 +106,9 @@
         <if test="null != userId and '' != userId">
             and mc.user_id = #{userId}
         </if>
+        <if test="null != memberId and '' != memberId">
+            and h.member_id = #{memberId}
+        </if>
         <if test="null != time">
             and date_format(mc.modify_date,'%Y-%m') = #{time}
         </if>

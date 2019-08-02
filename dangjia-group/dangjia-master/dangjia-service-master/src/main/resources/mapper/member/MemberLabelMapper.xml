@@ -70,6 +70,7 @@
 
     <select id="queryDescribes" resultType="com.dangjia.acg.dto.member.CustomerRecordInFoDTO">
         select m.head as head,
+        m.name as name,
         mcr.remind_time as remindTime,
         mcr.describes as describes,
         mcr.create_date as createDate
@@ -83,12 +84,13 @@
         select m.name as name,
         m.mobile as mobile,
         m.head as head,
-        h.visit_state as visitState
+        cwt.type as type
         from
-        dj_core_house_worker chw INNER JOIN dj_member m on chw.worker_id = m.id
-        INNER JOIN dj_house h on h.id = chw.house_id
+        dj_core_house_flow chf INNER JOIN dj_member m on chf.worker_id = m.id
+        INNER JOIN dj_core_worker_type cwt on chf.worker_type_id = cwt.id
         where m.worker_type = 3
-        and chw.house_id = #{houseId}
+        and chf.house_id = #{houseId}
+        ORDER BY cwt.create_date DESC
     </select>
 
 

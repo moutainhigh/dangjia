@@ -5,6 +5,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.clue.Clue;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -97,30 +98,76 @@ public interface ClientAPI {
                                   @RequestParam("clue") Clue clue);
 
 
+
     /**
      *
      * @param request
-     * @param id 线索阶段传线索id  客户阶段传客户阶段id
+     * @param clueId 线索阶段传线索id
      * @param phaseStatus 阶段
+     * @param mcId 客户阶段传客户阶段id
      * @return
      */
     @PostMapping(value = "sale/client/setReported")
     @ApiOperation(value = "报备", notes = "报备")
     ServerResponse setReported(@RequestParam("request") HttpServletRequest request,
-                               @RequestParam("id") String id,
-                               @RequestParam("phaseStatus") Integer phaseStatus);
+                               @RequestParam("clueId") String clueId,
+                               @RequestParam("phaseStatus") Integer phaseStatus,
+                               @RequestParam("mcId") String mcId);
 
 
     /**
      *
      * @param request
-     * @param id 线索阶段传线索id  客户阶段传客户阶段id
+     * @param clueId 线索阶段传线索id
      * @param phaseStatus 阶段
+     * @param mcId 客户阶段传客户阶段id
      * @return
      */
     @PostMapping(value = "sale/client/setFollow")
     @ApiOperation(value = "放弃跟进", notes = "放弃跟进")
     ServerResponse setFollow(@RequestParam("request") HttpServletRequest request,
-                             @RequestParam("id") String id,
-                             @RequestParam("phaseStatus") Integer phaseStatus);
+                             @RequestParam("clueId") String clueId,
+                             @RequestParam("phaseStatus") Integer phaseStatus,
+                             @RequestParam("mcId") String mcId);
+
+
+    /**
+     * 中台转出
+     * @param request
+     * @param cityId
+     * @param storeId
+     * @param id
+     * @return
+     */
+    @PostMapping(value = "sale/client/setTurnOut")
+    @ApiOperation(value = "中台转出", notes = "中台转出")
+    ServerResponse setTurnOut(@RequestParam("request") HttpServletRequest request,
+                              @RequestParam("cityId") String cityId,
+                              @RequestParam("storeId") String storeId,
+                              @RequestParam("id") String id,
+                              @RequestParam("phaseStatus") Integer phaseStatus);
+
+    /**
+     * 页面红点提示
+     * @param request
+     * @return
+     */
+    @PostMapping(value = "sale/client/setTips")
+    @ApiOperation(value = "提示", notes = "提示")
+    ServerResponse setTips(@RequestParam("request") HttpServletRequest request,
+                           @RequestParam("stage") Integer stage);
+
+
+
+    /**
+     * 页面红点提示
+     * @param request
+     * @return
+     */
+    @PostMapping(value = "sale/client/setWithdraw")
+    @ApiOperation(value = "撤回", notes = "撤回")
+    ServerResponse setWithdraw(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("mcId") String mcId,
+                               @RequestParam("houseId") String houseId);
+
 }

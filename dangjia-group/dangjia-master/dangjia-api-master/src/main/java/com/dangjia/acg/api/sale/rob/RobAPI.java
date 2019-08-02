@@ -68,8 +68,7 @@ public interface RobAPI {
     @PostMapping(value = "sale/rob/queryCustomerInfo")
     @ApiOperation(value = "客户详情查询", notes = "客户详情查询")
     ServerResponse queryCustomerInfo(@RequestParam("request")HttpServletRequest request,
-                                     @RequestParam("houseId")String houseId,
-                                     @RequestParam("labelIdArr")String labelIdArr,
+                                     @RequestParam("userId")String userId,
                                      @RequestParam("memberId")String memberId);
 
     /**
@@ -116,7 +115,7 @@ public interface RobAPI {
     * @Date: 2019/7/31 0031 19:33
     */
     @PostMapping(value = "sale/rob/addDescribes")
-    @ApiOperation(value = "新增标签", notes = "新增标签")
+    @ApiOperation(value = "新增沟通记录", notes = "新增沟通记录")
     ServerResponse addDescribes(@RequestParam("request")HttpServletRequest request,
                                 @RequestBody CustomerRecord customerRecord);
 
