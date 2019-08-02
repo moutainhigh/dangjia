@@ -64,6 +64,7 @@ public class RobService {
         }
         List<RobDTO> list = clueMapper.queryRobSingledata(map);
 
+        //查询标签
         List<RobDTO> robDTOs = new ArrayList<>();
         for (RobDTO li:list) {
             RobDTO robDTO = new RobDTO();
@@ -137,6 +138,7 @@ public class RobService {
             robArrInFoDTO.setData(data);
         }
 
+        //销售人员订单数量
         List<UserAchievementDTO> uadto = clueMapper.queryUserAchievementInFo(map);
 
         //全部提成数量
@@ -180,36 +182,45 @@ public class RobService {
             Map<String,Object> Map = new HashMap<>();
             if (!CommonUtil.isEmpty(memberId)) {
                 String str = iCustomerMapper.queryLabelIdArr(memberId);
+
+                if(!CommonUtil.isEmpty(str)){
+                    String[] strs = str.split(",");
+                    List<String> strsToList= Arrays.asList(strs);
+                    for(String s:strsToList){
+                        if(s.equals(labelId)){
+                            return ServerResponse.createBySuccessMessage("标签已存在");
+                        }
+                    }
+                }
+
                 String labelIdrr = str +","+ labelId;
                 Map.put("labelIdArr",labelIdrr);
                 Map.put("memberId",memberId);
                 iCustomerMapper.upDateLabelIdArr(Map);
                 return ServerResponse.createBySuccessMessage("新增成功");
             }
+            return ServerResponse.createByErrorMessage("修改失败");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("修改失败");
+        }
+    }
 
+    /**
+     * 新增标签
+     * @param memberId
+     * @param labelIdArr
+     * @return
+     */
+    public ServerResponse deleteLabel(String memberId, String labelIdArr) {
+        try {
+            Map<String,Object> Map = new HashMap<>();
             if (!CommonUtil.isEmpty(memberId)) {
-                String str = iCustomerMapper.queryLabelIdArr(memberId);
-                String[] arr = str.split(","); // 用,分割
-                List<String> list = Arrays.asList(arr);
-
-//                list.contains(labelId);
-                for (String s:list) {
-                    if(s.contains(labelId)){
-                       list.remove(labelId);
-                    }
-                }
-
-
-
-//                Map.put("labelIdArr",labelIdrr);
+                Map.put("labelIdArr",labelIdArr);
                 Map.put("memberId",memberId);
                 iCustomerMapper.upDateLabelIdArr(Map);
-                return ServerResponse.createBySuccessMessage("新增成功");
-
+                return ServerResponse.createBySuccessMessage("删除成功");
             }
-
-
-
             return ServerResponse.createByErrorMessage("修改失败");
         } catch (Exception e) {
             e.printStackTrace();

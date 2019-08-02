@@ -97,6 +97,12 @@ public interface RobAPI {
                             @RequestParam("labelId")String labelId);
 
 
+    @PostMapping(value = "sale/rob/deleteLabel")
+    @ApiOperation(value = "删除标签", notes = "删除标签")
+    ServerResponse deleteLabel(@RequestParam("request")HttpServletRequest request,
+                               @RequestParam("memberId")String memberId,
+                               @RequestParam("labelIdArr")String labelIdArr);
+
    /**
     * showdoc
     * @catalog TODO 当家接口文档/设计模块

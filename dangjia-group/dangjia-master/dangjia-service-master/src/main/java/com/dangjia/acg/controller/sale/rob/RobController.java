@@ -61,6 +61,18 @@ public class RobController implements RobAPI {
     }
 
     /**
+     * 删除标签
+     * @param memberId
+     * @param labelIdArr
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse deleteLabel(HttpServletRequest request,String memberId,String labelIdArr) {
+        return robService.deleteLabel(memberId,labelIdArr);
+    }
+
+    /**
      * 新增沟通记录
      * @param customerRecord
      * @return

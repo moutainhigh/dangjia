@@ -338,14 +338,16 @@
         h.visit_state as visitState,
         h.create_date as createDate,
         mc.label_id_arr as labelIdArr
-        from dj_house h INNER JOIN dj_member_customer mc on h.member_id = mc.member_id
+        from
+        dj_house h
+        INNER JOIN dj_member_customer mc on h.member_id = mc.member_id
         INNER JOIN dj_clue c on h.member_id = c.member_id
         where h.visit_state = 0 and h.is_rob_stats = 0
         <if test="null != userId">
-            and mc.user_id = #{userId}
+            and c.cus_service = #{userId}
         </if>
         <if test="null != storeId">
-            and mc.store_id = #{storeId}
+            and c.store_id = #{storeId}
         </if>
         <if test="null != type">
             and h.is_type = #{type}
