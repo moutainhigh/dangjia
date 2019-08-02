@@ -8,6 +8,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.member.CustomerRecordInFoDTO;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
+import com.dangjia.acg.dto.sale.achievement.UserAchievementDTO;
 import com.dangjia.acg.dto.sale.rob.RobArrInFoDTO;
 import com.dangjia.acg.dto.sale.rob.RobDTO;
 import com.dangjia.acg.dto.sale.rob.RobInfoDTO;
@@ -20,10 +21,7 @@ import com.dangjia.acg.modle.member.CustomerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 抢单模块
@@ -42,7 +40,6 @@ public class RobService {
     private ICustomerMapper iCustomerMapper;
     @Autowired
     private ConfigUtil configUtil;
-
     @Autowired
     private ICustomerRecordMapper iCustomerRecordMapper;
 
@@ -88,32 +85,49 @@ public class RobService {
 
     /**
      * 查询客户详情
-     * @param houseId
+     * @param memberId
      * @return
      */
-    public ServerResponse queryCustomerInfo(String houseId,String labelIdArr,String memberId){
+    public ServerResponse queryCustomerInfo(String memberId,String userId){
 
         Map<String,Object> map = new HashMap<>();
         if (!CommonUtil.isEmpty(memberId)) {
             map.put("memberId",memberId);
         }
+        if (!CommonUtil.isEmpty(userId)) {
+            map.put("userId",userId);
+        }
+        //获取图片url
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 
         RobArrInFoDTO robArrInFoDTO = new RobArrInFoDTO();
 
         List<RobInfoDTO> robInfoDTO = clueMapper.queryCustomerInfo(map);
 
+        if(!CommonUtil.isEmpty(robInfoDTO)){
+            for (RobInfoDTO to:robInfoDTO) {
+                //查询大管家信息
+                if (!CommonUtil.isEmpty(to.getHouseId())) {
+                    WorkerTypeDTO workerTypeDTO = iMemberLabelMapper.queryWorkerType(to.getHouseId());
+                    if(null != workerTypeDTO){
+                        workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
+                    }
+
+                    to.setWorkerTypeDTO(workerTypeDTO);
+                }
+            }
+        }
+
         //查询标签
         if(!CommonUtil.isEmpty(robInfoDTO)){
             String str = robInfoDTO.get(0).getLabelIdArr();
-            houseId = robInfoDTO.get(0).getHouseId();
             if(null != str){
                 String[] labelIds = str.split(",");
                 List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
                 robArrInFoDTO.setList(labelByIds);
             }
         }
-        //获取图片url
-        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+
         //根据客户id查询沟通记录
         if (!CommonUtil.isEmpty(memberId)) {
             List<CustomerRecordInFoDTO> data = iMemberLabelMapper.queryDescribes(memberId);
@@ -123,13 +137,30 @@ public class RobService {
             robArrInFoDTO.setData(data);
         }
 
-        //查询大管家信息
-        if (!CommonUtil.isEmpty(houseId)) {
-            WorkerTypeDTO workerTypeDTO = iMemberLabelMapper.queryWorkerType(houseId);
-            workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
-            robArrInFoDTO.setWorkerTypeDTO(workerTypeDTO);
+        List<UserAchievementDTO> uadto = clueMapper.queryUserAchievementInFo(map);
+
+        //全部提成数量
+        int arrRoyalty = 1000;
+        int s = 0;
+        //每条数据当月提成
+        if(!uadto.isEmpty()){
+            for (UserAchievementDTO to:uadto) {
+                if(to.getVisitState() == 1){
+                    s = (int) (arrRoyalty*0.75);
+                    to.setMonthRoyaltys(s);
+                    to.setMeterRoyaltys(s);
+                }
+                if(to.getVisitState() == 3){
+                    s = (int) (arrRoyalty*0.25);
+                    to.setMonthRoyaltys(s);
+                    to.setMeterRoyaltys(arrRoyalty);
+                }
+                to.setHead(imageAddress + to.getHead());
+                to.setArrRoyalty(arrRoyalty);
+            }
         }
 
+        robArrInFoDTO.setUserInFo(uadto.get(0));
         robArrInFoDTO.setCustomerList(robInfoDTO);
         if (CommonUtil.isEmpty(robArrInFoDTO)) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -149,12 +180,37 @@ public class RobService {
             Map<String,Object> Map = new HashMap<>();
             if (!CommonUtil.isEmpty(memberId)) {
                 String str = iCustomerMapper.queryLabelIdArr(memberId);
-                String labelIdArr = str + labelId;
-                Map.put("labelIdArr",labelIdArr);
+                String labelIdrr = str +","+ labelId;
+                Map.put("labelIdArr",labelIdrr);
                 Map.put("memberId",memberId);
+                iCustomerMapper.upDateLabelIdArr(Map);
+                return ServerResponse.createBySuccessMessage("新增成功");
             }
-            iCustomerMapper.upDateLabelIdArr(Map);
-            return ServerResponse.createBySuccessMessage("修改成功");
+
+            if (!CommonUtil.isEmpty(memberId)) {
+                String str = iCustomerMapper.queryLabelIdArr(memberId);
+                String[] arr = str.split(","); // 用,分割
+                List<String> list = Arrays.asList(arr);
+
+//                list.contains(labelId);
+                for (String s:list) {
+                    if(s.contains(labelId)){
+                       list.remove(labelId);
+                    }
+                }
+
+
+
+//                Map.put("labelIdArr",labelIdrr);
+                Map.put("memberId",memberId);
+                iCustomerMapper.upDateLabelIdArr(Map);
+                return ServerResponse.createBySuccessMessage("新增成功");
+
+            }
+
+
+
+            return ServerResponse.createByErrorMessage("修改失败");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("修改失败");

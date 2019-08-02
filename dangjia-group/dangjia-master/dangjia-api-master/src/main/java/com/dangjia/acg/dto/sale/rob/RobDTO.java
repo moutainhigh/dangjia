@@ -35,6 +35,10 @@ public class RobDTO extends BaseEntity {
     @ApiModelProperty("小区id")
     private String villageId;
 
+    @ApiModelProperty("销售id")
+    private String cusService;
+
+
     @ApiModelProperty("标签名称")
     private List<SaleMemberLabelDTO> list=new ArrayList<>();//标签
 

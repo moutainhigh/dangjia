@@ -100,7 +100,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <update id="upDateLabelIdArr" parameterType="java.util.Map">
         update dj_member_customer
-        set label_id_arr = {labelIdArr}
+        set label_id_arr = #{labelIdArr}
         where member_id = #{memberId}
     </update>
 

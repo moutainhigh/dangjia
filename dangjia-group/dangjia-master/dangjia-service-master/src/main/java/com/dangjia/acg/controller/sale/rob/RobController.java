@@ -39,13 +39,12 @@ public class RobController implements RobAPI {
 
     /**
      * 查询客户详情
-     * @param houseId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse queryCustomerInfo(HttpServletRequest request, String houseId,String labelIdArr,String memberId) {
-        return robService.queryCustomerInfo(houseId,labelIdArr,memberId);
+    public ServerResponse queryCustomerInfo(HttpServletRequest request, String userId,String memberId) {
+        return robService.queryCustomerInfo(memberId,userId);
     }
 
 

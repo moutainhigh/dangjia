@@ -5,11 +5,14 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.persistence.Entity;
+
 /**
  * 大管家信息
  */
 @Data
-@ApiModel
+@ApiModel(description = "大管家信息")
+@Entity
 public class WorkerTypeDTO {
 
     @ApiModelProperty("大管家姓名")
@@ -21,6 +24,33 @@ public class WorkerTypeDTO {
     @ApiModelProperty("图片")
     private String head;
 
-    @ApiModelProperty("大管家姓名")
-    private Integer visitState;
+    @ApiModelProperty("1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工")
+    private Integer type;
+
+
+    public String getTypeName(){
+        if(null != getType() &&getType() == 1){
+            return "设计师";
+        }else if(null != getType() &&getType() == 2){
+            return "精算师";
+        }else if(null != getType() &&getType() == 3){
+            return "大管家";
+        }else if(null != getType() &&getType() == 4){
+            return "拆除";
+        }else if(null != getType() &&getType() == 5){
+            return "打孔";
+        }else if(null != getType() &&getType() == 6){
+            return "水电工";
+        }else if(null != getType() &&getType() == 7){
+            return "防水";
+        }else if(null != getType() &&getType() == 8){
+            return "泥工";
+        }else if(null != getType() &&getType() == 9){
+            return "木工";
+        }else if(null != getType() &&getType() == 10){
+            return "油漆工";
+        }else{
+            return "";
+        }
+    }
 }

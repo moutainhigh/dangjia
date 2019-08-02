@@ -1,6 +1,7 @@
 package com.dangjia.acg.dto.sale.rob;
 
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -32,6 +33,9 @@ public class RobInfoDTO {
 
     @ApiModelProperty("客户id")
     private String memberId;
+
+    @ApiModelProperty("销售id")
+    private String cusService;
 
     @ApiModelProperty("线索id")
     private String clueId;
@@ -81,6 +85,9 @@ public class RobInfoDTO {
     @ApiModelProperty("城市id")
     private String cityId;
 
+    @ApiModelProperty("阶段 0:线索阶段 1:客户阶段")
+    private String phaseStatus;
+
     @ApiModelProperty("标签id")
     private String labelIdArr;
 
@@ -101,7 +108,14 @@ public class RobInfoDTO {
     @ApiModelProperty("单元号")
     private String unit;
 
+    @ApiModelProperty("阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单")
+    private Integer stage;
 
+    @ApiModelProperty("线索类型 1：跨域下单  0：正常")
+    private Integer clueType;
+
+    @ApiModelProperty("大管家信息")
+    WorkerTypeDTO workerTypeDTO;
 
     public String getDrawingsName(){
         if(null != getDrawings() && 0 == getDrawings()){
