@@ -50,8 +50,8 @@ public class StoreManagementController implements StoreManagementAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse BuildingList(HttpServletRequest request,String storeId,PageDTO pageDTO) {
-        return storeManagementService.BuildingList(storeId,pageDTO);
+    public ServerResponse BuildingList(HttpServletRequest request,String storeId,PageDTO pageDTO,String userId) {
+        return storeManagementService.BuildingList(storeId,pageDTO,userId);
     }
 
     /**

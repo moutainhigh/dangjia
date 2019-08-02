@@ -42,14 +42,33 @@ public class ClientController implements ClientAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setReported(HttpServletRequest request, String id, Integer phaseStatus) {
-        return customerService.setReported(id,phaseStatus);
+    public ServerResponse setReported(HttpServletRequest request, String clueId, Integer phaseStatus, String mcId) {
+        return customerService.setReported(clueId,phaseStatus,mcId);
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse setFollow(HttpServletRequest request, String clueId, Integer phaseStatus, String mcId) {
+        return customerService.setFollow(clueId,phaseStatus,mcId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse setFollow(HttpServletRequest request, String id, Integer phaseStatus) {
-        return customerService.setFollow(id,phaseStatus);
+    public ServerResponse setTurnOut(HttpServletRequest request, String cityId, String storeId, String id,Integer phaseStatus) {
+        return customerService.setTurnOut(cityId,storeId,id,phaseStatus);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setTips(HttpServletRequest request, Integer stage) {
+        return null;
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setWithdraw(HttpServletRequest request, String mcId,String houseId) {
+        return customerService.setWithdraw(mcId,houseId);
     }
 
 

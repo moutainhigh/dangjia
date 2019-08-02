@@ -27,7 +27,7 @@ public interface ClueMapper extends Mapper<Clue> {
 
     List<Clue> getAllByCondition(String values);
 
-    List<Clue> getGroupBy(@Param("phone") String phone,@Param("userId") String userId);
+    List<Clue> getGroupBy(@Param("phone") String phone,@Param("userId") String userId,@Param("storeId") String storeId);
 
     Clue getClue(@Param("phone") String phone,@Param("userId") String userId);
 

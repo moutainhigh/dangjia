@@ -45,5 +45,7 @@ public interface IMemberMapper extends Mapper<Member> {
 
     Member getByPhone(@Param("mobile") String mobile);
 
+
+
 }
 

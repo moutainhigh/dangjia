@@ -55,6 +55,9 @@
        <if test="null!=userId and ''!=userId">
            and cus_service=#{userId}
        </if>
+       <if test="null!=storeId ans ''!=storeId">
+           and store_id=#{storeId}
+       </if>
     </select>
 
 
@@ -148,14 +151,15 @@
     <select id="clientPage" resultType="com.dangjia.acg.dto.sale.client.CustomerIndexDTO">
         SELECT 
           <if test="type==0">
-              c.id,owername as name,phone,c.modify_date as modifyDate
+              c.id,owername as name,phone,c.modify_date as modifyDate,c.cus_service as userId,c.member_id as memberId
           </if>
           <if test="type==1 or type==2">
-              m.id,
+              m.id as memberId,
               if(m.name is not null,m.nick_name,m.name) as name,
               m.mobile as phone,
               m.modify_date as modifyDate,
-              CONCAT(IFNULL(h.residential,'*'),IFNULL(h.building,'*栋'),IFNULL(h.unit,'*单元'),IFNULL(h.number,'*号')) as houseName
+              CONCAT(IFNULL(h.residential,'*'),IFNULL(h.building,'*栋'),IFNULL(h.unit,'*单元'),IFNULL(h.number,'*号')) as houseName,
+              c.cus_service as userId
           </if>
         FROM dj_clue c
         <if test="type==0">
