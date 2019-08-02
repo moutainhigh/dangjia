@@ -15,7 +15,7 @@ public class BudgetDTO {
     private Double workerPrice;//人工
     private Double caiPrice;//材料服务
     private BigDecimal totalPrice;//总计
-
+    private String customEdit;
     private List<BudgetItemDTO> budgetItemDTOList;
 
 }
