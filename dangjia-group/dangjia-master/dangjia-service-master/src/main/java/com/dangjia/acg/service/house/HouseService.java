@@ -630,10 +630,8 @@ public class HouseService {
         if (houseDTO.getSquare() <= 0) {
             return ServerResponse.createByErrorMessage("面积错误");
         }
-        ModelingLayout modelingLayout = modelingLayoutMapper.selectByPrimaryKey(houseDTO.getModelingLayoutId());
-
         House house = iHouseMapper.selectByPrimaryKey(houseDTO.getHouseId());
-        house.setBuildSquare(new BigDecimal(modelingLayout.getBuildSquare()));//建筑面积
+        house.setBuildSquare(new BigDecimal(houseDTO.getBuildSquare()));//建筑面积
         house.setCityId(houseDTO.getCityId());
         house.setCityName(houseDTO.getCityName());
         house.setVillageId(houseDTO.getVillageId());
