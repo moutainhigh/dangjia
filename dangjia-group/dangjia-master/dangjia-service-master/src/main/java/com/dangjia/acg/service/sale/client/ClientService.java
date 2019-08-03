@@ -278,6 +278,9 @@ public class ClientService {
         clueMapper.insert(clue);//记录为中台的线索
         return ServerResponse.createBySuccessMessage("提交成功");
     }
+    private void setPush(){
+
+    }
 
     /**
      * 编辑客户

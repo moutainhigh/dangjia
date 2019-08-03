@@ -27,7 +27,6 @@ import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMemberMapper;
-import com.dangjia.acg.mapper.matter.IRenovationStageMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -93,8 +92,6 @@ public class HouseService {
     private ConfigUtil configUtil;
     @Autowired
     private IRenovationManualMapper renovationManualMapper;
-    @Autowired
-    private IRenovationStageMapper renovationStageMapper;
     @Autowired
     private IRenovationManualMemberMapper renovationManualMemberMapper;
     @Autowired
@@ -500,14 +497,16 @@ public class HouseService {
         house.setConstructionDate(new Date());
         iHouseMapper.updateByPrimaryKeySelective(house);
         try {
-            //开始建群
-//            Group group = new Group();
-//            group.setHouseId(house.getId());
-//            group.setUserId(house.getMemberId());
-//            String members = "";//创建群前，配置的成员userid组，多个以逗号分隔，不包含业主的userid组
-//            String prefixs = "";//创建群前，配置的成员userid组的前缀，多个以逗号分隔，不包含业主的前缀组
-//            groupInfoService.addGroup(request, group, members, prefixs);
-
+            List<String> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+            if (ms != null) {
+                String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                for (String m : ms) {
+                    configMessageService.addConfigMessage(AppType.SALE, m, "开工提醒",
+                            "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                                    + String.format("customerDetails?title=%s&storeId=%s&memberId=%s&phaseStatus=%s&listType=%s",
+                                    "客户详情", "", m, "1", ""));
+                }
+            }
             //通知业主确认开工
             configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修提醒",
                     String.format(DjConstants.PushMessage.START_FITTING_UP, house.getHouseName()), "");
@@ -610,8 +609,13 @@ public class HouseService {
         } else {
             house.setAbroadStats(0);
         }
-        //TODO 有待抢单时	外场销售/内场销售	:您有一个新的待抢单客户，请及时查看。	去抢单页
-
+        List<String> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+        if (ms != null) {
+            for (String m : ms) {
+                configMessageService.addConfigMessage(AppType.SALE, m, "待抢单客户提醒",
+                        "您有一个新的待抢单客户，请及时查看。", 4, null, "您有新的待抢单客户快去查看吧！");
+            }
+        }
         house.setIsRobStats(0);
         house.setMemberId(member.getId());//用户id
         if (city != null)

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.member.ICustomerMapper">
     <sql id="all_columns">
 		id,
@@ -20,7 +20,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!-- 根据业主id 查询 -->
     <select id="getCustomerByMemberId" parameterType="String" resultType="com.dangjia.acg.modle.member.Customer">
         SELECT
-        <include refid="all_columns" />
+        <include refid="all_columns"/>
         FROM dj_member_customer
         WHERE 1=1
         <if test="memberId!=null and memberId!=''">
@@ -30,9 +30,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <!-- 根据业主id 和 stage 查询 -->
-    <select id="getCustomerByMemberIdAndStage" parameterType="String" resultType="com.dangjia.acg.modle.member.Customer">
+    <select id="getCustomerByMemberIdAndStage" parameterType="String"
+            resultType="com.dangjia.acg.modle.member.Customer">
         SELECT
-        <include refid="all_columns" />
+        <include refid="all_columns"/>
         FROM dj_member_customer
         WHERE 1=1
         <if test="memberId!=null and memberId!=''">
@@ -68,7 +69,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             desc
         </if>
     </select>
-    
+
     <select id="grabSheet" resultType="com.dangjia.acg.dto.sale.store.GrabSheetDTO">
         SELECT
           mc.id as customerId,
@@ -124,6 +125,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         inner join dj_member m
         on mc.member_id=m.id
         where m.mobile=#{mobile}
+    </select>
+    <select id="getCustomerMemberIdList" resultType="java.lang.String">
+        SELECT
+            u.member_id
+        FROM
+            dj_member_customer mc
+            INNER JOIN dj_user u ON u.id = mc.user_id
+        WHERE
+            mc.member_id =#{memberId}
+		GROUP BY u.member_id
     </select>
 
 

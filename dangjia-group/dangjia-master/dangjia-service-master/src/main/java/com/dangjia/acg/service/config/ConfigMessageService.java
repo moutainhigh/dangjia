@@ -104,58 +104,120 @@ public class ConfigMessageService {
     }
 
     /**
+     * 推送至个人消息（即将废弃）
+     */
+    public ServerResponse addConfigMessage(HttpServletRequest request, AppType appType, String memberId,
+                                           String targetType, String title, String alert, String typeText) {
+        String data = null;
+        int type = 0;
+        typeText = (!CommonUtil.isEmpty(typeText)) ? typeText : "2";
+        if (!CommonUtil.isEmpty(typeText) && "6".equals(typeText)) {
+            data = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.JUGLELIST,
+                    "", "", "评价记录");
+        } else if (!CommonUtil.isEmpty(typeText) && "7".equals(typeText)) {
+            data = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.JIANGFALIST,
+                    "", "", "奖罚记录");
+        } else if (!StringUtils.isNumeric(typeText)) {
+            data = typeText;
+        } else {
+            type = Integer.parseInt(typeText);
+        }
+        return addConfigMessage(appType, memberId, targetType, title, alert, type, data);
+    }
+
+    /**
+     * 推送至个人消息(无语音，type！=0）
+     *
+     * @param appType  应用端类别
+     * @param memberId 接收人
+     * @param title    推送标题
+     * @param alert    推送内容
+     * @param type     动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
+     * @return
+     */
+    public ServerResponse addConfigMessage(AppType appType, String memberId, String title, String alert, int type) {
+        return addConfigMessage(appType, memberId, title, alert, type, null);
+    }
+
+    /**
+     * 推送至个人消息(无语音）
+     *
+     * @param appType  应用端类别
+     * @param memberId 接收人
+     * @param title    推送标题
+     * @param alert    推送内容
+     * @param type     动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
+     * @param data     跳转地址
+     * @return
+     */
+    public ServerResponse addConfigMessage(AppType appType, String memberId, String title, String alert, int type, String data) {
+        return addConfigMessage(appType, memberId, title, alert, type, data, null);
+    }
+
+    /**
      * 推送至个人消息
      *
-     * @param request
-     * @param appType
+     * @param appType  应用端类别
+     * @param memberId 接收人
+     * @param title    推送标题
+     * @param alert    推送内容
+     * @param type     动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
+     * @param data     跳转地址
+     * @param speak    语音提示内容
+     * @return
+     */
+    public ServerResponse addConfigMessage(AppType appType, String memberId, String title, String alert, int type, String data, String speak) {
+        return addConfigMessage(appType, memberId, "0", title, alert, type, data, speak);
+    }
+
+    /**
+     * 推送消息(无语音）
+     *
+     * @param appType    应用端类别
      * @param memberId   接收人
      * @param targetType 消息类型 0=个人推送  1=全推
      * @param title      推送标题
      * @param alert      推送内容
      * @param type       动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
+     * @param data       跳转地址
      * @return
      */
-    public ServerResponse addConfigMessage(HttpServletRequest request, AppType appType, String memberId,
-                                           String targetType, String title, String alert, String type) {
-        return addConfigMessage(appType, memberId, targetType, title, alert, type);
+    public ServerResponse addConfigMessage(AppType appType, String memberId, String targetType,
+                                           String title, String alert, int type, String data) {
+        return addConfigMessage(appType, memberId, targetType, title, alert, type, data, null);
     }
 
-    public ServerResponse addConfigMessage(AppType appType, String memberId,String targetType, String title, String alert, String type) {
+    /**
+     * 推送消息
+     *
+     * @param appType    应用端类别
+     * @param memberId   接收人
+     * @param targetType 消息类型 0=个人推送  1=全推
+     * @param title      推送标题
+     * @param alert      推送内容
+     * @param type       动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
+     * @param data       跳转地址
+     * @param speak      语音提示内容
+     * @return
+     */
+    public ServerResponse addConfigMessage(AppType appType, String memberId, String targetType,
+                                           String title, String alert, int type, String data, String speak) {
         ConfigMessage configMessage = new ConfigMessage();
         if (appType == null) {
             appType = AppType.ZHUANGXIU;
         }
-        type = (!CommonUtil.isEmpty(type)) ? type : "2";
         configMessage.setAppType(appType.getCode() + "");
         configMessage.setTargetUid(memberId);
         configMessage.setTargetType(targetType);
         configMessage.setName(title);
         configMessage.setText(alert);
-        if (!CommonUtil.isEmpty(type) && "6".equals(type)) {
-            String pingJia = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.JUGLELIST,
-                    "", "", "评价记录");
-            configMessage.setType(0);
-            configMessage.setData(pingJia);
-        } else if (!CommonUtil.isEmpty(type) && "7".equals(type)) {
-            String pingJia = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.JIANGFALIST,
-                    "", "", "奖罚记录");
-            configMessage.setType(0);
-            configMessage.setData(pingJia);
-        } else if (!StringUtils.isNumeric(type)) {
-            configMessage.setType(0);
-            configMessage.setData(type);
-        } else {
-            configMessage.setType(Integer.parseInt(type));
-        }
+        configMessage.setType(type);
+        configMessage.setData(data);
+        configMessage.setSpeak(speak);
         return addConfigMessage(configMessage);
     }
 
-    /**
-     * 新增
-     *
-     * @param configMessage
-     * @return
-     */
+
     public ServerResponse addConfigMessage(ConfigMessage configMessage) {
         try {
             if (this.configMessageMapper.insertSelective(configMessage) > 0) {

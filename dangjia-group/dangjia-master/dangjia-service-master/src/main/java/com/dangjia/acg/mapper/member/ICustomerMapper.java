@@ -52,5 +52,7 @@ public interface ICustomerMapper extends Mapper<Customer> {
     List<Customer> getCustomerGroupBy(@Param("mobile") String mobile);
 
     Integer getwaitDistributionTips();
+
+    List<String> getCustomerMemberIdList(@Param("memberId") String memberId);
 }
 
