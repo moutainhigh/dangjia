@@ -12,7 +12,8 @@ import java.util.Date;
  */
 @Data
 public class CustomerIndexDTO {
-    private String id;
+    private String clueId;
+    private String mcId;
     private String name;//客户名称
     private String phone;//号码
     private Date modifyDate;//时间
@@ -22,4 +23,5 @@ public class CustomerIndexDTO {
     private String userName;//跟进人
     private String userId;
     private String memberId;
+    private Integer tips;//消息提示 0:无提示 1：提示
 }

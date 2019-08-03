@@ -50,5 +50,7 @@ public interface ICustomerMapper extends Mapper<Customer> {
     Integer queryTypeId(@Param("userId") String userId);
 
     List<Customer> getCustomerGroupBy(@Param("mobile") String mobile);
+
+    Integer getwaitDistributionTips();
 }
 

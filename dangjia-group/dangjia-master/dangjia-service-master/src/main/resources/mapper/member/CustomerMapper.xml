@@ -12,7 +12,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         curr_record_id AS currRecordId,
         remind_record_id AS remindRecordId,
         create_date AS createDate,
-        modify_date AS modifyDate
+        modify_date AS modifyDate,
+        phase_status AS phaseStatus,
+        tips
 	</sql>
 
     <!-- 根据业主id 查询 -->
@@ -45,7 +47,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!--待分配客户-->
     <select id="waitDistribution" parameterType="String" resultType="com.dangjia.acg.dto.sale.client.CustomerIndexDTO">
         SELECT
-        m.id, if(m.name is not null,m.nick_name,m.name) as name,
+        mc.id as mcId,
+        m.id as memberId,
+        if(m.name is not null,m.nick_name,m.name) as name,
         m.mobile as phone,
         mc.modify_date AS modifyDate,
         mc.create_date AS createDate,
@@ -120,6 +124,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         inner join dj_member m
         on mc.member_id=m.id
         where m.mobile=#{mobile}
+    </select>
+
+
+    <select id="getwaitDistributionTips"  resultType="java.lang.Integer">
+        SELECT
+        count(0)
+        FROM dj_member_customer mc
+        INNER join dj_member m
+        ON mc.member_id=m.id
+        WHERE user_id=#{userId}
+        AND mc.data_status=0
+        AND stage IN(0,1)
+        AND tips = 1
     </select>
 
 </mapper>

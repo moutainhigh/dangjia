@@ -121,6 +121,8 @@ public class ClueService {
             List<ClueDTO> clueDTOList = new ArrayList<>();
             for (Clue c : clues) {
                 ClueDTO clueDTO = new ClueDTO();
+                clueDTO.setClueId(c.getId());
+                clueDTO.setPhaseStatus(c.getPhaseStatus());
                 BeanUtils.beanToBean(c, clueDTO);
                 if (c.getLabelId() != null) {
                     String[] split = c.getLabelId().split(",");
