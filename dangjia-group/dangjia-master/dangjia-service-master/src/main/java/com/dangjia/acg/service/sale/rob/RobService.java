@@ -5,19 +5,20 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.member.CustomerRecordInFoDTO;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import com.dangjia.acg.dto.sale.achievement.UserAchievementDTO;
-import com.dangjia.acg.dto.sale.rob.RobArrInFoDTO;
-import com.dangjia.acg.dto.sale.rob.RobDTO;
-import com.dangjia.acg.dto.sale.rob.RobInfoDTO;
+import com.dangjia.acg.dto.sale.rob.*;
 import com.dangjia.acg.mapper.clue.ClueMapper;
+import com.dangjia.acg.mapper.clue.ClueTalkMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.modle.clue.Clue;
+import com.dangjia.acg.modle.clue.ClueTalk;
+import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.CustomerRecord;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,20 +43,36 @@ public class RobService {
     private ConfigUtil configUtil;
     @Autowired
     private ICustomerRecordMapper iCustomerRecordMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
+
+    @Autowired
+    private ClueTalkMapper clueTalkMapper;
 
     /**
      * 查询抢单列表
-     * @param userId
+     * @param userToken
      * @param storeId
      * @return
      */
-    public ServerResponse queryRobSingledata(String userId,String storeId){
-        Integer type = iCustomerMapper.queryTypeId(userId);
+    public ServerResponse queryRobSingledata(String userToken,String storeId){
+
+        Object object = constructionService.getAccessToken(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        AccessToken accessToken = (AccessToken) object;
+        if (CommonUtil.isEmpty(accessToken.getUserId())) {
+            return ServerResponse.createbyUserTokenError();
+        }
+
+        Integer type = iCustomerMapper.queryTypeId(accessToken.getUserId());
+
 
         Map<String,Object> map = new HashMap<>();
-        if (!CommonUtil.isEmpty(userId)) {
-            map.put("userId",userId);
-        }
+
+        map.put("userId",accessToken.getUserId());
+
         if (!CommonUtil.isEmpty(type)) {
             map.put("type",type);
         }
@@ -64,6 +81,7 @@ public class RobService {
         }
         List<RobDTO> list = clueMapper.queryRobSingledata(map);
 
+        //查询标签
         List<RobDTO> robDTOs = new ArrayList<>();
         for (RobDTO li:list) {
             RobDTO robDTO = new RobDTO();
@@ -83,89 +101,138 @@ public class RobService {
         return ServerResponse.createBySuccess("查询提成列表", robDTOs);
     }
 
+
+
+    public ServerResponse upDateIsRobStats(String id){
+        try {
+            if (!CommonUtil.isEmpty(id)) {
+                Map<String,Object> map = new HashMap<>();
+                map.put("id",id);
+                clueMapper.upDateIsRobStats(map);
+                return ServerResponse.createBySuccessMessage("修改成功");
+            }
+            return ServerResponse.createByErrorMessage("修改成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("修改成功");
+        }
+
+    }
+
+
     /**
      * 查询客户详情
      * @param memberId
      * @return
      */
-    public ServerResponse queryCustomerInfo(String memberId,String userId){
-
-        Map<String,Object> map = new HashMap<>();
-        if (!CommonUtil.isEmpty(memberId)) {
-            map.put("memberId",memberId);
-        }
-        if (!CommonUtil.isEmpty(userId)) {
-            map.put("userId",userId);
-        }
+    public ServerResponse queryCustomerInfo(String memberId,String userId,String clueId,Integer phaseStatus){
         //获取图片url
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 
-        RobArrInFoDTO robArrInFoDTO = new RobArrInFoDTO();
+        //客户阶段查询客户详情
+        if(phaseStatus == 1){
+            Map<String,Object> map = new HashMap<>();
+            if (!CommonUtil.isEmpty(memberId)) {
+                map.put("memberId",memberId);
+            }
+            if (!CommonUtil.isEmpty(userId)) {
+                map.put("userId",userId);
+            }
 
-        List<RobInfoDTO> robInfoDTO = clueMapper.queryCustomerInfo(map);
+            RobArrInFoDTO robArrInFoDTO = new RobArrInFoDTO();
 
-        if(!CommonUtil.isEmpty(robInfoDTO)){
-            for (RobInfoDTO to:robInfoDTO) {
-                //查询大管家信息
-                if (!CommonUtil.isEmpty(to.getHouseId())) {
-                    WorkerTypeDTO workerTypeDTO = iMemberLabelMapper.queryWorkerType(to.getHouseId());
-                    if(null != workerTypeDTO){
-                        workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
+            List<RobInfoDTO> robInfoDTO = clueMapper.queryCustomerInfo(map);
+
+            if(!CommonUtil.isEmpty(robInfoDTO)){
+                for (RobInfoDTO to:robInfoDTO) {
+                    //查询大管家信息
+                    if (!CommonUtil.isEmpty(to.getHouseId())) {
+                        WorkerTypeDTO workerTypeDTO = iMemberLabelMapper.queryWorkerType(to.getHouseId());
+                        if(null != workerTypeDTO){
+                            workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
+                        }
+                        to.setWorkerTypeDTO(workerTypeDTO);
                     }
-
-                    to.setWorkerTypeDTO(workerTypeDTO);
                 }
             }
-        }
 
-        //查询标签
-        if(!CommonUtil.isEmpty(robInfoDTO)){
-            String str = robInfoDTO.get(0).getLabelIdArr();
-            if(null != str){
-                String[] labelIds = str.split(",");
-                List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
-                robArrInFoDTO.setList(labelByIds);
+            //查询客户标签
+            if(!CommonUtil.isEmpty(robInfoDTO)){
+                String str = robInfoDTO.get(0).getLabelIdArr();
+                if(null != str){
+                    String[] labelIds = str.split(",");
+                    List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
+                    robArrInFoDTO.setList(labelByIds);
+                }
             }
-        }
 
-        //根据客户id查询沟通记录
-        if (!CommonUtil.isEmpty(memberId)) {
-            List<CustomerRecordInFoDTO> data = iMemberLabelMapper.queryDescribes(memberId);
-            for (CustomerRecordInFoDTO datum : data) {
+            //查询客户沟通记录
+            if (!CommonUtil.isEmpty(memberId)) {
+                List<com.dangjia.acg.dto.member.CustomerRecordInFoDTO> data = iMemberLabelMapper.queryDescribes(memberId);
+                for (com.dangjia.acg.dto.member.CustomerRecordInFoDTO datum : data) {
+                    datum.setHead(imageAddress + datum.getHead());
+                }
+                robArrInFoDTO.setData(data);
+            }
+
+            //销售人员订单数量
+            List<UserAchievementDTO> uadto = clueMapper.queryUserAchievementInFo(map);
+
+            //全部提成数量
+            int arrRoyalty = 1000;
+            int s = 0;
+            //每条数据当月提成
+            if(!uadto.isEmpty()){
+                for (UserAchievementDTO to:uadto) {
+                    if(to.getVisitState() == 1){
+                        s = (int) (arrRoyalty*0.75);
+                        to.setMonthRoyaltys(s);
+                        to.setMeterRoyaltys(s);
+                    }
+                    if(to.getVisitState() == 3){
+                        s = (int) (arrRoyalty*0.25);
+                        to.setMonthRoyaltys(s);
+                        to.setMeterRoyaltys(arrRoyalty);
+                    }
+                    to.setHead(imageAddress + to.getHead());
+                    to.setArrRoyalty(arrRoyalty);
+                }
+                robArrInFoDTO.setUserInFo(uadto.get(0));
+            }
+
+
+            robArrInFoDTO.setCustomerList(robInfoDTO);
+            if (CommonUtil.isEmpty(robArrInFoDTO)) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            return ServerResponse.createBySuccess("查询客户详情", robArrInFoDTO);
+        }else{
+            //线索阶段查询详情
+            Map<String,Object> map = new HashMap<>();
+            map.put("id",clueId);
+            UserInfoDTO userInfoDTO = clueMapper.queryTips(map);
+            //查询线索阶段标签
+            if(!CommonUtil.isEmpty(userInfoDTO)){
+                if(!CommonUtil.isEmpty(userInfoDTO)){
+                    String str = userInfoDTO.getLabelId();
+                    if(null != str){
+                        String[] labelIds = str.split(",");
+                        List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
+                        userInfoDTO.setList(labelByIds);
+                    }
+                }
+            }
+
+            //查询线索沟通记录
+            List<com.dangjia.acg.dto.member.CustomerRecordInFoDTO> data = iMemberLabelMapper.queryTalkContent(clueId);
+            for (com.dangjia.acg.dto.member.CustomerRecordInFoDTO datum : data) {
                 datum.setHead(imageAddress + datum.getHead());
             }
-            robArrInFoDTO.setData(data);
+            userInfoDTO.setData(data);
+
+            return ServerResponse.createBySuccess("查询客户详情", userInfoDTO);
         }
 
-        List<UserAchievementDTO> uadto = clueMapper.queryUserAchievementInFo(map);
-
-        //全部提成数量
-        int arrRoyalty = 1000;
-        int s = 0;
-        //每条数据当月提成
-        if(!uadto.isEmpty()){
-            for (UserAchievementDTO to:uadto) {
-                if(to.getVisitState() == 1){
-                    s = (int) (arrRoyalty*0.75);
-                    to.setMonthRoyaltys(s);
-                    to.setMeterRoyaltys(s);
-                }
-                if(to.getVisitState() == 3){
-                    s = (int) (arrRoyalty*0.25);
-                    to.setMonthRoyaltys(s);
-                    to.setMeterRoyaltys(arrRoyalty);
-                }
-                to.setHead(imageAddress + to.getHead());
-                to.setArrRoyalty(arrRoyalty);
-            }
-        }
-
-        robArrInFoDTO.setUserInFo(uadto.get(0));
-        robArrInFoDTO.setCustomerList(robInfoDTO);
-        if (CommonUtil.isEmpty(robArrInFoDTO)) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-        }
-        return ServerResponse.createBySuccess("查询客户详情", robArrInFoDTO);
     }
 
 
@@ -175,40 +242,85 @@ public class RobService {
      * @param labelId
      * @return
      */
-    public ServerResponse addLabel(String memberId, String labelId) {
+    public ServerResponse addLabel(String memberId, String labelId,String clueId,Integer phaseStatus) {
         try {
-            Map<String,Object> Map = new HashMap<>();
-            if (!CommonUtil.isEmpty(memberId)) {
-                String str = iCustomerMapper.queryLabelIdArr(memberId);
-                String labelIdrr = str +","+ labelId;
-                Map.put("labelIdArr",labelIdrr);
-                Map.put("memberId",memberId);
-                iCustomerMapper.upDateLabelIdArr(Map);
-                return ServerResponse.createBySuccessMessage("新增成功");
-            }
-
-            if (!CommonUtil.isEmpty(memberId)) {
-                String str = iCustomerMapper.queryLabelIdArr(memberId);
-                String[] arr = str.split(","); // 用,分割
-                List<String> list = Arrays.asList(arr);
-
-//                list.contains(labelId);
-                for (String s:list) {
-                    if(s.contains(labelId)){
-                       list.remove(labelId);
+            if(phaseStatus == 1) {
+                //客户阶段新增标签
+                Map<String,Object> Map = new HashMap<>();
+                if(!CommonUtil.isEmpty(memberId)) {
+                    String str = iCustomerMapper.queryLabelIdArr(memberId);
+                    if(!CommonUtil.isEmpty(str)){
+                        String[] strs = str.split(",");
+                        List<String> strsToList= Arrays.asList(strs);
+                        for(String s:strsToList){
+                            if(s.equals(labelId)){
+                                return ServerResponse.createBySuccessMessage("标签已存在");
+                            }
+                        }
                     }
+
+                    String labelIdrr = str +","+ labelId;
+                    Map.put("labelIdArr",labelIdrr);
+                    Map.put("memberId",memberId);
+                    iCustomerMapper.upDateLabelIdArr(Map);
+                    return ServerResponse.createBySuccessMessage("新增成功");
                 }
-
-
-
-//                Map.put("labelIdArr",labelIdrr);
-                Map.put("memberId",memberId);
-                iCustomerMapper.upDateLabelIdArr(Map);
-                return ServerResponse.createBySuccessMessage("新增成功");
-
+            }else {
+                //线索阶段新增标签
+                if (CommonUtil.isEmpty(clueId)) {
+                    Map<String, Object> Map = new HashMap<>();
+                        String str = iCustomerMapper.queryLabelId(clueId);
+                        if (!CommonUtil.isEmpty(str)) {
+                            String[] strs = str.split(",");
+                            List<String> strsToList = Arrays.asList(strs);
+                            for (String s : strsToList) {
+                                if (s.equals(labelId)) {
+                                    return ServerResponse.createBySuccessMessage("标签已存在 ");
+                                }
+                            }
+                        }
+                        String labelIdrr = str + "," + labelId;
+                        Map.put("labelIdArr", labelIdrr);
+                        Map.put("memberId", memberId);
+                        iCustomerMapper.upDateLabelIdArr(Map);
+                        return ServerResponse.createBySuccessMessage("新增成功");
+                    }
             }
 
+            return ServerResponse.createByErrorMessage("修改失败");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("修改失败");
+        }
+    }
 
+    /**
+     * 删除标签
+     * @param memberId
+     * @param labelIdArr
+     * @return
+     */
+    public ServerResponse deleteLabel(String memberId, String labelIdArr,String clueId,Integer phaseStatus) {
+        try {
+            if (phaseStatus == 1) {
+                //删除客户阶段标签
+                Map<String,Object> Map = new HashMap<>();
+                if (!CommonUtil.isEmpty(memberId)) {
+                    Map.put("labelIdArr",labelIdArr);
+                    Map.put("memberId",memberId);
+                    iCustomerMapper.upDateLabelIdArr(Map);
+                    return ServerResponse.createBySuccessMessage("删除成功");
+                }
+            }else{
+                //删除线索阶段标签
+                Map<String,Object> Map = new HashMap<>();
+                if (!CommonUtil.isEmpty(memberId)) {
+                    Map.put("labelId",labelIdArr);
+                    Map.put("clueId",clueId);
+                    iCustomerMapper.upDateLabelId(Map);
+                    return ServerResponse.createBySuccessMessage("删除成功 ");
+                }
+            }
 
             return ServerResponse.createByErrorMessage("修改失败");
         } catch (Exception e) {
@@ -219,18 +331,38 @@ public class RobService {
 
     /**
      * 新增沟通记录
-     * @param customerRecord
+     * @param customerRecDTO
      * @return
      */
-    public ServerResponse addDescribes(CustomerRecord customerRecord) {
+    public ServerResponse addDescribes(CustomerRecDTO customerRecDTO) {
         try {
-            iCustomerRecordMapper.insert(customerRecord);
-            return ServerResponse.createBySuccessMessage("新增成功");
+            if (!CommonUtil.isEmpty(customerRecDTO)) {
+                if(customerRecDTO.getPhaseStatus() == 1){
+                    //客户阶段新增沟通记录
+                    CustomerRecord customerRecord = new CustomerRecord();
+                    customerRecord.setDescribes(customerRecDTO.getDescribes());
+                    customerRecord.setRemindTime(customerRecDTO.getRemindTime());
+                    customerRecord.setUserId(customerRecDTO.getUserId());
+                    customerRecord.setMemberId(customerRecDTO.getMemberId());
+                    iCustomerRecordMapper.insert(customerRecord);
+                    return ServerResponse.createBySuccessMessage("新增成功");
+                }else{
+                    // 线索阶段新增沟通记录
+                    ClueTalk clueTalk = new ClueTalk();
+                    clueTalk.setUserId(customerRecDTO.getUserId());
+                    clueTalk.setClueId(customerRecDTO.getClueId());
+                    clueTalk.setTalkContent(customerRecDTO.getDescribes());
+                    clueTalkMapper.insert(clueTalk);
+                    return ServerResponse.createBySuccessMessage("新增成功");
+                }
+            }
+            return ServerResponse.createByErrorMessage("新增失败");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("新增失败");
         }
     }
+
 
     /**
      * 修改客户信息

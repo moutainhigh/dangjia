@@ -7,6 +7,7 @@ import com.dangjia.acg.dto.sale.client.CustomerIndexDTO;
 import com.dangjia.acg.dto.sale.client.OrdersCustomerDTO;
 import com.dangjia.acg.dto.sale.rob.RobDTO;
 import com.dangjia.acg.dto.sale.rob.RobInfoDTO;
+import com.dangjia.acg.dto.sale.rob.UserInfoDTO;
 import com.dangjia.acg.dto.sale.store.StoreUserDTO;
 import com.dangjia.acg.modle.clue.Clue;
 import org.apache.ibatis.annotations.Param;
@@ -70,5 +71,9 @@ public interface ClueMapper extends Mapper<Clue> {
     List<UserAchievementDTO> queryUserAchievementInFo(Map<String,Object> map);
 
 
+    void upDateIsRobStats(Map<String,Object> map);
+
+
+    UserInfoDTO queryTips(Map<String,Object> map);
 
 }

@@ -93,6 +93,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select label_id_arr as labelIdArr from dj_member_customer mc where mc.member_id = #{memberId}
     </select>
 
+    <select id="queryLabelId" resultType="java.lang.String" parameterType="java.lang.String">
+        select label_id as labelId from dj_clue mc where c.id = #{clueId}
+    </select>
+
     <select id="queryTypeId" resultType="java.lang.Integer" parameterType="java.lang.String">
         select type from dj_store_users where user_id = #{userId}
     </select>
@@ -103,6 +107,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         set label_id_arr = #{labelIdArr}
         where member_id = #{memberId}
     </update>
+
+    <update id="upDateLabelId" parameterType="java.util.Map">
+        update dj_clue
+        set label_id = #{labelId}
+        where id = #{clueId}
+    </update>
+
 
     <select id="getCustomerGroupBy" resultType="com.dangjia.acg.modle.member.Customer">
         select * from dj_member_customer mc

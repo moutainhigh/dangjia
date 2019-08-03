@@ -1,8 +1,8 @@
 package com.dangjia.acg.api.sale.rob;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.sale.rob.CustomerRecDTO;
 import com.dangjia.acg.modle.clue.Clue;
-import com.dangjia.acg.modle.member.CustomerRecord;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -44,8 +44,15 @@ public interface RobAPI {
     @PostMapping(value = "sale/rob/queryRobSingledata")
     @ApiOperation(value = "抢单列表查询", notes = "抢单列表查询")
     ServerResponse queryRobSingledata(@RequestParam("request")HttpServletRequest request,
-                                      @RequestParam("userId")String userId,
+                                      @RequestParam("userToken")String userToken,
                                       @RequestParam("storeId")String storeId);
+
+
+
+    @PostMapping(value = "sale/rob/upDateIsRobStats")
+    @ApiOperation(value = "抢单", notes = "抢单")
+    ServerResponse upDateIsRobStats(@RequestParam("request")HttpServletRequest request,
+                                    @RequestParam("id")String id);
 
     /**
      * showdoc
@@ -69,7 +76,9 @@ public interface RobAPI {
     @ApiOperation(value = "客户详情查询", notes = "客户详情查询")
     ServerResponse queryCustomerInfo(@RequestParam("request")HttpServletRequest request,
                                      @RequestParam("userId")String userId,
-                                     @RequestParam("memberId")String memberId);
+                                     @RequestParam("memberId")String memberId,
+                                     @RequestParam("clueId")String clueId,
+                                     @RequestParam("phaseStatus")Integer phaseStatus);
 
     /**
      * showdoc
@@ -94,8 +103,18 @@ public interface RobAPI {
     @ApiOperation(value = "新增标签", notes = "新增标签")
     ServerResponse addLabel(@RequestParam("request")HttpServletRequest request,
                             @RequestParam("memberId")String memberId,
-                            @RequestParam("labelId")String labelId);
+                            @RequestParam("labelId")String labelId,
+                            @RequestParam("clueId")String clueId,
+                            @RequestParam("phaseStatus")Integer phaseStatus);
 
+
+    @PostMapping(value = "sale/rob/deleteLabel")
+    @ApiOperation(value = "删除标签", notes = "删除标签")
+    ServerResponse deleteLabel(@RequestParam("request")HttpServletRequest request,
+                               @RequestParam("memberId")String memberId,
+                               @RequestParam("labelIdArr")String labelIdArr,
+                               @RequestParam("clueIdr")String clueIdr,
+                               @RequestParam("phaseStatus")Integer phaseStatus);
 
    /**
     * showdoc
@@ -117,7 +136,7 @@ public interface RobAPI {
     @PostMapping(value = "sale/rob/addDescribes")
     @ApiOperation(value = "新增沟通记录", notes = "新增沟通记录")
     ServerResponse addDescribes(@RequestParam("request")HttpServletRequest request,
-                                @RequestBody CustomerRecord customerRecord);
+                                @RequestBody CustomerRecDTO customerRecDTO);
 
     /**
      * showdoc

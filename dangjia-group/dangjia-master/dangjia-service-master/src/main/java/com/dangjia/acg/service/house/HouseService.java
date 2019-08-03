@@ -496,6 +496,7 @@ public class HouseService {
             return ServerResponse.createByErrorMessage("操作失败");
         }
         house.setVisitState(1);//开工成单
+        house.setIsRobStats(1);
         house.setConstructionDate(new Date());
         iHouseMapper.updateByPrimaryKeySelective(house);
         try {
@@ -585,44 +586,36 @@ public class HouseService {
             }
         }
         Integer type = iCustomerMapper.queryType(member.getId());
-
         Integer result = clueMapper.queryTClue(member.getMobile());
-
         City city = iCityMapper.selectByPrimaryKey(cityId);
-
         House house = new House(true);//新增房产信息
-
-
         //0:场内录入，1:场外录入
-        if(null != type){
-            if(type == 0){
+        if (null != type) {
+            if (type == 0) {
                 house.setIsType(0);
-            }else{
+            } else {
                 house.setIsType(1);
             }
-        }else{
+        } else {
             house.setIsType(0);
         }
-
-
-        if(null != result){
-            if(result == 1){
+        if (null != result) {
+            if (result == 1) {
                 //一个销售人员下单
                 house.setAbroadStats(0);
-            }else if(result > 1){
+            } else if (result > 1) {
                 //两个销售人员同时下单
                 house.setAbroadStats(1);
             }
-        }else{
+        } else {
             house.setAbroadStats(0);
         }
         //TODO 有待抢单时	外场销售/内场销售	:您有一个新的待抢单客户，请及时查看。	去抢单页
 
-
-
         house.setIsRobStats(0);
         house.setMemberId(member.getId());//用户id
-        house.setCityName(city.getName());//城市名
+        if (city != null)
+            house.setCityName(city.getName());//城市名
         house.setCityId(cityId);
         house.setAgain(again);//第几套房产
         house.setHouseType(houseType);//装修的房子类型0：新房；1：老房

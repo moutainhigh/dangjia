@@ -180,6 +180,7 @@ public class GroupInfoService {
         }
         return ServerResponse.createBySuccessMessage("ok");
     }
+
     /**
      * 批量更新群组成员(跨域)
      *
@@ -295,17 +296,23 @@ public class GroupInfoService {
                     MainUser user = userMapper.selectByPrimaryKey(username[i]);
                     if (user == null) {
                         Member member = memberMapper.selectByPrimaryKey(username[i]);
-                        if (!CommonUtil.isEmpty(member.getWorkerTypeId()) && CommonUtil.isEmpty(prefix)) {
-                            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                            if (workerType != null) {
-                                prefix = workerType.getName();
-                                signature = String.valueOf(workerType.getType());
+                        if (member != null) {
+                            if (!CommonUtil.isEmpty(member.getWorkerTypeId()) && CommonUtil.isEmpty(prefix)) {
+                                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                                if (workerType != null) {
+                                    prefix = workerType.getName();
+                                    signature = String.valueOf(workerType.getType());
+                                }
                             }
+                            phone = member.getMobile();
+                            nickname = member.getName();
+                            avatar = StringUtils.isEmpty(member.getHead()) ? null :
+                                    configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + member.getHead();
+                        } else {
+                            phone = "400-168-1231";
+                            nickname = user.getUsername();
+                            avatar = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + "qrcode/logo.png";
                         }
-                        phone = member.getMobile();
-                        nickname = member.getName();
-                        avatar = StringUtils.isEmpty(member.getHead()) ? null :
-                                configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + member.getHead();
                     } else {
                         phone = "400-168-1231";
                         nickname = user.getUsername();

@@ -54,11 +54,19 @@ public interface IMemberLabelMapper extends Mapper<MemberLabel> {
 
 
     /**
-     * 根据id查询沟通记录
+     * 查询客户沟通记录
      * @param memberId
      * @return
      */
     List<CustomerRecordInFoDTO> queryDescribes(@Param("memberId") String memberId);
+
+
+    /**
+     * 查询线索阶段沟通记录
+     * @param clueId
+     * @return
+     */
+    List<CustomerRecordInFoDTO> queryTalkContent(@Param("clueId") String clueId);
 
 
     /**
