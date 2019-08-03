@@ -197,9 +197,10 @@ public class RobService {
                     to.setHead(imageAddress + to.getHead());
                     to.setArrRoyalty(arrRoyalty);
                 }
+                robArrInFoDTO.setUserInFo(uadto.get(0));
             }
 
-            robArrInFoDTO.setUserInFo(uadto.get(0));
+
             robArrInFoDTO.setCustomerList(robInfoDTO);
             if (CommonUtil.isEmpty(robArrInFoDTO)) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
