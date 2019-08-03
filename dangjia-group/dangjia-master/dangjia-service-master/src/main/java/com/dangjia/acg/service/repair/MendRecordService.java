@@ -424,6 +424,9 @@ public class MendRecordService {
             return (ServerResponse) object;
         }
         Member worker = (Member) object;
+        if(worker.getWorkerType()!=null&&worker.getWorkerType()==3){
+            roleType=2;
+        }
         List<Map<String, Object>> returnMap = new ArrayList<>();
         if (CommonUtil.isEmpty(type) || type == -1) {
             getHouseFlowApplies(worker, roleType, houseId, 6, returnMap);
@@ -602,13 +605,16 @@ public class MendRecordService {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<Map<String, Object>> returnMap = new ArrayList<>();
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (accessToken == null) {
-                return ServerResponse.createbyUserTokenError();
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
-            Member worker = accessToken.getMember();
+            Member worker = (Member) object;
+            if(worker.getWorkerType()!=null&&worker.getWorkerType()==3){
+                roleType=2;
+            }
             List<MendOrder> mendOrderList;
-            if (accessToken.getMemberType() == 1) {//工匠
+            if (roleType == 3) {//工匠
                 mendOrderList = mendOrderMapper.workerMendOrder(houseId, 1, worker.getWorkerTypeId());
             } else {
                 mendOrderList = mendOrderMapper.workerMendOrder(houseId, 1, "");
@@ -635,7 +641,7 @@ public class MendRecordService {
                 map.put("size", "共" + mendOrderList.size() + "条");
                 returnMap.add(map);
             }
-            if (accessToken.getMemberType() == 1) {//工匠
+            if (roleType == 3) {//工匠
                 mendOrderList = mendOrderMapper.workerMendOrder(houseId, 3, worker.getWorkerTypeId());
             } else {
                 mendOrderList = mendOrderMapper.workerMendOrder(houseId, 3, "");
@@ -679,7 +685,7 @@ public class MendRecordService {
             }
             example = new Example(HouseFlowApply.class);
             /*审核记录*/
-            if (accessToken.getMemberType() == 1) {//工匠
+            if (roleType == 3) {//工匠
                 example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId)
                         .andCondition(" apply_type <3 and apply_type!=0  ")
                         .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
