@@ -1,6 +1,7 @@
 package com.dangjia.acg.dto.sale.rob;
 
 import com.dangjia.acg.dto.member.CustomerRecordInFoDTO;
+import com.dangjia.acg.dto.member.IntentionHouseDTO;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
 import com.dangjia.acg.dto.sale.achievement.UserAchievementDTO;
 import io.swagger.annotations.ApiModel;
@@ -27,6 +28,9 @@ public class RobArrInFoDTO {
 
     @ApiModelProperty("销售业绩")
     UserAchievementDTO userInFo;
+
+    @ApiModelProperty("意向房屋信息")
+    private List<IntentionHouseDTO> intentionHouseList;
 
 
 }

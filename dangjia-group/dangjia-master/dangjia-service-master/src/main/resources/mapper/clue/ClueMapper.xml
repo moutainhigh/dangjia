@@ -82,7 +82,8 @@
             m.modify_date as modifyDate,
             m.create_date as create_date,
             mc.label_id_arr as labelId,
-            u.username as userName
+            u.username as userName,
+            mc.phase_status as phaseStatus
             from dj_member_customer mc
             INNER JOIN dj_member m
             on mc.member_id=m.id
@@ -121,6 +122,7 @@
             c.member_id as memberId,
             c.store_id as storeId,
             u.username as userName,
+            c.phase_status as phaseStatus,
             c.clue_type as clueType
            from dj_clue c
            INNER JOIN dj_user u
@@ -150,10 +152,16 @@
     <!--客户页-->
     <select id="clientPage" resultType="com.dangjia.acg.dto.sale.client.CustomerIndexDTO">
         SELECT 
-          <if test="type==0">
-              c.id,owername as name,phone,c.modify_date as modifyDate,c.cus_service as userId,c.member_id as memberId
+          <if test="type==''">
+              c.id as clueId,
+              owername as name,
+              phone,
+              c.modify_date as modifyDate,
+              c.cus_service as userId,
+              c.member_id as memberId
           </if>
           <if test="type==1 or type==2">
+              c.id as clueId,
               m.id as memberId,
               if(m.name is not null,m.nick_name,m.name) as name,
               m.mobile as phone,
@@ -162,7 +170,7 @@
               c.cus_service as userId
           </if>
         FROM dj_clue c
-        <if test="type==0">
+        <if test="type==''">
             WHERE c.data_status = 0 and c.stage NOT IN (2,3)
             <if test="null!=userId and ''!=userId">
                 and c.cus_service=#{userId}
@@ -227,6 +235,7 @@
     
     <select id="ordersCustomer" resultType="com.dangjia.acg.dto.sale.client.OrdersCustomerDTO">
         SELECT
+        mc.id as mcId,
         m.id as memberId,
         h.id as houseId,
         CONCAT(IFNULL(h.residential,'*'),IFNULL(CONCAT(h.building,'栋'),'*栋'),IFNULL(CONCAT(h.unit,'单元'),'*单元'),IFNULL(CONCAT(h.number,'号'),'*号')) as houseName,
@@ -275,14 +284,17 @@
 
 
     <select id="sleepingCustomer" resultType="com.dangjia.acg.dto.sale.client.CustomerIndexDTO">
-        select name,phone,modifyDate,createDate,labelIdArr,userName from (
+        select clueId,mcId,name,phone,modifyDate,createDate,labelIdArr,userName,phaseStatus from (
             SELECT
+            c.id as clueId,
+            null as mcId,
             c.owername as name,
             c.phone,
             c.modify_date AS modifyDate,
             c.create_date AS createDate,
             c.label_id AS labelIdArr,
-            u.username as userName
+            u.username as userName,
+            c.phase_status as phaseStatus
             FROM dj_clue c
             inner join dj_user u
             on c.cus_service=u.id
@@ -298,12 +310,15 @@
             </if>
             UNION
             SELECT
+            mc.id as mcId,
+            null as clueId,
             if(m.name is not null,m.nick_name,m.name) as name,
             m.mobile AS phone,
             mc.modify_date AS modifyDate,
             mc.create_date AS createDate,
             mc.label_id_arr AS labelIdArr,
-            u.username as userName
+            u.username as userName,
+            mc.phase_status as phaseStatus
             FROM dj_member m
             INNER JOIN dj_member_customer mc
             ON m.id=mc.member_id
@@ -424,6 +439,99 @@
             and h.member_id = #{memberId}
         </if>
             and (h.visit_state = 1 or h.visit_state = 3)
+    </select>
+
+
+    <!--消息红点提示-->
+    <select id="getTips" resultType="java.lang.Integer">
+        SELECT
+        COUNT(0)
+        FROM dj_clue c
+        <if test="type==''">
+            WHERE c.data_status = 0 and c.stage NOT IN (2,3)
+        <if test="null!=userId and ''!=userId">
+            and c.cus_service=#{userId}
+        </if>
+        <if test="null!=storeUsers and storeUsers.size>0">
+            and c.cus_service in
+            <foreach collection="storeUsers" index="index" item="item" open="(" separator="," close=")">
+                #{item.userId}
+            </foreach>
+        </if>
+        </if>
+        <if test="type==1">
+            INNER JOIN dj_member m
+            ON m.id=c.member_id
+            INNER JOIN dj_house h
+            ON h.member_id = m.id  and h.data_status =0 and h.visit_state =1
+            WHERE m.data_status = 0
+            and c.data_status = 0
+            <if test="null!=userId and ''!=userId">
+                and c.cus_service=#{userId}
+            </if>
+            <if test="null!=storeUsers and storeUsers.size>0">
+                and c.cus_service in
+                <foreach collection="storeUsers" index="index" item="item" open="(" separator="," close=")">
+                    #{item.userId}
+                </foreach>
+            </if>
+        </if>
+        <if test="type==2">
+            INNER JOIN dj_member m
+            ON m.id=c.member_id
+            INNER JOIN dj_house h
+            ON h.member_id = m.id  and h.data_status =0 and h.visit_state =3
+            WHERE m.data_status = 0
+            and c.data_status = 0
+            <if test="null!=userId and ''!=userId">
+                and c.cus_service=#{userId}
+            </if>
+            <if test="null!=storeUsers and storeUsers.size>0">
+                and c.cus_service in
+                <foreach collection="storeUsers" index="index" item="item" open="(" separator="," close=")">
+                    #{item.userId}
+                </foreach>
+            </if>
+        </if>
+        and tips = 1
+    </select>
+
+
+    <select id="getSleepingCustomerTips" resultType="java.lang.Integer">
+        select count(0) from (
+        SELECT
+        c.owername as name,
+        c.phone,
+        c.modify_date AS modifyDate,
+        c.create_date AS createDate,
+        c.label_id AS labelIdArr,
+        u.username as userName
+        FROM dj_clue c
+        inner join dj_user u
+        on c.cus_service=u.id
+        WHERE (c.member_id IS NULL or c.member_id='')
+        and c.stage=2
+        and c.store_id=#{storeId}
+        and c.data_status=0
+        and c.tips = 1
+        UNION
+        SELECT
+        if(m.name is not null,m.nick_name,m.name) as name,
+        m.mobile AS phone,
+        mc.modify_date AS modifyDate,
+        mc.create_date AS createDate,
+        mc.label_id_arr AS labelIdArr,
+        u.username as userName
+        FROM dj_member m
+        INNER JOIN dj_member_customer mc
+        ON m.id=mc.member_id
+        inner join dj_user u
+        on mc.user_id=u.id
+        WHERE mc.stage=2
+        and mc.store_id=#{storeId}
+        and mc.data_status=0
+        and mc.tips = 1
+        ) a
     </select>
 
 

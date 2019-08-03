@@ -5,6 +5,7 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.sale.rob.CustomerRecDTO;
 import com.dangjia.acg.modle.clue.Clue;
+import com.dangjia.acg.modle.home.IntentionHouse;
 import com.dangjia.acg.service.sale.rob.RobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -112,5 +113,25 @@ public class RobController implements RobAPI {
         return robService.upDateCustomerInfo(clue);
     }
 
+
+    /**
+     * 新增意向房子
+     * @param intentionHouse
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse addIntentionHouse(HttpServletRequest request, IntentionHouse intentionHouse) {
+        return robService.addIntentionHouse(intentionHouse);
+    }
+
+    /**
+     * 删除意向房子
+     * @param id
+     * @return
+     */
+    public ServerResponse deleteIntentionHouse(String id) {
+        return robService.deleteIntentionHouse(id);
+    }
 
 }

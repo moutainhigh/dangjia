@@ -59,16 +59,17 @@ public class ClientController implements ClientAPI {
         return customerService.setTurnOut(cityId,storeId,id,phaseStatus);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse setTips(HttpServletRequest request, Integer stage) {
-        return null;
-    }
 
     @Override
     @ApiMethod
     public ServerResponse setWithdraw(HttpServletRequest request, String mcId,String houseId) {
         return customerService.setWithdraw(mcId,houseId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setTips(HttpServletRequest request, String mcId, String clueId) {
+        return customerService.setTips(mcId,clueId);
     }
 
 

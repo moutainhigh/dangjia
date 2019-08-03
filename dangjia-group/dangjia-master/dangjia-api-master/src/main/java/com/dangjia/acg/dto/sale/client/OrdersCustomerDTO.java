@@ -24,5 +24,7 @@ public class OrdersCustomerDTO {
     private Date completedDate;//竣工时间
     private String userName;//跟进人
     private Date modifyDate;//最新跟进时间
+    private String clueId;
+    private String mcId;
     private List<SaleMemberLabelDTO> list=new ArrayList<>();//标签
 }

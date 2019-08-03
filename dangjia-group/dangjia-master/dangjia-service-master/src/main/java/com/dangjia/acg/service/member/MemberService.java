@@ -688,6 +688,8 @@ public class MemberService {
                 }
 
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
+                mcDTO.setMcId(customer.getId());
+                mcDTO.setPhaseStatus(customer.getPhaseStatus());
                 mcDTO.setOrderDate(member.getModifyDate());
                 mcDTO.setMemberId(member.getId());
                 mcDTO.setMemberName(member.getName());

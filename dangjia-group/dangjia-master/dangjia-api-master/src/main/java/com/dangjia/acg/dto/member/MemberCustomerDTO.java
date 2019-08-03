@@ -32,6 +32,8 @@ public class MemberCustomerDTO implements Comparable<MemberCustomerDTO> {
     protected Date createDate;// 创建日期
     protected Date orderDate;//下单时间
     private List<MemberLabel> memberLabelList;//多个标签对象
+    private String mcId;
+    private Integer phaseStatus;
 
     @Override
     public int compareTo(MemberCustomerDTO m) {

@@ -23,4 +23,6 @@ public class ClueDTO {
     private String userName;
     private String memberId;
     private Date reportDate;
+    private Integer phaseStatus;//阶段
+    private String clueId;
 }

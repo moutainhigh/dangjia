@@ -278,6 +278,9 @@ public class ClientService {
         clueMapper.insert(clue);//记录为中台的线索
         return ServerResponse.createBySuccessMessage("提交成功");
     }
+    private void setPush(){
+
+    }
 
     /**
      * 编辑客户
@@ -369,9 +372,15 @@ public class ClientService {
         Example example = new Example(Store.class);
         example.createCriteria().andEqualTo(Store.USER_ID, user.getId());
         if (iStoreMapper.selectByExample(example).size() <= 0) {//判断用户是否为店长
-            map.put("followList", clueMapper.clientPage("0", user.getId(), null));
-            map.put("placeOrder", clueMapper.clientPage("1", user.getId(), null));
-            map.put("completion", clueMapper.clientPage("2", user.getId(), null));
+            CustomerIndexDTO customerIndexDTO = clueMapper.clientPage(0, user.getId(), null);
+            customerIndexDTO.setTips(clueMapper.getTips(0,user.getId(),null)>0?1:0);
+            map.put("followList", customerIndexDTO);
+            customerIndexDTO = clueMapper.clientPage(1, user.getId(), null);
+            customerIndexDTO.setTips(clueMapper.getTips(1,user.getId(),null)>0?1:0);
+            map.put("placeOrder", customerIndexDTO);
+            customerIndexDTO = clueMapper.clientPage(2, user.getId(), null);
+            customerIndexDTO.setTips(clueMapper.getTips(2,user.getId(),null)>0?1:0);
+            map.put("completion", customerIndexDTO);
             MonthlyTargetDTO monthlyTargetDTO = new MonthlyTargetDTO();
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM");
             String date = dateFormat.format(new Date());
@@ -388,16 +397,27 @@ public class ClientService {
             }
             Store store = (Store) object;
             List<StoreUserDTO> storeUsers = iStoreUserMapper.getStoreUsers(store.getId(), null, null);
-            map.put("followList", clueMapper.clientPage("0", null, storeUsers));
-            map.put("placeOrder", clueMapper.clientPage("1", null, storeUsers));
-            map.put("completion", clueMapper.clientPage("2", null, storeUsers));
+            CustomerIndexDTO customerIndexDTO = clueMapper.clientPage(0, null, storeUsers);
+            customerIndexDTO.setTips(clueMapper.getTips(0,user.getId(),null)>0?1:0);
+            map.put("followList", customerIndexDTO);
+            customerIndexDTO = clueMapper.clientPage(1, null, storeUsers);
+            customerIndexDTO.setTips(clueMapper.getTips(1,user.getId(),null)>0?1:0);
+            map.put("placeOrder", customerIndexDTO);
+            customerIndexDTO = clueMapper.clientPage(2, null, storeUsers);
+            customerIndexDTO.setTips(clueMapper.getTips(2,user.getId(),null)>0?1:0);
+            map.put("completion", customerIndexDTO);
             List<CustomerIndexDTO> customerIndexDTOS = clueMapper.sleepingCustomer(store.getId(), null, "desc", null);
-            map.put("sleepingCustomer", customerIndexDTOS.size() > 0 ? customerIndexDTOS.get(0) : null);
+            if(customerIndexDTOS.size() >0) {
+                customerIndexDTOS.get(0).setTips(clueMapper.getSleepingCustomerTips() > 0 ? 1 : 0);
+                map.put("sleepingCustomer", customerIndexDTOS.get(0));
+            }
             List<CustomerIndexDTO> customerIndexDTOS1 = iCustomerMapper.waitDistribution(user.getId(), null, "desc");
-            map.put("waitDistribution", customerIndexDTOS1.size() > 0 ? customerIndexDTOS1.get(0) : null);
+            if(customerIndexDTOS1.size()>0){
+                customerIndexDTOS1.get(0).setTips(iCustomerMapper.getwaitDistributionTips()>0?1:0);
+                map.put("waitDistribution", customerIndexDTOS1.get(0));
+            }
             map.put("storeId", store.getId());
             map.put("grabSheet", iCustomerMapper.grabSheet(store.getId()));
-
         }
         return ServerResponse.createBySuccess("查询成功", map);
     }
@@ -565,7 +585,9 @@ public class ClientService {
                     List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
                     ordersCustomerDTO.setList(labelByIds);
                 }
-                ordersCustomerDTO.setMemberId(customerIndexDTO.getId());
+                ordersCustomerDTO.setClueId(customerIndexDTO.getClueId());
+                ordersCustomerDTO.setMcId(customerIndexDTO.getMcId());
+                ordersCustomerDTO.setMemberId(customerIndexDTO.getMemberId());
                 ordersCustomerDTO.setMobile(customerIndexDTO.getPhone());
                 ordersCustomerDTO.setName(customerIndexDTO.getName());
                 ordersCustomerDTO.setCreateDate(customerIndexDTO.getCreateDate());
@@ -579,7 +601,14 @@ public class ClientService {
     }
 
 
-
+    /**
+     * 中台转出
+     * @param cityId
+     * @param storeId
+     * @param id
+     * @param phaseStatus
+     * @return
+     */
     public ServerResponse  setTurnOut(String cityId, String storeId, String id ,Integer phaseStatus){
         Store store = iStoreMapper.selectByPrimaryKey(storeId);
         if(phaseStatus==0){
@@ -603,45 +632,12 @@ public class ClientService {
     }
 
 
-    public ServerResponse  setTips(Integer stage){
-        Example example=new Example(Clue.class);
-        if(stage==1){//跟进列表
-            example.createCriteria().andEqualTo(Clue.TIPS,1);
-            List<Clue> clues = clueMapper.selectByExample(example);
-            if(clues.size()>0){
-                return ServerResponse.createBySuccessMessage("红点提示");
-            }
-        }
-        if(stage==2){//已下单客户
-            example=new Example(Customer.class);
-            example.createCriteria().andEqualTo(Customer.TIPS,1);
-            List<Customer> customers = iCustomerMapper.selectByExample(example);
-            if(customers.size()>0){
-                return ServerResponse.createBySuccessMessage("红点提示");
-            }
-        }
-        if(stage==3){//已下单客户
-            example=new Example(Customer.class);
-            example.createCriteria().andEqualTo(Customer.TIPS,1);
-            List<Customer> customers = iCustomerMapper.selectByExample(example);
-            if(customers.size()>0){
-                return ServerResponse.createBySuccessMessage("红点提示");
-            }
-        }
-        if(stage==4){//沉睡客户
-            example.createCriteria().andEqualTo(Clue.STAGE,2);
-            List<Clue> clues = clueMapper.selectByExample(example);
-            example=new Example(Customer.class);
-            example.createCriteria().andEqualTo(Customer.STAGE,2);
-            List<Customer> customers = iCustomerMapper.selectByExample(example);
-            if(customers.size()>0||clues.size()>0){
-                return ServerResponse.createBySuccessMessage("红点提示");
-            }
-        }
-        return ServerResponse.createByErrorMessage("红点不提示");
-    }
-
-
+    /**
+     * 撤回
+     * @param mcId
+     * @param houseId
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse  setWithdraw(String mcId,String houseId){
         House house=new House();
@@ -656,6 +652,39 @@ public class ClientService {
             return ServerResponse.createByErrorMessage("撤回失败");
         }
     }
+
+
+    /**
+     * 红点提示
+     * @param mcId
+     * @param clueId
+     * @return
+     */
+    public ServerResponse setTips(String mcId, String clueId){
+        if(!CommonUtil.isEmpty(mcId)){
+            Customer customer=new Customer();
+            customer.setId(mcId);
+            customer.setTips("0");
+            iCustomerMapper.updateByPrimaryKeySelective(customer);
+        }else{
+            Clue clue=new Clue();
+            clue.setId(clueId);
+            clue.setTips("0");
+            clueMapper.updateByPrimaryKeySelective(clue);
+        }
+        return ServerResponse.createBySuccessMessage("新消息已查看");
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 //    private void judgeRegister(Clue clue, String memberid, String userId, String storeId) {
 //        //有沟通记录

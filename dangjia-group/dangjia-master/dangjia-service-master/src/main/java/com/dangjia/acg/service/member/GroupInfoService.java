@@ -308,10 +308,8 @@ public class GroupInfoService {
                             nickname = member.getName();
                             avatar = StringUtils.isEmpty(member.getHead()) ? null :
                                     configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + member.getHead();
-                        } else {
-                            phone = "400-168-1231";
-                            nickname = user.getUsername();
-                            avatar = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + "qrcode/logo.png";
+                        }else{
+                            return;
                         }
                     } else {
                         phone = "400-168-1231";

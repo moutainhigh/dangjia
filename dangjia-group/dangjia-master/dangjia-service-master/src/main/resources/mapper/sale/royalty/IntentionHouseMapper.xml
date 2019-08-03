@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.sale.royalty.IntentionHouseMapper">
+
+
+    <!-- 删除对象 -->
+    <delete id="deleteIntentionHouse" parameterType="java.lang.String">
+		DELETE FROM dj_intention_house
+		WHERE id = #{id}
+	</delete>
+
+	<!--查询成交量-->
+	<select id="queryIntentionHouse" resultType="com.dangjia.acg.dto.member.IntentionHouseDTO">
+        select  id,
+        residential_name as residentialName,
+        building_name AS buildingName,
+        number_name as numberName
+		from dj_intention_house where clue_id = #{clueId}
+    </select>
+
+
+
+</mapper>

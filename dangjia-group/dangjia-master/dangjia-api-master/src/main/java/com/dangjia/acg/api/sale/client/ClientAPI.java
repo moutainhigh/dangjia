@@ -34,7 +34,6 @@ public interface ClientAPI {
                                  @RequestParam("clue") Clue clue,
                                  @RequestParam("userToken") String userToken);
 
-
     /**
      * 跨域下单
      *
@@ -148,19 +147,7 @@ public interface ClientAPI {
                               @RequestParam("phaseStatus") Integer phaseStatus);
 
     /**
-     * 页面红点提示
-     * @param request
-     * @return
-     */
-    @PostMapping(value = "sale/client/setTips")
-    @ApiOperation(value = "提示", notes = "提示")
-    ServerResponse setTips(@RequestParam("request") HttpServletRequest request,
-                           @RequestParam("stage") Integer stage);
-
-
-
-    /**
-     * 页面红点提示
+     * 撤回
      * @param request
      * @return
      */
@@ -170,4 +157,15 @@ public interface ClientAPI {
                                @RequestParam("mcId") String mcId,
                                @RequestParam("houseId") String houseId);
 
+
+    /**
+     * 撤回
+     * @param request
+     * @return
+     */
+    @PostMapping(value = "sale/client/setTips")
+    @ApiOperation(value = "红点提示取消", notes = "红点提示取消")
+    ServerResponse setTips(@RequestParam("request") HttpServletRequest request,
+                           @RequestParam("mcId") String mcId,
+                           @RequestParam("clueId") String clueId);
 }
