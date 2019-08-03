@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.repair;
 
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -21,6 +23,7 @@ import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.worker.Evaluate;
@@ -76,6 +79,8 @@ public class MendRecordService {
     @Autowired
     private IEvaluateMapper evaluateMapper;
 
+    @Autowired
+    private RedisClient redisClient;//缓存
     /**
      * 要补退明细
      * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货
@@ -597,13 +602,13 @@ public class MendRecordService {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<Map<String, Object>> returnMap = new ArrayList<>();
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
+            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+            if (accessToken == null) {
+                return ServerResponse.createbyUserTokenError();
             }
-            Member worker = (Member) object;
+            Member worker = accessToken.getMember();
             List<MendOrder> mendOrderList;
-            if (roleType == 3) {//工匠
+            if (accessToken.getMemberType() == 1) {//工匠
                 mendOrderList = mendOrderMapper.workerMendOrder(houseId, 1, worker.getWorkerTypeId());
             } else {
                 mendOrderList = mendOrderMapper.workerMendOrder(houseId, 1, "");
@@ -630,7 +635,7 @@ public class MendRecordService {
                 map.put("size", "共" + mendOrderList.size() + "条");
                 returnMap.add(map);
             }
-            if (roleType == 3) {//工匠
+            if (accessToken.getMemberType() == 1) {//工匠
                 mendOrderList = mendOrderMapper.workerMendOrder(houseId, 3, worker.getWorkerTypeId());
             } else {
                 mendOrderList = mendOrderMapper.workerMendOrder(houseId, 3, "");
@@ -674,7 +679,7 @@ public class MendRecordService {
             }
             example = new Example(HouseFlowApply.class);
             /*审核记录*/
-            if (roleType == 3) {//工匠
+            if (accessToken.getMemberType() == 1) {//工匠
                 example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, houseId)
                         .andCondition(" apply_type <3 and apply_type!=0  ")
                         .andEqualTo(HouseFlowApply.WORKER_TYPE_ID, worker.getWorkerTypeId());
