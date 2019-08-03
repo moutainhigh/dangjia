@@ -112,11 +112,15 @@ public class ConfigMessageService {
      * @param targetType 消息类型 0=个人推送  1=全推
      * @param title      推送标题
      * @param alert      推送内容
-     * @param type       动作类型 动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面，5:工匠端施工界面，6:评价记录，7:奖罚记录）
+     * @param type       动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
      * @return
      */
     public ServerResponse addConfigMessage(HttpServletRequest request, AppType appType, String memberId,
                                            String targetType, String title, String alert, String type) {
+        return addConfigMessage(appType, memberId, targetType, title, alert, type);
+    }
+
+    public ServerResponse addConfigMessage(AppType appType, String memberId,String targetType, String title, String alert, String type) {
         ConfigMessage configMessage = new ConfigMessage();
         if (appType == null) {
             appType = AppType.ZHUANGXIU;
