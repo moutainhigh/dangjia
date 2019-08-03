@@ -117,6 +117,16 @@ public class RobInfoDTO {
     @ApiModelProperty("大管家信息")
     WorkerTypeDTO workerTypeDTO;
 
+
+    @ApiModelProperty("标签id")
+    private String labelId;
+    @ApiModelProperty("用户名")
+    private String userName;
+    @ApiModelProperty("头像")
+    private String head;
+
+
+
     public String getDrawingsName(){
         if(null != getDrawings() && 0 == getDrawings()){
             return "无图纸";

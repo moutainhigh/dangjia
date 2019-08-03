@@ -74,10 +74,25 @@
         mcr.remind_time as remindTime,
         mcr.describes as describes,
         mcr.create_date as createDate
-        from dj_member_customer_record mcr INNER JOIN dj_member m
-        on m.id = mcr.member_id
+        from
+        dj_member_customer_record mcr
+        INNER JOIN dj_member m on m.id = mcr.member_id
         where  mcr.member_id = #{memberId}
     </select>
+
+
+    <select id="queryTalkContent" resultType="com.dangjia.acg.dto.member.CustomerRecordInFoDTO">
+        select
+            m.name as name,
+            m.head as head,
+            ct.talk_content as describes,
+            ct.create_date as createDate
+        from dj_user u
+        INNER JOIN dj_member m on u.member_id=m.id
+        INNER JOIN dj_clue_talk ct on ct.user_id=u.id
+        where ct.clue_id= #{clueId}
+    </select>
+
 
 
     <select id="queryWorkerType" resultType="com.dangjia.acg.dto.member.WorkerTypeDTO">

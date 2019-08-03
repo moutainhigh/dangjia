@@ -380,7 +380,6 @@
         c.phone as phone,
         c.wechat as wechat,
         c.remark as remark,
-        c.id as id,
         c.address as address,
         c.building as building,
         c.number as number,
@@ -397,10 +396,10 @@
         INNER JOIN dj_member_customer mc on h.member_id = mc.member_id
         <where>
             1=1
-            <if test="null != houseId">
+            <if test="null != memberId">
                and  c.member_id = #{memberId}
             </if>
-            <if test="null != houseId">
+            <if test="null != cusService">
                 and  c.cus_service = #{cusService}
             </if>
         </where>
@@ -426,6 +425,31 @@
         </if>
             and (h.visit_state = 1 or h.visit_state = 3)
     </select>
+
+
+    <!--修改抢单状态-->
+    <update id="upDateIsRobStats" parameterType="java.util.Map">
+        update dj_house h
+        set h.is_rob_stats = 1
+        where h.id = #{id}
+    </update>
+
+
+    <select id="queryTips" resultType="com.dangjia.acg.dto.sale.rob.UserInfoDTO" parameterType="java.util.HashMap">
+        SELECT
+        c.id as clueId
+        c.owername as owerName,
+        c.phone as phone,
+        c.label_id as labelId,
+        m.name as userName,
+        m.head as head
+        FROM
+        dj_clue c
+        INNER JOIN dj_user u ON c.cus_service = u.id
+        INNER JOIN dj_member m ON u.member_id = m.id
+        where c.id = #{id}
+    </select>
+
 
 </mapper>
 

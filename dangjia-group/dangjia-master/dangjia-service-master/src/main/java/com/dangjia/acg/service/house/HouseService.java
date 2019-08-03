@@ -496,6 +496,7 @@ public class HouseService {
             return ServerResponse.createByErrorMessage("操作失败");
         }
         house.setVisitState(1);//开工成单
+        house.setIsRobStats(1);
         house.setConstructionDate(new Date());
         iHouseMapper.updateByPrimaryKeySelective(house);
         try {
