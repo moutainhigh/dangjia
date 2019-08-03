@@ -5,6 +5,7 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.member.IntentionHouseDTO;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import com.dangjia.acg.dto.sale.achievement.UserAchievementDTO;
@@ -14,8 +15,10 @@ import com.dangjia.acg.mapper.clue.ClueTalkMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
+import com.dangjia.acg.mapper.sale.royalty.IntentionHouseMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.clue.ClueTalk;
+import com.dangjia.acg.modle.home.IntentionHouse;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -48,6 +51,8 @@ public class RobService {
 
     @Autowired
     private ClueTalkMapper clueTalkMapper;
+    @Autowired
+    private IntentionHouseMapper intentionHouseMapper;
 
     /**
      * 查询抢单列表
@@ -67,7 +72,6 @@ public class RobService {
         }
 
         Integer type = iCustomerMapper.queryTypeId(accessToken.getUserId());
-
 
         Map<String,Object> map = new HashMap<>();
 
@@ -129,6 +133,8 @@ public class RobService {
         //获取图片url
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 
+
+
         //客户阶段查询客户详情
         if(phaseStatus == 1){
             Map<String,Object> map = new HashMap<>();
@@ -142,6 +148,13 @@ public class RobService {
             RobArrInFoDTO robArrInFoDTO = new RobArrInFoDTO();
 
             List<RobInfoDTO> robInfoDTO = clueMapper.queryCustomerInfo(map);
+
+            if(!CommonUtil.isEmpty(robInfoDTO)){
+                //查询意向房子
+                List<IntentionHouseDTO> intentionHouseList= intentionHouseMapper.queryIntentionHouse(robInfoDTO.get(0).getClueId());
+                robArrInFoDTO.setIntentionHouseList(intentionHouseList);
+            }
+
 
             if(!CommonUtil.isEmpty(robInfoDTO)){
                 for (RobInfoDTO to:robInfoDTO) {
@@ -211,6 +224,13 @@ public class RobService {
             Map<String,Object> map = new HashMap<>();
             map.put("id",clueId);
             UserInfoDTO userInfoDTO = clueMapper.queryTips(map);
+
+            if(!CommonUtil.isEmpty(userInfoDTO)){
+                //查询意向房子
+                List<IntentionHouseDTO> intentionHouseList= intentionHouseMapper.queryIntentionHouse(userInfoDTO.getClueId());
+                userInfoDTO.setIntentionHouseList(intentionHouseList);
+            }
+
             //查询线索阶段标签
             if(!CommonUtil.isEmpty(userInfoDTO)){
                 if(!CommonUtil.isEmpty(userInfoDTO)){
@@ -371,12 +391,55 @@ public class RobService {
      */
     public ServerResponse upDateCustomerInfo(Clue clue) {
         try {
-            clueMapper.updateByPrimaryKeySelective(clue);
-            return ServerResponse.createBySuccessMessage("修改成功");
+            if (!CommonUtil.isEmpty(clue)) {
+                clueMapper.updateByPrimaryKeySelective(clue);
+                return ServerResponse.createBySuccessMessage("修改成功");
+            }
+            return ServerResponse.createByErrorMessage("修改失败");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("修改成功");
+            return ServerResponse.createByErrorMessage("修改失败");
         }
     }
+
+    /**
+     * 添加意向房子
+     * @param intentionHouse
+     * @return
+     */
+    public ServerResponse addIntentionHouse(IntentionHouse intentionHouse) {
+        try {
+            if (!CommonUtil.isEmpty(intentionHouse)) {
+                intentionHouseMapper.insert(intentionHouse);
+                return ServerResponse.createBySuccessMessage("新增成功");
+            }
+            return ServerResponse.createByErrorMessage("新增失败");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("新增失败");
+        }
+
+    }
+
+
+    /**
+     * 删除意向房子
+     * @param id
+     * @return
+     */
+    public ServerResponse deleteIntentionHouse(String id) {
+        try {
+            if (!CommonUtil.isEmpty(id)) {
+                intentionHouseMapper.deleteIntentionHouse(id);
+                return ServerResponse.createBySuccessMessage("删除成功");
+            }
+            return ServerResponse.createByErrorMessage("删除失败");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("删除失败");
+        }
+
+    }
+
 
 }

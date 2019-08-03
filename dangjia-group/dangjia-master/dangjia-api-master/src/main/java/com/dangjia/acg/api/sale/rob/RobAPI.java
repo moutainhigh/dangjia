@@ -3,6 +3,7 @@ package com.dangjia.acg.api.sale.rob;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.sale.rob.CustomerRecDTO;
 import com.dangjia.acg.modle.clue.Clue;
+import com.dangjia.acg.modle.home.IntentionHouse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -157,5 +158,16 @@ public interface RobAPI {
      */
     @PostMapping(value = "sale/rob/upDateCustomerInfo")
     @ApiOperation(value = "修改客户信息", notes = "修改客户信息")
-    ServerResponse upDateCustomerInfo(HttpServletRequest request, Clue clue);
+    ServerResponse upDateCustomerInfo(@RequestParam("request")HttpServletRequest request,
+                                      @RequestBody Clue clue);
+
+    @PostMapping(value = "sale/rob/addIntentionHouse")
+    @ApiOperation(value = "新增意向房子", notes = "新增意向房子")
+    ServerResponse addIntentionHouse(@RequestParam("request")HttpServletRequest request,
+                                     @RequestBody IntentionHouse intentionHouse);
+
+
+    @PostMapping(value = "sale/rob/deleteIntentionHouse")
+    @ApiOperation(value = "删除意向房子", notes = "删除意向房子")
+    ServerResponse deleteIntentionHouse(@RequestParam("id")String id);
 }
