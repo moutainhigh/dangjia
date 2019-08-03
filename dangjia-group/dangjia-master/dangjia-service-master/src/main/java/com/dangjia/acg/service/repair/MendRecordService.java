@@ -419,6 +419,9 @@ public class MendRecordService {
             return (ServerResponse) object;
         }
         Member worker = (Member) object;
+        if(worker.getWorkerType()!=null&&worker.getWorkerType()==3){
+            roleType=2;
+        }
         List<Map<String, Object>> returnMap = new ArrayList<>();
         if (CommonUtil.isEmpty(type) || type == -1) {
             getHouseFlowApplies(worker, roleType, houseId, 6, returnMap);
@@ -602,6 +605,9 @@ public class MendRecordService {
                 return (ServerResponse) object;
             }
             Member worker = (Member) object;
+            if(worker.getWorkerType()!=null&&worker.getWorkerType()==3){
+                roleType=2;
+            }
             List<MendOrder> mendOrderList;
             if (roleType == 3) {//工匠
                 mendOrderList = mendOrderMapper.workerMendOrder(houseId, 1, worker.getWorkerTypeId());
