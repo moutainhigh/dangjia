@@ -342,10 +342,11 @@ public class ClueService {
                             customer.setPhaseStatus(1);
                             customer.setStoreId(store.getId());
                             iCustomerMapper.insert(customer);
-                            break;
+                            return ServerResponse.createBySuccessMessage("操作成功");
                         }
                     }
                 }
+
             }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {

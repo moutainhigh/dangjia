@@ -24,11 +24,13 @@ import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.sale.residential.ResidentialBuildingMapper;
 import com.dangjia.acg.mapper.sale.residential.ResidentialRangeMapper;
+import com.dangjia.acg.mapper.sale.royalty.IntentionHouseMapper;
 import com.dangjia.acg.mapper.sale.stroe.MonthlyTargetMappper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.clue.Clue;
+import com.dangjia.acg.modle.home.IntentionHouse;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.AccessToken;
@@ -42,6 +44,7 @@ import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.sale.SaleService;
+import com.dangjia.acg.service.sale.rob.RobService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
@@ -93,6 +96,8 @@ public class ClientService {
     private ICustomerRecordMapper iCustomerRecordMapper;
     @Autowired
     private IHouseMapper iHouseMapper;
+    @Autowired
+    private IntentionHouseMapper intentionHouseMapper;
 
     /**
      * 录入客户
@@ -131,15 +136,22 @@ public class ClientService {
         //如果客户已录入过则把录入的房子变为意向房子
         Clue clue1 = clueMapper.getClue(clue.getPhone(), user.getId());
         if (null != clue1) {
-            if (null == clue1.getAddress()) {
-                clue1.setAddress("");
+            Example example=new Example(IntentionHouse.class);
+            example.createCriteria().andEqualTo(IntentionHouse.RESIDENTIAL_NAME,clue.getAddress())
+                    .andEqualTo(IntentionHouse.BUILDING_NAME,clue.getBuilding())
+                    .andEqualTo(IntentionHouse.NUMBER_NAME,clue.getNumber());
+            List<IntentionHouse> intentionHouses = intentionHouseMapper.selectByExample(example);
+            if(intentionHouses.size()>0) {
+                return ServerResponse.createByErrorMessage("该线索已存在");
+            }else{
+                IntentionHouse intentionHouse=new IntentionHouse();
+                intentionHouse.setClueId(clue1.getId());
+                intentionHouse.setBuildingName(clue.getBuilding());
+                intentionHouse.setNumberName(clue.getNumber());
+                intentionHouse.setResidentialName(clue.getAddress());
+                intentionHouseMapper.insert(intentionHouse);
+                return ServerResponse.createByErrorMessage("该线索已存在录入为该线索的意向房子");
             }
-            if (!clue1.getAddress().contains(clue.getAddress())) {
-                clue1.setAddress(clue1.getAddress() + "," + clue.getAddress());
-                clueMapper.updateByPrimaryKeySelective(clue1);
-                return ServerResponse.createBySuccessMessage("提交成功,已存在该线索录入为意向房子");
-            }
-            return ServerResponse.createByErrorMessage("该线索已存在");
         }
         Example example = new Example(Member.class);
         example.createCriteria().andEqualTo(Member.MOBILE, clue.getPhone());
@@ -162,6 +174,12 @@ public class ClientService {
             clue.setClueType(0);
             clue.setTurnStatus(0);
             clue.setCityId(store.getCityId());
+            IntentionHouse intentionHouse=new IntentionHouse();
+            intentionHouse.setClueId(clue.getId());
+            intentionHouse.setBuildingName(clue.getBuilding());
+            intentionHouse.setNumberName(clue.getNumber());
+            intentionHouse.setResidentialName(clue.getAddress());
+            intentionHouseMapper.insert(intentionHouse);
             customer.setUserId(user.getId());
             customer.setMemberId(members.get(0).getId());
             customer.setStage(1);
