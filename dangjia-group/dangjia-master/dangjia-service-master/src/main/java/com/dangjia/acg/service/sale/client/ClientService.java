@@ -545,6 +545,8 @@ public class ClientService {
                     List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
                     saleClueDTO.setList(labelByIds);
                 }
+                saleClueDTO.setClueId(clueDTO.getClueId());
+                saleClueDTO.setMcId(clueDTO.getMcId());
                 saleClueDTO.setPhaseStatus(clueDTO.getPhaseStatus());
                 saleClueDTO.setUsername(clueDTO.getUserName());
                 saleClueDTO.setClueType(clueDTO.getClueType());

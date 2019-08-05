@@ -38,5 +38,9 @@ public class SaleClueDTO{
 
     private Integer phaseStatus;//阶段
 
+    private String clueId;
+
+    private String mcId;
+
 
 }
