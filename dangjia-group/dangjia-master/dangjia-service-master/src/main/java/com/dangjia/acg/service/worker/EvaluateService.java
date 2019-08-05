@@ -14,6 +14,7 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.WorkIntegralDTO;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
@@ -27,6 +28,7 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.HouseFlowApplyImage;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
@@ -60,6 +62,9 @@ import java.util.*;
 @Service
 public class EvaluateService {
 
+
+    @Autowired
+    private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
@@ -342,10 +347,14 @@ public class EvaluateService {
              * 大管家每次审核拿钱 新算法 2018.08.03
              */
             if (houseFlowApply.getApplyType() == 1 || houseFlowApply.getApplyType() == 2) {
+                Example example = new Example(HouseFlowApplyImage.class);
+                example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
+                List<HouseFlowApplyImage> hfaiList = houseFlowApplyImageMapper.selectByExample(example);
                 //算管家每次审核该拿的钱数
                 //大管家的hf
                 HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);
                 houseFlowApply.setSupervisorMoney(supervisorHF.getCheckMoney());
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
 
                 //添加一条记录
                 HouseFlowApply hfa = new HouseFlowApply();//发起申请任务
@@ -362,7 +371,10 @@ public class EvaluateService {
                 hfa.setMemberCheck(1);//业主审核状态0未审核，1审核通过，2审核不通过，3自动审核
                 hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
                 hfa.setPayState(0);//是否付款
-                hfa.setApplyDec("业主您好，我是大管家，我已验收了" + worker.getName() + (houseFlowApply.getApplyType() == 1 ? "的阶段完工" : "的整体完工"));//描述
+                hfa.setApplyDec("尊敬的业主，您好！<br/>" +
+                        "当家大管家【"+supervisor.getName()+"】为您新家质量保驾护航，工地【"+workerType.getName()+"】已阶段完工，已经根据平台施工验收标准进行验收，未发现漏项及施工不合格情况，请您查收。<br/>" +
+                        "【配图"+hfaiList.size()+"张以上】");//描述
+//                hfa.setApplyDec("业主您好，我是大管家，我已验收了" + worker.getName() + (houseFlowApply.getApplyType() == 1 ? "的阶段完工" : "的整体完工"));//描述
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
             }
