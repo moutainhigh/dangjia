@@ -53,7 +53,7 @@ public interface EmployeeDetailsAPI {
      * @title 制定员工月目标
      * @description 制定员工月目标
      * @method POST
-     * @url master/sale/store/monthlyTarget
+     * @url master/sale/store/setSalesRange
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 7
      * @Author: wukang 18075121944
