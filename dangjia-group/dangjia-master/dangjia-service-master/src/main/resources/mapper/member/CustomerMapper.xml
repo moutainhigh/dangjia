@@ -50,6 +50,7 @@
         SELECT
         mc.id as mcId,
         m.id as memberId,
+        mc.user_id as userId,
         if(m.name is not null,m.nick_name,m.name) as name,
         m.mobile as phone,
         mc.modify_date AS modifyDate,
@@ -77,7 +78,10 @@
           h.id as houseId,
           if(m.name is not null,m.nick_name,m.name) as name,
           h.create_date AS createDate,
-          h.visit_state as visitState
+          h.visit_state as visitState,
+          mc.user_id as userId,
+          mc.member_id as memberId,
+          mc.phase_status as phaseStatus
         FROM dj_member_customer mc
         INNER  JOIN dj_member m
         on mc.member_id=m.id

@@ -53,8 +53,13 @@ public class RobController implements RobAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryCustomerInfo(HttpServletRequest request, String userId,String memberId,String clueId,Integer phaseStatus) {
-        return robService.queryCustomerInfo(memberId,userId,clueId,phaseStatus);
+    public ServerResponse queryCustomerInfo(HttpServletRequest request,
+                                            String userId,
+                                            String memberId,
+                                            String clueId,
+                                            Integer phaseStatus,
+                                            String stage) {
+        return robService.queryCustomerInfo(memberId,userId,clueId,phaseStatus,stage);
     }
 
 
