@@ -504,7 +504,7 @@ public class HouseService {
                     configMessageService.addConfigMessage(AppType.SALE, m, "开工提醒",
                             "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
                                     + String.format("customerDetails?title=%s&storeId=%s&memberId=%s&phaseStatus=%s&listType=%s",
-                                    "客户详情", "", m, "1", ""));
+                                    "客户详情", "", house.getMemberId(), "1", ""));
                 }
             }
             //通知业主确认开工
