@@ -17,4 +17,7 @@ public class GrabSheetDTO {
     private String name;//业主名字
     private Date createDate;//开始时间
     private String visitState;//阶段
+    private String memberId;
+    private String userId;
+    private Integer phaseStatus;
 }
