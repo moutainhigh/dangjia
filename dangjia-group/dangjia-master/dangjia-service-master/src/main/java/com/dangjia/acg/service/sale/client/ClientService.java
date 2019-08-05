@@ -466,17 +466,17 @@ public class ClientService {
             String[] buildingId = {};
             if (!CommonUtil.isEmpty(residentialRange.getBuildingId())) {
                 buildingId = residentialRange.getBuildingId().split(",");
+                example = new Example(ResidentialBuilding.class);
+                example.createCriteria().andIn(ResidentialBuilding.ID, Arrays.asList(buildingId));
+                List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
+                for (ResidentialBuilding residentialBuilding : residentialBuildings) {
+                    ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(residentialBuilding.getVillageId());
+                    residentialRangeDTO.setVillageId(modelingVillage.getId());
+                    residentialRangeDTO.setVillagename(modelingVillage.getName());
+                }
+                residentialRangeDTO.setList(residentialBuildings);
+                residentialRangeDTOList.add(residentialRangeDTO);
             }
-            example = new Example(ResidentialBuilding.class);
-            example.createCriteria().andIn(ResidentialBuilding.ID, Arrays.asList(buildingId));
-            List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
-            for (ResidentialBuilding residentialBuilding : residentialBuildings) {
-                ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(residentialBuilding.getVillageId());
-                residentialRangeDTO.setVillageId(modelingVillage.getId());
-                residentialRangeDTO.setVillagename(modelingVillage.getName());
-            }
-            residentialRangeDTO.setList(residentialBuildings);
-            residentialRangeDTOList.add(residentialRangeDTO);
         }
         return residentialRangeDTOList;
     }
@@ -653,8 +653,8 @@ public class ClientService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse  setWithdraw(String mcId,String houseId){
         House house=new House();
+        house.setId(houseId);
         house.setDataStatus(1);
-        house.setHouseId(houseId);
         Customer customer=new Customer();
         customer.setId(mcId);
         customer.setStage(1);

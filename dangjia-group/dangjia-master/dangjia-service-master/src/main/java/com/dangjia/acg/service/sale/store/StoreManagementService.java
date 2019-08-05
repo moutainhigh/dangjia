@@ -26,6 +26,7 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.sale.SaleService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.collections.BagUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -155,10 +156,23 @@ public class StoreManagementService {
      */
     public ServerResponse delBuilding(String buildingId) {
         if (residentialBuildingMapper.deleteByPrimaryKey(buildingId) > 0) {
-            return ServerResponse.createBySuccessMessage("删除成功");
+            Example example=new Example(ResidentialRange.class);
+            example.createCriteria().andLike(ResidentialRange.BUILDING_ID, "%"+buildingId+"%");
+            List<ResidentialRange> list = residentialRangeMapper.selectByExample(example);
+            for (ResidentialRange residentialRange : list) {
+                if(residentialRange.getBuildingId().contains(",")){
+                    residentialRange.setBuildingId(residentialRange.getBuildingId().replace(","+buildingId,null));
+                    residentialRangeMapper.updateByPrimaryKeySelective(residentialRange);
+                    return ServerResponse.createBySuccessMessage("删除成功");
+                }else{
+                    residentialRangeMapper.deleteByPrimaryKey(residentialRange.getId());
+                    return ServerResponse.createBySuccessMessage("删除成功");
+                }
+            }
         }
         return ServerResponse.createByErrorMessage("删除失败");
     }
+
 
 
     /**

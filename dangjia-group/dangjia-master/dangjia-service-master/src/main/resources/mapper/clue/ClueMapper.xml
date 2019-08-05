@@ -55,7 +55,7 @@
        <if test="null!=userId and ''!=userId">
            and cus_service=#{userId}
        </if>
-       <if test="null!=storeId ans ''!=storeId">
+       <if test="null!=storeId and ''!=storeId">
            and store_id=#{storeId}
        </if>
     </select>
