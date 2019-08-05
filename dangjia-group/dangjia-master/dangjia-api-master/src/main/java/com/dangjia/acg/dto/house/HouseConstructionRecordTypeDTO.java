@@ -26,7 +26,7 @@ public class HouseConstructionRecordTypeDTO{
 	@Column(name = "text")
 	@Desc(value = "类名")
 	@ApiModelProperty("类名")
-	private Integer text;
+	private String text;
 
 	@Column(name = "week")
 	@Desc(value = "周期")
