@@ -300,8 +300,7 @@
             c.owername as name,
             c.phone,
             c.modify_date AS modifyDate,
-            c.create_date AS cre
-        ateDate,
+            c.create_date AS createDate,
             c.label_id AS labelIdArr,
             u.username as userName,
             c.phase_status as phaseStatus
