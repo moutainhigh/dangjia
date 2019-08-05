@@ -3,6 +3,7 @@ package com.dangjia.acg.dto.member;
 import com.dangjia.acg.common.util.CommonUtil;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,6 +12,7 @@ import lombok.Data;
  * Time: 16:02
  */
 @Data
+@FieldNameConstants(prefix = "")
 public class IntentionHouseDTO {
 
     private String id;
@@ -27,6 +29,7 @@ public class IntentionHouseDTO {
     @ApiModelProperty("线索id")
     private String clueId;
 
+    private String houseNameArr;
 
     public String getHouseNameArr() {
         return (CommonUtil.isEmpty(getResidentialName()) ? "*" : getResidentialName())+ "栋"
@@ -34,19 +37,4 @@ public class IntentionHouseDTO {
                 + (CommonUtil.isEmpty(getNumberName()) ? "*" : getNumberName()) + "号";
     }
 
-    /*public String getHouserName(){
-        String rName = "";
-        String bName = "";
-        String nName = "";
-        if(!CommonUtil.isEmpty(getResidentialName())){
-             rName = getResidentialName();
-        }
-        if(!CommonUtil.isEmpty(getBuildingName())){
-             bName = getBuildingName();
-        }
-        if(!CommonUtil.isEmpty(getNumberName())){
-             nName = getNumberName();
-        }
-        return (rName+ bName+ nName);
-    }*/
 }

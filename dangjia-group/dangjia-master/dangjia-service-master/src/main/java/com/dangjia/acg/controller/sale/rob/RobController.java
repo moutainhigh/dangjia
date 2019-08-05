@@ -130,7 +130,9 @@ public class RobController implements RobAPI {
      * @param id
      * @return
      */
-    public ServerResponse deleteIntentionHouse(String id) {
+    @Override
+    @ApiMethod
+    public ServerResponse deleteIntentionHouse(HttpServletRequest request,String id) {
         return robService.deleteIntentionHouse(id);
     }
 

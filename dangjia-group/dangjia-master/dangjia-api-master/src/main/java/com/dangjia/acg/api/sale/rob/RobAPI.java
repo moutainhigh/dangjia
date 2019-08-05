@@ -169,5 +169,6 @@ public interface RobAPI {
 
     @PostMapping(value = "sale/rob/deleteIntentionHouse")
     @ApiOperation(value = "删除意向房子", notes = "删除意向房子")
-    ServerResponse deleteIntentionHouse(@RequestParam("id")String id);
+    ServerResponse deleteIntentionHouse(@RequestParam("request")HttpServletRequest request,
+                                        @RequestParam("id")String id);
 }

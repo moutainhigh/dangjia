@@ -133,8 +133,6 @@ public class RobService {
         //获取图片url
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 
-
-
         //客户阶段查询客户详情
         if(phaseStatus == 1){
             Map<String,Object> map = new HashMap<>();
