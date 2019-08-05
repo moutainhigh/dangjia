@@ -25,4 +25,5 @@ public class ClueDTO {
     private Date reportDate;
     private Integer phaseStatus;//阶段
     private String clueId;
+    private String mcId;
 }

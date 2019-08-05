@@ -54,7 +54,8 @@
         m.mobile as phone,
         mc.modify_date AS modifyDate,
         mc.create_date AS createDate,
-        mc.label_id_arr AS labelIdArr
+        mc.label_id_arr AS labelIdArr,
+        mc.phase_status as phaseStatus
         FROM dj_member_customer mc
         INNER join dj_member m
         ON mc.member_id=m.id

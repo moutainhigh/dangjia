@@ -36,5 +36,7 @@ public class SaleClueDTO{
 
     private String username;
 
+    private Integer phaseStatus;//阶段
+
 
 }

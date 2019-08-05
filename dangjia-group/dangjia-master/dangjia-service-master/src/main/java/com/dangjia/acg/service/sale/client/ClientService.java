@@ -173,6 +173,7 @@ public class ClientService {
             clue.setCusService(user.getId());
             clue.setClueType(0);
             clue.setTurnStatus(0);
+            clue.setTips("1");
             clue.setCityId(store.getCityId());
             IntentionHouse intentionHouse=new IntentionHouse();
             intentionHouse.setClueId(clue.getId());
@@ -189,6 +190,7 @@ public class ClientService {
             customer.setPhaseStatus(1);
             customer.setClueType(0);
             customer.setDataStatus(0);
+            customer.setTips("1");
             if(groupBys.size()>0){//该线索已被其他人录入并成为客户阶段
                 clue.setPhaseStatus(1);
                 clue.setStage(4);
@@ -543,6 +545,7 @@ public class ClientService {
                     List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
                     saleClueDTO.setList(labelByIds);
                 }
+                saleClueDTO.setPhaseStatus(clueDTO.getPhaseStatus());
                 saleClueDTO.setUsername(clueDTO.getUserName());
                 saleClueDTO.setClueType(clueDTO.getClueType());
                 saleClueDTO.setId(clueDTO.getId());
@@ -615,6 +618,7 @@ public class ClientService {
                     List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
                     ordersCustomerDTO.setList(labelByIds);
                 }
+                ordersCustomerDTO.setPhaseStatus(customerIndexDTO.getPhaseStatus());
                 ordersCustomerDTO.setClueId(customerIndexDTO.getClueId());
                 ordersCustomerDTO.setMcId(customerIndexDTO.getMcId());
                 ordersCustomerDTO.setMemberId(customerIndexDTO.getMemberId());

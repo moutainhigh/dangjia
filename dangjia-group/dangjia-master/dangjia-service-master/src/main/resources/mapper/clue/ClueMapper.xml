@@ -76,6 +76,7 @@
     <select id="followList" resultType="com.dangjia.acg.dto.other.ClueDTO">
         <if test="stage==4">
             select
+            mc.id as mcId,
             mc.member_id as memberId,
             if(m.name is not null,m.nick_name,m.name) as owername,
             m.mobile as phone,
@@ -110,7 +111,7 @@
         </if>
         <if test="stage==''">
            select
-            c.id,c.owername,c.phone,c.wechat,c.address,c.stage,
+            c.id as clueId,c.owername,c.phone,c.wechat,c.address,c.stage,
             c.building,c.number,
             c.label_id as labelId,
             c.cus_service as cusService,
@@ -158,7 +159,8 @@
               phone,
               c.modify_date as modifyDate,
               c.cus_service as userId,
-              c.member_id as memberId
+              c.member_id as memberId,
+              c.phase_status as phaseStatus
           </if>
           <if test="type==1 or type==2">
               c.id as clueId,
@@ -167,7 +169,8 @@
               m.mobile as phone,
               m.modify_date as modifyDate,
               CONCAT(IFNULL(h.residential,'*'),IFNULL(h.building,'*栋'),IFNULL(h.unit,'*单元'),IFNULL(h.number,'*号')) as houseName,
-              c.cus_service as userId
+              c.cus_service as userId,
+              c.phase_status as phaseStatus
           </if>
         FROM dj_clue c
         <if test="type==''">
@@ -243,7 +246,8 @@
         if(m.name is not null,m.nick_name,m.name) as name,
         h.create_date as createDate,
         h.completed_date as completedDate,
-        u.username
+        u.username,
+        mc.phase_status as phaseStatus
         FROM dj_member m
         INNER JOIN dj_member_customer mc
         ON m.id=mc.member_id
