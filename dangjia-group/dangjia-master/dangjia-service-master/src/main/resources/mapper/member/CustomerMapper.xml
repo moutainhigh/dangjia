@@ -50,6 +50,7 @@
         SELECT
         mc.id as mcId,
         m.id as memberId,
+        mc.user_id as userId,
         if(m.name is not null,m.nick_name,m.name) as name,
         m.mobile as phone,
         mc.modify_date AS modifyDate,

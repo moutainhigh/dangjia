@@ -28,4 +28,5 @@ public class OrdersCustomerDTO {
     private String mcId;
     private List<SaleMemberLabelDTO> list=new ArrayList<>();//标签
     private Integer phaseStatus;//阶段
+    private String userId;
 }

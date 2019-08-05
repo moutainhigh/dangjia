@@ -42,5 +42,9 @@ public class SaleClueDTO{
 
     private String mcId;
 
+    private String memberId;
+
+    private String userId;
+
 
 }

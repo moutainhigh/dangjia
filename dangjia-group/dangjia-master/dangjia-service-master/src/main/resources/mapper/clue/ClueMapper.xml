@@ -84,7 +84,8 @@
             m.create_date as create_date,
             mc.label_id_arr as labelId,
             u.username as userName,
-            mc.phase_status as phaseStatus
+            mc.phase_status as phaseStatus,
+            mc.user_id as userId,
             from dj_member_customer mc
             INNER JOIN dj_member m
             on mc.member_id=m.id
@@ -241,6 +242,7 @@
         mc.id as mcId,
         m.id as memberId,
         h.id as houseId,
+        mc.user_id as userId,
         CONCAT(IFNULL(h.residential,'*'),IFNULL(CONCAT(h.building,'栋'),'*栋'),IFNULL(CONCAT(h.unit,'单元'),'*单元'),IFNULL(CONCAT(h.number,'号'),'*号')) as houseName,
         m.mobile,
         if(m.name is not null,m.nick_name,m.name) as name,
@@ -292,6 +294,7 @@
             SELECT
             c.id as clueId,
             null as mcId,
+            c.c.cus_service as userId,
             c.owername as name,
             c.phone,
             c.modify_date AS modifyDate,
@@ -316,6 +319,7 @@
             SELECT
             mc.id as mcId,
             null as clueId,
+            mc.user_id as userId,
             if(m.name is not null,m.nick_name,m.name) as name,
             m.mobile AS phone,
             mc.modify_date AS modifyDate,
@@ -415,10 +419,10 @@
         INNER JOIN dj_member_customer mc on h.member_id = mc.member_id
         <where>
             1=1
-            <if test="null != memberId">
+            <if test="null != memberId and memberId !=''">
                and  c.member_id = #{memberId}
             </if>
-            <if test="null != cusService">
+            <if test="null != cusService and cusService != ''">
                 and  c.cus_service = #{cusService}
             </if>
         </where>
