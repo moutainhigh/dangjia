@@ -144,7 +144,7 @@ public class ClientService {
         Example example = new Example(Member.class);
         example.createCriteria().andEqualTo(Member.MOBILE, clue.getPhone());
         List<Member> members = iMemberMapper.selectByExample(example);
-        if (members.size() > 0) {
+        if (members.size() > 0) {//如果线索已注册
             example = new Example(StoreUser.class);
             example.createCriteria().andEqualTo(StoreUser.USER_ID, accessToken.getUserId())
                     .andEqualTo(Store.DATA_STATUS, 0);
@@ -373,13 +373,19 @@ public class ClientService {
         example.createCriteria().andEqualTo(Store.USER_ID, user.getId());
         if (iStoreMapper.selectByExample(example).size() <= 0) {//判断用户是否为店长
             CustomerIndexDTO customerIndexDTO = clueMapper.clientPage(0, user.getId(), null);
-            customerIndexDTO.setTips(clueMapper.getTips(0,user.getId(),null)>0?1:0);
+            if(null!=customerIndexDTO) {
+                customerIndexDTO.setTips(clueMapper.getTips(0, user.getId(), null) > 0 ? 1 : 0);
+            }
             map.put("followList", customerIndexDTO);
             customerIndexDTO = clueMapper.clientPage(1, user.getId(), null);
-            customerIndexDTO.setTips(clueMapper.getTips(1,user.getId(),null)>0?1:0);
+            if(null!=customerIndexDTO) {
+                customerIndexDTO.setTips(clueMapper.getTips(1, user.getId(), null) > 0 ? 1 : 0);
+            }
             map.put("placeOrder", customerIndexDTO);
             customerIndexDTO = clueMapper.clientPage(2, user.getId(), null);
-            customerIndexDTO.setTips(clueMapper.getTips(2,user.getId(),null)>0?1:0);
+            if(null!=customerIndexDTO) {
+                customerIndexDTO.setTips(clueMapper.getTips(2, user.getId(), null) > 0 ? 1 : 0);
+            }
             map.put("completion", customerIndexDTO);
             MonthlyTargetDTO monthlyTargetDTO = new MonthlyTargetDTO();
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM");
@@ -398,13 +404,19 @@ public class ClientService {
             Store store = (Store) object;
             List<StoreUserDTO> storeUsers = iStoreUserMapper.getStoreUsers(store.getId(), null, null);
             CustomerIndexDTO customerIndexDTO = clueMapper.clientPage(0, null, storeUsers);
-            customerIndexDTO.setTips(clueMapper.getTips(0,user.getId(),null)>0?1:0);
+            if(null!=customerIndexDTO) {
+                customerIndexDTO.setTips(clueMapper.getTips(0, user.getId(), null) > 0 ? 1 : 0);
+            }
             map.put("followList", customerIndexDTO);
             customerIndexDTO = clueMapper.clientPage(1, null, storeUsers);
-            customerIndexDTO.setTips(clueMapper.getTips(1,user.getId(),null)>0?1:0);
+            if(null!=customerIndexDTO) {
+                customerIndexDTO.setTips(clueMapper.getTips(1, user.getId(), null) > 0 ? 1 : 0);
+            }
             map.put("placeOrder", customerIndexDTO);
             customerIndexDTO = clueMapper.clientPage(2, null, storeUsers);
-            customerIndexDTO.setTips(clueMapper.getTips(2,user.getId(),null)>0?1:0);
+            if(null!=customerIndexDTO) {
+                customerIndexDTO.setTips(clueMapper.getTips(2, user.getId(), null) > 0 ? 1 : 0);
+            }
             map.put("completion", customerIndexDTO);
             List<CustomerIndexDTO> customerIndexDTOS = clueMapper.sleepingCustomer(store.getId(), null, "desc", null);
             if(customerIndexDTOS.size() >0) {
@@ -503,7 +515,7 @@ public class ClientService {
                 }
                 Store store = (Store) object;
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                clueDTOS = clueMapper.followList(label, time, stage, searchKey, null, store.getId());
+                clueDTOS = clueMapper.followList(label, time, stage, searchKey, userId, store.getId());
             }
             List<SaleClueDTO> list = new ArrayList<>();
             for (ClueDTO clueDTO : clueDTOS) {
