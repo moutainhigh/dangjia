@@ -161,11 +161,13 @@
               c.modify_date as modifyDate,
               c.cus_service as userId,
               c.member_id as memberId,
-              c.phase_status as phaseStatus
+              c.phase_status as phaseStatus,
+              c.stage
           </if>
           <if test="type==1 or type==2">
               c.id as clueId,
               m.id as memberId,
+              c.stage,
               if(m.name is not null,m.nick_name,m.name) as name,
               m.mobile as phone,
               m.modify_date as modifyDate,
@@ -384,21 +386,23 @@
 
     <select id="queryCustomerInfo" resultType="com.dangjia.acg.dto.sale.rob.RobInfoDTO" parameterType="java.util.Map">
         select
-        h.id as houseId,
-        h.member_id as memberId,
-        h.city_id as cityId,
-        h.village_id as villageId,
-        h.visit_state as visitState,
-        h.create_date as createDate,
-        h.city_name as cityName,
-        h.residential as villageName,
-        h.build_square as buildSquare,
-        h.style as style,
-        h.square as square,
-        h.decoration_type as decorationType,
-        h.residential as residential,
-        h.unit as unit,
-        h.create_date as createDate,
+        <if test="stage==4">
+            h.id as houseId,
+            h.member_id as memberId,
+            h.city_id as cityId,
+            h.village_id as villageId,
+            h.visit_state as visitState,
+            h.create_date as createDate,
+            h.city_name as cityName,
+            h.residential as villageName,
+            h.build_square as buildSquare,
+            h.style as style,
+            h.square as square,
+            h.decoration_type as decorationType,
+            h.residential as residential,
+            h.unit as unit,
+            h.create_date as createDate,
+        </if>
         c.owername as owerName,
         c.phone as phone,
         c.wechat as wechat,
@@ -415,15 +419,19 @@
         mc.member_id as memberId,
         mc.label_id_arr as labelIdArr,
         mc.stage as stage
-        from dj_house h INNER JOIN dj_clue c on h.member_id = c.member_id
-        INNER JOIN dj_member_customer mc on h.member_id = mc.member_id
+        from dj_clue c
+        <if test="stage==4">
+            INNER JOIN dj_house h
+            on h.member_id = c.member_id
+        </if>
+        INNER JOIN dj_member_customer mc on c.member_id = mc.member_id
         <where>
             1=1
             <if test="null != memberId and memberId !=''">
                and  c.member_id = #{memberId}
             </if>
             <if test="null != cusService and cusService != ''">
-                and  c.cus_service = #{cusService}
+                and  c.cus_service = #{userId}
             </if>
         </where>
     </select>

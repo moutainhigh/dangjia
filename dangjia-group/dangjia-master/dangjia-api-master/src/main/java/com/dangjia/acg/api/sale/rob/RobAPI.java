@@ -79,7 +79,8 @@ public interface RobAPI {
                                      @RequestParam("userId")String userId,
                                      @RequestParam("memberId")String memberId,
                                      @RequestParam("clueId")String clueId,
-                                     @RequestParam("phaseStatus")Integer phaseStatus);
+                                     @RequestParam("phaseStatus")Integer phaseStatus,
+                                     @RequestParam("stage")String stage);
 
     /**
      * showdoc

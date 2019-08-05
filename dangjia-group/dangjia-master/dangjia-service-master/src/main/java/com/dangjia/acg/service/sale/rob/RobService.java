@@ -129,7 +129,7 @@ public class RobService {
      * @param memberId
      * @return
      */
-    public ServerResponse queryCustomerInfo(String memberId,String userId,String clueId,Integer phaseStatus){
+    public ServerResponse queryCustomerInfo(String memberId,String userId,String clueId,Integer phaseStatus,String stage){
         //获取图片url
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 
@@ -142,7 +142,7 @@ public class RobService {
             if (!CommonUtil.isEmpty(userId)) {
                 map.put("userId",userId);
             }
-
+            map.put("stage",stage);
             RobArrInFoDTO robArrInFoDTO = new RobArrInFoDTO();
 
             List<RobInfoDTO> robInfoDTO = clueMapper.queryCustomerInfo(map);
