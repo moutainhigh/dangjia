@@ -19,4 +19,11 @@ public class MyHomeController implements MyHomeAPI {
         return myHouseService.getMyHouse(userToken, isNew);
     }
 
+
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseTubogramImage(String houseId) {
+        return myHouseService.getHouseTubogramImage(houseId);
+    }
+
 }
