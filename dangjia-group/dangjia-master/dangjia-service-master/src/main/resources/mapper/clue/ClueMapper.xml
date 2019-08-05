@@ -296,7 +296,7 @@
             SELECT
             c.id as clueId,
             null as mcId,
-            c.c.cus_service as userId,
+            c.cus_service as userId,
             c.owername as name,
             c.phone,
             c.modify_date AS modifyDate,
