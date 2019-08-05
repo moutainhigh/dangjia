@@ -545,6 +545,7 @@ public class ClientService {
                     List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
                     saleClueDTO.setList(labelByIds);
                 }
+                saleClueDTO.setPhaseStatus(clueDTO.getPhaseStatus());
                 saleClueDTO.setUsername(clueDTO.getUserName());
                 saleClueDTO.setClueType(clueDTO.getClueType());
                 saleClueDTO.setId(clueDTO.getId());
@@ -617,6 +618,7 @@ public class ClientService {
                     List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
                     ordersCustomerDTO.setList(labelByIds);
                 }
+                ordersCustomerDTO.setPhaseStatus(customerIndexDTO.getPhaseStatus());
                 ordersCustomerDTO.setClueId(customerIndexDTO.getClueId());
                 ordersCustomerDTO.setMcId(customerIndexDTO.getMcId());
                 ordersCustomerDTO.setMemberId(customerIndexDTO.getMemberId());

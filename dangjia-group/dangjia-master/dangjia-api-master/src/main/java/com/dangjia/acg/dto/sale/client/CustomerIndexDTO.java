@@ -24,4 +24,5 @@ public class CustomerIndexDTO {
     private String userId;
     private String memberId;
     private Integer tips;//消息提示 0:无提示 1：提示
+    private Integer phaseStatus;
 }
