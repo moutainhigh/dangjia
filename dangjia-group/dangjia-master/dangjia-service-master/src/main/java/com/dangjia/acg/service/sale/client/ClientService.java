@@ -173,6 +173,7 @@ public class ClientService {
             clue.setCusService(user.getId());
             clue.setClueType(0);
             clue.setTurnStatus(0);
+            clue.setTips("1");
             clue.setCityId(store.getCityId());
             IntentionHouse intentionHouse=new IntentionHouse();
             intentionHouse.setClueId(clue.getId());
@@ -189,6 +190,7 @@ public class ClientService {
             customer.setPhaseStatus(1);
             customer.setClueType(0);
             customer.setDataStatus(0);
+            customer.setTips("1");
             if(groupBys.size()>0){//该线索已被其他人录入并成为客户阶段
                 clue.setPhaseStatus(1);
                 clue.setStage(4);
