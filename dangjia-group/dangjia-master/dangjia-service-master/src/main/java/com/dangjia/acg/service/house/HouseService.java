@@ -1269,11 +1269,17 @@ public class HouseService {
         pageResult.setList(listMap);
         return ServerResponse.createBySuccess("查询施工记录成功", pageResult);
     }
-
+    /**
+     * 施工记录（分类型）
+     */
+    public ServerResponse queryConstructionRecordType(String houseId) {
+        List<HouseConstructionRecordTypeDTO> hfaList = houseConstructionRecordMapper.getHouseConstructionRecordTypeDTO(houseId);
+        return ServerResponse.createBySuccess("查询施工记录成功", hfaList);
+    }
     /**
      * 施工记录
      */
-    public ServerResponse queryConstructionRecordAll(String houseId, String day, String workerType, PageDTO pageDTO) {
+    public ServerResponse queryConstructionRecordAll(String houseId, String ids, String day, String workerType, PageDTO pageDTO) {
         // 施工记录的内容需要更改
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         Example example = new Example(HouseConstructionRecord.class);
@@ -1281,6 +1287,10 @@ public class HouseService {
         criteria.andEqualTo(HouseConstructionRecord.HOUSE_ID, houseId);
         if (!CommonUtil.isEmpty(day)) {
             criteria.andCondition(" to_days(create_date) = to_days('" + day + "') ");
+        }
+        if (!CommonUtil.isEmpty(ids)) {
+            String[] id = ids.split(",");
+            criteria.andIn(HouseConstructionRecord.ID,  Arrays.asList(id));
         }
         if (!CommonUtil.isEmpty(workerType)) {
             criteria.andEqualTo(HouseConstructionRecord.WORKER_TYPE, workerType);
@@ -1624,6 +1634,7 @@ public class HouseService {
             return ServerResponse.createByErrorMessage("更新失败");
         }
     }
+
     public ServerResponse getHistoryWorker(String houseId, String workerTypeId, String workId, PageDTO pageDTO) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());

@@ -4,5 +4,51 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.house.HouseConstructionRecordMapper">
 
+    <select id="getHouseConstructionRecordTypeDTO" resultType="com.dangjia.acg.dto.house.HouseConstructionRecordTypeDTO">
+       SELECT
+            *
+        FROM
+            (
+                (
+                SELECT
+                    CONCAT( '第', ( @i := @i + 1 ), '周', '（共', COUNT( r.id ), '条）' ) AS 'text',
+                    DATE_FORMAT( r.create_date, '%x年-第%v周' ) WEEK,
+                    GROUP_CONCAT( r.id ) ids,
+                    '0' apply_type
+                FROM
+                    `dj_house_construction_record` r,
+                    ( SELECT @i := 0 ) AS init
+                WHERE
+                    r.house_id = #{houseId}
+                    AND r.apply_type NOT IN ( 1, 2 )
+                GROUP BY
+                WEEK
+                ) UNION ALL
+                (
+                SELECT
+                    (
+                    CASE
+
+                            WHEN r.apply_type = 1 THEN
+                            CONCAT( wt.NAME, '阶段完工' ) ELSE CONCAT( wt.NAME, '整体完工' )
+                        END
+                        ) AS 'text',
+                        DATE_FORMAT( r.create_date, '%x年-第%v周' ) WEEK,
+                        GROUP_CONCAT( r.id ) ids,
+                        r.apply_type
+                    FROM
+                        `dj_house_construction_record` r
+                        INNER JOIN dj_core_worker_type wt ON wt.type = r.worker_type
+                    WHERE
+                        r.house_id= #{houseId}
+                        AND r.apply_type IN ( 1, 2 )
+                    GROUP BY
+                        r.id
+                    )
+                ) a
+        ORDER BY
+            a.WEEK
+    </select>
+
 </mapper>
 

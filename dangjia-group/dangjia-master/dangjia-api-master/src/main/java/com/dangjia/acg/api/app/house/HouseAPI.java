@@ -180,10 +180,14 @@ public interface HouseAPI {
     @PostMapping("app/house/house/queryConstructionRecordAll")
     @ApiOperation(value = "施工记录(new 包含要补退记录)", notes = "施工记录(new 包含要补退记录)")
     ServerResponse queryConstructionRecordAll(@RequestParam("houseId") String houseId,
+                                              @RequestParam("ids") String ids,
                                               @RequestParam("day") String day,
                                               @RequestParam("workerType") String workerType,
                                               @RequestParam("pageDTO") PageDTO pageDTO);
 
+    @PostMapping("app/house/queryConstructionRecordType")
+    @ApiOperation(value = "施工记录(new 包含要补退记录)分类型", notes = "施工记录(new 包含要补退记录)")
+    ServerResponse queryConstructionRecordType(@RequestParam("houseId") String houseId);
     /**
      * showdoc
      *
