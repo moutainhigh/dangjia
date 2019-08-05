@@ -59,7 +59,9 @@ public interface StoreManagementAPI {
     @ApiOperation(value = "分配销售", notes = "分配销售")
     ServerResponse upDateCusService(@RequestParam("request")HttpServletRequest request,
                                     @RequestParam("clueId")String clueId,
-                                    @RequestParam("cusService")String cusService);
+                                    @RequestParam("cusService")String cusService,
+                                    @RequestParam("mcId")String mcId,
+                                    @RequestParam("phaseStatus")Integer phaseStatus);
 
 
     @PostMapping(value = "sale/store/upDateCustomer")
@@ -67,5 +69,6 @@ public interface StoreManagementAPI {
     ServerResponse upDateCustomer(@RequestParam("request")HttpServletRequest request,
                                   @RequestParam("clueId")String clueId,
                                   @RequestParam("mcId")String mcId,
-                                  @RequestParam("cityId")String cityId);
+                                  @RequestParam("cityId")String cityId,
+                                  @RequestParam("phaseStatus")Integer phaseStatus);
 }

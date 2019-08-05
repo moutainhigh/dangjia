@@ -26,6 +26,7 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.sale.SaleService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.collections.BagUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -155,10 +156,23 @@ public class StoreManagementService {
      */
     public ServerResponse delBuilding(String buildingId) {
         if (residentialBuildingMapper.deleteByPrimaryKey(buildingId) > 0) {
-            return ServerResponse.createBySuccessMessage("删除成功");
+            Example example=new Example(ResidentialRange.class);
+            example.createCriteria().andLike(ResidentialRange.BUILDING_ID, "%"+buildingId+"%");
+            List<ResidentialRange> list = residentialRangeMapper.selectByExample(example);
+            for (ResidentialRange residentialRange : list) {
+                if(residentialRange.getBuildingId().contains(",")){
+                    residentialRange.setBuildingId(residentialRange.getBuildingId().replace(","+buildingId,null));
+                    residentialRangeMapper.updateByPrimaryKeySelective(residentialRange);
+                    return ServerResponse.createBySuccessMessage("删除成功");
+                }else{
+                    residentialRangeMapper.deleteByPrimaryKey(residentialRange.getId());
+                    return ServerResponse.createBySuccessMessage("删除成功");
+                }
+            }
         }
         return ServerResponse.createByErrorMessage("删除失败");
     }
+
 
 
     /**
@@ -254,28 +268,41 @@ public class StoreManagementService {
      * @param clueId
      * @return
      */
-    public ServerResponse upDateCusService(String clueId, String cusSerice) {
+    public ServerResponse upDateCusService(String clueId,
+                                           String cusSerice,
+                                           String mcId,
+                                           Integer phaseStatus) {
         try {
             Clue clue = new Clue();
+            Customer customer = new Customer();
             clue.setCusService(cusSerice);
             clue.setId(clueId);
+            clue.setStage(1);
             clue.setModifyDate(new Date());
             clueMapper.updateByPrimaryKeySelective(clue);
-            return ServerResponse.createBySuccessMessage("修改成功");
+            if(phaseStatus ==1){
+                customer.setUserId(cusSerice);
+                customer.setStage(1);
+                customer.setId(mcId);
+            }
+            return ServerResponse.createBySuccessMessage("分配成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("修改成功");
+            return ServerResponse.createByErrorMessage("分配成功");
         }
     }
 
     /**
-     * 转出客户
+     *   转出客户
      * @param clueId 线索id
      * @param mcId   客户基础id
      * @param cityId 城市id
      * @return
      */
-    public ServerResponse upDateCustomer(String clueId,String mcId,String cityId) {
+    public ServerResponse upDateCustomer(String clueId,
+                                         String mcId,
+                                         String cityId,
+                                         Integer phaseStatus) {
 
         try {
             Clue clue = new Clue();
@@ -297,17 +324,20 @@ public class StoreManagementService {
             //转出修改线索表
             clueMapper.updateByPrimaryKeySelective(clue);
 
-            if (!CommonUtil.isEmpty(mcId)) {
-                customer.setId(mcId);
+            if(phaseStatus == 1){
+                if (!CommonUtil.isEmpty(mcId)) {
+                    customer.setId(mcId);
+                }
+                customer.setModifyDate(new Date());
+                customer.setUserId(null);
+                customer.setStoreId(null);
+                customer.setStage(1);
+                //转出
+                customer.setTurnStatus(1);
+                //转出修改客户基础表
+                iCustomerMapper.updateByPrimaryKey(customer);
             }
-            customer.setModifyDate(new Date());
-            customer.setUserId(null);
-            customer.setStoreId(null);
-            customer.setStage(1);
-            //转出
-            customer.setTurnStatus(1);
-            //转出修改客户基础表
-            iCustomerMapper.updateByPrimaryKey(customer);
+
             return ServerResponse.createBySuccessMessage("转出成功");
         } catch (Exception e) {
             e.printStackTrace();
