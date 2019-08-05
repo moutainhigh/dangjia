@@ -568,12 +568,13 @@ public class HouseWorkerService {
         }
         hfa.setOtherMoney((workPrice).subtract(haveMoney).subtract(hfa.getApplyMoney()));
 //        hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经完工了");//描述
+        applyDec=setHouseFlowApplyImage(hfa, house, imageList);
+
         hfa.setApplyDec("尊敬的业主，您好！当家工匠【"+worker.getName()+"】为您新家施工，今日实际施工为:<br/>" +
                 applyDec +
                 "<br/>现向您发送完成情况，请您查收。");//描述
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
-        setHouseFlowApplyImage(hfa, house, imageList);
         //每日完工
         houseFlowApplyService.checkWorker(hfa.getId(), false);
         return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）每日完工申请成功");
@@ -786,6 +787,7 @@ public class HouseWorkerService {
         hfa.setSupervisorCheck(1);//默认大管家审核状态通过
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
+        setHouseFlowApplyImage(hfa, house, imageList);
         //已经停工的工序，若工匠提前复工，则复工日期以及之后的停工全部取消，
         // 原来被停工推后了的计划完工日期往前推，推的天数等于被取消的停工天数
         Date start = DateUtil.toDate(DateUtil.dateToString(new Date(),null));
@@ -971,16 +973,19 @@ public class HouseWorkerService {
     /**
      * 保存巡查图片,验收节点图片等信息
      */
-    private void setHouseFlowApplyImage(HouseFlowApply hfa, House house, String imageList) {
+    private String setHouseFlowApplyImage(HouseFlowApply hfa, House house, String imageList) {
+        StringBuffer strbfr=new StringBuffer();
         if (StringUtil.isNotEmpty(imageList)) {
             JSONArray imageObjArr = JSON.parseArray(imageList);
             for (int i = 0; i < imageObjArr.size(); i++) {//上传材料照片
                 JSONObject imageObj = imageObjArr.getJSONObject(i);
                 int imageType = Integer.parseInt(imageObj.getString("imageType"));
+                String imageTypeName = imageObj.getString("imageTypeName");
+                strbfr.append(imageTypeName);
+                strbfr.append("<br/>");
                 String imageUrl = imageObj.getString("imageUrl"); //图片,拼接
                 if (imageType == 3) {//节点图
                     String imageTypeId = imageObj.getString("imageTypeId");
-                    String imageTypeName = imageObj.getString("imageTypeName");
                     Technology technology = forMasterAPI.byTechnologyId(house.getCityId(), imageTypeId);
                     TechnologyRecord technologyRecord = new TechnologyRecord();
                     technologyRecord.setHouseId(house.getId());
@@ -1011,6 +1016,7 @@ public class HouseWorkerService {
                 }
             }
         }
+        return strbfr.toString();
     }
 
     /**
