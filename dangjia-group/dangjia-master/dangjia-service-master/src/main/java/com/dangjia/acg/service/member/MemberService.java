@@ -18,6 +18,7 @@ import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.*;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
@@ -667,74 +668,76 @@ public class MemberService {
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
             for (Member member : list) {
                 logger.info("getMemberListByName id:" + member.getId());
-                Customer customer = iCustomerMapper.getCustomerByMemberId(member.getId());
-                //每个业主增加关联 客服跟进
-                if (customer == null) {
-                    customer = new Customer();
-                    customer.setMemberId(member.getId());
-                    customer.setStage(0);
-                } else {
-                    if (customer.getRemindRecordId() != null)//有提醒记录的 更新 为最新的更新沟通记录
-                        customerRecordService.updateMaxNearRemind(customer);
-                }
-                List<MemberLabel> memberLabelList = new ArrayList<>();
-                if (customer.getLabelIdArr() != null) {
-                    String[] labelIdArr = customer.getLabelIdArr().split(",");
-                    for (String aLabelIdArr : labelIdArr) {
-                        MemberLabel memberlabel = iMemberLabelMapper.selectByPrimaryKey(aLabelIdArr);
-                        if (memberlabel != null)
-                            memberLabelList.add(memberlabel);
-                    }
-                }
-
-                MemberCustomerDTO mcDTO = new MemberCustomerDTO();
-                mcDTO.setMcId(customer.getId());
-                mcDTO.setPhaseStatus(customer.getPhaseStatus());
-                mcDTO.setOrderDate(member.getModifyDate());
-                mcDTO.setMemberId(member.getId());
-                mcDTO.setMemberName(member.getName());
-                mcDTO.setMemberNickName(member.getNickName());
-                mcDTO.setMobile(member.getMobile());
-                mcDTO.setReferrals(member.getReferrals());
-
-                Member referralsMember = memberMapper.selectByPrimaryKey(member.getReferrals());
-                if (referralsMember != null) {
-                    mcDTO.setReferralsMobile(referralsMember.getMobile());
-                } else {
-                    mcDTO.setReferralsMobile("");
-                }
-                mcDTO.setSource("来源未知");
-                mcDTO.setStage(customer.getStage());
-                mcDTO.setUserId(customer.getUserId());
-                mcDTO.setCreateDate(member.getCreateDate());
-                if (customer.getUserId() != null) {
-                    MainUser mainUser = userMapper.selectByPrimaryKey(customer.getUserId());
-                    if (null != mainUser) {
-                        mcDTO.setUserName(mainUser.getUsername());
-                    }
-                }
-                //找到提醒内容 ： 离当前时间最近的那一条
-                if (customer.getCurrRecordId() != null) {
-                    CustomerRecord remindCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getCurrRecordId());
-                    mcDTO.setRemindContent(remindCustomerRecord.getDescribes());
-                    mcDTO.setRemindTime(remindCustomerRecord.getRemindTime());
-                    if (remindCustomerRecord.getRemindTime() != null) {
-                        mcDTO.setRemindTimeOvertime(
-                                Long.compare(remindCustomerRecord.getRemindTime().getTime(), new Date().getTime()));
+                List<Customer> customerByMemberId = iCustomerMapper.getCustomerByMemberId(member.getId());
+                for (Customer customer : customerByMemberId) {
+                    //每个业主增加关联 客服跟进
+                    if (customer == null) {
+                        customer = new Customer();
+                        customer.setMemberId(member.getId());
+                        customer.setStage(0);
                     } else {
-                        mcDTO.setRemindTimeOvertime(-1);
+                        if (customer.getRemindRecordId() != null)//有提醒记录的 更新 为最新的更新沟通记录
+                            customerRecordService.updateMaxNearRemind(customer);
                     }
+                    List<MemberLabel> memberLabelList = new ArrayList<>();
+                    if (customer.getLabelIdArr() != null) {
+                        String[] labelIdArr = customer.getLabelIdArr().split(",");
+                        for (String aLabelIdArr : labelIdArr) {
+                            MemberLabel memberlabel = iMemberLabelMapper.selectByPrimaryKey(aLabelIdArr);
+                            if (memberlabel != null)
+                                memberLabelList.add(memberlabel);
+                        }
+                    }
+
+                    MemberCustomerDTO mcDTO = new MemberCustomerDTO();
+                    mcDTO.setMcId(customer.getId());
+                    mcDTO.setPhaseStatus(customer.getPhaseStatus());
+                    mcDTO.setOrderDate(member.getModifyDate());
+                    mcDTO.setMemberId(member.getId());
+                    mcDTO.setMemberName(member.getName());
+                    mcDTO.setMemberNickName(member.getNickName());
+                    mcDTO.setMobile(member.getMobile());
+                    mcDTO.setReferrals(member.getReferrals());
+
+                    Member referralsMember = memberMapper.selectByPrimaryKey(member.getReferrals());
+                    if (referralsMember != null) {
+                        mcDTO.setReferralsMobile(referralsMember.getMobile());
+                    } else {
+                        mcDTO.setReferralsMobile("");
+                    }
+                    mcDTO.setSource("来源未知");
+                    mcDTO.setStage(customer.getStage());
+                    mcDTO.setUserId(customer.getUserId());
+                    mcDTO.setCreateDate(member.getCreateDate());
+                    if (customer.getUserId() != null) {
+                        MainUser mainUser = userMapper.selectByPrimaryKey(customer.getUserId());
+                        if (null != mainUser) {
+                            mcDTO.setUserName(mainUser.getUsername());
+                        }
+                    }
+                    //找到提醒内容 ： 离当前时间最近的那一条
+                    if (customer.getCurrRecordId() != null) {
+                        CustomerRecord remindCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getCurrRecordId());
+                        mcDTO.setRemindContent(remindCustomerRecord.getDescribes());
+                        mcDTO.setRemindTime(remindCustomerRecord.getRemindTime());
+                        if (remindCustomerRecord.getRemindTime() != null) {
+                            mcDTO.setRemindTimeOvertime(
+                                    Long.compare(remindCustomerRecord.getRemindTime().getTime(), new Date().getTime()));
+                        } else {
+                            mcDTO.setRemindTimeOvertime(-1);
+                        }
+                    }
+                    if (customer.getCurrRecordId() != null) {
+                        CustomerRecord currCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getCurrRecordId());
+                        if (currCustomerRecord != null)
+                            mcDTO.setLastRecord(currCustomerRecord.getCreateDate());
+                    }
+                    if (member.getRemarks() != null) {
+                        mcDTO.setRemarks(member.getRemarks());//业主备注
+                    }
+                    mcDTO.setMemberLabelList(memberLabelList);
+                    mcDTOList.add(mcDTO);
                 }
-                if (customer.getCurrRecordId() != null) {
-                    CustomerRecord currCustomerRecord = iCustomerRecordMapper.selectByPrimaryKey(customer.getCurrRecordId());
-                    if (currCustomerRecord != null)
-                        mcDTO.setLastRecord(currCustomerRecord.getCreateDate());
-                }
-                if (member.getRemarks() != null) {
-                    mcDTO.setRemarks(member.getRemarks());//业主备注
-                }
-                mcDTO.setMemberLabelList(memberLabelList);
-                mcDTOList.add(mcDTO);
             }
 //            logger.info(" mcDTOList getMemberNickName:" + mcDTOList.get(0).getMemberNickName());
 //            logger.info("mcDTOList size:" + mcDTOList.size() +" mcDTOListOrderBy:"+ mcDTOListOrderBy.size() + " list:"+ list.size());

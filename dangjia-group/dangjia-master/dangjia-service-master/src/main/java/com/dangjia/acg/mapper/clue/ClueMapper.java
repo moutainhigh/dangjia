@@ -32,7 +32,9 @@ public interface ClueMapper extends Mapper<Clue> {
 
     Clue getClue(@Param("phone") String phone,@Param("userId") String userId);
 
-    List<ClueDTO> followList(@Param("label") String label,
+    List<ClueDTO>
+
+    followList(@Param("label") String label,
                              @Param("time") String time,
                              @Param("stage") Integer stage,
                              @Param("searchKey") String searchKey,
