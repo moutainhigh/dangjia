@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.clue;
 
+import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -8,6 +10,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.GaoDeUtils;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.common.util.excel.ImportExcel;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.other.ClueDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.clue.ClueTalkMapper;
@@ -16,6 +19,7 @@ import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.user.UserRoleMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.clue.ClueTalk;
@@ -24,7 +28,10 @@ import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberLabel;
 import com.dangjia.acg.modle.store.Store;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.user.UserRoleKey;
+import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +65,12 @@ public class ClueService {
     private UserRoleMapper userRoleMapper;
     @Autowired
     private IStoreMapper iStoreMapper;
+    @Autowired
+    private ConfigUtil configUtil;
+    @Autowired
+    private ConfigMessageService configMessageService;
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * 获取所有线索
@@ -331,6 +344,7 @@ public class ClueService {
             } else {
                 if (!CommonUtil.isEmpty(longitude) && !CommonUtil.isEmpty(latitude)) {
                     List<Store> stores = iStoreMapper.selectAll();
+                    String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
                     for (Store store : stores) {
                         //野生客户如果在门店范围内转给门店店长待分配
                         if (GaoDeUtils.isInPolygon(longitude + "," + latitude, store.getScopeItude())) {
@@ -342,6 +356,11 @@ public class ClueService {
                             customer.setPhaseStatus(1);
                             customer.setStoreId(store.getId());
                             iCustomerMapper.insert(customer);
+                            MainUser u = userMapper.selectByPrimaryKey(store.getUserId());
+                            if (u != null && !CommonUtil.isEmpty(u.getMemberId()))
+                                configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "待分配客户提醒",
+                                        "有一个门店范围内的注册客户待分配，快去分配给员工吧。", 0, url
+                                                + Utils.getCustomerDetails(member.getId(), "", 1, "1"));
                             return ServerResponse.createBySuccessMessage("操作成功");
                         }
                     }
