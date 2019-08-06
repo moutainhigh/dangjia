@@ -28,6 +28,12 @@ public class HouseConstructionRecordTypeDTO{
 	@ApiModelProperty("类名")
 	private String text;
 
+
+	@Column(name = "num")
+	@Desc(value = "记录数量")
+	@ApiModelProperty("记录数量")
+	private String num;
+
 	@Column(name = "week")
 	@Desc(value = "周期")
 	@ApiModelProperty("周期")
