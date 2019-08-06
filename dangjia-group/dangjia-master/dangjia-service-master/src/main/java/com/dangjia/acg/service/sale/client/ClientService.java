@@ -217,6 +217,7 @@ public class ClientService {
             clue.setCusService(user.getId());
             clue.setStoreId(store.getId());
             clue.setStage(0);
+            clue.setTips("1");
             if (clueMapper.insert(clue) > 0) {
                 return ServerResponse.createBySuccessMessage("提交成功");
             }else{
