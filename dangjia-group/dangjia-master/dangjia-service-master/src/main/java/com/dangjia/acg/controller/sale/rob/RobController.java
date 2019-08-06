@@ -28,27 +28,30 @@ public class RobController implements RobAPI {
 
     /**
      * 查询抢单列表
+     *
      * @param request
      * @param userToken
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse queryRobSingledata(HttpServletRequest request,String userToken,String storeId) {
-        return robService.queryRobSingledata(userToken,storeId);
+    public ServerResponse queryRobSingledata(HttpServletRequest request, String userToken, String storeId) {
+        return robService.queryRobSingledata(userToken, storeId);
     }
 
     /**
      * 抢单
+     *
      * @param id
      * @return
      */
-    public ServerResponse upDateIsRobStats(HttpServletRequest request,String id){
+    public ServerResponse upDateIsRobStats(HttpServletRequest request, String id) {
         return robService.upDateIsRobStats(id);
     }
 
     /**
      * 查询客户详情
+     *
      * @return
      */
     @Override
@@ -59,13 +62,13 @@ public class RobController implements RobAPI {
                                             String clueId,
                                             Integer phaseStatus,
                                             String stage) {
-        return robService.queryCustomerInfo(userToken,memberId,clueId,phaseStatus,stage);
+        return robService.queryCustomerInfo(userToken, memberId, clueId, phaseStatus, stage);
     }
-
 
 
     /**
      * 新增标签
+     *
      * @param memberId
      * @param labelId
      * @return
@@ -77,11 +80,12 @@ public class RobController implements RobAPI {
                                    String labelId,
                                    String clueId,
                                    Integer phaseStatus) {
-        return robService.addLabel(memberId,labelId,clueId,phaseStatus);
+        return robService.addLabel(memberId, labelId, clueId, phaseStatus);
     }
 
     /**
      * 删除标签
+     *
      * @param memberId
      * @param labelIdArr
      * @return
@@ -93,11 +97,12 @@ public class RobController implements RobAPI {
                                       String labelIdArr,
                                       String clueIdr,
                                       Integer phaseStatus) {
-        return robService.deleteLabel(memberId,labelIdArr,clueIdr,phaseStatus);
+        return robService.deleteLabel(memberId, labelIdArr, clueIdr, phaseStatus);
     }
 
     /**
      * 新增沟通记录
+     *
      * @param customerRecDTO
      * @return
      */
@@ -107,8 +112,15 @@ public class RobController implements RobAPI {
         return robService.addDescribes(customerRecDTO);
     }
 
+    @Override
+    @ApiMethod
+    public void remindTime() {
+        robService.remindTime();
+    }
+
     /**
      * 修改客户信息
+     *
      * @param clue
      * @return
      */
@@ -121,6 +133,7 @@ public class RobController implements RobAPI {
 
     /**
      * 新增意向房子
+     *
      * @param intentionHouse
      * @return
      */
@@ -132,12 +145,13 @@ public class RobController implements RobAPI {
 
     /**
      * 删除意向房子
+     *
      * @param id
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse deleteIntentionHouse(HttpServletRequest request,String id) {
+    public ServerResponse deleteIntentionHouse(HttpServletRequest request, String id) {
         return robService.deleteIntentionHouse(id);
     }
 
