@@ -51,6 +51,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.design.DesignDataService;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -503,8 +504,7 @@ public class HouseService {
                 for (Customer m : ms) {
                     configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
                             "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                                    + String.format("customerDetails?title=%s&storeId=%s&memberId=%s&phaseStatus=%s&listType=%userId=%s",
-                                    "客户详情", "", house.getMemberId(), "1", "", m.getUserId()));
+                                    + Utils.getCustomerDetails(house.getMemberId(), "", 1, "4"));
                 }
             }
             //通知业主确认开工

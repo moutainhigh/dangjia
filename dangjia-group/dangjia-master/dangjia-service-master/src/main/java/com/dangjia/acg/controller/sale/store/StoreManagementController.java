@@ -62,9 +62,8 @@ public class StoreManagementController implements StoreManagementAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse upDateCusService(HttpServletRequest request, String clueId, String cusService, String mcId,
-                                           String houseId, Integer phaseStatus) {
-        return storeManagementService.upDateCusService(clueId, cusService, mcId, houseId, phaseStatus);
+    public ServerResponse upDateCusService(HttpServletRequest request, String clueId, String cusService, String mcId, Integer phaseStatus) {
+        return storeManagementService.upDateCusService(clueId, cusService, mcId, phaseStatus);
     }
 
 
