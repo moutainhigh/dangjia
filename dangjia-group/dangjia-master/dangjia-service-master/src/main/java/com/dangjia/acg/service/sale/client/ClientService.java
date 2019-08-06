@@ -454,6 +454,14 @@ public class ClientService {
             monthlyTargetDTO.setTargetNumber(monthlyTargets.size() > 0 ? monthlyTargets.get(0).getTargetNumber() : 0);
             map.put("monthlyTarget", monthlyTargetDTO);
             map.put("outField", getResidentialRangeDTOList(user.getId()));
+            example.createCriteria().andEqualTo(StoreUser.USER_ID, accessToken.getUserId())
+                    .andEqualTo(Store.DATA_STATUS, 0);
+            List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
+            if (storeUsers.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            StoreUser storeUser = storeUsers.get(0);
+            map.put("storeId", storeUser.getStoreId());
         } else {
             object = saleService.getStore(accessToken.getUserId());
             if (object instanceof ServerResponse) {
@@ -519,21 +527,21 @@ public class ClientService {
         example.createCriteria().andEqualTo(ResidentialRange.USER_ID, userId);
         List<ResidentialRange> residentialRanges = residentialRangeMapper.selectByExample(example);
         List<ResidentialRangeDTO> residentialRangeDTOList = new ArrayList<>();
+        String[] buildingId = {};
         for (ResidentialRange residentialRange : residentialRanges) {
-            ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
-            String[] buildingId = {};
             if (!CommonUtil.isEmpty(residentialRange.getBuildingId())) {
                 buildingId = residentialRange.getBuildingId().split(",");
-                example = new Example(ResidentialBuilding.class);
-                example.createCriteria().andIn(ResidentialBuilding.ID, Arrays.asList(buildingId));
-                List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
-                for (ResidentialBuilding residentialBuilding : residentialBuildings) {
-                    ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(residentialBuilding.getVillageId());
-                    residentialRangeDTO.setVillageId(modelingVillage.getId());
-                    residentialRangeDTO.setVillagename(modelingVillage.getName());
-                    residentialRangeDTO.setList(residentialBuildings);
-                }
             }
+        }
+        example = new Example(ResidentialBuilding.class);
+        example.createCriteria().andIn(ResidentialBuilding.ID, Arrays.asList(buildingId));
+        List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
+        for (ResidentialBuilding residentialBuilding : residentialBuildings) {
+            ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
+            ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(residentialBuilding.getVillageId());
+            residentialRangeDTO.setVillageId(modelingVillage.getId());
+            residentialRangeDTO.setVillagename(modelingVillage.getName());
+            residentialRangeDTO.setList(residentialBuildings);
             residentialRangeDTOList.add(residentialRangeDTO);
         }
         return residentialRangeDTOList;
