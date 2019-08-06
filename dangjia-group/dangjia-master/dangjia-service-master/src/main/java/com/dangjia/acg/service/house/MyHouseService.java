@@ -144,9 +144,12 @@ public class MyHouseService {
         Example example = new Example(HouseFlowApplyImage.class);
         example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_ID, houseId).andEqualTo(HouseFlowApplyImage.IMAGE_TYPE, 4);
         List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
-        List<String> imageList = new ArrayList<>();
+        List<Map> imageList = new ArrayList<>();
         for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList) {
-            imageList.add(address + houseFlowApplyImage.getImageUrl());
+            Map map =new HashMap();
+            map.put("image",address + houseFlowApplyImage.getImageUrl());
+            map.put("imageUrl",houseFlowApplyImage.getImageUrl());
+            imageList.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", imageList);
     }
