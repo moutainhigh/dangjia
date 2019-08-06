@@ -149,6 +149,7 @@ public class MyHouseService {
             Map map =new HashMap();
             map.put("image",address + houseFlowApplyImage.getImageUrl());
             map.put("imageUrl",houseFlowApplyImage.getImageUrl());
+            map.put("createDate",houseFlowApplyImage.getCreateDate());
             imageList.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", imageList);
