@@ -558,12 +558,17 @@ public class ClientService {
             example = new Example(ResidentialBuilding.class);
             example.createCriteria().andIn(ResidentialBuilding.ID, Arrays.asList(buildingId));
             List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
-            for (ResidentialBuilding residentialBuilding : residentialBuildings) {
+            List<ResidentialBuilding> getvillageIdGroupBy = residentialBuildingMapper.getvillageIdGroupBy(buildingId);
+            for (ResidentialBuilding residentialBuilding : getvillageIdGroupBy) {
                 ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
                 ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(residentialBuilding.getVillageId());
                 residentialRangeDTO.setVillageId(modelingVillage.getId());
                 residentialRangeDTO.setVillagename(modelingVillage.getName());
-                residentialRangeDTO.getList().add(residentialBuilding);
+                for (ResidentialBuilding residentialBuilding1 : residentialBuildings) {
+                    if(residentialBuilding1.getVillageId().equals(residentialRangeDTO.getVillageId())) {
+                        residentialRangeDTO.getList().add(residentialBuilding1);
+                    }
+                }
                 residentialRangeDTOList.add(residentialRangeDTO);
             }
         }
