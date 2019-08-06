@@ -26,7 +26,7 @@ public class MemberController implements MemberAPI {
     }
 
     @Override
-    public String getSmsCode(String phone) {
+    public ServerResponse getSmsCode(String phone) {
         return memberService.getSmsCode(phone);
     }
 
