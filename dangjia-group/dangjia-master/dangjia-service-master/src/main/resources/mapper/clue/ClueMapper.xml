@@ -86,6 +86,7 @@
             u.username as userName,
             mc.phase_status as phaseStatus,
             mc.user_id as userId,
+            mc.stage
             from dj_member_customer mc
             INNER JOIN dj_member m
             on mc.member_id=m.id
@@ -125,7 +126,8 @@
             c.store_id as storeId,
             u.username as userName,
             c.phase_status as phaseStatus,
-            c.clue_type as clueType
+            c.clue_type as clueType,
+            c.stage
            from dj_clue c
            INNER JOIN dj_user u
            on c.cus_service=u.id
@@ -401,8 +403,8 @@
             h.decoration_type as decorationType,
             h.residential as residential,
             h.unit as unit,
-            h.create_date as createDate,
         </if>
+        c.create_date as createDate,
         c.owername as owerName,
         c.phone as phone,
         c.wechat as wechat,

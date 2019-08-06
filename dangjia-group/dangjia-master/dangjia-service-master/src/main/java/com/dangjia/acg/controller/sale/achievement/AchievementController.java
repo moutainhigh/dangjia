@@ -33,8 +33,9 @@ public class AchievementController implements AchievementAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryLeaderAchievementData(HttpServletRequest request, String storeId , String userId, Date time) {
-        return achievementService.queryLeaderAchievementData(storeId,userId,time);
+    public ServerResponse queryLeaderAchievementData(HttpServletRequest request,String userToken,
+                                                     String storeId , String userId, Date time) {
+        return achievementService.queryLeaderAchievementData(userToken,storeId,userId,time);
     }
 
 

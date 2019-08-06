@@ -14,7 +14,7 @@ public class ClueDTO {
     private String phone;
     private String wechat;
     private String address;
-    private int stage;
+    private Integer stage;
     private String cusService;
     private String labelId;
     private String labelName;

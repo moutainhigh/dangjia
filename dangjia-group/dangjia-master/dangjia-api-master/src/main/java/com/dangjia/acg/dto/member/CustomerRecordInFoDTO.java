@@ -29,5 +29,9 @@ public class CustomerRecordInFoDTO {
     @ApiModelProperty("销售顾问")
     private String name;
 
+    @ApiModelProperty("销售顾问")
+    private String nickName;
+
+
 
 }

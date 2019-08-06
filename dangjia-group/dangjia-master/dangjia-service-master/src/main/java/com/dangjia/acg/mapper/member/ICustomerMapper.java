@@ -53,6 +53,6 @@ public interface ICustomerMapper extends Mapper<Customer> {
 
     Integer getwaitDistributionTips();
 
-    List<String> getCustomerMemberIdList(@Param("memberId") String memberId);
+    List<Customer> getCustomerMemberIdList(@Param("memberId") String memberId);
 }
 

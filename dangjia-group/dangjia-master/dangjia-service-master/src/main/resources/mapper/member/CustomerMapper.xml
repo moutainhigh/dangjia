@@ -131,9 +131,9 @@
         on mc.member_id=m.id
         where m.mobile=#{mobile}
     </select>
-    <select id="getCustomerMemberIdList" resultType="java.lang.String">
+    <select id="getCustomerMemberIdList" resultType="com.dangjia.acg.modle.member.Customer">
         SELECT
-            u.member_id
+            u.member_id as memberId,u.user_id as userId
         FROM
             dj_member_customer mc
             INNER JOIN dj_user u ON u.id = mc.user_id

@@ -1,17 +1,22 @@
 package com.dangjia.acg.service.sale.store;
 
+import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.sale.residential.ResidentialRangeMapper;
 import com.dangjia.acg.mapper.sale.stroe.MonthlyTargetMappper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
 import com.dangjia.acg.modle.sale.store.MonthlyTarget;
+import com.dangjia.acg.modle.user.MainUser;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -28,6 +33,12 @@ public class EmployeeDetailsService {
     private MonthlyTargetMappper monthlyTargetMappper;
     @Autowired
     private ResidentialRangeMapper residentialRangeMapper;
+    @Autowired
+    private ConfigMessageService configMessageService;
+    @Autowired
+    private ConfigUtil configUtil;
+    @Autowired
+    private UserMapper userMapper;
 
     public ServerResponse setMonthlyTarget(String userId, String time, Integer target) {
         if (CommonUtil.isEmpty(userId)) {
@@ -63,6 +74,12 @@ public class EmployeeDetailsService {
         monthlyTarget.setTargetNumber(target);
         monthlyTarget.setDataStatus(0);
         if (monthlyTargetMappper.insert(monthlyTarget) > 0) {
+            //TODO 检查
+            MainUser u = userMapper.selectByPrimaryKey(userId);
+            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+            configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "跨域客户",
+                    "您本月有新的下单目标，请及时查看【" + u.getUsername() + "】", 0,"");
+
             return ServerResponse.createBySuccess("制定成功");
         }
         return ServerResponse.createByErrorMessage("制定失败");

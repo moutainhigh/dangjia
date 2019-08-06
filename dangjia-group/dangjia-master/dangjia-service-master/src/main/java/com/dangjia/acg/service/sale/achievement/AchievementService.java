@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.sale.achievement;
 
-import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
@@ -9,6 +8,8 @@ import com.dangjia.acg.dto.sale.achievement.AchievementInfoDTO;
 import com.dangjia.acg.dto.sale.achievement.UserAchievementDataDTO;
 import com.dangjia.acg.dto.sale.achievement.UserAchievementInfoDTO;
 import com.dangjia.acg.mapper.sale.achievement.AchievementMapper;
+import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,8 @@ public class AchievementService {
 
     @Autowired
     private AchievementMapper achievementMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
     /**
      * 根据月份 查询店长业绩
      * @param storeId
@@ -37,7 +40,16 @@ public class AchievementService {
      * @param time
      * @return
      */
-    public ServerResponse queryLeaderAchievementData(String storeId , String userId, Date time){
+    public ServerResponse queryLeaderAchievementData(String userToken,String storeId , String userId, Date time){
+
+        Object object = constructionService.getAccessToken(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        AccessToken accessToken = (AccessToken) object;
+        if (CommonUtil.isEmpty(accessToken.getUserId())) {
+            return ServerResponse.createbyUserTokenError();
+        }
 
         Map<String,Object> map = new HashMap();
         if (!CommonUtil.isEmpty(time)) {
@@ -46,9 +58,8 @@ public class AchievementService {
         if (!CommonUtil.isEmpty(storeId)) {
             map.put("storeId",storeId);
         }
-        if (!CommonUtil.isEmpty(userId)) {
-            map.put("userId",userId);
-        }
+        map.put("userId",accessToken.getUserId());
+
         Integer result = achievementMapper.queryDealNumber(map);
         AchievementDataDTO achievementDataDTO = new AchievementDataDTO();
 
@@ -153,9 +164,7 @@ public class AchievementService {
         achievementDataDTO.setAchievementDataDTOS(queryUserId);
         achievementDataDTO.setDealNumber(result);
 
-        if (achievementDataDTO == null) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-        }
+
         return ServerResponse.createBySuccess("查询提成列表", achievementDataDTO);
     }
 
@@ -214,9 +223,7 @@ public class AchievementService {
         userAchievementDataDTO.setUserAchievementInfoDTOS(list);
         userAchievementDataDTO.setArrMonthRoyalty(taskOrderNum);
         userAchievementDataDTO.setDealNumber(list.size());
-        if (userAchievementDataDTO == null) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-        }
+
         return ServerResponse.createBySuccess("查询提成列表", userAchievementDataDTO);
     }
 

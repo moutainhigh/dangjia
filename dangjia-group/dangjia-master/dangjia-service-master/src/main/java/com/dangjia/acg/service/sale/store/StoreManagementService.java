@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.sale.store;
 
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -9,6 +10,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.sale.residential.ResidentialRangeDTO;
 import com.dangjia.acg.dto.sale.store.StoreUserDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.sale.residential.ResidentialBuildingMapper;
@@ -16,17 +18,18 @@ import com.dangjia.acg.mapper.sale.residential.ResidentialRangeMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.modle.clue.Clue;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
 import com.dangjia.acg.modle.store.Store;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.sale.SaleService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.collections.BagUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,6 +66,11 @@ public class StoreManagementService {
     private ICustomerMapper iCustomerMapper;
     @Autowired
     private ClueMapper clueMapper;
+    @Autowired
+    private ConfigMessageService configMessageService;
+    @Autowired
+    private IHouseMapper iHouseMapper;
+
     /**
      * 门店管理页
      *
@@ -271,6 +279,7 @@ public class StoreManagementService {
     public ServerResponse upDateCusService(String clueId,
                                            String cusSerice,
                                            String mcId,
+                                           String houseId,
                                            Integer phaseStatus) {
         try {
             Clue clue = new Clue();
@@ -284,7 +293,27 @@ public class StoreManagementService {
                 customer.setUserId(cusSerice);
                 customer.setStage(1);
                 customer.setId(mcId);
+                customer.setModifyDate(new Date());
+                iCustomerMapper.updateByPrimaryKeySelective(customer);
             }
+
+            //TODO 检查
+            if (!CommonUtil.isEmpty(houseId)) {
+                House house = iHouseMapper.selectByPrimaryKey(houseId);
+                if (!CommonUtil.isEmpty(house)) {
+                    List<Customer>  ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+                    if (ms != null) {
+                        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                        for (Customer  m : ms) {
+                            configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "分配提醒",
+                                    "您收到一个分配给自己的客户，请及时跟进【" + house.getHouseName() + "】", 0, url
+                                            + String.format("customerDetails?title=%s&storeId=%s&memberId=%s&phaseStatus=%s&listType=%s&phaseStatus=%s&userId=%s",
+                                            "客户详情", "", house.getMemberId(), "1", "","",m.getUserId()));
+                        }
+                    }
+                }
+            }
+
             return ServerResponse.createBySuccessMessage("分配成功");
         } catch (Exception e) {
             e.printStackTrace();

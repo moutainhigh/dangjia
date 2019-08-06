@@ -29,8 +29,8 @@ public class IntentionHouse extends BaseEntity {
     private String buildingName;
 
     @Column(name = "number_name")
-    @Desc(value = "小区名称")
-    @ApiModelProperty("小区名称")
+    @Desc(value = "单元号")
+    @ApiModelProperty("单元号")
     private String numberName;
 
     @Column(name = "clue_id")
