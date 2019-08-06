@@ -214,6 +214,7 @@ public class ClientService {
             }
             return ServerResponse.createBySuccessMessage("提交成功");
         }else {
+            clue.setStage(0);
             if (clueMapper.insert(clue) > 0) {
                 return ServerResponse.createBySuccessMessage("提交成功");
             }else{
