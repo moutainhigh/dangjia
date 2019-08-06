@@ -558,7 +558,7 @@ public class ClientService {
                 ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(residentialBuilding.getVillageId());
                 residentialRangeDTO.setVillageId(modelingVillage.getId());
                 residentialRangeDTO.setVillagename(modelingVillage.getName());
-                residentialRangeDTO.setList(residentialBuildings);
+                residentialRangeDTO.getList().add(residentialBuilding);
                 residentialRangeDTOList.add(residentialRangeDTO);
             }
         }
