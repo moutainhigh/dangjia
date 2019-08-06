@@ -138,6 +138,7 @@ public class RobService {
         //获取图片url
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 
+
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -287,7 +288,7 @@ public class RobService {
                         List<String> strsToList= Arrays.asList(strs);
                         for(String s:strsToList){
                             if(s.equals(labelId)){
-                                return ServerResponse.createByErrorMessage("标签已存在");
+                                return ServerResponse.createBySuccessMessage("标签已存在");
                             }
                         }
                     }
@@ -308,7 +309,7 @@ public class RobService {
                             List<String> strsToList = Arrays.asList(strs);
                             for (String s : strsToList) {
                                 if (s.equals(labelId)) {
-                                    return ServerResponse.createByErrorMessage("标签已存在 ");
+                                    return ServerResponse.createBySuccessMessage("标签已存在 ");
                                 }
                             }
                         }
