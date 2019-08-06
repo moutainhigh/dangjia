@@ -39,12 +39,25 @@ public class UserInfoDTO {
     @ApiModelProperty("备注")
     private String remark;
 
+    @ApiModelProperty("阶段 0:新线索 1：继续跟进 2：已放弃 3：黑名单 4:转客服")
+    private Integer stage;
+
     @ApiModelProperty("标签id")
     private String labelId;
     @ApiModelProperty("用户名")
     private String userName;
     @ApiModelProperty("头像")
     private String head;
+
+
+    @ApiModelProperty("客户id")
+    private String memberId;
+
+    @ApiModelProperty("客户基础id")
+    private String mcId;
+
+    @ApiModelProperty("阶段 0:线索阶段 1:客户阶段")
+    private String phaseStatus;
 
     @ApiModelProperty("标签名称")
     private List<SaleMemberLabelDTO> list;
