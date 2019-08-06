@@ -276,11 +276,7 @@ public class StoreManagementService {
      * @param clueId
      * @return
      */
-    public ServerResponse upDateCusService(String clueId,
-                                           String cusSerice,
-                                           String mcId,
-                                           String houseId,
-                                           Integer phaseStatus) {
+    public ServerResponse upDateCusService(String clueId, String cusSerice, String mcId, String houseId, Integer phaseStatus) {
         try {
             Clue clue = new Clue();
             Customer customer = new Customer();
@@ -296,7 +292,6 @@ public class StoreManagementService {
                 customer.setModifyDate(new Date());
                 iCustomerMapper.updateByPrimaryKeySelective(customer);
             }
-
             //TODO 检查
             if (!CommonUtil.isEmpty(houseId)) {
                 House house = iHouseMapper.selectByPrimaryKey(houseId);

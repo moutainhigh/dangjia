@@ -27,66 +27,60 @@ public class StoreManagementController implements StoreManagementAPI {
     @Override
     @ApiMethod
     public ServerResponse storeManagementPage(HttpServletRequest request, String userToken, PageDTO pageDTO) {
-        return storeManagementService.storeManagementPage(userToken,pageDTO);
+        return storeManagementService.storeManagementPage(userToken, pageDTO);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse addBuilding(HttpServletRequest request, String villageId, Date modifyDate, String building,String storeId) {
-        return storeManagementService.addBuilding(villageId,modifyDate,building,storeId);
+    public ServerResponse addBuilding(HttpServletRequest request, String villageId, Date modifyDate, String building, String storeId) {
+        return storeManagementService.addBuilding(villageId, modifyDate, building, storeId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse delBuilding(HttpServletRequest request,String buildingId) {
+    public ServerResponse delBuilding(HttpServletRequest request, String buildingId) {
         return storeManagementService.delBuilding(buildingId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse updatBuilding(HttpServletRequest request, String buildingId , ResidentialBuilding residentialBuilding) {
-        return storeManagementService.updatBuilding(buildingId,residentialBuilding);
+    public ServerResponse updatBuilding(HttpServletRequest request, String buildingId, ResidentialBuilding residentialBuilding) {
+        return storeManagementService.updatBuilding(buildingId, residentialBuilding);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse BuildingList(HttpServletRequest request,String storeId,PageDTO pageDTO,String userId) {
-        return storeManagementService.BuildingList(storeId,pageDTO,userId);
+    public ServerResponse BuildingList(HttpServletRequest request, String storeId, PageDTO pageDTO, String userId) {
+        return storeManagementService.BuildingList(storeId, pageDTO, userId);
     }
 
     /**
      * 分配销售
+     *
      * @param clueId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse upDateCusService(HttpServletRequest request,
-                                           String clueId,
-                                           String cusService,
-                                           String mcId,
-                                           String houseId,
-                                           Integer phaseStatus) {
-        return storeManagementService.upDateCusService(clueId,cusService,mcId,houseId,phaseStatus);
+    public ServerResponse upDateCusService(HttpServletRequest request, String clueId, String cusService, String mcId,
+                                           String houseId, Integer phaseStatus) {
+        return storeManagementService.upDateCusService(clueId, cusService, mcId, houseId, phaseStatus);
     }
 
 
     /**
      * 转出客户
+     *
      * @param request
-     * @param clueId 线索id
-     * @param mcId   客户基础id
+     * @param clueId  线索id
+     * @param mcId    客户基础id
      * @param cityId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse upDateCustomer(HttpServletRequest request,
-                                         String clueId,
-                                         String mcId,
-                                         String cityId,
-                                         Integer phaseStatus) {
-        return storeManagementService.upDateCustomer(clueId,mcId,cityId,phaseStatus);
+    public ServerResponse upDateCustomer(HttpServletRequest request, String clueId, String mcId, String cityId, Integer phaseStatus) {
+        return storeManagementService.upDateCustomer(clueId, mcId, cityId, phaseStatus);
     }
 
 }
