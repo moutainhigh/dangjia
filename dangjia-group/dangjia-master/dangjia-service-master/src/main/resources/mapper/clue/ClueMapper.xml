@@ -579,7 +579,15 @@
         dj_clue c
         INNER JOIN dj_user u ON c.cus_service = u.id
         INNER JOIN dj_member m ON u.member_id = m.id
-        where c.id = #{id}
+        where 1=1
+        <if test="null!=id and ''!=id">
+            and c.id = #{id}
+        </if>
+        <if test="null!=userId and ''!=userId">
+            and c.cus_service = #{userId}
+        </if>
+
+
     </select>
 
 

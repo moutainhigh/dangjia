@@ -46,5 +46,7 @@ public class SaleClueDTO{
 
     private String userId;
 
+    private Integer stage;
+
 
 }
