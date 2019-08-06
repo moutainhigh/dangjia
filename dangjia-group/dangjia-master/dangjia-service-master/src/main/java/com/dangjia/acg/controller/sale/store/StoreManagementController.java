@@ -65,8 +65,9 @@ public class StoreManagementController implements StoreManagementAPI {
                                            String clueId,
                                            String cusService,
                                            String mcId,
+                                           String houseId,
                                            Integer phaseStatus) {
-        return storeManagementService.upDateCusService(clueId,cusService,mcId,phaseStatus);
+        return storeManagementService.upDateCusService(clueId,cusService,mcId,houseId,phaseStatus);
     }
 
 

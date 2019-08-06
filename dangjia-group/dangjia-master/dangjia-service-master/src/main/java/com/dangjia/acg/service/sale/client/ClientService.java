@@ -1,11 +1,14 @@
 package com.dangjia.acg.service.sale.client;
 
+import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.GaoDeUtils;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
 import com.dangjia.acg.dto.other.ClueDTO;
 import com.dangjia.acg.dto.sale.client.CustomerIndexDTO;
@@ -42,9 +45,9 @@ import com.dangjia.acg.modle.sale.store.MonthlyTarget;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.user.MainUser;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.sale.SaleService;
-import com.dangjia.acg.service.sale.rob.RobService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
@@ -96,6 +99,10 @@ public class ClientService {
     private ICustomerRecordMapper iCustomerRecordMapper;
     @Autowired
     private IHouseMapper iHouseMapper;
+    @Autowired
+    private ConfigMessageService configMessageService;
+    @Autowired
+    private ConfigUtil configUtil;
     @Autowired
     private IntentionHouseMapper intentionHouseMapper;
 
@@ -254,6 +261,13 @@ public class ClientService {
                     clue.setCityId(store.getCityId());
                     clue.setClueType(1);
                     clueMapper.insert(clue);
+                    //TODO 检查
+                    MainUser u = userMapper.selectByPrimaryKey(store.getUserId());
+                    String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                    configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "跨域客户",
+                            "您收到了一个跨域客户【客户名称】，快去分配给内场销售吧。【" + u.getUsername() + "】", 0, url
+                                    + String.format("customerDetails?title=%s&storeId=%s&memberId=%s&phaseStatus=%s&listType=%s&phaseStatus=%s",
+                                    "客户详情", "", u, "1", "",""));
                     return ServerResponse.createBySuccessMessage("提交成功");
                 }
                 ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectSingleResidentialBuilding(store.getId(), clue.getBuilding(), villageId);
@@ -271,6 +285,13 @@ public class ClientService {
                 clue.setCityId(store.getCityId());
                 clue.setClueType(1);
                 clueMapper.insert(clue);
+                //TODO 检查
+                MainUser u = userMapper.selectByPrimaryKey(clue.getCusService());
+                String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "跨域客户",
+                        "您收到了一个分配给自己的【跨域客户】，请及时跟进【" + u.getUsername() + "】", 0, url
+                                + String.format("customerDetails?title=%s&storeId=%s&memberId=%s&phaseStatus=%s&listType=%s&phaseStatus=%s",
+                                "客户详情", "", u, "1", "",""));
                 return ServerResponse.createBySuccessMessage("提交成功");
             }
         }
@@ -360,6 +381,16 @@ public class ClientService {
             Clue clue=new Clue();
             clue.setId(clueId);
             clue.setStage(2);
+
+
+            //TODO 检查
+            MainUser u = userMapper.selectByPrimaryKey(clue.getCusService());
+            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+            configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "沉睡客户",
+                    "收到了【销售名称】放弃跟进的客户【客户名称】，快去分配给员工吧。【" + u.getUsername() + "】", 0, url
+                            + String.format("customerDetails?title=%s&storeId=%s&memberId=%s&phaseStatus=%s&listType=%s&phaseStatus=%s",
+                            "客户详情", "", u, "1", ""," "));
+
             clueMapper.updateByPrimaryKeySelective(clue);
         }else if(phaseStatus==1){
             Customer customer=new Customer();

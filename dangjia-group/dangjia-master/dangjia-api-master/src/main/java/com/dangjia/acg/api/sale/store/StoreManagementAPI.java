@@ -61,6 +61,7 @@ public interface StoreManagementAPI {
                                     @RequestParam("clueId")String clueId,
                                     @RequestParam("cusService")String cusService,
                                     @RequestParam("mcId")String mcId,
+                                    @RequestParam("houseId")String houseId,
                                     @RequestParam("phaseStatus")Integer phaseStatus);
 
 

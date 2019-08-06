@@ -24,6 +24,7 @@ import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.*;
 
@@ -408,6 +409,14 @@ public class RobService {
     public ServerResponse addIntentionHouse(IntentionHouse intentionHouse) {
         try {
             if (!CommonUtil.isEmpty(intentionHouse)) {
+                Example example=new Example(IntentionHouse.class);
+                example.createCriteria().andEqualTo(IntentionHouse.RESIDENTIAL_NAME,intentionHouse.getResidentialName())
+                        .andEqualTo(IntentionHouse.BUILDING_NAME,intentionHouse.getBuildingName())
+                        .andEqualTo(IntentionHouse.NUMBER_NAME,intentionHouse.getNumberName());
+                List<IntentionHouse> intentionHouses = intentionHouseMapper.selectByExample(example);
+                if(intentionHouses.size()>0) {
+                    return ServerResponse.createByErrorMessage("该意向房子已存在");
+                }
                 intentionHouseMapper.insert(intentionHouse);
                 return ServerResponse.createBySuccessMessage("新增成功");
             }
