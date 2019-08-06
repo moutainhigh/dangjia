@@ -875,6 +875,7 @@ public class HouseFlowApplyService {
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
             houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());
+            houseFlowApplyDTO.setWorkerTypeId(houseFlowApply.getWorkerTypeId());
             houseFlowApplyDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId()).getName());
             Example example = new Example(HouseFlowApplyImage.class);
             example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
