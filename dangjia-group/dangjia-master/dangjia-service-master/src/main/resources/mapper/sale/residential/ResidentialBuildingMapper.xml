@@ -31,6 +31,7 @@
         <foreach collection="buildingId" index="index" item="item" open="(" separator="," close=")">
             #{item}
         </foreach>
+        Group by village_id
     </select>
 
 </mapper>
