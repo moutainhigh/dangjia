@@ -58,6 +58,9 @@ public class RobInfoDTO {
     @ApiModelProperty("备注")
     private String remark;
 
+    @ApiModelProperty("楼栋号")
+    private String HouseBuilding;
+
     @ApiModelProperty("意向房子")
     private String address;
 
