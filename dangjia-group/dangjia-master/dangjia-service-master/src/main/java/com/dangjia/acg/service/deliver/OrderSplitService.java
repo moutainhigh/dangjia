@@ -286,7 +286,7 @@ public class OrderSplitService {
                 String id = obj.getString("id");
                 String supplierId = obj.getString("supplierId");
                 Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), supplierId);
-                JsmsUtil.sendSupplier(supplier.getTelephone(), address + "submitNumber");
+                JsmsUtil.sendSupplier(supplier.getTelephone(), address + "submitNumber?cityId="+house.getCityId());
 
 
                 OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
