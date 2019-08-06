@@ -17,4 +17,20 @@
         and village_id=#{villageId}
     </select>
 
+    <select id="getvillageIdGroupBy" resultType="com.dangjia.acg.modle.sale.residential.ResidentialBuilding">
+        select
+            id,
+            create_date as createDate,
+            modify_date as modifyDate,
+            data_status as dataStatus,
+            village_id as villageId,
+            building,
+            store_id as storeId
+        from dj_sale_residential_building
+        WHERE id in
+        <foreach collection="buildingId" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
 </mapper>
