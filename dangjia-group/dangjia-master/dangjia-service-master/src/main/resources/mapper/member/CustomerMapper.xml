@@ -108,7 +108,7 @@
     </select>
 
     <select id="queryTypeId" resultType="java.lang.Integer" parameterType="java.lang.String">
-        select type from dj_store_users where user_id = #{userId}
+        select type from dj_store_users where user_id = #{userId} and data_status=0
     </select>
 
 
