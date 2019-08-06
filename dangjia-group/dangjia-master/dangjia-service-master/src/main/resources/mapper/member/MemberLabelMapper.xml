@@ -70,6 +70,7 @@
 
     <select id="queryDescribes" resultType="com.dangjia.acg.dto.member.CustomerRecordInFoDTO">
         select m.head as head,
+        m.nick_name as nickName,
         m.name as name,
         mcr.remind_time as remindTime,
         mcr.describes as describes,

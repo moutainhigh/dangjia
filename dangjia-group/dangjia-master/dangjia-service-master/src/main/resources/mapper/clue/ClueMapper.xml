@@ -401,8 +401,8 @@
             h.decoration_type as decorationType,
             h.residential as residential,
             h.unit as unit,
-            h.create_date as createDate,
         </if>
+        c.create_date as createDate,
         c.owername as owerName,
         c.phone as phone,
         c.wechat as wechat,
