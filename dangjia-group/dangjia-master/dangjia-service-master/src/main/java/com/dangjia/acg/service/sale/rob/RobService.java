@@ -310,7 +310,7 @@ public class RobService {
                         String[] strs = str.split(",");
                         for (String s : strs) {
                             if (s.equals(labelId)) {
-                                return ServerResponse.createBySuccessMessage("标签已存在");
+                                return ServerResponse.createByErrorMessage("标签已存在");
                             }
                         }
                     }
@@ -330,7 +330,7 @@ public class RobService {
                         String[] strs = str.split(",");
                         for (String s : strs) {
                             if (s.equals(labelId)) {
-                                return ServerResponse.createBySuccessMessage("标签已存在 ");
+                                return ServerResponse.createByErrorMessage("标签已存在 ");
                             }
                         }
                     }
