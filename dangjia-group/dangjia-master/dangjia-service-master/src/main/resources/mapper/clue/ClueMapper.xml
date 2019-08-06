@@ -567,8 +567,14 @@
         c.owername as owerName,
         c.phone as phone,
         c.label_id as labelId,
+        c.wechat as wechat,
+        c.create_date as createDate,
+        c.remark as remark,
+        c.phase_status as phaseStatus,
+        c.stage as stage,
         m.name as userName,
-        m.head as head
+        m.head as head,
+        m.id as memberId
         FROM
         dj_clue c
         INNER JOIN dj_user u ON c.cus_service = u.id
