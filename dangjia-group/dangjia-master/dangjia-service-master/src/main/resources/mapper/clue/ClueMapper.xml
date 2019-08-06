@@ -140,12 +140,12 @@
                and CONCAT(owername,phone) like CONCAT('%',#{searchKey},'%')
            </if>
            and stage in (0,1)
-            <if test="null!=userId and ''!=userId">
-                and cus_service=#{userId}
-            </if>
-            <if test="null!=storeId and ''!=storeId">
-                and store_id=#{storeId}
-            </if>
+           <if test="null!=userId and ''!=userId">
+            and cus_service=#{userId}
+           </if>
+           <if test="null!=storeId and ''!=storeId">
+            and store_id=#{storeId}
+           </if>
            ORDER BY c.create_date
            <if test="null!=time and ''!=time">
                desc
@@ -155,7 +155,7 @@
 
     <!--客户页-->
     <select id="clientPage" resultType="com.dangjia.acg.dto.sale.client.CustomerIndexDTO">
-        SELECT 
+        SELECT
           <if test="type==''">
               c.id as clueId,
               owername as name,
@@ -179,7 +179,7 @@
           </if>
         FROM dj_clue c
         <if test="type==''">
-            WHERE c.data_status = 0 and c.stage NOT IN (2,3)
+            WHERE c.data_status = 0 and c.stage NOT IN (2,3,4)
             <if test="null!=userId and ''!=userId">
                 and c.cus_service=#{userId}
             </if>

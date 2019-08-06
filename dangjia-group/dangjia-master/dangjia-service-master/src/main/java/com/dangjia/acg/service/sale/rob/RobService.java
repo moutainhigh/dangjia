@@ -7,6 +7,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.member.CustomerRecordInFoDTO;
 import com.dangjia.acg.dto.member.IntentionHouseDTO;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
@@ -215,8 +216,8 @@ public class RobService {
 
             //查询客户沟通记录
             if (!CommonUtil.isEmpty(memberId)) {
-                List<com.dangjia.acg.dto.member.CustomerRecordInFoDTO> data = iMemberLabelMapper.queryDescribes(memberId);
-                for (com.dangjia.acg.dto.member.CustomerRecordInFoDTO datum : data) {
+                List<CustomerRecordInFoDTO> data = iMemberLabelMapper.queryDescribes(memberId);
+                for (CustomerRecordInFoDTO datum : data) {
                     datum.setHead(imageAddress + datum.getHead());
                 }
                 robArrInFoDTO.setData(data);
@@ -279,9 +280,9 @@ public class RobService {
             }
 
             //查询线索沟通记录
-            List<com.dangjia.acg.dto.member.CustomerRecordInFoDTO> data = iMemberLabelMapper.queryTalkContent(clueId);
+            List<CustomerRecordInFoDTO> data = iMemberLabelMapper.queryTalkContent(clueId);
             if (!data.isEmpty()) {
-                for (com.dangjia.acg.dto.member.CustomerRecordInFoDTO datum : data) {
+                for (CustomerRecordInFoDTO datum : data) {
                     datum.setHead(imageAddress + datum.getHead());
                 }
                 userInfoDTO.setData(data);
@@ -423,8 +424,8 @@ public class RobService {
     public void remindTime() {
         String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
         Example example = new Example(CustomerRecord.class);
-        example.createCriteria().andCondition(" DATE_FORMAT(remind_time, '%Y-%m-%d %I:%i')= DATE_FORMAT('"
-                + DateUtil.getDateString(new Date().getTime()) + "', '%Y-%m-%d %I:%i') ");
+        example.createCriteria().andCondition(" DATE_FORMAT(remind_time, '%Y-%m-%d %I:%i')= '"
+                + DateUtil.dateToString(new Date(), DateUtil.FORMAT11) + "' ");
         List<CustomerRecord> customerRecords = iCustomerRecordMapper.selectByExample(example);
         for (CustomerRecord customerRecord : customerRecords) {
             MainUser u = userMapper.selectByPrimaryKey(customerRecord.getUserId());
