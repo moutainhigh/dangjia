@@ -12,7 +12,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 (
                 SELECT
                     CONCAT( '第', ( @i := @i + 1 ), '周' ) AS 'text',
-                    COUNT( r.id ) num
+                    COUNT( r.id ) num,
                     DATE_FORMAT( r.create_date, '%x年-第%v周' ) WEEK,
                     GROUP_CONCAT( r.id ) ids,
                     '0' apply_type
@@ -34,7 +34,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                             CONCAT( wt.NAME, '阶段完工' ) ELSE CONCAT( wt.NAME, '整体完工' )
                         END
                         ) AS 'text',,
-                        COUNT( r.id ) num
+                        COUNT( r.id ) num,
                         DATE_FORMAT( r.create_date, '%x年-第%v周' ) WEEK,
                         GROUP_CONCAT( r.id ) ids,
                         r.apply_type

@@ -688,6 +688,17 @@ public class MemberService {
                     memberLabelList=iMemberLabelMapper.selectByExample(example);
                 }
                 mcDTO.setMemberLabelList(memberLabelList);
+
+                Example example = new Example(MemberCity.class);
+                example.createCriteria()
+                        .andEqualTo(MemberCity.MEMBER_ID, member.getId())
+                        .andEqualTo(MemberCity.CITY_ID, cityId);
+                example.orderBy(MemberCity.CREATE_DATE);
+                List<MemberCity> listcity=memberCityMapper.selectByExample(example);
+                if(listcity.size()>0){
+                    mcDTO.setMemberCityID(listcity.get(0).getCityId());
+                    mcDTO.setMemberCityName(listcity.get(0).getCityName());
+                }
                 mcDTOList.add(mcDTO);
             }
 //            logger.info(" mcDTOList getMemberNickName:" + mcDTOList.get(0).getMemberNickName());
