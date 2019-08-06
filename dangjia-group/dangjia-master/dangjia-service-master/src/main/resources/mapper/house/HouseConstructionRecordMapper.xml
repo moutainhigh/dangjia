@@ -33,7 +33,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                             WHEN r.apply_type = 1 THEN
                             CONCAT( wt.NAME, '阶段完工' ) ELSE CONCAT( wt.NAME, '整体完工' )
                         END
-                        ) AS 'text',,
+                        ) AS 'text',
                         COUNT( r.id ) num,
                         DATE_FORMAT( r.create_date, '%x年-第%v周' ) WEEK,
                         GROUP_CONCAT( r.id ) ids,
