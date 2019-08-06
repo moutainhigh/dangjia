@@ -256,11 +256,12 @@ public class RobService {
 
             //查询线索沟通记录
             List<com.dangjia.acg.dto.member.CustomerRecordInFoDTO> data = iMemberLabelMapper.queryTalkContent(clueId);
-            for (com.dangjia.acg.dto.member.CustomerRecordInFoDTO datum : data) {
-                datum.setHead(imageAddress + datum.getHead());
+            if(!data.isEmpty()) {
+                for (com.dangjia.acg.dto.member.CustomerRecordInFoDTO datum : data) {
+                    datum.setHead(imageAddress + datum.getHead());
+                }
+                userInfoDTO.setData(data);
             }
-            userInfoDTO.setData(data);
-
             return ServerResponse.createBySuccess("查询客户详情", userInfoDTO);
         }
 
