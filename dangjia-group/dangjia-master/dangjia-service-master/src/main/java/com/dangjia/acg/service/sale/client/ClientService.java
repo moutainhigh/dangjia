@@ -181,6 +181,7 @@ public class ClientService {
             clue.setClueType(0);
             clue.setTurnStatus(0);
             clue.setTips("1");
+            clue.setPhaseStatus(1);
             clue.setCityId(store.getCityId());
             IntentionHouse intentionHouse=new IntentionHouse();
             intentionHouse.setClueId(clue.getId());
@@ -198,6 +199,7 @@ public class ClientService {
             customer.setClueType(0);
             customer.setDataStatus(0);
             customer.setTips("1");
+            customer.setPhaseStatus(1);
             if(groupBys.size()>0){//该线索已被其他人录入并成为客户阶段
                 clue.setPhaseStatus(1);
                 clue.setStage(4);
@@ -218,6 +220,7 @@ public class ClientService {
             clue.setStoreId(store.getId());
             clue.setStage(0);
             clue.setTips("1");
+            clue.setPhaseStatus(0);
             if (clueMapper.insert(clue) > 0) {
                 return ServerResponse.createBySuccessMessage("提交成功");
             }else{
