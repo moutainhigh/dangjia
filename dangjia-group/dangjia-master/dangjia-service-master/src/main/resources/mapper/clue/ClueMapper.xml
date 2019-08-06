@@ -85,7 +85,7 @@
             mc.label_id_arr as labelId,
             u.username as userName,
             mc.phase_status as phaseStatus,
-            mc.user_id as userId,
+            mc.user_id as userId
             from dj_member_customer mc
             INNER JOIN dj_member m
             on mc.member_id=m.id
