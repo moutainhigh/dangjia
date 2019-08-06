@@ -76,7 +76,7 @@ public interface RobAPI {
     @PostMapping(value = "sale/rob/queryCustomerInfo")
     @ApiOperation(value = "客户详情查询", notes = "客户详情查询")
     ServerResponse queryCustomerInfo(@RequestParam("request")HttpServletRequest request,
-                                     @RequestParam("userId")String userId,
+                                     @RequestParam("userToken")String userToken,
                                      @RequestParam("memberId")String memberId,
                                      @RequestParam("clueId")String clueId,
                                      @RequestParam("phaseStatus")Integer phaseStatus,
