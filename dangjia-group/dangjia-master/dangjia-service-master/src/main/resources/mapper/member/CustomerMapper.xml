@@ -133,7 +133,7 @@
     </select>
     <select id="getCustomerMemberIdList" resultType="com.dangjia.acg.modle.member.Customer">
         SELECT
-            u.member_id as memberId,u.user_id as userId
+            u.member_id as memberId,u.id as userId
         FROM
             dj_member_customer mc
             INNER JOIN dj_user u ON u.id = mc.user_id

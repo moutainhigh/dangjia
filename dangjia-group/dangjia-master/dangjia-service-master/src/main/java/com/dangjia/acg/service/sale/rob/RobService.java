@@ -38,7 +38,7 @@ import java.util.*;
 @Service
 public class RobService {
     @Autowired
-    private ClueMapper  clueMapper;
+    private ClueMapper clueMapper;
     @Autowired
     private IMemberLabelMapper iMemberLabelMapper;
     @Autowired
@@ -57,11 +57,12 @@ public class RobService {
 
     /**
      * 查询抢单列表
+     *
      * @param userToken
      * @param storeId
      * @return
      */
-    public ServerResponse queryRobSingledata(String userToken,String storeId){
+    public ServerResponse queryRobSingledata(String userToken, String storeId) {
 
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
@@ -74,21 +75,21 @@ public class RobService {
 
         Integer type = iCustomerMapper.queryTypeId(accessToken.getUserId());
 
-        Map<String,Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
 
-        map.put("userId",accessToken.getUserId());
+        map.put("userId", accessToken.getUserId());
 
         if (!CommonUtil.isEmpty(type)) {
-            map.put("type",type);
+            map.put("type", type);
         }
         if (!CommonUtil.isEmpty(storeId)) {
-            map.put("storeId",storeId);
+            map.put("storeId", storeId);
         }
         List<RobDTO> list = clueMapper.queryRobSingledata(map);
 
         //查询标签
         List<RobDTO> robDTOs = new ArrayList<>();
-        for (RobDTO li:list) {
+        for (RobDTO li : list) {
             RobDTO robDTO = new RobDTO();
             if (!CommonUtil.isEmpty(li.getLabelIdArr())) {
                 String[] labelIds = li.getLabelIdArr().split(",");
@@ -107,12 +108,11 @@ public class RobService {
     }
 
 
-
-    public ServerResponse upDateIsRobStats(String id){
+    public ServerResponse upDateIsRobStats(String id) {
         try {
             if (!CommonUtil.isEmpty(id)) {
-                Map<String,Object> map = new HashMap<>();
-                map.put("id",id);
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", id);
                 clueMapper.upDateIsRobStats(map);
                 return ServerResponse.createBySuccessMessage("修改成功");
             }
@@ -127,6 +127,7 @@ public class RobService {
 
     /**
      * 查询客户详情
+     *
      * @param memberId
      * @return
      */
@@ -134,7 +135,7 @@ public class RobService {
                                             String memberId,
                                             String clueId,
                                             Integer phaseStatus,
-                                            String stage){
+                                            String stage) {
         //获取图片url
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 
@@ -149,30 +150,30 @@ public class RobService {
         }
 
         //客户阶段查询客户详情
-        if(phaseStatus == 1){
-            Map<String,Object> map = new HashMap<>();
+        if (phaseStatus == 1) {
+            Map<String, Object> map = new HashMap<>();
             if (!CommonUtil.isEmpty(memberId)) {
-                map.put("memberId",memberId);
+                map.put("memberId", memberId);
             }
-            map.put("userId",accessToken.getUserId());
-            map.put("stage",stage);
+            map.put("userId", accessToken.getUserId());
+            map.put("stage", stage);
             RobArrInFoDTO robArrInFoDTO = new RobArrInFoDTO();
 
             List<RobInfoDTO> robInfoDTO = clueMapper.queryCustomerInfo(map);
 
-            if(!CommonUtil.isEmpty(robInfoDTO)){
+            if (!CommonUtil.isEmpty(robInfoDTO)) {
                 //查询意向房子
-                List<IntentionHouseDTO> intentionHouseList= intentionHouseMapper.queryIntentionHouse(robInfoDTO.get(0).getClueId());
+                List<IntentionHouseDTO> intentionHouseList = intentionHouseMapper.queryIntentionHouse(robInfoDTO.get(0).getClueId());
                 robArrInFoDTO.setIntentionHouseList(intentionHouseList);
             }
 
 
-            if(!CommonUtil.isEmpty(robInfoDTO)){
-                for (RobInfoDTO to:robInfoDTO) {
+            if (!CommonUtil.isEmpty(robInfoDTO)) {
+                for (RobInfoDTO to : robInfoDTO) {
                     //查询大管家信息
                     if (!CommonUtil.isEmpty(to.getHouseId())) {
                         WorkerTypeDTO workerTypeDTO = iMemberLabelMapper.queryWorkerType(to.getHouseId());
-                        if(null != workerTypeDTO){
+                        if (null != workerTypeDTO) {
                             workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
                         }
                         to.setWorkerTypeDTO(workerTypeDTO);
@@ -181,9 +182,9 @@ public class RobService {
             }
 
             //查询客户标签
-            if(!CommonUtil.isEmpty(robInfoDTO)){
+            if (!CommonUtil.isEmpty(robInfoDTO)) {
                 String str = robInfoDTO.get(0).getLabelIdArr();
-                if(null != str){
+                if (null != str) {
                     String[] labelIds = str.split(",");
                     List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
                     robArrInFoDTO.setList(labelByIds);
@@ -206,15 +207,15 @@ public class RobService {
             int arrRoyalty = 1000;
             int s = 0;
             //每条数据当月提成
-            if(!uadto.isEmpty()){
-                for (UserAchievementDTO to:uadto) {
-                    if(to.getVisitState() == 1){
-                        s = (int) (arrRoyalty*0.75);
+            if (!uadto.isEmpty()) {
+                for (UserAchievementDTO to : uadto) {
+                    if (to.getVisitState() == 1) {
+                        s = (int) (arrRoyalty * 0.75);
                         to.setMonthRoyaltys(s);
                         to.setMeterRoyaltys(s);
                     }
-                    if(to.getVisitState() == 3){
-                        s = (int) (arrRoyalty*0.25);
+                    if (to.getVisitState() == 3) {
+                        s = (int) (arrRoyalty * 0.25);
                         to.setMonthRoyaltys(s);
                         to.setMeterRoyaltys(arrRoyalty);
                     }
@@ -230,23 +231,23 @@ public class RobService {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             return ServerResponse.createBySuccess("查询客户详情", robArrInFoDTO);
-        }else{
+        } else {
             //线索阶段查询详情
-            Map<String,Object> map = new HashMap<>();
-            map.put("id",clueId);
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", clueId);
             UserInfoDTO userInfoDTO = clueMapper.queryTips(map);
 
-            if(!CommonUtil.isEmpty(userInfoDTO)){
+            if (!CommonUtil.isEmpty(userInfoDTO)) {
                 //查询意向房子
-                List<IntentionHouseDTO> intentionHouseList= intentionHouseMapper.queryIntentionHouse(userInfoDTO.getClueId());
+                List<IntentionHouseDTO> intentionHouseList = intentionHouseMapper.queryIntentionHouse(userInfoDTO.getClueId());
                 userInfoDTO.setIntentionHouseList(intentionHouseList);
             }
 
             //查询线索阶段标签
-            if(!CommonUtil.isEmpty(userInfoDTO)){
-                if(!CommonUtil.isEmpty(userInfoDTO)){
+            if (!CommonUtil.isEmpty(userInfoDTO)) {
+                if (!CommonUtil.isEmpty(userInfoDTO)) {
                     String str = userInfoDTO.getLabelId();
-                    if(null != str){
+                    if (null != str) {
                         String[] labelIds = str.split(",");
                         List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
                         userInfoDTO.setList(labelByIds);
@@ -256,7 +257,7 @@ public class RobService {
 
             //查询线索沟通记录
             List<com.dangjia.acg.dto.member.CustomerRecordInFoDTO> data = iMemberLabelMapper.queryTalkContent(clueId);
-            if(!data.isEmpty()) {
+            if (!data.isEmpty()) {
                 for (com.dangjia.acg.dto.member.CustomerRecordInFoDTO datum : data) {
                     datum.setHead(imageAddress + datum.getHead());
                 }
@@ -270,58 +271,52 @@ public class RobService {
 
     /**
      * 新增标签
+     *
      * @param memberId
      * @param labelId
      * @return
      */
-    public ServerResponse addLabel(String memberId,
-                                   String labelId,
-                                   String clueId,
-                                   Integer phaseStatus) {
+    public ServerResponse addLabel(String memberId, String labelId, String clueId, Integer phaseStatus) {
         try {
-            if(phaseStatus == 1) {
+            if (phaseStatus == 1) {
                 //客户阶段新增标签
-                Map<String,Object> Map = new HashMap<>();
-                if(!CommonUtil.isEmpty(memberId)) {
+                Map<String, Object> Map = new HashMap<>();
+                if (!CommonUtil.isEmpty(memberId)) {
                     String str = iCustomerMapper.queryLabelIdArr(memberId);
-                    if(!CommonUtil.isEmpty(str)){
+                    if (!CommonUtil.isEmpty(str)) {
                         String[] strs = str.split(",");
-                        List<String> strsToList= Arrays.asList(strs);
-                        for(String s:strsToList){
-                            if(s.equals(labelId)){
+                        for (String s : strs) {
+                            if (s.equals(labelId)) {
                                 return ServerResponse.createBySuccessMessage("标签已存在");
                             }
                         }
                     }
-
-                    String labelIdrr = str +","+ labelId;
-                    Map.put("labelIdArr",labelIdrr);
-                    Map.put("memberId",memberId);
+                    String labelIdrr = str + "," + labelId;
+                    Map.put("labelIdArr", labelIdrr);
+                    Map.put("memberId", memberId);
                     iCustomerMapper.upDateLabelIdArr(Map);
                     return ServerResponse.createBySuccessMessage("新增成功");
                 }
-            }else {
+            } else {
                 //线索阶段新增标签
                 if (CommonUtil.isEmpty(clueId)) {
                     Map<String, Object> Map = new HashMap<>();
-                        String str = iCustomerMapper.queryLabelId(clueId);
-                        if (!CommonUtil.isEmpty(str)) {
-                            String[] strs = str.split(",");
-                            List<String> strsToList = Arrays.asList(strs);
-                            for (String s : strsToList) {
-                                if (s.equals(labelId)) {
-                                    return ServerResponse.createBySuccessMessage("标签已存在 ");
-                                }
+                    String str = iCustomerMapper.queryLabelId(clueId);
+                    if (!CommonUtil.isEmpty(str)) {
+                        String[] strs = str.split(",");
+                        for (String s : strs) {
+                            if (s.equals(labelId)) {
+                                return ServerResponse.createBySuccessMessage("标签已存在 ");
                             }
                         }
-                        String labelIdrr = str + "," + labelId;
-                        Map.put("labelIdArr", labelIdrr);
-                        Map.put("memberId", memberId);
-                        iCustomerMapper.upDateLabelIdArr(Map);
-                        return ServerResponse.createBySuccessMessage("新增成功");
                     }
+                    String labelIdrr = str + "," + labelId;
+                    Map.put("labelIdArr", labelIdrr);
+                    Map.put("memberId", memberId);
+                    iCustomerMapper.upDateLabelIdArr(Map);
+                    return ServerResponse.createBySuccessMessage("新增成功");
+                }
             }
-
             return ServerResponse.createByErrorMessage("修改失败");
         } catch (Exception e) {
             e.printStackTrace();
@@ -331,30 +326,28 @@ public class RobService {
 
     /**
      * 删除标签
+     *
      * @param memberId
      * @param labelIdArr
      * @return
      */
-    public ServerResponse deleteLabel(String memberId,
-                                      String labelIdArr,
-                                      String clueId,
-                                      Integer phaseStatus) {
+    public ServerResponse deleteLabel(String memberId, String labelIdArr, String clueId, Integer phaseStatus) {
         try {
             if (phaseStatus == 1) {
                 //删除客户阶段标签
-                Map<String,Object> Map = new HashMap<>();
+                Map<String, Object> Map = new HashMap<>();
                 if (!CommonUtil.isEmpty(memberId)) {
-                    Map.put("labelIdArr",labelIdArr);
-                    Map.put("memberId",memberId);
+                    Map.put("labelIdArr", labelIdArr);
+                    Map.put("memberId", memberId);
                     iCustomerMapper.upDateLabelIdArr(Map);
                     return ServerResponse.createBySuccessMessage("删除成功");
                 }
-            }else{
+            } else {
                 //删除线索阶段标签
-                Map<String,Object> Map = new HashMap<>();
+                Map<String, Object> Map = new HashMap<>();
                 if (!CommonUtil.isEmpty(memberId)) {
-                    Map.put("labelId",labelIdArr);
-                    Map.put("clueId",clueId);
+                    Map.put("labelId", labelIdArr);
+                    Map.put("clueId", clueId);
                     iCustomerMapper.upDateLabelId(Map);
                     return ServerResponse.createBySuccessMessage("删除成功 ");
                 }
@@ -369,13 +362,14 @@ public class RobService {
 
     /**
      * 新增沟通记录
+     *
      * @param customerRecDTO
      * @return
      */
     public ServerResponse addDescribes(CustomerRecDTO customerRecDTO) {
         try {
             if (!CommonUtil.isEmpty(customerRecDTO)) {
-                if(customerRecDTO.getPhaseStatus() == 1){
+                if (customerRecDTO.getPhaseStatus() == 1) {
                     //客户阶段新增沟通记录
                     CustomerRecord customerRecord = new CustomerRecord();
                     customerRecord.setDescribes(customerRecDTO.getDescribes());
@@ -384,7 +378,7 @@ public class RobService {
                     customerRecord.setMemberId(customerRecDTO.getMemberId());
                     iCustomerRecordMapper.insert(customerRecord);
                     return ServerResponse.createBySuccessMessage("新增成功");
-                }else{
+                } else {
                     // 线索阶段新增沟通记录
                     ClueTalk clueTalk = new ClueTalk();
                     clueTalk.setUserId(customerRecDTO.getUserId());
@@ -404,6 +398,7 @@ public class RobService {
 
     /**
      * 修改客户信息
+     *
      * @param clue
      * @return
      */
@@ -422,18 +417,19 @@ public class RobService {
 
     /**
      * 添加意向房子
+     *
      * @param intentionHouse
      * @return
      */
     public ServerResponse addIntentionHouse(IntentionHouse intentionHouse) {
         try {
             if (!CommonUtil.isEmpty(intentionHouse)) {
-                Example example=new Example(IntentionHouse.class);
-                example.createCriteria().andEqualTo(IntentionHouse.RESIDENTIAL_NAME,intentionHouse.getResidentialName())
-                        .andEqualTo(IntentionHouse.BUILDING_NAME,intentionHouse.getBuildingName())
-                        .andEqualTo(IntentionHouse.NUMBER_NAME,intentionHouse.getNumberName());
+                Example example = new Example(IntentionHouse.class);
+                example.createCriteria().andEqualTo(IntentionHouse.RESIDENTIAL_NAME, intentionHouse.getResidentialName())
+                        .andEqualTo(IntentionHouse.BUILDING_NAME, intentionHouse.getBuildingName())
+                        .andEqualTo(IntentionHouse.NUMBER_NAME, intentionHouse.getNumberName());
                 List<IntentionHouse> intentionHouses = intentionHouseMapper.selectByExample(example);
-                if(intentionHouses.size()>0) {
+                if (intentionHouses.size() > 0) {
                     return ServerResponse.createByErrorMessage("该意向房子已存在");
                 }
                 intentionHouseMapper.insert(intentionHouse);
@@ -450,6 +446,7 @@ public class RobService {
 
     /**
      * 删除意向房子
+     *
      * @param id
      * @return
      */

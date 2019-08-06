@@ -10,7 +10,6 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.sale.residential.ResidentialRangeDTO;
 import com.dangjia.acg.dto.sale.store.StoreUserDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
-import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.sale.residential.ResidentialBuildingMapper;
@@ -70,8 +69,6 @@ public class StoreManagementService {
     private ClueMapper clueMapper;
     @Autowired
     private ConfigMessageService configMessageService;
-    @Autowired
-    private IHouseMapper iHouseMapper;
     @Autowired
     private UserMapper userMapper;
 
@@ -198,7 +195,7 @@ public class StoreManagementService {
         if (!residentialBuilding1.getBuilding().equals(residentialBuilding.getBuilding())) {
             Example example = new Example(ResidentialBuilding.class);
             example.createCriteria().andEqualTo(ResidentialBuilding.BUILDING, residentialBuilding.getBuilding())
-                    .andEqualTo(residentialBuilding.DATA_STATUS, 0);
+                    .andEqualTo(ResidentialBuilding.DATA_STATUS, 0);
             if (residentialBuildingMapper.selectByExample(example).size() > 0) {
                 return ServerResponse.createByErrorMessage("该楼栋已存在");
             }

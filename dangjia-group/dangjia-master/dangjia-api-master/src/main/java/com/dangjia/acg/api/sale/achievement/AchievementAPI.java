@@ -45,7 +45,6 @@ public interface AchievementAPI {
     ServerResponse queryLeaderAchievementData(@RequestParam("request") HttpServletRequest request,
                                               @RequestParam("userToken")String userToken,
                                               @RequestParam("storeId") String storeId,
-                                              @RequestParam("userId") String userId,
                                               @RequestParam("time") Date time);
 
 

@@ -78,10 +78,15 @@ public class StoreUserServices {
                 .andEqualTo(StoreUser.DATA_STATUS, 0);
         List<StoreUser> storeUserList = iStoreUserMapper.selectByExample(example);
         if (storeUserList.size() > 0) {
-            if (userId.equals(storeUserList.get(0).getUserId())) {
+            if (storeId.equals(storeUserList.get(0).getStoreId())) {
                 return ServerResponse.createByErrorMessage("该用户已在本门店存在，请勿重复添加");
             } else {
-                return ServerResponse.createByErrorMessage("该用户已在其他门店存在，请勿重复添加");
+                Store store = iStoreMapper.selectByPrimaryKey(storeUserList.get(0).getStoreId());
+                if (store != null) {
+                    return ServerResponse.createByErrorMessage("该用户已在" + store.getStoreName() + "门店存在，请勿重复添加");
+                } else {
+                    return ServerResponse.createByErrorMessage("该用户已在其他门店存在，请勿重复添加");
+                }
             }
         }
         StoreUser storeUser = new StoreUser();
