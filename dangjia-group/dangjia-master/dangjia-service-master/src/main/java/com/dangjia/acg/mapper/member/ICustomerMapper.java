@@ -21,7 +21,7 @@ import java.util.Map;
 public interface ICustomerMapper extends Mapper<Customer> {
 
 
-    List<Customer> getCustomerByMemberId(@Param("memberId") String memberId);
+    Customer getCustomerByMemberId(@Param("memberId") String memberId);
 
     /**
      * 根据业主id查询

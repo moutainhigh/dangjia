@@ -27,6 +27,7 @@
             and member_id=#{memberId}
         </if>
         ORDER by create_date desc
+        limit 1
     </select>
 
     <!-- 根据业主id 和 stage 查询 -->
