@@ -15,7 +15,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                     COUNT( r.id ) num,
                     DATE_FORMAT( r.create_date, '%x年-第%v周' ) WEEK,
                     GROUP_CONCAT( r.id ) ids,
-                    '0' apply_type
+                    '0' applyType
                 FROM
                     `dj_house_construction_record` r,
                     ( SELECT @i := 0 ) AS init
@@ -37,7 +37,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                         COUNT( r.id ) num,
                         DATE_FORMAT( r.create_date, '%x年-第%v周' ) WEEK,
                         GROUP_CONCAT( r.id ) ids,
-                        r.apply_type
+                        r.apply_type applyType
                     FROM
                         `dj_house_construction_record` r
                         INNER JOIN dj_core_worker_type wt ON wt.type = r.worker_type
