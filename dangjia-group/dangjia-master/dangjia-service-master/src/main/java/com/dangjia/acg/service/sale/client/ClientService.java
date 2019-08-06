@@ -429,6 +429,11 @@ public class ClientService {
         Map<String, Object> map = new HashedMap();
         Example example = new Example(Store.class);
         example.createCriteria().andEqualTo(Store.USER_ID, user.getId());
+        object = saleService.getStore(accessToken.getUserId());
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Store store = (Store) object;
         if (iStoreMapper.selectByExample(example).size() <= 0) {//判断用户是否为店长
             CustomerIndexDTO customerIndexDTO = clueMapper.clientPage(0, user.getId(), null);
             if(null!=customerIndexDTO) {
@@ -454,12 +459,8 @@ public class ClientService {
             monthlyTargetDTO.setTargetNumber(monthlyTargets.size() > 0 ? monthlyTargets.get(0).getTargetNumber() : 0);
             map.put("monthlyTarget", monthlyTargetDTO);
             map.put("outField", getResidentialRangeDTOList(user.getId()));
+            map.put("storeId", store.getId());
         } else {
-            object = saleService.getStore(accessToken.getUserId());
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Store store = (Store) object;
             List<StoreUserDTO> storeUsers = iStoreUserMapper.getStoreUsers(store.getId(), null, null);
             CustomerIndexDTO customerIndexDTO = clueMapper.clientPage(0, null, storeUsers);
             if(null!=customerIndexDTO) {

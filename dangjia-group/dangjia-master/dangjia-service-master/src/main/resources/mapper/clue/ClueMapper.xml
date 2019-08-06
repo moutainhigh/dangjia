@@ -563,7 +563,7 @@
 
     <select id="queryTips" resultType="com.dangjia.acg.dto.sale.rob.UserInfoDTO" parameterType="java.util.HashMap">
         SELECT
-        c.id as clueId
+        c.id as clueId,
         c.owername as owerName,
         c.phone as phone,
         c.label_id as labelId,
