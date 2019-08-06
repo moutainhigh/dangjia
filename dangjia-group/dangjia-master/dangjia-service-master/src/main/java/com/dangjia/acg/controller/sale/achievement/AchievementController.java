@@ -25,24 +25,24 @@ public class AchievementController implements AchievementAPI {
 
     /**
      * 根据月份 查询店长业绩
+     *
      * @param request
      * @param storeId
-     * @param userId
      * @param time
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse queryLeaderAchievementData(HttpServletRequest request,String userToken,
-                                                     String storeId , String userId, Date time) {
-        return achievementService.queryLeaderAchievementData(userToken,storeId,userId,time);
+    public ServerResponse queryLeaderAchievementData(HttpServletRequest request, String userToken,
+                                                     String storeId, Date time) {
+        return achievementService.queryLeaderAchievementData(userToken, storeId, time);
     }
 
 
     @Override
     @ApiMethod
-    public ServerResponse queryUserAchievementData(HttpServletRequest request, Integer visitState , String userId, Date time) {
-        return achievementService.queryUserAchievementData(visitState,userId,time);
+    public ServerResponse queryUserAchievementData(HttpServletRequest request, Integer visitState, String userId, Date time) {
+        return achievementService.queryUserAchievementData(visitState, userId, time);
     }
 
 }

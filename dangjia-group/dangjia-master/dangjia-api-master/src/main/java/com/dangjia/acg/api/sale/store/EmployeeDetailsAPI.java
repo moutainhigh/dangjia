@@ -50,12 +50,12 @@ public interface EmployeeDetailsAPI {
      * @param buildingId   可选 string 楼栋id字符串
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/销售模块/店长门店管理
-     * @title 制定员工月目标
-     * @description 制定员工月目标
+     * @title 配置员工销售范围
+     * @description 配置员工销售范围
      * @method POST
      * @url master/sale/store/setSalesRange
      * @remark 更多返回错误代码请看首页的错误代码描述
-     * @number 7
+     * @number 8
      * @Author: wukang 18075121944
      * @Date: 2019/7/29 5:21 PM
      */

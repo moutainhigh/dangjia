@@ -163,7 +163,12 @@ public class StoreServices {
                 if (store.getId().equals(storeUserList.get(0).getStoreId())) {
                     return ServerResponse.createByErrorMessage("该用户是本门店销售员，不能设置为店长");
                 } else {
-                    return ServerResponse.createByErrorMessage("该用户是其他门店销售员，不能设置为店长");
+                    Store store1 = iStoreMapper.selectByPrimaryKey(storeUserList.get(0).getStoreId());
+                    if (store1 != null) {
+                        return ServerResponse.createByErrorMessage("该用户是" + store1.getStoreName() + "门店销售员，不能设置为店长");
+                    } else {
+                        return ServerResponse.createByErrorMessage("该用户是其他门店销售员，不能设置为店长");
+                    }
                 }
             }
         }

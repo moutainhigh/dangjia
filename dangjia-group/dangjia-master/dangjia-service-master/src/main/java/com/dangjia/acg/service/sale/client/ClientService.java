@@ -588,7 +588,7 @@ public class ClientService {
             MainUser user = userMapper.getNameById(accessToken.getUserId());
             Example example = new Example(Store.class);
             example.createCriteria().andEqualTo(Store.USER_ID, user.getId());
-            List<ClueDTO> clueDTOS = new ArrayList<>();
+            List<ClueDTO> clueDTOS;
             if (iStoreMapper.selectByExample(example).size() <= 0) {//判断用户是否为店长
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 clueDTOS = clueMapper.followList(label, time, stage, searchKey, user.getId(), null);
@@ -624,7 +624,7 @@ public class ClientService {
                 saleClueDTO.setModifyDate(clueDTO.getModifyDate());
                 saleClueDTO.setClueType(clueDTO.getClueType());
                 Date maxDate = clueTalkMapper.getMaxDate(clueDTO.getId());
-                saleClueDTO.setCommunicationDate(null != maxDate ? maxDate : null);
+                saleClueDTO.setCommunicationDate(maxDate);
                 list.add(saleClueDTO);
             }
             PageInfo pageResult = new PageInfo(list);
@@ -784,62 +784,5 @@ public class ClientService {
         }
         return ServerResponse.createBySuccessMessage("新消息已查看");
     }
-
-
-//    private void judgeRegister(Clue clue, String memberid, String userId, String storeId) {
-//        //有沟通记录
-//        List<ClueTalk> clueTalkList = clueTalkMapper.getTalkByClueId(clue.getId());
-//        if (clueTalkList.size() != 0) {
-//            Date date = clueTalkMapper.getMaxDate(clue.getId());
-//            for (ClueTalk clueTalk : clueTalkList) {
-//                //操作dj_member_customer_record表
-//                CustomerRecord customerRecord = new CustomerRecord();
-//                customerRecord.setUserId(clue.getCusService());
-//                customerRecord.setMemberId(memberid);
-//                customerRecord.setDescribes(clueTalk.getTalkContent());
-//                //customerRecord.setModifyDate(clueTalk.getModifyDate());
-//                customerRecord.setCreateDate(clueTalk.getCreateDate());
-//                iCustomerRecordMapper.insert(customerRecord);
-//                //操作dj_member_customer表
-//                if (date.compareTo(clueTalk.getModifyDate()) == 0) {
-//                    Customer customer = new Customer();
-//                    customer.setUserId(clue.getCusService());
-//                    customer.setMemberId(memberid);
-//                    customer.setCurrRecordId(customerRecord.getId());
-//                    //customer.setModifyDate(clueTalk.getModifyDate());
-//                    customer.setCreateDate(clueTalk.getCreateDate());
-//                    customer.setStage(1);
-//                    customer.setStoreId(clue.getStoreId());
-//                    iCustomerMapper.insert(customer);
-//                }
-//                //改变线索沟通表的数据状态
-//                clueTalk.setDataStatus(1);
-//                clueTalkMapper.updateByPrimaryKeySelective(clueTalk);
-//            }
-//        } else {
-//            Customer customer = new Customer();
-//            customer.setUserId(clue.getCusService());
-//            customer.setMemberId(memberid);
-//            //customer.setModifyDate(clueTalk.getModifyDate());
-//            customer.setCreateDate(clue.getCreateDate());
-//            customer.setStage(1);
-//            customer.setStoreId(clue.getStoreId());
-//            iCustomerMapper.insert(customer);
-//        }
-//        //改变线索表的数据状态
-//        clue.setDataStatus(0);
-//        clue.setStoreId(storeId);
-//        clue.setCusService(userId);
-//        clue.setClueType(0);
-//        clue.setStage(4);
-//        clue.setMemberId(memberid);
-//        clue.setClueType(0);
-//        clue.setTurnStatus(0);
-//        clue.setPhaseStatus(1);
-//        Example example=new Example(Store.class);
-//        Store store = iStoreMapper.selectByPrimaryKey(example);
-//        clue.setCityId(store.getCityId());
-//        clueMapper.insert(clue);
-//    }
 }
 

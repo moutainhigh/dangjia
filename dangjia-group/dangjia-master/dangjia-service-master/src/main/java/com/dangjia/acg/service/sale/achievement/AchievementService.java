@@ -40,8 +40,7 @@ public class AchievementService {
      * @param time
      * @return
      */
-    public ServerResponse queryLeaderAchievementData(String userToken,String storeId , String userId, Date time){
-
+    public ServerResponse queryLeaderAchievementData(String userToken,String storeId ,Date time){
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -50,7 +49,6 @@ public class AchievementService {
         if (CommonUtil.isEmpty(accessToken.getUserId())) {
             return ServerResponse.createbyUserTokenError();
         }
-
         Map<String,Object> map = new HashMap();
         if (!CommonUtil.isEmpty(time)) {
             map.put("time",DateUtil.dateToString(time, DateUtil.FORMAT));
