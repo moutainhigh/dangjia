@@ -130,9 +130,22 @@ public class RobService {
      * @param memberId
      * @return
      */
-    public ServerResponse queryCustomerInfo(String memberId,String userId,String clueId,Integer phaseStatus,String stage){
+    public ServerResponse queryCustomerInfo(String userToken,
+                                            String memberId,
+                                            String clueId,
+                                            Integer phaseStatus,
+                                            String stage){
         //获取图片url
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+
+        Object object = constructionService.getAccessToken(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        AccessToken accessToken = (AccessToken) object;
+        if (CommonUtil.isEmpty(accessToken.getUserId())) {
+            return ServerResponse.createbyUserTokenError();
+        }
 
         //客户阶段查询客户详情
         if(phaseStatus == 1){
@@ -140,9 +153,7 @@ public class RobService {
             if (!CommonUtil.isEmpty(memberId)) {
                 map.put("memberId",memberId);
             }
-            if (!CommonUtil.isEmpty(userId)) {
-                map.put("userId",userId);
-            }
+            map.put("userId",accessToken.getUserId());
             map.put("stage",stage);
             RobArrInFoDTO robArrInFoDTO = new RobArrInFoDTO();
 
@@ -261,7 +272,10 @@ public class RobService {
      * @param labelId
      * @return
      */
-    public ServerResponse addLabel(String memberId, String labelId,String clueId,Integer phaseStatus) {
+    public ServerResponse addLabel(String memberId,
+                                   String labelId,
+                                   String clueId,
+                                   Integer phaseStatus) {
         try {
             if(phaseStatus == 1) {
                 //客户阶段新增标签
@@ -273,7 +287,7 @@ public class RobService {
                         List<String> strsToList= Arrays.asList(strs);
                         for(String s:strsToList){
                             if(s.equals(labelId)){
-                                return ServerResponse.createBySuccessMessage("标签已存在");
+                                return ServerResponse.createByErrorMessage("标签已存在");
                             }
                         }
                     }
@@ -294,7 +308,7 @@ public class RobService {
                             List<String> strsToList = Arrays.asList(strs);
                             for (String s : strsToList) {
                                 if (s.equals(labelId)) {
-                                    return ServerResponse.createBySuccessMessage("标签已存在 ");
+                                    return ServerResponse.createByErrorMessage("标签已存在 ");
                                 }
                             }
                         }
@@ -319,7 +333,10 @@ public class RobService {
      * @param labelIdArr
      * @return
      */
-    public ServerResponse deleteLabel(String memberId, String labelIdArr,String clueId,Integer phaseStatus) {
+    public ServerResponse deleteLabel(String memberId,
+                                      String labelIdArr,
+                                      String clueId,
+                                      Integer phaseStatus) {
         try {
             if (phaseStatus == 1) {
                 //删除客户阶段标签
