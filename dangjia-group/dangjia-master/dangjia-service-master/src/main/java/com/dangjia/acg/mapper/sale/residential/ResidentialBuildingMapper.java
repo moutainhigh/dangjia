@@ -19,5 +19,5 @@ public interface ResidentialBuildingMapper extends Mapper<ResidentialBuilding> {
 
     ResidentialBuilding selectSingleResidentialBuilding(@Param("storeId") String storeId,@Param("building") String building,@Param("villageId") String villageId);
 
-    List<ResidentialBuilding> getvillageIdGroupBy(@Param("storeId") String []storeId);
+    List<ResidentialBuilding> getvillageIdGroupBy(@Param("buildingId") String []buildingId);
 }
