@@ -423,8 +423,8 @@ public class RobService {
     public void remindTime() {
         String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
         Example example = new Example(CustomerRecord.class);
-        example.createCriteria().andCondition(" DATE_FORMAT(remind_time, '%Y-%m-%d %I:%i')= DATE_FORMAT('"
-                + DateUtil.getDateString(new Date().getTime()) + "', '%Y-%m-%d %I:%i') ");
+        example.createCriteria().andCondition(" DATE_FORMAT(remind_time, '%Y-%m-%d %I:%i')= '"
+                + DateUtil.dateToString(new Date(), DateUtil.FORMAT11) + "' ");
         List<CustomerRecord> customerRecords = iCustomerRecordMapper.selectByExample(example);
         for (CustomerRecord customerRecord : customerRecords) {
             MainUser u = userMapper.selectByPrimaryKey(customerRecord.getUserId());
