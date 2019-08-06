@@ -533,16 +533,18 @@ public class ClientService {
                 buildingId = residentialRange.getBuildingId().split(",");
             }
         }
-        example = new Example(ResidentialBuilding.class);
-        example.createCriteria().andIn(ResidentialBuilding.ID, Arrays.asList(buildingId));
-        List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
-        for (ResidentialBuilding residentialBuilding : residentialBuildings) {
-            ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
-            ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(residentialBuilding.getVillageId());
-            residentialRangeDTO.setVillageId(modelingVillage.getId());
-            residentialRangeDTO.setVillagename(modelingVillage.getName());
-            residentialRangeDTO.setList(residentialBuildings);
-            residentialRangeDTOList.add(residentialRangeDTO);
+        if(buildingId.length>0) {
+            example = new Example(ResidentialBuilding.class);
+            example.createCriteria().andIn(ResidentialBuilding.ID, Arrays.asList(buildingId));
+            List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
+            for (ResidentialBuilding residentialBuilding : residentialBuildings) {
+                ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
+                ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(residentialBuilding.getVillageId());
+                residentialRangeDTO.setVillageId(modelingVillage.getId());
+                residentialRangeDTO.setVillagename(modelingVillage.getName());
+                residentialRangeDTO.setList(residentialBuildings);
+                residentialRangeDTOList.add(residentialRangeDTO);
+            }
         }
         return residentialRangeDTOList;
     }
