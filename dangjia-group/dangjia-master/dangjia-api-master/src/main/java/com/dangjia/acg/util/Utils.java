@@ -56,4 +56,19 @@ public class Utils {
         String afterShuffle = sb.toString();
         return afterShuffle.substring(5, 9);
     }
+
+    /**
+     * 客户详情页
+     *
+     //TODO 检查
+     * @param memberId    客户ID
+     * @param clueId
+     * @param phaseStatus
+     * @param stage
+     * @return
+     */
+    public static String getCustomerDetails(String memberId, String clueId, Integer phaseStatus,String stage) {
+        return String.format("customerDetails?title=客户详情&memberId=%s&clueId=%s&phaseStatus=%s&stage=%s",
+                memberId, clueId, phaseStatus + "", stage);
+    }
 }
