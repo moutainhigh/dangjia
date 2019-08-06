@@ -300,7 +300,7 @@ public class RobService {
                         List<String> strsToList= Arrays.asList(strs);
                         for(String s:strsToList){
                             if(s.equals(labelId)){
-                                return ServerResponse.createBySuccessMessage("标签已存在");
+                                return ServerResponse.createByErrorMessage("标签已存在");
                             }
                         }
                     }
@@ -321,7 +321,7 @@ public class RobService {
                             List<String> strsToList = Arrays.asList(strs);
                             for (String s : strsToList) {
                                 if (s.equals(labelId)) {
-                                    return ServerResponse.createBySuccessMessage("标签已存在 ");
+                                    return ServerResponse.createByErrorMessage("标签已存在 ");
                                 }
                             }
                         }
