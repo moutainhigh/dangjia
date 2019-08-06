@@ -45,7 +45,7 @@ public interface MemberAPI {
 
     @RequestMapping(value = "member/sms", method = RequestMethod.GET)
     @ApiOperation(value = "查询验证码", notes = "查询验证码")
-    String getSmsCode(@RequestParam("phone") String phone);
+    ServerResponse getSmsCode(@RequestParam("phone") String phone);
 
     /**
      * showdoc
