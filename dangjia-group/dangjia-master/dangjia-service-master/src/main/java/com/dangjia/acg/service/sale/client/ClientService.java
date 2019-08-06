@@ -163,16 +163,16 @@ public class ClientService {
         Example example = new Example(Member.class);
         example.createCriteria().andEqualTo(Member.MOBILE, clue.getPhone());
         List<Member> members = iMemberMapper.selectByExample(example);
+        example = new Example(StoreUser.class);
+        example.createCriteria().andEqualTo(StoreUser.USER_ID, accessToken.getUserId())
+                .andEqualTo(Store.DATA_STATUS, 0);
+        List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
+        if (storeUsers.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        StoreUser storeUser = storeUsers.get(0);
+        Store store = iStoreMapper.selectByPrimaryKey(storeUser.getStoreId());
         if (members.size() > 0) {//如果线索已注册
-            example = new Example(StoreUser.class);
-            example.createCriteria().andEqualTo(StoreUser.USER_ID, accessToken.getUserId())
-                    .andEqualTo(Store.DATA_STATUS, 0);
-            List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
-            if (storeUsers.size() <= 0) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            }
-            StoreUser storeUser = storeUsers.get(0);
-            Store store = iStoreMapper.selectByPrimaryKey(storeUser.getStoreId());
             Customer customer = new Customer();
             clue.setStage(0);
             clue.setDataStatus(0);
@@ -214,6 +214,9 @@ public class ClientService {
             }
             return ServerResponse.createBySuccessMessage("提交成功");
         }else {
+            clue.setCusService(user.getId());
+            clue.setStoreId(store.getId());
+            clue.setStage(0);
             if (clueMapper.insert(clue) > 0) {
                 return ServerResponse.createBySuccessMessage("提交成功");
             }else{
