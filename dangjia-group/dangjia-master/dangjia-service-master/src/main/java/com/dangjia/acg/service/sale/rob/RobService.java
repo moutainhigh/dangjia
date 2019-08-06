@@ -7,6 +7,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.member.CustomerRecordInFoDTO;
 import com.dangjia.acg.dto.member.IntentionHouseDTO;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
@@ -215,8 +216,8 @@ public class RobService {
 
             //查询客户沟通记录
             if (!CommonUtil.isEmpty(memberId)) {
-                List<com.dangjia.acg.dto.member.CustomerRecordInFoDTO> data = iMemberLabelMapper.queryDescribes(memberId);
-                for (com.dangjia.acg.dto.member.CustomerRecordInFoDTO datum : data) {
+                List<CustomerRecordInFoDTO> data = iMemberLabelMapper.queryDescribes(memberId);
+                for (CustomerRecordInFoDTO datum : data) {
                     datum.setHead(imageAddress + datum.getHead());
                 }
                 robArrInFoDTO.setData(data);
@@ -279,9 +280,9 @@ public class RobService {
             }
 
             //查询线索沟通记录
-            List<com.dangjia.acg.dto.member.CustomerRecordInFoDTO> data = iMemberLabelMapper.queryTalkContent(clueId);
+            List<CustomerRecordInFoDTO> data = iMemberLabelMapper.queryTalkContent(clueId);
             if (!data.isEmpty()) {
-                for (com.dangjia.acg.dto.member.CustomerRecordInFoDTO datum : data) {
+                for (CustomerRecordInFoDTO datum : data) {
                     datum.setHead(imageAddress + datum.getHead());
                 }
                 userInfoDTO.setData(data);
