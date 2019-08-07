@@ -333,7 +333,7 @@ public class RobService {
                 }
             } else {
                 //线索阶段新增标签
-                if (CommonUtil.isEmpty(clueId)) {
+                if (!CommonUtil.isEmpty(clueId)) {
                     Map<String, Object> Map = new HashMap<>();
                     String str = iCustomerMapper.queryLabelId(clueId);
                     if (!CommonUtil.isEmpty(str)) {
