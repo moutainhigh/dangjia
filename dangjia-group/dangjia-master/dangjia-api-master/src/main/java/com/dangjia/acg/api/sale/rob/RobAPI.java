@@ -52,6 +52,7 @@ public interface RobAPI {
     @ApiOperation(value = "新增标签", notes = "新增标签")
     ServerResponse addLabel(@RequestParam("request")HttpServletRequest request,
                             @RequestParam("memberId")String memberId,
+                            @RequestParam("mcId")String mcId,
                             @RequestParam("labelId")String labelId,
                             @RequestParam("clueId")String clueId,
                             @RequestParam("phaseStatus")Integer phaseStatus);

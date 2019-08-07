@@ -39,7 +39,7 @@ public interface ICustomerMapper extends Mapper<Customer> {
 
     Integer queryType(@Param("memberId") String memberId);
 
-    String queryLabelIdArr(@Param("memberId") String memberId);
+    String queryLabelIdArr(@Param("mcId") String mcId);
 
     String queryLabelId(@Param("clueId") String clueId);
 
