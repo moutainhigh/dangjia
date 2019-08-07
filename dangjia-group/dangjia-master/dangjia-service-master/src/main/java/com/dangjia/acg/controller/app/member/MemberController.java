@@ -102,6 +102,15 @@ public class MemberController implements MemberAPI {
         return memberService.getMembers(userToken, memberId, phone);
     }
 
+    /**
+     * 获取我的界面
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getMyHomePage(String userToken, Integer userRole) {
+        return memberService.getMyHomePage(userToken, userRole);
+    }
+
     @Override
     @ApiMethod
     public Object getMember(String userToken) {

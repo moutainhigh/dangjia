@@ -16,7 +16,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.core.HomePageBean;
 import com.dangjia.acg.dto.house.HouseChatDTO;
 import com.dangjia.acg.dto.house.MyHouseFlowDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
@@ -25,7 +24,6 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
@@ -36,11 +34,9 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
-import com.dangjia.acg.service.complain.ComplainService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.util.LocationUtils;
@@ -100,8 +96,6 @@ public class HouseWorkerService {
     private ConfigMessageService configMessageService;
     @Autowired
     private HouseFlowApplyService houseFlowApplyService;
-    @Autowired
-    private IMenuConfigurationMapper iMenuConfigurationMapper;
     @Autowired
     private HouseService houseService;
     @Autowired
@@ -205,7 +199,7 @@ public class HouseWorkerService {
             Map<String, Object> map = new HashMap<>();
             map.put("id", member1.getId());
             map.put("targetId", member1.getId());
-            map.put("targetAppKey",  messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
+            map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
             map.put("nickName", member1.getNickName());
             map.put("name", member1.getName());
             map.put("mobile", member1.getMobile());
@@ -247,7 +241,7 @@ public class HouseWorkerService {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", member1.getId());
                 map.put("targetId", member1.getId());
-                map.put("targetAppKey",  messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
+                map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
                 map.put("nickName", member1.getNickName());
                 map.put("name", member1.getName());
                 map.put("mobile", member1.getMobile());
@@ -357,91 +351,6 @@ public class HouseWorkerService {
     }
 
     /**
-     * 获取我的界面
-     *
-     * @param userToken 用户登录信息
-     * @return 我的页面
-     */
-    public ServerResponse getMyHomePage(String userToken) {
-        try {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member worker = (Member) object;
-            String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
-            worker = memberMapper.selectByPrimaryKey(worker.getId());
-            if (worker == null) {
-                return ServerResponse.createbyUserTokenError();
-            }
-            HomePageBean homePageBean = new HomePageBean();
-            homePageBean.setWorkerId(worker.getId());
-            homePageBean.setIoflow(CommonUtil.isEmpty(worker.getHead()) ? null : imageAddress + worker.getHead());
-            homePageBean.setWorkerName(CommonUtil.isEmpty(worker.getName()) ? worker.getNickName() : worker.getName());
-            homePageBean.setEvaluation(worker.getEvaluationScore() == null ? new BigDecimal(60) : worker.getEvaluationScore());
-            homePageBean.setFavorable(worker.getPraiseRate() == null ? "0.00%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
-            StringBuilder stringBuffer = new StringBuilder();
-            if (worker.getIsCrowned() == null || worker.getIsCrowned() != 1) {
-                if (worker.getEvaluationScore() == null) {
-                    stringBuffer.append("普通");
-                } else if (Double.parseDouble(worker.getEvaluationScore().toString()) > 90) {
-                    stringBuffer.append("金牌");
-                } else if (Double.parseDouble(worker.getEvaluationScore().toString()) > 80) {
-                    stringBuffer.append("银牌");
-                } else if (Double.parseDouble(worker.getEvaluationScore().toString()) > 70) {
-                    stringBuffer.append("铜牌");
-                } else {
-                    stringBuffer.append("普通");
-                }
-            } else {
-                stringBuffer.append("皇冠");
-            }
-            stringBuffer.append(worker.getWorkerType() != null && worker.getWorkerType() == 3 ? "大管家" : "工匠");
-            homePageBean.setGradeName(stringBuffer.toString());
-            Example example = new Example(MenuConfiguration.class);
-            Example.Criteria criteria = example.createCriteria()
-                    .andEqualTo(MenuConfiguration.DATA_STATUS, 0)
-                    .andEqualTo(MenuConfiguration.MENU_TYPE, 1);
-            if (worker.getWorkerType() == null) {
-                criteria.andEqualTo(MenuConfiguration.SHOW_CRAFTSMAN, 1);
-            } else {
-                switch (worker.getWorkerType()) {
-                    case 1://设计师
-                        criteria.andEqualTo(MenuConfiguration.SHOW_DESIGNER, 1);
-                        break;
-                    case 2://精算师
-                        criteria.andEqualTo(MenuConfiguration.SHOW_ACTUARIES, 1);
-                        break;
-                    case 3://大管家
-                        criteria.andEqualTo(MenuConfiguration.SHOW_HOUSEKEEPER, 1);
-                        break;
-                    default://工匠
-                        criteria.andEqualTo(MenuConfiguration.SHOW_CRAFTSMAN, 1);
-                        break;
-                }
-            }
-            example.orderBy(MenuConfiguration.SORT).asc();
-            List<MenuConfiguration> menuConfigurations = iMenuConfigurationMapper.selectByExample(example);
-            List<HomePageBean.ListBean> list = new ArrayList<>();
-            for (MenuConfiguration configuration : menuConfigurations) {
-                configuration.initPath(imageAddress, webAddress);
-                HomePageBean.ListBean listBean = new HomePageBean.ListBean();
-                listBean.setName(configuration.getName());
-                listBean.setUrl(configuration.getUrl());
-                listBean.setImageUrl(configuration.getImage());
-                listBean.setType(configuration.getType());
-                list.add(listBean);
-            }
-            homePageBean.setList(list);
-            return ServerResponse.createBySuccess("获取我的界面成功！", homePageBean);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("获取我的界面信息失败！");
-        }
-    }
-
-    /**
      * 获取申请单明细
      */
     public ServerResponse getHouseFlowApply(String houseFlowApplyId) {
@@ -509,7 +418,7 @@ public class HouseWorkerService {
         }
         houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 4, worker.getId(), new Date());
         if (houseFlowApplyList.size() > 0) {
-            if(active!=null&&(active.equals("pre"))) {
+            if (active != null && (active.equals("pre"))) {
                 HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
                 if (new Date().getTime() < DateUtil.addDateHours(houseFlowApply.getCreateDate(), 3).getTime()) {
                     return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）开工后3小时才能申请完工！");
@@ -683,7 +592,7 @@ public class HouseWorkerService {
      * 每日开工
      */
     private ServerResponse setStartDaily(Member worker, HouseFlow hf, House house, String latitude, String longitude) {
-        if(active!=null&&(active.equals("pre"))) {
+        if (active != null && (active.equals("pre"))) {
             ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
             if (village != null && village.getLocationx() != null && village.getLocationy() != null
                     && latitude != null && longitude != null) {
@@ -740,7 +649,7 @@ public class HouseWorkerService {
         houseService.insertConstructionRecord(hfa);
         //已经停工的工序，若工匠提前复工，则复工日期以及之后的停工全部取消，
         // 原来被停工推后了的计划完工日期往前推，推的天数等于被取消的停工天数
-        Date start = DateUtil.toDate(DateUtil.dateToString(new Date(),null));
+        Date start = DateUtil.toDate(DateUtil.dateToString(new Date(), null));
         Date end = start;
 
         Example example = new Example(HouseFlowApply.class);
@@ -764,13 +673,13 @@ public class HouseWorkerService {
                 houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
             }
         }
-        int suspendDay = 1+DateUtil.daysofTwo(start, end);
+        int suspendDay = 1 + DateUtil.daysofTwo(start, end);
         if (suspendDay > 0) {
             //计划提前
             houseFlowScheduleService.updateFlowSchedule(hf.getHouseId(), hf.getWorkerTypeId(), null, suspendDay);
         }
         //重新获取最新信息,防止计划时间变更后还原
-        hf=houseFlowMapper.selectByPrimaryKey(hf.getId());
+        hf = houseFlowMapper.selectByPrimaryKey(hf.getId());
         //若未进场的工序比计划开工日期提早开工，则计划开工日期修改为实际开工日期，（施工天数不变）完工日期随之提早
         if (hf.getStartDate() != null && hf.getStartDate().getTime() > start.getTime()) {
             suspendDay = DateUtil.daysofTwo(start, hf.getStartDate());

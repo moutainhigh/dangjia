@@ -5,6 +5,7 @@ import com.dangjia.acg.modle.member.Member;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,8 +23,9 @@ public interface MemberAPI {
     /**
      * showdoc
      *
-     * @param id     必选 string 来源ID
-     * @param idType 必选 string 来源类型：1=房屋ID, 2=用户ID
+     * @param id       必选 string 来源ID
+     * @param idType   必选 string 来源类型：1=房屋ID, 2=用户ID
+     * @param userRole 必选 string 1为业主应用，2为工匠应用，3为销售应用
      * @return {"res":1000,"msg":{"resultObj":"13788885555","resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/用户信息
      * @title 获取用户手机资料
@@ -51,6 +53,7 @@ public interface MemberAPI {
      * showdoc
      *
      * @param userToken 必选 string userToken
+     * @param userRole  必选 string 1为业主应用，2为工匠应用，3为销售应用
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/用户信息
      * @title 获取用户详细资料
@@ -120,9 +123,9 @@ public interface MemberAPI {
     /**
      * showdoc
      *
-     * @param phone    必选/可选 string 用户名
-     * @param password 必选/可选 string 密码
-     * @param userRole 必选/可选 string app应用 1为业主应用，2为工匠应用
+     * @param phone    必选 string 用户名
+     * @param password 必选 string 密码
+     * @param userRole 必选 string 1为业主应用，2为工匠应用，3为销售应用
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/用户信息
      * @title 用户登录
@@ -212,11 +215,11 @@ public interface MemberAPI {
     /**
      * showdoc
      *
-     * @param phone          必选/可选 string 手机号
-     * @param password       必选/可选 string 密码
-     * @param smscode        必选/可选 string 验证码Code
-     * @param invitationCode 必选/可选 string 邀请码
-     * @param userRole       必选/可选 string app应用 1为业主应用，2为工匠应用
+     * @param phone          必选 string 手机号
+     * @param password       必选 string 密码
+     * @param smscode        必选 string 验证码Code
+     * @param invitationCode 必选 string 邀请码
+     * @param userRole       必选 string 1为业主应用，2为工匠应用，3为销售应用
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/用户信息
      * @title 用户注册
@@ -307,7 +310,7 @@ public interface MemberAPI {
      * @param address        可选 String 现居地址
      * @param selfAssessment 可选 String 自我评价
      * @param specialty      可选 String 擅长工作
-     * @param userRole       可选 string app应用 1为业主应用，2为工匠应用
+     * @param userRole       必选 string 1为业主应用，2为工匠应用，3为销售应用
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/用户信息
      * @title 工匠提交详细资料
@@ -444,6 +447,7 @@ public interface MemberAPI {
      * showdoc
      *
      * @param userToken 必选 string userToken
+     * @param userRole  必选 string 1为业主应用，2为工匠应用，3为销售应用
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/用户信息
      * @title 我的邀请码
@@ -495,6 +499,39 @@ public interface MemberAPI {
     ServerResponse getMembers(@RequestParam("userToken") String userToken,
                               @RequestParam("memberId") String memberId,
                               @RequestParam("phone") String phone);
+
+
+    /**
+     * showdoc
+     *
+     * @param userToken 可选 string userToken
+     * @param userRole  必选 string 1为业主应用，2为工匠应用，3为销售应用
+     * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
+     * @catalog 当家接口文档/用户模块/用户信息
+     * @title 获取我的界面
+     * @description 获取我的界面
+     * @method POST
+     * @url master/app/core/houseWorker/getMyHomePage
+     * @return_param evaluation BigDecimal 积分
+     * @return_param favorable string 好评率
+     * @return_param gradeName string 工匠等级别称
+     * @return_param ioflow string 工匠头像
+     * @return_param workerId string 工匠ID
+     * @return_param workerName string 工匠名称
+     * @return_param list List<ListBean> 菜单
+     * @return_param list_imageUrl string 菜单图片地址
+     * @return_param list_name string 菜单名称
+     * @return_param list_url string 点击URL
+     * @return_param list_type int 0:跳转URL，1:获取定位后跳转URL，2:量房，3：传平面图，4：传施工图，5：跳转我的钱包，6：跳转我的优惠券
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 14
+     * @Author: Ruking 18075121944
+     * @Date: 2019/8/7 10:26 AM
+     */
+    @PostMapping("app/core/houseWorker/getMyHomePage")
+    @ApiOperation(value = "获取我的界面", notes = "获取我的界面")
+    ServerResponse getMyHomePage(@RequestParam("userToken") String userToken,
+                                 @RequestParam("userRole") Integer userRole);
 
 
     @RequestMapping(value = "member/getMember", method = RequestMethod.POST)

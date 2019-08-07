@@ -69,7 +69,8 @@ public interface RobAPI {
     @PostMapping(value = "sale/rob/addDescribes")
     @ApiOperation(value = "新增沟通记录", notes = "新增沟通记录")
     ServerResponse addDescribes(@RequestParam("request")HttpServletRequest request,
-                                @RequestBody CustomerRecDTO customerRecDTO);
+                                @RequestBody CustomerRecDTO customerRecDTO,
+                                @RequestParam("userToken")String userToken);
 
     @PostMapping(value = "sale/rob/remindTime")
     @ApiOperation(value = "定时执行", notes = "定时执行")
