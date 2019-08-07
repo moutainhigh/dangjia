@@ -387,9 +387,9 @@ public class RobService {
             if (phaseStatus == 1) {
                 //删除客户阶段标签
                 Map<String, Object> Map = new HashMap<>();
-                if (!CommonUtil.isEmpty(memberId)) {
+                if (!CommonUtil.isEmpty(mcId)) {
                     Map.put("labelIdArr", labelIdArr);
-                    Map.put("memberId", memberId);
+                    Map.put("mcId", mcId);
                     iCustomerMapper.upDateLabelIdArr(Map);
                     return ServerResponse.createBySuccessMessage("删除成功");
                 }
