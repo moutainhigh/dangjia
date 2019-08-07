@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.design;
 
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -68,9 +67,6 @@ public class DesignDataService {
     private IPayConfigurationMapper payConfigurationMapper;
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
-
-    @Autowired
-    private RedisClient redisClient;//缓存
 
     /**
      * 获取平面图
@@ -317,7 +313,9 @@ public class DesignDataService {
      */
     public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey) {
         String userID = request.getParameter(Constants.USERID);
-        String cityKey = redisClient.getCache(Constants.CITY_KEY + userID, String.class);
+
+        String cityKey = request.getParameter(Constants.CITY_ID);
+//        String cityKey = redisClient.getCache(Constants.CITY_KEY + userID, String.class);
         if (CommonUtil.isEmpty(cityKey)) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }

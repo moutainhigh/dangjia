@@ -109,7 +109,35 @@
 		and house_flow_id = #{houseFlowId}
 		and delete_state = 3;
 	</select>
-
+	<!--根据houseFlowId-->
+	<select id="getByHouseFlowTechnologyId" resultType="com.dangjia.acg.modle.basics.Technology">
+		SELECT
+			y.id,
+			y.NAME,
+			y.material_or_worker AS materialOrWorker,
+			y.worker_type_id AS workerTypeId,
+			y.content,
+			y.type,
+			y.image,
+			y.goods_id AS goodsId,
+			y.sample_image AS sampleImage,
+			y.create_date,
+			y.modify_date,
+			y.considerations,
+			y.text_content AS textContent
+		FROM
+			dj_actuary_budget_worker w
+			INNER JOIN `dj_basics_worker_goods` g ON w.worker_goods_id = g.id
+			INNER JOIN dj_basics_technology y ON FIND_IN_SET( y.id, g.technology_ids )
+		WHERE
+		    w.house_id=#{houseId}
+			AND w.house_flow_id = #{houseFlowId}
+			AND w.delete_state = 3
+			AND ( w.shop_count + w.repair_count ) > 0
+			AND y.type IN ( 1, 3 )
+		GROUP BY
+			y.id
+	</select>
 	<!--支付时工种人工总价-->
 	<select id="getBudgetWorkerPrice" resultType="java.lang.Double">
 		SELECT

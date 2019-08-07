@@ -494,6 +494,7 @@ public class BudgetWorkerService {
                 iActuarialTemplateMapper.updateByPrimaryKeySelective(actuarialTemplate);
             }
 
+            houseAPI.updateCustomEdit(houseId);
             return ServerResponse.createBySuccessMessage("生成精算成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -737,6 +738,13 @@ public class BudgetWorkerService {
                     }
                 }
             }
+//            List<Technology> tList = iBudgetWorkerMapper.getByHouseFlowTechnologyId(houseId, houseFlowId);
+//            for (Technology t : tList) {
+//                JSONObject map = new JSONObject();
+//                map.put("technologyName", t.getName());
+//                map.put("content", t.getContent());
+//                jsonArray.add(map);
+//            }
             return jsonArray;
         } catch (Exception e) {
             e.printStackTrace();

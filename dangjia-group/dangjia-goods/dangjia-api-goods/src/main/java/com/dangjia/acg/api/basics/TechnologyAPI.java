@@ -42,7 +42,7 @@ public interface TechnologyAPI {
     @PostMapping("/basics/technology/getTechnology")
     @ApiOperation(value = "根据id查询工艺实体", notes = "根据id查询工艺实体")
     ServerResponse getTechnology(@RequestParam("request") HttpServletRequest request,
-                                         @RequestParam("workerGoodsId") String technologyId);
+                                 @RequestParam("technologyId") String technologyId);
 
     @PostMapping("/basics/technology/queryTechnologyByWgId")
     @ApiOperation(value = "根据商品id查询人工商品关联工艺实体", notes = "根据商品id查询人工商品关联工艺实体")
@@ -52,6 +52,6 @@ public interface TechnologyAPI {
 
     @PostMapping("/basics/technology/queryByName")
     @ApiOperation(value = "根据名称查询所有工艺（名称去重）", notes = "根据名称查询所有工艺（名称去重）")
-    ServerResponse queryByName(@RequestParam("request")HttpServletRequest request,@RequestParam("name")String name,@RequestParam("workerTypeId")String workerTypeId);
+    ServerResponse queryByName(@RequestParam("request") HttpServletRequest request, @RequestParam("name") String name, @RequestParam("workerTypeId") String workerTypeId);
 
 }

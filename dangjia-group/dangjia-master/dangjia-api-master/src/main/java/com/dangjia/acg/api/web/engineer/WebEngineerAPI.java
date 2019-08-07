@@ -63,6 +63,11 @@ public interface WebEngineerAPI {
     @ApiOperation(value = "查看工序", notes = "查看工序")
     ServerResponse houseFlowList(@RequestParam("houseId") String houseId);
 
+    @PostMapping(value = "data/engineer/houseFlowList")
+    @ApiOperation(value = "查看工序(业主申请的供需)", notes = "查看工序(业主申请的供需)")
+    ServerResponse getHouseFlowList(@RequestParam("houseId") String houseId);
+
+
     @PostMapping(value = "web/engineer/workerMess")
     @ApiOperation(value = "工匠钱包信息", notes = "工匠钱包信息")
     ServerResponse workerMess(@RequestParam("workerId") String workerId);

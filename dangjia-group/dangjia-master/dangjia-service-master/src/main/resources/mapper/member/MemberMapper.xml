@@ -56,9 +56,9 @@
         WHERE w.data_status = 0
         <if test="name!=null and name!=''">
             and(
-              w.name LIKE CONCAT('%',#{name},'%')
-              or
-              w.mobile LIKE CONCAT('%',#{name},'%')
+            w.name LIKE CONCAT('%',#{name},'%')
+            or
+            w.mobile LIKE CONCAT('%',#{name},'%')
             )
         </if>
         <if test="workerTypeId!=null and workerTypeId!=''">
@@ -160,32 +160,39 @@
         w.remarks,
         w.create_date AS createDate,
         w.data_status AS dataStatus,
-        mc.stage,
-        mc.label_id_arr,
-        mc.remind_record_id,
-        mcr.remind_time,
         h.construction_date AS modifyDate
         FROM dj_member w
         INNER JOIN dj_member_info mi on mi.member_id = w.id and mi.policy_id=#{userRole}
-        <if test="userId==null or userId==''">
-        LEFT JOIN dj_member_customer mc on mc.member_id = w.id
-        LEFT JOIN dj_member_customer_record mcr on mc.remind_record_id = mcr.id
-        </if>
+        INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id FROM dj_member_city c GROUP BY c.member_id )
+        mt ON mt.member_id = w.id
+        AND FIND_IN_SET(#{cityId}, mt.city_id )
 
-        <if test="userId!=null and userId!=''">
-            INNER JOIN dj_member_customer mc on mc.member_id = w.id and  mc.user_id=#{userId}
-            LEFT JOIN dj_member_customer_record mcr on mc.remind_record_id = mcr.id
-        </if>
+        <choose>
+            <when test="(userId==null or userId=='') and (userKey==null or userKey=='')">
+                LEFT JOIN dj_member_customer mc on mc.member_id = w.id
+                LEFT JOIN dj_member_customer_record mcr on mc.remind_record_id = mcr.id
+            </when>
+            <otherwise>
+                INNER JOIN dj_member_customer mc on mc.member_id = w.id
+                <if test="userId!=null and userId!=''">
+                    and mc.user_id=#{userId}
+                </if>
+                <if test="userKey!=null and userKey!=''">
+                    AND FIND_IN_SET(mc.user_id,#{userKey})
+                </if>
+                LEFT JOIN dj_member_customer_record mcr on mc.remind_record_id = mcr.id
+            </otherwise>
+        </choose>
 
         <if test="type=='bb'">
             INNER
-            JOIN dj_house	h ON h.member_id = w.id  and h.data_status =0 and h.visit_state =1
+            JOIN dj_house h ON h.member_id = w.id and h.data_status =0 and h.visit_state =1
             WHERE w.data_status = 0
         </if>
 
         <if test="type!='bb'">
             LEFT
-            JOIN dj_house	h ON h.member_id = w.id  and h.data_status =0 and h.visit_state =1
+            JOIN dj_house h ON h.member_id = w.id and h.data_status =0 and h.visit_state =1
             WHERE w.data_status = 0
         </if>
 

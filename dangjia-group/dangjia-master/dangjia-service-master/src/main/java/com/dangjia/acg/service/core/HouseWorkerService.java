@@ -34,6 +34,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberCity;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.worker.WorkerDetail;
@@ -368,6 +369,9 @@ public class HouseWorkerService {
         if (CommonUtil.isEmpty(applyType)) {
             return ServerResponse.createByErrorMessage("请选择提交审核类别");
         }
+        if (CommonUtil.isEmpty(applyDec)) {
+            applyDec="";
+        }
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -383,13 +387,13 @@ public class HouseWorkerService {
         }
         switch (applyType) {
             case 0:
-                return setCompletedToday(worker, hf, house, imageList);
+                return setCompletedToday(worker, hf, house,  applyDec,imageList);
             case 1:
                 return setPhaseCompletion(worker, hf, house, imageList);
             case 2:
                 return setWholeCompletion(worker, hf, house, imageList);
             case 4:
-                return setStartDaily(worker, hf, house, latitude, longitude);
+                return setStartDaily(worker, hf, house, latitude, longitude,  imageList);
             case 5:
             case 6:
             case 7:
@@ -401,7 +405,7 @@ public class HouseWorkerService {
     /**
      * 今日完工
      */
-    private ServerResponse setCompletedToday(Member worker, HouseFlow hf, House house, String imageList) {
+    private ServerResponse setCompletedToday(Member worker, HouseFlow hf, House house, String applyDec,String imageList) {
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
         if (hf.getPause() == 1) {
             return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已暂停施工,请勿提交申请！");
@@ -455,10 +459,14 @@ public class HouseWorkerService {
             hfa.setApplyMoney(new BigDecimal(0));
         }
         hfa.setOtherMoney((workPrice).subtract(haveMoney).subtract(hfa.getApplyMoney()));
-        hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经完工了");//描述
+//        hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经完工了");//描述
+        applyDec=setHouseFlowApplyImage(hfa, house, imageList);
+
+        hfa.setApplyDec("尊敬的业主，您好！当家工匠【"+worker.getName()+"】为您新家施工，今日实际施工为:<br/>" +
+                applyDec +
+                "<br/>现向您发送完成情况，请您查收。");//描述
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
-        setHouseFlowApplyImage(hfa, house, imageList);
         //每日完工
         houseFlowApplyService.checkWorker(hfa.getId(), false);
         return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）每日完工申请成功");
@@ -509,7 +517,15 @@ public class HouseWorkerService {
             hfa.setApplyMoney(new BigDecimal(0));
         }
         hfa.setOtherMoney(workPrice.subtract(haveMoney).subtract(hfa.getApplyMoney()));
-        hfa.setApplyDec("我是" + workerType.getName() + ",我已申请了阶段完工");//描述
+//        hfa.setApplyDec("我是" + workerType.getName() + ",我已申请了阶段完工");//描述
+        int nums=0;
+        if(!CommonUtil.isEmpty(imageList)){
+            JSONArray imageObjArr = JSON.parseArray(imageList);
+            nums=imageObjArr.size();
+        }
+        hfa.setApplyDec("尊敬的业主，您好！<br/>" +
+                "当家工匠【"+worker.getName()+"】为您新家施工，工地【" + workerType.getName() + "】已阶段完工，剩余部分待其他工种完成后继续进行，严格按照平台施工验收标准进行施工，请您查收。<br/>" +
+                "【配图"+nums+"张以上】");//描述
         hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
         //增加倒计时系统自动审核时间
         Calendar calendar = Calendar.getInstance();
@@ -574,7 +590,15 @@ public class HouseWorkerService {
         }
         BigDecimal alsoMoney = new BigDecimal(workPrice.doubleValue() - haveMoney.doubleValue() - retentionMoney.doubleValue() - deductPrice.doubleValue());
         hfa.setApplyMoney(alsoMoney);
-        hfa.setApplyDec("我是" + workerType.getName() + ",我已申请了整体完工");//描述
+//        hfa.setApplyDec("我是" + workerType.getName() + ",我已申请了整体完工");//描述
+        int nums=0;
+        if(!CommonUtil.isEmpty(imageList)){
+            JSONArray imageObjArr = JSON.parseArray(imageList);
+            nums=imageObjArr.size();
+        }
+        hfa.setApplyDec("尊敬的业主，您好！<br/>" +
+                "当家工匠【"+worker.getName()+"】为您新家施工，工地【" + workerType.getName() + "】已全部完工，严格按照平台施工验收标准进行施工，请您查收。<br/>" +
+                "【配图"+nums+"张以上】");//描述
         hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
         //增加倒计时系统自动审核时间
         Calendar calendar = Calendar.getInstance();
@@ -591,8 +615,8 @@ public class HouseWorkerService {
     /**
      * 每日开工
      */
-    private ServerResponse setStartDaily(Member worker, HouseFlow hf, House house, String latitude, String longitude) {
-        if (active != null && (active.equals("pre"))) {
+    private ServerResponse setStartDaily(Member worker, HouseFlow hf, House house, String latitude, String longitude, String imageList) {
+        if(active!=null&&(active.equals("pre"))) {
             ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
             if (village != null && village.getLocationx() != null && village.getLocationy() != null
                     && latitude != null && longitude != null) {
@@ -640,13 +664,26 @@ public class HouseWorkerService {
 //                houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
 //            }
 //        }
+//        int nums=0;
+//        if(!CommonUtil.isEmpty(imageList)){
+//            JSONArray imageObjArr = JSON.parseArray(imageList);
+//            nums=imageObjArr.size();
+//        }
         HouseFlowApply hfa = getHouseFlowApply(hf, 4, null);
         hfa.setPayState(0);//是否付款
-        hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经开工了");//描述
+//        hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经开工了");//描述
+//        hfa.setApplyDec("尊敬的业主，您好！<br/>" +
+//                "好工匠在当家，当家工匠" + workerType.getName() + "【"+worker.getName()+"】已到吉屋准备开工，开工前工地现场实况如下，请您查收。<br/>" +
+//                "【配图"+nums+"张，工地情况与材料情况】");//描述
+
+                hfa.setApplyDec("尊敬的业主，您好！<br/>" +
+                "好工匠在当家，当家工匠" + workerType.getName() + "【"+worker.getName()+"】已到吉屋准备开工");
+
         hfa.setMemberCheck(1);//默认业主审核状态通过
         hfa.setSupervisorCheck(1);//默认大管家审核状态通过
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
+        setHouseFlowApplyImage(hfa, house, imageList);
         //已经停工的工序，若工匠提前复工，则复工日期以及之后的停工全部取消，
         // 原来被停工推后了的计划完工日期往前推，推的天数等于被取消的停工天数
         Date start = DateUtil.toDate(DateUtil.dateToString(new Date(), null));
@@ -717,7 +754,10 @@ public class HouseWorkerService {
                 return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
             }
             hfa = getHouseFlowApply(hf, applyType, supervisorHF);
-            hfa.setApplyDec("业主您好，我已巡查了" + workerType.getName() + "，现场情况如下：" + applyDec);//描述
+
+            hfa.setApplyDec("尊敬的业主，您好！\n" +
+                    "当家大管家【"+supervisor.getName()+"】为您新家质量保驾护航，工地现为【"+applyDec+"】阶段，今日巡查房屋现场情况如下，未发现施工不合格情况，请您查收。" );//描述
+//            hfa.setApplyDec("业主您好，我已巡查了" + workerType.getName() + "，现场情况如下：" + applyDec);//描述
             //描述
             hfa.setMemberCheck(1);//默认业主审核状态通过
             hfa.setSupervisorCheck(1);//默认大管家审核状态通过
@@ -829,16 +869,19 @@ public class HouseWorkerService {
     /**
      * 保存巡查图片,验收节点图片等信息
      */
-    private void setHouseFlowApplyImage(HouseFlowApply hfa, House house, String imageList) {
+    private String setHouseFlowApplyImage(HouseFlowApply hfa, House house, String imageList) {
+        StringBuffer strbfr=new StringBuffer();
         if (StringUtil.isNotEmpty(imageList)) {
             JSONArray imageObjArr = JSON.parseArray(imageList);
             for (int i = 0; i < imageObjArr.size(); i++) {//上传材料照片
                 JSONObject imageObj = imageObjArr.getJSONObject(i);
                 int imageType = Integer.parseInt(imageObj.getString("imageType"));
+                String imageTypeName = imageObj.getString("imageTypeName");
+                strbfr.append(imageTypeName);
+                strbfr.append("<br/>");
                 String imageUrl = imageObj.getString("imageUrl"); //图片,拼接
                 if (imageType == 3) {//节点图
                     String imageTypeId = imageObj.getString("imageTypeId");
-                    String imageTypeName = imageObj.getString("imageTypeName");
                     Technology technology = forMasterAPI.byTechnologyId(house.getCityId(), imageTypeId);
                     TechnologyRecord technologyRecord = new TechnologyRecord();
                     technologyRecord.setHouseId(house.getId());
@@ -869,6 +912,7 @@ public class HouseWorkerService {
                 }
             }
         }
+        return strbfr.toString();
     }
 
     /**

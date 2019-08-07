@@ -21,6 +21,7 @@ import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.*;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
+import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
@@ -30,6 +31,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.member.*;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
+import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.sup.Supplier;
@@ -68,6 +70,10 @@ public class MemberService {
     private RedPackPayService redPackPayService;
     @Autowired
     private IMemberMapper memberMapper;
+    @Autowired
+    private ICityMapper iCityMapper;
+    @Autowired
+    private IMemberCityMapper memberCityMapper;
     @Autowired
     private IMemberInfoMapper memberInfoMapper;
     @Autowired
@@ -334,7 +340,7 @@ public class MemberService {
         if (sms == null || sms.size() == 0) {
             return ServerResponse.createBySuccessMessage("无效验证码");
         }
-        return ServerResponse.createBySuccess("ok", sms.get(0).getCode());
+        return ServerResponse.createBySuccess("验证码获取成功", sms.get(0).getCode());
     }
 
     /**
@@ -376,6 +382,15 @@ public class MemberService {
             }
             user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
             memberMapper.insertSelective(user);
+
+            MemberCity userCity = new MemberCity();
+            userCity.setMemberId(user.getId());
+            userCity.setCityId(request.getParameter(Constants.CITY_ID));
+            if (!CommonUtil.isEmpty(userCity.getCityId())) {
+                City city = iCityMapper.selectByPrimaryKey(userCity.getCityId());
+                userCity.setCityName(city.getName());
+                memberCityMapper.insert(userCity);
+            }
 //            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
             if (userRole == 1) {
                 clueService.sendUser(user, user.getMobile(), longitude, latitude);
@@ -646,9 +661,10 @@ public class MemberService {
     /**
      * 业主列表
      */
-    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String userRole, String searchKey, String
-            parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
+    public ServerResponse getMemberList(PageDTO pageDTO, String cityId, String userKey, Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
         try {
+            userKey = iStoreUserMapper.getVisitUser(userKey);
+            logger.info("权限返回结果 id:" + userKey);
             List<String> childsLabelIdList = new ArrayList<>();
             if (StringUtils.isNotBlank(parentId)) {
                 if (!StringUtils.isNotBlank(childId)) {//如果 子标签为null ，就是父标签的所有标签
@@ -667,7 +683,7 @@ public class MemberService {
                 }
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Member> list = memberMapper.getMemberListByName(searchKey, stage, userRole, childsLabelIdArr, orderBy, type, userId, beginDate, endDate);
+            List<Member> list = memberMapper.getMemberListByName(cityId, searchKey, stage, userRole, childsLabelIdArr, orderBy, type, userKey, userId, beginDate, endDate);
             PageInfo pageResult = new PageInfo(list);
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
             for (Member member : list) {
@@ -682,16 +698,6 @@ public class MemberService {
                     if (customer.getRemindRecordId() != null)//有提醒记录的 更新 为最新的更新沟通记录
                         customerRecordService.updateMaxNearRemind(customer);
                 }
-                List<MemberLabel> memberLabelList = new ArrayList<>();
-                if (customer.getLabelIdArr() != null) {
-                    String[] labelIdArr = customer.getLabelIdArr().split(",");
-                    for (String aLabelIdArr : labelIdArr) {
-                        MemberLabel memberlabel = iMemberLabelMapper.selectByPrimaryKey(aLabelIdArr);
-                        if (memberlabel != null)
-                            memberLabelList.add(memberlabel);
-                    }
-                }
-
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
                 mcDTO.setMcId(customer.getId());
                 mcDTO.setPhaseStatus(customer.getPhaseStatus());
@@ -702,17 +708,19 @@ public class MemberService {
                 mcDTO.setMobile(member.getMobile());
                 mcDTO.setReferrals(member.getReferrals());
 
-                Member referralsMember = memberMapper.selectByPrimaryKey(member.getReferrals());
-                if (referralsMember != null) {
-                    mcDTO.setReferralsMobile(referralsMember.getMobile());
-                } else {
-                    mcDTO.setReferralsMobile("");
+                if (!CommonUtil.isEmpty(member.getReferrals())) {
+                    Member referralsMember = memberMapper.selectByPrimaryKey(member.getReferrals());
+                    if (referralsMember != null) {
+                        mcDTO.setReferralsMobile(referralsMember.getMobile());
+                    } else {
+                        mcDTO.setReferralsMobile("");
+                    }
                 }
                 mcDTO.setSource("来源未知");
                 mcDTO.setStage(customer.getStage());
                 mcDTO.setUserId(customer.getUserId());
                 mcDTO.setCreateDate(member.getCreateDate());
-                if (customer.getUserId() != null) {
+                if (!CommonUtil.isEmpty(customer.getUserId())) {
                     MainUser mainUser = userMapper.selectByPrimaryKey(customer.getUserId());
                     if (null != mainUser) {
                         mcDTO.setUserName(mainUser.getUsername());
@@ -738,7 +746,25 @@ public class MemberService {
                 if (member.getRemarks() != null) {
                     mcDTO.setRemarks(member.getRemarks());//业主备注
                 }
+                List<MemberLabel> memberLabelList = new ArrayList<>();
+                if (customer.getLabelIdArr() != null) {
+                    String[] labelIdArr = customer.getLabelIdArr().split(",");
+                    Example example = new Example(MemberLabel.class);
+                    example.createCriteria().andIn(Member.ID, Arrays.asList(labelIdArr));
+                    memberLabelList = iMemberLabelMapper.selectByExample(example);
+                }
                 mcDTO.setMemberLabelList(memberLabelList);
+
+                Example example = new Example(MemberCity.class);
+                example.createCriteria()
+                        .andEqualTo(MemberCity.MEMBER_ID, member.getId())
+                        .andEqualTo(MemberCity.CITY_ID, cityId);
+                example.orderBy(MemberCity.CREATE_DATE);
+                List<MemberCity> listcity = memberCityMapper.selectByExample(example);
+                if (listcity.size() > 0) {
+                    mcDTO.setMemberCityID(listcity.get(0).getCityId());
+                    mcDTO.setMemberCityName(listcity.get(0).getCityName());
+                }
                 mcDTOList.add(mcDTO);
             }
 //            logger.info(" mcDTOList getMemberNickName:" + mcDTOList.get(0).getMemberNickName());

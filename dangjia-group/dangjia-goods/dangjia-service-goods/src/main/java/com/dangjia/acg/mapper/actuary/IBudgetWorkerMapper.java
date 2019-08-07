@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.actuary;
 
 import com.dangjia.acg.modle.actuary.BudgetWorker;
+import com.dangjia.acg.modle.basics.Technology;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -28,6 +29,8 @@ public interface IBudgetWorkerMapper extends Mapper<BudgetWorker> {
 
 	/**getByHouseFlowId*/
 	List<BudgetWorker> getByHouseFlowId(@Param("houseId")String houseId, @Param("houseFlowId")String houseFlowId);
+	/**getByHouseFlowId*/
+	List<Technology> getByHouseFlowTechnologyId(@Param("houseId")String houseId, @Param("houseFlowId")String houseFlowId);
 
 	/**支付时工种人工总价*/
 	Double getBudgetWorkerPrice(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);

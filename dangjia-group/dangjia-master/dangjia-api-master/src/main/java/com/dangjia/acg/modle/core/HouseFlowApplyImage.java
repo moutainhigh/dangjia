@@ -33,8 +33,8 @@ public class HouseFlowApplyImage extends BaseEntity {
 	private String imageUrl; //
 
 	@Column(name = "image_type")
-	@Desc(value = "图片类型 0：材料照片；1：进度照片；2:其他")
-	@ApiModelProperty("图片类型 0：材料照片；1：进度照片；2:其他")
+	@Desc(value = "图片类型 0：材料照片；1：进度照片；2:其他 3:节点图  4:水电管路图")
+	@ApiModelProperty("图片类型 0：材料照片；1：进度照片；2:其他 3:节点图  4:水电管路图")
 	private Integer imageType; //
 
 	@Column(name = "image_type_name")

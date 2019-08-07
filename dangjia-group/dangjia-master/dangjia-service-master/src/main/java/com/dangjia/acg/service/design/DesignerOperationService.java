@@ -370,7 +370,7 @@ public class DesignerOperationService {
      * @return ServerResponse
      */
     public ServerResponse setPlaneMap(String userToken, String houseId, String userId, String image) {
-        return setQuantityRoom(userToken, houseId, userId, image, 1);
+        return setQuantityRoom(userToken, houseId, userId, image, 1, null, null);
     }
 
     /**
@@ -385,7 +385,7 @@ public class DesignerOperationService {
      * @return ServerResponse
      */
     public ServerResponse setConstructionPlans(String userToken, String houseId, String userId, String imageJson) {
-        return setQuantityRoom(userToken, houseId, userId, imageJson, 2);
+        return setQuantityRoom(userToken, houseId, userId, imageJson, 2, null, null);
     }
 
     /**
@@ -397,8 +397,8 @@ public class DesignerOperationService {
      * @param images    图片","号分割
      * @return ServerResponse
      */
-    public ServerResponse setQuantityRoom(String userToken, String houseId, String userId, String images) {
-        return setQuantityRoom(userToken, houseId, userId, images, 0);
+    public ServerResponse setQuantityRoom(String userToken, String houseId, String userId, String images, Integer elevator, String floor) {
+        return setQuantityRoom(userToken, houseId, userId, images, 0, elevator, floor);
     }
 
     /**
@@ -411,7 +411,7 @@ public class DesignerOperationService {
      * @param type        事务类型：0:量房，1平面图，2施工图
      * @return ServerResponse
      */
-    private ServerResponse setQuantityRoom(String userToken, String houseId, String userId, String imageString, int type) {
+    private ServerResponse setQuantityRoom(String userToken, String houseId, String userId, String imageString, int type, Integer elevator, String floor) {
         House house = houseMapper.selectByPrimaryKey(houseId);
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
@@ -437,6 +437,12 @@ public class DesignerOperationService {
                 }
                 if (house.getDesignerOk() != 1) {
                     return ServerResponse.createByErrorMessage("该阶段无法上传量房信息");
+                }
+                if (CommonUtil.isEmpty(elevator)) {
+                    return ServerResponse.createByErrorMessage("请选择是否为电梯房");
+                }
+                if (elevator == 0 && CommonUtil.isEmpty(floor)) {
+                    return ServerResponse.createByErrorMessage("请输入楼层");
                 }
                 break;
             case 1:
@@ -483,6 +489,8 @@ public class DesignerOperationService {
             quantityRoom.setUserId(userId);
         }
         quantityRoom.setHouseId(houseId);
+        quantityRoom.setElevator(elevator);
+        quantityRoom.setFloor(floor);
         quantityRoom.setType(type);
         quantityRoom.setOperationType(0);
         switch (type) {
@@ -536,7 +544,7 @@ public class DesignerOperationService {
                             images.setImage(object.getString("image"));
                             images.setSort(object.getInteger("sort"));
                             quantityRoomImagesList.add(images);
-                            if(i==1){
+                            if (i == 1) {
                                 if (CommonUtil.isEmpty(house.getImage())) {
                                     house.setImage(object.getString("image"));
                                     houseMapper.updateByPrimaryKeySelective(house);

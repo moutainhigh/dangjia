@@ -13,6 +13,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.UserInfoResultDTO;
 import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.core.NodeDTO;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
@@ -24,6 +25,7 @@ import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.HouseFlowApplyImage;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.group.GroupUserConfig;
 import com.dangjia.acg.modle.house.House;
@@ -66,6 +68,8 @@ public class MyHouseService {
     @Autowired
     private IMenuConfigurationMapper iMenuConfigurationMapper;
 
+    @Autowired
+    private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
     @Autowired
     private UserAPI userAPI;
     @Autowired
@@ -136,6 +140,25 @@ public class MyHouseService {
         return houseId;
     }
 
+    public ServerResponse getHouseTubogramImage(String houseId) {
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        Example example = new Example(HouseFlowApplyImage.class);
+        example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_ID, houseId).andEqualTo(HouseFlowApplyImage.IMAGE_TYPE, 4);
+        List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
+        Member supervisor = memberMapper.getSupervisor(houseId);
+        List<Map> imageList = new ArrayList<>();
+        Map mapObj =new HashMap();
+        for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList) {
+            Map map =new HashMap();
+            map.put("image",address + houseFlowApplyImage.getImageUrl());
+            map.put("imageUrl",houseFlowApplyImage.getImageUrl());
+            mapObj.put("createDate",houseFlowApplyImage.getCreateDate());
+            imageList.add(map);
+        }
+        mapObj.put("name",supervisor.getName());
+        mapObj.put("list",imageList);
+        return ServerResponse.createBySuccess("查询成功", imageList);
+    }
     /**
      * APP我的房产
      */
@@ -217,9 +240,12 @@ public class MyHouseService {
         }
         //获取客服明细
         Customer srcCustomer = iCustomerMapper.getCustomerByMemberId(member.getId());
-        String userid = "773075761552045112068";
-        if (srcCustomer != null && !CommonUtil.isEmpty(srcCustomer.getUserId())) {
-            userid = srcCustomer.getUserId();
+        String userid="773075761552045112068";
+        if(house.getCityId().equals("961188961562724011757")){
+            userid="682958011563430082579";
+        }
+        if(srcCustomer!=null&&!CommonUtil.isEmpty(srcCustomer.getUserId())){
+            userid=srcCustomer.getUserId();
         }
         Example example = new Example(MainUser.class);
         example.createCriteria().andEqualTo(MainUser.ID, userid);//默认李优
@@ -230,8 +256,8 @@ public class MyHouseService {
             Map<String, Object> map = new HashMap<>();
             map.put("id", user.getId());
             map.put("targetId", user.getId());
-            map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
-            UserInfoResultDTO userInfoResult = userAPI.getUserInfo(AppType.GONGJIANG.getDesc(), userid);
+            map.put("targetAppKey", messageAPI.getAppKey(AppType.SALE.getDesc()));
+            UserInfoResultDTO userInfoResult = userAPI.getUserInfo(AppType.SALE.getDesc(), userid);
             if (userInfoResult != null && !CommonUtil.isEmpty(userInfoResult.getNickname())) {
                 map.put("nickName", "装修顾问 " + userInfoResult.getNickname());
             } else {
