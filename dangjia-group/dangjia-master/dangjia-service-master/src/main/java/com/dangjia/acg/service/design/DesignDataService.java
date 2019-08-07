@@ -69,9 +69,6 @@ public class DesignDataService {
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
 
-    @Autowired
-    private RedisClient redisClient;//缓存
-
     /**
      * 获取平面图
      *

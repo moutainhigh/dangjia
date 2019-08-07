@@ -50,4 +50,14 @@ public class QuantityRoom extends BaseEntity {
     @ApiModelProperty("操作类型：0:执行，1：跳过")
     private Integer operationType;//
 
+    @Column(name = "elevator")
+    @Desc(value = "是否电梯房：0:否，1：是")
+    @ApiModelProperty("是否电梯房：0:否，1：是")
+    private Integer elevator;//
+
+    @Column(name = "floor")
+    @Desc(value = "楼层")
+    @ApiModelProperty("楼层")
+    private String floor;//
+
 }
