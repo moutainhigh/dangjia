@@ -69,36 +69,33 @@ public class RobController implements RobAPI {
     /**
      * 新增标签
      *
-     * @param memberId
      * @param labelId
      * @return
      */
     @Override
     @ApiMethod
     public ServerResponse addLabel(HttpServletRequest request,
-                                   String memberId,
                                    String mcId,
                                    String labelId,
                                    String clueId,
                                    Integer phaseStatus) {
-        return robService.addLabel(memberId,mcId, labelId, clueId, phaseStatus);
+        return robService.addLabel(mcId, labelId, clueId, phaseStatus);
     }
 
     /**
      * 删除标签
      *
-     * @param memberId
      * @param labelIdArr
      * @return
      */
     @Override
     @ApiMethod
     public ServerResponse deleteLabel(HttpServletRequest request,
-                                      String memberId,
+                                      String mcId,
                                       String labelIdArr,
                                       String clueId,
                                       Integer phaseStatus) {
-        return robService.deleteLabel(memberId, labelIdArr, clueId, phaseStatus);
+        return robService.deleteLabel(mcId, labelIdArr, clueId, phaseStatus);
     }
 
     /**

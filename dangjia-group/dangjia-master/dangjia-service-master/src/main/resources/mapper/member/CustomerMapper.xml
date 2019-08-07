@@ -129,8 +129,9 @@
 
     <select id="getCustomerGroupBy" resultType="com.dangjia.acg.modle.member.Customer">
         select * from dj_member_customer mc
-        inner join dj_member m
-        on mc.member_id=m.id
+        inner join dj_clue c
+        on mc.member_id=c.member_id
+        and c.cus_service=mc.user_id
         where m.mobile=#{mobile}
     </select>
     <select id="getCustomerMemberIdList" resultType="com.dangjia.acg.modle.member.Customer">

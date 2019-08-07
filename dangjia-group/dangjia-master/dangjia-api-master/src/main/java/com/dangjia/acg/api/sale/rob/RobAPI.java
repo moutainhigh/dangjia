@@ -51,7 +51,6 @@ public interface RobAPI {
     @PostMapping(value = "sale/rob/addLabel")
     @ApiOperation(value = "新增标签", notes = "新增标签")
     ServerResponse addLabel(@RequestParam("request")HttpServletRequest request,
-                            @RequestParam("memberId")String memberId,
                             @RequestParam("mcId")String mcId,
                             @RequestParam("labelId")String labelId,
                             @RequestParam("clueId")String clueId,
@@ -61,7 +60,7 @@ public interface RobAPI {
     @PostMapping(value = "sale/rob/deleteLabel")
     @ApiOperation(value = "删除标签", notes = "删除标签")
     ServerResponse deleteLabel(@RequestParam("request")HttpServletRequest request,
-                               @RequestParam("memberId")String memberId,
+                               @RequestParam("mcId")String mcId,
                                @RequestParam("labelIdArr")String labelIdArr,
                                @RequestParam("clueId")String clueId,
                                @RequestParam("phaseStatus")Integer phaseStatus);
