@@ -402,7 +402,7 @@
             h.city_id as cityId,
             h.village_id as villageId,
             h.visit_state as visitState,
-            h.create_date as createDate,
+            h.create_date as houseCreateDate,
             h.city_name as cityName,
             h.residential as villageName,
             h.build_square as buildSquare,
