@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.service.actuary.BudgetWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +48,10 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
         return budgetWorkerService.getBudgetWorkerByMyId(id);
     }
 
+    @Override
+    public BudgetWorker getHouseBudgetWorkerId(String cityId, String houseId, String workerGoodsId) {
+        return budgetWorkerService.getHouseBudgetWorkerId(houseId,workerGoodsId);
+    }
     /**
      * 根据houseId和wokerTypeId查询房子人工精算
      *

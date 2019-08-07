@@ -129,6 +129,24 @@ public class BudgetWorkerService {
         }
     }
 
+    /**
+     * 根据人工商品ID.获得指定房子的精算人工明细
+     */
+    public BudgetWorker getHouseBudgetWorkerId(String houseId, String workerGoodsId) {
+        try {
+            Example example = new Example(BudgetWorker.class);
+            example.createCriteria().andEqualTo(BudgetWorker.HOUSE_ID, houseId).andEqualTo(BudgetWorker.WORKER_GOODS_ID, workerGoodsId);
+            List<BudgetWorker> budgetWorker = iBudgetWorkerMapper.selectByExample(example);
+            if(budgetWorker.size()>0){
+                return budgetWorker.get(0);
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     //根据Id查询到精算
     public ServerResponse getBudgetWorkerByMyId(String id) {
         try {
@@ -165,7 +183,7 @@ public class BudgetWorkerService {
         for (int i = 0; i < goodsList.size(); i++) {
             JSONObject job = goodsList.getJSONObject(i);
             BudgetMaterial jobT = job.toJavaObject(BudgetMaterial.class);
-            if (jobT.getProductType() != 2) {//材料或者服务
+            if (jobT.getProductType() != 2) {//材料或者包工包料
                 try {
                     BudgetMaterial budgetMaterial = new BudgetMaterial();
                     budgetMaterial.setConvertCount(1d);
@@ -362,11 +380,11 @@ public class BudgetWorkerService {
                 JSONObject job = goodsList.getJSONObject(i);
                 String goodsId = job.getString("goodsId");//商品id
                 String productId = job.getString("productId");//货品id
-                Integer productType = Integer.parseInt(job.getString("productType"));//0:材料；1：服务；2:人工
+                Integer productType = Integer.parseInt(job.getString("productType"));//0:材料；1：包工包料；2:人工
                 String groupType = job.getString("groupType");//null：单品；有值：关联组合
                 String goodsGroupId = job.getString("goodsGroupId");//所属关联组
                 Double shopCount = Double.parseDouble(job.getString("shopCount"));//数量
-                if (0 == productType || 1 == productType) {//材料或者服务
+                if (0 == productType || 1 == productType) {//材料或者包工包料
                     Example example1 = new Example(BudgetMaterial.class);
                     example1.createCriteria().andEqualTo(BudgetMaterial.HOUSE_ID, houseId).andEqualTo(BudgetMaterial.PRODUCT_ID, productId).andEqualTo(BudgetMaterial.WORKER_TYPE_ID, workerTypeId);
                     int num = iBudgetMaterialMapper.selectCountByExample(example1);
@@ -526,7 +544,7 @@ public class BudgetWorkerService {
             map.put("caiLiaos", caiLiaos);
 
 
-            ImportExcel fuWu = new ImportExcel(file, 0, 2);//服务
+            ImportExcel fuWu = new ImportExcel(file, 0, 2);//包工包料
             List<ProductDTO> fuWuList = fuWu.getDataList(ProductDTO.class, 0);
             List<ProductDTO> fuWus = new ArrayList<>();
             for (int i = 0; i < fuWuList.size(); i++) {

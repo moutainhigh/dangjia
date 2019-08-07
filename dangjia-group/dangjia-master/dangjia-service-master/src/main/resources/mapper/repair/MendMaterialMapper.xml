@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.repair.IMendMaterialMapper">
 
     <sql id="all_columns">
@@ -30,25 +30,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!-- 查询房子工种所有补材料 -->
     <select id="askAndQuit"  resultType="com.dangjia.acg.modle.repair.MendMateriel">
         SELECT
-            mm.id,
-            mm.mend_order_id as mendOrderId,
-            mm.product_id as productId,
-            mm.product_sn as productSn,
-            mm.product_name as productName,
-            mm.product_nick_name as productNickName,
-            mm.price,
-            mm.cost,
-            mm.unit_name as unitName,
-            mm.shop_count as shopCount,
-            mm.total_price as totalPrice,
-            mm.product_type as productType,
-            mm.category_id as categoryId,
-            mm.image,
-            mm.create_date as createDate,
-            mm.modify_date as modifyDate
+        mm.id,
+        mm.mend_order_id as mendOrderId,
+        mm.product_id as productId,
+        mm.product_sn as productSn,
+        mm.product_name as productName,
+        mm.product_nick_name as productNickName,
+        mm.price,
+        mm.cost,
+        mm.unit_name as unitName,
+        mm.shop_count as shopCount,
+        mm.total_price as totalPrice,
+        mm.product_type as productType,
+        mm.category_id as categoryId,
+        mm.image,
+        mm.create_date as createDate,
+        mm.modify_date as modifyDate
         FROM dj_repair_mend_order mo, dj_repair_mend_materiel mm
         where
-            mo.house_id = #{houseId}
+        mo.house_id = #{houseId}
         and mo.worker_type_id = #{workerTypeId}
         and mo.type = 0
         and mo.state = 4
@@ -86,5 +86,66 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
 
+    <select id="getWarehouseGoods" parameterType="java.lang.String" resultType="com.dangjia.acg.dto.house.WarehouseGoodsDTO">
+       SELECT
+            orderId,
+            type,
+            number,
+            createDate,
+            state
+        FROM
+            (
+                (
+                SELECT
+                    o.id orderId,
+                    o.type,
+                    o.house_id,
+                    o.number,
+                    o.create_date createDate,
+                    o.state
+                FROM
+                    dj_repair_mend_order o
+                    INNER JOIN dj_repair_mend_materiel m ON o.id = m.mend_order_id
+                WHERE
+                    m.product_id =#{productId} and  o.house_id= #{houseId} and o.state!=0
+                GROUP BY
+                    o.id
+                ) UNION ALL
+                (
+                SELECT
+                    o.id orderId,
+                    '7' type,
+                    o.house_id,
+                    o.number,
+                    o.create_date createDate,
+                    o.shipping_state state
+                FROM
+                    dj_deliver_split_deliver o
+                    INNER JOIN dj_deliver_order_split_item m ON o.id = m.split_deliver_id
+                WHERE
+                    m.product_id = #{productId} and  o.house_id= #{houseId}
+                GROUP BY
+                    o.id
+                )
+            ) a
+        ORDER BY
+            a.createDate DESC
+    </select>
+
+    <select id="getWarehouseWorker" parameterType="java.lang.String" resultType="com.dangjia.acg.dto.house.WarehouseGoodsDTO">
+       SELECT
+			o.id orderId,
+			o.type,
+			o.house_id,
+			o.number,
+			o.create_date createDate,
+			o.state
+        FROM dj_repair_mend_order o
+        INNER JOIN dj_repair_mend_worker m ON o.id = m.mend_order_id
+        WHERE
+                m.worker_goods_id =#{productId} and  o.house_id= #{houseId}
+        GROUP BY
+                o.id
+    </select>
 </mapper>
 
