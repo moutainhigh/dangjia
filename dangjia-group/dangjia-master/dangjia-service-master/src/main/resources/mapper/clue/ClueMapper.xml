@@ -182,7 +182,7 @@
           </if>
         FROM dj_clue c
         <if test="type==''">
-            WHERE c.data_status = 0 and c.stage NOT IN (2,3,4)
+            WHERE c.data_status = 0 and c.stage NOT IN (2,3)
             <if test="null!=userId and ''!=userId">
                 and c.cus_service=#{userId}
             </if>
