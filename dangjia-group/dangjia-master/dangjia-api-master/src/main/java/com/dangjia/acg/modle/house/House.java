@@ -216,6 +216,11 @@ public class House extends BaseEntity {
     @ApiModelProperty("自定义房子工序顺序 5,4,3逗号分隔")
     private String customSort;
 
+    @Column(name = "custom_edit")
+    @Desc(value = "业主申请修复精算房子工序 5,4,3逗号分隔")
+    @ApiModelProperty("业主申请修复精算房子工序 5,4,3逗号分隔")
+    private String customEdit;
+
     @Column(name = "work_deposit_id")
     @Desc(value = "结算比例ID")
     @ApiModelProperty("结算比例ID")

@@ -70,13 +70,9 @@ public class ActuaryOperationService {
     @Autowired
     private IWorkerGoodsMapper workerGoodsMapper;
     @Autowired
-    private ITechnologyMapper technologyMapper;
-    @Autowired
     private IBrandSeriesMapper iBrandSeriesMapper;
     @Autowired
     private IBrandMapper iBrandMapper;
-    @Autowired
-    private IAttributeValueMapper iAttributeValueMapper;
     @Autowired
     private HouseAPI houseAPI;
     @Autowired

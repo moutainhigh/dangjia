@@ -18,6 +18,7 @@ import java.util.List;
 @Repository
 public interface IStoreUserMapper extends Mapper<StoreUser> {
 
-    List<StoreUserDTO> getStoreUsers(@Param("storeId") String storeId, @Param("searchKey") String searchKey ,@Param("limit") Integer limit);
+    List<StoreUserDTO> getStoreUsers(@Param("storeId") String storeId, @Param("searchKey") String searchKey, @Param("limit") Integer limit);
 
+    String getVisitUser(@Param("userId") String userId);
 }

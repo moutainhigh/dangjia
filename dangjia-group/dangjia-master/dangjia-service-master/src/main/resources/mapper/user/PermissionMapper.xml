@@ -90,7 +90,10 @@
     LEFT JOIN dj_user_role_permission rp ON rp.permit_id=p.id
     LEFT JOIN dj_user_role r ON r.id=rp.role_id
     LEFT JOIN dj_system_job_role ur ON ur.role_id=r.id
-    WHERE ur.job_id=#{userId} AND p.sys_id=#{source}
+    WHERE ur.job_id=#{userId}
+    <if test="null!=source and ''!=source">
+      AND p.sys_id=#{source}
+    </if>
     GROUP BY p.id
     order by p.zindex
   </select>

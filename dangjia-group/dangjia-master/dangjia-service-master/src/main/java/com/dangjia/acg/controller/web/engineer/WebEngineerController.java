@@ -108,7 +108,14 @@ public class WebEngineerController implements WebEngineerAPI {
     public ServerResponse houseFlowList(String houseId) {
         return engineerService.houseFlowList(houseId);
     }
-
+    /**
+     * 查看工序
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseFlowList(String houseId) {
+        return engineerService.getHouseFlowList(houseId);
+    }
     /**
      * 工匠钱包 信息
      */

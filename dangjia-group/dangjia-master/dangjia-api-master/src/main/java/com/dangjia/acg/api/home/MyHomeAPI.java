@@ -23,5 +23,10 @@ public interface MyHomeAPI {
     @ApiOperation(value = "业主端，我的装修界面", notes = "业主端，我的装修界面")
     ServerResponse getMyHouse(@RequestParam("userToken") String userToken, @RequestParam("isNew")String isNew) ;
 
+    @PostMapping("data/home/tubogram/image")
+    @ApiOperation(value = "获得房子的水电管路图", notes = "获得房子的水电管路图")
+    ServerResponse getHouseTubogramImage(@RequestParam("houseId")String houseId);
+
+
 
 }
