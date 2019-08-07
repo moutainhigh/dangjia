@@ -276,7 +276,7 @@ public class RobService {
             //线索阶段查询详情
             Map<String, Object> map = new HashMap<>();
             map.put("id", clueId);
-            map.put("userId", accessToken.getUserId());
+//            map.put("userId", accessToken.getUserId());
             UserInfoDTO userInfoDTO = clueMapper.queryTips(map);
 
             if (!CommonUtil.isEmpty(userInfoDTO)) {

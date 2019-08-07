@@ -138,6 +138,7 @@
                 and mc.stage in (0,1)
                 <if test="null!=userId and ''!=userId">
                     and mc.user_id=#{userId}
+                    and c.cus_service=#{userId}
                 </if>
                 <if test="null!=storeId and ''!=storeId">
                     and mc.store_id=#{storeId}
