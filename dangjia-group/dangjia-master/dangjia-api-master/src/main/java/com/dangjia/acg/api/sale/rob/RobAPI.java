@@ -62,7 +62,7 @@ public interface RobAPI {
     ServerResponse deleteLabel(@RequestParam("request")HttpServletRequest request,
                                @RequestParam("memberId")String memberId,
                                @RequestParam("labelIdArr")String labelIdArr,
-                               @RequestParam("clueIdr")String clueIdr,
+                               @RequestParam("clueId")String clueId,
                                @RequestParam("phaseStatus")Integer phaseStatus);
 
 

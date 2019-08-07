@@ -580,6 +580,7 @@
         c.remark as remark,
         c.phase_status as phaseStatus,
         c.stage as stage,
+        c.create_date as createDate,
         m.name as userName,
         m.head as head,
         m.id as memberId

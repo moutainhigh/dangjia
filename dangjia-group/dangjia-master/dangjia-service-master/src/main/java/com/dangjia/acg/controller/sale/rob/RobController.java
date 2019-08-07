@@ -95,9 +95,9 @@ public class RobController implements RobAPI {
     public ServerResponse deleteLabel(HttpServletRequest request,
                                       String memberId,
                                       String labelIdArr,
-                                      String clueIdr,
+                                      String clueId,
                                       Integer phaseStatus) {
-        return robService.deleteLabel(memberId, labelIdArr, clueIdr, phaseStatus);
+        return robService.deleteLabel(memberId, labelIdArr, clueId, phaseStatus);
     }
 
     /**

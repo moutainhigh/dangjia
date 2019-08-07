@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.persistence.Entity;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -20,6 +21,9 @@ public class UserInfoDTO {
 
     @ApiModelProperty("销售id")
     private String userId;
+
+    @ApiModelProperty("创建时间")
+    private Date createDate;// 创建日期
 
     @ApiModelProperty("线索id")
     private String clueId;
