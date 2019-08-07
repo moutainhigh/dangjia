@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.web.member;
 
 import com.dangjia.acg.api.web.member.WebMemberAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.member.Customer;
@@ -36,7 +37,9 @@ public class WebMemberController implements WebMemberAPI {
     @Override
     @ApiMethod
     public ServerResponse getMemberList(HttpServletRequest request, PageDTO pageDTO, Integer stage, String userRole,String searchKey, String parentId, String childId,String orderBy,String type, String userId,String beginDate,String endDate) {
-        return memberService.getMemberList(pageDTO, stage,  userRole,searchKey, parentId, childId, orderBy,type,userId,beginDate,endDate);
+        String cityId = request.getParameter(Constants.CITY_ID);
+        String userID = request.getParameter(Constants.USERID);
+        return memberService.getMemberList(pageDTO,  cityId, userID , stage,  userRole,searchKey, parentId, childId, orderBy,type,userId,beginDate,endDate);
     }
 
     @Override
