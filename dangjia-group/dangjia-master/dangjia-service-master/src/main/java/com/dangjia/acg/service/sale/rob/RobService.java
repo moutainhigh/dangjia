@@ -102,7 +102,7 @@ public class RobService {
         List<RobDTO> list = clueMapper.queryRobSingledata(map);
 
         //查询标签
-//        List<RobDTO> robDTOs = new ArrayList<>();
+        List<RobDTO> robDTOs = new ArrayList<>();
         if(!list.isEmpty()){
             for (RobDTO li : list) {
                 RobDTO robDTO = new RobDTO();
@@ -111,17 +111,23 @@ public class RobService {
                     List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
                     robDTO.setList(labelByIds);
                 }
-//            robDTO.setPhone(li.getPhone());
-//            robDTO.setOwerName(li.getOwerName());
-//            robDTO.setVisitState(li.getVisitState());
-                list.add(robDTO);
+                robDTO.setPhone(li.getPhone());
+                robDTO.setOwerName(li.getOwerName());
+                robDTO.setVisitState(li.getVisitState());
+                robDTO.setClueId(li.getClueId());
+                robDTO.setMcId(li.getMcId());
+                robDTO.setStage(li.getStage());
+                robDTO.setPhaseStatus(li.getPhaseStatus());
+                robDTO.setHouseId(li.getHouseId());
+                robDTO.setMemberId(li.getMemberId());
+                robDTOs.add(robDTO);
             }
         }
 
-        if (list.size() <= 0) {
+        if (robDTOs.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        return ServerResponse.createBySuccess("查询提成列表", list);
+        return ServerResponse.createBySuccess("查询提成列表", robDTOs);
     }
 
 
