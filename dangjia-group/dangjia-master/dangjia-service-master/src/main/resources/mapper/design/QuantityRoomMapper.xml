@@ -13,6 +13,8 @@
             member_id AS memberId,
             user_id AS userId,
             type,
+            elevator,
+            floor,
             operation_type AS operationType
         FROM
             dj_design_quantity_room
@@ -34,6 +36,8 @@
             member_id AS memberId,
             user_id AS userId,
             type,
+            elevator,
+            floor,
             operation_type AS operationType
         FROM
             dj_design_quantity_room
@@ -53,6 +57,8 @@
             member_id AS memberId,
             user_id AS userId,
             type,
+            elevator,
+            floor,
             operation_type AS operationType
         FROM
             dj_design_quantity_room

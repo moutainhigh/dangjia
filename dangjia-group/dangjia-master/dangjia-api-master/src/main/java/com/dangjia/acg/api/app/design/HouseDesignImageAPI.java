@@ -198,6 +198,8 @@ public interface HouseDesignImageAPI {
      * @param houseId   必选 string 房子ID
      * @param userId    可选 string 可以为空
      * @param images    必选 string 图片","号分割
+     * @param elevator  必选 int 是否电梯房：0:否，1：是
+     * @param floor     必选 string 楼层
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/设计模块
      * @title 添加量房
@@ -215,7 +217,9 @@ public interface HouseDesignImageAPI {
                                    @RequestParam("userToken") String userToken,
                                    @RequestParam("houseId") String houseId,
                                    @RequestParam("userId") String userId,
-                                   @RequestParam("images") String images);
+                                   @RequestParam("images") String images,
+                                   @RequestParam("elevator") Integer elevator,
+                                   @RequestParam("floor") String floor);
 
     /**
      * showdoc
@@ -237,6 +241,8 @@ public interface HouseDesignImageAPI {
      * @return_param operationType int 操作类型：0:执行，1：跳过
      * @return_param userType int 操作人类型：-1为未知，0为App，1为中台
      * @return_param userName string 操作人名称
+     * @return_param elevator int 是否电梯房：0:否，1：是
+     * @return_param floor string 楼层
      * @return_param images List 图片集合
      * @return_param images-id string id
      * @return_param images-modifyDate string 修改时间
