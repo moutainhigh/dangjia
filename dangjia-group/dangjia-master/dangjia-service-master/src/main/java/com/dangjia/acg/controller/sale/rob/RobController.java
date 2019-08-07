@@ -77,10 +77,11 @@ public class RobController implements RobAPI {
     @ApiMethod
     public ServerResponse addLabel(HttpServletRequest request,
                                    String memberId,
+                                   String mcId,
                                    String labelId,
                                    String clueId,
                                    Integer phaseStatus) {
-        return robService.addLabel(memberId, labelId, clueId, phaseStatus);
+        return robService.addLabel(memberId,mcId, labelId, clueId, phaseStatus);
     }
 
     /**

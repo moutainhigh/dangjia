@@ -102,7 +102,7 @@
     </select>
 
     <select id="queryLabelIdArr" resultType="java.lang.String" parameterType="java.lang.String">
-        select label_id_arr as labelIdArr from dj_member_customer mc where mc.member_id = #{memberId}
+        select label_id_arr as labelIdArr from dj_member_customer mc where mc.id = #{mcId}
     </select>
 
     <select id="queryLabelId" resultType="java.lang.String" parameterType="java.lang.String">
@@ -117,7 +117,7 @@
     <update id="upDateLabelIdArr" parameterType="java.util.Map">
         update dj_member_customer
         set label_id_arr = #{labelIdArr}
-        where member_id = #{memberId}
+        where id = #{mcId}
     </update>
 
     <update id="upDateLabelId" parameterType="java.util.Map">

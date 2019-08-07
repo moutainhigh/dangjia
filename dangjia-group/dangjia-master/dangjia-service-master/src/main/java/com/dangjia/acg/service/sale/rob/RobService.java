@@ -322,12 +322,17 @@ public class RobService {
                                    String labelId,
                                    String clueId,
                                    Integer phaseStatus) {
+    public ServerResponse addLabel(String memberId,
+                                   String mcId,
+                                   String labelId,
+                                   String clueId,
+                                   Integer phaseStatus) {
         try {
             if (phaseStatus == 1) {
                 //客户阶段新增标签
                 Map<String, Object> Map = new HashMap<>();
-                if (!CommonUtil.isEmpty(memberId)) {
-                    String str = iCustomerMapper.queryLabelIdArr(memberId);
+                if (!CommonUtil.isEmpty(mcId)) {
+                    String str = iCustomerMapper.queryLabelIdArr(mcId);
                     if (!CommonUtil.isEmpty(str)) {
                         String[] strs = str.split(",");
                         for (String s : strs) {
@@ -339,7 +344,7 @@ public class RobService {
 
                     String labelIdrr = str + "," + labelId;
                     Map.put("labelIdArr", labelIdrr);
-                    Map.put("memberId", memberId);
+                    Map.put("mcId", mcId);
                     iCustomerMapper.upDateLabelIdArr(Map);
                     return ServerResponse.createBySuccessMessage("新增成功");
                 }
