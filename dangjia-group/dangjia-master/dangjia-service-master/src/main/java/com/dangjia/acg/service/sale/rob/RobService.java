@@ -356,9 +356,6 @@ public class RobService {
                         }
                     }
                     String labelIdrr = str + "," + labelId;
-                    Map.put("labelIdArr", labelIdrr);
-                    Map.put("clueId", clueId);
-                    iCustomerMapper.upDateLabelId(Map);
                     Map.put("labelId", labelIdrr);
                     Map.put("clueId", clueId);
                     iCustomerMapper.upDateLabelId(Map);
