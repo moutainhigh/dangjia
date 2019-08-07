@@ -314,12 +314,10 @@ public class RobService {
     /**
      * 新增标签
      *
-     * @param memberId
      * @param labelId
      * @return
      */
-    public ServerResponse addLabel(String memberId,
-                                   String mcId,
+    public ServerResponse addLabel(String mcId,
                                    String labelId,
                                    String clueId,
                                    Integer phaseStatus) {
@@ -359,8 +357,8 @@ public class RobService {
                     }
                     String labelIdrr = str + "," + labelId;
                     Map.put("labelIdArr", labelIdrr);
-                    Map.put("memberId", memberId);
-                    iCustomerMapper.upDateLabelIdArr(Map);
+                    Map.put("clueId", clueId);
+                    iCustomerMapper.upDateLabelId(Map);
                     return ServerResponse.createBySuccessMessage("新增成功");
                 }
             }
@@ -375,18 +373,20 @@ public class RobService {
     /**
      * 删除标签
      *
-     * @param memberId
      * @param labelIdArr
      * @return
      */
-    public ServerResponse deleteLabel(String memberId, String labelIdArr, String clueId, Integer phaseStatus) {
+    public ServerResponse deleteLabel(String mcId,
+                                      String labelIdArr,
+                                      String clueId,
+                                      Integer phaseStatus) {
         try {
             if (phaseStatus == 1) {
                 //删除客户阶段标签
                 Map<String, Object> Map = new HashMap<>();
-                if (!CommonUtil.isEmpty(memberId)) {
+                if (!CommonUtil.isEmpty(mcId)) {
                     Map.put("labelIdArr", labelIdArr);
-                    Map.put("memberId", memberId);
+                    Map.put("mcId", mcId);
                     iCustomerMapper.upDateLabelIdArr(Map);
                     return ServerResponse.createBySuccessMessage("删除成功");
                 }
