@@ -380,7 +380,7 @@ public class RobService {
             } else {
                 //删除线索阶段标签
                 Map<String, Object> Map = new HashMap<>();
-                if (!CommonUtil.isEmpty(memberId)) {
+                if (!CommonUtil.isEmpty(clueId)) {
                     Map.put("labelId", labelIdArr);
                     Map.put("clueId", clueId);
                     iCustomerMapper.upDateLabelId(Map);
