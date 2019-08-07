@@ -185,13 +185,19 @@
 			bg.create_date AS createDate,
 			bg.modify_date AS modifyDate
 		FROM dj_basics_goods bg
+		INNER JOIN dj_basics_product bp ON bp.goods_id = bg.id
+		INNER JOIN dj_basics_brand bb ON bb.id = bp.brand_id
+		INNER JOIN dj_basics_brand_series bbs ON bbs.id = bp.brand_series_id
 		where 1=1
 		<if test="categoryId!=null and categoryId!=''">
 			and bg.category_id=#{categoryId}
 		</if>
 		<if test="name!=null and name!=''">
 			AND (
-			bg.`name` LIKE CONCAT( '%', #{name}, '%' )
+			bp.`name` LIKE CONCAT('%',#{name}, '%' )
+			OR bb.`name` LIKE CONCAT('%',#{name}, '%' )
+			OR bbs.`name` LIKE CONCAT( '%', #{name}, '%' )
+			OR bg.`other_name` LIKE CONCAT( '%', #{name}, '%' )
 			)
 		</if>
 		GROUP BY bg.id

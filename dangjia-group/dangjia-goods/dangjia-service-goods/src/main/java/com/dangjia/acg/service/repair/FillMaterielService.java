@@ -209,7 +209,7 @@ public class FillMaterielService {
 
     /**
      * 工匠补货查询商品库普通材料
-     * 是大管家就查询商品库服务材料
+     * 是大管家就查询商品库包工包料材料
      */
     public ServerResponse repairLibraryMaterial(String userToken, String categoryId, String name, PageDTO pageDTO) {
         try {
