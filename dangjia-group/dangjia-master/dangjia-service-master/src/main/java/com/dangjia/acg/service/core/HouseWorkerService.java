@@ -786,6 +786,12 @@ public class HouseWorkerService {
 
                 hfa.setApplyDec("尊敬的业主，您好！<br/>" +
                 "好工匠在当家，当家工匠" + workerType.getName() + "【"+worker.getName()+"】已到吉屋准备开工");
+
+        hfa.setMemberCheck(1);//默认业主审核状态通过
+        hfa.setSupervisorCheck(1);//默认大管家审核状态通过
+        houseFlowApplyMapper.insert(hfa);
+        houseService.insertConstructionRecord(hfa);
+        setHouseFlowApplyImage(hfa, house, imageList);
         //已经停工的工序，若工匠提前复工，则复工日期以及之后的停工全部取消，
         // 原来被停工推后了的计划完工日期往前推，推的天数等于被取消的停工天数
         Date start = DateUtil.toDate(DateUtil.dateToString(new Date(),null));
