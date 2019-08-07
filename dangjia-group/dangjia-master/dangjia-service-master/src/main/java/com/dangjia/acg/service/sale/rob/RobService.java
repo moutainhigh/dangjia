@@ -309,7 +309,10 @@ public class RobService {
      * @param labelId
      * @return
      */
-    public ServerResponse addLabel(String memberId, String labelId, String clueId, Integer phaseStatus) {
+    public ServerResponse addLabel(String memberId,
+                                   String labelId,
+                                   String clueId,
+                                   Integer phaseStatus) {
         try {
             if (phaseStatus == 1) {
                 //客户阶段新增标签
@@ -345,9 +348,9 @@ public class RobService {
                         }
                     }
                     String labelIdrr = str + "," + labelId;
-                    Map.put("labelIdArr", labelIdrr);
-                    Map.put("memberId", memberId);
-                    iCustomerMapper.upDateLabelIdArr(Map);
+                    Map.put("labelId", labelIdrr);
+                    Map.put("clueId", clueId);
+                    iCustomerMapper.upDateLabelId(Map);
                     return ServerResponse.createBySuccessMessage("新增成功");
                 }
             }
