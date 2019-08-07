@@ -1,4 +1,4 @@
-package com.dangjia.acg.mapper.sale.achievement;
+package com.dangjia.acg.mapper.sale;
 
 import com.dangjia.acg.dto.sale.achievement.AchievementInfoDTO;
 import com.dangjia.acg.dto.sale.achievement.UserAchievementInfoDTO;
@@ -22,7 +22,7 @@ public interface AchievementMapper {
      * @param map
      * @return
      */
-    Integer queryDealNumber(Map<String,Object> map);
+    Integer queryDealNumber(Map<String, Object> map);
 
 
     /**
@@ -30,32 +30,32 @@ public interface AchievementMapper {
      * @param map
      * @return
      */
-    List<AchievementInfoDTO> queryVisitState(Map<String,Object> map);
+    List<AchievementInfoDTO> queryVisitState(Map<String, Object> map);
 
     /**
      * 全部订单状态
      * @param map
      * @return
      */
-    List<AchievementInfoDTO> queryMeterVisitState(Map<String,Object> map);
+    List<AchievementInfoDTO> queryMeterVisitState(Map<String, Object> map);
 
     /**
      * 根据店长查询销售人员的下单数
      * @param map
      * @return
      */
-    List<AchievementInfoDTO> querySingleNumber(Map<String,Object> map);
+    List<AchievementInfoDTO> querySingleNumber(Map<String, Object> map);
 
     /**
      * 查询店长下面员工
      */
-    List<AchievementInfoDTO>queryUserId(Map<String,Object> map);
+    List<AchievementInfoDTO>queryUserId(Map<String, Object> map);
 
     /**
      *  查询员工业绩
      * @param map
      * @return
      */
-    List<UserAchievementInfoDTO>queryUserAchievementData(Map<String,Object> map);
+    List<UserAchievementInfoDTO>queryUserAchievementData(Map<String, Object> map);
 
 }

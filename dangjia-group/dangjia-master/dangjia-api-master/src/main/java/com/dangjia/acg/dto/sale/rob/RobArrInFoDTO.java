@@ -31,6 +31,9 @@ public class RobArrInFoDTO {
     @ApiModelProperty("备注")
     private String remark;
 
+    @ApiModelProperty("昵称")
+    private String nickName;
+
     @ApiModelProperty("客户id")
     private String memberId;
 

@@ -358,17 +358,22 @@
     </select>
 
     <select id="queryRobSingledata" resultType="com.dangjia.acg.dto.sale.rob.RobDTO" parameterType="java.util.Map">
-       select c.owername as owerName,
+       select
+        c.owername as owerName,
         c.phone as phone,
         c.cus_service as cusService,
         c.member_id as memberId,
-        h.id as id,
+        c.id as clueId,
+        c.stage as stage,
+        c.phase_status as phaseStatus,
+        h.id as houseId,
         h.member_id as memberId,
         h.city_id as cityId,
         h.village_id as villageId,
         h.visit_state as visitState,
         h.create_date as createDate,
-        mc.label_id_arr as labelIdArr
+        mc.label_id_arr as labelIdArr,
+        mc.id as mcId
         from
         dj_house h
         INNER JOIN dj_member_customer mc on h.member_id = mc.member_id

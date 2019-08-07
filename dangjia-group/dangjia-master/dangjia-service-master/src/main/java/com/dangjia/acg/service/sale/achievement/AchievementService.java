@@ -7,7 +7,7 @@ import com.dangjia.acg.dto.sale.achievement.AchievementDataDTO;
 import com.dangjia.acg.dto.sale.achievement.AchievementInfoDTO;
 import com.dangjia.acg.dto.sale.achievement.UserAchievementDataDTO;
 import com.dangjia.acg.dto.sale.achievement.UserAchievementInfoDTO;
-import com.dangjia.acg.mapper.sale.achievement.AchievementMapper;
+import com.dangjia.acg.mapper.sale.AchievementMapper;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;

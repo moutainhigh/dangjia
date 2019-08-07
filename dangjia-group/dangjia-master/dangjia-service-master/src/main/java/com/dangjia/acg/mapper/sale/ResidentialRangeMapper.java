@@ -1,11 +1,9 @@
-package com.dangjia.acg.mapper.sale.residential;
+package com.dangjia.acg.mapper.sale;
 
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
-
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,6 +15,6 @@ import java.util.List;
 public interface ResidentialRangeMapper extends Mapper<ResidentialRange> {
 
 
-   ResidentialRange selectSingleResidentialRange (@Param("buildingId") String buildingId);
+   ResidentialRange selectSingleResidentialRange(@Param("buildingId") String buildingId);
 
 }

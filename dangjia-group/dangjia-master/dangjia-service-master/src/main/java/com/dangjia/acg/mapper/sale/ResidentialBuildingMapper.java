@@ -1,7 +1,6 @@
-package com.dangjia.acg.mapper.sale.residential;
+package com.dangjia.acg.mapper.sale;
 
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
-import com.dangjia.acg.modle.sale.residential.ResidentialRange;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -17,7 +16,7 @@ import java.util.List;
 @Repository
 public interface ResidentialBuildingMapper extends Mapper<ResidentialBuilding> {
 
-    ResidentialBuilding selectSingleResidentialBuilding(@Param("storeId") String storeId,@Param("building") String building,@Param("villageId") String villageId);
+    ResidentialBuilding selectSingleResidentialBuilding(@Param("storeId") String storeId, @Param("building") String building, @Param("villageId") String villageId);
 
-    List<ResidentialBuilding> getvillageIdGroupBy(@Param("buildingId") String []buildingId);
+    List<ResidentialBuilding> getvillageIdGroupBy(@Param("buildingId") String[] buildingId);
 }

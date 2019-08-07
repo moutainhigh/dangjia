@@ -18,13 +18,15 @@ import com.dangjia.acg.mapper.clue.ClueTalkMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
-import com.dangjia.acg.mapper.sale.royalty.IntentionHouseMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.sale.IntentionHouseMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.clue.ClueTalk;
 import com.dangjia.acg.modle.home.IntentionHouse;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.CustomerRecord;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -64,6 +66,8 @@ public class RobService {
     private ConfigMessageService configMessageService;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private IMemberMapper iMemberMapper;
 
     /**
      * 查询抢单列表
@@ -172,7 +176,6 @@ public class RobService {
             List<RobInfoDTO> robInfoDTO = clueMapper.queryCustomerInfo(map);
 
             if (!CommonUtil.isEmpty(robInfoDTO)) {
-
                 robArrInFoDTO.setOwerName(robInfoDTO.get(0).getOwerName());
                 robArrInFoDTO.setPhone(robInfoDTO.get(0).getPhone());
                 robArrInFoDTO.setWechat(robInfoDTO.get(0).getWechat());
@@ -185,6 +188,12 @@ public class RobService {
                 robArrInFoDTO.setUserId(robInfoDTO.get(0).getUserId());
                 robArrInFoDTO.setStage(robInfoDTO.get(0).getStage());
 
+                Member member = iMemberMapper.selectByPrimaryKey(robInfoDTO.get(0).getStage());
+
+                if(null != member.getNickName()){
+                    robArrInFoDTO.setNickName(member.getNickName());
+                }
+                
                 //查询意向房子
                 List<IntentionHouseDTO> intentionHouseList = intentionHouseMapper.queryIntentionHouse(robInfoDTO.get(0).getClueId());
                 robArrInFoDTO.setIntentionHouseList(intentionHouseList);
@@ -343,10 +352,10 @@ public class RobService {
                 }
             }
 
-            return ServerResponse.createByErrorMessage("修改失败");
+            return ServerResponse.createByErrorMessage("新增失败");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("修改失败");
+            return ServerResponse.createByErrorMessage("新增失败");
         }
     }
 
@@ -379,10 +388,10 @@ public class RobService {
                 }
             }
 
-            return ServerResponse.createByErrorMessage("修改失败");
+            return ServerResponse.createByErrorMessage("删除失败");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("修改失败");
+            return ServerResponse.createByErrorMessage("删除失败");
         }
     }
 

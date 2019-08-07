@@ -7,8 +7,6 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.mapper.sale.royalty.RoyaltyMapper;
-import com.dangjia.acg.mapper.sale.royalty.SurfaceMapper;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltyDetailsSurface;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltySurface;
 import com.dangjia.acg.modle.store.Store;

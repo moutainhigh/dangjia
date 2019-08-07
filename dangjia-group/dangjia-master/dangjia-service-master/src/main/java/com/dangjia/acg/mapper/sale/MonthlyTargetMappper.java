@@ -1,4 +1,4 @@
-package com.dangjia.acg.mapper.sale.stroe;
+package com.dangjia.acg.mapper.sale;
 
 import com.dangjia.acg.modle.sale.store.MonthlyTarget;
 import org.springframework.stereotype.Repository;
