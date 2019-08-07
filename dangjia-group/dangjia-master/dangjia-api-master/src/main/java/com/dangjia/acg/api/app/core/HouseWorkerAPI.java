@@ -92,10 +92,6 @@ public interface HouseWorkerAPI {
                                              @RequestParam("userToken") String userToken,
                                              @RequestParam("cityId") String cityId);
 
-    @PostMapping("app/core/houseWorker/getMyHomePage")
-    @ApiOperation(value = "获取我的界面", notes = "获取我的界面")
-    ServerResponse getMyHomePage(@RequestParam("userToken") String userToken,
-                                 @RequestParam("cityId") String cityId);
 
     @PostMapping("app/core/houseWorker/getHouseFlowApply")
     @ApiOperation(value = "获取申请单明细", notes = "获取申请单明细")
