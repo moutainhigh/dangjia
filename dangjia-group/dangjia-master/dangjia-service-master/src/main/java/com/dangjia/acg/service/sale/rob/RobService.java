@@ -102,23 +102,26 @@ public class RobService {
         List<RobDTO> list = clueMapper.queryRobSingledata(map);
 
         //查询标签
-        List<RobDTO> robDTOs = new ArrayList<>();
-        for (RobDTO li : list) {
-            RobDTO robDTO = new RobDTO();
-            if (!CommonUtil.isEmpty(li.getLabelIdArr())) {
-                String[] labelIds = li.getLabelIdArr().split(",");
-                List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
-                robDTO.setList(labelByIds);
+//        List<RobDTO> robDTOs = new ArrayList<>();
+        if(!list.isEmpty()){
+            for (RobDTO li : list) {
+                RobDTO robDTO = new RobDTO();
+                if (!CommonUtil.isEmpty(li.getLabelIdArr())) {
+                    String[] labelIds = li.getLabelIdArr().split(",");
+                    List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
+                    robDTO.setList(labelByIds);
+                }
+//            robDTO.setPhone(li.getPhone());
+//            robDTO.setOwerName(li.getOwerName());
+//            robDTO.setVisitState(li.getVisitState());
+                list.add(robDTO);
             }
-            robDTO.setPhone(li.getPhone());
-            robDTO.setOwerName(li.getOwerName());
-            robDTO.setVisitState(li.getVisitState());
-            robDTOs.add(robDTO);
         }
-        if (robDTOs.size() <= 0) {
+
+        if (list.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        return ServerResponse.createBySuccess("查询提成列表", robDTOs);
+        return ServerResponse.createBySuccess("查询提成列表", list);
     }
 
 
