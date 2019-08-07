@@ -188,7 +188,7 @@ public class RobService {
                 robArrInFoDTO.setUserId(robInfoDTO.get(0).getUserId());
                 robArrInFoDTO.setStage(robInfoDTO.get(0).getStage());
 
-                Member member = iMemberMapper.selectByPrimaryKey(robInfoDTO.get(0).getStage());
+                Member member = iMemberMapper.selectByPrimaryKey(robInfoDTO.get(0).getMemberId());
 
                 if(null != member.getNickName()){
                     robArrInFoDTO.setNickName(member.getNickName());
