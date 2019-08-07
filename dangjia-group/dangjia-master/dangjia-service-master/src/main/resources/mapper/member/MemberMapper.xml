@@ -53,12 +53,14 @@
         <include refid="all_columns"/>
         FROM dj_member w
         INNER JOIN dj_member_info mi on mi.member_id = w.id and mi.policy_id='2'
+        INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id FROM dj_member_city c GROUP BY c.member_id ) mt ON mt.member_id = w.id
+        AND FIND_IN_SET(#{cityId}, mt.city_id )
         WHERE w.data_status = 0
         <if test="name!=null and name!=''">
             and(
-            w.name LIKE CONCAT('%',#{name},'%')
-            or
-            w.mobile LIKE CONCAT('%',#{name},'%')
+              w.name LIKE CONCAT('%',#{name},'%')
+              or
+              w.mobile LIKE CONCAT('%',#{name},'%')
             )
         </if>
         <if test="workerTypeId!=null and workerTypeId!=''">

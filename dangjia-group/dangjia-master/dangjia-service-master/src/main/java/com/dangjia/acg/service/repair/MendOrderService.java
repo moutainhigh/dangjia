@@ -37,7 +37,6 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.member.MemberInfo;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -215,7 +214,7 @@ public class MendOrderService {
     /**
      * 业主一键退
      */
-    public ServerResponse landlordOnekeyBack(String userToken,  String houseId) {
+    public ServerResponse landlordOnekeyBack(String userToken, String houseId) {
         try {
             House house = houseMapper.selectByPrimaryKey(houseId);
             if (house == null) {
@@ -225,20 +224,20 @@ public class MendOrderService {
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo(Warehouse.HOUSE_ID, houseId);
             List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
-            List<Map> productArrMap=new ArrayList<>();
+            List<Map> productArrMap = new ArrayList<>();
             for (Warehouse warehouse : warehouseList) {
                 Map<String, Object> map = new HashMap<>();
-                double num=warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount();
-                map.put("num",num);//剩余数量 所有买的数量 - 业主退货 - 要的
+                double num = warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount();
+                map.put("num", num);//剩余数量 所有买的数量 - 业主退货 - 要的
                 map.put("productId", warehouse.getProductId());
-                if(num>0) {
+                if (num > 0) {
                     productArrMap.add(map);
                 }
 
             }
             //生成退货单
-            String productArr=JSON.toJSONString(productArrMap);
-            ServerResponse response=landlordBack(userToken,houseId,productArr);
+            String productArr = JSON.toJSONString(productArrMap);
+            ServerResponse response = landlordBack(userToken, houseId, productArr);
             if (!response.isSuccess()) {
                 return response;
             }
@@ -1053,7 +1052,7 @@ public class MendOrderService {
                         if (product != null) {
                             Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
                             //判断用户角色是否为业主业主可任意退
-                            if(mendOrder.getType() == 2) {
+                            if (mendOrder.getType() == 2) {
                                 if (goods != null && goods.getSales() == 1) {
                                     continue;//跳过
                                 }
@@ -1104,7 +1103,7 @@ public class MendOrderService {
             mendMateriel.setUnitName(unitName);
             mendMateriel.setProductType(forMasterAPI.getGoods(house.getCityId(), product.getGoodsId()).getType());//0：材料；1：包工包料
         }
-        ServerResponse serverResponse = unitAPI.getUnitById(request, product.getConvertUnit());
+        ServerResponse serverResponse = unitAPI.getUnitById(request, house.getCityId(), product.getConvertUnit());
         Unit unit;
         if (serverResponse.getResultObj() instanceof JSONObject) {
             unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);

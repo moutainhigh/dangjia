@@ -170,7 +170,7 @@ public class TaskService {
             return taskList;
         }
         if (worker.getWorkerType() == 3) {
-            //退材料退服务
+            //退材料退包工包料
             Example example = new Example(MendDeliver.class);
             example.createCriteria().andEqualTo(MendDeliver.HOUSE_ID, houseId)
                     .andEqualTo(MendDeliver.SHIPPING_STATE, 0);
@@ -188,7 +188,7 @@ public class TaskService {
                 task.setName("退材料待审核处理");
                 if (workerType.getType() == 3) {
                     productType = "1";
-                    task.setName("退服务待审核处理");
+                    task.setName("退包工包料待审核处理");
                 }
                 task.setImage(imageAddress + "icon/buchailiao.png");
                 String url = address + String.format(DjConstants.YZPageAddress.TUIPRODUCTEXAMINE, userToken, house.getCityId(), task.getName()) + "&mendDeliverId=" + mendDeliver.getId() + "&productType=" + productType + "&houseId=" + mendOrder.getHouseId();
@@ -305,7 +305,7 @@ public class TaskService {
             task.setTaskId(houseFlow.getId());
             taskList.add(task);
         }
-        //补材料补服务
+        //补材料补包工包料
         example = new Example(MendOrder.class);
         example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
                 .andEqualTo(MendOrder.STATE, 1);//补材料审核状态全通过
@@ -317,7 +317,7 @@ public class TaskService {
             task.setDate(DateUtil.dateToString(mendOrder.getModifyDate(), DateUtil.FORMAT11));
             task.setName(workerType.getName() + "补材料审核");
             if (workerType.getType() == 3) {
-                task.setName(workerType.getName() + "补服务审核");
+                task.setName(workerType.getName() + "补包工包料审核");
                 productType = "1";
             }
             task.setImage(imageAddress + "icon/buchailiao.png");

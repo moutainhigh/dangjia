@@ -27,8 +27,10 @@ import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMemberMapper;
+import com.dangjia.acg.mapper.matter.IRenovationStageMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
+import com.dangjia.acg.mapper.member.IMemberCityMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
@@ -42,6 +44,7 @@ import com.dangjia.acg.modle.matter.RenovationManualMember;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberCity;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
@@ -82,6 +85,8 @@ public class HouseService {
     @Autowired
     private ICityMapper iCityMapper;
     @Autowired
+    private IMemberCityMapper memberCityMapper;
+    @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
@@ -93,6 +98,8 @@ public class HouseService {
     private ConfigUtil configUtil;
     @Autowired
     private IRenovationManualMapper renovationManualMapper;
+    @Autowired
+    private IRenovationStageMapper renovationStageMapper;
     @Autowired
     private IRenovationManualMemberMapper renovationManualMemberMapper;
     @Autowired
@@ -633,6 +640,20 @@ public class HouseService {
         house.setDrawings(drawings);//有无图纸0：无图纸；1：有图纸
         house.setWorkDepositId(workDeposits.get(0).getId());
         iHouseMapper.insert(house);
+
+        example = new Example(MemberCity.class);
+        example.createCriteria()
+                .andEqualTo(MemberCity.MEMBER_ID, member.getId())
+                .andEqualTo(MemberCity.CITY_ID, cityId);
+        List list=memberCityMapper.selectByExample(example);
+        if(list.size()==0) {
+            MemberCity userCity = new MemberCity();
+            userCity.setMemberId(member.getId());
+            userCity.setCityId(cityId);
+            userCity.setCityName(city.getName());
+            memberCityMapper.insert(userCity);
+        }
+
         //房子花费
         HouseExpend houseExpend = new HouseExpend(true);
         houseExpend.setHouseId(house.getId());

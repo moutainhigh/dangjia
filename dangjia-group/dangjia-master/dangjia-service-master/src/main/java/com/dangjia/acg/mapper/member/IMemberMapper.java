@@ -17,12 +17,13 @@ import java.util.Map;
 @Repository
 public interface IMemberMapper extends Mapper<Member> {
 
-    List<Member> artisanList(@Param("name") String name,@Param("workerTypeId")String workerTypeId ,@Param("type") String type,@Param("checkType")String checkType);
+    List<Member> artisanList(@Param("cityId") String cityId,@Param("name") String name,@Param("workerTypeId")String workerTypeId ,@Param("type") String type,@Param("checkType")String checkType);
 
     /**通过评价表的houseId获得大管家*/
     Member getSupervisor(@Param("houseId") String houseId);
 
     Member getUser(Member member);
+
     /**
      * 按照条件查询
      * @param searchKey
@@ -31,8 +32,8 @@ public interface IMemberMapper extends Mapper<Member> {
      * @return
      */
     List<Member> getMemberListByName(@Param("cityId") String cityId,@Param("searchKey") String searchKey,
-                                     @Param("stage") Integer stage, @Param("userRole") String userRole,
-                                     @Param("childsLabelIdArr")String[] childsLabelIdArr,@Param("orderBy") String orderBy,
+                                      @Param("stage") Integer stage, @Param("userRole") String userRole,
+                                      @Param("childsLabelIdArr")String[] childsLabelIdArr,@Param("orderBy") String orderBy,
                                      @Param("type") String type,
                                      @Param("userKey") String userKey,
                                      @Param("userId") String userId,

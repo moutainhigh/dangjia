@@ -23,6 +23,7 @@ import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
+import com.dangjia.acg.mapper.member.IMemberCityMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
@@ -114,6 +115,8 @@ public class HouseWorkerService {
     @Autowired
     private IModelingVillageMapper modelingVillageMapper;
 
+    @Autowired
+    private IMemberCityMapper memberCityMapper;
     /**
      * 根据工人id查询所有房子任务
      */
@@ -291,6 +294,19 @@ public class HouseWorkerService {
             houseWorker.setWorkType(1);//已抢单
             houseWorker.setIsSelect(1);
             houseWorkerMapper.insert(houseWorker);
+            
+            Example example = new Example(MemberCity.class);
+            example.createCriteria()
+                    .andEqualTo(MemberCity.MEMBER_ID, worker.getId())
+                    .andEqualTo(MemberCity.CITY_ID, cityId);
+            List list=memberCityMapper.selectByExample(example);
+            if(list.size()==0) {
+                MemberCity userCity = new MemberCity();
+                userCity.setMemberId(worker.getId());
+                userCity.setCityId(cityId);
+                userCity.setCityName(house.getCityName());
+                memberCityMapper.insert(userCity);
+            }
 //            3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工
             //通知业主设计师抢单成功
             if (worker.getWorkerType() == 1) {//设计师
@@ -317,7 +333,7 @@ public class HouseWorkerService {
                 configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠抢单提醒",
                         String.format(DjConstants.PushMessage.STEWARD_TWO_RUSH_TO_PURCHASE, house.getHouseName()), "4");
             }
-            Example example = new Example(WorkerType.class);
+            example = new Example(WorkerType.class);
             example.createCriteria().andEqualTo(WorkerType.TYPE, worker.getWorkerType());
             List<WorkerType> workerType = workerTypeMapper.selectByExample(example);
             String text = "业主您好,我是" + workerType.get(0).getName() + worker.getName() + "已成功抢单";

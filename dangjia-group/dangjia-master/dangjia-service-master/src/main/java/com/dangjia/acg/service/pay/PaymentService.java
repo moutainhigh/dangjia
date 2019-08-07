@@ -932,7 +932,7 @@ public class PaymentService {
                 PageInfo pageInfo = (PageInfo) groups.getResultObj();
                 List<GroupDTO> listdto = pageInfo.getList();
                 if (listdto != null && listdto.size() > 0) {
-                    groupInfoService.editManageLocalGroup(Integer.parseInt(listdto.get(0).getGroupId()), memberid, "");
+                    groupInfoService.editManageGroup(Integer.parseInt(listdto.get(0).getGroupId()), memberid, "");
                 }
             }
         } catch (Exception e) {
