@@ -139,6 +139,8 @@ public class HouseService {
     private MyHouseService myHouseService;
     @Autowired
     private ClueMapper clueMapper;
+    @Autowired
+    private IModelingVillageMapper iModelingVillageMapper;
 
 
     protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
@@ -410,7 +412,7 @@ public class HouseService {
         if (houseDTO.getDecorationType() >= 3 || houseDTO.getDecorationType() == 0) {
             return ServerResponse.createByErrorMessage("装修类型参数错误");
         }
-        if (StringUtils.isEmpty(houseDTO.getHouseId()) || StringUtils.isEmpty(houseDTO.getCityId()) || StringUtils.isEmpty(houseDTO.getVillageId())) {
+        if (StringUtils.isEmpty(houseDTO.getHouseId())|| StringUtils.isEmpty(houseDTO.getVillageId())) {
             return ServerResponse.createByErrorMessage("参数为空");
         }
         if (houseDTO.getSquare() <= 0) {
@@ -421,7 +423,11 @@ public class HouseService {
             return ServerResponse.createByErrorMessage("该房产不存在");
         }
         house.setBuildSquare(new BigDecimal(houseDTO.getBuildSquare()));//建筑面积
-        house.setCityId(houseDTO.getCityId());
+        if(StringUtils.isEmpty(houseDTO.getCityId())){
+            house.setCityId(iModelingVillageMapper.selectByPrimaryKey(houseDTO.getVillageId()).getCityId());
+        }else{
+            house.setCityId(houseDTO.getCityId());
+        }
         house.setCityName(houseDTO.getCityName());
         house.setVillageId(houseDTO.getVillageId());
         house.setResidential(houseDTO.getResidential());
