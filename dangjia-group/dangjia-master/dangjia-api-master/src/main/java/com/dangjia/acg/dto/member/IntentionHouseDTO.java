@@ -17,13 +17,13 @@ public class IntentionHouseDTO {
 
     private String id;
 
-    @ApiModelProperty("小区名称")
+    @ApiModelProperty("小区")
     private String residentialName;
 
-    @ApiModelProperty("楼栋名称")
+    @ApiModelProperty("楼栋")
     private String buildingName;
 
-    @ApiModelProperty("房号名称")
+    @ApiModelProperty("房号")
     private String numberName;
 
     @ApiModelProperty("线索id")

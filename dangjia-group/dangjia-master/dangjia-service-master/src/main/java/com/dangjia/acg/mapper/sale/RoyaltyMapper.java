@@ -1,4 +1,4 @@
-package com.dangjia.acg.mapper.sale.royalty;
+package com.dangjia.acg.mapper.sale;
 
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltyDetailsSurface;

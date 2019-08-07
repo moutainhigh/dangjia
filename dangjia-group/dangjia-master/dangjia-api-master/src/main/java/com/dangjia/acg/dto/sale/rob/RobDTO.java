@@ -14,6 +14,18 @@ import java.util.List;
 @Data
 public class RobDTO extends BaseEntity {
 
+    @ApiModelProperty("线索id")
+    private String clueId;
+
+    @ApiModelProperty("mcid")
+    private String mcId;
+
+    @ApiModelProperty("阶段 0:新线索 1：继续跟进 2：已放弃 3：黑名单 4:转客服")
+    private Integer stage;
+
+    @ApiModelProperty("阶段 0:线索阶段 1:客户阶段")
+    private Integer phaseStatus;
+
     @ApiModelProperty("业主名称")
     private String owerName;
 
@@ -28,6 +40,9 @@ public class RobDTO extends BaseEntity {
 
     @ApiModelProperty("客戶id")
     private String memberId;
+
+    @ApiModelProperty("房子id")
+    private String houseId;
 
     @ApiModelProperty("城市ID")
     private String cityId;

@@ -1,4 +1,4 @@
-package com.dangjia.acg.mapper.sale.royalty;
+package com.dangjia.acg.mapper.sale;
 
 import com.dangjia.acg.dto.member.IntentionHouseDTO;
 import com.dangjia.acg.modle.home.IntentionHouse;
@@ -22,13 +22,13 @@ public interface IntentionHouseMapper extends Mapper<IntentionHouse> {
      * 删除意向房子
      * @param id
      */
-    void deleteIntentionHouse(@Param("id")String id);
+    void deleteIntentionHouse(@Param("id") String id);
 
     /**
      * 查询意向房子
      * @param clueId
      * @return
      */
-    List<IntentionHouseDTO> queryIntentionHouse(@Param("clueId")String clueId);
+    List<IntentionHouseDTO> queryIntentionHouse(@Param("clueId") String clueId);
 
 }
