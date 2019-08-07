@@ -240,6 +240,9 @@ public class MyHouseService {
         //获取客服明细
         Customer srcCustomer = iCustomerMapper.getCustomerByMemberId(member.getId());
         String userid="773075761552045112068";
+        if(house.getCityId().equals("961188961562724011757")){
+            userid="682958011563430082579";
+        }
         if(srcCustomer!=null&&!CommonUtil.isEmpty(srcCustomer.getUserId())){
             userid=srcCustomer.getUserId();
         }
