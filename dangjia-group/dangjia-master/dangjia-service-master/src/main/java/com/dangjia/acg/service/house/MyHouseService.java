@@ -220,6 +220,9 @@ public class MyHouseService {
         if(house.getCityId().equals("961188961562724011757")){
             userid="682958011563430082579";
         }
+        if(srcCustomer!=null&&!CommonUtil.isEmpty(srcCustomer.getUserId())){
+            userid=srcCustomer.getUserId();
+        }
         Example example = new Example(MainUser.class);
         example.createCriteria().andEqualTo(MainUser.ID, userid);//默认李优
         example.orderBy(GroupUserConfig.CREATE_DATE).desc();
