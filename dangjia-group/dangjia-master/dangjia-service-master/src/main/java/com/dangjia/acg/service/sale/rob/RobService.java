@@ -196,7 +196,7 @@ public class RobService {
                 robArrInFoDTO.setCreateDate(robInfoDTO.get(0).getCreateDate());
                 robArrInFoDTO.setUserId(robInfoDTO.get(0).getUserId());
                 robArrInFoDTO.setStage(robInfoDTO.get(0).getStage());
-
+                robArrInFoDTO.setDrawings(robInfoDTO.get(0).getDrawings());
                 Member member = iMemberMapper.selectByPrimaryKey(robInfoDTO.get(0).getMemberId());
 
                 if(null != member.getNickName()){

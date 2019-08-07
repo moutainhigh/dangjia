@@ -412,6 +412,7 @@
             h.residential as residential,
             h.unit as unit,
             h.building as HouseBuilding,
+            h.drawings,
         </if>
         c.create_date as createDate,
         c.owername as owerName,

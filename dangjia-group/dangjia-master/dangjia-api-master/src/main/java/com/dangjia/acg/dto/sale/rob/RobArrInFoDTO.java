@@ -17,7 +17,8 @@ import java.util.List;
 @ApiModel(description = "抢单详情list")
 @Data
 public class RobArrInFoDTO {
-
+    @ApiModelProperty("有无图纸0：无图纸；1：有图纸")
+    private Integer drawings;
 
     @ApiModelProperty("业主名称")
     private String owerName;
