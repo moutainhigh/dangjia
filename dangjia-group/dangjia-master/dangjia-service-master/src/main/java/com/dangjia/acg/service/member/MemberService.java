@@ -13,18 +13,24 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.core.HomePageBean;
 import com.dangjia.acg.dto.member.MemberCustomerDTO;
 import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.*;
+import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
+import com.dangjia.acg.mapper.other.ICityMapper;
+import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.member.*;
+import com.dangjia.acg.modle.menu.MenuConfiguration;
+import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.activity.RedPackPayService;
@@ -59,8 +65,15 @@ public class MemberService {
     private ConfigUtil configUtil;
     @Autowired
     private RedPackPayService redPackPayService;
+
     @Autowired
     private IMemberMapper memberMapper;
+    @Autowired
+    private IStoreUserMapper iStoreUserMapper;
+    @Autowired
+    private ICityMapper iCityMapper;
+    @Autowired
+    private IMemberCityMapper memberCityMapper;
     @Autowired
     private IMemberInfoMapper memberInfoMapper;
     @Autowired
@@ -91,6 +104,9 @@ public class MemberService {
     private IHouseDistributionMapper iHouseDistributionMapper;
     @Autowired
     private CraftsmanConstructionService constructionService;
+    @Autowired
+    private IMenuConfigurationMapper iMenuConfigurationMapper;
+
     /****
      * 注入配置
      */
@@ -120,7 +136,7 @@ public class MemberService {
                 }
                 break;
             case "3":
-                Supplier supplier = supplierProductAPI.getSupplier(cityId,id);
+                Supplier supplier = supplierProductAPI.getSupplier(cityId, id);
                 if (supplier != null) {
                     mobile = supplier.getTelephone();
                 }
@@ -206,7 +222,7 @@ public class MemberService {
         groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
         groupInfoService.registerJGUsers("gj", new String[]{accessToken.getMemberId()}, new String[1]);
         MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
-        if(mainUser!=null&&CommonUtil.isEmpty(mainUser.getMemberId())) {
+        if (mainUser != null && CommonUtil.isEmpty(mainUser.getMemberId())) {
             //插入MemberId
             userMapper.insertMemberId(user.getMobile());
         }
@@ -244,18 +260,18 @@ public class MemberService {
     /*
      * 查询验证码
      */
-    public String getSmsCode(String phone) {
+    public ServerResponse getSmsCode(String phone) {
         if (!Validator.isMobileNo(phone)) {
-            return "手机号不正确";
+            return ServerResponse.createBySuccessMessage("手机号不正确");
         }
         Example example = new Example(Sms.class);
         example.createCriteria().andEqualTo("mobile", phone);
         example.orderBy(Sms.CREATE_DATE).desc();
         List<Sms> sms = smsMapper.selectByExample(example);
         if (sms == null || sms.size() == 0) {
-            return "无效验证码";
+            return ServerResponse.createBySuccessMessage("无效验证码");
         }
-        return sms.get(0).getCode();
+        return ServerResponse.createBySuccess("验证码获取成功", sms.get(0).getCode());
     }
 
     /**
@@ -288,6 +304,15 @@ public class MemberService {
             user.setIsCrowned(0);
             user.setHead("qrcode/logo.png");
             memberMapper.insertSelective(user);
+
+            MemberCity userCity = new MemberCity();
+            userCity.setMemberId(user.getId());
+            userCity.setCityId(request.getParameter(Constants.CITY_ID));
+            if (!CommonUtil.isEmpty(userCity.getCityId())) {
+                City city = iCityMapper.selectByPrimaryKey(userCity.getCityId());
+                userCity.setCityName(city.getName());
+                memberCityMapper.insert(userCity);
+            }
 //            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
             if (userRole == 1) {
                 clueService.sendUser(user, user.getMobile());
@@ -574,8 +599,10 @@ public class MemberService {
     /**
      * 业主列表
      */
-    public ServerResponse getMemberList(PageDTO pageDTO, Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
+    public ServerResponse getMemberList(PageDTO pageDTO, String cityId, String userKey, Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
         try {
+            userKey = iStoreUserMapper.getVisitUser(userKey);
+            logger.info("权限返回结果 id:" + userKey);
             List<String> childsLabelIdList = new ArrayList<>();
             if (StringUtils.isNotBlank(parentId)) {
                 if (!StringUtils.isNotBlank(childId)) {//如果 子标签为null ，就是父标签的所有标签
@@ -587,14 +614,16 @@ public class MemberService {
             }
             String[] childsLabelIdArr = new String[childsLabelIdList.size()];
             childsLabelIdList.toArray(childsLabelIdArr);
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
                 if (beginDate.equals(endDate)) {
                     beginDate = beginDate + " " + "00:00:00";
                     endDate = endDate + " " + "23:59:59";
                 }
             }
-            List<Member> list = memberMapper.getMemberListByName(searchKey, stage, userRole, childsLabelIdArr, orderBy, type, userId, beginDate, endDate);
+            //数据权限控制（总部根据城市查看全部客户，城市管理者根据指定城市查看所有客户，店长可看门店所有销售的客户，销售只能看自己的客户）
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<Member> list = memberMapper.getMemberListByName(cityId, searchKey, stage, userRole, childsLabelIdArr, orderBy, type, userKey, userId, beginDate, endDate);
             PageInfo pageResult = new PageInfo(list);
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
             for (Member member : list) {
@@ -609,15 +638,6 @@ public class MemberService {
                     if (customer.getRemindRecordId() != null)//有提醒记录的 更新 为最新的更新沟通记录
                         customerRecordService.updateMaxNearRemind(customer);
                 }
-                List<MemberLabel> memberLabelList = new ArrayList<>();
-                if (customer.getLabelIdArr() != null) {
-                    String[] labelIdArr = customer.getLabelIdArr().split(",");
-                    for (String aLabelIdArr : labelIdArr) {
-                        MemberLabel memberlabel = iMemberLabelMapper.selectByPrimaryKey(aLabelIdArr);
-                        if (memberlabel != null)
-                            memberLabelList.add(memberlabel);
-                    }
-                }
 
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
                 mcDTO.setOrderDate(member.getModifyDate());
@@ -627,19 +647,21 @@ public class MemberService {
                 mcDTO.setMobile(member.getMobile());
                 mcDTO.setReferrals(member.getReferrals());
 
-                Member referralsMember = memberMapper.selectByPrimaryKey(member.getReferrals());
-                if (referralsMember != null) {
-                    mcDTO.setReferralsMobile(referralsMember.getMobile());
-                } else {
-                    mcDTO.setReferralsMobile("");
+                if (!CommonUtil.isEmpty(member.getReferrals())) {
+                    Member referralsMember = memberMapper.selectByPrimaryKey(member.getReferrals());
+                    if (referralsMember != null) {
+                        mcDTO.setReferralsMobile(referralsMember.getMobile());
+                    } else {
+                        mcDTO.setReferralsMobile("");
+                    }
                 }
                 mcDTO.setSource("来源未知");
                 mcDTO.setStage(customer.getStage());
                 mcDTO.setUserId(customer.getUserId());
                 mcDTO.setCreateDate(member.getCreateDate());
-                if (customer.getUserId() != null) {
+                if (!CommonUtil.isEmpty(customer.getUserId())) {
                     MainUser mainUser = userMapper.selectByPrimaryKey(customer.getUserId());
-                    if(null!=mainUser) {
+                    if (null != mainUser) {
                         mcDTO.setUserName(mainUser.getUsername());
                     }
                 }
@@ -663,7 +685,25 @@ public class MemberService {
                 if (member.getRemarks() != null) {
                     mcDTO.setRemarks(member.getRemarks());//业主备注
                 }
+                List<MemberLabel> memberLabelList = new ArrayList<>();
+                if (customer.getLabelIdArr() != null) {
+                    String[] labelIdArr = customer.getLabelIdArr().split(",");
+                    Example example = new Example(MemberLabel.class);
+                    example.createCriteria().andIn(Member.ID, Arrays.asList(labelIdArr));
+                    memberLabelList = iMemberLabelMapper.selectByExample(example);
+                }
                 mcDTO.setMemberLabelList(memberLabelList);
+
+                Example example = new Example(MemberCity.class);
+                example.createCriteria()
+                        .andEqualTo(MemberCity.MEMBER_ID, member.getId())
+                        .andEqualTo(MemberCity.CITY_ID, cityId);
+                example.orderBy(MemberCity.CREATE_DATE);
+                List<MemberCity> listcity = memberCityMapper.selectByExample(example);
+                if (listcity.size() > 0) {
+                    mcDTO.setMemberCityID(listcity.get(0).getCityId());
+                    mcDTO.setMemberCityName(listcity.get(0).getCityName());
+                }
                 mcDTOList.add(mcDTO);
             }
 //            logger.info(" mcDTOList getMemberNickName:" + mcDTOList.get(0).getMemberNickName());
@@ -971,4 +1011,100 @@ public class MemberService {
         }
         return ServerResponse.createBySuccess("查询成功", datas);
     }
+
+
+    /**
+     * 获取我的界面
+     *
+     * @param userToken 用户登录信息
+     * @return 我的页面
+     */
+    public ServerResponse getMyHomePage(String userToken, Integer userRole) {
+        if (userRole == 1) {
+            HomePageBean homePageBean = new HomePageBean();
+            homePageBean.setList(getMyMenuList(userRole, null));
+            return ServerResponse.createBySuccess("获取我的界面成功！", homePageBean);
+        } else {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
+            String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            worker = memberMapper.selectByPrimaryKey(worker.getId());
+            if (worker == null) {
+                return ServerResponse.createbyUserTokenError();
+            }
+            HomePageBean homePageBean = new HomePageBean();
+            homePageBean.setWorkerId(worker.getId());
+            homePageBean.setIoflow(CommonUtil.isEmpty(worker.getHead()) ? null : imageAddress + worker.getHead());
+            homePageBean.setWorkerName(CommonUtil.isEmpty(worker.getName()) ? worker.getNickName() : worker.getName());
+            homePageBean.setEvaluation(worker.getEvaluationScore() == null ? new BigDecimal(60) : worker.getEvaluationScore());
+            homePageBean.setFavorable(worker.getPraiseRate() == null ? "0.00%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
+            StringBuilder stringBuffer = new StringBuilder();
+            if (worker.getIsCrowned() == null || worker.getIsCrowned() != 1) {
+                if (worker.getEvaluationScore() == null) {
+                    stringBuffer.append("普通");
+                } else if (Double.parseDouble(worker.getEvaluationScore().toString()) > 90) {
+                    stringBuffer.append("金牌");
+                } else if (Double.parseDouble(worker.getEvaluationScore().toString()) > 80) {
+                    stringBuffer.append("银牌");
+                } else if (Double.parseDouble(worker.getEvaluationScore().toString()) > 70) {
+                    stringBuffer.append("铜牌");
+                } else {
+                    stringBuffer.append("普通");
+                }
+            } else {
+                stringBuffer.append("皇冠");
+            }
+            stringBuffer.append(worker.getWorkerType() != null && worker.getWorkerType() == 3 ? "大管家" : "工匠");
+            homePageBean.setGradeName(stringBuffer.toString());
+            homePageBean.setList(getMyMenuList(userRole, worker.getWorkerType()));
+            return ServerResponse.createBySuccess("获取我的界面成功！", homePageBean);
+        }
+    }
+
+    private List<HomePageBean.ListBean> getMyMenuList(Integer userRole, Integer workerType) {
+        String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
+        Example example = new Example(MenuConfiguration.class);
+        Example.Criteria criteria = example.createCriteria()
+                .andEqualTo(MenuConfiguration.DATA_STATUS, 0)
+                .andEqualTo(MenuConfiguration.MENU_TYPE, 1);
+        if (userRole == 1) {
+            criteria.andEqualTo(MenuConfiguration.SHOW_PROPRIETOR, 1);
+        } else if (workerType == null) {
+            criteria.andEqualTo(MenuConfiguration.SHOW_CRAFTSMAN, 1);
+        } else {
+            switch (workerType) {
+                case 1://设计师
+                    criteria.andEqualTo(MenuConfiguration.SHOW_DESIGNER, 1);
+                    break;
+                case 2://精算师
+                    criteria.andEqualTo(MenuConfiguration.SHOW_ACTUARIES, 1);
+                    break;
+                case 3://大管家
+                    criteria.andEqualTo(MenuConfiguration.SHOW_HOUSEKEEPER, 1);
+                    break;
+                default://工匠
+                    criteria.andEqualTo(MenuConfiguration.SHOW_CRAFTSMAN, 1);
+                    break;
+            }
+        }
+        example.orderBy(MenuConfiguration.SORT).asc();
+        List<MenuConfiguration> menuConfigurations = iMenuConfigurationMapper.selectByExample(example);
+        List<HomePageBean.ListBean> list = new ArrayList<>();
+        for (MenuConfiguration configuration : menuConfigurations) {
+            configuration.initPath(imageAddress, webAddress);
+            HomePageBean.ListBean listBean = new HomePageBean.ListBean();
+            listBean.setName(configuration.getName());
+            listBean.setUrl(configuration.getUrl());
+            listBean.setImageUrl(configuration.getImage());
+            listBean.setType(configuration.getType());
+            list.add(listBean);
+        }
+        return list;
+    }
+
+
 }

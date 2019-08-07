@@ -30,6 +30,7 @@ import com.dangjia.acg.mapper.matter.IRenovationManualMemberMapper;
 import com.dangjia.acg.mapper.matter.IRenovationStageMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
+import com.dangjia.acg.mapper.member.IMemberCityMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
@@ -44,6 +45,7 @@ import com.dangjia.acg.modle.matter.RenovationStage;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberCity;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
@@ -84,6 +86,8 @@ public class HouseService {
     private IHouseMapper iHouseMapper;
     @Autowired
     private ICityMapper iCityMapper;
+    @Autowired
+    private IMemberCityMapper memberCityMapper;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
@@ -558,6 +562,7 @@ public class HouseService {
                 srcHouse.setCustomSort(house.getCustomSort());
             }
             srcHouse.setOptionalLabel(house.getOptionalLabel());
+            srcHouse.setCustomEdit(house.getCustomEdit());
             iHouseMapper.updateByPrimaryKeySelective(srcHouse);
             return ServerResponse.createBySuccessMessage("保存成功");
         } catch (Exception e) {
@@ -625,10 +630,8 @@ public class HouseService {
         if (houseDTO.getSquare() <= 0) {
             return ServerResponse.createByErrorMessage("面积错误");
         }
-        ModelingLayout modelingLayout = modelingLayoutMapper.selectByPrimaryKey(houseDTO.getModelingLayoutId());
-
         House house = iHouseMapper.selectByPrimaryKey(houseDTO.getHouseId());
-        house.setBuildSquare(new BigDecimal(modelingLayout.getBuildSquare()));//建筑面积
+        house.setBuildSquare(new BigDecimal(houseDTO.getBuildSquare()));//建筑面积
         house.setCityId(houseDTO.getCityId());
         house.setCityName(houseDTO.getCityName());
         house.setVillageId(houseDTO.getVillageId());
@@ -802,6 +805,19 @@ public class HouseService {
         house.setDrawings(drawings);//有无图纸0：无图纸；1：有图纸
         house.setWorkDepositId(workDeposits.get(0).getId());
         iHouseMapper.insert(house);
+
+        example = new Example(MemberCity.class);
+        example.createCriteria()
+                .andEqualTo(MemberCity.MEMBER_ID, member.getId())
+                .andEqualTo(MemberCity.CITY_ID, cityId);
+        List list=memberCityMapper.selectByExample(example);
+        if(list.size()==0) {
+            MemberCity userCity = new MemberCity();
+            userCity.setMemberId(member.getId());
+            userCity.setCityId(cityId);
+            userCity.setCityName(city.getName());
+            memberCityMapper.insert(userCity);
+        }
         //房子花费
         HouseExpend houseExpend = new HouseExpend(true);
         houseExpend.setHouseId(house.getId());
@@ -1253,11 +1269,17 @@ public class HouseService {
         pageResult.setList(listMap);
         return ServerResponse.createBySuccess("查询施工记录成功", pageResult);
     }
-
+    /**
+     * 施工记录（分类型）
+     */
+    public ServerResponse queryConstructionRecordType(String houseId) {
+        List<HouseConstructionRecordTypeDTO> hfaList = houseConstructionRecordMapper.getHouseConstructionRecordTypeDTO(houseId);
+        return ServerResponse.createBySuccess("查询施工记录成功", hfaList);
+    }
     /**
      * 施工记录
      */
-    public ServerResponse queryConstructionRecordAll(String houseId, String day, String workerType, PageDTO pageDTO) {
+    public ServerResponse queryConstructionRecordAll(String houseId, String ids, String day, String workerType, PageDTO pageDTO) {
         // 施工记录的内容需要更改
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         Example example = new Example(HouseConstructionRecord.class);
@@ -1265,6 +1287,10 @@ public class HouseService {
         criteria.andEqualTo(HouseConstructionRecord.HOUSE_ID, houseId);
         if (!CommonUtil.isEmpty(day)) {
             criteria.andCondition(" to_days(create_date) = to_days('" + day + "') ");
+        }
+        if (!CommonUtil.isEmpty(ids)) {
+            String[] id = ids.split(",");
+            criteria.andIn(HouseConstructionRecord.ID,  Arrays.asList(id));
         }
         if (!CommonUtil.isEmpty(workerType)) {
             criteria.andEqualTo(HouseConstructionRecord.WORKER_TYPE, workerType);
@@ -1592,7 +1618,21 @@ public class HouseService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("更新失败");
         }
-
+    }
+    /**
+     * 房子申请修改未进场的工序还原
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse updateCustomEdit(String houseId) {
+        try {
+            House house = iHouseMapper.selectByPrimaryKey(houseId);
+            house.setCustomEdit(null);
+            iHouseMapper.updateByPrimaryKey(house);
+            return ServerResponse.createBySuccessMessage("更新成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("更新失败");
+        }
     }
 
     public ServerResponse getHistoryWorker(String houseId, String workerTypeId, String workId, PageDTO pageDTO) {

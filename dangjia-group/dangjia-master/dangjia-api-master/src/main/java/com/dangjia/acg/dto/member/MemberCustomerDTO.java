@@ -17,6 +17,8 @@ public class MemberCustomerDTO implements Comparable<MemberCustomerDTO> {
     private String memberId;//业主id
     private String memberName;//业主姓名
     private String memberNickName;//业主昵称
+    private String memberCityID;//业主注册城市
+    private String memberCityName;//业主注册城市
     private String mobile;//手机
     private String referrals;//邀请人
     private String referralsMobile;//邀请人电话

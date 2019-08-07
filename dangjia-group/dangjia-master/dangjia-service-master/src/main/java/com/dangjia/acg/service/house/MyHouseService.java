@@ -11,6 +11,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.UserInfoResultDTO;
 import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.core.NodeDTO;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
@@ -22,6 +23,7 @@ import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.HouseFlowApplyImage;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.group.GroupUserConfig;
 import com.dangjia.acg.modle.house.House;
@@ -66,6 +68,8 @@ public class MyHouseService {
     @Autowired
     private IMenuConfigurationMapper iMenuConfigurationMapper;
 
+    @Autowired
+    private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
     @Autowired
     private UserAPI userAPI;
     @Autowired
@@ -135,6 +139,25 @@ public class MyHouseService {
         return houseId;
     }
 
+    public ServerResponse getHouseTubogramImage(String houseId) {
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        Example example = new Example(HouseFlowApplyImage.class);
+        example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_ID, houseId).andEqualTo(HouseFlowApplyImage.IMAGE_TYPE, 4);
+        List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
+        Member supervisor = memberMapper.getSupervisor(houseId);
+        List<Map> imageList = new ArrayList<>();
+        Map mapObj =new HashMap();
+        for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList) {
+            Map map =new HashMap();
+            map.put("image",address + houseFlowApplyImage.getImageUrl());
+            map.put("imageUrl",houseFlowApplyImage.getImageUrl());
+            mapObj.put("createDate",houseFlowApplyImage.getCreateDate());
+            imageList.add(map);
+        }
+        mapObj.put("name",supervisor.getName());
+        mapObj.put("list",imageList);
+        return ServerResponse.createBySuccess("查询成功", imageList);
+    }
     /**
      * APP我的房产
      */

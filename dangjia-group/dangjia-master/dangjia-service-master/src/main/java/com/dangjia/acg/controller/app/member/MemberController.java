@@ -26,7 +26,7 @@ public class MemberController implements MemberAPI {
     }
 
     @Override
-    public String getSmsCode(String phone) {
+    public ServerResponse getSmsCode(String phone) {
         return memberService.getSmsCode(phone);
     }
 
@@ -101,6 +101,16 @@ public class MemberController implements MemberAPI {
     public ServerResponse getMembers(String userToken, String memberId, String phone) {
         return memberService.getMembers(userToken, memberId, phone);
     }
+
+    /**
+     * 获取我的界面
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getMyHomePage(String userToken, Integer userRole) {
+        return memberService.getMyHomePage(userToken, userRole);
+    }
+
 
     @Override
     @ApiMethod

@@ -68,11 +68,22 @@ public class IndexPageService {
      */
     public ServerResponse queryHouseDistance(HttpServletRequest request, String userToken, String cityId, String villageId, Double square, PageDTO pageDTO) {
         try {
-            ModelingVillage modelingVillage = modelingVillageMapper.selectByPrimaryKey(villageId);
+            String locationx=null;
+            String Locationy=null;
+            if(!CommonUtil.isEmpty(villageId)) {
+                ModelingVillage modelingVillage = modelingVillageMapper.selectByPrimaryKey(villageId);
+                locationx=modelingVillage.getLocationx();
+                Locationy=modelingVillage.getLocationy();
+            }
             Double minSquare = square - 15;
             Double maxSquare = square + 15;
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<House> houseList = houseMapper.getSameLayoutDistance(cityId, modelingVillage.getLocationx(), modelingVillage.getLocationy(), minSquare, maxSquare,villageId);
+            List<House> houseList;
+            if(!CommonUtil.isEmpty(villageId)) {
+                houseList=houseMapper.getSameLayoutDistance(cityId, locationx, Locationy, minSquare, maxSquare,villageId);
+            }else{
+                houseList = houseMapper.getSameLayout(cityId, null, minSquare, maxSquare,null);
+            }
             if(houseList.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
@@ -91,7 +102,7 @@ public class IndexPageService {
                 if (order != null) {
                     totalPrice = totalPrice.add(order.getTotalAmount());
                 }
-                BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getId());
+                BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getCityId(),house.getId());
                 if(totalAmount!=null) {
                     totalPrice = totalPrice.add(totalAmount);
                 }
@@ -117,7 +128,6 @@ public class IndexPageService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             BigDecimal totalPrice = new BigDecimal(0);//总计
             House house = houseMapper.selectByPrimaryKey(houseId);
-            request.setAttribute(Constants.CITY_ID, house.getCityId());
             HouseDetailsDTO houseDetailsDTO = new HouseDetailsDTO();
             houseDetailsDTO.setCityId(house.getCityId());
             houseDetailsDTO.setCityName(house.getCityName());
@@ -179,7 +189,8 @@ public class IndexPageService {
                 map.put("image", address + workerType.getImage());
                 map.put("workerType", workerType.getType());
                 map.put("workerTypeId", workerType.getId());
-                ServerResponse serverResponse = budgetMaterialAPI.getHouseBudgetStageCost(request, houseId, houseFlow.getWorkerTypeId());
+                request.setAttribute(Constants.CITY_ID, house.getCityId());
+                ServerResponse serverResponse = budgetMaterialAPI.getHouseBudgetStageCost(request,house.getCityId(), houseId, houseFlow.getWorkerTypeId());
                 JSONArray pageInfo = (JSONArray) serverResponse.getResultObj();
                 if(!CommonUtil.isEmpty(pageInfo)) {
                     List<BudgetStageCostDTO> budgetStageCostDTOS = pageInfo.toJavaList(BudgetStageCostDTO.class);
@@ -340,7 +351,10 @@ public class IndexPageService {
      * @return
      */
     public ServerResponse getRecommended(HttpServletRequest request,String latitude, String longitude,Integer limit){
-       try {
+
+        try {
+
+
         if (CommonUtil.isEmpty(latitude)) {
             latitude = "28.228259";
         }
@@ -363,7 +377,7 @@ public class IndexPageService {
                 totalPrice = totalPrice.add(order.getTotalAmount());
             }
 
-            BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getId());
+            BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request,house.getCityId(), house.getId());
             if(totalAmount!=null) {
                 totalPrice = totalPrice.add(totalAmount);
             }
@@ -371,9 +385,9 @@ public class IndexPageService {
             house.setMoney(totalPrice);
         }
         return ServerResponse.createBySuccess("查询成功", houses);
-       }catch (Exception e){
-           e.printStackTrace();
-           return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
-       }
+        }catch (Exception e){
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询出错,获取数据失败");
+        }
     }
 }

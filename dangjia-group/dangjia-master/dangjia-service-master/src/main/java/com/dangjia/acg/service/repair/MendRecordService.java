@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.repair;
 
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -21,6 +23,7 @@ import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.worker.Evaluate;
@@ -76,6 +79,8 @@ public class MendRecordService {
     @Autowired
     private IEvaluateMapper evaluateMapper;
 
+    @Autowired
+    private RedisClient redisClient;//缓存
     /**
      * 要补退明细
      * 0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料, 5 要货

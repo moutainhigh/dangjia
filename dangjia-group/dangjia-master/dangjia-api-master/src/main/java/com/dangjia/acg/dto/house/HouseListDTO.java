@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.house;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.http.util.TextUtils;
 
@@ -18,6 +19,7 @@ public class HouseListDTO {
 
     private String houseName;
     private String customSort;
+    private String customEdit;
     private String name;
     private Integer budgetOk;
     private Integer designerOk;

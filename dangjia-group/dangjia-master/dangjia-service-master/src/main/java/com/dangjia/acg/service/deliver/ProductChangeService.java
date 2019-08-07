@@ -127,8 +127,8 @@ public class ProductChangeService {
                     productType = goods.getType();
                 }
                 // 查询转换单位
-                ServerResponse srcUnitResponse = unitAPI.getUnitById(request, srcProduct.getConvertUnit());
-                ServerResponse destUnitResponse = unitAPI.getUnitById(request, destProduct.getConvertUnit());
+                ServerResponse srcUnitResponse = unitAPI.getUnitById(request, request.getParameter(Constants.CITY_ID),srcProduct.getConvertUnit());
+                ServerResponse destUnitResponse = unitAPI.getUnitById(request, request.getParameter(Constants.CITY_ID),destProduct.getConvertUnit());
                 boolean flagB = (srcUnitResponse != null && srcUnitResponse.getResultObj() != null && destUnitResponse != null && destUnitResponse.getResultObj() != null);
                 if (flagB) {
                     srcUnit = JSON.parseObject(JSON.toJSONString(srcUnitResponse.getResultObj()), Unit.class);
@@ -314,7 +314,7 @@ public class ProductChangeService {
                 }
                 Unit unit;
                 Product product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
-                ServerResponse serverResponse = unitAPI.getUnitById(request, product.getConvertUnit());
+                ServerResponse serverResponse = unitAPI.getUnitById(request, house.getCityId(),product.getConvertUnit());
                 if (serverResponse.getResultObj() instanceof JSONObject) {
                     unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
                 } else {
@@ -379,7 +379,7 @@ public class ProductChangeService {
                     }
                     Unit unit;
                     Product product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
-                    ServerResponse serverResponse = unitAPI.getUnitById(request, product.getConvertUnit());
+                    ServerResponse serverResponse = unitAPI.getUnitById(request,house.getCityId(), product.getConvertUnit());
                     if (serverResponse.getResultObj() instanceof JSONObject) {
                         unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
                     } else {
@@ -569,7 +569,7 @@ public class ProductChangeService {
                     ServerResponse destResponse = productAPI.getProductById(request, change.getDestProductId());
                     if (destResponse != null && destResponse.getResultObj() != null) {
                         destProduct = JSON.parseObject(JSON.toJSONString(destResponse.getResultObj()), Product.class);
-                        ServerResponse destUnitResponse = unitAPI.getUnitById(request, destProduct.getConvertUnit());
+                        ServerResponse destUnitResponse = unitAPI.getUnitById(request,request.getParameter(Constants.CITY_ID), destProduct.getConvertUnit());
                         boolean flagB = destUnitResponse != null && destUnitResponse.getResultObj() != null;
                         if (flagB) {
                             destUnit = JSON.parseObject(JSON.toJSONString(destUnitResponse.getResultObj()), Unit.class);

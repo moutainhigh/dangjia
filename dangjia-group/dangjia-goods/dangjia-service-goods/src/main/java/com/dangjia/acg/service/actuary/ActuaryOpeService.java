@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.actuary;
 
+import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -15,6 +16,8 @@ import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.util.JdbcContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +45,8 @@ public class ActuaryOpeService {
     @Autowired
     private IGoodsCategoryMapper goodsCategoryMapper;
 
+    @Autowired
+    private HouseAPI houseAPI;
 
     /**
      * 根据分类list查询商品
@@ -195,6 +200,7 @@ public class ActuaryOpeService {
                 goodsItemDTO.setBackCount(budgetWorker.getBackCount());
                 goodsItemDTO.setRepairCount(budgetWorker.getRepairCount());
                 goodsItemDTO.setSurCount(budgetWorker.getShopCount() - budgetWorker.getBackCount() + budgetWorker.getRepairCount());
+                goodsItemDTO.setTolPrice(goodsItemDTO.getSurCount()*goodsItemDTO.getPrice());
                 goodsItemDTOList.add(goodsItemDTO);
             }
             budgetItemDTO.setGoodsItemDTOList(goodsItemDTOList);
@@ -213,8 +219,12 @@ public class ActuaryOpeService {
      */
     public ServerResponse actuary(String houseId, Integer type) {
         try {
+            //切换数据源
+            House house = houseAPI.getHouseById(houseId);
+            JdbcContextHolder.putDataSource(house.getCityId());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             BudgetDTO budgetDTO = new BudgetDTO();
+            budgetDTO.setCustomEdit(house.getCustomEdit());
             budgetDTO.setWorkerPrice(budgetWorkerMapper.getHouseWorkerPrice(houseId, null));
             budgetDTO.setCaiPrice(budgetMaterialMapper.getHouseCaiPrice(houseId));
             budgetDTO.setTotalPrice(new BigDecimal((budgetDTO.getWorkerPrice() + budgetDTO.getCaiPrice())));

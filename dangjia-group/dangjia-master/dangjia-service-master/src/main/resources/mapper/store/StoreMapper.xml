@@ -18,6 +18,7 @@
           reservation_number AS reservationNumber,
           latitude,
           longitude,
+          user_id userId,
           scope_itude scopeItude,
           villages
 	</sql>

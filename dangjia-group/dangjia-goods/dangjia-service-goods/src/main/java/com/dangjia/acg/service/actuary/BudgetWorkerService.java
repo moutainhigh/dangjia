@@ -129,6 +129,24 @@ public class BudgetWorkerService {
         }
     }
 
+    /**
+     * 根据人工商品ID.获得指定房子的精算人工明细
+     */
+    public BudgetWorker getHouseBudgetWorkerId(String houseId, String workerGoodsId) {
+        try {
+            Example example = new Example(BudgetWorker.class);
+            example.createCriteria().andEqualTo(BudgetWorker.HOUSE_ID, houseId).andEqualTo(BudgetWorker.WORKER_GOODS_ID, workerGoodsId);
+            List<BudgetWorker> budgetWorker = iBudgetWorkerMapper.selectByExample(example);
+            if(budgetWorker.size()>0){
+                return budgetWorker.get(0);
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     //根据Id查询到精算
     public ServerResponse getBudgetWorkerByMyId(String id) {
         try {
@@ -494,6 +512,7 @@ public class BudgetWorkerService {
                 iActuarialTemplateMapper.updateByPrimaryKeySelective(actuarialTemplate);
             }
 
+            houseAPI.updateCustomEdit(houseId);
             return ServerResponse.createBySuccessMessage("生成精算成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -737,6 +756,13 @@ public class BudgetWorkerService {
                     }
                 }
             }
+//            List<Technology> tList = iBudgetWorkerMapper.getByHouseFlowTechnologyId(houseId, houseFlowId);
+//            for (Technology t : tList) {
+//                JSONObject map = new JSONObject();
+//                map.put("technologyName", t.getName());
+//                map.put("content", t.getContent());
+//                jsonArray.add(map);
+//            }
             return jsonArray;
         } catch (Exception e) {
             e.printStackTrace();

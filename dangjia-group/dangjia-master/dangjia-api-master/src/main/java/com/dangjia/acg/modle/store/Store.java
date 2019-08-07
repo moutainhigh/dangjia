@@ -81,6 +81,12 @@ public class Store extends BaseEntity {
     @ApiModelProperty("门店管辖范围的小区集合")
     private String villages;
 
+
+    @Column(name = "user_id")
+    @Desc(value = "门店店长")
+    @ApiModelProperty("门店店长")
+    private String userId;
+
     @Transient
     private Integer juli;//门店距离
 

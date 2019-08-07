@@ -68,8 +68,8 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setQuantityRoom(HttpServletRequest request, String userToken, String houseId, String userId, String images) {
-        return designerOperationService.setQuantityRoom(userToken, houseId, userId, images);
+    public ServerResponse setQuantityRoom(HttpServletRequest request, String userToken, String houseId, String userId, String images, Integer elevator, String floor) {
+        return designerOperationService.setQuantityRoom(userToken, houseId, userId, images, elevator, floor);
     }
 
     @Override

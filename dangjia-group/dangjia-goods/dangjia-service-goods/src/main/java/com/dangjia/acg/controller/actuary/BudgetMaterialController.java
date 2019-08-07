@@ -25,7 +25,7 @@ public class BudgetMaterialController implements BudgetMaterialAPI {
 
 
 	@Override
-	public BigDecimal getHouseBudgetTotalAmount(HttpServletRequest request,String houseId){
+	public BigDecimal getHouseBudgetTotalAmount(HttpServletRequest request, String cityId,String houseId){
 		return budgetMaterialService.getHouseBudgetTotalAmount(houseId);
 	}
 	/**
@@ -34,7 +34,7 @@ public class BudgetMaterialController implements BudgetMaterialAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse getHouseBudgetStageCost(HttpServletRequest request,String houseId, String workerTypeId){
+	public ServerResponse getHouseBudgetStageCost(HttpServletRequest request, String cityId,String houseId, String workerTypeId){
 		return budgetMaterialService.getHouseBudgetStageCost(houseId,workerTypeId);
 	}
 	/**

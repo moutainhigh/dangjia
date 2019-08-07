@@ -180,10 +180,14 @@ public interface HouseAPI {
     @PostMapping("app/house/house/queryConstructionRecordAll")
     @ApiOperation(value = "施工记录(new 包含要补退记录)", notes = "施工记录(new 包含要补退记录)")
     ServerResponse queryConstructionRecordAll(@RequestParam("houseId") String houseId,
+                                              @RequestParam("ids") String ids,
                                               @RequestParam("day") String day,
                                               @RequestParam("workerType") String workerType,
                                               @RequestParam("pageDTO") PageDTO pageDTO);
 
+    @PostMapping("app/house/queryConstructionRecordType")
+    @ApiOperation(value = "施工记录(new 包含要补退记录)分类型", notes = "施工记录(new 包含要补退记录)")
+    ServerResponse queryConstructionRecordType(@RequestParam("houseId") String houseId);
     /**
      * showdoc
      *
@@ -253,7 +257,9 @@ public interface HouseAPI {
                                    @RequestParam("modelingLayoutId") String modelingLayoutId,       //户型Id
                                    @RequestParam("villageId") String villageId);                    //小区Id
 
-
+    @PostMapping("app/house/house/updateCustomEdit")
+    @ApiOperation(value = "房子申请修改未进场的工序还原", notes = "房子申请修改未进场的工序还原")
+    ServerResponse updateCustomEdit(@RequestParam("houseId") String houseId);
     /**
      * 获取房屋精选案例详情
      *
