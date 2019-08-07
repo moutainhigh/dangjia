@@ -319,10 +319,6 @@ public class RobService {
      * @return
      */
     public ServerResponse addLabel(String memberId,
-                                   String labelId,
-                                   String clueId,
-                                   Integer phaseStatus) {
-    public ServerResponse addLabel(String memberId,
                                    String mcId,
                                    String labelId,
                                    String clueId,
