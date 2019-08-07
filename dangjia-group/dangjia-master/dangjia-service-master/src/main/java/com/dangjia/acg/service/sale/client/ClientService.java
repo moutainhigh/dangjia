@@ -56,6 +56,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -125,16 +126,16 @@ public class ClientService {
         //线索阶段是否报备
         List<Clue> groupBys = clueMapper.getGroupBy(clue.getPhone(), null, null);
         for (Clue groupBy : groupBys) {
-            if (!CommonUtil.isEmpty(groupBy.getReportDate()) && DateUtil.getDiffDays(new Date(), groupBy.getReportDate()) < 7) {
-                long time = System.currentTimeMillis() - groupBy.getReportDate().getTime();
+            if (null!=groupBy.getReportDate() && new Date().getTime()>groupBy.getReportDate().getTime()) {
+                long time = groupBy.getReportDate().getTime()-new Date().getTime();
                 return ServerResponse.createByErrorMessage(String.valueOf(time));
             }
         }
         //客户阶段是否报备
         List<Customer> customerGroupBy = iCustomerMapper.getCustomerGroupBy(clue.getPhone());
         for (Customer customer : customerGroupBy) {
-            if (!CommonUtil.isEmpty(customer.getReportDate()) && DateUtil.getDiffDays(new Date(), customer.getReportDate()) < 7) {
-                long time = System.currentTimeMillis() - customer.getReportDate().getTime();
+            if (null!=customer.getReportDate() && new Date().getTime()>customer.getReportDate().getTime()) {
+                long time = customer.getReportDate().getTime()-new Date().getTime();
                 return ServerResponse.createByErrorMessage(String.valueOf(time));
             }
         }
