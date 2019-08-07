@@ -262,7 +262,9 @@ public class ModelingVillageService {
 
     public ServerResponse getModelingVillage(HttpServletRequest request) {
         String userID = request.getParameter(Constants.USERID);
-        String cityKey = redisClient.getCache(Constants.CITY_KEY + userID, String.class);
+
+        String cityKey = request.getParameter(Constants.CITY_ID);
+//        String cityKey = redisClient.getCache(Constants.CITY_KEY + userID, String.class);
         if (CommonUtil.isEmpty(cityKey)) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }

@@ -52,13 +52,13 @@ public class MenuConfiguration extends BaseEntity {
     private String apiUrl;//统一返回格式：{"image":"图标地址","state":"0无 1有点","num":"点数量"}
 
     @Column(name = "type")
-    @Desc(value = "0:跳转URL，1:获取定位后跳转URL，2:量房，3：传平面图，4：传施工图")
-    @ApiModelProperty("0:跳转URL，1:获取定位后跳转URL,2:量房，3：传平面图，4：传施工图")
+    @Desc(value = "0:跳转URL，1:获取定位后跳转URL，2:量房，3：传平面图，4：传施工图，5：跳转我的钱包，6：跳转我的优惠券")
+    @ApiModelProperty("0:跳转URL，1:获取定位后跳转URL,2:量房，3：传平面图，4：传施工图，5：跳转我的钱包，6：跳转我的优惠券")
     private Integer type;
 
     @Column(name = "menu_type")
-    @Desc(value = "菜单类型：0:施工页面，1:工匠我的页面，2:装修设计阶段，3:装修精算阶段，4:装修施工阶段")
-    @ApiModelProperty("菜单类型：0:施工页面，1:工匠我的页面")
+    @Desc(value = "菜单类型：0:施工页面，1:我的页面，2:装修设计阶段，3:装修精算阶段，4:装修施工阶段")
+    @ApiModelProperty("菜单类型：0:施工页面，1:我的页面，2:装修设计阶段，3:装修精算阶段，4:装修施工阶段")
     private Integer menuType;
 
     @Column(name = "show_designer")

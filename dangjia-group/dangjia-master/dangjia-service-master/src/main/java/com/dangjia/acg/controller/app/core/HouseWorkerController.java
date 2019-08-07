@@ -67,15 +67,6 @@ public class HouseWorkerController implements HouseWorkerAPI {
     }
 
     /**
-     * 获取我的界面
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse getMyHomePage(String userToken, String cityId) {
-        return houseWorkerService.getMyHomePage(userToken);
-    }
-
-    /**
      * 获取申请单明细
      */
 
