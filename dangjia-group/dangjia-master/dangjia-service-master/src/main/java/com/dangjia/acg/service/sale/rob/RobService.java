@@ -401,22 +401,39 @@ public class RobService {
      * @param customerRecDTO
      * @return
      */
-    public ServerResponse addDescribes(CustomerRecDTO customerRecDTO) {
+    public ServerResponse addDescribes(CustomerRecDTO customerRecDTO,String userToken) {
         try {
+
+            AccessToken accessToken =null;
+            if (!CommonUtil.isEmpty(userToken)) {
+                Object object = constructionService.getAccessToken(userToken);
+                if (object instanceof ServerResponse) {
+                    return (ServerResponse) object;
+                }
+                accessToken = (AccessToken) object;
+                if (CommonUtil.isEmpty(accessToken.getUserId())) {
+                    return ServerResponse.createbyUserTokenError();
+                }
+            }
+
             if (!CommonUtil.isEmpty(customerRecDTO)) {
                 if (customerRecDTO.getPhaseStatus() == 1) {
                     //客户阶段新增沟通记录
                     CustomerRecord customerRecord = new CustomerRecord();
                     customerRecord.setDescribes(customerRecDTO.getDescribes());
                     customerRecord.setRemindTime(customerRecDTO.getRemindTime());
-                    customerRecord.setUserId(customerRecDTO.getUserId());
+                    if(accessToken != null){
+                        customerRecord.setUserId(accessToken.getUserId());
+                    }
                     customerRecord.setMemberId(customerRecDTO.getMemberId());
                     iCustomerRecordMapper.insert(customerRecord);
                     return ServerResponse.createBySuccessMessage("新增成功");
                 } else {
                     // 线索阶段新增沟通记录
                     ClueTalk clueTalk = new ClueTalk();
-                    clueTalk.setUserId(customerRecDTO.getUserId());
+                    if(accessToken != null){
+                        clueTalk.setUserId(accessToken.getUserId());
+                    }
                     clueTalk.setClueId(customerRecDTO.getClueId());
                     clueTalk.setTalkContent(customerRecDTO.getDescribes());
                     clueTalkMapper.insert(clueTalk);

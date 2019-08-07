@@ -108,8 +108,8 @@ public class RobController implements RobAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse addDescribes(HttpServletRequest request, CustomerRecDTO customerRecDTO) {
-        return robService.addDescribes(customerRecDTO);
+    public ServerResponse addDescribes(HttpServletRequest request, CustomerRecDTO customerRecDTO,String userToken) {
+        return robService.addDescribes(customerRecDTO,userToken);
     }
 
     @Override
