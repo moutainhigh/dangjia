@@ -82,6 +82,7 @@
                convert_unit,
                convert_quality,
                create_date,
+               istop,
                modify_date
     </sql>
     <sql id="new_columns">
@@ -100,6 +101,7 @@
                cost,
                price,
                profit,
+               istop,
                brand_id         as brandId,
                brand_series_id  as brandSeriesId,
                attribute_id_arr as attributeIdArr,
@@ -117,6 +119,7 @@
                product_id,
                attribute_id,
                value_id,
+               istop,
                create_date,
                modify_date
     </sql>
@@ -135,7 +138,7 @@
             where
             category_id=#{category_id}
         </if>
-        ORDER BY create_date desc
+        ORDER BY istop DESC,create_date desc
     </select>
 
 
@@ -145,7 +148,7 @@
         <include refid="new_columns"/>
         FROM dj_basics_product
         where goods_id=#{goodsId}
-        ORDER BY create_date desc
+        ORDER BY istop DESC,create_date desc
     </select>
     <!-- 根据货品id查询货品对象 -->
     <select id="getById" resultType="com.dangjia.acg.modle.basics.Product">
@@ -153,7 +156,7 @@
         <include refid="new_columns"/>
         FROM dj_basics_product
         where id=#{id}
-        ORDER BY create_date desc
+        ORDER BY istop DESC,create_date desc
     </select>
 
     <!-- 根据标签id查询货品对象 -->
@@ -162,7 +165,7 @@
         <include refid="new_columns"/>
         FROM dj_basics_product
         where label_id=#{labelId}
-        ORDER BY create_date desc
+        ORDER BY istop DESC,create_date desc
     </select>
 
     <!-- 根据标签id查询货品对象 -->
@@ -171,7 +174,7 @@
         <include refid="new_columns"/>
         FROM dj_basics_product
         where label_id=#{labelId}
-        ORDER BY create_date desc
+        ORDER BY istop DESC,create_date desc
     </select>
 
     <!-- 根据名称查询 -->
@@ -184,7 +187,7 @@
             and
             name=#{name}
         </if>
-        ORDER BY create_date desc
+        ORDER BY istop DESC,create_date desc
     </select>
 
     <!-- 根据货号查询 -->
@@ -197,7 +200,7 @@
             and
             product_sn=#{productSn}
         </if>
-        ORDER BY create_date desc
+        ORDER BY istop DESC,create_date desc
     </select>
 
     <!-- 根据名称模糊查询 -->
@@ -212,7 +215,7 @@
             other_name LIKE CONCAT('%',#{name},'%')
             )
         </if>
-        ORDER BY create_date desc
+        ORDER BY istop DESC,create_date desc
     </select>
     <!-- 查询product -->
     <select id="selectProduct" resultType="com.dangjia.acg.modle.basics.Product">
@@ -230,6 +233,7 @@
         p.type,
         p.maket,
         p.cost,
+        p.istop,
         p.price,
         p.profit,
         p.brand_id as brandId,
@@ -288,6 +292,7 @@
         p.unit_name as unitName,
         p.type as type,
         p.price as price,
+        p.istop,
         p.brand_id as brandId,
         p.brand_series_id as brandSeriesId,
         p.attribute_id_arr AS attributeIdArr,
@@ -318,6 +323,7 @@
         p.label_id as labelId,
         p.unit_name as unitName,
         p.type as type,
+        p.istop,
         p.price as price,
         p.brand_id as brandId,
         p.brand_series_id as brandSeriesId,
@@ -348,6 +354,7 @@
         p.unit_name as unitName,
         p.type as type,
         p.price as price,
+        p.istop,
         p.brand_id as brandId,
         p.brand_series_id as brandSeriesId,
         p.attribute_id_arr AS attributeIdArr,
@@ -379,6 +386,7 @@
         p.unit_name as unitName,
         p.type as type,
         p.price as price,
+        p.istop,
         p.brand_id as brandId,
         p.brand_series_id as brandSeriesId,
         p.attribute_id_arr AS attributeIdArr,
@@ -411,6 +419,7 @@
         p.label_id as labelId,
         p.unit_name as unitName,
         p.type as type,
+        p.istop,
         p.price as price,
         p.brand_id as brandId,
         p.brand_series_id as brandSeriesId,
@@ -444,6 +453,7 @@
         p.label_id as labelId,
         p.unit_name as unitName,
         p.type as type,
+        p.istop,
         p.price as price,
         p.brand_id as brandId,
         p.brand_series_id as brandSeriesId,
@@ -473,6 +483,7 @@
         p.unit_name as unitName,
         p.type as type,
         p.price as price,
+        p.istop,
         p.brand_id as brandId,
         p.brand_series_id as brandSeriesId,
         p.attribute_id_arr AS attributeIdArr,
@@ -506,6 +517,7 @@
         p.type,
         p.maket,
         p.cost,
+        p.istop,
         p.price,
         p.profit,
         p.brand_id AS brandId,
@@ -550,6 +562,7 @@
         p.weight,
         p.type,
         p.maket,
+        p.istop,
         p.cost,
         p.price,
         p.profit,
@@ -604,7 +617,7 @@
         <if test="categoryId!=null and categoryId!=''">
             AND (ca.parent_top=#{categoryId} OR p.category_id=#{categoryId})
         </if>
-        ORDER BY p.`name` DESC
+        ORDER BY p.istop DESC,p.`name` DESC
     </select>
 
     <!-- 根据系列和属性查询切换货品-->
@@ -629,6 +642,7 @@
         bp.image,
         bp.price,
         bg.type,
+        bp.istop,
         bp.convert_unit AS convertUnit
         FROM
         dj_basics_goods bg
@@ -645,6 +659,7 @@
         GROUP BY
         bp.goods_id
         ORDER BY
+        bp.istop DESC,
         bg.category_id,
         bg.`name` DESC
     </select>
