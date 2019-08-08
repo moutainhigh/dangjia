@@ -177,7 +177,7 @@
               mc.member_id as memberId,
               c.stage,
               c.owername as name,
-              mc.mobile as phone,
+              c.phone,
               mc.modify_date as modifyDate,
               CONCAT(IFNULL(h.residential,'*'),IFNULL(h.building,'*栋'),IFNULL(h.unit,'*单元'),IFNULL(h.number,'*号')) as houseName,
               c.cus_service as userId,
@@ -319,7 +319,7 @@
             <if test="null!=searchKey and ''!=searchKey">
                 AND CONCAT(name,phone,address) like CONCAT('%',#{searchKey},'%')
             </if>
-            order by a.modifyDate
+            order by c.modify_date
             <if test="null!=time and ''!=time">
                 desc
             </if>
