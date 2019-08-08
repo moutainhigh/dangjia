@@ -50,22 +50,21 @@
     <select id="waitDistribution" parameterType="String" resultType="com.dangjia.acg.dto.sale.client.CustomerIndexDTO">
         SELECT
         mc.id as mcId,
-        m.id as memberId,
+        mc.member_id as memberId,
         mc.user_id as userId,
-        if(m.name is not null,m.nick_name,m.name) as name,
-        m.mobile as phone,
+        c.owername as name,
+        c.phone,
         mc.modify_date AS modifyDate,
         mc.create_date AS createDate,
         mc.label_id_arr AS labelIdArr,
         mc.phase_status as phaseStatus
         FROM dj_member_customer mc
-        INNER join dj_member m
-        ON mc.member_id=m.id
-        WHERE user_id=#{userId}
+        INNER join dj_clue c
+        ON mc.member_id=c.member_id
+        WHERE mc.user_id=#{userId}
         AND mc.data_status=0
-        AND stage IN(0,1)
         <if test="null!=searchKey and ''!=searchKey">
-            AND CONCAT(m.name,m.mobile) like CONCAT('%',#{searchKey},'%')
+            AND CONCAT(c.owername,c.phone) like CONCAT('%',#{searchKey},'%')
         </if>
         ORDER by mc.create_date
         <if test="null!=time and ''!=time">
