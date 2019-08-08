@@ -27,7 +27,6 @@ import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMemberMapper;
-import com.dangjia.acg.mapper.matter.IRenovationStageMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberCityMapper;
@@ -98,8 +97,6 @@ public class HouseService {
     private ConfigUtil configUtil;
     @Autowired
     private IRenovationManualMapper renovationManualMapper;
-    @Autowired
-    private IRenovationStageMapper renovationStageMapper;
     @Autowired
     private IRenovationManualMemberMapper renovationManualMemberMapper;
     @Autowired
@@ -424,6 +421,9 @@ public class HouseService {
         }
         if (houseDTO.getSquare() <= 0) {
             return ServerResponse.createByErrorMessage("面积错误");
+        }
+        if (CommonUtil.isEmpty(houseDTO.getStyle())) {
+            houseDTO.setStyle("简单装修");
         }
         House house = iHouseMapper.selectByPrimaryKey(houseDTO.getHouseId());
         if (house == null) {
