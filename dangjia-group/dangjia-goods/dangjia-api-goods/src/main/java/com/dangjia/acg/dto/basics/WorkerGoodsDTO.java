@@ -42,6 +42,8 @@ public class WorkerGoodsDTO {
     private String workerDec;
     @ApiModelProperty("workerDecUrl")
     private String workerDecUrl;
+    @ApiModelProperty(" 是否置顶 0=正常  1=置顶")
+    private String istop;
     @ApiModelProperty("workerStandard")
     private String workerStandard;
     @ApiModelProperty("workerTypeId")
