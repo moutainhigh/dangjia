@@ -174,11 +174,11 @@
           </if>
           <if test="type==1 or type==2">
               c.id as clueId,
-              m.id as memberId,
+              mc.member_id as memberId,
               c.stage,
-              if(m.name is not null,m.nick_name,m.name) as name,
-              m.mobile as phone,
-              m.modify_date as modifyDate,
+              c.owername as name,
+              mc.mobile as phone,
+              mc.modify_date as modifyDate,
               CONCAT(IFNULL(h.residential,'*'),IFNULL(h.building,'*栋'),IFNULL(h.unit,'*单元'),IFNULL(h.number,'*号')) as houseName,
               c.cus_service as userId,
               c.phase_status as phaseStatus
