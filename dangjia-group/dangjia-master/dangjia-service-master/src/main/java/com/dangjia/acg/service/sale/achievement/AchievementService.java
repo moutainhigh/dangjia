@@ -36,7 +36,6 @@ public class AchievementService {
     /**
      * 根据月份 查询店长业绩
      * @param storeId
-     * @param userId
      * @param time
      * @return
      */

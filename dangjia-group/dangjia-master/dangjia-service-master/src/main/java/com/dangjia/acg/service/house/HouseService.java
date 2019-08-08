@@ -419,7 +419,7 @@ public class HouseService {
         if (houseDTO.getDecorationType() >= 3 || houseDTO.getDecorationType() == 0) {
             return ServerResponse.createByErrorMessage("装修类型参数错误");
         }
-        if (StringUtils.isEmpty(houseDTO.getHouseId())|| StringUtils.isEmpty(houseDTO.getVillageId())) {
+        if (StringUtils.isEmpty(houseDTO.getHouseId()) || StringUtils.isEmpty(houseDTO.getVillageId())) {
             return ServerResponse.createByErrorMessage("参数为空");
         }
         if (houseDTO.getSquare() <= 0) {
@@ -430,9 +430,9 @@ public class HouseService {
             return ServerResponse.createByErrorMessage("该房产不存在");
         }
         house.setBuildSquare(new BigDecimal(houseDTO.getBuildSquare()));//建筑面积
-        if(StringUtils.isEmpty(houseDTO.getCityId())){
+        if (StringUtils.isEmpty(houseDTO.getCityId())) {
             house.setCityId(iModelingVillageMapper.selectByPrimaryKey(houseDTO.getVillageId()).getCityId());
-        }else{
+        } else {
             house.setCityId(houseDTO.getCityId());
         }
         house.setCityName(houseDTO.getCityName());
@@ -645,12 +645,13 @@ public class HouseService {
         example.createCriteria()
                 .andEqualTo(MemberCity.MEMBER_ID, member.getId())
                 .andEqualTo(MemberCity.CITY_ID, cityId);
-        List list=memberCityMapper.selectByExample(example);
-        if(list.size()==0) {
+        List list = memberCityMapper.selectByExample(example);
+        if (list.size() == 0) {
             MemberCity userCity = new MemberCity();
             userCity.setMemberId(member.getId());
             userCity.setCityId(cityId);
-            userCity.setCityName(city.getName());
+            if (city != null)
+                userCity.setCityName(city.getName());
             memberCityMapper.insert(userCity);
         }
 
@@ -1057,6 +1058,7 @@ public class HouseService {
         pageResult.setList(listMap);
         return ServerResponse.createBySuccess("查询施工记录成功", pageResult);
     }
+
     /**
      * 施工记录（分类型）
      */
@@ -1064,6 +1066,7 @@ public class HouseService {
         List<HouseConstructionRecordTypeDTO> hfaList = houseConstructionRecordMapper.getHouseConstructionRecordTypeDTO(houseId);
         return ServerResponse.createBySuccess("查询施工记录成功", hfaList);
     }
+
     /**
      * 施工记录
      */
@@ -1078,7 +1081,7 @@ public class HouseService {
         }
         if (!CommonUtil.isEmpty(ids)) {
             String[] id = ids.split(",");
-            criteria.andIn(HouseConstructionRecord.ID,  Arrays.asList(id));
+            criteria.andIn(HouseConstructionRecord.ID, Arrays.asList(id));
         }
         if (!CommonUtil.isEmpty(workerType)) {
             criteria.andEqualTo(HouseConstructionRecord.WORKER_TYPE, workerType);
@@ -1409,6 +1412,7 @@ public class HouseService {
         return ServerResponse.createBySuccessMessage("更新成功");
 
     }
+
     /**
      * 房子申请修改未进场的工序还原
      */
@@ -1424,6 +1428,7 @@ public class HouseService {
             return ServerResponse.createByErrorMessage("更新失败");
         }
     }
+
     public ServerResponse getHistoryWorker(String houseId, String workerTypeId, String workId, PageDTO pageDTO) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
