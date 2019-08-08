@@ -172,7 +172,7 @@ public class ClientService {
         Store store = iStoreMapper.selectByPrimaryKey(storeUser.getStoreId());
         if (members.size() > 0) {//如果线索已注册
             Customer customer = new Customer();
-            clue.setStage(0);
+            clue.setStage(1);
             clue.setDataStatus(0);
             clue.setStoreId(storeUser.getStoreId());
             clue.setCusService(user.getId());
@@ -198,13 +198,9 @@ public class ClientService {
             customer.setDataStatus(0);
             customer.setTips("1");
             customer.setPhaseStatus(1);
-            if (groupBys.size() > 0) {//该线索已被其他人录入并成为客户阶段
-                clue.setPhaseStatus(1);
-                clue.setStage(4);
-                clue.setMemberId(members.get(0).getId());
-                clueMapper.insert(clue);//记录进入线索线索状态为转客户客户阶段
-                iCustomerMapper.insert(customer);
-            }
+            clue.setMemberId(members.get(0).getId());
+            clueMapper.insert(clue);//记录进入线索线索状态为转客户客户阶段
+            iCustomerMapper.insert(customer);
             return ServerResponse.createBySuccessMessage("提交成功");
         } else {
             clue.setCusService(user.getId());
@@ -258,6 +254,7 @@ public class ClientService {
                     clue.setTurnStatus(0);
                     clue.setCityId(store.getCityId());
                     clue.setClueType(1);
+                    clue.setPhaseStatus(0);
                     clueMapper.insert(clue);
                     MainUser u = userMapper.selectByPrimaryKey(store.getUserId());
                     if (u != null && !CommonUtil.isEmpty(u.getMemberId()))
@@ -280,6 +277,7 @@ public class ClientService {
                 clue.setTurnStatus(0);
                 clue.setCityId(store.getCityId());
                 clue.setClueType(1);
+                clue.setPhaseStatus(0);
                 clueMapper.insert(clue);
                 MainUser u = userMapper.selectByPrimaryKey(clue.getCusService());
                 if (u != null && !CommonUtil.isEmpty(u.getMemberId()))
@@ -384,21 +382,16 @@ public class ClientService {
             if (clue == null) {
                 return ServerResponse.createByErrorMessage("找不到此线索");
             }
-            clue.setStage(2);
             clue.setModifyDate(new Date());
             user = userMapper.selectByPrimaryKey(clue.getCusService());
-            clueMapper.updateByPrimaryKeySelective(clue);
         } else {
             Customer customer = iCustomerMapper.selectByPrimaryKey(mcId);
             if (customer == null) {
                 return ServerResponse.createByErrorMessage("找不到此客户");
             }
-            customer.setStage(2);
-            customer.setModifyDate(new Date());
-            memberId = customer.getMemberId();
             user = userMapper.selectByPrimaryKey(customer.getUserId());
-            iCustomerMapper.updateByPrimaryKeySelective(customer);
         }
+        clueMapper.setFollow(clueId,phaseStatus,mcId);
         if (user != null) {
             Example example = new Example(StoreUser.class);
             example.createCriteria().andEqualTo(StoreUser.USER_ID, user.getId())

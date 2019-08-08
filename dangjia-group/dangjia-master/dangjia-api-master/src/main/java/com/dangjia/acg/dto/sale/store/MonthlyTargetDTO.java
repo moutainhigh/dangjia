@@ -14,5 +14,5 @@ import java.util.Date;
 public class MonthlyTargetDTO {
     private String modifyDate;
     private Integer targetNumber;//目标数
-    private Integer Complete;//下单数
+    private Integer complete;//下单数
 }
