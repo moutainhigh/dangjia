@@ -56,7 +56,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -661,11 +660,6 @@ public class ClientService {
             return ServerResponse.createbyUserTokenError();
         }
         MainUser user = userMapper.getNameById(accessToken.getUserId());
-        object = saleService.getStore(accessToken.getUserId());
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
-        }
-        Store store = (Store) object;
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<OrdersCustomerDTO> ordersCustomerDTOS = new ArrayList<>();
         if (!CommonUtil.isEmpty(visitState)) {
@@ -674,6 +668,11 @@ public class ClientService {
             if (iStoreMapper.selectByExample(example).size() <= 0) {
                 ordersCustomerDTOS = clueMapper.ordersCustomer(user.getId(), visitState, searchKey, time, null, null);
             } else {
+                object = saleService.getStore(accessToken.getUserId());
+                if (object instanceof ServerResponse) {
+                    return (ServerResponse) object;
+                }
+                Store store = (Store) object;
                 ordersCustomerDTOS = clueMapper.ordersCustomer(null, visitState, searchKey, time, store.getId(), userId);
             }
         } else {
@@ -682,6 +681,11 @@ public class ClientService {
                 customerIndexDTOS = iCustomerMapper.waitDistribution(user.getId(), searchKey, time);
             }
             if (null != type && type == 2) {//沉睡客户
+                object = saleService.getStore(accessToken.getUserId());
+                if (object instanceof ServerResponse) {
+                    return (ServerResponse) object;
+                }
+                Store store = (Store) object;
                 customerIndexDTOS = clueMapper.sleepingCustomer(store.getId(), searchKey, time, userId);
             }
             for (CustomerIndexDTO customerIndexDTO : customerIndexDTOS) {
