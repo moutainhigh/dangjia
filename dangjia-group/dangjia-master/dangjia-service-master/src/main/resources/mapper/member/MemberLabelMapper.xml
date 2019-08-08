@@ -87,7 +87,8 @@
             m.name as name,
             m.head as head,
             ct.talk_content as describes,
-            ct.create_date as createDate
+            ct.create_date as createDate,
+            ct.remind_time as remindTime
         from dj_user u
         INNER JOIN dj_member m on u.member_id=m.id
         INNER JOIN dj_clue_talk ct on ct.user_id=u.id
