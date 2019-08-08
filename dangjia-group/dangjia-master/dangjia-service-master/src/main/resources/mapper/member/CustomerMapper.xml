@@ -132,7 +132,7 @@
         inner join dj_clue c
         on mc.member_id=c.member_id
         and c.cus_service=mc.user_id
-        where m.mobile=#{mobile}
+        where c.phone=#{mobile}
     </select>
     <select id="getCustomerMemberIdList" resultType="com.dangjia.acg.modle.member.Customer">
         SELECT
