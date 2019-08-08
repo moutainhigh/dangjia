@@ -95,7 +95,6 @@ public class WorkerGoods extends BaseEntity {
     @ApiModelProperty("施工说明，json串")
     private String buildContent;
 
-
     @Column(name = "istop")
     @Desc(value = " 是否置顶 0=正常  1=置顶")
     @ApiModelProperty(" 是否置顶 0=正常  1=置顶")
