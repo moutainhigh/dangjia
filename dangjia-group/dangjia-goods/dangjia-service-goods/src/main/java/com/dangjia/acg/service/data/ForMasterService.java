@@ -96,6 +96,36 @@ public class ForMasterService {
         return brandSeriesMapper.brandName(productId);
     }
 
+    /**
+     * 设置材料或者人工商品置顶或取消置顶
+     * @param gid 商品ID
+     * @param type 0=材料商品  1=人工商品
+     */
+    public void setProductOrWorkerGoodsIsTop(String gid,Integer type){
+        if(type==0){
+            Product product= productMapper.selectByPrimaryKey(gid);
+            if(product!=null){
+                if("0".equals(product.getIstop())){
+                    product.setIstop("1");
+                }
+                if("1".equals(product.getIstop())){
+                    product.setIstop("0");
+                }
+                productMapper.updateByPrimaryKeySelective(product);
+            }
+        }else{
+            WorkerGoods workerGoods= workerGoodsMapper.selectByPrimaryKey(gid);
+            if(workerGoods!=null){
+                if("0".equals(workerGoods.getIstop())){
+                    workerGoods.setIstop("1");
+                }
+                if("1".equals(workerGoods.getIstop())){
+                    workerGoods.setIstop("0");
+                }
+                workerGoodsMapper.updateByPrimaryKeySelective(workerGoods);
+            }
+        }
+    }
     public WorkerGoods getWorkerGoods(String workerGoodsId){
         return workerGoodsMapper.selectByPrimaryKey(workerGoodsId);
     }

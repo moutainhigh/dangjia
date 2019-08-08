@@ -83,5 +83,7 @@ public class Product extends BaseEntity {
     @Column(name = "value_id_arr")
     private String valueIdArr;// 属性选项Id集合    AttributeValue
 
-    
+    @Column(name = "istop")
+    private String istop;// 是否置顶 0=正常  1=置顶
+
 }

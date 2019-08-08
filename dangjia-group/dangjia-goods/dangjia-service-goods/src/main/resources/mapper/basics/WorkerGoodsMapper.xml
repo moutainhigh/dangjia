@@ -11,6 +11,7 @@
         unit_name unitName,
         price,
         sales,
+        istop,
         work_explain workExplain,
         worker_dec workerDec,
         worker_standard workerStandard,
@@ -37,6 +38,7 @@
         unit_id as unitId,
         unit_name as unitName,
         price,
+        istop,
         other_name as otherName,
         sales,
         work_explain as workExplain,
@@ -66,7 +68,7 @@
         <if test="showGoods != null">
             AND show_goods=#{showGoods}
         </if>
-        ORDER BY create_date desc
+        ORDER BY istop DESC,create_date desc
     </select>
     <select id="selectLists" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
         SELECT
@@ -106,6 +108,7 @@
         unit_name as unitName,
         price,
         sales,
+        istop,
         other_name as otherName,
         work_explain as workExplain,
         worker_dec as workerDec,
@@ -124,7 +127,7 @@
             AND
             w.worker_type_id =#{workerTypeId}
         </if>
-        ORDER BY create_date desc
+        ORDER BY istop DESC,create_date desc
     </select>
 
     <!-- 根据商品编号查询 -->
@@ -138,6 +141,7 @@
         unit_id as unitId,
         unit_name as unitName,
         price,
+        istop,
         other_name as otherName,
         sales,
         work_explain as workExplain,
@@ -157,7 +161,7 @@
             AND
             w.worker_type_id =#{workerTypeId}
         </if>
-        ORDER BY create_date desc
+        ORDER BY istop DESC,create_date desc
     </select>
 
     <!-- 根据名称查询 -->
@@ -170,6 +174,7 @@
         unit_id as unitId,
         unit_name as unitName,
         price,
+        istop,
         other_name as otherName,
         sales,
         work_explain as workExplain,
@@ -189,7 +194,7 @@
             AND
             w.worker_type_id =#{workerTypeId}
         </if>
-        ORDER BY create_date desc
+        ORDER BY istop DESC,create_date desc
     </select>
 
     <!-- 根据id查询 -->
@@ -197,6 +202,7 @@
         SELECT
         id,
         name,
+        istop,
         worker_goods_sn as workerGoodsSn,
         image,
         unit_id as unitId,
@@ -214,7 +220,7 @@
         from dj_basics_worker_goods
         where
          id =#{id}
-        ORDER BY create_date desc
+        ORDER BY istop DESC,create_date desc
     </select>
 
     <!--补货查询精算内人工商品-->
@@ -227,6 +233,7 @@
         w.unit_id as unitId,
         w.unit_name as unitName,
         w.price,
+        istop,
         w.sales,
         w.work_explain as workExplain,
         w.worker_dec as workerDec,

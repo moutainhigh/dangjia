@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.data;
 
+import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Goods;
@@ -67,6 +68,10 @@ public interface ForMasterAPI {
     @PostMapping("/data/forMaster/getWorkerGoods")
     @ApiOperation(value = "工价商品信息", notes = "工价商品信息")
     WorkerGoods getWorkerGoods(@RequestParam("cityId") String cityId,@RequestParam("workerGoodsId") String workerGoodsId);
+
+    @PostMapping("/data/goods/settop")
+    @ApiOperation(value = "设置材料或者人工商品置顶或取消置顶", notes = "设置材料或者人工商品置顶或取消置顶")
+    ServerResponse setProductOrWorkerGoodsIsTop(@RequestParam("gid") String gid, @RequestParam("type") Integer type);
 
     @PostMapping("/data/forMaster/getGoods")
     @ApiOperation(value = "商品信息", notes = "商品信息")
