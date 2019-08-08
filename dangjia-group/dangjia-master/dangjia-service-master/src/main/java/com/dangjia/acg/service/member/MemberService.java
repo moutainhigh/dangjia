@@ -179,10 +179,13 @@ public class MemberService {
             if (user == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
             }
-            if (userRole == 3) {
-                ServerResponse serverResponse = setSale(accessToken, accessToken.getUserId());
-                if (!serverResponse.isSuccess()) {
-                    return ServerResponse.createbyUserTokenError();
+            if (userRole == 3) {//销售端放开登录权限
+                if (!CommonUtil.isEmpty(accessToken.getUserId())) {
+                    ServerResponse serverResponse = setSale(accessToken, accessToken.getUserId());
+                    if (!serverResponse.isSuccess()) {
+//                    return ServerResponse.createbyUserTokenError();
+                        accessToken.setMemberType(6);
+                    }
                 }
             }
             updataMember(user, accessToken);
@@ -247,36 +250,44 @@ public class MemberService {
         return ServerResponse.createBySuccess();
     }
 
-    private ServerResponse setAccessToken(Member user, Integer userRole) {
-        MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
+    private ServerResponse setAccessToken(Member member, Integer userRole) {
+        int memberType = -1;
+        MainUser mainUser = userMapper.findUserByMobile(member.getMobile());
         if (mainUser != null && CommonUtil.isEmpty(mainUser.getMemberId())) {
             //插入MemberId
-            userMapper.insertMemberId(user.getMobile());
+            userMapper.insertMemberId(member.getMobile());
         }
-        if (userRole == 3) {
+        if (userRole == 3) {//销售端放开登录权限
             if (mainUser == null) {
-                return ServerResponse.createByErrorMessage("当前用户暂无权限使用该终端，请联系管理员");
-            }
-            if (mainUser.getIsJob()) {
-                return ServerResponse.createByErrorMessage("当前用户已离职，请您联系管理员");
-            }
-        }
-        user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-        AccessToken accessToken = TokenUtil.generateAccessToken(user, mainUser);
-        if (userRole == 3) {
-            ServerResponse serverResponse = setSale(accessToken, mainUser.getId());
-            if (!serverResponse.isSuccess()) {
-                return serverResponse;
+//                return ServerResponse.createByErrorMessage("当前用户暂无权限使用该终端，请联系管理员");
+                memberType = 6;
+            } else if (mainUser.getIsJob()) {
+//                return ServerResponse.createByErrorMessage("当前用户已离职，请您联系管理员");
+                memberType = 6;
             }
         }
-        if (!CommonUtil.isEmpty(user.getWorkerTypeId())) {
-            WorkerType wt = workerTypeMapper.selectByPrimaryKey(user.getWorkerTypeId());
+        member.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+        AccessToken accessToken = TokenUtil.generateAccessToken(member, mainUser);
+        if (userRole == 3) {//销售端放开登录权限
+            if (memberType == -1) {
+                ServerResponse serverResponse = setSale(accessToken, mainUser.getId());
+                if (!serverResponse.isSuccess()) {
+//                    return serverResponse;
+                    memberType = 6;
+                }
+            }
+            if (memberType != -1) {
+                accessToken.setMemberType(memberType);
+            }
+        }
+        if (!CommonUtil.isEmpty(member.getWorkerTypeId())) {
+            WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
             if (wt != null) {
                 accessToken.setWorkerTypeName(wt.getName());
             }
         }
         redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
-        String userRoleText = "role" + userRole + ":" + user.getId();
+        String userRoleText = "role" + userRole + ":" + member.getId();
         String token = redisClient.getCache(userRoleText, String.class);
         //如果用户存在usertoken则清除原来的token数据
         if (!CommonUtil.isEmpty(token)) {
@@ -285,10 +296,10 @@ public class MemberService {
         redisClient.put(userRoleText, accessToken.getUserToken());
         switch (userRole) {
             case 1:
-                groupInfoService.registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{user.getId()}, new String[1]);
+                groupInfoService.registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{member.getId()}, new String[1]);
                 break;
             case 2:
-                groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{user.getId()}, new String[1]);
+                groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{member.getId()}, new String[1]);
                 break;
             case 3:
                 if (!CommonUtil.isEmpty(accessToken.getUserId()))
