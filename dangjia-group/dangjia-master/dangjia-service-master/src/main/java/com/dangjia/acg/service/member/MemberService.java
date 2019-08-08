@@ -294,18 +294,18 @@ public class MemberService {
             redisClient.deleteCache(token + Constants.SESSIONUSERID);
         }
         redisClient.put(userRoleText, accessToken.getUserToken());
-        switch (userRole) {
-            case 1:
-                groupInfoService.registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{member.getId()}, new String[1]);
-                break;
-            case 2:
-                groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{member.getId()}, new String[1]);
-                break;
-            case 3:
-                if (!CommonUtil.isEmpty(accessToken.getUserId()))
-                    groupInfoService.registerJGUsers(AppType.SALE.getDesc(), new String[]{accessToken.getUserId()}, new String[1]);
-                break;
-        }
+//        switch (userRole) {
+//            case 1:
+//                groupInfoService.registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{member.getId()}, new String[1]);
+//                break;
+//            case 2:
+//                groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{member.getId()}, new String[1]);
+//                break;
+//            case 3:
+//                if (!CommonUtil.isEmpty(accessToken.getUserId()))
+//                    groupInfoService.registerJGUsers(AppType.SALE.getDesc(), new String[]{accessToken.getUserId()}, new String[1]);
+//                break;
+//        }
         return ServerResponse.createBySuccess(accessToken);
     }
 
