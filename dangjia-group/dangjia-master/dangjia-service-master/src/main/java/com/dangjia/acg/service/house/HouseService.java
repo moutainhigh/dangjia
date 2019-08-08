@@ -538,7 +538,10 @@ public class HouseService {
             //确认开工后，要修改 业主客服阶段 为已下单
             Customer customer = iCustomerMapper.getCustomerByMemberId(house.getMemberId());
             customer.setStage(4);//阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单
+            customer.setPhaseStatus(1);
             iCustomerMapper.updateByPrimaryKeySelective(customer);
+
+//            clueMapper.updateByPrimaryKeySelective();
         } catch (Exception e) {
             System.out.println("建群失败，异常：" + e.getMessage());
         }

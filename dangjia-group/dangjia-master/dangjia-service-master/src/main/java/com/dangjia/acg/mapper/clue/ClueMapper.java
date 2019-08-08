@@ -80,4 +80,6 @@ public interface ClueMapper extends Mapper<Clue> {
     Integer getTips(@Param("type") Integer type,@Param("userId") String userId,@Param("storeUsers") List<StoreUserDTO> storeUsers);
 
     Integer getSleepingCustomerTips();
+
+    int setFollow(@Param("clueId") String clueId,@Param("phaseStatus") Integer phaseStatus,@Param("mcId") String mcId);
 }

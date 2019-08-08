@@ -348,6 +348,17 @@ public class ClueService {
                     for (Store store : stores) {
                         //野生客户如果在门店范围内转给门店店长待分配
                         if (GaoDeUtils.isInPolygon(longitude + "," + latitude, store.getScopeItude())) {
+                            clue.setStage(0);
+                            clue.setDataStatus(0);
+                            clue.setStoreId(store.getId());
+                            clue.setClueType(0);
+                            clue.setTurnStatus(0);
+                            clue.setCityId(store.getCityId());
+                            clue.setClueType(0);
+                            clue.setPhaseStatus(1);
+                            clue.setMemberId(member.getId());
+                            clue.setCusService(store.getUserId());
+                            clueMapper.insert(clue);
                             Customer customer = new Customer();
                             customer.setUserId(store.getUserId());
                             customer.setMemberId(member.getId());
