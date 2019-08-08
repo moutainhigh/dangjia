@@ -133,7 +133,7 @@ public class WorkerGoodsService {
             }
             workerGoodsResult.setWorkerTypeName(workerTypeName);
             workerGoodsResult.setPrice(workerGoods.getPrice());
-            workerGoodsResult.setIstop(workerGoods.getIstop());
+            workerGoodsResult.setIstops(workerGoods.getIstop());
             workerGoodsResult.setSales(workerGoods.getSales());
             workerGoodsResult.setWorkExplain(workerGoods.getWorkExplain());
             workerGoodsResult.setWorkerStandard(workerGoods.getWorkerStandard());
