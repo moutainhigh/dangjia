@@ -74,7 +74,7 @@ public class MendMateriel extends BaseEntity {
 	private Double totalPrice; //总价G
 
 	@Column(name = "product_type")
-	private Integer productType; //0：材料；1：服务
+	private Integer productType; //0：材料；1：包工包料
 
 	@Column(name = "category_id")
 	private String categoryId;//分类id

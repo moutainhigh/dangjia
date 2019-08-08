@@ -670,10 +670,10 @@ public class EngineerService {
     /**
      * 工匠列表
      */
-    public ServerResponse artisanList(String name, String workerTypeId, String type, String checkType, PageDTO pageDTO) {
+    public ServerResponse artisanList(String cityId,String name, String workerTypeId, String type, String checkType, PageDTO pageDTO) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Member> memberList = memberMapper.artisanList(name, workerTypeId, type, checkType);
+            List<Member> memberList = memberMapper.artisanList(cityId,name, workerTypeId, type, checkType);
             PageInfo pageResult = new PageInfo(memberList);
             List<ArtisanDTO> artisanDTOS = new ArrayList<>();
             for (Member member : memberList) {

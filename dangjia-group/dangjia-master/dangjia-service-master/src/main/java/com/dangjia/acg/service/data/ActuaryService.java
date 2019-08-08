@@ -33,8 +33,6 @@ public class ActuaryService {
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
-    private IMemberMapper userMapper;
-    @Autowired
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private IMemberMapper memberMapper;

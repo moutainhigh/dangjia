@@ -95,7 +95,7 @@ public class ProductChangeService {
      * @param srcProductId
      * @param destProductId
      * @param srcSurCount
-     * @param productType   0:材料 1：服务
+     * @param productType   0:材料 1：包工包料
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
@@ -127,8 +127,8 @@ public class ProductChangeService {
                     productType = goods.getType();
                 }
                 // 查询转换单位
-                ServerResponse srcUnitResponse = unitAPI.getUnitById(request, srcProduct.getConvertUnit());
-                ServerResponse destUnitResponse = unitAPI.getUnitById(request, destProduct.getConvertUnit());
+                ServerResponse srcUnitResponse = unitAPI.getUnitById(request, request.getParameter(Constants.CITY_ID),srcProduct.getConvertUnit());
+                ServerResponse destUnitResponse = unitAPI.getUnitById(request, request.getParameter(Constants.CITY_ID),destProduct.getConvertUnit());
                 boolean flagB = (srcUnitResponse != null && srcUnitResponse.getResultObj() != null && destUnitResponse != null && destUnitResponse.getResultObj() != null);
                 if (flagB) {
                     srcUnit = JSON.parseObject(JSON.toJSONString(srcUnitResponse.getResultObj()), Unit.class);
@@ -152,7 +152,7 @@ public class ProductChangeService {
                 change.setDestPrice(destProduct.getPrice());
                 change.setDestImage(destProduct.getImage());
                 change.setDestSurCount(srcSurCount);
-                // 类型 0 材料 1 服务
+                // 类型 0 材料 1 包工包料
                 change.setProductType(productType);
                 // 差额单价
                 BigDecimal price = BigDecimal.valueOf(MathUtil.sub(change.getDestPrice(), change.getSrcPrice()));
@@ -187,7 +187,7 @@ public class ProductChangeService {
                 productChange.setDestSurCount(srcSurCount);
                 // 未处理
                 productChange.setType(0);
-                // 类型 0 材料 1 服务
+                // 类型 0 材料 1 包工包料
                 productChange.setProductType(productType);
                 // 差额单价
                 BigDecimal price = BigDecimal.valueOf(MathUtil.sub(productChange.getDestPrice(), productChange.getSrcPrice()));
@@ -314,7 +314,7 @@ public class ProductChangeService {
                 }
                 Unit unit;
                 Product product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
-                ServerResponse serverResponse = unitAPI.getUnitById(request, product.getConvertUnit());
+                ServerResponse serverResponse = unitAPI.getUnitById(request, house.getCityId(),product.getConvertUnit());
                 if (serverResponse.getResultObj() instanceof JSONObject) {
                     unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
                 } else {
@@ -379,7 +379,7 @@ public class ProductChangeService {
                     }
                     Unit unit;
                     Product product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
-                    ServerResponse serverResponse = unitAPI.getUnitById(request, product.getConvertUnit());
+                    ServerResponse serverResponse = unitAPI.getUnitById(request,house.getCityId(), product.getConvertUnit());
                     if (serverResponse.getResultObj() instanceof JSONObject) {
                         unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
                     } else {
@@ -569,7 +569,7 @@ public class ProductChangeService {
                     ServerResponse destResponse = productAPI.getProductById(request, change.getDestProductId());
                     if (destResponse != null && destResponse.getResultObj() != null) {
                         destProduct = JSON.parseObject(JSON.toJSONString(destResponse.getResultObj()), Product.class);
-                        ServerResponse destUnitResponse = unitAPI.getUnitById(request, destProduct.getConvertUnit());
+                        ServerResponse destUnitResponse = unitAPI.getUnitById(request,request.getParameter(Constants.CITY_ID), destProduct.getConvertUnit());
                         boolean flagB = destUnitResponse != null && destUnitResponse.getResultObj() != null;
                         if (flagB) {
                             destUnit = JSON.parseObject(JSON.toJSONString(destUnitResponse.getResultObj()), Unit.class);

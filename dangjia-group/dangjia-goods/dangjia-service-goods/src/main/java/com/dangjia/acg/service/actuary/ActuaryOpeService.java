@@ -200,6 +200,7 @@ public class ActuaryOpeService {
                 goodsItemDTO.setBackCount(budgetWorker.getBackCount());
                 goodsItemDTO.setRepairCount(budgetWorker.getRepairCount());
                 goodsItemDTO.setSurCount(budgetWorker.getShopCount() - budgetWorker.getBackCount() + budgetWorker.getRepairCount());
+                goodsItemDTO.setTolPrice(goodsItemDTO.getSurCount()*goodsItemDTO.getPrice());
                 goodsItemDTOList.add(goodsItemDTO);
             }
             budgetItemDTO.setGoodsItemDTOList(goodsItemDTOList);
@@ -214,7 +215,7 @@ public class ActuaryOpeService {
 
     /**
      * 精算详情
-     * type: 1人工 2材料服务
+     * type: 1人工 2材料包工包料
      */
     public ServerResponse actuary(String houseId, Integer type) {
         try {

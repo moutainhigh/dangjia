@@ -191,8 +191,8 @@ public interface BudgetWorkerAPI {
 
     @PostMapping("/actuary/budgetWorker/getTecList")
     @ApiOperation(value = "根据人工商品查询工艺", notes = "根据人工商品查询工艺")
-    JSONArray getTecList(@RequestParam("cityId") String cityId,
-                         @RequestParam("workerType")int workerType,@RequestParam("workerGoodsId")String workerGoodsId);
+   JSONArray getTecList(@RequestParam("cityId") String cityId,
+                        @RequestParam("workerType")int workerType,@RequestParam("workerGoodsId")String workerGoodsId);
 
     @PostMapping("/actuary/budgetWorker/getWorkerGoodsList")
     @ApiOperation(value = "精算查询包含工艺的人工商品", notes = "精算查询包含工艺的人工商品")

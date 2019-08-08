@@ -21,12 +21,14 @@ public interface BudgetMaterialAPI {
     @PostMapping("/actuary/budgetMaterial/getHouseBudgetTotalAmount")
     @ApiOperation(value = "房子精算总花费统计", notes = "房子精算总花费统计")
     BigDecimal getHouseBudgetTotalAmount( @RequestParam("request") HttpServletRequest request,
+                                          @RequestParam("cityId") String cityId,
                                           @RequestParam("houseId") String houseId);
 
     @PostMapping("/actuary/budgetMaterial/getHouseBudgetStageCost")
     @ApiOperation(value = "精算阶段花费统计", notes = "精算阶段花费统计")
     ServerResponse getHouseBudgetStageCost(
             @RequestParam("request") HttpServletRequest request,
+            @RequestParam("cityId") String cityId,
             @RequestParam("houseId") String houseId,
             @RequestParam("workerTypeId") String workerTypeId);
 
