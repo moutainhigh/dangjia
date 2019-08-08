@@ -39,7 +39,7 @@ public class StoreController implements StoreAPI {
     @Override
     @ApiMethod
     public ServerResponse queryStore(HttpServletRequest request, String cityId, String storeName, PageDTO pageDTO) {
-        return storeServices.queryStore(request, cityId, storeName, pageDTO);
+        return storeServices.queryStore(cityId, storeName, pageDTO);
     }
 
     @Override
