@@ -193,7 +193,7 @@ public class RobService {
                 robArrInFoDTO.setClueId(robInfoDTO.get(0).getClueId());
                 robArrInFoDTO.setMcId(robInfoDTO.get(0).getMcId());
                 robArrInFoDTO.setPhaseStatus(robInfoDTO.get(0).getPhaseStatus());
-                robArrInFoDTO.setCreateDate(robInfoDTO.get(0).getCreateDate());
+                robArrInFoDTO.setCreateDate(robInfoDTO.get(0).getHouseCreateDate());
                 robArrInFoDTO.setUserId(robInfoDTO.get(0).getUserId());
                 robArrInFoDTO.setStage(robInfoDTO.get(0).getStage());
                 robArrInFoDTO.setDrawings(robInfoDTO.get(0).getDrawings());
@@ -201,6 +201,8 @@ public class RobService {
 
                 if(null != member.getNickName()){
                     robArrInFoDTO.setNickName(member.getNickName());
+                    robArrInFoDTO.setPhone(member.getMobile());
+                    robArrInFoDTO.setRemark(member.getRemarks());
                 }
                 
                 //查询意向房子
