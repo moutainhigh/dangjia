@@ -87,8 +87,8 @@ public class ForMasterController implements ForMasterAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setProductOrWorkerGoodsIsTop(String gid, Integer type){
-        forMasterService.setProductOrWorkerGoodsIsTop(gid,type);
+    public ServerResponse setProductOrWorkerGoodsIsTop(String gid, Integer type,String istop){
+        forMasterService.setProductOrWorkerGoodsIsTop(gid,type,istop);
         return ServerResponse.createBySuccessMessage("置顶设置更新成功");
     }
     @Override

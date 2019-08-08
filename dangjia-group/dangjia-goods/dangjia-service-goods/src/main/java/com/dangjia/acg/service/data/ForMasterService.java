@@ -101,27 +101,17 @@ public class ForMasterService {
      * @param gid 商品ID
      * @param type 0=材料商品  1=人工商品
      */
-    public void setProductOrWorkerGoodsIsTop(String gid,Integer type){
+    public void setProductOrWorkerGoodsIsTop(String gid,Integer type,String istop){
         if(type==0){
             Product product= productMapper.selectByPrimaryKey(gid);
             if(product!=null){
-                if("0".equals(product.getIstop())){
-                    product.setIstop("1");
-                }
-                if("1".equals(product.getIstop())){
-                    product.setIstop("0");
-                }
+                product.setIstop(istop);
                 productMapper.updateByPrimaryKeySelective(product);
             }
         }else{
             WorkerGoods workerGoods= workerGoodsMapper.selectByPrimaryKey(gid);
             if(workerGoods!=null){
-                if("0".equals(workerGoods.getIstop())){
-                    workerGoods.setIstop("1");
-                }
-                if("1".equals(workerGoods.getIstop())){
-                    workerGoods.setIstop("0");
-                }
+                workerGoods.setIstop(istop);
                 workerGoodsMapper.updateByPrimaryKeySelective(workerGoods);
             }
         }

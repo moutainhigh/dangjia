@@ -71,7 +71,7 @@ public interface ForMasterAPI {
 
     @PostMapping("/data/goods/settop")
     @ApiOperation(value = "设置材料或者人工商品置顶或取消置顶", notes = "设置材料或者人工商品置顶或取消置顶")
-    ServerResponse setProductOrWorkerGoodsIsTop(@RequestParam("gid") String gid, @RequestParam("type") Integer type);
+    ServerResponse setProductOrWorkerGoodsIsTop(@RequestParam("gid") String gid, @RequestParam("type") Integer type,@RequestParam("istop") String istop);
 
     @PostMapping("/data/forMaster/getGoods")
     @ApiOperation(value = "商品信息", notes = "商品信息")
