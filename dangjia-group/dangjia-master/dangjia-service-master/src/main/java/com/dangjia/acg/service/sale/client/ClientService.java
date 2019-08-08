@@ -205,13 +205,6 @@ public class ClientService {
                 clue.setMemberId(members.get(0).getId());
                 clueMapper.insert(clue);//记录进入线索线索状态为转客户客户阶段
                 iCustomerMapper.insert(customer);
-            } else {//未录入但成已为客户阶段
-                clue.setPhaseStatus(1);
-                clue.setStage(4);
-                clue.setMemberId(members.get(0).getId());
-                clueMapper.insert(clue);//记录进入线索线索状态为转客户客户阶段
-                customer.setId(customerGroupBy.get(0).getId());
-                iCustomerMapper.updateByPrimaryKeySelective(customer);
             }
             return ServerResponse.createBySuccessMessage("提交成功");
         } else {
