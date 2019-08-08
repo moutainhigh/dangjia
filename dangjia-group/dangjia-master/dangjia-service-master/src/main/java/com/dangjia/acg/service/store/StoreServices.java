@@ -11,11 +11,13 @@ import com.dangjia.acg.dto.house.DesignDTO;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
+import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreSubscribeMapper;
 import com.dangjia.acg.mapper.system.IDepartmentMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.house.ModelingVillage;
+import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreSubscribe;
 import com.dangjia.acg.modle.system.Department;
@@ -43,6 +45,8 @@ public class StoreServices {
     private IStoreMapper iStoreMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private ICityMapper cityMapper;
 
 
     @Autowired
@@ -83,10 +87,14 @@ public class StoreServices {
             if (iStoreMapper.selectByExample(example).size() > 0) {
                 return ServerResponse.createByErrorMessage("门店已存在");
             }
+            if(!CommonUtil.isEmpty(store.getCityId())) {
+                City city = cityMapper.selectByPrimaryKey(store.getCityId());
+                store.setCityName(city.getName());
+                store.setCityId(city.getId());
+
+            }
             if(!CommonUtil.isEmpty(store.getDepartmentId())) {
                 Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
-                store.setCityName(department.getCityName());
-                store.setCityId(department.getCityId());
                 store.setDepartmentName(department.getName());
             }
             getStoreVillages(store);
@@ -143,10 +151,14 @@ public class StoreServices {
                     return ServerResponse.createByErrorMessage("门店已存在");
                 }
             }
+            if(!CommonUtil.isEmpty(store.getCityId())) {
+                City city = cityMapper.selectByPrimaryKey(store.getCityId());
+                store.setCityName(city.getName());
+                store.setCityId(city.getId());
+
+            }
             if(!CommonUtil.isEmpty(store.getDepartmentId())) {
                 Department department = departmentMapper.selectByPrimaryKey(store.getDepartmentId());
-                store.setCityName(department.getCityName());
-                store.setCityId(department.getCityId());
                 store.setDepartmentName(department.getName());
             }
             getStoreVillages(store);
