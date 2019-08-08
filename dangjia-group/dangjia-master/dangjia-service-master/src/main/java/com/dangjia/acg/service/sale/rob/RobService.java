@@ -485,6 +485,7 @@ public class RobService {
     public ServerResponse upDateCustomerInfo(Clue clue) {
         try {
             if (!CommonUtil.isEmpty(clue)) {
+                clue.setCreateDate(null);
                 clueMapper.updateByPrimaryKeySelective(clue);
                 return ServerResponse.createBySuccessMessage("修改成功");
             }
