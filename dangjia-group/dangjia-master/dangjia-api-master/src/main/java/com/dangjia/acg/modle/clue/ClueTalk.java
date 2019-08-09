@@ -39,5 +39,4 @@ public class ClueTalk extends BaseEntity {
     @ApiModelProperty("提醒时间")
     private Date remindTime;
 
-
 }
