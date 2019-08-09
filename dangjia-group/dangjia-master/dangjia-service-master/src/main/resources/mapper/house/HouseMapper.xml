@@ -229,17 +229,31 @@
     <select id="getSameLayout" resultType="com.dangjia.acg.modle.house.House">
         SELECT
         <include refid="basic_columns"/>
+        <if test="villageId!=null and villageId!=''">
+            , (
+                SELECT
+                (
+                st_distance (
+                point (v.locationx, v.locationy),
+                point (mv.locationx, mv.locationy)
+                ) * 111195 / 1000
+                ) AS juli
+                FROM
+                `dj_house_modeling_village` mv
+                WHERE
+                mv.locationx IS NOT NULL
+                AND mv.id = #{villageId}
+            ) juli
+        </if>
         from dj_house h
-        INNER JOIN (SELECT a.house_id,COUNT(a.id) num FROM dj_core_house_flow_apply a GROUP BY a.house_id ) b ON
+        INNER JOIN (SELECT a.house_id,COUNT(a.id) num FROM dj_core_house_flow_apply_image a GROUP BY a.house_id ) b ON
         b.house_id=h.id
         where
         data_status=0
         <if test="cityId!=null and cityId!=''">
             and city_id = #{cityId}
         </if>
-        <if test="villageId!=null and villageId!=''">
-            and village_id = #{villageId}
-        </if>
+
         <if test="minSquare!=null and minSquare!=''">
             and build_square &gt;= #{minSquare}
         </if>
@@ -249,10 +263,15 @@
         <if test="houseType!=null and houseType!=''">
             and house_type = #{houseType}
         </if>
-        and ((decoration_type in (1,2) and budget_ok=3) or (decoration_type=3 and visit_state=1))
         and site_display=0
         AND h.visit_state in(1,3)
-        order by num desc
+        <if test="villageId!=null and villageId!=''">
+            ORDER BY FIELD(h.village_id,#{villageId}) DESC,juli,num DESC
+        </if>
+        <if test="villageId==null or villageId==''">
+            order by num desc
+        </if>
+
     </select>
     <!--参考花费-->
     <select id="getSameLayoutDistance" resultType="com.dangjia.acg.modle.house.House">
