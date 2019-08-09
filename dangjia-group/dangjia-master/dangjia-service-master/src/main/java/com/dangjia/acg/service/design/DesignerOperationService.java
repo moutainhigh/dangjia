@@ -437,12 +437,12 @@ public class DesignerOperationService {
                 if (house.getDesignerOk() != 1) {
                     return ServerResponse.createByErrorMessage("该阶段无法上传量房信息");
                 }
-                if (CommonUtil.isEmpty(elevator)) {
-                    return ServerResponse.createByErrorMessage("请选择是否为电梯房");
-                }
-                if (elevator == 0 && CommonUtil.isEmpty(floor)) {
-                    return ServerResponse.createByErrorMessage("请输入楼层");
-                }
+//                if (CommonUtil.isEmpty(elevator)) {
+//                    return ServerResponse.createByErrorMessage("请选择是否为电梯房");
+//                }
+//                if (elevator == 0 && CommonUtil.isEmpty(floor)) {
+//                    return ServerResponse.createByErrorMessage("请输入楼层");
+//                }
                 break;
             case 1:
                 if (house.getDecorationType() == 2) {
