@@ -96,7 +96,7 @@
                 mc.id as mcId,
                 mc.member_id as memberId,
                 c.owername as owername,
-                c.phone as phone,
+                c.phone,
                 mc.modify_date as modifyDate,
                 mc.create_date as create_date,
                 mc.label_id_arr as labelId,
@@ -179,8 +179,8 @@
               mc.id as mcId,
               mc.member_id as memberId,
               c.stage,
-              c.owername as name,
-              c.phone,
+              m.mobile as phone,
+              m.nick_name as name,
               mc.modify_date as modifyDate,
               CONCAT(IFNULL(h.residential,'*'),IFNULL(h.building,'*栋'),IFNULL(h.unit,'*单元'),IFNULL(h.number,'*号')) as houseName,
               c.cus_service as userId,
@@ -209,6 +209,9 @@
             and mc.user_id=c.cus_service
             INNER JOIN dj_house h
             ON h.member_id = mc.member_id
+            INNER JOIN dj_member m
+            on m.id=mc.member_id
+            WHERE mc.stage=4
             WHERE mc.data_status = 0
             and c.data_status = 0
             and c.phase_status=1
@@ -256,8 +259,8 @@
         h.id as houseId,
         mc.user_id as userId,
         CONCAT(IFNULL(h.residential,'*'),IFNULL(CONCAT(h.building,'栋'),'*栋'),IFNULL(CONCAT(h.unit,'单元'),'*单元'),IFNULL(CONCAT(h.number,'号'),'*号')) as houseName,
-        c.phone,
-        c.owername as name,
+        m.mobile as mobile,
+        m.nick_name as name,
         h.create_date as createDate,
         h.completed_date as completedDate,
         u.username,
@@ -270,8 +273,9 @@
         on mc.user_id=u.id
         INNER JOIN dj_house h
         ON mc.member_id=h.member_id
-        WHERE 1=1
-        AND mc.stage=4
+        INNER JOIN dj_member m
+        on m.id=mc.member_id
+        WHERE mc.stage=4
         and c.stage=4
         and mc.phase_status=1
         and c.phase_status=1
