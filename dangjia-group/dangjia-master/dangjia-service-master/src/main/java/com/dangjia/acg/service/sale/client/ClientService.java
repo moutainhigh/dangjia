@@ -775,21 +775,7 @@ public class ClientService {
      * @return
      */
     public ServerResponse setTips(String mcId, String clueId) {
-        if (!CommonUtil.isEmpty(mcId)) {
-            Customer customer = new Customer();
-            customer.setId(mcId);
-            customer.setTips("0");
-            customer.setModifyDate(null);
-            customer.setCreateDate(null);
-            iCustomerMapper.updateByPrimaryKeySelective(customer);
-        } else {
-            Clue clue = new Clue();
-            clue.setId(clueId);
-            clue.setTips("0");
-            clue.setModifyDate(null);
-            clue.setCreateDate(null);
-            clueMapper.updateByPrimaryKeySelective(clue);
-        }
+        clueMapper.setTips(clueId,mcId);
         return ServerResponse.createBySuccessMessage("新消息已查看");
     }
 }
