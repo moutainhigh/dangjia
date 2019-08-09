@@ -80,7 +80,9 @@ public interface RobAPI {
     @PostMapping(value = "sale/rob/upDateCustomerInfo")
     @ApiOperation(value = "修改客户信息", notes = "修改客户信息")
     ServerResponse upDateCustomerInfo(@RequestParam("request")HttpServletRequest request,
-                                      @RequestBody Clue clue);
+                                      @RequestBody Clue clue,
+                                      @RequestParam("phaseStatus")Integer phaseStatus,
+                                      @RequestParam("memberId")String memberId);
 
     @PostMapping(value = "sale/rob/addIntentionHouse")
     @ApiOperation(value = "新增意向房子", notes = "新增意向房子")
