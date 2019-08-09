@@ -88,7 +88,9 @@ public class EmployeeDetailsService {
         example.createCriteria().andEqualTo(ResidentialRange.USER_ID);
         List<ResidentialRange> list = residentialRangeMapper.selectByExample(example);
         if (list.size() > 0) {
-            residentialRangeMapper.deleteByExample(example);
+            ResidentialRange residentialRange=new ResidentialRange();
+            residentialRange.setUserId(userId);
+            residentialRangeMapper.delete(residentialRange);
         }
         ResidentialRange residentialRange = new ResidentialRange();
         residentialRange.setBuildingId(buildingId);
