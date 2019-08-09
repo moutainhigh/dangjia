@@ -42,6 +42,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.RKIDCardUtil;
 import com.dangjia.acg.util.TokenUtil;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -384,7 +385,7 @@ public class MemberService {
             user.setNickName("当家-" + CommonUtil.randomString(6));
             user.setInviteNum(0);
             user.setIsCrowned(0);
-            user.setHead("qrcode/logo.png");
+            user.setHead(Utils.getHead());
             updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             ServerResponse serverResponse = setAccessToken(user, userRole);

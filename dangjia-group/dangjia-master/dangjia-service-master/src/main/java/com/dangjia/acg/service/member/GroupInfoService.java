@@ -28,6 +28,7 @@ import com.dangjia.acg.modle.group.GroupUserConfig;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.user.MainUser;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -308,13 +309,28 @@ public class GroupInfoService {
                             nickname = member.getName();
                             avatar = StringUtils.isEmpty(member.getHead()) ? null :
                                     configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + member.getHead();
-                        }else{
+                        } else {
                             return;
                         }
                     } else {
-                        phone = "400-168-1231";
-                        nickname = user.getUsername();
-                        avatar = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + "qrcode/logo.png";
+                        Member member = memberMapper.selectByPrimaryKey(user.getMemberId());
+                        if (member != null) {
+                            if (!CommonUtil.isEmpty(member.getWorkerTypeId()) && CommonUtil.isEmpty(prefix)) {
+                                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                                if (workerType != null) {
+                                    signature = String.valueOf(workerType.getType());
+                                    prefix = workerType.getName();
+                                }
+                            }
+                            phone = member.getMobile();
+                            nickname = member.getName();
+                            avatar = StringUtils.isEmpty(member.getHead()) ? null :
+                                    configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + member.getHead();
+                        } else {
+                            phone = "400-168-1231";
+                            nickname = user.getUsername();
+                            avatar = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + Utils.getHead();
+                        }
                     }
                     if (!CommonUtil.isEmpty(prefix)) {
                         nickname = prefix + "-" + nickname;

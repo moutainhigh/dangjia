@@ -5,6 +5,7 @@ import com.dangjia.acg.dto.core.ButtonListBean;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author Ruking.Cheng
@@ -60,15 +61,27 @@ public class Utils {
     /**
      * 客户详情页
      *
-     //TODO 检查
+     * //TODO 检查
+     *
      * @param memberId    客户ID
      * @param clueId
      * @param phaseStatus
      * @param stage
      * @return
      */
-    public static String getCustomerDetails(String memberId, String clueId, Integer phaseStatus,String stage) {
+    public static String getCustomerDetails(String memberId, String clueId, Integer phaseStatus, String stage) {
         return String.format("customerDetails?title=客户详情&memberId=%s&clueId=%s&phaseStatus=%s&stage=%s",
                 memberId, clueId, phaseStatus + "", stage);
+    }
+
+    /**
+     * 随机获取图片
+     *
+     * @return
+     */
+    public static String getHead() {
+        String[] heads = {"qrcode/img_tx01.png", "qrcode/img_tx02.png", "qrcode/img_tx03.png", "qrcode/img_tx04.png", "qrcode/img_tx05.png"};
+        Random r = new Random();
+        return heads[r.nextInt(heads.length)];
     }
 }

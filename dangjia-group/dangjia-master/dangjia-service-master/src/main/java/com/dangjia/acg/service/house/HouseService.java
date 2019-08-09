@@ -294,9 +294,13 @@ public class HouseService {
      */
     public ServerResponse startWorkPage(HttpServletRequest request, String houseId) {
         HouseDTO houseDTO = iHouseMapper.startWorkPage(houseId);
+        if (houseDTO == null) {
+            return ServerResponse.createByErrorMessage("该房产不存在");
+        }
         if (StringUtil.isNotEmpty(houseDTO.getReferHouseId())) {
             House house = iHouseMapper.selectByPrimaryKey(houseDTO.getReferHouseId());
-            houseDTO.setReferHouseName(house.getHouseName());
+            if (house != null)
+                houseDTO.setReferHouseName(house.getHouseName());
         }
         return ServerResponse.createBySuccess("查询成功", houseDTO);
     }
@@ -476,8 +480,8 @@ public class HouseService {
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey("1");
                 Example example = new Example(HouseFlow.class);
                 example.createCriteria()
-                        .andEqualTo("houseId", houseDTO.getHouseId())
-                        .andEqualTo("workerTypeId", workerType.getId());
+                        .andEqualTo(HouseFlow.HOUSE_ID, houseDTO.getHouseId())
+                        .andEqualTo(HouseFlow.WORKER_TYPE_ID, workerType.getId());
                 List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
                 if (houseFlowList.size() > 1) {
                     return ServerResponse.createByErrorMessage("设计异常,请联系平台部");
