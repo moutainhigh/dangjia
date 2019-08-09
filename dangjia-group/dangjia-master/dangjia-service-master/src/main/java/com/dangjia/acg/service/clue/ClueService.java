@@ -338,7 +338,7 @@ public class ClueService {
                     }
                     //改变线索表的数据状态
 //                clue.setDataStatus(1);
-                    clue.setStage(4);
+                    clue.setStage(1);
                     clue.setMemberId(member.getId());
                     clue.setPhaseStatus(1);
                     clueMapper.updateByPrimaryKeySelective(clue);

@@ -99,25 +99,26 @@ public class StoreManagementService {
             String imageUrl = storeUserDTO.getUserHead();
             storeUserDTO.setUserHead(CommonUtil.isEmpty(imageUrl) ? null : (imageAddress + imageUrl));
         }
-        Example example = new Example(ModelingVillage.class);
-        if (!CommonUtil.isEmpty(store.getVillages())) {
-            example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
-        }
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
-        PageInfo pageResult = new PageInfo(modelingVillages);
         List<ResidentialRangeDTO> residentialRangeDTOList = new ArrayList<>();
-        for (ModelingVillage modelingVillage : modelingVillages) {
-            ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
-            residentialRangeDTO.setVillageId(modelingVillage.getId());
-            residentialRangeDTO.setVillagename(modelingVillage.getName());
-            example = new Example(ResidentialBuilding.class);
-            example.createCriteria().andEqualTo(ResidentialBuilding.STORE_ID, store.getId())
-                    .andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId());
-            residentialRangeDTO.setList(residentialBuildingMapper.selectByExample(example));
-            residentialRangeDTOList.add(residentialRangeDTO);
+        PageInfo pageResult=new PageInfo();
+        if (!CommonUtil.isEmpty(store.getVillages())) {
+            Example example = new Example(ModelingVillage.class);
+            example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
+            pageResult = new PageInfo(modelingVillages);
+            for (ModelingVillage modelingVillage : modelingVillages) {
+                ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
+                residentialRangeDTO.setVillageId(modelingVillage.getId());
+                residentialRangeDTO.setVillagename(modelingVillage.getName());
+                example = new Example(ResidentialBuilding.class);
+                example.createCriteria().andEqualTo(ResidentialBuilding.STORE_ID, store.getId())
+                        .andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId());
+                residentialRangeDTO.setList(residentialBuildingMapper.selectByExample(example));
+                residentialRangeDTOList.add(residentialRangeDTO);
+            }
+            pageResult.setList(residentialRangeDTOList);
         }
-        pageResult.setList(residentialRangeDTOList);
         Map<String, Object> resultMap = new HashedMap();
         resultMap.put("storeUsers", storeUserDTOS);
         resultMap.put("residentialRangeDTOList", pageResult);
@@ -178,6 +179,7 @@ public class StoreManagementService {
                     return ServerResponse.createBySuccessMessage("删除成功");
                 }
             }
+            return ServerResponse.createBySuccessMessage("删除成功");
         }
         return ServerResponse.createByErrorMessage("删除失败");
     }
