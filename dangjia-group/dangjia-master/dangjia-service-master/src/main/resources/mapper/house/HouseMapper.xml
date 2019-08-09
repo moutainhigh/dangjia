@@ -246,6 +246,7 @@
             ) juli
         </if>
         from dj_house h
+        INNER JOIN `dj_house_modeling_village` v ON h.village_id = v.id
         INNER JOIN (SELECT a.house_id,COUNT(a.id) num FROM dj_core_house_flow_apply_image a GROUP BY a.house_id ) b ON
         b.house_id=h.id
         where
