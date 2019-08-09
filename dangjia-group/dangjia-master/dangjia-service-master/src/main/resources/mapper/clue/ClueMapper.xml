@@ -164,6 +164,7 @@
         SELECT
           <if test="type==''">
               c.id as clueId,
+              mc.id as mcId,
               c.owername as name,
               c.phone,
               c.modify_date as modifyDate,
@@ -174,18 +175,22 @@
           </if>
           <if test="type==1 or type==2">
               c.id as clueId,
-              m.id as memberId,
+              mc.id as mcId,
+              mc.member_id as memberId,
               c.stage,
-              if(m.name is not null,m.nick_name,m.name) as name,
-              m.mobile as phone,
-              m.modify_date as modifyDate,
+              c.owername as name,
+              c.phone,
+              mc.modify_date as modifyDate,
               CONCAT(IFNULL(h.residential,'*'),IFNULL(h.building,'*栋'),IFNULL(h.unit,'*单元'),IFNULL(h.number,'*号')) as houseName,
               c.cus_service as userId,
               c.phase_status as phaseStatus
           </if>
         FROM dj_clue c
         <if test="type==''">
-            WHERE c.data_status = 0 and c.stage NOT IN (2,3,4) and c.phase_status=0
+            LEFT JOIN dj_member_customer mc
+            on mc.member_id=c.member_id
+            and mc.user_id=c.cus_service
+            WHERE c.data_status = 0 and c.stage NOT IN (2,3,4)
             <if test="null!=userId and ''!=userId">
                 and c.cus_service=#{userId}
             </if>
@@ -319,7 +324,7 @@
             <if test="null!=searchKey and ''!=searchKey">
                 AND CONCAT(name,phone,address) like CONCAT('%',#{searchKey},'%')
             </if>
-            order by a.modifyDate
+            order by c.modify_date
             <if test="null!=time and ''!=time">
                 desc
             </if>
@@ -327,7 +332,7 @@
 
 
     <select id="queryTClue" resultType="java.lang.Integer" parameterType="java.lang.String">
-       select count(0) from dj_clue c where phone = #{mobile} GROUP BY c.cus_service
+       select COUNT(0) from(select count(0) from dj_clue c where phone = #{mobile} GROUP BY c.cus_service)a
     </select>
 
     <select id="queryRobSingledata" resultType="com.dangjia.acg.dto.sale.rob.RobDTO" parameterType="java.util.Map">
@@ -407,6 +412,7 @@
             on h.member_id = c.member_id
         </if>
         INNER JOIN dj_member_customer mc on c.member_id = mc.member_id
+        and c.cus_service = mc.user_id
         <where>
             1=1
             <if test="null != memberId and memberId !=''">
@@ -446,7 +452,7 @@
         COUNT(0)
         FROM dj_clue c
         <if test="type==''">
-            WHERE c.data_status = 0 and c.stage NOT IN (2,3)
+            WHERE c.data_status = 0 and c.stage NOT IN (2,3,4)
         <if test="null!=userId and ''!=userId">
             and c.cus_service=#{userId}
         </if>
@@ -591,6 +597,28 @@
             c.id=#{clueId}
         </if>
     </update>
+
+
+    <update id="setTips">
+        update dj_clue c
+        <if test="null!=mcId and ''!=mcId">
+            INNER JOIN dj_member_customer mc
+            on c.member_id=mc.member_id
+            and c.cus_service=mc.user_id
+        </if>
+        set c.tips=0
+        <if test="null!=mcId and ''!=mcId">
+            ,mc.tips=0
+        </if>
+        where
+        <if test="null!=mcId and ''!=mcId">
+            mc.id=#{mcId}
+        </if>
+        <if test="null!=clueId and ''!=clueId">
+            c.id=#{clueId}
+        </if>
+    </update>
+
 
 
 </mapper>

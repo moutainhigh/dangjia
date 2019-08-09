@@ -209,6 +209,12 @@ public class ClientService {
             clue.setTips("1");
             clue.setPhaseStatus(0);
             if (clueMapper.insert(clue) > 0) {
+                IntentionHouse intentionHouse = new IntentionHouse();
+                intentionHouse.setClueId(clue.getId());
+                intentionHouse.setBuildingName(clue.getBuilding());
+                intentionHouse.setNumberName(clue.getNumber());
+                intentionHouse.setResidentialName(clue.getAddress());
+                intentionHouseMapper.insert(intentionHouse);
                 return ServerResponse.createBySuccessMessage("提交成功");
             } else {
                 return ServerResponse.createByErrorMessage("提交失败");
@@ -769,21 +775,7 @@ public class ClientService {
      * @return
      */
     public ServerResponse setTips(String mcId, String clueId) {
-        if (!CommonUtil.isEmpty(mcId)) {
-            Customer customer = new Customer();
-            customer.setId(mcId);
-            customer.setTips("0");
-            customer.setModifyDate(null);
-            customer.setCreateDate(null);
-            iCustomerMapper.updateByPrimaryKeySelective(customer);
-        } else {
-            Clue clue = new Clue();
-            clue.setId(clueId);
-            clue.setTips("0");
-            clue.setModifyDate(null);
-            clue.setCreateDate(null);
-            clueMapper.updateByPrimaryKeySelective(clue);
-        }
+        clueMapper.setTips(clueId,mcId);
         return ServerResponse.createBySuccessMessage("新消息已查看");
     }
 }

@@ -193,7 +193,11 @@ public class RobService {
                 robArrInFoDTO.setClueId(robInfoDTO.get(0).getClueId());
                 robArrInFoDTO.setMcId(robInfoDTO.get(0).getMcId());
                 robArrInFoDTO.setPhaseStatus(robInfoDTO.get(0).getPhaseStatus());
-                robArrInFoDTO.setCreateDate(robInfoDTO.get(0).getCreateDate());
+                if(robInfoDTO.get(0).getHouseCreateDate() != null){
+                    robArrInFoDTO.setCreateDate(robInfoDTO.get(0).getHouseCreateDate());
+                }else{
+                    robArrInFoDTO.setCreateDate(robInfoDTO.get(0).getCreateDate());
+                }
                 robArrInFoDTO.setUserId(robInfoDTO.get(0).getUserId());
                 robArrInFoDTO.setStage(robInfoDTO.get(0).getStage());
                 robArrInFoDTO.setDrawings(robInfoDTO.get(0).getDrawings());
@@ -201,6 +205,8 @@ public class RobService {
 
                 if(null != member.getNickName()){
                     robArrInFoDTO.setNickName(member.getNickName());
+                    robArrInFoDTO.setPhone(member.getMobile());
+                    robArrInFoDTO.setRemark(member.getRemarks());
                 }
                 
                 //查询意向房子
@@ -232,14 +238,23 @@ public class RobService {
                 }
             }
 
-            //查询客户沟通记录
-            if (!CommonUtil.isEmpty(memberId)) {
-                List<CustomerRecordInFoDTO> data = iMemberLabelMapper.queryDescribes(memberId);
+            //查询沟通记录
+            List<CustomerRecordInFoDTO> data = iMemberLabelMapper.queryTalkContent(clueId);
+            if (!data.isEmpty()) {
                 for (CustomerRecordInFoDTO datum : data) {
                     datum.setHead(imageAddress + datum.getHead());
                 }
                 robArrInFoDTO.setData(data);
             }
+
+//            //查询客户沟通记录
+//            if (!CommonUtil.isEmpty(memberId)) {
+//                List<CustomerRecordInFoDTO> data = iMemberLabelMapper.queryDescribes(memberId);
+//                for (CustomerRecordInFoDTO datum : data) {
+//                    datum.setHead(imageAddress + datum.getHead());
+//                }
+//                robArrInFoDTO.setData(data);
+//            }
 
             //销售人员订单数量
             List<UserAchievementDTO> uadto = clueMapper.queryUserAchievementInFo(map);
@@ -430,28 +445,30 @@ public class RobService {
             }
 
             if (!CommonUtil.isEmpty(customerRecDTO)) {
-                if (customerRecDTO.getPhaseStatus() == 1) {
-                    //客户阶段新增沟通记录
-                    CustomerRecord customerRecord = new CustomerRecord();
-                    customerRecord.setDescribes(customerRecDTO.getDescribes());
-                    customerRecord.setRemindTime(customerRecDTO.getRemindTime());
-                    if(accessToken != null){
-                        customerRecord.setUserId(accessToken.getUserId());
-                    }
-                    customerRecord.setMemberId(customerRecDTO.getMemberId());
-                    iCustomerRecordMapper.insert(customerRecord);
-                    return ServerResponse.createBySuccessMessage("新增成功");
-                } else {
+//                if (customerRecDTO.getPhaseStatus() == 1) {
+//                    //客户阶段新增沟通记录
+//                    CustomerRecord customerRecord = new CustomerRecord();
+//                    customerRecord.setDescribes(customerRecDTO.getDescribes());
+//                    customerRecord.setRemindTime(customerRecDTO.getRemindTime());
+//                    if(accessToken != null){
+//                        customerRecord.setUserId(accessToken.getUserId());
+//                    }
+//                    customerRecord.setMemberId(customerRecDTO.getMemberId());
+//                    iCustomerRecordMapper.insert(customerRecord);
+//                    return ServerResponse.createBySuccessMessage("新增成功");
+//                } else {
                     // 线索阶段新增沟通记录
                     ClueTalk clueTalk = new ClueTalk();
                     if(accessToken != null){
                         clueTalk.setUserId(accessToken.getUserId());
                     }
+
+                    clueTalk.setRemindTime(customerRecDTO.getRemindTime());
                     clueTalk.setClueId(customerRecDTO.getClueId());
                     clueTalk.setTalkContent(customerRecDTO.getDescribes());
                     clueTalkMapper.insert(clueTalk);
                     return ServerResponse.createBySuccessMessage("新增成功");
-                }
+//                }
             }
             return ServerResponse.createByErrorMessage("新增失败");
         } catch (Exception e) {
@@ -482,13 +499,27 @@ public class RobService {
      * @param clue
      * @return
      */
-    public ServerResponse upDateCustomerInfo(Clue clue) {
+    public ServerResponse upDateCustomerInfo(Clue clue,Integer phaseStatus,String memberId) {
         try {
-            if (!CommonUtil.isEmpty(clue)) {
-                clue.setCreateDate(null);
-                clueMapper.updateByPrimaryKeySelective(clue);
-                return ServerResponse.createBySuccessMessage("修改成功");
+            if(phaseStatus == 1){
+                Member member = new Member();
+                if (!CommonUtil.isEmpty(clue)) {
+                    member.setNickName(clue.getOwername());
+                    member.setRemarks(clue.getRemark());
+                    member.setMobile(clue.getPhone());
+                    member.setId(memberId);
+                    iMemberMapper.updateByPrimaryKeySelective(member);
+                    return ServerResponse.createBySuccessMessage("修改成功");
+                }
+
+            }else{
+                if (!CommonUtil.isEmpty(clue)) {
+                    clue.setCreateDate(null);
+                    clueMapper.updateByPrimaryKeySelective(clue);
+                    return ServerResponse.createBySuccessMessage("修改成功");
+                }
             }
+
             return ServerResponse.createByErrorMessage("修改失败");
         } catch (Exception e) {
             e.printStackTrace();

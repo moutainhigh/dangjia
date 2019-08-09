@@ -85,9 +85,9 @@ public class EmployeeDetailsService {
 
     public ServerResponse setSalesRange(String userId, String buildingId) {
         Example example = new Example(ResidentialRange.class);
-        example.createCriteria().andEqualTo(ResidentialRange.USER_ID);
+        example.createCriteria().andEqualTo(ResidentialRange.USER_ID,userId);
         List<ResidentialRange> list = residentialRangeMapper.selectByExample(example);
-        if (list.size() > 0) {
+        if (list.size() > 0||CommonUtil.isEmpty(buildingId)) {
             residentialRangeMapper.deleteByExample(example);
         }
         ResidentialRange residentialRange = new ResidentialRange();

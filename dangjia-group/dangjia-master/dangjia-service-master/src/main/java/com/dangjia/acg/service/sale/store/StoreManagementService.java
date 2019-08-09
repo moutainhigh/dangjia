@@ -220,12 +220,13 @@ public class StoreManagementService {
                     slist.addAll(Arrays.asList(residentialRange.getBuildingId().split(",")));
                 }
             }
-            example = new Example(ModelingVillage.class);
-            if (!CommonUtil.isEmpty(store.getVillages())) {
-                example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
-            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<ModelingVillage> modelingVillages = modelingVillageMapper.selectByExample(example);
+            List<ModelingVillage> modelingVillages=new ArrayList<>();
+            if (!CommonUtil.isEmpty(store.getVillages())) {
+                example = new Example(ModelingVillage.class);
+                example.createCriteria().andIn(ModelingVillage.ID, Arrays.asList(store.getVillages().split(",")));
+                modelingVillages = modelingVillageMapper.selectByExample(example);
+            }
             List residentialRangeDTOList = new ArrayList();
             example = new Example(ResidentialRange.class);
             example.createCriteria().andEqualTo(ResidentialRange.USER_ID, userId);
