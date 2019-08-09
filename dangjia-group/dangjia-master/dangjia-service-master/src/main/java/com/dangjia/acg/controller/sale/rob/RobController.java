@@ -124,8 +124,8 @@ public class RobController implements RobAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse upDateCustomerInfo(HttpServletRequest request, Clue clue) {
-        return robService.upDateCustomerInfo(clue);
+    public ServerResponse upDateCustomerInfo(HttpServletRequest request, Clue clue,Integer phaseStatus,String memberId) {
+        return robService.upDateCustomerInfo(clue,phaseStatus,memberId);
     }
 
 
