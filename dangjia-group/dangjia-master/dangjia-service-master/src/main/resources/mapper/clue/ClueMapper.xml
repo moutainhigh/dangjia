@@ -186,7 +186,7 @@
               c.cus_service as userId,
               c.phase_status as phaseStatus
           </if>
-        FROM dj_clue c
+        FROM dj_clue
         <if test="type==''">
             LEFT JOIN dj_member_customer mc
             on mc.member_id=c.member_id
@@ -273,8 +273,8 @@
         WHERE 1=1
         AND mc.stage=4
         and c.stage=4
-        and mc.phaseStatus=1
-        and c.phaseStatus=1
+        and mc.phase_status=1
+        and c.phase_status=1
         <if test="null!=userId and ''!=userId">
             and mc.user_id=#{userId}
         </if>
@@ -360,7 +360,7 @@
         from
         dj_house h
         INNER JOIN dj_member_customer mc on h.member_id = mc.member_id
-        INNER JOIN dj_clue c on h.member_id = c.member_id and h.user_id = c.cus_service
+        INNER JOIN dj_clue c on h.member_id = c.member_id and mc.user_id = c.cus_service
         where h.visit_state = 0 and h.is_rob_stats = 0
         <if test="null != userId">
             and c.cus_service = #{userId}
@@ -594,12 +594,12 @@
         <if test="phaseStatus==1">
             ,mc.stage=2
         </if>
-        where
+        where 1=1
         <if test="null!=mcId and ''!=mcId">
-            mc.id=#{mcId}
+            and mc.id=#{mcId}
         </if>
         <if test="null!=clueId and ''!=clueId">
-            c.id=#{clueId}
+            and c.id=#{clueId}
         </if>
     </update>
 
@@ -615,12 +615,12 @@
         <if test="null!=mcId and ''!=mcId">
             ,mc.tips=0
         </if>
-        where
+        where 1=1
         <if test="null!=mcId and ''!=mcId">
-            mc.id=#{mcId}
+           and mc.id=#{mcId}
         </if>
         <if test="null!=clueId and ''!=clueId">
-            c.id=#{clueId}
+           and c.id=#{clueId}
         </if>
     </update>
 
