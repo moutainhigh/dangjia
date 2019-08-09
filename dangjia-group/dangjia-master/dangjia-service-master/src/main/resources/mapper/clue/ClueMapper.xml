@@ -174,6 +174,7 @@
           </if>
           <if test="type==1 or type==2">
               c.id as clueId,
+              mc.id as mcId,
               mc.member_id as memberId,
               c.stage,
               c.owername as name,
@@ -185,6 +186,9 @@
           </if>
         FROM dj_clue c
         <if test="type==''">
+            INNER JOIN dj_member_customer mc
+            on mc.member_id=c.member_id
+            and mc.user_id=c.cus_service
             WHERE c.data_status = 0 and c.stage NOT IN (2,3,4) and c.phase_status=0
             <if test="null!=userId and ''!=userId">
                 and c.cus_service=#{userId}
@@ -319,7 +323,7 @@
             <if test="null!=searchKey and ''!=searchKey">
                 AND CONCAT(name,phone,address) like CONCAT('%',#{searchKey},'%')
             </if>
-            order by c.modify_date
+            order by a.modifyDate
             <if test="null!=time and ''!=time">
                 desc
             </if>
@@ -446,7 +450,7 @@
         COUNT(0)
         FROM dj_clue c
         <if test="type==''">
-            WHERE c.data_status = 0 and c.stage NOT IN (2,3)
+            WHERE c.data_status = 0 and c.stage NOT IN (2,3,4)
         <if test="null!=userId and ''!=userId">
             and c.cus_service=#{userId}
         </if>
