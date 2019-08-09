@@ -228,7 +228,7 @@
     <!--根据城市、小区，最大最小面积搜索-->
     <select id="getSameLayout" resultType="com.dangjia.acg.modle.house.House">
         SELECT
-        <include refid="basic_columns"/>
+        <include refid="basic_h_columns"/>
         <if test="villageId!=null and villageId!=''">
             , (
                 SELECT
