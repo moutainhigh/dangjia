@@ -360,7 +360,7 @@
         from
         dj_house h
         INNER JOIN dj_member_customer mc on h.member_id = mc.member_id
-        INNER JOIN dj_clue c on h.member_id = c.member_id
+        INNER JOIN dj_clue c on h.member_id = c.member_id and h.user_id = c.cus_service
         where h.visit_state = 0 and h.is_rob_stats = 0
         <if test="null != userId">
             and c.cus_service = #{userId}
