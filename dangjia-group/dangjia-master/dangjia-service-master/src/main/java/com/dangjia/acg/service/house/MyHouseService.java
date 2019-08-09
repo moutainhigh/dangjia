@@ -148,18 +148,19 @@ public class MyHouseService {
         List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
         Member supervisor = memberMapper.getSupervisor(houseId);
         List<Map> imageList = new ArrayList<>();
-        Map mapObj =new HashMap();
+        Map mapObj = new HashMap();
         for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList) {
-            Map map =new HashMap();
-            map.put("image",address + houseFlowApplyImage.getImageUrl());
-            map.put("imageUrl",houseFlowApplyImage.getImageUrl());
-            mapObj.put("createDate",houseFlowApplyImage.getCreateDate());
+            Map map = new HashMap();
+            map.put("image", address + houseFlowApplyImage.getImageUrl());
+            map.put("imageUrl", houseFlowApplyImage.getImageUrl());
+            mapObj.put("createDate", houseFlowApplyImage.getCreateDate());
             imageList.add(map);
         }
-        mapObj.put("name",supervisor.getName());
-        mapObj.put("list",imageList);
+        mapObj.put("name", supervisor.getName());
+        mapObj.put("list", imageList);
         return ServerResponse.createBySuccess("查询成功", imageList);
     }
+
     /**
      * APP我的房产
      */
@@ -241,12 +242,12 @@ public class MyHouseService {
         }
         //获取客服明细
         Customer srcCustomer = iCustomerMapper.getCustomerByMemberId(member.getId());
-        String userid="773075761552045112068";
-        if(house.getCityId().equals("961188961562724011757")){
-            userid="682958011563430082579";
+        String userid = "773075761552045112068";
+        if (house.getCityId().equals("961188961562724011757")) {
+            userid = "682958011563430082579";
         }
-        if(srcCustomer!=null&&!CommonUtil.isEmpty(srcCustomer.getUserId())){
-            userid=srcCustomer.getUserId();
+        if (srcCustomer != null && !CommonUtil.isEmpty(srcCustomer.getUserId())) {
+            userid = srcCustomer.getUserId();
         }
         Example example = new Example(MainUser.class);
         example.createCriteria().andEqualTo(MainUser.ID, userid);//默认李优

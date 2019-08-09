@@ -22,7 +22,7 @@ import java.util.Map;
 public interface ClueMapper extends Mapper<Clue> {
     List<Clue> getByStage(int stage);
 
-    Clue getByPhone(String phone);
+    List<Clue> getByPhone(String phone);
 
     List<Clue> getAll();
 
@@ -82,4 +82,7 @@ public interface ClueMapper extends Mapper<Clue> {
     Integer getSleepingCustomerTips();
 
     int setFollow(@Param("clueId") String clueId,@Param("phaseStatus") Integer phaseStatus,@Param("mcId") String mcId);
+
+    int setTips(@Param("clueId") String clueId,@Param("mcId") String mcId);
+
 }

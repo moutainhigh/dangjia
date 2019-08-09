@@ -601,14 +601,14 @@
 
     <update id="setTips">
         update dj_clue c
-        <if test="mcId">
+        <if test="null!=mcId and ''!=mcId">
             INNER JOIN dj_member_customer mc
             on c.member_id=mc.member_id
             and c.cus_service=mc.user_id
         </if>
-        set c.stage=2
-        <if test="phaseStatus==1">
-            ,mc.stage=2
+        set c.tips=0
+        <if test="null!=mcId and ''!=mcId">
+            ,mc.tips=0
         </if>
         where
         <if test="null!=mcId and ''!=mcId">
