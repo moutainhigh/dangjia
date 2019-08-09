@@ -180,6 +180,7 @@ public class RobService {
             }
             map.put("userId", accessToken.getUserId());
             map.put("stage", stage);
+            map.put("phaseStatus", phaseStatus);
             RobArrInFoDTO robArrInFoDTO = new RobArrInFoDTO();
 
             List<RobInfoDTO> robInfoDTO = clueMapper.queryCustomerInfo(map);
@@ -194,7 +195,7 @@ public class RobService {
                 robArrInFoDTO.setMcId(robInfoDTO.get(0).getMcId());
                 robArrInFoDTO.setPhaseStatus(robInfoDTO.get(0).getPhaseStatus());
                 if(robInfoDTO.get(0).getHouseCreateDate() != null){
-                    robArrInFoDTO.setCreateDate(robInfoDTO.get(0).getHouseCreateDate());
+                    robArrInFoDTO.setHouseCreateDate(robInfoDTO.get(0).getHouseCreateDate());
                 }else{
                     robArrInFoDTO.setCreateDate(robInfoDTO.get(0).getCreateDate());
                 }
