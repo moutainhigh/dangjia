@@ -238,14 +238,23 @@ public class RobService {
                 }
             }
 
-            //查询客户沟通记录
-            if (!CommonUtil.isEmpty(memberId)) {
-                List<CustomerRecordInFoDTO> data = iMemberLabelMapper.queryDescribes(memberId);
+            //查询沟通记录
+            List<CustomerRecordInFoDTO> data = iMemberLabelMapper.queryTalkContent(clueId);
+            if (!data.isEmpty()) {
                 for (CustomerRecordInFoDTO datum : data) {
                     datum.setHead(imageAddress + datum.getHead());
                 }
                 robArrInFoDTO.setData(data);
             }
+
+//            //查询客户沟通记录
+//            if (!CommonUtil.isEmpty(memberId)) {
+//                List<CustomerRecordInFoDTO> data = iMemberLabelMapper.queryDescribes(memberId);
+//                for (CustomerRecordInFoDTO datum : data) {
+//                    datum.setHead(imageAddress + datum.getHead());
+//                }
+//                robArrInFoDTO.setData(data);
+//            }
 
             //销售人员订单数量
             List<UserAchievementDTO> uadto = clueMapper.queryUserAchievementInFo(map);
@@ -436,18 +445,18 @@ public class RobService {
             }
 
             if (!CommonUtil.isEmpty(customerRecDTO)) {
-                if (customerRecDTO.getPhaseStatus() == 1) {
-                    //客户阶段新增沟通记录
-                    CustomerRecord customerRecord = new CustomerRecord();
-                    customerRecord.setDescribes(customerRecDTO.getDescribes());
-                    customerRecord.setRemindTime(customerRecDTO.getRemindTime());
-                    if(accessToken != null){
-                        customerRecord.setUserId(accessToken.getUserId());
-                    }
-                    customerRecord.setMemberId(customerRecDTO.getMemberId());
-                    iCustomerRecordMapper.insert(customerRecord);
-                    return ServerResponse.createBySuccessMessage("新增成功");
-                } else {
+//                if (customerRecDTO.getPhaseStatus() == 1) {
+//                    //客户阶段新增沟通记录
+//                    CustomerRecord customerRecord = new CustomerRecord();
+//                    customerRecord.setDescribes(customerRecDTO.getDescribes());
+//                    customerRecord.setRemindTime(customerRecDTO.getRemindTime());
+//                    if(accessToken != null){
+//                        customerRecord.setUserId(accessToken.getUserId());
+//                    }
+//                    customerRecord.setMemberId(customerRecDTO.getMemberId());
+//                    iCustomerRecordMapper.insert(customerRecord);
+//                    return ServerResponse.createBySuccessMessage("新增成功");
+//                } else {
                     // 线索阶段新增沟通记录
                     ClueTalk clueTalk = new ClueTalk();
                     if(accessToken != null){
@@ -459,7 +468,7 @@ public class RobService {
                     clueTalk.setTalkContent(customerRecDTO.getDescribes());
                     clueTalkMapper.insert(clueTalk);
                     return ServerResponse.createBySuccessMessage("新增成功");
-                }
+//                }
             }
             return ServerResponse.createByErrorMessage("新增失败");
         } catch (Exception e) {
