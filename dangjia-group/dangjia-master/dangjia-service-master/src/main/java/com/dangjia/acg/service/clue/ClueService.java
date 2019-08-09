@@ -294,7 +294,7 @@ public class ClueService {
             List<Clue> clues = clueMapper.getByPhone(phone);
             //表示线索表存在线索
             for (Clue clue : clues) {
-                if (clue != null && clue.getStage() != 4) {
+                if (clues.size()>0 && clue.getStage() != 4) {
                     //有沟通记录
                     List<ClueTalk> clueTalkList = clueTalkMapper.getTalkByClueId(clue.getId());
                     if (clueTalkList.size() != 0) {
@@ -376,7 +376,6 @@ public class ClueService {
                                     configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "待分配客户提醒",
                                             "有一个门店范围内的注册客户待分配，快去分配给员工吧。", 0, url
                                                     + Utils.getCustomerDetails(member.getId(), "", 1, "1"));
-                                return ServerResponse.createBySuccessMessage("操作成功");
                             }
                         }
                     }

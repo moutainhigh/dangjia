@@ -36,6 +36,7 @@ import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.*;
@@ -541,8 +542,7 @@ public class HouseService {
             customer.setStage(4);//阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单
             customer.setPhaseStatus(1);
             iCustomerMapper.updateByPrimaryKeySelective(customer);
-
-//            clueMapper.updateByPrimaryKeySelective();
+            clueMapper.setStage(customer.getUserId(),customer.getMemberId());//修改线索的阶段
         } catch (Exception e) {
             System.out.println("建群失败，异常：" + e.getMessage());
         }

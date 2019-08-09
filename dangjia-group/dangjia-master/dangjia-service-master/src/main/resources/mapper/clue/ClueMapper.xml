@@ -629,6 +629,12 @@
         </if>
     </update>
 
+    <update id="setStage">
+        update dj_clue
+        set stage=4,tips=1
+        where cus_service = #{userId}
+        and member_id = #{memberId}
+    </update>
 
 
 </mapper>

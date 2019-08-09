@@ -77,6 +77,7 @@ public interface ClueMapper extends Mapper<Clue> {
 
 
     UserInfoDTO queryTips(Map<String,Object> map);
+
     Integer getTips(@Param("type") Integer type,@Param("userId") String userId,@Param("storeUsers") List<StoreUserDTO> storeUsers);
 
     Integer getSleepingCustomerTips();
@@ -85,4 +86,5 @@ public interface ClueMapper extends Mapper<Clue> {
 
     int setTips(@Param("clueId") String clueId,@Param("mcId") String mcId);
 
+    int setStage(@Param("userId") String userId,@Param("memberId") String memberId);
 }
