@@ -324,7 +324,7 @@
             <if test="null!=searchKey and ''!=searchKey">
                 AND CONCAT(name,phone,address) like CONCAT('%',#{searchKey},'%')
             </if>
-            order by a.modifyDate
+            order by c.modify_date
             <if test="null!=time and ''!=time">
                 desc
             </if>
