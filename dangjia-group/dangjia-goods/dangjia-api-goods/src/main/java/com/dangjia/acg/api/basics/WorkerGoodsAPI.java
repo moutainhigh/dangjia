@@ -27,6 +27,7 @@ public interface WorkerGoodsAPI {
     @ApiOperation(value = "查询所有商品单位", notes = "查询所有商品单位")
     ServerResponse<PageInfo> getWorkerGoodses(@RequestParam("request") HttpServletRequest request,
                                               @RequestParam("pageDTO") PageDTO pageDTO,
+                                              @RequestParam("istops") String istops,
                                               @RequestParam("workerTypeId") String workerTypeId,
                                               @RequestParam("searchKey") String searchKey,
                                               @RequestParam("showGoods") String showGoods);

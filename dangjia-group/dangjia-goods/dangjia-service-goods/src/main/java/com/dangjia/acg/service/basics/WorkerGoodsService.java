@@ -57,10 +57,10 @@ public class WorkerGoodsService {
     @Autowired
     private MasterMendWorkerAPI masterMendWorkerAPI;
 
-    public ServerResponse<PageInfo> getWorkerGoodses(PageDTO pageDTO, String workerTypeId, String searchKey, String showGoods) {
+    public ServerResponse<PageInfo> getWorkerGoodses(PageDTO pageDTO, String istops,String workerTypeId, String searchKey, String showGoods) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<WorkerGoods> productList = iWorkerGoodsMapper.selectList(StringUtils.isBlank(workerTypeId) ? null : workerTypeId,
-                StringUtils.isBlank(searchKey) ? null : searchKey, StringUtils.isBlank(showGoods) ? null : showGoods);
+                StringUtils.isBlank(searchKey) ? null : searchKey, StringUtils.isBlank(showGoods) ? null : showGoods,istops);
 
         if (productList == null || productList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无工价商品");

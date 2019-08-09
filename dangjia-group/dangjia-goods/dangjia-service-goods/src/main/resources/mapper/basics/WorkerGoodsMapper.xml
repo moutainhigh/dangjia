@@ -65,6 +65,10 @@
             OR other_name like CONCAT('%',#{searchKey},'%')
             )
         </if>
+
+        <if test="istops != null and istops !=''">
+            AND istop=#{istops}
+        </if>
         <if test="showGoods != null">
             AND show_goods=#{showGoods}
         </if>
