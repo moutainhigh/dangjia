@@ -186,7 +186,7 @@
               c.cus_service as userId,
               c.phase_status as phaseStatus
           </if>
-        FROM dj_clue
+        FROM dj_clue c
         <if test="type==''">
             LEFT JOIN dj_member_customer mc
             on mc.member_id=c.member_id
