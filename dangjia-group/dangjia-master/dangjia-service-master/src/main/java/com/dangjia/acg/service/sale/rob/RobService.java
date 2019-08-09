@@ -453,6 +453,8 @@ public class RobService {
                     if(accessToken != null){
                         clueTalk.setUserId(accessToken.getUserId());
                     }
+
+                    clueTalk.setRemindTime(customerRecDTO.getRemindTime());
                     clueTalk.setClueId(customerRecDTO.getClueId());
                     clueTalk.setTalkContent(customerRecDTO.getDescribes());
                     clueTalkMapper.insert(clueTalk);
