@@ -416,8 +416,9 @@
             INNER JOIN dj_house h
             on h.member_id = c.member_id
         </if>
-        INNER JOIN dj_member_customer mc on c.member_id = mc.member_id
-        and c.cus_service = mc.user_id
+        INNER JOIN
+        dj_member_customer mc on c.member_id = mc.member_id
+        and mc.user_id = c.cus_service
         <where>
             1=1
             <if test="null != memberId and memberId !=''">
