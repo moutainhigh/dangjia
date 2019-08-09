@@ -111,6 +111,7 @@
             <if test="stage==4">
                 INNER JOIN dj_member_customer mc
                 on c.member_id=mc.member_id
+                and c.cus_service=mc.user_id
             </if>
             WHERE
             <if test="stage==''">
@@ -207,16 +208,20 @@
             on mc.member_id=c.member_id
             and mc.user_id=c.cus_service
             INNER JOIN dj_house h
-            ON h.member_id = mc.id  and h.data_status =0
+            ON h.member_id = mc.member_id
+            WHERE mc.data_status = 0
+            and c.data_status = 0
+            and c.phase_status=1
+            and mc.phase_status=1
+            and h.data_status =0
+            and c.stage=4
+            and mc.stage=4
             <if test="type==1">
                 and h.visit_state =1
             </if>
             <if test="type==2">
                 and h.visit_state =3
             </if>
-            WHERE mc.data_status = 0
-            and c.data_status = 0
-            and c.phase_status=0
             <if test="null!=userId and ''!=userId">
                 and c.cus_service=#{userId}
             </if>
@@ -355,7 +360,7 @@
         from
         dj_house h
         INNER JOIN dj_member_customer mc on h.member_id = mc.member_id
-        INNER JOIN dj_clue c on h.member_id = c.member_id
+        INNER JOIN dj_clue c on h.member_id = c.member_id and h.user_id = c.cus_service
         where h.visit_state = 0 and h.is_rob_stats = 0
         <if test="null != userId">
             and c.cus_service = #{userId}

@@ -41,8 +41,12 @@ public class UserToKenAspect {
                 .getRequest();
         String userToken = request.getParameter(Constants.USER_TOKEY);
         if (!CommonUtil.isEmpty(userToken) && !request.getServletPath().equals("/member/login") && !request.getServletPath().equals("/config/adverts/list")) {
-            AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
-            if (accessToken == null) {//无效的token
+            try {
+                AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+                if (accessToken == null) {//无效的token
+                    return ServerResponse.createbyUserTokenError();
+                }
+            } catch (Exception e) {
                 return ServerResponse.createbyUserTokenError();
             }
         }
