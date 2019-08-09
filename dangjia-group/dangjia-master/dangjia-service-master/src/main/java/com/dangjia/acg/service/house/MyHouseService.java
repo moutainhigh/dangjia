@@ -36,6 +36,7 @@ import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.HouseUtil;
+import com.dangjia.acg.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -265,7 +266,7 @@ public class MyHouseService {
             }
             map.put("name", user.getUsername());
             map.put("mobile", user.getMobile());
-            map.put("head", address + "qrcode/logo.png");
+            map.put("head", address + Utils.getHead());
             houseResult.setMember(map);
         }
         houseResult.setDecorationType(house.getDecorationType());
