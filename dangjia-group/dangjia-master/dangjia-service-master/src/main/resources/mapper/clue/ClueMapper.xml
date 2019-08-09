@@ -594,12 +594,12 @@
         <if test="phaseStatus==1">
             ,mc.stage=2
         </if>
-        where
+        where 1=1
         <if test="null!=mcId and ''!=mcId">
-            mc.id=#{mcId}
+            and mc.id=#{mcId}
         </if>
         <if test="null!=clueId and ''!=clueId">
-            c.id=#{clueId}
+            and c.id=#{clueId}
         </if>
     </update>
 
