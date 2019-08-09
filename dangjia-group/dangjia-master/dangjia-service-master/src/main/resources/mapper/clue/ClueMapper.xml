@@ -324,7 +324,7 @@
             <if test="null!=searchKey and ''!=searchKey">
                 AND CONCAT(name,phone,address) like CONCAT('%',#{searchKey},'%')
             </if>
-            order by a.modifyDate
+            order by c.modify_date
             <if test="null!=time and ''!=time">
                 desc
             </if>
@@ -332,7 +332,7 @@
 
 
     <select id="queryTClue" resultType="java.lang.Integer" parameterType="java.lang.String">
-       select count(0) from dj_clue c where phone = #{mobile} GROUP BY c.cus_service
+       select COUNT(0) from(select count(0) from dj_clue c where phone = #{mobile} GROUP BY c.cus_service)a
     </select>
 
     <select id="queryRobSingledata" resultType="com.dangjia.acg.dto.sale.rob.RobDTO" parameterType="java.util.Map">
@@ -597,6 +597,28 @@
             c.id=#{clueId}
         </if>
     </update>
+
+
+    <update id="setTips">
+        update dj_clue c
+        <if test="mcId">
+            INNER JOIN dj_member_customer mc
+            on c.member_id=mc.member_id
+            and c.cus_service=mc.user_id
+        </if>
+        set c.stage=2
+        <if test="phaseStatus==1">
+            ,mc.stage=2
+        </if>
+        where
+        <if test="null!=mcId and ''!=mcId">
+            mc.id=#{mcId}
+        </if>
+        <if test="null!=clueId and ''!=clueId">
+            c.id=#{clueId}
+        </if>
+    </update>
+
 
 
 </mapper>
