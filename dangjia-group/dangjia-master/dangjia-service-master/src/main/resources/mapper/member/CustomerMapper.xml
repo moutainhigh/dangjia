@@ -94,7 +94,7 @@
         INNER JOIN dj_house h
         on m.id=h.member_id
         where h.visit_state=0
-        and store_id=#{storeId}
+        and c.store_id=#{storeId}
         order By h.create_date
     </select>
 
