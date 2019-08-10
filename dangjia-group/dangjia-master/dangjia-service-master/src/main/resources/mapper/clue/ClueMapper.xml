@@ -94,6 +94,7 @@
             </if>
             <if test="stage==4">
                 mc.id as mcId,
+                c.id as clueId,
                 mc.member_id as memberId,
                 c.owername as owername,
                 c.phone,
