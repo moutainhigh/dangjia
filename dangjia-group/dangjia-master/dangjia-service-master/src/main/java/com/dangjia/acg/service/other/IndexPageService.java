@@ -104,6 +104,51 @@ public class IndexPageService {
         }
     }
 
+
+
+    /**
+     * 施工现场详情
+     */
+    public ServerResponse houseOtherDetails(HttpServletRequest request, String houseId) {
+        try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            //获得装修总花费
+            house = setHouseTotalPrice(request,house);
+            HouseDetailsDTO houseDetailsDTO = new HouseDetailsDTO();
+            houseDetailsDTO.setCityId(house.getCityId());
+            houseDetailsDTO.setCityName(house.getCityName());
+            houseDetailsDTO.setSquare(house.getSquare());
+            houseDetailsDTO.setHouseId(house.getId());
+            houseDetailsDTO.setResidential(house.getResidential());
+            houseDetailsDTO.setImage(address+house.getImage());
+            houseDetailsDTO.setHouseName(house.getHouseName());
+            houseDetailsDTO.setOptionalLabel(house.getOptionalLabel());
+            houseDetailsDTO.setVisitState(house.getVisitState());
+            houseDetailsDTO.setNoNumberHouseName(house.getNoNumberHouseName());
+            String[] liangArr = {};
+            if (house.getLiangDian() != null) {
+                liangArr = house.getLiangDian().split(",");
+            }
+            List<String> dianList = new ArrayList<>();
+            if (!CommonUtil.isEmpty(house.getStyle())) {
+                dianList.add(house.getStyle());
+
+            }
+            if (!CommonUtil.isEmpty(house.getLiangDian())) {
+                Collections.addAll(dianList, liangArr);
+            }
+            if (!CommonUtil.isEmpty(house.getBuildSquare())) {
+                dianList.add(house.getBuildSquare() + "㎡");
+            }
+            houseDetailsDTO.setDianList(dianList);
+            houseDetailsDTO.setTotalPrice(house.getMoney());
+            return ServerResponse.createBySuccess("查询成功", houseDetailsDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
+        }
+    }
     /**
      * 施工现场详情
      */

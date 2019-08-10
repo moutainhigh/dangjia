@@ -39,8 +39,12 @@ public interface IndexPageAPI {
                                       @RequestParam("square")Double square,
                                       @RequestParam("pageDTO")PageDTO pageDTO);
 
-    @PostMapping("/app/other/indexPage/houseDetails")
+    @PostMapping("/app/other/house/details")
     @ApiOperation(value = "施工现场详情", notes = "施工现场详情")
+    ServerResponse houseOtherDetails(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId") String houseId);
+
+    @PostMapping("/app/other/indexPage/houseDetails")
+    @ApiOperation(value = "施工现场详情（带花费）", notes = "施工现场详情（带花费）")
     ServerResponse houseDetails(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId") String houseId);
 
     @PostMapping("/app/other/indexPage/getHouseLabels")

@@ -10,6 +10,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.deliver.IOrderMapper;
 import com.dangjia.acg.mapper.member.IMemberCollectMapper;
+import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCollect;
@@ -72,6 +73,32 @@ public class MemberCollectService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
         }
+    }
+
+
+    /**
+     *  检测该工地是否已收藏
+     * @param request userToken
+     * @param houseId 房子ID
+     * @return
+     */
+    public ServerResponse isMemberCollect(HttpServletRequest request,String houseId) {
+        String userToken = request.getParameter(Constants.USER_TOKEY);
+        if (userToken != null) {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof Member) {
+                Member operator = (Member) object;
+                Example example = new Example(MemberCollect.class);
+                example.createCriteria()
+                        .andEqualTo(MemberCollect.MEMBER_ID, operator.getId())
+                        .andEqualTo(MemberCollect.HOUSE_ID,houseId);
+                List<MemberCollect> list = iMemberCollectMapper.selectByExample(example);
+                if(list.size()>0){
+                    return ServerResponse.createBySuccess("ok","1");
+                }
+            }
+        }
+        return ServerResponse.createBySuccess("ok","0");
     }
 
     /**
