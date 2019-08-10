@@ -19,6 +19,7 @@ import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
+import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.user.UserRoleMapper;
 import com.dangjia.acg.modle.clue.Clue;
@@ -28,6 +29,7 @@ import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberLabel;
 import com.dangjia.acg.modle.store.Store;
+import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.user.UserRoleKey;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -71,6 +73,8 @@ public class ClueService {
     private ConfigMessageService configMessageService;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private IStoreUserMapper iStoreUserMapper;
 
     /**
      * 获取所有线索
@@ -396,13 +400,31 @@ public class ClueService {
         example.createCriteria().andEqualTo(Clue.CUS_SERVICE, userId).andEqualTo(Clue.PHONE, phone);
         List<Clue> clueList = clueMapper.selectByExample(example);
         if (clueList.size() > 0) {
+            return ServerResponse.createByErrorMessage("线索已存在");
+        }
+        example=new Example(StoreUser.class);
+        example.createCriteria().andEqualTo(StoreUser.USER_ID,userId)
+                .andEqualTo(StoreUser.DATA_STATUS,0);
+        List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
+        if(!storeUsers.isEmpty()){
+            Clue clue = new Clue();
+            clue.setCusService(userId);
+            clue.setPhone(phone);
+            clue.setPhaseStatus(0);
+            clue.setStoreId(storeUsers.get(0).getStoreId());
+            clue.setStage(0);
+            clue.setDataStatus(0);
+            clue.setClueType(0);
+            clue.setTurnStatus(0);
+            Store store = iStoreMapper.selectByPrimaryKey(storeUsers.get(0).getStoreId());
+            if(null==store){
+                return ServerResponse.createByErrorMessage("该门店不存在");
+            }
+            clue.setCityId(store.getCityId());
+            clueMapper.insert(clue);
             return ServerResponse.createBySuccessMessage("操作成功");
         }
-        Clue clue = new Clue();
-        clue.setCusService(userId);
-        clue.setPhone(phone);
-        clueMapper.insert(clue);
-        return ServerResponse.createBySuccessMessage("操作成功");
+        return ServerResponse.createByErrorMessage("操作失败");
     }
 }
 
