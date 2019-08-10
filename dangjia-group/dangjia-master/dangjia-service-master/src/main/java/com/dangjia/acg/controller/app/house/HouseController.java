@@ -27,8 +27,8 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setSelectHouse(String userToken, String cityId, String houseId) {
-        return houseService.setSelectHouse(userToken, cityId, houseId);
+    public ServerResponse setSelectHouse(String userToken, String houseId) {
+        return houseService.setSelectHouse(userToken, houseId);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class HouseController implements HouseAPI {
     @ApiMethod
     public ServerResponse queryConstructionRecord(String houseId, String day, String workerType, PageDTO pageDTO) {
 //        return  houseService.queryConstructionRecord(houseId, pageDTO, null);
-        return houseService.queryConstructionRecordAll(houseId,null, day, workerType, pageDTO);
+        return houseService.queryConstructionRecordAll(houseId, null, day, workerType, pageDTO);
     }
 
     /**
@@ -144,8 +144,8 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryConstructionRecordAll(String houseId,String ids, String day, String workerType, PageDTO pageDTO) {
-        return houseService.queryConstructionRecordAll(houseId, ids,day, workerType, pageDTO);
+    public ServerResponse queryConstructionRecordAll(String houseId, String ids, String day, String workerType, PageDTO pageDTO) {
+        return houseService.queryConstructionRecordAll(houseId, ids, day, workerType, pageDTO);
     }
 
     @Override
@@ -220,9 +220,10 @@ public class HouseController implements HouseAPI {
 
     @Override
     @ApiMethod
-    public  ServerResponse updateCustomEdit(String houseId){
+    public ServerResponse updateCustomEdit(String houseId) {
         return houseService.updateCustomEdit(houseId);
     }
+
     @Override
     @ApiMethod
     public ServerResponse getHouseChoiceCases(String id) {

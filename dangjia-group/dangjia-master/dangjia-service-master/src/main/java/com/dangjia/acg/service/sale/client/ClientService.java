@@ -625,10 +625,10 @@ public class ClientService {
                 saleClueDTO.setPhone(clueDTO.getPhone());
                 saleClueDTO.setReportDate(clueDTO.getReportDate());
                 saleClueDTO.setCreateDate(clueDTO.getCreateDate());
-                saleClueDTO.setModifyDate(clueDTO.getModifyDate());
+                saleClueDTO.setModifyDate(clueDTO.getModifyDate());//最新跟进时间
                 saleClueDTO.setClueType(clueDTO.getClueType());
                 Date maxDate = clueTalkMapper.getMaxDate(clueDTO.getId());
-                saleClueDTO.setCommunicationDate(maxDate);
+                saleClueDTO.setCommunicationDate(maxDate);//沟通时间
                 list.add(saleClueDTO);
             }
             PageInfo pageResult = new PageInfo(list);

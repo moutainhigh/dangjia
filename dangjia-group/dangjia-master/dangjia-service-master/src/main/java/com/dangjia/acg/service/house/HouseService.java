@@ -36,7 +36,6 @@ import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
-import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.*;
@@ -156,7 +155,7 @@ public class HouseService {
     /**
      * 切换房产
      */
-    public ServerResponse setSelectHouse(String userToken, String cityId, String houseId) {
+    public ServerResponse setSelectHouse(String userToken, String houseId) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -542,7 +541,7 @@ public class HouseService {
             customer.setStage(4);//阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单
             customer.setPhaseStatus(1);
             iCustomerMapper.updateByPrimaryKeySelective(customer);
-            clueMapper.setStage(customer.getUserId(),customer.getMemberId());//修改线索的阶段
+            clueMapper.setStage(customer.getUserId(), customer.getMemberId());//修改线索的阶段
         } catch (Exception e) {
             System.out.println("建群失败，异常：" + e.getMessage());
         }
@@ -597,7 +596,7 @@ public class HouseService {
             for (House house : houseList) {
                 if (house.getVisitState() == 0) { //0待确认开工,1装修中,2休眠中,3已完工
                     //默认切换至未确认开工的房子
-                    setSelectHouse(userToken, cityId, house.getId());
+                    setSelectHouse(userToken, house.getId());
                     return ServerResponse.createByErrorMessage("有房子未确认开工,不能再装");
                 }
             }
@@ -664,7 +663,7 @@ public class HouseService {
         houseExpend.setHouseId(house.getId());
         houseExpendMapper.insert(houseExpend);
         //默认切换至未确认开工的房子
-        setSelectHouse(userToken, cityId, house.getId());
+        setSelectHouse(userToken, house.getId());
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
@@ -1036,9 +1035,9 @@ public class HouseService {
                     name.append(house.getNoNumberHouseName());
                 }
                 Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
-                if(null!=member) {
+                if (null != member) {
                     WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                    if(null != workerType){
+                    if (null != workerType) {
                         name.append(" " + workerType.getName());
                     }
                     name.append(applyTypeMap.get(hfa.getApplyType()));

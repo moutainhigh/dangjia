@@ -96,10 +96,10 @@
                 mc.id as mcId,
                 c.id as clueId,
                 mc.member_id as memberId,
-                c.owername as owername,
-                c.phone,
+                m.mobile as mobile,
+                m.nick_name as name,
                 mc.modify_date as modifyDate,
-                mc.create_date as create_date,
+                mc.create_date as createDate,
                 mc.label_id_arr as labelId,
                 u.username as userName,
                 mc.phase_status as phaseStatus,
@@ -113,6 +113,8 @@
                 INNER JOIN dj_member_customer mc
                 on c.member_id=mc.member_id
                 and c.cus_service=mc.user_id
+                INNER JOIN dj_member m
+                on mc.member_id=m.id
             </if>
             WHERE
             <if test="stage==''">
@@ -624,12 +626,6 @@
             ,mc.tips=0
         </if>
         where 1=1
-        <if test="null!=mcId and ''!=mcId">
-           and mc.id=#{mcId}
-        </if>
-        <if test="null!=clueId and ''!=clueId">
-           and c.id=#{clueId}
-        </if>
     </update>
 
     <update id="setStage">
