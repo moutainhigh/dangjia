@@ -36,6 +36,7 @@ import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.*;
@@ -57,6 +58,7 @@ import com.dangjia.acg.service.design.DesignDataService;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -541,7 +543,12 @@ public class HouseService {
             customer.setStage(4);//阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单
             customer.setPhaseStatus(1);
             iCustomerMapper.updateByPrimaryKeySelective(customer);
-            clueMapper.setStage(customer.getUserId(), customer.getMemberId());//修改线索的阶段
+            Map<String,Object> map=new HashedMap();
+            map.put("memberId",customer.getMemberId());
+            map.put("userId",customer.getUserId());
+            map.put("stage",4);
+            map.put("tips",1);
+            clueMapper.setStage(map);//修改线索的阶段
         } catch (Exception e) {
             System.out.println("建群失败，异常：" + e.getMessage());
         }
@@ -601,6 +608,16 @@ public class HouseService {
                 }
             }
         }
+        Map<String,Object> map=new HashedMap();
+        map.put("memberId",member.getId());
+        map.put("stage",5);
+        map.put("tips",1);
+        clueMapper.setStage(map);//修改线索的阶段
+        example=new Example(Customer.class);
+        example.createCriteria().andEqualTo(Customer.MEMBER_ID,member.getId());
+        Customer customer=new Customer();
+        customer.setStage(5);
+        iCustomerMapper.updateByExampleSelective(customer,example);
         Integer type = iCustomerMapper.queryType(member.getId());
         Integer result = clueMapper.queryTClue(member.getMobile());
         City city = iCityMapper.selectByPrimaryKey(cityId);
@@ -1035,9 +1052,9 @@ public class HouseService {
                     name.append(house.getNoNumberHouseName());
                 }
                 Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
-                if (null != member) {
+                if(null!=member) {
                     WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                    if (null != workerType) {
+                    if(null != workerType){
                         name.append(" " + workerType.getName());
                     }
                     name.append(applyTypeMap.get(hfa.getApplyType()));

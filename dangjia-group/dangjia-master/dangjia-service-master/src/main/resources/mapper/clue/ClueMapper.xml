@@ -628,12 +628,22 @@
         where 1=1
     </update>
 
-    <update id="setStage">
+    <update id="setStage" parameterType="java.util.Map">
         update dj_clue
-        set stage=4,tips=1
-        where cus_service = #{userId}
-        and member_id = #{memberId}
+        set stage=#{stage}
+        <if test="null!=tips">
+            ,tips=#{tips}
+        </if>
+        where 1=1
+        <if test="null!=userId and ''!=userId">
+            and cus_service = #{userId}
+        </if>
+        <if test="null!=memberId and ''!=memberId">
+            and member_id = #{memberId}
+        </if>
     </update>
+
+
 
 
 </mapper>
