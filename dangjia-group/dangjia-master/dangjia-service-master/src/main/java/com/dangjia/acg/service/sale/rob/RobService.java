@@ -157,6 +157,10 @@ public class RobService {
                                             String clueId,
                                             Integer phaseStatus,
                                             String stage) {
+
+        if(CommonUtil.isEmpty(clueId)){
+            return ServerResponse.createByErrorMessage("线索不能为空");
+        }
         //获取图片url
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 
