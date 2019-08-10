@@ -162,6 +162,8 @@ public class RobService {
         //获取图片url
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 
+        Clue clue = clueMapper.selectByPrimaryKey(clueId);
+
 
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
@@ -179,7 +181,10 @@ public class RobService {
                 map.put("memberId", memberId);
             }
             map.put("userId", accessToken.getUserId());
-            map.put("stage", stage);
+            if(clue != null){
+                map.put("stage", clue.getStage());
+            }
+
             map.put("phaseStatus", phaseStatus);
             RobArrInFoDTO robArrInFoDTO = new RobArrInFoDTO();
 
