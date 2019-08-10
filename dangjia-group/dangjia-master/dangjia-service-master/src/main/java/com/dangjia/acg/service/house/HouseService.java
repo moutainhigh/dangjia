@@ -1039,9 +1039,14 @@ public class HouseService {
                     name.append(house.getNoNumberHouseName());
                 }
                 Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
-                name.append(" " + workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());
-                name.append(applyTypeMap.get(hfa.getApplyType()));
-                listMap.add(name.toString());
+                if(null!=member) {
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                    if(null != workerType){
+                        name.append(" " + workerType.getName());
+                    }
+                    name.append(applyTypeMap.get(hfa.getApplyType()));
+                    listMap.add(name.toString());
+                }
             }
             return ServerResponse.createBySuccess("ok", listMap);
         } catch (Exception e) {

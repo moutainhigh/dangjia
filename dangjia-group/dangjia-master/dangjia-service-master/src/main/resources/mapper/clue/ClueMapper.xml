@@ -94,6 +94,7 @@
             </if>
             <if test="stage==4">
                 mc.id as mcId,
+                c.id as clueId,
                 mc.member_id as memberId,
                 c.owername as owername,
                 c.phone,
@@ -381,7 +382,7 @@
 
     <select id="queryCustomerInfo" resultType="com.dangjia.acg.dto.sale.rob.RobInfoDTO" parameterType="java.util.Map">
         select
-        <if test="phaseStatus == 1">
+        <if test="stage == 4">
             h.id as houseId,
             h.member_id as memberId,
             h.city_id as cityId,
@@ -417,7 +418,7 @@
         mc.label_id_arr as labelIdArr,
         mc.stage as stage
         from dj_clue c
-        <if test="phaseStatus == 1">
+        <if test="stage == 4">
             INNER JOIN dj_house h
             on h.member_id = c.member_id
         </if>
