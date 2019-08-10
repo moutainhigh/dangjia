@@ -473,7 +473,6 @@ public class RobService {
                     clueTalk.setRemindTime(customerRecDTO.getRemindTime());
                     clueTalk.setClueId(customerRecDTO.getClueId());
                     clueTalk.setTalkContent(customerRecDTO.getDescribes());
-                    clueTalk.setDataStatus(0);
                     clueTalkMapper.insert(clueTalk);
                     return ServerResponse.createBySuccessMessage("新增成功");
 //                }
