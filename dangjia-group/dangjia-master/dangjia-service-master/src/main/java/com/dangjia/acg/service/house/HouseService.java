@@ -57,6 +57,7 @@ import com.dangjia.acg.service.design.DesignDataService;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,7 +154,7 @@ public class HouseService {
     /**
      * 切换房产
      */
-    public ServerResponse setSelectHouse(String userToken, String cityId, String houseId) {
+    public ServerResponse setSelectHouse(String userToken, String houseId) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -545,7 +546,12 @@ public class HouseService {
             customer.setStage(4);//阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单
             customer.setPhaseStatus(1);
             iCustomerMapper.updateByPrimaryKeySelective(customer);
-            clueMapper.setStage(customer.getUserId(),customer.getMemberId());//修改线索的阶段
+            Map<String,Object> map=new HashedMap();
+            map.put("memberId",customer.getMemberId());
+            map.put("userId",customer.getUserId());
+            map.put("stage",4);
+            map.put("tips",1);
+            clueMapper.setStage(map);//修改线索的阶段
         } catch (Exception e) {
             System.out.println("建群失败，异常：" + e.getMessage());
         }
@@ -600,11 +606,21 @@ public class HouseService {
             for (House house : houseList) {
                 if (house.getVisitState() == 0) { //0待确认开工,1装修中,2休眠中,3已完工
                     //默认切换至未确认开工的房子
-                    setSelectHouse(userToken, cityId, house.getId());
+                    setSelectHouse(userToken, house.getId());
                     return ServerResponse.createByErrorMessage("有房子未确认开工,不能再装");
                 }
             }
         }
+        Map<String,Object> map=new HashedMap();
+        map.put("memberId",member.getId());
+        map.put("stage",5);
+        map.put("tips",1);
+        clueMapper.setStage(map);//修改线索的阶段
+        example=new Example(Customer.class);
+        example.createCriteria().andEqualTo(Customer.MEMBER_ID,member.getId());
+        Customer customer=new Customer();
+        customer.setStage(5);
+        iCustomerMapper.updateByExampleSelective(customer,example);
         Integer type = iCustomerMapper.queryType(member.getId());
         Integer result = clueMapper.queryTClue(member.getMobile());
         City city = iCityMapper.selectByPrimaryKey(cityId);
@@ -667,7 +683,7 @@ public class HouseService {
         houseExpend.setHouseId(house.getId());
         houseExpendMapper.insert(houseExpend);
         //默认切换至未确认开工的房子
-        setSelectHouse(userToken, cityId, house.getId());
+        setSelectHouse(userToken, house.getId());
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 

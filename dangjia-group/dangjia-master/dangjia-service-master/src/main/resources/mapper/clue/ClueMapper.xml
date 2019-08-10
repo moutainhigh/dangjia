@@ -385,7 +385,7 @@
 
     <select id="queryCustomerInfo" resultType="com.dangjia.acg.dto.sale.rob.RobInfoDTO" parameterType="java.util.Map">
         select
-        <if test="stage == 4">
+        <if test="stage == 4 or stage == 5">
             h.id as houseId,
             h.member_id as memberId,
             h.city_id as cityId,
@@ -421,7 +421,7 @@
         mc.label_id_arr as labelIdArr,
         mc.stage as stage
         from dj_clue c
-        <if test="stage == 4">
+        <if test="stage == 4 or stage == 5">
             INNER JOIN dj_house h
             on h.member_id = c.member_id
         </if>
@@ -628,12 +628,22 @@
         where 1=1
     </update>
 
-    <update id="setStage">
+    <update id="setStage" parameterType="java.util.Map">
         update dj_clue
-        set stage=4,tips=1
-        where cus_service = #{userId}
-        and member_id = #{memberId}
+        set stage=#{stage}
+        <if test="null!=tips">
+            ,tips=#{tips}
+        </if>
+        where 1=1
+        <if test="null!=userId and ''!=userId">
+            and cus_service = #{userId}
+        </if>
+        <if test="null!=memberId and ''!=memberId">
+            and member_id = #{memberId}
+        </if>
     </update>
+
+
 
 
 </mapper>

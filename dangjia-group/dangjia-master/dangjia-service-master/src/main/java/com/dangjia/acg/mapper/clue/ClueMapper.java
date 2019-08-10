@@ -86,5 +86,5 @@ public interface ClueMapper extends Mapper<Clue> {
 
     int setTips(@Param("clueId") String clueId,@Param("mcId") String mcId);
 
-    int setStage(@Param("userId") String userId,@Param("memberId") String memberId);
+    int setStage(Map<String,Object> map);
 }

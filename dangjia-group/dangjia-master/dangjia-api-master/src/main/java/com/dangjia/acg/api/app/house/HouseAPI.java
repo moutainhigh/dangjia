@@ -24,7 +24,6 @@ public interface HouseAPI {
     @PostMapping("app/house/house/setSelectHouse")
     @ApiOperation(value = "切换房产", notes = "切换房产")
     ServerResponse setSelectHouse(@RequestParam("userToken") String userToken,
-                                  @RequestParam("cityId") String cityId,
                                   @RequestParam("houseId") String houseId);
 
 
@@ -164,6 +163,7 @@ public interface HouseAPI {
     @PostMapping("app/house/queryConstructionRecordType")
     @ApiOperation(value = "施工记录(new 包含要补退记录)分类型", notes = "施工记录(new 包含要补退记录)")
     ServerResponse queryConstructionRecordType(@RequestParam("houseId") String houseId);
+
     /**
      * showdoc
      *
@@ -236,6 +236,7 @@ public interface HouseAPI {
     @PostMapping("app/house/house/updateCustomEdit")
     @ApiOperation(value = "房子申请修改未进场的工序还原", notes = "房子申请修改未进场的工序还原")
     ServerResponse updateCustomEdit(@RequestParam("houseId") String houseId);
+
     /**
      * 获取房屋精选案例详情
      *
