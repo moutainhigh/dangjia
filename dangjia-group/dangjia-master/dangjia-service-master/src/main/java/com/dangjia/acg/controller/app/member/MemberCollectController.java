@@ -35,6 +35,12 @@ public class MemberCollectController implements MemberCollectAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse isMemberCollect(HttpServletRequest request,String houseId){
+        return memberCollectService.isMemberCollect(request, houseId);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse delMemberCollect(HttpServletRequest request,String houseId){
         return memberCollectService.delMemberCollect(request, houseId);
     }

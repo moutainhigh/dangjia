@@ -27,6 +27,12 @@ public interface MemberCollectAPI {
     ServerResponse addMemberCollect(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("houseId") String houseId);
 
+    @RequestMapping(value = "member/collect/check", method = RequestMethod.POST)
+    @ApiOperation(value = "检测是否收藏", notes = "检测是否收藏")
+    ServerResponse isMemberCollect(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("houseId") String houseId);
+
+
     @RequestMapping(value = "member/collect/del", method = RequestMethod.POST)
     @ApiOperation(value = "取消收藏", notes = "取消收藏")
     ServerResponse delMemberCollect(@RequestParam("request") HttpServletRequest request,
