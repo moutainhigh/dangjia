@@ -90,9 +90,7 @@ public class RobService {
         Integer type = iCustomerMapper.queryTypeId(accessToken.getUserId());
 
         Map<String, Object> map = new HashMap<>();
-
         map.put("userId", accessToken.getUserId());
-
         if (!CommonUtil.isEmpty(type)) {
             map.put("type", type);
         }
@@ -180,11 +178,10 @@ public class RobService {
             if (!CommonUtil.isEmpty(memberId)) {
                 map.put("memberId", memberId);
             }
-            map.put("userId", accessToken.getUserId());
+            map.put("userId", clue.getCusService());
             if(clue != null){
                 map.put("stage", clue.getStage());
             }
-
             map.put("phaseStatus", phaseStatus);
             RobArrInFoDTO robArrInFoDTO = new RobArrInFoDTO();
 
@@ -545,7 +542,8 @@ public class RobService {
                 Example example = new Example(IntentionHouse.class);
                 example.createCriteria().andEqualTo(IntentionHouse.RESIDENTIAL_NAME, intentionHouse.getResidentialName())
                         .andEqualTo(IntentionHouse.BUILDING_NAME, intentionHouse.getBuildingName())
-                        .andEqualTo(IntentionHouse.NUMBER_NAME, intentionHouse.getNumberName());
+                        .andEqualTo(IntentionHouse.NUMBER_NAME, intentionHouse.getNumberName())
+                        .andEqualTo(IntentionHouse.CLUE_ID, intentionHouse.getClueId());
                 List<IntentionHouse> intentionHouses = intentionHouseMapper.selectByExample(example);
                 if (intentionHouses.size() > 0) {
                     return ServerResponse.createByErrorMessage("该意向房子已存在");

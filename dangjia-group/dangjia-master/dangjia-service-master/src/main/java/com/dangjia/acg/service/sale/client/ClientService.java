@@ -144,7 +144,8 @@ public class ClientService {
             Example example = new Example(IntentionHouse.class);
             example.createCriteria().andEqualTo(IntentionHouse.RESIDENTIAL_NAME, clue.getAddress())
                     .andEqualTo(IntentionHouse.BUILDING_NAME, clue.getBuilding())
-                    .andEqualTo(IntentionHouse.NUMBER_NAME, clue.getNumber());
+                    .andEqualTo(IntentionHouse.NUMBER_NAME, clue.getNumber())
+                    .andEqualTo(IntentionHouse.CLUE_ID,clue1.getId());
             List<IntentionHouse> intentionHouses = intentionHouseMapper.selectByExample(example);
             if (intentionHouses.size() > 0) {
                 return ServerResponse.createByErrorMessage("该线索已存在");
