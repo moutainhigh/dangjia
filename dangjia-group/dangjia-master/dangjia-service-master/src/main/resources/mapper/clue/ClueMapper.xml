@@ -428,7 +428,7 @@
             <if test="null != memberId and memberId !=''">
                and  c.member_id = #{memberId}
             </if>
-            <if test="null != cusService and cusService != ''">
+            <if test="null != userId and userId != ''">
                 and  c.cus_service = #{userId}
             </if>
         </where>
