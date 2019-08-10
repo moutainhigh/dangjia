@@ -211,7 +211,12 @@ public class MemberService {
 
     ServerResponse getUser(Member user, Integer userRole) {
         if (userRole == 1) {
-            clueService.sendUser(user, user.getMobile(), null, null);
+            Example example=new Example(Customer.class);
+            example.createCriteria().andEqualTo(Customer.MEMBER_ID,user.getId());
+            List<Customer> customers = iCustomerMapper.selectByExample(example);
+            if(customers.size()<=0) {
+                clueService.sendUser(user, user.getMobile(), null, null);
+            }
         }
         ServerResponse serverResponse = setAccessToken(user, userRole);
         if (!serverResponse.isSuccess()) {
