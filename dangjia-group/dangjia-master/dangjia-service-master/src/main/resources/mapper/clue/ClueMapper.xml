@@ -99,7 +99,7 @@
                 c.owername as owername,
                 c.phone,
                 mc.modify_date as modifyDate,
-                mc.create_date as create_date,
+                mc.create_date as createDate,
                 mc.label_id_arr as labelId,
                 u.username as userName,
                 mc.phase_status as phaseStatus,
