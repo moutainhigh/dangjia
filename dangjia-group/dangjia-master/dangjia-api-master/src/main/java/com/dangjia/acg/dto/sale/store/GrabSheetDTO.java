@@ -20,4 +20,5 @@ public class GrabSheetDTO {
     private String memberId;
     private String userId;
     private Integer phaseStatus;
+    private String clueId;
 }

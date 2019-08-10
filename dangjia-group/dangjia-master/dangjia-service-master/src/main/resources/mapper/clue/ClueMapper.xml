@@ -255,6 +255,7 @@
     
     <select id="ordersCustomer" resultType="com.dangjia.acg.dto.sale.client.OrdersCustomerDTO">
         SELECT
+        c.id as clueId,
         mc.id as mcId,
         mc.member_id as memberId,
         h.id as houseId,
