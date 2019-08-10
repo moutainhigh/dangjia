@@ -346,7 +346,6 @@
 
     <select id="queryRobSingledata" resultType="com.dangjia.acg.dto.sale.rob.RobDTO" parameterType="java.util.Map">
        select
-        c.owername as owerName,
         c.phone as phone,
         c.cus_service as cusService,
         c.member_id as memberId,
@@ -360,11 +359,13 @@
         h.visit_state as visitState,
         h.create_date as createDate,
         mc.label_id_arr as labelIdArr,
-        mc.id as mcId
+        mc.id as mcId,
+        m.nick_name as owerName
         from
         dj_house h
         INNER JOIN dj_member_customer mc on h.member_id = mc.member_id
         INNER JOIN dj_clue c on mc.member_id = c.member_id and mc.user_id = c.cus_service
+        INNER JOIN dj_member m on mc.member_id = m.id
         where h.visit_state = 0 and h.is_rob_stats = 0
         <if test="null != userId">
             and c.cus_service = #{userId}
@@ -428,7 +429,7 @@
             <if test="null != memberId and memberId !=''">
                and  c.member_id = #{memberId}
             </if>
-            <if test="null != cusService and cusService != ''">
+            <if test="null != userId and userId != ''">
                 and  c.cus_service = #{userId}
             </if>
         </where>
