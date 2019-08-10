@@ -289,7 +289,7 @@ public class ClientService {
                 MainUser u = userMapper.selectByPrimaryKey(clue.getCusService());
                 if (u != null && !CommonUtil.isEmpty(u.getMemberId()))
                     configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "跨域客户提醒",
-                            "您收到了一个跨域客户，快去分配给内场销售吧。", 0, url
+                            "您收到了一个跨域客户。", 0, url
                                     + Utils.getCustomerDetails("", clue.getId(), 0, "0"));
                 return ServerResponse.createBySuccessMessage("提交成功");
             }

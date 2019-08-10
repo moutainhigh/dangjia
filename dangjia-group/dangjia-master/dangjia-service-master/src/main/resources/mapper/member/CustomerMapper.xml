@@ -49,6 +49,7 @@
     <!--待分配客户-->
     <select id="waitDistribution" parameterType="String" resultType="com.dangjia.acg.dto.sale.client.CustomerIndexDTO">
         SELECT
+        c.id as clueId,
         mc.id as mcId,
         mc.member_id as memberId,
         mc.user_id as userId,
@@ -61,6 +62,7 @@
         FROM dj_member_customer mc
         INNER join dj_clue c
         ON mc.member_id=c.member_id
+        and mc.user_id=c.cus_service
         WHERE mc.user_id=#{userId}
         AND mc.data_status=0
         <if test="null!=searchKey and ''!=searchKey">
@@ -74,6 +76,7 @@
 
     <select id="grabSheet" resultType="com.dangjia.acg.dto.sale.store.GrabSheetDTO">
         SELECT
+          c.id as clueId,
           mc.id as customerId,
           h.id as houseId,
           if(m.name is not null,m.nick_name,m.name) as name,
@@ -83,7 +86,10 @@
           mc.member_id as memberId,
           mc.phase_status as phaseStatus
         FROM dj_member_customer mc
-        INNER  JOIN dj_member m
+        INNER JOIN dj_clue c
+        on mc.member_id=c.member_id
+        and mc.user_id=c.cus_service
+        INNER JOIN dj_member m
         on mc.member_id=m.id
         INNER JOIN dj_house h
         on m.id=h.member_id
