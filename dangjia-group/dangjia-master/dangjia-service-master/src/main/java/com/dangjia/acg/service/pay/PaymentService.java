@@ -215,7 +215,7 @@ public class PaymentService {
                 if(insurance.getEndDate()==null){
                     insurance.setEndDate(new Date());
                 }
-                insurance.setNumber(payOrder.getNumber());
+                insurance.setNumber(businessOrder.getNumber());
                 insurance.setEndDate(DateUtil.addDateYear(insurance.getEndDate(), 1));
                 insuranceMapper.updateByPrimaryKeySelective(insurance);
 
