@@ -427,6 +427,7 @@ public class HouseFlowService {
             if(DateUtil.addDateMinutes(houseWorker.getCreateDate(),30).getTime()<=(new Date()).getTime()) {
                 example = new Example(Insurance.class);
                 example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+                example.orderBy(Insurance.END_DATE).desc();
                 List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
                 //保险服务剩余天数小于等于60天
@@ -467,6 +468,7 @@ public class HouseFlowService {
         for (HouseWorker houseWorker : hwList) {
             example = new Example(Insurance.class);
             example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+            example.orderBy(Insurance.END_DATE).desc();
             List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
             //保险服务剩余天数小于等于60天
@@ -488,34 +490,25 @@ public class HouseFlowService {
                     Member operator = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
                     String insuranceMoney=configUtil.getValue(SysConfig.INSURANCE_MONEY, String.class);
                     insuranceMoney= CommonUtil.isEmpty(insuranceMoney)?"100":insuranceMoney;
-                    Insurance insurance;
+                    Insurance insurance=new Insurance();
+                    insurance.setWorkerId(operator.getId());
+                    insurance.setWorkerMobile(operator.getMobile());
+                    insurance.setWorkerName(operator.getName());
+                    insurance.setMoney(new BigDecimal(insuranceMoney));
                     if (insurances.size()==0) {
-                        insurance=new Insurance();
-                        insurance.setWorkerId(operator.getId());
-                        insurance.setWorkerMobile(operator.getMobile());
-                        insurance.setWorkerName(operator.getName());
-                        insurance.setMoney(new BigDecimal(insuranceMoney));
                         insurance.setType("0");
-                        if(insurance.getStartDate()==null){
-                            insurance.setStartDate(new Date());
-                        }
-                        if(insurance.getEndDate()==null){
-                            insurance.setEndDate(new Date());
-                        }
-                        insurance.setEndDate(DateUtil.addDateYear(insurance.getEndDate(), 1));
-                        insuranceMapper.insert(insurance);
                     }else{
-                        insurance=insurances.get(0);
                         insurance.setType("1");
-                        if(insurance.getStartDate()==null){
-                            insurance.setStartDate(new Date());
-                        }
-                        if(insurance.getEndDate()==null){
-                            insurance.setEndDate(new Date());
-                        }
-                        insurance.setEndDate(DateUtil.addDateYear(insurance.getEndDate(), 1));
-                        insuranceMapper.updateByPrimaryKeySelective(insurance);
                     }
+                    if(insurance.getStartDate()==null){
+                        insurance.setStartDate(new Date());
+                    }
+                    if(insurance.getEndDate()==null){
+                        insurance.setEndDate(new Date());
+                    }
+                    insurance.setEndDate(DateUtil.addDateYear(insurance.getEndDate(), 1));
+                    insuranceMapper.insert(insurance);
+
                     if (operator != null) {
                         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(operator.getWorkerTypeId());
                         BigDecimal money = new BigDecimal(insuranceMoney);
