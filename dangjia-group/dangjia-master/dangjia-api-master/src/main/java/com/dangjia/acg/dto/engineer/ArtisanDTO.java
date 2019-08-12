@@ -23,6 +23,7 @@ public class ArtisanDTO {
     private Integer volume;//成交量
     private String superior;//邀请人
 
+    private Integer surDay;//保险剩余天数
     private Integer realNameState;
     private String realNameDescribe;
     private String checkDescribe;

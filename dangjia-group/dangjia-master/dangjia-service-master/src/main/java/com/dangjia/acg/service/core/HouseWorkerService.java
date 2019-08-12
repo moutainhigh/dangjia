@@ -318,6 +318,7 @@ public class HouseWorkerService {
             }
             example = new Example(Insurance.class);
             example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+            example.orderBy(Insurance.END_DATE).desc();
             List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
             //保险服务剩余天数小于等于60天

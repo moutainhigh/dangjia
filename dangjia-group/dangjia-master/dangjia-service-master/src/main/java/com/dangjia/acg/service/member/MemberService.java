@@ -8,10 +8,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.BeanUtils;
-import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.JsmsUtil;
-import com.dangjia.acg.common.util.Validator;
+import com.dangjia.acg.common.util.*;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HomePageBean;
 import com.dangjia.acg.dto.member.MemberCustomerDTO;
@@ -24,6 +21,7 @@ import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
+import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
@@ -33,6 +31,7 @@ import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
+import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.activity.RedPackPayService;
 import com.dangjia.acg.service.clue.ClueService;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -66,6 +65,8 @@ public class MemberService {
     @Autowired
     private RedPackPayService redPackPayService;
 
+    @Autowired
+    private IInsuranceMapper insuranceMapper;
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -1104,6 +1105,41 @@ public class MemberService {
             list.add(listBean);
         }
         return list;
+    }
+
+
+    /**
+     * 获取工匠保险信息
+     *
+     * @param type 保险类型 0=首保 1=续保
+     * @param valueKey 工人名称或电话
+     * @return
+     */
+    public ServerResponse  queryInsurances(String type, String valueKey,PageDTO pageDTO) {
+
+        List<Map<String, Object>> datas = new ArrayList<>();
+        Example example = new Example(Insurance.class);
+        example.createCriteria();
+
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<Insurance> infos = insuranceMapper.selectByExample(example);
+        PageInfo pageResult = new PageInfo(infos);
+        if (infos != null && infos.size() > 0) {
+            for (Insurance info : infos) {
+                Map<String, Object> map = BeanUtils.beanToMap(info);
+                map.put("surDay", 0);
+                Integer daynum=DateUtil.daysofTwo(new Date(),info.getEndDate());
+                if(daynum>0) {
+                    map.put("surDay", daynum);
+                }
+                datas.add(map);
+            }
+        }
+        if (infos.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无该用户");
+        }
+        pageResult.setList(datas);
+        return ServerResponse.createBySuccess("查询成功",pageResult);
     }
 
 

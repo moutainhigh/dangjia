@@ -144,6 +144,7 @@ public class TaskService {
         if(member.getWorkerType()>2){
             Example example = new Example(Insurance.class);
             example.createCriteria().andEqualTo(Insurance.WORKER_ID, member.getId());
+            example.orderBy(Insurance.END_DATE).desc();
             List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
             if(insurances.size()==0){
@@ -319,6 +320,7 @@ public class TaskService {
             HouseWorker hw = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(),1);
             example = new Example(Insurance.class);
             example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId());
+            example.orderBy(Insurance.END_DATE).desc();
             List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
             //保险服务剩余天数小于等于60天

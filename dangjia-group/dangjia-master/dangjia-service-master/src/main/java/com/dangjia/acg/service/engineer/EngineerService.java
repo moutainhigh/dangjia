@@ -20,6 +20,7 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.matter.IWorkerDisclosureMapper;
 import com.dangjia.acg.mapper.matter.IWorkerEverydayMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.modle.core.*;
@@ -28,6 +29,7 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
 import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.service.core.HouseWorkerService;
@@ -59,6 +61,8 @@ public class EngineerService {
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private HouseWorkerService houseWorkerService;
+    @Autowired
+    private IInsuranceMapper insuranceMapper;
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -705,6 +709,19 @@ public class EngineerService {
                     if (superior != null) {
                         artisanDTO.setSuperior(superior.getName());
                     }
+                }
+                Example example = new Example(Insurance.class);
+                example.createCriteria().andEqualTo(Insurance.WORKER_ID, member.getId());
+                example.orderBy(Insurance.END_DATE).desc();
+                List<Insurance> insurances = insuranceMapper.selectByExample(example);
+
+                if(insurances.size()==0){
+                    artisanDTO.setSurDay(0);
+                }
+                if(insurances.size()>0){
+                    //保险服务剩余天数小于等于60天
+                    Integer daynum=DateUtil.daysofTwo(new Date(),insurances.get(0).getEndDate());
+                    artisanDTO.setSurDay(daynum);
                 }
                 artisanDTOS.add(artisanDTO);
             }

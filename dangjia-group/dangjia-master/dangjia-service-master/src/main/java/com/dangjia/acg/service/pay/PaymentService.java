@@ -975,6 +975,7 @@ public class PaymentService {
                 Member operator = (Member) object;
                 Example example = new Example(Insurance.class);
                 example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId());
+                example.orderBy(Insurance.END_DATE).desc();
                 List<Insurance> insurances = insuranceMapper.selectByExample(example);
                 Insurance insurance;
                 if (insurances.size()==0) {
