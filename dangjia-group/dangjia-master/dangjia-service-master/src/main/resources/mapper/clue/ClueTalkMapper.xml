@@ -10,8 +10,8 @@
       talk_content as talkContent,
       create_date as createDate,
       modify_date as modifyDate,
-      data_status as dataStatus
-
+      data_status as dataStatus,
+      remind_time as remindTime
     </sql>
 
     <select id="getTalkByClueId" parameterType="String" resultType="com.dangjia.acg.modle.clue.ClueTalk">
@@ -22,6 +22,27 @@
 
     <select id="getMaxDate" parameterType="String" resultType="date">
         SELECT max(modify_date) from dj_clue_talk where data_status='0' and clue_id=#{clue_id}
+    </select>
+
+    <select id="getTodayDescribes" resultType="com.dangjia.acg.dto.clue.ClueTalkDTO">
+        SELECT
+            ct.id,
+            ct.clue_id AS clueId,
+            ct.user_id AS userId,
+            ct.talk_content AS talkContent,
+            ct.create_date AS createDate,
+            ct.modify_date AS modifyDate,
+            ct.data_status AS dataStatus,
+            ct.remind_time AS remindTime,
+            u.member_id AS memberId,
+            c.stage as stage,
+            c.phase_status as phaseStatus
+        FROM
+            dj_clue_talk ct
+        INNER JOIN dj_clue c ON ct.clue_id = c.id
+        INNER JOIN dj_user u ON ct.user_id = u.id
+        WHERE
+            DATE_FORMAT(remind_time, '%y-%m-%d') = DATE_FORMAT(now(), '%y-%m-%d')
     </select>
 </mapper>
 

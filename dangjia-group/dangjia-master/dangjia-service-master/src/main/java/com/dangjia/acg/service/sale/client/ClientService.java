@@ -267,7 +267,7 @@ public class ClientService {
                     if (u != null && !CommonUtil.isEmpty(u.getMemberId()))
                         configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "跨域客户提醒",
                                 "您收到了一个跨域客户，快去分配给内场销售吧。", 0, url
-                                        + Utils.getCustomerDetails("", clue.getId(), 0, "0"));
+                                        + Utils.getCustomerDetails(u.getMemberId(), clue.getId(), 0, "0"));
                     return ServerResponse.createBySuccessMessage("提交成功");
                 }
                 ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectSingleResidentialBuilding(store.getId(), clue.getBuilding(), villageId);
@@ -290,7 +290,7 @@ public class ClientService {
                 if (u != null && !CommonUtil.isEmpty(u.getMemberId()))
                     configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "跨域客户提醒",
                             "您收到了一个跨域客户。", 0, url
-                                    + Utils.getCustomerDetails("", clue.getId(), 0, "0"));
+                                    + Utils.getCustomerDetails(u.getMemberId(), clue.getId(), 0, "0"));
                 return ServerResponse.createBySuccessMessage("提交成功");
             }
         }
@@ -314,7 +314,7 @@ public class ClientService {
                 if (u != null && !CommonUtil.isEmpty(u.getMemberId()))
                     configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "跨域客户提醒",
                             "您收到了一个跨域客户，快去分配给内场销售吧。", 0, url
-                                    + Utils.getCustomerDetails(members.get(0).getId(), "", 0, "1"));
+                                    + Utils.getCustomerDetails(u.getMemberId(), "", 0, "1"));
             }
             return ServerResponse.createBySuccessMessage("提交成功");
         }
