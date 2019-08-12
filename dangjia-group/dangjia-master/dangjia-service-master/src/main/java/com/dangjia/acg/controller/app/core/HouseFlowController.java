@@ -71,6 +71,15 @@ public class HouseFlowController implements HouseFlowAPI {
     }
 
     /**
+     * 工匠自动续保
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse autoRenewOrder() {
+        return houseFlowService.autoRenewOrder();
+    }
+    /**
      * 拒单
      *
      * @param userToken

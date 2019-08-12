@@ -546,6 +546,9 @@ public class CraftsmanConstructionService {
                     "&houseName=" + house.getHouseName();
             buttonList.add(Utils.getButton("查看拿钱明细", url, 0));
         } else if (hf.getWorkType() == 4) {
+//            if(!isBX) {
+//                buttonList.add(Utils.getButton("购买保险", 9));
+//            }else
             if (hf.getWorkSteta() == 3) {//待交底
                 buttonList.add(Utils.getButton("找大管家交底", 1));
 //            } else if (worker.getWorkerType() == 4) {//如果是拆除，只有整体完工

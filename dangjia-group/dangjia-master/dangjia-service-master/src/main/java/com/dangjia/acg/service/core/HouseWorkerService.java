@@ -557,14 +557,8 @@ public class HouseWorkerService {
         }
         hfa.setOtherMoney(workPrice.subtract(haveMoney).subtract(hfa.getApplyMoney()));
 //        hfa.setApplyDec("我是" + workerType.getName() + ",我已申请了阶段完工");//描述
-        int nums=0;
-        if(!CommonUtil.isEmpty(imageList)){
-            JSONArray imageObjArr = JSON.parseArray(imageList);
-            nums=imageObjArr.size();
-        }
         hfa.setApplyDec("尊敬的业主，您好！<br/>" +
-                "当家工匠【"+worker.getName()+"】为您新家施工，工地【" + workerType.getName() + "】已阶段完工，剩余部分待其他工种完成后继续进行，严格按照平台施工验收标准进行施工，请您查收。<br/>" +
-                "【配图"+nums+"张以上】");//描述
+                "当家工匠【"+worker.getName()+"】为您新家施工，工地【" + workerType.getName() + "】已阶段完工，剩余部分待其他工种完成后继续进行，严格按照平台施工验收标准进行施工，请您查收。<br/>");//描述
         hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
         //增加倒计时系统自动审核时间
         Calendar calendar = Calendar.getInstance();
@@ -630,14 +624,8 @@ public class HouseWorkerService {
         BigDecimal alsoMoney = new BigDecimal(workPrice.doubleValue() - haveMoney.doubleValue() - retentionMoney.doubleValue() - deductPrice.doubleValue());
         hfa.setApplyMoney(alsoMoney);
 //        hfa.setApplyDec("我是" + workerType.getName() + ",我已申请了整体完工");//描述
-        int nums=0;
-        if(!CommonUtil.isEmpty(imageList)){
-            JSONArray imageObjArr = JSON.parseArray(imageList);
-            nums=imageObjArr.size();
-        }
         hfa.setApplyDec("尊敬的业主，您好！<br/>" +
-                "当家工匠【"+worker.getName()+"】为您新家施工，工地【" + workerType.getName() + "】已全部完工，严格按照平台施工验收标准进行施工，请您查收。<br/>" +
-                "【配图"+nums+"张以上】");//描述
+                "当家工匠【"+worker.getName()+"】为您新家施工，工地【" + workerType.getName() + "】已全部完工，严格按照平台施工验收标准进行施工，请您查收。<br/>");//描述
         hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
         //增加倒计时系统自动审核时间
         Calendar calendar = Calendar.getInstance();
