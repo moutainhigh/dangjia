@@ -1109,6 +1109,37 @@ public class MemberService {
 
 
     /**
+     * 新增工匠保险信息
+     *
+     * @param userToken
+     * @return
+     */
+    public ServerResponse  addInsurances(String userToken) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        String insuranceMoney=configUtil.getValue(SysConfig.INSURANCE_MONEY, String.class);
+        insuranceMoney= CommonUtil.isEmpty(insuranceMoney)?"100":insuranceMoney;
+        Member operator = (Member) object;
+        Example example = new Example(Insurance.class);
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId());
+        example.orderBy(Insurance.END_DATE).desc();
+        List<Insurance> insurances = insuranceMapper.selectByExample(example);
+        Insurance insurance=new Insurance();
+        insurance.setWorkerId(operator.getId());
+        insurance.setWorkerMobile(operator.getMobile());
+        insurance.setWorkerName(operator.getName());
+        insurance.setMoney(new BigDecimal(insuranceMoney));
+        if (insurances.size()==0) {
+            insurance.setType("0");
+        }else{
+            insurance.setType("1");
+        }
+        insuranceMapper.insert(insurance);
+        return ServerResponse.createBySuccess("ok", insurance.getId());
+    }
+    /**
      * 获取工匠保险信息
      *
      * @param type 保险类型 0=首保 1=续保
@@ -1119,8 +1150,14 @@ public class MemberService {
 
         List<Map<String, Object>> datas = new ArrayList<>();
         Example example = new Example(Insurance.class);
-        example.createCriteria();
-
+        Example.Criteria criteria=example.createCriteria();
+        if(!CommonUtil.isEmpty(type)){
+            criteria.andEqualTo(Insurance.TYPE,type);
+        }
+        if(!CommonUtil.isEmpty(valueKey)){
+            criteria.andCondition(" CONCAT(worker_mobile,worker_name) like CONCAT('%','" + valueKey + "','%')");
+        }
+        example.orderBy(Insurance.CREATE_DATE).desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Insurance> infos = insuranceMapper.selectByExample(example);
         PageInfo pageResult = new PageInfo(infos);
@@ -1128,9 +1165,11 @@ public class MemberService {
             for (Insurance info : infos) {
                 Map<String, Object> map = BeanUtils.beanToMap(info);
                 map.put("surDay", 0);
-                Integer daynum=DateUtil.daysofTwo(new Date(),info.getEndDate());
-                if(daynum>0) {
-                    map.put("surDay", daynum);
+                if(info.getEndDate()!=null) {
+                    Integer daynum = DateUtil.daysofTwo(new Date(), info.getEndDate());
+                    if (daynum > 0) {
+                        map.put("surDay", daynum);
+                    }
                 }
                 datas.add(map);
             }

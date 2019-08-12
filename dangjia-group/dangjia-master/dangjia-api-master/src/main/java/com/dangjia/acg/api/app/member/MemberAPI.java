@@ -529,5 +529,8 @@ public interface MemberAPI {
     @ApiOperation(value = "其他项目获取登录信息", notes = "其他项目获取登录信息")
     Object getMember(@RequestParam("userToken") String userToken);
 
+    @RequestMapping(value = "member/insurances/add", method = RequestMethod.POST)
+    @ApiOperation(value = "添加用户保险单信息", notes = "添加用户保险单信息")
+    ServerResponse  addInsurances(String userToken);
 }
 

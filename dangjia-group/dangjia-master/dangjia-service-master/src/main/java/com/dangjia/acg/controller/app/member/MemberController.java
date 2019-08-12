@@ -111,7 +111,11 @@ public class MemberController implements MemberAPI {
         return memberService.getMyHomePage(userToken, userRole);
     }
 
-
+    @Override
+    @ApiMethod
+    public ServerResponse  addInsurances(String userToken){
+        return memberService.addInsurances(userToken);
+    }
     @Override
     @ApiMethod
     public Object getMember(String userToken) {
