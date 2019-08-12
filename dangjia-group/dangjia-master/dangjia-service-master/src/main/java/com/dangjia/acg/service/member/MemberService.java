@@ -211,10 +211,10 @@ public class MemberService {
 
     ServerResponse getUser(Member user, Integer userRole) {
         if (userRole == 1) {
-            Example example=new Example(Customer.class);
-            example.createCriteria().andEqualTo(Customer.MEMBER_ID,user.getId());
+            Example example = new Example(Customer.class);
+            example.createCriteria().andEqualTo(Customer.MEMBER_ID, user.getId());
             List<Customer> customers = iCustomerMapper.selectByExample(example);
-            if(customers.size()<=0) {
+            if (customers.size() <= 0) {
                 clueService.sendUser(user, user.getMobile(), null, null);
             }
         }
@@ -1090,17 +1090,19 @@ public class MemberService {
             datas.add(map);
         }
         MainUser mainUser = userMapper.findUserByMobile(member.getMobile());
-        ServerResponse serverResponse = setSale(null, mainUser.getId());
-        if (serverResponse.isSuccess()) {//有销售
-            Map<String, Object> map = new HashMap<>();
-            map.put("memberType", 2);
-            map.put("id", mainUser.getId());
-            map.put("nickName", member.getNickName());
-            map.put("name", member.getNickName());
-            map.put("mobile", member.getMobile());
-            map.put("head", member.getHead());
-            map.put("appKey", messageAPI.getAppKey(AppType.SALE.getDesc()));
-            datas.add(map);
+        if (mainUser != null) {
+            ServerResponse serverResponse = setSale(null, mainUser.getId());
+            if (serverResponse.isSuccess()) {//有销售
+                Map<String, Object> map = new HashMap<>();
+                map.put("memberType", 2);
+                map.put("id", mainUser.getId());
+                map.put("nickName", member.getNickName());
+                map.put("name", member.getNickName());
+                map.put("mobile", member.getMobile());
+                map.put("head", member.getHead());
+                map.put("appKey", messageAPI.getAppKey(AppType.SALE.getDesc()));
+                datas.add(map);
+            }
         }
         if (datas.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无该用户");
