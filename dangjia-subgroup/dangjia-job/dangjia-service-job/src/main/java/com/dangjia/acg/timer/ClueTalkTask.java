@@ -2,10 +2,7 @@ package com.dangjia.acg.timer;
 
 import com.dangjia.acg.api.config.ConfigMessageAPI;
 import com.dangjia.acg.api.sale.rob.RobAPI;
-import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.clue.ClueTalkDTO;
 import com.dangjia.acg.modle.config.ConfigMessage;
 import com.dangjia.acg.util.Utils;

@@ -140,7 +140,7 @@
             </if>
             <if test="stage==4">
                 mc.data_status=0
-                and mc.stage in (0,1)
+                and mc.stage in (0,1,5)
                 and mc.phase_status=1
                 and c.phase_status=1
                 <if test="null!=userId and ''!=userId">
@@ -195,7 +195,7 @@
             LEFT JOIN dj_member_customer mc
             on mc.member_id=c.member_id
             and mc.user_id=c.cus_service
-            WHERE c.data_status = 0 and c.stage NOT IN (2,3,4)
+            WHERE c.data_status = 0 and c.stage NOT IN (2,3,4,5)
             <if test="null!=userId and ''!=userId">
                 and c.cus_service=#{userId}
             </if>
