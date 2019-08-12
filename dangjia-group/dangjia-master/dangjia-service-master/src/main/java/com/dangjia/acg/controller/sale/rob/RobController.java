@@ -3,14 +3,17 @@ package com.dangjia.acg.controller.sale.rob;
 import com.dangjia.acg.api.sale.rob.RobAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.clue.ClueTalkDTO;
 import com.dangjia.acg.dto.sale.rob.CustomerRecDTO;
 import com.dangjia.acg.modle.clue.Clue;
+import com.dangjia.acg.modle.clue.ClueTalk;
 import com.dangjia.acg.modle.home.IntentionHouse;
 import com.dangjia.acg.service.sale.rob.RobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 
 /**
@@ -108,6 +111,11 @@ public class RobController implements RobAPI {
     @ApiMethod
     public ServerResponse addDescribes(HttpServletRequest request, CustomerRecDTO customerRecDTO,String userToken) {
         return robService.addDescribes(customerRecDTO,userToken);
+    }
+
+    @Override
+    public List<ClueTalkDTO> getTodayDescribes() {
+        return robService.getTodayDescribes();
     }
 
     @Override

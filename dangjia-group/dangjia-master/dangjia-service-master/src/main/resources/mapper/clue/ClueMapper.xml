@@ -97,7 +97,7 @@
                 c.id as clueId,
                 mc.member_id as memberId,
                 m.mobile as mobile,
-                m.nick_name as name,
+                m.nick_name as owername,
                 mc.modify_date as modifyDate,
                 mc.create_date as createDate,
                 mc.label_id_arr as labelId,
@@ -184,6 +184,7 @@
               c.stage,
               m.mobile as phone,
               m.nick_name as name,
+              h.create_date as createDate,
               mc.modify_date as modifyDate,
               CONCAT(IFNULL(h.residential,'*'),IFNULL(h.building,'*栋'),IFNULL(h.unit,'*单元'),IFNULL(h.number,'*号')) as houseName,
               c.cus_service as userId,
@@ -237,7 +238,7 @@
                      #{item.userId}
                 </foreach>
             </if>
-            ORDER BY h.modify_date desc
+            ORDER BY h.create_date desc
         </if>
         limit 1
     </select>

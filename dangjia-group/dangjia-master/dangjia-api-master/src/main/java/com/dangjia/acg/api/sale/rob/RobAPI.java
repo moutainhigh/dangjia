@@ -1,8 +1,10 @@
 package com.dangjia.acg.api.sale.rob;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.clue.ClueTalkDTO;
 import com.dangjia.acg.dto.sale.rob.CustomerRecDTO;
 import com.dangjia.acg.modle.clue.Clue;
+import com.dangjia.acg.modle.clue.ClueTalk;
 import com.dangjia.acg.modle.home.IntentionHouse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -71,6 +74,11 @@ public interface RobAPI {
     ServerResponse addDescribes(@RequestParam("request")HttpServletRequest request,
                                 @RequestBody CustomerRecDTO customerRecDTO,
                                 @RequestParam("userToken")String userToken);
+
+    @PostMapping(value = "sale/rob/getTodayDescribes")
+    @ApiOperation(value = "查询今天提醒的沟通记录", notes = "查询今天提醒的沟通记录")
+    List<ClueTalkDTO> getTodayDescribes();
+
 
     @PostMapping(value = "sale/rob/remindTime")
     @ApiOperation(value = "定时执行", notes = "定时执行")

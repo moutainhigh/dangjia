@@ -7,6 +7,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.clue.ClueTalkDTO;
 import com.dangjia.acg.dto.member.CustomerRecordInFoDTO;
 import com.dangjia.acg.dto.member.IntentionHouseDTO;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
@@ -35,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -483,6 +485,15 @@ public class RobService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("新增失败");
         }
+    }
+
+
+    /**
+     * 查询今天提醒的沟通记录
+     * @return
+     */
+    public List<ClueTalkDTO> getTodayDescribes(){
+        return clueTalkMapper.getTodayDescribes();
     }
 
     public void remindTime() {
