@@ -24,6 +24,12 @@ import java.util.Date;
 @FieldNameConstants(prefix = "")
 public class Insurance extends BaseEntity {
 
+
+	@Column(name = "number")
+	@Desc(value = "业务订单号")
+	@ApiModelProperty("业务订单号")
+	private String number;
+
 	@Column(name = "worker_id")
 	@Desc(value = "工人ID")
 	@ApiModelProperty("工人ID")

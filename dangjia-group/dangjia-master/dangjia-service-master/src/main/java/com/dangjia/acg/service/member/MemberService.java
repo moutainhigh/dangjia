@@ -1109,6 +1109,37 @@ public class MemberService {
 
 
     /**
+     * 新增工匠保险信息
+     *
+     * @param userToken
+     * @return
+     */
+    public ServerResponse  addInsurances(String userToken) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        String insuranceMoney=configUtil.getValue(SysConfig.INSURANCE_MONEY, String.class);
+        insuranceMoney= CommonUtil.isEmpty(insuranceMoney)?"100":insuranceMoney;
+        Member operator = (Member) object;
+        Example example = new Example(Insurance.class);
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId());
+        example.orderBy(Insurance.END_DATE).desc();
+        List<Insurance> insurances = insuranceMapper.selectByExample(example);
+        Insurance insurance=new Insurance();
+        insurance.setWorkerId(operator.getId());
+        insurance.setWorkerMobile(operator.getMobile());
+        insurance.setWorkerName(operator.getName());
+        insurance.setMoney(new BigDecimal(insuranceMoney));
+        if (insurances.size()==0) {
+            insurance.setType("0");
+        }else{
+            insurance.setType("1");
+        }
+        insuranceMapper.insert(insurance);
+        return ServerResponse.createBySuccess("ok", insurance.getId());
+    }
+    /**
      * 获取工匠保险信息
      *
      * @param type 保险类型 0=首保 1=续保

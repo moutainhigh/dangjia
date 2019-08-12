@@ -215,6 +215,7 @@ public class PaymentService {
                 if(insurance.getEndDate()==null){
                     insurance.setEndDate(new Date());
                 }
+                insurance.setNumber(payOrder.getNumber());
                 insurance.setEndDate(DateUtil.addDateYear(insurance.getEndDate(), 1));
                 insuranceMapper.updateByPrimaryKeySelective(insurance);
 
@@ -969,29 +970,12 @@ public class PaymentService {
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             if (type == 9) {
-                String insuranceMoney=configUtil.getValue(SysConfig.INSURANCE_MONEY, String.class);
-                insuranceMoney= CommonUtil.isEmpty(insuranceMoney)?"100":insuranceMoney;
-
-                Member operator = (Member) object;
-                Example example = new Example(Insurance.class);
-                example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId());
-                example.orderBy(Insurance.END_DATE).desc();
-                List<Insurance> insurances = insuranceMapper.selectByExample(example);
-                Insurance insurance;
-                if (insurances.size()==0) {
-
-                    insurance=new Insurance();
-                    insurance.setWorkerId(operator.getId());
-                    insurance.setWorkerMobile(operator.getMobile());
-                    insurance.setWorkerName(operator.getName());
-                    insurance.setMoney(new BigDecimal(insuranceMoney));
-                    insurance.setType("0");
-                    insuranceMapper.insert(insurance);
-                }else{
-                    insurance=insurances.get(0);
-                    insurance.setType("1");
+                Insurance insurance = insuranceMapper.selectByPrimaryKey(houseDistributionId);
+                if (insurance == null) {
+                    return ServerResponse.createByErrorMessage("保险记录不存在");
                 }
-                example = new Example(BusinessOrder.class);
+
+                Example example = new Example(BusinessOrder.class);
                 example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andEqualTo(BusinessOrder.STATE, 1).andEqualTo(BusinessOrder.TYPE, 9);
                 List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
                 BusinessOrder businessOrder;
