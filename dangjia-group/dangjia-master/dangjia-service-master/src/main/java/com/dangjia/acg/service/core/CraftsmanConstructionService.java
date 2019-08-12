@@ -16,6 +16,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.IWorkerEverydayMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
+import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.house.House;
@@ -23,6 +24,7 @@ import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
+import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +72,8 @@ public class CraftsmanConstructionService {
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
 
+    @Autowired
+    private IInsuranceMapper insuranceMapper;
     /**
      * 获取施工页面
      *
@@ -417,6 +421,20 @@ public class CraftsmanConstructionService {
      * 工匠
      */
     private ServerResponse getCraftsmanBean(HttpServletRequest request, ConstructionByWorkerIdBean bean, HouseWorker hw, Member worker, House house, HouseFlow hf) {
+        Example example = new Example(Insurance.class);
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId());
+        List<Insurance> insurances = insuranceMapper.selectByExample(example);
+
+        //保险服务剩余天数小于等于60天
+        Integer daynum=0;
+        if(insurances.size()>0){
+            daynum =DateUtil.daysofTwo(new Date(),insurances.get(0).getEndDate());
+        }
+        Boolean isBX=true;
+        //工人未购买保险
+        if (hw.getWorkerType()>2||(insurances.size()==0) || (insurances.size()>0&daynum<=60)) {
+            isBX=false;
+        }
         bean.setWorkerType(1);//0:大管家；1：工匠；2：设计师；3：精算师
         bean.setHouseFlowId(hf.getId());
         setMoney(bean, hw);
@@ -502,7 +520,11 @@ public class CraftsmanConstructionService {
             bean.setIfDisclose(2);
         }
         if (hf.getWorkType() == 3) {//如果是已抢单待支付。则提醒业主支付
-            promptList.add("请联系业主支付您的工匠费用");
+            if(isBX) {
+                promptList.add("请联系业主支付您的工匠费用");
+            }else {
+                buttonList.add(Utils.getButton("购买保险", 9));
+            }
             bean.setIfBackOut(0);//0可放弃；1：申请停工；2：已停工 3 审核中
         } else if (hf.getPause() == 1) {
             promptList.add("您已停工");
@@ -524,6 +546,9 @@ public class CraftsmanConstructionService {
                     "&houseName=" + house.getHouseName();
             buttonList.add(Utils.getButton("查看拿钱明细", url, 0));
         } else if (hf.getWorkType() == 4) {
+//            if(!isBX) {
+//                buttonList.add(Utils.getButton("购买保险", 9));
+//            }else
             if (hf.getWorkSteta() == 3) {//待交底
                 buttonList.add(Utils.getButton("找大管家交底", 1));
 //            } else if (worker.getWorkerType() == 4) {//如果是拆除，只有整体完工

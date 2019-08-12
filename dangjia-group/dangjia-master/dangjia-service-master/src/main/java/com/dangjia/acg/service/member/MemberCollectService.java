@@ -80,7 +80,7 @@ public class MemberCollectService {
                 if (!CommonUtil.isEmpty(house.getBuildSquare())) {
                     dianList.add(house.getBuildSquare() + "㎡");
                 }
-                map.put("dianList", dianList);
+                map.put("dianList",dianList);
                 map.put("houseName", house.getHouseName());
                 map.put("imageUrl", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null));
                 houseMap.add(map);

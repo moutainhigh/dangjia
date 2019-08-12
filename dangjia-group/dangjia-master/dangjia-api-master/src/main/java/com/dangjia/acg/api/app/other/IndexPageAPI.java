@@ -32,37 +32,37 @@ public interface IndexPageAPI {
      */
     @PostMapping("/app/other/indexPage/queryHouseDistance")
     @ApiOperation(value = "参考列表", notes = "参考列表")
-    ServerResponse queryHouseDistance(@RequestParam("request")HttpServletRequest request,
-                                      @RequestParam("userToken")String userToken,
-                                      @RequestParam("cityId")String cityId,
-                                      @RequestParam("villageId")String villageId,
-                                      @RequestParam("square")Double square,
-                                      @RequestParam("pageDTO")PageDTO pageDTO);
+    ServerResponse queryHouseDistance(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("userToken") String userToken,
+                                      @RequestParam("cityId") String cityId,
+                                      @RequestParam("villageId") String villageId,
+                                      @RequestParam("square") Double square,
+                                      @RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping("/app/other/house/details")
     @ApiOperation(value = "施工现场详情", notes = "施工现场详情")
-    ServerResponse houseOtherDetails(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId") String houseId);
+    ServerResponse houseOtherDetails(@RequestParam("request") HttpServletRequest request, @RequestParam("houseId") String houseId);
 
     @PostMapping("/app/other/indexPage/houseDetails")
     @ApiOperation(value = "施工现场详情（带花费）", notes = "施工现场详情（带花费）")
-    ServerResponse houseDetails(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId") String houseId);
+    ServerResponse houseDetails(@RequestParam("request") HttpServletRequest request, @RequestParam("houseId") String houseId);
 
     @PostMapping("/app/other/indexPage/getHouseLabels")
     @ApiOperation(value = "工地标签详情", notes = "工地标签详情")
-    ServerResponse getHouseLabels(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId") String houseId);
+    ServerResponse getHouseLabels(@RequestParam("request") HttpServletRequest request, @RequestParam("houseId") String houseId);
 
     @PostMapping("/app/other/indexPage/jobLocation")
     @ApiOperation(value = "施工现场", notes = "施工现场")
     ServerResponse jobLocation(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("latitude") String latitude,
                                @RequestParam("longitude") String longitude,
-                               @RequestParam("limit")Integer limit);
+                               @RequestParam("limit") Integer limit);
 
 
     @PostMapping("/app/other/indexPage/getRecommended")
     @ApiOperation(value = "参考花费推荐", notes = "参考花费推荐")
-    ServerResponse getRecommended(@RequestParam("request")HttpServletRequest request,
+    ServerResponse getRecommended(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("latitude") String latitude,
                                   @RequestParam("longitude") String longitude,
-                                  @RequestParam("limit")Integer limit);
+                                  @RequestParam("limit") Integer limit);
 }

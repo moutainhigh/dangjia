@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.core;
 
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
@@ -18,8 +19,11 @@ import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
+import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
+import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowCountDownTime;
 import com.dangjia.acg.modle.core.HouseWorker;
@@ -28,8 +32,11 @@ import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.pay.BusinessOrder;
+import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
+import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.member.GroupInfoService;
 import org.apache.commons.lang3.StringUtils;
@@ -57,6 +64,8 @@ import java.util.*;
 public class HouseFlowService {
 
     @Autowired
+    private RedisClient redisClient;
+    @Autowired
     private ConfigMessageService configMessageService;
     @Autowired
     private ConfigUtil configUtil;
@@ -72,6 +81,9 @@ public class HouseFlowService {
     private IHouseFlowCountDownTimeMapper houseFlowCountDownTimeMapper;
     @Autowired
     private IMemberMapper memberMapper;
+
+    @Autowired
+    private IWorkerDetailMapper workerDetailMapper;
     @Autowired
     private BudgetWorkerAPI budgetWorkerAPI;
     @Autowired
@@ -85,6 +97,10 @@ public class HouseFlowService {
     @Autowired
     private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private IBusinessOrderMapper businessOrderMapper;
+    @Autowired
+    private IInsuranceMapper insuranceMapper;
     @Autowired
     private GroupInfoService groupInfoService;
     private static Logger LOG = LoggerFactory.getLogger(HouseFlowService.class);
@@ -397,6 +413,135 @@ public class HouseFlowService {
         }
     }
 
+    /**
+     * 工人30分钟自动放弃抢单任务，工人未购买保险或者保险服务剩余天数小于等于60天则自动放弃订单
+     *
+     * @return
+     */
+    public ServerResponse autoGiveUpOrder() {
+        //找到所有抢单带支付的订单
+        Example example = new Example(HouseWorker.class);
+        example.createCriteria().andEqualTo(HouseWorker.WORK_TYPE, 1);
+        List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);
+        for (HouseWorker houseWorker : hwList) {
+            if(DateUtil.addDateMinutes(houseWorker.getCreateDate(),30).getTime()<=(new Date()).getTime()) {
+                example = new Example(Insurance.class);
+                example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+                List<Insurance> insurances = insuranceMapper.selectByExample(example);
+
+                //保险服务剩余天数小于等于60天
+                Integer daynum=0;
+                if(insurances.size()>0){
+                    daynum =DateUtil.daysofTwo(new Date(),insurances.get(0).getEndDate());
+                }
+                //工人未购买保险
+                if (houseWorker.getWorkerType()>2||(insurances.size()==0) || (insurances.size()>0&daynum<=60)) {
+                    Example exampleFlow = new Example(HouseFlow.class);
+                    exampleFlow.createCriteria()
+                            .andEqualTo(HouseFlow.WORKER_ID, houseWorker.getWorkerId())
+                            .andEqualTo(HouseFlow.WORK_TYPE, 3)
+                            .andEqualTo(HouseFlow.WORKER_TYPE_ID, houseWorker.getWorkerTypeId())
+                            .andEqualTo(HouseFlow.HOUSE_ID, houseWorker.getHouseId());
+                    exampleFlow.orderBy(HouseFlow.CREATE_DATE).desc();
+                    List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(exampleFlow);
+                    if(houseFlowList.size()>0) {
+                        String userToken = redisClient.getCache("role2:" + houseWorker.getWorkerId(), String.class);
+                        setGiveUpOrder(userToken, houseFlowList.get(0).getId());
+                    }
+                }
+            }
+        }
+        return ServerResponse.createBySuccessMessage("ok");
+    }
+
+    /**
+     * 工人30分钟自动放弃抢单任务，工人未购买保险或者保险服务剩余天数小于等于60天则自动放弃订单
+     *
+     * @return
+     */
+    public ServerResponse autoRenewOrder() {
+        //找到所有抢单带支付的订单
+        Example example = new Example(HouseWorker.class);
+        example.createCriteria().andEqualTo(HouseWorker.WORK_TYPE, 4);
+        List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);
+        for (HouseWorker houseWorker : hwList) {
+            example = new Example(Insurance.class);
+            example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+            List<Insurance> insurances = insuranceMapper.selectByExample(example);
+
+            //保险服务剩余天数小于等于60天
+            Integer daynum=0;
+            if(insurances.size()>0){
+                daynum =DateUtil.daysofTwo(new Date(),insurances.get(0).getEndDate());
+            }
+            //工人未购买保险
+            if (houseWorker.getWorkerType()>2||(insurances.size()==0) || (insurances.size()>0&daynum<=0)) {
+                Example exampleFlow = new Example(HouseFlow.class);
+                exampleFlow.createCriteria()
+                        .andEqualTo(HouseFlow.WORKER_ID, houseWorker.getWorkerId())
+                        .andEqualTo(HouseFlow.WORK_TYPE, 3)
+                        .andEqualTo(HouseFlow.WORKER_TYPE_ID, houseWorker.getWorkerTypeId())
+                        .andEqualTo(HouseFlow.HOUSE_ID, houseWorker.getHouseId());
+                exampleFlow.orderBy(HouseFlow.CREATE_DATE).desc();
+                List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(exampleFlow);
+                if(houseFlowList.size()>0) {
+                    Member operator = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
+                    String insuranceMoney=configUtil.getValue(SysConfig.INSURANCE_MONEY, String.class);
+                    insuranceMoney= CommonUtil.isEmpty(insuranceMoney)?"100":insuranceMoney;
+                    Insurance insurance;
+                    if (insurances.size()==0) {
+                        insurance=new Insurance();
+                        insurance.setWorkerId(operator.getId());
+                        insurance.setWorkerMobile(operator.getMobile());
+                        insurance.setWorkerName(operator.getName());
+                        insurance.setMoney(new BigDecimal(insuranceMoney));
+                        insurance.setType("0");
+                        if(insurance.getStartDate()==null){
+                            insurance.setStartDate(new Date());
+                        }
+                        if(insurance.getEndDate()==null){
+                            insurance.setEndDate(new Date());
+                        }
+                        insurance.setEndDate(DateUtil.addDateYear(insurance.getEndDate(), 1));
+                        insuranceMapper.insert(insurance);
+                    }else{
+                        insurance=insurances.get(0);
+                        insurance.setType("1");
+                        if(insurance.getStartDate()==null){
+                            insurance.setStartDate(new Date());
+                        }
+                        if(insurance.getEndDate()==null){
+                            insurance.setEndDate(new Date());
+                        }
+                        insurance.setEndDate(DateUtil.addDateYear(insurance.getEndDate(), 1));
+                        insuranceMapper.updateByPrimaryKeySelective(insurance);
+                    }
+                    if (operator != null) {
+                        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(operator.getWorkerTypeId());
+                        BigDecimal money = new BigDecimal(insuranceMoney);
+                        BigDecimal surplusMoney = operator.getSurplusMoney().subtract(money);
+                        BigDecimal haveMoney = operator.getHaveMoney().subtract(money);
+                        WorkerDetail workerDetail = new WorkerDetail();
+                        workerDetail.setName(workerType.getName() + "自动续保");
+                        workerDetail.setWorkerId(operator.getId());
+                        workerDetail.setWorkerName(operator.getName());
+                        workerDetail.setHouseId("");
+                        workerDetail.setMoney(money);
+                        workerDetail.setWalletMoney(surplusMoney);
+                        workerDetail.setHaveMoney(haveMoney);
+                        workerDetail.setState(3);
+                        workerDetailMapper.insert(workerDetail);
+                        operator.setSurplusMoney(surplusMoney);
+                        operator.setHaveMoney(haveMoney);
+                        memberMapper.updateByPrimaryKeySelective(operator);
+                        configMessageService.addConfigMessage(null, "gj", operator.getId(), "0",
+                                "保险自动续保","您的保险已到期,为确保您在施工期间的保障,系统已自动续保", "0");
+                    }
+                }
+            }
+        }
+        return ServerResponse.createBySuccessMessage("ok");
+    }
     /**
      * 放弃此单
      *
