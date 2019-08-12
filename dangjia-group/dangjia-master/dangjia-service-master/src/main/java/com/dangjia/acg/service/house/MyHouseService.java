@@ -267,7 +267,13 @@ public class MyHouseService {
             }
             map.put("name", user.getUsername());
             map.put("mobile", user.getMobile());
-            map.put("head", address + Utils.getHead());
+            Member member1 = memberMapper.selectByPrimaryKey(user.getMemberId());
+            if (member1 != null) {
+                member1.initPath(address);
+                map.put("head", member1.getHead());
+            } else {
+                map.put("head", address + Utils.getHead());
+            }
             houseResult.setMember(map);
         }
         houseResult.setDecorationType(house.getDecorationType());
