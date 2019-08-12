@@ -50,4 +50,7 @@ public class ClueTalkDTO {
     @ApiModelProperty("阶段 0:新线索 1：继续跟进 2:已放弃 3:黑名单 4:已下单 5:待确认下单")
     private Integer stage;
 
+    @ApiModelProperty("电话号码")
+    private String phone;
+
 }
