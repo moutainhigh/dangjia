@@ -1,5 +1,6 @@
 package com.dangjia.acg.timer;
 
+import com.dangjia.acg.api.app.core.HouseFlowAPI;
 import com.dangjia.acg.api.app.core.HouseFlowApplyAPI;
 import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.config.ConfigMessageAPI;
@@ -36,6 +37,9 @@ public class HouseTask {
   private HouseAPI houseAPI;
   @Autowired
   private HouseFlowApplyAPI houseFlowApplyAPI;
+  @Autowired
+  private HouseFlowAPI houseFlowAPI;
+
 
   private Logger log = LoggerFactory.getLogger(HouseTask.class);
   private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -54,6 +58,12 @@ public class HouseTask {
     log.info(format.format(new Date()) + "开始执行完工申请业主检测任务...");
     houseFlowApplyAPI.couponApply();
     log.info(format.format(new Date()) + "结束执行完工申请业主检测任务...");
+
+
+    log.info(format.format(new Date()) + "开始执行完工工匠保险检测任务...");
+    houseFlowAPI.autoGiveUpOrder();
+    log.info(format.format(new Date()) + "结束执行完工工匠保险检测任务...");
+
   }
 
 

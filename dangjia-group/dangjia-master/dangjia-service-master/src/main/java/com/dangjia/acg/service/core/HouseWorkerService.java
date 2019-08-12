@@ -27,6 +27,7 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
+import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.complain.Complain;
@@ -38,6 +39,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCity;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
+import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.complain.ComplainService;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -120,6 +122,8 @@ public class HouseWorkerService {
     @Autowired
     private IModelingVillageMapper modelingVillageMapper;
 
+    @Autowired
+    private IInsuranceMapper insuranceMapper;
     @Autowired
     private IMemberCityMapper memberCityMapper;
     /**
@@ -312,31 +316,45 @@ public class HouseWorkerService {
                 userCity.setCityName(house.getCityName());
                 memberCityMapper.insert(userCity);
             }
-//            3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工
-            //通知业主设计师抢单成功
-            if (worker.getWorkerType() == 1) {//设计师
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计师抢单提醒",
-                        String.format(DjConstants.PushMessage.DESIGNER_GRABS_THE_BILL, house.getHouseName()), "");
-            }
-            //通知业主精算师抢单成功
-            if (worker.getWorkerType() == 2) {//精算师
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "精算师抢单提醒",
-                        String.format(DjConstants.PushMessage.BUDGET_GRABS_THE_BILL, house.getHouseName()), "");
-            }
-            //通知业主大管家抢单成功
-            if (worker.getWorkerType() == 3) {//大管家
+            example = new Example(Insurance.class);
+            example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+            List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家抢单提醒",
-                        String.format(DjConstants.PushMessage.STEWARD_RUSH_TO_PURCHASE, house.getHouseName()), "");
+            //保险服务剩余天数小于等于60天
+            Integer daynum=0;
+            if(insurances.size()>0){
+                daynum =DateUtil.daysofTwo(new Date(),insurances.get(0).getEndDate());
             }
-            if (worker.getWorkerType() > 3) {//其他工匠
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠抢单提醒",
-                        String.format(DjConstants.PushMessage.CRAFTSMAN_RUSH_TO_PURCHASE, house.getHouseName()), "4");
-                //通知大管家已有工匠抢单
-                //通知大管家抢单
-                HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
-                configMessageService.addConfigMessage(null, "gj", houseFlowDgj.getWorkerId(), "0", "工匠抢单提醒",
-                        String.format(DjConstants.PushMessage.STEWARD_TWO_RUSH_TO_PURCHASE, house.getHouseName()), "4");
+            //工人未购买保险
+            if (houseFlow.getWorkerType()>2||(insurances.size()==0) || (insurances.size()>0&daynum<=60)) {
+                //满足则不提醒业主
+            }else {
+//            3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工
+                //通知业主设计师抢单成功
+                if (worker.getWorkerType() == 1) {//设计师
+                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "设计师抢单提醒",
+                            String.format(DjConstants.PushMessage.DESIGNER_GRABS_THE_BILL, house.getHouseName()), "");
+                }
+                //通知业主精算师抢单成功
+                if (worker.getWorkerType() == 2) {//精算师
+                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "精算师抢单提醒",
+                            String.format(DjConstants.PushMessage.BUDGET_GRABS_THE_BILL, house.getHouseName()), "");
+                }
+                //通知业主大管家抢单成功
+                if (worker.getWorkerType() == 3) {//大管家
+
+                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家抢单提醒",
+                            String.format(DjConstants.PushMessage.STEWARD_RUSH_TO_PURCHASE, house.getHouseName()), "");
+                }
+                if (worker.getWorkerType() > 3) {//其他工匠
+                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠抢单提醒",
+                            String.format(DjConstants.PushMessage.CRAFTSMAN_RUSH_TO_PURCHASE, house.getHouseName()), "4");
+                    //通知大管家已有工匠抢单
+                    //通知大管家抢单
+                    HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
+                    configMessageService.addConfigMessage(null, "gj", houseFlowDgj.getWorkerId(), "0", "工匠抢单提醒",
+                            String.format(DjConstants.PushMessage.STEWARD_TWO_RUSH_TO_PURCHASE, house.getHouseName()), "4");
+                }
             }
             example = new Example(WorkerType.class);
             example.createCriteria().andEqualTo(WorkerType.TYPE, worker.getWorkerType());

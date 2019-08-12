@@ -6,6 +6,7 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.deliver.IOrderMapper;
@@ -24,6 +25,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -63,6 +65,22 @@ public class MemberCollectService {
             for (House house : houseList) {
                 house = indexPageService.setHouseTotalPrice(request,house);
                 Map map = BeanUtils.beanToMap(house);
+                String[] liangArr = {};
+                if (house.getLiangDian() != null) {
+                    liangArr = house.getLiangDian().split(",");
+                }
+                List<String> dianList = new ArrayList<>();
+                if (!CommonUtil.isEmpty(house.getStyle())) {
+                    dianList.add(house.getStyle());
+
+                }
+                if (!CommonUtil.isEmpty(house.getLiangDian())) {
+                    Collections.addAll(dianList, liangArr);
+                }
+                if (!CommonUtil.isEmpty(house.getBuildSquare())) {
+                    dianList.add(house.getBuildSquare() + "㎡");
+                }
+                map.put("dianList",dianList);
                 map.put("houseName", house.getHouseName());
                 map.put("imageUrl", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null));
                 houseMap.add(map);

@@ -36,6 +36,11 @@ public interface HouseFlowAPI {
     ServerResponse setGiveUpOrder(@RequestParam("userToken") String userToken,
                                   @RequestParam("houseFlowId") String houseFlowId);
 
+    @PostMapping("app/core/houseFlow/autoGiveUpOrder")
+    @ApiOperation(value = "未购买保险自动放弃此单", notes = "未购买保险自动放弃此单")
+    ServerResponse autoGiveUpOrder();
+
+
     @PostMapping("app/core/houseFlow/setRefuse")
     @ApiOperation(value = "拒单", notes = "拒单")
     ServerResponse setRefuse(@RequestParam("userToken") String userToken,
