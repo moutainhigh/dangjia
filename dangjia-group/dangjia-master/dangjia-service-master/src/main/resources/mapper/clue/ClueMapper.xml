@@ -96,7 +96,7 @@
                 mc.id as mcId,
                 c.id as clueId,
                 mc.member_id as memberId,
-                m.mobile as mobile,
+                m.mobile as phone,
                 m.nick_name as owername,
                 mc.modify_date as modifyDate,
                 mc.create_date as createDate,

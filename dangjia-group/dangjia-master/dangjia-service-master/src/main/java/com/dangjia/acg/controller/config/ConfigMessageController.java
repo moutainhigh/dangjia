@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.config;
 
 import com.dangjia.acg.api.config.ConfigMessageAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.config.ConfigMessage;
@@ -56,5 +57,11 @@ public class ConfigMessageController implements ConfigMessageAPI {
     @ApiMethod
     public ServerResponse addConfigMessage(HttpServletRequest request, ConfigMessage configMessage) {
         return configMessageService.addConfigMessage(configMessage);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addConfigMessage(String memberId, String title, String alert, int type, String data) {
+        return configMessageService.addConfigMessage(AppType.SALE,memberId,title,alert,type,data);
     }
 }

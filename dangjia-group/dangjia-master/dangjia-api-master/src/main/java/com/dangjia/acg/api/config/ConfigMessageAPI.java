@@ -52,4 +52,15 @@ public interface ConfigMessageAPI {
     ServerResponse addConfigMessage(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("configMessage") ConfigMessage configMessage);
 
+
+
+    @PostMapping("/config/message/addConfigMessage")
+    @ApiOperation(value = "沟通提示消息", notes = "沟通提示消息")
+    ServerResponse addConfigMessage(@RequestParam("memberId") String memberId,
+                                    @RequestParam("title") String title,
+                                    @RequestParam("alert") String alert,
+                                    @RequestParam("type") int type,
+                                    @RequestParam("data")String data);
+
+
 }

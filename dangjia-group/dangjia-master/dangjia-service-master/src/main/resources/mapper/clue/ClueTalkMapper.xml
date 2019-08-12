@@ -36,7 +36,8 @@
             ct.remind_time AS remindTime,
             u.member_id AS memberId,
             c.stage as stage,
-            c.phase_status as phaseStatus
+            c.phase_status as phaseStatus,
+            c.phone as phone
         FROM
             dj_clue_talk ct
         INNER JOIN dj_clue c ON ct.clue_id = c.id
