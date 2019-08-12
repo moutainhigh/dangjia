@@ -114,6 +114,7 @@ public class RobController implements RobAPI {
     }
 
     @Override
+    @ApiMethod
     public List<ClueTalkDTO> getTodayDescribes() {
         return robService.getTodayDescribes();
     }
