@@ -33,7 +33,8 @@ public interface PaymentAPI {
     @PostMapping("app/pay/payment/getWeiXinSign")
     @ApiOperation(value = "获取微信签名信息", notes = "获取微信签名信息")
     ServerResponse getWeiXinSign(@RequestParam("userToken") String userToken,
-                                 @RequestParam("businessOrderNumber") String businessOrderNumber);
+                                 @RequestParam("businessOrderNumber") String businessOrderNumber,
+                                 @RequestParam("userRole")Integer userRole);
 
     @PostMapping("app/pay/payment/getAliSign")
     @ApiOperation(value = "获取支付宝签名信息", notes = "获取支付宝签名信息")
