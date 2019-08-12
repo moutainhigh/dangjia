@@ -1119,8 +1119,14 @@ public class MemberService {
 
         List<Map<String, Object>> datas = new ArrayList<>();
         Example example = new Example(Insurance.class);
-        example.createCriteria();
-
+        Example.Criteria criteria=example.createCriteria();
+        if(!CommonUtil.isEmpty(type)){
+            criteria.andEqualTo(Insurance.TYPE,type);
+        }
+        if(!CommonUtil.isEmpty(valueKey)){
+            criteria.andCondition(" CONCAT(worker_mobile,worker_name) like CONCAT('%','" + valueKey + "','%')");
+        }
+        example.orderBy(Insurance.CREATE_DATE).desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Insurance> infos = insuranceMapper.selectByExample(example);
         PageInfo pageResult = new PageInfo(infos);
@@ -1128,9 +1134,11 @@ public class MemberService {
             for (Insurance info : infos) {
                 Map<String, Object> map = BeanUtils.beanToMap(info);
                 map.put("surDay", 0);
-                Integer daynum=DateUtil.daysofTwo(new Date(),info.getEndDate());
-                if(daynum>0) {
-                    map.put("surDay", daynum);
+                if(info.getEndDate()!=null) {
+                    Integer daynum = DateUtil.daysofTwo(new Date(), info.getEndDate());
+                    if (daynum > 0) {
+                        map.put("surDay", daynum);
+                    }
                 }
                 datas.add(map);
             }
