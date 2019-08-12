@@ -546,7 +546,6 @@ public class EngineerService {
         map.put("haveMoney", worker.getHaveMoney());
         map.put("surplusMoney", worker.getSurplusMoney());
         map.put("retentionMoney", worker.getRetentionMoney());
-
         if (CommonUtil.isEmpty(worker.getHead())) {
             worker.setHead(Utils.getHead());
         }
