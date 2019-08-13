@@ -98,7 +98,7 @@ public class WebMemberController implements WebMemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse  queryInsurances(HttpServletRequest request,String type, String valueKey,PageDTO pageDTO){
-        return memberService.queryInsurances(type, valueKey, pageDTO);
+    public ServerResponse  queryInsurances(HttpServletRequest request,String type, String searchKey,PageDTO pageDTO){
+        return memberService.queryInsurances(type, searchKey, pageDTO);
     }
 }
