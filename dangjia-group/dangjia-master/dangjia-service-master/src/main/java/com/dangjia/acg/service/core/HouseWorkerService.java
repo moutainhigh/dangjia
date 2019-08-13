@@ -327,7 +327,7 @@ public class HouseWorkerService {
                 daynum =DateUtil.daysofTwo(new Date(),insurances.get(0).getEndDate());
             }
             //工人未购买保险
-            if (houseFlow.getWorkerType()>2||(insurances.size()==0) || (insurances.size()>0&daynum<=60)) {
+            if (houseFlow.getWorkerType()>2&&((insurances.size()==0) || (insurances.size()>0&daynum<=60))) {
                 //满足则不提醒业主
             }else {
 //            3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工

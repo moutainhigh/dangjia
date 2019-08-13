@@ -330,7 +330,7 @@ public class TaskService {
                 daynum =DateUtil.daysofTwo(new Date(),insurances.get(0).getEndDate());
             }
             //工人未购买保险
-            if (workerType.getType()>2&&((insurances.size()==0) || (insurances.size()>0&daynum<=60))) {
+            if (workerType.getType()>2&&((insurances.size()==0) || (insurances.size()>0&daynum<=60))){
                 //系统检查该工匠是否剩余保险天数超过60天，
                 // 是则正常流程走，
                 // 否则提示剩余保险天数为XX天，请购买保险再继续工作；

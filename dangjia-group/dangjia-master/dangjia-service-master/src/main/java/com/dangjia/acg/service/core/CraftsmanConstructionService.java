@@ -433,7 +433,7 @@ public class CraftsmanConstructionService {
         }
         Boolean isBX=true;
         //工人未购买保险
-        if (hw.getWorkerType()>2||(insurances.size()==0) || (insurances.size()>0&daynum<=60)) {
+        if (hw.getWorkerType()>2&&((insurances.size()==0) || (insurances.size()>0&daynum<=60))) {
             isBX=false;
         }
         bean.setWorkerType(1);//0:大管家；1：工匠；2：设计师；3：精算师
