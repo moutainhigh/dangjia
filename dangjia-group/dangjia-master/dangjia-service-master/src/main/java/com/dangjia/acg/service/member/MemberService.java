@@ -1194,5 +1194,47 @@ public class MemberService {
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
+    /**
+     * 获取我的保险信息
+     *
+     * @param userToken
+     * @param pageDTO 页码
+     * @return
+     */
+    public ServerResponse myInsurances(String userToken,PageDTO pageDTO) {
+
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member operator = (Member) object;
+        List<Map<String, Object>> datas = new ArrayList<>();
+        Example example = new Example(Insurance.class);
+        Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo(Insurance.WORKER_ID, operator);
+        example.orderBy(Insurance.CREATE_DATE).desc();
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<Insurance> infos = insuranceMapper.selectByExample(example);
+        PageInfo pageResult = new PageInfo(infos);
+        if (infos != null && infos.size() > 0) {
+            for (Insurance info : infos) {
+                Map<String, Object> map = BeanUtils.beanToMap(info);
+                map.put("surDay", 0);
+                if (info.getEndDate() != null) {
+                    Integer daynum = DateUtil.daysofTwo(new Date(), info.getEndDate());
+                    if (daynum > 0) {
+                        map.put("surDay", daynum);
+                    }
+                }
+                datas.add(map);
+            }
+        }
+        if (infos.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无该用户");
+        }
+        pageResult.setList(datas);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
+    }
+
 
 }

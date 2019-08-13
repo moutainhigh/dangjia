@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.app.member;
 
 import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -120,6 +121,13 @@ public class MemberController implements MemberAPI {
     @ApiMethod
     public Object getMember(String userToken) {
         return constructionService.getMember(userToken);
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse  myInsurances(HttpServletRequest request, String userToken, PageDTO pageDTO){
+        return memberService.myInsurances(userToken, pageDTO);
     }
 }
 
