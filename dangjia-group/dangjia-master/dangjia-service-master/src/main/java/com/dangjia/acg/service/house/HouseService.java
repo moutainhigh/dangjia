@@ -594,7 +594,7 @@ public class HouseService {
     /**
      * APP开始装修
      */
-    public ServerResponse setStartHouse(String userToken, String cityId, int houseType, int drawings) {
+    public ServerResponse setStartHouse(String userToken, String cityId, Integer houseType, Integer drawings) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;

@@ -70,8 +70,8 @@ public interface HouseAPI {
     @ApiOperation(value = "app开始装修", notes = "app开始装修")
     ServerResponse setStartHouse(@RequestParam("userToken") String userToken,
                                  @RequestParam("cityId") String cityId,
-                                 @RequestParam("houseType") int houseType,
-                                 @RequestParam("drawings") int drawings);
+                                 @RequestParam("houseType") Integer houseType,
+                                 @RequestParam("drawings") Integer drawings);
 
     @PostMapping("app/house/house/revokeHouse")
     @ApiOperation(value = "撤销房子装修", notes = "撤销房子装修")

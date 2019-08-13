@@ -53,7 +53,7 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setStartHouse(String userToken, String cityId, int houseType, int drawings) {
+    public ServerResponse setStartHouse(String userToken, String cityId, Integer houseType, Integer drawings) {
         return houseService.setStartHouse(userToken, cityId, houseType, drawings);
     }
 
