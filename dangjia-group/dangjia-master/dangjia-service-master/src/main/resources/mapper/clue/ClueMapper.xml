@@ -492,7 +492,7 @@
             <if test="type==2">
                 and h.visit_state =3
             </if>
-            WHERE m.data_status = 0
+            WHERE mc.data_status = 0
             and c.data_status = 0
             <if test="null!=userId and ''!=userId">
                 and c.cus_service=#{userId}
