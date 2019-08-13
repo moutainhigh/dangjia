@@ -436,7 +436,7 @@ public class HouseFlowService {
                     daynum =DateUtil.daysofTwo(new Date(),insurances.get(0).getEndDate());
                 }
                 //工人未购买保险
-                if (houseWorker.getWorkerType()>2||(insurances.size()==0) || (insurances.size()>0&daynum<=60)) {
+                if (houseWorker.getWorkerType()>2&&((insurances.size()==0) || (insurances.size()>0&daynum<=60))) {
                     Example exampleFlow = new Example(HouseFlow.class);
                     exampleFlow.createCriteria()
                             .andEqualTo(HouseFlow.WORKER_ID, houseWorker.getWorkerId())
