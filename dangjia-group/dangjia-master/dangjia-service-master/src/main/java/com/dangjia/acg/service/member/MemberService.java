@@ -1126,7 +1126,14 @@ public class MemberService {
         example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId());
         example.orderBy(Insurance.END_DATE).desc();
         List<Insurance> insurances = insuranceMapper.selectByExample(example);
+
+        example = new Example(Insurance.class);
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId()).andIsNull(Insurance.END_DATE);
+        List<Insurance> insurances2 = insuranceMapper.selectByExample(example);
         Insurance insurance=new Insurance();
+        if(insurances2.size()>0){
+            insurance=insurances2.get(0);
+        }
         insurance.setWorkerId(operator.getId());
         insurance.setWorkerMobile(operator.getMobile());
         insurance.setWorkerName(operator.getName());
