@@ -403,6 +403,7 @@
             h.unit as unit,
             h.building as HouseBuilding,
             h.drawings,
+            h.house_type as houseType,
         </if>
         c.create_date as createDate,
         c.owername as owerName,
